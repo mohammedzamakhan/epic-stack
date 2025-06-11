@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import {
 	Tooltip,
 	TooltipContent,
@@ -63,7 +64,7 @@ export default function Index() {
 							className="underline hover:no-underline"
 							href="https://github.com/epicweb-dev/epic-stack/blob/main/docs/getting-started.md"
 						>
-							Getting Started guide
+							<Trans>Getting Started guide</Trans>
 						</a>{' '}
 						file for how to get your project off the ground!
 					</p>

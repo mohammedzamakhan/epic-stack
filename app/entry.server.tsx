@@ -1,6 +1,8 @@
 import crypto from 'node:crypto'
 import { PassThrough } from 'node:stream'
 import { styleText } from 'node:util'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
 import { contentSecurity } from '@nichtsam/helmet/content'
 import { createReadableStreamFromReadable } from '@react-router/node'
 import * as Sentry from '@sentry/react-router'
@@ -12,6 +14,8 @@ import {
 	type ActionFunctionArgs,
 	type HandleDocumentRequestFunction,
 } from 'react-router'
+import { loadCatalog } from './modules/lingui/lingui'
+import { linguiServer } from './modules/lingui/lingui.server'
 import { getEnv, init } from './utils/env.server.ts'
 import { getInstanceInfo } from './utils/litefs.server.ts'
 import { NonceProvider } from './utils/nonce-provider.ts'
@@ -44,6 +48,8 @@ export default async function handleRequest(...args: DocRequestArgs) {
 		: 'onShellReady'
 
 	const nonce = crypto.randomBytes(16).toString('hex')
+	const locale = await linguiServer.getLocale(request)
+	await loadCatalog(locale)
 	return new Promise(async (resolve, reject) => {
 		let didError = false
 		// NOTE: this timing will only include things that are rendered in the shell
@@ -51,13 +57,15 @@ export default async function handleRequest(...args: DocRequestArgs) {
 		const timings = makeTimings('render', 'renderToPipeableStream')
 
 		const { pipe, abort } = renderToPipeableStream(
-			<NonceProvider value={nonce}>
-				<ServerRouter
-					nonce={nonce}
-					context={reactRouterContext}
-					url={request.url}
-				/>
-			</NonceProvider>,
+			<I18nProvider i18n={i18n}>
+				<NonceProvider value={nonce}>
+					<ServerRouter
+						nonce={nonce}
+						context={reactRouterContext}
+						url={request.url}
+					/>
+				</NonceProvider>
+			</I18nProvider>,
 			{
 				[callbackName]: () => {
 					const body = new PassThrough()

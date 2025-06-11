@@ -1,3 +1,4 @@
+import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import {
 	type SentryReactRouterBuildOptions,
@@ -7,6 +8,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { reactRouterDevTools } from 'react-router-devtools'
 import { defineConfig } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
+import macrosPlugin from 'vite-plugin-babel-macros'
 import { iconsSpritesheet } from 'vite-plugin-icons-spritesheet'
 
 const MODE = process.env.NODE_ENV
@@ -52,6 +54,8 @@ export default defineConfig((config) => ({
 		// it would be really nice to have this enabled in tests, but we'll have to
 		// wait until https://github.com/remix-run/remix/issues/9871 is fixed
 		MODE === 'test' ? null : reactRouter(),
+		macrosPlugin(),
+		lingui(),
 		MODE === 'production' && process.env.SENTRY_AUTH_TOKEN
 			? sentryReactRouter(sentryConfig, config)
 			: null,

@@ -22,6 +22,7 @@ import { Button } from './components/ui/button.tsx'
 import { href as iconsHref } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { UserDropdown } from './components/user-dropdown.tsx'
+import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import {
 	ThemeSwitch,
 	useOptionalTheme,
@@ -75,6 +76,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 		type: 'getUserId',
 		desc: 'getUserId in root',
 	})
+	const locale = await linguiServer.getLocale(request)
+	console.log('locale', locale)
 
 	const user = userId
 		? await time(
@@ -122,10 +125,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 			ENV: getEnv(),
 			toast,
 			honeyProps,
+			locale,
 		},
 		{
 			headers: combineHeaders(
-				{ 'Server-Timing': timings.toString() },
+				{
+					'Server-Timing': timings.toString(),
+					'Set-Cookie': await localeCookie.serialize(locale),
+				},
 				toastHeaders,
 			),
 		},
@@ -146,8 +153,9 @@ function Document({
 	env?: Record<string, string | undefined>
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
+	const { locale } = useLoaderData<typeof loader>()
 	return (
-		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>
 			<head>
 				<ClientHintCheck nonce={nonce} />
 				<Meta />
