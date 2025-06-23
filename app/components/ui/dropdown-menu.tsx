@@ -1,7 +1,7 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import * as React from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '#app/utils/misc'
 
 function DropdownMenu(
 	props: React.ComponentProps<typeof DropdownMenuPrimitive.Root>,
@@ -114,6 +114,7 @@ const DropdownMenuItem = ({
 	...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
 	inset?: boolean
+	variant?: string
 }) => (
 	<DropdownMenuPrimitive.Item
 		data-slot="dropdown-menu-item"
@@ -122,6 +123,7 @@ const DropdownMenuItem = ({
 			'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm px-2 py-1.5 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
 			inset && 'pl-8',
 			className,
+			props.variant === 'destructive' && 'text-destructive',
 		)}
 		{...props}
 	/>

@@ -15,9 +15,10 @@ import { type Route } from './+types/root.ts'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import { MarketingDocument } from './components/marketing-document.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { SearchBar } from './components/search-bar.tsx'
-import { useToast } from './components/toaster.tsx'
+// useToast is not used in this file
 import { Button } from './components/ui/button.tsx'
 import { href as iconsHref } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
@@ -37,6 +38,7 @@ import { pipeHeaders } from './utils/headers.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
+import { getSidebarState } from './utils/sidebar-cookie.server.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
@@ -108,20 +110,28 @@ export async function loader({ request }: Route.LoaderArgs) {
 		// them in the database. Maybe they were deleted? Let's log them out.
 		await logout({ request, redirectTo: '/' })
 	}
+	const honeyProps = honeypot.getInputProps()
+	const requestUrl = new URL(request.url)
+
+	// Get sidebar state for marketing routes
+	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
+	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
+
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: requestUrl.pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+		sidebarState,
+	}
 	const { toast, headers: toastHeaders } = await getToast(request)
-	const honeyProps = await honeypot.getInputProps()
 
 	return data(
 		{
 			user,
-			requestInfo: {
-				hints: getHints(request),
-				origin: getDomainUrl(request),
-				path: new URL(request.url).pathname,
-				userPrefs: {
-					theme: getTheme(request),
-				},
-			},
+			requestInfo,
 			ENV: getEnv(),
 			toast,
 			honeyProps,
@@ -185,7 +195,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
 	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
-	const theme = useOptionalTheme()
+	const theme = useOptionalTheme() || 'light'
+	const matches = useMatches()
+	const isMarketingRoute = matches.some((match) =>
+		match.pathname?.startsWith?.('/dashboard'),
+	)
+
+	if (isMarketingRoute) {
+		// For marketing routes, only render the MarketingDocument without the App component
+		const safeNonce = nonce || ''
+		return (
+			<MarketingDocument nonce={safeNonce} theme={theme} env={data?.ENV || {}}>
+				{children}
+			</MarketingDocument>
+		)
+	}
+
+	// For non-marketing routes, use the regular Document with App component
 	return (
 		<Document nonce={nonce} theme={theme} env={data?.ENV}>
 			{children}
@@ -200,7 +226,6 @@ function App() {
 	const matches = useMatches()
 	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
-	useToast(data.toast)
 
 	return (
 		<OpenImgContextProvider
@@ -257,6 +282,17 @@ function Logo() {
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
+	const matches = useMatches()
+	const isMarketingRoute = matches.some((match) =>
+		match.pathname?.startsWith?.('/dashboard'),
+	)
+
+	// For marketing routes, just render the children (handled by MarketingDocument)
+	if (isMarketingRoute) {
+		return <Outlet />
+	}
+
+	// For non-marketing routes, wrap with HoneypotProvider and App
 	return (
 		<HoneypotProvider {...data.honeyProps}>
 			<App />
