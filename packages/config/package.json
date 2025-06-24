@@ -1,0 +1,16 @@
+{
+  "name": "@repo/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "eslint/*",
+    "typescript/*"
+  ],
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
+  "devDependencies": {
+    "eslint": "^9.26.0",
+    "typescript": "^5.8.3"
+  }
+}

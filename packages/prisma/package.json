@@ -1,0 +1,25 @@
+{
+  "name": "@repo/prisma",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
+    "db:seed": "tsx seed.ts",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "setup": "npm run db:migrate:deploy && npm run db:generate"
+  },
+  "dependencies": {
+    "@epic-web/remember": "^1.1.0",
+    "@prisma/client": "^6.7.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "prisma": "^6.7.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

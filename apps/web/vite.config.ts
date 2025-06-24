@@ -35,7 +35,7 @@ export default defineConfig((config) => ({
 	},
 	server: {
 		watch: {
-			ignored: ['**/playwright-report/**'],
+			ignored: ['**/playwright-report/**', '**/node_modules/.vite-temp/**'],
 		},
 	},
 	sentryConfig,

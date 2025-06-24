@@ -6,16 +6,16 @@
     "types": ["@react-router/node", "vite/client"],
     "rootDirs": [".", "./.react-router/types"],
     "paths": {
-      "#app/*": ["./apps/web/app/*"],
-      "#tests/*": ["./apps/web/tests/*"],
+      "#app/*": ["./app/*"],
+      "#tests/*": ["./tests/*"],
       "@/icon-name": [
-        "./apps/web/app/components/ui/icons/types.ts",
-        "./apps/web/types/icon-name.d.ts"
+        "./app/components/ui/icons/types.ts",
+        "./types/icon-name.d.ts"
       ],
-      "@repo/ui": ["./packages/ui"],
-      "@repo/ui/*": ["./packages/ui/*"],
-      "@repo/config": ["./packages/config"],
-      "@repo/config/*": ["./packages/config/*"]
+      "@repo/ui": ["../../packages/ui"],
+      "@repo/ui/*": ["../../packages/ui/*"],
+      "@repo/config": ["../../packages/config"],
+      "@repo/config/*": ["../../packages/config/*"]
     }
   }
 }
