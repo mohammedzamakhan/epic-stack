@@ -1,0 +1,9 @@
+{
+  "name": "@repo/docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx mint dev --port 3004",
+    "build": "npx mint build"
+  }
+}

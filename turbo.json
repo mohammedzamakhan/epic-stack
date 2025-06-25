@@ -23,6 +23,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "build:docs": {
+      "outputs": [".mintlify/doc-build/**"]
     }
   }
 }

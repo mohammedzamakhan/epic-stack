@@ -17,10 +17,13 @@
     "db:generate": "cd packages/prisma && npm run db:generate",
     "db:migrate:deploy": "cd packages/prisma && npm run db:migrate:deploy",
     "db:seed": "cd packages/prisma && npm run db:seed",
-    "db:migrate:dev": "cd packages/prisma && npm run db:migrate:dev"
+    "db:migrate:dev": "cd packages/prisma && npm run db:migrate:dev",
+    "docs:dev": "cd apps/docs && npx mint dev",
+    "docs:build": "cd apps/docs && npx mint build"
   },
   "devDependencies": {
     "@epic-web/config": "^1.20.1",
+    "ajv": "^8.17.1",
     "prettier": "^3.5.3",
     "prettier-plugin-sql": "^0.19.0",
     "prettier-plugin-tailwindcss": "^0.6.11",

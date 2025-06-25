@@ -1,0 +1,55 @@
+---
+title: 'Deployment'
+description: 'Deployment options for Epic Stack'
+---
+
+# Deployment
+
+Epic Stack is designed to be deployed to various platforms with minimal configuration.
+
+## Fly.io Deployment
+
+By default, Epic Stack is configured for deployment to Fly.io:
+
+- Docker-based deployment
+- Automatic scaling
+- Global CDN
+- Built-in database scaling
+- LiteFS for database replication
+
+## Server Requirements
+
+The application requires:
+
+- Node.js 18+ (recommended: Node.js 20+)
+- Dependencies listed in package.json
+- Database (SQLite by default)
+
+## Environment Variables
+
+Key environment variables include:
+
+- `SESSION_SECRET` - Required for secure sessions
+- `DATABASE_URL` - Database connection string
+- Various authentication provider keys (if using OAuth)
+
+## CI/CD Pipeline
+
+Epic Stack includes GitHub Actions workflows for:
+
+- Testing
+- Linting
+- Type checking
+- Automated deployments
+
+## Monitoring
+
+The stack includes built-in monitoring capabilities:
+
+- Server-side logging
+- Error tracking with Sentry integration
+- Performance monitoring
+
+## Database Backups
+
+Database backup strategies are included for production deployments to ensure your data is safe and recoverable.
