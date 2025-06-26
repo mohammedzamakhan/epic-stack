@@ -27,6 +27,8 @@ model User {
   sessions    Session[]
   connections Connection[]
   passkey     Passkey[]
+  organizations UserOrganization[]
+  sentInvitations OrganizationInvitation[] @relation("inviter")
 }
 
 model Note {
@@ -183,4 +185,68 @@ model Passkey {
   transports     String? // Stored as comma-separated values
 
   @@index(userId)
+}
+
+model Organization {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  active      Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       UserOrganization[]
+  invitations OrganizationInvitation[]
+  image       OrganizationImage?
+}
+
+model UserOrganization {
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  role           String       // e.g., "admin", "member", etc.
+  active         Boolean      @default(true)
+  isDefault      Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model OrganizationImage {
+  id        String  @id @default(cuid())
+  altText   String?
+  objectKey String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String       @unique
+}
+
+model OrganizationInvitation {
+  id        String    @id @default(cuid())
+  email     String
+  role      String    @default("member")
+  token     String    @unique
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  inviter   User?   @relation("inviter", fields: [inviterId], references: [id])
+  inviterId String?
+
+  @@unique([email, organizationId])
+  @@index([organizationId])
 }

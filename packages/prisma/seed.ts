@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { MOCK_CODE_GITHUB } from '#app/utils/providers/constants'
 import {
 	createPassword,
@@ -108,29 +108,44 @@ async function seed() {
 
 	const githubUser = await insertGitHubUser(MOCK_CODE_GITHUB)
 
-	const kody = await prisma.user.create({
+	// Check if kody already exists
+	let kody = await prisma.user.findUnique({
+		where: { username: 'kody' },
 		select: { id: true },
-		data: {
-			email: 'kody@kcd.dev',
-			username: 'kody',
-			name: 'Kody',
-			password: { create: createPassword('kodylovesyou') },
-			connections: {
-				create: {
-					providerName: 'github',
-					providerId: String(githubUser.profile.id),
-				},
-			},
-			roles: { connect: [{ name: 'admin' }, { name: 'user' }] },
-		},
 	})
 
-	await prisma.userImage.create({
-		data: {
-			userId: kody.id,
-			objectKey: kodyImages.kodyUser.objectKey,
-		},
+	if (!kody) {
+		kody = await prisma.user.create({
+			select: { id: true },
+			data: {
+				email: 'kody@kcd.dev',
+				username: 'kody',
+				name: 'Kody',
+				password: { create: createPassword('kodylovesyou') },
+				connections: {
+					create: {
+						providerName: 'github',
+						providerId: String(githubUser.profile.id),
+					},
+				},
+				roles: { connect: [{ name: 'admin' }, { name: 'user' }] },
+			},
+		})
+	}
+
+	// Create user image if it doesn't exist
+	const existingImage = await prisma.userImage.findFirst({
+		where: { userId: kody.id },
 	})
+
+	if (!existingImage) {
+		await prisma.userImage.create({
+			data: {
+				userId: kody.id,
+				objectKey: kodyImages.kodyUser.objectKey,
+			},
+		})
+	}
 
 	// Create Kody's notes
 	const kodyNotes = [

@@ -116,6 +116,22 @@ export async function loader({ request }: Route.LoaderArgs) {
 	// Get sidebar state for marketing routes
 	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
+	
+	// Get user organizations if user exists
+	let userOrganizations = undefined
+	if (user) {
+		try {
+			const { getUserOrganizations, getUserDefaultOrganization } = await import('./utils/organizations.server')
+			const orgs = await getUserOrganizations(user.id)
+			const defaultOrg = await getUserDefaultOrganization(user.id)
+			userOrganizations = {
+				organizations: orgs,
+				currentOrganization: defaultOrg,
+			}
+		} catch (error) {
+			console.error('Failed to load user organizations', error)
+		}
+	}
 
 	const requestInfo = {
 		hints: getHints(request),
@@ -136,6 +152,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			toast,
 			honeyProps,
 			locale,
+			userOrganizations,
 		},
 		{
 			headers: combineHeaders(
@@ -198,7 +215,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const theme = useOptionalTheme() || 'light'
 	const matches = useMatches()
 	const isMarketingRoute = matches.some((match) =>
-		match.pathname?.startsWith?.('/dashboard'),
+		match.pathname?.startsWith?.('/app'),
 	)
 
 	if (isMarketingRoute) {
@@ -284,7 +301,7 @@ function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	const matches = useMatches()
 	const isMarketingRoute = matches.some((match) =>
-		match.pathname?.startsWith?.('/dashboard'),
+		match.pathname?.startsWith?.('/app'),
 	)
 
 	// For marketing routes, just render the children (handled by MarketingDocument)

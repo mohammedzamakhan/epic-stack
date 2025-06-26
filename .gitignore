@@ -27,3 +27,5 @@ node_modules
 /app/components/ui/icons
 .react-router/
 .turbo
+
+reference-saas-app/
