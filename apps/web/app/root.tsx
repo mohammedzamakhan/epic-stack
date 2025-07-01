@@ -236,67 +236,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	)
 }
 
-function App() {
-	const data = useLoaderData<typeof loader>()
-	const user = useOptionalUser()
-	const theme = useTheme()
-	const matches = useMatches()
-	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
-	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
-
-	return (
-		<OpenImgContextProvider
-			optimizerEndpoint="/resources/images"
-			getSrc={getImgSrc}
-		>
-			<div className="flex min-h-screen flex-col justify-between">
-				<header className="container py-6">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-						<Logo />
-						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
-							{searchBar}
-						</div>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="lg">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
-						</div>
-						<div className="block w-full sm:hidden">{searchBar}</div>
-					</nav>
-				</header>
-
-				<div className="flex flex-1 flex-col">
-					<Outlet />
-				</div>
-
-				<div className="container flex justify-between pb-5">
-					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
-			</div>
-			<EpicToaster closeButton position="top-center" theme={theme} />
-			<EpicProgress />
-		</OpenImgContextProvider>
-	)
-}
-
-function Logo() {
-	return (
-		<Link to="/" className="group grid leading-snug">
-			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
-			</span>
-		</Link>
-	)
-}
-
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	const matches = useMatches()
@@ -304,15 +243,14 @@ function AppWithProviders() {
 		match.pathname?.startsWith?.('/app'),
 	)
 
-	// For marketing routes, just render the children (handled by MarketingDocument)
-	if (isMarketingRoute) {
-		return <Outlet />
-	}
-
-	// For non-marketing routes, wrap with HoneypotProvider and App
-	return (
-		<HoneypotProvider {...data.honeyProps}>
-			<App />
+		return (
+			<HoneypotProvider {...data.honeyProps}>
+			<OpenImgContextProvider
+			optimizerEndpoint="/resources/images"
+			getSrc={getImgSrc}
+		>
+			<Outlet />
+		</OpenImgContextProvider>
 		</HoneypotProvider>
 	)
 }

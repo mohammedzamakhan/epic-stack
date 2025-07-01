@@ -1,10 +1,3 @@
-import {
-	IconDots,
-	IconFolder,
-	IconShare3,
-	IconTrash,
-	type Icon,
-} from '@tabler/icons-react'
 
 import {
 	DropdownMenu,
@@ -42,7 +35,7 @@ export function NavDocuments({
 					<SidebarMenuItem key={item.name}>
 						<SidebarMenuButton asChild>
 							<a href={item.url}>
-								<item.icon />
+								{/* <item.icon /> */}
 								<span>{item.name}</span>
 							</a>
 						</SidebarMenuButton>

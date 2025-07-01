@@ -1,4 +1,3 @@
-import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react'
 
 import { Button } from '#app/components/ui/button'
 import {
@@ -28,7 +27,7 @@ export function NavMain({
 							tooltip="Quick Create"
 							className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
 						>
-							<IconCirclePlusFilled />
+							{/* <IconCirclePlusFilled /> */}
 							<span>Quick Create</span>
 						</SidebarMenuButton>
 						<Button
@@ -36,7 +35,7 @@ export function NavMain({
 							className="size-8 group-data-[collapsible=icon]:opacity-0"
 							variant="outline"
 						>
-							<IconMail />
+							{/* <IconMail /> */}
 							<span className="sr-only">Inbox</span>
 						</Button>
 					</SidebarMenuItem>
@@ -46,7 +45,7 @@ export function NavMain({
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton asChild tooltip={item.title}>
 								<Link to={item.url}>
-									{item.icon && <item.icon />}
+									{/* <item.icon /> */}
 									<span>{item.title}</span>
 								</Link>
 							</SidebarMenuButton>

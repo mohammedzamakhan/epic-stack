@@ -39,7 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
       userId: userId,
     });
 
-    return redirect(`/organizations/${organization.slug}`);
+    return redirect(`/app/${organization.slug}`);
   } catch (error) {
     console.error('Failed to create organization', error);
     return Response.json(

@@ -25,7 +25,7 @@ export default function OrganizationDashboard() {
 	const { organization } = useLoaderData() as { organization: { name: string } };
 
 	return (
-		<div>
+		<div className="p-8">
 			<h1>{organization.name} Dashboard</h1>
 		</div>
 	);

@@ -1,10 +1,4 @@
-import {
-	IconCreditCard,
-	IconDotsVertical,
-	IconLogout,
-	IconNotification,
-	IconUserCircle,
-} from '@tabler/icons-react'
+
 
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
@@ -53,7 +47,7 @@ export function NavUser({
 									{user.email}
 								</span>
 							</div>
-							<IconDotsVertical className="ml-auto size-4" />
+							{/* <IconDotsVertical className="ml-auto size-4" /> */}
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
@@ -79,21 +73,17 @@ export function NavUser({
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem>
-								<IconUserCircle />
 								Account
 							</DropdownMenuItem>
 							<DropdownMenuItem>
-								<IconCreditCard />
 								Billing
 							</DropdownMenuItem>
 							<DropdownMenuItem>
-								<IconNotification />
 								Notifications
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>
-							<IconLogout />
 							Log out
 						</DropdownMenuItem>
 					</DropdownMenuContent>

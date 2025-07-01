@@ -74,7 +74,7 @@ export default function OrganizationsPage() {
                     variant="outline"
                     asChild
                   >
-                    <Link to={`/organizations/${org.organization.slug}`}>
+                    <Link to={`/app/${org.organization.slug}`}>
                       View
                     </Link>
                   </Button>
@@ -84,7 +84,7 @@ export default function OrganizationsPage() {
                       variant="outline"
                       asChild
                     >
-                      <Link to={`/organizations/${org.organization.slug}/settings`}>
+                      <Link to={`/app/${org.organization.slug}/settings`}>
                         Settings
                       </Link>
                     </Button>
