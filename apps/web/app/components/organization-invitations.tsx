@@ -8,14 +8,14 @@ import {
   FormProvider
 } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { Form } from "react-router";
 import { Trash2, Plus } from "lucide-react";
+import { Form } from "react-router";
 import { z } from "zod";
 import { ErrorList, Field } from "#app/components/forms";
+import { Badge } from "#app/components/ui/badge";
 import { Button } from "#app/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#app/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#app/components/ui/select";
-import { Badge } from "#app/components/ui/badge";
 import { Separator } from "#app/components/ui/separator";
 
 const roles = [

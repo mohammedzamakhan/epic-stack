@@ -22,7 +22,7 @@ export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
 }
 
-const ProfileFormSchema = z.object({
+export const ProfileFormSchema = z.object({
 	name: NameSchema.nullable().default(null),
 	username: UsernameSchema,
 })

@@ -1,7 +1,6 @@
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
-	Link,
 	Links,
 	Meta,
 	Outlet,
@@ -16,19 +15,9 @@ import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { MarketingDocument } from './components/marketing-document.tsx'
-import { EpicProgress } from './components/progress-bar.tsx'
-import { SearchBar } from './components/search-bar.tsx'
-// useToast is not used in this file
-import { Button } from './components/ui/button.tsx'
 import { href as iconsHref } from './components/ui/icon.tsx'
-import { EpicToaster } from './components/ui/sonner.tsx'
-import { UserDropdown } from './components/user-dropdown.tsx'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
-import {
-	ThemeSwitch,
-	useOptionalTheme,
-	useTheme,
-} from './routes/resources+/theme-switch.tsx'
+import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { getUserId, logout } from './utils/auth.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
@@ -42,7 +31,6 @@ import { getSidebarState } from './utils/sidebar-cookie.server.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
-import { useOptionalUser } from './utils/user.ts'
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -180,7 +168,8 @@ function Document({
 	env?: Record<string, string | undefined>
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
-	const { locale } = useLoaderData<typeof loader>()
+	// const { locale } = useLoaderData<typeof loader>()
+	const locale = 'en'
 	return (
 		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>
 			<head>
