@@ -29,6 +29,7 @@ model User {
   passkey     Passkey[]
   organizations UserOrganization[]
   sentInvitations OrganizationInvitation[] @relation("inviter")
+  utmSource   UtmSource?
 }
 
 model Note {
@@ -249,4 +250,19 @@ model OrganizationInvitation {
 
   @@unique([email, organizationId])
   @@index([organizationId])
+}
+
+model UtmSource {
+  id          String  @id @default(cuid())
+  source      String?
+  medium      String?
+  campaign    String?
+  term        String?
+  content     String?
+  referrer    String?
+  
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      String   @unique
 }

@@ -10,6 +10,7 @@ import { combineHeaders, downloadFile } from './misc.tsx'
 import { type ProviderUser } from './providers/provider.ts'
 import { authSessionStorage } from './session.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
+import { getUtmParams } from './utm.server.ts'
 
 export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30
 export const getSessionExpirationDate = () =>
@@ -117,13 +118,18 @@ export async function signup({
 	username,
 	password,
 	name,
+	request,
 }: {
 	email: User['email']
 	username: User['username']
 	name: User['name']
 	password: string
+	request?: Request
 }) {
 	const hashedPassword = await getPasswordHash(password)
+	
+	// Get UTM parameters from cookies if request is provided
+	const utmParams = request ? await getUtmParams(request) : null
 
 	const session = await prisma.session.create({
 		data: {
@@ -139,6 +145,19 @@ export async function signup({
 							hash: hashedPassword,
 						},
 					},
+					// Add UTM source if available
+					...(utmParams && {
+						utmSource: {
+							create: {
+								source: utmParams.source,
+								medium: utmParams.medium,
+								campaign: utmParams.campaign,
+								term: utmParams.term,
+								content: utmParams.content,
+								referrer: utmParams.referrer,
+							},
+						},
+					}),
 				},
 			},
 		},

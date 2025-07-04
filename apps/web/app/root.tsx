@@ -31,6 +31,7 @@ import { getSidebarState } from './utils/sidebar-cookie.server.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
+import { storeUtmParams } from './utils/utm.server.ts'
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -132,6 +133,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 	}
 	const { toast, headers: toastHeaders } = await getToast(request)
 
+	// Handle UTM parameters if present in the URL
+	const utmResponse = await storeUtmParams(request)
+	const utmHeaders = utmResponse?.headers || {}
+
 	return data(
 		{
 			user,
@@ -149,6 +154,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 					'Set-Cookie': await localeCookie.serialize(locale),
 				},
 				toastHeaders,
+				utmHeaders,
 			),
 		},
 	)

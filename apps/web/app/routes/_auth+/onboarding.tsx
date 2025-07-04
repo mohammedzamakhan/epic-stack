@@ -88,7 +88,8 @@ export async function action({ request }: Route.ActionArgs) {
 			}).transform(async (data) => {
 				if (intent !== null) return { ...data, session: null }
 
-				const session = await signup({ ...data, email })
+				// Pass the request to the signup function to capture UTM parameters
+				const session = await signup({ ...data, email, request })
 				return { ...data, session }
 			}),
 		async: true,
