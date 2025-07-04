@@ -1,25 +1,23 @@
-import { getFormProps, getInputProps, useForm } from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { parseWithZod } from "@conform-to/zod";
 import { invariant } from "@epic-web/invariant";
-import { type ActionFunctionArgs, type LoaderFunctionArgs, Form, useLoaderData, useActionData, useFetcher } from "react-router";
+import { parseFormData } from "@mjackson/form-data-parser";
+import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData, useActionData } from "react-router";
 import { z } from "zod";
 
+import { GeneralSettingsCard } from "#app/components/settings/cards/organization/general-settings-card";
+import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
+import { MembersCard } from "#app/components/settings/cards/organization/members-card";
+import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent, OrgPhotoFormSchema } from "#app/components/settings/cards/organization/organization-photo-card";
 import { requireUserId } from "#app/utils/auth.server";
 import { prisma } from "#app/utils/db.server";
-import { redirectWithToast } from "#app/utils/toast.server";
-import { OrganizationInvitations } from "#app/components/organization-invitations";
-import { OrganizationInvitationsSimple } from "#app/components/organization-invitations-simple";
-import { OrganizationMembers } from "#app/components/organization-members";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "#app/components/ui/card";
-import { Button } from "#app/components/ui/button";
-import { StatusButton } from "#app/components/ui/status-button";
-import { Field, ErrorList } from "#app/components/forms";
 import { 
   createOrganizationInvitation, 
   sendOrganizationInvitationEmail,
   getOrganizationInvitations,
   deleteOrganizationInvitation 
 } from "#app/utils/organization-invitation.server";
+import { redirectWithToast } from "#app/utils/toast.server";
+import { uploadOrganizationImage } from "#app/utils/storage.server.ts";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const userId = await requireUserId(request);
@@ -37,6 +35,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       id: true,
       name: true,
       slug: true,
+      image: {
+        select: {
+          id: true,
+          objectKey: true,
+          altText: true,
+        },
+      },
     },
   });
 
@@ -94,9 +99,7 @@ const InviteSchema = z.object({
 export async function action({ request, params }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
   invariant(params.orgSlug, "orgSlug is required");
-  const formData = await request.formData();
-  const intent = formData.get("intent");
-
+  
   // Get the organization first
   const organization = await prisma.organization.findFirst({
     where: {
@@ -107,12 +110,92 @@ export async function action({ request, params }: ActionFunctionArgs) {
         },
       },
     },
-    select: { id: true, name: true },
+    select: { id: true, name: true, slug: true },
   });
 
   if (!organization) {
     throw new Response("Not Found", { status: 404 });
   }
+
+  // Handle file uploads for organization logo
+  const contentType = request.headers.get('content-type');
+  if (contentType?.includes('multipart/form-data')) {
+    // Use parseFormData for multipart requests (file uploads)
+    const formData = await parseFormData(request, { maxFileSize: 1024 * 1024 * 3 });
+    const intent = formData.get('intent');
+
+    const submission = await parseWithZod(formData, {
+        schema: OrgPhotoFormSchema.transform(async data => {
+          if (data.intent === 'delete-org-photo') return { intent: 'delete-org-photo' }
+          if (data.photoFile.size <= 0) return z.NEVER
+          return {
+            intent: data.intent,
+            image: { objectKey: await uploadOrganizationImage(userId, data.photoFile) },
+          }
+        }),
+        async: true,
+      })
+
+    if (intent === uploadOrgPhotoActionIntent) {
+      const photoFile = formData.get('photoFile') as File;
+      if (!photoFile || !(photoFile instanceof File) || !photoFile.size) {
+        return Response.json(
+          { error: 'A valid image file is required.' },
+          { status: 400 }
+        );
+      }
+
+      try {
+        if (submission.status !== 'success') {
+          return Response.json(
+            { result: submission.reply() },
+            { status: submission.status === 'error' ? 400 : 200 },
+          )
+        }
+        const { image, intent } = submission.value as { intent: string; image?: { objectKey: string } }
+
+        // Create or update organization image
+        await prisma.$transaction(async $prisma => {
+          await $prisma.organizationImage.deleteMany({ where: { organizationId: organization.id } })
+          await $prisma.organization.update({ 
+            where: { id: organization.id }, 
+            data: { image: { create: image! } } 
+          })
+        })
+
+        // In a real app, you'd store the image in a storage service
+        // For now, we're just simulating this part
+
+        return Response.json({ status: 'success' });
+      } catch (error) {
+        console.error('Error uploading organization logo:', error);
+        return Response.json(
+          { error: 'Failed to upload organization logo' },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (intent === deleteOrgPhotoActionIntent) {
+      try {
+        await prisma.organizationImage.delete({
+          where: { organizationId: organization.id },
+        });
+
+        return Response.json({ status: 'success' });
+      } catch (error) {
+        console.error('Error deleting organization logo:', error);
+        return Response.json(
+          { error: 'Failed to delete organization logo' },
+          { status: 500 }
+        );
+      }
+    }
+  }
+
+  // For non-multipart requests
+  const formData = await request.formData();
+  const intent = formData.get("intent");
 
   if (intent === "invite") {
     const submission = parseWithZod(formData, { schema: InviteSchema });
@@ -202,9 +285,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   // Organization settings update
   if (intent === "update-settings") {
-    // Log all form data entries for debugging
-    console.log("Form data received:", Object.fromEntries([...formData.entries()]));
-    
     const submission = parseWithZod(formData, { 
       schema: SettingsSchema 
     });
@@ -243,23 +323,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function OrganizationSettings() {
   const { organization, pendingInvitations, members, currentUserId } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const fetcher = useFetcher();
-  
-  const [form, fields] = useForm({
-    id: "organization-settings-form",
-    constraint: getZodConstraint(SettingsSchema),
-    lastResult: fetcher.data?.result || actionData?.result,
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: SettingsSchema });
-    },
-    defaultValue: {
-      name: organization.name,
-      slug: organization.slug,
-    },
-  });
 
   return (
-    <div className="flex flex-col gap-6 p-8 scroll-auto h-[calc(100vh-64px)] overflow-y-auto">
+    <div className="flex flex-col gap-12 p-8 scroll-auto h-[calc(100vh-64px)] overflow-y-auto">
       <div>
         <h3 className="text-lg font-medium">Organization Settings</h3>
         <p className="text-sm text-muted-foreground">
@@ -267,54 +333,19 @@ export default function OrganizationSettings() {
         </p>
       </div>
 
-      {/* Organization Settings Form */}
-      <Card className="w-full">
-        <CardHeader className="border-b border-muted">
-          <CardTitle className="text-xl">General Settings</CardTitle>
-          <CardDescription>Update your organization details</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <fetcher.Form method="POST" {...getFormProps(form)}>
-            <input type="hidden" name="intent" value="update-settings" />
-            <div className="grid grid-cols-6 gap-x-10">
-              <Field
-                className="col-span-3"
-                labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
-                inputProps={getInputProps(fields.name, {type: 'text'})}
-                errors={fields.name.errors}
-              />
-              <Field
-                className="col-span-3"
-                labelProps={{ htmlFor: fields.slug.id, children: 'Slug' }}
-                inputProps={getInputProps(fields.slug, {type: 'text'})}
-                errors={fields.slug.errors}
-              />
-            </div>
-            <ErrorList id={form.errorId} errors={form.errors} />
-          </fetcher.Form>
-        </CardContent>
-        <CardFooter className="justify-end border-t border-muted pt-4">
-          <StatusButton
-            form={form.id}
-            type="submit"
-            variant="outline"
-            name="intent" 
-            value="update-settings"
-            status={fetcher.state !== 'idle' ? 'pending' : form.status ?? 'idle'}
-          >
-            Save changes
-          </StatusButton>
-        </CardFooter>
-      </Card>
+      {/* Organization Photo removed from here - will be moved inside GeneralSettingsCard */}
+      
+      {/* Organization General Settings */}
+      <GeneralSettingsCard organization={organization} />
       
       {/* Organization Members */}
-      <OrganizationMembers 
+      <MembersCard 
         members={members}
         currentUserId={currentUserId}
       />
       
       {/* Organization Invitations */}
-      <OrganizationInvitations 
+      <InvitationsCard 
         pendingInvitations={pendingInvitations}
         actionData={actionData}
       />

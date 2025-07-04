@@ -162,7 +162,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<Response>
 
 	switch (intent) {
 		case profileUpdateActionIntent: {
-			return profileUpdateAction({ request, userId, formData })
+			return profileUpdateAction({ userId, formData })
 		}
 		case signOutOfSessionsActionIntent: {
 			return signOutOfSessionsAction({ request, userId, formData })
@@ -171,7 +171,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<Response>
 			return deleteDataAction({ request, userId, formData })
 		}
 		case disconnectProviderActionIntent: {
-			return disconnectProviderAction({ request, userId, formData })
+			return disconnectProviderAction({ userId, formData })
 		}
     case changeEmailActionIntent: {
       return changeEmailAction({ request, userId, formData })
@@ -229,7 +229,6 @@ export default function GeneralSettings() {
 
 	return (
 		<div className="flex flex-col gap-12">
-			<ProfilePhoto user={data.user} />
       <ProfileCard user={data.user} />
       <EmailCard email={data.user.email} />
       <SecurityCard hasPassword={data.hasPassword} isTwoFactorEnabled={data.isTwoFactorEnabled} passkeys={data.passkeys} user={data.user} qrCode={data.qrCode} otpUri={data.otpUri} />

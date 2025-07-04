@@ -37,6 +37,17 @@ export async function uploadProfileImage(
 	return uploadToStorage(file, key)
 }
 
+export async function uploadOrganizationImage(
+	organizationId: string,
+	file: File | FileUpload,
+) {
+	const fileId = createId()
+	const fileExtension = file.name.split('.').pop() || ''
+	const timestamp = Date.now()
+	const key = `org/${organizationId}/logo/${timestamp}-${fileId}.${fileExtension}`
+	return uploadToStorage(file, key)
+}
+
 export async function uploadNoteImage(
 	userId: string,
 	noteId: string,

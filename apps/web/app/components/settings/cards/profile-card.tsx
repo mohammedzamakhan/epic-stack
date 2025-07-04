@@ -7,6 +7,7 @@ import { ErrorList, Field } from '#app/components/forms.tsx'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '#app/components/ui/card.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { ProfilePhoto } from './profile-photo'
 
 export const ProfileFormSchema = z.object({
   name: NameSchema.nullable().default(null),
@@ -45,26 +46,28 @@ export function ProfileCard({ user }: ProfileCardProps) {
         <CardDescription>Customize how you appear to others</CardDescription>
       </CardHeader>
       <CardContent className="pt-6 pb-0">
-        <fetcher.Form method="POST" {...getFormProps(form)}>
-          <div className="grid grid-cols-6 gap-x-10">
-            <Field
-              className="col-span-3"
-              labelProps={{
-                htmlFor: fields.username.id,
-                children: 'Username',
-              }}
-              inputProps={getInputProps(fields.username, { type: 'text' })}
-              errors={fields.username.errors}
-            />
-            <Field
-              className="col-span-3"
-              labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
-              inputProps={getInputProps(fields.name, { type: 'text' })}
-              errors={fields.name.errors}
-            />
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex-shrink-0 w-32">
+            <ProfilePhoto user={user} size="small" />
           </div>
-          <ErrorList errors={form.errors} id={form.errorId} />
-        </fetcher.Form>
+          <div className="flex-grow">
+            <fetcher.Form method="POST" {...getFormProps(form)}>
+              <div className="flex flex-col gap-4">
+                <Field
+                  labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
+                  inputProps={getInputProps(fields.name, { type: 'text' })}
+                  errors={fields.name.errors}
+                />
+                <Field
+                  labelProps={{ htmlFor: fields.username.id, children: 'Username' }}
+                  inputProps={getInputProps(fields.username, { type: 'text' })}
+                  errors={fields.username.errors}
+                />
+              </div>
+              <ErrorList errors={form.errors} id={form.errorId} />
+            </fetcher.Form>
+          </div>
+        </div>
       </CardContent>
       <CardFooter className="justify-end border-t border-muted pt-4">
         <StatusButton
