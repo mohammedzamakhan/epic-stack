@@ -22,10 +22,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	console.log('rootData', rootData)
 
 	const data = {
-		user: {
-			name: 'shadcn',
-			email: 'm@example.com',
-			avatar: '/avatars/shadcn.jpg',
+		user: rootData?.user ? {
+			name: rootData.user.name || rootData.user.username || 'User',
+			email: rootData.user.username, // Using username as email since email property is not available
+			avatar: rootData.user.image ? `/resources/images?objectKey=${rootData.user.image.objectKey}` : '/avatars/user.jpg',
+		} : {
+			name: 'Guest',
+			email: '',
+			avatar: '/avatars/user.jpg',
 		},
 		navMain: [
 			{

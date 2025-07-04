@@ -1,5 +1,6 @@
 
 
+import { Link, Form } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
 	DropdownMenu,
@@ -72,19 +73,23 @@ export function NavUser({
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								Account
+							<DropdownMenuItem asChild>
+								<Link to="/settings/general">Account</Link>
 							</DropdownMenuItem>
-							<DropdownMenuItem>
-								Billing
+							<DropdownMenuItem asChild>
+								<Link to="/settings/billing">Billing</Link>
 							</DropdownMenuItem>
-							<DropdownMenuItem>
-								Notifications
+							<DropdownMenuItem asChild>
+								<Link to="/settings/notifications">Notifications</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							Log out
+						<DropdownMenuItem asChild>
+							<Form action="/logout" method="POST">
+								<button type="submit" className="w-full text-left">
+									Log out
+								</button>
+							</Form>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
