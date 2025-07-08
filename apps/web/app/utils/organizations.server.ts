@@ -5,7 +5,7 @@ export type OrganizationWithImage = {
   id: string
   name: string
   slug: string
-  image?: { id: string; altText?: string | null } | null
+  image?: { id: string; altText?: string | null, objectKey: string } | null
 }
 
 export type UserOrganizationWithRole = {
@@ -29,6 +29,7 @@ export async function getUserOrganizations(userId: User['id']) {
             select: {
               id: true,
               altText: true,
+              objectKey: true
             },
           },
         },
@@ -52,6 +53,7 @@ export async function getUserDefaultOrganization(userId: User['id']) {
             select: {
               id: true,
               altText: true,
+              objectKey: true
             },
           },
         },

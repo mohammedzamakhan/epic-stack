@@ -55,6 +55,8 @@ export function TeamSwitcher() {
     return null
   }
 
+  console.log(activeTeam)
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -65,10 +67,10 @@ export function TeamSwitcher() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-lg">
-                <Avatar className="h-6 w-6">
-                  {activeTeam.image?.id ? (
+                <Avatar className="h-6 w-6 rounded-md">
+                  {activeTeam.image?.objectKey ? (
                     <AvatarImage
-                      src={`/resources/organizations/${activeTeam.id}/logo`}
+                      src={`/resources/images?objectKey=${activeTeam.image.objectKey}`}
                       alt={activeTeam.image?.altText || `${activeTeam.name} logo`}
                     />
                   ) : null}
@@ -97,10 +99,10 @@ export function TeamSwitcher() {
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <Avatar className="h-5 w-5">
-                    {userOrg.organization.image?.id ? (
+                  <Avatar className="h-5 w-5 rounded-md">
+                    {userOrg.organization.image?.objectKey ? (
                       <AvatarImage
-                        src={`/resources/organizations/${userOrg.organization.id}/logo`}
+                        src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}
                         alt={
                           userOrg.organization.image?.altText ||
                           `${userOrg.organization.name} logo`
