@@ -1,4 +1,5 @@
 import { type LoaderFunctionArgs } from 'react-router'
+import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 
@@ -9,4 +10,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	return {}
 }
 
-export default OrgNoteEditor
+export default function NewNote() {
+	return (
+		<>
+			<SheetHeader className="border-b">
+				<SheetTitle className="text-xl font-semibold">Create New Note</SheetTitle>
+			</SheetHeader>
+			<OrgNoteEditor />
+		</>
+	)
+}

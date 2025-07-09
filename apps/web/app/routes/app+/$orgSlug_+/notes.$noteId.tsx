@@ -11,6 +11,7 @@ import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
+import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -145,56 +146,58 @@ export default function NoteRoute() {
 	}, [note.id])
 
 	return (
-		<section
-			ref={sectionRef}
-			className="absolute inset-0 flex flex-col px-10"
-			aria-labelledby="note-title"
-			tabIndex={-1} // Make the section focusable without keyboard navigation
-		>
-			<h2 id="note-title" className="text-h2 mb-2 pt-12 lg:mb-6">
-				{note.title}
-			</h2>
-			<div className="pb-24 overflow-y-auto">
-				<ul className="flex flex-wrap gap-5 py-5">
-					{note.images.map((image) => (
-						<li key={image.objectKey}>
-							<a href={getNoteImgSrc(image.objectKey)}>
-								<Img
-									src={getNoteImgSrc(image.objectKey)}
-									alt={image.altText ?? ''}
-									className="size-32 rounded-lg object-cover"
-									width={512}
-									height={512}
-								/>
-							</a>
-						</li>
-					))}
-				</ul>
-				<p className="text-sm whitespace-break-spaces md:text-lg">
-					{note.content}
-				</p>
-			</div>
-			<div className={floatingToolbarClassName}>
-				<span className="text-foreground/90 text-sm max-[524px]:hidden">
-					<Icon name="clock" className="scale-125">
-						{timeAgo} ago
-					</Icon>
-				</span>
-				<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
-					<DeleteNote id={note.id} />
-					<Button
-						asChild
-						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-					>
-						<Link to="edit">
-							<Icon name="pencil-1" className="scale-125 max-md:scale-150">
-								<span className="max-md:hidden">Edit</span>
-							</Icon>
-						</Link>
-					</Button>
+		<>
+			<SheetHeader className="border-b">
+				<SheetTitle className="text-xl font-semibold">{note.title}</SheetTitle>
+			</SheetHeader>
+			<section
+				ref={sectionRef}
+				className="flex flex-col px-6 py-4 h-full"
+				aria-labelledby="note-title"
+				tabIndex={-1} // Make the section focusable without keyboard navigation
+			>
+				<div className="pb-24 overflow-y-auto">
+					<ul className="flex flex-wrap gap-5 py-5">
+						{note.images.map((image) => (
+							<li key={image.objectKey}>
+								<a href={getNoteImgSrc(image.objectKey)}>
+									<Img
+										src={getNoteImgSrc(image.objectKey)}
+										alt={image.altText ?? ''}
+										className="size-32 rounded-lg object-cover"
+										width={512}
+										height={512}
+									/>
+								</a>
+							</li>
+						))}
+					</ul>
+					<p className="text-sm whitespace-break-spaces md:text-lg">
+						{note.content}
+					</p>
 				</div>
-			</div>
-		</section>
+				<div className={floatingToolbarClassName}>
+					<span className="text-foreground/90 text-sm max-[524px]:hidden">
+						<Icon name="clock" className="scale-125">
+							{timeAgo} ago
+						</Icon>
+					</span>
+					<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
+						<DeleteNote id={note.id} />
+						<Button
+							asChild
+							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+						>
+							<Link to="edit">
+								<Icon name="pencil-1" className="scale-125 max-md:scale-150">
+									<span className="max-md:hidden">Edit</span>
+								</Icon>
+							</Link>
+						</Button>
+					</div>
+				</div>
+			</section>
+		</>
 	)
 }
 

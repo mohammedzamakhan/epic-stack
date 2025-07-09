@@ -1,4 +1,3 @@
-import { getFormProps, useForm } from '@conform-to/react'
 import {
   flexRender,
   getCoreRowModel,
@@ -9,21 +8,10 @@ import {
 } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
-import { Form } from 'react-router'
+import { useNavigate, Link } from 'react-router'
 import { z } from 'zod'
-import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
-import { ErrorList } from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
-import { 
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '#app/components/ui/sheet.tsx'
-import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { 
   Table, 
   TableBody, 
@@ -32,8 +20,6 @@ import {
   TableHeader,
   TableRow 
 } from '#app/components/ui/table.tsx'
-import { useIsPending } from '#app/utils/misc.tsx'
-import { OrgNoteEditor } from './__org-note-editor.tsx'
 
 export type Note = {
   id: string
@@ -56,9 +42,7 @@ const DeleteFormSchema = z.object({
 
 export function NotesTable({ notes }: { notes: Note[] }) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
+  const navigate = useNavigate()
 
   const columns: ColumnDef<Note>[] = [
     {
@@ -97,25 +81,20 @@ export function NotesTable({ notes }: { notes: Note[] }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent row click handler
-                setSelectedNote(note)
-                setSheetOpen(true)
-              }}
+              asChild
             >
-              <Icon name="clock" className="size-4" />
+              <Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
+                <Icon name="magnifying-glass" className="size-4" />
+              </Link>
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent row click handler
-                setSelectedNote(note);
-                setEditMode(true);
-                setSheetOpen(true);
-              }}
+              asChild
             >
-              <Icon name="pencil-1" className="size-4" />
+              <Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
+                <Icon name="pencil-1" className="size-4" />
+              </Link>
             </Button>
           </div>
         )
@@ -135,14 +114,7 @@ export function NotesTable({ notes }: { notes: Note[] }) {
   })
 
   function handleRowClick(note: Note) {
-    setSelectedNote(note)
-    setSheetOpen(true)
-  }
-
-  function handleEditClick() {
-    if (selectedNote) {
-      setEditMode(true)
-    }
+    void navigate(`${note.id}`)
   }
 
   return (
@@ -189,107 +161,8 @@ export function NotesTable({ notes }: { notes: Note[] }) {
           )}
         </TableBody>
       </Table>
-      
-      {selectedNote && (
-        <Sheet 
-          open={sheetOpen} 
-          onOpenChange={(open) => {
-            setSheetOpen(open);
-            if (!open) setEditMode(false);
-          }}
-        >
-          <SheetContent className="w-[90vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl overflow-auto p-0">
-            {editMode ? (
-              <>
-                <SheetHeader className="p-6 pb-2 border-b">
-                  <SheetTitle className="text-xl font-semibold">Edit Note</SheetTitle>
-                </SheetHeader>
-                <div className="px-1">
-                  <OrgNoteEditor 
-                    note={selectedNote} 
-                    onSuccess={() => {
-                      setSheetOpen(false);
-                      setEditMode(false);
-                    }} 
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <SheetHeader className="p-6 pb-2 border-b">
-                  <SheetTitle className="text-xl font-semibold">{selectedNote.title}</SheetTitle>
-                  <SheetDescription className="text-muted-foreground">
-                    {formatDistanceToNow(new Date(selectedNote.updatedAt), { addSuffix: true })}
-                  </SheetDescription>
-                </SheetHeader>
-                
-                <div className="p-6 pt-4 overflow-y-auto max-h-[calc(80vh-120px)]">
-                  {selectedNote.images.length > 0 && (
-                    <div className="flex flex-wrap gap-4 mb-6">
-                      {selectedNote.images.map((image) => (
-                        <img 
-                          key={image.id}
-                          src={`/resources/note-images/${image.objectKey}`}
-                          alt={image.altText || ''}
-                          className="size-36 rounded-lg object-cover shadow-sm hover:shadow transition-shadow"
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <div className="whitespace-pre-wrap prose prose-sm max-w-none">
-                    {selectedNote.content}
-                  </div>
-                </div>
-
-                <SheetFooter className={`${floatingToolbarClassName} bg-background border-t px-6 py-4`}>
-                  <div className="flex items-center justify-between gap-2 w-full">
-                    <DeleteNote id={selectedNote.id} onDelete={() => setSheetOpen(false)} />
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setSheetOpen(false)}>
-                        Close
-                      </Button>
-                      <Button onClick={handleEditClick}>
-                        <Icon name="pencil-1">Edit</Icon>
-                      </Button>
-                    </div>
-                  </div>
-                </SheetFooter>
-              </>
-            )}
-          </SheetContent>
-        </Sheet>
-      )}
     </div>
   )
 }
 
-function DeleteNote({ id, onDelete }: { id: string; onDelete: () => void }) {
-  const isPending = useIsPending()
-  const [form] = useForm({
-    id: 'delete-note',
-  })
-
-  return (
-    <Form method="POST" {...getFormProps(form)}>
-      <input type="hidden" name="noteId" value={id} />
-      <StatusButton
-        type="submit"
-        name="intent"
-        value="delete-note"
-        variant="destructive"
-        status={isPending ? 'pending' : (form.status ?? 'idle')}
-        disabled={isPending}
-        onClick={(e) => {
-          // Prevent the row click handler from firing
-          e.stopPropagation()
-          if (onDelete) {
-            onDelete()
-          }
-        }}
-      >
-        <Icon name="trash">Delete</Icon>
-      </StatusButton>
-      <ErrorList errors={form.errors} id={form.errorId} />
-    </Form>
-  )
-}
+// DeleteNote component moved to the individual note view

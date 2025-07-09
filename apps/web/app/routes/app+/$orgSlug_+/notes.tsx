@@ -1,14 +1,12 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { useState } from 'react'
-import { Outlet } from 'react-router'
+import { Outlet, useMatches, Link } from 'react-router'
 import { type LoaderFunctionArgs } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
+import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
-import { OrgNoteEditor } from './__org-note-editor.tsx'
 import { NotesTable } from './notes-table.tsx'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
@@ -73,11 +71,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export default function NotesRoute({ loaderData }: { loaderData: { organization: { id: string, name: string, slug: string, image?: { objectKey: string } }, notes: Array<any> } }) {
 	const orgName = loaderData.organization.name
-	const [createSheetOpen, setCreateSheetOpen] = useState(false)
-
-    const handleSuccess = () => {
-        setCreateSheetOpen(false);
-    }
+	const matches = useMatches();
+	// Check if a nested route is active (note view, note edit, or new note)
+	const hasOutlet = matches.some(match => 
+		match.id.includes('notes.$noteId') || 
+		match.id.includes('notes.$noteId_.edit') || 
+		match.id.includes('notes.new')
+	);
 
 	return (
 		<div className="flex h-full flex-col m-8">
@@ -85,8 +85,10 @@ export default function NotesRoute({ loaderData }: { loaderData: { organization:
 				<h1 className="text-3xl md:text-left">
 					{orgName}'s Notes
 				</h1>
-				<Button variant="default" onClick={() => setCreateSheetOpen(true)}>
-					<Icon name="plus">New Note</Icon>
+				<Button variant="default" asChild>
+					<Link to="new">
+						<Icon name="plus">New Note</Icon>
+					</Link>
 				</Button>
 			</div>
 
@@ -96,22 +98,24 @@ export default function NotesRoute({ loaderData }: { loaderData: { organization:
 				) : (
 					<div className="flex flex-col items-center justify-center h-64 text-center">
 						<p className="text-muted-foreground mb-4">No notes found</p>
-						<Button variant="outline" onClick={() => setCreateSheetOpen(true)}>
-							<Icon name="plus">Create your first note</Icon>
+						<Button variant="outline" asChild>
+							<Link to="new">
+								<Icon name="plus">Create your first note</Icon>
+							</Link>
 						</Button>
 					</div>
 				)}
 			</div>
 
-			{/* Create Note Sheet */}
-			<Sheet open={createSheetOpen} onOpenChange={setCreateSheetOpen}>
+			{/* Sheet for nested routes */}
+			<Sheet open={hasOutlet} onOpenChange={() => {
+				if (hasOutlet) {
+					// Navigate back to notes list
+					window.history.back();
+				}
+			}}>
 				<SheetContent className="w-[90vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl overflow-auto p-0">
-					<SheetHeader className="p-6 pb-2 border-b">
-						<SheetTitle className="text-xl font-semibold">Create New Note</SheetTitle>
-					</SheetHeader>
-					<div className="px-1">
-						<OrgNoteEditor onSuccess={handleSuccess} />
-					</div>
+					<Outlet />
 				</SheetContent>
 			</Sheet>
 		</div>

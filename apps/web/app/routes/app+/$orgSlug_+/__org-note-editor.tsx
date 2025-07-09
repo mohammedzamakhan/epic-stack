@@ -99,12 +99,12 @@ export function OrgNoteEditor({
 	const imageList = fields.images.getFieldList()
 
 	return (
-		<div className="absolute inset-0">
+		<div>
 			<FormProvider context={form.context}>
 				<fetcher.Form
 					method="POST"
 					action={note ? `/app/${params.orgSlug}/notes/${note.id}/edit` : `/app/${params.orgSlug}/notes/new`}
-					className="flex h-full flex-col gap-y-4 overflow-x-hidden overflow-y-auto px-10 pt-12 pb-28"
+					className="flex flex-col gap-y-4 overflow-x-hidden overflow-y-auto px-10 pt-2 pb-8"
 					{...getFormProps(form)}
 					encType="multipart/form-data"
 				>
