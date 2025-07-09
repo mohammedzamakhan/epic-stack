@@ -30,6 +30,7 @@ model User {
   organizations UserOrganization[]
   sentInvitations OrganizationInvitation[] @relation("inviter")
   utmSource   UtmSource?
+  createdOrgNotes OrganizationNote[] @relation("createdBy")
 }
 
 model Note {
@@ -201,6 +202,7 @@ model Organization {
   users       UserOrganization[]
   invitations OrganizationInvitation[]
   image       OrganizationImage?
+  notes       OrganizationNote[]
 }
 
 model UserOrganization {
@@ -265,4 +267,41 @@ model UtmSource {
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId      String   @unique
+}
+
+model OrganizationNote {
+  id      String @id @default(cuid())
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
+
+  createdBy   User   @relation("createdBy", fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdById String
+
+  images OrganizationNoteImage[]
+
+  // non-unique foreign keys
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([organizationId, updatedAt])
+}
+
+model OrganizationNoteImage {
+  id        String  @id @default(cuid())
+  altText   String?
+  objectKey String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  note   OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  noteId String
+
+  // non-unique foreign key
+  @@index([noteId])
 }

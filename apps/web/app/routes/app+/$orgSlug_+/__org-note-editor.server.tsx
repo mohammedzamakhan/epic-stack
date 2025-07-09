@@ -8,9 +8,9 @@ import { prisma } from '#app/utils/db.server.ts'
 import { uploadNoteImage } from '#app/utils/storage.server.ts'
 import {
 	MAX_UPLOAD_SIZE,
-	NoteEditorSchema,
+	OrgNoteEditorSchema,
 	type ImageFieldset,
-} from './__note-editor'
+} from './__org-note-editor'
 
 function imageHasFile(
 	image: ImageFieldset,
@@ -24,20 +24,31 @@ function imageHasId(
 	return Boolean(image.id)
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
+	const orgSlug = params.orgSlug
+
+	// Find organization ID
+	const organization = await prisma.organization.findFirst({
+		where: { slug: orgSlug, users: { some: { userId } } },
+		select: { id: true },
+	})
+
+	if (!organization) {
+		throw new Response('Organization not found or you do not have access', { status: 404 })
+	}
 
 	const formData = await parseFormData(request, {
 		maxFileSize: MAX_UPLOAD_SIZE,
 	})
 
 	const submission = await parseWithZod(formData, {
-		schema: NoteEditorSchema.superRefine(async (data, ctx) => {
+		schema: OrgNoteEditorSchema.superRefine(async (data, ctx) => {
 			if (!data.id) return
 
-			const note = await prisma.note.findUnique({
+			const note = await prisma.organizationNote.findUnique({
 				select: { id: true },
-				where: { id: data.id, ownerId: userId },
+				where: { id: data.id, organizationId: organization.id },
 			})
 			if (!note) {
 				ctx.addIssue({
@@ -97,14 +108,15 @@ export async function action({ request }: ActionFunctionArgs) {
 		newImages = [],
 	} = submission.value
 
-	const updatedNote = await prisma.note.upsert({
-		select: { id: true, owner: { select: { username: true } } },
+	const updatedNote = await prisma.organizationNote.upsert({
+		select: { id: true },
 		where: { id: noteId },
 		create: {
 			id: noteId,
-			ownerId: userId,
 			title,
 			content,
+			organization: { connect: { id: organization.id } },
+			createdBy: { connect: { id: userId } },
 			images: { create: newImages },
 		},
 		update: {
@@ -126,7 +138,6 @@ export async function action({ request }: ActionFunctionArgs) {
 	})
 
 	return redirect(
-		`/app/test/notes`,
-		
+		`/app/${orgSlug}/notes/${updatedNote.id}`,
 	)
 }

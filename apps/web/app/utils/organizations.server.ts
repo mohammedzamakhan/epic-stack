@@ -193,3 +193,39 @@ export async function checkUserOrganizationAccess(
 
   return !!userOrg
 }
+
+/**
+ * Check if the user has access to the specified organization
+ * Throws a 403 Response if user doesn't have access
+ */
+export async function userHasOrgAccess(request: Request, organizationId: string): Promise<boolean> {
+  const user = await prisma.user.findFirst({
+    where: {
+      sessions: {
+        some: {
+          expirationDate: { gt: new Date() },
+        },
+      },
+    },
+    select: { id: true },
+  })
+  
+  if (!user) {
+    throw new Response('Unauthorized', { status: 401 })
+  }
+  
+  // Check if user is a member of this organization
+  const userOrg = await prisma.userOrganization.findFirst({
+    where: { 
+      userId: user.id, 
+      organizationId,
+      active: true
+    },
+  })
+  
+  if (!userOrg) {
+    throw new Response('You do not have access to this organization', { status: 403 })
+  }
+  
+  return true
+}

@@ -37,6 +37,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
 			},
 			{
+				title: 'Notes',
+				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`,
+			},
+			{
 				title: 'Settings',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
 			},
