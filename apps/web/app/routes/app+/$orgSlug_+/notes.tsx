@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { invariantResponse } from '@epic-web/invariant'
-import { Outlet, useMatches, Link } from 'react-router'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router'
 import { type LoaderFunctionArgs } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button } from '#app/components/ui/button.tsx'
@@ -8,6 +9,9 @@ import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { NotesTable } from './notes-table.tsx'
+import { SquarePenIcon } from '#app/components/ui/square-pen-icon.tsx'
+import { EmptyState } from '#app/components/empty-state.tsx'
+import { Files, FileText, Link2 } from 'lucide-react'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
@@ -51,40 +55,53 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			},
 		},
 		where: {
-			organizationId: organization.id
+			organizationId: organization.id,
 		},
 		orderBy: {
-			updatedAt: 'desc'
+			updatedAt: 'desc',
 		},
 	})
 
-	const formattedNotes = notes.map(note => ({
+	const formattedNotes = notes.map((note) => ({
 		...note,
-		createdByName: note.createdBy?.name || note.createdBy?.username || 'Unknown',
+		createdByName:
+			note.createdBy?.name || note.createdBy?.username || 'Unknown',
 	}))
 
-	return { 
+	return {
 		organization,
-		notes: formattedNotes
+		notes: formattedNotes,
 	}
 }
 
-export default function NotesRoute({ loaderData }: { loaderData: { organization: { id: string, name: string, slug: string, image?: { objectKey: string } }, notes: Array<any> } }) {
+export default function NotesRoute({
+	loaderData,
+}: {
+	loaderData: {
+		organization: {
+			id: string
+			name: string
+			slug: string
+			image?: { objectKey: string }
+		}
+		notes: Array<any>
+	}
+}) {
 	const orgName = loaderData.organization.name
-	const matches = useMatches();
-	// Check if a nested route is active (note view, note edit, or new note)
-	const hasOutlet = matches.some(match => 
-		match.id.includes('notes.$noteId') || 
-		match.id.includes('notes.$noteId_.edit') || 
-		match.id.includes('notes.new')
-	);
+	const location = useLocation()
+	const [hasOutlet, setHasOutlet] = useState(false)
+	const navigate = useNavigate()
+
+	// Simple check: if we're not on the base notes route, show outlet
+	useEffect(() => {
+		const baseNotesPath = `/app/${loaderData.organization.slug}/notes`
+		setHasOutlet(location.pathname !== baseNotesPath)
+	}, [location.pathname, loaderData.organization.slug])
 
 	return (
-		<div className="flex h-full flex-col m-8">
-			<div className="flex justify-between items-center pb-4">
-				<h1 className="text-3xl md:text-left">
-					{orgName}'s Notes
-				</h1>
+		<div className="m-8 flex h-full flex-col">
+			<div className="flex items-center justify-between pb-4">
+				<h1 className="text-3xl md:text-left">{orgName}'s Notes</h1>
 				<Button variant="default" asChild>
 					<Link to="new">
 						<Icon name="plus">New Note</Icon>
@@ -96,25 +113,33 @@ export default function NotesRoute({ loaderData }: { loaderData: { organization:
 				{loaderData.notes.length > 0 ? (
 					<NotesTable notes={loaderData.notes} />
 				) : (
-					<div className="flex flex-col items-center justify-center h-64 text-center">
-						<p className="text-muted-foreground mb-4">No notes found</p>
-						<Button variant="outline" asChild>
-							<Link to="new">
-								<Icon name="plus">Create your first note</Icon>
-							</Link>
-						</Button>
-					</div>
+					<>
+						<EmptyState
+							title="You haven't created any notes yet!"
+							description="Notes help you capture thoughts, meeting minutes, or anything
+							important for your organization. Get started by creating your
+							first note."
+							icons={[FileText, Link2, Files]}
+							action={{
+								label: 'Create Note',
+                                href: `/app/${loaderData.organization.slug}/notes/new`,
+							}}
+						/>
+					</>
 				)}
 			</div>
 
 			{/* Sheet for nested routes */}
-			<Sheet open={hasOutlet} onOpenChange={() => {
-				if (hasOutlet) {
-					// Navigate back to notes list
-					window.history.back();
-				}
-			}}>
-				<SheetContent className="w-[90vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl overflow-auto p-0">
+			<Sheet
+				open={hasOutlet}
+				onOpenChange={() => {
+					if (hasOutlet) {
+						// Navigate back to notes list
+						void navigate(`/app/${loaderData.organization.slug}/notes`)
+					}
+				}}
+			>
+				<SheetContent className="w-[90vw] overflow-auto sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
 					<Outlet />
 				</SheetContent>
 			</Sheet>

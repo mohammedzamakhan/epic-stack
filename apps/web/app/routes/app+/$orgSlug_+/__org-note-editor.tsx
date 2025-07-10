@@ -104,7 +104,7 @@ export function OrgNoteEditor({
 				<fetcher.Form
 					method="POST"
 					action={note ? `/app/${params.orgSlug}/notes/${note.id}/edit` : `/app/${params.orgSlug}/notes/new`}
-					className="flex flex-col gap-y-4 overflow-x-hidden overflow-y-auto px-10 pt-2 pb-8"
+					className="flex flex-col gap-y-4 overflow-x-hidden px-6 overflow-y-auto pt-2 pb-8"
 					{...getFormProps(form)}
 					encType="multipart/form-data"
 				>

@@ -67,7 +67,7 @@ export function TeamSwitcher() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-lg">
-                <Avatar className="h-6 w-6 rounded-md">
+                <Avatar className="size-7 rounded-md">
                   {activeTeam.image?.objectKey ? (
                     <AvatarImage
                       src={`/resources/images?objectKey=${activeTeam.image.objectKey}`}
@@ -99,7 +99,7 @@ export function TeamSwitcher() {
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <Avatar className="h-5 w-5 rounded-md">
+                  <Avatar className="size-6 rounded-md">
                     {userOrg.organization.image?.objectKey ? (
                       <AvatarImage
                         src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}

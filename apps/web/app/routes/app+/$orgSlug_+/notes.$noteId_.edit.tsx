@@ -63,7 +63,7 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle className="text-xl font-semibold">Edit Note</SheetTitle>
+				<SheetTitle>Edit Note</SheetTitle>
 			</SheetHeader>
 			<OrgNoteEditor note={loaderData.note} actionData={actionData} />
 		</>

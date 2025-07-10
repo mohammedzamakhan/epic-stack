@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { AppSidebar } from '#app/components/app-sidebar'
 import { SiteHeader } from '#app/components/site-header'
 import { SidebarInset, SidebarProvider } from '#app/components/ui/sidebar'
+import { EpicProgress } from './progress-bar'
 
 type MarketingLayoutProps = {
 	children: ReactNode
@@ -13,6 +14,7 @@ export function MarketingLayout({
 	isCollapsed = false,
 }: MarketingLayoutProps) {
 	return (
+		<>
 		<SidebarProvider
 			open={!isCollapsed}
 			style={
@@ -43,8 +45,11 @@ export function MarketingLayout({
 						{children}
 					</div>
 				</div>
+				
 			</SidebarInset>
 		</SidebarProvider>
+		<EpicProgress />
+		</>
 	)
 }
 

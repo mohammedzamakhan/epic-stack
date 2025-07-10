@@ -148,15 +148,15 @@ export default function NoteRoute() {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle className="text-xl font-semibold">{note.title}</SheetTitle>
+				<SheetTitle>{note.title}</SheetTitle>
 			</SheetHeader>
 			<section
 				ref={sectionRef}
-				className="flex flex-col px-6 py-4 h-full"
+				className="flex flex-col h-full"
 				aria-labelledby="note-title"
 				tabIndex={-1} // Make the section focusable without keyboard navigation
 			>
-				<div className="pb-24 overflow-y-auto">
+				<div className="pb-8 px-6 overflow-y-auto">
 					<ul className="flex flex-wrap gap-5 py-5">
 						{note.images.map((image) => (
 							<li key={image.objectKey}>

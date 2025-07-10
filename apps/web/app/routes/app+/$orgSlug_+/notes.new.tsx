@@ -14,7 +14,7 @@ export default function NewNote() {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle className="text-xl font-semibold">Create New Note</SheetTitle>
+				<SheetTitle>Create New Note</SheetTitle>
 			</SheetHeader>
 			<OrgNoteEditor />
 		</>
