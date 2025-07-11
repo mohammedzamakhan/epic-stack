@@ -118,11 +118,13 @@ export async function createOrganization({
   slug,
   description,
   userId,
+  imageObjectKey,
 }: {
   name: string
   slug: string
   description?: string
   userId: string
+  imageObjectKey?: string
 }) {
   return prisma.$transaction(async (tx) => {
     const organization = await tx.organization.create({
@@ -137,11 +139,27 @@ export async function createOrganization({
             isDefault: true,
           },
         },
+        ...(imageObjectKey
+          ? {
+              image: {
+                create: {
+                  altText: `${name} logo`,
+                  objectKey: imageObjectKey,
+                },
+              },
+            }
+          : {}),
       },
       select: {
         id: true,
         name: true,
         slug: true,
+        image: {
+          select: {
+            id: true,
+            objectKey: true,
+          },
+        },
       },
     })
 

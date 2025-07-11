@@ -1,11 +1,20 @@
-import { redirect, type ActionFunctionArgs, Form, Link, useActionData } from 'react-router';
+import { getFormProps, getInputProps, useForm } from '@conform-to/react';
+import { getZodConstraint, parseWithZod } from '@conform-to/zod';
+import { useState } from 'react';
+import { redirect, type ActionFunctionArgs, Link, useActionData } from 'react-router';
 import { z } from 'zod';
+import { ErrorList } from '#app/components/forms';
 import { Button } from '#app/components/ui/button';
 import { Input } from '#app/components/ui/input';
 import { Label } from '#app/components/ui/label';
+import { Textarea } from '#app/components/ui/textarea';
 
 import { requireUserId } from '#app/utils/auth.server';
 import { createOrganization } from '#app/utils/organizations.server';
+import { uploadOrganizationImage } from '#app/utils/storage.server';
+
+// Photo upload schema
+const MAX_SIZE = 1024 * 1024 * 5; // 5MB
 
 const CreateOrganizationSchema = z.object({
   name: z.string().min(2, { message: 'Organization name is required' }),
@@ -17,126 +26,180 @@ const CreateOrganizationSchema = z.object({
         'Slug can only contain lowercase letters, numbers, and hyphens, and cannot start or end with a hyphen',
     }),
   description: z.string().optional(),
+  logoFile: z
+    .instanceof(File)
+    .optional()
+    .refine(file => !file || file.size <= MAX_SIZE, 'Image size must be less than 5MB')
+    .refine(
+      file => !file || ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type),
+      'Only .jpg, .jpeg, and .png files are accepted.',
+    ),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
 
   const formData = await request.formData();
-  const result = CreateOrganizationSchema.safeParse(Object.fromEntries(formData));
+  const submission = await parseWithZod(formData, {
+    schema: CreateOrganizationSchema,
+    async: true,
+  });
 
-  if (!result.success) {
-    return Response.json({ errors: result.error.flatten() }, { status: 400 });
+  if (submission.status !== 'success') {
+    return submission.reply();
   }
 
-  const { name, slug, description } = result.data;
+  const { name, slug, description, logoFile } = submission.value;
 
   try {
+    // Process image upload if exists
+    let imageObjectKey: string | undefined;
+    if (logoFile && logoFile instanceof File && logoFile.size > 0) {
+      // Upload the image to storage and get the object key
+      imageObjectKey = await uploadOrganizationImage(userId, logoFile);
+    }
+
     const organization = await createOrganization({
       name,
       slug,
       description,
-      userId: userId,
+      userId,
+      imageObjectKey,
     });
 
     return redirect(`/app/${organization.slug}`);
   } catch (error) {
     console.error('Failed to create organization', error);
-    return Response.json(
-      {
-        errors: {
-          formErrors: ['Failed to create organization'],
-          fieldErrors: {},
-        },
-      },
-      { status: 500 },
-    );
+    return submission.reply({
+      formErrors: ['Failed to create organization'],
+    });
   }
 }
 
 export default function CreateOrganizationPage() {
   const actionData = useActionData<typeof action>();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const [form, fields] = useForm({
+    id: 'create-organization',
+    constraint: getZodConstraint(CreateOrganizationSchema),
+    lastResult: actionData,
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: CreateOrganizationSchema });
+    },
+  });
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = ev => setPreviewImage(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
-    <div className="container max-w-3xl py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Create a New Organization</h1>
-        <p className="text-gray-600">
-          Create a new organization to collaborate with your team.
+    <div className="container max-w-md py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Add your organization</h1>
+        <p className="text-gray-600 text-sm">
+          We just need some basic info to get your organization set up.
+          You'll be able to edit this later.
         </p>
       </div>
 
-      <Form method="post" className="space-y-6">
-        <div className="space-y-4">
+      <form
+        method="post"
+        className="space-y-6"
+        encType="multipart/form-data"
+        {...getFormProps(form)}
+      >
+        <div className="space-y-5">
           <div>
-            <Label htmlFor="name">Organization Name</Label>
+            <Label htmlFor={fields.logoFile.id}>Logo</Label>
+            <div className="mt-2">
+              <div className="flex items-center">
+                <div className="relative size-16 bg-muted rounded-md flex items-center justify-center overflow-hidden border border-input">
+                  {previewImage ? (
+                    <img 
+                      src={previewImage} 
+                      alt="Organization logo preview" 
+                      className="size-full object-cover" 
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-xs text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-1">
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" />
+                        <line x1="16" x2="22" y1="5" y2="5" />
+                        <line x1="19" x2="19" y1="2" y2="8" />
+                        <circle cx="9" cy="9" r="2" />
+                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="ml-4">
+                  <input
+                    {...getInputProps(fields.logoFile, { type: 'file' })}
+                    accept="image/png,image/jpeg"
+                    className="sr-only"
+                    onChange={handleImageChange}
+                  />
+                  <Button type="button" variant="outline" size="sm" asChild>
+                    <label htmlFor={fields.logoFile.id} className="cursor-pointer">
+                      Upload your logo
+                    </label>
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-1">*.png, *.jpeg files up to 5 MB</p>
+                </div>
+              </div>
+              <ErrorList errors={fields.logoFile.errors} id={fields.logoFile.id} />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor={fields.name.id}>Name<span className="text-red-500">*</span></Label>
             <Input
-              id="name"
-              name="name"
+              {...getInputProps(fields.name, { type: 'text' })}
               placeholder="Acme Inc."
               className="mt-1"
-              required
             />
-            {actionData?.errors?.fieldErrors?.name ? (
-              <p className="mt-1 text-sm text-red-500">
-                {actionData.errors.fieldErrors.name[0]}
-              </p>
-            ) : null}
+            <ErrorList errors={fields.name.errors} id={fields.name.id} />
           </div>
 
           <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input
-              id="slug"
-              name="slug"
-              placeholder="acme"
+            <Label htmlFor={fields.slug.id}>Slug<span className="text-red-500">*</span></Label>
+            <div className="mt-1 flex items-center">
+              <div className="text-sm text-gray-500 pr-1">/app/</div>
+              <Input
+                {...getInputProps(fields.slug, { type: 'text' })}
+                placeholder="acme"
+                className="flex-1"
+              />
+            </div>
+            <ErrorList errors={fields.slug.errors} id={fields.slug.id} />
+          </div>
+
+          <div>
+            <Label htmlFor={fields.description.id}>Description</Label>
+            <Textarea
+              {...getInputProps(fields.description, { type: 'text'})}
               className="mt-1"
-              required
-              pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Used in URLs: example.com/organizations/your-slug
-            </p>
-            {actionData?.errors?.fieldErrors?.slug ? (
-              <p className="mt-1 text-sm text-red-500">
-                {actionData.errors.fieldErrors.slug[0]}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description (Optional)</Label>
-            <textarea
-              id="description"
-              name="description"
-              className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm"
               rows={3}
             />
+            <ErrorList errors={fields.description.errors} id={fields.description.id} />
           </div>
         </div>
 
-        {actionData?.errors?.formErrors?.length ? (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="text-red-700">
-                <p>Failed to create organization:</p>
-                <ul className="list-disc pl-5">
-                  {actionData.errors.formErrors.map((error: string) => (
-                    <li key={error}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        <ErrorList errors={form.errors} id={form.errorId} />
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 pt-4">
           <Button variant="outline" asChild>
             <Link to="/organizations">Cancel</Link>
           </Button>
           <Button type="submit">Create Organization</Button>
         </div>
-      </Form>
+      </form>
     </div>
   );
 }
