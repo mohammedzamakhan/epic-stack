@@ -39,9 +39,9 @@ const SquarePenIcon = forwardRef<SquarePenIconHandle, SquarePenIconProps>(
     });
 
     const handleMouseEnter = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      async (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isControlledRef.current) {
-          controls.start('animate');
+          await controls.start('animate');
         } else {
           onMouseEnter?.(e);
         }
@@ -50,9 +50,9 @@ const SquarePenIcon = forwardRef<SquarePenIconHandle, SquarePenIconProps>(
     );
 
     const handleMouseLeave = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+      async (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isControlledRef.current) {
-          controls.start('normal');
+          await controls.start('normal');
         } else {
           onMouseLeave?.(e);
         }

@@ -40,7 +40,7 @@ export async function changeEmailAction({ formData, userId, request }: EmailActi
     )
   }
   
-  const { otp, redirectTo, verifyUrl } = await prepareVerification({
+  const { otp, verifyUrl } = await prepareVerification({
     period: 10 * 60,
     request,
     target: userId,

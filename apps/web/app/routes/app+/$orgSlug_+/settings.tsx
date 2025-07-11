@@ -8,6 +8,7 @@ import { GeneralSettingsCard } from "#app/components/settings/cards/organization
 import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
 import { MembersCard } from "#app/components/settings/cards/organization/members-card";
 import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent, OrgPhotoFormSchema } from "#app/components/settings/cards/organization/organization-photo-card";
+import { AnnotatedLayout, AnnotatedSection } from "#app/components/ui/annotated-layout";
 import { requireUserId } from "#app/utils/auth.server";
 import { prisma } from "#app/utils/db.server";
 import { 
@@ -16,8 +17,8 @@ import {
   getOrganizationInvitations,
   deleteOrganizationInvitation 
 } from "#app/utils/organization-invitation.server";
-import { redirectWithToast } from "#app/utils/toast.server";
 import { uploadOrganizationImage } from "#app/utils/storage.server.ts";
+import { redirectWithToast } from "#app/utils/toast.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const userId = await requireUserId(request);
@@ -152,7 +153,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
             { status: submission.status === 'error' ? 400 : 200 },
           )
         }
-        const { image, intent } = submission.value as { intent: string; image?: { objectKey: string } }
+        const { image } = submission.value as { intent: string; image?: { objectKey: string } }
 
         // Create or update organization image
         await prisma.$transaction(async $prisma => {
@@ -325,30 +326,35 @@ export default function OrganizationSettings() {
   const actionData = useActionData<typeof action>();
 
   return (
-    <div className="flex flex-col gap-12 p-8 scroll-auto h-[calc(100vh-64px)] overflow-y-auto">
-      <div>
-        <h3 className="text-lg font-medium">Organization Settings</h3>
-        <p className="text-sm text-muted-foreground">
-          Manage your organization's settings and team members.
-        </p>
-      </div>
-
-      {/* Organization Photo removed from here - will be moved inside GeneralSettingsCard */}
+    <div className="p-8">
+      <AnnotatedLayout>
+      <AnnotatedSection
+        title="General Settings"
+        description="Manage your organization's name, slug, and profile image."
+      >
+        <GeneralSettingsCard organization={organization} />
+      </AnnotatedSection>
       
-      {/* Organization General Settings */}
-      <GeneralSettingsCard organization={organization} />
+      <AnnotatedSection
+        title="Members"
+        description="Manage the members of your organization."
+      >
+        <MembersCard 
+          members={members}
+          currentUserId={currentUserId}
+        />
+      </AnnotatedSection>
       
-      {/* Organization Members */}
-      <MembersCard 
-        members={members}
-        currentUserId={currentUserId}
-      />
-      
-      {/* Organization Invitations */}
-      <InvitationsCard 
-        pendingInvitations={pendingInvitations}
-        actionData={actionData}
-      />
+      <AnnotatedSection
+        title="Invitations"
+        description="Invite new members to your organization."
+      >
+        <InvitationsCard 
+          pendingInvitations={pendingInvitations}
+          actionData={actionData}
+        />
+      </AnnotatedSection>
+    </AnnotatedLayout>
     </div>
   );
 }

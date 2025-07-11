@@ -1,7 +1,7 @@
 import { webcrypto as crypto } from 'node:crypto';
+import OrganizationInviteEmail from '#app/emails/organization-invite';
 import { prisma } from '#app/utils/db.server';
 import { sendEmail } from '#app/utils/email.server';
-import OrganizationInviteEmail from '#app/emails/organization-invite';
 
 export async function createOrganizationInvitation({
   organizationId,

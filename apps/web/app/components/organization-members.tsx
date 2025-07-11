@@ -1,9 +1,9 @@
-import { Form } from "react-router";
 import { Trash2, Shield, User } from "lucide-react";
-import { Button } from "#app/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#app/components/ui/card";
-import { Badge } from "#app/components/ui/badge";
+import { Form } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "#app/components/ui/avatar";
+import { Badge } from "#app/components/ui/badge";
+import { Button } from "#app/components/ui/button";
+import { Card, CardContent } from "#app/components/ui/card";
 
 interface OrganizationMember {
   userId: string;
@@ -30,10 +30,6 @@ export function OrganizationMembers({
   if (members.length === 0) {
     return (
       <Card>
-        <CardHeader className="border-b border-muted">
-          <CardTitle className="text-xl">Team Members</CardTitle>
-          <CardDescription>Manage your team and their access</CardDescription>
-        </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">No members found.</p>
         </CardContent>
@@ -43,10 +39,6 @@ export function OrganizationMembers({
 
   return (
     <Card>
-      <CardHeader className="border-b border-muted">
-        <CardTitle className="text-xl">Team Members ({members.length})</CardTitle>
-        <CardDescription>Manage your team members and their roles</CardDescription>
-      </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {members.map((member) => (

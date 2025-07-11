@@ -7,7 +7,7 @@ type PasskeyActionArgs = {
 }
 
 // Mock function for passkey registration - in a real app, you'd use your passkey API
-export async function registerPasskeyAction({ request, userId, formData }: PasskeyActionArgs) {
+export async function registerPasskeyAction({  }: PasskeyActionArgs) {
   return Response.json({ status: 'success' })
 }
 

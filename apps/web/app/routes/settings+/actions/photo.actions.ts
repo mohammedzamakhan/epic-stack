@@ -26,7 +26,7 @@ type PhotoActionArgs = {
   userId: string
 }
 
-export async function photoAction({ request, formData, userId }: PhotoActionArgs) {
+export async function photoAction({ formData, userId }: PhotoActionArgs) {
   const submission = await parseWithZod(formData, {
     schema: PhotoFormSchema.transform(async data => {
       if (data.intent === 'delete-photo') return { intent: 'delete-photo' }

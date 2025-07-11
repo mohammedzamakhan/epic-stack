@@ -178,7 +178,7 @@ export function MultiImageUpload({
                         'border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer',
                         isDragging
                             ? 'border-primary bg-primary/5'
-                            : 'border-gray-300 hover:border-gray-400',
+                            : 'border-gray-300 hover:border-primary',
                     )}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}

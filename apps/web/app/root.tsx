@@ -233,20 +233,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
-	const matches = useMatches()
-	const isMarketingRoute = matches.some((match) =>
-		match.pathname?.startsWith?.('/app'),
-	)
 
-		return (
-			<HoneypotProvider {...data.honeyProps}>
-			<OpenImgContextProvider
+	return (
+		<HoneypotProvider {...data.honeyProps}>
+		<OpenImgContextProvider
 			optimizerEndpoint="/resources/images"
 			getSrc={getImgSrc}
 		>
 			<Outlet />
 		</OpenImgContextProvider>
-		</HoneypotProvider>
+	</HoneypotProvider>
 	)
 }
 

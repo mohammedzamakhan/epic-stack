@@ -1,4 +1,5 @@
 
+import { Link } from 'react-router'
 import { Button } from '#app/components/ui/button'
 import {
 	SidebarGroup,
@@ -7,7 +8,6 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '#app/components/ui/sidebar'
-import { Link } from 'react-router'
 
 export function NavMain({
 	items,

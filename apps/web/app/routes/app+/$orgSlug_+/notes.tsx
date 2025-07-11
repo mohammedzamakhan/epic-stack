@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { invariantResponse } from '@epic-web/invariant'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router'
-import { type LoaderFunctionArgs } from 'react-router'
+import { Files, FileText, Link2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Outlet, Link, useLocation, useNavigate, type LoaderFunctionArgs } from 'react-router'
+import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
@@ -9,9 +10,6 @@ import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { NotesTable } from './notes-table.tsx'
-import { SquarePenIcon } from '#app/components/ui/square-pen-icon.tsx'
-import { EmptyState } from '#app/components/empty-state.tsx'
-import { Files, FileText, Link2 } from 'lucide-react'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug

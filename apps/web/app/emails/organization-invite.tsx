@@ -1,4 +1,4 @@
-import { Html, Container, Text, Link, Head, Body, Section, Button } from "@react-email/components";
+import { Html, Container, Text, Head, Body, Section, Button } from "@react-email/components";
 
 export default function OrganizationInviteEmail({ 
   inviteUrl, 

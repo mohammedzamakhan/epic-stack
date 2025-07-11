@@ -1,6 +1,6 @@
-import { type LoaderFunctionArgs, redirect } from "react-router";
-import { validateAndAcceptInvitation } from "#app/utils/organization-invitation.server";
+import { type LoaderFunctionArgs } from "react-router";
 import { requireUserId } from "#app/utils/auth.server";
+import { validateAndAcceptInvitation } from "#app/utils/organization-invitation.server";
 import { redirectWithToast } from "#app/utils/toast.server";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {

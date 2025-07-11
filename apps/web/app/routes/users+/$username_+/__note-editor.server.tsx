@@ -97,7 +97,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		newImages = [],
 	} = submission.value
 
-	const updatedNote = await prisma.note.upsert({
+	await prisma.note.upsert({
 		select: { id: true, owner: { select: { username: true } } },
 		where: { id: noteId },
 		create: {

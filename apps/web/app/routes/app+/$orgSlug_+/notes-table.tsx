@@ -9,7 +9,6 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import { z } from 'zod'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { 
@@ -34,11 +33,6 @@ export type Note = {
     objectKey: string
   }>
 }
-
-const DeleteFormSchema = z.object({
-  intent: z.literal('delete-note'),
-  noteId: z.string(),
-})
 
 export function NotesTable({ notes }: { notes: Note[] }) {
   const [sorting, setSorting] = useState<SortingState>([])

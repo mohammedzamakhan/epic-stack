@@ -7,7 +7,6 @@ import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-se
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { EmailCard } from '#app/components/settings/cards/email-card.tsx'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
-import { ProfilePhoto } from '#app/components/settings/cards/profile-photo.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { AnnotatedLayout, AnnotatedSection } from '#app/components/ui/annotated-layout.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -202,7 +201,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<Response>
 }
 
 // Mock function for passkey registration - in a real app, you'd use your passkey API
-async function registerPasskeyAction({ request, userId, formData }: ProfileActionArgs) {
+async function registerPasskeyAction({  }: ProfileActionArgs) {
   return Response.json({ status: 'success' })
 }
 

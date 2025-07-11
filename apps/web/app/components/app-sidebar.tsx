@@ -2,9 +2,7 @@
 import * as React from 'react'
 
 import { useRouteLoaderData } from 'react-router'
-import { NavDocuments } from '#app/components/nav-documents'
 import { NavMain } from '#app/components/nav-main'
-import { NavSecondary } from '#app/components/nav-secondary'
 import { NavUser } from '#app/components/nav-user'
 import { TeamSwitcher } from '#app/components/team-switcher'
 import {

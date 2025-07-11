@@ -14,7 +14,7 @@ import { z } from "zod";
 import { ErrorList, Field } from "#app/components/forms";
 import { Badge } from "#app/components/ui/badge";
 import { Button } from "#app/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#app/components/ui/card";
+import { Card, CardContent } from "#app/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#app/components/ui/select";
 import { Separator } from "#app/components/ui/separator";
 
@@ -72,10 +72,6 @@ export function OrganizationInvitations({
 
   return (
     <Card>
-      <CardHeader className="border-b border-muted">
-        <CardTitle className="text-xl">Invite Team Members</CardTitle>
-        <CardDescription>Send invitations to new team members</CardDescription>
-      </CardHeader>
       <CardContent className="space-y-6">
         {/* Invitation Form */}
         <FormProvider context={form.context}>

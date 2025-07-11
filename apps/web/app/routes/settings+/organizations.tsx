@@ -1,6 +1,6 @@
+import { Search, ChevronRight, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
 import { type LoaderFunctionArgs, Link, useLoaderData } from 'react-router';
-import { Search, ChevronRight, FolderOpen } from 'lucide-react';
 import { Button } from '#app/components/ui/button';
 import { Input } from '#app/components/ui/input';
 import { requireUserId } from '#app/utils/auth.server';
