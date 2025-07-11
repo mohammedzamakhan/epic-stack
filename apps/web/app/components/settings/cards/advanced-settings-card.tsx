@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import { SignOutOfSessions, DeleteData } from '#app/components/settings/account-management.tsx'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/components/ui/card.tsx'
+import { Card, CardContent } from '#app/components/ui/card.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 
 export const signOutOfSessionsActionIntent = 'sign-out-of-sessions'
@@ -9,6 +9,7 @@ export const deleteDataActionIntent = 'delete-data'
 interface AdvancedSettingsCardProps {
   user: {
     id: string
+    email: string
     _count: {
       sessions: number
     }
@@ -18,10 +19,6 @@ interface AdvancedSettingsCardProps {
 export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
   return (
     <Card className="w-full">
-      <CardHeader className="border-b border-muted">
-        <CardTitle className="text-xl">Advanced Settings</CardTitle>
-        <CardDescription>Manage your data and account sessions</CardDescription>
-      </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-6">
           <div className="flex items-center">

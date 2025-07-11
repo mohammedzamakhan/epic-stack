@@ -4,7 +4,7 @@ import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 import { PasswordForm } from '#app/components/settings/password-form.tsx'
 import { TwoFactorForm } from '#app/components/settings/two-factor-form.tsx'
 import { Button } from '#app/components/ui/button.tsx'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/components/ui/card.tsx'
+import { Card, CardContent } from '#app/components/ui/card.tsx'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '#app/components/ui/dialog.tsx'
 
 export const changePasswordActionIntent = 'change-password'
@@ -20,7 +20,7 @@ interface SecurityCardProps {
   passkeys: Array<{
     id: string
     deviceType: string
-    createdAt: string
+    createdAt: Date
   }>
   user: {
     email: string
@@ -46,10 +46,6 @@ export function SecurityCard({
 
   return (
     <Card className="w-full">
-      <CardHeader className="border-b border-muted">
-        <CardTitle className="text-xl">Security</CardTitle>
-        <CardDescription>Manage your account security settings</CardDescription>
-      </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-6">
           {/* Password Section */}
@@ -134,7 +130,7 @@ export function SecurityCard({
                 <DialogHeader>
                   <DialogTitle>Manage Passkeys</DialogTitle>
                 </DialogHeader>
-                <PasskeyManager data={{ passkeys, user }} />
+                <PasskeyManager data={{ passkeys }} />
               </DialogContent>
             </Dialog>
           </div>

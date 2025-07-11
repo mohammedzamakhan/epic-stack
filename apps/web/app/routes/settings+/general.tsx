@@ -5,7 +5,6 @@ import * as QRCode from 'qrcode'
 import { useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
-import { EmailCard } from '#app/components/settings/cards/email-card.tsx'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { AnnotatedLayout, AnnotatedSection } from '#app/components/ui/annotated-layout.tsx'
@@ -234,13 +233,6 @@ export default function GeneralSettings() {
 				description="Update your photo and personal details here."
 			>
 				<ProfileCard user={data.user} />
-			</AnnotatedSection>
-
-			<AnnotatedSection
-				title="Email"
-				description="Manage your email address and preferences."
-			>
-				<EmailCard email={data.user.email} />
 			</AnnotatedSection>
 
 			<AnnotatedSection

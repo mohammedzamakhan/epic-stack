@@ -56,7 +56,7 @@ export default function OrganizationsPage() {
             to={`/app/${org.organization.slug}`}
             className="block"
           >
-            <div className="flex items-center justify-between p-4 bg-background hover:bg-muted/50 rounded-lg border transition-colors">
+            <div className="flex items-center justify-between p-4 bg-background hover:shadow-sm rounded-lg border transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center font-medium text-sm">
                   {org.organization.name.charAt(0).toUpperCase()}
