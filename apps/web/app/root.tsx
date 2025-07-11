@@ -68,7 +68,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 		desc: 'getUserId in root',
 	})
 	const locale = await linguiServer.getLocale(request)
-	console.log('locale', locale)
 
 	const user = userId
 		? await time(
