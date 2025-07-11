@@ -77,7 +77,6 @@ export function OrgNoteEditor({
 	
 	// Track submission state to trigger onSuccess
 	useEffect(() => {
-        console.log(fetcher);
 		if (fetcher.state === 'submitting' && onSuccess) {
 			onSuccess()
 		}

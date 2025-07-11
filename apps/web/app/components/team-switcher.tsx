@@ -55,8 +55,6 @@ export function TeamSwitcher() {
     return null
   }
 
-  console.log(activeTeam)
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>

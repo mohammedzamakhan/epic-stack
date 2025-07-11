@@ -11,7 +11,6 @@ if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
 }
 
 const locale = detect(fromHtmlTag('lang')) || 'en'
-console.log('locale:::', locale)
 await loadCatalog(locale)
 
 startTransition(() => {

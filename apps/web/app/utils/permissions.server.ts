@@ -47,13 +47,6 @@ export async function requireUserWithRole(request: Request, name: string) {
 		where: { id: userId, roles: { some: { name } } },
 	})
 
-	const user2 = await prisma.user.findFirst({
-		select: { id: true, roles: { select: { name: true } } },
-		where: { id: userId },
-	})
-
-	console.log('user', user)
-	console.log('user2', user2)
 	if (!user) {
 		throw data(
 			{

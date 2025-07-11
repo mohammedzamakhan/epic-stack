@@ -31,9 +31,6 @@ for (const file of allFiles) {
 	}
 }
 
-console.log()
-console.log('building...')
-
 esbuild
 	.build({
 		entryPoints: entries,

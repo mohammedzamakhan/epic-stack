@@ -43,7 +43,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 		cacheFolder: await getCacheDir(),
 		getImgSource: () => {
 			if (objectKey) {
-				console.log('???')
 				const { url: signedUrl, headers: signedHeaders } =
 					getSignedGetRequestInfo(objectKey)
 				return {

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 
-import { useRouteLoaderData } from 'react-router'
+import { useLocation, useRouteLoaderData } from 'react-router'
 import { NavMain } from '#app/components/nav-main'
 import { NavUser } from '#app/components/nav-user'
 import { TeamSwitcher } from '#app/components/team-switcher'
@@ -17,7 +17,7 @@ import { type loader as rootLoader } from '#app/root.tsx'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
-	console.log('rootData', rootData)
+	const location = useLocation()
 
 	const data = {
 		user: rootData?.user ? {
@@ -33,20 +33,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: 'Dashboard',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
+				isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
 			},
 			{
 				title: 'Notes',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`,
+				isActive: location.pathname.includes(`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`),
 			},
 			{
 				title: 'Settings',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
+				isActive: location.pathname.includes(`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`),
 			},
 		],
 		navClouds: [
 			{
 				title: 'Capture',
-				isActive: true,
+				isActive: location.pathname.includes('/capture'),
 				url: '#',
 				items: [
 					{
@@ -62,6 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: 'Proposal',
 				url: '#',
+				isActive: location.pathname.includes('/proposal'),
 				items: [
 					{
 						title: 'Active Proposals',
@@ -76,6 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: 'Prompts',
 				url: '#',
+				isActive: location.pathname.includes('/prompts'),
 				items: [
 					{
 						title: 'Active Proposals',
@@ -92,28 +97,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			{
 				title: 'Settings',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
+				isActive: location.pathname.includes(`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`),
 			},
 			{
 				title: 'Get Help',
 				url: '#',
+				isActive: location.pathname.includes('/help'),
 			},
 			{
 				title: 'Search',
 				url: '#',
+				isActive: location.pathname.includes('/search'),
 			},
 		],
 		documents: [
 			{
 				name: 'Data Library',
 				url: '#',
+				isActive: location.pathname.includes('/data-library'),
 			},
 			{
 				name: 'Reports',
 				url: '#',
+				isActive: location.pathname.includes('/reports'),
 			},
 			{
 				name: 'Word Assistant',
 				url: '#',
+				isActive: location.pathname.includes('/word-assistant'),
 			},
 		],
 	}
