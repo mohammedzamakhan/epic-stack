@@ -9,6 +9,7 @@ import { EmailCard } from '#app/components/settings/cards/email-card.tsx'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 import { ProfilePhoto } from '#app/components/settings/cards/profile-photo.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
+import { AnnotatedLayout, AnnotatedSection } from '#app/components/ui/annotated-layout.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { deleteDataAction, signOutOfSessionsAction } from './actions/account.actions'
@@ -228,12 +229,41 @@ export default function GeneralSettings() {
 	const data = useLoaderData()
 
 	return (
-		<div className="flex flex-col gap-12">
-      <ProfileCard user={data.user} />
-      <EmailCard email={data.user.email} />
-      <SecurityCard hasPassword={data.hasPassword} isTwoFactorEnabled={data.isTwoFactorEnabled} passkeys={data.passkeys} user={data.user} qrCode={data.qrCode} otpUri={data.otpUri} />
-      <ConnectionsCard user={data.user} connections={data.connections} />
-      <AdvancedSettingsCard user={data.user} />
-		</div>
+		<AnnotatedLayout>
+			<AnnotatedSection
+				title="Profile"
+				description="Update your photo and personal details here."
+			>
+				<ProfileCard user={data.user} />
+			</AnnotatedSection>
+
+			<AnnotatedSection
+				title="Email"
+				description="Manage your email address and preferences."
+			>
+				<EmailCard email={data.user.email} />
+			</AnnotatedSection>
+
+			<AnnotatedSection
+				title="Security"
+				description="Manage your password and two-factor authentication settings."
+			>
+				<SecurityCard hasPassword={data.hasPassword} isTwoFactorEnabled={data.isTwoFactorEnabled} passkeys={data.passkeys} user={data.user} qrCode={data.qrCode} otpUri={data.otpUri} />
+			</AnnotatedSection>
+
+			<AnnotatedSection
+				title="Connected accounts"
+				description="Sign up faster to your account by linking it to Google or Microsoft."
+			>
+				<ConnectionsCard user={data.user} connections={data.connections} />
+			</AnnotatedSection>
+
+			<AnnotatedSection
+				title="Advanced"
+				description="Manage your sessions and delete your account data."
+			>
+				<AdvancedSettingsCard user={data.user} />
+			</AnnotatedSection>
+		</AnnotatedLayout>
 	)
 }

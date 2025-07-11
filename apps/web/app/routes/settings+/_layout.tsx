@@ -84,7 +84,7 @@ const AccountSettingsPage = () => {
 			</header>
 
 			{/* Scrollable Main Content */}
-			<main className="flex-1 overflow-y-auto p-4 bg-muted">
+			<main className="flex-1 overflow-y-auto p-8 bg-muted">
 				<section className="max-w-4xl mx-auto">
 					<Outlet />
 				</section>
