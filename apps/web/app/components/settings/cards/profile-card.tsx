@@ -55,7 +55,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
           </div>
           <div className="flex-grow">
             <fetcher.Form method="POST" {...getFormProps(form)}>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
                 <Field
                   labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
                   inputProps={getInputProps(fields.name, { type: 'text' })}

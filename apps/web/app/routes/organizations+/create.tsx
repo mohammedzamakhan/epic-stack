@@ -195,7 +195,7 @@ export default function CreateOrganizationPage() {
 
         <div className="flex justify-end gap-4 pt-4">
           <Button variant="outline" asChild>
-            <Link to="/organizations">Cancel</Link>
+            <Link to="/settings/organizations">Cancel</Link>
           </Button>
           <Button type="submit">Create Organization</Button>
         </div>

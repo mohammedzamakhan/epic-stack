@@ -2,6 +2,7 @@ import { Img } from 'openimg/react'
 import { useRef } from 'react'
 import { Link, Form } from 'react-router'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { useCurrentOrganization } from '#app/utils/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 import { Button } from './ui/button'
 import {
@@ -15,6 +16,7 @@ import { Icon } from './ui/icon'
 
 export function UserDropdown() {
 	const user = useUser()
+	const { organization } = useCurrentOrganization()
 	const formRef = useRef<HTMLFormElement>(null)
 	return (
 		<DropdownMenu>
@@ -42,16 +44,16 @@ export function UserDropdown() {
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="end">
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}`}>
+						<Link prefetch="intent" to={`/settings/general`}>
 							<Icon className="text-body-md" name="avatar">
 								Profile
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}/notes`}>
-							<Icon className="text-body-md" name="pencil-2">
-								Notes
+						<Link prefetch="intent" to={`/app/${organization.slug}`}>
+							<Icon className="text-body-md" name="clock">
+								Dashboard
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
