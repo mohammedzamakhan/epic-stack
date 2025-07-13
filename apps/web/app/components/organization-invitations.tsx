@@ -77,7 +77,7 @@ export function OrganizationInvitations({
         <FormProvider context={form.context}>
           <Form method="POST" {...getFormProps(form)}>
             <input type="hidden" name="intent" value="invite" />
-            <div className="space-y-4">
+            <div className="space-y-1">
               {invitesList.map((invite, index) => (
                 <InviteFieldset
                   key={invite.key}
@@ -222,9 +222,9 @@ function InviteFieldset({
                 if (!open) {
                   role.blur();
                 }
-              }}
+              }}   
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue>
                   {roles.find((r) => r.value === role.value)?.label}
                 </SelectValue>

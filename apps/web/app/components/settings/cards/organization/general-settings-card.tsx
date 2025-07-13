@@ -47,7 +47,7 @@ export function GeneralSettingsCard({ organization }: { organization: Organizati
           <div className="flex-grow">
             <fetcher.Form method="POST" {...getFormProps(form)}>
               <input type="hidden" name="intent" value={organizationUpdateActionIntent} />
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
                 <Field
                   labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
                   inputProps={getInputProps(fields.name, { type: 'text' })}
