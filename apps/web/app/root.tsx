@@ -216,7 +216,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 		// For marketing routes, only render the MarketingDocument without the App component
 		const safeNonce = nonce || ''
 		return (
-			<MarketingDocument nonce={safeNonce} theme={theme} env={data?.ENV || {}}>
+			<MarketingDocument locale={data?.locale} nonce={safeNonce} theme={theme} env={data?.ENV || {}}>
 				{children}
 			</MarketingDocument>
 		)

@@ -3,7 +3,6 @@ import {
 	Meta,
 	Scripts,
 	ScrollRestoration,
-	useLoaderData,
 } from 'react-router'
 import { ClientHintCheck } from '#app/utils/client-hints.tsx'
 import { type Theme } from '#app/utils/theme.server.ts'
@@ -13,6 +12,7 @@ interface MarketingDocumentProps {
 	theme: Theme
 	env: Record<string, string | undefined>
 	nonce: string
+	locale?: string
 }
 
 export function MarketingDocument({
@@ -20,9 +20,8 @@ export function MarketingDocument({
 	theme,
 	env,
 	nonce,
+	locale
 }: MarketingDocumentProps) {
-	const { locale } = useLoaderData<{ locale: string }>()
-
 	return (
 		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>
 			<head>

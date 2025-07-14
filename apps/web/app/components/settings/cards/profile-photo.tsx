@@ -30,22 +30,25 @@ export function ProfilePhoto({ user, size = 'normal' }: ProfilePhotoProps) {
   return (
     <div className="flex justify-center">
       <div className={`relative ${containerSize}`}>
-        <Img
-          src={getUserImgSrc(user.image?.objectKey)}
-          alt={user.name ?? user.username}
-          className="h-full w-full rounded-full object-cover"
-          width={832}
-          height={832}
-          isAboveFold
-        />
+        
         <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
           <DialogTrigger asChild>
+          <div>
+          <Img
+            src={getUserImgSrc(user.image?.objectKey)}
+            alt={user.name ?? user.username}
+            className="h-full w-full rounded-full object-cover ring-offset-2 ring-2 ring-muted hover:ring-primary/50"
+            width={832}
+            height={832}
+            isAboveFold
+          />
             <Button
               variant="outline"
-              className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} items-center justify-center rounded-full p-0`}
+              className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} items-center justify-center rounded-full p-0 ring-offset-2 ring-2 ring-transparent hover:ring-primary/50`}
             >
               <Icon name="camera" className="size-4" />
             </Button>
+          </div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
