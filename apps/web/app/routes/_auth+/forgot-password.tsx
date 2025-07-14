@@ -1,3 +1,4 @@
+import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
@@ -8,6 +9,7 @@ import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
+import arcjet from '#app/utils/arcjet.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
@@ -23,9 +25,69 @@ const ForgotPasswordSchema = z.object({
 	usernameOrEmail: z.union([EmailSchema, UsernameSchema]),
 })
 
+// Add rules to the base Arcjet instance for forgot password protection
+const aj = arcjet
+	.withRule(
+		detectBot({
+			// Will block requests. Use "DRY_RUN" to log only.
+			mode: 'LIVE',
+			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
+			// Blocks all bots except monitoring services.
+			allow: ['CATEGORY:MONITOR'],
+		}),
+	)
+	.withRule(
+		// Chain bot protection with rate limiting.
+		// Forgot password form shouldn't be submitted more than a few times per hour to prevent abuse.
+		slidingWindow({
+			mode: 'LIVE',
+			max: 3, // 3 requests per window.
+			interval: '3600s', // 1 hour sliding window.
+		}),
+	)
+	.withRule(
+		// Validate the email address to prevent spam.
+		validateEmail({
+			mode: 'LIVE',
+			// Block disposable, invalid, and email addresses with no MX records.
+			block: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
+		}),
+	)
+
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
 	await checkHoneypot(formData)
+
+	// Arcjet security protection for forgot password
+	if (process.env.ARCJET_KEY) {
+		const usernameOrEmail = formData.get('usernameOrEmail') as string
+		try {
+			const decision = await aj.protect({ request, context: {} }, { email: usernameOrEmail })
+
+			if (decision.isDenied()) {
+				let errorMessage = 'Access denied'
+
+				if (decision.reason.isBot()) {
+					errorMessage = 'Forbidden'
+				} else if (decision.reason.isRateLimit()) {
+					errorMessage = 'Too many password reset attempts - try again later'
+				} else if (decision.reason.isEmail()) {
+					// This is a generic error, but you could be more specific
+					// See https://docs.arcjet.com/email-validation/reference#checking-the-email-type
+					errorMessage = 'Invalid email address'
+				}
+
+				// Return early with error response
+				return data(
+					{ result: null },
+					{ status: 400, statusText: errorMessage },
+				)
+			}
+		} catch (error) {
+			// If Arcjet fails, log error but continue with forgot password process
+			console.error('Arcjet protection failed:', error)
+		}
+	}
 	const submission = await parseWithZod(formData, {
 		schema: ForgotPasswordSchema.superRefine(async (data, ctx) => {
 			const user = await prisma.user.findFirst({

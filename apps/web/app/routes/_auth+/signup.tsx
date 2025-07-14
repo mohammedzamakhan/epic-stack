@@ -1,3 +1,4 @@
+import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
@@ -8,6 +9,7 @@ import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
+import arcjet from '#app/utils/arcjet.server.ts'
 import { requireAnonymous } from '#app/utils/auth.server.ts'
 import {
 	ProviderConnectionForm,
@@ -29,15 +31,75 @@ const SignupSchema = z.object({
 	email: EmailSchema,
 })
 
+// Add rules to the base Arcjet instance outside of the handler function.
+const aj = arcjet
+	.withRule(
+		detectBot({
+			// Will block requests. Use "DRY_RUN" to log only.
+			mode: 'LIVE',
+			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
+			// Blocks all bots except monitoring services.
+			allow: ['CATEGORY:MONITOR'],
+		}),
+	)
+	.withRule(
+		// Chain bot protection with rate limiting.
+		// A signup form shouldn't be submitted more than a few times a minute.
+		slidingWindow({
+			mode: 'LIVE',
+			max: 5, // 5 requests per window.
+			interval: '60s', // 60 second sliding window.
+		}),
+	)
+	.withRule(
+		// Validate the email address to prevent spam.
+		validateEmail({
+			mode: 'LIVE',
+			// Block disposable, invalid, and email addresses with no MX records.
+			block: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
+		}),
+	)
+
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireAnonymous(request)
 	return null
 }
 
-export async function action({ request }: Route.ActionArgs) {
-	const formData = await request.formData()
+export async function action(args: Route.ActionArgs) {
+	const formData = await args.request.formData()
 
 	await checkHoneypot(formData)
+
+	// Arcjet security protection
+	if (process.env.ARCJET_KEY) {
+		const email = formData.get('email') as string
+		try {
+			const decision = await aj.protect(args, { email })
+
+			if (decision.isDenied()) {
+				let errorMessage = 'Access denied'
+
+				if (decision.reason.isBot()) {
+					errorMessage = 'Forbidden'
+				} else if (decision.reason.isRateLimit()) {
+					errorMessage = 'Too many signup attempts - try again shortly'
+				} else if (decision.reason.isEmail()) {
+					// This is a generic error, but you could be more specific
+					// See https://docs.arcjet.com/email-validation/reference#checking-the-email-type
+					errorMessage = 'Invalid email address'
+				}
+
+				// Return early with error response
+				return data(
+					{ result: null },
+					{ status: 400, statusText: errorMessage },
+				)
+			}
+		} catch (error) {
+			// If Arcjet fails, log error but continue with signup process
+			console.error('Arcjet protection failed:', error)
+		}
+	}
 
 	const submission = await parseWithZod(formData, {
 		schema: SignupSchema.superRefine(async (data, ctx) => {
@@ -65,7 +127,7 @@ export async function action({ request }: Route.ActionArgs) {
 	const { email } = submission.value
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
 		period: 10 * 60,
-		request,
+		request: args.request,
 		type: 'onboarding',
 		target: email,
 	})

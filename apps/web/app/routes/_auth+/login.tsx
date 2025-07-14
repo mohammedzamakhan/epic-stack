@@ -1,3 +1,4 @@
+import { detectBot, slidingWindow } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
@@ -11,6 +12,7 @@ import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
 import { Spacer } from '#app/components/spacer.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
+import arcjet from '#app/utils/arcjet.server.ts'
 import { login, requireAnonymous } from '#app/utils/auth.server.ts'
 import {
 	ProviderConnectionForm,
@@ -37,6 +39,27 @@ const AuthenticationOptionsSchema = z.object({
 	options: z.object({ challenge: z.string() }),
 }) satisfies z.ZodType<{ options: PublicKeyCredentialRequestOptionsJSON }>
 
+// Add rules to the base Arcjet instance for login protection
+const aj = arcjet
+	.withRule(
+		detectBot({
+			// Will block requests. Use "DRY_RUN" to log only.
+			mode: 'LIVE',
+			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
+			// Blocks all bots except monitoring services.
+			allow: ['CATEGORY:MONITOR'],
+		}),
+	)
+	.withRule(
+		// Chain bot protection with rate limiting.
+		// A login form shouldn't be submitted more than a few times a minute to prevent brute force.
+		slidingWindow({
+			mode: 'LIVE',
+			max: 10, // 10 requests per window.
+			interval: '60s', // 60 second sliding window.
+		}),
+	)
+
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireAnonymous(request)
 	return {}
@@ -46,6 +69,32 @@ export async function action({ request }: Route.ActionArgs) {
 	await requireAnonymous(request)
 	const formData = await request.formData()
 	await checkHoneypot(formData)
+
+	// Arcjet security protection for login
+	if (process.env.ARCJET_KEY) {
+		try {
+			const decision = await aj.protect({ request, context: {} })
+
+			if (decision.isDenied()) {
+				let errorMessage = 'Access denied'
+
+				if (decision.reason.isBot()) {
+					errorMessage = 'Forbidden'
+				} else if (decision.reason.isRateLimit()) {
+					errorMessage = 'Too many login attempts - try again shortly'
+				}
+
+				// Return early with error response
+				return data(
+					{ result: null },
+					{ status: 400, statusText: errorMessage },
+				)
+			}
+		} catch (error) {
+			// If Arcjet fails, log error but continue with login process
+			console.error('Arcjet protection failed:', error)
+		}
+	}
 	const submission = await parseWithZod(formData, {
 		schema: (intent) =>
 			LoginFormSchema.transform(async (data, ctx) => {
