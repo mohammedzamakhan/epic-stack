@@ -196,6 +196,13 @@ model Organization {
   description String?
   active      Boolean @default(true)
 
+  // Stripe payment fields
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripeProductId      String?
+  planName             String?
+  subscriptionStatus   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

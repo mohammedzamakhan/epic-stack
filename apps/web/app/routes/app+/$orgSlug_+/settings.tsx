@@ -4,6 +4,7 @@ import { parseFormData } from "@mjackson/form-data-parser";
 import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData, useActionData } from "react-router";
 import { z } from "zod";
 
+import { BillingCard } from "#app/components/settings/cards/organization/billing-card";
 import { GeneralSettingsCard } from "#app/components/settings/cards/organization/general-settings-card";
 import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
 import { MembersCard } from "#app/components/settings/cards/organization/members-card";
@@ -17,6 +18,11 @@ import {
   getOrganizationInvitations,
   deleteOrganizationInvitation 
 } from "#app/utils/organization-invitation.server";
+import {
+  checkoutAction,
+  customerPortalAction,
+  getPlansAndPrices,
+} from "#app/utils/payments.server";
 import { uploadOrganizationImage } from "#app/utils/storage.server.ts";
 import { redirectWithToast } from "#app/utils/toast.server";
 
@@ -36,11 +42,25 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       id: true,
       name: true,
       slug: true,
+      stripeCustomerId: true,
+      stripeSubscriptionId: true,
+      stripeProductId: true,
+      planName: true,
+      subscriptionStatus: true,
       image: {
         select: {
           id: true,
           objectKey: true,
           altText: true,
+        },
+      },
+      _count: {
+        select: {
+          users: {
+            where: {
+              active: true,
+            },
+          },
         },
       },
     },
@@ -50,7 +70,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  const [pendingInvitations, members] = await Promise.all([
+  const isClosedBeta = process.env.LAUNCH_STATUS === 'CLOSED_BETA';
+  
+  const [pendingInvitations, members, plansAndPrices] = await Promise.all([
     getOrganizationInvitations(organization.id),
     prisma.userOrganization.findMany({
       where: {
@@ -76,9 +98,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         createdAt: 'asc',
       },
     }),
+    isClosedBeta ? Promise.resolve(null) : getPlansAndPrices(),
   ]);
 
-  return { organization, pendingInvitations, members, currentUserId: userId };
+  return { 
+    organization, 
+    pendingInvitations, 
+    members, 
+    currentUserId: userId,
+    plansAndPrices,
+    isClosedBeta,
+  };
 }
 
 const SettingsSchema = z.object({
@@ -317,12 +347,65 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   }
   
+  // Billing actions
+  if (intent === 'upgrade') {
+    const organizationWithBilling = await prisma.organization.findUnique({
+      where: { id: organization.id },
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        slug: true,
+        description: true,
+        active: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        stripeProductId: true,
+        planName: true,
+        subscriptionStatus: true,
+      },
+    });
+    
+    if (!organizationWithBilling) {
+      return Response.json({ error: 'Organization not found' }, { status: 404 });
+    }
+    
+    return checkoutAction(request, organizationWithBilling);
+  }
+
+  if (intent === 'customer-portal') {
+    const organizationWithBilling = await prisma.organization.findUnique({
+      where: { id: organization.id },
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        slug: true,
+        description: true,
+        active: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        stripeProductId: true,
+        planName: true,
+        subscriptionStatus: true,
+      },
+    });
+    
+    if (!organizationWithBilling) {
+      return Response.json({ error: 'Organization not found' }, { status: 404 });
+    }
+    
+    return customerPortalAction(request, organizationWithBilling);
+  }
+
   // No valid intent found
   return Response.json({ error: `Invalid intent: ${intent}` }, { status: 400 });
 }
 
 export default function OrganizationSettings() {
-  const { organization, pendingInvitations, members, currentUserId } = useLoaderData<typeof loader>();
+  const { organization, pendingInvitations, members, currentUserId, plansAndPrices, isClosedBeta } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
@@ -352,6 +435,17 @@ export default function OrganizationSettings() {
         <InvitationsCard 
           pendingInvitations={pendingInvitations}
           actionData={actionData}
+        />
+      </AnnotatedSection>
+      
+      <AnnotatedSection
+        title="Billing & Subscription"
+        description="Manage your organization's subscription and billing settings."
+      >
+        <BillingCard 
+          organization={organization}
+          plansAndPrices={plansAndPrices}
+          isClosedBeta={isClosedBeta}
         />
       </AnnotatedSection>
     </AnnotatedLayout>
