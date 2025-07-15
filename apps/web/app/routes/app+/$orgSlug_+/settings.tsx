@@ -8,7 +8,7 @@ import { BillingCard } from "#app/components/settings/cards/organization/billing
 import { GeneralSettingsCard } from "#app/components/settings/cards/organization/general-settings-card";
 import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
 import { MembersCard } from "#app/components/settings/cards/organization/members-card";
-import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent, OrgPhotoFormSchema } from "#app/components/settings/cards/organization/organization-photo-card";
+import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent } from "#app/components/settings/cards/organization/organization-photo-card";
 import { AnnotatedLayout, AnnotatedSection } from "#app/components/ui/annotated-layout";
 import { requireUserId } from "#app/utils/auth.server";
 import { prisma } from "#app/utils/db.server";
@@ -155,18 +155,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const formData = await parseFormData(request, { maxFileSize: 1024 * 1024 * 3 });
     const intent = formData.get('intent');
 
-    const submission = await parseWithZod(formData, {
-        schema: OrgPhotoFormSchema.transform(async data => {
-          if (data.intent === 'delete-org-photo') return { intent: 'delete-org-photo' }
-          if (data.photoFile.size <= 0) return z.NEVER
-          return {
-            intent: data.intent,
-            image: { objectKey: await uploadOrganizationImage(userId, data.photoFile) },
-          }
-        }),
-        async: true,
-      })
-
     if (intent === uploadOrgPhotoActionIntent) {
       const photoFile = formData.get('photoFile') as File;
       if (!photoFile || !(photoFile instanceof File) || !photoFile.size) {
@@ -177,25 +165,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
       }
 
       try {
-        if (submission.status !== 'success') {
-          return Response.json(
-            { result: submission.reply() },
-            { status: submission.status === 'error' ? 400 : 200 },
-          )
-        }
-        const { image } = submission.value as { intent: string; image?: { objectKey: string } }
+        // Upload the image and get the object key
+        const objectKey = await uploadOrganizationImage(userId, photoFile);
 
         // Create or update organization image
         await prisma.$transaction(async $prisma => {
           await $prisma.organizationImage.deleteMany({ where: { organizationId: organization.id } })
           await $prisma.organization.update({ 
             where: { id: organization.id }, 
-            data: { image: { create: image! } } 
+            data: { image: { create: { objectKey } } } 
           })
         })
-
-        // In a real app, you'd store the image in a storage service
-        // For now, we're just simulating this part
 
         return Response.json({ status: 'success' });
       } catch (error) {

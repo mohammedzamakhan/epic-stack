@@ -1,16 +1,13 @@
 import { Img } from 'openimg/react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 import { OrganizationPhotoForm } from '#app/components/settings/organization-photo-form.tsx'
 import { Button } from '#app/components/ui/button.tsx'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '#app/components/ui/dialog.tsx'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '#app/components/ui/dialog.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 
 export const uploadOrgPhotoActionIntent = 'upload-org-photo'
 export const deleteOrgPhotoActionIntent = 'delete-org-photo'
-
-// We're exporting the schema from the OrganizationPhotoForm component now
-export { OrgPhotoFormSchema } from '#app/components/settings/organization-photo-form.tsx'
 
 interface OrganizationPhotoProps {
   organization: {
@@ -25,10 +22,24 @@ interface OrganizationPhotoProps {
 }
 
 export function OrganizationPhoto({ organization, size = 'normal' }: OrganizationPhotoProps) {
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false)
+  const [showPhotoForm, setShowPhotoForm] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const containerSize = size === 'small' ? 'size-32' : 'size-52'
   const buttonPosition = size === 'small' ? 'top-1 -right-1' : 'top-3 -right-3'
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setShowPhotoForm(true)
+    }
+  }
 
   function getOrgImgSrc(objectKey?: string | null) {
     return objectKey
@@ -39,28 +50,40 @@ export function OrganizationPhoto({ organization, size = 'normal' }: Organizatio
   return (
     <div className="flex justify-center">
       <div className={`relative ${containerSize}`}>
-        <Img
-          src={getOrgImgSrc(organization.image?.objectKey)}
-          alt={organization.name}
-          className="h-full w-full rounded-md object-contain bg-secondary"
-          width={832}
-          height={832}
-          isAboveFold
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={handleFileSelect}
         />
-        <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} items-center justify-center rounded-full p-0`}
-            >
-              <Icon name="camera" className="size-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <div onClick={handlePhotoClick} className="cursor-pointer">
+          <Img
+            src={getOrgImgSrc(organization.image?.objectKey)}
+            alt={organization.name}
+            className="h-full w-full rounded-md object-contain bg-secondary"
+            width={832}
+            height={832}
+            isAboveFold
+          />
+          <Button
+            variant="outline"
+            className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} items-center justify-center rounded-full p-0`}
+          >
+            <Icon name="camera" className="size-4" />
+          </Button>
+        </div>
+        
+        <Dialog open={showPhotoForm} onOpenChange={setShowPhotoForm}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Change organization logo</DialogTitle>
+              <DialogTitle>Update Organization Logo</DialogTitle>
             </DialogHeader>
-            <OrganizationPhotoForm setIsOpen={setIsPhotoModalOpen} organization={organization} />
+            <OrganizationPhotoForm 
+              setIsOpen={setShowPhotoForm} 
+              organization={organization} 
+              selectedFile={selectedFile}
+            />
           </DialogContent>
         </Dialog>
       </div>

@@ -1,5 +1,4 @@
-
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import ReactCrop, {
   centerCrop,
   makeAspectCrop,
@@ -19,33 +18,51 @@ interface User {
   image?: { objectKey: string } | null
 }
 
-export function ProfilePhotoForm({ user, setIsOpen }: { user: User; setIsOpen: (open: boolean) => void }) {
+interface ProfilePhotoFormProps {
+  user: User
+  setIsOpen: (open: boolean) => void
+  selectedFile?: File | null
+}
+
+export function ProfilePhotoForm({ user, setIsOpen, selectedFile }: ProfilePhotoFormProps) {
   const fetcher = useFetcher()
   const [newImgSrc, setNewImgSrc] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [showCropper, setShowCropper] = useState(false)
+  const [currentSelectedFile, setCurrentSelectedFile] = useState<File | null>(selectedFile || null)
   const [croppedFile, setCroppedFile] = useState<File | null>(null)
   const [crop, setCrop] = useState<Crop>()
-  const [croppedImageUrl, setCroppedImageUrl] = useState<string>('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [ignoredCroppedImageUrl, setIgnoredCroppedImageUrl] = useState<string>('')
+  const internalFileInputRef = useRef<HTMLInputElement>(null)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
-  // Simple file input props without complex form management
-  const photoInputId = 'profile-photo-input'
+  // Process selected file when provided
+  React.useEffect(() => {
+    if (selectedFile && !newImgSrc) {
+      setCurrentSelectedFile(selectedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setNewImgSrc(event.target.result as string)
+        }
+      }
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error)
+      }
+      reader.readAsDataURL(selectedFile)
+    }
+  }, [selectedFile, newImgSrc])
 
   if (fetcher.data?.status === 'success') {
     setIsOpen(false)
   }
 
-  // Handle file selection
+  // Handle file selection (for fallback input)
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0]
     if (file) {
-      setSelectedFile(file)
+      setCurrentSelectedFile(file)
       const reader = new FileReader()
       reader.onload = (event) => {
         setNewImgSrc(event.target?.result as string)
-        setShowCropper(true)
       }
       reader.readAsDataURL(file)
     }
@@ -57,11 +74,13 @@ export function ProfilePhotoForm({ user, setIsOpen }: { user: User; setIsOpen: (
     setCrop(centerAspectCrop(width, height, 1))
   }
 
-  // Handle crop complete
+  // Handle crop complete and automatically apply crop
   function onCropComplete(crop: PixelCrop) {
     if (imgRef.current && crop.width && crop.height) {
-      const croppedImageUrl = getCroppedImg(imgRef.current, crop)
-      setCroppedImageUrl(croppedImageUrl)
+      const croppedUrl = getCroppedImg(imgRef.current, crop)
+      setIgnoredCroppedImageUrl(croppedUrl)
+      // Automatically create cropped file
+      void applyCropFromUrl(croppedUrl)
     }
   }
 
@@ -96,38 +115,36 @@ export function ProfilePhotoForm({ user, setIsOpen }: { user: User; setIsOpen: (
     return canvas.toDataURL('image/jpeg', 0.9)
   }
 
-  // Apply crop
-  async function applyCrop() {
+  // Apply crop from URL
+  async function applyCropFromUrl(croppedUrl: string) {
     try {
-      if (croppedImageUrl && selectedFile) {
-        const response = await fetch(croppedImageUrl)
+      if (croppedUrl && currentSelectedFile) {
+        const response = await fetch(croppedUrl)
         const blob = await response.blob()
         
         // Create File object from cropped blob
-        const croppedFile = new File([blob], selectedFile.name || 'cropped-profile.jpg', {
+        const croppedFile = new File([blob], currentSelectedFile.name || 'cropped-profile.jpg', {
           type: 'image/jpeg',
           lastModified: Date.now(),
         })
         
         setCroppedFile(croppedFile)
-        setNewImgSrc(croppedImageUrl)
-        setShowCropper(false)
       }
     } catch (error) {
       console.error('Error applying crop:', error)
     }
   }
 
-  // Cancel crop
-  function cancelCrop() {
-    setShowCropper(false)
-    setSelectedFile(null)
+  // Cancel and close
+  function handleCancel() {
+    setCurrentSelectedFile(null)
     setNewImgSrc(null)
-    setCroppedImageUrl('')
+    setIgnoredCroppedImageUrl('')
     setCroppedFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    if (internalFileInputRef.current) {
+      internalFileInputRef.current.value = ''
     }
+    setIsOpen(false)
   }
 
   // Helper function to center the crop
@@ -152,9 +169,36 @@ export function ProfilePhotoForm({ user, setIsOpen }: { user: User; setIsOpen: (
     )
   }
 
-  if (showCropper && newImgSrc) {
+
+
+  // Handle form submission with cropped file
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    
+    const formData = new FormData()
+    formData.append('intent', uploadPhotoActionIntent)
+    
+    if (croppedFile) {
+      formData.append('photoFile', croppedFile)
+    } else if (currentSelectedFile) {
+      formData.append('photoFile', currentSelectedFile)
+    }
+    
+    void fetcher.submit(formData, {
+      method: 'POST',
+      encType: 'multipart/form-data',
+    })
+  }
+
+  // Show cropping interface if image is selected
+  if (newImgSrc) {
     return (
-      <div className="flex flex-col items-center gap-4">
+      <form 
+        method="POST" 
+        encType="multipart/form-data"
+        className="flex flex-col items-center gap-4"
+        onSubmit={handleSubmit}
+      >
         <div className="w-full max-w-md">
           <ReactCrop
             crop={crop}
@@ -173,79 +217,60 @@ export function ProfilePhotoForm({ user, setIsOpen }: { user: User; setIsOpen: (
             />
           </ReactCrop>
         </div>
+        <input type="hidden" name="intent" value={uploadPhotoActionIntent} />
         <div className="flex gap-3">
           <Button 
+            type="button"
             variant="outline" 
-            onClick={cancelCrop}
+            onClick={handleCancel}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={applyCrop}
-            disabled={!croppedImageUrl}
+          <StatusButton 
+            type="submit"
+            disabled={!croppedFile}
+            status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
           >
-            Apply Crop
-          </Button>
+            Save
+          </StatusButton>
         </div>
+      </form>
+    )
+  }
+
+  // If selectedFile is provided but not processed yet, show waiting state
+  if (selectedFile && !newImgSrc) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <img
+          src={getUserImgSrc(user.image?.objectKey)}
+          alt={user.name ?? user.username}
+          className="size-40 rounded-full object-cover"
+        />
+        <div className="text-sm text-muted-foreground">Processing selected image...</div>
       </div>
     )
   }
 
-  // Handle form submission with cropped file
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    
-    const formData = new FormData()
-    formData.append('intent', uploadPhotoActionIntent)
-    
-    if (croppedFile) {
-      formData.append('photoFile', croppedFile)
-    } else if (fileInputRef.current?.files?.[0]) {
-      formData.append('photoFile', fileInputRef.current.files[0])
-    }
-    
-    void fetcher.submit(formData, {
-      method: 'POST',
-      encType: 'multipart/form-data',
-    })
-  }
-
+  // Fallback: show file input if no external ref provided
   return (
-    <form 
-      method="POST" 
-      encType="multipart/form-data"
-      className="flex flex-col items-center gap-6"
-      onSubmit={handleSubmit}
-    >
+    <div className="flex flex-col items-center gap-4">
       <img
-        src={newImgSrc ?? getUserImgSrc(user.image?.objectKey)}
+        src={getUserImgSrc(user.image?.objectKey)}
         alt={user.name ?? user.username}
         className="size-40 rounded-full object-cover"
       />
-      <div className="flex flex-col items-center gap-2">
-        <input
-          id={photoInputId}
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="peer sr-only"
-          onChange={handleFileSelect}
-        />
-        <input type="hidden" name="intent" value={uploadPhotoActionIntent} />
-        
-        <Button asChild className="cursor-pointer">
-          <label htmlFor={photoInputId}>Select Photo</label>
-        </Button>
-        
-        <StatusButton 
-          type="submit"
-          className="mt-2"
-          disabled={!newImgSrc && !croppedFile}
-          status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
-        >
-          Save
-        </StatusButton>
-      </div>
-    </form>
+      <input
+        ref={internalFileInputRef}
+        type="file"
+        accept="image/*"
+        className="peer sr-only"
+        id="photo-input-fallback"
+        onChange={handleFileSelect}
+      />
+      <Button asChild className="cursor-pointer">
+        <label htmlFor="photo-input-fallback">Select Photo</label>
+      </Button>
+    </div>
   )
 }

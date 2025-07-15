@@ -1,6 +1,4 @@
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import ReactCrop, {
   centerCrop,
   makeAspectCrop,
@@ -8,30 +6,10 @@ import ReactCrop, {
   type PixelCrop,
 } from 'react-image-crop'
 import { useFetcher } from 'react-router'
-import { z } from 'zod'
-import { ErrorList } from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
-import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent } from '../settings/cards/organization/organization-photo-card'
+import { uploadOrgPhotoActionIntent } from '../settings/cards/organization/organization-photo-card'
 import 'react-image-crop/dist/ReactCrop.css'
-
-// Photo upload schema - modified to be more flexible with cropped images
-const MAX_SIZE = 1024 * 1024 * 3 // 3MB
-
-export const DeleteImageSchema = z.object({
-  intent: z.literal('delete-org-photo'),
-})
-
-export const NewImageSchema = z.object({
-  intent: z.literal('upload-org-photo'),
-  photoFile: z
-    .any() // More flexible than z.instanceof(File) to handle cropped images
-    .refine((file) => file instanceof File || file instanceof Blob, 'Image is required')
-    .refine((file) => !file || file.size > 0, 'Image is required')
-    .refine((file) => !file || file.size <= MAX_SIZE, 'Image size must be less than 3MB'),
-})
-
-export const OrgPhotoFormSchema = z.discriminatedUnion('intent', [DeleteImageSchema, NewImageSchema])
 
 interface Organization {
   name: string
@@ -39,31 +17,38 @@ interface Organization {
   image?: { objectKey: string } | null
 }
 
-export function OrganizationPhotoForm({ organization, setIsOpen }: { organization: Organization; setIsOpen: (open: boolean) => void }) {
+interface OrganizationPhotoFormProps {
+  organization: Organization
+  setIsOpen: (open: boolean) => void
+  selectedFile?: File | null
+}
+
+export function OrganizationPhotoForm({ organization, setIsOpen, selectedFile }: OrganizationPhotoFormProps) {
   const fetcher = useFetcher()
   const [newImgSrc, setNewImgSrc] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [showCropper, setShowCropper] = useState(false)
+  const [currentSelectedFile, setCurrentSelectedFile] = useState<File | null>(selectedFile || null)
   const [croppedFile, setCroppedFile] = useState<File | null>(null)
   const [crop, setCrop] = useState<Crop>()
-  const [croppedImageUrl, setCroppedImageUrl] = useState<string>('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [ignoredCroppedImageUrl, setIgnoredCroppedImageUrl] = useState<string>('')
+  const internalFileInputRef = useRef<HTMLInputElement>(null)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
-  const [form, fields] = useForm({
-    id: 'organization-photo',
-    constraint: getZodConstraint(OrgPhotoFormSchema),
-    lastResult: fetcher.data?.result,
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: OrgPhotoFormSchema })
-    },
-    onSubmit(event, { formData }) {
-      // If we have a cropped file, replace the form data file with it
-      if (croppedFile) {
-        formData.set('photoFile', croppedFile)
+  // Process selected file when provided
+  React.useEffect(() => {
+    if (selectedFile && !newImgSrc) {
+      setCurrentSelectedFile(selectedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setNewImgSrc(event.target.result as string)
+        }
       }
-    },
-  })
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error)
+      }
+      reader.readAsDataURL(selectedFile)
+    }
+  }, [selectedFile, newImgSrc])
 
   if (fetcher.data?.status === 'success') {
     setIsOpen(false)
@@ -75,15 +60,14 @@ export function OrganizationPhotoForm({ organization, setIsOpen }: { organizatio
       : '/img/user.png'
   }
 
-  // Handle file selection
+  // Handle file selection (for fallback input)
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0]
     if (file) {
-      setSelectedFile(file)
+      setCurrentSelectedFile(file)
       const reader = new FileReader()
       reader.onload = (event) => {
         setNewImgSrc(event.target?.result as string)
-        setShowCropper(true)
       }
       reader.readAsDataURL(file)
     }
@@ -95,11 +79,13 @@ export function OrganizationPhotoForm({ organization, setIsOpen }: { organizatio
     setCrop(centerAspectCrop(width, height, 1))
   }
 
-  // Handle crop complete
+  // Handle crop complete and automatically apply crop
   function onCropComplete(crop: PixelCrop) {
     if (imgRef.current && crop.width && crop.height) {
-      const croppedImageUrl = getCroppedImg(imgRef.current, crop)
-      setCroppedImageUrl(croppedImageUrl)
+      const croppedUrl = getCroppedImg(imgRef.current, crop)
+      setIgnoredCroppedImageUrl(croppedUrl)
+      // Automatically create cropped file
+      void applyCropFromUrl(croppedUrl)
     }
   }
 
@@ -134,38 +120,36 @@ export function OrganizationPhotoForm({ organization, setIsOpen }: { organizatio
     return canvas.toDataURL('image/jpeg', 0.9)
   }
 
-  // Apply crop
-  async function applyCrop() {
+  // Apply crop from URL
+  async function applyCropFromUrl(croppedUrl: string) {
     try {
-      if (croppedImageUrl && selectedFile) {
-        const response = await fetch(croppedImageUrl)
+      if (croppedUrl && currentSelectedFile) {
+        const response = await fetch(croppedUrl)
         const blob = await response.blob()
         
         // Create File object from cropped blob
-        const croppedFile = new File([blob], selectedFile.name || 'cropped-logo.jpg', {
+        const croppedFile = new File([blob], currentSelectedFile.name || 'cropped-org-logo.jpg', {
           type: 'image/jpeg',
           lastModified: Date.now(),
         })
         
         setCroppedFile(croppedFile)
-        setNewImgSrc(croppedImageUrl)
-        setShowCropper(false)
       }
     } catch (error) {
       console.error('Error applying crop:', error)
     }
   }
 
-  // Cancel crop
-  function cancelCrop() {
-    setShowCropper(false)
-    setSelectedFile(null)
+  // Cancel and close
+  function handleCancel() {
+    setCurrentSelectedFile(null)
     setNewImgSrc(null)
-    setCroppedImageUrl('')
+    setIgnoredCroppedImageUrl('')
     setCroppedFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    if (internalFileInputRef.current) {
+      internalFileInputRef.current.value = ''
     }
+    setIsOpen(false)
   }
 
   // Helper function to center the crop
@@ -190,9 +174,34 @@ export function OrganizationPhotoForm({ organization, setIsOpen }: { organizatio
     )
   }
 
-  if (showCropper && newImgSrc) {
+  // Handle form submission with cropped file
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    
+    const formData = new FormData()
+    formData.append('intent', uploadOrgPhotoActionIntent)
+    
+    if (croppedFile) {
+      formData.append('photoFile', croppedFile)
+    } else if (currentSelectedFile) {
+      formData.append('photoFile', currentSelectedFile)
+    }
+    
+    void fetcher.submit(formData, {
+      method: 'POST',
+      encType: 'multipart/form-data',
+    })
+  }
+
+  // Show cropping interface if image is selected
+  if (newImgSrc) {
     return (
-      <div className="flex flex-col items-center gap-4">
+      <form 
+        method="POST" 
+        encType="multipart/form-data"
+        className="flex flex-col items-center gap-4"
+        onSubmit={handleSubmit}
+      >
         <div className="w-full max-w-md">
           <ReactCrop
             crop={crop}
@@ -210,88 +219,60 @@ export function OrganizationPhotoForm({ organization, setIsOpen }: { organizatio
             />
           </ReactCrop>
         </div>
+        <input type="hidden" name="intent" value={uploadOrgPhotoActionIntent} />
         <div className="flex gap-3">
           <Button 
+            type="button"
             variant="outline" 
-            onClick={cancelCrop}
+            onClick={handleCancel}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={applyCrop}
-            disabled={!croppedImageUrl}
+          <StatusButton 
+            type="submit"
+            disabled={!croppedFile}
+            status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
           >
-            Apply Crop
-          </Button>
+            Save
+          </StatusButton>
         </div>
+      </form>
+    )
+  }
+
+  // If selectedFile is provided but not processed yet, show waiting state
+  if (selectedFile && !newImgSrc) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <img
+          src={getOrgImgSrc(organization.image?.objectKey)}
+          alt={organization.name}
+          className="size-40 rounded-sm object-contain bg-secondary"
+        />
+        <div className="text-sm text-muted-foreground">Processing selected image...</div>
       </div>
     )
   }
 
+  // Fallback: show file input if no external file provided
   return (
-    <fetcher.Form 
-      method="POST" 
-      encType="multipart/form-data"
-      className="flex flex-col items-center gap-6"
-      {...getFormProps(form)}
-    >
+    <div className="flex flex-col items-center gap-4">
       <img
-        src={newImgSrc ?? getOrgImgSrc(organization.image?.objectKey)}
+        src={getOrgImgSrc(organization.image?.objectKey)}
         alt={organization.name}
-        className="size-40 rounded-md object-contain bg-secondary"
+        className="size-40 rounded-sm object-contain bg-secondary"
       />
-      <div className="flex flex-col items-center gap-2">
-        <input
-          {...getInputProps(fields.photoFile, { type: 'file' })}
-          ref={fileInputRef}
-          accept="image/*"
-          className="peer sr-only"
-          onChange={handleFileSelect}
-        />
-        <input type="hidden" name="intent" value={uploadOrgPhotoActionIntent} />
-        
-        <div className="flex gap-3">
-          <Button asChild className="cursor-pointer">
-            <label htmlFor={fields.photoFile.id}>Select Logo</label>
-          </Button>
-          
-          {organization.image?.objectKey && !newImgSrc && (
-            <fetcher.Form method="POST" encType="multipart/form-data">
-              <input type="hidden" name="intent" value={deleteOrgPhotoActionIntent} />
-              <Button type="submit" variant="destructive">
-                Remove Logo
-              </Button>
-            </fetcher.Form>
-          )}
-        </div>
-        
-        <ErrorList errors={fields.photoFile.errors} id={fields.photoFile.id} />
-        
-        <StatusButton 
-          type="submit"
-          className="mt-2"
-          disabled={!newImgSrc && !croppedFile}
-          status={fetcher.state !== 'idle' ? 'pending' : form.status ?? 'idle'}
-        >
-          Save
-        </StatusButton>
-        {newImgSrc && (
-          <StatusButton 
-            type="button"
-            className="mt-2 ml-2"
-            onClick={() => {
-              setNewImgSrc(null)
-              setSelectedFile(null)
-              setCroppedFile(null)
-              if (fileInputRef.current) {
-                fileInputRef.current.value = ''
-              }
-            }}
-          >
-            Cancel
-          </StatusButton>
-        )}
-      </div>
-    </fetcher.Form>
+      <input
+        ref={internalFileInputRef}
+        type="file"
+        accept="image/*"
+        className="peer sr-only"
+        id="org-photo-input-fallback"
+        onChange={handleFileSelect}
+      />
+      <Button asChild className="cursor-pointer">
+        <label htmlFor="org-photo-input-fallback">Select Logo</label>
+      </Button>
+    </div>
   )
 }
