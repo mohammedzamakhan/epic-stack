@@ -1,4 +1,5 @@
 import { Search, ChevronRight, FolderOpen } from 'lucide-react';
+import { Img } from 'openimg/react';
 import { useState } from 'react';
 import { type LoaderFunctionArgs, Link, useLoaderData } from 'react-router';
 import { Button } from '#app/components/ui/button';
@@ -22,6 +23,12 @@ export default function OrganizationsPage() {
     org.organization.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     org.organization.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  function getOrgImgSrc(objectKey?: string | null) {
+    return objectKey
+      ? `/resources/images?objectKey=${encodeURIComponent(objectKey)}`
+      : '/img/user.png'
+  }
 
   return (
     <div className="container max-w-2xl py-8">
@@ -58,8 +65,18 @@ export default function OrganizationsPage() {
           >
             <div className="flex items-center justify-between p-4 bg-background hover:shadow-sm rounded-lg border transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center font-medium text-sm">
-                  {org.organization.name.charAt(0).toUpperCase()}
+                <div className="w-10 h-10 rounded-md ring-2 ring-offset-2 ring-muted overflow-hidden bg-muted flex items-center justify-center font-medium text-sm">
+                  {org.organization.image?.objectKey ? (
+                    <Img
+                      src={getOrgImgSrc(org.organization.image.objectKey)}
+                      alt={org.organization.name}
+                      className="w-full h-full object-cover"
+                      width={40}
+                      height={40}
+                    />
+                  ) : (
+                    <span>{org.organization.name.charAt(0).toUpperCase()}</span>
+                  )}
                 </div>
                 <div>
                   <div className="font-medium">{org.organization.name}</div>
