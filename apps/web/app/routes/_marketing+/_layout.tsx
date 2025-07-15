@@ -51,7 +51,7 @@ export default function MarketingLayout() {
 
 				<div className="container flex justify-between pb-5">
 					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
 				</div>
 			</div>
 			<EpicToaster closeButton position="top-center" theme={theme} />
