@@ -17,6 +17,7 @@ import {
     useTheme,
 } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalUser } from '#app/utils/user.ts'
+import { HeroHeader } from '#app/components/ui/header.tsx'
 
 function Logo() {
     return (
@@ -42,24 +43,7 @@ export default function MarketingLayout() {
 	return (
 		<>
 			<div className="flex min-h-screen flex-col justify-between">
-				<header className="container py-6">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-						<Logo />
-						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
-							{searchBar}
-						</div>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="lg">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
-						</div>
-						<div className="block w-full sm:hidden">{searchBar}</div>
-					</nav>
-				</header>
+				<HeroHeader />
 
 				<div className="flex flex-1 flex-col">
 					<Outlet />
