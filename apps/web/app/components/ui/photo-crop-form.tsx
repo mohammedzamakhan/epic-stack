@@ -11,57 +11,37 @@ import { StatusButton } from '#app/components/ui/status-button.tsx'
 import 'react-image-crop/dist/ReactCrop.css'
 
 export interface PhotoCropFormConfig {
-  // Image source function
-  getImageSrc: (objectKey?: string | null) => string
   // Form submission intent
   actionIntent: string
   // Cropping style
   circularCrop?: boolean
-  // Styling
-  imageClassName: string
   // Default filename for cropped image
   defaultCroppedFilename: string
-  // Input and labels
-  inputId: string
-  selectButtonLabel: string
-  // Alt text for image
-  getAltText: (entity: any) => string
-  // Processing text
-  processingText?: string
 }
 
-interface PhotoCropFormProps<T = any> {
-  entity: T
+interface PhotoCropFormProps{
   setIsOpen: (open: boolean) => void
   selectedFile?: File | null
   config: PhotoCropFormConfig
 }
 
-export function PhotoCropForm<T>({ 
-  entity, 
+export function PhotoCropForm({ 
   setIsOpen, 
   selectedFile, 
   config 
-}: PhotoCropFormProps<T>) {
+}: PhotoCropFormProps) {
   const fetcher = useFetcher()
-  const [newImgSrc, setNewImgSrc] = useState<string | null>(null)
+  const [newImgSrc, setNewImgSrc] = useState<string | undefined>(undefined)
   const [currentSelectedFile, setCurrentSelectedFile] = useState<File | null>(selectedFile || null)
   const [croppedFile, setCroppedFile] = useState<File | null>(null)
   const [crop, setCrop] = useState<Crop>()
-  const [ignoredCroppedImageUrl, setIgnoredCroppedImageUrl] = useState<string>('')
   const internalFileInputRef = useRef<HTMLInputElement>(null)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
   const {
-    getImageSrc,
     actionIntent,
     circularCrop = false,
-    imageClassName,
     defaultCroppedFilename,
-    inputId,
-    selectButtonLabel,
-    getAltText,
-    processingText = 'Processing selected image...'
   } = config
 
   // Process selected file when provided
@@ -85,19 +65,6 @@ export function PhotoCropForm<T>({
     setIsOpen(false)
   }
 
-  // Handle file selection (for fallback input)
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.currentTarget.files?.[0]
-    if (file) {
-      setCurrentSelectedFile(file)
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setNewImgSrc(event.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
   // Handle image load for cropping
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget
@@ -108,7 +75,6 @@ export function PhotoCropForm<T>({
   function onCropComplete(crop: PixelCrop) {
     if (imgRef.current && crop.width && crop.height) {
       const croppedUrl = getCroppedImg(imgRef.current, crop)
-      setIgnoredCroppedImageUrl(croppedUrl)
       // Automatically create cropped file
       void applyCropFromUrl(croppedUrl)
     }
@@ -168,8 +134,7 @@ export function PhotoCropForm<T>({
   // Cancel and close
   function handleCancel() {
     setCurrentSelectedFile(null)
-    setNewImgSrc(null)
-    setIgnoredCroppedImageUrl('')
+    setNewImgSrc(undefined)
     setCroppedFile(null)
     if (internalFileInputRef.current) {
       internalFileInputRef.current.value = ''
@@ -218,87 +183,48 @@ export function PhotoCropForm<T>({
     })
   }
 
-  // Show cropping interface if image is selected
-  if (newImgSrc) {
-    return (
-      <form 
-        method="POST" 
-        encType="multipart/form-data"
-        className="flex flex-col items-center gap-4"
-        onSubmit={handleSubmit}
-      >
-        <div className="w-full max-w-md">
-          <ReactCrop
-            crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
-            onComplete={(c) => onCropComplete(c)}
-            aspect={1}
-            className="w-full"
-            circularCrop={circularCrop}
-          >
-            <img
-              ref={imgRef}
-              className="max-h-80 w-full object-contain"
-              alt="Image to crop"
-              src={newImgSrc}
-              onLoad={onImageLoad}
-            />
-          </ReactCrop>
-        </div>
-        <input type="hidden" name="intent" value={actionIntent} />
-        <div className="flex gap-3">
-          <Button 
-            type="button"
-            variant="outline" 
-            onClick={handleCancel}
-          >
-            Cancel
-          </Button>
-          <StatusButton 
-            type="submit"
-            disabled={!croppedFile}
-            status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
-          >
-            Save
-          </StatusButton>
-        </div>
-      </form>
-    )
-  }
-
-  // If selectedFile is provided but not processed yet, show waiting state
-  if (selectedFile && !newImgSrc) {
-    return (
-      <div className="flex flex-col items-center gap-4">
-        <img
-          src={getImageSrc((entity as any)?.image?.objectKey)}
-          alt={getAltText(entity)}
-          className={imageClassName}
-        />
-        <div className="text-sm text-muted-foreground">{processingText}</div>
-      </div>
-    )
-  }
-
-  // Fallback: show file input if no external file provided
   return (
-    <div className="flex flex-col items-center gap-4">
-      <img
-        src={getImageSrc((entity as any)?.image?.objectKey)}
-        alt={getAltText(entity)}
-        className={imageClassName}
-      />
-      <input
-        ref={internalFileInputRef}
-        type="file"
-        accept="image/*"
-        className="peer sr-only"
-        id={inputId}
-        onChange={handleFileSelect}
-      />
-      <Button asChild className="cursor-pointer">
-        <label htmlFor={inputId}>{selectButtonLabel}</label>
-      </Button>
-    </div>
+    <form 
+      method="POST" 
+      encType="multipart/form-data"
+      className="flex flex-col items-center gap-4"
+      onSubmit={handleSubmit}
+    >
+      <div className="w-full max-w-md">
+        <ReactCrop
+          crop={crop}
+          onChange={(_, percentCrop) => setCrop(percentCrop)}
+          onComplete={(c) => onCropComplete(c)}
+          aspect={1}
+          className="w-full"
+          circularCrop={circularCrop}
+        >
+          <img
+            ref={imgRef}
+            className="max-h-80 w-full object-contain"
+            alt="Image to crop"
+            src={newImgSrc}
+            onLoad={onImageLoad}
+          />
+        </ReactCrop>
+      </div>
+      <input type="hidden" name="intent" value={actionIntent} />
+      <div className="flex gap-3">
+        <Button 
+          type="button"
+          variant="outline" 
+          onClick={handleCancel}
+        >
+          Cancel
+        </Button>
+        <StatusButton 
+          type="submit"
+          disabled={!croppedFile}
+          status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
+        >
+          Save
+        </StatusButton>
+      </div>
+    </form>
   )
 }

@@ -75,7 +75,6 @@ export function ProfilePhoto({ user, size = 'normal' }: ProfilePhotoProps) {
             </DialogHeader>
             <ProfilePhotoForm 
               setIsOpen={setShowPhotoForm} 
-              user={user} 
               selectedFile={selectedFile}
             />
           </DialogContent>

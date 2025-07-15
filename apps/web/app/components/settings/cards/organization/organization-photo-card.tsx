@@ -81,7 +81,6 @@ export function OrganizationPhoto({ organization, size = 'normal' }: Organizatio
             </DialogHeader>
             <OrganizationPhotoForm 
               setIsOpen={setShowPhotoForm} 
-              organization={organization} 
               selectedFile={selectedFile}
             />
           </DialogContent>
