@@ -1,9 +1,9 @@
-import { Trash2, Shield, User } from "lucide-react";
 import { Form } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "#app/components/ui/avatar";
 import { Badge } from "#app/components/ui/badge";
 import { Button } from "#app/components/ui/button";
 import { Card, CardContent } from "#app/components/ui/card";
+import { Icon } from "#app/components/ui/icon";
 
 interface OrganizationMember {
   userId: string;
@@ -78,8 +78,8 @@ export function OrganizationMembers({
                     variant={member.role === 'admin' ? 'default' : 'secondary'}
                     className="text-xs"
                   >
-                    {member.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
-                    {member.role === 'member' && <User className="h-3 w-3 mr-1" />}
+                    {member.role === 'admin' && <Icon name="gear" className="h-3 w-3 mr-1" />}
+                    {member.role === 'member' && <Icon name="person" className="h-3 w-3 mr-1" />}
                     {member.role}
                   </Badge>
                   
@@ -93,7 +93,7 @@ export function OrganizationMembers({
                         size="sm"
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Icon name="trash" className="h-4 w-4" />
                       </Button>
                     </Form>
                   )}

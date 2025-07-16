@@ -3,7 +3,7 @@
 	"libraries": [
 		{
 			"name": "@radix-ui/icons",
-			"directory": "./other/svg-icons",
+			"directory": "./apps/web/other/svg-icons",
 			"transformers": ["transform-icon.ts"]
 		}
 	]

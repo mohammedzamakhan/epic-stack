@@ -8,13 +8,13 @@ import {
   FormProvider
 } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { Trash2, Plus } from "lucide-react";
 import { Form } from "react-router";
 import { z } from "zod";
 import { ErrorList, Field } from "#app/components/forms";
 import { Badge } from "#app/components/ui/badge";
 import { Button } from "#app/components/ui/button";
 import { Card, CardContent } from "#app/components/ui/card";
+import { Icon } from "#app/components/ui/icon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#app/components/ui/select";
 import { Separator } from "#app/components/ui/separator";
 
@@ -96,7 +96,7 @@ export function OrganizationInvitations({
                   defaultValue: { email: '', role: 'member' }
                 })}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Icon name="plus" className="h-4 w-4 mr-2" />
                 Add another invitation
               </Button>
             </div>
@@ -139,7 +139,7 @@ export function OrganizationInvitations({
                       <input type="hidden" name="intent" value="remove-invitation" />
                       <input type="hidden" name="invitationId" value={invitation.id} />
                       <Button type="submit" variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4" />
+                        <Icon name="trash" className="h-4 w-4" />
                       </Button>
                     </Form>
                   </div>
@@ -253,7 +253,7 @@ function InviteFieldset({
                 index,
               })}
             >
-              <Trash2 className="h-4 w-4" />
+              <Icon name="trash" className="h-4 w-4" />
             </Button>
           )}
         </div>

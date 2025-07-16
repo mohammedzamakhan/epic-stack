@@ -1,9 +1,9 @@
 "use client"
 
-import { ChevronsUpDown, Plus } from "lucide-react"
 import * as React from "react"
 
 import { Link, useSubmit } from "react-router"
+import { Avatar, AvatarFallback, AvatarImage } from "#app/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "#app/components/ui/dropdown-menu"
+import { Icon } from "#app/components/ui/icon"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -20,7 +21,6 @@ import {
   useSidebar,
 } from "#app/components/ui/sidebar"
 import { useUserOrganizations } from "#app/utils/organizations"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
@@ -78,7 +78,7 @@ export function TeamSwitcher() {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeTeam.name}</span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <Icon name="chevron-down" className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -121,7 +121,7 @@ export function TeamSwitcher() {
             <DropdownMenuItem asChild className="gap-2 p-2">
               <Link to="/organizations/create">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                  <Plus className="size-4" />
+                  <Icon name="plus" className="size-4" />
                 </div>
                 <div className="text-muted-foreground font-medium">Add team</div>
               </Link>
