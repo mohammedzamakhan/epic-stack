@@ -18,6 +18,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { noteHooks } from '#app/utils/integrations/note-hooks.ts'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	// User ID not needed here as userHasOrgAccess will check for authorization
@@ -109,6 +110,9 @@ export async function action({ request }: ActionFunctionArgs) {
 	if (!userOrg) {
 		throw new Response('Not authorized', { status: 403 })
 	}
+
+	// Trigger deletion hook before deleting the note
+	await noteHooks.beforeNoteDeleted(note.id, userId)
 
 	// Delete the note
 	await prisma.organizationNote.delete({ where: { id: note.id } })

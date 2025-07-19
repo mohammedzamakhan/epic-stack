@@ -91,5 +91,23 @@ export {
     OAuthFlowManager,
 } from './oauth-manager'
 
+// Note notification system
+export {
+    NoteEventHandler,
+    noteEventHandler,
+    type NoteChangeType,
+    type NoteChangeEvent,
+    type NoteEventResult,
+} from './note-event-handler'
+
+export {
+    NoteHooks,
+    noteHooks,
+    triggerNoteCreated,
+    triggerNoteUpdated,
+    triggerNoteDeleted,
+    NoteOperationWrapper,
+} from './note-hooks'
+
 // Re-export commonly used types for convenience
 export type { Integration, NoteIntegrationConnection, OrganizationNote } from '@prisma/client'

@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { uploadNoteImage } from '#app/utils/storage.server.ts'
+import { noteHooks } from '#app/utils/integrations/note-hooks.ts'
 import {
 	MAX_UPLOAD_SIZE,
 	OrgNoteEditorSchema,
@@ -108,6 +109,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		newImages = [],
 	} = submission.value
 
+	// Check if this is a new note or an update
+	const existingNote = await prisma.organizationNote.findUnique({
+		where: { id: noteId },
+		select: { id: true, title: true, content: true }
+	})
+
+	const isNewNote = !existingNote
+	let beforeSnapshot: { title: string; content: string } | undefined
+
+	if (!isNewNote && existingNote) {
+		beforeSnapshot = {
+			title: existingNote.title,
+			content: existingNote.content
+		}
+	}
+
 	const updatedNote = await prisma.organizationNote.upsert({
 		select: { id: true },
 		where: { id: noteId },
@@ -136,6 +153,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 		},
 	})
+
+	// Trigger integration hooks
+	if (isNewNote) {
+		await noteHooks.afterNoteCreated(updatedNote.id, userId)
+	} else {
+		await noteHooks.afterNoteUpdated(updatedNote.id, userId, beforeSnapshot)
+	}
 
 	return redirect(
 		`/app/${orgSlug}/notes/${updatedNote.id}`,
