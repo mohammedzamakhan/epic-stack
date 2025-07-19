@@ -206,10 +206,11 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users       UserOrganization[]
-  invitations OrganizationInvitation[]
-  image       OrganizationImage?
-  notes       OrganizationNote[]
+  users        UserOrganization[]
+  invitations  OrganizationInvitation[]
+  image        OrganizationImage?
+  notes        OrganizationNote[]
+  integrations Integration[]
 }
 
 model UserOrganization {
@@ -290,7 +291,8 @@ model OrganizationNote {
   createdBy   User   @relation("createdBy", fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdById String
 
-  images OrganizationNoteImage[]
+  images              OrganizationNoteImage[]
+  integrationConnections NoteIntegrationConnection[]
 
   // non-unique foreign keys
   @@index([organizationId])
@@ -311,4 +313,75 @@ model OrganizationNoteImage {
 
   // non-unique foreign key
   @@index([noteId])
+}
+
+model Integration {
+  id             String @id @default(cuid())
+  organizationId String
+  providerName   String // 'slack', 'teams', 'jira', etc.
+  providerType   String // 'productivity', 'ticketing', etc.
+  
+  // OAuth/API credentials (encrypted)
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  
+  // Provider-specific configuration
+  config         String // JSON string for provider-specific data
+  
+  // Connection metadata
+  isActive       Boolean @default(true)
+  lastSyncAt     DateTime?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  connections    NoteIntegrationConnection[]
+  logs           IntegrationLog[]
+  
+  @@unique([organizationId, providerName])
+  @@index([organizationId])
+}
+
+model NoteIntegrationConnection {
+  id            String @id @default(cuid())
+  noteId        String
+  integrationId String
+  
+  // Provider-specific connection data
+  externalId    String // e.g., Slack channel ID
+  config        String // JSON string: Channel name, webhook URL, etc.
+  
+  isActive      Boolean @default(true)
+  lastPostedAt  DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  note          OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  
+  @@unique([noteId, integrationId, externalId])
+  @@index([noteId])
+  @@index([integrationId])
+}
+
+model IntegrationLog {
+  id            String @id @default(cuid())
+  integrationId String
+  action        String // 'post_message', 'sync_channels', etc.
+  status        String // 'success', 'error', 'pending'
+  
+  // Request/response data
+  requestData   String? // JSON string
+  responseData  String? // JSON string
+  errorMessage  String?
+  
+  createdAt     DateTime @default(now())
+  
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  
+  @@index([integrationId])
+  @@index([createdAt])
 }
