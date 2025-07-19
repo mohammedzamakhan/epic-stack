@@ -25,6 +25,9 @@ const schema = z.object({
 	// Integration encryption key (required for token security)
 	INTEGRATION_ENCRYPTION_KEY: z.string().optional(),
 
+	// OAuth state secret (required for OAuth flow security)
+	OAUTH_STATE_SECRET: z.string().optional(),
+
 	ALLOW_INDEXING: z.enum(['true', 'false']).optional(),
 
 	// Tigris Object Storage Configuration
