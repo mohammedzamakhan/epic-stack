@@ -310,3 +310,54 @@ export function isEncryptionConfigured(): boolean {
 export function generateNewEncryptionKey(): string {
   return IntegrationEncryptionService.generateEncryptionKey()
 }
+
+/**
+ * Simple utility function to encrypt a token string
+ * @param token - Token to encrypt
+ * @returns Promise resolving to encrypted token string
+ */
+export async function encryptToken(token: string): Promise<string> {
+  const tokenData: TokenData = { accessToken: token }
+  const encrypted = await integrationEncryption.encryptTokenData(tokenData)
+  return encrypted.encryptedAccessToken
+}
+
+/**
+ * Simple utility function to decrypt a token string
+ * @param encryptedToken - Encrypted token string
+ * @returns Promise resolving to decrypted token
+ */
+export async function decryptToken(encryptedToken: string): Promise<string> {
+  // For simple token decryption, we need to reconstruct the encrypted data structure
+  // This assumes the token was encrypted using encryptToken above
+  const key = await integrationEncryption['getEncryptionKey']()
+  const encryptedBuffer = Buffer.from(encryptedToken, 'hex')
+  
+  // Extract IV from the beginning of the encrypted data
+  const iv = encryptedBuffer.subarray(0, 16) // ivLength = 16
+  const encryptedData = encryptedBuffer.subarray(16)
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    key,
+    { name: 'AES-GCM' },
+    false,
+    ['decrypt']
+  )
+
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv,
+      },
+      cryptoKey,
+      encryptedData
+    )
+
+    const decoder = new TextDecoder()
+    return decoder.decode(decrypted)
+  } catch (error) {
+    throw new Error('Failed to decrypt token - invalid key or corrupted data')
+  }
+}

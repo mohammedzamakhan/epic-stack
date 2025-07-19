@@ -8,6 +8,7 @@ export interface TokenData {
   refreshToken?: string
   expiresAt?: Date
   scope?: string
+  metadata?: Record<string, any>
 }
 
 // Channel representation for messaging services

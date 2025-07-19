@@ -18,6 +18,13 @@ const schema = z.object({
 	GITHUB_REDIRECT_URI: z.string().optional(),
 	GITHUB_TOKEN: z.string().optional(),
 
+	// If you plan to use Slack integration, remove the .optional()
+	SLACK_CLIENT_ID: z.string().optional(),
+	SLACK_CLIENT_SECRET: z.string().optional(),
+
+	// Integration encryption key (required for token security)
+	INTEGRATION_ENCRYPTION_KEY: z.string().optional(),
+
 	ALLOW_INDEXING: z.enum(['true', 'false']).optional(),
 
 	// Tigris Object Storage Configuration
