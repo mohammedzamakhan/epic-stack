@@ -87,3 +87,20 @@ export interface IntegrationLogEntry {
   errorMessage?: string
   timestamp: Date
 }
+
+// Integration provider interface
+export interface IntegrationProvider {
+  name: string
+  type: ProviderType
+  
+  // OAuth flow methods
+  getAuthUrl(organizationId: string, redirectUri: string): Promise<string>
+  handleCallback(code: string, state: string): Promise<TokenData>
+  refreshToken?(refreshToken: string): Promise<TokenData>
+  revokeToken?(accessToken: string): Promise<void>
+  
+  // Provider-specific operations
+  getAvailableChannels(accessToken: string): Promise<Channel[]>
+  postMessage(accessToken: string, channelId: string, message: MessageData): Promise<void>
+  validateConnection(accessToken: string, channelId: string): Promise<boolean>
+}
