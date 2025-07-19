@@ -1,5 +1,8 @@
 /**
  * Core integration service for managing third-party integrations
+ * 
+ * This service acts as a facade over the IntegrationManager, providing
+ * a simplified interface for common integration operations.
  */
 
 import type { Integration, NoteIntegrationConnection, OrganizationNote } from '@prisma/client'
@@ -13,10 +16,13 @@ import type {
   IntegrationLogEntry,
 } from './types'
 import type { IntegrationProvider } from './provider'
-import { providerRegistry } from './provider'
+import { integrationManager } from './integration-manager'
 
 /**
  * Main service class for managing integrations
+ * 
+ * This class provides a simplified interface over the IntegrationManager
+ * for common integration operations.
  */
 export class IntegrationService {
   /**
@@ -36,25 +42,20 @@ export class IntegrationService {
     authUrl: string
     state: string
   }> {
-    const { OAuthFlowManager } = await import('./oauth-manager')
-    return OAuthFlowManager.startOAuthFlow(organizationId, providerName, redirectUri, additionalParams)
+    return integrationManager.initiateOAuth(organizationId, providerName, redirectUri, additionalParams)
   }
 
   /**
    * Handle OAuth callback and create integration
    * @param providerName - Provider name
    * @param params - OAuth callback parameters
-   * @returns Token data and state information
+   * @returns Created integration
    */
   async handleOAuthCallback(
     providerName: string,
     params: OAuthCallbackParams
-  ): Promise<{
-    tokenData: TokenData
-    stateData: import('./types').OAuthState
-  }> {
-    const { OAuthFlowManager } = await import('./oauth-manager')
-    return OAuthFlowManager.completeOAuthFlow(providerName, params)
+  ): Promise<Integration> {
+    return integrationManager.handleOAuthCallback(providerName, params)
   }
 
   /**
@@ -63,8 +64,7 @@ export class IntegrationService {
    * @returns Available channels
    */
   async getAvailableChannels(integrationId: string): Promise<Channel[]> {
-    // This will be implemented with database operations in a later task
-    throw new Error('getAvailableChannels not yet implemented - requires database operations')
+    return integrationManager.getAvailableChannels(integrationId)
   }
 
   /**
@@ -81,8 +81,12 @@ export class IntegrationService {
     channelId: string,
     config?: Record<string, any>
   ): Promise<NoteIntegrationConnection> {
-    // This will be implemented with database operations in a later task
-    throw new Error('connectNoteToChannel not yet implemented - requires database operations')
+    return integrationManager.connectNoteToChannel({
+      noteId,
+      integrationId,
+      externalId: channelId,
+      config
+    })
   }
 
   /**
@@ -90,8 +94,7 @@ export class IntegrationService {
    * @param connectionId - Connection ID to remove
    */
   async disconnectNoteFromChannel(connectionId: string): Promise<void> {
-    // This will be implemented with database operations in a later task
-    throw new Error('disconnectNoteFromChannel not yet implemented - requires database operations')
+    return integrationManager.disconnectNoteFromChannel(connectionId)
   }
 
   /**
@@ -105,22 +108,16 @@ export class IntegrationService {
     changeType: 'created' | 'updated' | 'deleted',
     userId: string
   ): Promise<void> {
-    // This will be implemented with database operations and message posting in later tasks
-    throw new Error('handleNoteUpdate not yet implemented - requires database operations and message posting')
+    return integrationManager.handleNoteUpdate(noteId, changeType, userId)
   }
 
   /**
    * Refresh expired tokens for an integration
-   * @param providerName - Provider name
-   * @param currentTokenData - Current token data
-   * @returns Refreshed token data
+   * @param integrationId - Integration ID
+   * @returns Updated integration with refreshed tokens
    */
-  async refreshTokens(
-    providerName: string,
-    currentTokenData: TokenData
-  ): Promise<TokenData> {
-    const { OAuthFlowManager } = await import('./oauth-manager')
-    return OAuthFlowManager.ensureValidToken(providerName, currentTokenData)
+  async refreshTokens(integrationId: string): Promise<Integration> {
+    return integrationManager.refreshIntegrationTokens(integrationId)
   }
 
   /**
@@ -153,8 +150,7 @@ export class IntegrationService {
     invalid: number
     errors: string[]
   }> {
-    // This will be implemented with database operations and connection validation in later tasks
-    throw new Error('validateIntegrationConnections not yet implemented - requires database operations')
+    return integrationManager.validateIntegrationConnections(integrationId)
   }
 
   /**
@@ -168,8 +164,7 @@ export class IntegrationService {
     connectionCount: number
     recentErrors: IntegrationLogEntry[]
   }> {
-    // This will be implemented with database operations in a later task
-    throw new Error('getIntegrationStatus not yet implemented - requires database operations')
+    return integrationManager.getIntegrationStatus(integrationId)
   }
 
   /**
@@ -177,8 +172,7 @@ export class IntegrationService {
    * @param integrationId - Integration ID to disconnect
    */
   async disconnectIntegration(integrationId: string): Promise<void> {
-    // This will be implemented with database operations in a later task
-    throw new Error('disconnectIntegration not yet implemented - requires database operations')
+    return integrationManager.disconnectIntegration(integrationId)
   }
 
   /**
@@ -191,8 +185,7 @@ export class IntegrationService {
     organizationId: string,
     type?: ProviderType
   ): Promise<Integration[]> {
-    // This will be implemented with database operations in a later task
-    throw new Error('getOrganizationIntegrations not yet implemented - requires database operations')
+    return integrationManager.getOrganizationIntegrations(organizationId, type)
   }
 
   /**
@@ -201,8 +194,7 @@ export class IntegrationService {
    * @returns List of connections
    */
   async getNoteConnections(noteId: string): Promise<NoteIntegrationConnection[]> {
-    // This will be implemented with database operations in a later task
-    throw new Error('getNoteConnections not yet implemented - requires database operations')
+    return integrationManager.getNoteConnections(noteId)
   }
 
   /**
@@ -220,8 +212,7 @@ export class IntegrationService {
     data?: Record<string, any>,
     error?: string
   ): Promise<void> {
-    // This will be implemented with database operations in a later task
-    throw new Error('logIntegrationActivity not yet implemented - requires database operations')
+    return integrationManager.logIntegrationActivity(integrationId, action, status, data, error)
   }
 
   /**
@@ -267,6 +258,81 @@ export class IntegrationService {
   private generateNoteUrl(note: OrganizationNote): string {
     // This will need to be implemented based on the app's routing structure
     return `/notes/${note.id}`
+  }
+
+  // Provider Management Methods
+
+  /**
+   * Register a new integration provider
+   * @param provider - Provider instance to register
+   */
+  registerProvider(provider: IntegrationProvider): void {
+    return integrationManager.registerProvider(provider)
+  }
+
+  /**
+   * Get a provider by name
+   * @param name - Provider name
+   * @returns Provider instance
+   */
+  getProvider(name: string): IntegrationProvider {
+    return integrationManager.getProvider(name)
+  }
+
+  /**
+   * Get all registered providers
+   * @returns Array of all providers
+   */
+  getAllProviders(): IntegrationProvider[] {
+    return integrationManager.getAllProviders()
+  }
+
+  /**
+   * Get providers by type
+   * @param type - Provider type to filter by
+   * @returns Array of providers matching the type
+   */
+  getProvidersByType(type: ProviderType): IntegrationProvider[] {
+    return integrationManager.getProvidersByType(type)
+  }
+
+  // Additional Integration Management Methods
+
+  /**
+   * Get integration by ID
+   * @param integrationId - Integration ID
+   * @returns Integration with relations
+   */
+  async getIntegration(integrationId: string) {
+    return integrationManager.getIntegration(integrationId)
+  }
+
+  /**
+   * Get all connections for an integration
+   * @param integrationId - Integration ID
+   * @returns List of connections
+   */
+  async getIntegrationConnections(integrationId: string) {
+    return integrationManager.getIntegrationConnections(integrationId)
+  }
+
+  /**
+   * Get integration statistics
+   * @param integrationId - Integration ID
+   * @returns Integration statistics
+   */
+  async getIntegrationStats(integrationId: string) {
+    return integrationManager.getIntegrationStats(integrationId)
+  }
+
+  /**
+   * Update integration configuration
+   * @param integrationId - Integration ID
+   * @param config - New configuration
+   * @returns Updated integration
+   */
+  async updateIntegrationConfig(integrationId: string, config: Record<string, any>) {
+    return integrationManager.updateIntegrationConfig(integrationId, config)
   }
 }
 

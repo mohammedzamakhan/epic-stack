@@ -30,13 +30,23 @@ export {
     providerRegistry,
 } from './provider'
 
-// Integration service
+// Integration service and manager
 export {
     IntegrationService,
     type MessageFormatter,
     BaseMessageFormatter,
     integrationService,
 } from './service'
+
+export {
+    IntegrationManager,
+    integrationManager,
+    type IntegrationWithRelations,
+    type ConnectionWithRelations,
+    type CreateIntegrationParams,
+    type CreateConnectionParams,
+    type IntegrationStats,
+} from './integration-manager'
 
 // Setup and utility functions
 export {
