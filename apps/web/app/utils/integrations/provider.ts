@@ -132,25 +132,20 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
    * Generate a secure random state string for OAuth
    * @param organizationId - Organization ID
    * @param additionalData - Additional data to include in state
-   * @returns Base64 encoded state string
+   * @returns Secure state string
    */
   protected generateOAuthState(
     organizationId: string, 
     additionalData?: Record<string, any>
   ): string {
-    const stateData = {
-      organizationId,
-      providerName: this.name,
-      timestamp: Date.now(),
-      ...additionalData,
-    }
-    
-    return Buffer.from(JSON.stringify(stateData)).toString('base64')
+    // Import here to avoid circular dependencies
+    const { OAuthStateManager } = require('./oauth-manager')
+    return OAuthStateManager.generateState(organizationId, this.name, undefined, additionalData)
   }
   
   /**
    * Parse and validate OAuth state
-   * @param state - Base64 encoded state string
+   * @param state - State string to validate
    * @returns Parsed state data
    * @throws Error if state is invalid or expired
    */
@@ -160,34 +155,9 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
     timestamp: number
     [key: string]: any
   } {
-    try {
-      const stateData = JSON.parse(Buffer.from(state, 'base64').toString()) as any
-      
-      // Validate state structure
-      if (!stateData?.organizationId || !stateData?.providerName || !stateData?.timestamp) {
-        throw new Error('Invalid state structure')
-      }
-      
-      // Check if state is expired (30 minutes)
-      const maxAge = 30 * 60 * 1000 // 30 minutes in milliseconds
-      if (Date.now() - stateData.timestamp > maxAge) {
-        throw new Error('OAuth state expired')
-      }
-      
-      // Validate provider name matches
-      if (stateData.providerName !== this.name) {
-        throw new Error('Provider name mismatch in state')
-      }
-      
-      return stateData as {
-        organizationId: string
-        providerName: string
-        timestamp: number
-        [key: string]: any
-      }
-    } catch (error) {
-      throw new Error(`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    // Import here to avoid circular dependencies
+    const { OAuthStateManager } = require('./oauth-manager')
+    return OAuthStateManager.validateState(state)
   }
   
   /**

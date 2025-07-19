@@ -25,35 +25,36 @@ export class IntegrationService {
    * @param providerName - Name of the provider to connect
    * @param redirectUri - OAuth callback URI
    * @param additionalParams - Provider-specific parameters
-   * @returns Authorization URL to redirect user to
+   * @returns Object containing authorization URL and state
    */
   async initiateOAuth(
     organizationId: string,
     providerName: string,
     redirectUri: string,
     additionalParams?: Record<string, any>
-  ): Promise<string> {
-    const provider = providerRegistry.get(providerName)
-    return provider.getAuthUrl(organizationId, redirectUri, additionalParams)
+  ): Promise<{
+    authUrl: string
+    state: string
+  }> {
+    const { OAuthFlowManager } = await import('./oauth-manager')
+    return OAuthFlowManager.startOAuthFlow(organizationId, providerName, redirectUri, additionalParams)
   }
 
   /**
    * Handle OAuth callback and create integration
    * @param providerName - Provider name
    * @param params - OAuth callback parameters
-   * @returns Created integration
+   * @returns Token data and state information
    */
   async handleOAuthCallback(
     providerName: string,
     params: OAuthCallbackParams
-  ): Promise<Integration> {
-    const provider = providerRegistry.get(providerName)
-    
-    // Handle OAuth callback and get tokens
-    const tokenData = await provider.handleCallback(params)
-    
-    // Store integration (this will be implemented with database operations in a later task)
-    throw new Error('Integration storage not yet implemented - requires database operations')
+  ): Promise<{
+    tokenData: TokenData
+    stateData: import('./types').OAuthState
+  }> {
+    const { OAuthFlowManager } = await import('./oauth-manager')
+    return OAuthFlowManager.completeOAuthFlow(providerName, params)
   }
 
   /**
@@ -110,12 +111,36 @@ export class IntegrationService {
 
   /**
    * Refresh expired tokens for an integration
-   * @param integrationId - Integration ID
-   * @returns Updated integration with new tokens
+   * @param providerName - Provider name
+   * @param currentTokenData - Current token data
+   * @returns Refreshed token data
    */
-  async refreshIntegrationTokens(integrationId: string): Promise<Integration> {
-    // This will be implemented with database operations and token management in later tasks
-    throw new Error('refreshIntegrationTokens not yet implemented - requires database operations and token management')
+  async refreshTokens(
+    providerName: string,
+    currentTokenData: TokenData
+  ): Promise<TokenData> {
+    const { OAuthFlowManager } = await import('./oauth-manager')
+    return OAuthFlowManager.ensureValidToken(providerName, currentTokenData)
+  }
+
+  /**
+   * Check if token needs refresh
+   * @param tokenData - Token data to check
+   * @returns True if token should be refreshed
+   */
+  shouldRefreshToken(tokenData: TokenData): boolean {
+    const { TokenRefreshManager } = require('./oauth-manager')
+    return TokenRefreshManager.shouldRefreshToken(tokenData)
+  }
+
+  /**
+   * Check if token is expired
+   * @param tokenData - Token data to check
+   * @returns True if token is expired
+   */
+  isTokenExpired(tokenData: TokenData): boolean {
+    const { TokenRefreshManager } = require('./oauth-manager')
+    return TokenRefreshManager.isTokenExpired(tokenData)
   }
 
   /**

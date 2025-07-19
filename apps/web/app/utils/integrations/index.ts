@@ -73,5 +73,13 @@ export {
 // Provider implementations
 export { SlackProvider } from './providers/slack'
 
+// OAuth flow management
+export {
+    OAuthStateManager,
+    OAuthCallbackHandler,
+    TokenRefreshManager,
+    OAuthFlowManager,
+} from './oauth-manager'
+
 // Re-export commonly used types for convenience
 export type { Integration, NoteIntegrationConnection, OrganizationNote } from '@prisma/client'

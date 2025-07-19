@@ -70,6 +70,8 @@ export interface OAuthState {
   providerName: string
   redirectUrl?: string
   timestamp: number
+  nonce?: string
+  [key: string]: any
 }
 
 // Integration status types

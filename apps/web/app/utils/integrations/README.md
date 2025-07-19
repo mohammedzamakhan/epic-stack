@@ -21,6 +21,12 @@ This directory contains the core integration system for connecting with third-pa
 - **MessageFormatter**: Interface for formatting messages for different providers
 - **BaseMessageFormatter**: Base implementation with common formatting utilities
 
+### OAuth Flow Management (`oauth-manager.ts`)
+- **OAuthStateManager**: Secure OAuth state generation and validation
+- **OAuthCallbackHandler**: Generic OAuth callback processing
+- **TokenRefreshManager**: Token refresh with retry logic
+- **OAuthFlowManager**: Complete OAuth flow orchestration
+
 ### Security & Encryption (`encryption.ts`, `token-manager.ts`, `security.ts`)
 - **IntegrationEncryptionService**: AES-256-GCM encryption for OAuth tokens
 - **TokenManager**: Secure token storage, retrieval, and refresh management
@@ -34,6 +40,62 @@ This directory contains the core integration system for connecting with third-pa
 - **initializeIntegrations()**: Register all available providers
 - **getAvailableProviders()**: Get providers for UI display
 - **getProvidersByType()**: Get categorized providers
+
+## OAuth Flow Management
+
+The OAuth flow management system provides secure, robust handling of OAuth 2.0 flows:
+
+### Key Features
+
+- **Secure State Management**: Cryptographically signed OAuth states with expiration
+- **Token Refresh**: Automatic token refresh with exponential backoff retry logic
+- **Error Handling**: Comprehensive error handling and validation
+- **Security**: CSRF protection, signature verification, and tamper detection
+
+### Usage
+
+```typescript
+import { OAuthFlowManager } from '#app/utils/integrations'
+
+// Start OAuth flow
+const { authUrl, state } = await OAuthFlowManager.startOAuthFlow(
+  'org-123',
+  'slack',
+  'https://yourapp.com/callback'
+)
+
+// Handle OAuth callback
+const { tokenData, stateData } = await OAuthFlowManager.completeOAuthFlow('slack', {
+  code: 'auth-code',
+  state: 'oauth-state',
+  organizationId: 'org-123'
+})
+
+// Ensure token is valid (refresh if needed)
+const validToken = await OAuthFlowManager.ensureValidToken('slack', currentToken)
+```
+
+### Components
+
+#### OAuthStateManager
+- Generates cryptographically secure OAuth states
+- Validates states with signature verification
+- Includes expiration and tamper detection
+
+#### OAuthCallbackHandler
+- Handles OAuth callbacks from providers
+- Validates state and exchanges codes for tokens
+- Provides error handling for OAuth errors
+
+#### TokenRefreshManager
+- Detects when tokens need refresh
+- Implements retry logic with exponential backoff
+- Handles refresh token expiration
+
+#### OAuthFlowManager
+- Orchestrates complete OAuth flows
+- Combines all utilities for easy usage
+- Provides high-level API for OAuth operations
 
 ## Security Features
 
@@ -87,6 +149,9 @@ Required environment variables:
 # 64-character hex string (32 bytes) for AES-256 encryption
 INTEGRATION_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
+# OAuth state signing secret
+OAUTH_STATE_SECRET=your-oauth-state-secret-key
+
 # Provider-specific credentials
 SLACK_CLIENT_ID=your_slack_client_id
 SLACK_CLIENT_SECRET=your_slack_client_secret
@@ -117,12 +182,19 @@ initializeIntegrations()
 // Get a provider
 const slackProvider = providerRegistry.get('slack')
 
-// Start OAuth flow
-const authUrl = await integrationService.initiateOAuth(
+// Start OAuth flow (now returns auth URL and state)
+const { authUrl, state } = await integrationService.initiateOAuth(
   'org-123',
   'slack',
   'https://app.example.com/oauth/callback'
 )
+
+// Handle OAuth callback
+const { tokenData, stateData } = await integrationService.handleOAuthCallback('slack', {
+  code: 'auth-code',
+  state: state,
+  organizationId: 'org-123'
+})
 
 // Store tokens securely
 await tokenManager.storeTokenData(integrationId, tokenData)
@@ -136,6 +208,12 @@ Verify encryption functionality:
 npx tsx apps/web/app/utils/integrations/verify-encryption.ts
 ```
 
+Verify OAuth flow management:
+
+```bash
+npx tsx apps/web/app/utils/integrations/verify-oauth-manager.ts
+```
+
 ## Implementation Status
 
 ✅ **Completed:**
@@ -146,12 +224,15 @@ npx tsx apps/web/app/utils/integrations/verify-encryption.ts
 - **Token encryption and security utilities (AES-256-GCM)**
 - **Secure token storage and management**
 - **Rate limiting and security validation**
-- **OAuth state generation and validation**
+- **OAuth flow management system**
+  - **OAuth state generation and validation with cryptographic signing**
+  - **Generic OAuth callback handler**
+  - **Token refresh mechanism with retry logic**
+  - **Complete OAuth flow orchestration**
 - MessageFormatter interfaces
 - Setup and initialization utilities
 
 🚧 **To be implemented in future tasks:**
-- OAuth flow implementation
 - Slack API integration
 - Message posting functionality
 - Database operations integration
