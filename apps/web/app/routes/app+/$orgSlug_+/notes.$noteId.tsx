@@ -19,6 +19,8 @@ import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { noteHooks } from '#app/utils/integrations/note-hooks.ts'
+import { integrationManager } from '#app/utils/integrations/integration-manager'
+import { IntegrationControls } from '#app/components/note/integration-controls'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	// User ID not needed here as userHasOrgAccess will check for authorization
@@ -56,7 +58,33 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const date = new Date(note.updatedAt)
 	const timeAgo = formatDistanceToNow(date)
 
-	return { note, timeAgo }
+	// Get integration data for this note
+	const [connections, availableIntegrations] = await Promise.all([
+		integrationManager.getNoteConnections(note.id),
+		integrationManager.getOrganizationIntegrations(note.organizationId)
+	])
+
+	return { 
+		note, 
+		timeAgo, 
+		connections: connections.map(conn => ({
+			id: conn.id,
+			externalId: conn.externalId,
+			config: conn.config ? JSON.parse(conn.config as string) : {},
+			integration: {
+				id: conn.integration.id,
+				providerName: conn.integration.providerName,
+				providerType: conn.integration.providerType,
+				isActive: conn.integration.isActive
+			}
+		})),
+		availableIntegrations: availableIntegrations.map(int => ({
+			id: int.id,
+			providerName: int.providerName,
+			providerType: int.providerType,
+			isActive: int.isActive
+		}))
+	}
 }
 
 const DeleteFormSchema = z.object({
@@ -64,20 +92,41 @@ const DeleteFormSchema = z.object({
 	noteId: z.string(),
 })
 
+const ConnectNoteSchema = z.object({
+	intent: z.literal('connect-note-to-channel'),
+	noteId: z.string(),
+	integrationId: z.string(),
+	channelId: z.string(),
+})
+
+const DisconnectNoteSchema = z.object({
+	intent: z.literal('disconnect-note-from-channel'),
+	connectionId: z.string(),
+})
+
+const GetChannelsSchema = z.object({
+	intent: z.literal('get-integration-channels'),
+	integrationId: z.string(),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
-	const submission = parseWithZod(formData, {
-		schema: DeleteFormSchema,
-	})
-	if (submission.status !== 'success') {
-		return data(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
-	}
+	const intent = formData.get('intent')
 
-	const { noteId } = submission.value
+	// Handle different intents
+	if (intent === 'delete-note') {
+		const submission = parseWithZod(formData, {
+			schema: DeleteFormSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId } = submission.value
 
 	// Get the organization note
 	const note = await prisma.organizationNote.findFirst({
@@ -117,11 +166,132 @@ export async function action({ request }: ActionFunctionArgs) {
 	// Delete the note
 	await prisma.organizationNote.delete({ where: { id: note.id } })
 
-	return redirectWithToast(`/app/${note.organization.slug}/notes`, {
-		type: 'success',
-		title: 'Success',
-		description: 'The note has been deleted.',
-	})
+		return redirectWithToast(`/app/${note.organization.slug}/notes`, {
+			type: 'success',
+			title: 'Success',
+			description: 'The note has been deleted.',
+		})
+	}
+
+	if (intent === 'connect-note-to-channel') {
+		const submission = parseWithZod(formData, {
+			schema: ConnectNoteSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId, integrationId, channelId } = submission.value
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { organizationId: true },
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		try {
+			await integrationManager.connectNoteToChannel({
+				noteId,
+				integrationId,
+				externalId: channelId,
+			})
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error connecting note to channel:', error)
+			return data(
+				{ result: { status: 'error', error: 'Failed to connect note to channel' } },
+				{ status: 500 }
+			)
+		}
+	}
+
+	if (intent === 'disconnect-note-from-channel') {
+		const submission = parseWithZod(formData, {
+			schema: DisconnectNoteSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { connectionId } = submission.value
+
+		// Get the connection to verify access
+		const connection = await prisma.noteIntegrationConnection.findFirst({
+			select: { 
+				note: { 
+					select: { organizationId: true } 
+				} 
+			},
+			where: { id: connectionId },
+		})
+		invariantResponse(connection, 'Connection not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, connection.note.organizationId)
+
+		try {
+			await integrationManager.disconnectNoteFromChannel(connectionId)
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error disconnecting note from channel:', error)
+			return data(
+				{ result: { status: 'error', error: 'Failed to disconnect note from channel' } },
+				{ status: 500 }
+			)
+		}
+	}
+
+	if (intent === 'get-integration-channels') {
+		const submission = parseWithZod(formData, {
+			schema: GetChannelsSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { integrationId } = submission.value
+
+		try {
+			// Get the integration to verify access
+			const integration = await integrationManager.getIntegration(integrationId)
+			if (!integration) {
+				return data({ error: 'Integration not found' }, { status: 404 })
+			}
+
+			// Check if user has access to this organization
+			await userHasOrgAccess(request, integration.organizationId)
+
+			// Get available channels for this integration
+			const channels = await integrationManager.getAvailableChannels(integrationId)
+
+			return data({ channels })
+		} catch (error) {
+			console.error('Error fetching integration channels:', error)
+			
+			// For demo purposes, return empty channels array instead of error
+			// This allows the UI to show "No channels available" instead of crashing
+			return data({ 
+				channels: [],
+				error: error instanceof Error ? error.message : 'Failed to fetch channels'
+			})
+		}
+	}
+
+	return data({ result: { status: 'error', error: 'Invalid intent' } }, { status: 400 })
 }
 
 type NoteLoaderData = {
@@ -134,10 +304,27 @@ type NoteLoaderData = {
 		organization: { slug: string }
 	}
 	timeAgo: string
+	connections: Array<{
+		id: string
+		externalId: string
+		config: any
+		integration: {
+			id: string
+			providerName: string
+			providerType: string
+			isActive: boolean
+		}
+	}>
+	availableIntegrations: Array<{
+		id: string
+		providerName: string
+		providerType: string
+		isActive: boolean
+	}>
 }
 
 export default function NoteRoute() {
-	const { note, timeAgo } = useLoaderData() as NoteLoaderData
+	const { note, timeAgo, connections, availableIntegrations } = useLoaderData() as NoteLoaderData
 	
 	// Add ref for auto-focusing
 	const sectionRef = useRef<HTMLElement>(null)
@@ -186,7 +373,12 @@ export default function NoteRoute() {
 							{timeAgo} ago
 						</Icon>
 					</span>
-					<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
+					<div className="flex flex-1 justify-end gap-2 md:gap-4">
+						<IntegrationControls
+							noteId={note.id}
+							connections={connections}
+							availableIntegrations={availableIntegrations}
+						/>
 						<DeleteNote id={note.id} />
 						<Button
 							asChild

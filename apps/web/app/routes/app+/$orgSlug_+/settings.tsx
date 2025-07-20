@@ -8,21 +8,25 @@ import { BillingCard } from "#app/components/settings/cards/organization/billing
 import { GeneralSettingsCard } from "#app/components/settings/cards/organization/general-settings-card";
 import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
 import { MembersCard } from "#app/components/settings/cards/organization/members-card";
+import { IntegrationsCard, connectIntegrationActionIntent, disconnectIntegrationActionIntent } from "#app/components/settings/cards/organization/integrations-card";
 import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent } from "#app/components/settings/cards/organization/organization-photo-card";
 import { AnnotatedLayout, AnnotatedSection } from "#app/components/ui/annotated-layout";
 import { requireUserId } from "#app/utils/auth.server";
 import { prisma } from "#app/utils/db.server";
-import { 
-  createOrganizationInvitation, 
+import {
+  createOrganizationInvitation,
   sendOrganizationInvitationEmail,
   getOrganizationInvitations,
-  deleteOrganizationInvitation 
+  deleteOrganizationInvitation
 } from "#app/utils/organization-invitation.server";
 import {
   checkoutAction,
   customerPortalAction,
   getPlansAndPrices,
 } from "#app/utils/payments.server";
+import { integrationManager } from "#app/utils/integrations/integration-manager";
+// Initialize providers
+import "#app/utils/integrations/providers";
 import { uploadOrganizationImage } from "#app/utils/storage.server.ts";
 import { redirectWithToast } from "#app/utils/toast.server";
 
@@ -71,8 +75,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
 
   const isClosedBeta = process.env.LAUNCH_STATUS === 'CLOSED_BETA';
-  
-  const [pendingInvitations, members, plansAndPrices] = await Promise.all([
+
+  const [pendingInvitations, members, integrations] = await Promise.all([
     getOrganizationInvitations(organization.id),
     prisma.userOrganization.findMany({
       where: {
@@ -98,16 +102,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         createdAt: 'asc',
       },
     }),
-    isClosedBeta ? Promise.resolve(null) : getPlansAndPrices(),
+    // isClosedBeta ? Promise.resolve(null) : getPlansAndPrices(),
+    integrationManager.getOrganizationIntegrations(organization.id),
   ]);
 
-  return { 
-    organization, 
-    pendingInvitations, 
-    members, 
+  // Get available providers
+  const { getAvailableProviders } = await import('#app/utils/integrations/providers');
+  const availableProviders = getAvailableProviders();
+
+  return {
+    organization,
+    pendingInvitations,
+    members,
     currentUserId: userId,
-    plansAndPrices,
+    // plansAndPrices,
     isClosedBeta,
+    integrations,
+    availableProviders,
   };
 }
 
@@ -130,7 +141,7 @@ const InviteSchema = z.object({
 export async function action({ request, params }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
   invariant(params.orgSlug, "orgSlug is required");
-  
+
   // Get the organization first
   const organization = await prisma.organization.findFirst({
     where: {
@@ -171,9 +182,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         // Create or update organization image
         await prisma.$transaction(async $prisma => {
           await $prisma.organizationImage.deleteMany({ where: { organizationId: organization.id } })
-          await $prisma.organization.update({ 
-            where: { id: organization.id }, 
-            data: { image: { create: { objectKey } } } 
+          await $prisma.organization.update({
+            where: { id: organization.id },
+            data: { image: { create: { objectKey } } }
           })
         })
 
@@ -257,7 +268,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (intent === "remove-invitation") {
     const invitationId = formData.get("invitationId") as string;
-    
+
     try {
       await deleteOrganizationInvitation(invitationId);
       return Response.json({ success: true });
@@ -269,12 +280,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (intent === "remove-member") {
     const memberUserId = formData.get("userId") as string;
-    
+
     // Prevent removing yourself
     if (memberUserId === userId) {
       return Response.json({ error: 'You cannot remove yourself' }, { status: 400 });
     }
-    
+
     try {
       await prisma.userOrganization.update({
         where: {
@@ -296,8 +307,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   // Organization settings update
   if (intent === "update-settings") {
-    const submission = parseWithZod(formData, { 
-      schema: SettingsSchema 
+    const submission = parseWithZod(formData, {
+      schema: SettingsSchema
     });
 
     if (submission.status !== 'success') {
@@ -305,13 +316,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     const { name, slug } = submission.value;
-    
+
     try {
       await prisma.organization.update({
         where: { id: organization.id },
         data: { name, slug },
       });
-      
+
       return redirectWithToast(`/app/${slug}/settings`, {
         title: "Organization updated",
         description: "Your organization's settings have been updated.",
@@ -319,14 +330,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     } catch (error) {
       console.error("Error updating organization:", error);
-      return Response.json({ 
+      return Response.json({
         result: submission.reply({
           formErrors: ["Failed to update organization settings. Please try again."]
         })
       });
     }
   }
-  
+
   // Billing actions
   if (intent === 'upgrade') {
     const organizationWithBilling = await prisma.organization.findUnique({
@@ -346,11 +357,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
         subscriptionStatus: true,
       },
     });
-    
+
     if (!organizationWithBilling) {
       return Response.json({ error: 'Organization not found' }, { status: 404 });
     }
-    
+
     return checkoutAction(request, organizationWithBilling);
   }
 
@@ -372,12 +383,64 @@ export async function action({ request, params }: ActionFunctionArgs) {
         subscriptionStatus: true,
       },
     });
-    
+
     if (!organizationWithBilling) {
       return Response.json({ error: 'Organization not found' }, { status: 404 });
     }
-    
+
     return customerPortalAction(request, organizationWithBilling);
+  }
+
+  // Integration actions
+  if (intent === connectIntegrationActionIntent) {
+    const providerName = formData.get("providerName") as string;
+
+    if (!providerName) {
+      return Response.json({ error: 'Provider name is required' }, { status: 400 });
+    }
+
+    try {
+      // Generate OAuth URL and redirect
+const url = new URL(request.url);
+      const protocol = url.protocol === 'https:' ? 'https:' : 'https:';
+      const redirectUri = `${protocol}//${url.host}/api/integrations/oauth/callback?provider=${providerName}`;
+      console.log('Redirect URI:', redirectUri);
+      console.log('Organization ID:', organization.id);
+
+      const { authUrl } = await integrationManager.initiateOAuth(
+        organization.id,
+        providerName,
+        redirectUri
+      );
+
+      console.log('Generated OAuth URL:', authUrl);
+      return Response.redirect(authUrl);
+    } catch (error) {
+      console.error('Error initiating OAuth:', error);
+      return redirectWithToast(`/app/${organization.slug}/settings`, {
+        title: 'Integration failed',
+        description: `Failed to initiate OAuth: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'error',
+      });
+    }
+  }
+
+  if (intent === disconnectIntegrationActionIntent) {
+    const integrationId = formData.get("integrationId") as string;
+
+    if (!integrationId) {
+      return Response.json({ error: 'Integration ID is required' }, { status: 400 });
+    }
+
+    try {
+      await integrationManager.disconnectIntegration(integrationId);
+      return Response.json({ success: true });
+    } catch (error) {
+      console.error('Error disconnecting integration:', error);
+      return Response.json({
+        error: 'Failed to disconnect integration'
+      }, { status: 500 });
+    }
   }
 
   // No valid intent found
@@ -385,40 +448,50 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function OrganizationSettings() {
-  const { organization, pendingInvitations, members, currentUserId, plansAndPrices, isClosedBeta } = useLoaderData<typeof loader>();
+  const { organization, pendingInvitations, members, currentUserId, plansAndPrices, isClosedBeta, integrations, availableProviders } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
     <div className="p-8">
       <AnnotatedLayout>
-      <AnnotatedSection
-        title="General Settings"
-        description="Manage your organization's name, slug, and profile image."
-      >
-        <GeneralSettingsCard organization={organization} />
-      </AnnotatedSection>
-      
-      <AnnotatedSection
-        title="Members"
-        description="Manage the members of your organization."
-      >
-        <MembersCard 
-          members={members}
-          currentUserId={currentUserId}
-        />
-      </AnnotatedSection>
-      
-      <AnnotatedSection
-        title="Invitations"
-        description="Invite new members to your organization."
-      >
-        <InvitationsCard 
-          pendingInvitations={pendingInvitations}
-          actionData={actionData}
-        />
-      </AnnotatedSection>
-      
-      <AnnotatedSection
+        <AnnotatedSection
+          title="General Settings"
+          description="Manage your organization's name, slug, and profile image."
+        >
+          <GeneralSettingsCard organization={organization} />
+        </AnnotatedSection>
+
+        <AnnotatedSection
+          title="Members"
+          description="Manage the members of your organization."
+        >
+          <MembersCard
+            members={members}
+            currentUserId={currentUserId}
+          />
+        </AnnotatedSection>
+
+        <AnnotatedSection
+          title="Invitations"
+          description="Invite new members to your organization."
+        >
+          <InvitationsCard
+            pendingInvitations={pendingInvitations}
+            actionData={actionData}
+          />
+        </AnnotatedSection>
+
+        <AnnotatedSection
+          title="Integrations"
+          description="Connect your organization to third-party services like Slack, Teams, and more."
+        >
+          <IntegrationsCard
+            integrations={integrations}
+            availableProviders={availableProviders}
+          />
+        </AnnotatedSection>
+
+        {/* <AnnotatedSection
         title="Billing & Subscription"
         description="Manage your organization's subscription and billing settings."
       >
@@ -427,8 +500,8 @@ export default function OrganizationSettings() {
           plansAndPrices={plansAndPrices}
           isClosedBeta={isClosedBeta}
         />
-      </AnnotatedSection>
-    </AnnotatedLayout>
+      </AnnotatedSection> */}
+      </AnnotatedLayout>
     </div>
   );
 }
