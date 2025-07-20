@@ -932,9 +932,9 @@ export class IntegrationManager {
    * @returns Note URL
    */
   private generateNoteUrl(note: OrganizationNote): string {
-    // This will need to be implemented based on the app's routing structure
-    // For now, return a placeholder URL
-    return `/app/notes/${note.id}`
+    // Get the base URL from environment or use localhost for development
+    const baseUrl = process.env.APP_BASE_URL || 'http://localhost:3001'
+    return `${baseUrl}/app/notes/${note.id}`
   }
 
   /**

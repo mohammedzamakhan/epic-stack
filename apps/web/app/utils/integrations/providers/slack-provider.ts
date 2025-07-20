@@ -532,6 +532,8 @@ export class SlackProvider extends BaseIntegrationProvider {
                 throw new Error('Slack API rate limit exceeded. Please try again later.')
             } else if (errorMessage.includes('invalid_auth')) {
                 throw new Error('Slack authentication failed. Please reconnect your Slack integration.')
+            } else if (errorMessage.includes('invalid_blocks')) {
+                throw new Error('Invalid Slack message format. This might be due to an invalid URL or block structure.')
             }
 
             throw error
