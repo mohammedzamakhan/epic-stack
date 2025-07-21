@@ -2,29 +2,20 @@
  * Slack integration provider implementation
  */
 
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
-import type {
-    TokenData,
-    Channel,
-    MessageData,
-    OAuthCallbackParams,
-} from '../types'
+import  { type Integration, type NoteIntegrationConnection } from '@prisma/client'
 import { BaseIntegrationProvider } from '../provider'
-
-/**
- * Slack-specific configuration interface
- */
-interface SlackConfig {
-    teamId: string
-    teamName: string
-    botUserId: string
-    scope: string
-}
+import  {
+    type TokenData,
+    type Channel,
+    type MessageData,
+    type OAuthCallbackParams,
+} from '../types'
 
 /**
  * Slack API response interfaces
  */
 interface SlackOAuthResponse {
+    app_id: string
     ok: boolean
     access_token?: string
     scope?: string
@@ -117,7 +108,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 
         const params = new URLSearchParams({
             client_id: this.clientId,
-            scope: 'conversations:read,chat:write',
+            scope: 'channels:read,chat:write,channels:history,groups:read',
             redirect_uri: redirectUri,
             state,
             response_type: 'code',
@@ -157,7 +148,7 @@ export class SlackProvider extends BaseIntegrationProvider {
             // For demo purposes, return mock token data
             return {
                 accessToken: `mock-slack-token-${Date.now()}`,
-                scope: 'conversations:read,chat:write',
+                scope: 'channels:read,chat:write,channels:history,groups:read',
                 metadata: {
                     teamId: 'T1234567890',
                     teamName: 'Demo Team',
@@ -350,7 +341,7 @@ export class SlackProvider extends BaseIntegrationProvider {
                         bot_needs_invite: !channel.is_member,
                         can_post: true // Bot can post to any channel with chat:write scope
                     }
-                }))
+                } as Channel))
                 .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
             console.log(JSON.stringify(allChannels, null, 2))
             console.log(`Returning ${channels.length} accessible channels (${channels.filter(c => c.type === 'public').length} public, ${channels.filter(c => c.type === 'private').length} private)`)
@@ -472,8 +463,8 @@ export class SlackProvider extends BaseIntegrationProvider {
 
             // Parse connection config to get posting preferences
             const connectionConfig = connection.config ? JSON.parse(connection.config as string) : {}
-            const useBlocks = connectionConfig.postFormat !== 'text'
-            const includeContent = connectionConfig.includeContent !== false
+            const useBlocks = (connectionConfig as any).postFormat !== 'text'
+            const includeContent = (connectionConfig as any).includeContent !== false
 
             // Prepare the message payload
             const payload: any = {
@@ -544,7 +535,7 @@ export class SlackProvider extends BaseIntegrationProvider {
      * Validate a Slack connection
      */
     async validateConnection(
-        connection: NoteIntegrationConnection & { integration: Integration }
+        _connection: NoteIntegrationConnection & { integration: Integration }
     ): Promise<boolean> {
         // For now, we'll return true for mock implementation
         // In a real implementation, we would check if the channel still exists and is accessible

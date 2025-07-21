@@ -5,9 +5,8 @@
  * and trigger integration notifications without requiring manual intervention.
  */
 
-import type { OrganizationNote } from '@prisma/client'
-import { noteEventHandler } from './note-event-handler'
 import { prisma } from '../db.server'
+import { noteEventHandler } from './note-event-handler'
 
 /**
  * Note data for change detection
@@ -159,7 +158,7 @@ export class NoteHooks {
     noteId: string,
     userId: string,
     beforeSnapshot?: NoteSnapshot,
-    afterSnapshot?: NoteSnapshot
+    _afterSnapshot?: NoteSnapshot
   ): Promise<void> {
     let previousData: { title: string; content: string } | undefined
 

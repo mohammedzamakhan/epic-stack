@@ -10,26 +10,23 @@
  * - Message posting and notification handling
  */
 
-import type { 
-  Integration, 
-  NoteIntegrationConnection, 
-  OrganizationNote,
-  User,
-  Organization 
+import  { 
+  type Integration, 
+  type NoteIntegrationConnection, 
+  type OrganizationNote,
+  type Organization 
 } from '@prisma/client'
-import type {
-  TokenData,
-  Channel,
-  MessageData,
-  OAuthCallbackParams,
-  IntegrationStatus,
-  ProviderType,
-  IntegrationLogEntry,
-  OAuthState,
+import { prisma } from '@repo/prisma'
+import { type IntegrationProvider, providerRegistry } from './provider'
+import  {
+  type TokenData,
+  type Channel,
+  type MessageData,
+  type OAuthCallbackParams,
+  type IntegrationStatus,
+  type ProviderType,
+  type IntegrationLogEntry,
 } from './types'
-import type { IntegrationProvider } from './provider'
-import { providerRegistry } from './provider'
-import { prisma } from '../db.server'
 
 /**
  * Extended Integration type with relations
@@ -182,7 +179,7 @@ export class IntegrationManager {
     // Parse simplified state
     let stateData
     try {
-      stateData = JSON.parse(Buffer.from(params.state, 'base64').toString())
+      stateData = JSON.parse(Buffer.from(params.state, 'base64').toString()) as { providerName: string, organizationId: string }
     } catch (error) {
       throw new Error('Invalid OAuth state')
     }
@@ -742,7 +739,7 @@ export class IntegrationManager {
       return { valid: 0, invalid: 0, errors: ['No connections found'] }
     }
     
-    const provider = this.getProvider(connections[0].integration.providerName)
+    const provider = this.getProvider(connections[0]?.integration?.providerName as string)
     if (!provider) {
       return { valid: 0, invalid: connections.length, errors: ['Provider not found'] }
     }
@@ -944,7 +941,7 @@ export class IntegrationManager {
    */
   private safeJsonParse(jsonString: string): Record<string, any> | undefined {
     try {
-      return JSON.parse(jsonString)
+      return JSON.parse(jsonString) as Record<string, any>
     } catch {
       return undefined
     }

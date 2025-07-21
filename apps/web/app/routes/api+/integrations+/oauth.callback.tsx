@@ -1,10 +1,10 @@
-import { type LoaderFunctionArgs } from 'react-router'
 import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs } from 'react-router'
+import { requireUserId } from '#app/utils/auth.server'
 import { integrationManager } from '#app/utils/integrations/integration-manager'
-// Initialize providers
 import '#app/utils/integrations/providers'
 import { redirectWithToast } from '#app/utils/toast.server'
-import { requireUserId } from '#app/utils/auth.server'
+import { OAuthState } from '#app/utils/integrations/types.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireUserId(request)
@@ -21,7 +21,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const errorMsg = errorDescription || error
     console.error('OAuth error:', errorMsg)
     
-    return redirectWithToast('/app/settings', {
+    return redirectWithToast('/', {
       title: 'Integration failed',
       description: `Failed to connect: ${errorMsg}`,
       type: 'error',
@@ -30,7 +30,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   // Validate required parameters
   if (!code || !state || !providerName) {
-    return redirectWithToast('/app/settings', {
+    return redirectWithToast('/', {
       title: 'Integration failed',
       description: 'Missing required OAuth parameters',
       type: 'error',
@@ -41,9 +41,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Parse state to get organization ID
     let stateData
     try {
-      stateData = JSON.parse(Buffer.from(state, 'base64').toString())
+      stateData = JSON.parse(Buffer.from(state, 'base64').toString()) as OAuthState
     } catch (error) {
-      throw new Error('Invalid OAuth state')
+      throw new Error(`Invalid OAuth state: ${error}`)
     }
 
     // Handle OAuth callback
@@ -74,7 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     
-    return redirectWithToast('/app/settings', {
+    return redirectWithToast('/', {
       title: 'Integration failed',
       description: `Failed to complete connection: ${errorMessage}`,
       type: 'error',

@@ -8,9 +8,8 @@
  * - Manage event queuing and processing
  */
 
-import type { OrganizationNote, User } from '@prisma/client'
+import { prisma } from '@repo/prisma'
 import { integrationManager } from './integration-manager'
-import { prisma } from '../db.server'
 
 /**
  * Note change event types
@@ -348,7 +347,7 @@ export class NoteEventHandler {
       logs.forEach(log => {
         if (log.requestData) {
           try {
-            const data = JSON.parse(log.requestData)
+            const data = JSON.parse(log.requestData) as { noteId: string; channelId: string }
             if (data.noteId && data.channelId) {
               uniqueConnections.add(`${data.noteId}-${data.channelId}`)
             }

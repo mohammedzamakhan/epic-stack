@@ -48,13 +48,6 @@ export {
     type IntegrationStats,
 } from './integration-manager'
 
-// Setup and utility functions
-export {
-    initializeIntegrations,
-    getAvailableProviders,
-    getProvidersByType,
-} from './setup'
-
 // Encryption and security utilities
 export {
     IntegrationEncryptionService,
@@ -71,17 +64,6 @@ export {
     type TokenRefreshResult,
     type TokenStorageResult,
 } from './token-manager'
-
-export {
-    IntegrationSecurityUtils,
-    integrationSecurity,
-    createRateLimitKey,
-    RATE_LIMITS,
-    type RateLimitConfig,
-} from './security'
-
-// Provider implementations
-export { SlackProvider } from './providers/slack'
 
 // OAuth flow management
 export {

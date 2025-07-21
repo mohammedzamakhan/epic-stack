@@ -8,8 +8,8 @@
  */
 
 import { randomBytes, createHash } from 'crypto'
-import type { TokenData, OAuthState, OAuthCallbackParams } from './types'
 import { providerRegistry } from './provider'
+import  { type TokenData, type OAuthState, type OAuthCallbackParams } from './types'
 
 /**
  * OAuth state management utilities
@@ -92,7 +92,7 @@ export class OAuthStateManager {
             const decoded = Buffer.from(statePayload, 'base64').toString()
             stateData = JSON.parse(decoded) as OAuthState
         } catch (error) {
-            throw new Error('Invalid state: failed to parse data')
+            throw new Error(`Invalid state: failed to parse data: ${error}`)
         }
 
         // Validate required fields
@@ -233,7 +233,7 @@ export class TokenRefreshManager {
 
             // Check if we should retry
             if (attempt < this.MAX_RETRIES && this.isRetryableError(error)) {
-                const delayMs = this.RETRY_DELAYS[attempt - 1] || this.RETRY_DELAYS[this.RETRY_DELAYS.length - 1]
+                const delayMs = this.RETRY_DELAYS[attempt - 1] || this.RETRY_DELAYS[this.RETRY_DELAYS.length - 1] as number
 
                 console.warn(`Token refresh attempt ${attempt} failed for ${providerName}: ${errorMessage}. Retrying in ${delayMs}ms...`)
 

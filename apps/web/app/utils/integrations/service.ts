@@ -5,18 +5,18 @@
  * a simplified interface for common integration operations.
  */
 
-import type { Integration, NoteIntegrationConnection, OrganizationNote } from '@prisma/client'
-import type {
-  TokenData,
-  Channel,
-  MessageData,
-  OAuthCallbackParams,
-  IntegrationStatus,
-  ProviderType,
-  IntegrationLogEntry,
-} from './types'
-import type { IntegrationProvider } from './provider'
+import  { type Integration, type NoteIntegrationConnection, type OrganizationNote } from '@prisma/client'
 import { integrationManager } from './integration-manager'
+import  { type IntegrationProvider } from './provider'
+import   {
+  type TokenData,
+  type Channel,
+  type MessageData,
+  type OAuthCallbackParams,
+  type IntegrationStatus,
+  type ProviderType,
+  type IntegrationLogEntry,
+} from './types'
 
 /**
  * Main service class for managing integrations

@@ -6,7 +6,7 @@
  */
 
 import { webcrypto as crypto } from 'node:crypto'
-import type { TokenData } from './types'
+import  { type TokenData } from './types'
 
 // Environment variable for encryption key
 const ENCRYPTION_KEY_ENV = process.env.INTEGRATION_ENCRYPTION_KEY as string

@@ -2,15 +2,13 @@
  * Core integration provider interface and base implementation
  */
 
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
-import type {
-  TokenData,
-  Channel,
-  MessageData,
-  OAuthCallbackParams,
-  ProviderConfig,
-  ProviderType,
-  IntegrationStatus,
+import  { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import  {
+  type TokenData,
+  type Channel,
+  type MessageData,
+  type OAuthCallbackParams,
+  type ProviderType,
 } from './types'
 
 /**
@@ -177,13 +175,13 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
    * Make an authenticated HTTP request to the provider's API
    * @param integration - Integration with credentials
    * @param endpoint - API endpoint
-   * @param options - Fetch options
+   * @param _options - Fetch options
    * @returns Promise resolving to response
    */
   protected async makeAuthenticatedRequest(
     integration: Integration,
     endpoint: string,
-    options: RequestInit = {}
+    _options: RequestInit = {}
   ): Promise<Response> {
     // This will be implemented with token decryption in a later task
     throw new Error('makeAuthenticatedRequest not yet implemented - requires token encryption utilities')
