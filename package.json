@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "db:setup": "cd packages/prisma && npm run setup",
     "db:generate": "cd packages/prisma && npm run db:generate",
+    "db:push": "cd packages/prisma && npm run db:push",
     "db:migrate:deploy": "cd packages/prisma && npm run db:migrate:deploy",
     "db:seed": "cd packages/prisma && npm run db:seed",
     "db:migrate:dev": "cd packages/prisma && npm run db:migrate:dev",

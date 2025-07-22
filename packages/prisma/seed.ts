@@ -8,10 +8,14 @@ import {
 	getUserImages,
 } from '#tests/db-utils.ts'
 import { insertGitHubUser } from '#tests/mocks/github.ts'
+import { setupRoles } from './setup-roles.ts'
 
 async function seed() {
 	console.log('🌱 Seeding...')
 	console.time(`🌱 Database has been seeded`)
+
+	// Setup roles first
+	await setupRoles()
 
 	const totalUsers = 5
 	console.time(`👤 Created ${totalUsers} users...`)
