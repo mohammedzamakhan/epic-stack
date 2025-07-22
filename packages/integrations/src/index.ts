@@ -91,5 +91,7 @@ export {
     NoteOperationWrapper,
 } from './note-hooks'
 
+export { getAvailableProviders } from './providers'
+
 // Re-export commonly used types for convenience
 export type { Integration, NoteIntegrationConnection, OrganizationNote } from '@prisma/client'

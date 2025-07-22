@@ -4,7 +4,7 @@
  */
 
 import  { type Integration } from '@prisma/client'
-import { prisma } from '#app/utils/db.server'
+import { prisma } from '@repo/prisma'
 import { integrationEncryption, type EncryptedTokenData, type TokenValidationResult } from './encryption'
 import  { type TokenData, type IntegrationProvider } from './types'
 

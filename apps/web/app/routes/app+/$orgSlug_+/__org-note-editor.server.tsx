@@ -1,12 +1,12 @@
 import { parseWithZod } from '@conform-to/zod'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { createId as cuid } from '@paralleldrive/cuid2'
+import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { uploadNoteImage } from '#app/utils/storage.server.ts'
-import { noteHooks } from '#app/utils/integrations/note-hooks.ts'
 import {
 	MAX_UPLOAD_SIZE,
 	OrgNoteEditorSchema,

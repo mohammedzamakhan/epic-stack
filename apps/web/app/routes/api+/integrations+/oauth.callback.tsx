@@ -1,8 +1,7 @@
 import { invariant } from '@epic-web/invariant'
+import { type OAuthState, integrationManager } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server'
-import { integrationManager } from '#app/utils/integrations/integration-manager'
-import { type OAuthState } from '#app/utils/integrations/types.ts'
 import { redirectWithToast } from '#app/utils/toast.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {

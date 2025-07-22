@@ -1,14 +1,15 @@
 import { parseWithZod } from "@conform-to/zod";
 import { invariant } from "@epic-web/invariant";
 import { parseFormData } from "@mjackson/form-data-parser";
+import { integrationManager, getAvailableProviders } from "@repo/integrations";
 import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData, useActionData } from "react-router";
 import { z } from "zod";
 
 import { BillingCard } from "#app/components/settings/cards/organization/billing-card";
 import { GeneralSettingsCard } from "#app/components/settings/cards/organization/general-settings-card";
+import { IntegrationsCard, connectIntegrationActionIntent, disconnectIntegrationActionIntent } from "#app/components/settings/cards/organization/integrations-card";
 import { InvitationsCard } from "#app/components/settings/cards/organization/invitations-card";
 import { MembersCard } from "#app/components/settings/cards/organization/members-card";
-import { IntegrationsCard, connectIntegrationActionIntent, disconnectIntegrationActionIntent } from "#app/components/settings/cards/organization/integrations-card";
 import { uploadOrgPhotoActionIntent, deleteOrgPhotoActionIntent } from "#app/components/settings/cards/organization/organization-photo-card";
 import { AnnotatedLayout, AnnotatedSection } from "#app/components/ui/annotated-layout";
 import { requireUserId } from "#app/utils/auth.server";
@@ -24,9 +25,6 @@ import {
   customerPortalAction,
   getPlansAndPrices,
 } from "#app/utils/payments.server";
-import { integrationManager } from "#app/utils/integrations/integration-manager";
-// Initialize providers
-import "#app/utils/integrations/providers";
 import { uploadOrganizationImage } from "#app/utils/storage.server.ts";
 import { redirectWithToast } from "#app/utils/toast.server";
 
@@ -107,7 +105,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   ]);
 
   // Get available providers
-  const { getAvailableProviders } = await import('#app/utils/integrations/providers');
   const availableProviders = getAvailableProviders();
 
   return {
@@ -401,7 +398,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     try {
       // Generate OAuth URL and redirect
-const url = new URL(request.url);
+      const url = new URL(request.url);
       const protocol = url.protocol === 'https:' ? 'https:' : 'https:';
       const redirectUri = `${protocol}//${url.host}/api/integrations/oauth/callback?provider=${providerName}`;
       console.log('Redirect URI:', redirectUri);

@@ -1,9 +1,9 @@
 import { useFetcher, Form } from 'react-router'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/components/ui/card'
+import { Badge } from '#app/components/ui/badge'
 import { Button } from '#app/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/components/ui/card'
 import { Icon } from '#app/components/ui/icon'
 import { StatusButton } from '#app/components/ui/status-button'
-import { Badge } from '#app/components/ui/badge'
 
 export const connectIntegrationActionIntent = 'connect-integration'
 export const disconnectIntegrationActionIntent = 'disconnect-integration'
