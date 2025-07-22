@@ -28,6 +28,8 @@ node_modules
 .react-router/
 .turbo
 
+dist
+
 data.db
 
 reference-saas-app/
