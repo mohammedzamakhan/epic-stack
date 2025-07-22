@@ -3,7 +3,7 @@
  */
 
 import { providerRegistry } from '../provider'
-import { SlackProvider } from './slack-provider'
+import { SlackProvider } from './slack/provider'
 
 /**
  * Initialize and register all available integration providers

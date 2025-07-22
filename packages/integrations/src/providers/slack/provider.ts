@@ -3,13 +3,13 @@
  */
 
 import  { type Integration, type NoteIntegrationConnection } from '@prisma/client'
-import { BaseIntegrationProvider } from '../provider'
+import { BaseIntegrationProvider } from '../../provider'
 import  {
     type TokenData,
     type Channel,
     type MessageData,
     type OAuthCallbackParams,
-} from '../types'
+} from '../../types'
 
 /**
  * Slack API response interfaces
