@@ -7,6 +7,7 @@ import { SlackProvider } from './slack/provider'
 import { JiraProvider } from './jira/provider'
 import { LinearProvider } from './linear/provider'
 import { GitLabProvider } from './gitlab/provider'
+import { ClickUpProvider } from './clickup/provider'
 
 /**
  * Initialize and register all available integration providers
@@ -23,6 +24,9 @@ export function initializeProviders(): void {
   
   // Register GitLab provider
   providerRegistry.register(new GitLabProvider())
+  
+  // Register ClickUp provider
+  providerRegistry.register(new ClickUpProvider())
   
   // Future providers can be registered here
   // providerRegistry.register(new TeamsProvider())
@@ -59,6 +63,13 @@ export function getAvailableProviders() {
       type: 'productivity',
       displayName: 'GitLab',
       description: 'Connect notes to GitLab projects for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    {
+      name: 'clickup',
+      type: 'productivity',
+      displayName: 'ClickUp',
+      description: 'Connect notes to ClickUp spaces and lists for task management',
       icon: 'link-2' // Using generic icon for now
     }
   ]

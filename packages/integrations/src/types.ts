@@ -79,6 +79,18 @@ export interface GitLabConfig {
   }
 }
 
+export interface ClickUpConfig {
+  scope?: string
+  user: {
+    id: number
+    username: string
+    email: string
+    profilePicture?: string
+    initials: string
+    timezone: string
+  }
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -116,11 +128,23 @@ export interface GitLabConnectionConfig {
   assigneeId?: number
 }
 
+export interface ClickUpConnectionConfig {
+  listId: string
+  listName: string
+  spaceName: string
+  teamName: string
+  includeNoteContent: boolean
+  defaultPriority?: number // 1=Urgent, 2=High, 3=Normal, 4=Low
+  defaultAssignees?: number[]
+  defaultTags?: string[]
+  defaultStatus?: string
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {
