@@ -187,11 +187,35 @@ export interface AsanaConnectionConfig {
   defaultSection?: string // Section GID to add tasks to
 }
 
+export interface TrelloConfig {
+  user: {
+    id: string
+    username: string
+    fullName: string
+    email?: string
+    avatarUrl?: string
+  }
+  boards: Array<{
+    id: string
+    name: string
+    url: string
+  }>
+}
+
+export interface TrelloConnectionConfig {
+  listId: string
+  listName: string
+  boardName: string
+  includeNoteContent: boolean
+  defaultLabels?: string[] // Array of label IDs to apply to created cards
+  defaultMembers?: string[] // Array of member IDs to assign cards to by default
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | AsanaConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | AsanaConfig | TrelloConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | AsanaConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | AsanaConnectionConfig | TrelloConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {
@@ -200,6 +224,7 @@ export interface OAuthCallbackParams {
   state: string
   error?: string
   errorDescription?: string
+  oauthToken?: string
 }
 
 // OAuth state data

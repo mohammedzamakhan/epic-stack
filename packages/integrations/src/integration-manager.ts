@@ -178,16 +178,28 @@ export class IntegrationManager {
     const provider = this.getProvider(providerName)
     
     // Parse simplified state
-
     let stateData
-    try {
-      stateData = OAuthStateManager.validateState(params.state)
-    } catch (error) {
-      throw new Error('Invalid OAuth state')
-    }
     
-    if (stateData.providerName !== providerName) {
-      throw new Error('Provider name mismatch in OAuth state')
+    // Check if this is an OAuth 1.0a flow (Trello) with a generated state
+    if (params.state.startsWith('trello-oauth1-')) {
+      // For OAuth 1.0a flows, we don't validate the state in the traditional way
+      // The organization context was already validated in the callback handler
+      stateData = {
+        organizationId: params.organizationId,
+        providerName: providerName,
+        timestamp: Date.now()
+      }
+    } else {
+      // Standard OAuth 2.0 state validation
+      try {
+        stateData = OAuthStateManager.validateState(params.state)
+      } catch (error) {
+        throw new Error('Invalid OAuth state')
+      }
+      
+      if (stateData.providerName !== providerName) {
+        throw new Error('Provider name mismatch in OAuth state')
+      }
     }
     
     // Handle OAuth callback with provider
