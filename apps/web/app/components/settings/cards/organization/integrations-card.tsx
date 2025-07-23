@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/
 import { Icon } from '#app/components/ui/icon'
 import { StatusButton } from '#app/components/ui/status-button'
 import { JiraIntegrationSettings } from './jira-integration-settings'
+import { getAvailableProviders } from '@repo/integrations'
 
 export const connectIntegrationActionIntent = 'connect-integration'
 export const disconnectIntegrationActionIntent = 'disconnect-integration'
@@ -231,21 +232,48 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
 function getProviderInfo(providerName: string) {
   const providers = {
     slack: {
+      name: 'slack',
+      type: 'productivity',
       displayName: 'Slack',
-      icon: 'link-2', // We'll use a generic icon for now
-      description: 'Team communication and collaboration'
-    },
-    teams: {
-      displayName: 'Microsoft Teams',
-      icon: 'link-2',
-      description: 'Video meetings and team chat'
+      description: 'Connect notes to Slack channels for team collaboration',
+      icon: 'link-2' // Using generic icon for now
     },
     jira: {
+      name: 'jira',
+      type: 'productivity',
       displayName: 'Jira',
-      icon: 'link-2',
-      description: 'Issue and project tracking'
+      description: 'Connect notes to Jira projects for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    linear: {
+      name: 'linear',
+      type: 'productivity',
+      displayName: 'Linear',
+      description: 'Connect notes to Linear teams and projects for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    gitlab: {
+      name: 'gitlab',
+      type: 'productivity',
+      displayName: 'GitLab',
+      description: 'Connect notes to GitLab projects for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    clickup: {
+      name: 'clickup',
+      type: 'productivity',
+      displayName: 'ClickUp',
+      description: 'Connect notes to ClickUp spaces and lists for task management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    notion: {
+      name: 'notion',
+      type: 'productivity',
+      displayName: 'Notion',
+      description: 'Connect notes to Notion databases for knowledge management and collaboration',
+      icon: 'link-2' // Using generic icon for now
     }
-  } as const
+  }
 
   return providers[providerName as keyof typeof providers] || {
     displayName: providerName,
