@@ -8,6 +8,7 @@ import { JiraProvider } from './jira/provider'
 import { LinearProvider } from './linear/provider'
 import { GitLabProvider } from './gitlab/provider'
 import { ClickUpProvider } from './clickup/provider'
+import { NotionProvider } from './notion/provider'
 
 /**
  * Initialize and register all available integration providers
@@ -27,6 +28,9 @@ export function initializeProviders(): void {
   
   // Register ClickUp provider
   providerRegistry.register(new ClickUpProvider())
+  
+  // Register Notion provider
+  providerRegistry.register(new NotionProvider())
   
   // Future providers can be registered here
   // providerRegistry.register(new TeamsProvider())
@@ -71,6 +75,13 @@ export function getAvailableProviders() {
       displayName: 'ClickUp',
       description: 'Connect notes to ClickUp spaces and lists for task management',
       icon: 'link-2' // Using generic icon for now
+    },
+    {
+      name: 'notion',
+      type: 'productivity',
+      displayName: 'Notion',
+      description: 'Connect notes to Notion databases for knowledge management and collaboration',
+      icon: 'link-2' // Using generic icon for now
     }
   ]
 }
@@ -82,4 +93,7 @@ initializeProviders()
 export { SlackProvider }
 export { JiraProvider }
 export { LinearProvider }
+export { GitLabProvider }
+export { ClickUpProvider }
+export { NotionProvider }
 export { providerRegistry } from '../provider'

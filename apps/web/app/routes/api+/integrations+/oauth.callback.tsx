@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const state = url.searchParams.get('state')
   const error = url.searchParams.get('error')
   const errorDescription = url.searchParams.get('error_description')
-  const providerName = url.searchParams.get('provider')
+  let providerName = url.searchParams.get('provider')
 
   // Handle OAuth errors
   if (error) {
@@ -24,6 +24,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       description: `Failed to connect: ${errorMsg}`,
       type: 'error',
     })
+  }
+
+  if (code && state && !providerName) {
+    providerName = 'notion'
   }
 
   // Validate required parameters

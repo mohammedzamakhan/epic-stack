@@ -91,6 +91,18 @@ export interface ClickUpConfig {
   }
 }
 
+export interface NotionConfig {
+  workspaceId: string
+  workspaceName: string
+  botId: string
+  user: {
+    id: string
+    name: string
+    email?: string
+    avatarUrl?: string
+  }
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -140,11 +152,18 @@ export interface ClickUpConnectionConfig {
   defaultStatus?: string
 }
 
+export interface NotionConnectionConfig {
+  databaseId: string
+  databaseName: string
+  includeNoteContent: boolean
+  defaultProperties?: Record<string, any>
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {
