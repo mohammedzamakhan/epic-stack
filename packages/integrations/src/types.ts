@@ -67,6 +67,18 @@ export interface LinearConfig {
   scope: string
 }
 
+export interface GitLabConfig {
+  instanceUrl: string
+  scope: string
+  user: {
+    id: number
+    username: string
+    name: string
+    email?: string
+    avatarUrl?: string
+  }
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -94,11 +106,21 @@ export interface LinearConnectionConfig {
   issuePriority?: string
 }
 
+export interface GitLabConnectionConfig {
+  projectId: string
+  projectName: string
+  projectPath: string
+  includeNoteContent: boolean
+  defaultLabels?: string[]
+  milestoneId?: number
+  assigneeId?: number
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {
