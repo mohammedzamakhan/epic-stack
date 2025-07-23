@@ -9,6 +9,7 @@ import { LinearProvider } from './linear/provider'
 import { GitLabProvider } from './gitlab/provider'
 import { ClickUpProvider } from './clickup/provider'
 import { NotionProvider } from './notion/provider'
+import { AsanaProvider } from './asana/provider'
 
 /**
  * Initialize and register all available integration providers
@@ -31,6 +32,9 @@ export function initializeProviders(): void {
   
   // Register Notion provider
   providerRegistry.register(new NotionProvider())
+  
+  // Register Asana provider
+  providerRegistry.register(new AsanaProvider())
   
   // Future providers can be registered here
   // providerRegistry.register(new TeamsProvider())
@@ -81,6 +85,13 @@ export function getAvailableProviders() {
       type: 'productivity',
       displayName: 'Notion',
       description: 'Connect notes to Notion databases for knowledge management and collaboration',
+      icon: 'link-2' // Using generic icon for now
+    },
+    {
+      name: 'asana',
+      type: 'productivity',
+      displayName: 'Asana',
+      description: 'Connect notes to Asana projects for task management and team collaboration',
       icon: 'link-2' // Using generic icon for now
     }
   ]

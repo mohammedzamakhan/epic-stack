@@ -103,6 +103,25 @@ export interface NotionConfig {
   }
 }
 
+export interface AsanaConfig {
+  user: {
+    gid: string
+    name: string
+    email?: string
+    photo?: {
+      image_21x21?: string
+      image_27x27?: string
+      image_36x36?: string
+      image_60x60?: string
+    }
+  }
+  workspaces: Array<{
+    gid: string
+    name: string
+    resource_type: string
+  }>
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -159,11 +178,20 @@ export interface NotionConnectionConfig {
   defaultProperties?: Record<string, any>
 }
 
+export interface AsanaConnectionConfig {
+  projectGid: string
+  projectName: string
+  workspaceName: string
+  includeNoteContent: boolean
+  defaultAssignee?: string // User GID to assign tasks to by default
+  defaultSection?: string // Section GID to add tasks to
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | AsanaConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | AsanaConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {
