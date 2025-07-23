@@ -60,6 +60,13 @@ export interface JiraConfig {
   }
 }
 
+export interface LinearConfig {
+  userId: string
+  userName: string
+  userEmail: string
+  scope: string
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -78,11 +85,20 @@ export interface JiraConnectionConfig {
   reporterAccountId?: string // Override the issue reporter
 }
 
+export interface LinearConnectionConfig {
+  channelId: string
+  channelName: string
+  channelType: 'team' | 'project'
+  includeNoteContent: boolean
+  defaultIssueState?: string
+  issuePriority?: string
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {

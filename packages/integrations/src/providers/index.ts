@@ -5,6 +5,7 @@
 import { providerRegistry } from '../provider'
 import { SlackProvider } from './slack/provider'
 import { JiraProvider } from './jira/provider'
+import { LinearProvider } from './linear/provider'
 
 /**
  * Initialize and register all available integration providers
@@ -15,6 +16,9 @@ export function initializeProviders(): void {
   
   // Register Jira provider
   providerRegistry.register(new JiraProvider())
+  
+  // Register Linear provider
+  providerRegistry.register(new LinearProvider())
   
   // Future providers can be registered here
   // providerRegistry.register(new TeamsProvider())
@@ -38,6 +42,13 @@ export function getAvailableProviders() {
       displayName: 'Jira',
       description: 'Connect notes to Jira projects for issue tracking and project management',
       icon: 'link-2' // Using generic icon for now
+    },
+    {
+      name: 'linear',
+      type: 'productivity',
+      displayName: 'Linear',
+      description: 'Connect notes to Linear teams and projects for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
     }
   ]
 }
@@ -48,4 +59,5 @@ initializeProviders()
 // Re-export providers for convenience
 export { SlackProvider }
 export { JiraProvider }
+export { LinearProvider }
 export { providerRegistry } from '../provider'
