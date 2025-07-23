@@ -431,15 +431,6 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			this.apiBaseUrl
 		const url = `${baseUrl}/user`
 
-		console.log('GitLab getCurrentUser request:', {
-			url,
-			hasToken: !!accessToken,
-			tokenLength: accessToken?.length,
-			tokenPrefix: accessToken?.substring(0, 10) + '...',
-			instanceUrl,
-			baseUrl
-		})
-
 		const response = await fetch(url, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -447,20 +438,12 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			},
 		})
 
-		console.log('GitLab getCurrentUser response:', {
-			status: response.status,
-			statusText: response.statusText,
-			headers: Object.fromEntries(response.headers.entries())
-		})
-
 		if (!response.ok) {
 			const errorText = await response.text()
-			console.error('GitLab getCurrentUser error details:', errorText)
 			throw new Error(`Failed to get GitLab user: ${response.statusText} - ${errorText}`)
 		}
 
 		const userData = await response.json()
-		console.log('GitLab user data received:', { id: userData.id, username: userData.username, name: userData.name })
 		return userData
 	}
 
@@ -516,14 +499,6 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		const baseUrl = this.getBaseUrl(integration)
 		const url = `${baseUrl}/projects?membership=true&per_page=100&order_by=last_activity_at`
 		
-		console.log('GitLab API request:', {
-			url,
-			hasToken: !!accessToken,
-			tokenLength: accessToken?.length,
-			tokenPrefix: accessToken?.substring(0, 10) + '...',
-			baseUrl
-		})
-		
 		const response = await fetch(url, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -531,15 +506,8 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			},
 		})
 
-		console.log('GitLab API response:', {
-			status: response.status,
-			statusText: response.statusText,
-			headers: Object.fromEntries(response.headers.entries())
-		})
-
 		if (!response.ok) {
 			const errorText = await response.text()
-			console.error('GitLab API error details:', errorText)
 			throw new Error(`Failed to get GitLab projects: ${response.statusText} - ${errorText}`)
 		}
 

@@ -144,7 +144,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 		})
 
 		const authUrl = `https://app.asana.com/-/oauth_authorize?${params.toString()}`
-		console.log('Generated Asana OAuth URL')
 		return authUrl
 	}
 
@@ -164,7 +163,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 
 		// Parse and validate state
 		const stateData = this.parseOAuthState(state)
-		console.log('Processing Asana OAuth callback for organization:', stateData.organizationId)
 
 		try {
 			// Exchange authorization code for access token
@@ -202,11 +200,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			const userInfo = await this.getCurrentUser(tokenData.access_token)
 			const workspaces = await this.getUserWorkspaces(tokenData.access_token)
 
-			console.log('Successfully exchanged OAuth code for Asana access token')
-			console.log('User:', userInfo.name, '(', userInfo.gid, ')')
-			console.log('Workspaces:', workspaces.length)
-
-			// Calculate expiration date if provided
 			let expiresAt: Date | undefined
 			if (tokenData.expires_in) {
 				expiresAt = new Date(Date.now() + tokenData.expires_in * 1000)
@@ -261,21 +254,17 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				throw new Error('No access token received from Asana refresh')
 			}
 
-			// Calculate expiration date if provided
 			let expiresAt: Date | undefined
 			if (tokenData.expires_in) {
 				expiresAt = new Date(Date.now() + tokenData.expires_in * 1000)
 			}
 
-			console.log('Successfully refreshed Asana access token')
-
 			return {
 				accessToken: tokenData.access_token,
-				refreshToken: tokenData.refresh_token || refreshToken, // Keep old refresh token if new one not provided
+				refreshToken: tokenData.refresh_token || refreshToken,
 				expiresAt,
 			}
 		} catch (error) {
-			console.error('Error refreshing Asana token:', error)
 			throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`)
 		}
 	}
@@ -331,10 +320,8 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				}
 			}
 
-			console.log(`Retrieved ${channels.length} Asana projects across ${workspaces.length} workspaces`)
 			return channels.sort((a, b) => a.name.localeCompare(b.name))
 		} catch (error) {
-			console.error('Error fetching Asana projects:', error)
 			throw new Error(`Failed to fetch Asana projects: ${error instanceof Error ? error.message : 'Unknown error'}`)
 		}
 	}
@@ -427,12 +414,8 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				throw new Error(errorMessage)
 			}
 
-			const result = await response.json() as AsanaCreateTaskResponse
-			
-			console.log('Successfully created Asana task:', result.data.name, '(', result.data.gid, ')')
-			console.log('Task URL:', result.data.permalink_url)
+			const result = await response.json() as AsanaCreateTaskResponse			
 		} catch (error) {
-			console.error('Error creating Asana task:', error)
 			throw new Error(`Failed to create Asana task: ${error instanceof Error ? error.message : 'Unknown error'}`)
 		}
 	}
@@ -475,10 +458,8 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			}
 
 			const project = await response.json()
-			console.log('Asana connection validated for project:', project.data?.name)
 			return true
 		} catch (error) {
-			console.error('Error validating Asana connection:', error)
 			return false
 		}
 	}

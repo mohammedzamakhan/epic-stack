@@ -191,4 +191,179 @@ export const handlers: Array<HttpHandler> = [
 			headers: { 'content-type': 'image/jpg' },
 		})
 	}),
+	// GitHub Integration API endpoints
+	http.get('https://api.github.com/user/repos', async ({ request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		// Mock repository data for testing
+		const mockRepos = [
+			{
+				id: 1,
+				name: 'test-repo',
+				full_name: `${user.profile.login}/test-repo`,
+				description: 'A test repository for integration testing',
+				private: false,
+				html_url: `https://github.com/${user.profile.login}/test-repo`,
+				clone_url: `https://github.com/${user.profile.login}/test-repo.git`,
+				ssh_url: `git@github.com:${user.profile.login}/test-repo.git`,
+				default_branch: 'main',
+				owner: {
+					id: user.profile.id,
+					login: user.profile.login,
+					avatar_url: user.profile.avatar_url,
+					type: 'User'
+				},
+				permissions: {
+					admin: true,
+					maintain: true,
+					push: true,
+					triage: true,
+					pull: true
+				},
+				archived: false,
+				disabled: false,
+				fork: false
+			},
+			{
+				id: 2,
+				name: 'another-repo',
+				full_name: `${user.profile.login}/another-repo`,
+				description: 'Another test repository',
+				private: true,
+				html_url: `https://github.com/${user.profile.login}/another-repo`,
+				clone_url: `https://github.com/${user.profile.login}/another-repo.git`,
+				ssh_url: `git@github.com:${user.profile.login}/another-repo.git`,
+				default_branch: 'main',
+				owner: {
+					id: user.profile.id,
+					login: user.profile.login,
+					avatar_url: user.profile.avatar_url,
+					type: 'User'
+				},
+				permissions: {
+					admin: true,
+					maintain: true,
+					push: true,
+					triage: true,
+					pull: true
+				},
+				archived: false,
+				disabled: false,
+				fork: false
+			}
+		]
+
+		return json(mockRepos)
+	}),
+	http.get('https://api.github.com/repos/:owner/:repo', async ({ params, request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		// Mock single repository data
+		const mockRepo = {
+			id: 1,
+			name: params.repo,
+			full_name: `${params.owner}/${params.repo}`,
+			description: `Mock repository ${params.repo}`,
+			private: false,
+			html_url: `https://github.com/${params.owner}/${params.repo}`,
+			clone_url: `https://github.com/${params.owner}/${params.repo}.git`,
+			ssh_url: `git@github.com:${params.owner}/${params.repo}.git`,
+			default_branch: 'main',
+			owner: {
+				id: user.profile.id,
+				login: user.profile.login,
+				avatar_url: user.profile.avatar_url,
+				type: 'User'
+			},
+			permissions: {
+				admin: true,
+				maintain: true,
+				push: true,
+				triage: true,
+				pull: true
+			},
+			archived: false,
+			disabled: false,
+			fork: false
+		}
+
+		return json(mockRepo)
+	}),
+	http.post('https://api.github.com/repos/:owner/:repo/issues', async ({ params, request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		const issueData = await request.json() as any
+
+		// Mock created issue response
+		const mockIssue = {
+			id: faker.number.int({ min: 1, max: 1000 }),
+			number: faker.number.int({ min: 1, max: 100 }),
+			title: issueData.title,
+			body: issueData.body,
+			html_url: `https://github.com/${params.owner}/${params.repo}/issues/${faker.number.int({ min: 1, max: 100 })}`,
+			state: 'open',
+			user: user.profile,
+			repository_url: `https://api.github.com/repos/${params.owner}/${params.repo}`
+		}
+
+		return json(mockIssue)
+	}),
+	http.get('https://api.github.com/repos/:owner/:repo/labels', async ({ request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		// Mock labels
+		const mockLabels = [
+			{ id: 1, name: 'bug', color: 'd73a49', description: 'Something isn\'t working', default: true },
+			{ id: 2, name: 'enhancement', color: 'a2eeef', description: 'New feature or request', default: true },
+			{ id: 3, name: 'documentation', color: '0075ca', description: 'Improvements or additions to documentation', default: true }
+		]
+
+		return json(mockLabels)
+	}),
+	http.get('https://api.github.com/repos/:owner/:repo/milestones', async ({ params, request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		// Mock milestones
+		const mockMilestones = [
+			{
+				id: 1,
+				number: 1,
+				title: 'v1.0.0',
+				description: 'First major release',
+				state: 'open',
+				html_url: `https://github.com/${params.owner}/${params.repo}/milestone/1`,
+				due_on: null,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString()
+			}
+		]
+
+		return json(mockMilestones)
+	}),
+	http.get('https://api.github.com/repos/:owner/:repo/collaborators', async ({ request }) => {
+		if (passthroughGitHub) return passthrough()
+
+		const user = await getUser(request)
+		if (user instanceof Response) return user
+
+		// Mock collaborators (just return the current user)
+		const mockCollaborators = [user.profile]
+
+		return json(mockCollaborators)
+	}),
 ]

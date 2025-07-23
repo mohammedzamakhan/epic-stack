@@ -75,7 +75,6 @@ export class SlackProvider extends BaseIntegrationProvider {
             console.warn('SLACK_CLIENT_ID not found in environment variables, using demo client ID')
             return 'demo-slack-client-id'
         }
-        console.log('Using Slack client ID from environment:', clientId.substring(0, 10) + '...')
         return clientId
     }
 
@@ -85,7 +84,6 @@ export class SlackProvider extends BaseIntegrationProvider {
             console.warn('SLACK_CLIENT_SECRET not found in environment variables, using demo client secret')
             return 'demo-slack-client-secret'
         }
-        console.log('Using Slack client secret from environment (length:', clientSecret.length, 'chars)')
         return clientSecret
     }
 
@@ -116,15 +114,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 
         const authUrl = `https://slack.com/oauth/v2/authorize?${params.toString()}`
 
-        // Check if we're using demo credentials
-        const hasRealCredentials = this.clientId !== 'demo-slack-client-id'
-        if (!hasRealCredentials) {
-            console.log('Generated Slack OAuth URL with demo credentials:', authUrl)
-            console.log('To use real Slack integration, set SLACK_CLIENT_ID and SLACK_CLIENT_SECRET environment variables')
-        } else {
-            console.log('Generated Slack OAuth URL with real credentials')
-        }
-
         return authUrl
     }
 
@@ -144,8 +133,6 @@ export class SlackProvider extends BaseIntegrationProvider {
         const hasRealCredentials = this.clientId !== 'demo-slack-client-id' && this.clientSecret !== 'demo-slack-client-secret'
 
         if (!hasRealCredentials) {
-            console.log('Using demo Slack credentials, returning mock token for development')
-            // For demo purposes, return mock token data
             return {
                 accessToken: `mock-slack-token-${Date.now()}`,
                 scope: 'channels:read,chat:write,channels:history,groups:read',
@@ -182,12 +169,6 @@ export class SlackProvider extends BaseIntegrationProvider {
             if (!data.ok || !data.access_token) {
                 throw new Error(`Slack OAuth error: ${data.error || 'Unknown error'}`)
             }
-
-            console.log('Successfully exchanged OAuth code for Slack access token')
-            console.log('Granted scopes:', data.scope)
-            console.log('Team:', data.team?.name, '(', data.team?.id, ')')
-            console.log('Bot User ID:', data.bot_user_id)
-            console.log('App ID:', data.app_id)
 
             return {
                 accessToken: data.access_token,
@@ -228,7 +209,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 
             // Check if this is a mock token (for demo purposes)
             if (accessToken.startsWith('mock-slack-token-')) {
-                console.log('Using mock token, returning demo channels instead of making API call')
                 return [
                     {
                         id: 'C1234567890',
@@ -318,12 +298,8 @@ export class SlackProvider extends BaseIntegrationProvider {
 
             } while (cursor)
 
-            console.log(`Fetched ${allChannels.length} total channels from Slack`)
-
             const channels: Channel[] = allChannels
                 .filter(channel =>
-                    // Include all non-archived channels (bot can be invited later or post via chat:write)
-                    // Note: Bot doesn't need to be a member initially - it can be invited to channels
                     !channel.is_archived
                 )
                 .map(channel => ({
@@ -343,9 +319,6 @@ export class SlackProvider extends BaseIntegrationProvider {
                     }
                 } as Channel))
                 .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
-            console.log(JSON.stringify(allChannels, null, 2))
-            console.log(`Returning ${channels.length} accessible channels (${channels.filter(c => c.type === 'public').length} public, ${channels.filter(c => c.type === 'private').length} private)`)
-
             return channels
 
         } catch (error) {
@@ -449,15 +422,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 
             // Check if this is a mock token
             if (accessToken.startsWith('mock-slack-token-')) {
-                console.log('Mock Slack message post (demo mode):', {
-                    channel: connection.externalId,
-                    message: {
-                        title: message.title,
-                        author: message.author,
-                        changeType: message.changeType,
-                        noteUrl: message.noteUrl
-                    }
-                })
                 return
             }
 
@@ -482,9 +446,6 @@ export class SlackProvider extends BaseIntegrationProvider {
                 payload.text = this.formatSlackText(message, includeContent)
             }
 
-            console.log('Posting to Slack with payload:', JSON.stringify(payload, null, 2))
-
-            // Make the API call to Slack
             const response = await fetch('https://slack.com/api/chat.postMessage', {
                 method: 'POST',
                 headers: {
@@ -504,11 +465,8 @@ export class SlackProvider extends BaseIntegrationProvider {
                 throw new Error(`Slack API error: ${data.error || 'Unknown error'}`)
             }
 
-            console.log(`Successfully posted message to Slack channel ${connection.externalId}:`, data.ts)
-
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-            console.error('Error posting message to Slack:', errorMessage)
 
             // Provide specific error messages for common issues
             if (errorMessage.includes('channel_not_found')) {

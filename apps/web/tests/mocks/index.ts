@@ -7,7 +7,7 @@ import { handlers as tigrisHandlers } from './tigris.ts'
 
 export const server = setupServer(
 	...resendHandlers,
-	...githubHandlers,
+	// ...githubHandlers,
 	...tigrisHandlers,
 	...pwnedPasswordApiHandlers,
 )

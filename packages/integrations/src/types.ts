@@ -211,11 +211,33 @@ export interface TrelloConnectionConfig {
   defaultMembers?: string[] // Array of member IDs to assign cards to by default
 }
 
+export interface GitHubConfig {
+  user: {
+    id: number
+    login: string
+    name?: string
+    email?: string
+    avatarUrl?: string
+  }
+  scope: string
+}
+
+export interface GitHubConnectionConfig {
+  repositoryId: string
+  repositoryName: string
+  repositoryFullName: string
+  ownerName: string
+  includeNoteContent: boolean
+  defaultLabels?: string[] // Array of label names to apply to created issues
+  defaultAssignees?: string[] // Array of usernames to assign issues to by default
+  defaultMilestone?: number // Milestone number for created issues
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | AsanaConfig | TrelloConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | LinearConfig | GitLabConfig | ClickUpConfig | NotionConfig | AsanaConfig | TrelloConfig | GitHubConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | AsanaConnectionConfig | TrelloConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | LinearConnectionConfig | GitLabConnectionConfig | ClickUpConnectionConfig | NotionConnectionConfig | AsanaConnectionConfig | TrelloConnectionConfig | GitHubConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {

@@ -401,8 +401,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const url = new URL(request.url);
       const protocol = url.protocol === 'https:' ? 'https:' : 'https:';
       const redirectUri = `${protocol}//${url.host}/api/integrations/oauth/callback?provider=${providerName}`;
-      console.log('Redirect URI:', redirectUri);
-      console.log('Organization ID:', organization.id);
 
       const { authUrl } = await integrationManager.initiateOAuth(
         organization.id,
@@ -410,10 +408,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
         redirectUri
       );
 
-      console.log('Generated OAuth URL:', authUrl);
       return Response.redirect(authUrl);
     } catch (error) {
-      console.error('Error initiating OAuth:', error);
       return redirectWithToast(`/app/${organization.slug}/settings`, {
         title: 'Integration failed',
         description: `Failed to initiate OAuth: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -432,8 +428,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     try {
       await integrationManager.disconnectIntegration(integrationId);
       return Response.json({ success: true });
-    } catch (error) {
-      console.error('Error disconnecting integration:', error);
+    } catch {
       return Response.json({
         error: 'Failed to disconnect integration'
       }, { status: 500 });

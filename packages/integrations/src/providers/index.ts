@@ -11,6 +11,7 @@ import { ClickUpProvider } from './clickup/provider'
 import { NotionProvider } from './notion/provider'
 import { AsanaProvider } from './asana/provider'
 import { TrelloProvider } from './trello/provider'
+import { GitHubProvider } from './github/provider'
 
 /**
  * Initialize and register all available integration providers
@@ -39,6 +40,9 @@ export function initializeProviders(): void {
   
   // Register Trello provider
   providerRegistry.register(new TrelloProvider())
+  
+  // Register GitHub provider
+  providerRegistry.register(new GitHubProvider())
   
   // Future providers can be registered here
   // providerRegistry.register(new TeamsProvider())
@@ -104,6 +108,13 @@ export function getAvailableProviders() {
       displayName: 'Trello',
       description: 'Connect notes to Trello boards for task management and project organization',
       icon: 'link-2' // Using generic icon for now
+    },
+    {
+      name: 'github',
+      type: 'productivity',
+      displayName: 'GitHub',
+      description: 'Connect notes to GitHub repositories for issue tracking and project management',
+      icon: 'link-2' // Using generic icon for now
     }
   ]
 }
@@ -120,4 +131,5 @@ export { ClickUpProvider }
 export { NotionProvider }
 export { AsanaProvider }
 export { TrelloProvider }
+export { GitHubProvider }
 export { providerRegistry } from '../provider'

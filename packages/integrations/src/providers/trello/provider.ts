@@ -449,14 +449,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 
 			const connectionConfig = this.parseConnectionConfig(connection.config)
 
-			console.log('Connection config raw:', connection.config)
-			console.log('Connection config parsed:', connectionConfig)
-			console.log('Connection externalId:', connection.externalId)
-
 			// If listId is empty, try to use externalId as fallback
 			if (!connectionConfig.listId && connection.externalId) {
 				connectionConfig.listId = connection.externalId
-				console.log('Using externalId as listId:', connection.externalId)
 			}
 
 			if (!connectionConfig.listId) {
@@ -497,11 +492,6 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				cardData.idMembers = connectionConfig.defaultMembers.join(',')
 			}
 
-			console.log('Creating Trello card with data:', {
-				...cardData,
-				token: '[REDACTED]' // Don't log the actual token
-			})
-
 			const response = await fetch(`${this.apiBaseUrl}/cards`, {
 				method: 'POST',
 				headers: {
@@ -530,14 +520,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 						// If both fail, use the status text
 					}
 				}
-				console.error('Trello API error details:', errorDetails)
 				throw new Error(errorMessage)
 			}
-
-			const card: TrelloCard = await response.json()
-			console.log(`Successfully created Trello card: ${card.url}`)
 		} catch (error) {
-			console.error('Failed to post message to Trello:', error)
 			throw new Error(`Failed to post message to Trello: ${error instanceof Error ? error.message : 'Unknown error'}`)
 		}
 	}

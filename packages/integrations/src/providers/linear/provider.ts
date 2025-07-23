@@ -187,7 +187,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 		} catch (error) {
 			// Check if it's an authentication error
 			if (error instanceof Error && (error.message.includes('Authentication required') || error.message.includes('not authenticated'))) {
-				console.log('Linear authentication failed, token may be expired or invalid')
 				throw new Error(
 					'Linear access token is invalid or expired. ' +
 					'Please disconnect and reconnect the Linear integration.'
@@ -426,14 +425,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 			requestBody.append('redirect_uri', redirectUri)
 		}
 
-		console.log('Linear OAuth token exchange:', {
-			url: tokenUrl,
-			clientId,
-			hasClientSecret: !!clientSecret,
-			hasCode: !!code,
-			redirectUri
-		})
-
 		const response = await fetch(tokenUrl, {
 			method: 'POST',
 			headers: {
@@ -444,11 +435,8 @@ export class LinearProvider extends BaseIntegrationProvider {
 			body: requestBody,
 		})
 
-		console.log('Linear OAuth response status:', response.status, response.statusText)
-
 		if (!response.ok) {
 			const errorText = await response.text()
-			console.error('Linear OAuth error response:', errorText)
 			throw new Error(`Failed to exchange code for token: ${response.status} ${response.statusText}\n${errorText}`)
 		}
 
@@ -479,13 +467,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 		query: string,
 		variables?: Record<string, any>
 	): Promise<T> {
-		console.log('Linear GraphQL request:', {
-			url: `${this.apiBaseUrl}/graphql`,
-			query: query.trim(),
-			variables,
-			hasToken: !!accessToken
-		})
-
 		const response = await fetch(`${this.apiBaseUrl}/graphql`, {
 			method: 'POST',
 			headers: {
@@ -499,20 +480,14 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}),
 		})
 
-		console.log('Linear GraphQL response status:', response.status, response.statusText)
-
 		if (!response.ok) {
 			const errorText = await response.text()
-			console.error('Linear GraphQL error response:', errorText)
 			throw new Error(`Linear API request failed: ${response.status} ${response.statusText}\n${errorText}`)
 		}
 
 		const data: LinearGraphQLResponse<T> = await response.json()
 
-		console.log('Linear GraphQL response data:', JSON.stringify(data, null, 2))
-
 		if (data.errors && data.errors.length > 0) {
-			console.error('Linear GraphQL errors:', data.errors)
 			throw new Error(`Linear GraphQL error: ${data.errors[0]?.message || 'Unknown error'}`)
 		}
 

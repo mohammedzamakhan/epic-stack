@@ -228,12 +228,6 @@ function AddConnectionForm({ integrations, onConnect, isConnecting }: AddConnect
 
       if (channelsFetcher.data.channels) {
         setAvailableChannels(channelsFetcher.data.channels)
-        
-        // Show a toast if channels are demo/fallback channels
-        const hasDemo = channelsFetcher.data.channels.some((ch: any) => ch.metadata?.demo)
-        if (hasDemo) {
-          console.log('Showing demo channels - in production, these would be real Slack channels')
-        }
       } else if (channelsFetcher.data.error) {
         console.error('Error fetching channels:', channelsFetcher.data.error)
         // Fall back to empty array

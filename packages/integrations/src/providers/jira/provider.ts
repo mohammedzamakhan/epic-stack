@@ -537,9 +537,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			return await apiCall(accessToken)
 		} catch (error) {
 			// Check if it's an authorization error
-			if (error instanceof Error && error.message.includes('Unauthorized')) {
-				console.log('Token expired, attempting to refresh...')
-				
+			if (error instanceof Error && error.message.includes('Unauthorized')) {				
 				try {
 					// Import integration manager to refresh tokens
 					const { integrationManager } = await import('../../integration-manager')
@@ -652,7 +650,6 @@ export class JiraProvider extends BaseIntegrationProvider {
 
 		const data = await response.json()
 
-		console.log('projectKey, data:::', projectKey, JSON.stringify(data, null, 2));
 		const project = data.projects?.[0]
 		if (!project || !project.issuetypes) {
 			throw new Error('No issue types found for project')
@@ -728,24 +725,17 @@ export class JiraProvider extends BaseIntegrationProvider {
 			
 			// First try to get from siteUrl in config
 			if (config?.siteUrl) {
-				console.log('Using siteUrl from config:', config.siteUrl)
 				instanceUrl = config.siteUrl
 			} else if (config?.instanceUrl) {
 				// Fall back to instanceUrl if available
-				console.log('Using instanceUrl from config:', config.instanceUrl)
 				instanceUrl = config.instanceUrl
 			} else {
 				// Default to Atlassian API as last resort
-				console.warn('No instanceUrl or siteUrl found, falling back to api.atlassian.com')
 				instanceUrl = 'https://api.atlassian.com'
 			}
 
-            console.log('query:::', query)
-
             const url = new URL(`${instanceUrl}/rest/api/3/user/search`);
             url.searchParams.append('query', query);
-
-            console.log('url:::', url.toString())
 			
 			// Make API request to search users
 			const response = await fetch(
@@ -771,8 +761,6 @@ export class JiraProvider extends BaseIntegrationProvider {
 	 */
 	private async getCloudId(accessToken: string): Promise<string> {
 		const resources = await this.getAccessibleResources(accessToken)
-        console.log('RESOURCES::::', resources)
-		// For now, just get the first Jira resource since we don't have baseUrl context here
 		const jiraResource = resources[0];
 		if (!jiraResource) {
 			throw new Error('No accessible Jira resource found')
@@ -811,10 +799,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 			} else {
 				// Fallback to the first available issue type
 				issueType = availableIssueTypes[0]?.name || 'Task'
-				console.log(`Preferred issue type '${preferredIssueType}' not found, using '${issueType}' instead`)
 			}
 		} catch (error) {
-			console.error('Failed to fetch issue types, using fallback:', error)
 			issueType = 'Task' // Final fallback
 		}
 
