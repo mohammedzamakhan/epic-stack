@@ -29,6 +29,7 @@ node_modules
 .turbo
 
 dist
+coverage
 
 data.db
 
