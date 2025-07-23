@@ -18,9 +18,9 @@ export class OAuthStateManager {
     private static readonly STATE_EXPIRY_MINUTES = 30
 
     private static getStateSecret(): string {
-        const secret = process.env.OAUTH_STATE_SECRET
+        const secret = process.env.INTEGRATIONS_OAUTH_STATE_SECRET
         if (!secret) {
-            throw new Error('OAUTH_STATE_SECRET environment variable is required for OAuth security')
+            throw new Error('INTEGRATIONS_OAUTH_STATE_SECRET environment variable is required for OAuth security')
         }
         return secret
     }

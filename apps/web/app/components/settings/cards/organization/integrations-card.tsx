@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useFetcher, Form } from 'react-router'
 import { Badge } from '#app/components/ui/badge'
 import { Button } from '#app/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/components/ui/card'
 import { Icon } from '#app/components/ui/icon'
 import { StatusButton } from '#app/components/ui/status-button'
+import { JiraIntegrationSettings } from './jira-integration-settings'
 
 export const connectIntegrationActionIntent = 'connect-integration'
 export const disconnectIntegrationActionIntent = 'disconnect-integration'
@@ -72,7 +74,7 @@ export function IntegrationsCard({ integrations, availableProviders }: Integrati
             <h4 className="text-sm font-medium text-muted-foreground">
               {integrations.length > 0 ? 'Available Services' : 'Connect a Service'}
             </h4>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="gap-3 flex flex-col">
               {availableToConnect.map((provider) => (
                 <AvailableIntegrationItem
                   key={provider.name}
@@ -107,53 +109,76 @@ function ConnectedIntegrationItem({ integration, isDisconnecting }: ConnectedInt
   const fetcher = useFetcher()
   const providerInfo = getProviderInfo(integration.providerName)
   const connectionCount = integration._count?.connections || 0
+  const [showSettings, setShowSettings] = useState(false)
+  
+  // Check if this is a Jira integration
+  const isJira = integration.providerName === 'jira'
   
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon 
-            name="link-2"
-            className="h-8 w-8 text-muted-foreground" 
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium text-foreground truncate">
-              {providerInfo.displayName}
-            </p>
-            <Badge 
-              variant={integration.isActive ? "default" : "secondary"}
-              className="text-xs"
-            >
-              {integration.isActive ? 'Active' : 'Inactive'}
-            </Badge>
+    <div className="border rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex-shrink-0">
+            <Icon 
+              name="link-2"
+              className="h-8 w-8 text-muted-foreground" 
+            />
           </div>
-          <div className="flex items-center space-x-4 mt-1">
-            <p className="text-xs text-muted-foreground">
-              {connectionCount} {connectionCount === 1 ? 'connection' : 'connections'}
-            </p>
-            {integration.lastSyncAt && (
-              <p className="text-xs text-muted-foreground">
-                Last sync: {new Date(integration.lastSyncAt).toLocaleDateString()}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-medium text-foreground truncate">
+                {providerInfo.displayName}
               </p>
-            )}
+              <Badge 
+                variant={integration.isActive ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {integration.isActive ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-4 mt-1">
+              <p className="text-xs text-muted-foreground">
+                {connectionCount} {connectionCount === 1 ? 'connection' : 'connections'}
+              </p>
+              {integration.lastSyncAt && (
+                <p className="text-xs text-muted-foreground">
+                  Last sync: {new Date(integration.lastSyncAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          {isJira && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              {showSettings ? 'Hide Settings' : 'Settings'}
+            </Button>
+          )}
+          <fetcher.Form method="POST">
+            <input type="hidden" name="intent" value={disconnectIntegrationActionIntent} />
+            <input type="hidden" name="integrationId" value={integration.id} />
+            <StatusButton
+              type="submit"
+              variant="outline"
+              size="sm"
+              status={isDisconnecting ? 'pending' : 'idle'}
+            >
+              Disconnect
+            </StatusButton>
+          </fetcher.Form>
         </div>
       </div>
-      <fetcher.Form method="POST">
-        <input type="hidden" name="intent" value={disconnectIntegrationActionIntent} />
-        <input type="hidden" name="integrationId" value={integration.id} />
-        <StatusButton
-          type="submit"
-          variant="outline"
-          size="sm"
-          status={isDisconnecting ? 'pending' : 'idle'}
-          className="text-destructive hover:text-destructive"
-        >
-          Disconnect
-        </StatusButton>
-      </fetcher.Form>
+      
+      {/* Show Jira settings if this is a Jira integration and settings are expanded */}
+      {isJira && showSettings && (
+        <div className="border-t px-4 py-4 bg-muted/10">
+          <JiraIntegrationSettings integration={integration} />
+        </div>
+      )}
     </div>
   )
 }

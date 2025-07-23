@@ -26,7 +26,7 @@ const schema = z.object({
 	INTEGRATION_ENCRYPTION_KEY: z.string().optional(),
 
 	// OAuth state secret (required for OAuth flow security)
-	OAUTH_STATE_SECRET: z.string().optional(),
+	INTEGRATIONS_OAUTH_STATE_SECRET: z.string().optional(),
 
 	ALLOW_INDEXING: z.enum(['true', 'false']).optional(),
 

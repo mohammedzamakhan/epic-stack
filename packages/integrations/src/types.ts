@@ -42,6 +42,24 @@ export interface TeamsConfig {
   scope: string
 }
 
+export interface JiraConfig {
+  instanceUrl: string
+  cloudId: string
+  scope: string
+  user: {
+    accountId: string
+    displayName: string
+    emailAddress?: string
+  }
+  // Bot user configuration
+  useBotUser?: boolean
+  botUser?: {
+    accountId: string
+    displayName: string
+    emailAddress?: string
+  }
+}
+
 // Connection-specific configuration
 export interface SlackConnectionConfig {
   channelName: string
@@ -50,11 +68,21 @@ export interface SlackConnectionConfig {
   includeContent: boolean
 }
 
+export interface JiraConnectionConfig {
+  projectKey: string
+  projectName: string
+  defaultIssueType: string
+  includeNoteContent: boolean
+  // Bot user settings for this connection
+  useBotUser?: boolean
+  reporterAccountId?: string // Override the issue reporter
+}
+
 // Generic provider configuration
-export type ProviderConfig = SlackConfig | TeamsConfig | Record<string, any>
+export type ProviderConfig = SlackConfig | TeamsConfig | JiraConfig | Record<string, any>
 
 // Generic connection configuration
-export type ConnectionConfig = SlackConnectionConfig | Record<string, any>
+export type ConnectionConfig = SlackConnectionConfig | JiraConnectionConfig | Record<string, any>
 
 // OAuth callback parameters
 export interface OAuthCallbackParams {

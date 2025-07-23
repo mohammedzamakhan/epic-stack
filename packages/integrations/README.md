@@ -32,7 +32,7 @@ const config = createWebAppIntegrationsConfig({
     key: process.env.INTEGRATION_ENCRYPTION_KEY
   },
   oauth: {
-    stateSecret: process.env.OAUTH_STATE_SECRET
+    stateSecret: process.env.INTEGRATIONS_OAUTH_STATE_SECRET
   },
   providers: {
     slack: {

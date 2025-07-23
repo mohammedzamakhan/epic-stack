@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import { type OAuthState, integrationManager } from '@repo/integrations'
+import { type OAuthState, integrationManager, OAuthStateManager } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server'
 import { redirectWithToast } from '#app/utils/toast.server'
@@ -36,10 +36,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   try {
-    // Parse state to get organization ID
+    // Parse and validate state using OAuthStateManager
     let stateData
     try {
-      stateData = JSON.parse(Buffer.from(state, 'base64').toString()) as OAuthState
+      stateData = OAuthStateManager.validateState(state)
     } catch (error) {
       throw new Error(`Invalid OAuth state: ${error}`)
     }

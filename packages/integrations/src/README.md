@@ -150,7 +150,7 @@ Required environment variables:
 INTEGRATION_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 # OAuth state signing secret
-OAUTH_STATE_SECRET=your-oauth-state-secret-key
+INTEGRATIONS_OAUTH_STATE_SECRET=your-oauth-state-secret-key
 
 # Provider-specific credentials
 SLACK_CLIENT_ID=your_slack_client_id

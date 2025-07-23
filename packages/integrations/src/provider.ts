@@ -10,6 +10,7 @@ import  {
   type OAuthCallbackParams,
   type ProviderType,
 } from './types'
+import { OAuthStateManager } from './oauth-manager'
 
 /**
  * Core interface that all integration providers must implement
@@ -137,7 +138,6 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
     additionalData?: Record<string, any>
   ): string {
     // Import here to avoid circular dependencies
-    const { OAuthStateManager } = require('./oauth-manager')
     return OAuthStateManager.generateState(organizationId, this.name, undefined, additionalData)
   }
   
@@ -154,7 +154,6 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
     [key: string]: any
   } {
     // Import here to avoid circular dependencies
-    const { OAuthStateManager } = require('./oauth-manager')
     return OAuthStateManager.validateState(state)
   }
   

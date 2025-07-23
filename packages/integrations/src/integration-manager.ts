@@ -27,6 +27,7 @@ import  {
   type ProviderType,
   type IntegrationLogEntry,
 } from './types'
+import { OAuthStateManager } from './oauth-manager'
 
 /**
  * Extended Integration type with relations
@@ -177,9 +178,10 @@ export class IntegrationManager {
     const provider = this.getProvider(providerName)
     
     // Parse simplified state
+
     let stateData
     try {
-      stateData = JSON.parse(Buffer.from(params.state, 'base64').toString()) as { providerName: string, organizationId: string }
+      stateData = OAuthStateManager.validateState(params.state)
     } catch (error) {
       throw new Error('Invalid OAuth state')
     }
@@ -222,10 +224,12 @@ export class IntegrationManager {
     
     const provider = this.getProvider(providerName)
     
-    // For demo purposes, store tokens without encryption
-    // In production, you would encrypt these tokens
-    const accessToken = tokenData.accessToken
-    const refreshToken = tokenData.refreshToken || null
+    // Encrypt tokens before storing in database
+    const { encryptToken } = await import('./encryption')
+    const encryptedAccessToken = await encryptToken(tokenData.accessToken)
+    const encryptedRefreshToken = tokenData.refreshToken 
+      ? await encryptToken(tokenData.refreshToken)
+      : null
     
     // Create integration record
     const integration = await prisma.integration.create({
@@ -233,8 +237,8 @@ export class IntegrationManager {
         organizationId,
         providerName,
         providerType: provider.type,
-        accessToken,
-        refreshToken,
+        accessToken: encryptedAccessToken,
+        refreshToken: encryptedRefreshToken,
         tokenExpiresAt: tokenData.expiresAt,
         config: JSON.stringify({
           ...config,
