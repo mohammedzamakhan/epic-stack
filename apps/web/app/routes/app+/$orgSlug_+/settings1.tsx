@@ -74,7 +74,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   const isClosedBeta = process.env.LAUNCH_STATUS === 'CLOSED_BETA';
 
-  const [pendingInvitations, members, integrations] = await Promise.all([
+  const [pendingInvitations, members, plansAndPrices, integrations] = await Promise.all([
     getOrganizationInvitations(organization.id),
     prisma.userOrganization.findMany({
       where: {
@@ -100,7 +100,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         createdAt: 'asc',
       },
     }),
-    // isClosedBeta ? Promise.resolve(null) : getPlansAndPrices(),
+    isClosedBeta ? Promise.resolve(null) : getPlansAndPrices(),
     integrationManager.getOrganizationIntegrations(organization.id),
   ]);
 
@@ -112,7 +112,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     pendingInvitations,
     members,
     currentUserId: userId,
-    // plansAndPrices,
+    plansAndPrices,
     isClosedBeta,
     integrations,
     availableProviders,
@@ -483,7 +483,7 @@ export default function OrganizationSettings() {
           />
         </AnnotatedSection>
 
-        {/* <AnnotatedSection
+        <AnnotatedSection
         title="Billing & Subscription"
         description="Manage your organization's subscription and billing settings."
       >
@@ -492,7 +492,7 @@ export default function OrganizationSettings() {
           plansAndPrices={plansAndPrices}
           isClosedBeta={isClosedBeta}
         />
-      </AnnotatedSection> */}
+      </AnnotatedSection>
       </AnnotatedLayout>
     </div>
   );

@@ -17,6 +17,11 @@ export function NavMain({
 		url: string
 		icon?: unknown
 		isActive: boolean
+		items?: {
+			title: string
+			url: string
+			isActive: boolean
+		}[]
 	}[]
 }) {
 	return (
@@ -50,6 +55,19 @@ export function NavMain({
 									<span>{item.title}</span>
 								</Link>
 							</SidebarMenuButton>
+							{item.items && item.isActive && (
+								<SidebarMenu className="ml-4 mt-1">
+									{item.items.map((subItem) => (
+										<SidebarMenuItem key={subItem.title}>
+											<SidebarMenuButton asChild tooltip={subItem.title} isActive={subItem.isActive} size="sm">
+												<Link to={subItem.url}>
+													<span>{subItem.title}</span>
+												</Link>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									))}
+								</SidebarMenu>
+							)}
 						</SidebarMenuItem>
 					))}
 				</SidebarMenu>
