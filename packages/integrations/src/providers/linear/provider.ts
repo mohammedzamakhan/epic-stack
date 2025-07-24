@@ -355,7 +355,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	/**
 	 * Get emoji for change type
 	 */
-	private getChangeEmoji(changeType: string): string {
+	protected getChangeEmoji(changeType: string): string {
 		switch (changeType) {
 			case 'created':
 				return '✨'

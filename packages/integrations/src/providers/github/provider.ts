@@ -519,7 +519,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	/**
 	 * Truncate text to specified length
 	 */
-	private truncateText(text: string, maxLength: number): string {
+	protected truncateText(text: string, maxLength: number): string {
 		if (text.length <= maxLength) {
 			return text
 		}

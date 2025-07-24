@@ -272,6 +272,27 @@ function getProviderInfo(providerName: string) {
       displayName: 'Notion',
       description: 'Connect notes to Notion databases for knowledge management and collaboration',
       icon: 'link-2' // Using generic icon for now
+    },
+    github: {
+      name: 'github',
+      type: 'productivity',
+      displayName: 'GitHub',
+      description: 'Connect notes to GitHub repositories for code review and collaboration',
+      icon: 'link-2' // Using generic icon for now
+    },
+    trello: {
+      name: 'trello',
+      type: 'productivity',
+      displayName: 'Trello',
+      description: 'Connect notes to Trello boards and cards for task management',
+      icon: 'link-2' // Using generic icon for now
+    },
+    asana: {
+      name: 'asana',
+      type: 'productivity',
+      displayName: 'Asana',
+      description: 'Connect notes to Asana projects and tasks for task management',
+      icon: 'link-2' // Using generic icon for now
     }
   }
 

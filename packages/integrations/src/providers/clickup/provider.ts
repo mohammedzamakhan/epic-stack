@@ -699,7 +699,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Format task title from message data
 	 */
-	private formatTaskTitle(message: MessageData): string {
+	protected formatTaskTitle(message: MessageData): string {
 		const emoji = this.getChangeEmoji(message.changeType)
 		const truncatedTitle = this.truncateText(message.title, 100)
 		return `${emoji} ${truncatedTitle}`
@@ -734,7 +734,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get emoji for change type
 	 */
-	private getChangeEmoji(changeType: string): string {
+	protected getChangeEmoji(changeType: string): string {
 		switch (changeType) {
 			case 'created':
 				return '✨'
@@ -750,7 +750,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Truncate text to specified length
 	 */
-	private truncateText(text: string, maxLength: number): string {
+	protected truncateText(text: string, maxLength: number): string {
 		if (text.length <= maxLength) {
 			return text
 		}

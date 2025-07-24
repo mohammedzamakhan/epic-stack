@@ -10,15 +10,15 @@
  * - Message posting and notification handling
  */
 
-import  { 
-  type Integration, 
-  type NoteIntegrationConnection, 
+import {
+  type Integration,
+  type NoteIntegrationConnection,
   type OrganizationNote,
-  type Organization 
+  type Organization
 } from '@prisma/client'
 import { prisma } from '@repo/prisma'
 import { type IntegrationProvider, providerRegistry } from './provider'
-import  {
+import {
   type TokenData,
   type Channel,
   type MessageData,
@@ -86,7 +86,7 @@ export interface IntegrationStats {
  */
 export class IntegrationManager {
   private static instance: IntegrationManager
-  
+
   /**
    * Get singleton instance of IntegrationManager
    */
@@ -154,14 +154,14 @@ export class IntegrationManager {
     state: string
   }> {
     const provider = this.getProvider(providerName)
-    
+
     // Get authorization URL from provider (provider will generate its own state)
     const authUrl = await provider.getAuthUrl(organizationId, redirectUri, additionalParams)
-    
+
     // Extract state from the URL for consistency
     const url = new URL(authUrl)
     const state = url.searchParams.get('state') || ''
-    
+
     return { authUrl, state }
   }
 
@@ -176,10 +176,10 @@ export class IntegrationManager {
     params: OAuthCallbackParams
   ): Promise<Integration> {
     const provider = this.getProvider(providerName)
-    
+
     // Parse simplified state
     let stateData
-    
+
     // Check if this is an OAuth 1.0a flow (Trello) with a generated state
     if (params.state.startsWith('trello-oauth1-')) {
       // For OAuth 1.0a flows, we don't validate the state in the traditional way
@@ -196,15 +196,15 @@ export class IntegrationManager {
       } catch (error) {
         throw new Error('Invalid OAuth state')
       }
-      
+
       if (stateData.providerName !== providerName) {
         throw new Error('Provider name mismatch in OAuth state')
       }
     }
-    
+
     // Handle OAuth callback with provider
     const tokenData = await provider.handleCallback(params)
-    
+
     // Create integration in database
     const integration = await this.createIntegration({
       organizationId: stateData.organizationId,
@@ -212,7 +212,7 @@ export class IntegrationManager {
       tokenData,
       config: {}
     })
-    
+
     // Log successful OAuth completion
     await this.logIntegrationActivity(
       integration.id,
@@ -220,7 +220,7 @@ export class IntegrationManager {
       'success',
       { provider: providerName }
     )
-    
+
     return integration
   }
 
@@ -233,16 +233,16 @@ export class IntegrationManager {
    */
   async createIntegration(params: CreateIntegrationParams): Promise<Integration> {
     const { organizationId, providerName, tokenData, config = {} } = params
-    
+
     const provider = this.getProvider(providerName)
-    
+
     // Encrypt tokens before storing in database
     const { encryptToken } = await import('./encryption')
     const encryptedAccessToken = await encryptToken(tokenData.accessToken)
-    const encryptedRefreshToken = tokenData.refreshToken 
+    const encryptedRefreshToken = tokenData.refreshToken
       ? await encryptToken(tokenData.refreshToken)
       : null
-    
+
     // Create integration record
     const integration = await prisma.integration.create({
       data: {
@@ -261,7 +261,7 @@ export class IntegrationManager {
         lastSyncAt: new Date(),
       },
     })
-    
+
     return integration
   }
 
@@ -306,6 +306,11 @@ export class IntegrationManager {
           include: {
             note: true
           }
+        },
+        _count: {
+          select: {
+            connections: true
+          }
         }
       },
       orderBy: {
@@ -331,14 +336,14 @@ export class IntegrationManager {
         updatedAt: new Date()
       }
     })
-    
+
     await this.logIntegrationActivity(
       integrationId,
       'config_update',
       'success',
       { config }
     )
-    
+
     return integration
   }
 
@@ -352,28 +357,28 @@ export class IntegrationManager {
     if (!integration) {
       throw new Error('Integration not found')
     }
-    
+
     // Delete all connections first
     await prisma.noteIntegrationConnection.deleteMany({
       where: { integrationId }
     })
-    
+
     // Delete integration logs
     await prisma.integrationLog.deleteMany({
       where: { integrationId }
     })
-    
+
     // Delete the integration
     await prisma.integration.delete({
       where: { id: integrationId }
     })
-    
+
     // Log disconnection
     await this.logIntegrationActivity(
       integrationId,
       'disconnect',
       'success',
-      { 
+      {
         provider: integration.providerName,
         connectionCount: integration.connections?.length || 0
       }
@@ -389,36 +394,36 @@ export class IntegrationManager {
    */
   async connectNoteToChannel(params: CreateConnectionParams): Promise<NoteIntegrationConnection> {
     const { noteId, integrationId, externalId, config = {} } = params
-    
+
     // Validate integration exists and is active
     const integration = await this.getIntegration(integrationId)
     if (!integration || !integration.isActive) {
       throw new Error('Integration not found or inactive')
     }
-    
+
     // Validate note exists and belongs to same organization
     const note = await prisma.organizationNote.findUnique({
       where: { id: noteId },
       include: { organization: true }
     })
-    
+
     if (!note) {
       throw new Error('Note not found')
     }
-    
+
     if (note.organizationId !== integration.organizationId) {
       throw new Error('Note and integration must belong to the same organization')
     }
-    
+
     // Validate channel exists and is accessible
     const provider = this.getProvider(integration.providerName)
     const channels = await provider.getAvailableChannels(integration)
     const channel = channels.find(c => c.id === externalId)
-    
+
     if (!channel) {
       throw new Error('Channel not found or not accessible')
     }
-    
+
     // Create connection
     const connection = await prisma.noteIntegrationConnection.create({
       data: {
@@ -434,19 +439,19 @@ export class IntegrationManager {
         isActive: true
       }
     })
-    
+
     // Log connection creation
     await this.logIntegrationActivity(
       integrationId,
       'connection_create',
       'success',
-      { 
+      {
         noteId,
         channelId: externalId,
         channelName: channel.name
       }
     )
-    
+
     return connection
   }
 
@@ -459,22 +464,22 @@ export class IntegrationManager {
       where: { id: connectionId },
       include: { integration: true, note: true }
     })
-    
+
     if (!connection) {
       throw new Error('Connection not found')
     }
-    
+
     // Delete the connection
     await prisma.noteIntegrationConnection.delete({
       where: { id: connectionId }
     })
-    
+
     // Log disconnection
     await this.logIntegrationActivity(
       connection.integrationId,
       'connection_delete',
       'success',
-      { 
+      {
         noteId: connection.noteId,
         channelId: connection.externalId
       }
@@ -488,7 +493,7 @@ export class IntegrationManager {
    */
   async getNoteConnections(noteId: string): Promise<ConnectionWithRelations[]> {
     return prisma.noteIntegrationConnection.findMany({
-      where: { 
+      where: {
         noteId,
         isActive: true
       },
@@ -509,7 +514,7 @@ export class IntegrationManager {
    */
   async getIntegrationConnections(integrationId: string): Promise<ConnectionWithRelations[]> {
     return prisma.noteIntegrationConnection.findMany({
-      where: { 
+      where: {
         integrationId,
         isActive: true
       },
@@ -535,12 +540,12 @@ export class IntegrationManager {
     if (!integration || !integration.isActive) {
       throw new Error('Integration not found or inactive')
     }
-    
+
     const provider = this.getProvider(integration.providerName)
-    
+
     try {
       const channels = await provider.getAvailableChannels(integration)
-      
+
       // Log successful channel fetch
       await this.logIntegrationActivity(
         integrationId,
@@ -548,7 +553,7 @@ export class IntegrationManager {
         'success',
         { channelCount: channels.length }
       )
-      
+
       return channels
     } catch (error) {
       // Log error
@@ -578,24 +583,24 @@ export class IntegrationManager {
   ): Promise<void> {
     // Get note connections
     const connections = await this.getNoteConnections(noteId)
-    
+
     if (connections.length === 0) {
       return // No connections to notify
     }
-    
+
     // Get note and user details
     const note = await prisma.organizationNote.findUnique({
       where: { id: noteId }
     })
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId }
     })
-    
+
     if (!note || !user) {
       throw new Error('Note or user not found')
     }
-    
+
     // Format message
     const message: MessageData = {
       title: note.title,
@@ -604,16 +609,16 @@ export class IntegrationManager {
       noteUrl: this.generateNoteUrl(note),
       changeType
     }
-    
+
     // Post to all connected channels
     const results = await Promise.allSettled(
       connections.map(connection => this.postMessageToConnection(connection, message))
     )
-    
+
     // Log overall results
     const successCount = results.filter(r => r.status === 'fulfilled').length
     const errorCount = results.filter(r => r.status === 'rejected').length
-    
+
     if (errorCount > 0) {
       console.warn(`Note update notification: ${successCount} succeeded, ${errorCount} failed`)
     }
@@ -631,13 +636,13 @@ export class IntegrationManager {
     try {
       const provider = this.getProvider(connection.integration.providerName)
       await provider.postMessage(connection, message)
-      
+
       // Update last posted timestamp
       await prisma.noteIntegrationConnection.update({
         where: { id: connection.id },
         data: { lastPostedAt: new Date() }
       })
-      
+
       // Log successful post
       await this.logIntegrationActivity(
         connection.integrationId,
@@ -662,7 +667,7 @@ export class IntegrationManager {
         },
         error instanceof Error ? error.message : 'Unknown error'
       )
-      
+
       throw error // Re-throw for Promise.allSettled handling
     }
   }
@@ -679,28 +684,28 @@ export class IntegrationManager {
     if (!integration) {
       throw new Error('Integration not found')
     }
-    
+
     if (!integration.refreshToken) {
       throw new Error('No refresh token available')
     }
-    
+
     const provider = this.getProvider(integration.providerName)
-    
+
     // Decrypt current refresh token
     const { decryptToken } = await import('./encryption')
     const refreshToken = await decryptToken(integration.refreshToken)
-    
+
     try {
       // Get new tokens from provider
       const tokenData = await provider.refreshToken(refreshToken)
-      
+
       // Encrypt new tokens
       const { encryptToken } = await import('./encryption')
       const encryptedAccessToken = await encryptToken(tokenData.accessToken)
-      const encryptedRefreshToken = tokenData.refreshToken 
-        ? await encryptToken(tokenData.refreshToken) 
+      const encryptedRefreshToken = tokenData.refreshToken
+        ? await encryptToken(tokenData.refreshToken)
         : integration.refreshToken // Keep existing if not provided
-      
+
       // Update integration
       const updatedIntegration = await prisma.integration.update({
         where: { id: integrationId },
@@ -711,14 +716,14 @@ export class IntegrationManager {
           lastSyncAt: new Date()
         }
       })
-      
+
       // Log successful refresh
       await this.logIntegrationActivity(
         integrationId,
         'token_refresh',
         'success'
       )
-      
+
       return updatedIntegration
     } catch (error) {
       // Log error
@@ -729,7 +734,7 @@ export class IntegrationManager {
         undefined,
         error instanceof Error ? error.message : 'Unknown error'
       )
-      
+
       throw error
     }
   }
@@ -750,16 +755,16 @@ export class IntegrationManager {
     const errors: string[] = []
     let valid = 0
     let invalid = 0
-    
+
     if (connections.length === 0) {
       return { valid: 0, invalid: 0, errors: ['No connections found'] }
     }
-    
+
     const provider = this.getProvider(connections[0]?.integration?.providerName as string)
     if (!provider) {
       return { valid: 0, invalid: connections.length, errors: ['Provider not found'] }
     }
-    
+
     // Validate each connection
     for (const connection of connections) {
       try {
@@ -776,7 +781,7 @@ export class IntegrationManager {
         errors.push(`Connection ${connection.id}: ${errorMsg}`)
       }
     }
-    
+
     // Log validation results
     await this.logIntegrationActivity(
       integrationId,
@@ -784,7 +789,7 @@ export class IntegrationManager {
       errors.length > 0 ? 'error' : 'success',
       { valid, invalid, totalConnections: connections.length }
     )
-    
+
     return { valid, invalid, errors }
   }
 
@@ -803,7 +808,7 @@ export class IntegrationManager {
     if (!integration) {
       throw new Error('Integration not found')
     }
-    
+
     // Get recent error logs
     const recentErrors = await prisma.integrationLog.findMany({
       where: {
@@ -816,10 +821,10 @@ export class IntegrationManager {
       orderBy: { createdAt: 'desc' },
       take: 10
     })
-    
+
     // Determine status
     let status: IntegrationStatus = 'active'
-    
+
     if (!integration.isActive) {
       status = 'inactive'
     } else if (recentErrors.length > 5) {
@@ -827,7 +832,7 @@ export class IntegrationManager {
     } else if (integration.tokenExpiresAt && integration.tokenExpiresAt < new Date()) {
       status = 'expired'
     }
-    
+
     return {
       status,
       lastSync: integration.lastSyncAt || undefined,
@@ -851,7 +856,7 @@ export class IntegrationManager {
   async getIntegrationStats(integrationId: string): Promise<IntegrationStats> {
     const connections = await this.getIntegrationConnections(integrationId)
     const activeConnections = connections.filter(c => c.isActive).length
-    
+
     // Get recent activity (last 7 days)
     const recentActivity = await prisma.integrationLog.count({
       where: {
@@ -861,7 +866,7 @@ export class IntegrationManager {
         }
       }
     })
-    
+
     // Get error count (last 24 hours)
     const errorCount = await prisma.integrationLog.count({
       where: {
@@ -872,14 +877,14 @@ export class IntegrationManager {
         }
       }
     })
-    
+
     // Get last activity
     const lastActivity = await prisma.integrationLog.findFirst({
       where: { integrationId },
       orderBy: { createdAt: 'desc' },
       select: { createdAt: true }
     })
-    
+
     return {
       totalConnections: connections.length,
       activeConnections,
@@ -935,7 +940,7 @@ export class IntegrationManager {
     if (content.length <= maxLength) {
       return content
     }
-    
+
     return content.substring(0, maxLength - 3) + '...'
   }
 
