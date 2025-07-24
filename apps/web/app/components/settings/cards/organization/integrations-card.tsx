@@ -48,7 +48,7 @@ export function IntegrationsCard({ integrations, availableProviders }: Integrati
           Connect your organization to external services to sync notes and collaborate across platforms.
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Connected Integrations */}
         {integrations.length > 0 && (
@@ -60,7 +60,7 @@ export function IntegrationsCard({ integrations, availableProviders }: Integrati
                   key={integration.id}
                   integration={integration}
                   isDisconnecting={
-                    fetcher.state !== 'idle' && 
+                    fetcher.state !== 'idle' &&
                     fetcher.formData?.get('integrationId') === integration.id
                   }
                 />
@@ -111,18 +111,18 @@ function ConnectedIntegrationItem({ integration, isDisconnecting }: ConnectedInt
   const providerInfo = getProviderInfo(integration.providerName)
   const connectionCount = integration._count?.connections || 0
   const [showSettings, setShowSettings] = useState(false)
-  
+
   // Check if this is a Jira integration
   const isJira = integration.providerName === 'jira'
-  
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
-            <Icon 
+            <Icon
               name="link-2"
-              className="h-8 w-8 text-muted-foreground" 
+              className="h-8 w-8 text-muted-foreground"
             />
           </div>
           <div className="flex-1 min-w-0">
@@ -130,7 +130,7 @@ function ConnectedIntegrationItem({ integration, isDisconnecting }: ConnectedInt
               <p className="text-sm font-medium text-foreground truncate">
                 {providerInfo.displayName}
               </p>
-              <Badge 
+              <Badge
                 variant={integration.isActive ? "default" : "secondary"}
                 className="text-xs"
               >
@@ -173,7 +173,7 @@ function ConnectedIntegrationItem({ integration, isDisconnecting }: ConnectedInt
           </fetcher.Form>
         </div>
       </div>
-      
+
       {/* Show Jira settings if this is a Jira integration and settings are expanded */}
       {isJira && showSettings && (
         <div className="border-t px-4 py-4 bg-muted/10">
@@ -199,9 +199,9 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
     <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
-          <Icon 
+          <Icon
             name="link-2"
-            className="h-8 w-8 text-muted-foreground" 
+            className="h-8 w-8 text-muted-foreground"
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -230,73 +230,10 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
 
 // Helper function to get provider display information
 function getProviderInfo(providerName: string) {
-  const providers = {
-    slack: {
-      name: 'slack',
-      type: 'productivity',
-      displayName: 'Slack',
-      description: 'Connect notes to Slack channels for team collaboration',
-      icon: 'link-2' // Using generic icon for now
-    },
-    jira: {
-      name: 'jira',
-      type: 'productivity',
-      displayName: 'Jira',
-      description: 'Connect notes to Jira projects for issue tracking and project management',
-      icon: 'link-2' // Using generic icon for now
-    },
-    linear: {
-      name: 'linear',
-      type: 'productivity',
-      displayName: 'Linear',
-      description: 'Connect notes to Linear teams and projects for issue tracking and project management',
-      icon: 'link-2' // Using generic icon for now
-    },
-    gitlab: {
-      name: 'gitlab',
-      type: 'productivity',
-      displayName: 'GitLab',
-      description: 'Connect notes to GitLab projects for issue tracking and project management',
-      icon: 'link-2' // Using generic icon for now
-    },
-    clickup: {
-      name: 'clickup',
-      type: 'productivity',
-      displayName: 'ClickUp',
-      description: 'Connect notes to ClickUp spaces and lists for task management',
-      icon: 'link-2' // Using generic icon for now
-    },
-    notion: {
-      name: 'notion',
-      type: 'productivity',
-      displayName: 'Notion',
-      description: 'Connect notes to Notion databases for knowledge management and collaboration',
-      icon: 'link-2' // Using generic icon for now
-    },
-    github: {
-      name: 'github',
-      type: 'productivity',
-      displayName: 'GitHub',
-      description: 'Connect notes to GitHub repositories for code review and collaboration',
-      icon: 'link-2' // Using generic icon for now
-    },
-    trello: {
-      name: 'trello',
-      type: 'productivity',
-      displayName: 'Trello',
-      description: 'Connect notes to Trello boards and cards for task management',
-      icon: 'link-2' // Using generic icon for now
-    },
-    asana: {
-      name: 'asana',
-      type: 'productivity',
-      displayName: 'Asana',
-      description: 'Connect notes to Asana projects and tasks for task management',
-      icon: 'link-2' // Using generic icon for now
-    }
-  }
+  const availableProviders = getAvailableProviders()
+  const provider = availableProviders.find(p => p.name === providerName)
 
-  return providers[providerName as keyof typeof providers] || {
+  return provider || {
     displayName: providerName,
     icon: 'link-2',
     description: 'Third-party service integration'
