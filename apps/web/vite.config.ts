@@ -33,9 +33,18 @@ export default defineConfig((config) => ({
 
 		sourcemap: true,
 	},
+	optimizeDeps: {
+		include: ['@repo/email', '@repo/integrations'],
+	},
+	ssr: {
+		noExternal: ['@repo/email'],
+	},
 	server: {
 		watch: {
 			ignored: ['**/playwright-report/**', '**/node_modules/.vite-temp/**'],
+		},
+		fs: {
+			allow: ['..'],
 		},
 	},
 	sentryConfig,

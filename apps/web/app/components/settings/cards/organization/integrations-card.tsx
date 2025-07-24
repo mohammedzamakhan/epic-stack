@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#app/
 import { Icon } from '#app/components/ui/icon'
 import { StatusButton } from '#app/components/ui/status-button'
 import { JiraIntegrationSettings } from './jira-integration-settings'
-import { getAvailableProviders } from '@repo/integrations'
 
 export const connectIntegrationActionIntent = 'connect-integration'
 export const disconnectIntegrationActionIntent = 'disconnect-integration'
@@ -57,6 +56,7 @@ export function IntegrationsCard({ integrations, availableProviders }: Integrati
             <div className="space-y-3">
               {integrations.map((integration) => (
                 <ConnectedIntegrationItem
+                  availableProviders={availableProviders}
                   key={integration.id}
                   integration={integration}
                   isDisconnecting={
@@ -102,13 +102,14 @@ export function IntegrationsCard({ integrations, availableProviders }: Integrati
 }
 
 interface ConnectedIntegrationItemProps {
+  availableProviders: IntegrationsCardProps['availableProviders']
   integration: Integration
   isDisconnecting: boolean
 }
 
-function ConnectedIntegrationItem({ integration, isDisconnecting }: ConnectedIntegrationItemProps) {
+function ConnectedIntegrationItem({ integration, isDisconnecting, availableProviders }: ConnectedIntegrationItemProps) {
   const fetcher = useFetcher()
-  const providerInfo = getProviderInfo(integration.providerName)
+  const providerInfo = getProviderInfo(integration.providerName, availableProviders)
   const connectionCount = integration._count?.connections || 0
   const [showSettings, setShowSettings] = useState(false)
 
@@ -229,8 +230,7 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
 }
 
 // Helper function to get provider display information
-function getProviderInfo(providerName: string) {
-  const availableProviders = getAvailableProviders()
+function getProviderInfo(providerName: string, availableProviders: IntegrationsCardProps['availableProviders']) {
   const provider = availableProviders.find(p => p.name === providerName)
 
   return provider || {
