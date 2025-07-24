@@ -2,6 +2,7 @@ import https from 'https'
 import { type Organization } from '@prisma/client'
 import { redirect } from 'react-router'
 import Stripe from 'stripe'
+import { TrialEndingEmail } from '@epic-stack/email'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
@@ -42,21 +43,21 @@ try {
 export { stripe }
 
 export async function getPlansAndPrices() {
-	try {	
+	try {
 		const prices = await getStripePrices()
 		const products = await getStripeProducts()
-		
+
 		const basePlan = products.find((product) => product.name === 'Base')
 		const plusPlan = products.find((product) => product.name === 'Plus')
-		
+
 		const basePrice = prices.find((price) => price.productId === basePlan?.id)
 		const plusPrice = prices.find((price) => price.productId === plusPlan?.id)
-		
+
 		const result = {
 			plans: { base: basePlan, plus: plusPlan },
 			prices: { base: basePrice, plus: plusPrice },
 		}
-		
+
 		return result
 	} catch {
 		// Return fallback data to prevent the app from hanging
@@ -159,11 +160,11 @@ export async function createCheckoutSession(
 			...(process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
 				? {}
 				: {
-						trial_period_days:
-							process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-								? 0
-								: parseInt(process.env.TRIAL_DAYS || '0', 10),
-					}),
+					trial_period_days:
+						process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
+							? 0
+							: parseInt(process.env.TRIAL_DAYS || '0', 10),
+				}),
 		},
 		payment_method_collection:
 			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'stripe'
@@ -298,32 +299,32 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 			await sendEmail({
 				to: user.email,
 				subject: 'Trial Ending Soon',
-				html: `
-					<h1>Trial Ending Soon</h1>
-					<p>Your trial is ending soon. Please <a href="${process.env.STRIPE_PORTAL_URL}">manage your subscription</a> to continue using our service.</p>
-				`,
-				text: `Trial Ending Soon\n\nYour trial is ending soon. Please manage your subscription at ${process.env.STRIPE_PORTAL_URL} to continue using our service.`,
+				react: TrialEndingEmail({
+					portalUrl: process.env.STRIPE_PORTAL_URL!,
+					userName: user.name || undefined,
+					daysRemaining: 3, // You can make this dynamic based on actual trial end date
+				}),
 			})
 		}),
 	)
 }
 
 export async function getStripePrices() {
-    try {
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Stripe API call timed out after 5 seconds')), 5000)
-        )
-        
-        // Verify account exists by retrieving it
-        await Promise.race([
-            stripe.accounts.retrieve(),
-            timeoutPromise
-        ])
-        
-    } catch (error: any) {
-        throw new Error(`Invalid Stripe API key or connectivity issue: ${error?.message || error}`)
-    }
-    
+	try {
+		const timeoutPromise = new Promise((_, reject) =>
+			setTimeout(() => reject(new Error('Stripe API call timed out after 5 seconds')), 5000)
+		)
+
+		// Verify account exists by retrieving it
+		await Promise.race([
+			stripe.accounts.retrieve(),
+			timeoutPromise
+		])
+
+	} catch (error: any) {
+		throw new Error(`Invalid Stripe API key or connectivity issue: ${error?.message || error}`)
+	}
+
 	const prices = await stripe.prices.list({
 		expand: ['data.product'],
 		active: true,
@@ -348,7 +349,7 @@ export async function getStripeProducts() {
 		expand: ['data.default_price'],
 		limit: 10, // Add limit to prevent large responses
 	})
-	
+
 	return products.data.map((product) => ({
 		id: product.id,
 		name: product.name,
@@ -377,9 +378,9 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 					parseInt(process.env.TRIAL_DAYS!, 10) -
 					(organization?.createdAt
 						? Math.ceil(
-								(new Date().getTime() - organization.createdAt.getTime()) /
-									(1000 * 60 * 60 * 24),
-							)
+							(new Date().getTime() - organization.createdAt.getTime()) /
+							(1000 * 60 * 60 * 24),
+						)
 						: 0) +
 					1,
 			}
