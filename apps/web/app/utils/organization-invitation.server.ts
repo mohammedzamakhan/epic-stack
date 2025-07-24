@@ -1,5 +1,5 @@
 import { webcrypto as crypto } from 'node:crypto';
-import OrganizationInviteEmail from '#app/emails/organization-invite';
+import { OrganizationInviteEmail } from '@repo/email';
 import { prisma } from '#app/utils/db.server';
 import { sendEmail } from '#app/utils/email.server';
 

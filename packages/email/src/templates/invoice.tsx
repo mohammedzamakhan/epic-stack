@@ -16,7 +16,7 @@ import {
   Text,
 } from '@react-email/components';
 
-interface InvoiceEmailProps {
+export interface InvoiceEmailProps {
   orderNumber: string;
   invoiceDate: string;
   customerName: string;

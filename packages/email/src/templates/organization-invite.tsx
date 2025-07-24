@@ -1,14 +1,16 @@
 import { Html, Container, Text, Head, Body, Section, Button } from "@react-email/components";
 
+export interface OrganizationInviteEmailProps {
+  inviteUrl: string;
+  organizationName: string;
+  inviterName: string;
+}
+
 export default function OrganizationInviteEmail({ 
   inviteUrl, 
   organizationName, 
   inviterName 
-}: { 
-  inviteUrl: string;
-  organizationName: string;
-  inviterName: string;
-}) {
+}: OrganizationInviteEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -88,3 +90,9 @@ export default function OrganizationInviteEmail({
     </Html>
   );
 }
+
+OrganizationInviteEmail.PreviewProps = {
+  inviteUrl: 'https://example.com/join/abc123',
+  organizationName: 'Acme Corp',
+  inviterName: 'John Doe'
+} as OrganizationInviteEmailProps;
