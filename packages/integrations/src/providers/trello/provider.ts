@@ -109,7 +109,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	/**
 	 * Store request token context for OAuth 1.0a flow
 	 */
-	private async storeRequestTokenContext(requestToken: string, context: {
+	async storeRequestTokenContext(requestToken: string, context: {
 		organizationId: string
 		requestTokenSecret: string
 		timestamp: number

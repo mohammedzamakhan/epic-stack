@@ -239,7 +239,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			const repositories = await this.getRepositories(accessToken)
 			
 			return repositories
-				.filter(repo => !repo.archived && !repo.disabled && repo.permissions.push) // Only repos where user can create issues
+				.filter(repo => !repo.archived && !repo.disabled && repo.permissions?.push) // Only repos where user can create issues
 				.map(repo => ({
 					id: repo.id.toString(),
 					name: `${repo.owner.login}/${repo.name}`,

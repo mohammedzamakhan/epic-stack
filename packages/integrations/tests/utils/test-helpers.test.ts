@@ -102,7 +102,7 @@ describe('Test Helpers', () => {
       const integration = createTestIntegration()
       expect(integration.id).toBe('integration-123')
       expect(integration.organizationId).toBe('org-123')
-      expect(integration.providerName).toBe('test')
+      expect(integration.providerName).toBe('mock')
     })
 
     it('should create test integration with overrides', () => {

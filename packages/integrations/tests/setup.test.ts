@@ -13,7 +13,7 @@ describe('Test Setup', () => {
   it('should have test environment variables set', () => {
     expect(process.env.NODE_ENV).toBe('test')
     expect(process.env.ENCRYPTION_KEY).toBe('test-encryption-key-32-characters')
-    expect(process.env.OAUTH_STATE_SECRET).toBe('test-oauth-state-secret-32-chars')
+    expect(process.env.INTEGRATIONS_OAUTH_STATE_SECRET).toBe('test-oauth-state-secret-32-chars')
   })
 
   it('should have global test config available', () => {

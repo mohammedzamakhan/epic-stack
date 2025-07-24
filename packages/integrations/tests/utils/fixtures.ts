@@ -187,10 +187,11 @@ export const fixtures = {
     integration: {
       id: 'integration-123',
       organizationId: 'org-123',
-      providerName: 'test',
+      providerName: 'mock',
+      providerType: 'test',
       accessToken: 'encrypted-access-token',
       refreshToken: 'encrypted-refresh-token',
-      expiresAt: new Date(Date.now() + 3600000),
+      tokenExpiresAt: new Date(Date.now() + 3600000),
       config: JSON.stringify({
         instanceUrl: 'https://test.atlassian.net',
         user: {
@@ -198,7 +199,8 @@ export const fixtures = {
           displayName: 'Test User'
         }
       }),
-      status: 'active' as const,
+      isActive: true,
+      lastSyncAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -214,6 +216,8 @@ export const fixtures = {
         defaultIssueType: 'Task',
         includeNoteContent: true
       }),
+      isActive: true,
+      lastPostedAt: null,
       createdAt: new Date(),
       updatedAt: new Date()
     }

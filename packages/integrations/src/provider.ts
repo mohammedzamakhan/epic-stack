@@ -209,6 +209,48 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
     
     throw new Error(errorMessage)
   }
+
+  /**
+   * Format task title from message data with emoji
+   * @param message - Message data
+   * @returns Formatted title with emoji
+   */
+  protected formatTaskTitle(message: MessageData): string {
+    const emoji = this.getChangeEmoji(message.changeType)
+    const truncatedTitle = this.truncateText(message.title, 100)
+    return `${emoji} ${truncatedTitle}`
+  }
+
+  /**
+   * Get emoji for change type
+   * @param changeType - Type of change
+   * @returns Appropriate emoji
+   */
+  protected getChangeEmoji(changeType: string): string {
+    switch (changeType) {
+      case 'created':
+        return '✨'
+      case 'updated':
+        return '📝'
+      case 'deleted':
+        return '🗑️'
+      default:
+        return '📄'
+    }
+  }
+
+  /**
+   * Truncate text to specified length
+   * @param text - Text to truncate
+   * @param maxLength - Maximum length
+   * @returns Truncated text with ellipsis if needed
+   */
+  protected truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) {
+      return text
+    }
+    return text.substring(0, maxLength - 3) + '...'
+  }
 }
 
 /**

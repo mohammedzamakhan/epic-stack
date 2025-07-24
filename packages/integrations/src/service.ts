@@ -8,6 +8,7 @@
 import  { type Integration, type NoteIntegrationConnection, type OrganizationNote } from '@prisma/client'
 import { integrationManager } from './integration-manager'
 import  { type IntegrationProvider } from './provider'
+import { TokenRefreshManager } from './oauth-manager'
 import   {
   type TokenData,
   type Channel,
@@ -126,7 +127,6 @@ export class IntegrationService {
    * @returns True if token should be refreshed
    */
   shouldRefreshToken(tokenData: TokenData): boolean {
-    const { TokenRefreshManager } = require('./oauth-manager')
     return TokenRefreshManager.shouldRefreshToken(tokenData)
   }
 
@@ -136,7 +136,6 @@ export class IntegrationService {
    * @returns True if token is expired
    */
   isTokenExpired(tokenData: TokenData): boolean {
-    const { TokenRefreshManager } = require('./oauth-manager')
     return TokenRefreshManager.isTokenExpired(tokenData)
   }
 

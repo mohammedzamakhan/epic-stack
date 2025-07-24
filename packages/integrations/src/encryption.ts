@@ -6,7 +6,7 @@
  */
 
 import { webcrypto as crypto } from 'node:crypto'
-import  { type TokenData } from './types'
+import { type TokenData } from './types'
 
 // Environment variable for encryption key
 const ENCRYPTION_KEY_ENV = 'INTEGRATION_ENCRYPTION_KEY' as const
@@ -53,7 +53,7 @@ export class IntegrationEncryptionService {
     }
 
     const keyString = process.env[ENCRYPTION_KEY_ENV]
-    if (!keyString) {
+    if (!keyString || keyString.trim() === '') {
       throw new Error(
         `${ENCRYPTION_KEY_ENV} environment variable is required for token encryption`
       )
@@ -79,16 +79,14 @@ export class IntegrationEncryptionService {
     }
 
     const key = await this.getEncryptionKey()
-    const iv = crypto.getRandomValues(new Uint8Array(this.ivLength))
 
-    // Encrypt access token
-    const encryptedAccessToken = await this.encryptString(tokenData.accessToken, key, iv)
+    // Encrypt access token (IV is embedded in the encrypted string)
+    const encryptedAccessToken = await this.encryptString(tokenData.accessToken, key)
 
-    // Encrypt refresh token if present
+    // Encrypt refresh token if present (each gets its own IV)
     let encryptedRefreshToken: string | undefined
     if (tokenData.refreshToken) {
-      const refreshIv = crypto.getRandomValues(new Uint8Array(this.ivLength))
-      encryptedRefreshToken = await this.encryptString(tokenData.refreshToken, key, refreshIv)
+      encryptedRefreshToken = await this.encryptString(tokenData.refreshToken, key)
     }
 
     return {
@@ -96,7 +94,7 @@ export class IntegrationEncryptionService {
       encryptedRefreshToken,
       expiresAt: tokenData.expiresAt,
       scope: tokenData.scope,
-      iv: Buffer.from(iv).toString('hex'),
+      iv: '', // Keep for backward compatibility but not used
     }
   }
 
@@ -105,16 +103,14 @@ export class IntegrationEncryptionService {
    */
   async decryptTokenData(encryptedData: EncryptedTokenData): Promise<TokenData> {
     const key = await this.getEncryptionKey()
-    const iv = Buffer.from(encryptedData.iv, 'hex')
 
-    // Decrypt access token
-    const accessToken = await this.decryptString(encryptedData.encryptedAccessToken, key, iv)
+    // Decrypt access token (IV is embedded in the encrypted string)
+    const accessToken = await this.decryptString(encryptedData.encryptedAccessToken, key)
 
-    // Decrypt refresh token if present
+    // Decrypt refresh token if present (IV is embedded in the encrypted string)
     let refreshToken: string | undefined
     if (encryptedData.encryptedRefreshToken) {
-      // For refresh tokens, we need to extract the IV from the encrypted data
-      refreshToken = await this.decryptString(encryptedData.encryptedRefreshToken, key, iv)
+      refreshToken = await this.decryptString(encryptedData.encryptedRefreshToken, key)
     }
 
     return {
@@ -128,9 +124,10 @@ export class IntegrationEncryptionService {
   /**
    * Encrypt a string using AES-256-GCM
    */
-  private async encryptString(plaintext: string, key: Buffer, iv: Uint8Array): Promise<string> {
+  private async encryptString(plaintext: string, key: Buffer): Promise<string> {
     const encoder = new TextEncoder()
     const data = encoder.encode(plaintext)
+    const iv = crypto.getRandomValues(new Uint8Array(this.ivLength))
 
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
@@ -160,14 +157,12 @@ export class IntegrationEncryptionService {
   /**
    * Decrypt a string using AES-256-GCM
    */
-  private async decryptString(encryptedHex: string, key: Buffer, expectedIv?: Uint8Array): Promise<string> {
+  private async decryptString(encryptedHex: string, key: Buffer): Promise<string> {
     const encryptedBuffer = Buffer.from(encryptedHex, 'hex')
     
     // Extract IV from the beginning of the encrypted data
-    const iv = expectedIv || encryptedBuffer.subarray(0, this.ivLength)
-    const encryptedData = expectedIv 
-      ? encryptedBuffer 
-      : encryptedBuffer.subarray(this.ivLength)
+    const iv = encryptedBuffer.subarray(0, this.ivLength)
+    const encryptedData = encryptedBuffer.subarray(this.ivLength)
 
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
