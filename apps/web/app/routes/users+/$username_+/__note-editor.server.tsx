@@ -125,8 +125,5 @@ export async function action({ request }: ActionFunctionArgs) {
 		},
 	})
 
-	return redirect(
-		`/app/test/notes`,
-		
-	)
+	return redirect(`/app/test/notes`)
 }

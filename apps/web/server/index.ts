@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/react-router'
 import { ip as ipAddress } from 'address'
 import closeWithGrace from 'close-with-grace'
 import compression from 'compression'
+import cors from 'cors'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
@@ -35,6 +36,36 @@ const viteDevServer = IS_PROD
 		)
 
 const app = express()
+
+// ✅ EARLY CORS + LOGGING MIDDLEWARE
+app.use((req, res, next) => {
+	const origin = req.get('Origin')
+	console.log('🌐 Incoming request:', req.method, req.url, origin)
+	const allowedOrigins = ['https://dashboard-v0.novu.co']
+
+	if (allowedOrigins.includes(origin || '')) {
+		res.header('Access-Control-Allow-Origin', origin)
+		res.header(
+			'Access-Control-Allow-Methods',
+			'GET, POST, PUT, DELETE, OPTIONS',
+		)
+		res.header(
+			'Access-Control-Allow-Headers',
+			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace',
+		)
+		res.header('Access-Control-Allow-Credentials', 'true')
+	}
+
+	if (req.method === 'OPTIONS') {
+		// print the headers
+		console.log('🌐 Incoming request headers:', req.headers)
+		// print response headers
+		console.log('🌐 Response headers:', res.getHeaders())
+		return res.sendStatus(204)
+	}
+
+	next()
+})
 
 const getHost = (req: { get: (key: string) => string | undefined }) =>
 	req.get('X-Forwarded-Host') ?? req.get('host') ?? ''
@@ -72,9 +103,12 @@ app.use(compression())
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by')
 
-app.use((_, res, next) => {
-	// The referrerPolicy breaks our redirectTo logic
-	helmet(res, { general: { referrerPolicy: false } })
+// Then continue with general middleware handling
+app.use((req, res, next) => {
+	// Apply Helmet for non-Novu routes
+	if (!req.url.includes('/novu')) {
+		helmet(res, { general: { referrerPolicy: false } })
+	}
 	next()
 })
 
@@ -196,6 +230,49 @@ if (!ALLOW_INDEXING) {
 		next()
 	})
 }
+
+app.all('/api/novu*', (req, res, next) => {
+	// Capture original writeHead
+	const originalWriteHead = res.writeHead
+
+	// Force our desired CORS headers right before response is sent
+	res.writeHead = function (statusCode, reasonPhraseOrHeaders, maybeHeaders) {
+		const headers =
+			typeof reasonPhraseOrHeaders === 'string'
+				? maybeHeaders
+				: reasonPhraseOrHeaders
+
+		if (headers) {
+			// Clear existing access-control-* headers
+			for (const key of Object.keys(headers)) {
+				if (key.toLowerCase().startsWith('access-control-')) {
+					delete headers[key]
+				}
+			}
+		}
+
+		// Our own CORS headers
+		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
+		res.setHeader('Access-Control-Allow-Credentials', 'true')
+		res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
+		res.setHeader(
+			'Access-Control-Allow-Headers',
+			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace',
+		)
+
+		return originalWriteHead.apply(res, arguments)
+	}
+
+	return createRequestHandler({
+		getLoadContext: () => ({ serverBuild: getBuild() }),
+		mode: MODE,
+		build: async () => {
+			const { error, build } = await getBuild()
+			if (error) throw error
+			return build
+		},
+	})(req, res, next)
+})
 
 app.all(
 	'*',

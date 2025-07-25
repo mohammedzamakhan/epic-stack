@@ -1,14 +1,18 @@
 # Note Update Notification System
 
-This document describes the note update notification system that automatically posts messages to connected third-party integrations when notes are created, updated, or deleted.
+This document describes the note update notification system that automatically
+posts messages to connected third-party integrations when notes are created,
+updated, or deleted.
 
 ## Overview
 
 The note notification system consists of three main components:
 
-1. **Note Event Handler** - Processes note change events and triggers integrations
+1. **Note Event Handler** - Processes note change events and triggers
+   integrations
 2. **Note Hooks** - Middleware that automatically detects note changes
-3. **Integration Manager** - Handles the actual message posting to external services
+3. **Integration Manager** - Handles the actual message posting to external
+   services
 
 ## Architecture
 
@@ -28,9 +32,11 @@ External Services (Slack, Teams, etc.)
 
 ### 1. Note Event Handler (`note-event-handler.ts`)
 
-The core component that processes note change events and coordinates with the integration system.
+The core component that processes note change events and coordinates with the
+integration system.
 
 **Key Features:**
+
 - Handles three types of note changes: created, updated, deleted
 - Detects what changed in note updates (title, content)
 - Manages event queuing and processing
@@ -38,6 +44,7 @@ The core component that processes note change events and coordinates with the in
 - Supports batch event processing
 
 **Main Methods:**
+
 - `handleNoteCreated(noteId, userId)` - Process note creation
 - `handleNoteUpdated(noteId, userId, previousData?)` - Process note updates
 - `handleNoteDeleted(noteId, userId, noteData)` - Process note deletion
@@ -48,6 +55,7 @@ The core component that processes note change events and coordinates with the in
 Middleware system that automatically triggers notifications when notes change.
 
 **Key Features:**
+
 - Automatic change detection
 - Asynchronous processing (doesn't block main request)
 - Error handling and logging
@@ -55,12 +63,14 @@ Middleware system that automatically triggers notifications when notes change.
 - Batch processing support
 
 **Main Methods:**
+
 - `afterNoteCreated(noteId, userId)` - Hook for after note creation
 - `afterNoteUpdated(noteId, userId, previousData?)` - Hook for after note update
 - `beforeNoteDeleted(noteId, userId)` - Hook for before note deletion
 - `captureNoteSnapshot(noteId)` - Capture note state for change detection
 
 **Convenience Functions:**
+
 - `triggerNoteCreated(noteId, userId)` - Simple creation trigger
 - `triggerNoteUpdated(noteId, userId, previousData?)` - Simple update trigger
 - `triggerNoteDeleted(noteId, userId)` - Simple deletion trigger
@@ -70,6 +80,7 @@ Middleware system that automatically triggers notifications when notes change.
 Utility class that wraps note operations with automatic hook triggering.
 
 **Usage:**
+
 ```typescript
 // Wrap note creation
 const result = await NoteOperationWrapper.create(
@@ -103,29 +114,29 @@ The system is integrated into the existing note route handlers:
 ```typescript
 // Check if this is a new note or an update
 const existingNote = await prisma.organizationNote.findUnique({
-  where: { id: noteId },
-  select: { id: true, title: true, content: true }
+	where: { id: noteId },
+	select: { id: true, title: true, content: true },
 })
 
 const isNewNote = !existingNote
 let beforeSnapshot: { title: string; content: string } | undefined
 
 if (!isNewNote && existingNote) {
-  beforeSnapshot = {
-    title: existingNote.title,
-    content: existingNote.content
-  }
+	beforeSnapshot = {
+		title: existingNote.title,
+		content: existingNote.content,
+	}
 }
 
 const updatedNote = await prisma.organizationNote.upsert({
-  // ... upsert logic
+	// ... upsert logic
 })
 
 // Trigger integration hooks
 if (isNewNote) {
-  await noteHooks.afterNoteCreated(updatedNote.id, userId)
+	await noteHooks.afterNoteCreated(updatedNote.id, userId)
 } else {
-  await noteHooks.afterNoteUpdated(updatedNote.id, userId, beforeSnapshot)
+	await noteHooks.afterNoteUpdated(updatedNote.id, userId, beforeSnapshot)
 }
 ```
 
@@ -141,9 +152,11 @@ await prisma.organizationNote.delete({ where: { id: note.id } })
 
 ## Message Format
 
-When a note change is detected, the system formats messages based on the change type:
+When a note change is detected, the system formats messages based on the change
+type:
 
 ### Note Created
+
 ```
 📝 New note created: "Note Title"
 Content preview...
@@ -152,6 +165,7 @@ Content preview...
 ```
 
 ### Note Updated
+
 ```
 ✏️ Note updated: "Note Title"
 Content preview...
@@ -160,6 +174,7 @@ Content preview...
 ```
 
 ### Note Deleted
+
 ```
 🗑️ Note deleted: "Note Title"
 👤 Deleted by: User Name
@@ -169,8 +184,10 @@ Content preview...
 
 The notification system respects the existing integration configuration:
 
-1. **Organization Integrations** - Only organizations with active integrations receive notifications
-2. **Note Connections** - Only notes connected to specific channels receive notifications
+1. **Organization Integrations** - Only organizations with active integrations
+   receive notifications
+2. **Note Connections** - Only notes connected to specific channels receive
+   notifications
 3. **Provider Settings** - Each provider can customize message formatting
 4. **Rate Limiting** - Built-in rate limiting prevents spam
 
@@ -215,12 +232,14 @@ The system includes comprehensive tests:
 - **Demo Scripts** - Manual testing utilities
 
 Run tests:
+
 ```bash
 npm run test -- note-event-handler.test.ts
 npm run test -- note-hooks.test.ts
 ```
 
 Run demo:
+
 ```typescript
 import { runAllDemos } from './note-notification-demo'
 await runAllDemos()
@@ -231,11 +250,13 @@ await runAllDemos()
 ### Common Issues
 
 1. **No Notifications Sent**
+
    - Check if organization has active integrations
    - Verify note has connections to channels
    - Check integration logs for errors
 
 2. **Partial Notifications**
+
    - Some integrations may fail while others succeed
    - Check individual integration status
    - Review error logs for specific failures
@@ -248,6 +269,7 @@ await runAllDemos()
 ### Debug Information
 
 Enable debug logging:
+
 ```typescript
 // Set environment variable
 DEBUG=integrations:notifications

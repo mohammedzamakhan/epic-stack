@@ -2,7 +2,10 @@
  * GitHub integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -10,7 +13,6 @@ import {
 	type MessageData,
 	type OAuthCallbackParams,
 } from '../../types'
-
 
 /**
  * GitHub API response interfaces
@@ -126,7 +128,8 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	readonly name = 'github'
 	readonly type = 'productivity' as const
 	readonly displayName = 'GitHub'
-	readonly description = 'Connect notes to GitHub repositories for issue tracking and project management'
+	readonly description =
+		'Connect notes to GitHub repositories for issue tracking and project management'
 	readonly logoPath = '/icons/github.svg'
 
 	private readonly apiBaseUrl = 'https://api.github.com'
@@ -139,7 +142,9 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	private clientId(): string {
 		const clientId = process.env.GITHUB_INTEGRATION_CLIENT_ID
 		if (!clientId) {
-			throw new Error('GITHUB_INTEGRATION_CLIENT_ID environment variable is required')
+			throw new Error(
+				'GITHUB_INTEGRATION_CLIENT_ID environment variable is required',
+			)
 		}
 		return clientId
 	}
@@ -147,7 +152,9 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	private clientSecret(): string {
 		const clientSecret = process.env.GITHUB_INTEGRATION_CLIENT_SECRET
 		if (!clientSecret) {
-			throw new Error('GITHUB_INTEGRATION_CLIENT_SECRET environment variable is required')
+			throw new Error(
+				'GITHUB_INTEGRATION_CLIENT_SECRET environment variable is required',
+			)
 		}
 		return clientSecret
 	}
@@ -158,10 +165,10 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		const state = this.generateOAuthState(organizationId, additionalParams)
-		
+
 		const params = new URLSearchParams({
 			client_id: this.clientId(),
 			redirect_uri: redirectUri,
@@ -178,7 +185,9 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	 */
 	async handleCallback(params: OAuthCallbackParams): Promise<TokenData> {
 		if (params.error) {
-			throw new Error(`GitHub OAuth error: ${params.error} - ${params.errorDescription || 'Unknown error'}`)
+			throw new Error(
+				`GitHub OAuth error: ${params.error} - ${params.errorDescription || 'Unknown error'}`,
+			)
 		}
 
 		if (!params.code) {
@@ -192,7 +201,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 		const tokenResponse = await fetch(`${this.authBaseUrl}/access_token`, {
 			method: 'POST',
 			headers: {
-				'Accept': 'application/json',
+				Accept: 'application/json',
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
@@ -204,19 +213,25 @@ export class GitHubProvider extends BaseIntegrationProvider {
 
 		if (!tokenResponse.ok) {
 			const errorText = await tokenResponse.text()
-			throw new Error(`Failed to exchange code for token: ${tokenResponse.statusText} - ${errorText}`)
+			throw new Error(
+				`Failed to exchange code for token: ${tokenResponse.statusText} - ${errorText}`,
+			)
 		}
 
 		const tokenData: GitHubOAuthResponse = await tokenResponse.json()
 
 		if (tokenData.error) {
-			throw new Error(`GitHub token error: ${tokenData.error} - ${tokenData.error_description || 'Unknown error'}`)
+			throw new Error(
+				`GitHub token error: ${tokenData.error} - ${tokenData.error_description || 'Unknown error'}`,
+			)
 		}
 
 		return {
 			accessToken: tokenData.access_token,
 			refreshToken: tokenData.refresh_token,
-			expiresAt: tokenData.expires_in ? new Date(Date.now() + tokenData.expires_in * 1000) : undefined,
+			expiresAt: tokenData.expires_in
+				? new Date(Date.now() + tokenData.expires_in * 1000)
+				: undefined,
 			scope: tokenData.scope,
 		}
 	}
@@ -228,7 +243,9 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	async refreshToken(refreshToken: string): Promise<TokenData> {
 		// GitHub doesn't support refresh tokens in their OAuth flow
 		// Users need to re-authenticate when tokens expire
-		throw new Error('GitHub does not support token refresh. Please re-authenticate.')
+		throw new Error(
+			'GitHub does not support token refresh. Please re-authenticate.',
+		)
 	}
 
 	/**
@@ -237,10 +254,12 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	async getAvailableChannels(integration: Integration): Promise<Channel[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const repositories = await this.getRepositories(accessToken)
-			
+
 			return repositories
-				.filter(repo => !repo.archived && !repo.disabled && repo.permissions?.push) // Only repos where user can create issues
-				.map(repo => ({
+				.filter(
+					(repo) => !repo.archived && !repo.disabled && repo.permissions?.push,
+				) // Only repos where user can create issues
+				.map((repo) => ({
 					id: repo.id.toString(),
 					name: `${repo.owner.login}/${repo.name}`,
 					type: repo.private ? 'private' : 'public',
@@ -264,46 +283,62 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
-		await this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-			const config = typeof connection.config === 'string' ? 
-				JSON.parse(connection.config) : 
-				connection.config
-			
-			// Use repositoryFullName from config (either direct or from channelMetadata), or fall back to externalId
-			const repositoryFullName = config?.repositoryFullName || config?.channelMetadata?.repositoryFullName || connection.externalId
+		await this.makeAuthenticatedApiCall(
+			connection.integration,
+			async (accessToken) => {
+				const config =
+					typeof connection.config === 'string'
+						? JSON.parse(connection.config)
+						: connection.config
 
-			if (!repositoryFullName) {
-				throw new Error('Repository full name is required for GitHub integration')
-			}
+				// Use repositoryFullName from config (either direct or from channelMetadata), or fall back to externalId
+				const repositoryFullName =
+					config?.repositoryFullName ||
+					config?.channelMetadata?.repositoryFullName ||
+					connection.externalId
 
-			const issueData = await this.formatGitHubIssue(message, connection)
-			await this.createIssue(accessToken, repositoryFullName, issueData)
-		})
+				if (!repositoryFullName) {
+					throw new Error(
+						'Repository full name is required for GitHub integration',
+					)
+				}
+
+				const issueData = await this.formatGitHubIssue(message, connection)
+				await this.createIssue(accessToken, repositoryFullName, issueData)
+			},
+		)
 	}
 
 	/**
 	 * Validate a GitHub connection
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		try {
-			const config = typeof connection.config === 'string' ? 
-				JSON.parse(connection.config) : 
-				connection.config
-			
+			const config =
+				typeof connection.config === 'string'
+					? JSON.parse(connection.config)
+					: connection.config
+
 			const repositoryFullName = config?.repositoryFullName
 
 			if (!repositoryFullName) {
 				return false
 			}
 
-			return await this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-				const repository = await this.getRepository(accessToken, repositoryFullName)
-				return repository !== null && repository.permissions.push === true
-			})
+			return await this.makeAuthenticatedApiCall(
+				connection.integration,
+				async (accessToken) => {
+					const repository = await this.getRepository(
+						accessToken,
+						repositoryFullName,
+					)
+					return repository !== null && repository.permissions.push === true
+				},
+			)
 		} catch (error) {
 			console.error('GitHub connection validation failed:', error)
 			return false
@@ -340,8 +375,8 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	async getCurrentUser(accessToken: string): Promise<GitHubUser> {
 		const response = await fetch(`${this.apiBaseUrl}/user`, {
 			headers: {
-				'Authorization': `token ${accessToken}`,
-				'Accept': 'application/vnd.github+json',
+				Authorization: `token ${accessToken}`,
+				Accept: 'application/vnd.github+json',
 				'X-GitHub-Api-Version': '2022-11-28',
 				'User-Agent': 'Epic-Stack-Integration/1.0',
 			},
@@ -359,7 +394,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	 */
 	private async makeAuthenticatedApiCall<T>(
 		integration: Integration,
-		apiCall: (accessToken: string) => Promise<T>
+		apiCall: (accessToken: string) => Promise<T>,
 	): Promise<T> {
 		try {
 			if (!integration.accessToken) {
@@ -371,7 +406,10 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			return await apiCall(accessToken)
 		} catch (error: any) {
 			// GitHub doesn't support token refresh, so we can't retry with a new token
-			if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+			if (
+				error.message?.includes('401') ||
+				error.message?.includes('Unauthorized')
+			) {
 				throw new Error('GitHub token has expired. Please re-authenticate.')
 			}
 			throw error
@@ -391,21 +429,23 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				`${this.apiBaseUrl}/user/repos?page=${page}&per_page=${perPage}&sort=updated&affiliation=owner,collaborator,organization_member`,
 				{
 					headers: {
-						'Authorization': `token ${accessToken}`,
-						'Accept': 'application/vnd.github+json',
+						Authorization: `token ${accessToken}`,
+						Accept: 'application/vnd.github+json',
 						'X-GitHub-Api-Version': '2022-11-28',
 						'User-Agent': 'Epic-Stack-Integration/1.0',
 					},
-				}
+				},
 			)
 
 			if (!response.ok) {
 				const errorText = await response.text()
-				throw new Error(`Failed to get GitHub repositories: ${response.status} ${response.statusText} - ${errorText}`)
+				throw new Error(
+					`Failed to get GitHub repositories: ${response.status} ${response.statusText} - ${errorText}`,
+				)
 			}
 
 			const repositories: GitHubRepository[] = await response.json()
-			
+
 			if (repositories.length === 0) {
 				break
 			}
@@ -425,15 +465,21 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	/**
 	 * Get a specific GitHub repository
 	 */
-	async getRepository(accessToken: string, repositoryFullName: string): Promise<GitHubRepository> {
-		const response = await fetch(`${this.apiBaseUrl}/repos/${repositoryFullName}`, {
-			headers: {
-				'Authorization': `token ${accessToken}`,
-				'Accept': 'application/vnd.github+json',
-				'X-GitHub-Api-Version': '2022-11-28',
-				'User-Agent': 'Epic-Stack-Integration/1.0',
+	async getRepository(
+		accessToken: string,
+		repositoryFullName: string,
+	): Promise<GitHubRepository> {
+		const response = await fetch(
+			`${this.apiBaseUrl}/repos/${repositoryFullName}`,
+			{
+				headers: {
+					Authorization: `token ${accessToken}`,
+					Accept: 'application/vnd.github+json',
+					'X-GitHub-Api-Version': '2022-11-28',
+					'User-Agent': 'Epic-Stack-Integration/1.0',
+				},
 			},
-		})
+		)
 
 		if (!response.ok) {
 			throw new Error(`Failed to get GitHub repository: ${response.statusText}`)
@@ -446,25 +492,30 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	 * Create a GitHub issue
 	 */
 	async createIssue(
-		accessToken: string, 
-		repositoryFullName: string, 
-		issueData: any
+		accessToken: string,
+		repositoryFullName: string,
+		issueData: any,
 	): Promise<GitHubCreateIssueResponse> {
-		const response = await fetch(`${this.apiBaseUrl}/repos/${repositoryFullName}/issues`, {
-			method: 'POST',
-			headers: {
-				'Authorization': `token ${accessToken}`,
-				'Accept': 'application/vnd.github+json',
-				'X-GitHub-Api-Version': '2022-11-28',
-				'Content-Type': 'application/json',
-				'User-Agent': 'Epic-Stack-Integration/1.0',
+		const response = await fetch(
+			`${this.apiBaseUrl}/repos/${repositoryFullName}/issues`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `token ${accessToken}`,
+					Accept: 'application/vnd.github+json',
+					'X-GitHub-Api-Version': '2022-11-28',
+					'Content-Type': 'application/json',
+					'User-Agent': 'Epic-Stack-Integration/1.0',
+				},
+				body: JSON.stringify(issueData),
 			},
-			body: JSON.stringify(issueData),
-		})
+		)
 
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}))
-			throw new Error(`Failed to create GitHub issue: ${response.statusText} - ${JSON.stringify(errorData)}`)
+			throw new Error(
+				`Failed to create GitHub issue: ${response.statusText} - ${JSON.stringify(errorData)}`,
+			)
 		}
 
 		return await response.json()
@@ -474,21 +525,22 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	 * Format message data as GitHub issue
 	 */
 	async formatGitHubIssue(
-		message: MessageData, 
-		connection: NoteIntegrationConnection
+		message: MessageData,
+		connection: NoteIntegrationConnection,
 	): Promise<any> {
-		const config = typeof connection.config === 'string' ? 
-			JSON.parse(connection.config) : 
-			connection.config
-		
+		const config =
+			typeof connection.config === 'string'
+				? JSON.parse(connection.config)
+				: connection.config
+
 		const includeContent = config?.includeNoteContent ?? true
 
 		let body = `**Author:** ${message.author}\n\n`
-		
+
 		if (includeContent && message.content) {
 			body += `**Content:**\n${message.content}\n\n`
 		}
-		
+
 		body += `**Source:** [View Note](${message.noteUrl})\n`
 		body += `**Change Type:** ${message.changeType}\n`
 		body += `**Created:** ${new Date().toISOString()}`
@@ -540,19 +592,27 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	/**
 	 * Get repository labels
 	 */
-	async getRepositoryLabels(integration: Integration, repositoryFullName: string): Promise<GitHubLabel[]> {
+	async getRepositoryLabels(
+		integration: Integration,
+		repositoryFullName: string,
+	): Promise<GitHubLabel[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const response = await fetch(`${this.apiBaseUrl}/repos/${repositoryFullName}/labels`, {
-				headers: {
-					'Authorization': `token ${accessToken}`,
-					'Accept': 'application/vnd.github+json',
-					'X-GitHub-Api-Version': '2022-11-28',
-					'User-Agent': 'Epic-Stack-Integration/1.0',
+			const response = await fetch(
+				`${this.apiBaseUrl}/repos/${repositoryFullName}/labels`,
+				{
+					headers: {
+						Authorization: `token ${accessToken}`,
+						Accept: 'application/vnd.github+json',
+						'X-GitHub-Api-Version': '2022-11-28',
+						'User-Agent': 'Epic-Stack-Integration/1.0',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to get repository labels: ${response.statusText}`)
+				throw new Error(
+					`Failed to get repository labels: ${response.statusText}`,
+				)
 			}
 
 			return await response.json()
@@ -562,19 +622,27 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	/**
 	 * Get repository milestones
 	 */
-	async getRepositoryMilestones(integration: Integration, repositoryFullName: string): Promise<GitHubMilestone[]> {
+	async getRepositoryMilestones(
+		integration: Integration,
+		repositoryFullName: string,
+	): Promise<GitHubMilestone[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const response = await fetch(`${this.apiBaseUrl}/repos/${repositoryFullName}/milestones?state=open`, {
-				headers: {
-					'Authorization': `token ${accessToken}`,
-					'Accept': 'application/vnd.github+json',
-					'X-GitHub-Api-Version': '2022-11-28',
-					'User-Agent': 'Epic-Stack-Integration/1.0',
+			const response = await fetch(
+				`${this.apiBaseUrl}/repos/${repositoryFullName}/milestones?state=open`,
+				{
+					headers: {
+						Authorization: `token ${accessToken}`,
+						Accept: 'application/vnd.github+json',
+						'X-GitHub-Api-Version': '2022-11-28',
+						'User-Agent': 'Epic-Stack-Integration/1.0',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to get repository milestones: ${response.statusText}`)
+				throw new Error(
+					`Failed to get repository milestones: ${response.statusText}`,
+				)
 			}
 
 			return await response.json()
@@ -584,29 +652,39 @@ export class GitHubProvider extends BaseIntegrationProvider {
 	/**
 	 * Search repository collaborators for assignee selection
 	 */
-	async searchRepositoryCollaborators(integration: Integration, repositoryFullName: string, query: string): Promise<GitHubUser[]> {
+	async searchRepositoryCollaborators(
+		integration: Integration,
+		repositoryFullName: string,
+		query: string,
+	): Promise<GitHubUser[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const response = await fetch(`${this.apiBaseUrl}/repos/${repositoryFullName}/collaborators`, {
-				headers: {
-					'Authorization': `token ${accessToken}`,
-					'Accept': 'application/vnd.github+json',
-					'X-GitHub-Api-Version': '2022-11-28',
-					'User-Agent': 'Epic-Stack-Integration/1.0',
+			const response = await fetch(
+				`${this.apiBaseUrl}/repos/${repositoryFullName}/collaborators`,
+				{
+					headers: {
+						Authorization: `token ${accessToken}`,
+						Accept: 'application/vnd.github+json',
+						'X-GitHub-Api-Version': '2022-11-28',
+						'User-Agent': 'Epic-Stack-Integration/1.0',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to get repository collaborators: ${response.statusText}`)
+				throw new Error(
+					`Failed to get repository collaborators: ${response.statusText}`,
+				)
 			}
 
 			const collaborators: GitHubUser[] = await response.json()
-			
+
 			// Filter collaborators by query if provided
 			if (query) {
 				const lowerQuery = query.toLowerCase()
-				return collaborators.filter(user => 
-					user.login.toLowerCase().includes(lowerQuery) ||
-					(user.name && user.name.toLowerCase().includes(lowerQuery))
+				return collaborators.filter(
+					(user) =>
+						user.login.toLowerCase().includes(lowerQuery) ||
+						(user.name && user.name.toLowerCase().includes(lowerQuery)),
 				)
 			}
 

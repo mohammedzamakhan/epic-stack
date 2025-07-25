@@ -1,5 +1,3 @@
-
-
 import { Link, Form } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
@@ -83,7 +81,6 @@ export function NavUser({
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
-
 							<Form action="/logout" method="POST">
 								<Icon name="exit" className="mr-2 size-4" />
 								<button type="submit" className="w-full text-left">

@@ -28,7 +28,17 @@ const PLANS = {
 }
 
 type BillingCardProps = {
-	organization: Pick<Organization, 'id' | 'name' | 'slug' | 'stripeCustomerId' | 'stripeSubscriptionId' | 'stripeProductId' | 'planName' | 'subscriptionStatus'> & {
+	organization: Pick<
+		Organization,
+		| 'id'
+		| 'name'
+		| 'slug'
+		| 'stripeCustomerId'
+		| 'stripeSubscriptionId'
+		| 'stripeProductId'
+		| 'planName'
+		| 'subscriptionStatus'
+	> & {
 		_count?: {
 			users: number
 		}
@@ -37,23 +47,30 @@ type BillingCardProps = {
 	isClosedBeta?: boolean
 }
 
-export function BillingCard({ organization, plansAndPrices, isClosedBeta }: BillingCardProps) {
+export function BillingCard({
+	organization,
+	plansAndPrices,
+	isClosedBeta,
+}: BillingCardProps) {
 	if (isClosedBeta) {
 		return (
 			<Card>
 				<CardHeader>
 					<CardTitle>Billing & Subscription</CardTitle>
-					<CardDescription>Manage your organization's subscription</CardDescription>
+					<CardDescription>
+						Manage your organization's subscription
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="text-center py-8">
+					<div className="py-8 text-center">
 						<div className="mb-4">
 							<Badge variant="secondary" className="text-sm">
 								Beta Access
 							</Badge>
 						</div>
 						<p className="text-muted-foreground">
-							You are covered during our beta phase. No billing required at this time.
+							You are covered during our beta phase. No billing required at this
+							time.
 						</p>
 					</div>
 				</CardContent>
@@ -67,41 +84,48 @@ export function BillingCard({ organization, plansAndPrices, isClosedBeta }: Bill
 			<Card>
 				<CardHeader>
 					<CardTitle>Current Subscription</CardTitle>
-					<CardDescription>Your organization's current plan and billing status</CardDescription>
+					<CardDescription>
+						Your organization's current plan and billing status
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						<div>
-							<div className="flex items-center gap-2 mb-2">
-								<h3 className="font-medium text-lg">
+							<div className="mb-2 flex items-center gap-2">
+								<h3 className="text-lg font-medium">
 									{organization.planName || 'Free Plan'}
 								</h3>
 								{organization.subscriptionStatus && (
-									<Badge 
+									<Badge
 										variant={
-											organization.subscriptionStatus === 'active' ? 'default' :
-											organization.subscriptionStatus === 'trialing' ? 'secondary' :
-											'destructive'
+											organization.subscriptionStatus === 'active'
+												? 'default'
+												: organization.subscriptionStatus === 'trialing'
+													? 'secondary'
+													: 'destructive'
 										}
 									>
-										{organization.subscriptionStatus === 'active' ? 'Active' :
-										 organization.subscriptionStatus === 'trialing' ? 'Trial' :
-										 organization.subscriptionStatus}
+										{organization.subscriptionStatus === 'active'
+											? 'Active'
+											: organization.subscriptionStatus === 'trialing'
+												? 'Trial'
+												: organization.subscriptionStatus}
 									</Badge>
 								)}
 							</div>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								{organization.subscriptionStatus === 'active'
 									? 'Billed monthly'
 									: organization.subscriptionStatus === 'trialing'
-									? 'Trial period active'
-									: organization.stripeCustomerId
-									? 'Subscription inactive'
-									: 'No active subscription'}
+										? 'Trial period active'
+										: organization.stripeCustomerId
+											? 'Subscription inactive'
+											: 'No active subscription'}
 							</p>
 							{organization._count?.users && (
-								<p className="text-sm text-muted-foreground mt-1">
-									{organization._count.users} active member{organization._count.users !== 1 ? 's' : ''}
+								<p className="text-muted-foreground mt-1 text-sm">
+									{organization._count.users} active member
+									{organization._count.users !== 1 ? 's' : ''}
 								</p>
 							)}
 						</div>
@@ -133,7 +157,10 @@ export function BillingCard({ organization, plansAndPrices, isClosedBeta }: Bill
 						price={PLANS.Base.price}
 						includesSeats={PLANS.Base.seats}
 						additionalSeatPrice={PLANS.Base.additionalSeatPrice}
-						currentPlan={plansAndPrices?.prices.base?.productId === organization.stripeProductId}
+						currentPlan={
+							plansAndPrices?.prices.base?.productId ===
+							organization.stripeProductId
+						}
 						priceId={plansAndPrices?.prices.base?.id}
 					/>
 					<PricingPlan
@@ -141,7 +168,10 @@ export function BillingCard({ organization, plansAndPrices, isClosedBeta }: Bill
 						price={PLANS.Plus.price}
 						includesSeats={PLANS.Plus.seats}
 						additionalSeatPrice={PLANS.Plus.additionalSeatPrice}
-						currentPlan={plansAndPrices?.prices.plus?.productId === organization.stripeProductId}
+						currentPlan={
+							plansAndPrices?.prices.plus?.productId ===
+							organization.stripeProductId
+						}
 						priceId={plansAndPrices?.prices.plus?.id}
 					/>
 				</div>
@@ -152,8 +182,8 @@ export function BillingCard({ organization, plansAndPrices, isClosedBeta }: Bill
 				<CardContent className="pt-6">
 					<div className="flex items-center justify-between">
 						<div>
-							<h3 className="font-semibold mb-2">Enterprise Plan</h3>
-							<p className="text-sm text-muted-foreground">
+							<h3 className="mb-2 font-semibold">Enterprise Plan</h3>
+							<p className="text-muted-foreground text-sm">
 								Single sign-on, custom SLA, private support channel, and more.{' '}
 								<Link to="/contact" className="text-primary hover:underline">
 									Learn more
@@ -171,7 +201,7 @@ export function BillingCard({ organization, plansAndPrices, isClosedBeta }: Bill
 			<Card>
 				<CardContent className="pt-6">
 					<div className="flex items-center justify-between">
-						<div className="text-sm text-muted-foreground">
+						<div className="text-muted-foreground text-sm">
 							Questions about billing?
 						</div>
 						<Button variant="link" className="text-sm" asChild>
@@ -200,16 +230,16 @@ function PricingPlan({
 	priceId?: string
 }) {
 	return (
-		<Card className={currentPlan ? 'ring-2 ring-primary' : ''}>
+		<Card className={currentPlan ? 'ring-primary ring-2' : ''}>
 			<CardHeader>
 				<div className="flex items-baseline gap-2">
 					<CardTitle className="text-2xl font-bold">${price}</CardTitle>
-					<span className="text-sm text-muted-foreground">per month</span>
+					<span className="text-muted-foreground text-sm">per month</span>
 				</div>
 				<CardDescription>{title}</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ul className="text-sm text-muted-foreground space-y-2 mb-4">
+				<ul className="text-muted-foreground mb-4 space-y-2 text-sm">
 					<li>Includes {includesSeats} user seats</li>
 					<li>Additional seats: ${additionalSeatPrice}/seat/month</li>
 				</ul>

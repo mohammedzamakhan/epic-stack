@@ -90,10 +90,7 @@ export async function action(args: Route.ActionArgs) {
 				}
 
 				// Return early with error response
-				return data(
-					{ result: null },
-					{ status: 400, statusText: errorMessage },
-				)
+				return data({ result: null }, { status: 400, statusText: errorMessage })
 			}
 		} catch (error) {
 			// If Arcjet fails, log error but continue with signup process
@@ -151,8 +148,6 @@ export async function action(args: Route.ActionArgs) {
 		)
 	}
 }
-
-
 
 export const meta: Route.MetaFunction = () => {
 	return [{ title: 'Sign Up | Epic Notes' }]

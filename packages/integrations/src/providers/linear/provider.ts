@@ -2,7 +2,10 @@
  * Linear integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -88,7 +91,8 @@ export class LinearProvider extends BaseIntegrationProvider {
 	readonly name = 'linear'
 	readonly type = 'productivity' as const
 	readonly displayName = 'Linear'
-	readonly description = 'Connect notes to Linear teams and projects for issue tracking and project management'
+	readonly description =
+		'Connect notes to Linear teams and projects for issue tracking and project management'
 	readonly logoPath = '/images/integrations/linear.svg'
 
 	private readonly apiBaseUrl = 'https://api.linear.app'
@@ -100,7 +104,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		const clientId = process.env.LINEAR_CLIENT_ID
 		if (!clientId) {
@@ -147,16 +151,16 @@ export class LinearProvider extends BaseIntegrationProvider {
 		// Exchange code for access token (include redirectUri if available in state)
 		const redirectUri = stateData.redirectUri as string | undefined
 		const tokenResponse = await this.exchangeCodeForToken(code, redirectUri)
-		
+
 		// Get user information and create provider config
 		const userInfo = await this.getCurrentUser(tokenResponse.access_token)
-		
+
 		// Note: Integration storage is handled by the calling code
 		// This method only returns the token data
 
 		return {
 			accessToken: tokenResponse.access_token,
-			expiresAt: tokenResponse.expires_in 
+			expiresAt: tokenResponse.expires_in
 				? new Date(Date.now() + tokenResponse.expires_in * 1000)
 				: undefined,
 			scope: tokenResponse.scope,
@@ -169,7 +173,9 @@ export class LinearProvider extends BaseIntegrationProvider {
 	async refreshToken(refreshToken: string): Promise<TokenData> {
 		// Linear doesn't currently support refresh tokens
 		// Access tokens are long-lived (typically 1 year)
-		throw new Error('Linear does not support token refresh. Please re-authenticate.')
+		throw new Error(
+			'Linear does not support token refresh. Please re-authenticate.',
+		)
 	}
 
 	/**
@@ -177,7 +183,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	 */
 	private async makeAuthenticatedApiCall<T>(
 		integration: Integration,
-		apiCall: (accessToken: string) => Promise<T>
+		apiCall: (accessToken: string) => Promise<T>,
 	): Promise<T> {
 		try {
 			// Decrypt the stored access token
@@ -186,13 +192,17 @@ export class LinearProvider extends BaseIntegrationProvider {
 			return await apiCall(accessToken)
 		} catch (error) {
 			// Check if it's an authentication error
-			if (error instanceof Error && (error.message.includes('Authentication required') || error.message.includes('not authenticated'))) {
+			if (
+				error instanceof Error &&
+				(error.message.includes('Authentication required') ||
+					error.message.includes('not authenticated'))
+			) {
 				throw new Error(
 					'Linear access token is invalid or expired. ' +
-					'Please disconnect and reconnect the Linear integration.'
+						'Please disconnect and reconnect the Linear integration.',
 				)
 			}
-			
+
 			// Re-throw other errors
 			throw error
 		}
@@ -208,11 +218,13 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 		try {
 			// Get teams and projects using authenticated API calls
-			const teams = await this.makeAuthenticatedApiCall(integration, (accessToken) => 
-				this.getTeams(accessToken)
+			const teams = await this.makeAuthenticatedApiCall(
+				integration,
+				(accessToken) => this.getTeams(accessToken),
 			)
-			const projects = await this.makeAuthenticatedApiCall(integration, (accessToken) => 
-				this.getProjects(accessToken)
+			const projects = await this.makeAuthenticatedApiCall(
+				integration,
+				(accessToken) => this.getProjects(accessToken),
 			)
 
 			const channels: Channel[] = []
@@ -235,7 +247,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 			// Add projects as channels
 			for (const project of projects) {
-				const teamNames = project.teams.nodes.map(t => t.name).join(', ')
+				const teamNames = project.teams.nodes.map((t) => t.name).join(', ')
 				channels.push({
 					id: `project:${project.id}`,
 					name: `${project.name} (Project)${teamNames ? ` - ${teamNames}` : ''}`,
@@ -253,7 +265,9 @@ export class LinearProvider extends BaseIntegrationProvider {
 			return channels.sort((a, b) => a.name.localeCompare(b.name))
 		} catch (error) {
 			console.error('Error fetching Linear channels:', error)
-			throw new Error(`Failed to fetch Linear channels: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Failed to fetch Linear channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -262,7 +276,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
 		if (!connection.integration.accessToken) {
 			throw new Error('No access token found for integration')
@@ -299,13 +313,17 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 		if (isTeam) {
 			// Create issue in team using authenticated API call
-			await this.makeAuthenticatedApiCall(connection.integration, (accessToken) =>
-				this.createIssueInTeam(accessToken, actualId, title, description)
+			await this.makeAuthenticatedApiCall(
+				connection.integration,
+				(accessToken) =>
+					this.createIssueInTeam(accessToken, actualId, title, description),
 			)
 		} else {
 			// Create issue in project using authenticated API call
-			await this.makeAuthenticatedApiCall(connection.integration, (accessToken) =>
-				this.createIssueInProject(accessToken, actualId, title, description)
+			await this.makeAuthenticatedApiCall(
+				connection.integration,
+				(accessToken) =>
+					this.createIssueInProject(accessToken, actualId, title, description),
 			)
 		}
 	}
@@ -314,7 +332,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	 * Validate that the connection is still active
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		try {
 			if (!connection.integration.accessToken) {
@@ -335,14 +353,16 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 			if (isTeam) {
 				// Validate team exists and is accessible using authenticated API call
-				const team = await this.makeAuthenticatedApiCall(connection.integration, (accessToken) =>
-					this.getTeam(accessToken, actualId)
+				const team = await this.makeAuthenticatedApiCall(
+					connection.integration,
+					(accessToken) => this.getTeam(accessToken, actualId),
 				)
 				return !!team
 			} else {
 				// Validate project exists and is accessible using authenticated API call
-				const project = await this.makeAuthenticatedApiCall(connection.integration, (accessToken) =>
-					this.getProject(accessToken, actualId)
+				const project = await this.makeAuthenticatedApiCall(
+					connection.integration,
+					(accessToken) => this.getProject(accessToken, actualId),
 				)
 				return !!project
 			}
@@ -380,13 +400,15 @@ export class LinearProvider extends BaseIntegrationProvider {
 				includeNoteContent: {
 					type: 'boolean',
 					title: 'Include Note Content',
-					description: 'Include the full note content in the Linear issue description',
+					description:
+						'Include the full note content in the Linear issue description',
 					default: true,
 				},
 				defaultIssueState: {
 					type: 'string',
 					title: 'Default Issue State',
-					description: 'Default state for created issues (e.g., "Todo", "In Progress")',
+					description:
+						'Default state for created issues (e.g., "Todo", "In Progress")',
 					default: 'Todo',
 				},
 				issuePriority: {
@@ -402,12 +424,17 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 	// Private helper methods
 
-	private async exchangeCodeForToken(code: string, redirectUri?: string): Promise<LinearOAuthResponse> {
+	private async exchangeCodeForToken(
+		code: string,
+		redirectUri?: string,
+	): Promise<LinearOAuthResponse> {
 		const clientId = process.env.LINEAR_CLIENT_ID
 		const clientSecret = process.env.LINEAR_CLIENT_SECRET
 
 		if (!clientId || !clientSecret) {
-			throw new Error('LINEAR_CLIENT_ID and LINEAR_CLIENT_SECRET environment variables must be set')
+			throw new Error(
+				'LINEAR_CLIENT_ID and LINEAR_CLIENT_SECRET environment variables must be set',
+			)
 		}
 
 		// Linear OAuth token endpoint
@@ -429,7 +456,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				'Accept': 'application/json',
+				Accept: 'application/json',
 				'User-Agent': 'Epic-Stack-Integration/1.0',
 			},
 			body: requestBody,
@@ -437,40 +464,56 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 		if (!response.ok) {
 			const errorText = await response.text()
-			throw new Error(`Failed to exchange code for token: ${response.status} ${response.statusText}\n${errorText}`)
+			throw new Error(
+				`Failed to exchange code for token: ${response.status} ${response.statusText}\n${errorText}`,
+			)
 		}
 
 		const contentType = response.headers.get('content-type')
 		if (!contentType?.includes('application/json')) {
 			const responseText = await response.text()
-			console.error('Linear OAuth unexpected response type:', contentType, responseText.substring(0, 200))
-			throw new Error(`Expected JSON response but got ${contentType}. Response: ${responseText.substring(0, 200)}...`)
+			console.error(
+				'Linear OAuth unexpected response type:',
+				contentType,
+				responseText.substring(0, 200),
+			)
+			throw new Error(
+				`Expected JSON response but got ${contentType}. Response: ${responseText.substring(0, 200)}...`,
+			)
 		}
 
 		try {
 			const data: LinearOAuthResponse = await response.json()
-			
+
 			if (data.error) {
-				throw new Error(`OAuth token exchange error: ${data.error_description || data.error}`)
+				throw new Error(
+					`OAuth token exchange error: ${data.error_description || data.error}`,
+				)
 			}
 
 			return data
 		} catch (jsonError) {
 			const responseText = await response.text()
-			console.error('Failed to parse Linear OAuth JSON response:', jsonError, responseText.substring(0, 200))
-			throw new Error(`Failed to parse OAuth response as JSON: ${jsonError}. Response: ${responseText.substring(0, 200)}...`)
+			console.error(
+				'Failed to parse Linear OAuth JSON response:',
+				jsonError,
+				responseText.substring(0, 200),
+			)
+			throw new Error(
+				`Failed to parse OAuth response as JSON: ${jsonError}. Response: ${responseText.substring(0, 200)}...`,
+			)
 		}
 	}
 
 	private async makeGraphQLRequest<T = any>(
 		accessToken: string,
 		query: string,
-		variables?: Record<string, any>
+		variables?: Record<string, any>,
 	): Promise<T> {
 		const response = await fetch(`${this.apiBaseUrl}/graphql`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${accessToken}`,
+				Authorization: `Bearer ${accessToken}`,
 				'Content-Type': 'application/json',
 				'User-Agent': 'Epic-Stack-Integration/1.0',
 			},
@@ -482,13 +525,17 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 		if (!response.ok) {
 			const errorText = await response.text()
-			throw new Error(`Linear API request failed: ${response.status} ${response.statusText}\n${errorText}`)
+			throw new Error(
+				`Linear API request failed: ${response.status} ${response.statusText}\n${errorText}`,
+			)
 		}
 
 		const data: LinearGraphQLResponse<T> = await response.json()
 
 		if (data.errors && data.errors.length > 0) {
-			throw new Error(`Linear GraphQL error: ${data.errors[0]?.message || 'Unknown error'}`)
+			throw new Error(
+				`Linear GraphQL error: ${data.errors[0]?.message || 'Unknown error'}`,
+			)
 		}
 
 		if (!data.data) {
@@ -511,7 +558,10 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 		`
 
-		const response = await this.makeGraphQLRequest<{ viewer: LinearUser }>(accessToken, query)
+		const response = await this.makeGraphQLRequest<{ viewer: LinearUser }>(
+			accessToken,
+			query,
+		)
 		return response.viewer
 	}
 
@@ -530,11 +580,16 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 		`
 
-		const response = await this.makeGraphQLRequest<{ teams: { nodes: LinearTeam[] } }>(accessToken, query)
+		const response = await this.makeGraphQLRequest<{
+			teams: { nodes: LinearTeam[] }
+		}>(accessToken, query)
 		return response.teams.nodes
 	}
 
-	private async getTeam(accessToken: string, teamId: string): Promise<LinearTeam> {
+	private async getTeam(
+		accessToken: string,
+		teamId: string,
+	): Promise<LinearTeam> {
 		const query = `
 			query($teamId: String!) {
 				team(id: $teamId) {
@@ -547,7 +602,11 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 		`
 
-		const response = await this.makeGraphQLRequest<{ team: LinearTeam }>(accessToken, query, { teamId })
+		const response = await this.makeGraphQLRequest<{ team: LinearTeam }>(
+			accessToken,
+			query,
+			{ teamId },
+		)
 		return response.team
 	}
 
@@ -573,11 +632,16 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 		`
 
-		const response = await this.makeGraphQLRequest<{ projects: { nodes: LinearProject[] } }>(accessToken, query)
+		const response = await this.makeGraphQLRequest<{
+			projects: { nodes: LinearProject[] }
+		}>(accessToken, query)
 		return response.projects.nodes
 	}
 
-	private async getProject(accessToken: string, projectId: string): Promise<LinearProject> {
+	private async getProject(
+		accessToken: string,
+		projectId: string,
+	): Promise<LinearProject> {
 		const query = `
 			query($projectId: String!) {
 				project(id: $projectId) {
@@ -597,7 +661,11 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 		`
 
-		const response = await this.makeGraphQLRequest<{ project: LinearProject }>(accessToken, query, { projectId })
+		const response = await this.makeGraphQLRequest<{ project: LinearProject }>(
+			accessToken,
+			query,
+			{ projectId },
+		)
 		return response.project
 	}
 
@@ -605,7 +673,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 		accessToken: string,
 		teamId: string,
 		title: string,
-		description: string
+		description: string,
 	): Promise<LinearIssue> {
 		const query = `
 			mutation($input: IssueCreateInput!) {
@@ -665,11 +733,11 @@ export class LinearProvider extends BaseIntegrationProvider {
 		accessToken: string,
 		projectId: string,
 		title: string,
-		description: string
+		description: string,
 	): Promise<LinearIssue> {
 		// First get the project to find its teams
 		const project = await this.getProject(accessToken, projectId)
-		
+
 		if (!project.teams.nodes.length) {
 			throw new Error('Project has no associated teams')
 		}
@@ -733,9 +801,13 @@ export class LinearProvider extends BaseIntegrationProvider {
 	}
 
 	private formatIssueTitle(message: MessageData): string {
-		const prefix = message.changeType === 'created' ? '📝' : 
-					  message.changeType === 'updated' ? '✏️' : '🗑️'
-		
+		const prefix =
+			message.changeType === 'created'
+				? '📝'
+				: message.changeType === 'updated'
+					? '✏️'
+					: '🗑️'
+
 		return `${prefix} ${message.title}`
 	}
 
@@ -744,13 +816,17 @@ export class LinearProvider extends BaseIntegrationProvider {
 
 		// Add note URL
 		parts.push(`**Note:** [${message.title}](${message.noteUrl})`)
-		
+
 		// Add author
 		parts.push(`**Author:** ${message.author}`)
-		
+
 		// Add change type
-		const changeTypeText = message.changeType === 'created' ? 'Created' :
-							  message.changeType === 'updated' ? 'Updated' : 'Deleted'
+		const changeTypeText =
+			message.changeType === 'created'
+				? 'Created'
+				: message.changeType === 'updated'
+					? 'Updated'
+					: 'Deleted'
 		parts.push(`**Action:** ${changeTypeText}`)
 
 		// Add content if enabled

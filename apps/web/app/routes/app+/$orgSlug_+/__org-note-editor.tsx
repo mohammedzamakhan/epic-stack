@@ -32,9 +32,11 @@ const ImageFieldsetSchema = z.object({
 		.any()
 		.optional()
 		.refine(
-			file =>
+			(file) =>
 				!file ||
-				(typeof File !== 'undefined' && file instanceof File && file.size <= MAX_UPLOAD_SIZE),
+				(typeof File !== 'undefined' &&
+					file instanceof File &&
+					file.size <= MAX_UPLOAD_SIZE),
 			'File size must be less than 3MB',
 		),
 	altText: z.string().optional(),
@@ -74,7 +76,7 @@ export function OrgNoteEditor({
 	const isPending = useIsPending()
 	const params = useParams<{ orgSlug: string }>()
 	const fetcher = useFetcher()
-	
+
 	// Track submission state to trigger onSuccess
 	useEffect(() => {
 		if (fetcher.state === 'submitting' && onSuccess) {
@@ -101,8 +103,12 @@ export function OrgNoteEditor({
 			<FormProvider context={form.context}>
 				<fetcher.Form
 					method="POST"
-					action={note ? `/app/${params.orgSlug}/notes/${note.id}/edit` : `/app/${params.orgSlug}/notes/new`}
-					className="flex flex-col gap-y-4 overflow-x-hidden px-6 overflow-y-auto pt-2 pb-8"
+					action={
+						note
+							? `/app/${params.orgSlug}/notes/${note.id}/edit`
+							: `/app/${params.orgSlug}/notes/new`
+					}
+					className="flex flex-col gap-y-4 overflow-x-hidden overflow-y-auto px-6 pt-2 pb-8"
 					{...getFormProps(form)}
 					encType="multipart/form-data"
 				>
@@ -129,10 +135,10 @@ export function OrgNoteEditor({
 							}}
 							errors={fields.content.errors}
 						/>
-						<MultiImageUpload 
-							meta={fields.images} 
-							formId={form.id} 
-							existingImages={note?.images} 
+						<MultiImageUpload
+							meta={fields.images}
+							formId={form.id}
+							existingImages={note?.images}
 						/>
 					</div>
 					<ErrorList id={form.errorId} errors={form.errors} />

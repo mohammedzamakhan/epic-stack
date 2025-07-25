@@ -36,7 +36,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	})
 
 	if (!organization) {
-		throw new Response('Organization not found or you do not have access', { status: 404 })
+		throw new Response('Organization not found or you do not have access', {
+			status: 404,
+		})
 	}
 
 	const formData = await parseFormData(request, {
@@ -112,7 +114,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	// Check if this is a new note or an update
 	const existingNote = await prisma.organizationNote.findUnique({
 		where: { id: noteId },
-		select: { id: true, title: true, content: true }
+		select: { id: true, title: true, content: true },
 	})
 
 	const isNewNote = !existingNote
@@ -121,7 +123,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	if (!isNewNote && existingNote) {
 		beforeSnapshot = {
 			title: existingNote.title,
-			content: existingNote.content
+			content: existingNote.content,
 		}
 	}
 
@@ -161,7 +163,5 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await noteHooks.afterNoteUpdated(updatedNote.id, userId, beforeSnapshot)
 	}
 
-	return redirect(
-		`/app/${orgSlug}/notes/${updatedNote.id}`,
-	)
+	return redirect(`/app/${orgSlug}/notes/${updatedNote.id}`)
 }

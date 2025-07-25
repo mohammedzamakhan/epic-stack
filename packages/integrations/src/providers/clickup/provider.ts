@@ -2,7 +2,10 @@
  * ClickUp integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -222,7 +225,8 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	readonly name = 'clickup'
 	readonly type = 'productivity' as const
 	readonly displayName = 'ClickUp'
-	readonly description = 'Connect notes to ClickUp spaces and lists for task management and project tracking'
+	readonly description =
+		'Connect notes to ClickUp spaces and lists for task management and project tracking'
 	readonly logoPath = '/icons/clickup.svg'
 
 	private readonly apiBaseUrl = 'https://api.clickup.com/api/v2'
@@ -255,7 +259,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		const state = this.generateOAuthState(organizationId, {
 			redirectUri,
@@ -314,7 +318,9 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			const tokenData: ClickUpOAuthResponse = await tokenResponse.json()
 
 			if (tokenData.error) {
-				throw new Error(`Token exchange error: ${tokenData.error_description || tokenData.error}`)
+				throw new Error(
+					`Token exchange error: ${tokenData.error_description || tokenData.error}`,
+				)
 			}
 
 			// Get user information to store in config
@@ -341,7 +347,9 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			}
 		} catch (error) {
 			console.error('ClickUp OAuth callback error:', error)
-			throw new Error(`Failed to exchange ClickUp authorization code: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Failed to exchange ClickUp authorization code: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -352,7 +360,9 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	async refreshToken(refreshToken: string): Promise<TokenData> {
 		// ClickUp doesn't currently support refresh tokens
 		// Users will need to re-authenticate when tokens expire
-		throw new Error('ClickUp does not support token refresh. Please re-authenticate.')
+		throw new Error(
+			'ClickUp does not support token refresh. Please re-authenticate.',
+		)
 	}
 
 	/**
@@ -423,56 +433,73 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
-		return this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-			const connectionConfig = connection.config ? 
-				(typeof connection.config === 'string' ? JSON.parse(connection.config) : connection.config) : 
-				{}
+		return this.makeAuthenticatedApiCall(
+			connection.integration,
+			async (accessToken) => {
+				const connectionConfig = connection.config
+					? typeof connection.config === 'string'
+						? JSON.parse(connection.config)
+						: connection.config
+					: {}
 
-			// Parse channel ID to determine if it's a space or list
-			const channelId = connection.externalId
-			let listId: string
+				// Parse channel ID to determine if it's a space or list
+				const channelId = connection.externalId
+				let listId: string
 
-			if (channelId.startsWith('list:')) {
-				listId = channelId.replace('list:', '')
-			} else if (channelId.startsWith('space:')) {
-				// If it's a space, we need to create the task in a default list
-				// For now, we'll throw an error and require list selection
-				throw new Error('Please select a specific list within the space to create tasks')
-			} else {
-				throw new Error('Invalid channel configuration')
-			}
+				if (channelId.startsWith('list:')) {
+					listId = channelId.replace('list:', '')
+				} else if (channelId.startsWith('space:')) {
+					// If it's a space, we need to create the task in a default list
+					// For now, we'll throw an error and require list selection
+					throw new Error(
+						'Please select a specific list within the space to create tasks',
+					)
+				} else {
+					throw new Error('Invalid channel configuration')
+				}
 
-			// Format task data
-			const taskData = await this.formatClickUpTask(message, listId, connection.integration, connection)
+				// Format task data
+				const taskData = await this.formatClickUpTask(
+					message,
+					listId,
+					connection.integration,
+					connection,
+				)
 
-			// Create the task
-			const task = await this.createTask(accessToken, listId, taskData)
+				// Create the task
+				const task = await this.createTask(accessToken, listId, taskData)
 
-			console.log(`Successfully created ClickUp task: ${task.name} (${task.url})`)
-		})
+				console.log(
+					`Successfully created ClickUp task: ${task.name} (${task.url})`,
+				)
+			},
+		)
 	}
 
 	/**
 	 * Validate a ClickUp connection
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		try {
-			return await this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-				// Try to get user information to validate the token
-				await this.getCurrentUser(accessToken)
+			return await this.makeAuthenticatedApiCall(
+				connection.integration,
+				async (accessToken) => {
+					// Try to get user information to validate the token
+					await this.getCurrentUser(accessToken)
 
-				// If channel is a list, try to get the list to ensure it still exists
-				if (connection.externalId.startsWith('list:')) {
-					const listId = connection.externalId.replace('list:', '')
-					await this.getList(accessToken, listId)
-				}
+					// If channel is a list, try to get the list to ensure it still exists
+					if (connection.externalId.startsWith('list:')) {
+						const listId = connection.externalId.replace('list:', '')
+						await this.getList(accessToken, listId)
+					}
 
-				return true
-			})
+					return true
+				},
+			)
 		} catch (error) {
 			console.error('ClickUp connection validation failed:', error)
 			return false
@@ -524,7 +551,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	 */
 	private async makeAuthenticatedApiCall<T>(
 		integration: Integration,
-		apiCall: (accessToken: string) => Promise<T>
+		apiCall: (accessToken: string) => Promise<T>,
 	): Promise<T> {
 		try {
 			if (!integration.accessToken) {
@@ -567,13 +594,19 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get spaces for a team
 	 */
-	private async getSpaces(accessToken: string, teamId: string): Promise<ClickUpSpace[]> {
-		const response = await fetch(`${this.apiBaseUrl}/team/${teamId}/space?archived=false`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				Accept: 'application/json',
+	private async getSpaces(
+		accessToken: string,
+		teamId: string,
+	): Promise<ClickUpSpace[]> {
+		const response = await fetch(
+			`${this.apiBaseUrl}/team/${teamId}/space?archived=false`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					Accept: 'application/json',
+				},
 			},
-		})
+		)
 
 		if (!response.ok) {
 			throw new Error(`Failed to get ClickUp spaces: ${response.statusText}`)
@@ -586,13 +619,19 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get lists for a space
 	 */
-	private async getLists(accessToken: string, spaceId: string): Promise<ClickUpList[]> {
-		const response = await fetch(`${this.apiBaseUrl}/space/${spaceId}/list?archived=false`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				Accept: 'application/json',
+	private async getLists(
+		accessToken: string,
+		spaceId: string,
+	): Promise<ClickUpList[]> {
+		const response = await fetch(
+			`${this.apiBaseUrl}/space/${spaceId}/list?archived=false`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					Accept: 'application/json',
+				},
 			},
-		})
+		)
 
 		if (!response.ok) {
 			throw new Error(`Failed to get ClickUp lists: ${response.statusText}`)
@@ -605,7 +644,10 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get a specific list
 	 */
-	private async getList(accessToken: string, listId: string): Promise<ClickUpList> {
+	private async getList(
+		accessToken: string,
+		listId: string,
+	): Promise<ClickUpList> {
 		const response = await fetch(`${this.apiBaseUrl}/list/${listId}`, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -626,7 +668,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	private async createTask(
 		accessToken: string,
 		listId: string,
-		taskData: any
+		taskData: any,
 	): Promise<ClickUpCreateTaskResponse> {
 		const response = await fetch(`${this.apiBaseUrl}/list/${listId}/task`, {
 			method: 'POST',
@@ -653,11 +695,13 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		message: MessageData,
 		listId: string,
 		integration: Integration,
-		connection?: NoteIntegrationConnection
+		connection?: NoteIntegrationConnection,
 	): Promise<any> {
-		const connectionConfig = connection?.config ? 
-			(typeof connection.config === 'string' ? JSON.parse(connection.config) : connection.config) : 
-			{}
+		const connectionConfig = connection?.config
+			? typeof connection.config === 'string'
+				? JSON.parse(connection.config)
+				: connection.config
+			: {}
 
 		// Format task title
 		const title = this.formatTaskTitle(message)
@@ -681,11 +725,17 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			taskData.priority = connectionConfig.defaultPriority
 		}
 
-		if (connectionConfig.defaultAssignees && connectionConfig.defaultAssignees.length > 0) {
+		if (
+			connectionConfig.defaultAssignees &&
+			connectionConfig.defaultAssignees.length > 0
+		) {
 			taskData.assignees = connectionConfig.defaultAssignees
 		}
 
-		if (connectionConfig.defaultTags && connectionConfig.defaultTags.length > 0) {
+		if (
+			connectionConfig.defaultTags &&
+			connectionConfig.defaultTags.length > 0
+		) {
 			taskData.tags = connectionConfig.defaultTags
 		}
 
@@ -712,8 +762,12 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		const parts: string[] = []
 
 		// Add change type information
-		const changeTypeText = message.changeType === 'created' ? 'Created' : 
-			message.changeType === 'updated' ? 'Updated' : 'Deleted'
+		const changeTypeText =
+			message.changeType === 'created'
+				? 'Created'
+				: message.changeType === 'updated'
+					? 'Updated'
+					: 'Deleted'
 		parts.push(`**${changeTypeText} by ${message.author}**`)
 
 		// Add note URL
@@ -770,7 +824,10 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get team spaces for UI utilities
 	 */
-	async getTeamSpaces(integration: Integration, teamId: string): Promise<ClickUpSpace[]> {
+	async getTeamSpaces(
+		integration: Integration,
+		teamId: string,
+	): Promise<ClickUpSpace[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			return this.getSpaces(accessToken, teamId)
 		})
@@ -779,7 +836,10 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	/**
 	 * Get space lists for UI utilities
 	 */
-	async getSpaceLists(integration: Integration, spaceId: string): Promise<ClickUpList[]> {
+	async getSpaceLists(
+		integration: Integration,
+		spaceId: string,
+	): Promise<ClickUpList[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			return this.getLists(accessToken, spaceId)
 		})

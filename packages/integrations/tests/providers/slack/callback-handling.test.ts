@@ -5,226 +5,253 @@ import { http, HttpResponse } from 'msw'
 import { fixtures } from '../../utils/fixtures'
 
 describe('SlackProvider - Callback Handling', () => {
-  let provider: SlackProvider
-  
-  beforeEach(() => {
-    provider = new SlackProvider()
-    // Reset environment variables
-    delete process.env.SLACK_CLIENT_ID
-    delete process.env.SLACK_CLIENT_SECRET
-  })
+	let provider: SlackProvider
 
-  describe('handleCallback', () => {
-    it('should return mock token data when using demo credentials', async () => {
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+	beforeEach(() => {
+		provider = new SlackProvider()
+		// Reset environment variables
+		delete process.env.SLACK_CLIENT_ID
+		delete process.env.SLACK_CLIENT_SECRET
+	})
 
-      const tokenData = await provider.handleCallback(params)
+	describe('handleCallback', () => {
+		it('should return mock token data when using demo credentials', async () => {
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-      expect(tokenData.accessToken).toMatch(/^mock-slack-token-\d+$/)
-      expect(tokenData.scope).toBe('channels:read,chat:write,channels:history,groups:read')
-      expect(tokenData.metadata).toEqual({
-        teamId: 'T1234567890',
-        teamName: 'Demo Team',
-        botUserId: 'U1234567890'
-      })
-    })
+			const tokenData = await provider.handleCallback(params)
 
-    it('should exchange code for real token when using real credentials', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			expect(tokenData.accessToken).toMatch(/^mock-slack-token-\d+$/)
+			expect(tokenData.scope).toBe(
+				'channels:read,chat:write,channels:history,groups:read',
+			)
+			expect(tokenData.metadata).toEqual({
+				teamId: 'T1234567890',
+				teamName: 'Demo Team',
+				botUserId: 'U1234567890',
+			})
+		})
 
-      // Override the handler to ensure we get the correct response
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', () => {
-          return HttpResponse.json(fixtures.slack.oauthResponse)
-        })
-      )
+		it('should exchange code for real token when using real credentials', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			// Override the handler to ensure we get the correct response
+			server.use(
+				http.post('https://slack.com/api/oauth.v2.access', () => {
+					return HttpResponse.json(fixtures.slack.oauthResponse)
+				}),
+			)
 
-      const tokenData = await provider.handleCallback(params)
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-      expect(tokenData.accessToken).toBe('xoxb-test-slack-token')
-      expect(tokenData.scope).toBe('channels:read,chat:write')
-      expect(tokenData.metadata).toEqual({
-        teamId: 'T1234567890',
-        teamName: 'Test Team',
-        botUserId: 'U1234567890'
-      })
-    })
+			const tokenData = await provider.handleCallback(params)
 
-    it('should handle OAuth API errors', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			expect(tokenData.accessToken).toBe('xoxb-test-slack-token')
+			expect(tokenData.scope).toBe('channels:read,chat:write')
+			expect(tokenData.metadata).toEqual({
+				teamId: 'T1234567890',
+				teamName: 'Test Team',
+				botUserId: 'U1234567890',
+			})
+		})
 
-      // Mock error response
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', () => {
-          return HttpResponse.json(fixtures.slack.oauthErrorResponse)
-        })
-      )
+		it('should handle OAuth API errors', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'error-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			// Mock error response
+			server.use(
+				http.post('https://slack.com/api/oauth.v2.access', () => {
+					return HttpResponse.json(fixtures.slack.oauthErrorResponse)
+				}),
+			)
 
-      await expect(provider.handleCallback(params)).rejects.toThrow('Slack OAuth error: invalid_code')
-    })
+			const params = {
+				organizationId: 'org-123',
+				code: 'error-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-    it('should handle network errors during token exchange', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Slack OAuth error: invalid_code',
+			)
+		})
 
-      // Mock network error
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', () => {
-          return HttpResponse.error()
-        })
-      )
+		it('should handle network errors during token exchange', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			// Mock network error
+			server.use(
+				http.post('https://slack.com/api/oauth.v2.access', () => {
+					return HttpResponse.error()
+				}),
+			)
 
-      await expect(provider.handleCallback(params)).rejects.toThrow('Failed to exchange OAuth code')
-    })
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-    it('should handle HTTP error responses', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Failed to exchange OAuth code',
+			)
+		})
 
-      // Mock HTTP error
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', () => {
-          return HttpResponse.json({ error: 'server_error' }, { status: 500 })
-        })
-      )
+		it('should handle HTTP error responses', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			// Mock HTTP error
+			server.use(
+				http.post('https://slack.com/api/oauth.v2.access', () => {
+					return HttpResponse.json({ error: 'server_error' }, { status: 500 })
+				}),
+			)
 
-      await expect(provider.handleCallback(params)).rejects.toThrow('Slack OAuth API error: 500')
-    })
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-    it('should handle missing access token in response', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Slack OAuth API error: 500',
+			)
+		})
 
-      // Mock response without access token
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', () => {
-          return HttpResponse.json({
-            ok: true,
-            // Missing access_token
-            scope: 'channels:read,chat:write'
-          })
-        })
-      )
+		it('should handle missing access token in response', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			// Mock response without access token
+			server.use(
+				http.post('https://slack.com/api/oauth.v2.access', () => {
+					return HttpResponse.json({
+						ok: true,
+						// Missing access_token
+						scope: 'channels:read,chat:write',
+					})
+				}),
+			)
 
-      await expect(provider.handleCallback(params)).rejects.toThrow('Slack OAuth error: Unknown error')
-    })
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-    it('should handle invalid state parameter', async () => {
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: 'invalid-base64-state'
-      }
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Slack OAuth error: Unknown error',
+			)
+		})
 
-      // The current implementation doesn't validate state, it returns mock data for demo credentials
-      // This test documents the current behavior
-      const tokenData = await provider.handleCallback(params)
-      expect(tokenData.accessToken).toMatch(/^mock-slack-token-\d+$/)
-    })
+		it('should handle invalid state parameter', async () => {
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: 'invalid-base64-state',
+			}
 
-    it('should make correct API request with real credentials', async () => {
-      process.env.SLACK_CLIENT_ID = 'real-client-id'
-      process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
+			// The current implementation doesn't validate state, it returns mock data for demo credentials
+			// This test documents the current behavior
+			const tokenData = await provider.handleCallback(params)
+			expect(tokenData.accessToken).toMatch(/^mock-slack-token-\d+$/)
+		})
 
-      let requestBody: string = ''
-      server.use(
-        http.post('https://slack.com/api/oauth.v2.access', async ({ request }) => {
-          requestBody = await request.text()
-          return HttpResponse.json(fixtures.slack.oauthResponse)
-        })
-      )
+		it('should make correct API request with real credentials', async () => {
+			process.env.SLACK_CLIENT_ID = 'real-client-id'
+			process.env.SLACK_CLIENT_SECRET = 'real-client-secret'
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'test-auth-code',
-        state: Buffer.from(JSON.stringify({
-          organizationId: 'org-123',
-          providerName: 'slack',
-          timestamp: Date.now(),
-          nonce: 'test-nonce'
-        })).toString('base64')
-      }
+			let requestBody: string = ''
+			server.use(
+				http.post(
+					'https://slack.com/api/oauth.v2.access',
+					async ({ request }) => {
+						requestBody = await request.text()
+						return HttpResponse.json(fixtures.slack.oauthResponse)
+					},
+				),
+			)
 
-      await provider.handleCallback(params)
+			const params = {
+				organizationId: 'org-123',
+				code: 'test-auth-code',
+				state: Buffer.from(
+					JSON.stringify({
+						organizationId: 'org-123',
+						providerName: 'slack',
+						timestamp: Date.now(),
+						nonce: 'test-nonce',
+					}),
+				).toString('base64'),
+			}
 
-      const parsedBody = new URLSearchParams(requestBody)
-      expect(parsedBody.get('client_id')).toBe('real-client-id')
-      expect(parsedBody.get('client_secret')).toBe('real-client-secret')
-      expect(parsedBody.get('code')).toBe('test-auth-code')
-    })
-  })
+			await provider.handleCallback(params)
 
-  describe('refreshToken', () => {
-    it('should throw error as Slack does not support token refresh', async () => {
-      await expect(provider.refreshToken('refresh-token')).rejects.toThrow(
-        'Slack bot tokens do not require refresh'
-      )
-    })
-  })
+			const parsedBody = new URLSearchParams(requestBody)
+			expect(parsedBody.get('client_id')).toBe('real-client-id')
+			expect(parsedBody.get('client_secret')).toBe('real-client-secret')
+			expect(parsedBody.get('code')).toBe('test-auth-code')
+		})
+	})
+
+	describe('refreshToken', () => {
+		it('should throw error as Slack does not support token refresh', async () => {
+			await expect(provider.refreshToken('refresh-token')).rejects.toThrow(
+				'Slack bot tokens do not require refresh',
+			)
+		})
+	})
 })

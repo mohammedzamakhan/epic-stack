@@ -127,7 +127,7 @@ export async function signup({
 	request?: Request
 }) {
 	const hashedPassword = await getPasswordHash(password)
-	
+
 	// Get UTM parameters from cookies if request is provided
 	const utmParams = request ? await getUtmParams(request) : null
 

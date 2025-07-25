@@ -1,9 +1,4 @@
-import {
-    Link,
-    Outlet,
-    useMatches,
-    useRouteLoaderData,
-} from 'react-router'
+import { Link, Outlet, useMatches, useRouteLoaderData } from 'react-router'
 
 import { EpicProgress } from '#app/components/progress-bar.tsx'
 import { SearchBar } from '#app/components/search-bar.tsx'
@@ -12,24 +7,21 @@ import { Button } from '#app/components/ui/button.tsx'
 import { EpicToaster } from '#app/components/ui/sonner.tsx'
 import { UserDropdown } from '#app/components/user-dropdown.tsx'
 import { type loader } from '#app/root.tsx'
-import {
-    ThemeSwitch,
-    useTheme,
-} from '#app/routes/resources+/theme-switch.tsx'
+import { ThemeSwitch, useTheme } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalUser } from '#app/utils/user.ts'
 import { HeroHeader } from '#app/components/ui/header.tsx'
 
 function Logo() {
-    return (
-        <Link to="/" className="group grid leading-snug">
-            <span className="font-light transition group-hover:-translate-x-1">
-                epic
-            </span>
-            <span className="font-bold transition group-hover:translate-x-1">
-                notes
-            </span>
-        </Link>
-    )
+	return (
+		<Link to="/" className="group grid leading-snug">
+			<span className="font-light transition group-hover:-translate-x-1">
+				epic
+			</span>
+			<span className="font-bold transition group-hover:translate-x-1">
+				notes
+			</span>
+		</Link>
+	)
 }
 
 export default function MarketingLayout() {

@@ -2,7 +2,10 @@
  * GitLab integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -111,7 +114,8 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	readonly name = 'gitlab'
 	readonly type = 'productivity' as const
 	readonly displayName = 'GitLab'
-	readonly description = 'Connect notes to GitLab projects for issue tracking and project management'
+	readonly description =
+		'Connect notes to GitLab projects for issue tracking and project management'
 	readonly logoPath = '/icons/gitlab.svg'
 
 	private readonly apiBaseUrl = 'https://gitlab.com/api/v4'
@@ -139,15 +143,19 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 	private getBaseUrl(integration?: Integration): string {
 		// Support for self-hosted GitLab instances
-		const config = integration?.config ? 
-			(typeof integration.config === 'string' ? JSON.parse(integration.config) : integration.config) : 
-			null
+		const config = integration?.config
+			? typeof integration.config === 'string'
+				? JSON.parse(integration.config)
+				: integration.config
+			: null
 		const instanceUrl = config?.instanceUrl as string
-		
+
 		if (instanceUrl) {
-			return instanceUrl.endsWith('/') ? `${instanceUrl}api/v4` : `${instanceUrl}/api/v4`
+			return instanceUrl.endsWith('/')
+				? `${instanceUrl}api/v4`
+				: `${instanceUrl}/api/v4`
 		}
-		
+
 		return this.apiBaseUrl
 	}
 
@@ -157,7 +165,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		const state = this.generateOAuthState(organizationId, {
 			redirectUri,
@@ -174,9 +182,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 		// Support custom GitLab instances
 		const instanceUrl = additionalParams?.instanceUrl as string
-		const authUrl = instanceUrl ? 
-			`${instanceUrl}/oauth/authorize` : 
-			`${this.authBaseUrl}/authorize`
+		const authUrl = instanceUrl
+			? `${instanceUrl}/oauth/authorize`
+			: `${this.authBaseUrl}/authorize`
 
 		return `${authUrl}?${params.toString()}`
 	}
@@ -187,7 +195,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	async handleCallback(params: OAuthCallbackParams): Promise<TokenData> {
 		if (params.error) {
 			throw new Error(
-				`GitLab OAuth error: ${params.error} - ${params.errorDescription || 'Unknown error'}`
+				`GitLab OAuth error: ${params.error} - ${params.errorDescription || 'Unknown error'}`,
 			)
 		}
 
@@ -203,9 +211,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 		// Support custom GitLab instances
 		const instanceUrl = stateData.instanceUrl as string
-		const tokenUrl = instanceUrl ? 
-			`${instanceUrl}/oauth/token` : 
-			`${this.authBaseUrl}/token`
+		const tokenUrl = instanceUrl
+			? `${instanceUrl}/oauth/token`
+			: `${this.authBaseUrl}/token`
 
 		try {
 			const tokenResponse = await fetch(tokenUrl, {
@@ -231,7 +239,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			const tokenData: GitLabOAuthResponse = await tokenResponse.json()
 
 			if (tokenData.error) {
-				throw new Error(`Token exchange error: ${tokenData.error_description || tokenData.error}`)
+				throw new Error(
+					`Token exchange error: ${tokenData.error_description || tokenData.error}`,
+				)
 			}
 
 			if (!tokenData.access_token) {
@@ -239,10 +249,13 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			}
 
 			// Get user info to store in config
-			const userInfo = await this.getCurrentUser(tokenData.access_token, instanceUrl)
+			const userInfo = await this.getCurrentUser(
+				tokenData.access_token,
+				instanceUrl,
+			)
 
 			// Calculate expiration date
-			const expiresAt = tokenData.expires_in 
+			const expiresAt = tokenData.expires_in
 				? new Date(Date.now() + tokenData.expires_in * 1000)
 				: undefined
 
@@ -263,7 +276,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				},
 			}
 		} catch (error) {
-			throw new Error(`GitLab OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`GitLab OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -298,7 +313,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			const tokenData: GitLabOAuthResponse = await tokenResponse.json()
 
 			if (tokenData.error) {
-				throw new Error(`Token refresh error: ${tokenData.error_description || tokenData.error}`)
+				throw new Error(
+					`Token refresh error: ${tokenData.error_description || tokenData.error}`,
+				)
 			}
 
 			if (!tokenData.access_token) {
@@ -306,7 +323,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			}
 
 			// Calculate expiration date
-			const expiresAt = tokenData.expires_in 
+			const expiresAt = tokenData.expires_in
 				? new Date(Date.now() + tokenData.expires_in * 1000)
 				: undefined
 
@@ -317,7 +334,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				scope: tokenData.scope,
 			}
 		} catch (error) {
-			throw new Error(`GitLab token refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`GitLab token refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -327,21 +346,23 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	async getAvailableChannels(integration: Integration): Promise<Channel[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const projects = await this.getProjects(accessToken, integration)
-			
-			return projects.map((project): Channel => ({
-				id: project.id.toString(),
-				name: project.name_with_namespace,
-				type: project.visibility === 'private' ? 'private' : 'public',
-				metadata: {
-					projectId: project.id,
-					projectPath: project.path_with_namespace,
-					description: project.description,
-					webUrl: project.web_url,
-					avatarUrl: project.avatar_url,
-					defaultBranch: project.default_branch,
-					namespace: project.namespace,
-				},
-			}))
+
+			return projects.map(
+				(project): Channel => ({
+					id: project.id.toString(),
+					name: project.name_with_namespace,
+					type: project.visibility === 'private' ? 'private' : 'public',
+					metadata: {
+						projectId: project.id,
+						projectPath: project.path_with_namespace,
+						description: project.description,
+						webUrl: project.web_url,
+						avatarUrl: project.avatar_url,
+						defaultBranch: project.default_branch,
+						namespace: project.namespace,
+					},
+				}),
+			)
 		})
 	}
 
@@ -350,44 +371,66 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
-		await this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-			const config = typeof connection.config === 'string' ? 
-				JSON.parse(connection.config) : 
-				connection.config
+		await this.makeAuthenticatedApiCall(
+			connection.integration,
+			async (accessToken) => {
+				const config =
+					typeof connection.config === 'string'
+						? JSON.parse(connection.config)
+						: connection.config
 
-			const projectId = config?.projectId || connection.externalId
-			if (!projectId) {
-				throw new Error('Project ID is required for GitLab integration')
-			}
+				const projectId = config?.projectId || connection.externalId
+				if (!projectId) {
+					throw new Error('Project ID is required for GitLab integration')
+				}
 
-			const issueData = await this.formatGitLabIssue(message, projectId, connection.integration, connection)
-			await this.createIssue(accessToken, projectId, issueData, connection.integration)
-		})
+				const issueData = await this.formatGitLabIssue(
+					message,
+					projectId,
+					connection.integration,
+					connection,
+				)
+				await this.createIssue(
+					accessToken,
+					projectId,
+					issueData,
+					connection.integration,
+				)
+			},
+		)
 	}
 
 	/**
 	 * Validate a GitLab connection
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		try {
-			return await this.makeAuthenticatedApiCall(connection.integration, async (accessToken) => {
-				const config = typeof connection.config === 'string' ? 
-					JSON.parse(connection.config) : 
-					connection.config
+			return await this.makeAuthenticatedApiCall(
+				connection.integration,
+				async (accessToken) => {
+					const config =
+						typeof connection.config === 'string'
+							? JSON.parse(connection.config)
+							: connection.config
 
-				const projectId = config?.projectId || connection.externalId
-				if (!projectId) {
-					return false
-				}
+					const projectId = config?.projectId || connection.externalId
+					if (!projectId) {
+						return false
+					}
 
-				// Try to get the project to validate access
-				const project = await this.getProject(accessToken, projectId, connection.integration)
-				return !!project
-			})
+					// Try to get the project to validate access
+					const project = await this.getProject(
+						accessToken,
+						projectId,
+						connection.integration,
+					)
+					return !!project
+				},
+			)
 		} catch (error) {
 			console.error('GitLab connection validation failed:', error)
 			return false
@@ -404,7 +447,8 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				instanceUrl: {
 					type: 'string',
 					title: 'GitLab Instance URL',
-					description: 'Custom GitLab instance URL (leave empty for gitlab.com)',
+					description:
+						'Custom GitLab instance URL (leave empty for gitlab.com)',
 					format: 'uri',
 				},
 				user: {
@@ -425,10 +469,11 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	/**
 	 * Get current user information
 	 */
-	async getCurrentUser(accessToken: string, instanceUrl?: string): Promise<GitLabUser> {
-		const baseUrl = instanceUrl ? 
-			`${instanceUrl}/api/v4` : 
-			this.apiBaseUrl
+	async getCurrentUser(
+		accessToken: string,
+		instanceUrl?: string,
+	): Promise<GitLabUser> {
+		const baseUrl = instanceUrl ? `${instanceUrl}/api/v4` : this.apiBaseUrl
 		const url = `${baseUrl}/user`
 
 		const response = await fetch(url, {
@@ -440,7 +485,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 		if (!response.ok) {
 			const errorText = await response.text()
-			throw new Error(`Failed to get GitLab user: ${response.statusText} - ${errorText}`)
+			throw new Error(
+				`Failed to get GitLab user: ${response.statusText} - ${errorText}`,
+			)
 		}
 
 		const userData = await response.json()
@@ -452,7 +499,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 */
 	private async makeAuthenticatedApiCall<T>(
 		integration: Integration,
-		apiCall: (accessToken: string) => Promise<T>
+		apiCall: (accessToken: string) => Promise<T>,
 	): Promise<T> {
 		try {
 			if (!integration.accessToken) {
@@ -471,7 +518,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 				try {
 					const newTokenData = await this.refreshToken(integration.refreshToken)
-					
+
 					// Update the integration with new tokens (this would typically be done by the calling code)
 					integration.accessToken = newTokenData.accessToken
 					if (newTokenData.refreshToken) {
@@ -484,7 +531,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 					// Retry the API call with the new token (already decrypted)
 					return await apiCall(newTokenData.accessToken)
 				} catch (refreshError) {
-					throw new Error(`Token refresh failed: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`)
+					throw new Error(
+						`Token refresh failed: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`,
+					)
 				}
 			}
 
@@ -495,10 +544,13 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	/**
 	 * Get GitLab projects
 	 */
-	private async getProjects(accessToken: string, integration: Integration): Promise<GitLabProject[]> {
+	private async getProjects(
+		accessToken: string,
+		integration: Integration,
+	): Promise<GitLabProject[]> {
 		const baseUrl = this.getBaseUrl(integration)
 		const url = `${baseUrl}/projects?membership=true&per_page=100&order_by=last_activity_at`
-		
+
 		const response = await fetch(url, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -508,7 +560,9 @@ export class GitLabProvider extends BaseIntegrationProvider {
 
 		if (!response.ok) {
 			const errorText = await response.text()
-			throw new Error(`Failed to get GitLab projects: ${response.statusText} - ${errorText}`)
+			throw new Error(
+				`Failed to get GitLab projects: ${response.statusText} - ${errorText}`,
+			)
 		}
 
 		return response.json()
@@ -517,15 +571,22 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	/**
 	 * Get a specific GitLab project
 	 */
-	private async getProject(accessToken: string, projectId: string, integration: Integration): Promise<GitLabProject> {
+	private async getProject(
+		accessToken: string,
+		projectId: string,
+		integration: Integration,
+	): Promise<GitLabProject> {
 		const baseUrl = this.getBaseUrl(integration)
-		
-		const response = await fetch(`${baseUrl}/projects/${encodeURIComponent(projectId)}`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				Accept: 'application/json',
+
+		const response = await fetch(
+			`${baseUrl}/projects/${encodeURIComponent(projectId)}`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					Accept: 'application/json',
+				},
 			},
-		})
+		)
 
 		if (!response.ok) {
 			throw new Error(`Failed to get GitLab project: ${response.statusText}`)
@@ -538,22 +599,25 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Create a GitLab issue
 	 */
 	private async createIssue(
-		accessToken: string, 
-		projectId: string, 
-		issueData: any, 
-		integration: Integration
+		accessToken: string,
+		projectId: string,
+		issueData: any,
+		integration: Integration,
 	): Promise<GitLabCreateIssueResponse> {
 		const baseUrl = this.getBaseUrl(integration)
-		
-		const response = await fetch(`${baseUrl}/projects/${encodeURIComponent(projectId)}/issues`, {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				'Content-Type': 'application/json',
-				Accept: 'application/json',
+
+		const response = await fetch(
+			`${baseUrl}/projects/${encodeURIComponent(projectId)}/issues`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+				body: JSON.stringify(issueData),
 			},
-			body: JSON.stringify(issueData),
-		})
+		)
 
 		if (!response.ok) {
 			const errorText = await response.text()
@@ -567,20 +631,22 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Format message data as GitLab issue
 	 */
 	private async formatGitLabIssue(
-		message: MessageData, 
-		projectId: string, 
+		message: MessageData,
+		projectId: string,
 		integration: Integration,
-		connection?: NoteIntegrationConnection
+		connection?: NoteIntegrationConnection,
 	): Promise<any> {
-		const config = connection?.config ? 
-			(typeof connection.config === 'string' ? JSON.parse(connection.config) : connection.config) : 
-			{}
+		const config = connection?.config
+			? typeof connection.config === 'string'
+				? JSON.parse(connection.config)
+				: connection.config
+			: {}
 
 		const includeContent = config.includeNoteContent !== false
 		const labels = config.defaultLabels || []
 
 		let description = `**Note by ${message.author}**\n\n`
-		
+
 		if (includeContent && message.content) {
 			// Truncate content if too long (GitLab has a limit)
 			const truncatedContent = this.truncateText(message.content, 50000)
@@ -636,19 +702,27 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Get project labels
 	 * Public method for UI utilities
 	 */
-	async getProjectLabels(integration: Integration, projectId: string): Promise<GitLabLabel[]> {
+	async getProjectLabels(
+		integration: Integration,
+		projectId: string,
+	): Promise<GitLabLabel[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const baseUrl = this.getBaseUrl(integration)
-			
-			const response = await fetch(`${baseUrl}/projects/${encodeURIComponent(projectId)}/labels`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					Accept: 'application/json',
+
+			const response = await fetch(
+				`${baseUrl}/projects/${encodeURIComponent(projectId)}/labels`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						Accept: 'application/json',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to get GitLab project labels: ${response.statusText}`)
+				throw new Error(
+					`Failed to get GitLab project labels: ${response.statusText}`,
+				)
 			}
 
 			return response.json()
@@ -659,19 +733,27 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Get project milestones
 	 * Public method for UI utilities
 	 */
-	async getProjectMilestones(integration: Integration, projectId: string): Promise<GitLabMilestone[]> {
+	async getProjectMilestones(
+		integration: Integration,
+		projectId: string,
+	): Promise<GitLabMilestone[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const baseUrl = this.getBaseUrl(integration)
-			
-			const response = await fetch(`${baseUrl}/projects/${encodeURIComponent(projectId)}/milestones?state=active`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					Accept: 'application/json',
+
+			const response = await fetch(
+				`${baseUrl}/projects/${encodeURIComponent(projectId)}/milestones?state=active`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						Accept: 'application/json',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to get GitLab project milestones: ${response.statusText}`)
+				throw new Error(
+					`Failed to get GitLab project milestones: ${response.statusText}`,
+				)
 			}
 
 			return response.json()
@@ -682,24 +764,33 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Search project users for assignee selection
 	 * Public method for UI utilities
 	 */
-	async searchProjectUsers(integration: Integration, projectId: string, query: string): Promise<GitLabUser[]> {
+	async searchProjectUsers(
+		integration: Integration,
+		projectId: string,
+		query: string,
+	): Promise<GitLabUser[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const baseUrl = this.getBaseUrl(integration)
-			
+
 			const params = new URLSearchParams({
 				search: query,
 				per_page: '20',
 			})
-			
-			const response = await fetch(`${baseUrl}/projects/${encodeURIComponent(projectId)}/users?${params}`, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					Accept: 'application/json',
+
+			const response = await fetch(
+				`${baseUrl}/projects/${encodeURIComponent(projectId)}/users?${params}`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						Accept: 'application/json',
+					},
 				},
-			})
+			)
 
 			if (!response.ok) {
-				throw new Error(`Failed to search GitLab project users: ${response.statusText}`)
+				throw new Error(
+					`Failed to search GitLab project users: ${response.statusText}`,
+				)
 			}
 
 			return response.json()
@@ -710,9 +801,10 @@ export class GitLabProvider extends BaseIntegrationProvider {
 	 * Get instance URL from integration config
 	 */
 	private getInstanceUrl(integration: Integration): string | undefined {
-		const config = typeof integration.config === 'string' ? 
-			JSON.parse(integration.config) : 
-			integration.config
+		const config =
+			typeof integration.config === 'string'
+				? JSON.parse(integration.config)
+				: integration.config
 		return config?.instanceUrl
 	}
 }

@@ -2,7 +2,10 @@
  * Notion integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -159,7 +162,8 @@ export class NotionProvider extends BaseIntegrationProvider {
 	readonly name = 'notion'
 	readonly type = 'productivity' as const
 	readonly displayName = 'Notion'
-	readonly description = 'Connect notes to Notion databases for knowledge management and collaboration'
+	readonly description =
+		'Connect notes to Notion databases for knowledge management and collaboration'
 	readonly logoPath = '/icons/notion.svg'
 
 	private readonly apiBaseUrl = 'https://api.notion.com/v1'
@@ -192,7 +196,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		const state = this.generateOAuthState(organizationId, {
 			redirectUri,
@@ -225,12 +229,14 @@ export class NotionProvider extends BaseIntegrationProvider {
 		// Exchange code for access token
 		// Notion requires HTTP Basic Auth (base64 encoded credentials) + JSON content
 		// Based on: https://floppynaomi.github.io/blog/notion-oauth-node-express/
-		const credentials = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')
-		
+		const credentials = Buffer.from(
+			`${this.clientId}:${this.clientSecret}`,
+		).toString('base64')
+
 		const tokenResponse = await fetch(`${this.authBaseUrl}/token`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Basic ${credentials}`,
+				Authorization: `Basic ${credentials}`,
 				'Content-Type': 'application/json',
 				'Notion-Version': this.apiVersion,
 			},
@@ -244,13 +250,17 @@ export class NotionProvider extends BaseIntegrationProvider {
 		if (!tokenResponse.ok) {
 			const errorData = await tokenResponse.json().catch(() => ({}))
 			console.error('Notion OAuth token exchange failed:', errorData)
-			throw new Error(`Failed to exchange code for token: ${tokenResponse.status}`)
+			throw new Error(
+				`Failed to exchange code for token: ${tokenResponse.status}`,
+			)
 		}
 
 		const tokenData: NotionOAuthResponse = await tokenResponse.json()
 
 		if (tokenData.error) {
-			throw new Error(`Notion OAuth error: ${tokenData.error_description || tokenData.error}`)
+			throw new Error(
+				`Notion OAuth error: ${tokenData.error_description || tokenData.error}`,
+			)
 		}
 
 		// Store configuration data for later use
@@ -277,7 +287,9 @@ export class NotionProvider extends BaseIntegrationProvider {
 	 * Note: Notion doesn't provide refresh tokens, so this will always throw
 	 */
 	async refreshToken(refreshToken: string): Promise<TokenData> {
-		throw new Error('Notion does not support token refresh. Users must re-authenticate.')
+		throw new Error(
+			'Notion does not support token refresh. Users must re-authenticate.',
+		)
 	}
 
 	/**
@@ -297,7 +309,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 			const response = await fetch(`${this.apiBaseUrl}/search`, {
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${accessToken}`,
+					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
 					'Notion-Version': this.apiVersion,
 				},
@@ -317,8 +329,12 @@ export class NotionProvider extends BaseIntegrationProvider {
 				if (response.status === 401) {
 					throw new Error('Notion access token is invalid or expired')
 				}
-				const errorData = await response.json().catch(() => ({})) as NotionErrorResponse
-				throw new Error(`Failed to fetch databases: ${errorData.message || response.statusText}`)
+				const errorData = (await response
+					.json()
+					.catch(() => ({}))) as NotionErrorResponse
+				throw new Error(
+					`Failed to fetch databases: ${errorData.message || response.statusText}`,
+				)
 			}
 
 			const searchData: NotionSearchResponse = await response.json()
@@ -344,21 +360,24 @@ export class NotionProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
 		if (!connection.integration.accessToken) {
 			throw new Error('No access token available')
 		}
 
-		const connectionConfig = typeof connection.config === 'string' 
-			? JSON.parse(connection.config) 
-			: connection.config
+		const connectionConfig =
+			typeof connection.config === 'string'
+				? JSON.parse(connection.config)
+				: connection.config
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId
 		if (!databaseId && connectionConfig?.channelMetadata?.url) {
 			// Extract database ID from Notion URL: https://www.notion.so/{DATABASE_ID}
-			const urlMatch = connectionConfig.channelMetadata.url.match(/notion\.so\/([a-f0-9]{32})/)
+			const urlMatch = connectionConfig.channelMetadata.url.match(
+				/notion\.so\/([a-f0-9]{32})/,
+			)
 			if (urlMatch) {
 				databaseId = urlMatch[1]
 			}
@@ -390,15 +409,19 @@ export class NotionProvider extends BaseIntegrationProvider {
 					// Add any default properties from connection config
 					...this.formatDefaultProperties(connectionConfig.defaultProperties),
 				},
-				children: connectionConfig.includeNoteContent 
-					? this.formatNoteContent(message.content, message.noteUrl, message.author)
+				children: connectionConfig.includeNoteContent
+					? this.formatNoteContent(
+							message.content,
+							message.noteUrl,
+							message.author,
+						)
 					: this.formatBasicContent(message.noteUrl, message.author),
 			}
 
 			const response = await fetch(`${this.apiBaseUrl}/pages`, {
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${accessToken}`,
+					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
 					'Notion-Version': this.apiVersion,
 				},
@@ -409,8 +432,12 @@ export class NotionProvider extends BaseIntegrationProvider {
 				if (response.status === 401) {
 					throw new Error('Notion access token is invalid or expired')
 				}
-				const errorData = await response.json().catch(() => ({})) as NotionErrorResponse
-				throw new Error(`Failed to create page: ${errorData.message || response.statusText}`)
+				const errorData = (await response
+					.json()
+					.catch(() => ({}))) as NotionErrorResponse
+				throw new Error(
+					`Failed to create page: ${errorData.message || response.statusText}`,
+				)
 			}
 
 			const createdPage: NotionCreatePageResponse = await response.json()
@@ -425,21 +452,24 @@ export class NotionProvider extends BaseIntegrationProvider {
 	 * Validate that a connection is still active and accessible
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		if (!connection.integration.accessToken) {
 			return false
 		}
 
-		const connectionConfig = typeof connection.config === 'string' 
-			? JSON.parse(connection.config) 
-			: connection.config
+		const connectionConfig =
+			typeof connection.config === 'string'
+				? JSON.parse(connection.config)
+				: connection.config
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId
 		if (!databaseId && connectionConfig?.channelMetadata?.url) {
 			// Extract database ID from Notion URL: https://www.notion.so/{DATABASE_ID}
-			const urlMatch = connectionConfig.channelMetadata.url.match(/notion\.so\/([a-f0-9]{32})/)
+			const urlMatch = connectionConfig.channelMetadata.url.match(
+				/notion\.so\/([a-f0-9]{32})/,
+			)
 			if (urlMatch) {
 				databaseId = urlMatch[1]
 			}
@@ -454,13 +484,16 @@ export class NotionProvider extends BaseIntegrationProvider {
 			const accessToken = await decryptToken(connection.integration.accessToken)
 
 			// Try to retrieve the database to validate access
-			const response = await fetch(`${this.apiBaseUrl}/databases/${databaseId}`, {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${accessToken}`,
-					'Notion-Version': this.apiVersion,
+			const response = await fetch(
+				`${this.apiBaseUrl}/databases/${databaseId}`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						'Notion-Version': this.apiVersion,
+					},
 				},
-			})
+			)
 
 			return response.ok
 		} catch (error) {
@@ -526,7 +559,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 	 */
 	private getDatabaseTitle(database: NotionDatabase): string {
 		if (database.title && database.title.length > 0) {
-			return database.title.map(t => t.plain_text).join('')
+			return database.title.map((t) => t.plain_text).join('')
 		}
 		return 'Untitled Database'
 	}
@@ -534,14 +567,16 @@ export class NotionProvider extends BaseIntegrationProvider {
 	/**
 	 * Helper method to format default properties for page creation
 	 */
-	private formatDefaultProperties(defaultProperties?: Record<string, any>): Record<string, any> {
+	private formatDefaultProperties(
+		defaultProperties?: Record<string, any>,
+	): Record<string, any> {
 		if (!defaultProperties) {
 			return {}
 		}
 
 		// Convert simple values to Notion property format
 		const formatted: Record<string, any> = {}
-		
+
 		for (const [key, value] of Object.entries(defaultProperties)) {
 			if (typeof value === 'string') {
 				formatted[key] = {
@@ -571,14 +606,18 @@ export class NotionProvider extends BaseIntegrationProvider {
 	/**
 	 * Helper method to format note content as Notion blocks
 	 */
-	private formatNoteContent(content: string, noteUrl: string, author: string): any[] {
+	private formatNoteContent(
+		content: string,
+		noteUrl: string,
+		author: string,
+	): any[] {
 		const blocks: any[] = []
 
 		// Add note content as paragraph blocks
 		if (content) {
 			// Split content into paragraphs and create blocks
-			const paragraphs = content.split('\n\n').filter(p => p.trim())
-			
+			const paragraphs = content.split('\n\n').filter((p) => p.trim())
+
 			for (const paragraph of paragraphs) {
 				if (paragraph.trim()) {
 					blocks.push({

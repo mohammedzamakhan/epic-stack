@@ -1,42 +1,27 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
-  "pipeline": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "build/**",
-        "public/build/**",
-        "server-build/**",
-        "dist/**"
-      ]
-    },
-    "lint": {},
-    "typecheck": {
-      "dependsOn": []
-    },
-    "test": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
-    "test:e2e:run": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "build:docs": {
-      "outputs": [
-        ".mintlify/doc-build/**"
-      ]
-    }
-  }
+	"$schema": "https://turbo.build/schema.json",
+	"globalDependencies": ["**/.env.*local"],
+	"pipeline": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["build/**", "public/build/**", "server-build/**", "dist/**"]
+		},
+		"lint": {},
+		"typecheck": {
+			"dependsOn": []
+		},
+		"test": {
+			"dependsOn": ["^build"]
+		},
+		"test:e2e:run": {
+			"dependsOn": ["^build"]
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"build:docs": {
+			"outputs": [".mintlify/doc-build/**"]
+		}
+	}
 }

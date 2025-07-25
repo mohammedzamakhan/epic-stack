@@ -2,15 +2,22 @@
 
 ## Overview
 
-The GitHub integration provider enables users to connect their notes to GitHub repositories for issue tracking and project management. This provider follows the established patterns used by other integration providers in the system.
+The GitHub integration provider enables users to connect their notes to GitHub
+repositories for issue tracking and project management. This provider follows
+the established patterns used by other integration providers in the system.
 
 ## Features
 
-- **OAuth 2.0 Authentication**: Secure authentication with GitHub using OAuth 2.0 flow
-- **Repository Discovery**: List all accessible repositories where the user has push permissions
-- **Issue Creation**: Create GitHub issues from note messages with rich content and metadata
-- **Connection Validation**: Real-time validation of repository access and permissions
-- **Configurable Options**: Support for default labels, assignees, and milestones
+- **OAuth 2.0 Authentication**: Secure authentication with GitHub using OAuth
+  2.0 flow
+- **Repository Discovery**: List all accessible repositories where the user has
+  push permissions
+- **Issue Creation**: Create GitHub issues from note messages with rich content
+  and metadata
+- **Connection Validation**: Real-time validation of repository access and
+  permissions
+- **Configurable Options**: Support for default labels, assignees, and
+  milestones
 
 ## OAuth Configuration
 
@@ -26,11 +33,13 @@ GITHUB_INTEGRATION_CLIENT_SECRET="your-github-integration-client-secret"
 
 ### OAuth Setup
 
-1. Go to [GitHub Developer Settings](https://github.com/settings/applications/new)
+1. Go to
+   [GitHub Developer Settings](https://github.com/settings/applications/new)
 2. Create a new OAuth App with the following settings:
    - **Application name**: Your app name (e.g., "Epic Stack Integration")
    - **Homepage URL**: Your application URL
-   - **Authorization callback URL**: `https://your-domain.com/api/integrations/oauth/callback`
+   - **Authorization callback URL**:
+     `https://your-domain.com/api/integrations/oauth/callback`
 3. Copy the Client ID and Client Secret to your environment variables
 
 ### OAuth Scopes
@@ -69,20 +78,20 @@ Repositories are mapped as "channels" for consistency with other providers:
 
 ```typescript
 interface Channel {
-  id: string // Repository ID
-  name: string // "owner/repo" format
-  type: 'public' | 'private'
-  metadata: {
-    repositoryId: string
-    repositoryName: string
-    repositoryFullName: string
-    ownerName: string
-    description?: string
-    htmlUrl: string
-    defaultBranch: string
-    isPrivate: boolean
-    isFork: boolean
-  }
+	id: string // Repository ID
+	name: string // "owner/repo" format
+	type: 'public' | 'private'
+	metadata: {
+		repositoryId: string
+		repositoryName: string
+		repositoryFullName: string
+		ownerName: string
+		description?: string
+		htmlUrl: string
+		defaultBranch: string
+		isPrivate: boolean
+		isFork: boolean
+	}
 }
 ```
 
@@ -91,7 +100,8 @@ interface Channel {
 Issues are created with the following structure:
 
 - **Title**: Note title (truncated to 256 characters)
-- **Body**: Formatted content including author, note content, source URL, and metadata
+- **Body**: Formatted content including author, note content, source URL, and
+  metadata
 - **Labels**: Optional default labels from connection configuration
 - **Assignees**: Optional default assignees from connection configuration
 - **Milestone**: Optional default milestone from connection configuration
@@ -102,14 +112,14 @@ Issues are created with the following structure:
 
 ```typescript
 interface GitHubConfig {
-  user: {
-    id: number
-    login: string
-    name?: string
-    email?: string
-    avatarUrl?: string
-  }
-  scope: string
+	user: {
+		id: number
+		login: string
+		name?: string
+		email?: string
+		avatarUrl?: string
+	}
+	scope: string
 }
 ```
 
@@ -117,14 +127,14 @@ interface GitHubConfig {
 
 ```typescript
 interface GitHubConnectionConfig {
-  repositoryId: string
-  repositoryName: string
-  repositoryFullName: string // "owner/repo" format
-  ownerName: string
-  includeNoteContent: boolean
-  defaultLabels?: string[] // Array of label names
-  defaultAssignees?: string[] // Array of usernames
-  defaultMilestone?: number // Milestone number
+	repositoryId: string
+	repositoryName: string
+	repositoryFullName: string // "owner/repo" format
+	ownerName: string
+	includeNoteContent: boolean
+	defaultLabels?: string[] // Array of label names
+	defaultAssignees?: string[] // Array of usernames
+	defaultMilestone?: number // Milestone number
 }
 ```
 
@@ -134,17 +144,20 @@ interface GitHubConnectionConfig {
 
 - Access tokens are encrypted using AES-256-GCM encryption
 - Tokens are stored securely in the database
-- No refresh token support (GitHub limitation - users must re-authenticate when tokens expire)
+- No refresh token support (GitHub limitation - users must re-authenticate when
+  tokens expire)
 
 ### Permissions
 
-- Only repositories where the user has push permissions are available for integration
+- Only repositories where the user has push permissions are available for
+  integration
 - Archived and disabled repositories are filtered out
 - Connection validation ensures repository access before allowing issue creation
 
 ### Rate Limiting
 
-- Respects GitHub's rate limiting (5,000 requests per hour for authenticated requests)
+- Respects GitHub's rate limiting (5,000 requests per hour for authenticated
+  requests)
 - Implements proper error handling for rate limit exceeded scenarios
 - Uses pagination for repository listing to handle large numbers of repositories
 
@@ -161,10 +174,14 @@ The provider implements comprehensive error handling for:
 
 ## Limitations
 
-1. **No Refresh Token Support**: GitHub's OAuth flow doesn't provide refresh tokens, so users must re-authenticate when access tokens expire
-2. **Repository Permissions**: Only repositories with push permissions are available for integration
-3. **Issue Creation Only**: Currently supports creating issues but not other GitHub features like pull requests or discussions
-4. **Rate Limiting**: Subject to GitHub's API rate limits which may affect high-volume usage
+1. **No Refresh Token Support**: GitHub's OAuth flow doesn't provide refresh
+   tokens, so users must re-authenticate when access tokens expire
+2. **Repository Permissions**: Only repositories with push permissions are
+   available for integration
+3. **Issue Creation Only**: Currently supports creating issues but not other
+   GitHub features like pull requests or discussions
+4. **Rate Limiting**: Subject to GitHub's API rate limits which may affect
+   high-volume usage
 
 ## Usage Examples
 
@@ -175,11 +192,9 @@ When a note is shared to a GitHub repository, an issue is created with:
 ```markdown
 **Author:** John Doe
 
-**Content:**
-This is the note content that will be included in the issue body.
+**Content:** This is the note content that will be included in the issue body.
 
-**Source:** [View Note](https://your-app.com/notes/123)
-**Change Type:** created
+**Source:** [View Note](https://your-app.com/notes/123) **Change Type:** created
 **Created:** 2024-01-15T10:30:00.000Z
 ```
 

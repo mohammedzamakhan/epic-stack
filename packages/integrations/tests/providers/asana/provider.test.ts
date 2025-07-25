@@ -10,399 +10,418 @@ import type { MessageData } from '../../../src/types'
 
 // Mock the encryption module
 vi.mock('../../../src/encryption', async () => {
-  const actual = await vi.importActual('../../../src/encryption')
-  return {
-    ...actual,
-    decryptToken: vi.fn().mockResolvedValue('access-token')
-  }
+	const actual = await vi.importActual('../../../src/encryption')
+	return {
+		...actual,
+		decryptToken: vi.fn().mockResolvedValue('access-token'),
+	}
 })
 
 import { decryptToken } from '../../../src/encryption'
 
 describe('AsanaProvider', () => {
-  let provider: AsanaProvider
+	let provider: AsanaProvider
 
-  beforeEach(() => {
-    // Set required environment variables
-    process.env.ASANA_CLIENT_ID = 'test-client-id'
-    process.env.ASANA_CLIENT_SECRET = 'test-client-secret'
-    
-    provider = new AsanaProvider()
-    vi.clearAllMocks()
-    
-    // Reset the mock for decryptToken
-    vi.mocked(decryptToken).mockResolvedValue('access-token')
-  })
+	beforeEach(() => {
+		// Set required environment variables
+		process.env.ASANA_CLIENT_ID = 'test-client-id'
+		process.env.ASANA_CLIENT_SECRET = 'test-client-secret'
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
+		provider = new AsanaProvider()
+		vi.clearAllMocks()
 
-  describe('Provider Properties', () => {
-    it('should have correct provider properties', () => {
-      expect(provider.name).toBe('asana')
-      expect(provider.type).toBe('productivity')
-      expect(provider.displayName).toBe('Asana')
-      expect(provider.description).toBe('Connect notes to Asana projects for task management and team collaboration')
-    })
-  })
+		// Reset the mock for decryptToken
+		vi.mocked(decryptToken).mockResolvedValue('access-token')
+	})
 
-  describe('getAuthUrl', () => {
-    it('should generate correct auth URL', async () => {
-      const organizationId = 'org-123'
-      const redirectUri = 'https://example.com/callback'
+	afterEach(() => {
+		vi.restoreAllMocks()
+	})
 
-      const authUrl = await provider.getAuthUrl(organizationId, redirectUri)
+	describe('Provider Properties', () => {
+		it('should have correct provider properties', () => {
+			expect(provider.name).toBe('asana')
+			expect(provider.type).toBe('productivity')
+			expect(provider.displayName).toBe('Asana')
+			expect(provider.description).toBe(
+				'Connect notes to Asana projects for task management and team collaboration',
+			)
+		})
+	})
 
-      expect(authUrl).toContain('https://app.asana.com/-/oauth_authorize')
-      expect(authUrl).toContain('client_id=')
-      expect(authUrl).toContain('redirect_uri=')
-      expect(authUrl).toContain('response_type=code')
-      expect(authUrl).toContain('state=')
-    })
+	describe('getAuthUrl', () => {
+		it('should generate correct auth URL', async () => {
+			const organizationId = 'org-123'
+			const redirectUri = 'https://example.com/callback'
 
-    it('should include organization ID in state', async () => {
-      const organizationId = 'org-123'
-      const redirectUri = 'https://example.com/callback'
+			const authUrl = await provider.getAuthUrl(organizationId, redirectUri)
 
-      const authUrl = await provider.getAuthUrl(organizationId, redirectUri)
-      const url = new URL(authUrl)
-      const state = url.searchParams.get('state')
+			expect(authUrl).toContain('https://app.asana.com/-/oauth_authorize')
+			expect(authUrl).toContain('client_id=')
+			expect(authUrl).toContain('redirect_uri=')
+			expect(authUrl).toContain('response_type=code')
+			expect(authUrl).toContain('state=')
+		})
 
-      expect(state).toBeTruthy()
-      // State should be JWT-like format with payload.signature
-      expect(state).toContain('.')
-    })
-  })
+		it('should include organization ID in state', async () => {
+			const organizationId = 'org-123'
+			const redirectUri = 'https://example.com/callback'
 
-  describe('handleCallback', () => {
-    it('should handle successful OAuth callback', async () => {
-      // Generate a proper OAuth state
-      const state = (provider as any).generateOAuthState('org-123', { redirectUri: 'https://example.com/callback' })
-      
-      // Override MSW handlers for token exchange and user info
-      server.use(
-        http.post('https://app.asana.com/-/oauth_token', () => {
-          return HttpResponse.json({
-            access_token: 'asana-access-token',
-            refresh_token: 'asana-refresh-token',
-            expires_in: 3600,
-            data: {
-              id: 'user-123',
-              gid: 'user-gid-123',
-              name: 'John Doe',
-              email: 'john@example.com',
-            },
-          })
-        }),
-        http.get('https://app.asana.com/api/1.0/users/me', () => {
-          return HttpResponse.json({
-            data: {
-              gid: 'user-gid-123',
-              name: 'John Doe',
-              email: 'john@example.com',
-              photo: {
-                image_60x60: 'https://example.com/avatar.jpg',
-              },
-              workspaces: [
-                {
-                  gid: 'workspace-123',
-                  name: 'My Workspace',
-                  resource_type: 'workspace',
-                },
-              ],
-            },
-          })
-        })
-      )
+			const authUrl = await provider.getAuthUrl(organizationId, redirectUri)
+			const url = new URL(authUrl)
+			const state = url.searchParams.get('state')
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'auth-code',
-        state: state,
-      }
-      
-      const tokenData = await provider.handleCallback(params)
+			expect(state).toBeTruthy()
+			// State should be JWT-like format with payload.signature
+			expect(state).toContain('.')
+		})
+	})
 
-      expect(tokenData.accessToken).toBe('asana-access-token')
-      expect(tokenData.refreshToken).toBe('asana-refresh-token')
-      expect(tokenData.expiresAt).toBeInstanceOf(Date)
-      // Just check that we have user data, don't check exact structure
-      expect(tokenData.metadata).toBeDefined()
-      expect(tokenData.metadata.user).toBeDefined()
-      expect(tokenData.metadata.user.gid).toBe('user-gid-123')
-    })
+	describe('handleCallback', () => {
+		it('should handle successful OAuth callback', async () => {
+			// Generate a proper OAuth state
+			const state = (provider as any).generateOAuthState('org-123', {
+				redirectUri: 'https://example.com/callback',
+			})
 
-    it('should handle OAuth error response', async () => {
-      const mockErrorResponse = {
-        error: 'access_denied',
-        error_description: 'User denied access',
-      }
+			// Override MSW handlers for token exchange and user info
+			server.use(
+				http.post('https://app.asana.com/-/oauth_token', () => {
+					return HttpResponse.json({
+						access_token: 'asana-access-token',
+						refresh_token: 'asana-refresh-token',
+						expires_in: 3600,
+						data: {
+							id: 'user-123',
+							gid: 'user-gid-123',
+							name: 'John Doe',
+							email: 'john@example.com',
+						},
+					})
+				}),
+				http.get('https://app.asana.com/api/1.0/users/me', () => {
+					return HttpResponse.json({
+						data: {
+							gid: 'user-gid-123',
+							name: 'John Doe',
+							email: 'john@example.com',
+							photo: {
+								image_60x60: 'https://example.com/avatar.jpg',
+							},
+							workspaces: [
+								{
+									gid: 'workspace-123',
+									name: 'My Workspace',
+									resource_type: 'workspace',
+								},
+							],
+						},
+					})
+				}),
+			)
 
-      // Error response will be handled by the provider logic
+			const params = {
+				organizationId: 'org-123',
+				code: 'auth-code',
+				state: state,
+			}
 
-      const params = {
-        organizationId: 'org-123',
-        code: 'auth-code',
-        state: 'state',
-        error: 'access_denied',
-        errorDescription: 'User denied access'
-      }
+			const tokenData = await provider.handleCallback(params)
 
-      await expect(
-        provider.handleCallback(params)
-      ).rejects.toThrow('Asana OAuth error: access_denied - User denied access')
-    })
+			expect(tokenData.accessToken).toBe('asana-access-token')
+			expect(tokenData.refreshToken).toBe('asana-refresh-token')
+			expect(tokenData.expiresAt).toBeInstanceOf(Date)
+			// Just check that we have user data, don't check exact structure
+			expect(tokenData.metadata).toBeDefined()
+			expect(tokenData.metadata.user).toBeDefined()
+			expect(tokenData.metadata.user.gid).toBe('user-gid-123')
+		})
 
-    it('should handle network errors', async () => {
-      // Override MSW handler to simulate network error
-      server.use(
-        http.post('https://app.asana.com/-/oauth_token', () => {
-          return HttpResponse.error()
-        })
-      )
+		it('should handle OAuth error response', async () => {
+			const mockErrorResponse = {
+				error: 'access_denied',
+				error_description: 'User denied access',
+			}
 
-      const state = (provider as any).generateOAuthState('org-123', { redirectUri: 'https://example.com/callback' })
-      
-      const params = {
-        organizationId: 'org-123',
-        code: 'auth-code',
-        state: state,
-      }
+			// Error response will be handled by the provider logic
 
-      await expect(
-        provider.handleCallback(params)
-      ).rejects.toThrow()
-    })
-  })
+			const params = {
+				organizationId: 'org-123',
+				code: 'auth-code',
+				state: 'state',
+				error: 'access_denied',
+				errorDescription: 'User denied access',
+			}
 
-  describe('refreshToken', () => {
-    it('should refresh token successfully', async () => {
-      // Override MSW handler for token refresh
-      server.use(
-        http.post('https://app.asana.com/-/oauth_token', () => {
-          return HttpResponse.json({
-            access_token: 'new-asana-access-token',
-            refresh_token: 'new-asana-refresh-token',
-            expires_in: 3600,
-          })
-        })
-      )
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Asana OAuth error: access_denied - User denied access',
+			)
+		})
 
-      const newTokenData = await provider.refreshToken!('old-refresh-token')
+		it('should handle network errors', async () => {
+			// Override MSW handler to simulate network error
+			server.use(
+				http.post('https://app.asana.com/-/oauth_token', () => {
+					return HttpResponse.error()
+				}),
+			)
 
-      expect(newTokenData.accessToken).toBe('new-asana-access-token')
-      expect(newTokenData.refreshToken).toBe('new-asana-refresh-token')
-      expect(newTokenData.expiresAt).toBeInstanceOf(Date)
-    })
+			const state = (provider as any).generateOAuthState('org-123', {
+				redirectUri: 'https://example.com/callback',
+			})
 
-    it('should handle refresh token errors', async () => {
-      // Override MSW handler for token refresh error
-      server.use(
-        http.post('https://app.asana.com/-/oauth_token', () => {
-          return HttpResponse.json({
-            error: 'invalid_grant',
-            error_description: 'Invalid refresh token',
-          }, { status: 400 })
-        })
-      )
+			const params = {
+				organizationId: 'org-123',
+				code: 'auth-code',
+				state: state,
+			}
 
-      await expect(
-        provider.refreshToken!('invalid-refresh-token')
-      ).rejects.toThrow('Failed to refresh token')
-    })
-  })
+			await expect(provider.handleCallback(params)).rejects.toThrow()
+		})
+	})
 
-  describe('getAvailableChannels', () => {
-    it('should fetch available projects as channels', async () => {
-      const mockIntegration = {
-        id: 'integration-123',
-        accessToken: 'encrypted-access-token',
-        organizationId: 'org-123',
-        providerName: 'asana',
-        isActive: true,
-      } as any
+	describe('refreshToken', () => {
+		it('should refresh token successfully', async () => {
+			// Override MSW handler for token refresh
+			server.use(
+				http.post('https://app.asana.com/-/oauth_token', () => {
+					return HttpResponse.json({
+						access_token: 'new-asana-access-token',
+						refresh_token: 'new-asana-refresh-token',
+						expires_in: 3600,
+					})
+				}),
+			)
 
-      const channels = await provider.getAvailableChannels(mockIntegration)
+			const newTokenData = await provider.refreshToken!('old-refresh-token')
 
-      // The global mock returns 1 project, so we expect 1 channel
-      expect(channels).toHaveLength(1)
-      expect(channels[0]).toEqual({
-        id: 'project-123',
-        name: 'Test Project (Test Workspace)',
-        type: 'public',
-        metadata: {
-          projectName: 'Test Project',
-          workspaceName: 'Test Workspace',
-          workspaceGid: 'workspace-123',
-          color: undefined,
-          notes: undefined,
-          team: undefined,
-        },
-      })
-    })
+			expect(newTokenData.accessToken).toBe('new-asana-access-token')
+			expect(newTokenData.refreshToken).toBe('new-asana-refresh-token')
+			expect(newTokenData.expiresAt).toBeInstanceOf(Date)
+		})
 
-    it('should handle API errors when fetching channels', async () => {
-      const mockIntegration = {
-        id: 'integration-123',
-        accessToken: null,
-        organizationId: 'org-123',
-        providerName: 'asana',
-        isActive: true,
-      } as any
+		it('should handle refresh token errors', async () => {
+			// Override MSW handler for token refresh error
+			server.use(
+				http.post('https://app.asana.com/-/oauth_token', () => {
+					return HttpResponse.json(
+						{
+							error: 'invalid_grant',
+							error_description: 'Invalid refresh token',
+						},
+						{ status: 400 },
+					)
+				}),
+			)
 
-      await expect(
-        provider.getAvailableChannels(mockIntegration)
-      ).rejects.toThrow('No access token available for Asana integration')
-    })
-  })
+			await expect(
+				provider.refreshToken!('invalid-refresh-token'),
+			).rejects.toThrow('Failed to refresh token')
+		})
+	})
 
-  describe('postMessage', () => {
-    it('should create task successfully', async () => {
-      const mockConnection = {
-        id: 'connection-123',
-        externalId: 'project-123',
-        config: JSON.stringify({ projectGid: 'project-123', includeNoteContent: true }),
-        integration: {
-          id: 'integration-123',
-          accessToken: 'encrypted-access-token',
-          organizationId: 'org-123',
-          providerName: 'asana',
-          isActive: true,
-        }
-      } as any
+	describe('getAvailableChannels', () => {
+		it('should fetch available projects as channels', async () => {
+			const mockIntegration = {
+				id: 'integration-123',
+				accessToken: 'encrypted-access-token',
+				organizationId: 'org-123',
+				providerName: 'asana',
+				isActive: true,
+			} as any
 
-      const messageData: MessageData = {
-        title: 'Test Note',
-        content: 'Test content',
-        author: 'John Doe',
-        noteUrl: 'https://example.com/notes/123',
-        changeType: 'created',
-      }
+			const channels = await provider.getAvailableChannels(mockIntegration)
 
-      await provider.postMessage(mockConnection, messageData)
+			// The global mock returns 1 project, so we expect 1 channel
+			expect(channels).toHaveLength(1)
+			expect(channels[0]).toEqual({
+				id: 'project-123',
+				name: 'Test Project (Test Workspace)',
+				type: 'public',
+				metadata: {
+					projectName: 'Test Project',
+					workspaceName: 'Test Workspace',
+					workspaceGid: 'workspace-123',
+					color: undefined,
+					notes: undefined,
+					team: undefined,
+				},
+			})
+		})
 
-      // The test passes if no error is thrown
-      expect(true).toBe(true)
-    })
+		it('should handle API errors when fetching channels', async () => {
+			const mockIntegration = {
+				id: 'integration-123',
+				accessToken: null,
+				organizationId: 'org-123',
+				providerName: 'asana',
+				isActive: true,
+			} as any
 
-    it('should handle task creation errors', async () => {
-      const mockConnection = {
-        id: 'connection-123',
-        externalId: 'project-123',
-        config: JSON.stringify({ projectGid: 'project-123', includeNoteContent: true }),
-        integration: {
-          id: 'integration-123',
-          accessToken: null,
-          organizationId: 'org-123',
-          providerName: 'asana',
-          isActive: true,
-        }
-      } as any
+			await expect(
+				provider.getAvailableChannels(mockIntegration),
+			).rejects.toThrow('No access token available for Asana integration')
+		})
+	})
 
-      const messageData: MessageData = {
-        title: 'Test Note',
-        content: 'Test content',
-        author: 'John Doe',
-        noteUrl: 'https://example.com/notes/123',
-        changeType: 'created',
-      }
+	describe('postMessage', () => {
+		it('should create task successfully', async () => {
+			const mockConnection = {
+				id: 'connection-123',
+				externalId: 'project-123',
+				config: JSON.stringify({
+					projectGid: 'project-123',
+					includeNoteContent: true,
+				}),
+				integration: {
+					id: 'integration-123',
+					accessToken: 'encrypted-access-token',
+					organizationId: 'org-123',
+					providerName: 'asana',
+					isActive: true,
+				},
+			} as any
 
-      await expect(
-        provider.postMessage(mockConnection, messageData)
-      ).rejects.toThrow('No access token available for Asana integration')
-    })
-  })
+			const messageData: MessageData = {
+				title: 'Test Note',
+				content: 'Test content',
+				author: 'John Doe',
+				noteUrl: 'https://example.com/notes/123',
+				changeType: 'created',
+			}
 
-  describe('validateConnection', () => {
-    it('should validate connection successfully', async () => {
-      const mockConnection = {
-        id: 'connection-123',
-        externalId: 'project-123',
-        config: JSON.stringify({ projectGid: 'project-123' }),
-        integration: {
-          id: 'integration-123',
-          accessToken: 'encrypted-access-token',
-          organizationId: 'org-123',
-          providerName: 'asana',
-          isActive: true,
-        }
-      } as any
+			await provider.postMessage(mockConnection, messageData)
 
-      const isValid = await provider.validateConnection(mockConnection)
+			// The test passes if no error is thrown
+			expect(true).toBe(true)
+		})
 
-      expect(isValid).toBe(true)
-    })
+		it('should handle task creation errors', async () => {
+			const mockConnection = {
+				id: 'connection-123',
+				externalId: 'project-123',
+				config: JSON.stringify({
+					projectGid: 'project-123',
+					includeNoteContent: true,
+				}),
+				integration: {
+					id: 'integration-123',
+					accessToken: null,
+					organizationId: 'org-123',
+					providerName: 'asana',
+					isActive: true,
+				},
+			} as any
 
-    it('should return false for invalid connection', async () => {
-      const mockConnection = {
-        id: 'connection-123',
-        externalId: 'invalid-project',
-        config: JSON.stringify({ projectGid: 'invalid-project' }),
-        integration: {
-          id: 'integration-123',
-          accessToken: null,
-          organizationId: 'org-123',
-          providerName: 'asana',
-          isActive: true,
-        }
-      } as any
+			const messageData: MessageData = {
+				title: 'Test Note',
+				content: 'Test content',
+				author: 'John Doe',
+				noteUrl: 'https://example.com/notes/123',
+				changeType: 'created',
+			}
 
-      const isValid = await provider.validateConnection(mockConnection)
+			await expect(
+				provider.postMessage(mockConnection, messageData),
+			).rejects.toThrow('No access token available for Asana integration')
+		})
+	})
 
-      expect(isValid).toBe(false)
-    })
+	describe('validateConnection', () => {
+		it('should validate connection successfully', async () => {
+			const mockConnection = {
+				id: 'connection-123',
+				externalId: 'project-123',
+				config: JSON.stringify({ projectGid: 'project-123' }),
+				integration: {
+					id: 'integration-123',
+					accessToken: 'encrypted-access-token',
+					organizationId: 'org-123',
+					providerName: 'asana',
+					isActive: true,
+				},
+			} as any
 
-    it('should handle validation errors', async () => {
-      const mockConnection = {
-        id: 'connection-123',
-        externalId: 'project-123',
-        config: JSON.stringify({ projectGid: 'project-123' }),
-        integration: {
-          id: 'integration-123',
-          accessToken: 'encrypted-access-token',
-          organizationId: 'org-123',
-          providerName: 'asana',
-          isActive: true,
-        }
-      } as any
+			const isValid = await provider.validateConnection(mockConnection)
 
-      // Mock decryptToken to throw an error
-      vi.mocked(decryptToken).mockRejectedValueOnce(new Error('Decryption error'))
+			expect(isValid).toBe(true)
+		})
 
-      const isValid = await provider.validateConnection(mockConnection)
+		it('should return false for invalid connection', async () => {
+			const mockConnection = {
+				id: 'connection-123',
+				externalId: 'invalid-project',
+				config: JSON.stringify({ projectGid: 'invalid-project' }),
+				integration: {
+					id: 'integration-123',
+					accessToken: null,
+					organizationId: 'org-123',
+					providerName: 'asana',
+					isActive: true,
+				},
+			} as any
 
-      expect(isValid).toBe(false)
-    })
-  })
+			const isValid = await provider.validateConnection(mockConnection)
 
-  describe('Error Handling', () => {
-    it('should handle malformed JSON responses', async () => {
-      const mockIntegration = {
-        id: 'integration-123',
-        accessToken: null,
-        organizationId: 'org-123',
-        providerName: 'asana',
-        isActive: true,
-      } as any
+			expect(isValid).toBe(false)
+		})
 
-      await expect(
-        provider.getAvailableChannels(mockIntegration)
-      ).rejects.toThrow('Failed to fetch Asana projects: No access token available for Asana integration')
-    })
+		it('should handle validation errors', async () => {
+			const mockConnection = {
+				id: 'connection-123',
+				externalId: 'project-123',
+				config: JSON.stringify({ projectGid: 'project-123' }),
+				integration: {
+					id: 'integration-123',
+					accessToken: 'encrypted-access-token',
+					organizationId: 'org-123',
+					providerName: 'asana',
+					isActive: true,
+				},
+			} as any
 
-    it('should handle missing response data', async () => {
-      const mockIntegration = {
-        id: 'integration-123',
-        accessToken: null,
-        organizationId: 'org-123',
-        providerName: 'asana',
-        isActive: true,
-      } as any
+			// Mock decryptToken to throw an error
+			vi.mocked(decryptToken).mockRejectedValueOnce(
+				new Error('Decryption error'),
+			)
 
-      await expect(
-        provider.getAvailableChannels(mockIntegration)
-      ).rejects.toThrow('Failed to fetch Asana projects: No access token available for Asana integration')
-    })
-  })
+			const isValid = await provider.validateConnection(mockConnection)
+
+			expect(isValid).toBe(false)
+		})
+	})
+
+	describe('Error Handling', () => {
+		it('should handle malformed JSON responses', async () => {
+			const mockIntegration = {
+				id: 'integration-123',
+				accessToken: null,
+				organizationId: 'org-123',
+				providerName: 'asana',
+				isActive: true,
+			} as any
+
+			await expect(
+				provider.getAvailableChannels(mockIntegration),
+			).rejects.toThrow(
+				'Failed to fetch Asana projects: No access token available for Asana integration',
+			)
+		})
+
+		it('should handle missing response data', async () => {
+			const mockIntegration = {
+				id: 'integration-123',
+				accessToken: null,
+				organizationId: 'org-123',
+				providerName: 'asana',
+				isActive: true,
+			} as any
+
+			await expect(
+				provider.getAvailableChannels(mockIntegration),
+			).rejects.toThrow(
+				'Failed to fetch Asana projects: No access token available for Asana integration',
+			)
+		})
+	})
 })

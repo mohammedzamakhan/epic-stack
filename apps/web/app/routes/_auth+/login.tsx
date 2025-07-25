@@ -85,10 +85,7 @@ export async function action({ request }: Route.ActionArgs) {
 				}
 
 				// Return early with error response
-				return data(
-					{ result: null },
-					{ status: 400, statusText: errorMessage },
-				)
+				return data({ result: null }, { status: 400, statusText: errorMessage })
 			}
 		} catch (error) {
 			// If Arcjet fails, log error but continue with login process

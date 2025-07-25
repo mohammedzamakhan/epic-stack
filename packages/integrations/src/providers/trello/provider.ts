@@ -2,7 +2,10 @@
  * Trello integration provider implementation
  */
 
-import { type Integration, type NoteIntegrationConnection } from '@prisma/client'
+import {
+	type Integration,
+	type NoteIntegrationConnection,
+} from '@prisma/client'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,
@@ -14,11 +17,14 @@ import crypto from 'crypto'
 
 // Simple in-memory storage for OAuth 1.0a request tokens
 // In production, this should be stored in a database or cache with TTL
-const requestTokenStorage = new Map<string, {
-	organizationId: string
-	requestTokenSecret: string
-	timestamp: number
-}>()
+const requestTokenStorage = new Map<
+	string,
+	{
+		organizationId: string
+		requestTokenSecret: string
+		timestamp: number
+	}
+>()
 
 /**
  * Trello API response interfaces
@@ -80,7 +86,8 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	readonly name = 'trello'
 	readonly type = 'productivity' as const
 	readonly displayName = 'Trello'
-	readonly description = 'Connect notes to Trello boards for task management and project organization'
+	readonly description =
+		'Connect notes to Trello boards for task management and project organization'
 	readonly logoPath = '/icons/trello.svg'
 
 	private readonly apiBaseUrl = 'https://api.trello.com/1'
@@ -109,23 +116,30 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	/**
 	 * Store request token context for OAuth 1.0a flow
 	 */
-	async storeRequestTokenContext(requestToken: string, context: {
-		organizationId: string
-		requestTokenSecret: string
-		timestamp: number
-	}): Promise<void> {
+	async storeRequestTokenContext(
+		requestToken: string,
+		context: {
+			organizationId: string
+			requestTokenSecret: string
+			timestamp: number
+		},
+	): Promise<void> {
 		// Store with 1 hour TTL
 		requestTokenStorage.set(requestToken, context)
-		
+
 		// Clean up expired tokens (older than 1 hour)
-		setTimeout(() => {
-			const now = Date.now()
-			for (const [token, ctx] of requestTokenStorage.entries()) {
-				if (now - ctx.timestamp > 60 * 60 * 1000) { // 1 hour
-					requestTokenStorage.delete(token)
+		setTimeout(
+			() => {
+				const now = Date.now()
+				for (const [token, ctx] of requestTokenStorage.entries()) {
+					if (now - ctx.timestamp > 60 * 60 * 1000) {
+						// 1 hour
+						requestTokenStorage.delete(token)
+					}
 				}
-			}
-		}, 60 * 60 * 1000) // Clean up after 1 hour
+			},
+			60 * 60 * 1000,
+		) // Clean up after 1 hour
 	}
 
 	/**
@@ -140,13 +154,13 @@ export class TrelloProvider extends BaseIntegrationProvider {
 		if (!context) {
 			return null
 		}
-		
+
 		// Check if expired (1 hour)
 		if (Date.now() - context.timestamp > 60 * 60 * 1000) {
 			requestTokenStorage.delete(requestToken)
 			return null
 		}
-		
+
 		return context
 	}
 
@@ -157,19 +171,22 @@ export class TrelloProvider extends BaseIntegrationProvider {
 		method: string,
 		url: string,
 		params: Record<string, string>,
-		tokenSecret?: string
+		tokenSecret?: string,
 	): string {
 		// Sort parameters
 		const sortedParams = Object.keys(params)
 			.sort()
-			.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key] || '')}`)
+			.map(
+				(key) =>
+					`${encodeURIComponent(key)}=${encodeURIComponent(params[key] || '')}`,
+			)
 			.join('&')
 
 		// Create signature base string
 		const signatureBaseString = [
 			method.toUpperCase(),
 			encodeURIComponent(url),
-			encodeURIComponent(sortedParams)
+			encodeURIComponent(sortedParams),
 		].join('&')
 
 		// Create signing key
@@ -190,7 +207,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>
+		additionalParams?: Record<string, any>,
 	): Promise<string> {
 		try {
 			// Step 1: Get request token
@@ -200,11 +217,15 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				oauth_nonce: crypto.randomBytes(16).toString('hex'),
 				oauth_signature_method: 'HMAC-SHA1',
 				oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-				oauth_version: '1.0'
+				oauth_version: '1.0',
 			}
 
 			const requestTokenUrl = `${this.authBaseUrl}/OAuthGetRequestToken`
-			const signature = this.generateOAuthSignature('POST', requestTokenUrl, requestTokenParams)
+			const signature = this.generateOAuthSignature(
+				'POST',
+				requestTokenUrl,
+				requestTokenParams,
+			)
 			requestTokenParams.oauth_signature = signature
 
 			const requestTokenResponse = await fetch(requestTokenUrl, {
@@ -212,7 +233,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 				},
-				body: new URLSearchParams(requestTokenParams).toString()
+				body: new URLSearchParams(requestTokenParams).toString(),
 			})
 
 			if (!requestTokenResponse.ok) {
@@ -235,7 +256,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			await this.storeRequestTokenContext(requestToken, {
 				organizationId,
 				requestTokenSecret,
-				timestamp: Date.now()
+				timestamp: Date.now(),
 			})
 
 			// Step 2: Generate authorization URL
@@ -244,13 +265,15 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				name: 'Epic Stack Integration',
 				scope: 'read,write',
 				expiration: 'never',
-				response_type: 'fragment'
+				response_type: 'fragment',
 			})
 
 			return `${this.authBaseUrl}/authorize?${authParams.toString()}`
 		} catch (error) {
 			console.error('Trello auth URL generation failed:', error)
-			throw new Error(`Failed to generate Trello auth URL: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Failed to generate Trello auth URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -269,7 +292,6 @@ export class TrelloProvider extends BaseIntegrationProvider {
 		}
 
 		try {
-
 			// Get the stored request token context
 			const tokenContext = await this.getRequestTokenContext(oauthToken)
 			if (!tokenContext) {
@@ -284,14 +306,19 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				oauth_nonce: crypto.randomBytes(16).toString('hex'),
 				oauth_signature_method: 'HMAC-SHA1',
 				oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-				oauth_version: '1.0'
+				oauth_version: '1.0',
 			}
 
 			const accessTokenUrl = `${this.authBaseUrl}/OAuthGetAccessToken`
-			
+
 			// Generate signature using request token secret
 			const tokenSecret = tokenContext.requestTokenSecret
-			const signature = this.generateOAuthSignature('POST', accessTokenUrl, accessTokenParams, tokenSecret)
+			const signature = this.generateOAuthSignature(
+				'POST',
+				accessTokenUrl,
+				accessTokenParams,
+				tokenSecret,
+			)
 			accessTokenParams.oauth_signature = signature
 
 			const accessTokenResponse = await fetch(accessTokenUrl, {
@@ -299,7 +326,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 				},
-				body: new URLSearchParams(accessTokenParams).toString()
+				body: new URLSearchParams(accessTokenParams).toString(),
 			})
 
 			if (!accessTokenResponse.ok) {
@@ -326,7 +353,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			}
 		} catch (error) {
 			console.error('Trello OAuth callback failed:', error)
-			throw new Error(`Trello OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Trello OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -358,7 +387,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			if (!accessToken) {
 				throw new Error('No access token available for Trello integration')
 			}
-			
+
 			const channels: Channel[] = []
 
 			// Get user's boards
@@ -366,7 +395,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			boardsUrl.searchParams.set('key', this.apiKey)
 			boardsUrl.searchParams.set('token', accessToken)
 			boardsUrl.searchParams.set('filter', 'open')
-			
+
 			const boardsResponse = await fetch(boardsUrl.toString())
 
 			if (!boardsResponse.ok) {
@@ -398,12 +427,12 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				listsUrl.searchParams.set('key', this.apiKey)
 				listsUrl.searchParams.set('token', accessToken)
 				listsUrl.searchParams.set('filter', 'open')
-				
+
 				const listsResponse = await fetch(listsUrl.toString())
 
 				if (listsResponse.ok) {
 					const lists: TrelloList[] = await listsResponse.json()
-					
+
 					for (const list of lists) {
 						channels.push({
 							id: list.id,
@@ -413,8 +442,8 @@ export class TrelloProvider extends BaseIntegrationProvider {
 								boardId: board.id,
 								boardName: board.name,
 								listName: list.name,
-								boardUrl: board.url
-							}
+								boardUrl: board.url,
+							},
 						})
 					}
 				}
@@ -423,7 +452,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			return channels
 		} catch (error) {
 			console.error('Failed to get Trello channels:', error)
-			throw new Error(`Failed to get Trello channels: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Failed to get Trello channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -432,7 +463,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
-		message: MessageData
+		message: MessageData,
 	): Promise<void> {
 		try {
 			if (!connection.integration.accessToken) {
@@ -455,16 +486,18 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			}
 
 			if (!connectionConfig.listId) {
-				throw new Error('No list ID found in connection configuration. Please reconfigure the Trello integration.')
+				throw new Error(
+					'No list ID found in connection configuration. Please reconfigure the Trello integration.',
+				)
 			}
 
 			// Create card description
 			let description = `**Created by:** ${message.author}\n\n`
-			
+
 			if (connectionConfig.includeNoteContent && message.content) {
 				description += `**Content:**\n${message.content}\n\n`
 			}
-			
+
 			description += `**Source:** [View Note](${message.noteUrl})\n`
 			description += `**Change Type:** ${message.changeType}`
 
@@ -474,21 +507,30 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				desc: description,
 				idList: connectionConfig.listId,
 				key: this.apiKey,
-				token: accessToken
+				token: accessToken,
 			}
 
 			// Add default members if configured
-			if (connectionConfig.defaultMembers && connectionConfig.defaultMembers.length > 0) {
+			if (
+				connectionConfig.defaultMembers &&
+				connectionConfig.defaultMembers.length > 0
+			) {
 				cardData.idMembers = connectionConfig.defaultMembers.join(',')
 			}
 
 			// Add default labels if configured
-			if (connectionConfig.defaultLabels && connectionConfig.defaultLabels.length > 0) {
+			if (
+				connectionConfig.defaultLabels &&
+				connectionConfig.defaultLabels.length > 0
+			) {
 				cardData.idLabels = connectionConfig.defaultLabels.join(',')
 			}
 
 			// Add default members if configured
-			if (connectionConfig.defaultMembers && connectionConfig.defaultMembers.length > 0) {
+			if (
+				connectionConfig.defaultMembers &&
+				connectionConfig.defaultMembers.length > 0
+			) {
 				cardData.idMembers = connectionConfig.defaultMembers.join(',')
 			}
 
@@ -497,7 +539,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 				},
-				body: new URLSearchParams(cardData).toString()
+				body: new URLSearchParams(cardData).toString(),
 			})
 
 			if (!response.ok) {
@@ -523,7 +565,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				throw new Error(errorMessage)
 			}
 		} catch (error) {
-			throw new Error(`Failed to post message to Trello: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Failed to post message to Trello: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 	}
 
@@ -531,7 +575,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	 * Validate a Trello connection
 	 */
 	async validateConnection(
-		connection: NoteIntegrationConnection & { integration: Integration }
+		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
 		try {
 			if (!connection.integration.accessToken) {
@@ -550,7 +594,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 
 			// Check if we can access the specified list
 			const response = await fetch(
-				`${this.apiBaseUrl}/lists/${connectionConfig.listId}?key=${this.apiKey}&token=${accessToken}`
+				`${this.apiBaseUrl}/lists/${connectionConfig.listId}?key=${this.apiKey}&token=${accessToken}`,
 			)
 
 			return response.ok
@@ -574,9 +618,9 @@ export class TrelloProvider extends BaseIntegrationProvider {
 						username: { type: 'string' },
 						fullName: { type: 'string' },
 						email: { type: 'string' },
-						avatarUrl: { type: 'string' }
+						avatarUrl: { type: 'string' },
 					},
-					required: ['id', 'username', 'fullName']
+					required: ['id', 'username', 'fullName'],
 				},
 				boards: {
 					type: 'array',
@@ -585,13 +629,13 @@ export class TrelloProvider extends BaseIntegrationProvider {
 						properties: {
 							id: { type: 'string' },
 							name: { type: 'string' },
-							url: { type: 'string' }
+							url: { type: 'string' },
 						},
-						required: ['id', 'name', 'url']
-					}
-				}
+						required: ['id', 'name', 'url'],
+					},
+				},
 			},
-			required: ['user']
+			required: ['user'],
 		}
 	}
 
@@ -613,7 +657,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			boardName: parsed.boardName || '',
 			includeNoteContent: parsed.includeNoteContent ?? true,
 			defaultLabels: parsed.defaultLabels || [],
-			defaultMembers: parsed.defaultMembers || []
+			defaultMembers: parsed.defaultMembers || [],
 		}
 	}
 
@@ -622,12 +666,14 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	 */
 	private async getUserInfo(accessToken: string): Promise<TrelloUser> {
 		const response = await fetch(
-			`${this.apiBaseUrl}/members/me?key=${this.apiKey}&token=${accessToken}&fields=id,username,fullName,email,avatarUrl,url`
+			`${this.apiBaseUrl}/members/me?key=${this.apiKey}&token=${accessToken}&fields=id,username,fullName,email,avatarUrl,url`,
 		)
 
 		if (!response.ok) {
 			const errorData: TrelloApiError = await response.json()
-			throw new Error(`Failed to get user info: ${errorData.message || 'Unknown error'}`)
+			throw new Error(
+				`Failed to get user info: ${errorData.message || 'Unknown error'}`,
+			)
 		}
 
 		return await response.json()
@@ -638,12 +684,14 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	 */
 	private async getUserBoards(accessToken: string): Promise<TrelloBoard[]> {
 		const response = await fetch(
-			`${this.apiBaseUrl}/members/me/boards?key=${this.apiKey}&token=${accessToken}&filter=open&fields=id,name,url,closed,desc,prefs`
+			`${this.apiBaseUrl}/members/me/boards?key=${this.apiKey}&token=${accessToken}&filter=open&fields=id,name,url,closed,desc,prefs`,
 		)
 
 		if (!response.ok) {
 			const errorData: TrelloApiError = await response.json()
-			throw new Error(`Failed to get boards: ${errorData.message || 'Unknown error'}`)
+			throw new Error(
+				`Failed to get boards: ${errorData.message || 'Unknown error'}`,
+			)
 		}
 
 		return await response.json()

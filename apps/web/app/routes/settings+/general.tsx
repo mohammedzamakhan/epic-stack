@@ -2,32 +2,49 @@ import { generateTOTP, getTOTPAuthUri } from '@epic-web/totp'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import * as QRCode from 'qrcode'
-import { useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import {
+	useLoaderData,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from 'react-router'
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
-import { AnnotatedLayout, AnnotatedSection } from '#app/components/ui/annotated-layout.tsx'
+import {
+	AnnotatedLayout,
+	AnnotatedSection,
+} from '#app/components/ui/annotated-layout.tsx'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { deleteDataAction, signOutOfSessionsAction } from './actions/account.actions'
+import {
+	deleteDataAction,
+	signOutOfSessionsAction,
+} from './actions/account.actions'
 import { disconnectProviderAction } from './actions/connections.actions'
 import { changeEmailAction } from './actions/email.actions'
 import { photoAction } from './actions/photo.actions'
 import { profileUpdateAction } from './actions/profile.actions'
-import { changePasswordAction, disable2FAAction, enable2FAAction, setPasswordAction } from './actions/security.actions'
+import {
+	changePasswordAction,
+	disable2FAAction,
+	enable2FAAction,
+	setPasswordAction,
+} from './actions/security.actions'
 import { twoFAVerificationType } from './profile.two-factor'
 import { twoFAVerifyVerificationType } from './profile.two-factor.verify'
 
 export const handle: SEOHandle = {
-  getSitemapEntries: () => null,
+	getSitemapEntries: () => null,
 }
 
 // Photo upload schema
 const MAX_SIZE = 1024 * 1024 * 3 // 3MB
 
-export async function loader({ request }: LoaderFunctionArgs): Promise<Response> {
+export async function loader({
+	request,
+}: LoaderFunctionArgs): Promise<Response> {
 	const userId = await requireUserId(request)
 	const user = await prisma.user.findUniqueOrThrow({
 		where: { id: userId },
@@ -71,54 +88,54 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<Response>
 		where: { userId },
 	})
 
-  // Get passkeys for this user
-  const passkeys = await prisma.passkey.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      deviceType: true,
-      createdAt: true,
-    },
-  })
+	// Get passkeys for this user
+	const passkeys = await prisma.passkey.findMany({
+		where: { userId },
+		orderBy: { createdAt: 'desc' },
+		select: {
+			id: true,
+			deviceType: true,
+			createdAt: true,
+		},
+	})
 
-  // Generate TOTP QR code if 2FA is not enabled
-  let qrCode = null
-  let otpUri = null
-  if (!twoFactorVerification) {
-    const { otp: _otp, ...config } = await generateTOTP()
-    otpUri = getTOTPAuthUri({
-      ...config,
-      accountName: user.email,
-      issuer: 'Epic Stack',
-    })
+	// Generate TOTP QR code if 2FA is not enabled
+	let qrCode = null
+	let otpUri = null
+	if (!twoFactorVerification) {
+		const { otp: _otp, ...config } = await generateTOTP()
+		otpUri = getTOTPAuthUri({
+			...config,
+			accountName: user.email,
+			issuer: 'Epic Stack',
+		})
 
-    qrCode = await QRCode.toDataURL(otpUri)
+		qrCode = await QRCode.toDataURL(otpUri)
 
-    const verificationData = {
-      ...config,
-      type: twoFAVerifyVerificationType,
-      target: userId,
-    }
+		const verificationData = {
+			...config,
+			type: twoFAVerifyVerificationType,
+			target: userId,
+		}
 
-    // Store the TOTP config in the database temporarily
-    await prisma.verification.upsert({
-      where: {
-        target_type: { target: userId, type: twoFAVerifyVerificationType},
-      },
-      create: verificationData,
-      update: verificationData,
-    })
-  }
+		// Store the TOTP config in the database temporarily
+		await prisma.verification.upsert({
+			where: {
+				target_type: { target: userId, type: twoFAVerifyVerificationType },
+			},
+			create: verificationData,
+			update: verificationData,
+		})
+	}
 
 	return Response.json({
 		user,
 		hasPassword: Boolean(password),
 		isTwoFactorEnabled: Boolean(twoFactorVerification),
 		connections,
-    qrCode,
-    otpUri,
-    passkeys
+		qrCode,
+		otpUri,
+		passkeys,
 	})
 }
 
@@ -142,22 +159,27 @@ export const disable2FAActionIntent = 'disable-2fa'
 export const uploadPhotoActionIntent = 'upload-photo'
 export const deletePhotoActionIntent = 'delete-photo'
 
-export async function action({ request }: ActionFunctionArgs): Promise<Response> {
+export async function action({
+	request,
+}: ActionFunctionArgs): Promise<Response> {
 	const userId = await requireUserId(request)
-  const contentType = request.headers.get('content-type')
-  
-  let intent
-	
+	const contentType = request.headers.get('content-type')
+
+	let intent
+
 	if (contentType?.includes('multipart/form-data')) {
-    const formData = await parseFormData(request, { maxFileSize: MAX_SIZE })
+		const formData = await parseFormData(request, { maxFileSize: MAX_SIZE })
 		intent = formData.get('intent')
-		
-		if (intent === uploadPhotoActionIntent || intent === deletePhotoActionIntent) {
-      return photoAction({ userId, formData, request })
+
+		if (
+			intent === uploadPhotoActionIntent ||
+			intent === deletePhotoActionIntent
+		) {
+			return photoAction({ userId, formData, request })
 		}
 	}
-  
-  const formData = await request.formData()
+
+	const formData = await request.formData()
 	intent = formData.get('intent')
 
 	switch (intent) {
@@ -173,27 +195,27 @@ export async function action({ request }: ActionFunctionArgs): Promise<Response>
 		case disconnectProviderActionIntent: {
 			return disconnectProviderAction({ userId, formData })
 		}
-    case changeEmailActionIntent: {
-      return changeEmailAction({ request, userId, formData })
-    }
-    case changePasswordActionIntent: {
-      return changePasswordAction({ request, userId, formData })
-    }
-    case setPasswordActionIntent: {
-      return setPasswordAction({ request, userId, formData })
-    }
-    case enable2FAActionIntent: {
-      return enable2FAAction({ request, userId, formData })
-    }
-    case disable2FAActionIntent: {
-      return disable2FAAction({ request, userId, formData })
-    }
-    case registerPasskeyActionIntent: {
-      return registerPasskeyAction({ request, userId, formData })
-    }
-    case deletePasskeyActionIntent: {
-      return deletePasskeyAction({ request, userId, formData })
-    }
+		case changeEmailActionIntent: {
+			return changeEmailAction({ request, userId, formData })
+		}
+		case changePasswordActionIntent: {
+			return changePasswordAction({ request, userId, formData })
+		}
+		case setPasswordActionIntent: {
+			return setPasswordAction({ request, userId, formData })
+		}
+		case enable2FAActionIntent: {
+			return enable2FAAction({ request, userId, formData })
+		}
+		case disable2FAActionIntent: {
+			return disable2FAAction({ request, userId, formData })
+		}
+		case registerPasskeyActionIntent: {
+			return registerPasskeyAction({ request, userId, formData })
+		}
+		case deletePasskeyActionIntent: {
+			return deletePasskeyAction({ request, userId, formData })
+		}
 		default: {
 			throw new Response(`Invalid intent "${intent}"`, { status: 400 })
 		}
@@ -201,27 +223,27 @@ export async function action({ request }: ActionFunctionArgs): Promise<Response>
 }
 
 // Mock function for passkey registration - in a real app, you'd use your passkey API
-async function registerPasskeyAction({  }: ProfileActionArgs) {
-  return Response.json({ status: 'success' })
+async function registerPasskeyAction({}: ProfileActionArgs) {
+	return Response.json({ status: 'success' })
 }
 
 async function deletePasskeyAction({ formData, userId }: ProfileActionArgs) {
-  const passkeyId = formData.get('passkeyId')
-  if (typeof passkeyId !== 'string') {
-    return Response.json(
-      { status: 'error', error: 'Invalid passkey ID' },
-      { status: 400 },
-    )
-  }
+	const passkeyId = formData.get('passkeyId')
+	if (typeof passkeyId !== 'string') {
+		return Response.json(
+			{ status: 'error', error: 'Invalid passkey ID' },
+			{ status: 400 },
+		)
+	}
 
-  await prisma.passkey.delete({
-    where: {
-      id: passkeyId,
-      userId, // Ensure the passkey belongs to the user
-    },
-  })
-  
-  return Response.json({ status: 'success' })
+	await prisma.passkey.delete({
+		where: {
+			id: passkeyId,
+			userId, // Ensure the passkey belongs to the user
+		},
+	})
+
+	return Response.json({ status: 'success' })
 }
 
 export default function GeneralSettings() {
@@ -229,7 +251,7 @@ export default function GeneralSettings() {
 
 	return (
 		<AnnotatedLayout>
-			<PageTitle 
+			<PageTitle
 				title="Account Settings"
 				description="Manage your account settings and set e-mail preferences."
 			/>
@@ -244,7 +266,14 @@ export default function GeneralSettings() {
 				title="Security"
 				description="Manage your password and two-factor authentication settings."
 			>
-				<SecurityCard hasPassword={data.hasPassword} isTwoFactorEnabled={data.isTwoFactorEnabled} passkeys={data.passkeys} user={data.user} qrCode={data.qrCode} otpUri={data.otpUri} />
+				<SecurityCard
+					hasPassword={data.hasPassword}
+					isTwoFactorEnabled={data.isTwoFactorEnabled}
+					passkeys={data.passkeys}
+					user={data.user}
+					qrCode={data.qrCode}
+					otpUri={data.otpUri}
+				/>
 			</AnnotatedSection>
 
 			<AnnotatedSection

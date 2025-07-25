@@ -43,7 +43,13 @@ export async function requireUserWithPermission(
 export async function requireUserWithRole(request: Request, name: string) {
 	const userId = await requireUserId(request)
 	const user = await prisma.user.findFirst({
-		select: { id: true, organizations: { where: {isDefault: true}, select: { organizationId: true } } },
+		select: {
+			id: true,
+			organizations: {
+				where: { isDefault: true },
+				select: { organizationId: true },
+			},
+		},
 		where: { id: userId, roles: { some: { name } } },
 	})
 

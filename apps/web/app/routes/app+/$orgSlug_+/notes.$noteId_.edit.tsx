@@ -8,21 +8,27 @@ import { OrgNoteEditor } from './__org-note-editor.tsx'
 
 export { action } from './__org-note-editor.server.tsx'
 
-export async function loader({ params, request }: { params: { orgSlug: string, noteId: string }, request: Request }) {
+export async function loader({
+	params,
+	request,
+}: {
+	params: { orgSlug: string; noteId: string }
+	request: Request
+}) {
 	await requireUserId(request)
 	const orgSlug = params.orgSlug
-	
+
 	// Get the organization ID
 	const organization = await prisma.organization.findFirst({
 		where: { slug: orgSlug },
 		select: { id: true },
 	})
-	
+
 	invariantResponse(organization, 'Organization not found', { status: 404 })
-	
+
 	// Check if the user has access to this organization
 	await userHasOrgAccess(request, organization.id)
-	
+
 	const note = await prisma.organizationNote.findFirst({
 		select: {
 			id: true,
@@ -46,16 +52,18 @@ export async function loader({ params, request }: { params: { orgSlug: string, n
 }
 
 type NoteEditProps = {
-	loaderData: { note: {
-		id: string
-		title: string
-		content: string
-		images: Array<{
+	loaderData: {
+		note: {
 			id: string
-			altText: string | null
-			objectKey: string
-		}>
-	} },
+			title: string
+			content: string
+			images: Array<{
+				id: string
+				altText: string | null
+				objectKey: string
+			}>
+		}
+	}
 	actionData?: { result: any }
 }
 

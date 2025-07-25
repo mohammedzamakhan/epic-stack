@@ -1,10 +1,12 @@
 # Integration System
 
-This directory contains the core integration system for connecting with third-party services like Slack, Microsoft Teams, and other productivity tools.
+This directory contains the core integration system for connecting with
+third-party services like Slack, Microsoft Teams, and other productivity tools.
 
 ## Core Components
 
 ### Types (`types.ts`)
+
 - **TokenData**: OAuth token structure
 - **Channel**: External service channel representation
 - **MessageData**: Message format for posting to external services
@@ -12,43 +14,54 @@ This directory contains the core integration system for connecting with third-pa
 - **OAuth and State Management Types**: Callback parameters and state data
 
 ### Provider Interface (`provider.ts`)
+
 - **IntegrationProvider**: Core interface all providers must implement
 - **BaseIntegrationProvider**: Abstract base class with common functionality
 - **ProviderRegistry**: Registry for managing integration providers
 
 ### Integration Service (`service.ts`)
+
 - **IntegrationService**: Main service for managing integrations
-- **MessageFormatter**: Interface for formatting messages for different providers
+- **MessageFormatter**: Interface for formatting messages for different
+  providers
 - **BaseMessageFormatter**: Base implementation with common formatting utilities
 
 ### OAuth Flow Management (`oauth-manager.ts`)
+
 - **OAuthStateManager**: Secure OAuth state generation and validation
 - **OAuthCallbackHandler**: Generic OAuth callback processing
 - **TokenRefreshManager**: Token refresh with retry logic
 - **OAuthFlowManager**: Complete OAuth flow orchestration
 
 ### Security & Encryption (`encryption.ts`, `token-manager.ts`, `security.ts`)
+
 - **IntegrationEncryptionService**: AES-256-GCM encryption for OAuth tokens
 - **TokenManager**: Secure token storage, retrieval, and refresh management
-- **IntegrationSecurityUtils**: Rate limiting, validation, and security utilities
+- **IntegrationSecurityUtils**: Rate limiting, validation, and security
+  utilities
 
 ### Provider Implementations (`providers/`)
+
 - **SlackProvider**: Slack integration implementation
 - Future providers will be added here
 
 ### Setup (`setup.ts`)
+
 - **initializeIntegrations()**: Register all available providers
 - **getAvailableProviders()**: Get providers for UI display
 - **getProvidersByType()**: Get categorized providers
 
 ## OAuth Flow Management
 
-The OAuth flow management system provides secure, robust handling of OAuth 2.0 flows:
+The OAuth flow management system provides secure, robust handling of OAuth 2.0
+flows:
 
 ### Key Features
 
-- **Secure State Management**: Cryptographically signed OAuth states with expiration
-- **Token Refresh**: Automatic token refresh with exponential backoff retry logic
+- **Secure State Management**: Cryptographically signed OAuth states with
+  expiration
+- **Token Refresh**: Automatic token refresh with exponential backoff retry
+  logic
 - **Error Handling**: Comprehensive error handling and validation
 - **Security**: CSRF protection, signature verification, and tamper detection
 
@@ -59,40 +72,50 @@ import { OAuthFlowManager } from '#app/utils/integrations'
 
 // Start OAuth flow
 const { authUrl, state } = await OAuthFlowManager.startOAuthFlow(
-  'org-123',
-  'slack',
-  'https://yourapp.com/callback'
+	'org-123',
+	'slack',
+	'https://yourapp.com/callback',
 )
 
 // Handle OAuth callback
-const { tokenData, stateData } = await OAuthFlowManager.completeOAuthFlow('slack', {
-  code: 'auth-code',
-  state: 'oauth-state',
-  organizationId: 'org-123'
-})
+const { tokenData, stateData } = await OAuthFlowManager.completeOAuthFlow(
+	'slack',
+	{
+		code: 'auth-code',
+		state: 'oauth-state',
+		organizationId: 'org-123',
+	},
+)
 
 // Ensure token is valid (refresh if needed)
-const validToken = await OAuthFlowManager.ensureValidToken('slack', currentToken)
+const validToken = await OAuthFlowManager.ensureValidToken(
+	'slack',
+	currentToken,
+)
 ```
 
 ### Components
 
 #### OAuthStateManager
+
 - Generates cryptographically secure OAuth states
 - Validates states with signature verification
 - Includes expiration and tamper detection
 
 #### OAuthCallbackHandler
+
 - Handles OAuth callbacks from providers
 - Validates state and exchanges codes for tokens
 - Provides error handling for OAuth errors
 
 #### TokenRefreshManager
+
 - Detects when tokens need refresh
 - Implements retry logic with exponential backoff
 - Handles refresh token expiration
 
 #### OAuthFlowManager
+
 - Orchestrates complete OAuth flows
 - Combines all utilities for easy usage
 - Provides high-level API for OAuth operations
@@ -110,7 +133,8 @@ import { integrationEncryption } from '#app/utils/integrations'
 const encryptedData = await integrationEncryption.encryptTokenData(tokenData)
 
 // Decrypt token data
-const decryptedData = await integrationEncryption.decryptTokenData(encryptedData)
+const decryptedData =
+	await integrationEncryption.decryptTokenData(encryptedData)
 ```
 
 ### Token Management
@@ -124,7 +148,10 @@ import { tokenManager } from '#app/utils/integrations'
 await tokenManager.storeTokenData(integrationId, tokenData)
 
 // Get valid access token (with automatic refresh)
-const accessToken = await tokenManager.getValidAccessToken(integration, provider)
+const accessToken = await tokenManager.getValidAccessToken(
+	integration,
+	provider,
+)
 ```
 
 ### Security Utilities
@@ -138,7 +165,11 @@ import { integrationSecurity, RATE_LIMITS } from '#app/utils/integrations'
 const rateLimit = integrationSecurity.checkRateLimit(key, RATE_LIMITS.API_CALLS)
 
 // Validate webhook signatures
-const isValid = await integrationSecurity.validateWebhookSignature(payload, signature, secret)
+const isValid = await integrationSecurity.validateWebhookSignature(
+	payload,
+	signature,
+	secret,
+)
 ```
 
 ## Environment Setup
@@ -169,11 +200,11 @@ console.log('INTEGRATION_ENCRYPTION_KEY=' + key)
 ## Usage Example
 
 ```typescript
-import { 
-  initializeIntegrations, 
-  providerRegistry, 
-  integrationService,
-  tokenManager
+import {
+	initializeIntegrations,
+	providerRegistry,
+	integrationService,
+	tokenManager,
 } from '#app/utils/integrations'
 
 // Initialize the system
@@ -184,17 +215,20 @@ const slackProvider = providerRegistry.get('slack')
 
 // Start OAuth flow (now returns auth URL and state)
 const { authUrl, state } = await integrationService.initiateOAuth(
-  'org-123',
-  'slack',
-  'https://app.example.com/oauth/callback'
+	'org-123',
+	'slack',
+	'https://app.example.com/oauth/callback',
 )
 
 // Handle OAuth callback
-const { tokenData, stateData } = await integrationService.handleOAuthCallback('slack', {
-  code: 'auth-code',
-  state: state,
-  organizationId: 'org-123'
-})
+const { tokenData, stateData } = await integrationService.handleOAuthCallback(
+	'slack',
+	{
+		code: 'auth-code',
+		state: state,
+		organizationId: 'org-123',
+	},
+)
 
 // Store tokens securely
 await tokenManager.storeTokenData(integrationId, tokenData)
@@ -217,6 +251,7 @@ npx tsx apps/web/app/utils/integrations/verify-oauth-manager.ts
 ## Implementation Status
 
 ✅ **Completed:**
+
 - Core type definitions and interfaces
 - IntegrationProvider interface and base classes
 - ProviderRegistry for managing providers
@@ -233,6 +268,7 @@ npx tsx apps/web/app/utils/integrations/verify-oauth-manager.ts
 - Setup and initialization utilities
 
 🚧 **To be implemented in future tasks:**
+
 - Slack API integration
 - Message posting functionality
 - Database operations integration
@@ -240,8 +276,11 @@ npx tsx apps/web/app/utils/integrations/verify-oauth-manager.ts
 
 ## Architecture Principles
 
-1. **Security First**: All tokens encrypted at rest, secure state management, rate limiting
-2. **Extensibility**: New providers can be added by implementing the IntegrationProvider interface
+1. **Security First**: All tokens encrypted at rest, secure state management,
+   rate limiting
+2. **Extensibility**: New providers can be added by implementing the
+   IntegrationProvider interface
 3. **Type Safety**: Full TypeScript support with proper type definitions
-4. **Separation of Concerns**: Clear separation between core interfaces, provider implementations, and service logic
+4. **Separation of Concerns**: Clear separation between core interfaces,
+   provider implementations, and service logic
 5. **Error Handling**: Comprehensive error handling and logging

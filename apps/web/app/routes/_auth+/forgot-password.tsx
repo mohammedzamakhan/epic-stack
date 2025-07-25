@@ -62,7 +62,10 @@ export async function action({ request }: Route.ActionArgs) {
 	if (process.env.ARCJET_KEY) {
 		const usernameOrEmail = formData.get('usernameOrEmail') as string
 		try {
-			const decision = await aj.protect({ request, context: {} }, { email: usernameOrEmail })
+			const decision = await aj.protect(
+				{ request, context: {} },
+				{ email: usernameOrEmail },
+			)
 
 			if (decision.isDenied()) {
 				let errorMessage = 'Access denied'
@@ -78,10 +81,7 @@ export async function action({ request }: Route.ActionArgs) {
 				}
 
 				// Return early with error response
-				return data(
-					{ result: null },
-					{ status: 400, statusText: errorMessage },
-				)
+				return data({ result: null }, { status: 400, statusText: errorMessage })
 			}
 		} catch (error) {
 			// If Arcjet fails, log error but continue with forgot password process
@@ -147,8 +147,6 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 	}
 }
-
-
 
 export const meta: Route.MetaFunction = () => {
 	return [{ title: 'Password Recovery for Epic Notes' }]

@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Icon } from '#app/components/ui/icon'
@@ -31,7 +30,7 @@ export function NavMain({
 	const [openItems, setOpenItems] = useState<Set<string>>(new Set())
 
 	const toggleItem = (title: string) => {
-		setOpenItems(prev => {
+		setOpenItems((prev) => {
 			const newSet = new Set(prev)
 			if (newSet.has(title)) {
 				newSet.delete(title)
@@ -64,13 +63,19 @@ export function NavMain({
 												{/* <item.icon /> */}
 												<span>{item.title}</span>
 											</div>
-											<Icon name={isOpen ? "chevron-down" : "chevron-right"} className="h-4 w-4" />
+											<Icon
+												name={isOpen ? 'chevron-down' : 'chevron-right'}
+												className="h-4 w-4"
+											/>
 										</SidebarMenuButton>
 										{isOpen && (
 											<SidebarMenuSub>
 												{item.items?.map((subItem) => (
 													<SidebarMenuSubItem key={subItem.title}>
-														<SidebarMenuSubButton asChild isActive={subItem.isActive}>
+														<SidebarMenuSubButton
+															asChild
+															isActive={subItem.isActive}
+														>
 															<Link to={subItem.url}>
 																<span>{subItem.title}</span>
 															</Link>
@@ -81,7 +86,11 @@ export function NavMain({
 										)}
 									</>
 								) : (
-									<SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+									<SidebarMenuButton
+										asChild
+										tooltip={item.title}
+										isActive={item.isActive}
+									>
 										<Link to={item.url}>
 											{/* <item.icon /> */}
 											<span>{item.title}</span>

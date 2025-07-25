@@ -1,15 +1,21 @@
+import { ArrowLeft, Menu } from 'lucide-react'
 import {
-	ArrowLeft,
-	Menu,
-} from 'lucide-react'
-import { Link, Outlet, useLocation, useParams, useRouteLoaderData } from 'react-router'
+	Link,
+	Outlet,
+	useLocation,
+	useParams,
+	useRouteLoaderData,
+} from 'react-router'
 import {
 	Avatar,
 	AvatarImage,
 	AvatarFallback,
 } from '#app/components/ui/avatar.tsx'
 import { Button, buttonVariants } from '#app/components/ui/button.tsx'
-import { DropdownMenu, DropdownMenuTrigger } from '#app/components/ui/dropdown-menu.js'
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+} from '#app/components/ui/dropdown-menu.js'
 import { cn, getUserImgSrc } from '#app/utils/misc.js'
 
 const AccountSettingsPage = () => {
@@ -20,16 +26,19 @@ const AccountSettingsPage = () => {
 	const isActiveTab = (path: string) => location.pathname.startsWith(path)
 
 	if (tenantSlug) {
-		return <Outlet />;
+		return <Outlet />
 	}
 
 	return (
-		<div className="flex h-screen flex-col bg-background text-foreground">
+		<div className="bg-background text-foreground flex h-screen flex-col">
 			<header className="flex flex-col border-b">
 				<div className="flex items-center justify-between p-2">
 					<Link
 						to="/"
-						className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), ' rounded-full')}
+						className={cn(
+							buttonVariants({ variant: 'ghost', size: 'icon' }),
+							'rounded-full',
+						)}
 					>
 						<ArrowLeft className="h-4 w-4" />
 					</Link>
@@ -42,7 +51,7 @@ const AccountSettingsPage = () => {
 							/>
 							<AvatarFallback className="rounded-full">ZK</AvatarFallback>
 						</Avatar>
-						<h1 className="mr-2 text-md font-semibold">Account settings</h1>
+						<h1 className="text-md mr-2 font-semibold">Account settings</h1>
 					</div>
 					<DropdownMenu>
 						<DropdownMenuTrigger>
@@ -55,25 +64,21 @@ const AccountSettingsPage = () => {
 					</DropdownMenu>
 				</div>
 				<div className="flex justify-center">
-					<div className="inline-flex border-b border-border">
-						<Link
-							to="/settings/general"
-						>
+					<div className="border-border inline-flex border-b">
+						<Link to="/settings/general">
 							<Button
 								variant="ghost"
-                                size="lg"
-								className={`px-4 py-2 rounded-none ring-offset-0 ring-0 focus-visible:ring-0 focus-within:ring-0 ${isActiveTab('/settings/general') ? 'border-b-2 border-primary' : ''}`}
+								size="lg"
+								className={`rounded-none px-4 py-2 ring-0 ring-offset-0 focus-within:ring-0 focus-visible:ring-0 ${isActiveTab('/settings/general') ? 'border-primary border-b-2' : ''}`}
 							>
 								General
 							</Button>
 						</Link>
-						<Link
-							to="/settings/organizations"
-						>
+						<Link to="/settings/organizations">
 							<Button
 								variant="ghost"
-                                size="lg"
-								className={`px-4 py-2 rounded-none ring-offset-0 ring-0 focus-visible:ring-0 focus-within:ring-0 ${isActiveTab('/settings/organizations') ? 'border-b-2 border-primary' : ''}`}
+								size="lg"
+								className={`rounded-none px-4 py-2 ring-0 ring-offset-0 focus-within:ring-0 focus-visible:ring-0 ${isActiveTab('/settings/organizations') ? 'border-primary border-b-2' : ''}`}
 							>
 								Organizations
 							</Button>
@@ -84,7 +89,7 @@ const AccountSettingsPage = () => {
 
 			{/* Scrollable Main Content */}
 			<main className="flex-1 overflow-y-auto p-8">
-				<section className="max-w-4xl mx-auto">
+				<section className="mx-auto max-w-4xl">
 					<Outlet />
 				</section>
 			</main>

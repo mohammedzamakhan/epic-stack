@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 
 import { useLocation, useRouteLoaderData } from 'react-router'
@@ -18,50 +17,68 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const location = useLocation()
 
 	const data = {
-		user: rootData?.user ? {
-			name: rootData.user.name || rootData.user.username || 'User',
-			email: rootData.user.username, // Using username as email since email property is not available
-			avatar: rootData.user.image ? `/resources/images?objectKey=${rootData.user.image.objectKey}` : '/avatars/user.jpg',
-		} : {
-			name: 'Guest',
-			email: '',
-			avatar: '/avatars/user.jpg',
-		},
+		user: rootData?.user
+			? {
+					name: rootData.user.name || rootData.user.username || 'User',
+					email: rootData.user.username, // Using username as email since email property is not available
+					avatar: rootData.user.image
+						? `/resources/images?objectKey=${rootData.user.image.objectKey}`
+						: '/avatars/user.jpg',
+				}
+			: {
+					name: 'Guest',
+					email: '',
+					avatar: '/avatars/user.jpg',
+				},
 		navMain: [
 			{
 				title: 'Dashboard',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
-				isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
+				isActive:
+					location.pathname ===
+					`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}`,
 			},
 			{
 				title: 'Notes',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`,
-				isActive: location.pathname.includes(`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`),
+				isActive: location.pathname.includes(
+					`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/notes`,
+				),
 			},
 			{
 				title: 'Settings',
 				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
-				isActive: location.pathname.includes(`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`),
+				isActive: location.pathname.includes(
+					`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
+				),
 				items: [
 					{
 						title: 'General',
 						url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
-						isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
+						isActive:
+							location.pathname ===
+							`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings`,
 					},
 					{
 						title: 'Members',
 						url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/members`,
-						isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/members`,
+						isActive:
+							location.pathname ===
+							`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/members`,
 					},
 					{
 						title: 'Integrations',
 						url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/integrations`,
-						isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/integrations`,
+						isActive:
+							location.pathname ===
+							`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/integrations`,
 					},
 					{
 						title: 'Billing',
 						url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/billing`,
-						isActive: location.pathname === `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/billing`,
+						isActive:
+							location.pathname ===
+							`/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/billing`,
 					},
 				],
 			},

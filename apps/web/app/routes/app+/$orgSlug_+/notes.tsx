@@ -1,7 +1,13 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Files, FileText, Link2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Outlet, Link, useLocation, useNavigate, type LoaderFunctionArgs } from 'react-router'
+import {
+	Outlet,
+	Link,
+	useLocation,
+	useNavigate,
+	type LoaderFunctionArgs,
+} from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button } from '#app/components/ui/button.tsx'
@@ -100,7 +106,7 @@ export default function NotesRoute({
 	return (
 		<div className="m-8 flex h-full flex-col">
 			<div className="flex items-center justify-between pb-4">
-				<PageTitle 
+				<PageTitle
 					title={`${orgName}'s Notes`}
 					description="You can create notes for your organization here."
 				/>
@@ -124,7 +130,7 @@ export default function NotesRoute({
 							icons={[FileText, Link2, Files]}
 							action={{
 								label: 'Create Note',
-                                href: `/app/${loaderData.organization.slug}/notes/new`,
+								href: `/app/${loaderData.organization.slug}/notes/new`,
 							}}
 						/>
 					</>

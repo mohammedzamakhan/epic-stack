@@ -15,40 +15,39 @@ export function MarketingLayout({
 }: MarketingLayoutProps) {
 	return (
 		<>
-		<SidebarProvider
-			open={!isCollapsed}
-			style={
-				{
-					'--sidebar-width': 'calc(var(--spacing) * 50)',
-					'--header-height': 'calc(var(--spacing) * 12)',
-				} as React.CSSProperties
-			}
-		>
-			<AppSidebar variant="inset" />
-			<SidebarInset
+			<SidebarProvider
+				open={!isCollapsed}
 				style={
 					{
-						'--sidebar-background': '15 23 42', // slate-900
-						'--sidebar-foreground': '248 250 252', // slate-50
-						'--sidebar-primary': '248 250 252', // slate-50Add commentMore actions
-						'--sidebar-primary-foreground': '15 23 42', // slate-900
-						'--sidebar-accent': '30 41 59', // slate-800
-						'--sidebar-accent-foreground': '248 250 252', // slate-50
-						'--sidebar-border': '51 65 85', // slate-600
-						'--sidebar-ring': '148 163 184', // slate-400
+						'--sidebar-width': 'calc(var(--spacing) * 50)',
+						'--header-height': 'calc(var(--spacing) * 12)',
 					} as React.CSSProperties
 				}
 			>
-				<SiteHeader />
-				<div className="flex flex-1 flex-col">
-					<div className="@container/main flex flex-1 flex-col gap-2">
-						{children}
+				<AppSidebar variant="inset" />
+				<SidebarInset
+					style={
+						{
+							'--sidebar-background': '15 23 42', // slate-900
+							'--sidebar-foreground': '248 250 252', // slate-50
+							'--sidebar-primary': '248 250 252', // slate-50Add commentMore actions
+							'--sidebar-primary-foreground': '15 23 42', // slate-900
+							'--sidebar-accent': '30 41 59', // slate-800
+							'--sidebar-accent-foreground': '248 250 252', // slate-50
+							'--sidebar-border': '51 65 85', // slate-600
+							'--sidebar-ring': '148 163 184', // slate-400
+						} as React.CSSProperties
+					}
+				>
+					<SiteHeader />
+					<div className="flex flex-1 flex-col">
+						<div className="@container/main flex flex-1 flex-col gap-2">
+							{children}
+						</div>
 					</div>
-				</div>
-				
-			</SidebarInset>
-		</SidebarProvider>
-		<EpicProgress />
+				</SidebarInset>
+			</SidebarProvider>
+			<EpicProgress />
 		</>
 	)
 }

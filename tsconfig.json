@@ -1,23 +1,25 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", ".react-router/types/**/*"],
-  "extends": ["@epic-web/config/typescript"],
-  "compilerOptions": {
-    // TODO: Probably should move this into epic-web/config
-    "types": ["@react-router/node", "vite/client"],
-    "rootDirs": [".", "./.react-router/types"],
-    "paths": {
-      "#app/*": ["./apps/web/app/*"],
-      "#tests/*": ["./apps/web/tests/*"],
-      "@/icon-name": [
-        "./apps/web/app/components/ui/icons/types.ts",
-        "./apps/web/types/icon-name.d.ts"
-      ],
-      "@repo/ui": ["./packages/ui"],
-      "@repo/ui/*": ["./packages/ui/*"],
-      "@repo/config": ["./packages/config"],
-      "@repo/config/*": ["./packages/config/*"],
-      "@repo/integrations": ["./packages/integrations/src"],
-      "@repo/integrations/*": ["./packages/integrations/src/*"]
-    }
-  }
+	"include": ["**/*.ts", "**/*.tsx", ".react-router/types/**/*"],
+	"extends": ["@epic-web/config/typescript"],
+	"compilerOptions": {
+		// TODO: Probably should move this into epic-web/config
+		"types": ["@react-router/node", "vite/client"],
+		"rootDirs": [".", "./.react-router/types"],
+		"paths": {
+			"#app/*": ["./apps/web/app/*"],
+			"#tests/*": ["./apps/web/tests/*"],
+			"@/icon-name": [
+				"./apps/web/app/components/ui/icons/types.ts",
+				"./apps/web/types/icon-name.d.ts"
+			],
+			"@repo/ui": ["./packages/ui"],
+			"@repo/ui/*": ["./packages/ui/*"],
+			"@repo/config": ["./packages/config"],
+			"@repo/config/*": ["./packages/config/*"],
+			"@repo/integrations": ["./packages/integrations/src"],
+			"@repo/integrations/*": ["./packages/integrations/src/*"],
+			"@repo/notifications": ["./packages/notifications/src"],
+			"@repo/notifications/*": ["./packages/notifications/src/*"]
+		}
+	}
 }

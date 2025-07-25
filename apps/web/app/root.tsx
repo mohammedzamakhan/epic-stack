@@ -1,3 +1,4 @@
+import { NotificationCenter } from '@repo/notifications'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
@@ -104,12 +105,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 	// Get sidebar state for marketing routes
 	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
-	
+
 	// Get user organizations if user exists
 	let userOrganizations = undefined
 	if (user) {
 		try {
-			const { getUserOrganizations, getUserDefaultOrganization } = await import('./utils/organizations.server')
+			const { getUserOrganizations, getUserDefaultOrganization } = await import(
+				'./utils/organizations.server'
+			)
 			const orgs = await getUserOrganizations(user.id)
 			const defaultOrg = await getUserDefaultOrganization(user.id)
 			userOrganizations = {
@@ -188,6 +191,12 @@ function Document({
 				<Links />
 			</head>
 			<body className="bg-background text-foreground">
+				<div className="flex items-center justify-end p-2">
+					<NotificationCenter
+						subscriberId={`user-id`}
+						applicationIdentifier="XQdYIaaQAOv5"
+					/>
+				</div>
 				{children}
 				<script
 					nonce={nonce}
@@ -216,7 +225,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 		// For marketing routes, only render the MarketingDocument without the App component
 		const safeNonce = nonce || ''
 		return (
-			<MarketingDocument locale={data?.locale} nonce={safeNonce} theme={theme} env={data?.ENV || {}}>
+			<MarketingDocument
+				locale={data?.locale}
+				nonce={safeNonce}
+				theme={theme}
+				env={data?.ENV || {}}
+			>
 				{children}
 			</MarketingDocument>
 		)
@@ -235,13 +249,13 @@ function AppWithProviders() {
 
 	return (
 		<HoneypotProvider {...data.honeyProps}>
-		<OpenImgContextProvider
-			optimizerEndpoint="/resources/images"
-			getSrc={getImgSrc}
-		>
-			<Outlet />
-		</OpenImgContextProvider>
-	</HoneypotProvider>
+			<OpenImgContextProvider
+				optimizerEndpoint="/resources/images"
+				getSrc={getImgSrc}
+			>
+				<Outlet />
+			</OpenImgContextProvider>
+		</HoneypotProvider>
 	)
 }
 

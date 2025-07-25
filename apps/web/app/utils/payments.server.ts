@@ -13,7 +13,8 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 if (!process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
-	const errorMsg = 'STRIPE_SECRET_KEY does not appear to be a valid Stripe secret key (should start with sk_)'
+	const errorMsg =
+		'STRIPE_SECRET_KEY does not appear to be a valid Stripe secret key (should start with sk_)'
 	throw new Error(errorMsg)
 }
 
@@ -24,7 +25,7 @@ const customAgent = new https.Agent({
 	maxSockets: 50,
 	maxFreeSockets: 10,
 	timeout: 10000,
-	rejectUnauthorized: true // Keep SSL verification
+	rejectUnauthorized: true, // Keep SSL verification
 })
 
 let stripe: Stripe
@@ -35,7 +36,6 @@ try {
 		maxNetworkRetries: 2,
 		httpAgent: customAgent, // Use custom agent
 	})
-
 } catch (error) {
 	throw error
 }
@@ -160,11 +160,11 @@ export async function createCheckoutSession(
 			...(process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
 				? {}
 				: {
-					trial_period_days:
-						process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-							? 0
-							: parseInt(process.env.TRIAL_DAYS || '0', 10),
-				}),
+						trial_period_days:
+							process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
+								? 0
+								: parseInt(process.env.TRIAL_DAYS || '0', 10),
+					}),
 		},
 		payment_method_collection:
 			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'stripe'
@@ -254,7 +254,6 @@ export async function handleSubscriptionChange(
 	const organization = await getOrganizationByStripeCustomerId(customerId)
 
 	if (!organization) {
-
 		return
 	}
 
@@ -312,17 +311,18 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 export async function getStripePrices() {
 	try {
 		const timeoutPromise = new Promise((_, reject) =>
-			setTimeout(() => reject(new Error('Stripe API call timed out after 5 seconds')), 5000)
+			setTimeout(
+				() => reject(new Error('Stripe API call timed out after 5 seconds')),
+				5000,
+			),
 		)
 
 		// Verify account exists by retrieving it
-		await Promise.race([
-			stripe.accounts.retrieve(),
-			timeoutPromise
-		])
-
+		await Promise.race([stripe.accounts.retrieve(), timeoutPromise])
 	} catch (error: any) {
-		throw new Error(`Invalid Stripe API key or connectivity issue: ${error?.message || error}`)
+		throw new Error(
+			`Invalid Stripe API key or connectivity issue: ${error?.message || error}`,
+		)
 	}
 
 	const prices = await stripe.prices.list({
@@ -378,9 +378,9 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 					parseInt(process.env.TRIAL_DAYS!, 10) -
 					(organization?.createdAt
 						? Math.ceil(
-							(new Date().getTime() - organization.createdAt.getTime()) /
-							(1000 * 60 * 60 * 24),
-						)
+								(new Date().getTime() - organization.createdAt.getTime()) /
+									(1000 * 60 * 60 * 24),
+							)
 						: 0) +
 					1,
 			}
@@ -442,7 +442,8 @@ export const updateSeatQuantity = async (organizationId: string) => {
 	}
 
 	// Get the number of users in the organization
-	const numUsersInOrganization = await getOrganizationSeatQuantity(organizationId)
+	const numUsersInOrganization =
+		await getOrganizationSeatQuantity(organizationId)
 
 	// Get the subscription item id
 	const subscription = await stripe.subscriptions.retrieve(
@@ -465,13 +466,23 @@ export const updateSeatQuantity = async (organizationId: string) => {
 	})
 }
 
-export const checkoutAction = async (request: Request, organization: Organization) => {
+export const checkoutAction = async (
+	request: Request,
+	organization: Organization,
+) => {
 	const formData = await request.formData()
 	const priceId = formData.get('priceId') as string
-	return createCheckoutSession(request, { organization, priceId, from: 'checkout' })
+	return createCheckoutSession(request, {
+		organization,
+		priceId,
+		from: 'checkout',
+	})
 }
 
-export const customerPortalAction = async (_: Request, organization: Organization) => {
+export const customerPortalAction = async (
+	_: Request,
+	organization: Organization,
+) => {
 	const portalSession = await createCustomerPortalSession(organization)
 	return redirect(portalSession.url)
 }

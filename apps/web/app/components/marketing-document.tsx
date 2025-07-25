@@ -1,9 +1,4 @@
-import {
-	Links,
-	Meta,
-	Scripts,
-	ScrollRestoration,
-} from 'react-router'
+import { Links, Meta, Scripts, ScrollRestoration } from 'react-router'
 import { ClientHintCheck } from '#app/utils/client-hints.tsx'
 import { type Theme } from '#app/utils/theme.server.ts'
 
@@ -20,7 +15,7 @@ export function MarketingDocument({
 	theme,
 	env,
 	nonce,
-	locale
+	locale,
 }: MarketingDocumentProps) {
 	return (
 		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>

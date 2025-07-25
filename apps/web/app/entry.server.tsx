@@ -50,6 +50,53 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const nonce = crypto.randomBytes(16).toString('hex')
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
+	console.log('request', request.url)
+
+	if (request.url.includes('/novu')) {
+		return new Promise(async (resolve, reject) => {
+			console.log('novu request')
+			let didError = false
+			// NOTE: this timing will only include things that are rendered in the shell
+			// and will not include suspended components and deferred loaders
+			const timings = makeTimings('render', 'renderToPipeableStream')
+
+			const { pipe, abort } = renderToPipeableStream(
+				<I18nProvider i18n={i18n}>
+					<NonceProvider value={nonce}>
+						<ServerRouter
+							nonce={nonce}
+							context={reactRouterContext}
+							url={request.url}
+						/>
+					</NonceProvider>
+				</I18nProvider>,
+				{
+					[callbackName]: () => {
+						const body = new PassThrough()
+						responseHeaders.set('Content-Type', 'text/html')
+						responseHeaders.append('Server-Timing', timings.toString())
+
+						resolve(
+							new Response(createReadableStreamFromReadable(body), {
+								headers: responseHeaders,
+								status: didError ? 500 : responseStatusCode,
+							}),
+						)
+						pipe(body)
+					},
+					onShellError: (err: unknown) => {
+						reject(err)
+					},
+					onError: () => {
+						didError = true
+					},
+					nonce,
+				},
+			)
+
+			setTimeout(abort, streamTimeout + 5000)
+		})
+	}
 	return new Promise(async (resolve, reject) => {
 		let didError = false
 		// NOTE: this timing will only include things that are rendered in the shell
