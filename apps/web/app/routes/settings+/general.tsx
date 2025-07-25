@@ -8,6 +8,7 @@ import { ConnectionsCard } from '#app/components/settings/cards/connections-card
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { AnnotatedLayout, AnnotatedSection } from '#app/components/ui/annotated-layout.tsx'
+import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { deleteDataAction, signOutOfSessionsAction } from './actions/account.actions'
@@ -228,6 +229,10 @@ export default function GeneralSettings() {
 
 	return (
 		<AnnotatedLayout>
+			<PageTitle 
+				title="Account Settings"
+				description="Manage your account settings and set e-mail preferences."
+			/>
 			<AnnotatedSection
 				title="Profile"
 				description="Update your photo and personal details here."

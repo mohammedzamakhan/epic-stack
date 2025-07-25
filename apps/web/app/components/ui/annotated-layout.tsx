@@ -23,10 +23,10 @@ export function AnnotatedSection({ title, description, children }: AnnotatedSect
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-1">
         <div className="space-y-2">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-medium leading-6">
             {title}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             {description}
           </p>
         </div>

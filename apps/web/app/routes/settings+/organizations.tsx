@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { type LoaderFunctionArgs, Link, useLoaderData } from 'react-router';
 import { Button } from '#app/components/ui/button';
 import { Input } from '#app/components/ui/input';
+import { PageTitle } from '#app/components/ui/page-title';
 import { requireUserId } from '#app/utils/auth.server';
 import { type UserOrganizationWithRole, getUserOrganizations } from '#app/utils/organizations.server';
 
@@ -33,10 +34,12 @@ export default function OrganizationsPage() {
   return (
     <div className="container max-w-2xl py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Organizations</h1>
-        <p className="text-muted-foreground mb-6">Jump into an existing organization or add a new one.</p>
+        <PageTitle 
+          title="Organizations"
+          description="Jump into an existing organization or add a new one."
+        />
         
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input

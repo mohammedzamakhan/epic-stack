@@ -1,5 +1,6 @@
 import { invariant } from '@epic-web/invariant';
 import { type LoaderFunctionArgs, useLoaderData } from 'react-router';
+import { PageTitle } from '#app/components/ui/page-title.tsx';
 import { requireUserId } from '#app/utils/auth.server';
 import { prisma } from '#app/utils/db.server';
 
@@ -26,7 +27,10 @@ export default function OrganizationDashboard() {
 
 	return (
 		<div className="p-8">
-			<h1>{organization.name} Dashboard</h1>
+			<PageTitle 
+				title={`${organization.name} Dashboard`}
+				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
+			/>
 		</div>
 	);
 }

@@ -7,6 +7,7 @@ import { ErrorList } from '#app/components/forms';
 import { Button } from '#app/components/ui/button';
 import { Input } from '#app/components/ui/input';
 import { Label } from '#app/components/ui/label';
+import { PageTitle } from '#app/components/ui/page-title';
 import { Textarea } from '#app/components/ui/textarea';
 
 import { requireUserId } from '#app/utils/auth.server';
@@ -99,13 +100,12 @@ export default function CreateOrganizationPage() {
   };
 
   return (
-    <div className="container max-w-md py-8">
+    <div className="container max-w-lg py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Add your organization</h1>
-        <p className="text-gray-600 text-sm">
-          We just need some basic info to get your organization set up.
-          You'll be able to edit this later.
-        </p>
+        <PageTitle 
+          title="Add your organization"
+          description="We just need some basic info to get your organization set up. You'll be able to edit this later."
+        />
       </div>
 
       <form

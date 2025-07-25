@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useRouteLoaderData } from "react-router";
 import { Link } from "react-router";
+import { PageTitle } from "#app/components/ui/page-title.tsx";
 import { cn } from "#app/utils/misc";
 import { type loader as rootLoader } from "#app/root.tsx";
 
@@ -12,10 +13,10 @@ export default function SettingsLayout() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your organization settings and preferences.
-        </p>
+        <PageTitle 
+          title="Settings"
+          description="Manage your organization settings and preferences."
+        />
       </div>
       
       <div className="flex gap-8">

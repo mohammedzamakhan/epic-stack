@@ -11,6 +11,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '#app/components/ui/dropdown-menu'
+import { Icon } from '#app/components/ui/icon'
 import {
 	SidebarMenu,
 	SidebarMenuButton,
@@ -53,11 +54,11 @@ export function NavUser({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
 						className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-						side={isMobile ? 'bottom' : 'right'}
+						side={isMobile ? 'bottom' : 'top'}
 						align="end"
 						sideOffset={4}
 					>
-						<DropdownMenuLabel className="p-0 font-normal">
+						{/* <DropdownMenuLabel className="p-0 font-normal">
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8">
 									<AvatarImage src={user.avatar} alt={user.name} />
@@ -71,21 +72,20 @@ export function NavUser({
 								</div>
 							</div>
 						</DropdownMenuLabel>
-						<DropdownMenuSeparator />
+						<DropdownMenuSeparator /> */}
 						<DropdownMenuGroup>
 							<DropdownMenuItem asChild>
-								<Link to="/settings/general">Account</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link to="/settings/billing">Billing</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link to="/settings/notifications">Notifications</Link>
+								<Link to="/settings/general">
+									<Icon name="person" className="mr-2 size-4" />
+									Account
+								</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
+
 							<Form action="/logout" method="POST">
+								<Icon name="exit" className="mr-2 size-4" />
 								<button type="submit" className="w-full text-left">
 									Log out
 								</button>

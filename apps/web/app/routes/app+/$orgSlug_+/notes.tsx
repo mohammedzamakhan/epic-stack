@@ -6,6 +6,7 @@ import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
+import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
@@ -99,7 +100,10 @@ export default function NotesRoute({
 	return (
 		<div className="m-8 flex h-full flex-col">
 			<div className="flex items-center justify-between pb-4">
-				<h1 className="text-3xl md:text-left">{orgName}'s Notes</h1>
+				<PageTitle 
+					title={`${orgName}'s Notes`}
+					description="You can create notes for your organization here."
+				/>
 				<Button variant="default" asChild>
 					<Link to="new">
 						<Icon name="plus">New Note</Icon>

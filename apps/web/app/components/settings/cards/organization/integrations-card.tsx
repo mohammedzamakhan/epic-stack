@@ -197,34 +197,34 @@ interface AvailableIntegrationItemProps {
 
 function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon
-            name="link-2"
-            className="h-8 w-8 text-muted-foreground"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
-            {provider.displayName}
-          </p>
-          <p className="text-xs text-muted-foreground truncate">
-            {provider.description}
-          </p>
-        </div>
+    <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+      <div className="flex-shrink-0">
+        <Icon
+          name="link-2"
+          className="h-8 w-8 text-muted-foreground"
+        />
       </div>
-      <Form method="POST">
-        <input type="hidden" name="intent" value={connectIntegrationActionIntent} />
-        <input type="hidden" name="providerName" value={provider.name} />
-        <Button
-          type="submit"
-          variant="outline"
-          size="sm"
-        >
-          Connect
-        </Button>
-      </Form>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground truncate">
+          {provider.displayName}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {provider.description}
+        </p>
+      </div>
+      <div className="flex-shrink-0">
+        <Form method="POST">
+          <input type="hidden" name="intent" value={connectIntegrationActionIntent} />
+          <input type="hidden" name="providerName" value={provider.name} />
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+          >
+            Connect
+          </Button>
+        </Form>
+      </div>
     </div>
   )
 }

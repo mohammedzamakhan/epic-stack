@@ -1,12 +1,16 @@
 
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { Button } from '#app/components/ui/button'
+import { Icon } from '#app/components/ui/icon'
 import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
 } from '#app/components/ui/sidebar'
 
 export function NavMain({
@@ -24,52 +28,69 @@ export function NavMain({
 		}[]
 	}[]
 }) {
+	const [openItems, setOpenItems] = useState<Set<string>>(new Set())
+
+	const toggleItem = (title: string) => {
+		setOpenItems(prev => {
+			const newSet = new Set(prev)
+			if (newSet.has(title)) {
+				newSet.delete(title)
+			} else {
+				newSet.add(title)
+			}
+			return newSet
+		})
+	}
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupContent className="flex flex-col gap-2">
 				<SidebarMenu>
-					<SidebarMenuItem className="flex items-center gap-2">
-						<SidebarMenuButton
-							tooltip="Quick Create"
-							className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-						>
-							{/* <IconCirclePlusFilled /> */}
-							<span>Quick Create</span>
-						</SidebarMenuButton>
-						<Button
-							size="icon"
-							className="size-8 group-data-[collapsible=icon]:opacity-0"
-							variant="outline"
-						>
-							{/* <IconMail /> */}
-							<span className="sr-only">Inbox</span>
-						</Button>
-					</SidebarMenuItem>
-				</SidebarMenu>
-				<SidebarMenu>
-					{items.map((item) => (
-						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
-								<Link to={item.url}>
-									{/* <item.icon /> */}
-									<span>{item.title}</span>
-								</Link>
-							</SidebarMenuButton>
-							{item.items && item.isActive && (
-								<SidebarMenu className="ml-4 mt-1">
-									{item.items.map((subItem) => (
-										<SidebarMenuItem key={subItem.title}>
-											<SidebarMenuButton asChild tooltip={subItem.title} isActive={subItem.isActive} size="sm">
-												<Link to={subItem.url}>
-													<span>{subItem.title}</span>
-												</Link>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									))}
-								</SidebarMenu>
-							)}
-						</SidebarMenuItem>
-					))}
+					{items.map((item) => {
+						const hasSubItems = item.items && item.items.length > 0
+						const isOpen = openItems.has(item.title)
+
+						return (
+							<SidebarMenuItem key={item.title}>
+								{hasSubItems ? (
+									<>
+										<SidebarMenuButton
+											onClick={() => toggleItem(item.title)}
+											tooltip={item.title}
+											isActive={item.isActive}
+											className="w-full justify-between"
+										>
+											<div className="flex items-center">
+												{/* <item.icon /> */}
+												<span>{item.title}</span>
+											</div>
+											<Icon name={isOpen ? "chevron-down" : "chevron-right"} className="h-4 w-4" />
+										</SidebarMenuButton>
+										{isOpen && (
+											<SidebarMenuSub>
+												{item.items?.map((subItem) => (
+													<SidebarMenuSubItem key={subItem.title}>
+														<SidebarMenuSubButton asChild isActive={subItem.isActive}>
+															<Link to={subItem.url}>
+																<span>{subItem.title}</span>
+															</Link>
+														</SidebarMenuSubButton>
+													</SidebarMenuSubItem>
+												))}
+											</SidebarMenuSub>
+										)}
+									</>
+								) : (
+									<SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+										<Link to={item.url}>
+											{/* <item.icon /> */}
+											<span>{item.title}</span>
+										</Link>
+									</SidebarMenuButton>
+								)}
+							</SidebarMenuItem>
+						)
+					})}
 				</SidebarMenu>
 			</SidebarGroupContent>
 		</SidebarGroup>
