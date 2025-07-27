@@ -40,7 +40,6 @@ const app = express()
 // ✅ EARLY CORS + LOGGING MIDDLEWARE
 app.use((req, res, next) => {
 	const origin = req.get('Origin')
-	console.log('🌐 Incoming request:', req.method, req.url, origin)
 	const allowedOrigins = ['https://dashboard-v0.novu.co']
 
 	if (allowedOrigins.includes(origin || '')) {
@@ -51,16 +50,12 @@ app.use((req, res, next) => {
 		)
 		res.header(
 			'Access-Control-Allow-Headers',
-			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace',
+			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace, bypass-tunnel-reminder',
 		)
 		res.header('Access-Control-Allow-Credentials', 'true')
 	}
 
 	if (req.method === 'OPTIONS') {
-		// print the headers
-		console.log('🌐 Incoming request headers:', req.headers)
-		// print response headers
-		console.log('🌐 Response headers:', res.getHeaders())
 		return res.sendStatus(204)
 	}
 
@@ -257,7 +252,7 @@ app.all('/api/novu*', (req, res, next) => {
 		res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
 		res.setHeader(
 			'Access-Control-Allow-Headers',
-			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace',
+			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
 		)
 
 		return originalWriteHead.apply(res, arguments)

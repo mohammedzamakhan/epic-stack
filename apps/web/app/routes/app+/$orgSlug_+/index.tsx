@@ -1,8 +1,19 @@
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, useLoaderData } from 'react-router'
+import { Novu } from '@novu/api'
+import { testWorkflow } from '@repo/notifications'
+import {
+	type ActionFunctionArgs,
+	Form,
+	type LoaderFunctionArgs,
+	useLoaderData,
+} from 'react-router'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
+
+const novu = new Novu({
+	secretKey: process.env.NOVU_SECRET_KEY,
+})
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -22,6 +33,40 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	return Response.json({ organization })
 }
 
+export async function action({ request, params }: ActionFunctionArgs) {
+	const userId = await requireUserId(request)
+	const orgSlug = params.orgSlug
+	invariant(orgSlug, 'orgSlug is required')
+
+	const organization = await prisma.organization.findFirst({
+		where: { slug: orgSlug, users: { some: { userId: userId } } },
+		select: { id: true },
+	})
+
+	invariant(organization, 'organization is required')
+
+	//subscriber id = org id + customner id
+	const subscriberId = `${organization.id}-${userId}`
+	console.log(subscriberId)
+	console.log('trigger initiated')
+
+	try {
+		console.log('testWorkflow.id', testWorkflow.id)
+		await novu.trigger({
+			workflowId: 'demo-verify-otp',
+			to: {
+				subscriberId: subscriberId,
+				email: 'mohammed.zama.khan@gmail.com',
+			},
+			payload: {},
+		})
+	} catch (err) {
+		console.error('Error triggering workflow', err)
+	}
+
+	return null
+}
+
 export default function OrganizationDashboard() {
 	const { organization } = useLoaderData() as { organization: { name: string } }
 
@@ -31,6 +76,10 @@ export default function OrganizationDashboard() {
 				title={`${organization.name} Dashboard`}
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
+
+			<Form method="POST">
+				<button type="submit"> trigger </button>
+			</Form>
 		</div>
 	)
 }

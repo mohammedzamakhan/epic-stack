@@ -1,4 +1,4 @@
-import { NotificationCenter } from '@repo/notifications'
+import { NovuProvider } from '@novu/react/hooks'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
@@ -191,12 +191,6 @@ function Document({
 				<Links />
 			</head>
 			<body className="bg-background text-foreground">
-				<div className="flex items-center justify-end p-2">
-					<NotificationCenter
-						subscriberId={`user-id`}
-						applicationIdentifier="XQdYIaaQAOv5"
-					/>
-				</div>
 				{children}
 				<script
 					nonce={nonce}
@@ -253,7 +247,12 @@ function AppWithProviders() {
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
 			>
-				<Outlet />
+				<NovuProvider
+					subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
+					applicationIdentifier="XQdYIaaQAOv5"
+				>
+					<Outlet />
+				</NovuProvider>
 			</OpenImgContextProvider>
 		</HoneypotProvider>
 	)
