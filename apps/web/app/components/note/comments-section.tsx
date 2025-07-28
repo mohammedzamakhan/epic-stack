@@ -1,4 +1,4 @@
-import { Form } from 'react-router'
+import { Form, useRevalidator } from 'react-router'
 import { useState } from 'react'
 import { Icon } from '../ui/icon'
 import { Button } from '../ui/button'
@@ -34,12 +34,9 @@ export function CommentsSection({
 }: CommentsSectionProps) {
 	const [newComment, setNewComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const revalidator = useRevalidator()
 
-	console.log('CommentsSection rendered with:', { 
-		noteId, 
-		commentsCount: comments.length, 
-		comments: comments.map(c => ({ id: c.id, repliesCount: c.replies.length }))
-	})
+
 
 	const handleAddComment = async (content: string) => {
 		setIsSubmitting(true)
@@ -50,13 +47,18 @@ export function CommentsSection({
 		formData.append('content', content)
 
 		try {
-			await fetch(window.location.pathname, {
+			const response = await fetch(window.location.pathname, {
 				method: 'POST',
 				body: formData,
 			})
 			
-			// Reload the page to show the new comment
-			window.location.reload()
+			if (response.ok) {
+				// Revalidate the data to show the new comment
+				revalidator.revalidate()
+			} else {
+				const errorText = await response.text()
+				console.error('Comment failed:', errorText)
+			}
 		} catch (error) {
 			console.error('Error adding comment:', error)
 		} finally {
@@ -65,8 +67,6 @@ export function CommentsSection({
 	}
 
 	const handleReply = async (parentId: string, content: string) => {
-		console.log('Submitting reply:', { parentId, content, noteId })
-		
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
@@ -79,11 +79,9 @@ export function CommentsSection({
 				body: formData,
 			})
 			
-			console.log('Reply response:', response.status, response.statusText)
-			
 			if (response.ok) {
-				// Reload the page to show the new reply
-				window.location.reload()
+				// Revalidate the data to show the new reply
+				revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
 				console.error('Reply failed:', errorText)
@@ -99,13 +97,18 @@ export function CommentsSection({
 		formData.append('commentId', commentId)
 
 		try {
-			await fetch(window.location.pathname, {
+			const response = await fetch(window.location.pathname, {
 				method: 'POST',
 				body: formData,
 			})
 			
-			// Reload the page to remove the deleted comment
-			window.location.reload()
+			if (response.ok) {
+				// Revalidate the data to remove the deleted comment
+				revalidator.revalidate()
+			} else {
+				const errorText = await response.text()
+				console.error('Delete failed:', errorText)
+			}
 		} catch (error) {
 			console.error('Error deleting comment:', error)
 		}

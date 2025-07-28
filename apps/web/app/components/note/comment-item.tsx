@@ -41,7 +41,6 @@ export function CommentItem({
 	const [isDeleting, setIsDeleting] = useState(false)
 
 	const handleReply = (content: string) => {
-		console.log('CommentItem handleReply called:', { commentId: comment.id, content })
 		if (onReply) {
 			onReply(comment.id, content)
 			setShowReplyForm(false)
@@ -82,12 +81,12 @@ export function CommentItem({
 						</Button>
 					)}
 				</div>
-				
-				<div 
+
+				<div
 					className="text-sm prose prose-sm max-w-none"
 					dangerouslySetInnerHTML={{ __html: comment.content }}
 				/>
-				
+
 				<div className="mt-2 flex items-center gap-2">
 					{depth < maxDepth && (
 						<Button

@@ -64,7 +64,6 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	}, [editor, value])
 
 	const handleSubmit = () => {
-		console.log('CommentInput handleSubmit called:', { content: content.trim(), disabled, reply })
 		if (content.trim() && !disabled) {
 			onSubmit(content)
 			editor?.commands.clearContent()
@@ -88,8 +87,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			onKeyDown={handleKeyDown}
 		>
 			<div className="px-4 py-3">
-				<EditorContent 
-					editor={editor} 
+				<EditorContent
+					editor={editor}
 					className="min-h-[40px]"
 					placeholder={placeholder}
 				/>
@@ -109,8 +108,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 								Cancel
 							</Button>
 						)}
-						<Button 
-							size="sm" 
+						<Button
+							size="sm"
 							disabled={!content.trim() || disabled}
 							onClick={handleSubmit}
 						>
