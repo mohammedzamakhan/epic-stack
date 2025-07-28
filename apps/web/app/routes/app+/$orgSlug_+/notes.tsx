@@ -14,6 +14,7 @@ import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { NotesTable } from './notes-table.tsx'
@@ -35,9 +36,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
 	// Check if the user has access to this organization
+	const userId = await requireUserId(request)
 	await userHasOrgAccess(request, organization.id)
 
-	// Get organization notes with more details
+	// Get organization notes with access control
 	const notes = await prisma.organizationNote.findMany({
 		select: {
 			id: true,
@@ -45,6 +47,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			content: true,
 			createdAt: true,
 			updatedAt: true,
+			isPublic: true,
+			createdById: true,
 			images: {
 				select: {
 					id: true,
@@ -58,9 +62,19 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 					username: true,
 				},
 			},
+			noteAccess: {
+				select: {
+					userId: true,
+				},
+			},
 		},
 		where: {
 			organizationId: organization.id,
+			OR: [
+				{ isPublic: true },
+				{ createdById: userId },
+				{ noteAccess: { some: { userId } } },
+			],
 		},
 		orderBy: {
 			updatedAt: 'desc',

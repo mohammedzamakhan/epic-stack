@@ -31,6 +31,7 @@ model User {
   sentInvitations OrganizationInvitation[] @relation("inviter")
   utmSource   UtmSource?
   createdOrgNotes OrganizationNote[] @relation("createdBy")
+  noteAccess      NoteAccess[]
 }
 
 model Note {
@@ -281,6 +282,7 @@ model OrganizationNote {
   id      String @id @default(cuid())
   title   String
   content String
+  isPublic Boolean @default(true) // Public by default
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -293,6 +295,7 @@ model OrganizationNote {
 
   images              OrganizationNoteImage[]
   integrationConnections NoteIntegrationConnection[]
+  noteAccess          NoteAccess[]
 
   // non-unique foreign keys
   @@index([organizationId])
@@ -384,4 +387,20 @@ model IntegrationLog {
   
   @@index([integrationId])
   @@index([createdAt])
+}
+
+model NoteAccess {
+  id     String @id @default(cuid())
+  noteId String
+  userId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  note OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([noteId, userId])
+  @@index([noteId])
+  @@index([userId])
 }

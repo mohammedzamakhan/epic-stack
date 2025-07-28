@@ -18,6 +18,7 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
+import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
@@ -29,8 +30,7 @@ import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-	// User ID not needed here as userHasOrgAccess will check for authorization
-	await requireUserId(request)
+	const userId = await requireUserId(request)
 	const noteId = params.noteId
 
 	const note = await prisma.organizationNote.findUnique({
@@ -42,6 +42,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			createdById: true,
 			organizationId: true,
 			updatedAt: true,
+			isPublic: true,
 			images: {
 				select: {
 					altText: true,
@@ -53,6 +54,18 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 					slug: true,
 				},
 			},
+			noteAccess: {
+				select: {
+					id: true,
+					user: {
+						select: {
+							id: true,
+							name: true,
+							username: true,
+						},
+					},
+				},
+			},
 		},
 	})
 
@@ -61,8 +74,36 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	// Check if the user has access to this organization
 	await userHasOrgAccess(request, note.organizationId)
 
+	// Check if user has access to this specific note
+	if (!note.isPublic) {
+		const hasAccess = note.createdById === userId || 
+			note.noteAccess.some(access => access.user.id === userId)
+		
+		if (!hasAccess) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+	}
+
 	const date = new Date(note.updatedAt)
 	const timeAgo = formatDistanceToNow(date)
+
+	// Get organization members for sharing
+	const organizationMembers = await prisma.userOrganization.findMany({
+		where: {
+			organizationId: note.organizationId,
+			active: true,
+		},
+		select: {
+			userId: true,
+			user: {
+				select: {
+					id: true,
+					name: true,
+					username: true,
+				},
+			},
+		},
+	})
 
 	// Get integration data for this note
 	const [connections, availableIntegrations] = await Promise.all([
@@ -73,6 +114,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	return {
 		note,
 		timeAgo,
+		organizationMembers,
 		connections: connections.map((conn) => ({
 			id: conn.id,
 			externalId: conn.externalId,
@@ -113,6 +155,38 @@ const DisconnectNoteSchema = z.object({
 const GetChannelsSchema = z.object({
 	intent: z.literal('get-integration-channels'),
 	integrationId: z.string(),
+})
+
+const ShareNoteSchema = z.object({
+	intent: z.literal('update-note-sharing'),
+	noteId: z.string(),
+	isPublic: z
+		.string()
+		.transform((val) => val === 'true')
+		.pipe(z.boolean()),
+})
+
+const AddNoteAccessSchema = z.object({
+	intent: z.literal('add-note-access'),
+	noteId: z.string(),
+	userId: z.string(),
+})
+
+const RemoveNoteAccessSchema = z.object({
+	intent: z.literal('remove-note-access'),
+	noteId: z.string(),
+	userId: z.string(),
+})
+
+const BatchUpdateNoteAccessSchema = z.object({
+	intent: z.literal('batch-update-note-access'),
+	noteId: z.string(),
+	isPublic: z
+		.string()
+		.transform((val) => val === 'true')
+		.pipe(z.boolean()),
+	usersToAdd: z.array(z.string()).optional().default([]),
+	usersToRemove: z.array(z.string()).optional().default([]),
 })
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -306,6 +380,340 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === 'update-note-sharing') {
+		console.log('Received update-note-sharing intent', { formData: Object.fromEntries(formData) })
+		
+		const submission = parseWithZod(formData, {
+			schema: ShareNoteSchema,
+		})
+		
+		console.log('Submission result:', submission)
+		
+		if (submission.status !== 'success') {
+			console.log('Submission failed:', submission)
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId, isPublic } = submission.value
+		console.log('Parsed values:', { noteId, isPublic })
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { organizationId: true, createdById: true },
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Only the note creator can change sharing settings
+		if (note.createdById !== userId) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+
+		try {
+			console.log('Updating note with:', { noteId, isPublic })
+			await prisma.organizationNote.update({
+				where: { id: noteId },
+				data: { isPublic },
+			})
+
+			// If making note public, remove all specific access entries
+			if (isPublic) {
+				await prisma.noteAccess.deleteMany({
+					where: { noteId },
+				})
+			}
+
+			console.log('Successfully updated note sharing')
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error updating note sharing:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to update note sharing',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === 'add-note-access') {
+		const submission = parseWithZod(formData, {
+			schema: AddNoteAccessSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId, userId: targetUserId } = submission.value
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { organizationId: true, createdById: true },
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Only the note creator can manage access
+		if (note.createdById !== userId) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+
+		// Verify target user is in the organization
+		const targetUserInOrg = await prisma.userOrganization.findFirst({
+			where: {
+				userId: targetUserId,
+				organizationId: note.organizationId,
+				active: true,
+			},
+		})
+
+		if (!targetUserInOrg) {
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'User is not a member of this organization',
+					},
+				},
+				{ status: 400 },
+			)
+		}
+
+		try {
+			await prisma.noteAccess.upsert({
+				where: {
+					noteId_userId: {
+						noteId,
+						userId: targetUserId,
+					},
+				},
+				update: {},
+				create: {
+					noteId,
+					userId: targetUserId,
+				},
+			})
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error adding note access:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to add note access',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === 'remove-note-access') {
+		const submission = parseWithZod(formData, {
+			schema: RemoveNoteAccessSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId, userId: targetUserId } = submission.value
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { organizationId: true, createdById: true },
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Only the note creator can manage access
+		if (note.createdById !== userId) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+
+		try {
+			await prisma.noteAccess.deleteMany({
+				where: {
+					noteId,
+					userId: targetUserId,
+				},
+			})
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error removing note access:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to remove note access',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === 'batch-update-note-access') {
+		console.log('Received batch-update-note-access intent')
+		
+		// Manually parse the arrays since FormData can have multiple values with same key
+		const usersToAdd = formData.getAll('usersToAdd') as string[]
+		const usersToRemove = formData.getAll('usersToRemove') as string[]
+
+		const parsedData = {
+			intent: formData.get('intent') as 'batch-update-note-access',
+			noteId: formData.get('noteId') as string,
+			isPublic: formData.get('isPublic') as string,
+			usersToAdd,
+			usersToRemove,
+		}
+
+		console.log('Parsed form data:', parsedData)
+
+		// Validate the parsed data
+		const validationResult = BatchUpdateNoteAccessSchema.safeParse(parsedData)
+		if (!validationResult.success) {
+			console.log('Validation failed:', validationResult.error)
+			return data(
+				{ result: { status: 'error', error: 'Invalid form data' } },
+				{ status: 400 },
+			)
+		}
+
+		const { noteId, isPublic, usersToAdd: validUsersToAdd, usersToRemove: validUsersToRemove } = validationResult.data
+		console.log('Validated data:', { noteId, isPublic, validUsersToAdd, validUsersToRemove })
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { organizationId: true, createdById: true, isPublic: true },
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Only the note creator can manage access
+		if (note.createdById !== userId) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+
+		try {
+			// Use a transaction to ensure all operations succeed or fail together
+			await prisma.$transaction(async (tx) => {
+				console.log('Starting transaction. Current note.isPublic:', note.isPublic, 'New isPublic:', isPublic)
+				
+				// Update public/private status if changed
+				if (isPublic !== note.isPublic) {
+					console.log('Updating note public status to:', isPublic)
+					await tx.organizationNote.update({
+						where: { id: noteId },
+						data: { isPublic },
+					})
+
+					// If making note public, remove all specific access entries
+					if (isPublic) {
+						console.log('Making note public, removing all access entries')
+						await tx.noteAccess.deleteMany({
+							where: { noteId },
+						})
+						console.log('Successfully made note public and removed access entries')
+						return // No need to process user additions/removals if making public
+					}
+				}
+
+				// Remove users (do this first to avoid conflicts)
+				if (validUsersToRemove.length > 0) {
+					await tx.noteAccess.deleteMany({
+						where: {
+							noteId,
+							userId: { in: validUsersToRemove },
+						},
+					})
+				}
+
+				// Add users (only if note is private)
+				if (validUsersToAdd.length > 0 && !isPublic) {
+					// Verify all target users are in the organization
+					const validOrgMembers = await tx.userOrganization.findMany({
+						where: {
+							userId: { in: validUsersToAdd },
+							organizationId: note.organizationId,
+							active: true,
+						},
+						select: { userId: true },
+					})
+
+					const validUserIds = validOrgMembers.map(member => member.userId)
+					const invalidUsers = validUsersToAdd.filter(id => !validUserIds.includes(id))
+
+					if (invalidUsers.length > 0) {
+						throw new Error(`Some users are not members of this organization: ${invalidUsers.join(', ')}`)
+					}
+
+					// Create access entries for valid users
+					const accessEntries = validUserIds.map(userId => ({
+						noteId,
+						userId,
+					}))
+
+					// Create access entries for valid users, handling duplicates manually
+					for (const userId of validUserIds) {
+						await tx.noteAccess.upsert({
+							where: {
+								noteId_userId: {
+									noteId,
+									userId,
+								},
+							},
+							update: {},
+							create: {
+								noteId,
+								userId,
+							},
+						})
+					}
+				}
+			})
+
+			console.log('Batch update completed successfully')
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error in batch update note access:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: error instanceof Error ? error.message : 'Failed to update note access',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
 	return data(
 		{ result: { status: 'error', error: 'Invalid intent' } },
 		{ status: 400 },
@@ -318,10 +726,27 @@ type NoteLoaderData = {
 		title: string
 		content: string
 		createdById: string
+		isPublic: boolean
 		images: { altText: string | null; objectKey: string }[]
 		organization: { slug: string }
+		noteAccess: Array<{
+			id: string
+			user: {
+				id: string
+				name: string | null
+				username: string
+			}
+		}>
 	}
 	timeAgo: string
+	organizationMembers: Array<{
+		userId: string
+		user: {
+			id: string
+			name: string | null
+			username: string
+		}
+	}>
 	connections: Array<{
 		id: string
 		externalId: string
@@ -342,7 +767,7 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
-	const { note, timeAgo, connections, availableIntegrations } =
+	const { note, timeAgo, organizationMembers, connections, availableIntegrations } =
 		useLoaderData() as NoteLoaderData
 
 	// Add ref for auto-focusing
@@ -393,6 +818,12 @@ export default function NoteRoute() {
 						</Icon>
 					</span>
 					<div className="flex flex-1 justify-end gap-2 md:gap-4">
+						<ShareNoteButton
+							noteId={note.id}
+							isPublic={note.isPublic}
+							noteAccess={note.noteAccess}
+							organizationMembers={organizationMembers}
+						/>
 						<IntegrationControls
 							noteId={note.id}
 							connections={connections}
