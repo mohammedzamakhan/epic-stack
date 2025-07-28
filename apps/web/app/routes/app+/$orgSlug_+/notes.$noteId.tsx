@@ -19,11 +19,12 @@ import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
+import { CommentsSection } from '#app/components/note/comments-section.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId, getUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
@@ -106,15 +107,58 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	})
 
 	// Get integration data for this note
-	const [connections, availableIntegrations] = await Promise.all([
+	const [connections, availableIntegrations, comments] = await Promise.all([
 		integrationManager.getNoteConnections(note.id),
 		integrationManager.getOrganizationIntegrations(note.organizationId),
+		// Get comments for this note
+		prisma.noteComment.findMany({
+			where: { noteId: note.id },
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+						username: true,
+					},
+				},
+			},
+			orderBy: { createdAt: 'asc' },
+		}),
 	])
+
+	// Organize comments into a tree structure
+	const organizeComments = (comments: any[]) => {
+		const commentMap = new Map<string, any>()
+		const rootComments: any[] = []
+
+		// First pass: create map of all comments
+		comments.forEach(comment => {
+			commentMap.set(comment.id, { ...comment, replies: [] })
+		})
+
+		// Second pass: organize into tree structure
+		comments.forEach(comment => {
+			if (comment.parentId) {
+				const parent = commentMap.get(comment.parentId)
+				if (parent) {
+					parent.replies.push(commentMap.get(comment.id))
+				}
+			} else {
+				rootComments.push(commentMap.get(comment.id))
+			}
+		})
+
+		return rootComments
+	}
+
+	const organizedComments = organizeComments(comments)
 
 	return {
 		note,
 		timeAgo,
+		currentUserId: userId,
 		organizationMembers,
+		comments: organizedComments,
 		connections: connections.map((conn) => ({
 			id: conn.id,
 			externalId: conn.externalId,
@@ -187,6 +231,18 @@ const BatchUpdateNoteAccessSchema = z.object({
 		.pipe(z.boolean()),
 	usersToAdd: z.array(z.string()).optional().default([]),
 	usersToRemove: z.array(z.string()).optional().default([]),
+})
+
+const AddCommentSchema = z.object({
+	intent: z.literal('add-comment'),
+	noteId: z.string(),
+	content: z.string().min(1, 'Comment cannot be empty'),
+	parentId: z.string().optional(),
+})
+
+const DeleteCommentSchema = z.object({
+	intent: z.literal('delete-comment'),
+	commentId: z.string(),
 })
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -714,6 +770,137 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === 'add-comment') {
+		const submission = parseWithZod(formData, {
+			schema: AddCommentSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId, content, parentId } = submission.value
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: { 
+				organizationId: true, 
+				isPublic: true, 
+				createdById: true,
+				noteAccess: {
+					select: { userId: true }
+				}
+			},
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Check if user has access to this specific note
+		if (!note.isPublic) {
+			const hasAccess = note.createdById === userId || 
+				note.noteAccess.some(access => access.userId === userId)
+			
+			if (!hasAccess) {
+				throw new Response('Not authorized', { status: 403 })
+			}
+		}
+
+		// If parentId is provided, verify the parent comment exists and belongs to this note
+		if (parentId) {
+			const parentComment = await prisma.noteComment.findFirst({
+				where: { id: parentId, noteId },
+			})
+			if (!parentComment) {
+				return data(
+					{ result: { status: 'error', error: 'Parent comment not found' } },
+					{ status: 404 },
+				)
+			}
+		}
+
+		try {
+			await prisma.noteComment.create({
+				data: {
+					content,
+					noteId,
+					userId,
+					parentId,
+				},
+			})
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error adding comment:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to add comment',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === 'delete-comment') {
+		const submission = parseWithZod(formData, {
+			schema: DeleteCommentSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { commentId } = submission.value
+
+		// Get the comment to verify access
+		const comment = await prisma.noteComment.findFirst({
+			select: { 
+				userId: true,
+				note: {
+					select: { organizationId: true }
+				}
+			},
+			where: { id: commentId },
+		})
+		invariantResponse(comment, 'Comment not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, comment.note.organizationId)
+
+		// Only the comment author can delete their comment
+		if (comment.userId !== userId) {
+			throw new Response('Not authorized', { status: 403 })
+		}
+
+		try {
+			await prisma.noteComment.delete({
+				where: { id: commentId },
+			})
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error deleting comment:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to delete comment',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
 	return data(
 		{ result: { status: 'error', error: 'Invalid intent' } },
 		{ status: 400 },
@@ -739,6 +926,7 @@ type NoteLoaderData = {
 		}>
 	}
 	timeAgo: string
+	currentUserId: string
 	organizationMembers: Array<{
 		userId: string
 		user: {
@@ -746,6 +934,17 @@ type NoteLoaderData = {
 			name: string | null
 			username: string
 		}
+	}>
+	comments: Array<{
+		id: string
+		content: string
+		createdAt: string
+		user: {
+			id: string
+			name: string | null
+			username: string
+		}
+		replies: any[]
 	}>
 	connections: Array<{
 		id: string
@@ -767,7 +966,7 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
-	const { note, timeAgo, organizationMembers, connections, availableIntegrations } =
+	const { note, timeAgo, currentUserId, organizationMembers, comments, connections, availableIntegrations } =
 		useLoaderData() as NoteLoaderData
 
 	// Add ref for auto-focusing
@@ -779,6 +978,13 @@ export default function NoteRoute() {
 			sectionRef.current.focus()
 		}
 	}, [note.id])
+
+	// Convert organization members to mention users format
+	const mentionUsers = organizationMembers.map(member => ({
+		id: member.user.id,
+		name: member.user.name || member.user.username,
+		email: member.user.username, // Using username as email placeholder
+	}))
 
 	return (
 		<>
@@ -810,6 +1016,14 @@ export default function NoteRoute() {
 					<p className="text-sm whitespace-break-spaces md:text-lg">
 						{note.content}
 					</p>
+
+					{/* Comments Section */}
+					<CommentsSection
+						noteId={note.id}
+						comments={comments}
+						currentUserId={currentUserId}
+						users={mentionUsers}
+					/>
 				</div>
 				<div className={floatingToolbarClassName}>
 					<span className="text-foreground/90 text-sm max-[524px]:hidden">

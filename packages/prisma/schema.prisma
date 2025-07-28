@@ -32,6 +32,7 @@ model User {
   utmSource   UtmSource?
   createdOrgNotes OrganizationNote[] @relation("createdBy")
   noteAccess      NoteAccess[]
+  noteComments    NoteComment[]
 }
 
 model Note {
@@ -296,6 +297,7 @@ model OrganizationNote {
   images              OrganizationNoteImage[]
   integrationConnections NoteIntegrationConnection[]
   noteAccess          NoteAccess[]
+  comments            NoteComment[]
 
   // non-unique foreign keys
   @@index([organizationId])
@@ -403,4 +405,25 @@ model NoteAccess {
   @@unique([noteId, userId])
   @@index([noteId])
   @@index([userId])
+}
+
+model NoteComment {
+  id      String @id @default(cuid())
+  content String // HTML content from TipTap editor
+  noteId  String
+  userId  String
+  parentId String? // For nested replies
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  note     OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   NoteComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  NoteComment[] @relation("CommentReplies")
+  
+  @@index([noteId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([noteId, createdAt])
 }
