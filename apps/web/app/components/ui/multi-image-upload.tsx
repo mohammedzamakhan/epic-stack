@@ -5,7 +5,6 @@ import {
 	type FieldMetadata,
 } from '@conform-to/react'
 import { Label } from '@radix-ui/react-label'
-import { Plus, X } from 'lucide-react'
 import React, { useState, useRef, useCallback } from 'react'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
@@ -212,7 +211,7 @@ export function MultiImageUpload({
 					<div className="p-8 text-center">
 						<div className="space-y-4">
 							<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-								<Plus className="h-6 w-6 text-gray-400" />
+								<Icon name="plus" className="h-6 w-6 text-gray-400" />
 							</div>
 							<div className="space-y-2">
 								<p className="text-sm font-medium text-gray-900">
@@ -313,7 +312,7 @@ function ImagePreview({
 					onClick={onRemove}
 					disabled={disabled}
 				>
-					<X className="h-4 w-4" />
+					<Icon name="cross-1" className="h-4 w-4" />
 				</Button>
 			</div>
 		</fieldset>

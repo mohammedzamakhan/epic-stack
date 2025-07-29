@@ -1,5 +1,4 @@
 import { type Organization } from '@prisma/client'
-import { Check } from 'lucide-react'
 import {
 	type ActionFunctionArgs,
 	redirect,
@@ -12,6 +11,7 @@ import {
 	createCheckoutSession,
 	getPlansAndPrices,
 } from '#app/utils/payments.server.ts'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 export async function loader() {
 	const isClosedBeta = process.env.LAUNCH_STATUS === 'CLOSED_BETA'
@@ -157,7 +157,7 @@ function PricingCard({
 			<ul className="mb-8 space-y-4">
 				{features.map((feature, index) => (
 					<li key={index} className="flex items-start">
-						<Check className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-orange-500" />
+						<Icon name="check" className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-orange-500" />
 						<span className="text-gray-700 dark:text-gray-300">{feature}</span>
 					</li>
 				))}

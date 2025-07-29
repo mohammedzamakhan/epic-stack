@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNotifications, useNovu } from '@novu/react/hooks'
-import {
-	Bell,
-	Check,
-	ChevronDown,
-	MoreVertical,
-	CheckCircle2,
-} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
 import { Button } from '../ui/button'
@@ -30,6 +23,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '../ui/tooltip'
+import { Icon } from './icon'
 
 interface Action {
 	label: string
@@ -100,7 +94,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 				disabled={isDisabled}
 			>
 				{action.label}
-				{action.isCompleted && <Check className="ml-2 h-4 w-4" />}
+				{action.isCompleted && <Icon name="check" className="ml-2 h-4 w-4" />}
 			</Button>
 		)
 	}
@@ -149,9 +143,9 @@ function NotificationItem({ notification }: { notification: Notification }) {
 													onClick={handleMarkAsReadUnread}
 												>
 													{notification.isRead ? (
-														<Bell className="h-3 w-3" />
+														<Icon name="bell" className="h-3 w-3" />
 													) : (
-														<CheckCircle2 className="h-3 w-3" />
+														<Icon name="check-circled" className="h-3 w-3" />
 													)}
 												</Button>
 											</TooltipTrigger>
@@ -297,7 +291,7 @@ export default function NotificationBell() {
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 				>
-					<Bell className="h-4 w-4" />
+					<Icon name="bell" className="h-4 w-4" />
 					<AnimatePresence>
 						{unreadCount > 0 && (
 							<motion.div
@@ -333,7 +327,7 @@ export default function NotificationBell() {
 												className="h-auto p-0 focus:outline-none"
 											>
 												{filterTitles[filter]}
-												<ChevronDown className="ml-2 inline h-4 w-4" />
+												<Icon name="chevron-down" className="ml-2 inline h-4 w-4" />
 											</Button>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
@@ -353,13 +347,13 @@ export default function NotificationBell() {
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
 										<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-											<MoreVertical className="h-4 w-4" />
+											<Icon name="height" className="h-4 w-4" />
 											<span className="sr-only">Open menu</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
 										<DropdownMenuItem onClick={handleReadAll}>
-											<CheckCircle2 className="mr-2 h-4 w-4" />
+											<Icon name="check-circled" className="mr-2 h-4 w-4" />
 											Mark all as read
 										</DropdownMenuItem>
 									</DropdownMenuContent>
@@ -377,7 +371,7 @@ export default function NotificationBell() {
 											ease: 'linear',
 										}}
 									>
-										<Bell className="text-primary h-8 w-8" />
+										<Icon name="bell" className="text-primary h-8 w-8" />
 									</motion.div>
 								</div>
 							) : (
@@ -400,7 +394,7 @@ export default function NotificationBell() {
 													className="mt-4 w-full"
 													onClick={handleLoadMore}
 												>
-													Load More <ChevronDown className="ml-2 h-4 w-4" />
+													Load More <Icon name="chevron-down" className="ml-2 h-4 w-4" />
 												</Button>
 											)}
 										</div>

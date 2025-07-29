@@ -1,6 +1,5 @@
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { PanelLeftIcon } from 'lucide-react'
 import * as React from 'react'
 import { useFetcher } from 'react-router'
 
@@ -23,6 +22,7 @@ import {
 } from '#app/components/ui/tooltip'
 import { useIsMobile } from '#app/hooks/use-mobile.ts'
 import { cn } from '#app/utils/misc'
+import { Icon } from './icon'
 
 const SIDEBAR_WIDTH = '16rem'
 const SIDEBAR_WIDTH_MOBILE = '18rem'
@@ -306,7 +306,7 @@ function SidebarTrigger({
 			}}
 			{...props}
 		>
-			<PanelLeftIcon />
+			<Icon name="panel-left" className="size-5" />
 			<span className="sr-only">Toggle Sidebar</span>
 		</Button>
 	)

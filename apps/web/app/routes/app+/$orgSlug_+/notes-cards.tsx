@@ -1,5 +1,4 @@
 import { formatDistanceToNow } from 'date-fns'
-import { FileText, Copy, Image as ImageIcon, Check } from 'lucide-react'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -8,6 +7,7 @@ import { Badge } from '#app/components/ui/badge.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Card, CardContent } from '#app/components/ui/card.tsx'
 import { getNoteImgSrc } from '#app/utils/misc.tsx'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 export type Note = {
 	id: string
@@ -86,7 +86,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 					) : (
 						<div className="flex items-center justify-center h-full">
 							<div className="bg-white/80 rounded-full p-4 shadow-sm">
-								<FileText className="w-8 h-8 text-blue-600" />
+								<Icon name='file-text' className="w-8 h-8 text-blue-600" />
 							</div>
 						</div>
 					)}
@@ -104,12 +104,12 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 						>
 							{copied ? (
 								<>
-									<Check className="w-3 h-3 mr-1.5" />
+									<Icon name="check" className="w-3 h-3 mr-1.5" />
 									Copied
 								</>
 							) : (
 								<>
-									<Copy className="w-3 h-3 mr-1.5" />
+									<Icon name="copy" className="w-3 h-3 mr-1.5" />
 									Copy
 								</>
 							)}
@@ -123,7 +123,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 								variant="outline"
 								className="bg-white/90 backdrop-blur-sm border-white/50 text-gray-700 text-xs shadow-sm"
 							>
-								<ImageIcon className="w-3 h-3 mr-1" />
+								<Icon name="image" className="w-3 h-3 mr-1" />
 								{note.images.length}
 							</Badge>
 						</div>

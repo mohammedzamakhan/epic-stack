@@ -1,4 +1,3 @@
-import { ArrowLeft, Menu } from 'lucide-react'
 import {
 	Link,
 	Outlet,
@@ -17,6 +16,7 @@ import {
 	DropdownMenuTrigger,
 } from '#app/components/ui/dropdown-menu.js'
 import { cn, getUserImgSrc } from '#app/utils/misc.js'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 const AccountSettingsPage = () => {
 	const location = useLocation()
@@ -40,7 +40,7 @@ const AccountSettingsPage = () => {
 							'rounded-full',
 						)}
 					>
-						<ArrowLeft className="h-4 w-4" />
+						<Icon name="arrow-left" className="h-4 w-4" />
 					</Link>
 					<div className="flex items-center gap-3">
 						<Avatar className="h-8 w-8 rounded-full">
@@ -57,7 +57,7 @@ const AccountSettingsPage = () => {
 						<DropdownMenuTrigger>
 							<Button variant="ghost" size="icon">
 								<span className="sr-only">Menu</span>
-								<Menu className="h-4 w-4" />
+								<Icon name="hamburger-menu" className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						{/* <NavUserDropdownMenuContent user={user} side="bottom" /> */}

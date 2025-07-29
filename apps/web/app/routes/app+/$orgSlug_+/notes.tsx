@@ -1,5 +1,4 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { Files, FileText, Link2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
 	Outlet,
@@ -141,7 +140,7 @@ export default function NotesRoute({
 							description="Notes help you capture thoughts, meeting minutes, or anything
 							important for your organization. Get started by creating your
 							first note."
-							icons={[FileText, Link2, Files]}
+							icons={['file-text', 'link-2', 'files']}
 							action={{
 								label: 'Create Note',
 								href: `/app/${loaderData.organization.slug}/notes/new`,

@@ -1,4 +1,3 @@
-import { Search, ChevronRight, FolderOpen } from 'lucide-react'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
 import { type LoaderFunctionArgs, Link, useLoaderData } from 'react-router'
@@ -10,6 +9,7 @@ import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
 } from '#app/utils/organizations.server'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -45,7 +45,7 @@ export default function OrganizationsPage() {
 
 				<div className="mt-4 flex items-center gap-3">
 					<div className="relative flex-1">
-						<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+						<Icon name="magnifying-glass" className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
 						<Input
 							type="text"
 							placeholder="Search..."
@@ -94,7 +94,7 @@ export default function OrganizationsPage() {
 							</div>
 							<div className="text-muted-foreground flex items-center gap-2">
 								<span className="text-sm">1</span>
-								<ChevronRight className="h-4 w-4" />
+								<Icon name="chevron-right" className="h-4 w-4" />
 							</div>
 						</div>
 					</Link>
@@ -105,7 +105,7 @@ export default function OrganizationsPage() {
 					<div className="border-border rounded-lg border p-12">
 						<div className="flex flex-col items-center justify-center text-center">
 							<div className="bg-muted mb-4 rounded-lg p-3">
-								<FolderOpen className="text-muted-foreground h-8 w-8" />
+								<Icon name="folder-open" className="text-muted-foreground h-8 w-8" />
 							</div>
 							<div className="mb-2 text-lg font-medium">
 								No organization found

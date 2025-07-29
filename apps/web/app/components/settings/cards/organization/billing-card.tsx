@@ -1,5 +1,4 @@
 import { type Organization } from '@prisma/client'
-import { Check } from 'lucide-react'
 import { Form, Link } from 'react-router'
 import { Badge } from '#app/components/ui/badge.tsx'
 import { Button } from '#app/components/ui/button.tsx'
@@ -11,6 +10,7 @@ import {
 	CardTitle,
 } from '#app/components/ui/card.tsx'
 import { type getPlansAndPrices } from '#app/utils/payments.server.ts'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 const PLANS = {
 	Base: {
@@ -255,7 +255,7 @@ function PricingPlan({
 					>
 						{currentPlan ? (
 							<>
-								<Check className="mr-2 h-4 w-4" /> Current Plan
+								<Icon name="check" className="mr-2 h-4 w-4" /> Current Plan
 							</>
 						) : (
 							'Upgrade'
