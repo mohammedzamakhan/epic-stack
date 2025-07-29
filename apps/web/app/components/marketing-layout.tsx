@@ -19,7 +19,7 @@ export function MarketingLayout({
 				open={!isCollapsed}
 				style={
 					{
-						'--sidebar-width': 'calc(var(--spacing) * 50)',
+						'--sidebar-width': 'calc(var(--spacing) * 60)',
 						'--header-height': 'calc(var(--spacing) * 12)',
 					} as React.CSSProperties
 				}

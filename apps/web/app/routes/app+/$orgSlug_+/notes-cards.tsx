@@ -104,12 +104,12 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 						>
 							{copied ? (
 								<>
-									<Icon name="check" className="w-3 h-3 mr-1.5" />
+									<Icon name="check" className="w-3 h-3" />
 									Copied
 								</>
 							) : (
 								<>
-									<Icon name="copy" className="w-3 h-3 mr-1.5" />
+									<Icon name="copy" className="w-3 h-3" />
 									Copy
 								</>
 							)}

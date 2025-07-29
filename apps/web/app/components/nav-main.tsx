@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Icon } from '#app/components/ui/icon'
 import {
@@ -18,7 +18,7 @@ export function NavMain({
 	items: {
 		title: string
 		url: string
-		icon?: unknown
+		icon?: React.ComponentType<any>
 		isActive: boolean
 		items?: {
 			title: string
@@ -28,6 +28,7 @@ export function NavMain({
 	}[]
 }) {
 	const [openItems, setOpenItems] = useState<Set<string>>(new Set())
+	const iconRefs = useRef<{ [key: string]: any }>({})
 
 	const toggleItem = (title: string) => {
 		setOpenItems((prev) => {
@@ -39,6 +40,20 @@ export function NavMain({
 			}
 			return newSet
 		})
+	}
+
+	const handleMenuItemMouseEnter = (title: string) => {
+		const iconRef = iconRefs.current[title]
+		if (iconRef?.startAnimation) {
+			iconRef.startAnimation()
+		}
+	}
+
+	const handleMenuItemMouseLeave = (title: string) => {
+		const iconRef = iconRefs.current[title]
+		if (iconRef?.stopAnimation) {
+			iconRef.stopAnimation()
+		}
 	}
 
 	return (
@@ -58,9 +73,16 @@ export function NavMain({
 											tooltip={item.title}
 											isActive={item.isActive}
 											className="w-full justify-between"
+											onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
+											onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 										>
-											<div className="flex items-center">
-												{/* <item.icon /> */}
+											<div className="flex items-center gap-2">
+												{item.icon && (
+													<item.icon
+														ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+														size={16}
+													/>
+												)}
 												<span>{item.title}</span>
 											</div>
 											<Icon
@@ -90,9 +112,16 @@ export function NavMain({
 										asChild
 										tooltip={item.title}
 										isActive={item.isActive}
+										onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
+										onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 									>
-										<Link to={item.url}>
-											{/* <item.icon /> */}
+										<Link to={item.url} className="flex items-center gap-2">
+											{item.icon && (
+												<item.icon
+													ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+													size={16}
+												/>
+											)}
 											<span>{item.title}</span>
 										</Link>
 									</SidebarMenuButton>
