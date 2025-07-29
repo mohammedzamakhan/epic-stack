@@ -20,6 +20,7 @@ import { ErrorList } from '#app/components/forms.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
 import { CommentsSection } from '#app/components/note/comments-section.tsx'
+import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
@@ -29,6 +30,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { logNoteActivity, getNoteActivityLogs } from '#app/utils/activity-log.server.ts'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -153,12 +155,16 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	const organizedComments = organizeComments(comments)
 
+	// Get recent activity logs for this note
+	const activityLogs = await getNoteActivityLogs(note.id, 20)
+
 	return {
 		note,
 		timeAgo,
 		currentUserId: userId,
 		organizationMembers,
 		comments: organizedComments,
+		activityLogs,
 		connections: connections.map((conn) => ({
 			id: conn.id,
 			externalId: conn.externalId,
@@ -268,6 +274,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		const note = await prisma.organizationNote.findFirst({
 			select: {
 				id: true,
+				title: true,
 				organizationId: true,
 				createdById: true,
 				organization: { select: { slug: true } },
@@ -292,6 +299,14 @@ export async function action({ request }: ActionFunctionArgs) {
 		if (!userOrg) {
 			throw new Response('Not authorized', { status: 403 })
 		}
+
+		// Log deletion activity before deleting
+		await logNoteActivity({
+			noteId: note.id,
+			userId,
+			action: 'deleted',
+			metadata: { title: note.title || 'Untitled' },
+		})
 
 		// Trigger deletion hook before deleting the note
 		await noteHooks.beforeNoteDeleted(note.id, userId)
@@ -334,6 +349,15 @@ export async function action({ request }: ActionFunctionArgs) {
 				noteId,
 				integrationId,
 				externalId: channelId,
+			})
+
+			// Log integration connection activity
+			await logNoteActivity({
+				noteId,
+				userId,
+				action: 'integration_connected',
+				integrationId,
+				metadata: { externalId: channelId },
 			})
 
 			return data({ result: { status: 'success' } })
@@ -379,7 +403,32 @@ export async function action({ request }: ActionFunctionArgs) {
 		await userHasOrgAccess(request, connection.note.organizationId)
 
 		try {
+			// Get connection details before disconnecting for logging
+			const connectionDetails = await prisma.noteIntegrationConnection.findFirst({
+				where: { id: connectionId },
+				include: {
+					integration: {
+						select: { id: true, providerName: true },
+					},
+				},
+			})
+
 			await integrationManager.disconnectNoteFromChannel(connectionId)
+
+			// Log integration disconnection activity
+			if (connectionDetails) {
+				await logNoteActivity({
+					noteId: connectionDetails.noteId,
+					userId,
+					action: 'integration_disconnected',
+					integrationId: connectionDetails.integration.id,
+					metadata: { 
+						externalId: connectionDetails.externalId,
+						providerName: connectionDetails.integration.providerName,
+					},
+				})
+			}
+
 			return data({ result: { status: 'success' } })
 		} catch (error) {
 			console.error('Error disconnecting note from channel:', error)
@@ -485,6 +534,14 @@ export async function action({ request }: ActionFunctionArgs) {
 				})
 			}
 
+			// Log sharing change activity
+			await logNoteActivity({
+				noteId,
+				userId,
+				action: 'sharing_changed',
+				metadata: { isPublic },
+			})
+
 			console.log('Successfully updated note sharing')
 			return data({ result: { status: 'success' } })
 		} catch (error) {
@@ -565,6 +622,14 @@ export async function action({ request }: ActionFunctionArgs) {
 				},
 			})
 
+			// Log access granted activity
+			await logNoteActivity({
+				noteId,
+				userId,
+				action: 'access_granted',
+				targetUserId,
+			})
+
 			return data({ result: { status: 'success' } })
 		} catch (error) {
 			console.error('Error adding note access:', error)
@@ -614,6 +679,14 @@ export async function action({ request }: ActionFunctionArgs) {
 					noteId,
 					userId: targetUserId,
 				},
+			})
+
+			// Log access revoked activity
+			await logNoteActivity({
+				noteId,
+				userId,
+				action: 'access_revoked',
+				targetUserId,
 			})
 
 			return data({ result: { status: 'success' } })
@@ -689,6 +762,14 @@ export async function action({ request }: ActionFunctionArgs) {
 						data: { isPublic },
 					})
 
+					// Log sharing change activity
+					await logNoteActivity({
+						noteId,
+						userId,
+						action: 'sharing_changed',
+						metadata: { isPublic },
+					})
+
 					// If making note public, remove all specific access entries
 					if (isPublic) {
 						console.log('Making note public, removing all access entries')
@@ -708,6 +789,16 @@ export async function action({ request }: ActionFunctionArgs) {
 							userId: { in: validUsersToRemove },
 						},
 					})
+
+					// Log access revoked for each user
+					for (const targetUserId of validUsersToRemove) {
+						await logNoteActivity({
+							noteId,
+							userId,
+							action: 'access_revoked',
+							targetUserId,
+						})
+					}
 				}
 
 				// Add users (only if note is private)
@@ -736,19 +827,27 @@ export async function action({ request }: ActionFunctionArgs) {
 					}))
 
 					// Create access entries for valid users, handling duplicates manually
-					for (const userId of validUserIds) {
+					for (const targetUserId of validUserIds) {
 						await tx.noteAccess.upsert({
 							where: {
 								noteId_userId: {
 									noteId,
-									userId,
+									userId: targetUserId,
 								},
 							},
 							update: {},
 							create: {
 								noteId,
-								userId,
+								userId: targetUserId,
 							},
+						})
+
+						// Log access granted for each user
+						await logNoteActivity({
+							noteId,
+							userId,
+							action: 'access_granted',
+							targetUserId,
 						})
 					}
 				}
@@ -824,13 +923,22 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		try {
-			await prisma.noteComment.create({
+			const comment = await prisma.noteComment.create({
 				data: {
 					content,
 					noteId,
 					userId,
 					parentId,
 				},
+			})
+
+			// Log comment added activity
+			await logNoteActivity({
+				noteId,
+				userId,
+				action: 'comment_added',
+				commentId: comment.id,
+				metadata: { parentId },
 			})
 
 			return data({ result: { status: 'success' } })
@@ -882,9 +990,25 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		try {
+			// Get note ID before deleting comment
+			const commentToDelete = await prisma.noteComment.findFirst({
+				where: { id: commentId },
+				select: { noteId: true },
+			})
+
 			await prisma.noteComment.delete({
 				where: { id: commentId },
 			})
+
+			// Log comment deleted activity
+			if (commentToDelete) {
+				await logNoteActivity({
+					noteId: commentToDelete.noteId,
+					userId,
+					action: 'comment_deleted',
+					commentId,
+				})
+			}
 
 			return data({ result: { status: 'success' } })
 		} catch (error) {
@@ -946,6 +1070,27 @@ type NoteLoaderData = {
 		}
 		replies: any[]
 	}>
+	activityLogs: Array<{
+		id: string
+		action: string
+		metadata: string | null
+		createdAt: Date
+		user: {
+			id: string
+			name: string | null
+			username: string
+		}
+		targetUser?: {
+			id: string
+			name: string | null
+			username: string
+		} | null
+		integration?: {
+			id: string
+			providerName: string
+			providerType: string
+		} | null
+	}>
 	connections: Array<{
 		id: string
 		externalId: string
@@ -966,7 +1111,7 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
-	const { note, timeAgo, currentUserId, organizationMembers, comments, connections, availableIntegrations } =
+	const { note, timeAgo, currentUserId, organizationMembers, comments, activityLogs, connections, availableIntegrations } =
 		useLoaderData() as NoteLoaderData
 
 	// Add ref for auto-focusing
@@ -1024,6 +1169,9 @@ export default function NoteRoute() {
 						currentUserId={currentUserId}
 						users={mentionUsers}
 					/>
+
+					{/* Activity Log Section */}
+					<ActivityLog activityLogs={activityLogs} />
 				</div>
 				<div className={floatingToolbarClassName}>
 					<span className="text-foreground/90 text-sm max-[524px]:hidden">

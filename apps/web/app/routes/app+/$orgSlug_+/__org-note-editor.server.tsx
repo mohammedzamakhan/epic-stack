@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { uploadNoteImage } from '#app/utils/storage.server.ts'
+import { logNoteActivity } from '#app/utils/activity-log.server.ts'
 import {
 	MAX_UPLOAD_SIZE,
 	OrgNoteEditorSchema,
@@ -155,6 +156,31 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 		},
 	})
+
+	// Log activity
+	if (isNewNote) {
+		await logNoteActivity({
+			noteId: updatedNote.id,
+			userId,
+			action: 'created',
+			metadata: { title, hasImages: newImages.length > 0 },
+		})
+	} else if (beforeSnapshot) {
+		// Determine what changed
+		const titleChanged = beforeSnapshot.title !== title
+		const contentChanged = beforeSnapshot.content !== content
+		
+		await logNoteActivity({
+			noteId: updatedNote.id,
+			userId,
+			action: 'updated',
+			metadata: { 
+				titleChanged,
+				contentChanged,
+				hasImageUpdates: imageUpdates.length > 0 || newImages.length > 0,
+			},
+		})
+	}
 
 	// Trigger integration hooks
 	if (isNewNote) {

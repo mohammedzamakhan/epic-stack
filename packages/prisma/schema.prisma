@@ -33,6 +33,8 @@ model User {
   createdOrgNotes OrganizationNote[] @relation("createdBy")
   noteAccess      NoteAccess[]
   noteComments    NoteComment[]
+  activityLogs    NoteActivityLog[]
+  targetedActivityLogs NoteActivityLog[] @relation("ActivityLogTarget")
 }
 
 model Note {
@@ -298,6 +300,7 @@ model OrganizationNote {
   integrationConnections NoteIntegrationConnection[]
   noteAccess          NoteAccess[]
   comments            NoteComment[]
+  activityLogs        NoteActivityLog[]
 
   // non-unique foreign keys
   @@index([organizationId])
@@ -344,6 +347,7 @@ model Integration {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   connections    NoteIntegrationConnection[]
   logs           IntegrationLog[]
+  activityLogs   NoteActivityLog[]
   
   @@unique([organizationId, providerName])
   @@index([organizationId])
@@ -426,4 +430,35 @@ model NoteComment {
   @@index([userId])
   @@index([parentId])
   @@index([noteId, createdAt])
+}
+
+model NoteActivityLog {
+  id      String @id @default(cuid())
+  noteId  String
+  userId  String
+  action  String // 'viewed', 'deleted', 'sharing_changed', 'access_granted', 'access_revoked', 'integration_connected', 'integration_disconnected', 'comment_added', 'comment_deleted'
+  
+  // Additional context data stored as JSON
+  metadata String? // JSON string containing action-specific data
+  
+  // For actions involving other users (e.g., granting access)
+  targetUserId String?
+  
+  // For integration-related actions
+  integrationId String?
+  
+  // For comment-related actions
+  commentId String?
+  
+  createdAt DateTime @default(now())
+  
+  note         OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetUser   User? @relation("ActivityLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  integration  Integration? @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  
+  @@index([noteId])
+  @@index([userId])
+  @@index([noteId, createdAt])
+  @@index([action])
 }
