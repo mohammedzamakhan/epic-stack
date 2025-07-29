@@ -17,7 +17,9 @@
 			"@repo/config": ["../../packages/config"],
 			"@repo/config/*": ["../../packages/config/*"],
 			"@repo/email": ["../../packages/email/src"],
-			"@repo/email/*": ["../../packages/email/src/*"]
+			"@repo/email/*": ["../../packages/email/src/*"],
+			"@repo/integrations": ["../../packages/integrations/src"],
+			"@repo/integrations/*": ["../../packages/integrations/src/*"]
 		}
 	}
 }

@@ -76,7 +76,7 @@ export function GeneralSettingsCard({
 				<StatusButton
 					form={form.id}
 					type="submit"
-					variant="outline"
+					variant="default"
 					name="intent"
 					value={organizationUpdateActionIntent}
 					status={

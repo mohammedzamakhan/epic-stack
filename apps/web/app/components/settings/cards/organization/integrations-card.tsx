@@ -150,7 +150,7 @@ function ConnectedIntegrationItem({
 			<div className="flex items-center justify-between p-4">
 				<div className="flex items-center space-x-3">
 					<div className="flex-shrink-0">
-						<Icon name="link-2" className="text-muted-foreground h-8 w-8" />
+						<Icon name={providerInfo.icon} className="text-muted-foreground h-8 w-8" />
 					</div>
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center space-x-2">
@@ -231,7 +231,7 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
 	return (
 		<div className="hover:bg-muted/50 flex items-center gap-3 rounded-lg border p-4 transition-colors">
 			<div className="flex-shrink-0">
-				<Icon name="link-2" className="text-muted-foreground h-8 w-8" />
+				<Icon name={provider.icon} className="text-muted-foreground h-8 w-8" />
 			</div>
 			<div className="min-w-0 flex-1">
 				<p className="text-foreground truncate text-sm font-medium">
@@ -262,6 +262,7 @@ function getProviderInfo(
 	availableProviders: IntegrationsCardProps['availableProviders'],
 ) {
 	const provider = availableProviders.find((p) => p.name === providerName)
+	console.log(provider)
 
 	return (
 		provider || {

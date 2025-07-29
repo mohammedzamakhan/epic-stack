@@ -58,7 +58,7 @@ export function getAvailableProviders() {
 			type: 'productivity',
 			displayName: 'Slack',
 			description: 'Connect notes to Slack channels for team collaboration',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'slack',
 		},
 		{
 			name: 'jira',
@@ -66,7 +66,7 @@ export function getAvailableProviders() {
 			displayName: 'Jira',
 			description:
 				'Connect notes to Jira projects for issue tracking and project management',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'jira',
 		},
 		{
 			name: 'linear',
@@ -74,7 +74,7 @@ export function getAvailableProviders() {
 			displayName: 'Linear',
 			description:
 				'Connect notes to Linear teams and projects for issue tracking and project management',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'linear',
 		},
 		{
 			name: 'gitlab',
@@ -82,7 +82,7 @@ export function getAvailableProviders() {
 			displayName: 'GitLab',
 			description:
 				'Connect notes to GitLab projects for issue tracking and project management',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'gitlab',
 		},
 		{
 			name: 'clickup',
@@ -90,7 +90,7 @@ export function getAvailableProviders() {
 			displayName: 'ClickUp',
 			description:
 				'Connect notes to ClickUp spaces and lists for task management',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'clickup',
 		},
 		{
 			name: 'notion',
@@ -98,7 +98,7 @@ export function getAvailableProviders() {
 			displayName: 'Notion',
 			description:
 				'Connect notes to Notion databases for knowledge management and collaboration',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'notion',
 		},
 		{
 			name: 'asana',
@@ -106,7 +106,7 @@ export function getAvailableProviders() {
 			displayName: 'Asana',
 			description:
 				'Connect notes to Asana projects for task management and team collaboration',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'asana',
 		},
 		{
 			name: 'trello',
@@ -114,7 +114,7 @@ export function getAvailableProviders() {
 			displayName: 'Trello',
 			description:
 				'Connect notes to Trello boards for task management and project organization',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'trello',
 		},
 		{
 			name: 'github',
@@ -122,7 +122,7 @@ export function getAvailableProviders() {
 			displayName: 'GitHub',
 			description:
 				'Connect notes to GitHub repositories for issue tracking and project management',
-			icon: 'link-2', // Using generic icon for now
+			icon: 'github',
 		},
 	]
 }

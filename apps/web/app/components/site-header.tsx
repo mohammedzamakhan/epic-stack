@@ -19,7 +19,7 @@ export function SiteHeader() {
 				/>
 			</div>
 			<div className="px-2 pr-6">
-				{/* <NotificationBell /> */}
+				<NotificationBell />
 			</div>
 		</header>
 	)

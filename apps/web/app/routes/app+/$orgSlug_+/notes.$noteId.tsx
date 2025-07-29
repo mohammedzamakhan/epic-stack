@@ -1219,7 +1219,7 @@ export default function NoteRoute() {
 							>
 								<Link to="edit">
 									<Icon name="pencil-1" className="h-4 w-4 max-md:scale-125">
-										<span className="max-md:hidden ml-1.5">Edit</span>
+										<span className="max-md:hidden">Edit</span>
 									</Icon>
 								</Link>
 							</Button>
@@ -1252,7 +1252,7 @@ export function DeleteNote({ id }: { id: string }) {
 				className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 			>
 				<Icon name="trash" className="h-4 w-4 max-md:scale-125">
-					<span className="max-md:hidden ml-1.5">Delete</span>
+					<span className="max-md:hidden">Delete</span>
 				</Icon>
 			</StatusButton>
 			<ErrorList errors={form.errors} id={form.errorId} />
