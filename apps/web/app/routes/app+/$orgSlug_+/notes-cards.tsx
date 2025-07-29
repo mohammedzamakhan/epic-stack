@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from 'date-fns'
-import { FileText, Copy, Image as ImageIcon } from 'lucide-react'
+import { FileText, Copy, Image as ImageIcon, Check } from 'lucide-react'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -30,6 +30,7 @@ interface NoteCardProps {
 
 const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	const [hovered, setHovered] = useState(isHovered)
+	const [copied, setCopied] = useState(false)
 	const navigate = useNavigate()
 
 	const timeAgo = formatDistanceToNow(new Date(note.updatedAt), {
@@ -53,6 +54,8 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 		e.stopPropagation()
 		const noteUrl = `${window.location.origin}${window.location.pathname}/${note.id}`
 		navigator.clipboard.writeText(noteUrl)
+		setCopied(true)
+		setTimeout(() => setCopied(false), 1000)
 	}
 
 	// Get the first image for display
@@ -60,7 +63,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 
 	return (
 		<Card
-			className="w-full cursor-pointer group overflow-hidden py-0"
+			className="w-full cursor-pointer group overflow-hidden py-0 hover:border-primary border-2 border-muted"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			onClick={handleCardClick}
@@ -99,8 +102,17 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 							onClick={handleCopyLink}
 							className="bg-white/90 backdrop-blur-sm border-white/50 text-gray-700 text-xs h-8 px-3 shadow-sm"
 						>
-							<Copy className="w-3 h-3 mr-1.5" />
-							Copy
+							{copied ? (
+								<>
+									<Check className="w-3 h-3 mr-1.5" />
+									Copied
+								</>
+							) : (
+								<>
+									<Copy className="w-3 h-3 mr-1.5" />
+									Copy
+								</>
+							)}
 						</Button>
 					</div>
 
@@ -119,25 +131,21 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 				</div>
 
 				{/* Content Section */}
-				<div className="p-3">
+				<div className="p-2 px-4">
 					<div className="flex items-start gap-3">
-						<Avatar className="w-9 h-9 border border-gray-200 flex-shrink-0">
-							<AvatarFallback className="bg-gray-100 text-gray-600 text-xs font-medium">
-								{initials}
-							</AvatarFallback>
-						</Avatar>
 						<div className="flex-1 min-w-0">
-							<div className="flex items-center justify-between mb-1 text-sm">
-								<h3 className="truncate">
-									{createdBy}
-								</h3>
-								<span className="text-gray-500 flex-shrink-0 ml-2 text-xs">
-									{timeAgo}
-								</span>
-							</div>
 							<h4 className="text-gray-900 line-clamp-2 leading-tight">
 								{note.title}
 							</h4>
+							<div className="text-xs mt-1">
+								<h3 className="font-medium text-foreground inline">
+									{createdBy}
+								</h3>
+								<span className="text-muted-foreground ml-2">
+									• {timeAgo}
+								</span>
+							</div>
+
 						</div>
 					</div>
 
@@ -154,7 +162,7 @@ export function NotesCards({ notes }: { notes: Note[] }) {
 	}
 
 	return (
-		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
 			{notes.map((note) => (
 				<NoteCard key={note.id} note={note} />
 			))}
