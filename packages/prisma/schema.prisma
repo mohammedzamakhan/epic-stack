@@ -425,11 +425,27 @@ model NoteComment {
   user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent   NoteComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies  NoteComment[] @relation("CommentReplies")
+  images   NoteCommentImage[]
   
   @@index([noteId])
   @@index([userId])
   @@index([parentId])
   @@index([noteId, createdAt])
+}
+
+model NoteCommentImage {
+  id        String  @id @default(cuid())
+  altText   String?
+  objectKey String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comment   NoteComment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  commentId String
+
+  // non-unique foreign key
+  @@index([commentId])
 }
 
 model NoteActivityLog {

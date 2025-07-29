@@ -99,15 +99,6 @@ export function ShareNoteButton({
 			.map(access => access.user.id)
 			.filter(id => !newAccessIds.has(id))
 
-		console.log('handleSubmit called with:', {
-			localIsPublic,
-			isPublic,
-			currentAccessIds: Array.from(currentAccessIds),
-			newAccessIds: Array.from(newAccessIds),
-			toAdd,
-			toRemove
-		})
-
 		// Check if we only need to update public/private status without member changes
 		const hasPublicStatusChange = localIsPublic !== isPublic
 		const hasMemberChanges = toAdd.length > 0 || toRemove.length > 0
@@ -134,7 +125,6 @@ export function ShareNoteButton({
 			})
 		}
 
-		console.log('Submitting form data:', Object.fromEntries(formData.entries()))
 		fetcher.submit(formData, { method: 'POST' })
 	}
 

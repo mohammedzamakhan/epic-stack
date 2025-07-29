@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react'
 import { cn } from '#app/utils/misc.js'
 import { Button } from '../ui/button'
 import getSuggestions from './suggestions'
+import { CommentImageUpload } from './comment-image-upload'
+import { CommentImagePreview } from './comment-image-preview'
 
 export interface MentionUser {
 	id: string
@@ -14,7 +16,7 @@ export interface MentionUser {
 
 interface CommentInputProps {
 	users: MentionUser[]
-	onSubmit: (comment: string) => void
+	onSubmit: (comment: string, images?: File[]) => void
 	value: string
 	className?: string
 	reply?: boolean
@@ -35,6 +37,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 }) => {
 	const [initialValue] = useState(value)
 	const [content, setContent] = useState(value)
+	const [selectedImages, setSelectedImages] = useState<File[]>([])
 
 	const editor = useEditor({
 		extensions: [
@@ -64,11 +67,20 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	}, [editor, value])
 
 	const handleSubmit = () => {
-		if (content.trim() && !disabled) {
-			onSubmit(content)
+		if ((content.trim() || selectedImages.length > 0) && !disabled) {
+			onSubmit(content, selectedImages)
 			editor?.commands.clearContent()
 			setContent('')
+			setSelectedImages([])
 		}
+	}
+
+	const handleImagesSelected = (files: File[]) => {
+		setSelectedImages(prev => [...prev, ...files].slice(0, 3)) // Max 3 images
+	}
+
+	const handleRemoveImage = (index: number) => {
+		setSelectedImages(prev => prev.filter((_, i) => i !== index))
 	}
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -92,10 +104,25 @@ const CommentInput: React.FC<CommentInputProps> = ({
 					className="min-h-[60px] focus:outline-none"
 					placeholder={placeholder}
 				/>
+				{selectedImages.length > 0 && (
+					<div className="mt-3">
+						<CommentImagePreview
+							files={selectedImages}
+							onRemove={handleRemoveImage}
+						/>
+					</div>
+				)}
 			</div>
 			<div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
-				<div className="text-xs text-muted-foreground">
-					{reply ? 'Replying to comment' : 'Use @ to mention someone • Cmd+Enter to submit'}
+				<div className="flex items-center gap-2">
+					<CommentImageUpload
+						onImagesSelected={handleImagesSelected}
+						maxImages={3 - selectedImages.length}
+						disabled={disabled || selectedImages.length >= 3}
+					/>
+					<div className="text-xs text-muted-foreground">
+						{reply ? 'Replying to comment' : 'Use @ to mention someone • Cmd+Enter to submit'}
+					</div>
 				</div>
 				<div className="flex gap-2">
 					{reply && onCancel && (
@@ -111,7 +138,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 					)}
 					<Button
 						size="sm"
-						disabled={!content.trim() || disabled}
+						disabled={(!content.trim() && selectedImages.length === 0) || disabled}
 						onClick={handleSubmit}
 					>
 						{reply ? 'Reply' : 'Comment'}

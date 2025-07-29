@@ -17,6 +17,11 @@ interface Comment {
 	createdAt: string
 	user: CommentUser
 	replies: Comment[]
+	images?: Array<{
+		id: string
+		altText: string | null
+		objectKey: string
+	}>
 }
 
 interface CommentsSectionProps {
@@ -38,13 +43,21 @@ export function CommentsSection({
 
 
 
-	const handleAddComment = async (content: string) => {
+	const handleAddComment = async (content: string, images?: File[]) => {
 		setIsSubmitting(true)
 
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
 		formData.append('content', content)
+		
+		// Add images to form data
+		if (images && images.length > 0) {
+			images.forEach((image, index) => {
+				formData.append(`image-${index}`, image)
+			})
+			formData.append('imageCount', images.length.toString())
+		}
 
 		try {
 			const response = await fetch(window.location.pathname, {
@@ -66,12 +79,20 @@ export function CommentsSection({
 		}
 	}
 
-	const handleReply = async (parentId: string, content: string) => {
+	const handleReply = async (parentId: string, content: string, images?: File[]) => {
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
 		formData.append('content', content)
 		formData.append('parentId', parentId)
+		
+		// Add images to form data
+		if (images && images.length > 0) {
+			images.forEach((image, index) => {
+				formData.append(`image-${index}`, image)
+			})
+			formData.append('imageCount', images.length.toString())
+		}
 
 		try {
 			const response = await fetch(window.location.pathname, {

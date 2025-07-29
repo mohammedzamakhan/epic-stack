@@ -1,7 +1,9 @@
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
+import { Img } from 'openimg/react'
 import { Button } from '../ui/button'
 import { Icon } from '../ui/icon'
+import { getNoteImgSrc } from '#app/utils/misc'
 import CommentInput, { type MentionUser } from './comment-input'
 
 interface CommentUser {
@@ -16,6 +18,11 @@ interface Comment {
 	createdAt: string
 	user: CommentUser
 	replies: Comment[]
+	images?: Array<{
+		id: string
+		altText: string | null
+		objectKey: string
+	}>
 }
 
 interface CommentItemProps {
@@ -24,7 +31,7 @@ interface CommentItemProps {
 	currentUserId: string
 	users: MentionUser[]
 	depth?: number
-	onReply?: (commentId: string, content: string) => void
+	onReply?: (commentId: string, content: string, images?: File[]) => void
 	onDelete?: (commentId: string) => void
 }
 
@@ -40,9 +47,9 @@ export function CommentItem({
 	const [showReplyForm, setShowReplyForm] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 
-	const handleReply = (content: string) => {
+	const handleReply = (content: string, images?: File[]) => {
 		if (onReply) {
-			onReply(comment.id, content)
+			onReply(comment.id, content, images)
 			setShowReplyForm(false)
 		}
 	}
@@ -96,6 +103,29 @@ export function CommentItem({
 							className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none prose-p:my-1"
 							dangerouslySetInnerHTML={{ __html: comment.content }}
 						/>
+
+						{/* Comment Images */}
+						{comment.images && comment.images.length > 0 && (
+							<div className="mt-3 flex flex-wrap gap-2">
+								{comment.images.map((image) => (
+									<a
+										key={image.id}
+										href={getNoteImgSrc(image.objectKey)}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="block"
+									>
+										<Img
+											src={getNoteImgSrc(image.objectKey)}
+											alt={image.altText ?? ''}
+											className="w-24 h-24 rounded-lg object-cover border hover:opacity-90 transition-opacity"
+											width={96}
+											height={96}
+										/>
+									</a>
+								))}
+							</div>
+						)}
 
 						<div className="mt-2 flex items-center gap-2">
 							{depth < maxDepth && (

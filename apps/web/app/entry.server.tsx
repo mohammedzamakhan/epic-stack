@@ -50,11 +50,9 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const nonce = crypto.randomBytes(16).toString('hex')
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
-	console.log('request', request.url)
 
 	if (request.url.includes('/novu')) {
 		return new Promise(async (resolve, reject) => {
-			console.log('novu request')
 			let didError = false
 			// NOTE: this timing will only include things that are rendered in the shell
 			// and will not include suspended components and deferred loaders

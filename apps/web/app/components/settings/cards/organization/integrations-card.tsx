@@ -262,8 +262,6 @@ function getProviderInfo(
 	availableProviders: IntegrationsCardProps['availableProviders'],
 ) {
 	const provider = availableProviders.find((p) => p.name === providerName)
-	console.log(provider)
-
 	return (
 		provider || {
 			displayName: providerName,

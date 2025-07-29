@@ -122,6 +122,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 						username: true,
 					},
 				},
+				images: {
+					select: {
+						id: true,
+						altText: true,
+						objectKey: true,
+					},
+				},
 			},
 			orderBy: { createdAt: 'asc' },
 		}),
@@ -252,7 +259,20 @@ const DeleteCommentSchema = z.object({
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
-	const formData = await request.formData()
+	
+	// Check if this is a multipart form (for image uploads)
+	const contentType = request.headers.get('content-type')
+	let formData: FormData
+	
+	if (contentType?.includes('multipart/form-data')) {
+		const { parseFormData } = await import('@mjackson/form-data-parser')
+		formData = await parseFormData(request, {
+			maxFileSize: 1024 * 1024 * 3, // 3MB max per image
+		})
+	} else {
+		formData = await request.formData()
+	}
+	
 	const intent = formData.get('intent')
 
 	// Handle different intents
@@ -922,6 +942,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		try {
+			// Create the comment first
 			const comment = await prisma.noteComment.create({
 				data: {
 					content,
@@ -931,13 +952,41 @@ export async function action({ request }: ActionFunctionArgs) {
 				},
 			})
 
+			// Handle image uploads if present
+			const imageCount = parseInt(formData.get('imageCount') as string) || 0
+			if (imageCount > 0) {
+				const { uploadCommentImage } = await import('#app/utils/storage.server.ts')
+				
+				const imagePromises = []
+				for (let i = 0; i < imageCount; i++) {
+					const imageFile = formData.get(`image-${i}`) as File
+					if (imageFile && imageFile.size > 0) {
+						imagePromises.push(
+							uploadCommentImage(userId, comment.id, imageFile).then(objectKey => ({
+								commentId: comment.id,
+								objectKey,
+								altText: null,
+							}))
+						)
+					}
+				}
+
+				// Upload all images and create database records
+				if (imagePromises.length > 0) {
+					const uploadedImages = await Promise.all(imagePromises)
+					await prisma.noteCommentImage.createMany({
+						data: uploadedImages,
+					})
+				}
+			}
+
 			// Log comment added activity
 			await logNoteActivity({
 				noteId,
 				userId,
 				action: 'comment_added',
 				commentId: comment.id,
-				metadata: { parentId },
+				metadata: { parentId, hasImages: imageCount > 0 },
 			})
 
 			return data({ result: { status: 'success' } })
@@ -1068,6 +1117,11 @@ type NoteLoaderData = {
 			username: string
 		}
 		replies: any[]
+		images?: Array<{
+			id: string
+			altText: string | null
+			objectKey: string
+		}>
 	}>
 	activityLogs: Array<{
 		id: string
