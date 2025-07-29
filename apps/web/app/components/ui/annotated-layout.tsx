@@ -28,7 +28,7 @@ export function AnnotatedSection({
 			<div className="lg:col-span-1">
 				<div className="space-y-2">
 					<h3 className="text-lg leading-6 font-medium">{title}</h3>
-					<p className="text-muted-foreground text-xs">{description}</p>
+					<p className="text-muted-foreground text-sm">{description}</p>
 				</div>
 			</div>
 			<div className="lg:col-span-2">{children}</div>

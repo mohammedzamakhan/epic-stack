@@ -78,7 +78,7 @@ export function OrganizationPhoto({
 						variant="outline"
 						className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} items-center justify-center rounded-full p-0`}
 					>
-						<Icon name="camera" className="size-4" />
+						<Icon name="image" className="size-4" />
 					</Button>
 				</div>
 

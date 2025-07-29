@@ -65,7 +65,7 @@ export async function sendOrganizationInvitationEmail({
 	const baseUrl =
 		process.env.NODE_ENV === 'production'
 			? 'https://yourapp.com' // Replace with your actual domain
-			: 'http://localhost:3000'
+			: 'http://localhost:3001'
 
 	const inviteUrl = `${baseUrl}/join/${invitation.token}`
 

@@ -179,7 +179,7 @@ export function BillingCard({
 
 			{/* Enterprise Plan */}
 			<Card>
-				<CardContent className="pt-6">
+				<CardContent>
 					<div className="flex items-center justify-between">
 						<div>
 							<h3 className="mb-2 font-semibold">Enterprise Plan</h3>
@@ -199,7 +199,7 @@ export function BillingCard({
 
 			{/* Help Section */}
 			<Card>
-				<CardContent className="pt-6">
+				<CardContent>
 					<div className="flex items-center justify-between">
 						<div className="text-muted-foreground text-sm">
 							Questions about billing?

@@ -87,7 +87,7 @@ export function CommentImageUpload({
 				className="h-8 w-8 p-0"
 				title="Add images"
 			>
-				<Icon name="camera" className="h-4 w-4" />
+				<Icon name="image" className="h-4 w-4" />
 			</Button>
 
 			{/* Optional: Drop zone overlay when dragging */}

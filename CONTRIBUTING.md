@@ -75,7 +75,7 @@ with:
 npm run dev
 ```
 
-And open up `http://localhost:3000` and rock!
+And open up `http://localhost:3001` and rock!
 
 ## Help Needed
 

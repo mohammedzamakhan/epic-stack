@@ -6,10 +6,12 @@ import {
 	Form,
 	type LoaderFunctionArgs,
 	useLoaderData,
+	useRouteLoaderData,
 } from 'react-router'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
+import { loader as rootLoader } from '#app/root.tsx'
 
 const novu = new Novu({
 	secretKey: process.env.NOVU_SECRET_KEY,
@@ -69,17 +71,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export default function OrganizationDashboard() {
 	const { organization } = useLoaderData() as { organization: { name: string } }
+	const { user } = useRouteLoaderData<typeof rootLoader>('root');
+
 
 	return (
 		<div className="p-8">
 			<PageTitle
-				title={`${organization.name} Dashboard`}
+				title={`Welcome ${user.name}!`}
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
 
-			<Form method="POST">
+			{/* <Form method="POST">
 				<button type="submit"> trigger </button>
-			</Form>
+			</Form> */}
 		</div>
 	)
 }

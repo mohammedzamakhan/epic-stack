@@ -118,9 +118,9 @@ export default function NotesRoute({
 
 	return (
 		<div className="m-8 flex h-full flex-col">
-			<div className="flex items-center justify-between pb-4">
+			<div className="flex items-center justify-between pb-8">
 				<PageTitle
-					title={`${orgName}'s Notes`}
+					title={`Notes`}
 					description="You can create notes for your organization here."
 				/>
 				<Button variant="default" asChild>
@@ -140,7 +140,7 @@ export default function NotesRoute({
 							description="Notes help you capture thoughts, meeting minutes, or anything
 							important for your organization. Get started by creating your
 							first note."
-							icons={['file-text', 'link-2', 'files']}
+							icons={['file-text', 'link-2', 'image']}
 							action={{
 								label: 'Create Note',
 								href: `/app/${loaderData.organization.slug}/notes/new`,
