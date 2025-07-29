@@ -17,7 +17,7 @@ import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
-import { NotesTable } from './notes-table.tsx'
+import { NotesCards } from './notes-cards.tsx'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
@@ -133,7 +133,7 @@ export default function NotesRoute({
 
 			<div className="flex-grow overflow-auto pb-4">
 				{loaderData.notes.length > 0 ? (
-					<NotesTable notes={loaderData.notes} />
+					<NotesCards notes={loaderData.notes} />
 				) : (
 					<>
 						<EmptyState
