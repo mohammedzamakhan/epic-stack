@@ -81,7 +81,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	return (
 		<div
 			className={cn(
-				'w-full rounded border bg-card text-card-foreground shadow-sm',
+				'w-full rounded-lg border bg-card text-card-foreground shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all',
 				className,
 			)}
 			onKeyDown={handleKeyDown}
@@ -89,33 +89,33 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			<div className="px-4 py-3">
 				<EditorContent
 					editor={editor}
-					className="min-h-[40px]"
+					className="min-h-[60px] focus:outline-none"
 					placeholder={placeholder}
 				/>
-				<div className="flex items-center justify-between mt-2">
-					<div className="text-xs text-muted-foreground">
-						{reply ? 'Replying to comment' : 'Use @ to mention someone'}
-					</div>
-					<div className="flex gap-2">
-						{reply && onCancel && (
-							<Button
-								type="button"
-								onClick={onCancel}
-								variant="outline"
-								size="sm"
-								disabled={disabled}
-							>
-								Cancel
-							</Button>
-						)}
+			</div>
+			<div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
+				<div className="text-xs text-muted-foreground">
+					{reply ? 'Replying to comment' : 'Use @ to mention someone • Cmd+Enter to submit'}
+				</div>
+				<div className="flex gap-2">
+					{reply && onCancel && (
 						<Button
+							type="button"
+							onClick={onCancel}
+							variant="outline"
 							size="sm"
-							disabled={!content.trim() || disabled}
-							onClick={handleSubmit}
+							disabled={disabled}
 						>
-							{reply ? 'Reply' : 'Comment'}
+							Cancel
 						</Button>
-					</div>
+					)}
+					<Button
+						size="sm"
+						disabled={!content.trim() || disabled}
+						onClick={handleSubmit}
+					>
+						{reply ? 'Reply' : 'Comment'}
+					</Button>
 				</div>
 			</div>
 		</div>

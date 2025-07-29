@@ -40,7 +40,7 @@ export function CommentsSection({
 
 	const handleAddComment = async (content: string) => {
 		setIsSubmitting(true)
-		
+
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
@@ -51,7 +51,7 @@ export function CommentsSection({
 				method: 'POST',
 				body: formData,
 			})
-			
+
 			if (response.ok) {
 				// Revalidate the data to show the new comment
 				revalidator.revalidate()
@@ -78,7 +78,7 @@ export function CommentsSection({
 				method: 'POST',
 				body: formData,
 			})
-			
+
 			if (response.ok) {
 				// Revalidate the data to show the new reply
 				revalidator.revalidate()
@@ -101,7 +101,7 @@ export function CommentsSection({
 				method: 'POST',
 				body: formData,
 			})
-			
+
 			if (response.ok) {
 				// Revalidate the data to remove the deleted comment
 				revalidator.revalidate()
@@ -118,12 +118,18 @@ export function CommentsSection({
 	const organizedComments = comments
 
 	return (
-		<div className="border-t pt-6">
-			<div className="flex items-center gap-2 mb-4">
-				<Icon name="file-text" className="h-5 w-5" />
-				<h3 className="text-lg font-semibold">
-					Comments ({comments.length})
-				</h3>
+		<div>
+			{/* Section Header */}
+			<div className="flex items-center gap-2 mb-6">
+				<Icon name="chat-bubble" className="h-5 w-5 text-muted-foreground" />
+				<h2 className="text-lg font-semibold">
+					Comments
+				</h2>
+				{comments.length > 0 && (
+					<span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+						{comments.length}
+					</span>
+				)}
 			</div>
 
 			{/* Add new comment */}
@@ -138,7 +144,7 @@ export function CommentsSection({
 			</div>
 
 			{/* Display comments */}
-			<div className="space-y-4">
+			<div className="space-y-2">
 				{organizedComments.length > 0 ? (
 					organizedComments.map((comment) => (
 						<CommentItem
@@ -152,9 +158,12 @@ export function CommentsSection({
 						/>
 					))
 				) : (
-					<div className="text-center py-8 text-muted-foreground">
-						<Icon name="file-text" className="h-12 w-12 mx-auto mb-2 opacity-50" />
-						<p>No comments yet. Be the first to comment!</p>
+					<div className="text-center py-12">
+						<div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+							<Icon name="chat-bubble" className="h-6 w-6 text-muted-foreground" />
+						</div>
+						<h3 className="text-sm font-medium text-foreground mb-1">No comments yet</h3>
+						<p className="text-sm text-muted-foreground">Start the conversation by adding the first comment.</p>
 					</div>
 				)}
 			</div>

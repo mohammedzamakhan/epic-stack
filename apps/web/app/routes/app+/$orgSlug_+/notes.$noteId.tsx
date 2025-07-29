@@ -15,7 +15,6 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
@@ -1134,31 +1133,50 @@ export default function NoteRoute() {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle>{note.title}</SheetTitle>
+				<SheetTitle className="text-left">
+					{note.title || 'Untitled Note'}
+				</SheetTitle>
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
+					<Icon name="clock" className="h-3.5 w-3.5" />
+					<span>Updated {timeAgo} ago</span>
+					{!note.isPublic && (
+						<>
+							<span>•</span>
+							<Icon name="lock-closed" className="h-3.5 w-3.5" />
+							<span>Private</span>
+						</>
+					)}
+				</div>
 			</SheetHeader>
+
 			<section
 				ref={sectionRef}
-				className="flex h-full flex-col"
+				className="flex flex-1 flex-col min-h-0"
 				aria-labelledby="note-title"
-				tabIndex={-1} // Make the section focusable without keyboard navigation
+				tabIndex={-1}
 			>
-				<div className="overflow-y-auto px-6 pb-8">
-					<ul className="flex flex-wrap gap-5 py-5">
-						{note.images.map((image) => (
-							<li key={image.objectKey}>
-								<a href={getNoteImgSrc(image.objectKey)}>
-									<Img
-										src={getNoteImgSrc(image.objectKey)}
-										alt={image.altText ?? ''}
-										className="size-32 rounded-lg object-cover"
-										width={512}
-										height={512}
-									/>
-								</a>
-							</li>
-						))}
-					</ul>
-					<p className="text-sm whitespace-break-spaces md:text-lg">
+				<div className="flex-1 overflow-y-auto px-6 pb-8 pt-4">
+					{/* Images */}
+					{note.images.length > 0 && (
+						<ul className="flex flex-wrap gap-5 py-5">
+							{note.images.map((image) => (
+								<li key={image.objectKey}>
+									<a href={getNoteImgSrc(image.objectKey)}>
+										<Img
+											src={getNoteImgSrc(image.objectKey)}
+											alt={image.altText ?? ''}
+											className="size-32 rounded-lg object-cover"
+											width={512}
+											height={512}
+										/>
+									</a>
+								</li>
+							))}
+						</ul>
+					)}
+
+					{/* Note Content */}
+					<p className="text-sm whitespace-break-spaces md:text-lg mb-8">
 						{note.content}
 					</p>
 
@@ -1173,35 +1191,40 @@ export default function NoteRoute() {
 					{/* Activity Log Section */}
 					<ActivityLog activityLogs={activityLogs} />
 				</div>
-				<div className={floatingToolbarClassName}>
-					<span className="text-foreground/90 text-sm max-[524px]:hidden">
-						<Icon name="clock" className="scale-125">
-							{timeAgo} ago
-						</Icon>
-					</span>
-					<div className="flex flex-1 justify-end gap-2 md:gap-4">
-						<ShareNoteButton
-							noteId={note.id}
-							isPublic={note.isPublic}
-							noteAccess={note.noteAccess}
-							organizationMembers={organizationMembers}
-						/>
-						<IntegrationControls
-							noteId={note.id}
-							connections={connections}
-							availableIntegrations={availableIntegrations}
-						/>
-						<DeleteNote id={note.id} />
-						<Button
-							asChild
-							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-						>
-							<Link to="edit">
-								<Icon name="pencil-1" className="scale-125 max-md:scale-150">
-									<span className="max-md:hidden">Edit</span>
-								</Icon>
-							</Link>
-						</Button>
+				
+				<div className="flex-shrink-0 border-t bg-background px-6 py-4">
+					<div className="flex items-center justify-between">
+						<span className="text-foreground/90 text-sm max-[524px]:hidden">
+							<Icon name="clock" className="h-4 w-4 mr-1">
+								{timeAgo} ago
+							</Icon>
+						</span>
+						<div className="flex items-center gap-2 md:gap-3">
+							<ShareNoteButton
+								noteId={note.id}
+								isPublic={note.isPublic}
+								noteAccess={note.noteAccess}
+								organizationMembers={organizationMembers}
+							/>
+							<IntegrationControls
+								noteId={note.id}
+								connections={connections}
+								availableIntegrations={availableIntegrations}
+							/>
+							<Button
+								asChild
+								variant="outline"
+								size="sm"
+								className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+							>
+								<Link to="edit">
+									<Icon name="pencil-1" className="h-4 w-4 max-md:scale-125">
+										<span className="max-md:hidden ml-1.5">Edit</span>
+									</Icon>
+								</Link>
+							</Button>
+							<DeleteNote id={note.id} />
+						</div>
 					</div>
 				</div>
 			</section>
@@ -1223,12 +1246,13 @@ export function DeleteNote({ id }: { id: string }) {
 				name="intent"
 				value="delete-note"
 				variant="destructive"
+				size="sm"
 				status={isPending ? 'pending' : (form.status ?? 'idle')}
 				disabled={isPending}
-				className="w-full max-md:aspect-square max-md:px-0"
+				className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 			>
-				<Icon name="trash" className="scale-125 max-md:scale-150">
-					<span className="max-md:hidden">Delete</span>
+				<Icon name="trash" className="h-4 w-4 max-md:scale-125">
+					<span className="max-md:hidden ml-1.5">Delete</span>
 				</Icon>
 			</StatusButton>
 			<ErrorList errors={form.errors} id={form.errorId} />

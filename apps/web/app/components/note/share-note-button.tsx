@@ -158,8 +158,8 @@ export function ShareNoteButton({
 					size="sm"
 					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 				>
-					<Icon name="link-2" className="scale-125 max-md:scale-150">
-						<span className="max-md:hidden">Share</span>
+					<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
+						<span className="max-md:hidden ml-1.5">Share</span>
 					</Icon>
 				</Button>
 			</DialogTrigger>

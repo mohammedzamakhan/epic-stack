@@ -59,59 +59,72 @@ export function CommentItem({
 	const maxDepth = 3 // Limit nesting depth
 
 	return (
-		<div className={`${depth > 0 ? 'ml-4 border-l' : ''}`}>
-			<div className="group rounded-lg p-2 hover:bg-muted/50">
-				<div className="flex items-start justify-between">
-					<div className="flex items-center gap-1 text-xs">
-						<span className="font-medium">
-							{comment.user.name || comment.user.username}
+		<div className={`${depth > 0 ? 'ml-6 pl-4 border-l border-border' : ''}`}>
+			<div className="group relative">
+				<div className="flex items-start gap-3 py-2">
+					{/* Avatar placeholder */}
+					<div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+						<span className="text-xs font-medium text-muted-foreground">
+							{(comment.user.name || comment.user.username).charAt(0).toUpperCase()}
 						</span>
-						<span className="text-muted-foreground">•</span>
-						<span className="text-muted-foreground">{timeAgo} ago</span>
 					</div>
-					{canDelete && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="opacity-0 group-hover:opacity-100 size-4"
-							onClick={handleDelete}
-							disabled={isDeleting}
-						>
-							<Icon name="trash" className="h-4 w-4" />
-						</Button>
-					)}
-				</div>
+					
+					<div className="flex-1 min-w-0">
+						<div className="flex items-center justify-between mb-1">
+							<div className="flex items-center gap-2 text-sm">
+								<span className="font-medium text-foreground">
+									{comment.user.name || comment.user.username}
+								</span>
+								<span className="text-muted-foreground">
+									{timeAgo} ago
+								</span>
+							</div>
+							{canDelete && (
+								<Button
+									variant="ghost"
+									size="sm"
+									className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+									onClick={handleDelete}
+									disabled={isDeleting}
+								>
+									<Icon name="trash" className="h-3.5 w-3.5" />
+								</Button>
+							)}
+						</div>
 
-				<div
-					className="text-sm prose prose-sm max-w-none"
-					dangerouslySetInnerHTML={{ __html: comment.content }}
-				/>
-
-				<div className="mt-2 flex items-center gap-2">
-					{depth < maxDepth && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setShowReplyForm(!showReplyForm)}
-							className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
-						>
-							Reply
-						</Button>
-					)}
-				</div>
-
-				{showReplyForm && (
-					<div className="mt-3">
-						<CommentInput
-							users={users}
-							onSubmit={handleReply}
-							value=""
-							reply
-							onCancel={() => setShowReplyForm(false)}
-							placeholder="Write a reply..."
+						<div
+							className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none prose-p:my-1"
+							dangerouslySetInnerHTML={{ __html: comment.content }}
 						/>
+
+						<div className="mt-2 flex items-center gap-2">
+							{depth < maxDepth && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => setShowReplyForm(!showReplyForm)}
+									className="h-auto px-0 py-1 text-xs text-muted-foreground hover:text-foreground"
+								>
+									<Icon name="paper-plane" className="h-3 w-3 mr-1" />
+									Reply
+								</Button>
+							)}
+						</div>
+
+						{showReplyForm && (
+							<div className="mt-4">
+								<CommentInput
+									users={users}
+									onSubmit={handleReply}
+									value=""
+									reply
+									onCancel={() => setShowReplyForm(false)}
+									placeholder="Write a reply..."
+								/>
+							</div>
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 
 			{/* Render replies */}
