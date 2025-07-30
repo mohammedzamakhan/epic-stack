@@ -1,12 +1,15 @@
 import Mention from '@tiptap/extension-mention'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import React, { useEffect, useState } from 'react'
 import { cn } from '#app/utils/misc.js'
 import { Button } from '../ui/button'
 import getSuggestions from './suggestions'
+import { default as getEmojiSuggestion } from './emoji-suggestions'
 import { CommentImageUpload } from './comment-image-upload'
 import { CommentImagePreview } from './comment-image-preview'
+import { EmojiPickerButton } from './emoji-picker-button'
 
 export interface MentionUser {
 	id: string
@@ -47,6 +50,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
 				HTMLAttributes: {
 					class: 'mention bg-primary/10 text-primary px-1 py-0.5 rounded text-sm font-medium',
 				},
+			}),
+			Emoji.configure({
+				emojis: gitHubEmojis,
+				enableEmoticons: true,
+				suggestion: getEmojiSuggestion(),
 			}),
 		],
 		content: initialValue,
@@ -90,6 +98,12 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		}
 	}
 
+	const handleEmojiSelect = (emoji: string) => {
+		if (editor) {
+			editor.chain().focus().insertContent(emoji).run()
+		}
+	}
+
 	return (
 		<div
 			className={cn(
@@ -114,13 +128,17 @@ const CommentInput: React.FC<CommentInputProps> = ({
 				)}
 			</div>
 			<div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
-				<div className="flex items-center gap-2">
+				<div className="flex items-center">
 					<CommentImageUpload
 						onImagesSelected={handleImagesSelected}
 						maxImages={3 - selectedImages.length}
 						disabled={disabled || selectedImages.length >= 3}
 					/>
-					<div className="text-xs text-muted-foreground">
+					<EmojiPickerButton
+						onEmojiSelect={handleEmojiSelect}
+						disabled={disabled}
+					/>
+					<div className="text-xs text-muted-foreground ml-2">
 						{reply ? 'Replying to comment' : 'Use @ to mention someone • Cmd+Enter to submit'}
 					</div>
 				</div>

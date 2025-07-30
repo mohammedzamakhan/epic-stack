@@ -75,7 +75,7 @@ export function CommentItem({
 							{(comment.user.name || comment.user.username).charAt(0).toUpperCase()}
 						</span>
 					</div>
-					
+
 					<div className="flex-1 min-w-0">
 						<div className="flex items-center justify-between mb-1">
 							<div className="flex items-center gap-2 text-sm">
@@ -100,7 +100,7 @@ export function CommentItem({
 						</div>
 
 						<div
-							className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none prose-p:my-1"
+							className="text-sm text-foreground leading-relaxed tracking-wider prose prose-sm max-w-none prose-p:my-1"
 							dangerouslySetInnerHTML={{ __html: comment.content }}
 						/>
 

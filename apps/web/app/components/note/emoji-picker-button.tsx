@@ -1,0 +1,171 @@
+import React, { useState, useRef, useEffect } from 'react'
+import { EmojiPicker } from 'frimousse'
+import { computePosition, flip, shift, offset } from '@floating-ui/dom'
+import { Button } from '../ui/button'
+import { Icon } from '../ui/icon'
+
+interface EmojiPickerButtonProps {
+    onEmojiSelect: (emoji: string) => void
+    disabled?: boolean
+}
+
+export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
+    onEmojiSelect,
+    disabled = false,
+}) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const [position, setPosition] = useState({ top: 0, left: 0 })
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const pickerRef = useRef<HTMLDivElement>(null)
+
+    const handleEmojiSelect = ({ emoji }: { emoji: string }) => {
+        onEmojiSelect(emoji)
+        setIsOpen(false)
+    }
+
+    const updatePosition = async () => {
+        if (!buttonRef.current || !pickerRef.current) return
+
+        const { x, y } = await computePosition(buttonRef.current, pickerRef.current, {
+            placement: 'top-start',
+            middleware: [
+                offset(8),
+                flip(),
+                shift({ padding: 8 }),
+            ],
+        })
+
+        setPosition({ top: y, left: x })
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            updatePosition()
+        }
+    }, [isOpen])
+
+    // Close on click outside
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node
+
+            // Don't close if clicking on the button
+            if (buttonRef.current?.contains(target)) {
+                return
+            }
+
+            // Don't close if clicking inside the picker
+            if (pickerRef.current?.contains(target)) {
+                return
+            }
+
+            // Close if clicking outside both
+            setIsOpen(false)
+        }
+
+        // Add a small delay to avoid immediate closure when opening
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside)
+        }, 50)
+
+        return () => {
+            clearTimeout(timeoutId)
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [isOpen])
+
+    // Close on escape key
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsOpen(false)
+            }
+        }
+
+        document.addEventListener('keydown', handleEscape)
+        return () => document.removeEventListener('keydown', handleEscape)
+    }, [isOpen])
+
+    const handleButtonClick = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsOpen(!isOpen)
+    }
+
+    return (
+        <>
+            <Button
+                ref={buttonRef}
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={disabled}
+                className="h-8 w-8 p-0 hover:bg-accent"
+                onClick={handleButtonClick}
+            >
+                <Icon name="smile" className="h-4 w-4" />
+                <span className="sr-only">Add emoji</span>
+            </Button>
+
+            {isOpen && (
+                <div 
+                    ref={pickerRef}
+                    className="fixed z-[9999] min-w-[300px] overflow-hidden rounded-md border bg-popover p-0 text-popover-foreground shadow-md"
+                    style={{ 
+                        top: position.top,
+                        left: position.left,
+                        pointerEvents: 'auto'
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <EmojiPicker.Root
+                        onEmojiSelect={handleEmojiSelect}
+                        className="h-[368px] w-fit flex flex-col bg-white dark:bg-neutral-900"
+                    >
+                        <EmojiPicker.Search className="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800" />
+                        <EmojiPicker.Viewport className="relative flex-1">
+                            <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                                Loading…
+                            </EmojiPicker.Loading>
+                            <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                                No emoji found.
+                            </EmojiPicker.Empty>
+                            <EmojiPicker.List
+                                className="select-none pb-1.5"
+                                components={{
+                                    CategoryHeader: ({ category, ...props }) => (
+                                        <div
+                                            className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-xs dark:bg-neutral-900 dark:text-neutral-400"
+                                            {...props}
+                                        >
+                                            {category.label}
+                                        </div>
+                                    ),
+                                    Row: ({ children, ...props }) => (
+                                        <div className="scroll-my-1.5 px-1.5" {...props}>
+                                            {children}
+                                        </div>
+                                    ),
+                                    Emoji: ({ emoji, ...props }) => (
+                                        <button
+                                            type="button"
+                                            className="flex size-8 items-center justify-center rounded-md text-lg data-[active]:bg-neutral-100 dark:data-[active]:bg-neutral-800"
+                                            {...props}
+                                        >
+                                            {emoji.emoji}
+                                        </button>
+                                    ),
+                                }}
+                            />
+                        </EmojiPicker.Viewport>
+                    </EmojiPicker.Root>
+                </div>
+            )}
+        </>
+    )
+}

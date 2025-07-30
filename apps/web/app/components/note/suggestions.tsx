@@ -37,6 +37,7 @@ export default function getSuggestions(items: MentionUser[]): Omit<SuggestionOpt
 						interactive: true,
 						trigger: 'manual',
 						placement: 'bottom-start',
+						zIndex: 9999,
 					})
 				},
 
