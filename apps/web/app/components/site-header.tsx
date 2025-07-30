@@ -1,28 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '#app/components/ui/button'
 import { Separator } from '#app/components/ui/separator'
 import { SidebarTrigger } from '#app/components/ui/sidebar'
-import { loader as rootLoader } from '#app/root.tsx'
-import { useRouteLoaderData } from 'react-router'
+import { useGlobalHotkeys } from '#app/hooks/use-hotkeys'
 import { Icon } from './ui/icon'
 import NotificationBell from './ui/notification-bell'
 import { CommandMenu } from './command-menu'
 
 export function SiteHeader() {
-	const data = useRouteLoaderData<typeof rootLoader>('root')
 	const [commandOpen, setCommandOpen] = useState(false)
 
-	useEffect(() => {
-		const down = (e: KeyboardEvent) => {
-			if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-				e.preventDefault()
-				setCommandOpen((open) => !open)
-			}
-		}
-
-		document.addEventListener('keydown', down)
-		return () => document.removeEventListener('keydown', down)
-	}, [])
+	// Setup global hotkeys
+	useGlobalHotkeys(setCommandOpen)
 
 	return (
 		<>

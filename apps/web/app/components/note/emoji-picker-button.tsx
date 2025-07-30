@@ -112,10 +112,10 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
             </Button>
 
             {isOpen && (
-                <div 
+                <div
                     ref={pickerRef}
                     className="fixed z-[9999] min-w-[300px] overflow-hidden rounded-md border bg-popover p-0 text-popover-foreground shadow-md"
-                    style={{ 
+                    style={{
                         top: position.top,
                         left: position.left,
                         pointerEvents: 'auto'
@@ -125,14 +125,14 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
                 >
                     <EmojiPicker.Root
                         onEmojiSelect={handleEmojiSelect}
-                        className="h-[368px] w-fit flex flex-col bg-white dark:bg-neutral-900"
+                        className="h-[368px] w-fit flex flex-col bg-background"
                     >
-                        <EmojiPicker.Search className="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800" />
+                        <EmojiPicker.Search className="z-10 mx-2 mt-2 appearance-none rounded-md bg-muted px-2.5 py-2 text-sm" />
                         <EmojiPicker.Viewport className="relative flex-1">
-                            <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                            <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
                                 Loading…
                             </EmojiPicker.Loading>
-                            <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+                            <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
                                 No emoji found.
                             </EmojiPicker.Empty>
                             <EmojiPicker.List
@@ -140,7 +140,7 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
                                 components={{
                                     CategoryHeader: ({ category, ...props }) => (
                                         <div
-                                            className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-xs dark:bg-neutral-900 dark:text-neutral-400"
+                                            className="bg-background px-3 pt-3 pb-1.5 font-medium text-muted-foreground text-xs"
                                             {...props}
                                         >
                                             {category.label}
@@ -154,7 +154,7 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
                                     Emoji: ({ emoji, ...props }) => (
                                         <button
                                             type="button"
-                                            className="flex size-8 items-center justify-center rounded-md text-lg data-[active]:bg-neutral-100 dark:data-[active]:bg-neutral-800"
+                                            className="flex size-8 items-center justify-center rounded-md text-lg data-[active]:bg-accent"
                                             {...props}
                                         >
                                             {emoji.emoji}

@@ -94,7 +94,7 @@ export function CommentItem({
 									onClick={handleDelete}
 									disabled={isDeleting}
 								>
-									<Icon name="trash" className="h-3.5 w-3.5" />
+									<Icon name="trash" className="h-4 w-4" />
 								</Button>
 							)}
 						</div>

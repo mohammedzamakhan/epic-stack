@@ -130,18 +130,31 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 
                 )}
                 <CommandGroup heading="Settings">
-                    <CommandItem>
+                    <CommandItem onSelect={() => {
+                        navigate('/settings/general')
+                        onOpenChange(false)
+                    }}>
                         <Icon name="person" />
-                        <span>Profile</span>
+                        <span>Account settings</span>
                         <CommandShortcut>⌘P</CommandShortcut>
                     </CommandItem>
-                    <CommandItem>
-                        <Icon name="envelope-closed"></Icon>
+                    <CommandItem onSelect={() => {
+                        if (orgSlug) {
+                            navigate(`/app/${orgSlug}/settings/billing`)
+                            onOpenChange(false)
+                        }
+                    }}>
+                        <Icon name="credit-card" />
                         <span>Billing</span>
                         <CommandShortcut>⌘B</CommandShortcut>
                     </CommandItem>
-                    <CommandItem>
-                        <Icon name="credit-card" />
+                    <CommandItem onSelect={() => {
+                        if (orgSlug) {
+                            navigate(`/app/${orgSlug}/settings`)
+                            onOpenChange(false)
+                        }
+                    }}>
+                        <Icon name="gear" />
                         <span>Settings</span>
                         <CommandShortcut>⌘S</CommandShortcut>
                     </CommandItem>
