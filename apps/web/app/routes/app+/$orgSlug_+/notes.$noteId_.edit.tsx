@@ -73,7 +73,14 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 			<SheetHeader className="border-b">
 				<SheetTitle>Edit Note</SheetTitle>
 			</SheetHeader>
-			<OrgNoteEditor note={loaderData.note} actionData={actionData} />
+
+			<section
+				className="flex flex-1 flex-col min-h-0"
+				aria-labelledby="edit-note-title"
+				tabIndex={-1}
+			>
+				<OrgNoteEditor note={loaderData.note} actionData={actionData} />
+			</section>
 		</>
 	)
 }

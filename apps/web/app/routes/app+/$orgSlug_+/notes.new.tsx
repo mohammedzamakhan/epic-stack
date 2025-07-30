@@ -16,7 +16,14 @@ export default function NewNote() {
 			<SheetHeader className="border-b">
 				<SheetTitle>Create New Note</SheetTitle>
 			</SheetHeader>
-			<OrgNoteEditor />
+
+			<section
+				className="flex flex-1 flex-col min-h-0"
+				aria-labelledby="new-note-title"
+				tabIndex={-1}
+			>
+				<OrgNoteEditor />
+			</section>
 		</>
 	)
 }

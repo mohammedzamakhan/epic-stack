@@ -1,3 +1,5 @@
+import { AssistantRuntimeProvider } from '@assistant-ui/react'
+import { useChatRuntime } from '@assistant-ui/react-ai-sdk'
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
@@ -14,22 +16,23 @@ import {
 	type LoaderFunctionArgs,
 } from 'react-router'
 import { z } from 'zod'
+import { Thread } from '#app/components/assistant-ui/thread.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
+import { ActivityLog } from '#app/components/note/activity-log.tsx'
+import { CommentsSection } from '#app/components/note/comments-section.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
-import { CommentsSection } from '#app/components/note/comments-section.tsx'
-import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
-import { requireUserId, getUserId } from '#app/utils/auth.server.ts'
+import { logNoteActivity, getNoteActivityLogs } from '#app/utils/activity-log.server.ts'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { logNoteActivity, getNoteActivityLogs } from '#app/utils/activity-log.server.ts'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -1164,8 +1167,14 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
+	
+
 	const { note, timeAgo, currentUserId, organizationMembers, comments, activityLogs, connections, availableIntegrations } =
 		useLoaderData() as NoteLoaderData
+
+	const runtime = useChatRuntime({
+		api: `/api/ai/chat?noteId=${note.id}`,
+	});
 
 	// Add ref for auto-focusing
 	const sectionRef = useRef<HTMLElement>(null)
@@ -1230,9 +1239,7 @@ export default function NoteRoute() {
 					)}
 
 					{/* Note Content */}
-					<p className="text-sm whitespace-break-spaces md:text-lg mb-8">
-						{note.content}
-					</p>
+					<p className="text-sm whitespace-break-spaces md:text-lg mb-8" dangerouslySetInnerHTML={{ __html: note.content }} />
 
 					{/* Comments Section */}
 					<CommentsSection
@@ -1244,6 +1251,9 @@ export default function NoteRoute() {
 
 					{/* Activity Log Section */}
 					<ActivityLog activityLogs={activityLogs} />
+					<AssistantRuntimeProvider runtime={runtime}>
+						<Thread  />
+					</AssistantRuntimeProvider>
 				</div>
 				
 				<div className="flex-shrink-0 border-t bg-background px-6 py-4">
