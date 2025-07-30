@@ -3,14 +3,17 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { startAuthentication } from '@simplewebauthn/browser'
+import { type PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server'
 import { useOptimistic, useState, useTransition } from 'react'
 import { data, Form, Link, useNavigate, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
-import { Spacer } from '#app/components/spacer.tsx'
+import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
+import { Input } from '#app/components/ui/input.tsx'
+import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { login, requireAnonymous } from '#app/utils/auth.server.ts'
@@ -145,43 +148,78 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<div className="flex min-h-full flex-col justify-center pt-20 pb-32">
-			<div className="mx-auto w-full max-w-md">
-				<div className="flex flex-col gap-3 text-center">
-					<h1 className="text-h1">Welcome back!</h1>
-					<p className="text-body-md text-muted-foreground">
-						Please enter your details.
-					</p>
-				</div>
-				<Spacer size="xs" />
+		<Card className="shadow-2xl border-0">
+			<CardHeader className="text-center">
+				<CardTitle className="text-xl">Welcome back</CardTitle>
+				<CardDescription>
+					Login with your social account or email
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
 
-				<div>
-					<div className="mx-auto w-full max-w-md px-8">
-						<Form method="POST" {...getFormProps(form)}>
-							<HoneypotInputs />
-							<Field
-								labelProps={{ children: 'Username' }}
-								inputProps={{
-									...getInputProps(fields.username, { type: 'text' }),
-									autoFocus: true,
-									className: 'lowercase',
-									autoComplete: 'username',
-								}}
-								errors={fields.username.errors}
+				<div className="grid gap-6">
+					{/* Social Login Buttons */}
+					<div className="flex flex-col gap-4">
+						{providerNames.map((providerName) => (
+							<ProviderConnectionForm
+								key={providerName}
+								type="Login"
+								providerName={providerName}
+								redirectTo={redirectTo}
 							/>
+						))}
+					</div>
 
-							<Field
-								labelProps={{ children: 'Password' }}
-								inputProps={{
-									...getInputProps(fields.password, {
+					{/* Passkey Login */}
+					<PasskeyLogin
+						redirectTo={redirectTo}
+						remember={fields.remember.value === 'on'}
+					/>
+
+					{/* Divider */}
+					<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+						<span className="relative z-10 bg-card px-2 text-muted-foreground">
+							Or continue with
+						</span>
+					</div>
+
+					<Form method="POST" {...getFormProps(form)}>
+						<HoneypotInputs />
+
+						{/* Email/Username Login Form */}
+						<div className="grid gap-6">
+							<div className="grid gap-3">
+								<Label htmlFor={fields.username.id}>Username</Label>
+								<Input
+									{...getInputProps(fields.username, { type: 'text' })}
+									autoFocus
+									className="lowercase"
+									autoComplete="username"
+									placeholder="Enter your username"
+								/>
+								<ErrorList errors={fields.username.errors} />
+							</div>
+							<div className="grid gap-3">
+								<div className="flex items-center">
+									<Label htmlFor={fields.password.id}>Password</Label>
+									<Link
+										to="/forgot-password"
+										className="ml-auto text-sm underline-offset-4 hover:underline"
+									>
+										Forgot your password?
+									</Link>
+								</div>
+								<Input
+									{...getInputProps(fields.password, {
 										type: 'password',
-									}),
-									autoComplete: 'current-password',
-								}}
-								errors={fields.password.errors}
-							/>
+									})}
+									autoComplete="current-password"
+									placeholder="Enter your password"
+								/>
+								<ErrorList errors={fields.password.errors} />
+							</div>
 
-							<div className="flex justify-between">
+							<div className="flex items-center space-x-2">
 								<CheckboxField
 									labelProps={{
 										htmlFor: fields.remember.id,
@@ -192,14 +230,6 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 									})}
 									errors={fields.remember.errors}
 								/>
-								<div>
-									<Link
-										to="/forgot-password"
-										className="text-body-xs font-semibold"
-									>
-										Forgot password?
-									</Link>
-								</div>
 							</div>
 
 							<input
@@ -207,52 +237,34 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 							/>
 							<ErrorList errors={form.errors} id={form.errorId} />
 
-							<div className="flex items-center justify-between gap-6 pt-3">
-								<StatusButton
-									className="w-full"
-									status={isPending ? 'pending' : (form.status ?? 'idle')}
-									type="submit"
-									disabled={isPending}
-								>
-									Log in
-								</StatusButton>
-							</div>
-						</Form>
-						<hr className="my-4" />
-						<div className="flex flex-col gap-5">
-							<PasskeyLogin
-								redirectTo={redirectTo}
-								remember={fields.remember.value === 'on'}
-							/>
-						</div>
-						<hr className="my-4" />
-						<ul className="flex flex-col gap-5">
-							{providerNames.map((providerName) => (
-								<li key={providerName}>
-									<ProviderConnectionForm
-										type="Login"
-										providerName={providerName}
-										redirectTo={redirectTo}
-									/>
-								</li>
-							))}
-						</ul>
-						<div className="flex items-center justify-center gap-2 pt-6">
-							<span className="text-muted-foreground">New here?</span>
-							<Link
-								to={
-									redirectTo
-										? `/signup?redirectTo=${encodeURIComponent(redirectTo)}`
-										: '/signup'
-								}
+							<StatusButton
+								className="w-full"
+								status={isPending ? 'pending' : (form.status ?? 'idle')}
+								type="submit"
+								disabled={isPending}
 							>
-								Create an account
-							</Link>
+								Login
+							</StatusButton>
 						</div>
+
+					</Form>
+
+					<div className="bg-muted backdrop-blur-sm rounded-lg p-4 text-center text-sm -m-6 mt-0">
+						Don&apos;t have an account?{' '}
+						<Link
+							to={
+								redirectTo
+									? `/signup?redirectTo=${encodeURIComponent(redirectTo)}`
+									: '/signup'
+							}
+							className="font-medium underline underline-offset-4"
+						>
+							Create account
+						</Link>
 					</div>
 				</div>
-			</div>
-		</div>
+			</CardContent>
+		</Card>
 	)
 }
 

@@ -14,11 +14,13 @@ import {
 } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
-import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
-import { Spacer } from '#app/components/spacer.tsx'
+import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import { Input } from '#app/components/ui/input.tsx'
+import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import {
-	sessionKey,
+	sessionKey,	
 	signupWithConnection,
 	requireAnonymous,
 } from '#app/utils/auth.server.ts'
@@ -182,89 +184,118 @@ export default function OnboardingProviderRoute({
 	})
 
 	return (
-		<div className="container flex min-h-full flex-col justify-center pt-20 pb-32">
-			<div className="mx-auto w-full max-w-lg">
-				<div className="flex flex-col gap-3 text-center">
-					<h1 className="text-h1">Welcome aboard {loaderData.email}!</h1>
-					<p className="text-body-md text-muted-foreground">
-						Please enter your details.
-					</p>
-				</div>
-				<Spacer size="xs" />
-				<Form
-					method="POST"
-					className="mx-auto max-w-sm min-w-full sm:min-w-[368px]"
-					{...getFormProps(form)}
-				>
-					{fields.imageUrl.initialValue ? (
-						<div className="mb-4 flex flex-col items-center justify-center gap-4">
-							<img
-								src={fields.imageUrl.initialValue}
-								alt="Profile"
-								className="size-24 rounded-full"
-							/>
-							<p className="text-body-sm text-muted-foreground">
-								You can change your photo later
-							</p>
-							<input {...getInputProps(fields.imageUrl, { type: 'hidden' })} />
-						</div>
-					) : null}
-					<Field
-						labelProps={{ htmlFor: fields.username.id, children: 'Username' }}
-						inputProps={{
-							...getInputProps(fields.username, { type: 'text' }),
-							autoComplete: 'username',
-							className: 'lowercase',
-						}}
-						errors={fields.username.errors}
-					/>
-					<Field
-						labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
-						inputProps={{
-							...getInputProps(fields.name, { type: 'text' }),
-							autoComplete: 'name',
-						}}
-						errors={fields.name.errors}
-					/>
+		<div 
+			className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-4"
+			style={{
+				backgroundImage: `url('/assets/images/background_1.webp')`,
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+				backgroundRepeat: 'no-repeat',
+			}}
+		>
+			<div className="w-full max-w-md">
+				<div className="flex flex-col gap-6">
+					<Card className="shadow-2xl border-0">
+						<CardHeader className="text-center">
+							<CardTitle className="text-xl">Complete your profile</CardTitle>
+							<CardDescription>
+								Hi {loaderData.email}, just a few more details to get started.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Form method="POST" {...getFormProps(form)}>
+								<div className="grid gap-6">
+									{fields.imageUrl.initialValue ? (
+										<div className="flex flex-col items-center justify-center gap-4">
+											<img
+												src={fields.imageUrl.initialValue}
+												alt="Profile"
+												className="size-24 rounded-full"
+											/>
+											<p className="text-sm text-muted-foreground">
+												You can change your photo later
+											</p>
+											<input
+												{...getInputProps(fields.imageUrl, { type: 'hidden' })}
+											/>
+										</div>
+									) : null}
 
-					<CheckboxField
-						labelProps={{
-							htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
-							children:
-								'Do you agree to our Terms of Service and Privacy Policy?',
-						}}
-						buttonProps={getInputProps(
-							fields.agreeToTermsOfServiceAndPrivacyPolicy,
-							{ type: 'checkbox' },
-						)}
-						errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
-					/>
-					<CheckboxField
-						labelProps={{
-							htmlFor: fields.remember.id,
-							children: 'Remember me',
-						}}
-						buttonProps={getInputProps(fields.remember, { type: 'checkbox' })}
-						errors={fields.remember.errors}
-					/>
+									<div className="grid gap-3">
+										<Label htmlFor={fields.username.id}>Username</Label>
+										<Input
+											{...getInputProps(fields.username, { type: 'text' })}
+											autoComplete="username"
+											className="lowercase"
+											placeholder="Enter your username"
+											required
+										/>
+										<ErrorList errors={fields.username.errors} />
+									</div>
 
-					{redirectTo ? (
-						<input type="hidden" name="redirectTo" value={redirectTo} />
-					) : null}
+									<div className="grid gap-3">
+										<Label htmlFor={fields.name.id}>Full Name</Label>
+										<Input
+											{...getInputProps(fields.name, { type: 'text' })}
+											autoComplete="name"
+											placeholder="Enter your full name"
+											required
+										/>
+										<ErrorList errors={fields.name.errors} />
+									</div>
 
-					<ErrorList errors={form.errors} id={form.errorId} />
+									<div className="flex items-center space-x-2">
+										<CheckboxField
+											labelProps={{
+												htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
+												children:
+													'I agree to the Terms of Service and Privacy Policy',
+											}}
+											buttonProps={getInputProps(
+												fields.agreeToTermsOfServiceAndPrivacyPolicy,
+												{ type: 'checkbox' },
+											)}
+											errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
+										/>
+									</div>
 
-					<div className="flex items-center justify-between gap-6">
-						<StatusButton
-							className="w-full"
-							status={isPending ? 'pending' : (form.status ?? 'idle')}
-							type="submit"
-							disabled={isPending}
-						>
-							Create an account
-						</StatusButton>
+									<div className="flex items-center space-x-2">
+										<CheckboxField
+											labelProps={{
+												htmlFor: fields.remember.id,
+												children: 'Remember me',
+											}}
+											buttonProps={getInputProps(fields.remember, {
+												type: 'checkbox',
+											})}
+											errors={fields.remember.errors}
+										/>
+									</div>
+
+									{redirectTo ? (
+										<input type="hidden" name="redirectTo" value={redirectTo} />
+									) : null}
+
+									<ErrorList errors={form.errors} id={form.errorId} />
+
+									<StatusButton
+										className="w-full"
+										status={isPending ? 'pending' : (form.status ?? 'idle')}
+										type="submit"
+										disabled={isPending}
+									>
+										Create account
+									</StatusButton>
+								</div>
+							</Form>
+						</CardContent>
+					</Card>
+					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
+						By creating an account, you agree to our{' '}
+						<a href="#">Terms of Service</a> and{' '}
+						<a href="#">Privacy Policy</a>.
 					</div>
-				</Form>
+				</div>
 			</div>
 		</div>
 	)

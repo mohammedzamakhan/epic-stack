@@ -24,8 +24,7 @@ export default defineConfig((config) => ({
 
 		assetsInlineLimit: (source: string) => {
 			if (
-				source.endsWith('favicon.svg') ||
-				source.endsWith('apple-touch-icon.png')
+				source.includes('/app/assets')
 			) {
 				return false
 			}

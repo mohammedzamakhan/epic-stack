@@ -99,7 +99,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		// them in the database. Maybe they were deleted? Let's log them out.
 		await logout({ request, redirectTo: '/' })
 	}
-	const honeyProps = honeypot.getInputProps()
+	const honeyProps = await honeypot.getInputProps()
 	const requestUrl = new URL(request.url)
 
 	// Get sidebar state for marketing routes
@@ -240,7 +240,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
-
+	console.log(data.honeyProps)
 	return (
 		<HoneypotProvider {...data.honeyProps}>
 			<OpenImgContextProvider

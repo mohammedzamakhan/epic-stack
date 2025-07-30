@@ -3,7 +3,10 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { data, redirect, Form } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { ErrorList, Field } from '#app/components/forms.tsx'
+import { ErrorList } from '#app/components/forms.tsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import { Input } from '#app/components/ui/input.tsx'
+import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import {
 	checkIsCommonPassword,
@@ -96,53 +99,57 @@ export default function ResetPasswordPage({
 	})
 
 	return (
-		<div className="container flex flex-col justify-center pt-20 pb-32">
-			<div className="text-center">
-				<h1 className="text-h1">Password Reset</h1>
-				<p className="text-body-md text-muted-foreground mt-3">
-					Hi, {loaderData.resetPasswordUsername}. No worries. It happens all the
-					time.
-				</p>
-			</div>
-			<div className="mx-auto mt-16 max-w-sm min-w-full sm:min-w-[368px]">
-				<Form method="POST" {...getFormProps(form)}>
-					<Field
-						labelProps={{
-							htmlFor: fields.password.id,
-							children: 'New Password',
-						}}
-						inputProps={{
-							...getInputProps(fields.password, { type: 'password' }),
-							autoComplete: 'new-password',
-							autoFocus: true,
-						}}
-						errors={fields.password.errors}
-					/>
-					<Field
-						labelProps={{
-							htmlFor: fields.confirmPassword.id,
-							children: 'Confirm Password',
-						}}
-						inputProps={{
-							...getInputProps(fields.confirmPassword, { type: 'password' }),
-							autoComplete: 'new-password',
-						}}
-						errors={fields.confirmPassword.errors}
-					/>
+		<Card className="shadow-2xl border-0">
+						<CardHeader className="text-center">
+							<CardTitle className="text-xl">Reset Password</CardTitle>
+							<CardDescription>
+								Hi, {loaderData.resetPasswordUsername}. Enter your new password below.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Form method="POST" {...getFormProps(form)}>
+								<div className="grid gap-6">
+									<div className="grid gap-3">
+										<Label htmlFor={fields.password.id}>New Password</Label>
+										<Input
+											{...getInputProps(fields.password, { type: 'password' })}
+											autoComplete="new-password"
+											autoFocus
+											placeholder="Enter your new password"
+											required
+										/>
+										<ErrorList errors={fields.password.errors} />
+									</div>
 
-					<ErrorList errors={form.errors} id={form.errorId} />
+									<div className="grid gap-3">
+										<Label htmlFor={fields.confirmPassword.id}>
+											Confirm Password
+										</Label>
+										<Input
+											{...getInputProps(fields.confirmPassword, {
+												type: 'password',
+											})}
+											autoComplete="new-password"
+											placeholder="Confirm your new password"
+											required
+										/>
+										<ErrorList errors={fields.confirmPassword.errors} />
+									</div>
 
-					<StatusButton
-						className="w-full"
-						status={isPending ? 'pending' : (form.status ?? 'idle')}
-						type="submit"
-						disabled={isPending}
-					>
-						Reset password
-					</StatusButton>
-				</Form>
-			</div>
-		</div>
+									<ErrorList errors={form.errors} id={form.errorId} />
+
+									<StatusButton
+										className="w-full"
+										status={isPending ? 'pending' : (form.status ?? 'idle')}
+										type="submit"
+										disabled={isPending}
+									>
+										Reset password
+									</StatusButton>
+								</div>
+							</Form>
+						</CardContent>
+					</Card>
 	)
 }
 

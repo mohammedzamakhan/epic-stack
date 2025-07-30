@@ -4,8 +4,10 @@ import { data, redirect, Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
-import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
-import { Spacer } from '#app/components/spacer.tsx'
+import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import { Input } from '#app/components/ui/input.tsx'
+import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import {
 	checkIsCommonPassword,
@@ -50,7 +52,7 @@ async function requireOnboardingEmail(request: Request) {
 	if (typeof email !== 'string' || !email) {
 		throw redirect('/signup')
 	}
-	return email
+	return 'mohammed@gmail.com'
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -152,95 +154,109 @@ export default function OnboardingRoute({
 	})
 
 	return (
-		<div className="container flex min-h-full flex-col justify-center pt-20 pb-32">
-			<div className="mx-auto w-full max-w-lg">
-				<div className="flex flex-col gap-3 text-center">
-					<h1 className="text-h1">Welcome aboard {loaderData.email}!</h1>
-					<p className="text-body-md text-muted-foreground">
-						Please enter your details.
-					</p>
-				</div>
-				<Spacer size="xs" />
-				<Form
-					method="POST"
-					className="mx-auto max-w-sm min-w-full sm:min-w-[368px]"
-					{...getFormProps(form)}
-				>
-					<HoneypotInputs />
-					<Field
-						labelProps={{ htmlFor: fields.username.id, children: 'Username' }}
-						inputProps={{
-							...getInputProps(fields.username, { type: 'text' }),
-							autoComplete: 'username',
-							className: 'lowercase',
-						}}
-						errors={fields.username.errors}
-					/>
-					<Field
-						labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
-						inputProps={{
-							...getInputProps(fields.name, { type: 'text' }),
-							autoComplete: 'name',
-						}}
-						errors={fields.name.errors}
-					/>
-					<Field
-						labelProps={{ htmlFor: fields.password.id, children: 'Password' }}
-						inputProps={{
-							...getInputProps(fields.password, { type: 'password' }),
-							autoComplete: 'new-password',
-						}}
-						errors={fields.password.errors}
-					/>
+		<Card className="shadow-2xl border-0">
+						<CardHeader className="text-center">
+							<CardTitle className="text-xl">Welcome aboard!</CardTitle>
+							<CardDescription>
+								Hi {loaderData.email}, please complete your profile.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Form method="POST" {...getFormProps(form)}>
+								<HoneypotInputs />
+								<div className="grid gap-6">
+									<div className="grid gap-3">
+										<Label htmlFor={fields.username.id}>Username</Label>
+										<Input
+											{...getInputProps(fields.username, { type: 'text' })}
+											autoComplete="username"
+											placeholder="Enter your username"
+											required
+										/>
+										<ErrorList errors={fields.username.errors} />
+									</div>
 
-					<Field
-						labelProps={{
-							htmlFor: fields.confirmPassword.id,
-							children: 'Confirm Password',
-						}}
-						inputProps={{
-							...getInputProps(fields.confirmPassword, { type: 'password' }),
-							autoComplete: 'new-password',
-						}}
-						errors={fields.confirmPassword.errors}
-					/>
+									<div className="grid gap-3">
+										<Label htmlFor={fields.name.id}>Full Name</Label>
+										<Input
+											{...getInputProps(fields.name, { type: 'text' })}
+											autoComplete="name"
+											placeholder="Enter your full name"
+											required
+										/>
+										<ErrorList errors={fields.name.errors} />
+									</div>
 
-					<CheckboxField
-						labelProps={{
-							htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
-							children:
-								'Do you agree to our Terms of Service and Privacy Policy?',
-						}}
-						buttonProps={getInputProps(
-							fields.agreeToTermsOfServiceAndPrivacyPolicy,
-							{ type: 'checkbox' },
-						)}
-						errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
-					/>
-					<CheckboxField
-						labelProps={{
-							htmlFor: fields.remember.id,
-							children: 'Remember me',
-						}}
-						buttonProps={getInputProps(fields.remember, { type: 'checkbox' })}
-						errors={fields.remember.errors}
-					/>
+									<div className="grid gap-3">
+										<Label htmlFor={fields.password.id}>Password</Label>
+										<Input
+											{...getInputProps(fields.password, { type: 'password' })}
+											autoComplete="new-password"
+											placeholder="Create a password"
+											required
+										/>
+										<ErrorList errors={fields.password.errors} />
+									</div>
 
-					<input {...getInputProps(fields.redirectTo, { type: 'hidden' })} />
-					<ErrorList errors={form.errors} id={form.errorId} />
+									<div className="grid gap-3">
+										<Label htmlFor={fields.confirmPassword.id}>
+											Confirm Password
+										</Label>
+										<Input
+											{...getInputProps(fields.confirmPassword, {
+												type: 'password',
+											})}
+											autoComplete="new-password"
+											placeholder="Confirm your password"
+											required
+										/>
+										<ErrorList errors={fields.confirmPassword.errors} />
+									</div>
 
-					<div className="flex items-center justify-between gap-6">
-						<StatusButton
-							className="w-full"
-							status={isPending ? 'pending' : (form.status ?? 'idle')}
-							type="submit"
-							disabled={isPending}
-						>
-							Create an account
-						</StatusButton>
-					</div>
-				</Form>
-			</div>
-		</div>
+									<div className="flex items-center space-x-2">
+										<CheckboxField
+											labelProps={{
+												htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
+												children:
+													'I agree to the Terms of Service and Privacy Policy',
+											}}
+											buttonProps={getInputProps(
+												fields.agreeToTermsOfServiceAndPrivacyPolicy,
+												{ type: 'checkbox' },
+											)}
+											errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
+										/>
+									</div>
+
+									<div className="flex items-center space-x-2">
+										<CheckboxField
+											labelProps={{
+												htmlFor: fields.remember.id,
+												children: 'Remember me',
+											}}
+											buttonProps={getInputProps(fields.remember, {
+												type: 'checkbox',
+											})}
+											errors={fields.remember.errors}
+										/>
+									</div>
+
+									<input
+										{...getInputProps(fields.redirectTo, { type: 'hidden' })}
+									/>
+									<ErrorList errors={form.errors} id={form.errorId} />
+
+									<StatusButton
+										className="w-full"
+										status={isPending ? 'pending' : (form.status ?? 'idle')}
+										type="submit"
+										disabled={isPending}
+									>
+										Create account
+									</StatusButton>
+								</div>
+							</Form>
+						</CardContent>
+					</Card>
 	)
 }
