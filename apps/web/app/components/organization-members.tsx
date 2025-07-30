@@ -46,44 +46,47 @@ export function OrganizationMembers({
 							key={member.userId}
 							className="flex items-center justify-between rounded-lg border p-3"
 						>
-							<div className="flex items-center gap-3">
-								<Avatar className="h-8 w-8">
-									<AvatarImage
-										src={
-											member.user.image
-												? `/resources/user-images/${member.user.image.id}`
-												: undefined
-										}
-										alt={
-											member.user.image?.altText ??
-											member.user.name ??
-											member.user.email
-										}
-									/>
-									<AvatarFallback>
-										{(member.user.name ?? member.user.email)
-											.charAt(0)
-											.toUpperCase()}
-									</AvatarFallback>
-								</Avatar>
+							<div className="flex justify-between items-center gap-3 w-full">
+								<div className="flex items-center gap-3">
+									<Avatar className="h-8 w-8">
+										<AvatarImage
+											src={
+												member.user.image
+													? `/resources/user-images/${member.user.image.id}`
+													: undefined
+											}
+											alt={
+												member.user.image?.altText ??
+												member.user.name ??
+												member.user.email
+											}
+										/>
+										<AvatarFallback>
+											{(member.user.name ?? member.user.email)
+												.charAt(0)
+												.toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
 
-								<div className="flex-1">
-									<div className="flex items-center gap-2">
-										<span className="text-sm font-medium">
-											{member.user.name || member.user.email}
-										</span>
-										{member.userId === currentUserId && (
-											<Badge variant="outline" className="text-xs">
-												You
-											</Badge>
+									<div className="flex-1">
+										<div className="flex items-center gap-2">
+											<span className="text-sm font-medium">
+												{member.user.name || member.user.email}
+											</span>
+											{member.userId === currentUserId && (
+												<Badge variant="outline" className="text-xs">
+													You
+												</Badge>
+											)}
+										</div>
+										{member.user.name && (
+											<p className="text-muted-foreground text-xs">
+												{member.user.email}
+											</p>
 										)}
 									</div>
-									{member.user.name && (
-										<p className="text-muted-foreground text-xs">
-											{member.user.email}
-										</p>
-									)}
 								</div>
+
 
 								<div className="flex items-center gap-2">
 									<Badge
