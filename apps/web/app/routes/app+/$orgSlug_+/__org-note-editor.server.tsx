@@ -172,7 +172,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			await markStepCompleted(userId, organization.id, 'create_first_note', {
 				completedVia: 'note_creation',
 				noteId: updatedNote.id,
-				noteTitle: title
+				noteTitle: title,
 			})
 		} catch (error) {
 			// Don't fail the note creation if onboarding tracking fails
@@ -182,12 +182,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		// Determine what changed
 		const titleChanged = beforeSnapshot.title !== title
 		const contentChanged = beforeSnapshot.content !== content
-		
+
 		await logNoteActivity({
 			noteId: updatedNote.id,
 			userId,
 			action: 'updated',
-			metadata: { 
+			metadata: {
 				titleChanged,
 				contentChanged,
 				hasImageUpdates: imageUpdates.length > 0 || newImages.length > 0,

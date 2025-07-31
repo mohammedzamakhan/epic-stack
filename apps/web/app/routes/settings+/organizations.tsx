@@ -45,7 +45,10 @@ export default function OrganizationsPage() {
 
 				<div className="mt-4 flex items-center gap-3">
 					<div className="relative flex-1">
-						<Icon name="magnifying-glass" className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+						<Icon
+							name="magnifying-glass"
+							className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
+						/>
 						<Input
 							type="text"
 							placeholder="Search..."
@@ -105,7 +108,10 @@ export default function OrganizationsPage() {
 					<div className="border-border rounded-lg border p-12">
 						<div className="flex flex-col items-center justify-center text-center">
 							<div className="bg-muted mb-4 rounded-lg p-3">
-								<Icon name="folder-open" className="text-muted-foreground h-8 w-8" />
+								<Icon
+									name="folder-open"
+									className="text-muted-foreground h-8 w-8"
+								/>
 							</div>
 							<div className="mb-2 text-lg font-medium">
 								No organization found

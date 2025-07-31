@@ -18,8 +18,6 @@ import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Separator } from '#app/components/ui/separator.tsx'
 
-
-
 type ShareNoteButtonProps = {
 	noteId: string
 	isPublic: boolean
@@ -53,7 +51,7 @@ export function ShareNoteButton({
 	// Local state for form changes (not submitted yet)
 	const [localIsPublic, setLocalIsPublic] = useState(isPublic)
 	const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(
-		noteAccess.map(access => access.user.id)
+		noteAccess.map((access) => access.user.id),
 	)
 	const [searchQuery, setSearchQuery] = useState('')
 
@@ -61,7 +59,7 @@ export function ShareNoteButton({
 	useEffect(() => {
 		if (open) {
 			setLocalIsPublic(isPublic)
-			setSelectedMemberIds(noteAccess.map(access => access.user.id))
+			setSelectedMemberIds(noteAccess.map((access) => access.user.id))
 			setSearchQuery('')
 		}
 	}, [open, isPublic, noteAccess])
@@ -74,30 +72,30 @@ export function ShareNoteButton({
 	}, [fetcher.data])
 
 	const toggleMemberSelection = (userId: string) => {
-		setSelectedMemberIds(prev =>
+		setSelectedMemberIds((prev) =>
 			prev.includes(userId)
-				? prev.filter(id => id !== userId)
-				: [...prev, userId]
+				? prev.filter((id) => id !== userId)
+				: [...prev, userId],
 		)
 	}
 
 	const removeMember = (userId: string) => {
-		setSelectedMemberIds(prev => prev.filter(id => id !== userId))
+		setSelectedMemberIds((prev) => prev.filter((id) => id !== userId))
 	}
 
 	const handleSubmit = () => {
 		const formData = new FormData()
 
 		// Handle member access changes
-		const currentAccessIds = new Set(noteAccess.map(access => access.user.id))
+		const currentAccessIds = new Set(noteAccess.map((access) => access.user.id))
 		const newAccessIds = new Set(selectedMemberIds)
 
 		// Members to add
-		const toAdd = selectedMemberIds.filter(id => !currentAccessIds.has(id))
+		const toAdd = selectedMemberIds.filter((id) => !currentAccessIds.has(id))
 		// Members to remove
 		const toRemove = noteAccess
-			.map(access => access.user.id)
-			.filter(id => !newAccessIds.has(id))
+			.map((access) => access.user.id)
+			.filter((id) => !newAccessIds.has(id))
 
 		// Check if we only need to update public/private status without member changes
 		const hasPublicStatusChange = localIsPublic !== isPublic
@@ -115,12 +113,12 @@ export function ShareNoteButton({
 			formData.append('isPublic', localIsPublic.toString())
 
 			// Add users to add
-			toAdd.forEach(userId => {
+			toAdd.forEach((userId) => {
 				formData.append('usersToAdd', userId)
 			})
 
 			// Add users to remove
-			toRemove.forEach(userId => {
+			toRemove.forEach((userId) => {
 				formData.append('usersToRemove', userId)
 			})
 		}
@@ -128,16 +126,19 @@ export function ShareNoteButton({
 		fetcher.submit(formData, { method: 'POST' })
 	}
 
-	const filteredMembers = organizationMembers.filter(member =>
-		(member.user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			member.user.username.toLowerCase().includes(searchQuery.toLowerCase())) &&
-		(!localIsPublic || !selectedMemberIds.includes(member.user.id))
+	const filteredMembers = organizationMembers.filter(
+		(member) =>
+			(member.user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				member.user.username
+					.toLowerCase()
+					.includes(searchQuery.toLowerCase())) &&
+			(!localIsPublic || !selectedMemberIds.includes(member.user.id)),
 	)
 
 	const getSelectedMemberDetails = () => {
 		return organizationMembers
-			.filter(member => selectedMemberIds.includes(member.user.id))
-			.map(member => member.user)
+			.filter((member) => selectedMemberIds.includes(member.user.id))
+			.map((member) => member.user)
 	}
 
 	return (
@@ -165,12 +166,13 @@ export function ShareNoteButton({
 					{/* Public/Private Toggle */}
 					<div className="flex items-center justify-between">
 						<div className="space-y-0.5">
-							<Label htmlFor="public-toggle" className="text-base">Public Access</Label>
-							<div className="text-sm text-muted-foreground">
+							<Label htmlFor="public-toggle" className="text-base">
+								Public Access
+							</Label>
+							<div className="text-muted-foreground text-sm">
 								{localIsPublic
-									? "All organization members can view this note"
-									: "Only selected members can access this note"
-								}
+									? 'All organization members can view this note'
+									: 'Only selected members can access this note'}
 							</div>
 						</div>
 						<Switch
@@ -189,7 +191,9 @@ export function ShareNoteButton({
 							{/* Selected Members */}
 							{selectedMemberIds.length > 0 && (
 								<div className="space-y-3">
-									<Label className="text-sm font-medium">Selected Members</Label>
+									<Label className="text-sm font-medium">
+										Selected Members
+									</Label>
 									<div className="flex flex-wrap gap-2">
 										{getSelectedMemberDetails().map((user) => (
 											<Badge
@@ -210,7 +214,7 @@ export function ShareNoteButton({
 												<Button
 													variant="ghost"
 													size="sm"
-													className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+													className="hover:bg-destructive hover:text-destructive-foreground h-4 w-4 p-0"
 													onClick={() => removeMember(user.id)}
 												>
 													<Icon name="cross-1" className="h-3 w-3" />
@@ -225,7 +229,10 @@ export function ShareNoteButton({
 							<div className="space-y-3">
 								<Label className="text-sm font-medium">Add Members</Label>
 								<div className="relative">
-									<Icon name="magnifying-glass" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+									<Icon
+										name="magnifying-glass"
+										className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
+									/>
 									<Input
 										placeholder="Search team members..."
 										value={searchQuery}
@@ -235,14 +242,15 @@ export function ShareNoteButton({
 								</div>
 
 								{/* Member List */}
-								<div className="max-h-48 overflow-y-auto space-y-2">
+								<div className="max-h-48 space-y-2 overflow-y-auto">
 									{filteredMembers.map((member) => (
 										<div
 											key={member.userId}
-											className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-colors ${selectedMemberIds.includes(member.user.id)
-												? "bg-primary/10 border-primary"
-												: "hover:bg-muted"
-												}`}
+											className={`flex cursor-pointer items-center justify-between rounded-lg border p-2 transition-colors ${
+												selectedMemberIds.includes(member.user.id)
+													? 'bg-primary/10 border-primary'
+													: 'hover:bg-muted'
+											}`}
 											onClick={() => toggleMemberSelection(member.user.id)}
 										>
 											<div className="flex items-center gap-3">
@@ -257,7 +265,7 @@ export function ShareNoteButton({
 													<div className="text-sm font-medium">
 														{member.user.name || member.user.username}
 													</div>
-													<div className="text-xs text-muted-foreground">
+													<div className="text-muted-foreground text-xs">
 														@{member.user.username}
 													</div>
 												</div>
@@ -289,9 +297,8 @@ export function ShareNoteButton({
 							disabled={fetcher.state !== 'idle'}
 						>
 							{localIsPublic
-								? "Make Public"
-								: `Share with ${selectedMemberIds.length} member${selectedMemberIds.length !== 1 ? 's' : ''}`
-							}
+								? 'Make Public'
+								: `Share with ${selectedMemberIds.length} member${selectedMemberIds.length !== 1 ? 's' : ''}`}
 						</StatusButton>
 					</div>
 				</div>

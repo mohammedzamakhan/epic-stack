@@ -23,9 +23,7 @@ export default defineConfig((config) => ({
 		},
 
 		assetsInlineLimit: (source: string) => {
-			if (
-				source.includes('/app/assets')
-			) {
+			if (source.includes('/app/assets')) {
 				return false
 			}
 		},

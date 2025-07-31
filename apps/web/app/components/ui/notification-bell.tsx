@@ -327,7 +327,10 @@ export default function NotificationBell() {
 												className="h-auto p-0 focus:outline-none"
 											>
 												{filterTitles[filter]}
-												<Icon name="chevron-down" className="ml-2 inline h-4 w-4" />
+												<Icon
+													name="chevron-down"
+													className="ml-2 inline h-4 w-4"
+												/>
 											</Button>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
@@ -394,7 +397,8 @@ export default function NotificationBell() {
 													className="mt-4 w-full"
 													onClick={handleLoadMore}
 												>
-													Load More <Icon name="chevron-down" className="ml-2 h-4 w-4" />
+													Load More{' '}
+													<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 												</Button>
 											)}
 										</div>

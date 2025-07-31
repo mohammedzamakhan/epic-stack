@@ -62,10 +62,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const formattedNotes = notes.map((note) => ({
 		id: note.id,
 		title: note.title,
-		content: note.content.substring(0, 100) + (note.content.length > 100 ? '...' : ''),
+		content:
+			note.content.substring(0, 100) + (note.content.length > 100 ? '...' : ''),
 		createdAt: note.createdAt.toISOString(),
 		updatedAt: note.updatedAt.toISOString(),
-		createdByName: note.createdBy?.name || note.createdBy?.username || 'Unknown',
+		createdByName:
+			note.createdBy?.name || note.createdBy?.username || 'Unknown',
 	}))
 
 	return Response.json({ notes: formattedNotes })

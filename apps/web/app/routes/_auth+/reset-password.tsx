@@ -4,7 +4,13 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { data, redirect, Form } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
@@ -99,57 +105,57 @@ export default function ResetPasswordPage({
 	})
 
 	return (
-		<Card className="shadow-2xl border-0">
-						<CardHeader className="text-center">
-							<CardTitle className="text-xl">Reset Password</CardTitle>
-							<CardDescription>
-								Hi, {loaderData.resetPasswordUsername}. Enter your new password below.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Form method="POST" {...getFormProps(form)}>
-								<div className="grid gap-6">
-									<div className="grid gap-3">
-										<Label htmlFor={fields.password.id}>New Password</Label>
-										<Input
-											{...getInputProps(fields.password, { type: 'password' })}
-											autoComplete="new-password"
-											autoFocus
-											placeholder="Enter your new password"
-											required
-										/>
-										<ErrorList errors={fields.password.errors} />
-									</div>
+		<Card className="border-0 shadow-2xl">
+			<CardHeader className="text-center">
+				<CardTitle className="text-xl">Reset Password</CardTitle>
+				<CardDescription>
+					Hi, {loaderData.resetPasswordUsername}. Enter your new password below.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form method="POST" {...getFormProps(form)}>
+					<div className="grid gap-6">
+						<div className="grid gap-3">
+							<Label htmlFor={fields.password.id}>New Password</Label>
+							<Input
+								{...getInputProps(fields.password, { type: 'password' })}
+								autoComplete="new-password"
+								autoFocus
+								placeholder="Enter your new password"
+								required
+							/>
+							<ErrorList errors={fields.password.errors} />
+						</div>
 
-									<div className="grid gap-3">
-										<Label htmlFor={fields.confirmPassword.id}>
-											Confirm Password
-										</Label>
-										<Input
-											{...getInputProps(fields.confirmPassword, {
-												type: 'password',
-											})}
-											autoComplete="new-password"
-											placeholder="Confirm your new password"
-											required
-										/>
-										<ErrorList errors={fields.confirmPassword.errors} />
-									</div>
+						<div className="grid gap-3">
+							<Label htmlFor={fields.confirmPassword.id}>
+								Confirm Password
+							</Label>
+							<Input
+								{...getInputProps(fields.confirmPassword, {
+									type: 'password',
+								})}
+								autoComplete="new-password"
+								placeholder="Confirm your new password"
+								required
+							/>
+							<ErrorList errors={fields.confirmPassword.errors} />
+						</div>
 
-									<ErrorList errors={form.errors} id={form.errorId} />
+						<ErrorList errors={form.errors} id={form.errorId} />
 
-									<StatusButton
-										className="w-full"
-										status={isPending ? 'pending' : (form.status ?? 'idle')}
-										type="submit"
-										disabled={isPending}
-									>
-										Reset password
-									</StatusButton>
-								</div>
-							</Form>
-						</CardContent>
-					</Card>
+						<StatusButton
+							className="w-full"
+							status={isPending ? 'pending' : (form.status ?? 'idle')}
+							type="submit"
+							disabled={isPending}
+						>
+							Reset password
+						</StatusButton>
+					</div>
+				</Form>
+			</CardContent>
+		</Card>
 	)
 }
 

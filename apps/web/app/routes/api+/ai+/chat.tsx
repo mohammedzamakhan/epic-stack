@@ -1,65 +1,68 @@
-import { google } from "@ai-sdk/google";
-import { frontendTools } from "@assistant-ui/react-ai-sdk";
-import { invariant } from "@epic-web/invariant";
-import { prisma } from "@repo/prisma";
-import { streamText } from "ai";
-import { type ActionFunctionArgs } from "react-router";
-import { z } from "zod";
-import { requireUserId } from "#app/utils/auth.server";
-import { markStepCompleted } from "#app/utils/onboarding";
+import { google } from '@ai-sdk/google'
+import { frontendTools } from '@assistant-ui/react-ai-sdk'
+import { invariant } from '@epic-web/invariant'
+import { prisma } from '@repo/prisma'
+import { streamText } from 'ai'
+import { type ActionFunctionArgs } from 'react-router'
+import { z } from 'zod'
+import { requireUserId } from '#app/utils/auth.server'
+import { markStepCompleted } from '#app/utils/onboarding'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  if (request.method !== "POST") {
-    throw new Response("Method not allowed", { status: 405 });
-  }
+	if (request.method !== 'POST') {
+		throw new Response('Method not allowed', { status: 405 })
+	}
 
-  const userId = await requireUserId(request);
-  const url = new URL(request.url);
-  const noteId = url.searchParams.get('noteId');
-  console.log('noteId', noteId)
-  if (!noteId) {
-    invariant(noteId, 'Note ID is required')
-  }
+	const userId = await requireUserId(request)
+	const url = new URL(request.url)
+	const noteId = url.searchParams.get('noteId')
+	console.log('noteId', noteId)
+	if (!noteId) {
+		invariant(noteId, 'Note ID is required')
+	}
 
-  const note = await prisma.organizationNote.findUnique({
-    where: { id: noteId },
-    select: {
-      content: true,
-      title: true,
-      organizationId: true,
-      comments: {
-        select: {
-          content: true,
-          user: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      }
-    },
-  });
+	const note = await prisma.organizationNote.findUnique({
+		where: { id: noteId },
+		select: {
+			content: true,
+			title: true,
+			organizationId: true,
+			comments: {
+				select: {
+					content: true,
+					user: {
+						select: {
+							name: true,
+						},
+					},
+				},
+			},
+		},
+	})
 
-  if (!note) {
-    invariant(note, 'Note not found');
-  }
+	if (!note) {
+		invariant(note, 'Note not found')
+	}
 
-  // Track AI chat usage for onboarding
-  try {
-    await markStepCompleted(userId, note.organizationId, 'try_ai_chat', {
-      completedVia: 'ai_chat_usage',
-      noteId
-    });
-  } catch (error) {
-    // Don't fail the AI request if onboarding tracking fails
-    console.error('Failed to track AI chat onboarding step:', error);
-  }
+	// Track AI chat usage for onboarding
+	try {
+		await markStepCompleted(userId, note.organizationId, 'try_ai_chat', {
+			completedVia: 'ai_chat_usage',
+			noteId,
+		})
+	} catch (error) {
+		// Don't fail the AI request if onboarding tracking fails
+		console.error('Failed to track AI chat onboarding step:', error)
+	}
 
-  const { messages, tools } = await request.json() as { messages: any; tools: any };
+	const { messages, tools } = (await request.json()) as {
+		messages: any
+		tools: any
+	}
 
-  const result = streamText({
-    model: google('models/gemini-2.5-flash'),
-    system: `\
+	const result = streamText({
+		model: google('models/gemini-2.5-flash'),
+		system: `\
     You are a friendly assistant that helps users with Epic SaaS, a powerful note-taking and organization management platform. You help users with their complete workflow
     from creating and organizing notes, managing organizations, collaborating with team members, and understanding platform features like authentication, 
     permissions, integrations, and content management.
@@ -87,21 +90,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     Content: ${note.content}
     Comments: ${note.comments.map((comment: any) => `${comment.user.name}: ${comment.content}`).join('\n')}
     `,
-    messages,
-    toolCallStreaming: true,
-    tools: {
-      ...frontendTools(tools),
-      weather: {
-        description: "Get weather information",
-        parameters: z.object({
-          location: z.string().describe("Location to get weather for"),
-        }),
-        execute: async ({ location }) => {
-          return `The weather in ${location} is sunny.`;
-        },
-      },
-    },
-  });
+		messages,
+		toolCallStreaming: true,
+		tools: {
+			...frontendTools(tools),
+			weather: {
+				description: 'Get weather information',
+				parameters: z.object({
+					location: z.string().describe('Location to get weather for'),
+				}),
+				execute: async ({ location }) => {
+					return `The weather in ${location} is sunny.`
+				},
+			},
+		},
+	})
 
-  return result.toDataStreamResponse();
-};
+	return result.toDataStreamResponse()
+}

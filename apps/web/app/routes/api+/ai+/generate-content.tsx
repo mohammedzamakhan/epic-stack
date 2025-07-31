@@ -29,7 +29,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		console.error('AI generation error:', error)
 		return data(
 			{ error: 'Failed to generate content. Please try again.' },
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }

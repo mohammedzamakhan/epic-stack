@@ -6,7 +6,13 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
@@ -51,7 +57,10 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 		description: "We've sent you a code to verify your email address.",
 	}
 
-	const headings: Record<VerificationTypes, { title: string; description: string }> = {
+	const headings: Record<
+		VerificationTypes,
+		{ title: string; description: string }
+	> = {
 		onboarding: checkEmail,
 		'reset-password': checkEmail,
 		'change-email': checkEmail,
@@ -76,59 +85,64 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 		},
 	})
 
-	const currentHeading = type ? headings[type] : { title: 'Invalid Verification Type', description: 'Please check your verification link.' }
+	const currentHeading = type
+		? headings[type]
+		: {
+				title: 'Invalid Verification Type',
+				description: 'Please check your verification link.',
+			}
 
 	return (
-		<Card className="shadow-2xl border-0">
-						<CardHeader className="text-center">
-							<CardTitle className="text-xl">{currentHeading.title}</CardTitle>
-							<CardDescription>{currentHeading.description}</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Form method="POST" {...getFormProps(form)}>
-								<HoneypotInputs />
-								<div className="grid gap-6">
-									<div className="flex items-center justify-center">
-										<OTPField
-											labelProps={{
-												htmlFor: fields[codeQueryParam].id,
-												children: 'Verification Code',
-											}}
-											inputProps={{
-												...getInputProps(fields[codeQueryParam], { type: 'text' }),
-												autoComplete: 'one-time-code',
-												autoFocus: true,
-											}}
-											errors={fields[codeQueryParam].errors}
-										/>
-									</div>
+		<Card className="border-0 shadow-2xl">
+			<CardHeader className="text-center">
+				<CardTitle className="text-xl">{currentHeading.title}</CardTitle>
+				<CardDescription>{currentHeading.description}</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form method="POST" {...getFormProps(form)}>
+					<HoneypotInputs />
+					<div className="grid gap-6">
+						<div className="flex items-center justify-center">
+							<OTPField
+								labelProps={{
+									htmlFor: fields[codeQueryParam].id,
+									children: 'Verification Code',
+								}}
+								inputProps={{
+									...getInputProps(fields[codeQueryParam], { type: 'text' }),
+									autoComplete: 'one-time-code',
+									autoFocus: true,
+								}}
+								errors={fields[codeQueryParam].errors}
+							/>
+						</div>
 
-									<input
-										{...getInputProps(fields[typeQueryParam], { type: 'hidden' })}
-									/>
-									<input
-										{...getInputProps(fields[targetQueryParam], { type: 'hidden' })}
-									/>
-									<input
-										{...getInputProps(fields[redirectToQueryParam], {
-											type: 'hidden',
-										})}
-									/>
+						<input
+							{...getInputProps(fields[typeQueryParam], { type: 'hidden' })}
+						/>
+						<input
+							{...getInputProps(fields[targetQueryParam], { type: 'hidden' })}
+						/>
+						<input
+							{...getInputProps(fields[redirectToQueryParam], {
+								type: 'hidden',
+							})}
+						/>
 
-									<ErrorList errors={form.errors} id={form.errorId} />
+						<ErrorList errors={form.errors} id={form.errorId} />
 
-									<StatusButton
-										className="w-full"
-										status={isPending ? 'pending' : (form.status ?? 'idle')}
-										type="submit"
-										disabled={isPending}
-									>
-										Verify
-									</StatusButton>
-								</div>
-							</Form>
-						</CardContent>
-					</Card>
+						<StatusButton
+							className="w-full"
+							status={isPending ? 'pending' : (form.status ?? 'idle')}
+							type="submit"
+							disabled={isPending}
+						>
+							Verify
+						</StatusButton>
+					</div>
+				</Form>
+			</CardContent>
+		</Card>
 	)
 }
 

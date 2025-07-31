@@ -35,16 +35,28 @@ export function EmptyState({
 				{icons.length === 3 ? (
 					<>
 						<div className="bg-background ring-border relative top-1.5 left-2.5 grid size-12 -rotate-6 place-items-center rounded-xl shadow-lg ring-1 transition duration-500 group-hover:-translate-x-5 group-hover:-translate-y-0.5 group-hover:-rotate-12 group-hover:duration-200">
-							{icons[0] &&
-								<Icon name={icons[0]} className='w-6 h-6 text-muted-foreground' />}
+							{icons[0] && (
+								<Icon
+									name={icons[0]}
+									className="text-muted-foreground h-6 w-6"
+								/>
+							)}
 						</div>
 						<div className="bg-background ring-border relative z-10 grid size-12 place-items-center rounded-xl shadow-lg ring-1 transition duration-500 group-hover:-translate-y-0.5 group-hover:duration-200">
-							{icons[1] &&
-								<Icon name={icons[1]} className='w-6 h-6 text-muted-foreground' />}
+							{icons[1] && (
+								<Icon
+									name={icons[1]}
+									className="text-muted-foreground h-6 w-6"
+								/>
+							)}
 						</div>
 						<div className="bg-background ring-border relative top-1.5 right-2.5 grid size-12 rotate-6 place-items-center rounded-xl shadow-lg ring-1 transition duration-500 group-hover:translate-x-5 group-hover:-translate-y-0.5 group-hover:rotate-12 group-hover:duration-200">
-							{icons[2] &&
-								<Icon name={icons[2]} className='w-6 h-6 text-muted-foreground' />}
+							{icons[2] && (
+								<Icon
+									name={icons[2]}
+									className="text-muted-foreground h-6 w-6"
+								/>
+							)}
 						</div>
 					</>
 				) : (

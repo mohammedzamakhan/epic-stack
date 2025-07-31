@@ -48,7 +48,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			Mention.configure({
 				suggestion: getSuggestions(users),
 				HTMLAttributes: {
-					class: 'mention bg-primary/10 text-primary px-1 py-0.5 rounded text-sm font-medium',
+					class:
+						'mention bg-primary/10 text-primary px-1 py-0.5 rounded text-sm font-medium',
 				},
 			}),
 			Emoji.configure({
@@ -60,7 +61,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		content: initialValue,
 		editorProps: {
 			attributes: {
-				class: 'text-sm min-h-[40px] focus:outline-none max-w-full prose prose-sm max-w-none',
+				class:
+					'text-sm min-h-[40px] focus:outline-none max-w-full prose prose-sm max-w-none',
 			},
 		},
 		onUpdate: ({ editor }: { editor: Editor }) => {
@@ -84,11 +86,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	}
 
 	const handleImagesSelected = (files: File[]) => {
-		setSelectedImages(prev => [...prev, ...files].slice(0, 3)) // Max 3 images
+		setSelectedImages((prev) => [...prev, ...files].slice(0, 3)) // Max 3 images
 	}
 
 	const handleRemoveImage = (index: number) => {
-		setSelectedImages(prev => prev.filter((_, i) => i !== index))
+		setSelectedImages((prev) => prev.filter((_, i) => i !== index))
 	}
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -107,7 +109,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	return (
 		<div
 			className={cn(
-				'w-full rounded-lg border bg-card text-card-foreground shadow-xs focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all',
+				'bg-card text-card-foreground focus-within:ring-ring w-full rounded-lg border shadow-xs transition-all focus-within:ring-2 focus-within:ring-offset-2',
 				className,
 			)}
 			onKeyDown={handleKeyDown}
@@ -127,7 +129,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 					</div>
 				)}
 			</div>
-			<div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
+			<div className="bg-muted/30 flex items-center justify-between border-t px-4 py-2">
 				<div className="flex items-center">
 					<CommentImageUpload
 						onImagesSelected={handleImagesSelected}
@@ -138,8 +140,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
 						onEmojiSelect={handleEmojiSelect}
 						disabled={disabled}
 					/>
-					<div className="text-xs text-muted-foreground ml-2">
-						{reply ? 'Replying to comment' : 'Use @ to mention someone • Cmd+Enter to submit'}
+					<div className="text-muted-foreground ml-2 text-xs">
+						{reply
+							? 'Replying to comment'
+							: 'Use @ to mention someone • Cmd+Enter to submit'}
 					</div>
 				</div>
 				<div className="flex gap-2">
@@ -156,7 +160,9 @@ const CommentInput: React.FC<CommentInputProps> = ({
 					)}
 					<Button
 						size="sm"
-						disabled={(!content.trim() && selectedImages.length === 0) || disabled}
+						disabled={
+							(!content.trim() && selectedImages.length === 0) || disabled
+						}
 						onClick={handleSubmit}
 					>
 						{reply ? 'Reply' : 'Comment'}

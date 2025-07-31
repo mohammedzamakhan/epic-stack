@@ -57,7 +57,7 @@ export async function createOrganizationInvitation({
 			await markStepCompleted(inviterId, organizationId, 'invite_members', {
 				completedVia: 'member_invitation',
 				invitedEmail: email,
-				role
+				role,
 			})
 		} catch (error) {
 			// Don't fail the invitation if onboarding tracking fails

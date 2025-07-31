@@ -8,7 +8,13 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
@@ -177,7 +183,7 @@ export default function SignupRoute({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<Card className="shadow-2xl border-0">
+		<Card className="border-0 shadow-2xl">
 			<CardHeader className="text-center">
 				<CardTitle className="text-xl">Create an account</CardTitle>
 				<CardDescription>
@@ -201,8 +207,8 @@ export default function SignupRoute({ actionData }: Route.ComponentProps) {
 						</div>
 
 						{/* Divider */}
-						<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-							<span className="relative z-10 bg-card px-2 text-muted-foreground">
+						<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+							<span className="bg-card text-muted-foreground relative z-10 px-2">
 								Or continue with
 							</span>
 						</div>
@@ -233,7 +239,7 @@ export default function SignupRoute({ actionData }: Route.ComponentProps) {
 							</StatusButton>
 						</div>
 
-						<div className="bg-muted backdrop-blur-sm rounded-lg p-4 text-center text-sm -m-6 mt-0">
+						<div className="bg-muted -m-6 mt-0 rounded-lg p-4 text-center text-sm backdrop-blur-sm">
 							Already have an account?{' '}
 							<Link
 								to={

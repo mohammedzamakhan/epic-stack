@@ -5,7 +5,13 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
 import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
@@ -154,109 +160,107 @@ export default function OnboardingRoute({
 	})
 
 	return (
-		<Card className="shadow-2xl border-0">
-						<CardHeader className="text-center">
-							<CardTitle className="text-xl">Welcome aboard!</CardTitle>
-							<CardDescription>
-								Hi {loaderData.email}, please complete your profile.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Form method="POST" {...getFormProps(form)}>
-								<HoneypotInputs />
-								<div className="grid gap-6">
-									<div className="grid gap-3">
-										<Label htmlFor={fields.username.id}>Username</Label>
-										<Input
-											{...getInputProps(fields.username, { type: 'text' })}
-											autoComplete="username"
-											placeholder="Enter your username"
-											required
-										/>
-										<ErrorList errors={fields.username.errors} />
-									</div>
+		<Card className="border-0 shadow-2xl">
+			<CardHeader className="text-center">
+				<CardTitle className="text-xl">Welcome aboard!</CardTitle>
+				<CardDescription>
+					Hi {loaderData.email}, please complete your profile.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form method="POST" {...getFormProps(form)}>
+					<HoneypotInputs />
+					<div className="grid gap-6">
+						<div className="grid gap-3">
+							<Label htmlFor={fields.username.id}>Username</Label>
+							<Input
+								{...getInputProps(fields.username, { type: 'text' })}
+								autoComplete="username"
+								placeholder="Enter your username"
+								required
+							/>
+							<ErrorList errors={fields.username.errors} />
+						</div>
 
-									<div className="grid gap-3">
-										<Label htmlFor={fields.name.id}>Full Name</Label>
-										<Input
-											{...getInputProps(fields.name, { type: 'text' })}
-											autoComplete="name"
-											placeholder="Enter your full name"
-											required
-										/>
-										<ErrorList errors={fields.name.errors} />
-									</div>
+						<div className="grid gap-3">
+							<Label htmlFor={fields.name.id}>Full Name</Label>
+							<Input
+								{...getInputProps(fields.name, { type: 'text' })}
+								autoComplete="name"
+								placeholder="Enter your full name"
+								required
+							/>
+							<ErrorList errors={fields.name.errors} />
+						</div>
 
-									<div className="grid gap-3">
-										<Label htmlFor={fields.password.id}>Password</Label>
-										<Input
-											{...getInputProps(fields.password, { type: 'password' })}
-											autoComplete="new-password"
-											placeholder="Create a password"
-											required
-										/>
-										<ErrorList errors={fields.password.errors} />
-									</div>
+						<div className="grid gap-3">
+							<Label htmlFor={fields.password.id}>Password</Label>
+							<Input
+								{...getInputProps(fields.password, { type: 'password' })}
+								autoComplete="new-password"
+								placeholder="Create a password"
+								required
+							/>
+							<ErrorList errors={fields.password.errors} />
+						</div>
 
-									<div className="grid gap-3">
-										<Label htmlFor={fields.confirmPassword.id}>
-											Confirm Password
-										</Label>
-										<Input
-											{...getInputProps(fields.confirmPassword, {
-												type: 'password',
-											})}
-											autoComplete="new-password"
-											placeholder="Confirm your password"
-											required
-										/>
-										<ErrorList errors={fields.confirmPassword.errors} />
-									</div>
+						<div className="grid gap-3">
+							<Label htmlFor={fields.confirmPassword.id}>
+								Confirm Password
+							</Label>
+							<Input
+								{...getInputProps(fields.confirmPassword, {
+									type: 'password',
+								})}
+								autoComplete="new-password"
+								placeholder="Confirm your password"
+								required
+							/>
+							<ErrorList errors={fields.confirmPassword.errors} />
+						</div>
 
-									<div className="flex items-center space-x-2">
-										<CheckboxField
-											labelProps={{
-												htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
-												children:
-													'I agree to the Terms of Service and Privacy Policy',
-											}}
-											buttonProps={getInputProps(
-												fields.agreeToTermsOfServiceAndPrivacyPolicy,
-												{ type: 'checkbox' },
-											)}
-											errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
-										/>
-									</div>
+						<div className="flex items-center space-x-2">
+							<CheckboxField
+								labelProps={{
+									htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
+									children:
+										'I agree to the Terms of Service and Privacy Policy',
+								}}
+								buttonProps={getInputProps(
+									fields.agreeToTermsOfServiceAndPrivacyPolicy,
+									{ type: 'checkbox' },
+								)}
+								errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
+							/>
+						</div>
 
-									<div className="flex items-center space-x-2">
-										<CheckboxField
-											labelProps={{
-												htmlFor: fields.remember.id,
-												children: 'Remember me',
-											}}
-											buttonProps={getInputProps(fields.remember, {
-												type: 'checkbox',
-											})}
-											errors={fields.remember.errors}
-										/>
-									</div>
+						<div className="flex items-center space-x-2">
+							<CheckboxField
+								labelProps={{
+									htmlFor: fields.remember.id,
+									children: 'Remember me',
+								}}
+								buttonProps={getInputProps(fields.remember, {
+									type: 'checkbox',
+								})}
+								errors={fields.remember.errors}
+							/>
+						</div>
 
-									<input
-										{...getInputProps(fields.redirectTo, { type: 'hidden' })}
-									/>
-									<ErrorList errors={form.errors} id={form.errorId} />
+						<input {...getInputProps(fields.redirectTo, { type: 'hidden' })} />
+						<ErrorList errors={form.errors} id={form.errorId} />
 
-									<StatusButton
-										className="w-full"
-										status={isPending ? 'pending' : (form.status ?? 'idle')}
-										type="submit"
-										disabled={isPending}
-									>
-										Create account
-									</StatusButton>
-								</div>
-							</Form>
-						</CardContent>
-					</Card>
+						<StatusButton
+							className="w-full"
+							status={isPending ? 'pending' : (form.status ?? 'idle')}
+							type="submit"
+							disabled={isPending}
+						>
+							Create account
+						</StatusButton>
+					</div>
+				</Form>
+			</CardContent>
+		</Card>
 	)
 }

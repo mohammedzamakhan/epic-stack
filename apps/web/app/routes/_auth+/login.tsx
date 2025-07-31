@@ -10,7 +10,13 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
@@ -148,7 +154,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<Card className="shadow-2xl border-0">
+		<Card className="border-0 shadow-2xl">
 			<CardHeader className="text-center">
 				<CardTitle className="text-xl">Welcome back</CardTitle>
 				<CardDescription>
@@ -156,7 +162,6 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-
 				<div className="grid gap-6">
 					{/* Social Login Buttons */}
 					<div className="flex flex-col gap-4">
@@ -177,8 +182,8 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 					/>
 
 					{/* Divider */}
-					<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-						<span className="relative z-10 bg-card px-2 text-muted-foreground">
+					<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+						<span className="bg-card text-muted-foreground relative z-10 px-2">
 							Or continue with
 						</span>
 					</div>
@@ -246,10 +251,9 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 								Login
 							</StatusButton>
 						</div>
-
 					</Form>
 
-					<div className="bg-muted backdrop-blur-sm rounded-lg p-4 text-center text-sm -m-6 mt-0">
+					<div className="bg-muted -m-6 mt-0 rounded-lg p-4 text-center text-sm backdrop-blur-sm">
 						Don&apos;t have an account?{' '}
 						<Link
 							to={

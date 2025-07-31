@@ -41,8 +41,6 @@ export function CommentsSection({
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const revalidator = useRevalidator()
 
-
-
 	const handleAddComment = async (content: string, images?: File[]) => {
 		setIsSubmitting(true)
 
@@ -50,7 +48,7 @@ export function CommentsSection({
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
 		formData.append('content', content)
-		
+
 		// Add images to form data
 		if (images && images.length > 0) {
 			images.forEach((image, index) => {
@@ -79,13 +77,17 @@ export function CommentsSection({
 		}
 	}
 
-	const handleReply = async (parentId: string, content: string, images?: File[]) => {
+	const handleReply = async (
+		parentId: string,
+		content: string,
+		images?: File[],
+	) => {
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
 		formData.append('content', content)
 		formData.append('parentId', parentId)
-		
+
 		// Add images to form data
 		if (images && images.length > 0) {
 			images.forEach((image, index) => {
@@ -141,13 +143,11 @@ export function CommentsSection({
 	return (
 		<div>
 			{/* Section Header */}
-			<div className="flex items-center gap-2 mb-6">
-				<Icon name="chat-bubble" className="h-5 w-5 text-muted-foreground" />
-				<h2 className="text-lg font-semibold">
-					Comments
-				</h2>
+			<div className="mb-6 flex items-center gap-2">
+				<Icon name="chat-bubble" className="text-muted-foreground h-5 w-5" />
+				<h2 className="text-lg font-semibold">Comments</h2>
 				{comments.length > 0 && (
-					<span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+					<span className="text-muted-foreground bg-muted rounded-full px-2 py-0.5 text-sm">
 						{comments.length}
 					</span>
 				)}
@@ -179,12 +179,19 @@ export function CommentsSection({
 						/>
 					))
 				) : (
-					<div className="text-center py-12">
-						<div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-							<Icon name="chat-bubble" className="h-6 w-6 text-muted-foreground" />
+					<div className="py-12 text-center">
+						<div className="bg-muted mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+							<Icon
+								name="chat-bubble"
+								className="text-muted-foreground h-6 w-6"
+							/>
 						</div>
-						<h3 className="text-sm font-medium text-foreground mb-1">No comments yet</h3>
-						<p className="text-sm text-muted-foreground">Start the conversation by adding the first comment.</p>
+						<h3 className="text-foreground mb-1 text-sm font-medium">
+							No comments yet
+						</h3>
+						<p className="text-muted-foreground text-sm">
+							Start the conversation by adding the first comment.
+						</p>
 					</div>
 				)}
 			</div>

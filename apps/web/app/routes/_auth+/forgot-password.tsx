@@ -8,7 +8,13 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
@@ -169,7 +175,7 @@ export default function ForgotPasswordRoute() {
 	})
 
 	return (
-		<Card className="shadow-2xl border-0">
+		<Card className="border-0 shadow-2xl">
 			<CardHeader className="text-center">
 				<CardTitle className="text-xl">Forgot Password</CardTitle>
 				<CardDescription>
@@ -208,7 +214,7 @@ export default function ForgotPasswordRoute() {
 							Send reset instructions
 						</StatusButton>
 
-						<div className="bg-muted backdrop-blur-sm rounded-lg p-4 text-center text-sm -m-6 mt-0">
+						<div className="bg-muted -m-6 mt-0 rounded-lg p-4 text-center text-sm backdrop-blur-sm">
 							Remember your password?{' '}
 							<Link
 								to="/login"

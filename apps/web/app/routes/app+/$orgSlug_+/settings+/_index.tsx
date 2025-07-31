@@ -166,11 +166,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			try {
 				await markStepCompleted(userId, organization.id, 'complete_profile', {
 					completedVia: 'organization_settings_update',
-					updatedFields: { name, slug }
+					updatedFields: { name, slug },
 				})
 			} catch (error) {
 				// Don't fail the settings update if onboarding tracking fails
-				console.error('Failed to track profile completion onboarding step:', error)
+				console.error(
+					'Failed to track profile completion onboarding step:',
+					error,
+				)
 			}
 
 			return redirectWithToast(`/app/${slug}/settings`, {

@@ -240,7 +240,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
-	
+
 	return (
 		<HoneypotProvider {...data.honeyProps}>
 			<OpenImgContextProvider

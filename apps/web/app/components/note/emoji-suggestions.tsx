@@ -7,103 +7,111 @@ import type { SuggestionOptions } from '@tiptap/suggestion'
 import { EmojiList } from './emoji-list'
 
 interface SuggestionItemsProps {
-    editor: Editor
-    query: string
+	editor: Editor
+	query: string
 }
 
-export default function getEmojiSuggestion(): Omit<SuggestionOptions<any, any>, "editor"> {
-    return {
-        items: ({ editor, query }: SuggestionItemsProps): EmojiItem[] => {
-            return (editor.storage.emoji.emojis as EmojiItem[])
-                .filter(({ shortcodes, tags }: EmojiItem) => {
-                    return (
-                        shortcodes?.find((shortcode: string) => shortcode.startsWith(query.toLowerCase())) ||
-                        tags?.find((tag: string) => tag.startsWith(query.toLowerCase()))
-                    )
-                })
-                .slice(0, 10)
-        },
+export default function getEmojiSuggestion(): Omit<
+	SuggestionOptions<any, any>,
+	'editor'
+> {
+	return {
+		items: ({ editor, query }: SuggestionItemsProps): EmojiItem[] => {
+			return (editor.storage.emoji.emojis as EmojiItem[])
+				.filter(({ shortcodes, tags }: EmojiItem) => {
+					return (
+						shortcodes?.find((shortcode: string) =>
+							shortcode.startsWith(query.toLowerCase()),
+						) ||
+						tags?.find((tag: string) => tag.startsWith(query.toLowerCase()))
+					)
+				})
+				.slice(0, 10)
+		},
 
-        allowSpaces: false,
+		allowSpaces: false,
 
-        render: () => {
-            let component: ReactRenderer<any, any> | null = null
+		render: () => {
+			let component: ReactRenderer<any, any> | null = null
 
-            function repositionComponent(clientRect: DOMRect): void {
-                if (!component || !component.element) {
-                    return
-                }
+			function repositionComponent(clientRect: DOMRect): void {
+				if (!component || !component.element) {
+					return
+				}
 
-                const virtualElement = {
-                    getBoundingClientRect(): DOMRect {
-                        return clientRect
-                    },
-                }
+				const virtualElement = {
+					getBoundingClientRect(): DOMRect {
+						return clientRect
+					},
+				}
 
-                computePosition(virtualElement, component.element as HTMLElement, {
-                    placement: 'bottom-start',
-                    strategy: 'fixed',
-                }).then(pos => {
-                    if (component?.element) {
-                        const element = component.element as HTMLElement
-                        Object.assign(element.style, {
-                            left: `${pos.x}px`,
-                            top: `${pos.y}px`,
-                            position: 'fixed',
-                            zIndex: '9999',
-                        })
-                    }
-                })
-            }
+				computePosition(virtualElement, component.element as HTMLElement, {
+					placement: 'bottom-start',
+					strategy: 'fixed',
+				}).then((pos) => {
+					if (component?.element) {
+						const element = component.element as HTMLElement
+						Object.assign(element.style, {
+							left: `${pos.x}px`,
+							top: `${pos.y}px`,
+							position: 'fixed',
+							zIndex: '9999',
+						})
+					}
+				})
+			}
 
-            return {
-                onStart: (props: any): void => {
-                    if (!props.clientRect) {
-                        return
-                    }
+			return {
+				onStart: (props: any): void => {
+					if (!props.clientRect) {
+						return
+					}
 
-                    component = new ReactRenderer(EmojiList, {
-                        props,
-                        editor: props.editor,
-                    })
+					component = new ReactRenderer(EmojiList, {
+						props,
+						editor: props.editor,
+					})
 
-                    document.body.appendChild(component.element)
-                    repositionComponent(props.clientRect())
-                },
+					document.body.appendChild(component.element)
+					repositionComponent(props.clientRect())
+				},
 
-                onUpdate(props: any): void {
-                    if (!component) return
+				onUpdate(props: any): void {
+					if (!component) return
 
-                    component.updateProps(props)
-                    
-                    if (!props.clientRect) {
-                        return
-                    }
+					component.updateProps(props)
 
-                    repositionComponent(props.clientRect())
-                },
+					if (!props.clientRect) {
+						return
+					}
 
-                onKeyDown(props: any): boolean {
-                    if (!component) return false
+					repositionComponent(props.clientRect())
+				},
 
-                    if (props.event.key === 'Escape') {
-                        if (component.element && document.body.contains(component.element)) {
-                            document.body.removeChild(component.element)
-                        }
-                        component.destroy()
-                        return true
-                    }
+				onKeyDown(props: any): boolean {
+					if (!component) return false
 
-                    return (component.ref as any)?.onKeyDown?.(props) ?? false
-                },
+					if (props.event.key === 'Escape') {
+						if (
+							component.element &&
+							document.body.contains(component.element)
+						) {
+							document.body.removeChild(component.element)
+						}
+						component.destroy()
+						return true
+					}
 
-                onExit(): void {
-                    if (component?.element && document.body.contains(component.element)) {
-                        document.body.removeChild(component.element)
-                    }
-                    component?.destroy()
-                },
-            }
-        },
-    }
+					return (component.ref as any)?.onKeyDown?.(props) ?? false
+				},
+
+				onExit(): void {
+					if (component?.element && document.body.contains(component.element)) {
+						document.body.removeChild(component.element)
+					}
+					component?.destroy()
+				},
+			}
+		},
+	}
 }

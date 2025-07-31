@@ -96,7 +96,7 @@ export function CommentImageUpload({
 					'absolute inset-0 rounded border-2 border-dashed transition-all',
 					isDragging
 						? 'border-primary bg-primary/5 opacity-100'
-						: 'border-transparent opacity-0 pointer-events-none',
+						: 'pointer-events-none border-transparent opacity-0',
 				)}
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}

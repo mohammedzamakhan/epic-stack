@@ -17,30 +17,34 @@ import {
 import { type loader as rootLoader } from '#app/root.tsx'
 import { type OnboardingProgressData } from '#app/utils/onboarding'
 
-export function AppSidebar({ 
+export function AppSidebar({
 	onboardingProgress,
-	...props 
-}: React.ComponentProps<typeof Sidebar> & { onboardingProgress?: OnboardingProgressData | null }) {
+	...props
+}: React.ComponentProps<typeof Sidebar> & {
+	onboardingProgress?: OnboardingProgressData | null
+}) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
 
-	const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug
-	const organizationId = rootData?.userOrganizations?.currentOrganization?.organization.id
+	const orgSlug =
+		rootData?.userOrganizations?.currentOrganization?.organization.slug
+	const organizationId =
+		rootData?.userOrganizations?.currentOrganization?.organization.id
 
 	const data = {
 		user: rootData?.user
 			? {
-				name: rootData.user.name || rootData.user.username || 'User',
-				email: rootData.user.username, // Using username as email since email property is not available
-				avatar: rootData.user.image
-					? `/resources/images?objectKey=${rootData.user.image.objectKey}`
-					: '/avatars/user.jpg',
-			}
+					name: rootData.user.name || rootData.user.username || 'User',
+					email: rootData.user.username, // Using username as email since email property is not available
+					avatar: rootData.user.image
+						? `/resources/images?objectKey=${rootData.user.image.objectKey}`
+						: '/avatars/user.jpg',
+				}
 			: {
-				name: 'Guest',
-				email: '',
-				avatar: '/avatars/user.jpg',
-			},
+					name: 'Guest',
+					email: '',
+					avatar: '/avatars/user.jpg',
+				},
 		navMain: [
 			{
 				title: 'Dashboard',
@@ -105,20 +109,20 @@ export function AppSidebar({
 			</SidebarHeader>
 			<SidebarContent>
 				{/* Onboarding Checklist in Sidebar */}
-				{onboardingProgress && 
-				 !onboardingProgress.isCompleted && 
-				 onboardingProgress.isVisible && 
-				 orgSlug && 
-				 organizationId && (
-					<Link to={`/app/${orgSlug}`}>
-						<OnboardingChecklist 
-							progress={onboardingProgress} 
-							orgSlug={orgSlug}
-							organizationId={organizationId}
-							variant="sidebar"
-						/>
-					</Link>
-				)}
+				{onboardingProgress &&
+					!onboardingProgress.isCompleted &&
+					onboardingProgress.isVisible &&
+					orgSlug &&
+					organizationId && (
+						<Link to={`/app/${orgSlug}`}>
+							<OnboardingChecklist
+								progress={onboardingProgress}
+								orgSlug={orgSlug}
+								organizationId={organizationId}
+								variant="sidebar"
+							/>
+						</Link>
+					)}
 				<NavMain items={data.navMain} />
 			</SidebarContent>
 			<SidebarFooter>

@@ -44,8 +44,6 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 		.join('')
 		.toUpperCase()
 
-
-
 	const handleCardClick = () => {
 		void navigate(`${note.id}`)
 	}
@@ -63,20 +61,20 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 
 	return (
 		<Card
-			className="w-full cursor-pointer group overflow-hidden py-0 hover:border-primary border-2 border-muted"
+			className="group hover:border-primary border-muted w-full cursor-pointer overflow-hidden border-2 py-0"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			onClick={handleCardClick}
 		>
 			<CardContent className="p-0">
 				{/* Image or Header Section */}
-				<div className="relative aspect-video bg-blue-50 overflow-hidden">
+				<div className="relative aspect-video overflow-hidden bg-blue-50">
 					{firstImage ? (
 						<>
 							<Img
 								src={getNoteImgSrc(firstImage.objectKey)}
 								alt={firstImage.altText || 'Note image'}
-								className="w-full h-full object-cover"
+								className="h-full w-full object-cover"
 								width={400}
 								height={225}
 							/>
@@ -84,32 +82,33 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 							<div className="absolute inset-0" />
 						</>
 					) : (
-						<div className="flex items-center justify-center h-full">
-							<div className="bg-white/80 rounded-full p-4 shadow-sm">
-								<Icon name='file-text' className="w-8 h-8 text-blue-600" />
+						<div className="flex h-full items-center justify-center">
+							<div className="rounded-full bg-white/80 p-4 shadow-sm">
+								<Icon name="file-text" className="h-8 w-8 text-blue-600" />
 							</div>
 						</div>
 					)}
 
 					{/* Copy Button - Top Right */}
 					<div
-						className={`absolute top-3 right-3 transition-all duration-300 ${hovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-							}`}
+						className={`absolute top-3 right-3 transition-all duration-300 ${
+							hovered ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
+						}`}
 					>
 						<Button
 							size="sm"
 							variant="outline"
 							onClick={handleCopyLink}
-							className="bg-white/90 backdrop-blur-sm border-white/50 text-gray-700 text-xs h-8 px-3 shadow-sm"
+							className="h-8 border-white/50 bg-white/90 px-3 text-xs text-gray-700 shadow-sm backdrop-blur-sm"
 						>
 							{copied ? (
 								<>
-									<Icon name="check" className="w-3 h-3" />
+									<Icon name="check" className="h-3 w-3" />
 									Copied
 								</>
 							) : (
 								<>
-									<Icon name="copy" className="w-3 h-3" />
+									<Icon name="copy" className="h-3 w-3" />
 									Copy
 								</>
 							)}
@@ -118,12 +117,12 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 
 					{/* Images Badge - Bottom Right */}
 					{note.images.length > 0 && (
-						<div className="absolute bottom-3 right-3">
+						<div className="absolute right-3 bottom-3">
 							<Badge
 								variant="outline"
-								className="bg-white/90 backdrop-blur-sm border-white/50 text-gray-700 text-xs shadow-sm"
+								className="border-white/50 bg-white/90 text-xs text-gray-700 shadow-sm backdrop-blur-sm"
 							>
-								<Icon name="image" className="w-3 h-3 mr-1" />
+								<Icon name="image" className="mr-1 h-3 w-3" />
 								{note.images.length}
 							</Badge>
 						</div>
@@ -133,23 +132,18 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 				{/* Content Section */}
 				<div className="p-2 px-4">
 					<div className="flex items-start gap-3">
-						<div className="flex-1 min-w-0">
-							<h4 className="text-gray-900 line-clamp-2 leading-tight">
+						<div className="min-w-0 flex-1">
+							<h4 className="line-clamp-2 leading-tight text-gray-900">
 								{note.title}
 							</h4>
-							<div className="text-xs mt-1">
-								<h3 className="font-medium text-foreground inline">
+							<div className="mt-1 text-xs">
+								<h3 className="text-foreground inline font-medium">
 									{createdBy}
 								</h3>
-								<span className="text-muted-foreground ml-2">
-									• {timeAgo}
-								</span>
+								<span className="text-muted-foreground ml-2">• {timeAgo}</span>
 							</div>
-
 						</div>
 					</div>
-
-
 				</div>
 			</CardContent>
 		</Card>

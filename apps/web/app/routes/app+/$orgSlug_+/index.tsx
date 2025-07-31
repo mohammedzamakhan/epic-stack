@@ -13,7 +13,10 @@ import { prisma } from '#app/utils/db.server'
 import { loader as rootLoader } from '#app/root.tsx'
 import { NotesChart } from '#app/components/notes-chart'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist'
-import { getOnboardingProgress, autoDetectCompletedSteps } from '#app/utils/onboarding'
+import {
+	getOnboardingProgress,
+	autoDetectCompletedSteps,
+} from '#app/utils/onboarding'
 
 const novu = new Novu({
 	secretKey: process.env.NOVU_SECRET_KEY,
@@ -38,9 +41,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const now = new Date()
 	const thirtyDaysAgo = new Date()
 	thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-	
-	const startDate = organization.createdAt > thirtyDaysAgo ? organization.createdAt : thirtyDaysAgo
-	const daysSinceStart = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+
+	const startDate =
+		organization.createdAt > thirtyDaysAgo
+			? organization.createdAt
+			: thirtyDaysAgo
+	const daysSinceStart = Math.ceil(
+		(now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+	)
 	const daysToShow = Math.max(7, Math.min(30, daysSinceStart)) // Show at least 7 days, max 30
 
 	const notesData = await prisma.organizationNote.findMany({
@@ -59,13 +67,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	})
 
 	// Group notes by day
-	const dailyNotes = notesData.reduce((acc, note) => {
-		const date = note.createdAt.toISOString().split('T')[0]
-		if (date) {
-			acc[date] = (acc[date] || 0) + 1
-		}
-		return acc
-	}, {} as Record<string, number>)
+	const dailyNotes = notesData.reduce(
+		(acc, note) => {
+			const date = note.createdAt.toISOString().split('T')[0]
+			if (date) {
+				acc[date] = (acc[date] || 0) + 1
+			}
+			return acc
+		},
+		{} as Record<string, number>,
+	)
 
 	// Create array with all days in the range, filling missing days with 0
 	const chartData = []
@@ -74,7 +85,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		date.setDate(date.getDate() - i)
 		const dateStr = date.toISOString().split('T')[0]
 		const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
-		const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+		const monthDay = date.toLocaleDateString('en-US', {
+			month: 'short',
+			day: 'numeric',
+		})
 
 		chartData.push({
 			date: dateStr,
@@ -86,9 +100,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	// Get onboarding progress
 	await autoDetectCompletedSteps(userId, organization.id)
-	const onboardingProgress = await getOnboardingProgress(userId, organization.id)
+	const onboardingProgress = await getOnboardingProgress(
+		userId,
+		organization.id,
+	)
 
-	return Response.json({ organization, chartData, daysToShow, onboardingProgress })
+	return Response.json({
+		organization,
+		chartData,
+		daysToShow,
+		onboardingProgress,
+	})
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -128,13 +150,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function OrganizationDashboard() {
 	const { chartData, daysToShow, onboardingProgress } = useLoaderData() as {
 		organization: { name: string }
-		chartData: Array<{ date: string; day: string; label: string; notes: number }>
+		chartData: Array<{
+			date: string
+			day: string
+			label: string
+			notes: number
+		}>
 		daysToShow: number
 		onboardingProgress: any
 	}
-	const rootData = useRouteLoaderData<typeof rootLoader>('root');
-	const user = rootData?.user;
-	const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug || '';
+	const rootData = useRouteLoaderData<typeof rootLoader>('root')
+	const user = rootData?.user
+	const orgSlug =
+		rootData?.userOrganizations?.currentOrganization?.organization.slug || ''
 
 	return (
 		<div className="p-8">
@@ -145,20 +173,25 @@ export default function OrganizationDashboard() {
 
 			<div className="flex gap-8">
 				{/* Onboarding Checklist */}
-			{onboardingProgress && !onboardingProgress.isCompleted && onboardingProgress.isVisible && (
-				<div className="mt-8 w-1/2">
-					<OnboardingChecklist 
-						progress={onboardingProgress} 
-						orgSlug={orgSlug}
-						organizationId={rootData?.userOrganizations?.currentOrganization?.organization.id || ''}
-						variant="dashboard"
-					/>
-				</div>
-			)}
+				{onboardingProgress &&
+					!onboardingProgress.isCompleted &&
+					onboardingProgress.isVisible && (
+						<div className="mt-8 w-1/2">
+							<OnboardingChecklist
+								progress={onboardingProgress}
+								orgSlug={orgSlug}
+								organizationId={
+									rootData?.userOrganizations?.currentOrganization?.organization
+										.id || ''
+								}
+								variant="dashboard"
+							/>
+						</div>
+					)}
 
-			<div className="mt-8 w-1/2">
-				<NotesChart data={chartData} daysShown={daysToShow} />
-			</div>
+				<div className="mt-8 w-1/2">
+					<NotesChart data={chartData} daysShown={daysToShow} />
+				</div>
 			</div>
 		</div>
 	)

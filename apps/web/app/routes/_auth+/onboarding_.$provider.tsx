@@ -15,12 +15,18 @@ import {
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
 import { CheckboxField, ErrorList } from '#app/components/forms.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#app/components/ui/card.tsx'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Label } from '#app/components/ui/label.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import {
-	sessionKey,	
+	sessionKey,
 	signupWithConnection,
 	requireAnonymous,
 } from '#app/utils/auth.server.ts'
@@ -184,7 +190,7 @@ export default function OnboardingProviderRoute({
 	})
 
 	return (
-		<div 
+		<div
 			className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-4"
 			style={{
 				backgroundImage: `url('/assets/images/background_1.webp')`,
@@ -195,7 +201,7 @@ export default function OnboardingProviderRoute({
 		>
 			<div className="w-full max-w-md">
 				<div className="flex flex-col gap-6">
-					<Card className="shadow-2xl border-0">
+					<Card className="border-0 shadow-2xl">
 						<CardHeader className="text-center">
 							<CardTitle className="text-xl">Complete your profile</CardTitle>
 							<CardDescription>
@@ -212,7 +218,7 @@ export default function OnboardingProviderRoute({
 												alt="Profile"
 												className="size-24 rounded-full"
 											/>
-											<p className="text-sm text-muted-foreground">
+											<p className="text-muted-foreground text-sm">
 												You can change your photo later
 											</p>
 											<input
@@ -247,7 +253,8 @@ export default function OnboardingProviderRoute({
 									<div className="flex items-center space-x-2">
 										<CheckboxField
 											labelProps={{
-												htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
+												htmlFor:
+													fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
 												children:
 													'I agree to the Terms of Service and Privacy Policy',
 											}}
@@ -255,7 +262,9 @@ export default function OnboardingProviderRoute({
 												fields.agreeToTermsOfServiceAndPrivacyPolicy,
 												{ type: 'checkbox' },
 											)}
-											errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
+											errors={
+												fields.agreeToTermsOfServiceAndPrivacyPolicy.errors
+											}
 										/>
 									</div>
 
@@ -292,8 +301,7 @@ export default function OnboardingProviderRoute({
 					</Card>
 					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
 						By creating an account, you agree to our{' '}
-						<a href="#">Terms of Service</a> and{' '}
-						<a href="#">Privacy Policy</a>.
+						<a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
 					</div>
 				</div>
 			</div>

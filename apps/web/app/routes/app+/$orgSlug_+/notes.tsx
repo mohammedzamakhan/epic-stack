@@ -160,7 +160,7 @@ export default function NotesRoute({
 					}
 				}}
 			>
-				<SheetContent className="w-[90vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl flex flex-col gap-0">
+				<SheetContent className="flex w-[90vw] flex-col gap-0 sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
 					<Outlet />
 				</SheetContent>
 			</Sheet>

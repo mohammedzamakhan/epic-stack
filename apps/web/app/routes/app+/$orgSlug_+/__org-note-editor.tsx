@@ -11,7 +11,10 @@ import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 import { AIContentGenerator } from '#app/components/note/ai-content-generator.tsx'
-import { ContentEditor, type ContentEditorRef } from '#app/components/note/content-editor.tsx'
+import {
+	ContentEditor,
+	type ContentEditorRef,
+} from '#app/components/note/content-editor.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { MultiImageUpload } from '#app/components/ui/multi-image-upload.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
@@ -112,7 +115,7 @@ export function OrgNoteEditor({
 	return (
 		<>
 			<FormProvider context={form.context}>
-				<div className="flex-1 overflow-y-auto px-6 pb-8 pt-4">
+				<div className="flex-1 overflow-y-auto px-6 pt-4 pb-8">
 					<fetcher.Form
 						method="POST"
 						action={
@@ -143,7 +146,7 @@ export function OrgNoteEditor({
 							/>
 							<div className="flex flex-col gap-2">
 								<div className="flex items-center justify-between">
-									<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+									<label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 										Content
 									</label>
 									<AIContentGenerator
@@ -161,8 +164,11 @@ export function OrgNoteEditor({
 									placeholder="Write your note content..."
 								/>
 								{fields.content.errors && (
-									<div className="min-h-[32px] px-4 pb-3 pt-1">
-										<ErrorList id={fields.content.errorId} errors={fields.content.errors} />
+									<div className="min-h-[32px] px-4 pt-1 pb-3">
+										<ErrorList
+											id={fields.content.errorId}
+											errors={fields.content.errors}
+										/>
 									</div>
 								)}
 							</div>
@@ -175,11 +181,11 @@ export function OrgNoteEditor({
 						<ErrorList id={form.errorId} errors={form.errors} />
 					</fetcher.Form>
 				</div>
-				
-				<div className="flex-shrink-0 border-t bg-background px-6 py-4">
+
+				<div className="bg-background flex-shrink-0 border-t px-6 py-4">
 					<div className="flex items-center justify-end gap-2 md:gap-3">
-						<Button 
-							variant="outline" 
+						<Button
+							variant="outline"
 							size="sm"
 							{...form.reset.getButtonProps()}
 						>

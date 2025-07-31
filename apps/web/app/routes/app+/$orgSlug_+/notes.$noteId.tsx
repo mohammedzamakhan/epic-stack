@@ -27,8 +27,16 @@ import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '#app/components/ui/tabs.tsx'
-import { logNoteActivity, getNoteActivityLogs } from '#app/utils/activity-log.server.ts'
+import {
+	Tabs,
+	TabsList,
+	TabsTrigger,
+	TabsContent,
+} from '#app/components/ui/tabs.tsx'
+import {
+	logNoteActivity,
+	getNoteActivityLogs,
+} from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
@@ -82,8 +90,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	// Check if user has access to this specific note
 	if (!note.isPublic) {
-		const hasAccess = note.createdById === userId ||
-			note.noteAccess.some(access => access.user.id === userId)
+		const hasAccess =
+			note.createdById === userId ||
+			note.noteAccess.some((access) => access.user.id === userId)
 
 		if (!hasAccess) {
 			throw new Response('Not authorized', { status: 403 })
@@ -144,12 +153,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		const rootComments: any[] = []
 
 		// First pass: create map of all comments
-		comments.forEach(comment => {
+		comments.forEach((comment) => {
 			commentMap.set(comment.id, { ...comment, replies: [] })
 		})
 
 		// Second pass: organize into tree structure
-		comments.forEach(comment => {
+		comments.forEach((comment) => {
 			if (comment.parentId) {
 				const parent = commentMap.get(comment.parentId)
 				if (parent) {
@@ -427,14 +436,15 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		try {
 			// Get connection details before disconnecting for logging
-			const connectionDetails = await prisma.noteIntegrationConnection.findFirst({
-				where: { id: connectionId },
-				include: {
-					integration: {
-						select: { id: true, providerName: true },
+			const connectionDetails =
+				await prisma.noteIntegrationConnection.findFirst({
+					where: { id: connectionId },
+					include: {
+						integration: {
+							select: { id: true, providerName: true },
+						},
 					},
-				},
-			})
+				})
 
 			await integrationManager.disconnectNoteFromChannel(connectionId)
 
@@ -509,7 +519,9 @@ export async function action({ request }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'update-note-sharing') {
-		console.log('Received update-note-sharing intent', { formData: Object.fromEntries(formData) })
+		console.log('Received update-note-sharing intent', {
+			formData: Object.fromEntries(formData),
+		})
 
 		const submission = parseWithZod(formData, {
 			schema: ShareNoteSchema,
@@ -754,8 +766,18 @@ export async function action({ request }: ActionFunctionArgs) {
 			)
 		}
 
-		const { noteId, isPublic, usersToAdd: validUsersToAdd, usersToRemove: validUsersToRemove } = validationResult.data
-		console.log('Validated data:', { noteId, isPublic, validUsersToAdd, validUsersToRemove })
+		const {
+			noteId,
+			isPublic,
+			usersToAdd: validUsersToAdd,
+			usersToRemove: validUsersToRemove,
+		} = validationResult.data
+		console.log('Validated data:', {
+			noteId,
+			isPublic,
+			validUsersToAdd,
+			validUsersToRemove,
+		})
 
 		// Get the note to verify access
 		const note = await prisma.organizationNote.findFirst({
@@ -775,7 +797,12 @@ export async function action({ request }: ActionFunctionArgs) {
 		try {
 			// Use a transaction to ensure all operations succeed or fail together
 			await prisma.$transaction(async (tx) => {
-				console.log('Starting transaction. Current note.isPublic:', note.isPublic, 'New isPublic:', isPublic)
+				console.log(
+					'Starting transaction. Current note.isPublic:',
+					note.isPublic,
+					'New isPublic:',
+					isPublic,
+				)
 
 				// Update public/private status if changed
 				if (isPublic !== note.isPublic) {
@@ -799,7 +826,9 @@ export async function action({ request }: ActionFunctionArgs) {
 						await tx.noteAccess.deleteMany({
 							where: { noteId },
 						})
-						console.log('Successfully made note public and removed access entries')
+						console.log(
+							'Successfully made note public and removed access entries',
+						)
 						return // No need to process user additions/removals if making public
 					}
 				}
@@ -836,15 +865,19 @@ export async function action({ request }: ActionFunctionArgs) {
 						select: { userId: true },
 					})
 
-					const validUserIds = validOrgMembers.map(member => member.userId)
-					const invalidUsers = validUsersToAdd.filter(id => !validUserIds.includes(id))
+					const validUserIds = validOrgMembers.map((member) => member.userId)
+					const invalidUsers = validUsersToAdd.filter(
+						(id) => !validUserIds.includes(id),
+					)
 
 					if (invalidUsers.length > 0) {
-						throw new Error(`Some users are not members of this organization: ${invalidUsers.join(', ')}`)
+						throw new Error(
+							`Some users are not members of this organization: ${invalidUsers.join(', ')}`,
+						)
 					}
 
 					// Create access entries for valid users
-					const accessEntries = validUserIds.map(userId => ({
+					const accessEntries = validUserIds.map((userId) => ({
 						noteId,
 						userId,
 					}))
@@ -884,7 +917,10 @@ export async function action({ request }: ActionFunctionArgs) {
 				{
 					result: {
 						status: 'error',
-						error: error instanceof Error ? error.message : 'Failed to update note access',
+						error:
+							error instanceof Error
+								? error.message
+								: 'Failed to update note access',
 					},
 				},
 				{ status: 500 },
@@ -912,8 +948,8 @@ export async function action({ request }: ActionFunctionArgs) {
 				isPublic: true,
 				createdById: true,
 				noteAccess: {
-					select: { userId: true }
-				}
+					select: { userId: true },
+				},
 			},
 			where: { id: noteId },
 		})
@@ -924,8 +960,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		// Check if user has access to this specific note
 		if (!note.isPublic) {
-			const hasAccess = note.createdById === userId ||
-				note.noteAccess.some(access => access.userId === userId)
+			const hasAccess =
+				note.createdById === userId ||
+				note.noteAccess.some((access) => access.userId === userId)
 
 			if (!hasAccess) {
 				throw new Response('Not authorized', { status: 403 })
@@ -959,18 +996,22 @@ export async function action({ request }: ActionFunctionArgs) {
 			// Handle image uploads if present
 			const imageCount = parseInt(formData.get('imageCount') as string) || 0
 			if (imageCount > 0) {
-				const { uploadCommentImage } = await import('#app/utils/storage.server.ts')
+				const { uploadCommentImage } = await import(
+					'#app/utils/storage.server.ts'
+				)
 
 				const imagePromises = []
 				for (let i = 0; i < imageCount; i++) {
 					const imageFile = formData.get(`image-${i}`) as File
 					if (imageFile && imageFile.size > 0) {
 						imagePromises.push(
-							uploadCommentImage(userId, comment.id, imageFile).then(objectKey => ({
-								commentId: comment.id,
-								objectKey,
-								altText: null,
-							}))
+							uploadCommentImage(userId, comment.id, imageFile).then(
+								(objectKey) => ({
+									commentId: comment.id,
+									objectKey,
+									altText: null,
+								}),
+							),
 						)
 					}
 				}
@@ -1026,8 +1067,8 @@ export async function action({ request }: ActionFunctionArgs) {
 			select: {
 				userId: true,
 				note: {
-					select: { organizationId: true }
-				}
+					select: { organizationId: true },
+				},
 			},
 			where: { id: commentId },
 		})
@@ -1168,12 +1209,20 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
-	const { note, timeAgo, currentUserId, organizationMembers, comments, activityLogs, connections, availableIntegrations } =
-		useLoaderData() as NoteLoaderData
+	const {
+		note,
+		timeAgo,
+		currentUserId,
+		organizationMembers,
+		comments,
+		activityLogs,
+		connections,
+		availableIntegrations,
+	} = useLoaderData() as NoteLoaderData
 
 	const runtime = useChatRuntime({
 		api: `/api/ai/chat?noteId=${note.id}`,
-	});
+	})
 
 	// Add ref for auto-focusing
 	const sectionRef = useRef<HTMLElement>(null)
@@ -1187,7 +1236,7 @@ export default function NoteRoute() {
 	}, [note.id])
 
 	// Convert organization members to mention users format
-	const mentionUsers = organizationMembers.map(member => ({
+	const mentionUsers = organizationMembers.map((member) => ({
 		id: member.user.id,
 		name: member.user.name || member.user.username,
 		email: member.user.username, // Using username as email placeholder
@@ -1199,7 +1248,7 @@ export default function NoteRoute() {
 				<SheetTitle className="text-left">
 					{note.title || 'Untitled Note'}
 				</SheetTitle>
-				<div className="flex items-center gap-2 text-sm text-muted-foreground">
+				<div className="text-muted-foreground flex items-center gap-2 text-sm">
 					<Icon name="clock" className="h-3.5 w-3.5" />
 					<span>Updated {timeAgo} ago</span>
 					{!note.isPublic && (
@@ -1214,11 +1263,15 @@ export default function NoteRoute() {
 
 			<section
 				ref={sectionRef}
-				className="flex flex-1 flex-col min-h-0"
+				className="flex min-h-0 flex-1 flex-col"
 				aria-labelledby="note-title"
 				tabIndex={-1}
 			>
-				<Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
+				<Tabs
+					value={activeTab}
+					onValueChange={setActiveTab}
+					className="flex min-h-0 flex-1 flex-col"
+				>
 					<TabsList className="w-full rounded-none">
 						<TabsTrigger value="overview" className="flex-1 gap-2">
 							<Icon name="file-text" className="h-4 w-4" />
@@ -1228,7 +1281,7 @@ export default function NoteRoute() {
 							<Icon name="envelope-closed" className="h-4 w-4" />
 							<span className="hidden sm:inline">Comments</span>
 							{comments.length > 0 && (
-								<span className="bg-muted-foreground/20 text-xs px-1.5 py-0.5 rounded-full">
+								<span className="bg-muted-foreground/20 rounded-full px-1.5 py-0.5 text-xs">
 									{comments.length}
 								</span>
 							)}
@@ -1243,10 +1296,13 @@ export default function NoteRoute() {
 						</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="overview" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+					<TabsContent
+						value="overview"
+						className="flex-1 overflow-y-auto px-6 pt-2 pb-8"
+					>
 						{/* Images */}
 						{note.images.length > 0 && (
-							<ul className="flex flex-wrap gap-5 mb-6">
+							<ul className="mb-6 flex flex-wrap gap-5">
 								{note.images.map((image) => (
 									<li key={image.objectKey}>
 										<a href={getNoteImgSrc(image.objectKey)}>
@@ -1272,7 +1328,10 @@ export default function NoteRoute() {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="comments" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+					<TabsContent
+						value="comments"
+						className="flex-1 overflow-y-auto px-6 pt-2 pb-8"
+					>
 						<CommentsSection
 							noteId={note.id}
 							comments={comments}
@@ -1281,21 +1340,27 @@ export default function NoteRoute() {
 						/>
 					</TabsContent>
 
-					<TabsContent value="activity" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+					<TabsContent
+						value="activity"
+						className="flex-1 overflow-y-auto px-6 pt-2 pb-8"
+					>
 						<ActivityLog activityLogs={activityLogs} />
 					</TabsContent>
 
-					<TabsContent value="ai-assistant" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+					<TabsContent
+						value="ai-assistant"
+						className="flex-1 overflow-y-auto px-6 pt-2 pb-8"
+					>
 						<AssistantRuntimeProvider runtime={runtime}>
 							<Thread />
 						</AssistantRuntimeProvider>
 					</TabsContent>
 				</Tabs>
 
-				<div className="flex-shrink-0 border-t bg-background px-6 py-4">
+				<div className="bg-background flex-shrink-0 border-t px-6 py-4">
 					<div className="flex items-center justify-between">
 						<span className="text-foreground/90 text-sm max-[524px]:hidden">
-							<Icon name="clock" className="h-4 w-4 mr-1">
+							<Icon name="clock" className="mr-1 h-4 w-4">
 								{timeAgo} ago
 							</Icon>
 						</span>

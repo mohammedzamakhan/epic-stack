@@ -75,7 +75,7 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 			</SheetHeader>
 
 			<section
-				className="flex flex-1 flex-col min-h-0"
+				className="flex min-h-0 flex-1 flex-col"
 				aria-labelledby="edit-note-title"
 				tabIndex={-1}
 			>

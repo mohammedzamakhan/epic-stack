@@ -150,7 +150,10 @@ function ConnectedIntegrationItem({
 			<div className="flex items-center justify-between p-4">
 				<div className="flex items-center space-x-3">
 					<div className="flex-shrink-0">
-						<Icon name={providerInfo.icon} className="text-muted-foreground h-8 w-8" />
+						<Icon
+							name={providerInfo.icon}
+							className="text-muted-foreground h-8 w-8"
+						/>
 					</div>
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center space-x-2">

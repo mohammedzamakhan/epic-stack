@@ -7,8 +7,15 @@ declare module 'hotkeys-js' {
 	}
 
 	interface Hotkeys {
-		(key: string, callback: (event: KeyboardEvent, handler: HotkeysEvent) => void): void
-		(key: string, scope: string, callback: (event: KeyboardEvent, handler: HotkeysEvent) => void): void
+		(
+			key: string,
+			callback: (event: KeyboardEvent, handler: HotkeysEvent) => void,
+		): void
+		(
+			key: string,
+			scope: string,
+			callback: (event: KeyboardEvent, handler: HotkeysEvent) => void,
+		): void
 		unbind(key: string, scope?: string): void
 		setScope(scope: string): void
 		getScope(): string

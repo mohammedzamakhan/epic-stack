@@ -31,18 +31,19 @@ export function useHotkeys(configs: HotkeyConfig[]) {
 export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 	const navigate = useNavigate()
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
-	const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug
+	const orgSlug =
+		rootData?.userOrganizations?.currentOrganization?.organization.slug
 
 	const configs: HotkeyConfig[] = [
 		{
 			key: 'cmd+k,ctrl+k',
 			action: () => setCommandOpen(true),
-			description: 'Open command menu'
+			description: 'Open command menu',
 		},
 		{
 			key: 'cmd+a,ctrl+a',
 			action: () => navigate('/settings/general'),
-			description: 'Go to account settings'
+			description: 'Go to account settings',
 		},
 		{
 			key: 'cmd+b,ctrl+b',
@@ -51,7 +52,7 @@ export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 					navigate(`/app/${orgSlug}/settings/billing`)
 				}
 			},
-			description: 'Go to billing'
+			description: 'Go to billing',
 		},
 		{
 			key: 'cmd+s,ctrl+s',
@@ -60,8 +61,8 @@ export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 					navigate(`/app/${orgSlug}/settings`)
 				}
 			},
-			description: 'Go to settings'
-		}
+			description: 'Go to settings',
+		},
 	]
 
 	useHotkeys(configs)

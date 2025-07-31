@@ -55,7 +55,10 @@ export function CommentItem({
 	}
 
 	const handleDelete = async () => {
-		if (onDelete && window.confirm('Are you sure you want to delete this comment?')) {
+		if (
+			onDelete &&
+			window.confirm('Are you sure you want to delete this comment?')
+		) {
 			setIsDeleting(true)
 			onDelete(comment.id)
 		}
@@ -66,31 +69,31 @@ export function CommentItem({
 	const maxDepth = 3 // Limit nesting depth
 
 	return (
-		<div className={`${depth > 0 ? 'ml-6 pl-4 border-l border-border' : ''}`}>
+		<div className={`${depth > 0 ? 'border-border ml-6 border-l pl-4' : ''}`}>
 			<div className="group relative">
 				<div className="flex items-start gap-3 py-2">
 					{/* Avatar placeholder */}
-					<div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-						<span className="text-xs font-medium text-muted-foreground">
-							{(comment.user.name || comment.user.username).charAt(0).toUpperCase()}
+					<div className="bg-muted flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+						<span className="text-muted-foreground text-xs font-medium">
+							{(comment.user.name || comment.user.username)
+								.charAt(0)
+								.toUpperCase()}
 						</span>
 					</div>
 
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center justify-between mb-1">
+					<div className="min-w-0 flex-1">
+						<div className="mb-1 flex items-center justify-between">
 							<div className="flex items-center gap-2 text-sm">
-								<span className="font-medium text-foreground">
+								<span className="text-foreground font-medium">
 									{comment.user.name || comment.user.username}
 								</span>
-								<span className="text-muted-foreground">
-									{timeAgo} ago
-								</span>
+								<span className="text-muted-foreground">{timeAgo} ago</span>
 							</div>
 							{canDelete && (
 								<Button
 									variant="ghost"
 									size="sm"
-									className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+									className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
 									onClick={handleDelete}
 									disabled={isDeleting}
 								>
@@ -100,7 +103,7 @@ export function CommentItem({
 						</div>
 
 						<div
-							className="text-sm text-foreground leading-relaxed tracking-wider prose prose-sm max-w-none prose-p:my-1"
+							className="text-foreground prose prose-sm prose-p:my-1 max-w-none text-sm leading-relaxed tracking-wider"
 							dangerouslySetInnerHTML={{ __html: comment.content }}
 						/>
 
@@ -118,7 +121,7 @@ export function CommentItem({
 										<Img
 											src={getNoteImgSrc(image.objectKey)}
 											alt={image.altText ?? ''}
-											className="w-24 h-24 rounded-lg object-cover border hover:opacity-90 transition-opacity"
+											className="h-24 w-24 rounded-lg border object-cover transition-opacity hover:opacity-90"
 											width={96}
 											height={96}
 										/>
@@ -133,9 +136,9 @@ export function CommentItem({
 									variant="ghost"
 									size="sm"
 									onClick={() => setShowReplyForm(!showReplyForm)}
-									className="h-auto px-0 py-1 text-xs text-muted-foreground hover:text-foreground"
+									className="text-muted-foreground hover:text-foreground h-auto px-0 py-1 text-xs"
 								>
-									<Icon name="paper-plane" className="h-3 w-3 mr-1" />
+									<Icon name="paper-plane" className="mr-1 h-3 w-3" />
 									Reply
 								</Button>
 							)}

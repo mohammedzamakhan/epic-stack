@@ -79,7 +79,9 @@ export function NavMain({
 											<div className="flex items-center gap-2">
 												{item.icon && (
 													<item.icon
-														ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+														ref={(ref: any) =>
+															(iconRefs.current[item.title] = ref)
+														}
 														size={16}
 													/>
 												)}
@@ -118,7 +120,9 @@ export function NavMain({
 										<Link to={item.url} className="flex items-center gap-2">
 											{item.icon && (
 												<item.icon
-													ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+													ref={(ref: any) =>
+														(iconRefs.current[item.title] = ref)
+													}
 													size={16}
 												/>
 											)}

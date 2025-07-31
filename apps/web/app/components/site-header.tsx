@@ -23,15 +23,15 @@ export function SiteHeader() {
 						className="mx-2 data-[orientation=vertical]:h-4"
 					/>
 				</div>
-				<div className="px-2 pr-6 flex gap-4">
+				<div className="flex gap-4 px-2 pr-6">
 					<Button
 						variant="outline"
-						className="relative h-8 w-full justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+						className="bg-muted/50 text-muted-foreground relative h-8 w-full justify-start rounded-[0.5rem] text-sm font-normal shadow-none sm:pr-12 md:w-40 lg:w-64"
 						onClick={() => setCommandOpen(true)}
 					>
 						<Icon name="magnifying-glass" className="mr-2 h-4 w-4" />
 						Search notes...
-						<kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+						<kbd className="bg-muted pointer-events-none absolute top-[0.3rem] right-[0.3rem] hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
 							<span className="text-xs">⌘</span>K
 						</kbd>
 					</Button>

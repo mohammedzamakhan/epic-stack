@@ -5,7 +5,9 @@ import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { type MentionUser } from './comment-input'
 import { MentionList } from './mention-list'
 
-export default function getSuggestions(items: MentionUser[]): Omit<SuggestionOptions<any, MentionNodeAttrs>, "editor"> {
+export default function getSuggestions(
+	items: MentionUser[],
+): Omit<SuggestionOptions<any, MentionNodeAttrs>, 'editor'> {
 	return {
 		items: ({ query }: { query: string }): MentionUser[] => {
 			return items

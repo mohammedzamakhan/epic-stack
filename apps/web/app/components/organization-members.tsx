@@ -46,7 +46,7 @@ export function OrganizationMembers({
 							key={member.userId}
 							className="flex items-center justify-between rounded-lg border p-3"
 						>
-							<div className="flex justify-between items-center gap-3 w-full">
+							<div className="flex w-full items-center justify-between gap-3">
 								<div className="flex items-center gap-3">
 									<Avatar className="h-8 w-8">
 										<AvatarImage
@@ -86,7 +86,6 @@ export function OrganizationMembers({
 										)}
 									</div>
 								</div>
-
 
 								<div className="flex items-center gap-2">
 									<Badge
