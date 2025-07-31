@@ -149,7 +149,7 @@ export function ActivityLog({ activityLogs }: ActivityLogProps) {
 
     return (
         <div>
-            <div className="flex items-center gap-2 my-6">
+            <div className="flex items-center gap-2 mb-4">
                 <Icon name="logs" className="h-5 w-5 text-muted-foreground" />
                 <h2 className="text-lg font-semibold">Recent Activity</h2>
             </div>

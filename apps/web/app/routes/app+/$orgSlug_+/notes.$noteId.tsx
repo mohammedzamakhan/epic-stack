@@ -6,7 +6,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import {
 	data,
 	Form,
@@ -27,6 +27,7 @@ import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { SheetHeader, SheetTitle } from '#app/components/ui/sheet.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '#app/components/ui/tabs.tsx'
 import { logNoteActivity, getNoteActivityLogs } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -81,9 +82,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	// Check if user has access to this specific note
 	if (!note.isPublic) {
-		const hasAccess = note.createdById === userId || 
+		const hasAccess = note.createdById === userId ||
 			note.noteAccess.some(access => access.user.id === userId)
-		
+
 		if (!hasAccess) {
 			throw new Response('Not authorized', { status: 403 })
 		}
@@ -262,11 +263,11 @@ const DeleteCommentSchema = z.object({
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
-	
+
 	// Check if this is a multipart form (for image uploads)
 	const contentType = request.headers.get('content-type')
 	let formData: FormData
-	
+
 	if (contentType?.includes('multipart/form-data')) {
 		const { parseFormData } = await import('@mjackson/form-data-parser')
 		formData = await parseFormData(request, {
@@ -275,7 +276,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	} else {
 		formData = await request.formData()
 	}
-	
+
 	const intent = formData.get('intent')
 
 	// Handle different intents
@@ -444,7 +445,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					userId,
 					action: 'integration_disconnected',
 					integrationId: connectionDetails.integration.id,
-					metadata: { 
+					metadata: {
 						externalId: connectionDetails.externalId,
 						providerName: connectionDetails.integration.providerName,
 					},
@@ -509,13 +510,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'update-note-sharing') {
 		console.log('Received update-note-sharing intent', { formData: Object.fromEntries(formData) })
-		
+
 		const submission = parseWithZod(formData, {
 			schema: ShareNoteSchema,
 		})
-		
+
 		console.log('Submission result:', submission)
-		
+
 		if (submission.status !== 'success') {
 			console.log('Submission failed:', submission)
 			return data(
@@ -728,7 +729,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'batch-update-note-access') {
 		console.log('Received batch-update-note-access intent')
-		
+
 		// Manually parse the arrays since FormData can have multiple values with same key
 		const usersToAdd = formData.getAll('usersToAdd') as string[]
 		const usersToRemove = formData.getAll('usersToRemove') as string[]
@@ -775,7 +776,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			// Use a transaction to ensure all operations succeed or fail together
 			await prisma.$transaction(async (tx) => {
 				console.log('Starting transaction. Current note.isPublic:', note.isPublic, 'New isPublic:', isPublic)
-				
+
 				// Update public/private status if changed
 				if (isPublic !== note.isPublic) {
 					console.log('Updating note public status to:', isPublic)
@@ -906,9 +907,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		// Get the note to verify access
 		const note = await prisma.organizationNote.findFirst({
-			select: { 
-				organizationId: true, 
-				isPublic: true, 
+			select: {
+				organizationId: true,
+				isPublic: true,
 				createdById: true,
 				noteAccess: {
 					select: { userId: true }
@@ -923,9 +924,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		// Check if user has access to this specific note
 		if (!note.isPublic) {
-			const hasAccess = note.createdById === userId || 
+			const hasAccess = note.createdById === userId ||
 				note.noteAccess.some(access => access.userId === userId)
-			
+
 			if (!hasAccess) {
 				throw new Response('Not authorized', { status: 403 })
 			}
@@ -959,7 +960,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			const imageCount = parseInt(formData.get('imageCount') as string) || 0
 			if (imageCount > 0) {
 				const { uploadCommentImage } = await import('#app/utils/storage.server.ts')
-				
+
 				const imagePromises = []
 				for (let i = 0; i < imageCount; i++) {
 					const imageFile = formData.get(`image-${i}`) as File
@@ -1022,7 +1023,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		// Get the comment to verify access
 		const comment = await prisma.noteComment.findFirst({
-			select: { 
+			select: {
 				userId: true,
 				note: {
 					select: { organizationId: true }
@@ -1167,8 +1168,6 @@ type NoteLoaderData = {
 }
 
 export default function NoteRoute() {
-	
-
 	const { note, timeAgo, currentUserId, organizationMembers, comments, activityLogs, connections, availableIntegrations } =
 		useLoaderData() as NoteLoaderData
 
@@ -1178,6 +1177,7 @@ export default function NoteRoute() {
 
 	// Add ref for auto-focusing
 	const sectionRef = useRef<HTMLElement>(null)
+	const [activeTab, setActiveTab] = useState('overview')
 
 	// Focus the section when the note ID changes
 	useEffect(() => {
@@ -1218,44 +1218,80 @@ export default function NoteRoute() {
 				aria-labelledby="note-title"
 				tabIndex={-1}
 			>
-				<div className="flex-1 overflow-y-auto px-6 pb-8 pt-4">
-					{/* Images */}
-					{note.images.length > 0 && (
-						<ul className="flex flex-wrap gap-5 py-5">
-							{note.images.map((image) => (
-								<li key={image.objectKey}>
-									<a href={getNoteImgSrc(image.objectKey)}>
-										<Img
-											src={getNoteImgSrc(image.objectKey)}
-											alt={image.altText ?? ''}
-											className="size-32 rounded-lg object-cover"
-											width={512}
-											height={512}
-										/>
-									</a>
-								</li>
-							))}
-						</ul>
-					)}
+				<Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
+					<TabsList className="w-full rounded-none">
+						<TabsTrigger value="overview" className="flex-1 gap-2">
+							<Icon name="file-text" className="h-4 w-4" />
+							<span className="hidden sm:inline">Overview</span>
+						</TabsTrigger>
+						<TabsTrigger value="comments" className="flex-1 gap-2">
+							<Icon name="envelope-closed" className="h-4 w-4" />
+							<span className="hidden sm:inline">Comments</span>
+							{comments.length > 0 && (
+								<span className="bg-muted-foreground/20 text-xs px-1.5 py-0.5 rounded-full">
+									{comments.length}
+								</span>
+							)}
+						</TabsTrigger>
+						<TabsTrigger value="activity" className="flex-1 gap-2">
+							<Icon name="logs" className="h-4 w-4" />
+							<span className="hidden sm:inline">Activity</span>
+						</TabsTrigger>
+						<TabsTrigger value="ai-assistant" className="flex-1 gap-2">
+							<Icon name="sparkles" className="h-4 w-4" />
+							<span className="hidden sm:inline">AI Assistant</span>
+						</TabsTrigger>
+					</TabsList>
 
-					{/* Note Content */}
-					<p className="text-sm whitespace-break-spaces md:text-lg mb-8" dangerouslySetInnerHTML={{ __html: note.content }} />
+					<TabsContent value="overview" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+						{/* Images */}
+						{note.images.length > 0 && (
+							<ul className="flex flex-wrap gap-5 mb-6">
+								{note.images.map((image) => (
+									<li key={image.objectKey}>
+										<a href={getNoteImgSrc(image.objectKey)}>
+											<Img
+												src={getNoteImgSrc(image.objectKey)}
+												alt={image.altText ?? ''}
+												className="size-32 rounded-lg object-cover"
+												width={512}
+												height={512}
+											/>
+										</a>
+									</li>
+								))}
+							</ul>
+						)}
 
-					{/* Comments Section */}
-					<CommentsSection
-						noteId={note.id}
-						comments={comments}
-						currentUserId={currentUserId}
-						users={mentionUsers}
-					/>
+						{/* Note Content */}
+						<div className="prose prose-sm max-w-none">
+							<div
+								className="text-sm whitespace-break-spaces md:text-lg"
+								dangerouslySetInnerHTML={{ __html: note.content }}
+							/>
+						</div>
+					</TabsContent>
 
-					{/* Activity Log Section */}
-					<ActivityLog activityLogs={activityLogs} />
-					<AssistantRuntimeProvider runtime={runtime}>
-						<Thread  />
-					</AssistantRuntimeProvider>
-				</div>
-				
+					<TabsContent value="comments" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+						<CommentsSection
+							noteId={note.id}
+							comments={comments}
+							currentUserId={currentUserId}
+							users={mentionUsers}
+						/>
+					</TabsContent>
+
+					<TabsContent value="activity" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+						<ActivityLog activityLogs={activityLogs} />
+					</TabsContent>
+
+					<TabsContent value="ai-assistant" className="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+						<AssistantRuntimeProvider runtime={runtime}>
+							<Thread />
+						</AssistantRuntimeProvider>
+					</TabsContent>
+				</Tabs>
+
 				<div className="flex-shrink-0 border-t bg-background px-6 py-4">
 					<div className="flex items-center justify-between">
 						<span className="text-foreground/90 text-sm max-[524px]:hidden">

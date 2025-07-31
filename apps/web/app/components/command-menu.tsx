@@ -36,13 +36,13 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug
 
     // Reset state when dialog closes
-    useEffect(() => {
-        if (!open) {
-            setQuery('')
-            setNotes([])
-            setLoading(false)
-        }
-    }, [open])
+    // useEffect(() => {
+    //     if (!open) {
+    //         setQuery('')
+    //         setNotes([])
+    //         setLoading(false)
+    //     }
+    // }, [open])
 
     const searchNotes = useCallback(async (searchQuery: string) => {
         if (!orgSlug) return

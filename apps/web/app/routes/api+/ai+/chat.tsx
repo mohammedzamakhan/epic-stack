@@ -22,7 +22,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     where: { id: noteId },
     select: {
       content: true,
-      title: true
+      title: true,
+      comments: {
+        select: {
+          content: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }
     },
   });
 
@@ -33,7 +43,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const { messages, tools } = await request.json() as { messages: any; tools: any };
 
   const result = streamText({
-    model: google('models/gemini-2.0-flash-exp'),
+    model: google('models/gemini-2.5-flash'),
     system: `\
     You are a friendly assistant that helps users with Epic SaaS, a powerful note-taking and organization management platform. You help users with their complete workflow
     from creating and organizing notes, managing organizations, collaborating with team members, and understanding platform features like authentication, 
@@ -60,6 +70,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     Here's the note context: 
     Title: ${note.title}
     Content: ${note.content}
+    Comments: ${note.comments.map((comment: any) => `${comment.user.name}: ${comment.content}`).join('\n')}
     `,
     messages,
     toolCallStreaming: true,
