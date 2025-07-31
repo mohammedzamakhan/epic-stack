@@ -2,6 +2,7 @@ import { webcrypto as crypto } from 'node:crypto'
 import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from '#app/utils/db.server'
 import { sendEmail } from '#app/utils/email.server'
+import { markStepCompleted } from '#app/utils/onboarding'
 
 export async function createOrganizationInvitation({
 	organizationId,
@@ -49,6 +50,20 @@ export async function createOrganizationInvitation({
 			inviterId,
 		},
 	})
+
+	// Track onboarding step completion for inviting members
+	if (!existingInvitation) {
+		try {
+			await markStepCompleted(inviterId, organizationId, 'invite_members', {
+				completedVia: 'member_invitation',
+				invitedEmail: email,
+				role
+			})
+		} catch (error) {
+			// Don't fail the invitation if onboarding tracking fails
+			console.error('Failed to track member invitation onboarding step:', error)
+		}
+	}
 
 	return { invitation, isNewInvitation: !existingInvitation }
 }

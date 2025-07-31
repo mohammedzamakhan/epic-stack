@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate, useRouteLoaderData } from 'react-router'
+import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 import {
     CommandDialog,
     CommandEmpty,
@@ -30,19 +30,24 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     const [notes, setNotes] = useState<Note[]>([])
     const [loading, setLoading] = useState(false)
     const [query, setQuery] = useState('')
+    const [hasTrackedUsage, setHasTrackedUsage] = useState(false)
     const navigate = useNavigate()
     const rootData = useRouteLoaderData<typeof rootLoader>('root')
+    const fetcher = useFetcher()
 
     const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug
+    const organizationId = rootData?.userOrganizations?.currentOrganization?.organization.id
 
-    // Reset state when dialog closes
-    // useEffect(() => {
-    //     if (!open) {
-    //         setQuery('')
-    //         setNotes([])
-    //         setLoading(false)
-    //     }
-    // }, [open])
+    // Track command menu usage for onboarding (only once per session)
+    useEffect(() => {
+        if (open && !hasTrackedUsage && organizationId) {
+            setHasTrackedUsage(true)
+            fetcher.submit(
+                { stepKey: 'explore_command_menu', organizationId },
+                { method: 'POST', action: '/api/onboarding/complete-step' }
+            )
+        }
+    }, [open, hasTrackedUsage, organizationId, fetcher])
 
     const searchNotes = useCallback(async (searchQuery: string) => {
         if (!orgSlug) return

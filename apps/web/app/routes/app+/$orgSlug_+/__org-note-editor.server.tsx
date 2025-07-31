@@ -8,6 +8,7 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { uploadNoteImage } from '#app/utils/storage.server.ts'
 import { logNoteActivity } from '#app/utils/activity-log.server.ts'
+import { markStepCompleted } from '#app/utils/onboarding.ts'
 import {
 	MAX_UPLOAD_SIZE,
 	OrgNoteEditorSchema,
@@ -165,6 +166,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			action: 'created',
 			metadata: { title, hasImages: newImages.length > 0 },
 		})
+
+		// Track onboarding step completion for creating first note
+		try {
+			await markStepCompleted(userId, organization.id, 'create_first_note', {
+				completedVia: 'note_creation',
+				noteId: updatedNote.id,
+				noteTitle: title
+			})
+		} catch (error) {
+			// Don't fail the note creation if onboarding tracking fails
+			console.error('Failed to track note creation onboarding step:', error)
+		}
 	} else if (beforeSnapshot) {
 		// Determine what changed
 		const titleChanged = beforeSnapshot.title !== title

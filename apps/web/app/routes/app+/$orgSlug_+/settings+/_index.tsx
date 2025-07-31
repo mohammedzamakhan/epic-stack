@@ -22,6 +22,7 @@ import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server'
+import { markStepCompleted } from '#app/utils/onboarding'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -159,6 +160,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				where: { id: organization.id },
 				data: { name, slug },
 			})
+
+			// Track onboarding step completion for completing profile
+			// Check if organization now has both name and description (or just name for basic completion)
+			try {
+				await markStepCompleted(userId, organization.id, 'complete_profile', {
+					completedVia: 'organization_settings_update',
+					updatedFields: { name, slug }
+				})
+			} catch (error) {
+				// Don't fail the settings update if onboarding tracking fails
+				console.error('Failed to track profile completion onboarding step:', error)
+			}
 
 			return redirectWithToast(`/app/${slug}/settings`, {
 				title: 'Organization updated',

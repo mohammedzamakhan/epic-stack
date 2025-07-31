@@ -1,12 +1,13 @@
 import * as React from 'react'
 
-import { useLocation, useRouteLoaderData } from 'react-router'
+import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { FoldersIcon } from '#app/components/icons/folders-icon'
 import { HomeIcon } from '#app/components/icons/home-icon'
 import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon'
 import { NavMain } from '#app/components/nav-main'
 import { NavUser } from '#app/components/nav-user'
 import { TeamSwitcher } from '#app/components/team-switcher'
+import { OnboardingChecklist } from '#app/components/onboarding-checklist'
 import {
 	Sidebar,
 	SidebarContent,
@@ -14,10 +15,17 @@ import {
 	SidebarHeader,
 } from '#app/components/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
+import { type OnboardingProgressData } from '#app/utils/onboarding'
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ 
+	onboardingProgress,
+	...props 
+}: React.ComponentProps<typeof Sidebar> & { onboardingProgress?: OnboardingProgressData | null }) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
+
+	const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug
+	const organizationId = rootData?.userOrganizations?.currentOrganization?.organization.id
 
 	const data = {
 		user: rootData?.user
@@ -96,6 +104,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<TeamSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
+				{/* Onboarding Checklist in Sidebar */}
+				{onboardingProgress && 
+				 !onboardingProgress.isCompleted && 
+				 onboardingProgress.isVisible && 
+				 orgSlug && 
+				 organizationId && (
+					<Link to={`/app/${orgSlug}`}>
+						<OnboardingChecklist 
+							progress={onboardingProgress} 
+							orgSlug={orgSlug}
+							organizationId={organizationId}
+							variant="sidebar"
+						/>
+					</Link>
+				)}
 				<NavMain items={data.navMain} />
 			</SidebarContent>
 			<SidebarFooter>

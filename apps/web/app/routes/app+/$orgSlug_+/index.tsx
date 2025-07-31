@@ -12,6 +12,8 @@ import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
 import { loader as rootLoader } from '#app/root.tsx'
 import { NotesChart } from '#app/components/notes-chart'
+import { OnboardingChecklist } from '#app/components/onboarding-checklist'
+import { getOnboardingProgress, autoDetectCompletedSteps } from '#app/utils/onboarding'
 
 const novu = new Novu({
 	secretKey: process.env.NOVU_SECRET_KEY,
@@ -82,7 +84,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		})
 	}
 
-	return Response.json({ organization, chartData, daysToShow })
+	// Get onboarding progress
+	await autoDetectCompletedSteps(userId, organization.id)
+	const onboardingProgress = await getOnboardingProgress(userId, organization.id)
+
+	return Response.json({ organization, chartData, daysToShow, onboardingProgress })
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -120,13 +126,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function OrganizationDashboard() {
-	const { chartData, daysToShow } = useLoaderData() as {
+	const { chartData, daysToShow, onboardingProgress } = useLoaderData() as {
 		organization: { name: string }
 		chartData: Array<{ date: string; day: string; label: string; notes: number }>
 		daysToShow: number
+		onboardingProgress: any
 	}
 	const rootData = useRouteLoaderData<typeof rootLoader>('root');
 	const user = rootData?.user;
+	const orgSlug = rootData?.userOrganizations?.currentOrganization?.organization.slug || '';
 
 	return (
 		<div className="p-8">
@@ -135,8 +143,22 @@ export default function OrganizationDashboard() {
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
 
+			<div className="flex gap-8">
+				{/* Onboarding Checklist */}
+			{onboardingProgress && !onboardingProgress.isCompleted && onboardingProgress.isVisible && (
+				<div className="mt-8 w-1/2">
+					<OnboardingChecklist 
+						progress={onboardingProgress} 
+						orgSlug={orgSlug}
+						organizationId={rootData?.userOrganizations?.currentOrganization?.organization.id || ''}
+						variant="dashboard"
+					/>
+				</div>
+			)}
+
 			<div className="mt-8 w-1/2">
 				<NotesChart data={chartData} daysShown={daysToShow} />
+			</div>
 			</div>
 		</div>
 	)

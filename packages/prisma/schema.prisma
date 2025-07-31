@@ -35,6 +35,8 @@ model User {
   noteComments    NoteComment[]
   activityLogs    NoteActivityLog[]
   targetedActivityLogs NoteActivityLog[] @relation("ActivityLogTarget")
+  onboardingProgress OnboardingProgress[]
+  onboardingStepProgress OnboardingStepProgress[]
 }
 
 model Note {
@@ -215,6 +217,8 @@ model Organization {
   image        OrganizationImage?
   notes        OrganizationNote[]
   integrations Integration[]
+  onboardingProgress OnboardingProgress[]
+  onboardingStepProgress OnboardingStepProgress[]
 }
 
 model UserOrganization {
@@ -477,4 +481,80 @@ model NoteActivityLog {
   @@index([userId])
   @@index([noteId, createdAt])
   @@index([action])
+}
+
+model OnboardingStep {
+  id          String @id @default(cuid())
+  key         String @unique // e.g., "create_first_note"
+  title       String
+  description String
+  icon        String?
+  
+  // Action configuration stored as JSON
+  actionConfig String? // JSON: {"type": "navigate", "target": "/notes/new", "label": "Create Note"}
+  
+  // Step configuration
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+  
+  // Auto-detection configuration
+  autoDetect  Boolean @default(false)
+  detectConfig String? // JSON: {"condition": "hasNotes", "params": {}}
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userProgress OnboardingStepProgress[]
+  
+  @@index([isActive, sortOrder])
+}
+
+model OnboardingStepProgress {
+  id       String @id @default(cuid())
+  userId   String
+  organizationId String
+  stepId   String
+  
+  isCompleted   Boolean @default(false)
+  completedAt   DateTime?
+  
+  // Optional metadata for the completion
+  metadata      String? // JSON for any additional data
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  step         OnboardingStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, organizationId, stepId])
+  @@index([userId, organizationId])
+  @@index([stepId])
+}
+
+model OnboardingProgress {
+  id             String @id @default(cuid())
+  userId         String
+  organizationId String
+  
+  // Aggregate progress data
+  totalSteps     Int @default(0)
+  completedCount Int @default(0)
+  isCompleted    Boolean @default(false)
+  completedAt    DateTime?
+  
+  // Settings
+  isVisible      Boolean @default(true) // Can be hidden by user
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
 }

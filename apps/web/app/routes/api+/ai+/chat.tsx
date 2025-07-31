@@ -5,12 +5,15 @@ import { prisma } from "@repo/prisma";
 import { streamText } from "ai";
 import { type ActionFunctionArgs } from "react-router";
 import { z } from "zod";
+import { requireUserId } from "#app/utils/auth.server";
+import { markStepCompleted } from "#app/utils/onboarding";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     throw new Response("Method not allowed", { status: 405 });
   }
 
+  const userId = await requireUserId(request);
   const url = new URL(request.url);
   const noteId = url.searchParams.get('noteId');
   console.log('noteId', noteId)
@@ -23,6 +26,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     select: {
       content: true,
       title: true,
+      organizationId: true,
       comments: {
         select: {
           content: true,
@@ -38,6 +42,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (!note) {
     invariant(note, 'Note not found');
+  }
+
+  // Track AI chat usage for onboarding
+  try {
+    await markStepCompleted(userId, note.organizationId, 'try_ai_chat', {
+      completedVia: 'ai_chat_usage',
+      noteId
+    });
+  } catch (error) {
+    // Don't fail the AI request if onboarding tracking fails
+    console.error('Failed to track AI chat onboarding step:', error);
   }
 
   const { messages, tools } = await request.json() as { messages: any; tools: any };

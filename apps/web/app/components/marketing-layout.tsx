@@ -3,15 +3,18 @@ import { AppSidebar } from '#app/components/app-sidebar'
 import { SiteHeader } from '#app/components/site-header'
 import { SidebarInset, SidebarProvider } from '#app/components/ui/sidebar'
 import { EpicProgress } from './progress-bar'
+import { type OnboardingProgressData } from '#app/utils/onboarding'
 
 type MarketingLayoutProps = {
 	children: ReactNode
 	isCollapsed?: boolean
+	onboardingProgress?: OnboardingProgressData | null
 }
 
 export function MarketingLayout({
 	children,
 	isCollapsed = false,
+	onboardingProgress,
 }: MarketingLayoutProps) {
 	return (
 		<>
@@ -24,7 +27,7 @@ export function MarketingLayout({
 					} as React.CSSProperties
 				}
 			>
-				<AppSidebar variant="inset" />
+				<AppSidebar variant="inset" onboardingProgress={onboardingProgress} />
 				<SidebarInset
 					style={
 						{
