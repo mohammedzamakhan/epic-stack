@@ -208,10 +208,10 @@ export async function getOnboardingProgress(
 			description: step.description,
 			icon: step.icon || undefined,
 			actionConfig: step.actionConfig
-				? JSON.parse(step.actionConfig)
+				? (JSON.parse(step.actionConfig) as OnboardingStepAction)
 				: undefined,
 			detectConfig: step.detectConfig
-				? JSON.parse(step.detectConfig)
+				? (JSON.parse(step.detectConfig) as OnboardingStepDetectConfig)
 				: undefined,
 			sortOrder: step.sortOrder,
 			isCompleted: userProgress?.isCompleted || false,
