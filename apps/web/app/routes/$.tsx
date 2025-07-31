@@ -5,10 +5,10 @@
 // ensure the user gets the right status code and we can display a nicer error
 // message for them than the Remix and/or browser default.
 
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { Icon } from '#app/components/ui/icon.tsx'
 import { Button } from '#app/components/ui/button.tsx'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 export function loader() {
 	throw new Response('Not found', { status: 404 })
@@ -587,7 +587,6 @@ export function NotFoundPage() {
 }
 
 export function ErrorBoundary() {
-	const location = useLocation()
 	return (
 		<GeneralErrorBoundary
 			statusHandlers={{

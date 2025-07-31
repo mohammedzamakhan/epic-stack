@@ -1,14 +1,20 @@
-import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server'
+import { redirect, type LoaderFunctionArgs } from 'react-router'
+import { getUserId } from '#app/utils/auth.server'
 import { validateAndAcceptInvitation } from '#app/utils/organization-invitation.server'
 import { redirectWithToast } from '#app/utils/toast.server'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-	const userId = await requireUserId(request)
+	const userId = await getUserId(request)
 	const token = params.token
+
+	console.log(userId, token)
 
 	if (!token) {
 		throw new Response('Invalid invitation link', { status: 400 })
+	}
+
+	if (!userId) {
+		return redirect('/signup')
 	}
 
 	try {
@@ -16,6 +22,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			token,
 			userId,
 		)
+
+		console.log(organization, alreadyMember)
 
 		if (alreadyMember) {
 			return redirectWithToast(`/app/${organization.slug}`, {

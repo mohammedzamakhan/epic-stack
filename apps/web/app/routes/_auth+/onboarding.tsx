@@ -58,7 +58,7 @@ async function requireOnboardingEmail(request: Request) {
 	if (typeof email !== 'string' || !email) {
 		throw redirect('/signup')
 	}
-	return 'mohammed@gmail.com'
+	return email
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -129,8 +129,33 @@ export async function action({ request }: Route.ActionArgs) {
 		await verifySessionStorage.destroySession(verifySession),
 	)
 
+	// Check for pending organization invitations and accept them
+	try {
+		const { acceptInvitationByEmail } = await import('#app/utils/organization-invitation.server.ts')
+		const invitationResults = await acceptInvitationByEmail(email, session.userId)
+
+		if (invitationResults.length > 0) {
+			const joinedOrganizations = invitationResults.filter(result => !result.alreadyMember)
+			if (joinedOrganizations.length > 0) {
+				const orgNames = joinedOrganizations.map(result => result.organization.name).join(', ')
+				const firstOrgSlug = joinedOrganizations[0]?.organization.slug
+				return redirectWithToast(
+					`/app/${firstOrgSlug}`,
+					{
+						title: 'Welcome!',
+						description: `Thanks for signing up! You've been added to: ${orgNames}`
+					},
+					{ headers },
+				)
+			}
+		}
+	} catch (error) {
+		// Don't fail the signup if invitation processing fails
+		console.error('Error processing organization invitations during signup:', error)
+	}
+
 	return redirectWithToast(
-		safeRedirect(redirectTo),
+		'/organizations/create',
 		{ title: 'Welcome', description: 'Thanks for signing up!' },
 		{ headers },
 	)

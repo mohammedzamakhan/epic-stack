@@ -17,6 +17,7 @@ import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 } from '#app/utils/onboarding'
+import { LeadershipCard } from '#app/components/leadership-card.tsx'
 
 const novu = new Novu({
 	secretKey: process.env.NOVU_SECRET_KEY,
@@ -105,11 +106,56 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		organization.id,
 	)
 
+	// Get leadership data - top note creators
+	const leadershipData = await prisma.organizationNote.groupBy({
+		by: ['createdById'],
+		where: {
+			organizationId: organization.id,
+		},
+		_count: {
+			id: true,
+		},
+		orderBy: {
+			_count: {
+				id: 'desc',
+			},
+		},
+		take: 6, // Top 6 contributors
+	})
+
+	// Get user details for the top contributors
+	const userIds = leadershipData.map(item => item.createdById)
+	const users = await prisma.user.findMany({
+		where: {
+			id: {
+				in: userIds,
+			},
+		},
+		select: {
+			id: true,
+			name: true,
+			email: true,
+		},
+	})
+
+	// Combine user data with note counts and add ranking
+	const leaders = leadershipData.map((item, index) => {
+		const user = users.find(u => u.id === item.createdById)
+		return {
+			id: item.createdById,
+			name: user?.name || 'Unknown User',
+			email: user?.email || '',
+			notesCount: item._count?.id || 0,
+			rank: index + 1,
+		}
+	})
+
 	return Response.json({
 		organization,
 		chartData,
 		daysToShow,
 		onboardingProgress,
+		leaders,
 	})
 }
 
@@ -148,7 +194,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function OrganizationDashboard() {
-	const { chartData, daysToShow, onboardingProgress } = useLoaderData() as {
+	const { chartData, daysToShow, onboardingProgress, leaders } = useLoaderData() as {
 		organization: { name: string }
 		chartData: Array<{
 			date: string
@@ -158,6 +204,13 @@ export default function OrganizationDashboard() {
 		}>
 		daysToShow: number
 		onboardingProgress: any
+		leaders: Array<{
+			id: string
+			name: string
+			email: string
+			notesCount: number
+			rank: number
+		}>
 	}
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const user = rootData?.user
@@ -175,7 +228,7 @@ export default function OrganizationDashboard() {
 				{/* Onboarding Checklist */}
 				{onboardingProgress &&
 					!onboardingProgress.isCompleted &&
-					onboardingProgress.isVisible && (
+					onboardingProgress.isVisible ? (
 						<div className="mt-8 w-1/2">
 							<OnboardingChecklist
 								progress={onboardingProgress}
@@ -187,10 +240,13 @@ export default function OrganizationDashboard() {
 								variant="dashboard"
 							/>
 						</div>
-					)}
+					) : <LeadershipCard className="mt-8 w-1/2 order-2" leaders={leaders} />}
 
 				<div className="mt-8 w-1/2">
 					<NotesChart data={chartData} daysShown={daysToShow} />
+					{onboardingProgress &&
+					!onboardingProgress.isCompleted &&
+					onboardingProgress.isVisible && <LeadershipCard className="mt-4" leaders={leaders} />}
 				</div>
 			</div>
 		</div>

@@ -3,6 +3,7 @@ import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from '#app/utils/db.server'
 import { sendEmail } from '#app/utils/email.server'
 import { markStepCompleted } from '#app/utils/onboarding'
+import { redirect } from 'react-router'
 
 export async function createOrganizationInvitation({
 	organizationId,
@@ -123,6 +124,74 @@ export async function deleteOrganizationInvitation(invitationId: string) {
 			id: invitationId,
 		},
 	})
+}
+
+export async function getPendingInvitationsByEmail(email: string) {
+	return prisma.organizationInvitation.findMany({
+		where: {
+			email: email.toLowerCase(),
+			expiresAt: {
+				gte: new Date(),
+			},
+		},
+		include: {
+			organization: true,
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	})
+}
+
+export async function acceptInvitationByEmail(
+	email: string,
+	userId: string,
+) {
+	const invitations = await getPendingInvitationsByEmail(email)
+
+	if (invitations.length === 0) {
+		return []
+	}
+
+	const results = []
+
+	for (const invitation of invitations) {
+		// Check if user is already a member
+		const existingMember = await prisma.userOrganization.findUnique({
+			where: {
+				userId_organizationId: {
+					userId,
+					organizationId: invitation.organizationId,
+				},
+			},
+		})
+
+		if (existingMember) {
+			// Delete the invitation since user is already a member
+			await prisma.organizationInvitation.delete({
+				where: { id: invitation.id },
+			})
+			results.push({ organization: invitation.organization, alreadyMember: true })
+		} else {
+			// Add user to organization and delete invitation
+			await prisma.$transaction([
+				prisma.userOrganization.create({
+					data: {
+						userId,
+						organizationId: invitation.organizationId,
+						role: invitation.role,
+						active: true,
+					},
+				}),
+				prisma.organizationInvitation.delete({
+					where: { id: invitation.id },
+				}),
+			])
+			results.push({ organization: invitation.organization, alreadyMember: false })
+		}
+	}
+
+	return results
 }
 
 export async function validateAndAcceptInvitation(

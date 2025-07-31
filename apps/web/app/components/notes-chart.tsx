@@ -59,7 +59,7 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<ChartContainer config={chartConfig}>
+				<ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
 					<AreaChart
 						accessibilityLayer
 						data={data}
