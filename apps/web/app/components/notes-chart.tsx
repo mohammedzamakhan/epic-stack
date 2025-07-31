@@ -18,7 +18,7 @@ import {
 const chartConfig = {
 	notes: {
 		label: 'Notes Created',
-		color: 'hsl(var(--chart-1))',
+		color: 'var(--chart-1)',
 	},
 } satisfies ChartConfig
 
