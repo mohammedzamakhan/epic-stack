@@ -38,6 +38,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		key: 'create_first_note',
 		title: 'Create your first note',
 		description: 'Start documenting your ideas and thoughts',
+		icon: 'note',
 		actionConfig: {
 			type: 'navigate' as const,
 			target: '/notes/new',
@@ -53,6 +54,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		key: 'invite_members',
 		title: 'Invite team members',
 		description: 'Collaborate with your team by inviting members',
+		icon: 'user-plus',
 		actionConfig: {
 			type: 'navigate' as const,
 			target: '/settings/members',
@@ -68,6 +70,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		key: 'complete_profile',
 		title: 'Set up your organization profile',
 		description: 'Update your organization name and settings',
+		icon: 'user',
 		actionConfig: {
 			type: 'navigate' as const,
 			target: '/settings',
@@ -99,6 +102,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		key: 'explore_command_menu',
 		title: 'Explore the command menu',
 		description: 'Use Cmd/Ctrl + K to quickly navigate and perform actions',
+		icon: 'command-menu',
 		actionConfig: {
 			type: 'modal' as const,
 			target: 'command-menu',
@@ -114,6 +118,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		key: 'connect_integration',
 		title: 'Connect integrations',
 		description: 'Enhance your workflow with third-party integrations',
+		icon: 'integration',
 		actionConfig: {
 			type: 'navigate' as const,
 			target: '/settings/integrations',

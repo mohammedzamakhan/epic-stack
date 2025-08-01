@@ -1,11 +1,11 @@
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { Button } from './ui/button'
-import { Progress } from './ui/progress'
-import { Icon } from './ui/icon'
 import { type OnboardingProgressData } from '#app/utils/onboarding'
-import { ShineBorder } from './magic-ui/shine-border'
 import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
+import { ShineBorder } from './magic-ui/shine-border'
+import { Button } from './ui/button'
+import { Icon } from './ui/icon'
+import { Progress } from './ui/progress'
 
 interface OnboardingChecklistProps {
 	progress: OnboardingProgressData
@@ -145,71 +145,72 @@ export function OnboardingChecklist({
 
 			<Progress value={progressPercentage} className="mb-6" />
 
-			<div className="space-y-3">
+			<div className="space-y-4">
 				{progress.steps.map((step) => (
 					<div
 						key={step.id}
-						className={`flex items-start gap-3 rounded-lg border p-3 transition-colors ${
-							step.isCompleted
-								? 'bg-muted/50 border-muted'
-								: 'bg-background border-border hover:bg-muted/30'
-						}`}
+						className="flex items-center gap-4 rounded-lg border border-border bg-background p-4"
 					>
-						<div
-							className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-								step.isCompleted
-									? 'bg-primary border-primary'
-									: 'border-muted-foreground'
-							}`}
-						>
-							{step.isCompleted && (
-								<Icon
-									name="check"
-									className="text-primary-foreground h-3 w-3"
-								/>
+						<div className="flex-shrink-0">
+							{step.isCompleted ? (
+								<div className="flex h-8 w-8 items-center justify-center rounded-full bg-black">
+									<Icon
+										name="check"
+										className="h-4 w-4 text-white"
+									/>
+								</div>
+							) : (
+								<div className="flex h-8 w-8 items-center justify-center">
+									<Icon
+										name={step.icon || "circle"}
+										className="h-5 w-5 text-muted-foreground"
+									/>
+								</div>
 							)}
 						</div>
 
 						<div className="min-w-0 flex-1">
-							<h4
-								className={`text-sm font-medium ${
-									step.isCompleted
-										? 'text-muted-foreground line-through'
-										: 'text-foreground'
-								}`}
-							>
+							<h4 className="text-sm font-medium text-foreground">
 								{step.title}
 							</h4>
-							<p className="text-muted-foreground mt-1 text-xs">
+							<p className="text-muted-foreground mt-1 text-sm">
 								{step.description}
 							</p>
+						</div>
 
-							{!step.isCompleted && step.actionConfig && (
-								<div className="mt-2">
-									{step.actionConfig.type === 'navigate' ? (
-										<Link
-											to={`/app/${orgSlug}${step.actionConfig.target}`}
-											onClick={() => handleStepAction(step)}
-										>
+						<div className="flex-shrink-0">
+							{step.isCompleted ? (
+								<span className="text-sm font-medium text-muted-foreground">
+									{step.completedLabel || 'Completed'}
+								</span>
+							) : (
+								step.actionConfig && (
+									<div>
+										{step.actionConfig.type === 'navigate' ? (
+											<Link
+												to={`/app/${orgSlug}${step.actionConfig.target}`}
+												onClick={() => handleStepAction(step)}
+											>
+												<Button
+													variant="outline"
+													size="sm"
+												>
+													{step.actionConfig.label}
+													<Icon name="arrow-right" className="ml-2 h-3 w-3" />
+												</Button>
+											</Link>
+										) : (
 											<Button
 												size="sm"
-												variant="outline"
-												className="h-7 text-xs"
+												className="bg-black text-white hover:bg-black/90"
+												onClick={() => handleStepAction(step)}
 											>
 												{step.actionConfig.label}
+												<Icon name="arrow-right" className="ml-2 h-3 w-3" />
 											</Button>
-										</Link>
-									) : (
-										<Button
-											size="sm"
-											variant="outline"
-											className="h-7 text-xs"
-											onClick={() => handleStepAction(step)}
-										>
-											{step.actionConfig.label}
-										</Button>
-									)}
-								</div>
+										)}
+									</div>
+								)
 							)}
 						</div>
 					</div>

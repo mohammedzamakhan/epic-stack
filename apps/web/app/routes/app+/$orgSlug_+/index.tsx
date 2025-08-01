@@ -225,7 +225,7 @@ export default function OrganizationDashboard() {
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
 
-			<div className="flex flex-wrap gap-8">
+			<div className="flex flex-wrap md:flex-nowrap gap-8">
 				{/* Onboarding Checklist */}
 				{onboardingProgress &&
 				!onboardingProgress.isCompleted &&
