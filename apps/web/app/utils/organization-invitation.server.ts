@@ -143,10 +143,7 @@ export async function getPendingInvitationsByEmail(email: string) {
 	})
 }
 
-export async function acceptInvitationByEmail(
-	email: string,
-	userId: string,
-) {
+export async function acceptInvitationByEmail(email: string, userId: string) {
 	const invitations = await getPendingInvitationsByEmail(email)
 
 	if (invitations.length === 0) {
@@ -171,7 +168,10 @@ export async function acceptInvitationByEmail(
 			await prisma.organizationInvitation.delete({
 				where: { id: invitation.id },
 			})
-			results.push({ organization: invitation.organization, alreadyMember: true })
+			results.push({
+				organization: invitation.organization,
+				alreadyMember: true,
+			})
 		} else {
 			// Add user to organization and delete invitation
 			await prisma.$transaction([
@@ -187,7 +187,10 @@ export async function acceptInvitationByEmail(
 					where: { id: invitation.id },
 				}),
 			])
-			results.push({ organization: invitation.organization, alreadyMember: false })
+			results.push({
+				organization: invitation.organization,
+				alreadyMember: false,
+			})
 		}
 	}
 

@@ -1,5 +1,11 @@
 import { cn } from '#app/utils/misc.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from './ui/card'
 
 interface LeadershipUser {
 	id: string
@@ -50,19 +56,19 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-1">
-					<div className="grid grid-cols-2 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
+					<div className="text-muted-foreground grid grid-cols-2 gap-4 border-b pb-2 text-sm font-medium">
 						<div>Rank</div>
 						<div>Team member</div>
 					</div>
 					{leaders.length === 0 ? (
-						<div className="text-center py-8 text-muted-foreground">
+						<div className="text-muted-foreground py-8 text-center">
 							No notes created yet
 						</div>
 					) : (
 						leaders.map((leader, index) => (
 							<div
 								key={leader.id}
-								className="grid grid-cols-2 gap-4 items-center py-1 border-b border-gray-100 last:border-b-0"
+								className="grid grid-cols-2 items-center gap-4 border-b border-gray-100 py-1 last:border-b-0"
 							>
 								<div className="flex items-center gap-2">
 									<span className="text-md font-semibold">{leader.rank}</span>
@@ -72,16 +78,17 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 								</div>
 								<div className="flex items-center gap-3">
 									<div
-										className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(
+										className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-white ${getAvatarColor(
 											index,
 										)}`}
 									>
 										{leader.name.charAt(0).toUpperCase()}
 									</div>
 									<div className="flex-1">
-										<div className="font-medium text-sm">{leader.name}</div>
-										<div className="text-xs text-muted-foreground">
-											{leader.notesCount} note{leader.notesCount !== 1 ? 's' : ''}
+										<div className="text-sm font-medium">{leader.name}</div>
+										<div className="text-muted-foreground text-xs">
+											{leader.notesCount} note
+											{leader.notesCount !== 1 ? 's' : ''}
 										</div>
 									</div>
 								</div>

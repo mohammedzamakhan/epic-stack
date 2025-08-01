@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
 import { Icon } from './ui/icon'
 import { type OnboardingProgressData } from '#app/utils/onboarding'
+import { ShineBorder } from './magic-ui/shine-border'
+import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
 
 interface OnboardingChecklistProps {
 	progress: OnboardingProgressData
@@ -21,6 +23,7 @@ export function OnboardingChecklist({
 	className = '',
 }: OnboardingChecklistProps) {
 	const fetcher = useFetcher()
+	const listTodoIconRef = useRef<ListTodoIconHandle>(null)
 
 	// Don't show if completed and not visible
 	if (progress.isCompleted && !progress.isVisible) {
@@ -66,15 +69,23 @@ export function OnboardingChecklist({
 	if (variant === 'sidebar') {
 		return (
 			<div
-				className={`relative overflow-hidden rounded-lg border border-slate-600/50 bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-slate-800/20 px-4 py-3 backdrop-blur-sm ${className}`}
+				className={`group relative overflow-hidden rounded-lg border border-slate-600/50 bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-slate-800/20 px-4 py-3 backdrop-blur-sm transition-all duration-300 hover:border-slate-500/60 hover:shadow-lg hover:shadow-blue-500/10 ${className}`}
+				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
+				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
 			>
-				{/* Subtle background pattern */}
-				<div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/5 to-transparent opacity-40" />
+				<ShineBorder shineColor={['#A07CFE', '#FE8FB5', '#FFBE7B']} />
+				{/* Subtle background pattern with hover animation */}
+				<div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/5 to-transparent opacity-40 transition-all duration-500 group-hover:via-blue-400/8 group-hover:opacity-60" />
+				<div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-300/0 to-blue-400/0 opacity-0 transition-all duration-700 group-hover:via-blue-300/3 group-hover:opacity-100" />
 
 				<div className="relative z-10">
 					<div className="mb-3 flex w-full items-center justify-between">
 						<div className="flex items-center gap-2">
-							<div className="h-2 w-2 animate-pulse rounded-full bg-blue-400 shadow-sm" />
+							<ListTodoIcon
+								ref={listTodoIconRef}
+								size={16}
+								className="text-blue-400"
+							/>
 							<span className="text-sm font-semibold text-white">
 								Get Started
 							</span>

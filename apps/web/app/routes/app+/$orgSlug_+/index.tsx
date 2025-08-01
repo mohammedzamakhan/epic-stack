@@ -124,7 +124,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	})
 
 	// Get user details for the top contributors
-	const userIds = leadershipData.map(item => item.createdById)
+	const userIds = leadershipData.map((item) => item.createdById)
 	const users = await prisma.user.findMany({
 		where: {
 			id: {
@@ -140,7 +140,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	// Combine user data with note counts and add ranking
 	const leaders = leadershipData.map((item, index) => {
-		const user = users.find(u => u.id === item.createdById)
+		const user = users.find((u) => u.id === item.createdById)
 		return {
 			id: item.createdById,
 			name: user?.name || 'Unknown User',
@@ -194,24 +194,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function OrganizationDashboard() {
-	const { chartData, daysToShow, onboardingProgress, leaders } = useLoaderData() as {
-		organization: { name: string }
-		chartData: Array<{
-			date: string
-			day: string
-			label: string
-			notes: number
-		}>
-		daysToShow: number
-		onboardingProgress: any
-		leaders: Array<{
-			id: string
-			name: string
-			email: string
-			notesCount: number
-			rank: number
-		}>
-	}
+	const { chartData, daysToShow, onboardingProgress, leaders } =
+		useLoaderData() as {
+			organization: { name: string }
+			chartData: Array<{
+				date: string
+				day: string
+				label: string
+				notes: number
+			}>
+			daysToShow: number
+			onboardingProgress: any
+			leaders: Array<{
+				id: string
+				name: string
+				email: string
+				notesCount: number
+				rank: number
+			}>
+		}
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const user = rootData?.user
 	const orgSlug =
@@ -227,26 +228,30 @@ export default function OrganizationDashboard() {
 			<div className="flex gap-8">
 				{/* Onboarding Checklist */}
 				{onboardingProgress &&
-					!onboardingProgress.isCompleted &&
-					onboardingProgress.isVisible ? (
-						<div className="mt-8 w-1/2">
-							<OnboardingChecklist
-								progress={onboardingProgress}
-								orgSlug={orgSlug}
-								organizationId={
-									rootData?.userOrganizations?.currentOrganization?.organization
-										.id || ''
-								}
-								variant="dashboard"
-							/>
-						</div>
-					) : <LeadershipCard className="mt-8 w-1/2 order-2" leaders={leaders} />}
+				!onboardingProgress.isCompleted &&
+				onboardingProgress.isVisible ? (
+					<div className="mt-8 w-1/2">
+						<OnboardingChecklist
+							progress={onboardingProgress}
+							orgSlug={orgSlug}
+							organizationId={
+								rootData?.userOrganizations?.currentOrganization?.organization
+									.id || ''
+							}
+							variant="dashboard"
+						/>
+					</div>
+				) : (
+					<LeadershipCard className="order-2 mt-8 w-1/2" leaders={leaders} />
+				)}
 
 				<div className="mt-8 w-1/2">
 					<NotesChart data={chartData} daysShown={daysToShow} />
 					{onboardingProgress &&
-					!onboardingProgress.isCompleted &&
-					onboardingProgress.isVisible && <LeadershipCard className="mt-4" leaders={leaders} />}
+						!onboardingProgress.isCompleted &&
+						onboardingProgress.isVisible && (
+							<LeadershipCard className="mt-4" leaders={leaders} />
+						)}
 				</div>
 			</div>
 		</div>

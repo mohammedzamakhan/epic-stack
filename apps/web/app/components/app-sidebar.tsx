@@ -16,6 +16,9 @@ import {
 } from '#app/components/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
 import { type OnboardingProgressData } from '#app/utils/onboarding'
+import { NavSecondary } from './nav-secondary'
+import { CircleHelpIcon } from './icons/circle-help'
+import { MessageSquareMoreIcon } from './icons/message-square-more'
 
 export function AppSidebar({
 	onboardingProgress,
@@ -101,6 +104,18 @@ export function AppSidebar({
 				],
 			},
 		],
+		navSecondary: [
+			{
+				title: 'Get help',
+				url: '#',
+				icon: CircleHelpIcon,
+			},
+			{
+				title: 'Give feedback',
+				url: '#',
+				icon: MessageSquareMoreIcon,
+			},
+		],
 	}
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
@@ -124,6 +139,7 @@ export function AppSidebar({
 						</Link>
 					)}
 				<NavMain items={data.navMain} />
+				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={data.user} />
