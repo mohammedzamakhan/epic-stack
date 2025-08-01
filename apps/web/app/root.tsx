@@ -110,6 +110,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	// Get user organizations if user exists
 	let userOrganizations = undefined
+	let favoriteNotes = undefined
 	if (user) {
 		try {
 			const { getUserOrganizations, getUserDefaultOrganization } = await import(
@@ -120,6 +121,39 @@ export async function loader({ request }: Route.LoaderArgs) {
 			userOrganizations = {
 				organizations: orgs,
 				currentOrganization: defaultOrg,
+			}
+
+			// Get user's favorite notes for the current organization
+			if (defaultOrg?.organization.id) {
+				favoriteNotes = await time(
+					() =>
+						prisma.organizationNoteFavorite.findMany({
+							where: {
+								userId: user.id,
+								note: {
+									organizationId: defaultOrg.organization.id,
+									OR: [
+										{ isPublic: true },
+										{ createdById: user.id },
+										{ noteAccess: { some: { userId: user.id } } },
+									],
+								},
+							},
+							select: {
+								note: {
+									select: {
+										id: true,
+										title: true,
+									},
+								},
+							},
+							orderBy: {
+								createdAt: 'desc',
+							},
+							take: 5, // Limit to 5 most recent favorites
+						}),
+					{ timings, type: 'find favorite notes', desc: 'find favorite notes in root' },
+				)
 			}
 		} catch (error) {
 			console.error('Failed to load user organizations', error)
@@ -141,6 +175,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const utmResponse = await storeUtmParams(request)
 	const utmHeaders = utmResponse?.headers || {}
 
+	console.log('locale', locale)
+
 	return data(
 		{
 			user,
@@ -150,6 +186,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			honeyProps,
 			locale,
 			userOrganizations,
+			favoriteNotes,
 		},
 		{
 			headers: combineHeaders(
@@ -178,8 +215,7 @@ function Document({
 	env?: Record<string, string | undefined>
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
-	// const { locale } = useLoaderData<typeof loader>()
-	const locale = 'en'
+	const { locale } = useLoaderData<typeof loader>()
 	return (
 		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>
 			<head>

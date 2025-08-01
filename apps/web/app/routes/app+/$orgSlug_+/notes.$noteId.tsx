@@ -177,10 +177,19 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	// Get recent activity logs for this note
 	const activityLogs = await getNoteActivityLogs(note.id, 20)
 
+	// Check if current user has favorited this note
+	const isFavorited = await prisma.organizationNoteFavorite.findFirst({
+		where: {
+			userId,
+			noteId: note.id,
+		},
+	})
+
 	return {
 		note,
 		timeAgo,
 		currentUserId: userId,
+		isFavorited: !!isFavorited,
 		organizationMembers,
 		comments: organizedComments,
 		activityLogs,
@@ -268,6 +277,11 @@ const AddCommentSchema = z.object({
 const DeleteCommentSchema = z.object({
 	intent: z.literal('delete-comment'),
 	commentId: z.string(),
+})
+
+const ToggleFavoriteSchema = z.object({
+	intent: z.literal('toggle-favorite'),
+	noteId: z.string(),
 })
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -1118,6 +1132,86 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === 'toggle-favorite') {
+		const submission = parseWithZod(formData, {
+			schema: ToggleFavoriteSchema,
+		})
+		if (submission.status !== 'success') {
+			return data(
+				{ result: submission.reply() },
+				{ status: submission.status === 'error' ? 400 : 200 },
+			)
+		}
+
+		const { noteId } = submission.value
+
+		// Get the note to verify access
+		const note = await prisma.organizationNote.findFirst({
+			select: {
+				organizationId: true,
+				isPublic: true,
+				createdById: true,
+				noteAccess: {
+					select: { userId: true },
+				},
+			},
+			where: { id: noteId },
+		})
+		invariantResponse(note, 'Note not found', { status: 404 })
+
+		// Check if user has access to this organization
+		await userHasOrgAccess(request, note.organizationId)
+
+		// Check if user has access to this specific note
+		if (!note.isPublic) {
+			const hasAccess =
+				note.createdById === userId ||
+				note.noteAccess.some((access) => access.userId === userId)
+
+			if (!hasAccess) {
+				throw new Response('Not authorized', { status: 403 })
+			}
+		}
+
+		try {
+			// Check if already favorited
+			const existingFavorite = await prisma.organizationNoteFavorite.findFirst({
+				where: {
+					userId,
+					noteId,
+				},
+			})
+
+			if (existingFavorite) {
+				// Remove favorite
+				await prisma.organizationNoteFavorite.delete({
+					where: { id: existingFavorite.id },
+				})
+			} else {
+				// Add favorite
+				await prisma.organizationNoteFavorite.create({
+					data: {
+						userId,
+						noteId,
+					},
+				})
+			}
+
+			return data({ result: { status: 'success' } })
+		} catch (error) {
+			console.error('Error toggling favorite:', error)
+			return data(
+				{
+					result: {
+						status: 'error',
+						error: 'Failed to toggle favorite',
+					},
+				},
+				{ status: 500 },
+			)
+		}
+	}
+
 	return data(
 		{ result: { status: 'error', error: 'Invalid intent' } },
 		{ status: 400 },
@@ -1144,6 +1238,7 @@ type NoteLoaderData = {
 	}
 	timeAgo: string
 	currentUserId: string
+	isFavorited: boolean
 	organizationMembers: Array<{
 		userId: string
 		user: {
@@ -1213,6 +1308,7 @@ export default function NoteRoute() {
 		note,
 		timeAgo,
 		currentUserId,
+		isFavorited,
 		organizationMembers,
 		comments,
 		activityLogs,
@@ -1365,6 +1461,7 @@ export default function NoteRoute() {
 							</Icon>
 						</span>
 						<div className="flex items-center gap-2 md:gap-3">
+							<FavoriteButton noteId={note.id} isFavorited={isFavorited} />
 							<ShareNoteButton
 								noteId={note.id}
 								isPublic={note.isPublic}
@@ -1394,6 +1491,45 @@ export default function NoteRoute() {
 				</div>
 			</section>
 		</>
+	)
+}
+
+export function FavoriteButton({
+	noteId,
+	isFavorited,
+}: {
+	noteId: string
+	isFavorited: boolean
+}) {
+	const isPending = useIsPending()
+	const [form] = useForm({
+		id: 'toggle-favorite',
+	})
+
+	return (
+		<Form method="POST" {...getFormProps(form)}>
+			<input type="hidden" name="noteId" value={noteId} />
+			<StatusButton
+				type="submit"
+				name="intent"
+				value="toggle-favorite"
+				variant="outline"
+				size="sm"
+				status={isPending ? 'pending' : (form.status ?? 'idle')}
+				disabled={isPending}
+				className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+			>
+				<Icon
+					name={isFavorited ? 'star-off' : 'star'}
+					className="h-4 w-4 max-md:scale-125"
+				>
+					<span className="max-md:hidden">
+						{isFavorited ? 'Unstar' : 'Star'}
+					</span>
+				</Icon>
+			</StatusButton>
+			<ErrorList errors={form.errors} id={form.errorId} />
+		</Form>
 	)
 }
 

@@ -21,6 +21,7 @@ import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { NavSecondary } from './nav-secondary'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { Logo } from './icons/logo'
+import FavoriteNotes from './favorite-notes'
 
 export function AppSidebar({
 	onboardingProgress,
@@ -147,6 +148,9 @@ export function AppSidebar({
 						</Link>
 					)}
 				<NavMain items={data.navMain} />
+				{rootData?.favoriteNotes && orgSlug && (
+					<FavoriteNotes favoriteNotes={rootData.favoriteNotes} orgSlug={orgSlug} />
+				)}
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>

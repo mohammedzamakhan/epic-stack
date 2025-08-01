@@ -5,25 +5,13 @@ import { useOptionalUserOrganizations } from '#app/utils/organizations.ts'
 import { useOptionalUser } from '#app/utils/user.ts'
 import { Button } from './button'
 import { Icon } from './icon'
+import { Logo } from '../icons/logo'
 
 const menuItems = [
 	{ name: 'Features', href: '#link' },
 	{ name: 'Pricing', href: '/pricing' },
 	{ name: 'About', href: '/about' },
 ]
-
-function Logo() {
-	return (
-		<Link to="/" className="group grid leading-snug">
-			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
-			</span>
-		</Link>
-	)
-}
 
 export const HeroHeader = () => {
 	const [menuState, setMenuState] = React.useState(false)

@@ -10,19 +10,7 @@ import { type loader } from '#app/root.tsx'
 import { ThemeSwitch, useTheme } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalUser } from '#app/utils/user.ts'
 import { HeroHeader } from '#app/components/ui/header.tsx'
-
-function Logo() {
-	return (
-		<Link to="/" className="group grid leading-snug">
-			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
-			</span>
-		</Link>
-	)
-}
+import { Logo } from '#app/components/icons/logo.tsx'
 
 export default function MarketingLayout() {
 	const data = useRouteLoaderData<typeof loader>('root')

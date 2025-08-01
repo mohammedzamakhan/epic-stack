@@ -9,39 +9,40 @@ datasource db {
 }
 
 model User {
-  id                     String                   @id @default(cuid())
-  email                  String                   @unique
-  username               String                   @unique
+  id                     String                     @id @default(cuid())
+  email                  String                     @unique
+  username               String                     @unique
   name                   String?
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
   connections            Connection[]
   notes                  Note[]
   noteAccess             NoteAccess[]
-  targetedActivityLogs   NoteActivityLog[]        @relation("ActivityLogTarget")
+  targetedActivityLogs   NoteActivityLog[]          @relation("ActivityLogTarget")
   activityLogs           NoteActivityLog[]
   noteComments           NoteComment[]
   onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]
-  sentInvitations        OrganizationInvitation[] @relation("inviter")
-  createdOrgNotes        OrganizationNote[]       @relation("createdBy")
+  sentInvitations        OrganizationInvitation[]   @relation("inviter")
+  createdOrgNotes        OrganizationNote[]         @relation("createdBy")
   passkey                Passkey[]
   password               Password?
   sessions               Session[]
   image                  UserImage?
   organizations          UserOrganization[]
   utmSource              UtmSource?
-  roles                  Role[]                   @relation("RoleToUser")
+  roles                  Role[]                     @relation("RoleToUser")
+  orgNoteFavorites       OrganizationNoteFavorite[]
 }
 
 model Note {
-  id        String      @id @default(cuid())
+  id        String         @id @default(cuid())
   title     String
   content   String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
   ownerId   String
-  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   images    NoteImage[]
 
   @@index([ownerId])
@@ -258,6 +259,7 @@ model OrganizationNote {
   createdBy              User                        @relation("createdBy", fields: [createdById], references: [id], onDelete: Cascade)
   organization           Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   images                 OrganizationNoteImage[]
+  favorites              OrganizationNoteFavorite[]
 
   @@index([organizationId])
   @@index([createdById])
@@ -452,4 +454,17 @@ model OnboardingProgress {
   @@unique([userId, organizationId])
   @@index([userId])
   @@index([organizationId])
+}
+
+model OrganizationNoteFavorite {
+  id        String           @id @default(cuid())
+  userId    String
+  noteId    String
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note      OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, noteId])
+  @@index([userId])
+  @@index([noteId])
 }
