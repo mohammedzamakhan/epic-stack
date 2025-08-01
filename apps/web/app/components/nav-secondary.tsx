@@ -8,6 +8,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '#app/components/ui/sidebar'
+import { Link } from 'react-router'
 
 export function NavSecondary({
 	items,
@@ -46,13 +47,13 @@ export function NavSecondary({
 								onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
 								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 							>
-								<a href={item.url}>
+								<Link to={item.url}>
 									<item.icon
 										ref={(ref: any) => (iconRefs.current[item.title] = ref)}
 										size={16}
 									/>
 									<span>{item.title}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}

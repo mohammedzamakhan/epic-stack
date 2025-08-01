@@ -68,7 +68,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 		>
 			<CardContent className="p-0">
 				{/* Image or Header Section */}
-				<div className="relative aspect-video overflow-hidden bg-primary/20">
+				<div className="bg-primary/20 relative aspect-video overflow-hidden">
 					{firstImage ? (
 						<>
 							<Img
@@ -83,8 +83,8 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 						</>
 					) : (
 						<div className="flex h-full items-center justify-center">
-							<div className="rounded-full bg-background/80 p-4 shadow-sm">
-								<Icon name="file-text" className="h-8 w-8 text-primary" />
+							<div className="bg-background/80 rounded-full p-4 shadow-sm">
+								<Icon name="file-text" className="text-primary h-8 w-8" />
 							</div>
 						</div>
 					)}
@@ -95,11 +95,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 							hovered ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
 						}`}
 					>
-						<Button
-							size="sm"
-							variant="secondary"
-							onClick={handleCopyLink}
-						>
+						<Button size="sm" variant="secondary" onClick={handleCopyLink}>
 							{copied ? (
 								<>
 									<Icon name="check" className="h-3 w-3" />
@@ -132,9 +128,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 				<div className="p-2 px-4">
 					<div className="flex items-start gap-3">
 						<div className="min-w-0 flex-1">
-							<h4 className="line-clamp-2 leading-tight">
-								{note.title}
-							</h4>
+							<h4 className="line-clamp-2 leading-tight">{note.title}</h4>
 							<div className="mt-1 text-xs">
 								<h3 className="text-foreground inline font-medium">
 									{createdBy}

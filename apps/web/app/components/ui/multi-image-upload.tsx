@@ -134,14 +134,14 @@ export function MultiImageUpload({
 	const canAddMore = imageList.length < maxImages && !disabled
 
 	return (
-		<div className={cn('space-y-4 mt-4', className)}>
+		<div className={cn('mt-4 space-y-4', className)}>
 			<Label className="text-sm font-medium">
 				{label} ({imageList.length}/{maxImages})
 			</Label>
 
 			{/* Existing Images Grid */}
 			{imageList.length > 0 && (
-				<div className="flex gap-4 h-32">
+				<div className="flex h-32 gap-4">
 					{imageList.map((imageMeta, index) => {
 						// Find existing image data by matching form field ID
 						const imageMetaId = imageMeta.getFieldset().id.value
@@ -183,9 +183,7 @@ export function MultiImageUpload({
 				<div
 					className={cn(
 						'cursor-pointer rounded-lg border-2 border-dashed transition-all duration-200',
-						isDragging
-							? 'border-primary bg-primary/5'
-							: 'hover:border-primary',
+						isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary',
 					)}
 					onDragOver={handleDragOver}
 					onDragLeave={handleDragLeave}
@@ -210,14 +208,14 @@ export function MultiImageUpload({
 					/>
 					<div className="p-8 text-center">
 						<div className="space-y-4">
-							<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+							<div className="bg-muted mx-auto flex h-12 w-12 items-center justify-center rounded-full">
 								<Icon name="plus" className="h-6 w-6" />
 							</div>
 							<div className="space-y-2">
 								<p className="text-sm font-medium">
 									{isDragging ? 'Drop images here' : 'Add more images'}
 								</p>
-								<p className="text-xs text-muted-foreground">
+								<p className="text-muted-foreground text-xs">
 									Or click to select files
 								</p>
 							</div>

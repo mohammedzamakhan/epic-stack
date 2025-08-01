@@ -225,12 +225,12 @@ export default function OrganizationDashboard() {
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
 
-			<div className="flex gap-8">
+			<div className="flex flex-wrap gap-8">
 				{/* Onboarding Checklist */}
 				{onboardingProgress &&
 				!onboardingProgress.isCompleted &&
 				onboardingProgress.isVisible ? (
-					<div className="mt-8 w-1/2">
+					<div className="mt-8 md:w-1/2">
 						<OnboardingChecklist
 							progress={onboardingProgress}
 							orgSlug={orgSlug}
@@ -242,10 +242,10 @@ export default function OrganizationDashboard() {
 						/>
 					</div>
 				) : (
-					<LeadershipCard className="order-2 mt-8 w-1/2" leaders={leaders} />
+					<LeadershipCard className="order-2 mt-8 md:w-1/2" leaders={leaders} />
 				)}
 
-				<div className="mt-8 w-1/2">
+				<div className="mt-8 md:w-1/2">
 					<NotesChart data={chartData} daysShown={daysToShow} />
 					{onboardingProgress &&
 						!onboardingProgress.isCompleted &&

@@ -1,4 +1,4 @@
-import { Form } from 'react-router'
+import { Form, Link } from 'react-router'
 import { Icon } from '#app/components/ui/icon'
 import {
 	DropdownMenu,
@@ -29,7 +29,10 @@ interface FavoriteNotesProps {
 	orgSlug: string
 }
 
-export default function FavoriteNotes({ favoriteNotes, orgSlug }: FavoriteNotesProps) {
+export default function FavoriteNotes({
+	favoriteNotes,
+	orgSlug,
+}: FavoriteNotesProps) {
 	const { isMobile } = useSidebar()
 
 	if (!favoriteNotes || favoriteNotes.length === 0) {
@@ -46,17 +49,14 @@ export default function FavoriteNotes({ favoriteNotes, orgSlug }: FavoriteNotesP
 				{favoriteNotes.map((favorite) => (
 					<SidebarMenuItem key={favorite.note.id}>
 						<SidebarMenuButton asChild>
-							<a href={`/app/${orgSlug}/notes/${favorite.note.id}`}>
+							<Link to={`/app/${orgSlug}/notes/${favorite.note.id}`}>
 								<Icon name="file-text" />
 								<span>{favorite.note.title}</span>
-							</a>
+							</Link>
 						</SidebarMenuButton>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<SidebarMenuAction
-									showOnHover
-									className="rounded-sm"
-								>
+								<SidebarMenuAction showOnHover className="rounded-sm">
 									<Icon name="dots-horizontal" />
 									<span className="sr-only">More</span>
 								</SidebarMenuAction>
@@ -67,23 +67,37 @@ export default function FavoriteNotes({ favoriteNotes, orgSlug }: FavoriteNotesP
 								align={isMobile ? 'end' : 'start'}
 							>
 								<DropdownMenuItem asChild className="gap-2">
-									<a href={`/app/${orgSlug}/notes/${favorite.note.id}`}>
+									<Link to={`/app/${orgSlug}/notes/${favorite.note.id}`}>
 										<Icon name="link-2" />
 										<span>Open</span>
-									</a>
+									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild className="gap-2">
-									<a href={`/app/${orgSlug}/notes/${favorite.note.id}/edit`}>
+									<Link to={`/app/${orgSlug}/notes/${favorite.note.id}/edit`}>
 										<Icon name="pencil-1" />
 										<span>Edit</span>
-									</a>
+									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem asChild>
-									<Form method="post" action={`/app/${orgSlug}/notes/${favorite.note.id}`}>
-										<input type="hidden" name="intent" value="toggle-favorite" />
-										<input type="hidden" name="noteId" value={favorite.note.id} />
-										<button type="submit" className="flex w-full items-center gap-2 text-destructive">
+									<Form
+										method="post"
+										action={`/app/${orgSlug}/notes/${favorite.note.id}`}
+									>
+										<input
+											type="hidden"
+											name="intent"
+											value="toggle-favorite"
+										/>
+										<input
+											type="hidden"
+											name="noteId"
+											value={favorite.note.id}
+										/>
+										<button
+											type="submit"
+											className="text-destructive flex w-full items-center gap-2"
+										>
 											<Icon name="star-off" />
 											<span>Unstar</span>
 										</button>

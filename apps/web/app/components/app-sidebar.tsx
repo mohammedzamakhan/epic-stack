@@ -22,6 +22,7 @@ import { NavSecondary } from './nav-secondary'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { Logo } from './icons/logo'
 import FavoriteNotes from './favorite-notes'
+import { FeatureUpdates } from './feature-updates'
 
 export function AppSidebar({
 	onboardingProgress,
@@ -31,6 +32,8 @@ export function AppSidebar({
 }) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
+	const [hasVisibleFeatureUpdates, setHasVisibleFeatureUpdates] =
+		React.useState(true)
 
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
@@ -128,7 +131,7 @@ export function AppSidebar({
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
 			<SidebarHeader>
-				<Logo className="py-2 pl-2" />
+				<Logo className="pl-2" />
 				<TeamSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
@@ -147,11 +150,23 @@ export function AppSidebar({
 							/>
 						</Link>
 					)}
+
 				<NavMain items={data.navMain} />
 				{rootData?.favoriteNotes && orgSlug && (
-					<FavoriteNotes favoriteNotes={rootData.favoriteNotes} orgSlug={orgSlug} />
+					<FavoriteNotes
+						favoriteNotes={rootData.favoriteNotes}
+						orgSlug={orgSlug}
+					/>
 				)}
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
+				{/* Feature Updates */}
+				<FeatureUpdates
+					className="mt-auto"
+					onVisibilityChange={setHasVisibleFeatureUpdates}
+				/>
+				<NavSecondary
+					items={data.navSecondary}
+					className={hasVisibleFeatureUpdates ? '' : 'mt-auto'}
+				/>
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={data.user} />

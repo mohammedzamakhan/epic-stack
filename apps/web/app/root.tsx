@@ -152,7 +152,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 							},
 							take: 5, // Limit to 5 most recent favorites
 						}),
-					{ timings, type: 'find favorite notes', desc: 'find favorite notes in root' },
+					{
+						timings,
+						type: 'find favorite notes',
+						desc: 'find favorite notes in root',
+					},
 				)
 			}
 		} catch (error) {
