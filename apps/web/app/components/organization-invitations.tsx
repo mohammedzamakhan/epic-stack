@@ -82,7 +82,7 @@ export function OrganizationInvitations({
 				{/* Invitation Form */}
 				<FormProvider context={form.context}>
 					<Form method="POST" {...getFormProps(form)}>
-						<input type="hidden" name="intent" value="invite" />
+						<input type="hidden" name="intent" value="send-invitations" />
 						<div className="space-y-1">
 							{invitesList.map((invite, index) => (
 								<InviteFieldset

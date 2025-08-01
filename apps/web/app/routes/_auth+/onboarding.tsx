@@ -256,32 +256,33 @@ export default function OnboardingRoute({
 							<ErrorList errors={fields.confirmPassword.errors} />
 						</div>
 
-						<div className="flex items-center space-x-2">
-							<CheckboxField
-								labelProps={{
-									htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
-									children:
-										'I agree to the Terms of Service and Privacy Policy',
-								}}
-								buttonProps={getInputProps(
-									fields.agreeToTermsOfServiceAndPrivacyPolicy,
-									{ type: 'checkbox' },
-								)}
-								errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
-							/>
-						</div>
-
-						<div className="flex items-center space-x-2">
-							<CheckboxField
-								labelProps={{
-									htmlFor: fields.remember.id,
-									children: 'Remember me',
-								}}
-								buttonProps={getInputProps(fields.remember, {
-									type: 'checkbox',
-								})}
-								errors={fields.remember.errors}
-							/>
+						<div>
+							<div className="flex items-center space-x-2">
+								<CheckboxField
+									labelProps={{
+										htmlFor: fields.agreeToTermsOfServiceAndPrivacyPolicy.id,
+										children:
+											'I agree to the Terms of Service and Privacy Policy',
+									}}
+									buttonProps={getInputProps(
+										fields.agreeToTermsOfServiceAndPrivacyPolicy,
+										{ type: 'checkbox' },
+									)}
+									errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
+								/>
+							</div>
+							<div className="flex items-center space-x-2">
+								<CheckboxField
+									labelProps={{
+										htmlFor: fields.remember.id,
+										children: 'Remember me',
+									}}
+									buttonProps={getInputProps(fields.remember, {
+										type: 'checkbox',
+									})}
+									errors={fields.remember.errors}
+								/>
+							</div>
 						</div>
 
 						<input {...getInputProps(fields.redirectTo, { type: 'hidden' })} />

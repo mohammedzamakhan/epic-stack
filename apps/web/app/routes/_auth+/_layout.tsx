@@ -23,7 +23,6 @@ export default function AuthLayout() {
 					</div>
 				</div>
 			</div>
-			<EpicToaster closeButton position="top-center" theme={theme} />
 		</div>
 	)
 }

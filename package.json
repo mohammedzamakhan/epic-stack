@@ -8,7 +8,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:web": "turbo run dev --filter @repo/integrations --filter web --filter @repo/email",
+    "dev:web": "turbo run dev --filter @repo/integrations --filter web --filter @repo/email --filter studio",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

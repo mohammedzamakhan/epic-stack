@@ -120,7 +120,7 @@ export function OnboardingChecklist({
 	}
 
 	return (
-		<div className={`bg-card rounded-lg border p-6 ${className}`}>
+		<div className={`bg-card relative rounded-lg border p-6 ${className}`}>
 			<div className="mb-4 flex items-center justify-between">
 				<div>
 					<h3 className="text-lg font-semibold">Get Started</h3>

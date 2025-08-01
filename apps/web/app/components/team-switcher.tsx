@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { Link, useSubmit } from 'react-router'
+import { Link, useNavigate, useSubmit } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
 	DropdownMenu,
@@ -24,6 +24,7 @@ import { useUserOrganizations } from '#app/utils/organizations'
 
 export function TeamSwitcher() {
 	const { isMobile } = useSidebar()
+	const navigate = useNavigate()
 	const submit = useSubmit()
 
 	const userOrganizations = useUserOrganizations() || {
@@ -33,13 +34,7 @@ export function TeamSwitcher() {
 
 	const { organizations, currentOrganization } = userOrganizations
 
-	const [activeTeam, setActiveTeam] = React.useState(
-		currentOrganization?.organization,
-	)
-
-	React.useEffect(() => {
-		setActiveTeam(currentOrganization?.organization)
-	}, [currentOrganization])
+	const activeTeam = currentOrganization?.organization
 
 	function handleOrganizationSelect(organizationId: string) {
 		void submit(
@@ -79,6 +74,12 @@ export function TeamSwitcher() {
 							</div>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">{activeTeam.name}</span>
+								{activeTeam.userCount && (
+									<span className="text-muted-foreground text-xs">
+										{activeTeam.userCount}{' '}
+										{activeTeam.userCount === 1 ? 'member' : 'members'}
+									</span>
+								)}
 							</div>
 							<Icon name="chevron-down" className="ml-auto" />
 						</SidebarMenuButton>
@@ -90,7 +91,7 @@ export function TeamSwitcher() {
 						sideOffset={4}
 					>
 						<DropdownMenuLabel className="text-muted-foreground text-xs">
-							Teams
+							Organizations
 						</DropdownMenuLabel>
 						{organizations.map((userOrg, index) => (
 							<DropdownMenuItem
@@ -121,15 +122,21 @@ export function TeamSwitcher() {
 								<DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
 							</DropdownMenuItem>
 						))}
+						<DropdownMenuItem asChild className="gap-2 p-2">
+							<Link to={`/app/${activeTeam.slug}/settings/members`}>
+								<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+									<Icon name="user-plus" className="size-4" />
+								</div>
+								<div>Invite members</div>
+							</Link>
+						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild className="gap-2 p-2">
 							<Link to="/organizations/create">
 								<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
 									<Icon name="plus" className="size-4" />
 								</div>
-								<div className="text-muted-foreground font-medium">
-									Add team
-								</div>
+								<div>Add organization</div>
 							</Link>
 						</DropdownMenuItem>
 					</DropdownMenuContent>

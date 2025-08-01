@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["typedSql"]
@@ -12,152 +9,124 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  username String  @unique
-  name     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  image       UserImage?
-  password    Password?
-  notes       Note[]
-  roles       Role[]
-  sessions    Session[]
-  connections Connection[]
-  passkey     Passkey[]
-  organizations UserOrganization[]
-  sentInvitations OrganizationInvitation[] @relation("inviter")
-  utmSource   UtmSource?
-  createdOrgNotes OrganizationNote[] @relation("createdBy")
-  noteAccess      NoteAccess[]
-  noteComments    NoteComment[]
-  activityLogs    NoteActivityLog[]
-  targetedActivityLogs NoteActivityLog[] @relation("ActivityLogTarget")
-  onboardingProgress OnboardingProgress[]
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
+  username               String                   @unique
+  name                   String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  connections            Connection[]
+  notes                  Note[]
+  noteAccess             NoteAccess[]
+  targetedActivityLogs   NoteActivityLog[]        @relation("ActivityLogTarget")
+  activityLogs           NoteActivityLog[]
+  noteComments           NoteComment[]
+  onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]
+  sentInvitations        OrganizationInvitation[] @relation("inviter")
+  createdOrgNotes        OrganizationNote[]       @relation("createdBy")
+  passkey                Passkey[]
+  password               Password?
+  sessions               Session[]
+  image                  UserImage?
+  organizations          UserOrganization[]
+  utmSource              UtmSource?
+  roles                  Role[]                   @relation("RoleToUser")
 }
 
 model Note {
-  id      String @id @default(cuid())
-  title   String
-  content String
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  ownerId   String
+  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  images    NoteImage[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  ownerId String
-
-  images NoteImage[]
-
-  // non-unique foreign key
   @@index([ownerId])
-  // This helps our order by in the user search a LOT
   @@index([ownerId, updatedAt])
 }
 
 model NoteImage {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   altText   String?
   objectKey String
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
-  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  noteId String
-
-  // non-unique foreign key
   @@index([noteId])
 }
 
 model UserImage {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   altText   String?
   objectKey String
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  hash   String
   userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
   id             String   @id @default(cuid())
   expirationDate DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
-
-  // non-unique foreign key
   @@index([userId])
 }
 
 model Permission {
-  id          String @id @default(cuid())
-  action      String // e.g. create, read, update, delete
-  entity      String // e.g. note, user, etc.
-  access      String // e.g. own or any
-  description String @default("")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  roles Role[]
+  id          String   @id @default(cuid())
+  action      String
+  entity      String
+  access      String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  roles       Role[]   @relation("PermissionToRole")
 
   @@unique([action, entity, access])
 }
 
 model Role {
-  id          String @id @default(cuid())
-  name        String @unique
-  description String @default("")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users       User[]
-  permissions Permission[]
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String       @default("")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  permissions Permission[] @relation("PermissionToRole")
+  users       User[]       @relation("RoleToUser")
 }
 
 model Verification {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
   /// The type of verification, e.g. "email" or "phone"
-  type String
-
+  type      String
   /// The thing we're trying to verify, e.g. a user's email or phone number
-  target String
-
+  target    String
   /// The secret key used to generate the otp
-  secret String
-
+  secret    String
   /// The algorithm used to generate the otp
   algorithm String
-
   /// The number of digits in the otp
-  digits Int
-
+  digits    Int
   /// The number of seconds the otp is valid for
-  period Int
-
+  period    Int
   /// The valid characters for the otp
-  charSet String
-
+  charSet   String
   /// When it's safe to delete this verification
   expiresAt DateTime?
 
@@ -165,15 +134,13 @@ model Verification {
 }
 
 model Connection {
-  id           String @id @default(cuid())
+  id           String   @id @default(cuid())
   providerName String
   providerId   String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerName, providerId])
 }
@@ -184,54 +151,51 @@ model Passkey {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   publicKey      Bytes
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   webauthnUserId String
   counter        BigInt
-  deviceType     String // 'singleDevice' or 'multiDevice'
+  deviceType     String
   backedUp       Boolean
-  transports     String? // Stored as comma-separated values
+  transports     String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index(userId)
+  @@index([userId])
 }
 
 model Organization {
-  id          String  @id @default(cuid())
-  name        String
-  slug        String  @unique
-  description String?
-  active      Boolean @default(true)
-
-  // Stripe payment fields
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  stripeProductId      String?
-  planName             String?
-  subscriptionStatus   String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users        UserOrganization[]
-  invitations  OrganizationInvitation[]
-  image        OrganizationImage?
-  notes        OrganizationNote[]
-  integrations Integration[]
-  onboardingProgress OnboardingProgress[]
+  id                     String                   @id @default(cuid())
+  name                   String
+  slug                   String                   @unique
+  description            String?
+  active                 Boolean                  @default(true)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  planName               String?
+  stripeCustomerId       String?
+  stripeProductId        String?
+  stripeSubscriptionId   String?
+  subscriptionStatus     String?
+  size                   String?
+  integrations           Integration[]
+  onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]
+  image                  OrganizationImage?
+  invitations            OrganizationInvitation[]
+  notes                  OrganizationNote[]
+  users                  UserOrganization[]
 }
 
 model UserOrganization {
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
-  role           String       // e.g., "admin", "member", etc.
+  role           String
   active         Boolean      @default(true)
   isDefault      Boolean      @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  department     String?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, organizationId])
   @@index([userId])
@@ -239,198 +203,162 @@ model UserOrganization {
 }
 
 model OrganizationImage {
-  id        String  @id @default(cuid())
-  altText   String?
-  objectKey String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id             String       @id @default(cuid())
+  altText        String?
+  objectKey      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model OrganizationInvitation {
-  id        String    @id @default(cuid())
-  email     String
-  role      String    @default("member")
-  token     String    @unique
-  expiresAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  email          String
+  role           String       @default("member")
+  token          String       @unique
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organizationId String
-
-  inviter   User?   @relation("inviter", fields: [inviterId], references: [id])
-  inviterId String?
+  inviterId      String?
+  inviter        User?        @relation("inviter", fields: [inviterId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([email, organizationId])
   @@index([organizationId])
 }
 
 model UtmSource {
-  id          String  @id @default(cuid())
-  source      String?
-  medium      String?
-  campaign    String?
-  term        String?
-  content     String?
-  referrer    String?
-  
-  createdAt   DateTime @default(now())
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId      String   @unique
+  id        String   @id @default(cuid())
+  source    String?
+  medium    String?
+  campaign  String?
+  term      String?
+  content   String?
+  referrer  String?
+  createdAt DateTime @default(now())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model OrganizationNote {
-  id      String @id @default(cuid())
-  title   String
-  content String
-  isPublic Boolean @default(true) // Public by default
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId String
-
-  createdBy   User   @relation("createdBy", fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdById String
-
-  images              OrganizationNoteImage[]
+  id                     String                      @id @default(cuid())
+  title                  String
+  content                String
+  isPublic               Boolean                     @default(true)
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  organizationId         String
+  createdById            String
+  noteAccess             NoteAccess[]
+  activityLogs           NoteActivityLog[]
+  comments               NoteComment[]
   integrationConnections NoteIntegrationConnection[]
-  noteAccess          NoteAccess[]
-  comments            NoteComment[]
-  activityLogs        NoteActivityLog[]
+  createdBy              User                        @relation("createdBy", fields: [createdById], references: [id], onDelete: Cascade)
+  organization           Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  images                 OrganizationNoteImage[]
 
-  // non-unique foreign keys
   @@index([organizationId])
   @@index([createdById])
   @@index([organizationId, updatedAt])
 }
 
 model OrganizationNoteImage {
-  id        String  @id @default(cuid())
+  id        String           @id @default(cuid())
   altText   String?
   objectKey String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  noteId    String
+  note      OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  note   OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  noteId String
-
-  // non-unique foreign key
   @@index([noteId])
 }
 
 model Integration {
-  id             String @id @default(cuid())
+  id             String                      @id @default(cuid())
   organizationId String
-  providerName   String // 'slack', 'teams', 'jira', etc.
-  providerType   String // 'productivity', 'ticketing', etc.
-  
-  // OAuth/API credentials (encrypted)
+  providerName   String
+  providerType   String
   accessToken    String?
   refreshToken   String?
   tokenExpiresAt DateTime?
-  
-  // Provider-specific configuration
-  config         String // JSON string for provider-specific data
-  
-  // Connection metadata
-  isActive       Boolean @default(true)
+  config         String
+  isActive       Boolean                     @default(true)
   lastSyncAt     DateTime?
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  connections    NoteIntegrationConnection[]
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  organization   Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   logs           IntegrationLog[]
   activityLogs   NoteActivityLog[]
-  
+  connections    NoteIntegrationConnection[]
+
   @@unique([organizationId, providerName])
   @@index([organizationId])
 }
 
 model NoteIntegrationConnection {
-  id            String @id @default(cuid())
+  id            String           @id @default(cuid())
   noteId        String
   integrationId String
-  
-  // Provider-specific connection data
-  externalId    String // e.g., Slack channel ID
-  config        String // JSON string: Channel name, webhook URL, etc.
-  
-  isActive      Boolean @default(true)
+  externalId    String
+  config        String
+  isActive      Boolean          @default(true)
   lastPostedAt  DateTime?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  integration   Integration      @relation(fields: [integrationId], references: [id], onDelete: Cascade)
   note          OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  
+
   @@unique([noteId, integrationId, externalId])
   @@index([noteId])
   @@index([integrationId])
 }
 
 model IntegrationLog {
-  id            String @id @default(cuid())
+  id            String      @id @default(cuid())
   integrationId String
-  action        String // 'post_message', 'sync_channels', etc.
-  status        String // 'success', 'error', 'pending'
-  
-  // Request/response data
-  requestData   String? // JSON string
-  responseData  String? // JSON string
+  action        String
+  status        String
+  requestData   String?
+  responseData  String?
   errorMessage  String?
-  
-  createdAt     DateTime @default(now())
-  
+  createdAt     DateTime    @default(now())
   integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  
+
   @@index([integrationId])
   @@index([createdAt])
 }
 
 model NoteAccess {
-  id     String @id @default(cuid())
-  noteId String
-  userId String
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  note OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id        String           @id @default(cuid())
+  noteId    String
+  userId    String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note      OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
   @@unique([noteId, userId])
   @@index([noteId])
   @@index([userId])
 }
 
 model NoteComment {
-  id      String @id @default(cuid())
-  content String // HTML content from TipTap editor
-  noteId  String
-  userId  String
-  parentId String? // For nested replies
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  note     OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent   NoteComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies  NoteComment[] @relation("CommentReplies")
-  images   NoteCommentImage[]
-  
+  id        String             @id @default(cuid())
+  content   String
+  noteId    String
+  userId    String
+  parentId  String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  parent    NoteComment?       @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   NoteComment[]      @relation("CommentReplies")
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note      OrganizationNote   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  images    NoteCommentImage[]
+
   @@index([noteId])
   @@index([userId])
   @@index([parentId])
@@ -438,45 +366,32 @@ model NoteComment {
 }
 
 model NoteCommentImage {
-  id        String  @id @default(cuid())
+  id        String      @id @default(cuid())
   altText   String?
   objectKey String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  comment   NoteComment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   commentId String
+  comment   NoteComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  // non-unique foreign key
   @@index([commentId])
 }
 
 model NoteActivityLog {
-  id      String @id @default(cuid())
-  noteId  String
-  userId  String
-  action  String // 'viewed', 'deleted', 'sharing_changed', 'access_granted', 'access_revoked', 'integration_connected', 'integration_disconnected', 'comment_added', 'comment_deleted'
-  
-  // Additional context data stored as JSON
-  metadata String? // JSON string containing action-specific data
-  
-  // For actions involving other users (e.g., granting access)
-  targetUserId String?
-  
-  // For integration-related actions
+  id            String           @id @default(cuid())
+  noteId        String
+  userId        String
+  action        String
+  metadata      String?
+  targetUserId  String?
   integrationId String?
-  
-  // For comment-related actions
-  commentId String?
-  
-  createdAt DateTime @default(now())
-  
-  note         OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetUser   User? @relation("ActivityLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
-  integration  Integration? @relation(fields: [integrationId], references: [id], onDelete: SetNull)
-  
+  commentId     String?
+  createdAt     DateTime         @default(now())
+  integration   Integration?     @relation(fields: [integrationId], references: [id])
+  targetUser    User?            @relation("ActivityLogTarget", fields: [targetUserId], references: [id])
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note          OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
   @@index([noteId])
   @@index([userId])
   @@index([noteId, createdAt])
@@ -484,76 +399,56 @@ model NoteActivityLog {
 }
 
 model OnboardingStep {
-  id          String @id @default(cuid())
-  key         String @unique // e.g., "create_first_note"
-  title       String
-  description String
-  icon        String?
-  
-  // Action configuration stored as JSON
-  actionConfig String? // JSON: {"type": "navigate", "target": "/notes/new", "label": "Create Note"}
-  
-  // Step configuration
-  isActive    Boolean @default(true)
-  sortOrder   Int     @default(0)
-  
-  // Auto-detection configuration
-  autoDetect  Boolean @default(false)
-  detectConfig String? // JSON: {"condition": "hasNotes", "params": {}}
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
+  id           String                   @id @default(cuid())
+  key          String                   @unique
+  title        String
+  description  String
+  icon         String?
+  actionConfig String?
+  isActive     Boolean                  @default(true)
+  sortOrder    Int                      @default(0)
+  autoDetect   Boolean                  @default(false)
+  detectConfig String?
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
   userProgress OnboardingStepProgress[]
-  
+
   @@index([isActive, sortOrder])
 }
 
 model OnboardingStepProgress {
-  id       String @id @default(cuid())
-  userId   String
+  id             String         @id @default(cuid())
+  userId         String
   organizationId String
-  stepId   String
-  
-  isCompleted   Boolean @default(false)
-  completedAt   DateTime?
-  
-  // Optional metadata for the completion
-  metadata      String? // JSON for any additional data
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  step         OnboardingStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  
+  stepId         String
+  isCompleted    Boolean        @default(false)
+  completedAt    DateTime?
+  metadata       String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  step           OnboardingStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, organizationId, stepId])
   @@index([userId, organizationId])
   @@index([stepId])
 }
 
 model OnboardingProgress {
-  id             String @id @default(cuid())
+  id             String       @id @default(cuid())
   userId         String
   organizationId String
-  
-  // Aggregate progress data
-  totalSteps     Int @default(0)
-  completedCount Int @default(0)
-  isCompleted    Boolean @default(false)
+  totalSteps     Int          @default(0)
+  completedCount Int          @default(0)
+  isCompleted    Boolean      @default(false)
   completedAt    DateTime?
-  
-  // Settings
-  isVisible      Boolean @default(true) // Can be hidden by user
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
+  isVisible      Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, organizationId])
   @@index([userId])
   @@index([organizationId])

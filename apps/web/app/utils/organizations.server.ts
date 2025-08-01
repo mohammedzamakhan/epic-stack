@@ -6,6 +6,7 @@ export type OrganizationWithImage = {
 	name: string
 	slug: string
 	image?: { id: string; altText?: string | null; objectKey: string } | null
+	userCount?: number
 }
 
 export type UserOrganizationWithRole = {
@@ -56,6 +57,13 @@ export async function getUserDefaultOrganization(userId: User['id']) {
 							objectKey: true,
 						},
 					},
+					_count: {
+						select: {
+							users: {
+								where: { active: true },
+							},
+						},
+					},
 				},
 			},
 			role: true,
@@ -77,6 +85,14 @@ export async function getUserDefaultOrganization(userId: User['id']) {
 							select: {
 								id: true,
 								altText: true,
+								objectKey: true,
+							},
+						},
+						_count: {
+							select: {
+								users: {
+									where: { active: true },
+								},
 							},
 						},
 					},
@@ -86,10 +102,26 @@ export async function getUserDefaultOrganization(userId: User['id']) {
 			},
 			orderBy: { createdAt: 'asc' },
 		})
-		return firstOrg as UserOrganizationWithRole | null
+
+		if (firstOrg) {
+			return {
+				...firstOrg,
+				organization: {
+					...firstOrg.organization,
+					userCount: firstOrg.organization._count.users,
+				},
+			} as UserOrganizationWithRole
+		}
+		return null
 	}
 
-	return defaultOrg as UserOrganizationWithRole
+	return {
+		...defaultOrg,
+		organization: {
+			...defaultOrg.organization,
+			userCount: defaultOrg.organization._count.users,
+		},
+	} as UserOrganizationWithRole
 }
 
 export async function setUserDefaultOrganization(

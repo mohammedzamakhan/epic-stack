@@ -46,7 +46,6 @@ export default function MarketingLayout() {
 					<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
 				</div>
 			</div>
-			<EpicToaster closeButton position="top-center" theme={theme} />
 			<EpicProgress />
 		</>
 	)

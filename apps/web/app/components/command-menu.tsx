@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
+import { useNavigate, useRouteLoaderData, useFetcher, Link } from 'react-router'
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -87,20 +87,6 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 		return () => clearTimeout(timeoutId)
 	}, [open, query, searchNotes])
 
-	const handleSelectNote = (noteId: string) => {
-		if (orgSlug) {
-			navigate(`/app/${orgSlug}/notes/${noteId}`)
-			onOpenChange(false)
-		}
-	}
-
-	const handleCreateNote = () => {
-		if (orgSlug) {
-			navigate(`/app/${orgSlug}/notes/new`)
-			onOpenChange(false)
-		}
-	}
-
 	return (
 		<CommandDialog
 			open={open}
@@ -118,64 +104,73 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 				</CommandEmpty>
 
 				<CommandGroup heading="Actions">
-					<CommandItem onSelect={handleCreateNote}>
-						<Icon name="plus" />
-						Create new note
+					<CommandItem asChild>
+						<Link
+							to={`/app/${orgSlug}/notes/new`}
+							onClick={() => onOpenChange(false)}
+						>
+							<Icon name="plus" />
+							Create new note
+						</Link>
+					</CommandItem>
+					<CommandItem asChild>
+						<Link
+							to={`/app/${orgSlug}/settings/members`}
+							onClick={() => onOpenChange(false)}
+						>
+							<Icon name="user-plus" />
+							Invite new members
+						</Link>
 					</CommandItem>
 				</CommandGroup>
 
 				{notes.length > 0 && (
 					<CommandGroup heading="Notes">
 						{notes.map((note) => (
-							<CommandItem
-								key={note.id}
-								onSelect={() => handleSelectNote(note.id)}
-							>
-								<Icon name="file-text" />
-								<div className="flex flex-col items-start">
-									<span className="font-medium">{note.title}</span>
-									<span className="text-muted-foreground text-xs">
-										by {note.createdByName}
-									</span>
-								</div>
+							<CommandItem key={note.id} asChild>
+								<Link
+									to={`/app/${orgSlug}/notes/${note.id}`}
+									onClick={() => onOpenChange(false)}
+								>
+									<Icon name="file-text" />
+									<div className="flex flex-col items-start">
+										<span className="font-medium">{note.title}</span>
+										<span className="text-muted-foreground text-xs">
+											by {note.createdByName}
+										</span>
+									</div>
+								</Link>
 							</CommandItem>
 						))}
 					</CommandGroup>
 				)}
 				<CommandGroup heading="Settings">
-					<CommandItem
-						onSelect={() => {
-							navigate('/settings/general')
-							onOpenChange(false)
-						}}
-					>
-						<Icon name="person" />
-						<span>Account settings</span>
-						<CommandShortcut>⌘P</CommandShortcut>
+					<CommandItem asChild>
+						<Link to="/settings/general" onClick={() => onOpenChange(false)}>
+							<Icon name="person" />
+							<span>Account settings</span>
+							<CommandShortcut>⌘P</CommandShortcut>
+						</Link>
 					</CommandItem>
-					<CommandItem
-						onSelect={() => {
-							if (orgSlug) {
-								navigate(`/app/${orgSlug}/settings/billing`)
-								onOpenChange(false)
-							}
-						}}
-					>
-						<Icon name="credit-card" />
-						<span>Billing</span>
-						<CommandShortcut>⌘B</CommandShortcut>
+					<CommandItem asChild>
+						<Link
+							to={`/app/${orgSlug}/settings/billing`}
+							onClick={() => onOpenChange(false)}
+						>
+							<Icon name="credit-card" />
+							<span>Billing</span>
+							<CommandShortcut>⌘B</CommandShortcut>
+						</Link>
 					</CommandItem>
-					<CommandItem
-						onSelect={() => {
-							if (orgSlug) {
-								navigate(`/app/${orgSlug}/settings`)
-								onOpenChange(false)
-							}
-						}}
-					>
-						<Icon name="gear" />
-						<span>Settings</span>
-						<CommandShortcut>⌘S</CommandShortcut>
+					<CommandItem asChild>
+						<Link
+							to={`/app/${orgSlug}/settings`}
+							onClick={() => onOpenChange(false)}
+						>
+							<Icon name="gear" />
+							<span>Settings</span>
+							<CommandShortcut>⌘S</CommandShortcut>
+						</Link>
 					</CommandItem>
 				</CommandGroup>
 			</CommandList>

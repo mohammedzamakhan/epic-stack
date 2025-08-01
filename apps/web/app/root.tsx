@@ -33,6 +33,8 @@ import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
 import { storeUtmParams } from './utils/utm.server.ts'
+import { EpicToaster } from './components/ui/sonner.tsx'
+import { useToast } from './components/toaster.tsx'
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -240,6 +242,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
+	useToast(data.toast)
 
 	return (
 		<HoneypotProvider {...data.honeyProps}>
@@ -252,6 +255,7 @@ function AppWithProviders() {
 					applicationIdentifier="XQdYIaaQAOv5"
 				>
 					<Outlet />
+					<EpicToaster />
 				</NovuProvider>
 			</OpenImgContextProvider>
 		</HoneypotProvider>

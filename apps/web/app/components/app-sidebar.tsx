@@ -6,8 +6,8 @@ import { HomeIcon } from '#app/components/icons/home-icon'
 import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon'
 import { NavMain } from '#app/components/nav-main'
 import { NavUser } from '#app/components/nav-user'
-import { TeamSwitcher } from '#app/components/team-switcher'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist'
+import { TeamSwitcher } from '#app/components/team-switcher'
 import {
 	Sidebar,
 	SidebarContent,
@@ -16,9 +16,11 @@ import {
 } from '#app/components/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
 import { type OnboardingProgressData } from '#app/utils/onboarding'
-import { NavSecondary } from './nav-secondary'
 import { CircleHelpIcon } from './icons/circle-help'
 import { MessageSquareMoreIcon } from './icons/message-square-more'
+import { NavSecondary } from './nav-secondary'
+import { UserRoundPlusIcon } from './icons/user-round-plus'
+import { Logo } from './icons/logo'
 
 export function AppSidebar({
 	onboardingProgress,
@@ -106,6 +108,11 @@ export function AppSidebar({
 		],
 		navSecondary: [
 			{
+				title: 'Add members',
+				url: `/app/${rootData?.userOrganizations?.currentOrganization?.organization.slug}/settings/members`,
+				icon: UserRoundPlusIcon,
+			},
+			{
 				title: 'Get help',
 				url: '#',
 				icon: CircleHelpIcon,
@@ -120,6 +127,7 @@ export function AppSidebar({
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
 			<SidebarHeader>
+				<Logo className="py-2 pl-2" />
 				<TeamSwitcher />
 			</SidebarHeader>
 			<SidebarContent>

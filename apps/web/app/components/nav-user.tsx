@@ -1,3 +1,5 @@
+import * as React from 'react'
+import { useRef } from 'react'
 import { Link, Form } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
@@ -5,7 +7,6 @@ import {
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '#app/components/ui/dropdown-menu'
@@ -16,6 +17,8 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '#app/components/ui/sidebar'
+import { UserIcon } from './icons/user-icon'
+import { LogoutIcon } from './icons/logout-icon'
 
 export function NavUser({
 	user,
@@ -27,6 +30,21 @@ export function NavUser({
 	}
 }) {
 	const { isMobile } = useSidebar()
+	const iconRefs = useRef<{ [key: string]: any }>({})
+
+	const handleMenuItemMouseEnter = (iconKey: string) => {
+		const iconRef = iconRefs.current[iconKey]
+		if (iconRef?.startAnimation) {
+			iconRef.startAnimation()
+		}
+	}
+
+	const handleMenuItemMouseLeave = (iconKey: string) => {
+		const iconRef = iconRefs.current[iconKey]
+		if (iconRef?.stopAnimation) {
+			iconRef.stopAnimation()
+		}
+	}
 
 	return (
 		<SidebarMenu>
@@ -47,7 +65,7 @@ export function NavUser({
 									{user.email}
 								</span>
 							</div>
-							{/* <IconDotsVertical className="ml-auto size-4" /> */}
+							<Icon name="ellipsis-vertical" className="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
@@ -56,33 +74,34 @@ export function NavUser({
 						align="start"
 						sideOffset={4}
 					>
-						{/* <DropdownMenuLabel className="p-0 font-normal">
-							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-								<Avatar className="h-8 w-8">
-									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg">CN</AvatarFallback>
-								</Avatar>
-								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">{user.name}</span>
-									<span className="text-muted-foreground truncate text-xs">
-										{user.email}
-									</span>
-								</div>
-							</div>
-						</DropdownMenuLabel>
-						<DropdownMenuSeparator /> */}
 						<DropdownMenuGroup>
-							<DropdownMenuItem asChild>
+							<DropdownMenuItem
+								asChild
+								className="gap-2"
+								onMouseEnter={() => handleMenuItemMouseEnter('account')}
+								onMouseLeave={() => handleMenuItemMouseLeave('account')}
+							>
 								<Link to="/settings/general">
-									<Icon name="person" className="mr-2 size-4" />
+									<UserIcon
+										ref={(ref: any) => (iconRefs.current['account'] = ref)}
+										size={16}
+									/>
 									Account
 								</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem asChild>
+						<DropdownMenuItem
+							asChild
+							className="gap-2"
+							onMouseEnter={() => handleMenuItemMouseEnter('logout')}
+							onMouseLeave={() => handleMenuItemMouseLeave('logout')}
+						>
 							<Form action="/logout" method="POST">
-								<Icon name="exit" className="mr-2 size-4" />
+								<LogoutIcon
+									ref={(ref: any) => (iconRefs.current['logout'] = ref)}
+									size={16}
+								/>
 								<button type="submit" className="w-full text-left">
 									Log out
 								</button>

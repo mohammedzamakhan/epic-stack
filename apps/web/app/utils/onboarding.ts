@@ -177,26 +177,24 @@ export async function getOnboardingProgress(
 	})
 
 	// Get or create overall progress record
-	let progress = await prisma.onboardingProgress.findUnique({
+	let progress = await prisma.onboardingProgress.upsert({
 		where: {
 			userId_organizationId: {
 				userId,
 				organizationId,
 			},
 		},
+		update: {
+			totalSteps: steps.length,
+		},
+		create: {
+			userId,
+			organizationId,
+			totalSteps: steps.length,
+			completedCount: 0,
+			isCompleted: false,
+		},
 	})
-
-	if (!progress) {
-		progress = await prisma.onboardingProgress.create({
-			data: {
-				userId,
-				organizationId,
-				totalSteps: steps.length,
-				completedCount: 0,
-				isCompleted: false,
-			},
-		})
-	}
 
 	// Transform steps with progress data
 	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map((step) => {
@@ -239,75 +237,92 @@ export async function markStepCompleted(
 	stepKey: string,
 	metadata?: Record<string, any>,
 ) {
-	const step = await prisma.onboardingStep.findUnique({
-		where: { key: stepKey },
-	})
+	try {
+		const step = await prisma.onboardingStep.findUnique({
+			where: { key: stepKey },
+		})
 
-	if (!step) {
-		throw new Error(`Onboarding step '${stepKey}' not found`)
-	}
+		if (!step) {
+			throw new Error(`Onboarding step '${stepKey}' not found`)
+		}
 
-	// Create or update step progress
-	await prisma.onboardingStepProgress.upsert({
-		where: {
-			userId_organizationId_stepId: {
+		// Create or update step progress
+		await prisma.onboardingStepProgress.upsert({
+			where: {
+				userId_organizationId_stepId: {
+					userId,
+					organizationId,
+					stepId: step.id,
+				},
+			},
+			update: {
+				isCompleted: true,
+				completedAt: new Date(),
+				metadata: metadata ? JSON.stringify(metadata) : null,
+			},
+			create: {
 				userId,
 				organizationId,
 				stepId: step.id,
+				isCompleted: true,
+				completedAt: new Date(),
+				metadata: metadata ? JSON.stringify(metadata) : null,
 			},
-		},
-		update: {
-			isCompleted: true,
-			completedAt: new Date(),
-			metadata: metadata ? JSON.stringify(metadata) : null,
-		},
-		create: {
-			userId,
-			organizationId,
-			stepId: step.id,
-			isCompleted: true,
-			completedAt: new Date(),
-			metadata: metadata ? JSON.stringify(metadata) : null,
-		},
-	})
+		})
 
-	// Update overall progress
-	const completedCount = await prisma.onboardingStepProgress.count({
-		where: {
-			userId,
-			organizationId,
-			isCompleted: true,
-		},
-	})
-
-	const totalSteps = await prisma.onboardingStep.count({
-		where: { isActive: true },
-	})
-
-	const isCompleted = completedCount === totalSteps
-
-	await prisma.onboardingProgress.upsert({
-		where: {
-			userId_organizationId: {
+		// Update overall progress
+		const completedCount = await prisma.onboardingStepProgress.count({
+			where: {
 				userId,
 				organizationId,
+				isCompleted: true,
 			},
-		},
-		update: {
-			completedCount,
-			totalSteps,
-			isCompleted,
-			completedAt: isCompleted ? new Date() : null,
-		},
-		create: {
-			userId,
-			organizationId,
-			completedCount,
-			totalSteps,
-			isCompleted,
-			completedAt: isCompleted ? new Date() : null,
-		},
-	})
+		})
+
+		const totalSteps = await prisma.onboardingStep.count({
+			where: { isActive: true },
+		})
+
+		const isCompleted = completedCount === totalSteps
+
+		await prisma.onboardingProgress.upsert({
+			where: {
+				userId_organizationId: {
+					userId,
+					organizationId,
+				},
+			},
+			update: {
+				completedCount,
+				totalSteps,
+				isCompleted,
+				completedAt: isCompleted ? new Date() : null,
+			},
+			create: {
+				userId,
+				organizationId,
+				completedCount,
+				totalSteps,
+				isCompleted,
+				completedAt: isCompleted ? new Date() : null,
+			},
+		})
+	} catch (error) {
+		// Log the error but don't throw it to prevent breaking the main flow
+		console.error('Error marking onboarding step as completed:', error)
+		// If it's a unique constraint error, it means the record already exists, which is fine
+		if (error instanceof Error && error.message.includes('Unique constraint')) {
+			console.log(
+				`Onboarding step ${stepKey} already completed for user ${userId} in organization ${organizationId}`,
+			)
+			return
+		}
+		// For other errors, we still don't want to break the main flow
+		console.error(
+			`Failed to mark onboarding step ${stepKey} as completed:`,
+			error,
+		)
+	}
 }
 
 // Hide onboarding for a user
