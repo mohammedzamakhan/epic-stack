@@ -68,7 +68,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 		>
 			<CardContent className="p-0">
 				{/* Image or Header Section */}
-				<div className="relative aspect-video overflow-hidden bg-blue-50">
+				<div className="relative aspect-video overflow-hidden bg-primary/20">
 					{firstImage ? (
 						<>
 							<Img
@@ -83,8 +83,8 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 						</>
 					) : (
 						<div className="flex h-full items-center justify-center">
-							<div className="rounded-full bg-white/80 p-4 shadow-sm">
-								<Icon name="file-text" className="h-8 w-8 text-blue-600" />
+							<div className="rounded-full bg-background/80 p-4 shadow-sm">
+								<Icon name="file-text" className="h-8 w-8 text-primary" />
 							</div>
 						</div>
 					)}
@@ -97,9 +97,8 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 					>
 						<Button
 							size="sm"
-							variant="outline"
+							variant="secondary"
 							onClick={handleCopyLink}
-							className="h-8 border-white/50 bg-white/90 px-3 text-xs text-gray-700 shadow-sm backdrop-blur-sm"
 						>
 							{copied ? (
 								<>
@@ -133,7 +132,7 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 				<div className="p-2 px-4">
 					<div className="flex items-start gap-3">
 						<div className="min-w-0 flex-1">
-							<h4 className="line-clamp-2 leading-tight text-gray-900">
+							<h4 className="line-clamp-2 leading-tight">
 								{note.title}
 							</h4>
 							<div className="mt-1 text-xs">

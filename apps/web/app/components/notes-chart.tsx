@@ -18,7 +18,7 @@ import {
 const chartConfig = {
 	notes: {
 		label: 'Notes Created',
-		color: 'var(--chart-1)',
+		color: 'var(--chart-2)',
 	},
 } satisfies ChartConfig
 

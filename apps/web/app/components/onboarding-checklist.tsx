@@ -99,8 +99,9 @@ export function OnboardingChecklist({
 
 					<div className="space-y-2">
 						<Progress
+              
 							value={progressPercentage}
-							className="h-2.5 border border-slate-600/50 bg-slate-700/60 shadow-inner"
+							className="h-2.5 border border-muted-foreground shadow-inner"
 						/>
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-medium text-slate-200">

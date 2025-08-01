@@ -68,7 +68,7 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 						leaders.map((leader, index) => (
 							<div
 								key={leader.id}
-								className="grid grid-cols-2 items-center gap-4 border-b border-gray-100 py-1 last:border-b-0"
+								className="grid grid-cols-2 items-center gap-4 border-b py-1 last:border-b-0"
 							>
 								<div className="flex items-center gap-2">
 									<span className="text-md font-semibold">{leader.rank}</span>
