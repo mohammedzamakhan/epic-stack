@@ -1,483 +1,313 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useFetcher, useFetchers } from 'react-router'
-import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable, DragOverlay } from '@dnd-kit/core'
+import { useRef, useState } from 'react'
 import {
-	SortableContext,
-	verticalListSortingStrategy,
-	useSortable,
+  DndContext,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  useDroppable,
+  DragOverlay,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
 } from '@dnd-kit/sortable'
+import { useFetcher, useFetchers } from 'react-router'
+import { CSS } from '@dnd-kit/utilities'
 import { Button } from '#app/components/ui/button.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { NoteCard } from './notes-cards.tsx'
-import { CSS } from '@dnd-kit/utilities'
 
-type Note = {
-	id: string
-	title: string
-	content: string
-	createdAt: string
-	updatedAt: string
-	isPublic: boolean
-	createdById: string
-	statusId?: string | null
-	statusName?: string | null
-	position?: number | null
-	uploads?: Array<{
-		id: string
-		type: string
-		altText: string | null
-		objectKey: string
-		thumbnailKey?: string | null
-		status?: string
-	}>
-	createdBy?: {
-		name: string | null
-		username: string | null
-	} | null
-	noteAccess: Array<{
-		userId: string
-	}>
-	createdByName: string
+type Note = LoaderNote & {
+  position?: number | null
+}
+type LoaderNote = {
+  id: string
+  title: string
+  content: string
+  createdAt: string
+  updatedAt: string
+  createdById: string
+  createdByName: string
+  statusId: string | null
+  statusName: string | null
 }
 
-interface Status {
-	id: string
-	name: string
-	position: number | null
-}
+type Status = { id: string; name: string; position: number | null }
+type Column = { id: string; name: string }
 
-interface NotesKanbanBoardProps {
-	notes: Note[]
-	orgSlug: string
-	statuses: Status[]
-}
+const UNCATEGORISED = '__uncategorised'
 
-type Column = {
-	id: string // status id or UNCATEGORIZED_ID or legacy string fallback
-	title: string
-	statusName?: string // for status columns, the name of the status
-	statusId?: string   // for status columns, the id of the status
-}
-
-const UNCATEGORIZED_ID = '__uncategorized'
-
-function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
-	const columns: Column[] = []
-	// Add status columns from DB
-	for (const stat of statuses) {
-		columns.push({ id: stat.id, title: stat.name, statusName: stat.name, statusId: stat.id })
-	}
-	// Add Uncategorized if notes exist with no statusId
-	if (notes.some(n => !n.statusId)) {
-		columns.unshift({ id: UNCATEGORIZED_ID, title: 'Uncategorized' })
-	}
-	// Add legacy statuses from notes not in DB (should be rare)
-	const legacy = Array.from(
-		new Set(notes.map(n => n.statusId).filter(sid => sid && !statuses.some(st => st.id === sid)) as string[])
-	)
-	for (const legacyStatusId of legacy) {
-		columns.push({ id: legacyStatusId, title: legacyStatusId, statusId: legacyStatusId })
-	}
-	return columns.length > 0 ? columns : [{ id: UNCATEGORIZED_ID, title: 'Uncategorized' }]
-}
-
-export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardProps) {
-	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
-	const [addingColumn, setAddingColumn] = useState(false)
-	const [newColInput, setNewColInput] = useState('')
-	const addColumnFetcher = useFetcher()
-	const reorderFetcher = useFetcher();
-	const fetchers = useFetchers();
-	const [activeNote, setActiveNote] = useState<Note | null>(null);
-
-	// Helpers to overlay optimistic fetchers onto canonical data
-
-	// 1. Pending note reorder (and creation)
-	function getPendingNotes(): Partial<Note>[] {
-		return fetchers
-			.filter(f => f.formData && f.formData.get('intent') === 'reorder-note')
-			.map(f => ({
-				id: String(f.formData!.get('noteId')),
-				statusId: f.formData!.get('statusId') ? String(f.formData!.get('statusId')) : null,
-				position: Number(f.formData!.get('position')),
-			}));
-	}
-	function getPendingCreates(): Partial<Note>[] {
-		return fetchers
-			.filter(f => f.formData && f.formData.get('intent') === 'create-note')
-			.map(f => ({
-				id: String(f.formData!.get('noteId')),
-				title: String(f.formData!.get('title')),
-				content: String(f.formData!.get('content') ?? ''),
-				statusId: f.formData!.get('statusId') ? String(f.formData!.get('statusId')) : null,
-				position: Number(f.formData!.get('position')),
-				createdByName: 'You',
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-				isPublic: true,
-				createdById: '', // could use userId from context
-				noteAccess: [],
-			}));
-	}
-
-	// 2. Pending column/status creates & renames
-	function getPendingStatusRenames(): Record<string, string> {
-		const map: Record<string, string> = {};
-		fetchers
-			.filter(f => f.formData && f.formData.get('intent') === 'rename-status')
-			.forEach(f => {
-				const sid = String(f.formData!.get('statusId'));
-				const name = String(f.formData!.get('name'));
-				if (sid && name) map[sid] = name;
-			});
-		return map;
-	}
-	function getPendingStatusCreates(): Array<{ id: string; title: string }> {
-		return fetchers
-			.filter(f => f.formData && f.formData.get('intent') === 'create-status')
-			.map(f => {
-				const name = String(f.formData!.get('name'));
-				return { id: name, title: name };
-			});
-	}
-
-	// Build columns: base from loader, overlay pending status renames and adds
-	const pendingStatusRenames = getPendingStatusRenames();
-	const pendingStatusCreates = getPendingStatusCreates();
-	const mergedColumns: Column[] = useMemo(() => {
-		const baseCols: Column[] = [];
-		for (const stat of statuses) {
-			baseCols.push({
-				id: stat.id,
-				title: pendingStatusRenames[stat.id] ?? stat.name,
-				statusName: pendingStatusRenames[stat.id] ?? stat.name,
-				statusId: stat.id,
-			});
-		}
-		if (notes.some(n => !n.statusId)) {
-			baseCols.unshift({ id: UNCATEGORIZED_ID, title: 'Uncategorized' });
-		}
-		for (const pending of pendingStatusCreates) {
-			if (!baseCols.some(c => c.id === pending.id))
-				baseCols.push({ ...pending });
-		}
-		return baseCols;
-	}, [statuses, notes, pendingStatusRenames, pendingStatusCreates]);
-
-	// Build notes: overlay pending reorder/creates
-	const pendingNotes = getPendingNotes();
-	const pendingCreates = getPendingCreates();
-	const mergedNotes: Note[] = useMemo(() => {
-		const noteMap = new Map<string, Note>();
-		for (const n of notes) noteMap.set(n.id, { ...n });
-		for (const patch of pendingNotes) {
-			if (patch.id && noteMap.has(patch.id)) {
-				const n = noteMap.get(patch.id)!;
-				n.statusId = patch.statusId;
-				if (patch.position !== undefined) n.position = patch.position;
-			}
-		}
-		// Add pending note creates
-		for (const pending of pendingCreates) {
-			if (pending.id && !noteMap.has(pending.id)) {
-				noteMap.set(pending.id, pending as Note);
-			}
-		}
-		return Array.from(noteMap.values());
-	}, [notes, pendingNotes, pendingCreates]);
-
-	const notesByStatus = useMemo(() => {
-		const map: Record<string, Note[]> = {};
-		for (const col of mergedColumns) map[col.id] = [];
-		for (const note of mergedNotes) {
-			const statusKey = note.statusId ?? UNCATEGORIZED_ID;
-			if (!map[statusKey]) map[statusKey] = [];
-			map[statusKey].push(note);
-		}
-		for (const colId of Object.keys(map)) {
-			map[colId].sort((a, b) => {
-				if (a.position != null && b.position != null) return a.position - b.position;
-				if (a.position != null) return -1;
-				if (b.position != null) return 1;
-				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-			});
-		}
-		return map;
-	}, [mergedNotes, mergedColumns]);
-
-	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-
-	const getColId = (ident: unknown) => {
-		const str = ident ? String(ident) : '';
-		return str.includes('___') ? str.split('___')[0] : str;
-	};
-
-	const handleDragStart = (event: any) => {
-		const activeIdStr = event?.active?.id ? String(event.active.id) : null;
-		if (!activeIdStr) return;
-		const noteId = activeIdStr.includes('___') ? activeIdStr.split('___')[1] : activeIdStr;
-		const found = mergedNotes.find(n => n.id === noteId);
-		if (found) setActiveNote(found);
-	};
-	const handleDragEnd = (event: any) => {
-		const { active, over } = event;
-		setActiveNote(null);
-		const activeIdStr = active?.id ? String(active.id) : null;
-		if (!activeIdStr) return;
-		const overIdStr = over?.id ? String(over.id) : null;
-		if (!overIdStr) return;
-
-		const noteId = activeIdStr.includes('___') ? activeIdStr.split('___')[1] : activeIdStr;
-		const sourceColId = getColId(activeIdStr);
-		const destColId = getColId(overIdStr);
-
-		if (!destColId) return;
-		if (sourceColId === destColId && activeIdStr === overIdStr) return;
-		const destNotes = [...notesByStatus[destColId] ?? []];
-		let destIndex;
-		if (overIdStr === destColId) {
-			destIndex = destNotes.length; // dropped on empty space
-		} else {
-			destIndex = destNotes.findIndex(n => `${destColId}___${n.id}` === overIdStr);
-			if (destIndex === -1) destIndex = destNotes.length;
-		}
-		const statusId = destColId === UNCATEGORIZED_ID ? null : destColId;
-
-		const formData = new FormData();
-		formData.append('intent', 'reorder-note');
-		formData.append('noteId', noteId);
-		formData.append('position', String(destIndex));
-		if (statusId !== null) formData.append('statusId', statusId);
-		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
-	}
-
-	const handleAddColumnStart = () => {
-		setAddingColumn(true)
-		setNewColInput('')
-	}
-	const handleAddColumnSubmit = () => {
-		const name = newColInput.trim()
-		if (!name) {
-			setAddingColumn(false)
-			setNewColInput('')
-			return
-		}
-		if (columns.some(col => col.title.toLowerCase() === name.toLowerCase())) {
-			alert('A column with that name already exists.')
-			return
-		}
-		const formData = new FormData()
-		formData.append('name', name)
-		addColumnFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/statuses` })
-		// Optimistically add
-		setColumns(prev =>
-			[...prev, { id: name, title: name, statusName: name }]
-		)
-		setAddingColumn(false)
-		setNewColInput('')
-	}
-	// Sync new column with backend response id/name
-	useEffect(() => {
-		if (addColumnFetcher.data && addColumnFetcher.data.id) {
-			setColumns(prev => {
-				const idx = prev.findIndex(c => c.title === addColumnFetcher.data.name)
-				if (idx !== -1) {
-					const updated = [...prev]
-					updated[idx] = {
-						id: addColumnFetcher.data.name,
-						title: addColumnFetcher.data.name,
-						statusName: addColumnFetcher.data.name,
-						statusId: addColumnFetcher.data.id,
-						position: addColumnFetcher.data.position,
-					}
-					return updated
-				}
-				return prev
-			})
-		}
-	}, [addColumnFetcher.data])
-
-	return (
-		<DndContext
-			sensors={sensors}
-			collisionDetection={closestCorners}
-			onDragStart={handleDragStart}
-			onDragEnd={handleDragEnd}
-			onDragCancel={() => setActiveNote(null)}
-		>
-			<div className="flex gap-6 overflow-x-auto py-2">
-				{mergedColumns.map((col) => (
-					<ColumnView
-						key={col.id}
-						column={col}
-						notes={notesByStatus[col.id] || []}
-						columns={mergedColumns}
-						orgSlug={orgSlug}
-					/>
-				))}
-				{/* Add column */}
-				<div className="flex flex-col justify-start min-w-[260px]">
-					{addingColumn ? (
-						<Input
-							autoFocus
-							value={newColInput}
-							onChange={e => setNewColInput(e.target.value)}
-							onBlur={handleAddColumnSubmit}
-							onKeyDown={e => {
-								if (e.key === 'Enter') {
-									handleAddColumnSubmit()
-								} else if (e.key === 'Escape') {
-									setAddingColumn(false)
-									setNewColInput('')
-								}
-							}}
-							className="mt-2"
-							placeholder="New column name"
-							spellCheck={false}
-							maxLength={24}
-						/>
-					) : (
-						<Button
-							variant="secondary"
-							className="mt-2"
-							onClick={handleAddColumnStart}
-							title="Add new column"
-						>
-							<Icon name="plus" className="mr-1" /> Add column
-						</Button>
-					)}
-				</div>
-			</div>
-			<DragOverlay>
-				{activeNote ? <NoteCard note={activeNote} /> : null}
-			</DragOverlay>
-		</DndContext>
-	)
-}
-
-function ColumnView({
-	column,
-	notes,
-	columns,
-	orgSlug,
+export function NotesKanbanBoard({
+  notes,
+  statuses,
+  orgSlug,
 }: {
-	column: Column
-	notes: Note[]
-	columns: Column[]
-	orgSlug: string
+  notes: LoaderNote[]
+  statuses: Status[]
+  orgSlug: string
 }) {
-	const { setNodeRef } = useDroppable({ id: column.id });
-	const [isEditing, setIsEditing] = useState(false)
-	const [titleInput, setTitleInput] = useState(column.title)
-	const inputRef = useRef<HTMLInputElement>(null)
-	const renameColumnFetcher = useFetcher()
-	const isUncategorized = column.id === UNCATEGORIZED_ID
+  // --- Optimistic overlays from Remix fetchers ---
+  const fetchers = useFetchers()
 
-	useEffect(() => {
-		setTitleInput(column.title)
-	}, [column.title])
+  // Pending note moves / creates
+  const pendingNotes = fetchers
+    .filter(f => f.formData?.get('intent') === 'reorder-note')
+    .map(f => ({
+      id: String(f.formData!.get('noteId')),
+      statusId: (f.formData!.get('statusId') as string) ?? null,
+      position: Number(f.formData!.get('position')),
+    }))
 
-	useEffect(() => {
-		if (isEditing) inputRef.current?.focus()
-	}, [isEditing])
+  const pendingNoteCreates = fetchers
+    .filter(f => f.formData?.get('intent') === 'create-note')
+    .map(f => ({
+      id: String(f.formData!.get('noteId')),
+      title: String(f.formData!.get('title')),
+      content: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdById: '',
+      createdByName: 'You',
+      statusId: (f.formData!.get('statusId') as string) ?? null,
+    } as LoaderNote))
 
-	const handleRenameSubmit = () => {
-		const newName = titleInput.trim()
-		if (!column.statusId) {
-			setIsEditing(false)
-			setTitleInput(column.title)
-			return
-		}
-		if (!newName || newName === column.title) {
-			setIsEditing(false)
-			setTitleInput(column.title)
-			return
-		}
-		if (columns.some(c => c.title.toLowerCase() === newName.toLowerCase() && c.id !== column.id)) {
-			alert('A column with that name already exists.')
-			return
-		}
-		const formData = new FormData()
-		formData.append('intent', 'rename-status')
-		formData.append('statusId', column.statusId)
-		formData.append('name', newName)
-		renameColumnFetcher.submit(formData, { method: 'PATCH', action: `/app/${orgSlug}/notes/status/${column.statusId}` })
-		setIsEditing(false)
-	}
+  // Pending status creates / renames
+  const renameMap: Record<string, string> = {}
+  fetchers
+    .filter(f => f.formData?.get('intent') === 'rename-status')
+    .forEach(f => {
+      renameMap[String(f.formData!.get('statusId'))] = String(
+        f.formData!.get('name'),
+      )
+    })
 
-	return (
-		<div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
-			<div className="font-semibold mb-3 flex items-center gap-2 group">
-				{isEditing ? (
-					<Input
-						ref={inputRef}
-						value={titleInput}
-						onChange={e => setTitleInput(e.target.value)}
-						onBlur={handleRenameSubmit}
-						onKeyDown={e => {
-							if (e.key === 'Enter') {
-								handleRenameSubmit()
-							} else if (e.key === 'Escape') {
-								setIsEditing(false)
-								setTitleInput(column.title)
-							}
-						}}
-						className="w-32 h-7"
-						maxLength={24}
-						spellCheck={false}
-					/>
-				) : (
-					<>
-						<span>{column.title}</span>
-						{!isUncategorized && (
-							<span
-								className={`ml-1 hidden rounded-sm p-1 text-muted-foreground group-hover:inline-block ${!column.statusId ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-muted-foreground/10'}`}
-								role="button"
-								tabIndex={0}
-								title={column.statusId ? "Rename column" : "Cannot rename"}
-								onClick={() => column.statusId && setIsEditing(true)}
-							>
-								<Icon name="pencil" size="xs" />
-							</span>
-						)}
-					</>
-				)}
-			</div>
-			<SortableContext
-				id={column.id}
-				items={notes.length > 0 ? notes.map((n) => `${column.id}___${n.id}`) : [column.id]}
-				strategy={verticalListSortingStrategy}
-			>
-				<div className="flex flex-col gap-3">
-					{notes.map((note) => (
-							<SortableNoteCard
-								key={note.id}
-								id={`${column.id}___${note.id}`}
-								note={note}
-							/>
-						))}
-				</div>
-			</SortableContext>
-		</div>
-	)
+  const pendingCreatesStatus = fetchers
+    .filter(f => f.formData?.get('intent') === 'create-status')
+    .map(f => {
+      const name = String(f.formData!.get('name'))
+      return { id: name, name }
+    })
+
+  // Build columns
+  const columns: Column[] = [
+    ...statuses.map(s => ({
+      id: s.id,
+      name: renameMap[s.id] ?? s.name,
+    })),
+    ...pendingCreatesStatus,
+  ]
+  if (notes.some(n => !n.statusId)) columns.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+
+  // Build notes
+  const noteMap = new Map<string, Note>()
+  notes.forEach(n => noteMap.set(n.id, { ...n }))
+  pendingNotes.forEach(p => {
+    const n = noteMap.get(p.id)
+    if (n) {
+      n.statusId = p.statusId
+      n.position = p.position
+    }
+  })
+  pendingNoteCreates.forEach(n => noteMap.set(n.id, n))
+
+  // Group by statusId
+  const grouped: Record<string, Note[]> = {}
+  columns.forEach(c => (grouped[c.id] = []))
+  noteMap.forEach(n => {
+    const bucket = grouped[n.statusId ?? UNCATEGORISED] ?? (grouped[n.statusId ?? UNCATEGORISED] = [])
+    bucket.push(n)
+  })
+  Object.values(grouped).forEach(arr =>
+    arr.sort(
+      (a, b) =>
+        (a.position ?? Number.POSITIVE_INFINITY) -
+        (b.position ?? Number.POSITIVE_INFINITY),
+    ),
+  )
+
+  // --- DnD-kit setup ---
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const reorderFetcher = useFetcher()
+  const activeNoteRef = useRef<Note | null>(null)
+
+  function handleDragStart(ev: any) {
+    const id = String(ev.active.id).split('___')[1] ?? ev.active.id
+    activeNoteRef.current = noteMap.get(id) ?? null
+  }
+
+  function handleDragEnd(ev: any) {
+    const { active, over } = ev
+    activeNoteRef.current = null
+    if (!over) return
+
+    const [destCol] = String(over.id).split('___')
+    const [, noteId] = String(active.id).split('___')
+
+    const list = grouped[destCol]
+    const destIndex = over.id === destCol ? list.length : list.findIndex(n => n.id === over.id.split('___')[1])
+
+    const fd = new FormData()
+    fd.append('intent', 'reorder-note')
+    fd.append('noteId', noteId)
+    fd.append('statusId', destCol === UNCATEGORISED ? '' : destCol)
+    fd.append('position', String(destIndex))
+    reorderFetcher.submit(fd, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
+  }
+
+  // --- Render ---
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => (activeNoteRef.current = null)}
+    >
+      <div className="flex gap-6 overflow-x-auto py-2">
+        {columns.map(col => (
+          <KanbanColumn
+            key={col.id}
+            column={col}
+            notes={grouped[col.id]}
+            orgSlug={orgSlug}
+          />
+        ))}
+        <NewColumnButton orgSlug={orgSlug} />
+      </div>
+      <DragOverlay>
+        {activeNoteRef.current ? <NoteCard note={activeNoteRef.current} /> : null}
+      </DragOverlay>
+    </DndContext>
+  )
 }
 
-function SortableNoteCard({ id, note }: { id: string; note: Note }) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging: sortableIsDragging } = useSortable({
-		id,
-	})
+/* -------------------------------------------------------------------------- */
+/*  Column                                                                    */
+/* -------------------------------------------------------------------------- */
 
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-		opacity: sortableIsDragging ? 0.2 : 1,
-		cursor: 'grab',
-	}
+function KanbanColumn({
+  column,
+  notes,
+  orgSlug,
+}: {
+  column: Column
+  notes: Note[]
+  orgSlug: string
+}) {
+  const { setNodeRef } = useDroppable({ id: column.id })
+  const renameFetcher = useFetcher()
+  const [editing, setEditing] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-	return (
-		<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-			<NoteCard note={note} />
-		</div>
-	)
+  return (
+    <div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
+      {/* header ------------------------------------------------------- */}
+      <div className="font-semibold mb-3 flex items-center gap-2 group">
+        {editing ? (
+          <renameFetcher.Form
+            method="patch"
+            action={`/app/${orgSlug}/notes/status/${column.id}`}
+            onSubmit={() => setEditing(false)}
+            onBlur={e => {
+              if (!e.currentTarget.contains(e.relatedTarget)) setEditing(false)
+            }}
+          >
+            <input type="hidden" name="intent" value="rename-status" />
+            <input type="hidden" name="statusId" value={column.id} />
+            <Input
+              name="name"
+              defaultValue={column.name}
+              autoFocus
+              className="w-32 h-7"
+              onKeyDown={e => e.key === 'Escape' && setEditing(false)}
+            />
+          </renameFetcher.Form>
+        ) : (
+          <>
+            <span>{column.name}</span>
+            {column.id !== UNCATEGORISED && (
+              <button
+                onClick={() => setEditing(true)}
+                className="invisible group-hover:visible ml-1 p-1 hover:bg-muted-foreground/10 rounded-sm"
+              >
+                <Icon name="pencil" size="xs" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* list --------------------------------------------------------- */}
+      <SortableContext
+        id={column.id}
+        items={notes.length ? notes.map(n => `${column.id}___${n.id}`) : [column.id]}
+        strategy={verticalListSortingStrategy}
+      >
+        <div className="flex flex-col gap-3">
+          {notes.map(n => (
+            <SortableNote key={n.id} note={n} columnId={column.id} />
+          ))}
+        </div>
+      </SortableContext>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Note Card wrapper                                                         */
+/* -------------------------------------------------------------------------- */
+
+function SortableNote({ note, columnId }: { note: Note; columnId: string }) {
+  const id = `${columnId}___${note.id}`
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.2 : 1,
+        cursor: 'grab',
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <NoteCard note={note} />
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  “+ column” button – stateless (details element manages open/close)    */
+/* -------------------------------------------------------------------------- */
+
+function NewColumnButton({ orgSlug }: { orgSlug: string }) {
+  const fetcher = useFetcher()
+
+  return (
+    <details className="flex flex-col justify-start min-w-[260px]">
+      <summary>
+        <Button variant="secondary" className="mt-2">
+          <Icon name="plus" className="mr-1" /> Add column
+        </Button>
+      </summary>
+
+      <fetcher.Form
+        method="post"
+        action={`/app/${orgSlug}/notes/statuses`}
+        onSubmit={() => (document.activeElement as HTMLElement)?.blur()}
+        className="mt-2 flex gap-2"
+      >
+        <input type="hidden" name="intent" value="create-status" />
+        <Input autoFocus name="name" placeholder="Column name" maxLength={24} />
+        <Button type="submit" variant="primary" size="sm">
+          Save
+        </Button>
+      </fetcher.Form>
+    </details>
+  )
 }
