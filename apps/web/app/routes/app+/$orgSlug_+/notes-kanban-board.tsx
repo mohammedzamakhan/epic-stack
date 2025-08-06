@@ -82,12 +82,18 @@ function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
 
 export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardProps) {
 	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
+	const [noteList, setNoteList] = useState<Note[]>(notes);
 	const reorderFetcher = useFetcher();
+
+	// Sync local noteList if notes prop changes
+	useEffect(() => {
+		setNoteList(notes);
+	}, [notes]);
 
 	const notesByStatus = useMemo(() => {
 		const map: Record<string, Note[]> = {};
 		for (const col of columns) map[col.id] = [];
-		for (const note of notes) {
+		for (const note of noteList) {
 			const statusKey = note.status ?? UNCATEGORIZED_ID;
 			if (!map[statusKey]) map[statusKey] = [];
 			map[statusKey].push(note);
@@ -101,7 +107,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 			});
 		}
 		return map;
-	}, [notes, columns]);
+	}, [noteList, columns]);
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -123,6 +129,35 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 			if (destIndex === -1) destIndex = destNotes.length;
 		}
 		const status = destColId === UNCATEGORIZED_ID ? null : destColId;
+		// Optimistic update
+		setNoteList(prev => {
+			const movingIdx = prev.findIndex(n => n.id === noteId);
+			if (movingIdx === -1) return prev;
+			const moving = { ...prev[movingIdx], status, position: destIndex };
+			const remaining = prev.filter((_, i) => i !== movingIdx);
+			const destArr: Note[] = [];
+			const others: Note[] = [];
+			remaining.forEach(n => {
+				const colId = (n.status ?? UNCATEGORIZED_ID);
+				if (colId === destColId) destArr.push(n);
+				else others.push(n);
+			});
+			destArr.splice(destIndex, 0, moving);
+			destArr.forEach((n, i) => { n.position = i; });
+			// Also reindex source column positions if source and dest differ
+			if (sourceColId !== destColId) {
+				const sourceArr = [];
+				const rest = [];
+				others.forEach(n => {
+					const colId = (n.status ?? UNCATEGORIZED_ID);
+					if (colId === sourceColId) sourceArr.push(n);
+					else rest.push(n);
+				});
+				sourceArr.forEach((n, i) => { n.position = i; });
+				return [...rest, ...sourceArr, ...destArr];
+			}
+			return [...others, ...destArr];
+		});
 		const formData = new FormData();
 		formData.append('noteId', noteId);
 		formData.append('position', String(destIndex));
