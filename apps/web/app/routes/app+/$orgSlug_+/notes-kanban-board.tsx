@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { DndContext, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useFetcher } from 'react-router'
+import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core'
 import {
 	SortableContext,
 	verticalListSortingStrategy,
@@ -159,13 +158,11 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	return (
 		<DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
 			<div className="flex gap-6 overflow-x-auto py-2">
-				{columns.map((col, colIdx) => (
+				{columns.map((col) => (
 					<ColumnView
 						key={col.id}
 						column={col}
 						notes={notesByStatus[col.id] || []}
-						colIdx={colIdx}
-						orgSlug={orgSlug}
 					/>
 				))}
 				{/* Add column */}
@@ -187,16 +184,13 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 function ColumnView({
 	column,
 	notes,
-	colIdx,
-	orgSlug,
 }: {
 	column: Column
 	notes: Note[]
-	colIdx: number
-	orgSlug: string
 }) {
+	const { setNodeRef } = useDroppable({ id: column.id });
 	return (
-		<div className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
+		<div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
 			<div className="font-semibold mb-3">{column.title}</div>
 			<SortableContext
 				id={column.id}
