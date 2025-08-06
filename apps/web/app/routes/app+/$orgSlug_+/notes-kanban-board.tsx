@@ -85,26 +85,22 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
 	const reorderFetcher = useFetcher();
 
-	useEffect(() => {
-		// Sync columns if notes/statuses change externally
-		setColumns(getInitialColumns(statuses, notes))
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [JSON.stringify(statuses), JSON.stringify(notes.map(n => n.status))])
+	const handleDragEnd = (event: any, destColId: string) => {
+		const { active, over } = event
+		if (!active || !over) return
 
-	const notesByStatus = useMemo(() => {
-		const map: Record<string, Note[]> = {}
-		for (const col of columns) map[col.id] = []
-		for (const note of notes) {
-			const status = note.status ?? UNCATEGORIZED_ID
-			if (!map[status]) map[status] = []
-			map[status].push(note)
-		}
-		// Sort by position, fallback to updatedAt
-		for (const colId of Object.keys(map)) {
-			map[colId].sort((a, b) => {
-				if (a.position != null && b.position != null) {
-					return a.position - b.position
-				}
+		const [, noteId] = active.id.split('___')
+		const status = destColId === UNCATEGORIZED_ID ? null : destColId
+		const newColNotes = notesByStatus[destColId] ?? []
+		let position = newColNotes.findIndex(n => n.id === noteId)
+		if (position === -1) position = 0
+
+		const formData = new FormData();
+		formData.append('noteId', noteId);
+		formData.append('position', String(position));
+		if (status !== null) formData.append('status', status);
+		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
+	}
 				if (a.position != null) return -1
 				if (b.position != null) return 1
 				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -197,7 +193,7 @@ function ColumnView({
 	notes: Note[]
 	colIdx: number
 	orgSlug: string
-	onDragEnd: (event: any) => void
+	onDragEnd: (event: any, destColId: string) => void
 }) {
 	return (
 		<div className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
@@ -205,7 +201,7 @@ function ColumnView({
 			<DndContext
 				sensors={useSensors(useSensor(PointerSensor))}
 				collisionDetection={closestCorners}
-				onDragEnd={onDragEnd}
+				onDragEnd={(e) => onDragEnd(e, column.id)}
 			>
 				<SortableContext
 					items={notes.map((n) => `${column.id}___${n.id}`)}
