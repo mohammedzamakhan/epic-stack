@@ -110,7 +110,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 import { ToggleGroup, ToggleGroupItem } from '#app/components/ui/toggle-group.tsx'
 import { Tooltip, TooltipTrigger, TooltipContent } from '#app/components/ui/tooltip.tsx'
-import { Icon } from '#app/components/ui/icon.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
 export default function NotesRoute({
