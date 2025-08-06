@@ -20,6 +20,55 @@ interface OrganizationMember {
 	}
 }
 
+function OrganizationMemberRoleEditor({
+	member,
+	currentUserId,
+	members,
+}: {
+	member: OrganizationMember
+	currentUserId: string
+	members: OrganizationMember[]
+}) {
+	const currentMember = members.find((m) => m.userId === currentUserId)
+	const isAdmin = currentMember?.role === 'admin' && currentMember.active
+	const isSelf = member.userId === currentUserId
+
+	if (!isAdmin || isSelf) {
+		return (
+			<Badge
+				variant={member.role === 'admin' ? 'default' : 'secondary'}
+				className="text-xs"
+			>
+				{member.role === 'admin' && (
+					<Icon name="settings" className="mr-1 h-3 w-3" />
+				)}
+				{member.role === 'member' && (
+					<Icon name="user" className="mr-1 h-3 w-3" />
+				)}
+				{member.role}
+			</Badge>
+		)
+	}
+
+	return (
+		<Form method="POST" className="flex items-center gap-2">
+			<input type="hidden" name="intent" value="update-member-role" />
+			<input type="hidden" name="userId" value={member.userId} />
+			<select
+				name="role"
+				defaultValue={member.role}
+				className="border rounded px-2 py-1 text-xs"
+			>
+				<option value="admin">Admin</option>
+				<option value="member">Member</option>
+			</select>
+			<Button type="submit" variant="ghost" size="sm">
+				<Icon name="save" className="h-4 w-4" />
+			</Button>
+		</Form>
+	)
+}
+
 export function OrganizationMembers({
 	members = [],
 	currentUserId,
@@ -80,19 +129,11 @@ export function OrganizationMembers({
 								</div>
 
 								<div className="flex items-center gap-2">
-									<Badge
-										variant={member.role === 'admin' ? 'default' : 'secondary'}
-										className="text-xs"
-									>
-										{member.role === 'admin' && (
-											<Icon name="settings" className="mr-1 h-3 w-3" />
-										)}
-										{member.role === 'member' && (
-											<Icon name="user" className="mr-1 h-3 w-3" />
-										)}
-										{member.role}
-									</Badge>
-
+									<OrganizationMemberRoleEditor
+										member={member}
+										currentUserId={currentUserId}
+										members={members}
+									/>
 									{member.userId !== currentUserId && (
 										<Form method="POST">
 											<input

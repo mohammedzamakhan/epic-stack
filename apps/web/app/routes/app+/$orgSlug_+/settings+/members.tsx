@@ -214,6 +214,59 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
+	// --- update-member-role intent ---
+	if (intent === 'update-member-role') {
+		const memberUserId = formData.get('userId') as string
+		const newRole = formData.get('role') as string
+
+		if (!memberUserId || typeof memberUserId !== 'string') {
+			return Response.json({ error: 'Missing userId' }, { status: 400 })
+		}
+		if (!['admin', 'member'].includes(newRole)) {
+			return Response.json({ error: 'Invalid role' }, { status: 400 })
+		}
+
+		// Only allow admins to change roles
+		const requester = await prisma.userOrganization.findUnique({
+			where: {
+				userId_organizationId: {
+					userId,
+					organizationId: organization.id,
+				},
+			},
+			select: { role: true, active: true },
+		})
+		if (!requester || requester.role !== 'admin' || !requester.active) {
+			return Response.json(
+				{ error: 'Only admins can change member roles' },
+				{ status: 403 }
+			)
+		}
+
+		// Optionally: Prevent demoting last admin (not required per spec)
+
+		try {
+			await prisma.userOrganization.update({
+				where: {
+					userId_organizationId: {
+						userId: memberUserId,
+						organizationId: organization.id,
+					},
+				},
+				data: {
+					role: newRole,
+				},
+			})
+			return Response.json({ success: true })
+		} catch (error) {
+			console.error('Error updating member role:', error)
+			return Response.json(
+				{ error: 'Failed to update member role' },
+				{ status: 500 }
+			)
+		}
+	}
+
 	if (intent === 'create-invite-link') {
 		try {
 			const inviteLink = await createOrganizationInviteLink({
