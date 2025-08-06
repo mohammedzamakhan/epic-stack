@@ -5,6 +5,7 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 	useSortable,
+	arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '#app/components/ui/button.tsx'
@@ -106,28 +107,39 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
 	const handleDragEnd = (event: any) => {
-		const { active, over } = event
-		if (!active || !over) return
+		const { active, over } = event;
+		if (!over) return;
 
-		const [, noteIdPart] = active.id.split('___');
-		const noteId = noteIdPart ?? active.id;
-		let destStatusId: string;
-		if (typeof over.id === 'string') {
-			destStatusId = over.id.includes('___') ? over.id.split('___')[0] : over.id.toString();
+		const activeId = active.id as string;
+		const overId = over.id as string;
+		const noteId = activeId.split('___')[1] ?? activeId;
+
+		const sourceColId = active.data.current?.sortable.containerId as string;
+		const destColId = over.data.current?.sortable.containerId as string;
+
+		// Same column & same position → nothing to do
+		if (sourceColId === destColId && activeId === overId) return;
+
+		const destNotes = notesByStatus[destColId] ?? [];
+
+		// Determine destination index
+		let destIndex: number;
+		if (overId === destColId) {
+			// Dropped on empty space in column
+			destIndex = destNotes.length;
 		} else {
-			destStatusId = over.id.toString();
+			destIndex = destNotes.findIndex(n => `${destColId}___${n.id}` === overId);
+			if (destIndex === -1) destIndex = destNotes.length;
 		}
-		const status = destStatusId === UNCATEGORIZED_ID ? null : destStatusId;
-		const newColNotes = notesByStatus[destStatusId] ?? [];
-		let position = newColNotes.findIndex(n => n.id === noteId);
-		if (position === -1) position = 0;
+
+		const status = destColId === UNCATEGORIZED_ID ? null : destColId;
 
 		const formData = new FormData();
 		formData.append('noteId', noteId);
-		formData.append('position', String(position));
+		formData.append('position', String(destIndex));
 		if (status !== null) formData.append('status', status);
 		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
-	}
+	};
 
 	const handleAddColumn = async () => {
 		const name = prompt('New column name?')
