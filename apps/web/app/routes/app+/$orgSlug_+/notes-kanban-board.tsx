@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import {
   DndContext,
   PointerSensor,
+  KeyboardSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -39,6 +40,18 @@ type Status = { id: string; name: string; position: number | null }
 type Column = { id: string; name: string }
 
 const UNCATEGORISED = '__uncategorised'
+const SEPARATOR = ':::'
+function makeDragId(columnId: string, noteId: string) {
+  return `${columnId}${SEPARATOR}${noteId}`
+}
+function parseDragId(id: unknown): { columnId: string; noteId?: string } | null {
+  if (!id || typeof id !== 'string') return null
+  if (id.includes(SEPARATOR)) {
+    const [columnId, noteId] = id.split(SEPARATOR)
+    return { columnId, noteId }
+  }
+  return { columnId: id }
+}
 
 export function NotesKanbanBoard({
   notes,
@@ -129,34 +142,53 @@ export function NotesKanbanBoard({
   )
 
   // --- DnD-kit setup ---
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  )
   const reorderFetcher = useFetcher()
   const activeNoteRef = useRef<Note | null>(null)
 
   function handleDragStart(ev: any) {
-    const id = String(ev.active.id).split('___')[1] ?? ev.active.id
-    activeNoteRef.current = noteMap.get(id) ?? null
+    const info = parseDragId(ev.active.id)
+    if (info?.noteId) {
+      activeNoteRef.current = noteMap.get(info.noteId) ?? null
+    } else {
+      activeNoteRef.current = null
+    }
   }
 
   function handleDragEnd(ev: any) {
-    const { active, over } = ev; activeNoteRef.current = null; if (!over) return;
-    const activeId = String(active.id);
-    const overId = String(over.id);
-    const [, noteId] = activeId.includes('___') ? activeId.split('___') : [null, activeId];
-    const [destCol, overNoteId] = overId.includes('___') ? overId.split('___') : [overId, null];
-    if (!destCol) return;
-    const list = grouped[destCol] ?? [];
-    let destIndex = list.length;
-    if (overNoteId) {
-      const idx = list.findIndex(n => n.id === overNoteId);
-      if (idx !== -1) destIndex = idx;
+    const { active, over } = ev
+    activeNoteRef.current = null
+    if (!over) return
+
+    const activeInfo = parseDragId(active.id)
+    const overInfo = parseDragId(over.id)
+    const destColId = overInfo?.columnId ?? String(over.id)
+    if (!destColId || !activeInfo?.noteId) return
+    const list = grouped[destColId] ?? []
+    let destIndex = list.length
+
+    if (overInfo?.noteId) {
+      const overIndex = list.findIndex(n => n.id === overInfo.noteId)
+      if (overIndex >= 0) destIndex = overIndex
+
+      // If moving within same column and after itself, adjust index
+      if (
+        activeInfo.columnId === destColId &&
+        overIndex > list.findIndex(n => n.id === activeInfo.noteId)
+      ) {
+        destIndex--
+      }
     }
-    const formData = new FormData();
-    formData.append('intent', 'reorder-note');
-    formData.append('noteId', noteId);
-    formData.append('position', String(destIndex));
-    if (destCol !== UNCATEGORISED) formData.append('statusId', destCol);
-    reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` });
+
+    const formData = new FormData()
+    formData.append('intent', 'reorder-note')
+    formData.append('noteId', activeInfo.noteId)
+    formData.append('position', String(destIndex))
+    if (destColId !== UNCATEGORISED) formData.append('statusId', destColId)
+    reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
   }
 
   // --- Render ---
@@ -245,12 +277,12 @@ function KanbanColumn({
       {/* list --------------------------------------------------------- */}
       <SortableContext
         id={column.id}
-        items={notes.map(n => `${column.id}___${n.id}`)}
+        items={notes.map(n => makeDragId(column.id, n.id))}
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col gap-3 min-h-[100px]">
           {notes.map(n => (
-            <SortableNote key={n.id} note={n} columnId={column.id} />
+            <SortableNote key={makeDragId(column.id, n.id)} note={n} dragId={makeDragId(column.id, n.id)} />
           ))}
         </div>
       </SortableContext>
@@ -262,9 +294,8 @@ function KanbanColumn({
 /*  Note Card wrapper                                                         */
 /* -------------------------------------------------------------------------- */
 
-function SortableNote({ note, columnId }: { note: Note; columnId: string }) {
-  const id = `${columnId}___${note.id}`
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+function SortableNote({ note, dragId }: { note: Note; dragId: string }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: dragId })
 
   return (
     <div
