@@ -113,6 +113,36 @@ export async function requireAnonymous(request: Request) {
 	}
 }
 
+// Helper to check if a user is allowed to login (and auto-lift expired bans)
+export async function canUserLogin(userId: string): Promise<boolean> {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { isBanned: true, banExpiresAt: true },
+	})
+	if (!user) return false
+
+	if (!user.isBanned) return true
+
+	const now = new Date()
+	const banExpired = user.banExpiresAt && new Date(user.banExpiresAt) <= now
+
+	if (banExpired) {
+		await prisma.user.update({
+			where: { id: userId },
+			data: {
+				isBanned: false,
+				banReason: null,
+				banExpiresAt: null,
+				bannedAt: null,
+				bannedById: null,
+			},
+		})
+		return true
+	}
+
+	return false
+}
+
 export async function login({
 	username,
 	password,
@@ -123,41 +153,8 @@ export async function login({
 	const user = await verifyUserPassword({ username }, password)
 	if (!user) return null
 
-	// Check if user is banned
-	const userWithBanInfo = await prisma.user.findUnique({
-		where: { id: user.id },
-		select: {
-			id: true,
-			isBanned: true,
-			banExpiresAt: true,
-			banReason: true,
-		},
-	})
-
-	if (userWithBanInfo?.isBanned) {
-		// Check if ban has expired
-		const now = new Date()
-		const banExpired =
-			userWithBanInfo.banExpiresAt &&
-			new Date(userWithBanInfo.banExpiresAt) <= now
-
-		if (banExpired) {
-			// Automatically lift expired ban
-			await prisma.user.update({
-				where: { id: user.id },
-				data: {
-					isBanned: false,
-					banReason: null,
-					banExpiresAt: null,
-					bannedAt: null,
-					bannedById: null,
-				},
-			})
-		} else {
-			// User is still banned, return null to prevent login
-			return null
-		}
-	}
+	const canLogin = await canUserLogin(user.id)
+	if (!canLogin) return null
 
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },

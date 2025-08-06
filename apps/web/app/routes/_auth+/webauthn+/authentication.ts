@@ -74,6 +74,19 @@ export async function action({ request }: Route.ActionArgs) {
 			data: { counter: BigInt(verification.authenticationInfo.newCounter) },
 		})
 
+		// Check if user is banned before creating session
+		const { canUserLogin } = await import('#app/utils/auth.server.ts')
+		const allowed = await canUserLogin(passkey.userId)
+		if (!allowed) {
+			return Response.json(
+				{
+					status: 'error',
+					error: 'Account suspended',
+				},
+				{ status: 403, headers: { 'Set-Cookie': deletePasskeyCookie } },
+			)
+		}
+
 		const session = await prisma.session.create({
 			select: { id: true, expirationDate: true, userId: true },
 			data: {

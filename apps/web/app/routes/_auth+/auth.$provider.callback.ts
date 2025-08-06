@@ -177,6 +177,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	})
 }
 
+import { canUserLogin } from '#app/utils/auth.server.ts'
+
 async function makeSession(
 	{
 		request,
@@ -186,6 +188,14 @@ async function makeSession(
 	responseInit?: ResponseInit,
 ) {
 	redirectTo ??= '/'
+
+	const allowed = await canUserLogin(userId)
+	if (!allowed) {
+		return redirect('/login?banned=true', {
+			headers: combineHeaders(responseInit?.headers, destroyRedirectTo),
+		})
+	}
+
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
