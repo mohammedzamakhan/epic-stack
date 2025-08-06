@@ -6,6 +6,7 @@ import {
 	verticalListSortingStrategy,
 	useSortable,
 } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Button } from '#app/components/ui/button.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
