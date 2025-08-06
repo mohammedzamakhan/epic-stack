@@ -109,6 +109,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 import { ToggleGroup, ToggleGroupItem } from '#app/components/ui/toggle-group.tsx'
+import { Tooltip, TooltipTrigger, TooltipContent } from '#app/components/ui/tooltip.tsx'
+import { Icon } from '#app/components/ui/icon.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
 export default function NotesRoute({
@@ -170,32 +172,47 @@ export default function NotesRoute({
 	return (
 		<div className="m-8 flex h-full flex-col">
 			<div className="flex items-center justify-between pb-8">
+				<PageTitle
+					title={`Notes`}
+					description="You can create notes for your organization here."
+				/>
 				<div className="flex items-center gap-4">
-					<PageTitle
-						title={`Notes`}
-						description="You can create notes for your organization here."
-					/>
 					<ToggleGroup
 						type="single"
+						variant="outline"
+						size="sm"
 						value={viewMode}
 						onValueChange={val => {
 							if (val === 'cards' || val === 'kanban') setViewMode(val)
 						}}
-						className="ml-4"
 					>
 						<ToggleGroupItem value="cards" aria-label="Cards view">
-							Cards
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span>
+										<Icon name="blocks" />
+									</span>
+								</TooltipTrigger>
+								<TooltipContent side="top">Cards</TooltipContent>
+							</Tooltip>
 						</ToggleGroupItem>
 						<ToggleGroupItem value="kanban" aria-label="Kanban board">
-							Kanban
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span>
+										<Icon name="layout-columns" />
+									</span>
+								</TooltipTrigger>
+								<TooltipContent side="top">Kanban</TooltipContent>
+							</Tooltip>
 						</ToggleGroupItem>
 					</ToggleGroup>
+					<Button variant="default" asChild>
+						<Link to="new">
+							<Icon name="plus">New Note</Icon>
+						</Link>
+					</Button>
 				</div>
-				<Button variant="default" asChild>
-					<Link to="new">
-						<Icon name="plus">New Note</Icon>
-					</Link>
-				</Button>
 			</div>
 
 			<div className="flex-grow overflow-auto pb-4">
