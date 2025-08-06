@@ -4,7 +4,6 @@ import { useFetcher } from 'react-router'
 import {
 	SortableContext,
 	verticalListSortingStrategy,
-	arrayMove,
 	useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -113,33 +112,6 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		const [, noteId] = active.id.split('___')
 		const status = destColId === UNCATEGORIZED_ID ? null : destColId
 		const newColNotes = notesByStatus[destColId] ?? []
-		let position = newColNotes.findIndex(n => n.id === noteId)
-		if (position === -1) position = 0
-
-		const formData = new FormData();
-		formData.append('noteId', noteId);
-		formData.append('position', String(position));
-		if (status !== null) formData.append('status', status);
-		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
-	}
-				if (a.position != null) return -1
-				if (b.position != null) return 1
-				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-			})
-		}
-		return map
-	}, [notes, columns])
-
-	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
-
-	const handleDragEnd = (event: any) => {
-		const { active, over } = event
-		if (!active || !over) return
-
-		const [, noteId] = active.id.split('___')
-		const [destStatus] = over.id.split('___')
-		const status = destStatus === UNCATEGORIZED_ID ? null : destStatus
-		const newColNotes = notesByStatus[destStatus] ?? []
 		let position = newColNotes.findIndex(n => n.id === noteId)
 		if (position === -1) position = 0
 
