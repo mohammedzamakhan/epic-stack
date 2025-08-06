@@ -91,19 +91,39 @@ export async function handleNewSession(
 	}
 }
 
-export async function handleVerification({ request, submission }: VerifyFunctionArgs) {
-  const { unverifiedSessionId, redirectTo } = submission.payload ?? {}
-  let finalRedirectTo = redirectTo
+export async function handleVerification({
+  request,
+  submission,
+}: VerifyFunctionArgs) {
+  invariant(
+    submission.status === 'success',
+    'Submission should be successful by now',
+  )
 
+  const authSession = await authSessionStorage.getSession(
+    request.headers.get('cookie'),
+  )
+  const verifySession = await verifySessionStorage.getSession(
+    request.headers.get('cookie'),
+  )
+
+  const remember = verifySession.get(rememberKey)
+  const { redirectTo } = submission.value
   const headers = new Headers()
+  authSession.set(verifiedTimeKey, Date.now())
+
+  const unverifiedSessionId = verifySession.get(unverifiedSessionIdKey) as
+    | string
+    | undefined
+
+  let userIdForRedirect: string | null = null
 
   if (unverifiedSessionId) {
-    // If unverifiedSessionId is passed, fetch session and get userId/expirationDate
+    // Fetch session to get expirationDate and userId
     const session = await prisma.session.findUnique({
       select: { expirationDate: true, userId: true },
       where: { id: unverifiedSessionId },
     })
-
     if (!session) {
       throw await redirectWithToast('/login', {
         type: 'error',
@@ -112,31 +132,38 @@ export async function handleVerification({ request, submission }: VerifyFunction
       })
     }
 
-    const sessionUserId = session.userId
+    userIdForRedirect = session.userId
 
-    // ...session/cookie logic here...
-    // (Assume existing logic to commit session cookies and set headers)
+    authSession.set(sessionKey, unverifiedSessionId)
 
-    if (!finalRedirectTo) {
-      finalRedirectTo = await getUserDashboardUrl(sessionUserId)
-    }
-
-    return redirect(safeRedirect(finalRedirectTo), { headers })
+    headers.append(
+      'set-cookie',
+      await authSessionStorage.commitSession(authSession, {
+        expires: remember ? session.expirationDate : undefined,
+      }),
+    )
   } else {
-    // ...existing logic to set session/cookie...
-    // (Assume existing logic to commit session cookies and set headers)
-
-    if (!finalRedirectTo) {
-      const currentUserId = await getUserId(request)
-      if (currentUserId) {
-        finalRedirectTo = await getUserDashboardUrl(currentUserId)
-      } else {
-        finalRedirectTo = '/app'
-      }
-    }
-
-    return redirect(safeRedirect(finalRedirectTo), { headers })
+    headers.append(
+      'set-cookie',
+      await authSessionStorage.commitSession(authSession),
+    )
+    userIdForRedirect = await getUserId(request)
   }
+
+  headers.append(
+    'set-cookie',
+    await verifySessionStorage.destroySession(verifySession),
+  )
+
+  // Determine final destination
+  let finalRedirectTo = redirectTo
+  if (!finalRedirectTo) {
+    finalRedirectTo = userIdForRedirect
+      ? await getUserDashboardUrl(userIdForRedirect)
+      : '/app'
+  }
+
+  return redirect(safeRedirect(finalRedirectTo), { headers })
 }
 
 export async function shouldRequestTwoFA(request: Request) {
