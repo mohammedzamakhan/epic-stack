@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useFetcher } from 'react-router'
+import { useFetcher, useFetchers } from 'react-router'
 import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core'
 import {
 	SortableContext,
@@ -87,18 +87,110 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	const [addingColumn, setAddingColumn] = useState(false)
 	const [newColInput, setNewColInput] = useState('')
 	const addColumnFetcher = useFetcher()
-	const [noteList, setNoteList] = useState<Note[]>(notes);
 	const reorderFetcher = useFetcher();
+	const fetchers = useFetchers();
+	const [draggingId, setDraggingId] = useState<string | null>(null);
 
-	// Sync local noteList if notes prop changes
-	useEffect(() => {
-		setNoteList(notes);
-	}, [notes]);
+	// Helpers to overlay optimistic fetchers onto canonical data
+
+	// 1. Pending note reorder (and creation)
+	function getPendingNotes(): Partial<Note>[] {
+		return fetchers
+			.filter(f => f.formData && f.formData.get('intent') === 'reorder-note')
+			.map(f => ({
+				id: String(f.formData!.get('noteId')),
+				statusId: f.formData!.get('statusId') ? String(f.formData!.get('statusId')) : null,
+				position: Number(f.formData!.get('position')),
+			}));
+	}
+	function getPendingCreates(): Partial<Note>[] {
+		return fetchers
+			.filter(f => f.formData && f.formData.get('intent') === 'create-note')
+			.map(f => ({
+				id: String(f.formData!.get('noteId')),
+				title: String(f.formData!.get('title')),
+				content: String(f.formData!.get('content') ?? ''),
+				statusId: f.formData!.get('statusId') ? String(f.formData!.get('statusId')) : null,
+				position: Number(f.formData!.get('position')),
+				createdByName: 'You',
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				isPublic: true,
+				createdById: '', // could use userId from context
+				noteAccess: [],
+			}));
+	}
+
+	// 2. Pending column/status creates & renames
+	function getPendingStatusRenames(): Record<string, string> {
+		const map: Record<string, string> = {};
+		fetchers
+			.filter(f => f.formData && f.formData.get('intent') === 'rename-status')
+			.forEach(f => {
+				const sid = String(f.formData!.get('statusId'));
+				const name = String(f.formData!.get('name'));
+				if (sid && name) map[sid] = name;
+			});
+		return map;
+	}
+	function getPendingStatusCreates(): Array<{ id: string; title: string }> {
+		return fetchers
+			.filter(f => f.formData && f.formData.get('intent') === 'create-status')
+			.map(f => {
+				const name = String(f.formData!.get('name'));
+				return { id: name, title: name };
+			});
+	}
+
+	// Build columns: base from loader, overlay pending status renames and adds
+	const pendingStatusRenames = getPendingStatusRenames();
+	const pendingStatusCreates = getPendingStatusCreates();
+	const mergedColumns: Column[] = useMemo(() => {
+		const baseCols: Column[] = [];
+		for (const stat of statuses) {
+			baseCols.push({
+				id: stat.id,
+				title: pendingStatusRenames[stat.id] ?? stat.name,
+				statusName: pendingStatusRenames[stat.id] ?? stat.name,
+				statusId: stat.id,
+			});
+		}
+		if (notes.some(n => !n.statusId)) {
+			baseCols.unshift({ id: UNCATEGORIZED_ID, title: 'Uncategorized' });
+		}
+		for (const pending of pendingStatusCreates) {
+			if (!baseCols.some(c => c.id === pending.id))
+				baseCols.push({ ...pending });
+		}
+		return baseCols;
+	}, [statuses, notes, pendingStatusRenames, pendingStatusCreates]);
+
+	// Build notes: overlay pending reorder/creates
+	const pendingNotes = getPendingNotes();
+	const pendingCreates = getPendingCreates();
+	const mergedNotes: Note[] = useMemo(() => {
+		const noteMap = new Map<string, Note>();
+		for (const n of notes) noteMap.set(n.id, { ...n });
+		for (const patch of pendingNotes) {
+			if (patch.id && noteMap.has(patch.id)) {
+				const n = noteMap.get(patch.id)!;
+				n.statusId = patch.statusId;
+				if (patch.position !== undefined) n.position = patch.position;
+			}
+		}
+		// Add pending note creates
+		for (const pending of pendingCreates) {
+			if (pending.id && !noteMap.has(pending.id)) {
+				noteMap.set(pending.id, pending as Note);
+			}
+		}
+		return Array.from(noteMap.values());
+	}, [notes, pendingNotes, pendingCreates]);
 
 	const notesByStatus = useMemo(() => {
 		const map: Record<string, Note[]> = {};
-		for (const col of columns) map[col.id] = [];
-		for (const note of noteList) {
+		for (const col of mergedColumns) map[col.id] = [];
+		for (const note of mergedNotes) {
 			const statusKey = note.statusId ?? UNCATEGORIZED_ID;
 			if (!map[statusKey]) map[statusKey] = [];
 			map[statusKey].push(note);
@@ -112,7 +204,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 			});
 		}
 		return map;
-	}, [noteList, columns]);
+	}, [mergedNotes, mergedColumns]);
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -143,40 +235,19 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 			if (destIndex === -1) destIndex = destNotes.length;
 		}
 		const statusId = destColId === UNCATEGORIZED_ID ? null : destColId;
-		// Optimistic update
-		setNoteList(prev => {
-			const movingIdx = prev.findIndex(n => n.id === noteId);
-			if (movingIdx === -1) return prev;
-			const moving = { ...prev[movingIdx], statusId, position: destIndex };
-			const remaining = prev.filter((_, i) => i !== movingIdx);
-			const destArr: Note[] = [];
-			const others: Note[] = [];
-			remaining.forEach(n => {
-				const colId = (n.statusId ?? UNCATEGORIZED_ID);
-				if (colId === destColId) destArr.push(n);
-				else others.push(n);
-			});
-			destArr.splice(destIndex, 0, moving);
-			destArr.forEach((n, i) => { n.position = i; });
-			// Also reindex source column positions if source and dest differ
-			if (sourceColId !== destColId) {
-				const sourceArr = [];
-				const rest = [];
-				others.forEach(n => {
-					const colId = (n.statusId ?? UNCATEGORIZED_ID);
-					if (colId === sourceColId) sourceArr.push(n);
-					else rest.push(n);
-				});
-				sourceArr.forEach((n, i) => { n.position = i; });
-				return [...rest, ...sourceArr, ...destArr];
-			}
-			return [...others, ...destArr];
-		});
+
+		// Show drag feedback: set draggingId for CSS
+		setDraggingId(noteId);
+
 		const formData = new FormData();
+		formData.append('intent', 'reorder-note');
 		formData.append('noteId', noteId);
 		formData.append('position', String(destIndex));
 		if (statusId !== null) formData.append('statusId', statusId);
 		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
+
+		// Reset draggingId after a tick (after optimistic fetcher overlays)
+		setTimeout(() => setDraggingId(null), 250);
 	}
 
 	const handleAddColumnStart = () => {
@@ -228,14 +299,14 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	return (
 		<DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
 			<div className="flex gap-6 overflow-x-auto py-2">
-				{columns.map((col) => (
+				{mergedColumns.map((col) => (
 					<ColumnView
 						key={col.id}
 						column={col}
 						notes={notesByStatus[col.id] || []}
-						columns={columns}
-						setColumns={setColumns}
+						columns={mergedColumns}
 						orgSlug={orgSlug}
+						draggingId={draggingId}
 					/>
 				))}
 				{/* Add column */}
@@ -279,14 +350,14 @@ function ColumnView({
 	column,
 	notes,
 	columns,
-	setColumns,
 	orgSlug,
+	draggingId,
 }: {
 	column: Column
 	notes: Note[]
 	columns: Column[]
-	setColumns: React.Dispatch<React.SetStateAction<Column[]>>
 	orgSlug: string
+	draggingId?: string | null
 }) {
 	const { setNodeRef } = useDroppable({ id: column.id });
 	const [isEditing, setIsEditing] = useState(false)
@@ -302,18 +373,6 @@ function ColumnView({
 	useEffect(() => {
 		if (isEditing) inputRef.current?.focus()
 	}, [isEditing])
-
-	// On backend PATCH success, sync column name/id
-	useEffect(() => {
-		if (renameColumnFetcher.data && renameColumnFetcher.data.id) {
-			setColumns(prev => prev.map(c =>
-				c.statusId === column.statusId
-					? { ...c, id: renameColumnFetcher.data.name, title: renameColumnFetcher.data.name, statusName: renameColumnFetcher.data.name }
-					: c
-			))
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [renameColumnFetcher.data])
 
 	const handleRenameSubmit = () => {
 		const newName = titleInput.trim()
@@ -332,14 +391,10 @@ function ColumnView({
 			return
 		}
 		const formData = new FormData()
+		formData.append('intent', 'rename-status')
+		formData.append('statusId', column.statusId)
 		formData.append('name', newName)
 		renameColumnFetcher.submit(formData, { method: 'PATCH', action: `/app/${orgSlug}/notes/status/${column.statusId}` })
-		// Optimistically update
-		setColumns(prev => prev.map(c =>
-			c.id === column.id
-				? { ...c, id: newName, title: newName, statusName: newName }
-				: c
-		))
 		setIsEditing(false)
 	}
 
@@ -388,27 +443,28 @@ function ColumnView({
 			>
 				<div className="flex flex-col gap-3">
 					{notes.map((note) => (
-						<SortableNoteCard
-							key={note.id}
-							id={`${column.id}___${note.id}`}
-							note={note}
-						/>
-					))}
+							<SortableNoteCard
+								key={note.id}
+								id={`${column.id}___${note.id}`}
+								note={note}
+								isDragging={draggingId === note.id}
+							/>
+						))}
 				</div>
 			</SortableContext>
 		</div>
 	)
 }
 
-function SortableNoteCard({ id, note }: { id: string; note: Note }) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function SortableNoteCard({ id, note, isDragging }: { id: string; note: Note; isDragging?: boolean }) {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging: sortableIsDragging } = useSortable({
 		id,
 	})
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
-		opacity: isDragging ? 0.5 : 1,
+		opacity: isDragging || sortableIsDragging ? 0.3 : 1,
 		cursor: 'grab',
 	}
 
