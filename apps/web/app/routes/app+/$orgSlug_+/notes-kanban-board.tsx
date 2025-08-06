@@ -3,7 +3,8 @@ import {
   DndContext,
   PointerSensor,
   KeyboardSensor,
-  closestCorners,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
   useDroppable,
@@ -52,6 +53,11 @@ function parseDragId(id: unknown): { columnId: string; noteId?: string } | null 
   }
   return { columnId: id }
 }
+
+const collisionStrategy = (args: any) => {
+  const pointer = pointerWithin(args);
+  return pointer.length > 0 ? pointer : rectIntersection(args);
+};
 
 export function NotesKanbanBoard({
   notes,
@@ -151,7 +157,7 @@ export function NotesKanbanBoard({
 
   function handleDragStart(ev: any) {
     const info = parseDragId(ev.active.id)
-    if (info?.noteId) {
+    if (info?.noteId && info.noteId !== '__placeholder') {
       activeNoteRef.current = noteMap.get(info.noteId) ?? null
     } else {
       activeNoteRef.current = null
@@ -163,21 +169,22 @@ export function NotesKanbanBoard({
     activeNoteRef.current = null
     if (!over) return
 
-    const activeInfo = parseDragId(active.id)
-    const overInfo = parseDragId(over.id)
-    const destColId = overInfo?.columnId ?? String(over.id)
-    if (!destColId || !activeInfo?.noteId) return
+    const activeParsed = parseDragId(active.id)
+    const overParsed = parseDragId(over.id)
+    const destColId = overParsed?.columnId ?? String(over.id)
+    const overNoteId = overParsed?.noteId && overParsed.noteId !== '__placeholder' ? overParsed.noteId : null
+    if (!destColId || !activeParsed?.noteId) return
     const list = grouped[destColId] ?? []
     let destIndex = list.length
 
-    if (overInfo?.noteId) {
-      const overIndex = list.findIndex(n => n.id === overInfo.noteId)
+    if (overNoteId) {
+      const overIndex = list.findIndex(n => n.id === overNoteId)
       if (overIndex >= 0) destIndex = overIndex
 
       // If moving within same column and after itself, adjust index
       if (
-        activeInfo.columnId === destColId &&
-        overIndex > list.findIndex(n => n.id === activeInfo.noteId)
+        activeParsed.columnId === destColId &&
+        overIndex > list.findIndex(n => n.id === activeParsed.noteId)
       ) {
         destIndex--
       }
@@ -185,7 +192,7 @@ export function NotesKanbanBoard({
 
     const formData = new FormData()
     formData.append('intent', 'reorder-note')
-    formData.append('noteId', activeInfo.noteId)
+    formData.append('noteId', activeParsed.noteId)
     formData.append('position', String(destIndex))
     if (destColId !== UNCATEGORISED) formData.append('statusId', destColId)
     reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
@@ -195,7 +202,7 @@ export function NotesKanbanBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionStrategy}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={() => (activeNoteRef.current = null)}
@@ -235,6 +242,9 @@ function KanbanColumn({
   const renameFetcher = useFetcher()
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const placeholderId = makeDragId(column.id, '__placeholder')
+  const sortableItems = notes.length ? notes.map(n => makeDragId(column.id, n.id)) : [placeholderId]
 
   return (
     <div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
@@ -277,7 +287,7 @@ function KanbanColumn({
       {/* list --------------------------------------------------------- */}
       <SortableContext
         id={column.id}
-        items={notes.map(n => makeDragId(column.id, n.id))}
+        items={sortableItems}
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col gap-3 min-h-[100px]">
