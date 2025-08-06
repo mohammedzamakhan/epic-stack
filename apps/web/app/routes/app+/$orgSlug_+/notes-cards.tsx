@@ -71,7 +71,7 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 
 	return (
 		<Card
-			className="group hover:border-primary border-muted w-full cursor-pointer overflow-hidden border-2 py-0"
+			className="group hover:ring-2 hover:ring-primary w-full cursor-pointer overflow-hidden py-0"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			onClick={handleCardClick}
@@ -118,9 +118,8 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 
 					{/* Copy Button - Top Right */}
 					<div
-						className={`absolute top-3 right-3 transition-all duration-300 ${
-							hovered ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
-						}`}
+						className={`absolute top-3 right-3 transition-all duration-300 ${hovered ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
+							}`}
 					>
 						<Button size="sm" variant="secondary" onClick={handleCopyLink}>
 							{copied ? (
@@ -187,7 +186,7 @@ export function NotesCards({ notes }: { notes: Note[] }) {
 	}
 
 	return (
-		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
+		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 p-1">
 			{notes.map((note) => (
 				<NoteCard key={note.id} note={note} />
 			))}

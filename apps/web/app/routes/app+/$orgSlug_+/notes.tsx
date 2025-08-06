@@ -5,7 +5,9 @@ import {
 	Link,
 	useLocation,
 	useNavigate,
+	useFetcher,
 	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
@@ -16,6 +18,7 @@ import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { getNotesViewMode, setNotesViewMode } from '#app/utils/notes-view-cookie.server.ts'
 import { NotesCards } from './notes-cards.tsx'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
@@ -95,6 +98,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		statusId: note.statusId ?? null,
 		statusName: note.status?.name ?? null,
 		position: note.position ?? null,
+		uploads: note.uploads.map(upload => ({
+			...upload,
+			thumbnailKey: upload.thumbnailKey ?? null,
+			status: upload.status ?? 'pending',
+		})),
 	}))
 
 	const statuses = await prisma.organizationNoteStatus.findMany({
@@ -103,14 +111,33 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		select: { id: true, name: true, position: true }
 	})
 
+	// Get the current view mode from cookie
+	const viewMode = await getNotesViewMode(request)
+
 	return {
 		organization,
 		notes: formattedNotes,
 		statuses,
+		viewMode,
 	}
 }
 
-import { ToggleGroup, ToggleGroupItem } from '#app/components/ui/toggle-group.tsx'
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+	const viewMode = formData.get('viewMode') as 'cards' | 'kanban'
+
+	if (viewMode !== 'cards' && viewMode !== 'kanban') {
+		throw new Response('Invalid view mode', { status: 400 })
+	}
+
+	return new Response(null, {
+		headers: {
+			'Set-Cookie': await setNotesViewMode(viewMode),
+		},
+	})
+}
+
+import { Tabs, TabsList, TabsTrigger } from '#app/components/ui/tabs.tsx'
 import { Tooltip, TooltipTrigger, TooltipContent } from '#app/components/ui/tooltip.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
@@ -132,15 +159,16 @@ export default function NotesRoute({
 			updatedAt: string
 			isPublic: boolean
 			createdById: string
-			status?: string | null
-			position?: number | null
-			uploads?: Array<{
+			statusId: string | null
+			statusName: string | null
+			position: number | null
+			uploads: Array<{
 				id: string
 				type: string
 				altText: string | null
 				objectKey: string
-				thumbnailKey?: string | null
-				status?: string
+				thumbnailKey: string | null
+				status: string
 			}>
 			createdBy?: {
 				name: string | null
@@ -156,13 +184,15 @@ export default function NotesRoute({
 			name: string
 			position: number | null
 		}>
+		viewMode: 'cards' | 'kanban'
 	}
 }) {
-	const orgName = loaderData.organization.name
 	const location = useLocation()
 	const [hasOutlet, setHasOutlet] = useState(false)
-	const [viewMode, setViewMode] = useState<'cards' | 'kanban'>('cards')
 	const navigate = useNavigate()
+	const fetcher = useFetcher()
+
+	const viewMode = loaderData.viewMode
 
 	// Simple check: if we're not on the base notes route, show outlet
 	useEffect(() => {
@@ -178,36 +208,40 @@ export default function NotesRoute({
 					description="You can create notes for your organization here."
 				/>
 				<div className="flex items-center gap-4">
-					<ToggleGroup
-						type="single"
-						variant="outline"
-						size="sm"
+					<Tabs
 						value={viewMode}
 						onValueChange={val => {
-							if (val === 'cards' || val === 'kanban') setViewMode(val)
+							if (val === 'cards' || val === 'kanban') {
+								fetcher.submit(
+									{ viewMode: val },
+									{ method: 'POST' }
+								)
+							}
 						}}
 					>
-						<ToggleGroupItem value="cards" aria-label="Cards view">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<span>
-										<Icon name="blocks" />
-									</span>
-								</TooltipTrigger>
-								<TooltipContent side="top">Cards</TooltipContent>
-							</Tooltip>
-						</ToggleGroupItem>
-						<ToggleGroupItem value="kanban" aria-label="Kanban board">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<span>
-										<Icon name="menu" />
-									</span>
-								</TooltipTrigger>
-								<TooltipContent side="top">Kanban</TooltipContent>
-							</Tooltip>
-						</ToggleGroupItem>
-					</ToggleGroup>
+						<TabsList>
+							<TabsTrigger value="cards" aria-label="Cards view">
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<span>
+											<Icon name="blocks" />
+										</span>
+									</TooltipTrigger>
+									<TooltipContent>Cards</TooltipContent>
+								</Tooltip>
+							</TabsTrigger>
+							<TabsTrigger value="kanban" aria-label="Kanban board">
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<span>
+											<Icon name="menu" />
+										</span>
+									</TooltipTrigger>
+									<TooltipContent>Kanban</TooltipContent>
+								</Tooltip>
+							</TabsTrigger>
+						</TabsList>
+					</Tabs>
 					<Button variant="default" asChild>
 						<Link to="new">
 							<Icon name="plus">New Note</Icon>

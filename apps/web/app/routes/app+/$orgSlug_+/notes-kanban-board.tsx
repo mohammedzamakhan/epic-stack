@@ -1,14 +1,20 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   DndContext,
-  PointerSensor,
   KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   pointerWithin,
   rectIntersection,
   useSensor,
   useSensors,
   useDroppable,
   DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+  Announcements,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -35,6 +41,14 @@ type LoaderNote = {
   createdByName: string
   statusId: string | null
   statusName: string | null
+  uploads: Array<{
+    id: string
+    type: string
+    altText: string | null
+    objectKey: string
+    thumbnailKey: string | null
+    status: string
+  }>
 }
 
 type Status = { id: string; name: string; position: number | null }
@@ -49,7 +63,7 @@ function parseDragId(id: unknown): { columnId: string; noteId?: string } | null 
   if (!id || typeof id !== 'string') return null
   if (id.includes(SEPARATOR)) {
     const [columnId, noteId] = id.split(SEPARATOR)
-    return { columnId, noteId }
+    return { columnId: columnId || '', noteId }
   }
   return { columnId: id }
 }
@@ -91,6 +105,8 @@ export function NotesKanbanBoard({
       createdById: '',
       createdByName: 'You',
       statusId: (f.formData!.get('statusId') as string) ?? null,
+      statusName: null,
+      uploads: [],
     } as LoaderNote))
 
   // Pending status creates / renames
@@ -149,24 +165,64 @@ export function NotesKanbanBoard({
 
   // --- DnD-kit setup ---
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor)
   )
   const reorderFetcher = useFetcher()
-  const activeNoteRef = useRef<Note | null>(null)
+  const [activeNote, setActiveNote] = useState<Note | null>(null)
+  const [dragDestination, setDragDestination] = useState<{
+    columnId: string
+    position?: number
+  } | null>(null)
 
-  function handleDragStart(ev: any) {
+  function handleDragStart(ev: DragStartEvent) {
     const info = parseDragId(ev.active.id)
     if (info?.noteId && info.noteId !== '__placeholder') {
-      activeNoteRef.current = noteMap.get(info.noteId) ?? null
+      setActiveNote(noteMap.get(info.noteId) ?? null)
     } else {
-      activeNoteRef.current = null
+      setActiveNote(null)
+    }
+    setDragDestination(null)
+  }
+
+  function handleDragOver(ev: DragOverEvent) {
+    const { active, over } = ev
+    if (!over || !activeNote) return
+
+    const activeParsed = parseDragId(active.id)
+    const overParsed = parseDragId(over.id)
+    const destColId = overParsed?.columnId ?? String(over.id)
+    const overNoteId = overParsed?.noteId && overParsed.noteId !== '__placeholder' ? overParsed.noteId : null
+
+    if (!destColId || !activeParsed?.noteId) return
+
+    const list = grouped[destColId] ?? []
+    let destIndex = list.length
+
+    if (overNoteId) {
+      const overIndex = list.findIndex(n => n.id === overNoteId)
+      if (overIndex >= 0) destIndex = overIndex
+
+      // If moving within same column and after itself, adjust index
+      if (
+        activeParsed.columnId === destColId &&
+        overIndex > list.findIndex(n => n.id === activeParsed.noteId)
+      ) {
+        destIndex--
+      }
+    }
+
+    // Only update if destination changed
+    if (dragDestination?.columnId !== destColId || dragDestination?.position !== destIndex) {
+      setDragDestination({ columnId: destColId, position: destIndex })
     }
   }
 
-  function handleDragEnd(ev: any) {
+  function handleDragEnd(ev: DragEndEvent) {
     const { active, over } = ev
-    activeNoteRef.current = null
+    setActiveNote(null)
+    setDragDestination(null)
     if (!over) return
 
     const activeParsed = parseDragId(active.id)
@@ -198,29 +254,82 @@ export function NotesKanbanBoard({
     reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
   }
 
+  // Accessibility announcements for screen readers
+  const announcements: Announcements = {
+    onDragStart({ active }) {
+      const info = parseDragId(active.id)
+      if (info?.noteId && info.noteId !== '__placeholder') {
+        const note = noteMap.get(info.noteId)
+        const column = columns.find(c => c.id === info.columnId)
+        return `Picked up note "${note?.title}" from column "${column?.name}"`
+      }
+      return 'Picked up draggable item'
+    },
+    onDragOver({ active, over }) {
+      if (!over) return
+      const activeInfo = parseDragId(active.id)
+      const overInfo = parseDragId(over.id)
+      const destColumn = columns.find(c => c.id === (overInfo?.columnId ?? over.id))
+
+      if (activeInfo?.noteId && destColumn) {
+        return `Moving note over column "${destColumn.name}"`
+      }
+      return 'Moving item'
+    },
+    onDragEnd({ active, over }) {
+      if (!over) return 'Note dropped'
+      const activeInfo = parseDragId(active.id)
+      const overInfo = parseDragId(over.id)
+      const destColumn = columns.find(c => c.id === (overInfo?.columnId ?? over.id))
+
+      if (activeInfo?.noteId && destColumn) {
+        const note = noteMap.get(activeInfo.noteId)
+        return `Note "${note?.title}" dropped in column "${destColumn.name}"`
+      }
+      return 'Item dropped'
+    },
+    onDragCancel() {
+      return 'Dragging cancelled'
+    }
+  }
+
   // --- Render ---
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={collisionStrategy}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => (activeNoteRef.current = null)}
+      onDragCancel={() => {
+        setActiveNote(null)
+        setDragDestination(null)
+      }}
+      accessibility={{ announcements }}
     >
-      <div className="flex gap-6 overflow-x-auto py-2">
+      <div className="flex gap-2 overflow-x-auto py-2 snap-x snap-mandatory">
         {columns.map(col => (
           <KanbanColumn
             key={col.id}
             column={col}
-            notes={grouped[col.id]}
+            notes={grouped[col.id] ?? []}
             orgSlug={orgSlug}
+            activeNote={activeNote}
+            dragDestination={dragDestination}
           />
         ))}
         <NewColumnButton orgSlug={orgSlug} />
       </div>
-      <DragOverlay>
-        {activeNoteRef.current ? <NoteCard note={activeNoteRef.current} /> : null}
-      </DragOverlay>
+      {typeof window !== 'undefined' && createPortal(
+        <DragOverlay>
+          {activeNote ? (
+            <div className="rotate-3 shadow-lg">
+              <NoteCard note={activeNote} />
+            </div>
+          ) : null}
+        </DragOverlay>,
+        document.body
+      )}
     </DndContext>
   )
 }
@@ -233,25 +342,44 @@ function KanbanColumn({
   column,
   notes,
   orgSlug,
+  activeNote,
+  dragDestination
 }: {
   column: Column
   notes: Note[]
   orgSlug: string
+  activeNote: Note | null
+  dragDestination: { columnId: string; position?: number } | null
 }) {
   const { setNodeRef } = useDroppable({ id: column.id })
   const renameFetcher = useFetcher()
   const [editing, setEditing] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   const placeholderId = makeDragId(column.id, '__placeholder')
   const sortableItems = notes.length ? notes.map(n => makeDragId(column.id, n.id)) : [placeholderId]
 
+  // Check if this column is the drag destination
+  const isDestination = dragDestination?.columnId === column.id
+  const dragPosition = dragDestination?.position ?? 0
+
+  // Create display notes with preview
+  const displayNotes = [...notes]
+  if (isDestination && activeNote && !notes.find(n => n.id === activeNote.id)) {
+    // Insert preview note at the correct position
+    const previewNote = { ...activeNote, id: `${activeNote.id}-preview` }
+    displayNotes.splice(dragPosition, 0, previewNote)
+  }
+
   return (
-    <div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
+    <div
+      ref={setNodeRef}
+      className="flex flex-col min-w-[320px] max-w-[320px] bg-muted/30 rounded p-2 shadow-xs snap-center flex-shrink-0"
+    >
       {/* header ------------------------------------------------------- */}
-      <div className="font-semibold mb-3 flex items-center gap-2 group">
+      <div className="font-semibold mb-1 flex items-center gap-2 group w-full">
         {editing ? (
           <renameFetcher.Form
+            className="w-full"
             method="patch"
             action={`/app/${orgSlug}/notes/status/${column.id}`}
             onSubmit={() => setEditing(false)}
@@ -265,22 +393,22 @@ function KanbanColumn({
               name="name"
               defaultValue={column.name}
               autoFocus
-              className="w-32 h-7"
+              className="w-full h-8 px-2"
               onKeyDown={e => e.key === 'Escape' && setEditing(false)}
             />
           </renameFetcher.Form>
         ) : (
-          <>
-            <span>{column.name}</span>
+          <button className="hover:underline" onClick={() => setEditing(true)}>
+            <span className="text-sm">{column.name}</span>
             {column.id !== UNCATEGORISED && (
               <button
-                onClick={() => setEditing(true)}
-                className="invisible group-hover:visible ml-1 p-1 hover:bg-muted-foreground/10 rounded-sm"
+
+                className="invisible group-hover:visible p-1 px-2"
               >
                 <Icon name="pencil" size="xs" />
               </button>
             )}
-          </>
+          </button>
         )}
       </div>
 
@@ -290,10 +418,46 @@ function KanbanColumn({
         items={sortableItems}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex flex-col gap-3 min-h-[100px]">
-          {notes.map(n => (
-            <SortableNote key={makeDragId(column.id, n.id)} note={n} dragId={makeDragId(column.id, n.id)} />
-          ))}
+        <div className="flex flex-col gap-3 min-h-screen p-1 overflow-y-auto">
+          {displayNotes.map((n) => {
+            const isPreview = n.id.endsWith('-preview')
+            const originalId = isPreview ? n.id.replace('-preview', '') : n.id
+
+            if (isPreview) {
+              return (
+                <div
+                  key={`preview-${originalId}`}
+                  className="opacity-30 scale-95"
+                >
+                  <NoteCard note={{ ...n, id: originalId }} />
+                </div>
+              )
+            }
+
+            // Hide the original note if it's being dragged
+            if (activeNote?.id === n.id) {
+              return (
+                <div
+                  key={makeDragId(column.id, n.id)}
+                  className="opacity-30"
+                >
+                  <SortableNote note={n} dragId={makeDragId(column.id, n.id)} />
+                </div>
+              )
+            }
+
+            return (
+              <SortableNote
+                key={makeDragId(column.id, n.id)}
+                note={n}
+                dragId={makeDragId(column.id, n.id)}
+              />
+            )
+          })}
+          {notes.length === 0 && !isDestination && (
+            <div className="flex min-h-screen items-center justify-center h-20 text-muted-foreground text-sm border-2 border-dashed border-muted-foreground/30 rounded">
+            </div>
+          )}
         </div>
       </SortableContext>
     </div>
@@ -305,17 +469,35 @@ function KanbanColumn({
 /* -------------------------------------------------------------------------- */
 
 function SortableNote({ note, dragId }: { note: Note; dragId: string }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: dragId })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver
+  } = useSortable({
+    id: dragId,
+    data: {
+      type: 'Note',
+      note
+    }
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    zIndex: isDragging ? 1000 : 'auto',
+  }
 
   return (
     <div
       ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.2 : 1,
-        cursor: 'grab',
-      }}
+      style={style}
+      className={`${isDragging ? 'shadow-2xl scale-105' : ''} ${isOver ? 'ring-2 ring-primary/50' : ''}`}
       {...attributes}
       {...listeners}
     >
@@ -330,27 +512,30 @@ function SortableNote({ note, dragId }: { note: Note; dragId: string }) {
 
 function NewColumnButton({ orgSlug }: { orgSlug: string }) {
   const fetcher = useFetcher()
+  const [editing, setEditing] = useState(false)
 
   return (
-    <details className="flex flex-col justify-start min-w-[260px]">
-      <summary>
-        <Button variant="secondary" className="mt-2">
+    <div className="flex flex-col justify-start min-w-[260px]">
+      {editing ? (
+        <fetcher.Form
+          method="post"
+          action={`/app/${orgSlug}/notes/statuses`}
+          onSubmit={() => (document.activeElement as HTMLElement)?.blur()}
+          className="mt-2 flex gap-2"
+        >
+          <input type="hidden" name="intent" value="create-status" />
+          <Input autoFocus name="name" placeholder="Column name" maxLength={24} onBlur={() => setEditing(false)} />
+          <Button type="submit" variant="default" size="sm">
+            Save
+          </Button>
+        </fetcher.Form>
+      ) : (
+        <Button type="button" variant="secondary" className="mt-2" onClick={() => setEditing(true)}>
           <Icon name="plus" className="mr-1" /> Add column
         </Button>
-      </summary>
+      )}
 
-      <fetcher.Form
-        method="post"
-        action={`/app/${orgSlug}/notes/statuses`}
-        onSubmit={() => (document.activeElement as HTMLElement)?.blur()}
-        className="mt-2 flex gap-2"
-      >
-        <input type="hidden" name="intent" value="create-status" />
-        <Input autoFocus name="name" placeholder="Column name" maxLength={24} />
-        <Button type="submit" variant="primary" size="sm">
-          Save
-        </Button>
-      </fetcher.Form>
-    </details>
+
+    </div>
   )
 }
