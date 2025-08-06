@@ -95,9 +95,16 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		position: note.position ?? null,
 	}))
 
+	const statuses = await prisma.organizationNoteStatus.findMany({
+		where: { organizationId: organization.id },
+		orderBy: { position: 'asc' },
+		select: { id: true, name: true, position: true }
+	})
+
 	return {
 		organization,
 		notes: formattedNotes,
+		statuses,
 	}
 }
 
@@ -140,6 +147,11 @@ export default function NotesRoute({
 				userId: string
 			}>
 			createdByName: string
+		}>
+		statuses: Array<{
+			id: string
+			name: string
+			position: number | null
 		}>
 	}
 }) {
@@ -192,6 +204,7 @@ export default function NotesRoute({
 						<NotesKanbanBoard
 							notes={loaderData.notes}
 							orgSlug={loaderData.organization.slug}
+							statuses={loaderData.statuses}
 						/>
 					) : (
 						<NotesCards notes={loaderData.notes} />

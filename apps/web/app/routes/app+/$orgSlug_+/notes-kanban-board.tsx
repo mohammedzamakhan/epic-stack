@@ -39,40 +39,55 @@ type Note = {
 	createdByName: string
 }
 
+interface Status {
+	id: string
+	name: string
+	position: number | null
+}
+
 interface NotesKanbanBoardProps {
 	notes: Note[]
 	orgSlug: string
+	statuses: Status[]
 }
 
 type Column = {
-	id: string // status string or "Uncategorized"
+	id: string // status id or UNCATEGORIZED_ID or legacy string fallback
 	title: string
+	statusName?: string // for status columns, the name of the status
+	statusId?: string   // for status columns, the id of the status
 }
 
 const UNCATEGORIZED_ID = '__uncategorized'
 
-function getInitialColumns(notes: Note[]): Column[] {
-	const statuses = Array.from(
-		new Set(notes.map(n => n.status).filter(Boolean) as string[]),
-	)
-	const columns: Column[] = statuses.map(s => ({
-		id: s,
-		title: s,
-	}))
+function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
+	const columns: Column[] = []
+	// Add status columns from DB
+	for (const stat of statuses) {
+		columns.push({ id: stat.name, title: stat.name, statusName: stat.name, statusId: stat.id })
+	}
+	// Add Uncategorized if notes exist with no status
 	if (notes.some(n => !n.status)) {
 		columns.unshift({ id: UNCATEGORIZED_ID, title: 'Uncategorized' })
+	}
+	// Add legacy statuses from notes not in DB
+	const legacy = Array.from(
+		new Set(notes.map(n => n.status).filter(Boolean) as string[]),
+	).filter(s => !statuses.some(st => st.name === s))
+	for (const legacyStatus of legacy) {
+		columns.push({ id: legacyStatus, title: legacyStatus, statusName: legacyStatus })
 	}
 	return columns.length > 0 ? columns : [{ id: UNCATEGORIZED_ID, title: 'Uncategorized' }]
 }
 
-export function NotesKanbanBoard({ notes, orgSlug }: NotesKanbanBoardProps) {
-	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(notes))
+export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardProps) {
+	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
 
 	useEffect(() => {
-		// Sync columns if notes change externally
-		setColumns(getInitialColumns(notes))
+		// Sync columns if notes/statuses change externally
+		setColumns(getInitialColumns(statuses, notes))
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [JSON.stringify(notes.map(n => n.status))])
+	}, [JSON.stringify(statuses), JSON.stringify(notes.map(n => n.status))])
 
 	const notesByStatus = useMemo(() => {
 		const map: Record<string, Note[]> = {}
@@ -116,14 +131,30 @@ export function NotesKanbanBoard({ notes, orgSlug }: NotesKanbanBoardProps) {
 		})
 	}
 
-	const handleAddColumn = () => {
+	const handleAddColumn = async () => {
 		const name = prompt('New column name?')
 		if (!name) return
 		if (columns.some(col => col.title === name)) {
 			alert('Column already exists')
 			return
 		}
-		setColumns([...columns, { id: name, title: name }])
+		try {
+			const res = await fetch(`/app/${orgSlug}/notes/statuses`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name }),
+			})
+			if (res.ok) {
+				const newStatus = await res.json()
+				setColumns(prev => [...prev, { id: newStatus.name, title: newStatus.name, statusName: newStatus.name, statusId: newStatus.id }])
+			} else if (res.status === 409) {
+				alert('A column with that name already exists.')
+			} else {
+				alert('Error creating column. Please try again.')
+			}
+		} catch (e) {
+			alert('Network error creating column.')
+		}
 	}
 
 	return (

@@ -508,3 +508,17 @@ model OrganizationNoteFavorite {
   @@index([userId])
   @@index([noteId])
 }
+
+model OrganizationNoteStatus {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  position       Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@index([organizationId, position])
+}
