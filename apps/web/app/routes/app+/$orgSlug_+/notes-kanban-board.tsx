@@ -114,21 +114,30 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-	const getColId = (id: string) => id.includes('___') ? id.split('___')[0] : id;
+	const getColId = (ident: unknown) => {
+		const str = ident ? String(ident) : '';
+		return str.includes('___') ? str.split('___')[0] : str;
+	};
 
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
-		if (!over) return;
-		const noteId = active.id.toString().split('___')[1] ?? active.id.toString();
-		const sourceColId = getColId(active.id.toString());
-		const destColId = getColId(over.id.toString());
-		if (sourceColId === destColId && active.id === over.id) return;
+		const activeIdStr = active?.id ? String(active.id) : null;
+		if (!activeIdStr) return;
+		const overIdStr = over?.id ? String(over.id) : null;
+		if (!overIdStr) return;
+
+		const noteId = activeIdStr.includes('___') ? activeIdStr.split('___')[1] : activeIdStr;
+		const sourceColId = getColId(activeIdStr);
+		const destColId = getColId(overIdStr);
+
+		if (!destColId) return;
+		if (sourceColId === destColId && activeIdStr === overIdStr) return;
 		const destNotes = [...notesByStatus[destColId] ?? []];
 		let destIndex;
-		if (over.id.toString() === destColId) {
+		if (overIdStr === destColId) {
 			destIndex = destNotes.length; // dropped on empty space
 		} else {
-			destIndex = destNotes.findIndex(n => `${destColId}___${n.id}` === over.id.toString());
+			destIndex = destNotes.findIndex(n => `${destColId}___${n.id}` === overIdStr);
 			if (destIndex === -1) destIndex = destNotes.length;
 		}
 		const status = destColId === UNCATEGORIZED_ID ? null : destColId;
