@@ -185,7 +185,7 @@ async function makeSession(
 	}: { request: Request; userId: string; redirectTo?: string | null },
 	responseInit?: ResponseInit,
 ) {
-	redirectTo ??= '/'
+	// Don't force redirectTo = '/'; pass undefined to allow dashboard logic
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {

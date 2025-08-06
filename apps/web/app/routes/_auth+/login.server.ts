@@ -9,6 +9,13 @@ import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { getRedirectToUrl, type VerifyFunctionArgs } from './verify.server.ts'
+import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
+
+// Helper to get user's dashboard URL
+async function getUserDashboardUrl(userId: string): Promise<string> {
+	const org = await getUserDefaultOrganization(userId)
+	return org?.slug ? `/app/${org.slug}` : '/app'
+}
 
 const verifiedTimeKey = 'verified-time'
 const unverifiedSessionIdKey = 'unverified-session-id'
@@ -64,8 +71,16 @@ export async function handleNewSession(
 		)
 		authSession.set(sessionKey, session.id)
 
+		const dest =
+			typeof redirectTo === "string" && redirectTo
+				? redirectTo
+				: (session.userId
+					? await getUserDashboardUrl(session.userId)
+					: '/app'
+				)
+
 		return redirect(
-			safeRedirect(redirectTo),
+			safeRedirect(dest),
 			combineResponseInits(
 				{
 					headers: {
@@ -81,29 +96,32 @@ export async function handleNewSession(
 }
 
 export async function handleVerification({
-	request,
-	submission,
-}: VerifyFunctionArgs) {
-	invariant(
-		submission.status === 'success',
-		'Submission should be successful by now',
-	)
-	const authSession = await authSessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-	const verifySession = await verifySessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-
-	const remember = verifySession.get(rememberKey)
-	const { redirectTo } = submission.value
-	const headers = new Headers()
-	authSession.set(verifiedTimeKey, Date.now())
-
-	const unverifiedSessionId = verifySession.get(unverifiedSessionIdKey)
-	if (unverifiedSessionId) {
-		const session = await prisma.session.findUnique({
-			select: { expirationDate: true },
+  request,
+  unverifiedSessionId,
+  redirectTo,
+}: {
+  request: Request
+  unverifiedSessionId?: string
+  redirectTo?: string | null
+}) {
+  // ...code...
+  if (unverifiedSessionId) {
+    // fetch session with expirationDate and userId
+    const session = await getUnverifiedSession(unverifiedSessionId)
+    if (!session || !session.userId) return redirect("/login")
+    // ...cookie/session logic...
+    const dest =
+      redirectTo ??
+      (session.userId ? await getUserDashboardUrl(session.userId) : "/app")
+    return redirect(safeRedirect(dest), { headers })
+  } else {
+    const userId = await getUserId(request)
+    // ...cookie/session logic...
+    const dest =
+      redirectTo ?? (userId ? await getUserDashboardUrl(userId) : "/app")
+    return redirect(safeRedirect(dest), { headers })
+  }
+},
 			where: { id: unverifiedSessionId },
 		})
 		if (!session) {
