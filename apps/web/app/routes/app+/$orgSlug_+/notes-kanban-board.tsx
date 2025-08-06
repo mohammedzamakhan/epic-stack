@@ -85,6 +85,27 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
 	const reorderFetcher = useFetcher();
 
+	const notesByStatus = useMemo(() => {
+		const map: Record<string, Note[]> = {};
+		for (const col of columns) map[col.id] = [];
+		for (const note of notes) {
+			const statusKey = note.status ?? UNCATEGORIZED_ID;
+			if (!map[statusKey]) map[statusKey] = [];
+			map[statusKey].push(note);
+		}
+		for (const colId of Object.keys(map)) {
+			map[colId].sort((a, b) => {
+				if (a.position != null && b.position != null) return a.position - b.position;
+				if (a.position != null) return -1;
+				if (b.position != null) return 1;
+				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+			});
+		}
+		return map;
+	}, [notes, columns]);
+
+	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
 	const handleDragEnd = (event: any, destColId: string) => {
 		const { active, over } = event
 		if (!active || !over) return
