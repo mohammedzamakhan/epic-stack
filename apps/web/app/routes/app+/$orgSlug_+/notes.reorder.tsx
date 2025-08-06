@@ -1,25 +1,21 @@
-import { json } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import type { ActionFunction } from 'react-router'
 
-export const action = async ({ request, params }) => {
-	const orgSlug = params.orgSlug
-	if (!orgSlug) return new Response('Missing orgSlug', { status: 400 })
+export const action: ActionFunction = async ({ request, params }) => {
+	const orgSlug = params.orgSlug;
+	if (!orgSlug) return new Response('Missing orgSlug', { status: 400 });
+	const organization = await prisma.organization.findFirst({ select:{id:true}, where:{slug:orgSlug} });
+	if (!organization) return new Response('Organization not found', { status:404 });
+	await userHasOrgAccess(request, organization.id);
 
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug },
-	})
-	if (!organization) return new Response('Organization not found', { status: 404 })
-
-	const userId = await requireUserId(request)
-	await userHasOrgAccess(request, organization.id)
-
-	const { noteId, status, position } = await request.json()
-	if (!noteId || typeof position !== 'number') {
-		return new Response('Missing fields', { status: 400 })
-	}
+	const formData = await request.formData();
+	const noteId = formData.get('noteId')?.toString();
+	const positionStr = formData.get('position')?.toString();
+	const statusField = formData.get('status')?.toString() ?? null;
+	if (!noteId || !positionStr) return new Response('Missing fields', { status:400 });
+	const position = Number(positionStr);
 
 	const updated = await prisma.organizationNote.updateMany({
 		where: {
@@ -27,14 +23,14 @@ export const action = async ({ request, params }) => {
 			organizationId: organization.id,
 		},
 		data: {
-			status: status ?? null,
+			status: statusField,
 			position,
 		},
-	})
+	});
 
 	if (updated.count === 0) {
-		return new Response('Note not found or not in org', { status: 404 })
+		return new Response('Note not found or not in org', { status: 404 });
 	}
 
-	return new Response(null, { status: 204 })
+	return new Response(null, { status: 204 });
 }

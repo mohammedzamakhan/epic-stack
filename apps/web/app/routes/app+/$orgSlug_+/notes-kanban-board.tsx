@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DndContext, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { useFetcher } from 'react-router'
 import {
 	SortableContext,
 	verticalListSortingStrategy,
@@ -82,6 +83,7 @@ function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
 
 export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardProps) {
 	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
+	const reorderFetcher = useFetcher();
 
 	useEffect(() => {
 		// Sync columns if notes/statuses change externally
@@ -113,7 +115,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
-	const handleDragEnd = async (event: any) => {
+	const handleDragEnd = (event: any) => {
 		const { active, over } = event
 		if (!active || !over) return
 
@@ -124,11 +126,11 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		let position = newColNotes.findIndex(n => n.id === noteId)
 		if (position === -1) position = 0
 
-		await fetch(`/app/${orgSlug}/notes/reorder`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ noteId, status, position }),
-		})
+		const formData = new FormData();
+		formData.append('noteId', noteId);
+		formData.append('position', String(position));
+		if (status !== null) formData.append('status', status);
+		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
 	}
 
 	const handleAddColumn = async () => {
