@@ -280,6 +280,8 @@ model OrganizationNote {
   updatedAt              DateTime                    @updatedAt
   organizationId         String
   createdById            String
+  status                 String?                     // Kanban column, null = Uncategorized
+  position               Int?                        // Ordering within status
   noteAccess             NoteAccess[]
   activityLogs           NoteActivityLog[]
   comments               NoteComment[]
@@ -292,6 +294,7 @@ model OrganizationNote {
   @@index([organizationId])
   @@index([createdById])
   @@index([organizationId, updatedAt])
+  @@index([organizationId, status, position])
 }
 
 model OrganizationNoteUpload {

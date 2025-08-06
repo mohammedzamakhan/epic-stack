@@ -16,6 +16,8 @@ export type Note = {
 	createdAt: string
 	updatedAt: string
 	createdByName?: string
+	status?: string | null
+	position?: number | null
 	uploads: Array<{
 		id: string
 		type: string

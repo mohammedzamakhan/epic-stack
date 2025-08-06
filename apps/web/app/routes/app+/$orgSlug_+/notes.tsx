@@ -48,6 +48,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			updatedAt: true,
 			isPublic: true,
 			createdById: true,
+			status: true,
+			position: true,
 			uploads: {
 				select: {
 					id: true,
@@ -78,15 +80,19 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				{ noteAccess: { some: { userId } } },
 			],
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
+		orderBy: [
+			{ status: 'asc' },
+			{ position: 'asc' },
+			{ updatedAt: 'desc' },
+		],
 	})
 
 	const formattedNotes = notes.map((note) => ({
 		...note,
 		createdByName:
 			note.createdBy?.name || note.createdBy?.username || 'Unknown',
+		status: note.status ?? null,
+		position: note.position ?? null,
 	}))
 
 	return {
@@ -94,6 +100,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		notes: formattedNotes,
 	}
 }
+
+import { ToggleGroup, ToggleGroupItem } from '#app/components/ui/toggle-group.tsx'
+import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
 export default function NotesRoute({
 	loaderData,
@@ -113,19 +122,17 @@ export default function NotesRoute({
 			updatedAt: string
 			isPublic: boolean
 			createdById: string
-			images: Array<{
+			status?: string | null
+			position?: number | null
+			uploads?: Array<{
 				id: string
+				type: string
 				altText: string | null
 				objectKey: string
+				thumbnailKey?: string | null
+				status?: string
 			}>
-			videos: Array<{
-				id: string
-				altText: string | null
-				objectKey: string
-				thumbnailKey: string | null
-				status: string
-			}>
-			createdBy: {
+			createdBy?: {
 				name: string | null
 				username: string | null
 			} | null
@@ -139,6 +146,7 @@ export default function NotesRoute({
 	const orgName = loaderData.organization.name
 	const location = useLocation()
 	const [hasOutlet, setHasOutlet] = useState(false)
+	const [viewMode, setViewMode] = useState<'cards' | 'kanban'>('cards')
 	const navigate = useNavigate()
 
 	// Simple check: if we're not on the base notes route, show outlet
@@ -150,10 +158,27 @@ export default function NotesRoute({
 	return (
 		<div className="m-8 flex h-full flex-col">
 			<div className="flex items-center justify-between pb-8">
-				<PageTitle
-					title={`Notes`}
-					description="You can create notes for your organization here."
-				/>
+				<div className="flex items-center gap-4">
+					<PageTitle
+						title={`Notes`}
+						description="You can create notes for your organization here."
+					/>
+					<ToggleGroup
+						type="single"
+						value={viewMode}
+						onValueChange={val => {
+							if (val === 'cards' || val === 'kanban') setViewMode(val)
+						}}
+						className="ml-4"
+					>
+						<ToggleGroupItem value="cards" aria-label="Cards view">
+							Cards
+						</ToggleGroupItem>
+						<ToggleGroupItem value="kanban" aria-label="Kanban board">
+							Kanban
+						</ToggleGroupItem>
+					</ToggleGroup>
+				</div>
 				<Button variant="default" asChild>
 					<Link to="new">
 						<Icon name="plus">New Note</Icon>
@@ -163,7 +188,14 @@ export default function NotesRoute({
 
 			<div className="flex-grow overflow-auto pb-4">
 				{loaderData.notes.length > 0 ? (
-					<NotesCards notes={loaderData.notes} />
+					viewMode === 'kanban' ? (
+						<NotesKanbanBoard
+							notes={loaderData.notes}
+							orgSlug={loaderData.organization.slug}
+						/>
+					) : (
+						<NotesCards notes={loaderData.notes} />
+					)
 				) : (
 					<>
 						<EmptyState
