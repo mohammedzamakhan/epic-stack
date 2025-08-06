@@ -6,11 +6,11 @@ import {
 	verticalListSortingStrategy,
 	useSortable,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { Button } from '#app/components/ui/button.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { NoteCard } from './notes-cards.tsx'
+import { CSS } from '@dnd-kit/utilities'
 
 type Note = {
 	id: string
@@ -234,6 +234,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 						notes={notesByStatus[col.id] || []}
 						columns={columns}
 						setColumns={setColumns}
+						orgSlug={orgSlug}
 					/>
 				))}
 				{/* Add column */}
@@ -278,11 +279,13 @@ function ColumnView({
 	notes,
 	columns,
 	setColumns,
+	orgSlug,
 }: {
 	column: Column
 	notes: Note[]
 	columns: Column[]
 	setColumns: React.Dispatch<React.SetStateAction<Column[]>>
+	orgSlug: string
 }) {
 	const { setNodeRef } = useDroppable({ id: column.id });
 	const [isEditing, setIsEditing] = useState(false)
@@ -313,6 +316,11 @@ function ColumnView({
 
 	const handleRenameSubmit = () => {
 		const newName = titleInput.trim()
+		if (!column.statusId) {
+			setIsEditing(false)
+			setTitleInput(column.title)
+			return
+		}
 		if (!newName || newName === column.title) {
 			setIsEditing(false)
 			setTitleInput(column.title)
@@ -324,15 +332,13 @@ function ColumnView({
 		}
 		const formData = new FormData()
 		formData.append('name', newName)
-		if (column.statusId) {
-			renameColumnFetcher.submit(formData, { method: 'PATCH', action: `/app/${column.statusId}/notes/status/${column.statusId}`.replace('//', '/') })
-			// Optimistically update
-			setColumns(prev => prev.map(c =>
-				c.id === column.id
-					? { ...c, id: newName, title: newName, statusName: newName }
-					: c
-			))
-		}
+		renameColumnFetcher.submit(formData, { method: 'PATCH', action: `/app/${orgSlug}/notes/status/${column.statusId}` })
+		// Optimistically update
+		setColumns(prev => prev.map(c =>
+			c.id === column.id
+				? { ...c, id: newName, title: newName, statusName: newName }
+				: c
+		))
 		setIsEditing(false)
 	}
 
@@ -362,11 +368,11 @@ function ColumnView({
 						<span>{column.title}</span>
 						{!isUncategorized && (
 							<span
-								className="ml-1 hidden cursor-pointer rounded-sm p-1 text-muted-foreground hover:bg-muted-foreground/10 group-hover:inline-block"
+								className={`ml-1 hidden rounded-sm p-1 text-muted-foreground group-hover:inline-block ${!column.statusId ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-muted-foreground/10'}`}
 								role="button"
 								tabIndex={0}
-								title="Rename column"
-								onClick={() => setIsEditing(true)}
+								title={column.statusId ? "Rename column" : "Cannot rename"}
+								onClick={() => column.statusId && setIsEditing(true)}
 							>
 								<Icon name="pencil" size={14} />
 							</span>

@@ -15,7 +15,8 @@ export const action = async ({ request, params }) => {
 	const userId = await requireUserId(request)
 	await userHasOrgAccess(request, organization.id)
 
-	const { name } = await request.json()
+	const formData = await request.formData();
+	const name = formData.get('name')?.toString().trim();
 	if (!name) return new Response('Missing name', { status: 400 })
 
 	// Prevent duplicate status names in org
