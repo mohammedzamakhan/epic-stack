@@ -48,7 +48,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			updatedAt: true,
 			isPublic: true,
 			createdById: true,
-			status: true,
+			statusId: true,
+			status: { select: { id: true, name: true } },
 			position: true,
 			uploads: {
 				select: {
@@ -81,7 +82,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			],
 		},
 		orderBy: [
-			{ status: 'asc' },
+			{ statusId: 'asc' },
 			{ position: 'asc' },
 			{ updatedAt: 'desc' },
 		],
@@ -91,7 +92,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		...note,
 		createdByName:
 			note.createdBy?.name || note.createdBy?.username || 'Unknown',
-		status: note.status ?? null,
+		statusId: note.statusId ?? null,
+		statusName: note.status?.name ?? null,
 		position: note.position ?? null,
 	}))
 

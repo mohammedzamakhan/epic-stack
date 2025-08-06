@@ -20,7 +20,8 @@ type Note = {
 	updatedAt: string
 	isPublic: boolean
 	createdById: string
-	status?: string | null
+	statusId?: string | null
+	statusName?: string | null
 	position?: number | null
 	uploads?: Array<{
 		id: string
@@ -65,18 +66,18 @@ function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
 	const columns: Column[] = []
 	// Add status columns from DB
 	for (const stat of statuses) {
-		columns.push({ id: stat.name, title: stat.name, statusName: stat.name, statusId: stat.id })
+		columns.push({ id: stat.id, title: stat.name, statusName: stat.name, statusId: stat.id })
 	}
-	// Add Uncategorized if notes exist with no status
-	if (notes.some(n => !n.status)) {
+	// Add Uncategorized if notes exist with no statusId
+	if (notes.some(n => !n.statusId)) {
 		columns.unshift({ id: UNCATEGORIZED_ID, title: 'Uncategorized' })
 	}
-	// Add legacy statuses from notes not in DB
+	// Add legacy statuses from notes not in DB (should be rare)
 	const legacy = Array.from(
-		new Set(notes.map(n => n.status).filter(Boolean) as string[]),
-	).filter(s => !statuses.some(st => st.name === s))
-	for (const legacyStatus of legacy) {
-		columns.push({ id: legacyStatus, title: legacyStatus, statusName: legacyStatus })
+		new Set(notes.map(n => n.statusId).filter(sid => sid && !statuses.some(st => st.id === sid)) as string[])
+	)
+	for (const legacyStatusId of legacy) {
+		columns.push({ id: legacyStatusId, title: legacyStatusId, statusId: legacyStatusId })
 	}
 	return columns.length > 0 ? columns : [{ id: UNCATEGORIZED_ID, title: 'Uncategorized' }]
 }
@@ -98,7 +99,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		const map: Record<string, Note[]> = {};
 		for (const col of columns) map[col.id] = [];
 		for (const note of noteList) {
-			const statusKey = note.status ?? UNCATEGORIZED_ID;
+			const statusKey = note.statusId ?? UNCATEGORIZED_ID;
 			if (!map[statusKey]) map[statusKey] = [];
 			map[statusKey].push(note);
 		}
@@ -141,17 +142,17 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 			destIndex = destNotes.findIndex(n => `${destColId}___${n.id}` === overIdStr);
 			if (destIndex === -1) destIndex = destNotes.length;
 		}
-		const status = destColId === UNCATEGORIZED_ID ? null : destColId;
+		const statusId = destColId === UNCATEGORIZED_ID ? null : destColId;
 		// Optimistic update
 		setNoteList(prev => {
 			const movingIdx = prev.findIndex(n => n.id === noteId);
 			if (movingIdx === -1) return prev;
-			const moving = { ...prev[movingIdx], status, position: destIndex };
+			const moving = { ...prev[movingIdx], statusId, position: destIndex };
 			const remaining = prev.filter((_, i) => i !== movingIdx);
 			const destArr: Note[] = [];
 			const others: Note[] = [];
 			remaining.forEach(n => {
-				const colId = (n.status ?? UNCATEGORIZED_ID);
+				const colId = (n.statusId ?? UNCATEGORIZED_ID);
 				if (colId === destColId) destArr.push(n);
 				else others.push(n);
 			});
@@ -162,7 +163,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 				const sourceArr = [];
 				const rest = [];
 				others.forEach(n => {
-					const colId = (n.status ?? UNCATEGORIZED_ID);
+					const colId = (n.statusId ?? UNCATEGORIZED_ID);
 					if (colId === sourceColId) sourceArr.push(n);
 					else rest.push(n);
 				});
@@ -174,7 +175,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		const formData = new FormData();
 		formData.append('noteId', noteId);
 		formData.append('position', String(destIndex));
-		if (status !== null) formData.append('status', status);
+		if (statusId !== null) formData.append('statusId', statusId);
 		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
 	}
 

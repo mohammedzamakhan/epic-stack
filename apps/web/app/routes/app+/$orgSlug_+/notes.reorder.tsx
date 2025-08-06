@@ -13,9 +13,17 @@ export const action: ActionFunction = async ({ request, params }) => {
 	const formData = await request.formData();
 	const noteId = formData.get('noteId')?.toString();
 	const positionStr = formData.get('position')?.toString();
-	const statusField = formData.get('status')?.toString() ?? null;
+	const statusId = formData.get('statusId')?.toString() ?? null;
 	if (!noteId || !positionStr) return new Response('Missing fields', { status:400 });
 	const position = Number(positionStr);
+
+	// Validate statusId (if provided)
+	if (statusId) {
+		const statusRow = await prisma.organizationNoteStatus.findFirst({
+			where: { id: statusId, organizationId: organization.id }
+		});
+		if (!statusRow) return new Response('Invalid statusId', { status: 400 });
+	}
 
 	const updated = await prisma.organizationNote.updateMany({
 		where: {
@@ -23,7 +31,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 			organizationId: organization.id,
 		},
 		data: {
-			status: statusField,
+			statusId,
 			position,
 		},
 	});
