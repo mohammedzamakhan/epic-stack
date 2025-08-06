@@ -1,1 +1,0 @@
-export { NoteCard } from './notes-cards.tsx'

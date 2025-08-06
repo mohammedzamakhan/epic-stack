@@ -194,6 +194,7 @@ model Organization {
   invitations            OrganizationInvitation[]
   inviteLinks            OrganizationInviteLink[]
   notes                  OrganizationNote[]
+  noteStatuses           OrganizationNoteStatus[]
   users                  UserOrganization[]
 }
 
