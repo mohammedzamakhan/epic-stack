@@ -101,15 +101,14 @@ export function NotesKanbanBoard({ notes, orgSlug }: NotesKanbanBoardProps) {
 	const handleDragEnd = async (event: any) => {
 		const { active, over } = event
 		if (!active || !over) return
-		const noteId = active.id
-		const [overColId, overIdxStr] = over.id.split('___')
-		const overIdx = Number(overIdxStr)
-		const status = overColId === UNCATEGORIZED_ID ? null : overColId
-		const position = overIdx
 
-		// Optimistically update UI (optional)
+		const [, noteId] = active.id.split('___')
+		const [destStatus] = over.id.split('___')
+		const status = destStatus === UNCATEGORIZED_ID ? null : destStatus
+		const newColNotes = notesByStatus[destStatus] ?? []
+		let position = newColNotes.findIndex(n => n.id === noteId)
+		if (position === -1) position = 0
 
-		// Persist to backend
 		await fetch(`/app/${orgSlug}/notes/reorder`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -176,17 +175,14 @@ function ColumnView({
 				onDragEnd={onDragEnd}
 			>
 				<SortableContext
-					items={notes.map((n, idx) => ({
-						id: `${column.id}___${idx}`,
-						noteId: n.id,
-					}))}
+					items={notes.map((n) => `${column.id}___${n.id}`)}
 					strategy={verticalListSortingStrategy}
 				>
 					<div className="flex flex-col gap-3">
-						{notes.map((note, idx) => (
+						{notes.map((note) => (
 							<SortableNoteCard
 								key={note.id}
-								id={`${column.id}___${idx}`}
+								id={`${column.id}___${note.id}`}
 								note={note}
 							/>
 						))}
