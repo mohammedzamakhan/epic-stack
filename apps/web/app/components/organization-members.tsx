@@ -5,6 +5,13 @@ import { Button } from '#app/components/ui/button'
 import { Card, CardContent } from '#app/components/ui/card'
 import { Icon } from '#app/components/ui/icon'
 import { getUserImgSrc } from '#app/utils/misc'
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectItem,
+} from '#app/components/ui/select'
 
 interface OrganizationMember {
 	userId: string
@@ -50,18 +57,27 @@ function OrganizationMemberRoleEditor({
 		)
 	}
 
+	const [role, setRole] = React.useState(member.role)
+
 	return (
 		<Form method="POST" className="flex items-center gap-2">
 			<input type="hidden" name="intent" value="update-member-role" />
 			<input type="hidden" name="userId" value={member.userId} />
-			<select
+			<input type="hidden" name="role" value={role} />
+			<Select
 				name="role"
 				defaultValue={member.role}
-				className="border rounded px-2 py-1 text-xs"
+				value={role}
+				onValueChange={setRole}
 			>
-				<option value="admin">Admin</option>
-				<option value="member">Member</option>
-			</select>
+				<SelectTrigger size="sm" className="w-28">
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>
+					<SelectItem value="admin">Admin</SelectItem>
+					<SelectItem value="member">Member</SelectItem>
+				</SelectContent>
+			</Select>
 			<Button type="submit" variant="ghost" size="sm">
 				<Icon name="save" className="h-4 w-4" />
 			</Button>
