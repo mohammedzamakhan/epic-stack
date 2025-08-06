@@ -112,8 +112,8 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		const [, noteIdPart] = active.id.split('___');
 		const noteId = noteIdPart ?? active.id;
 		let destStatusId: string;
-		if (typeof over.id === 'string' && over.id.includes('___')) {
-			destStatusId = over.id.split('___')[0];
+		if (typeof over.id === 'string') {
+			destStatusId = over.id.includes('___') ? over.id.split('___')[0] : over.id.toString();
 		} else {
 			destStatusId = over.id.toString();
 		}
@@ -156,29 +156,30 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	}
 
 	return (
-		<div className="flex gap-6 overflow-x-auto py-2">
-			{columns.map((col, colIdx) => (
-				<ColumnView
-					key={col.id}
-					column={col}
-					notes={notesByStatus[col.id] || []}
-					colIdx={colIdx}
-					orgSlug={orgSlug}
-					onDragEnd={handleDragEnd}
-				/>
-			))}
-			{/* Add column */}
-			<div className="flex flex-col justify-start min-w-[260px]">
-				<Button
-					variant="secondary"
-					className="mt-2"
-					onClick={handleAddColumn}
-					title="Add new column"
-				>
-					<Icon name="plus" className="mr-1" /> Add column
-				</Button>
+		<DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+			<div className="flex gap-6 overflow-x-auto py-2">
+				{columns.map((col, colIdx) => (
+					<ColumnView
+						key={col.id}
+						column={col}
+						notes={notesByStatus[col.id] || []}
+						colIdx={colIdx}
+						orgSlug={orgSlug}
+					/>
+				))}
+				{/* Add column */}
+				<div className="flex flex-col justify-start min-w-[260px]">
+					<Button
+						variant="secondary"
+						className="mt-2"
+						onClick={handleAddColumn}
+						title="Add new column"
+					>
+						<Icon name="plus" className="mr-1" /> Add column
+					</Button>
+				</div>
 			</div>
-		</div>
+		</DndContext>
 	)
 }
 
@@ -187,37 +188,30 @@ function ColumnView({
 	notes,
 	colIdx,
 	orgSlug,
-	onDragEnd,
 }: {
 	column: Column
 	notes: Note[]
 	colIdx: number
 	orgSlug: string
-	onDragEnd: (event: any) => void
 }) {
 	return (
 		<div className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
 			<div className="font-semibold mb-3">{column.title}</div>
-			<DndContext
-				sensors={useSensors(useSensor(PointerSensor))}
-				collisionDetection={closestCorners}
-				onDragEnd={onDragEnd}
+			<SortableContext
+				id={column.id}
+				items={notes.length > 0 ? notes.map((n) => `${column.id}___${n.id}`) : [column.id]}
+				strategy={verticalListSortingStrategy}
 			>
-				<SortableContext
-					items={notes.map((n) => `${column.id}___${n.id}`)}
-					strategy={verticalListSortingStrategy}
-				>
-					<div className="flex flex-col gap-3">
-						{notes.map((note) => (
-							<SortableNoteCard
-								key={note.id}
-								id={`${column.id}___${note.id}`}
-								note={note}
-							/>
-						))}
-					</div>
-				</SortableContext>
-			</DndContext>
+				<div className="flex flex-col gap-3">
+					{notes.map((note) => (
+						<SortableNoteCard
+							key={note.id}
+							id={`${column.id}___${note.id}`}
+							note={note}
+						/>
+					))}
+				</div>
+			</SortableContext>
 		</div>
 	)
 }
