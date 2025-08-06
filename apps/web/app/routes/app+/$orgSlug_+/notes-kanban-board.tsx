@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFetcher, useFetchers } from 'react-router'
-import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core'
+import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable, DragOverlay } from '@dnd-kit/core'
 import {
 	SortableContext,
 	verticalListSortingStrategy,
@@ -89,7 +89,7 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	const addColumnFetcher = useFetcher()
 	const reorderFetcher = useFetcher();
 	const fetchers = useFetchers();
-	const [draggingId, setDraggingId] = useState<string | null>(null);
+	const [activeNote, setActiveNote] = useState<Note | null>(null);
 
 	// Helpers to overlay optimistic fetchers onto canonical data
 
@@ -213,8 +213,16 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		return str.includes('___') ? str.split('___')[0] : str;
 	};
 
+	const handleDragStart = (event: any) => {
+		const activeIdStr = event?.active?.id ? String(event.active.id) : null;
+		if (!activeIdStr) return;
+		const noteId = activeIdStr.includes('___') ? activeIdStr.split('___')[1] : activeIdStr;
+		const found = mergedNotes.find(n => n.id === noteId);
+		if (found) setActiveNote(found);
+	};
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
+		setActiveNote(null);
 		const activeIdStr = active?.id ? String(active.id) : null;
 		if (!activeIdStr) return;
 		const overIdStr = over?.id ? String(over.id) : null;
@@ -236,18 +244,12 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		}
 		const statusId = destColId === UNCATEGORIZED_ID ? null : destColId;
 
-		// Show drag feedback: set draggingId for CSS
-		setDraggingId(noteId);
-
 		const formData = new FormData();
 		formData.append('intent', 'reorder-note');
 		formData.append('noteId', noteId);
 		formData.append('position', String(destIndex));
 		if (statusId !== null) formData.append('statusId', statusId);
 		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
-
-		// Reset draggingId after a tick (after optimistic fetcher overlays)
-		setTimeout(() => setDraggingId(null), 250);
 	}
 
 	const handleAddColumnStart = () => {
@@ -297,7 +299,13 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 	}, [addColumnFetcher.data])
 
 	return (
-		<DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+		<DndContext
+			sensors={sensors}
+			collisionDetection={closestCorners}
+			onDragStart={handleDragStart}
+			onDragEnd={handleDragEnd}
+			onDragCancel={() => setActiveNote(null)}
+		>
 			<div className="flex gap-6 overflow-x-auto py-2">
 				{mergedColumns.map((col) => (
 					<ColumnView
@@ -306,7 +314,6 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 						notes={notesByStatus[col.id] || []}
 						columns={mergedColumns}
 						orgSlug={orgSlug}
-						draggingId={draggingId}
 					/>
 				))}
 				{/* Add column */}
@@ -342,6 +349,9 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 					)}
 				</div>
 			</div>
+			<DragOverlay>
+				{activeNote ? <NoteCard note={activeNote} /> : null}
+			</DragOverlay>
 		</DndContext>
 	)
 }
@@ -351,13 +361,11 @@ function ColumnView({
 	notes,
 	columns,
 	orgSlug,
-	draggingId,
 }: {
 	column: Column
 	notes: Note[]
 	columns: Column[]
 	orgSlug: string
-	draggingId?: string | null
 }) {
 	const { setNodeRef } = useDroppable({ id: column.id });
 	const [isEditing, setIsEditing] = useState(false)
@@ -456,7 +464,7 @@ function ColumnView({
 	)
 }
 
-function SortableNoteCard({ id, note, isDragging }: { id: string; note: Note; isDragging?: boolean }) {
+function SortableNoteCard({ id, note }: { id: string; note: Note }) {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging: sortableIsDragging } = useSortable({
 		id,
 	})
@@ -464,7 +472,7 @@ function SortableNoteCard({ id, note, isDragging }: { id: string; note: Note; is
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
-		opacity: isDragging || sortableIsDragging ? 0.3 : 1,
+		opacity: sortableIsDragging ? 0.2 : 1,
 		cursor: 'grab',
 	}
 

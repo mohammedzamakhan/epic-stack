@@ -519,6 +519,8 @@ model OrganizationNoteStatus {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  OrganizationNote OrganizationNote[]
+
 
   @@unique([organizationId, name])
   @@index([organizationId])
