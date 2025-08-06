@@ -201,7 +201,7 @@ export default function NotesRoute({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<span>
-										<Icon name="layout-columns" />
+										<Icon name="menu" />
 									</span>
 								</TooltipTrigger>
 								<TooltipContent side="top">Kanban</TooltipContent>
