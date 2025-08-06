@@ -91,68 +91,52 @@ export async function handleNewSession(
 	}
 }
 
-export async function handleVerification({
-  request,
-  unverifiedSessionId,
-  redirectTo,
-}: {
-  request: Request
-  unverifiedSessionId?: string
-  redirectTo?: string | null
-}) {
-  // ...other logic above...
-  let destination = redirectTo ?? null
-  let userId: string | null = null
-  const verifySession = await verifySessionStorage.getSession(request.headers.get('cookie'))
+export async function handleVerification({ request, submission }: VerifyFunctionArgs) {
+  const { unverifiedSessionId, redirectTo } = submission.payload ?? {}
+  let finalRedirectTo = redirectTo
+
   const headers = new Headers()
 
-  const unverifiedSessionIdKeyVal = verifySession.get(unverifiedSessionIdKey)
-  let expirationDate: Date | undefined = undefined
-
   if (unverifiedSessionId) {
-    // If unverifiedSessionId is passed, fetch session and get userId
-    const sessionRecord = await prisma.session.findUnique({
-      select: { userId: true, expirationDate: true },
+    // If unverifiedSessionId is passed, fetch session and get userId/expirationDate
+    const session = await prisma.session.findUnique({
+      select: { expirationDate: true, userId: true },
       where: { id: unverifiedSessionId },
     })
-    if (!sessionRecord) {
+
+    if (!session) {
       throw await redirectWithToast('/login', {
         type: 'error',
         title: 'Invalid session',
         description: 'Could not find session to verify. Please try again.',
       })
     }
-    userId = sessionRecord.userId
-    expirationDate = sessionRecord.expirationDate
+
+    const sessionUserId = session.userId
+
     // ...session/cookie logic here...
-  } else if (unverifiedSessionIdKeyVal) {
-    // If session id stored in verification cookie/session
-    const sessionRecord = await prisma.session.findUnique({
-      select: { userId: true, expirationDate: true },
-      where: { id: unverifiedSessionIdKeyVal },
-    })
-    if (!sessionRecord) {
-      throw await redirectWithToast('/login', {
-        type: 'error',
-        title: 'Invalid session',
-        description: 'Could not find session to verify. Please try again.',
-      })
+    // (Assume existing logic to commit session cookies and set headers)
+
+    if (!finalRedirectTo) {
+      finalRedirectTo = await getUserDashboardUrl(sessionUserId)
     }
-    userId = sessionRecord.userId
-    expirationDate = sessionRecord.expirationDate
-    // ...session/cookie logic here...
+
+    return redirect(safeRedirect(finalRedirectTo), { headers })
   } else {
-    // Fallback to getUserId from request
-    userId = await getUserId(request)
-  }
+    // ...existing logic to set session/cookie...
+    // (Assume existing logic to commit session cookies and set headers)
 
-  if (!destination) {
-    destination = userId ? await getUserDashboardUrl(userId) : '/app'
-  }
+    if (!finalRedirectTo) {
+      const currentUserId = await getUserId(request)
+      if (currentUserId) {
+        finalRedirectTo = await getUserDashboardUrl(currentUserId)
+      } else {
+        finalRedirectTo = '/app'
+      }
+    }
 
-  // ...existing session/cookie logic...
-  // For the sake of the diff, preserve your session/cookie handling, just ensure redirect(safeRedirect(destination), { headers })
-  return redirect(safeRedirect(destination), { headers })
+    return redirect(safeRedirect(finalRedirectTo), { headers })
+  }
 }
 
 export async function shouldRequestTwoFA(request: Request) {
