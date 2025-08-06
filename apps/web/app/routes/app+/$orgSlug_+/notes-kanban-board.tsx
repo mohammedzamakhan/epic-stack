@@ -455,7 +455,6 @@ function ColumnView({
 								key={note.id}
 								id={`${column.id}___${note.id}`}
 								note={note}
-								isDragging={draggingId === note.id}
 							/>
 						))}
 				</div>
