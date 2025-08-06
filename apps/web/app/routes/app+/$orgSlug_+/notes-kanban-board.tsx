@@ -139,22 +139,24 @@ export function NotesKanbanBoard({
   }
 
   function handleDragEnd(ev: any) {
-    const { active, over } = ev
-    activeNoteRef.current = null
-    if (!over) return
-
-    const [destCol] = String(over.id).split('___')
-    const [, noteId] = String(active.id).split('___')
-
-    const list = grouped[destCol]
-    const destIndex = over.id === destCol ? list.length : list.findIndex(n => n.id === over.id.split('___')[1])
-
-    const fd = new FormData()
-    fd.append('intent', 'reorder-note')
-    fd.append('noteId', noteId)
-    fd.append('statusId', destCol === UNCATEGORISED ? '' : destCol)
-    fd.append('position', String(destIndex))
-    reorderFetcher.submit(fd, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
+    const { active, over } = ev; activeNoteRef.current = null; if (!over) return;
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    const [, noteId] = activeId.includes('___') ? activeId.split('___') : [null, activeId];
+    const [destCol, overNoteId] = overId.includes('___') ? overId.split('___') : [overId, null];
+    if (!destCol) return;
+    const list = grouped[destCol] ?? [];
+    let destIndex = list.length;
+    if (overNoteId) {
+      const idx = list.findIndex(n => n.id === overNoteId);
+      if (idx !== -1) destIndex = idx;
+    }
+    const formData = new FormData();
+    formData.append('intent', 'reorder-note');
+    formData.append('noteId', noteId);
+    formData.append('position', String(destIndex));
+    if (destCol !== UNCATEGORISED) formData.append('statusId', destCol);
+    reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` });
   }
 
   // --- Render ---
@@ -243,10 +245,10 @@ function KanbanColumn({
       {/* list --------------------------------------------------------- */}
       <SortableContext
         id={column.id}
-        items={notes.length ? notes.map(n => `${column.id}___${n.id}`) : [column.id]}
+        items={notes.map(n => `${column.id}___${n.id}`)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 min-h-[100px]">
           {notes.map(n => (
             <SortableNote key={n.id} note={n} columnId={column.id} />
           ))}
