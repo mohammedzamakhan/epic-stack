@@ -181,6 +181,8 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	)
 }
 
+export { NoteCard };
+
 export function NotesCards({ notes }: { notes: Note[] }) {
 	if (notes.length === 0) {
 		return null
