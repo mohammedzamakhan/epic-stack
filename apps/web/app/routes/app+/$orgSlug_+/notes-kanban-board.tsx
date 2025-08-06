@@ -415,7 +415,7 @@ function ColumnView({
 								setTitleInput(column.title)
 							}
 						}}
-						className="w-32"
+						className="w-32 h-7"
 						maxLength={24}
 						spellCheck={false}
 					/>
@@ -430,7 +430,7 @@ function ColumnView({
 								title={column.statusId ? "Rename column" : "Cannot rename"}
 								onClick={() => column.statusId && setIsEditing(true)}
 							>
-								<Icon name="pencil" size={14} />
+								<Icon name="pencil" size="xs" />
 							</span>
 						)}
 					</>
