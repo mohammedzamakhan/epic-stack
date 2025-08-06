@@ -105,15 +105,22 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-	const handleDragEnd = (event: any, destColId: string) => {
+	const handleDragEnd = (event: any) => {
 		const { active, over } = event
 		if (!active || !over) return
 
-		const [, noteId] = active.id.split('___')
-		const status = destColId === UNCATEGORIZED_ID ? null : destColId
-		const newColNotes = notesByStatus[destColId] ?? []
-		let position = newColNotes.findIndex(n => n.id === noteId)
-		if (position === -1) position = 0
+		const [, noteIdPart] = active.id.split('___');
+		const noteId = noteIdPart ?? active.id;
+		let destStatusId: string;
+		if (typeof over.id === 'string' && over.id.includes('___')) {
+			destStatusId = over.id.split('___')[0];
+		} else {
+			destStatusId = over.id.toString();
+		}
+		const status = destStatusId === UNCATEGORIZED_ID ? null : destStatusId;
+		const newColNotes = notesByStatus[destStatusId] ?? [];
+		let position = newColNotes.findIndex(n => n.id === noteId);
+		if (position === -1) position = 0;
 
 		const formData = new FormData();
 		formData.append('noteId', noteId);
@@ -186,7 +193,7 @@ function ColumnView({
 	notes: Note[]
 	colIdx: number
 	orgSlug: string
-	onDragEnd: (event: any, destColId: string) => void
+	onDragEnd: (event: any) => void
 }) {
 	return (
 		<div className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
@@ -194,7 +201,7 @@ function ColumnView({
 			<DndContext
 				sensors={useSensors(useSensor(PointerSensor))}
 				collisionDetection={closestCorners}
-				onDragEnd={(e) => onDragEnd(e, column.id)}
+				onDragEnd={onDragEnd}
 			>
 				<SortableContext
 					items={notes.map((n) => `${column.id}___${n.id}`)}
