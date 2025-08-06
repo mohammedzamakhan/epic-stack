@@ -33,7 +33,7 @@ interface NoteCardProps {
 	isHovered?: boolean
 }
 
-const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
+export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	const [hovered, setHovered] = useState(isHovered)
 	const [copied, setCopied] = useState(false)
 	const navigate = useNavigate()
@@ -180,8 +180,6 @@ const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 		</Card>
 	)
 }
-
-export { NoteCard };
 
 export function NotesCards({ notes }: { notes: Note[] }) {
 	if (notes.length === 0) {
