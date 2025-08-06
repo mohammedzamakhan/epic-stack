@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core'
 import {
@@ -6,8 +6,8 @@ import {
 	verticalListSortingStrategy,
 	useSortable,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { Button } from '#app/components/ui/button.tsx'
+import { Input } from '#app/components/ui/input.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { NoteCard } from './notes-cards.tsx'
 
@@ -82,6 +82,9 @@ function getInitialColumns(statuses: Status[], notes: Note[]): Column[] {
 
 export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardProps) {
 	const [columns, setColumns] = useState<Column[]>(() => getInitialColumns(statuses, notes))
+	const [addingColumn, setAddingColumn] = useState(false)
+	const [newColInput, setNewColInput] = useState('')
+	const addColumnFetcher = useFetcher()
 	const [noteList, setNoteList] = useState<Note[]>(notes);
 	const reorderFetcher = useFetcher();
 
@@ -165,31 +168,51 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 		reorderFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/reorder` });
 	}
 
-	const handleAddColumn = async () => {
-		const name = prompt('New column name?')
-		if (!name) return
-		if (columns.some(col => col.title === name)) {
-			alert('Column already exists')
+	const handleAddColumnStart = () => {
+		setAddingColumn(true)
+		setNewColInput('')
+	}
+	const handleAddColumnSubmit = () => {
+		const name = newColInput.trim()
+		if (!name) {
+			setAddingColumn(false)
+			setNewColInput('')
 			return
 		}
-		try {
-			const res = await fetch(`/app/${orgSlug}/notes/statuses`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name }),
-			})
-			if (res.ok) {
-				const newStatus = await res.json()
-				setColumns(prev => [...prev, { id: newStatus.name, title: newStatus.name, statusName: newStatus.name, statusId: newStatus.id }])
-			} else if (res.status === 409) {
-				alert('A column with that name already exists.')
-			} else {
-				alert('Error creating column. Please try again.')
-			}
-		} catch (e) {
-			alert('Network error creating column.')
+		if (columns.some(col => col.title.toLowerCase() === name.toLowerCase())) {
+			alert('A column with that name already exists.')
+			return
 		}
+		const formData = new FormData()
+		formData.append('name', name)
+		addColumnFetcher.submit(formData, { method: 'POST', action: `/app/${orgSlug}/notes/statuses` })
+		// Optimistically add
+		setColumns(prev =>
+			[...prev, { id: name, title: name, statusName: name }]
+		)
+		setAddingColumn(false)
+		setNewColInput('')
 	}
+	// Sync new column with backend response id/name
+	useEffect(() => {
+		if (addColumnFetcher.data && addColumnFetcher.data.id) {
+			setColumns(prev => {
+				const idx = prev.findIndex(c => c.title === addColumnFetcher.data.name)
+				if (idx !== -1) {
+					const updated = [...prev]
+					updated[idx] = {
+						id: addColumnFetcher.data.name,
+						title: addColumnFetcher.data.name,
+						statusName: addColumnFetcher.data.name,
+						statusId: addColumnFetcher.data.id,
+						position: addColumnFetcher.data.position,
+					}
+					return updated
+				}
+				return prev
+			})
+		}
+	}, [addColumnFetcher.data])
 
 	return (
 		<DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
@@ -199,18 +222,41 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 						key={col.id}
 						column={col}
 						notes={notesByStatus[col.id] || []}
+						columns={columns}
+						setColumns={setColumns}
 					/>
 				))}
 				{/* Add column */}
 				<div className="flex flex-col justify-start min-w-[260px]">
-					<Button
-						variant="secondary"
-						className="mt-2"
-						onClick={handleAddColumn}
-						title="Add new column"
-					>
-						<Icon name="plus" className="mr-1" /> Add column
-					</Button>
+					{addingColumn ? (
+						<Input
+							autoFocus
+							value={newColInput}
+							onChange={e => setNewColInput(e.target.value)}
+							onBlur={handleAddColumnSubmit}
+							onKeyDown={e => {
+								if (e.key === 'Enter') {
+									handleAddColumnSubmit()
+								} else if (e.key === 'Escape') {
+									setAddingColumn(false)
+									setNewColInput('')
+								}
+							}}
+							className="mt-2"
+							placeholder="New column name"
+							spellCheck={false}
+							maxLength={24}
+						/>
+					) : (
+						<Button
+							variant="secondary"
+							className="mt-2"
+							onClick={handleAddColumnStart}
+							title="Add new column"
+						>
+							<Icon name="plus" className="mr-1" /> Add column
+						</Button>
+					)}
 				</div>
 			</div>
 		</DndContext>
@@ -220,14 +266,104 @@ export function NotesKanbanBoard({ notes, orgSlug, statuses }: NotesKanbanBoardP
 function ColumnView({
 	column,
 	notes,
+	columns,
+	setColumns,
 }: {
 	column: Column
 	notes: Note[]
+	columns: Column[]
+	setColumns: React.Dispatch<React.SetStateAction<Column[]>>
 }) {
 	const { setNodeRef } = useDroppable({ id: column.id });
+	const [isEditing, setIsEditing] = useState(false)
+	const [titleInput, setTitleInput] = useState(column.title)
+	const inputRef = useRef<HTMLInputElement>(null)
+	const renameColumnFetcher = useFetcher()
+	const isUncategorized = column.id === UNCATEGORIZED_ID
+
+	useEffect(() => {
+		setTitleInput(column.title)
+	}, [column.title])
+
+	useEffect(() => {
+		if (isEditing) inputRef.current?.focus()
+	}, [isEditing])
+
+	// On backend PATCH success, sync column name/id
+	useEffect(() => {
+		if (renameColumnFetcher.data && renameColumnFetcher.data.id) {
+			setColumns(prev => prev.map(c =>
+				c.statusId === column.statusId
+					? { ...c, id: renameColumnFetcher.data.name, title: renameColumnFetcher.data.name, statusName: renameColumnFetcher.data.name }
+					: c
+			))
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [renameColumnFetcher.data])
+
+	const handleRenameSubmit = () => {
+		const newName = titleInput.trim()
+		if (!newName || newName === column.title) {
+			setIsEditing(false)
+			setTitleInput(column.title)
+			return
+		}
+		if (columns.some(c => c.title.toLowerCase() === newName.toLowerCase() && c.id !== column.id)) {
+			alert('A column with that name already exists.')
+			return
+		}
+		const formData = new FormData()
+		formData.append('name', newName)
+		if (column.statusId) {
+			renameColumnFetcher.submit(formData, { method: 'PATCH', action: `/app/${column.statusId}/notes/status/${column.statusId}`.replace('//', '/') })
+			// Optimistically update
+			setColumns(prev => prev.map(c =>
+				c.id === column.id
+					? { ...c, id: newName, title: newName, statusName: newName }
+					: c
+			))
+		}
+		setIsEditing(false)
+	}
+
 	return (
 		<div ref={setNodeRef} className="flex flex-col min-w-[320px] bg-muted/60 rounded-lg p-3 shadow-sm">
-			<div className="font-semibold mb-3">{column.title}</div>
+			<div className="font-semibold mb-3 flex items-center gap-2 group">
+				{isEditing ? (
+					<Input
+						ref={inputRef}
+						value={titleInput}
+						onChange={e => setTitleInput(e.target.value)}
+						onBlur={handleRenameSubmit}
+						onKeyDown={e => {
+							if (e.key === 'Enter') {
+								handleRenameSubmit()
+							} else if (e.key === 'Escape') {
+								setIsEditing(false)
+								setTitleInput(column.title)
+							}
+						}}
+						className="w-32"
+						maxLength={24}
+						spellCheck={false}
+					/>
+				) : (
+					<>
+						<span>{column.title}</span>
+						{!isUncategorized && (
+							<span
+								className="ml-1 hidden cursor-pointer rounded-sm p-1 text-muted-foreground hover:bg-muted-foreground/10 group-hover:inline-block"
+								role="button"
+								tabIndex={0}
+								title="Rename column"
+								onClick={() => setIsEditing(true)}
+							>
+								<Icon name="pencil" size={14} />
+							</span>
+						)}
+					</>
+				)}
+			</div>
 			<SortableContext
 				id={column.id}
 				items={notes.length > 0 ? notes.map((n) => `${column.id}___${n.id}`) : [column.id]}
