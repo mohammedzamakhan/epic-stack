@@ -177,8 +177,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	})
 }
 
-import { canUserLogin } from '#app/utils/auth.server.ts'
-
 async function makeSession(
 	{
 		request,
@@ -189,6 +187,7 @@ async function makeSession(
 ) {
 	redirectTo ??= '/'
 
+	const { canUserLogin } = await import('#app/utils/auth.server.ts')
 	const allowed = await canUserLogin(userId)
 	if (!allowed) {
 		return redirect('/login?banned=true', {
