@@ -16,8 +16,9 @@ export function NavSecondary({
 }: {
 	items: {
 		title: string
-		url: string
+		url?: string
 		icon: React.ComponentType<any>
+		onClick?: () => void
 	}[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
 	const iconRefs = useRef<{ [key: string]: any }>({})
@@ -41,21 +42,19 @@ export function NavSecondary({
 			<SidebarGroupContent>
 				<SidebarMenu>
 					{items.map((item) => (
-						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton
-								asChild
-								onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
-								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
-							>
-								<Link to={item.url}>
-									<item.icon
-										ref={(ref: any) => (iconRefs.current[item.title] = ref)}
-										size={16}
-									/>
-									<span>{item.title}</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
+						<li key={item.title}>
+							{item.onClick ? (
+								<SidebarMenuButton onClick={item.onClick}>
+									<item.icon className="mr-2" />
+									{item.title}
+								</SidebarMenuButton>
+							) : (
+								<SidebarMenuButton as={item.url ? Link : "button"} to={item.url}>
+									<item.icon className="mr-2" />
+									{item.title}
+								</SidebarMenuButton>
+							)}
+						</li>
 					))}
 				</SidebarMenu>
 			</SidebarGroupContent>

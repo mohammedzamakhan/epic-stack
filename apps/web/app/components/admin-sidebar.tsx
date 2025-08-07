@@ -4,6 +4,7 @@ import { HomeIcon } from '#app/components/icons/home-icon'
 import { UserIcon } from '#app/components/icons/user-icon'
 import { BuildingIcon } from '#app/components/icons/building-icon'
 import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon'
+import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { NavMain } from '#app/components/nav-main'
 import { NavUser } from '#app/components/nav-user'
 import {
@@ -53,6 +54,12 @@ export function AdminSidebar({
 			url: '/admin/audit-logs',
 			isActive: location.pathname.startsWith('/admin/audit-logs'),
 			icon: ShieldCheckIcon,
+		},
+		{
+			title: 'Feedback',
+			url: '/admin/feedbacks',
+			isActive: location.pathname.startsWith('/admin/feedbacks'),
+			icon: MessageSquareMoreIcon,
 		},
 	]
 

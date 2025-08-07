@@ -42,6 +42,7 @@ model User {
   utmSource              UtmSource?
   roles                  Role[]                     @relation("RoleToUser")
   orgNoteFavorites       OrganizationNoteFavorite[]
+  feedbacks              Feedback[]                 // <-- Added Feedback relation
 }
 
 model Note {
@@ -196,6 +197,7 @@ model Organization {
   notes                  OrganizationNote[]
   noteStatuses           OrganizationNoteStatus[]
   users                  UserOrganization[]
+  feedbacks              Feedback[]               // <-- Added Feedback relation
 }
 
 model UserOrganization {
@@ -524,4 +526,19 @@ model OrganizationNoteStatus {
   @@unique([organizationId, name])
   @@index([organizationId])
   @@index([organizationId, position])
+}
+
+// Feedback model
+model Feedback {
+  id              String         @id @default(cuid())
+  message         String
+  rating          String         // "negative" | "neutral" | "positive"
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId  String?
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+
+  @@index([userId])
+  @@index([organizationId])
 }

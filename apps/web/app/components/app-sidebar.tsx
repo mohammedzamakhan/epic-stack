@@ -119,6 +119,8 @@ function AccountSidebar({
 		},
 	]
 
+	const [feedbackOpen, setFeedbackOpen] = React.useState(false)
+	const openFeedback = React.useCallback(() => setFeedbackOpen(true), [])
 	const navSecondary = [
 		{
 			title: 'Get help',
@@ -127,8 +129,8 @@ function AccountSidebar({
 		},
 		{
 			title: 'Give feedback',
-			url: '#',
 			icon: MessageSquareMoreIcon,
+			onClick: openFeedback,
 		},
 	]
 
@@ -136,6 +138,15 @@ function AccountSidebar({
 		<>
 			<SidebarContent>
 				<NavMain items={navMain} />
+				{/* Feedback Modal for AccountSidebar */}
+				{typeof window !== "undefined" && (
+					<React.Suspense fallback={null}>
+						{React.createElement(
+							require('./feedback-modal').FeedbackModal,
+							{ open: feedbackOpen, setOpen: setFeedbackOpen }
+						)}
+					</React.Suspense>
+				)}
 			</SidebarContent>
 		</>
 	)
@@ -209,6 +220,8 @@ function OrganizationSidebar({
 		},
 	]
 
+	const [feedbackOpen, setFeedbackOpen] = React.useState(false)
+	const openFeedback = React.useCallback(() => setFeedbackOpen(true), [])
 	const navSecondary = [
 		{
 			title: 'Add members',
@@ -222,8 +235,8 @@ function OrganizationSidebar({
 		},
 		{
 			title: 'Give feedback',
-			url: '#',
 			icon: MessageSquareMoreIcon,
+			onClick: openFeedback,
 		},
 	]
 
@@ -272,6 +285,15 @@ function OrganizationSidebar({
 					{/* NavSecondary */}
 					<NavSecondary items={navSecondary} />
 				</div>
+				{/* Feedback Modal for OrganizationSidebar */}
+				{typeof window !== "undefined" && (
+					<React.Suspense fallback={null}>
+						{React.createElement(
+							require('./feedback-modal').FeedbackModal,
+							{ open: feedbackOpen, setOpen: setFeedbackOpen, orgSlug }
+						)}
+					</React.Suspense>
+				)}
 			</SidebarContent>
 
 			<SidebarFooter>
