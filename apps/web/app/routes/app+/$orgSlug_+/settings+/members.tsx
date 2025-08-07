@@ -243,7 +243,36 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		// Optionally: Prevent demoting last admin (not required per spec)
+		// Prevent demoting the last admin
+		const memberToUpdate = await prisma.userOrganization.findUnique({
+			where: {
+				userId_organizationId: {
+					userId: memberUserId,
+					organizationId: organization.id,
+				},
+			},
+			select: { role: true, active: true },
+		})
+		if (
+			memberToUpdate &&
+			memberToUpdate.role === 'admin' &&
+			memberToUpdate.active &&
+			newRole === 'member'
+		) {
+			const activeAdminCount = await prisma.userOrganization.count({
+				where: {
+					organizationId: organization.id,
+					role: 'admin',
+					active: true,
+				},
+			})
+			if (activeAdminCount === 1) {
+				return Response.json(
+					{ error: 'Cannot demote the last admin of the organization' },
+					{ status: 400 }
+				)
+			}
+		}
 
 		try {
 			await prisma.userOrganization.update({
