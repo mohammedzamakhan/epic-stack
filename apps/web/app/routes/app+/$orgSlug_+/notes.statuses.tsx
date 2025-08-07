@@ -1,8 +1,9 @@
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import type { ActionFunctionArgs } from 'react-router';
 
-export const action = async ({ request, params }) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const orgSlug = params.orgSlug
 	if (!orgSlug) return new Response('Missing orgSlug', { status: 400 })
 
