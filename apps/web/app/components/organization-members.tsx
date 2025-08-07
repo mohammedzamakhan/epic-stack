@@ -12,6 +12,7 @@ import {
 	SelectContent,
 	SelectItem,
 } from '#app/components/ui/select'
+import { useState } from 'react'
 
 interface OrganizationMember {
 	userId: string
@@ -57,7 +58,7 @@ function OrganizationMemberRoleEditor({
 		)
 	}
 
-	const [role, setRole] = React.useState(member.role)
+	const [role, setRole] = useState(member.role)
 
 	return (
 		<Form method="POST" className="flex items-center gap-2">
@@ -78,8 +79,8 @@ function OrganizationMemberRoleEditor({
 					<SelectItem value="member">Member</SelectItem>
 				</SelectContent>
 			</Select>
-			<Button type="submit" variant="ghost" size="sm">
-				<Icon name="save" className="h-4 w-4" />
+			<Button type="submit" variant="outline" size="sm">
+				Save
 			</Button>
 		</Form>
 	)
@@ -168,7 +169,7 @@ export function OrganizationMembers({
 												size="sm"
 												className="text-destructive hover:text-destructive"
 											>
-												<Icon name="trash" className="h-4 w-4" />
+												<Icon name="trash-2" className="h-4 w-4" />
 											</Button>
 										</Form>
 									)}
