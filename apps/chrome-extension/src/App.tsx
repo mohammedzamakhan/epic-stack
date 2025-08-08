@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react'
 import contentScript from './content?script'
+import { Button } from './components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './components/ui/card'
 
 function App() {
   const [url, setUrl] = useState('')
@@ -47,29 +56,46 @@ function App() {
     })
   }
 
+  const handleDisable = () => {
+    if (!url) return
+
+    chrome.storage.local.remove([url], () => {
+      console.log(`Permission removed for ${url}`)
+      setHasPermission(false)
+    })
+  }
+
   return (
-    <div className="w-64 p-4">
-      <h1 className="text-lg font-bold text-center mb-4">Inject Script</h1>
-      {hasPermission ? (
-        <p className="text-center">
-          Permission already granted for: <br />
-          <span className="font-semibold">{url}</span>
+    <Card className="w-80 border-none shadow-none">
+      <CardHeader>
+        <CardTitle>Epic SaaS Chrome Extension</CardTitle>
+        <CardDescription>Inject scripts with ease.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-center text-sm text-muted-foreground">
+          {hasPermission
+            ? 'Permission has been granted for:'
+            : 'Grant permission to inject script on:'}
+          <br />
+          <span className="font-semibold text-foreground">{url}</span>
         </p>
-      ) : (
-        <>
-          <p className="text-center mb-4">
-            Allow injecting script on: <br />
-            <span className="font-semibold">{url}</span>
-          </p>
-          <button
-            onClick={handleAllow}
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+      </CardContent>
+      <CardFooter>
+        {hasPermission ? (
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={handleDisable}
           >
+            Disable
+          </Button>
+        ) : (
+          <Button className="w-full" onClick={handleAllow}>
             Allow
-          </button>
-        </>
-      )}
-    </div>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   )
 }
 

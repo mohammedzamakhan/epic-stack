@@ -10,7 +10,7 @@
     "name": "index"
   },
   "index.html": {
-    "file": "assets/chunk-Chk53jB6.js",
+    "file": "assets/chunk-CWH0qrnG.js",
     "name": "index.html",
     "src": "index.html",
     "isEntry": true,
@@ -18,7 +18,7 @@
       "_chunk-D_23u5v3.js"
     ],
     "css": [
-      "assets/index-6OA9iqZs.css"
+      "assets/index-CdQtyQkv.css"
     ]
   },
   "src/background/index.ts": {
