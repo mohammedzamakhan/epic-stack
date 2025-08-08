@@ -1,11 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { crx } from '@crxjs/vite-plugin'
-import manifest from './public/manifest.json'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { crx, ManifestV3Export } from '@crxjs/vite-plugin'
+import * as manifest from './public/manifest.json'
 import tailwindcss from '@tailwindcss/vite'
+
+const devManifest: Partial<ManifestV3Export> = {
+  host_permissions: ['http://localhost:5173/*'],
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
+  const isDev = mode === 'development'
+
+  const finalManifest = {
+    ...manifest,
+    ...(isDev ? devManifest : {}),
+  }
+
   return {
     build: {
       emptyOutDir: true,
@@ -23,6 +36,10 @@ export default defineConfig(({ mode }) => {
         port: 5173,
       },
     },
-    plugins: [react(), tailwindcss(), crx({ manifest })],
+    plugins: [
+      react(),
+      tailwindcss(),
+      crx({ manifest: finalManifest as ManifestV3Export }),
+    ],
   }
 })
