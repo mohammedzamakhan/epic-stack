@@ -10,15 +10,16 @@ import {
 } from '#app/components/ui/sidebar'
 import { Link } from 'react-router'
 
+type NavItem = {
+	title: string
+	icon: React.ComponentType<any>
+} & ({ url: string; onClick?: never } | { url?: never; onClick: () => void })
+
 export function NavSecondary({
 	items,
 	...props
 }: {
-	items: {
-		title: string
-		url: string
-		icon: React.ComponentType<any>
-	}[]
+	items: NavItem[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
 	const iconRefs = useRef<{ [key: string]: any }>({})
 
@@ -40,20 +41,31 @@ export function NavSecondary({
 		<SidebarGroup {...props}>
 			<SidebarGroupContent>
 				<SidebarMenu>
-					{items.map((item) => (
+					{items.map(item => (
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton
-								asChild
+								asChild={!!item.url}
+								onClick={item.onClick}
 								onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
 								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 							>
-								<Link to={item.url}>
-									<item.icon
-										ref={(ref: any) => (iconRefs.current[item.title] = ref)}
-										size={16}
-									/>
-									<span>{item.title}</span>
-								</Link>
+								{item.url ? (
+									<Link to={item.url}>
+										<item.icon
+											ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+											size={16}
+										/>
+										<span>{item.title}</span>
+									</Link>
+								) : (
+									<>
+										<item.icon
+											ref={(ref: any) => (iconRefs.current[item.title] = ref)}
+											size={16}
+										/>
+										<span>{item.title}</span>
+									</>
+								)}
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}

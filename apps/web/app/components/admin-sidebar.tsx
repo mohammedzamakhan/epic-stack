@@ -14,6 +14,7 @@ import {
 } from '#app/components/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
 import { Logo } from './icons/logo'
+import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { ShieldCheckIcon } from './icons/shield-check-icon'
 
 export function AdminSidebar({
@@ -53,6 +54,12 @@ export function AdminSidebar({
 			url: '/admin/audit-logs',
 			isActive: location.pathname.startsWith('/admin/audit-logs'),
 			icon: ShieldCheckIcon,
+		},
+		{
+			title: 'Feedback',
+			url: '/admin/feedback',
+			isActive: location.pathname.startsWith('/admin/feedback'),
+			icon: MessageSquareMoreIcon,
 		},
 	]
 

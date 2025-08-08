@@ -35,6 +35,7 @@ import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'
 import { ArrowLeftIcon } from './icons/arrow-left-icon'
 import { BuildingIcon } from './icons/building-icon'
+import FeedbackModal from './core/feedback-modal'
 
 // Upgrade Account Card Component
 function UpgradeAccountCard({
@@ -83,10 +84,12 @@ function AccountSidebar({
 	user,
 	location,
 	orgSlug,
+	onFeedbackClick,
 }: {
 	user: any
 	location: any
 	orgSlug: string | undefined
+	onFeedbackClick: () => void
 }) {
 	const isProfileRoute = location.pathname === '/app/profile'
 	const isSecurityRoute = location.pathname === '/app/security'
@@ -127,8 +130,8 @@ function AccountSidebar({
 		},
 		{
 			title: 'Give feedback',
-			url: '#',
 			icon: MessageSquareMoreIcon,
+			onClick: onFeedbackClick,
 		},
 	]
 
@@ -136,7 +139,13 @@ function AccountSidebar({
 		<>
 			<SidebarContent>
 				<NavMain items={navMain} />
+				<div className="mt-auto">
+					<NavSecondary items={navSecondary} />
+				</div>
 			</SidebarContent>
+			<SidebarFooter>
+				<NavUser user={user} />
+			</SidebarFooter>
 		</>
 	)
 }
@@ -153,6 +162,7 @@ function OrganizationSidebar({
 	hasVisibleFeatureUpdates,
 	trialStatus,
 	rootData,
+	onFeedbackClick,
 }: {
 	user: any
 	location: any
@@ -164,6 +174,7 @@ function OrganizationSidebar({
 	hasVisibleFeatureUpdates: boolean
 	trialStatus?: { isActive: boolean; daysRemaining: number }
 	rootData: any
+	onFeedbackClick: () => void
 }) {
 	const navMain = [
 		{
@@ -222,8 +233,8 @@ function OrganizationSidebar({
 		},
 		{
 			title: 'Give feedback',
-			url: '#',
 			icon: MessageSquareMoreIcon,
+			onClick: onFeedbackClick,
 		},
 	]
 
@@ -296,6 +307,7 @@ export function AppSidebar({
 	const location = useLocation()
 	const [hasVisibleFeatureUpdates, setHasVisibleFeatureUpdates] =
 		React.useState(true)
+	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
 
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
@@ -327,6 +339,10 @@ export function AppSidebar({
 
 	return (
 		<Sidebar collapsible="offcanvas" {...props} className="overflow-hidden">
+			<FeedbackModal
+				isOpen={isFeedbackModalOpen}
+				onOpenChange={setIsFeedbackModalOpen}
+			/>
 			<div className="relative h-full">
 				{/* Account Sidebar */}
 				<motion.div
@@ -350,6 +366,7 @@ export function AppSidebar({
 						user={userData}
 						location={location}
 						orgSlug={orgSlug}
+						onFeedbackClick={() => setIsFeedbackModalOpen(true)}
 					/>
 				</motion.div>
 
@@ -382,6 +399,7 @@ export function AppSidebar({
 						hasVisibleFeatureUpdates={hasVisibleFeatureUpdates}
 						trialStatus={trialStatus}
 						rootData={rootData}
+						onFeedbackClick={() => setIsFeedbackModalOpen(true)}
 					/>
 				</motion.div>
 			</div>
