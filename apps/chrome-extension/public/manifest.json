@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Domain Script Injector",
+  "name": "Epic SaaS Chrome Extension",
   "version": "1.0",
   "description": "Injects a script into a domain after user permission.",
   "permissions": ["storage", "activeTab", "scripting"],
@@ -10,11 +10,5 @@
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["src/content/index.ts"]
-    }
-  ]
+  }
 }

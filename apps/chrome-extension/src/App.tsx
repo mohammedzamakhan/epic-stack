@@ -5,9 +5,17 @@ function App() {
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0].url) {
-        const url = new URL(tabs[0].url);
-        setUrl(url.hostname);
+      if (tabs[0] && tabs[0].url) {
+        try {
+          const url = new URL(tabs[0].url);
+          if (url.protocol === 'http:' || url.protocol === 'https:') {
+            setUrl(url.hostname);
+          } else {
+            setUrl('This page is not supported.');
+          }
+        } catch (error) {
+          setUrl('Invalid URL.');
+        }
       }
     });
   }, []);
