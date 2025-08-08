@@ -1,6 +1,8 @@
 import { styleText } from 'node:util'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { remember } from '@epic-web/remember'
+
+export * from '@prisma/client'
 
 // Changed import due to issue: https://github.com/remix-run/react-router/pull/12644
 export const prisma = remember('prisma', () => {
@@ -17,7 +19,7 @@ export const prisma = remember('prisma', () => {
 			{ level: 'warn', emit: 'stdout' },
 		],
 	})
-	client.$on('query', async (e) => {
+	client.$on('query', async (e: Prisma.QueryEvent) => {
 		if (e.duration < logThreshold) return
 		const color =
 			e.duration < logThreshold * 1.1
