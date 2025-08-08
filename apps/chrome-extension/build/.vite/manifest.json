@@ -6,12 +6,12 @@
     "isEntry": true
   },
   "index.html": {
-    "file": "assets/chunk-HUTVa8l8.js",
+    "file": "assets/chunk-7cPtvv6H.js",
     "name": "index.html",
     "src": "index.html",
     "isEntry": true,
     "css": [
-      "assets/index-CNMVFRF6.css"
+      "assets/index-6OA9iqZs.css"
     ]
   },
   "src/background/index.ts": {
