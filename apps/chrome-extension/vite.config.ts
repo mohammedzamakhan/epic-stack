@@ -5,10 +5,17 @@ import manifest from './public/manifest.json'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    crx({ manifest }),
-  ],
+export default defineConfig(({ mode }) => {
+  return {
+    build: {
+      emptyOutDir: true,
+      outDir: 'build',
+      rollupOptions: {
+        output: {
+          chunkFileNames: 'assets/chunk-[hash].js',
+        },
+      },
+    },
+    plugins: [react(), tailwindcss(), crx({ manifest })],
+  }
 })

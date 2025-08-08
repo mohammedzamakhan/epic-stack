@@ -1,0 +1,23 @@
+{
+  "../../../@crx/manifest": {
+    "file": "assets/chunk-CsVvkcyS.js",
+    "name": "crx-manifest.js",
+    "src": "../../../@crx/manifest",
+    "isEntry": true
+  },
+  "index.html": {
+    "file": "assets/chunk-HUTVa8l8.js",
+    "name": "index.html",
+    "src": "index.html",
+    "isEntry": true,
+    "css": [
+      "assets/index-CNMVFRF6.css"
+    ]
+  },
+  "src/background/index.ts": {
+    "file": "assets/chunk-DHgJ2QgI.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true
+  }
+}
