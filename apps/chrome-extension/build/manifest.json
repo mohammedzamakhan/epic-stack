@@ -1,18 +1,48 @@
 {
-  "manifest_version": 3,
-  "name": "Epic SaaS Chrome Extension",
-  "version": "1.0",
-  "description": "Injects a script into a domain after user permission.",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
   "action": {
     "default_popup": "index.html"
   },
   "background": {
     "service_worker": "service-worker-loader.js",
     "type": "module"
-  }
+  },
+  "default": {
+    "manifest_version": 3,
+    "name": "Epic SaaS Chrome Extension",
+    "version": "1.0",
+    "description": "Injects a script into a domain after user permission.",
+    "permissions": [
+      "storage",
+      "activeTab",
+      "scripting"
+    ],
+    "action": {
+      "default_popup": "index.html"
+    },
+    "background": {
+      "service_worker": "src/background/index.ts",
+      "type": "module"
+    }
+  },
+  "description": "Injects a script into a domain after user permission.",
+  "manifest_version": 3,
+  "name": "Epic SaaS Chrome Extension",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "version": "1.0",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "resources": [
+        "assets/chunk-DFkXb1SM.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
 }

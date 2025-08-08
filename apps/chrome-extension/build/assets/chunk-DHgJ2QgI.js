@@ -1,1 +1,0 @@
-chrome.tabs.onUpdated.addListener((r,c,e)=>{if(c.status==="complete"&&e.url){const t=new URL(e.url).hostname;chrome.storage.local.get([t],o=>{o[t]&&chrome.scripting.executeScript({target:{tabId:r},files:["src/content/index.js"]})})}});

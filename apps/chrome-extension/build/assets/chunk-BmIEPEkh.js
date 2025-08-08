@@ -1,0 +1,1 @@
+import{c as s}from"./chunk-D_23u5v3.js";chrome.tabs.onUpdated.addListener((t,o,r)=>{if(o.status==="complete"&&r.url)try{const e=new URL(r.url).hostname;chrome.storage.local.get([e],n=>{n[e]&&chrome.scripting.executeScript({target:{tabId:t},files:[s]})})}catch{console.error(`Invalid URL: ${r.url}`)}});
