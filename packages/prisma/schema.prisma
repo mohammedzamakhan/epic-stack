@@ -42,6 +42,7 @@ model User {
   utmSource              UtmSource?
   roles                  Role[]                     @relation("RoleToUser")
   orgNoteFavorites       OrganizationNoteFavorite[]
+  Feedback               Feedback[]
 }
 
 model Note {
@@ -196,6 +197,7 @@ model Organization {
   notes                  OrganizationNote[]
   noteStatuses           OrganizationNoteStatus[]
   users                  UserOrganization[]
+  Feedback               Feedback[]
 }
 
 model UserOrganization {

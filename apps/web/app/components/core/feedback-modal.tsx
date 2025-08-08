@@ -24,9 +24,9 @@ export default function FeedbackModal({
 	const [feedback, setFeedback] = useState('')
 
 	const icons = [
-		{ id: 'negative', icon: 'alert-triangle', label: 'Negative feedback' },
-		{ id: 'neutral', icon: 'ellipsis', label: 'Neutral feedback' },
-		{ id: 'positive', icon: 'check-circle', label: 'Positive feedback' },
+		{ id: 'negative', icon: 'frown', label: 'Negative feedback' },
+		{ id: 'neutral', icon: 'meh', label: 'Neutral feedback' },
+		{ id: 'positive', icon: 'smile', label: 'Positive feedback' },
 	]
 
 	const fetcher = useFetcher()
