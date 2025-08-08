@@ -17,7 +17,7 @@ export const prisma = remember('prisma', () => {
 			{ level: 'warn', emit: 'stdout' },
 		],
 	})
-	client.$on('query', async (e) => {
+	client.$on('query', async (e: any) => {
 		if (e.duration < logThreshold) return
 		const color =
 			e.duration < logThreshold * 1.1

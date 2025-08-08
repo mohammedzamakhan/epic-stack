@@ -142,7 +142,7 @@ describe('Providers Index', () => {
 			expect(slackProvider?.description).toBe(
 				'Connect notes to Slack channels for team collaboration',
 			)
-			expect(slackProvider?.icon).toBe('link-2')
+			expect(slackProvider?.icon).toBe('slack')
 		})
 
 		it('should include Jira provider with correct details', () => {
@@ -155,7 +155,7 @@ describe('Providers Index', () => {
 			expect(jiraProvider?.description).toBe(
 				'Connect notes to Jira projects for issue tracking and project management',
 			)
-			expect(jiraProvider?.icon).toBe('link-2')
+			expect(jiraProvider?.icon).toBe('jira')
 		})
 
 		it('should include Linear provider with correct details', () => {
@@ -168,7 +168,7 @@ describe('Providers Index', () => {
 			expect(linearProvider?.description).toBe(
 				'Connect notes to Linear teams and projects for issue tracking and project management',
 			)
-			expect(linearProvider?.icon).toBe('link-2')
+			expect(linearProvider?.icon).toBe('linear')
 		})
 
 		it('should include GitLab provider with correct details', () => {
@@ -181,7 +181,7 @@ describe('Providers Index', () => {
 			expect(gitlabProvider?.description).toBe(
 				'Connect notes to GitLab projects for issue tracking and project management',
 			)
-			expect(gitlabProvider?.icon).toBe('link-2')
+			expect(gitlabProvider?.icon).toBe('gitlab')
 		})
 
 		it('should include ClickUp provider with correct details', () => {
@@ -194,7 +194,7 @@ describe('Providers Index', () => {
 			expect(clickupProvider?.description).toBe(
 				'Connect notes to ClickUp spaces and lists for task management',
 			)
-			expect(clickupProvider?.icon).toBe('link-2')
+			expect(clickupProvider?.icon).toBe('clickup')
 		})
 
 		it('should include Notion provider with correct details', () => {
@@ -207,7 +207,7 @@ describe('Providers Index', () => {
 			expect(notionProvider?.description).toBe(
 				'Connect notes to Notion databases for knowledge management and collaboration',
 			)
-			expect(notionProvider?.icon).toBe('link-2')
+			expect(notionProvider?.icon).toBe('notion')
 		})
 
 		it('should include Asana provider with correct details', () => {
@@ -220,7 +220,7 @@ describe('Providers Index', () => {
 			expect(asanaProvider?.description).toBe(
 				'Connect notes to Asana projects for task management and team collaboration',
 			)
-			expect(asanaProvider?.icon).toBe('link-2')
+			expect(asanaProvider?.icon).toBe('asana')
 		})
 
 		it('should include Trello provider with correct details', () => {
@@ -233,7 +233,7 @@ describe('Providers Index', () => {
 			expect(trelloProvider?.description).toBe(
 				'Connect notes to Trello boards for task management and project organization',
 			)
-			expect(trelloProvider?.icon).toBe('link-2')
+			expect(trelloProvider?.icon).toBe('trello')
 		})
 
 		it('should include GitHub provider with correct details', () => {
@@ -246,7 +246,7 @@ describe('Providers Index', () => {
 			expect(githubProvider?.description).toBe(
 				'Connect notes to GitHub repositories for issue tracking and project management',
 			)
-			expect(githubProvider?.icon).toBe('link-2')
+			expect(githubProvider?.icon).toBe('github')
 		})
 
 		it('should return providers in consistent order', () => {
@@ -263,14 +263,6 @@ describe('Providers Index', () => {
 
 			providers.forEach((provider) => {
 				expect(provider.type).toBe('productivity')
-			})
-		})
-
-		it('should return all providers with link-2 icon', () => {
-			const providers = getAvailableProviders()
-
-			providers.forEach((provider) => {
-				expect(provider.icon).toBe('link-2')
 			})
 		})
 	})
