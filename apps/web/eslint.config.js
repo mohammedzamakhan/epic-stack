@@ -1,4 +1,4 @@
-import { default as defaultConfig } from '@epic-web/config/eslint'
+import { default as defaultConfig } from '@repo/config/eslint-preset'
 
 /** @type {import("eslint").Linter.Config} */
 export default [

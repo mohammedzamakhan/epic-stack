@@ -3,11 +3,5 @@ import { default as defaultConfig } from '@repo/config/eslint-preset'
 /** @type {import("eslint").Linter.Config} */
 export default [
 	...defaultConfig,
-	{
-		files: ['**/*.ts', '**/*.tsx'],
-		rules: {
-			'react-hooks/rules-of-hooks': 'error',
-			'react-hooks/exhaustive-deps': 'warn',
-		},
-	},
+	// add custom config objects here for this package
 ]
