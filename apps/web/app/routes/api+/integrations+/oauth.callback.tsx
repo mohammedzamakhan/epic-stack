@@ -1,6 +1,5 @@
 import { invariant } from '@epic-web/invariant'
 import {
-	type OAuthState,
 	integrationManager,
 	OAuthStateManager,
 } from '@repo/integrations'

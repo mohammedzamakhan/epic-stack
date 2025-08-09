@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { cn } from '#app/utils/misc'
 import { Button } from '../ui/button'
 import { Icon } from '../ui/icon'
@@ -60,7 +60,7 @@ export function CommentImageUpload({
 		e.target.value = ''
 	}
 
-	const handleClick = (e: React.MouseEvent) => {
+	const handleClick = () => {
 		if (!disabled && fileInputRef.current) {
 			fileInputRef.current.click()
 		}

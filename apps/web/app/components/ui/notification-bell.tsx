@@ -6,7 +6,7 @@ import Markdown from 'react-markdown'
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Card, CardContent, CardHeader } from '../ui/card'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -240,7 +240,7 @@ export default function NotificationBell() {
 		return () => {
 			novu.off('notifications.notification_received', listener)
 		}
-	}, [novu])
+	}, [novu, refetch])
 
 	const handleLoadMore = () => {
 		if (hasMore) {

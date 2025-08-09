@@ -159,7 +159,6 @@ function OrganizationSidebar({
 	organizationId,
 	favoriteNotes,
 	setHasVisibleFeatureUpdates,
-	hasVisibleFeatureUpdates,
 	trialStatus,
 	rootData,
 	onFeedbackClick,
@@ -171,7 +170,6 @@ function OrganizationSidebar({
 	organizationId: string | undefined
 	favoriteNotes: any
 	setHasVisibleFeatureUpdates: (value: boolean) => void
-	hasVisibleFeatureUpdates: boolean
 	trialStatus?: { isActive: boolean; daysRemaining: number }
 	rootData: any
 	onFeedbackClick: () => void
@@ -305,8 +303,7 @@ export function AppSidebar({
 }) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
-	const [hasVisibleFeatureUpdates, setHasVisibleFeatureUpdates] =
-		React.useState(true)
+	const [, setHasVisibleFeatureUpdates] = React.useState(true)
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
 
 	const orgSlug =
@@ -396,7 +393,6 @@ export function AppSidebar({
 						organizationId={organizationId}
 						favoriteNotes={rootData?.favoriteNotes}
 						setHasVisibleFeatureUpdates={setHasVisibleFeatureUpdates}
-						hasVisibleFeatureUpdates={hasVisibleFeatureUpdates}
 						trialStatus={trialStatus}
 						rootData={rootData}
 						onFeedbackClick={() => setIsFeedbackModalOpen(true)}

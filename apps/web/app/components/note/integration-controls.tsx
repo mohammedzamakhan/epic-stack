@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import * as React from 'react'
-import { useFetcher, useLoaderData } from 'react-router'
+import { useFetcher } from 'react-router'
 import { Badge } from '#app/components/ui/badge'
 import { Button } from '#app/components/ui/button'
 import {
@@ -20,7 +20,6 @@ import {
 	SelectValue,
 } from '#app/components/ui/select'
 import { StatusButton } from '#app/components/ui/status-button'
-import { cn } from '#app/utils/misc'
 
 export const connectNoteActionIntent = 'connect-note-to-channel'
 export const disconnectNoteActionIntent = 'disconnect-note-from-channel'

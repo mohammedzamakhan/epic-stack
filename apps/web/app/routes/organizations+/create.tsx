@@ -17,7 +17,6 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 import { ErrorList } from '#app/components/forms'
-import { OrganizationInvitations } from '#app/components/organization-invitations'
 import { Button } from '#app/components/ui/button'
 import {
 	Card,
@@ -29,7 +28,6 @@ import {
 import { Icon } from '#app/components/ui/icon.tsx'
 import { Input } from '#app/components/ui/input'
 import { Label } from '#app/components/ui/label'
-import { PageTitle } from '#app/components/ui/page-title'
 import {
 	Select,
 	SelectContent,
@@ -123,7 +121,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
 	const intent = formData.get('intent') as string
-	const step = formData.get('step') as string
+	formData.get('step') as string
 
 	// Handle step 1: Create organization
 	if (intent === 'create-organization') {
@@ -290,7 +288,7 @@ export default function CreateOrganizationPage() {
 			{/* Progress indicator */}
 			<div className="mb-8 text-center">
 				<div className="mb-2 flex items-center justify-center gap-2">
-					{steps.map((step, index) => (
+					{steps.map(step => (
 						<div
 							key={step.number}
 							className={`h-2 w-2 rounded-full ${

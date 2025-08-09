@@ -46,11 +46,6 @@ export async function loader({
 	})
 }
 
-type ProfileActionArgs = {
-	request: Request
-	userId: string
-	formData: FormData
-}
 
 export const profileUpdateActionIntent = 'update-profile'
 export const changeEmailActionIntent = 'change-email'

@@ -55,14 +55,12 @@ import {
 	clearCacheByType,
 	deleteCacheKeys,
 	type CacheKeyInfo,
-	type CacheStats,
 } from '#app/utils/cache.server.ts'
 import {
 	ensureInstance,
 	getAllInstances,
 	getInstanceInfo,
 } from '#app/utils/litefs.server.ts'
-import { useDebounce } from '#app/utils/misc.tsx'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { getToast, redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/cache.ts'
@@ -89,7 +87,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	await ensureInstance(instance)
 
 	// Get toast message
-	const { toast, headers: toastHeaders } = await getToast(request)
+	const { toast } = await getToast(request)
 
 	// Get cache statistics
 	const stats = await getCacheStats()
@@ -210,7 +208,7 @@ export async function action({ request }: Route.ActionArgs) {
 export default function CacheAdminRoute() {
 	const data = useLoaderData<typeof loader>()
 	const [searchParams, setSearchParams] = useSearchParams()
-	const submit = useSubmit()
+	useSubmit()
 	const [searchQuery, setSearchQuery] = useState(data.filters.query)
 	const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
 
@@ -222,9 +220,6 @@ export default function CacheAdminRoute() {
 	const cacheType = searchParams.get('type') ?? 'all'
 	const instance = searchParams.get('instance') ?? data.instance
 
-	const handleFormChange = useDebounce(async (form: HTMLFormElement) => {
-		await submit(form)
-	}, 400)
 
 	const handleSearch = (value: string) => {
 		setSearchQuery(value)

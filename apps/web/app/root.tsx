@@ -16,7 +16,6 @@ import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { ImpersonationBanner } from './components/impersonation-banner.tsx'
-import { MarketingDocument } from './components/marketing-document.tsx'
 import { useToast } from './components/toaster.tsx'
 import { href as iconsHref } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
@@ -259,10 +258,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useOptionalTheme() || 'light'
-	const matches = useMatches()
-	const isMarketingRoute = matches.some((match) =>
-		match.pathname?.startsWith?.('/app'),
-	)
+	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
 	return (

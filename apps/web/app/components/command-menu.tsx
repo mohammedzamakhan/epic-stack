@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate, useRouteLoaderData, useFetcher, Link } from 'react-router'
+import { useRouteLoaderData, useFetcher, Link } from 'react-router'
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -31,7 +31,6 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 	const [loading, setLoading] = useState(false)
 	const [query, setQuery] = useState('')
 	const [hasTrackedUsage, setHasTrackedUsage] = useState(false)
-	const navigate = useNavigate()
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const fetcher = useFetcher()
 

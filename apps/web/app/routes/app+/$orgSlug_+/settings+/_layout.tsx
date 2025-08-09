@@ -1,13 +1,10 @@
-import { Outlet, useLocation, useRouteLoaderData, Link  } from 'react-router'
+import { Outlet, useLocation, useRouteLoaderData } from 'react-router'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { cn } from '#app/utils/misc'
 
 export default function SettingsLayout() {
-	const rootData = useRouteLoaderData<typeof rootLoader>('root')
-	const location = useLocation()
-	const orgSlug =
-		rootData?.userOrganizations?.currentOrganization?.organization.slug
+	useRouteLoaderData<typeof rootLoader>('root')
+	useLocation()
 
 	return (
 		<div className="p-8">

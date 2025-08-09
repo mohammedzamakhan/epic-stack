@@ -2,7 +2,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Avatar, AvatarFallback } from '#app/components/ui/avatar.tsx'
 import { Badge } from '#app/components/ui/badge.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Card, CardContent } from '#app/components/ui/card.tsx'
@@ -43,7 +42,7 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	})
 
 	const createdBy = note.createdByName || 'Unknown'
-	const initials = createdBy
+	createdBy
 		.split(' ')
 		.map((n) => n[0])
 		.join('')

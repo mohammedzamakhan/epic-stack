@@ -22,29 +22,6 @@ import {
 	type MediaFieldset,
 } from './__org-note-editor'
 
-function imageHasFile(
-	image: ImageFieldset,
-): image is ImageFieldset & { file: NonNullable<ImageFieldset['file']> } {
-	return Boolean(image.file?.size && image.file?.size > 0)
-}
-
-function imageHasId(
-	image: ImageFieldset,
-): image is ImageFieldset & { id: string } {
-	return Boolean(image.id)
-}
-
-function mediaHasFile(
-	media: MediaFieldset,
-): media is MediaFieldset & { file: NonNullable<MediaFieldset['file']> } {
-	return Boolean(media.file?.size && media.file?.size > 0)
-}
-
-function mediaHasId(
-	media: MediaFieldset,
-): media is MediaFieldset & { id: string } {
-	return Boolean(media.id)
-}
 
 type UploadFieldset = (ImageFieldset | MediaFieldset) & { type?: string }
 

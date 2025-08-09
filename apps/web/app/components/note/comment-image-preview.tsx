@@ -46,7 +46,7 @@ export function CommentImagePreview({
 				}
 			})
 		}
-	}, [files])
+	}, [files, previewUrls])
 
 	if (files.length === 0) {
 		return null

@@ -1,4 +1,4 @@
-import { useLoaderData, useSearchParams } from 'react-router'
+import { useLoaderData } from 'react-router'
 import { AdminUsersTable } from '#app/components/admin-users-table'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -113,7 +113,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function AdminUsersPage() {
 	const data = useLoaderData<typeof loader>()
-	const [searchParams] = useSearchParams()
 
 	return (
 		<div className="space-y-6">

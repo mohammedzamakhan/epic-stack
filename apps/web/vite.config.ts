@@ -5,7 +5,6 @@ import {
 	sentryReactRouter,
 } from '@sentry/react-router'
 import tailwindcss from '@tailwindcss/vite'
-import { reactRouterDevTools } from 'react-router-devtools'
 import { defineConfig } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'

@@ -16,6 +16,11 @@ import { Icon } from '#app/components/ui/icon.tsx'
 import { PageTitle } from '#app/components/ui/page-title.tsx'
 import { Sheet, SheetContent } from '#app/components/ui/sheet.tsx'
 import { Tabs, TabsList, TabsTrigger } from '#app/components/ui/tabs.tsx'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '#app/components/ui/tooltip.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNotesViewMode, setNotesViewMode } from '#app/utils/notes-view-cookie.server.ts'
@@ -138,7 +143,6 @@ export async function action({ request }: ActionFunctionArgs) {
 	})
 }
 
-import { Tooltip, TooltipTrigger, TooltipContent } from '#app/components/ui/tooltip.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
 export default function NotesRoute({

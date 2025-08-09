@@ -35,7 +35,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	let config
 	try {
 		config = JSON.parse(configString)
-	} catch (error) {
+	} catch {
 		return Response.json({ error: 'Invalid config JSON' }, { status: 400 })
 	}
 

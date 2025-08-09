@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Form, useRevalidator } from 'react-router'
-import { Button } from '../ui/button'
+import { useRevalidator } from 'react-router'
 import { Icon } from '../ui/icon'
 import CommentInput, { type MentionUser } from './comment-input'
 import { CommentItem } from './comment-item'
@@ -38,7 +37,7 @@ export function CommentsSection({
 	currentUserId,
 	users,
 }: CommentsSectionProps) {
-	const [newComment, setNewComment] = useState('')
+	const [newComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const revalidator = useRevalidator()
 

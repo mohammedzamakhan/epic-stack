@@ -1,9 +1,6 @@
 import { Outlet } from 'react-router'
-import { EpicToaster } from '#app/components/ui/sonner.tsx'
-import { useTheme } from '../resources+/theme-switch'
 
 export default function AuthLayout() {
-	const theme = useTheme()
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-4"

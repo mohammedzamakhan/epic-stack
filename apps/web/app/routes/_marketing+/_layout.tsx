@@ -1,24 +1,14 @@
-import { Link, Outlet, useMatches, useRouteLoaderData } from 'react-router'
+import { Outlet, useRouteLoaderData } from 'react-router'
 
 import { Logo } from '#app/components/icons/logo.tsx'
 import { EpicProgress } from '#app/components/progress-bar.tsx'
-import { SearchBar } from '#app/components/search-bar.tsx'
 // useToast is not used in this file
-import { Button } from '#app/components/ui/button.tsx'
 import { HeroHeader } from '#app/components/ui/header.tsx'
-import { EpicToaster } from '#app/components/ui/sonner.tsx'
-import { UserDropdown } from '#app/components/user-dropdown.tsx'
 import { type loader } from '#app/root.tsx'
-import { ThemeSwitch, useTheme } from '#app/routes/resources+/theme-switch.tsx'
-import { useOptionalUser } from '#app/utils/user.ts'
+import { ThemeSwitch } from '#app/routes/resources+/theme-switch.tsx'
 
 export default function MarketingLayout() {
 	const data = useRouteLoaderData<typeof loader>('root')
-	const user = useOptionalUser()
-	const theme = useTheme()
-	const matches = useMatches()
-	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
-	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
 
 	return (
 		<>

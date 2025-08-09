@@ -894,12 +894,6 @@ export async function action({ request }: ActionFunctionArgs) {
 						)
 					}
 
-					// Create access entries for valid users
-					const accessEntries = validUserIds.map((userId) => ({
-						noteId,
-						userId,
-					}))
-
 					// Create access entries for valid users, handling duplicates manually
 					for (const targetUserId of validUserIds) {
 						await tx.noteAccess.upsert({

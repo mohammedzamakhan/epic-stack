@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { Link, useNavigate, useSubmit } from 'react-router'
+import { Link, useSubmit } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import {
 	DropdownMenu,
@@ -18,13 +18,10 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	useSidebar,
 } from '#app/components/ui/sidebar'
 import { useUserOrganizations } from '#app/utils/organizations'
 
 export function TeamSwitcher() {
-	const { isMobile } = useSidebar()
-	const navigate = useNavigate()
 	const submit = useSubmit()
 
 	const userOrganizations = useUserOrganizations() || {

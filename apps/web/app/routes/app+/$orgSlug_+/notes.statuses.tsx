@@ -13,7 +13,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	})
 	if (!organization) return new Response('Organization not found', { status: 404 })
 
-	const userId = await requireUserId(request)
+	await requireUserId(request)
 	await userHasOrgAccess(request, organization.id)
 
 	const formData = await request.formData();
