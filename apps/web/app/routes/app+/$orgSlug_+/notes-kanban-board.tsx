@@ -434,7 +434,8 @@ function KanbanColumn({
                   className="p-1 h-auto"
                   status={deleteFetcher.state !== 'idle' ? 'pending' : 'idle'}
                 >
-                  <Icon name={dc.doubleCheck ? 'check' : 'trash'} size="xs" />
+                  {dc.doubleCheck && 'Are you sure?'}
+                  <Icon name={dc.doubleCheck ? 'check' : 'trash-2'} size="xs" />
                 </StatusButton>
               </deleteFetcher.Form>
             )}
