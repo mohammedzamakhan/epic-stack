@@ -26,6 +26,8 @@ import { useFetcher, useFetchers } from 'react-router'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { Input } from '#app/components/ui/input.tsx'
+import { StatusButton } from '#app/components/ui/status-button.tsx'
+import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { NoteCard } from './notes-cards.tsx'
 
 type Note = LoaderNote & {
@@ -109,7 +111,7 @@ export function NotesKanbanBoard({
       uploads: [],
     } as LoaderNote))
 
-  // Pending status creates / renames
+  // Pending status creates / renames / deletes
   const renameMap: Record<string, string> = {}
   fetchers
     .filter(f => f.formData?.get('intent') === 'rename-status')
@@ -126,12 +128,22 @@ export function NotesKanbanBoard({
       return { id: name, name }
     })
 
+  const pendingDeletes = new Set<string>()
+  for (const f of fetchers) {
+    if (f.formMethod === 'DELETE' && f.formAction?.includes('/notes/status/')) {
+      const statusId = f.formAction.split('/').pop()
+      if (statusId) pendingDeletes.add(statusId)
+    }
+  }
+
   // Build columns
   const columns: Column[] = [
-    ...statuses.map(s => ({
-      id: s.id,
-      name: renameMap[s.id] ?? s.name,
-    })),
+    ...statuses
+      .filter(s => !pendingDeletes.has(s.id))
+      .map(s => ({
+        id: s.id,
+        name: renameMap[s.id] ?? s.name,
+      })),
     ...pendingCreatesStatus,
   ]
   if (notes.some(n => !n.statusId)) columns.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
@@ -353,6 +365,8 @@ function KanbanColumn({
 }) {
   const { setNodeRef } = useDroppable({ id: column.id })
   const renameFetcher = useFetcher()
+  const deleteFetcher = useFetcher()
+  const dc = useDoubleCheck()
   const [editing, setEditing] = useState(false)
 
   const placeholderId = makeDragId(column.id, '__placeholder')
@@ -398,17 +412,33 @@ function KanbanColumn({
             />
           </renameFetcher.Form>
         ) : (
-          <button className="hover:underline" onClick={() => setEditing(true)}>
-            <span className="text-sm">{column.name}</span>
+          <div className="flex items-center justify-between gap-2 w-full">
+            <button className="hover:underline" onClick={() => setEditing(true)}>
+              <span className="text-sm">{column.name}</span>
+              {column.id !== UNCATEGORISED && (
+                <button className="invisible group-hover:visible p-1 px-2">
+                  <Icon name="pencil" size="xs" />
+                </button>
+              )}
+            </button>
             {column.id !== UNCATEGORISED && (
-              <button
-
-                className="invisible group-hover:visible p-1 px-2"
+              <deleteFetcher.Form
+                method="delete"
+                action={`/app/${orgSlug}/notes/status/${column.id}`}
+                className="invisible group-hover:visible"
               >
-                <Icon name="pencil" size="xs" />
-              </button>
+                <StatusButton
+                  {...dc.getButtonProps({ type: 'submit' })}
+                  variant={dc.doubleCheck ? 'destructive' : 'ghost'}
+                  size="sm"
+                  className="p-1 h-auto"
+                  status={deleteFetcher.state !== 'idle' ? 'pending' : 'idle'}
+                >
+                  <Icon name={dc.doubleCheck ? 'check' : 'trash'} size="xs" />
+                </StatusButton>
+              </deleteFetcher.Form>
             )}
-          </button>
+          </div>
         )}
       </div>
 
