@@ -56,7 +56,7 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	const handleCopyLink = (e: React.MouseEvent) => {
 		e.stopPropagation()
 		const noteUrl = `${window.location.origin}${window.location.pathname}/${note.id}`
-		navigator.clipboard.writeText(noteUrl)
+		void navigator.clipboard.writeText(noteUrl)
 		setCopied(true)
 		setTimeout(() => setCopied(false), 1000)
 	}

@@ -251,7 +251,7 @@ export function NotesKanbanBoard({
     formData.append('noteId', activeParsed.noteId)
     formData.append('position', String(destIndex))
     if (destColId !== UNCATEGORISED) formData.append('statusId', destColId)
-    reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
+    void reorderFetcher.submit(formData, { method: 'post', action: `/app/${orgSlug}/notes/reorder` })
   }
 
   // Accessibility announcements for screen readers

@@ -70,7 +70,7 @@ export function JiraIntegrationSettings({
 
 	// Update the integration config
 	const updateConfig = (configUpdates: Record<string, any>) => {
-		fetcher.submit(
+		void fetcher.submit(
 			{
 				intent: 'update-integration-config',
 				integrationId: integration.id,

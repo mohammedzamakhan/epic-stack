@@ -44,7 +44,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 	useEffect(() => {
 		if (open && !hasTrackedUsage && organizationId) {
 			setHasTrackedUsage(true)
-			fetcher.submit(
+			void fetcher.submit(
 				{ stepKey: 'explore_command_menu', organizationId },
 				{ method: 'POST', action: '/api/onboarding/complete-step' },
 			)
@@ -81,7 +81,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 		if (!open) return
 
 		const timeoutId = setTimeout(() => {
-			searchNotes(query)
+			void searchNotes(query)
 		}, 300)
 
 		return () => clearTimeout(timeoutId)

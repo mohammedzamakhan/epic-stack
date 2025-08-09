@@ -28,15 +28,15 @@ const FileText = forwardRef<FileTextIconHandle, FileTextIconProps>(
 			isControlledRef.current = true
 
 			return {
-				startAnimation: () => controls.start('animate'),
-				stopAnimation: () => controls.start('normal'),
+				startAnimation: () => void controls.start('animate'),
+				stopAnimation: () => void controls.start('normal'),
 			}
 		})
 
 		const handleMouseEnter = useCallback(
 			(e: React.MouseEvent<HTMLDivElement>) => {
 				if (!isControlledRef.current) {
-					controls.start('animate')
+					void controls.start('animate')
 				} else {
 					onMouseEnter?.(e)
 				}
@@ -47,7 +47,7 @@ const FileText = forwardRef<FileTextIconHandle, FileTextIconProps>(
 		const handleMouseLeave = useCallback(
 			(e: React.MouseEvent<HTMLDivElement>) => {
 				if (!isControlledRef.current) {
-					controls.start('normal')
+					void controls.start('normal')
 				} else {
 					onMouseLeave?.(e)
 				}

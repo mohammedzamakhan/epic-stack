@@ -36,7 +36,7 @@ export default function FeedbackModal({
 			// Or show some validation message
 			return
 		}
-		fetcher.submit(
+		void fetcher.submit(
 			{
 				message: feedback,
 				type: selectedIcon,

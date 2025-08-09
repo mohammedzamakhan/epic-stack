@@ -212,7 +212,7 @@ export default function NotesRoute({
 						value={viewMode}
 						onValueChange={val => {
 							if (val === 'cards' || val === 'kanban') {
-								fetcher.submit(
+								void fetcher.submit(
 									{ viewMode: val },
 									{ method: 'POST' }
 								)

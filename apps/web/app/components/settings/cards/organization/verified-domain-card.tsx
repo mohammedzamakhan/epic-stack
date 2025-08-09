@@ -51,7 +51,7 @@ export default function VerifiedDomainCard({
 		setIsChecked(checked)
 		form.reset()
 		if (!checked) {
-			toggleFetcher.submit(
+			void toggleFetcher.submit(
 				{ intent: 'toggle-verified-domain', organizationId: organization.id },
 				{ method: 'POST' },
 			)

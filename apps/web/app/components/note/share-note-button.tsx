@@ -123,7 +123,7 @@ export function ShareNoteButton({
 			})
 		}
 
-		fetcher.submit(formData, { method: 'POST' })
+		void fetcher.submit(formData, { method: 'POST' })
 	}
 
 	const filteredMembers = organizationMembers.filter(

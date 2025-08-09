@@ -232,7 +232,7 @@ export default function NotificationBell() {
 
 	useEffect(() => {
 		const listener = () => {
-			refetch()
+			void refetch()
 		}
 
 		novu.on('notifications.notification_received', listener)
@@ -244,7 +244,7 @@ export default function NotificationBell() {
 
 	const handleLoadMore = () => {
 		if (hasMore) {
-			fetchMore()
+			void fetchMore()
 		}
 	}
 

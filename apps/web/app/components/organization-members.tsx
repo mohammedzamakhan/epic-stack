@@ -40,6 +40,7 @@ function OrganizationMemberRoleEditor({
 	const currentMember = members.find((m) => m.userId === currentUserId)
 	const isAdmin = currentMember?.role === 'admin' && currentMember.active
 	const isSelf = member.userId === currentUserId
+	const [role, setRole] = useState(member.role)
 
 	if (!isAdmin || isSelf) {
 		return (
@@ -57,8 +58,6 @@ function OrganizationMemberRoleEditor({
 			</Badge>
 		)
 	}
-
-	const [role, setRole] = useState(member.role)
 
 	return (
 		<Form method="POST" className="flex items-center gap-2">

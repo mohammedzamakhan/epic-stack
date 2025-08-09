@@ -172,7 +172,7 @@ export function NavUser({
 											if (requestInfo?.path) {
 												formData.append('redirectTo', requestInfo.path)
 											}
-											themeFetcher.submit(formData, {
+											void themeFetcher.submit(formData, {
 												method: 'POST',
 												action: '/resources/theme-switch',
 											})

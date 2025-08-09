@@ -66,7 +66,7 @@ export function CommentsSection({
 
 			if (response.ok) {
 				// Revalidate the data to show the new comment
-				revalidator.revalidate()
+				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
 				console.error('Comment failed:', errorText)
@@ -105,7 +105,7 @@ export function CommentsSection({
 
 			if (response.ok) {
 				// Revalidate the data to show the new reply
-				revalidator.revalidate()
+				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
 				console.error('Reply failed:', errorText)
@@ -128,7 +128,7 @@ export function CommentsSection({
 
 			if (response.ok) {
 				// Revalidate the data to remove the deleted comment
-				revalidator.revalidate()
+				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
 				console.error('Delete failed:', errorText)

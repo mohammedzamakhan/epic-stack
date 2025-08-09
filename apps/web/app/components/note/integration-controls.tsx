@@ -121,7 +121,7 @@ export function IntegrationControls({
 											const formData = new FormData()
 											formData.append('intent', disconnectNoteActionIntent)
 											formData.append('connectionId', connection.id)
-											disconnectFetcher.submit(formData, { method: 'POST' })
+											void disconnectFetcher.submit(formData, { method: 'POST' })
 										}}
 										isDisconnecting={
 											disconnectFetcher.state !== 'idle' &&
@@ -148,7 +148,7 @@ export function IntegrationControls({
 										formData.append('noteId', noteId)
 										formData.append('integrationId', integrationId)
 										formData.append('channelId', channelId)
-										connectFetcher.submit(formData, { method: 'POST' })
+										void connectFetcher.submit(formData, { method: 'POST' })
 									}}
 									isConnecting={connectFetcher.state !== 'idle'}
 								/>
@@ -245,7 +245,7 @@ function AddConnectionForm({
 			formData.append('intent', 'get-integration-channels')
 			formData.append('integrationId', integrationId)
 
-			channelsFetcher.submit(formData, { method: 'POST' })
+			void channelsFetcher.submit(formData, { method: 'POST' })
 		}
 	}
 

@@ -40,7 +40,7 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			updatePosition()
+			void updatePosition()
 		}
 	}, [isOpen])
 
