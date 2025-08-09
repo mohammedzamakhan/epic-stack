@@ -1,10 +1,8 @@
 'use client'
 
+import  { type Variants, motion, useAnimation  } from 'motion/react'
+import  { type HTMLAttributes, forwardRef, useCallback, useImperativeHandle, useRef  } from 'react'
 import { cn } from '#app/utils/misc.tsx'
-import type { Variants } from 'motion/react'
-import { motion, useAnimation } from 'motion/react'
-import type { HTMLAttributes } from 'react'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 
 export interface UserIconHandle {
 	startAnimation: () => void

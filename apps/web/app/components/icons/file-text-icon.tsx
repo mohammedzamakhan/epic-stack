@@ -1,13 +1,7 @@
 'use client'
 
-import React, {
-	forwardRef,
-	useCallback,
-	useImperativeHandle,
-	useRef,
-} from 'react'
+import { type HTMLAttributes, forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 import { motion, useAnimation } from 'motion/react'
-import type { HTMLAttributes } from 'react'
 import { cn } from '#app/utils/misc.tsx'
 
 export interface FileTextIconHandle {

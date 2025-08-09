@@ -1,9 +1,8 @@
 'use client'
 
-import { cn } from '#app/utils/misc.tsx'
+import { type HTMLAttributes, forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
 import { motion, useAnimation } from 'motion/react'
-import type { HTMLAttributes } from 'react'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
+import { cn } from '#app/utils/misc.tsx'
 
 export interface ListTodoIconHandle {
 	startAnimation: () => void
