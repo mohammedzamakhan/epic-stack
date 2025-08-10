@@ -28,7 +28,10 @@ jobs:
           node-version: 22
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env
@@ -37,7 +40,7 @@ jobs:
         run: npx prisma migrate deploy && npx prisma generate --sql
 
       - name: 🔬 Lint
-        run: npm run lint
+        run: pnpm run lint
 
   typecheck:
     name: ʦ TypeScript
@@ -52,10 +55,13 @@ jobs:
           node-version: 22
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
 
       - name: 🏗 Build
-        run: npm run build
+        run: pnpm run build
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env
@@ -64,7 +70,7 @@ jobs:
         run: npx prisma migrate deploy && npx prisma generate --sql
 
       - name: 🔎 Type check
-        run: npm run typecheck --if-present
+        run: pnpm run typecheck --if-present
 
   vitest:
     name: ⚡ Vitest
@@ -79,7 +85,10 @@ jobs:
           node-version: 22
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env
@@ -88,7 +97,7 @@ jobs:
         run: npx prisma migrate deploy && npx prisma generate --sql
 
       - name: ⚡ Run vitest
-        run: npm run test -- --coverage
+        run: pnpm run test -- --coverage
 
   playwright:
     name: 🎭 Playwright
@@ -107,10 +116,13 @@ jobs:
           node-version: 22
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
 
       - name: 📥 Install Playwright Browsers
-        run: npm run test:e2e:install
+        run: pnpm run test:e2e:install
 
       - name: 🛠 Setup Database
         run: npx prisma migrate deploy && npx prisma generate --sql
@@ -130,7 +142,7 @@ jobs:
         run: npx prisma migrate reset --force
 
       - name: 🏗 Build
-        run: npm run build
+        run: pnpm run build
 
       - name: 🎭 Playwright tests
         run: npx playwright test

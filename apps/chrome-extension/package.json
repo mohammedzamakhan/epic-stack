@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.1.0",
-    "@repo/config": "*",
+    "@repo/config": "workspace:*",
     "@tailwindcss/vite": "^4.1.5",
     "@types/chrome": "^0.0.268",
     "@types/react": "^18.2.66",
@@ -31,6 +31,7 @@
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
+    "tailwindcss": "^4.1.5",
     "typescript": "^5.2.2",
     "vite": "^6.3.5"
   }

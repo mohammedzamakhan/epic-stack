@@ -11,7 +11,7 @@
     "db:seed": "tsx seed.ts",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "setup": "npm run db:migrate:deploy && npm run db:generate"
+    "setup": "pnpm run db:migrate:deploy && pnpm run db:generate"
   },
   "dependencies": {
     "@epic-web/remember": "^1.1.0",

@@ -35,7 +35,7 @@
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {
-    "@repo/config": "*",
+    "@repo/config": "workspace:*",
     "@types/react": "^19.1.2",
     "typescript": "^5.8.3"
   }

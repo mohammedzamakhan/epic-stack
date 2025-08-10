@@ -1,7 +1,7 @@
 {
   "name": "epic-stack-monorepo",
   "private": true,
-  "packageManager": "npm@10.9.0",
+  "packageManager": "pnpm@9.6.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -16,12 +16,12 @@
     "test": "turbo run test",
     "test:e2e:run": "turbo run test:e2e:run",
     "format": "prettier --write .",
-    "db:setup": "cd packages/prisma && npm run setup",
-    "db:generate": "cd packages/prisma && npm run db:generate",
-    "db:push": "cd packages/prisma && npm run db:push",
-    "db:migrate:deploy": "cd packages/prisma && npm run db:migrate:deploy",
-    "db:seed": "cd packages/prisma && npm run db:seed",
-    "db:migrate:dev": "cd packages/prisma && npm run db:migrate:dev",
+    "db:setup": "cd packages/prisma && pnpm run setup",
+    "db:generate": "cd packages/prisma && pnpm run db:generate",
+    "db:push": "cd packages/prisma && pnpm run db:push",
+    "db:migrate:deploy": "cd packages/prisma && pnpm run db:migrate:deploy",
+    "db:seed": "cd packages/prisma && pnpm run db:seed",
+    "db:migrate:dev": "cd packages/prisma && pnpm run db:migrate:dev",
     "docs:dev": "cd apps/docs && npx mint dev",
     "docs:build": "cd apps/docs && npx mint build"
   },
@@ -39,7 +39,7 @@
   "prettier": "@epic-web/config/prettier",
   "volta": {
     "node": "22.15.0",
-    "npm": "10.9.0"
+    "pnpm": "9.6.0"
   },
   "dependencies": {
     "motion": "^12.23.1",

@@ -18,10 +18,11 @@
   },
   "dependencies": {
     "@novu/node": "^2.6.6",
-    "@novu/react": "^3.7.0"
+    "@novu/react": "^3.7.0",
+    "@novu/framework": "^2.6.7"
   },
   "devDependencies": {
-    "@repo/config": "*",
+    "@repo/config": "workspace:*",
     "@types/react": "^18.2.20",
     "eslint": "^8.56.0",
     "react": "^18.2.0",

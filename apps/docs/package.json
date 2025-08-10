@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "npx mint dev --port 3004",
-    "build": "npx mint build"
+    "dev": "pnpm exec mintlify dev --port 3004",
+    "build": "pnpm exec mintlify build"
+  },
+  "devDependencies": {
+    "mintlify": "^1.0.134"
   }
 }

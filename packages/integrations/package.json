@@ -19,8 +19,8 @@
     "test:coverage:watch": "vitest --coverage",
     "test:coverage:force": "vitest --run --coverage --reporter=verbose --passWithNoTests",
     "coverage:report": "vitest --run --coverage --reporter=verbose",
-    "coverage:summary": "npx c8 --reporter=text-summary --reports-dir=coverage npx vitest --run || true",
-    "coverage": "npx c8 --all --include='src/**/*.ts' --exclude='src/index.ts' --exclude='src/types.ts' --reporter=text --reports-dir=coverage vitest --run",
+    "coverage:summary": "pnpm exec c8 --reporter=text-summary --reports-dir=coverage pnpm exec vitest --run || true",
+    "coverage": "pnpm exec c8 --all --include='src/**/*.ts' --exclude='src/index.ts' --exclude='src/types.ts' --reporter=text --reports-dir=coverage vitest --run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "@prisma/client": "^6.0.0"
   },
   "devDependencies": {
+    "@types/node": "^24.2.1",
     "@vitest/coverage-v8": "^1.6.0",
     "msw": "^2.0.0",
     "typescript": "^5.0.0",
