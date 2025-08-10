@@ -5,29 +5,33 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode production",
+    "build": "npm run build:chrome",
+    "build:chrome": "BROWSER=chrome vite build --mode production",
+    "build:firefox": "BROWSER=firefox vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^2.3.0",
-    "class-variance-authority": "^0.7.0",
-    "@radix-ui/react-slot": "^1.0.2"
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.1.0",
+    "@repo/config": "*",
+    "@tailwindcss/vite": "^4.1.5",
     "@types/chrome": "^0.0.268",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@types/webextension-polyfill": "^0.12.3",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "typescript": "^5.2.2",
-    "vite": "^6.3.5",
-    "@tailwindcss/vite": "^4.1.5",
-    "@repo/config": "*"
+    "vite": "^6.3.5"
   }
 }

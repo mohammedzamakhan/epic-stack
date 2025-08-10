@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from './components/ui/card'
 import contentScript from './content/index.tsx?script'
+import browser from 'webextension-polyfill'
 
 function App() {
   const [url, setUrl] = useState('')
@@ -16,60 +17,55 @@ function App() {
   const [hasPermission, setHasPermission] = useState(false)
 
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].id && tabs[0].url) {
-        setTabId(tabs[0].id)
-        try {
-          const url = new URL(tabs[0].url)
+    const init = async () => {
+      try {
+        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0] && tabs[0].id && tabs[0].url) {
+          setTabId(tabs[0].id);
+          const url = new URL(tabs[0].url);
           if (url.protocol === 'http:' || url.protocol === 'https:') {
-            const hostname = url.hostname
-            setUrl(hostname)
-            chrome.storage.local.get([hostname], (result) => {
-              if (result[hostname]) {
-                setHasPermission(true)
-              }
-            })
+            const hostname = url.hostname;
+            setUrl(hostname);
+            const result = await browser.storage.local.get([hostname]);
+            if (result[hostname]) {
+              setHasPermission(true);
+            }
           } else {
-            setUrl('This page is not supported.')
+            setUrl('This page is not supported.');
           }
-        } catch (error) {
-          console.error(error)
-          setUrl('Invalid URL.')
         }
+      } catch (error) {
+        console.error(error);
+        setUrl('Invalid URL.');
       }
-    })
+    };
+    init();
   }, [])
 
-  const handleAllow = () => {
+  const handleAllow = async () => {
     if (!tabId || !url) return
 
-    chrome.storage.local.set({ [url]: true }, () => {
-      console.log(`Permission granted for ${url}`)
-      chrome.scripting.executeScript(
-        {
-          target: { tabId: tabId },
-          files: [contentScript],
-        },
-        () => {
-          window.close()
-        },
-      )
-    })
+    await browser.storage.local.set({ [url]: true });
+    console.log(`Permission granted for ${url}`);
+    await browser.scripting.executeScript({
+      target: { tabId: tabId },
+      files: [contentScript.startsWith('/') ? contentScript.slice(1) : contentScript],
+    });
+    window.close();
   }
 
-  const handleDisable = () => {
+  const handleDisable = async () => {
     if (!url) return
 
-    chrome.storage.local.remove([url], () => {
-      console.log(`Permission removed for ${url}`)
-      setHasPermission(false)
-    })
+    await browser.storage.local.remove([url]);
+    console.log(`Permission removed for ${url}`);
+    setHasPermission(false);
   }
 
   return (
     <Card className="w-80 border-none shadow-none">
       <CardHeader>
-        <CardTitle>Epic SaaS Chrome Extension</CardTitle>
+        <CardTitle>Epic SaaS Extension</CardTitle>
         <CardDescription>Inject scripts with ease.</CardDescription>
       </CardHeader>
       <CardContent>

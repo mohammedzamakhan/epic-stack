@@ -1,32 +1,31 @@
+import browser from 'webextension-polyfill'
 import contentScript from '../content/index.tsx?script'
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {  
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
   if (changeInfo.status === 'complete') {
-    chrome.tabs.get(tabId, (fullTab) => {
-      if (chrome.runtime.lastError) {
-        return
-      }
-
+    try {
+      const fullTab = await browser.tabs.get(tabId)
       if (!fullTab.url) {
         return
       }
-      try {
-        const url = new URL(fullTab.url)
-        const domain = url.hostname
-        
-        chrome.storage.local.get([domain], (result) => {          
-          if (result[domain]) {
-            const scriptPath = contentScript.startsWith('/') ? contentScript.slice(1) : contentScript
-            void chrome.scripting.executeScript({
-              target: { tabId: tabId },
-              files: [scriptPath],
-            })
-          } else {
-          }
+
+      const url = new URL(fullTab.url)
+      const domain = url.hostname
+
+      const result = await browser.storage.local.get([domain])
+      if (result[domain]) {
+        const scriptPath = contentScript.startsWith('/') ? contentScript.slice(1) : contentScript
+        await browser.scripting.executeScript({
+          target: { tabId: tabId },
+          files: [scriptPath],
         })
-      } catch (error) {
-        console.error('Error parsing URL:', error)
       }
-    })
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('No tab with id')) {
+        // Tab was closed before we could get its details, ignore.
+        return
+      }
+      console.error('Error in background script:', error)
+    }
   }
 })
