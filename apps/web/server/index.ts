@@ -142,6 +142,46 @@ app.use(
 	}),
 )
 
+// IP tracking middleware (only in production)
+if (IS_PROD) {
+	app.use(async (req, res, next) => {
+		try {
+			// Get the original send function
+			const originalSend = res.send
+			
+			// Override the send function to capture status code
+			res.send = function(body) {
+				// Track the request after response is sent
+				setImmediate(async () => {
+					try {
+						const ipTracking = await import('../app/utils/ip-tracking.server.js')
+						const ip = req.get('fly-client-ip') || req.ip
+						await ipTracking.trackIpRequest({
+							ip,
+							method: req.method,
+							path: req.path,
+							userAgent: req.get('user-agent'),
+							referer: req.get('referer'),
+							statusCode: res.statusCode,
+							// Note: We can't easily get userId here without parsing session
+							// but we can add it later in route loaders if needed
+						})
+					} catch (error) {
+						// Silently fail to not break the app
+						console.error('IP tracking error:', error)
+					}
+				})
+				
+				// Call the original send function
+				return originalSend.call(this, body)
+			}
+		} catch (error) {
+			// Silently fail and continue
+		}
+		next()
+	})
+}
+
 // When running tests or running in development, we want to effectively disable
 // rate limiting because playwright tests are very fast and we don't want to
 // have to wait for the rate limit to reset between tests.

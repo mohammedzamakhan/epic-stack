@@ -16,6 +16,7 @@ import { type loader as rootLoader } from '#app/root.tsx'
 import { Logo } from './icons/logo'
 import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { ShieldCheckIcon } from './icons/shield-check-icon'
+import { GlobeIcon } from './icons/globe-icon'
 
 export function AdminSidebar({
 	...props
@@ -42,6 +43,12 @@ export function AdminSidebar({
 			url: '/admin/organizations',
 			isActive: location.pathname.startsWith('/admin/organizations'),
 			icon: BuildingIcon,
+		},
+		{
+			title: 'IP Addresses',
+			url: '/admin/ip-addresses',
+			isActive: location.pathname.startsWith('/admin/ip-addresses'),
+			icon: GlobeIcon,
 		},
 		{
 			title: 'Cache',

@@ -43,6 +43,8 @@ model User {
   roles                  Role[]                     @relation("RoleToUser")
   orgNoteFavorites       OrganizationNoteFavorite[]
   Feedback               Feedback[]
+  blacklistedIps         IpAddress[]                @relation("IpBlacklists")
+  requests               IpRequestLog[]             @relation("UserRequests")
 }
 
 model Note {
@@ -541,4 +543,42 @@ model Feedback {
 
   @@index([userId])
   @@index([organizationId])
+}
+
+model IpAddress {
+  id              String         @id @default(cuid())
+  ip              String         @unique
+  country         String?
+  region          String?
+  city            String?
+  isBlacklisted   Boolean        @default(false)
+  blacklistReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  blacklistedAt   DateTime?
+  blacklistedById String?
+  blacklistedBy   User?          @relation("IpBlacklists", fields: [blacklistedById], references: [id])
+  requests        IpRequestLog[]
+
+  @@index([ip])
+  @@index([isBlacklisted])
+}
+
+model IpRequestLog {
+  id         String    @id @default(cuid())
+  ipId       String
+  ip         IpAddress @relation(fields: [ipId], references: [id], onDelete: Cascade)
+  method     String
+  path       String
+  userAgent  String?
+  referer    String?
+  statusCode Int?
+  userId     String?
+  user       User?     @relation("UserRequests", fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime  @default(now())
+
+  @@index([ipId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([ipId, createdAt])
 }
