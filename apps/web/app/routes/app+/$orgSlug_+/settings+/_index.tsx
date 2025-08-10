@@ -15,6 +15,11 @@ import {
 	uploadOrgPhotoActionIntent,
 	deleteOrgPhotoActionIntent,
 } from '#app/components/settings/cards/organization/organization-photo-card'
+import {
+	S3StorageCard,
+	S3StorageSchema,
+	s3StorageActionIntent,
+} from '#app/components/settings/cards/organization/s3-storage-card'
 import TeamSizeCard, {
 	TeamSizeSchema,
 } from '#app/components/settings/cards/organization/team-size-card'
@@ -27,8 +32,9 @@ import {
 } from '#app/components/ui/annotated-layout'
 import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
+import { encrypt } from '#app/utils/encryption.server'
 import { markStepCompleted } from '#app/utils/onboarding'
-import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
+import { uploadOrganizationImage, testS3Connection } from '#app/utils/storage.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -50,6 +56,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			slug: true,
 			size: true,
 			verifiedDomain: true,
+			s3Config: {
+				select: {
+					id: true,
+					isEnabled: true,
+					endpoint: true,
+					bucketName: true,
+					accessKeyId: true,
+					secretAccessKey: true,
+					region: true,
+				},
+			},
 			image: {
 				select: {
 					id: true,
@@ -91,6 +108,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			slug: true,
 			size: true,
 			verifiedDomain: true,
+			s3Config: {
+				select: {
+					id: true,
+					isEnabled: true,
+					endpoint: true,
+					bucketName: true,
+					accessKeyId: true,
+					secretAccessKey: true,
+					region: true,
+				},
+			},
 		},
 	})
 
@@ -384,6 +412,113 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === s3StorageActionIntent) {
+		const submission = parseWithZod(formData, {
+			schema: S3StorageSchema,
+		})
+
+		if (submission.status !== 'success') {
+			return Response.json({ result: submission.reply() })
+		}
+
+		const { s3Enabled, s3Endpoint, s3BucketName, s3AccessKeyId, s3SecretAccessKey, s3Region } = submission.value
+
+		try {
+			if (s3Enabled) {
+				// Get existing config to preserve secret key if not updated
+				const existingConfig = await prisma.organizationS3Config.findUnique({
+					where: { organizationId: organization.id },
+				})
+
+				const secretToUse = s3SecretAccessKey 
+					? encrypt(s3SecretAccessKey) 
+					: existingConfig?.secretAccessKey || ''
+
+				// Create or update S3 configuration
+				await prisma.organizationS3Config.upsert({
+					where: { organizationId: organization.id },
+					create: {
+						organizationId: organization.id,
+						isEnabled: true,
+						endpoint: s3Endpoint || '',
+						bucketName: s3BucketName || '',
+						accessKeyId: s3AccessKeyId || '',
+						secretAccessKey: secretToUse,
+						region: s3Region || '',
+					},
+					update: {
+						isEnabled: true,
+						endpoint: s3Endpoint || '',
+						bucketName: s3BucketName || '',
+						accessKeyId: s3AccessKeyId || '',
+						secretAccessKey: secretToUse,
+						region: s3Region || '',
+					},
+				})
+			} else {
+				// Disable S3 configuration or delete it
+				await prisma.organizationS3Config.upsert({
+					where: { organizationId: organization.id },
+					create: {
+						organizationId: organization.id,
+						isEnabled: false,
+						endpoint: '',
+						bucketName: '',
+						accessKeyId: '',
+						secretAccessKey: '',
+						region: '',
+					},
+					update: {
+						isEnabled: false,
+					},
+				})
+			}
+
+			return redirectWithToast(`/app/${organization.slug}/settings`, {
+				title: 'S3 Storage updated',
+				description: s3Enabled 
+					? 'Your custom S3 storage configuration has been saved.'
+					: 'S3 storage has been disabled. Using default storage.',
+				type: 'success',
+			})
+		} catch (error) {
+			console.error('Error updating S3 storage:', error)
+			return Response.json({
+				result: submission.reply({
+					formErrors: ['Failed to update S3 storage settings. Please try again.'],
+				}),
+			})
+		}
+	}
+
+	if (intent === 'test-s3-connection') {
+		const s3Endpoint = formData.get('s3Endpoint') as string
+		const s3BucketName = formData.get('s3BucketName') as string
+		const s3AccessKeyId = formData.get('s3AccessKeyId') as string
+		const s3SecretAccessKey = formData.get('s3SecretAccessKey') as string
+		const s3Region = formData.get('s3Region') as string
+
+		if (!s3Endpoint || !s3BucketName || !s3AccessKeyId || !s3SecretAccessKey || !s3Region) {
+			return Response.json({
+				connectionTest: {
+					success: false,
+					message: 'All S3 configuration fields are required for testing.',
+				},
+			})
+		}
+
+		const config = {
+			endpoint: s3Endpoint,
+			bucket: s3BucketName,
+			accessKey: s3AccessKeyId,
+			secretKey: s3SecretAccessKey,
+			region: s3Region,
+		}
+
+		const testResult = await testS3Connection(config)
+		return Response.json({ connectionTest: testResult })
+	}
+
 	return Response.json({ error: `Invalid intent: ${intent}` }, { status: 400 })
 }
 
@@ -412,6 +547,16 @@ export default function GeneralSettings() {
 				description="Automatically add team members based on their email domain."
 			>
 				<VerifiedDomainCard
+					organization={organization}
+					actionData={actionData}
+				/>
+			</AnnotatedSection>
+
+			<AnnotatedSection
+				title="Storage Configuration"
+				description="Configure custom S3-compatible storage for your organization's files."
+			>
+				<S3StorageCard
 					organization={organization}
 					actionData={actionData}
 				/>

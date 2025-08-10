@@ -199,6 +199,7 @@ model Organization {
   notes                  OrganizationNote[]
   noteStatuses           OrganizationNoteStatus[]
   users                  UserOrganization[]
+  s3Config               OrganizationS3Config?
   Feedback               Feedback[]
 }
 
@@ -223,6 +224,20 @@ model OrganizationImage {
   id             String       @id @default(cuid())
   altText        String?
   objectKey      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model OrganizationS3Config {
+  id             String       @id @default(cuid())
+  isEnabled      Boolean      @default(false)
+  endpoint       String
+  bucketName     String
+  accessKeyId    String
+  secretAccessKey String      // This should be encrypted in production
+  region         String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   organizationId String       @unique
