@@ -142,44 +142,48 @@ app.use(
 	}),
 )
 
-// IP tracking middleware (enabled in both dev and production for testing)
+// IP tracking and blacklist middleware
 app.use(async (req, res, next) => {
 	try {
-		// Get the original send function
-		const originalSend = res.send
+		// Check if IP is blacklisted first
+		const ipTracking = await import('../app/utils/ip-tracking.server.js')
+		const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
 		
-		// Override the send function to capture status code
-		res.send = function(body) {
-			// Track the request after response is sent
-			setImmediate(async () => {
-				try {
-					console.log('IP tracking middleware triggered for:', req.method, req.path)
-					const ipTracking = await import('../app/utils/ip-tracking.server.js')
-					const ip = req.get('fly-client-ip') || req.ip
-					console.log('Tracking IP:', ip)
-					await ipTracking.trackIpRequest({
-						ip,
-						method: req.method,
-						path: req.path,
-						userAgent: req.get('user-agent'),
-						referer: req.get('referer'),
-						statusCode: res.statusCode,
-						// Note: We can't easily get userId here without parsing session
-						// but we can add it later in route loaders if needed
-					})
-				} catch (error) {
-					// Silently fail to not break the app
-					console.error('IP tracking error:', error)
-				}
+		const isBlacklisted = await ipTracking.isIpBlacklisted(ip)
+		if (isBlacklisted) {
+			return res.status(403).json({ 
+				error: 'Access denied', 
+				message: 'Your IP address has been blocked due to suspicious activity.',
+				code: 'IP_BLACKLISTED'
 			})
-			
-			// Call the original send function
-			return originalSend.call(this, body)
 		}
 	} catch (error) {
-		// Silently fail and continue
-		console.error('IP tracking middleware setup error:', error)
+		// If there's an error checking blacklist, log it but don't block the request
+		console.error('Error checking IP blacklist:', error)
 	}
+	
+	// Track the request after the response is finished
+	res.on('finish', () => {
+		// Track the request asynchronously
+		setImmediate(async () => {
+			try {
+				const ipTracking = await import('../app/utils/ip-tracking.server.js')
+				const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
+				await ipTracking.trackIpRequest({
+					ip,
+					method: req.method,
+					path: req.path,
+					userAgent: req.get('user-agent'),
+					referer: req.get('referer'),
+					statusCode: res.statusCode,
+				})
+			} catch (error) {
+				// Silently fail to not break the app
+				console.error('IP tracking error:', error)
+			}
+		})
+	})
+	
 	next()
 })
 
