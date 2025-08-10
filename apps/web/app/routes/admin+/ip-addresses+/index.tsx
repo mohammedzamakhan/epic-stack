@@ -1,5 +1,4 @@
-import { useLoaderData, Form } from 'react-router'
-import { type Route } from './+types/ip-addresses.ts'
+import { useLoaderData, Form, LoaderFunctionArgs, ActionFunctionArgs } from 'react-router'
 import { requireUserWithRole } from '#app/utils/permissions.server'
 import { prisma } from '#app/utils/db.server'
 import { blacklistIp, unblacklistIp } from '#app/utils/ip-tracking.server'
@@ -25,8 +24,9 @@ import {
 } from '#app/components/ui/dialog'
 import { Label } from '#app/components/ui/label'
 import { Textarea } from '#app/components/ui/textarea'
+import { Link } from 'react-router'
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
 
 	const url = new URL(request.url)
@@ -101,7 +101,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	}
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
 	const userId = await getUserId(request)
 
@@ -190,7 +190,7 @@ export default function AdminIpAddressesPage() {
 						{data.ipAddresses.map((ip) => (
 							<TableRow key={ip.id}>
 								<TableCell className="font-mono">
-									<Link 
+									<Link
 										to={`/admin/ip-addresses/${ip.ip}`}
 										className="text-blue-600 hover:text-blue-800 hover:underline"
 									>
