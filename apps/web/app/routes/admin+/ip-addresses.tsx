@@ -33,7 +33,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const page = parseInt(url.searchParams.get('page') || '1', 10)
 	const pageSize = 20
 
-	// Get IP addresses with request counts
+	// Get IP addresses with request counts and associated users
 	const ipAddresses = await prisma.ipAddress.findMany({
 		select: {
 			id: true,
@@ -45,25 +45,34 @@ export async function loader({ request }: Route.LoaderArgs) {
 			blacklistReason: true,
 			blacklistedAt: true,
 			createdAt: true,
+			requestCount: true,
+			lastRequestAt: true,
+			lastUserAgent: true,
+			suspiciousScore: true,
 			blacklistedBy: {
 				select: {
 					name: true,
 					username: true,
 				},
 			},
-			_count: {
+			ipAddressUsers: {
 				select: {
-					requests: true,
-				},
-			},
-			requests: {
-				select: {
-					createdAt: true,
+					user: {
+						select: {
+							id: true,
+							name: true,
+							username: true,
+							email: true,
+						},
+					},
+					firstSeenAt: true,
+					lastSeenAt: true,
+					requestCount: true,
 				},
 				orderBy: {
-					createdAt: 'desc',
+					lastSeenAt: 'desc',
 				},
-				take: 1,
+				take: 5, // Limit to 5 most recent users per IP
 			},
 		},
 		orderBy: { createdAt: 'desc' },
@@ -75,16 +84,19 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const blacklistedCount = await prisma.ipAddress.count({
 		where: { isBlacklisted: true },
 	})
+	const suspiciousCount = await prisma.ipAddress.count({
+		where: { 
+			suspiciousScore: { gt: 0 },
+			isBlacklisted: false 
+		},
+	})
 
 	return {
-		ipAddresses: ipAddresses.map(ip => ({
-			...ip,
-			requestCount: ip._count.requests,
-			lastRequest: ip.requests[0]?.createdAt || null,
-		})),
+		ipAddresses,
 		stats: {
 			totalIps: totalCount,
 			blacklistedIps: blacklistedCount,
+			suspiciousIps: suspiciousCount,
 		},
 	}
 }
@@ -128,7 +140,8 @@ export async function action({ request }: Route.ActionArgs) {
 export default function AdminIpAddressesPage() {
 	const data = useLoaderData<typeof loader>()
 
-	const formatDate = (date: string) => {
+	const formatDate = (date: string | Date | null) => {
+		if (!date) return '-'
 		return new Date(date).toLocaleString()
 	}
 
@@ -142,7 +155,7 @@ export default function AdminIpAddressesPage() {
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				<div className="bg-card p-4 rounded-lg border">
 					<h3 className="text-sm font-medium text-muted-foreground">Total IPs</h3>
 					<p className="text-2xl font-bold">{data.stats.totalIps}</p>
@@ -150,6 +163,10 @@ export default function AdminIpAddressesPage() {
 				<div className="bg-card p-4 rounded-lg border">
 					<h3 className="text-sm font-medium text-muted-foreground">Blacklisted IPs</h3>
 					<p className="text-2xl font-bold text-red-600">{data.stats.blacklistedIps}</p>
+				</div>
+				<div className="bg-card p-4 rounded-lg border">
+					<h3 className="text-sm font-medium text-muted-foreground">Suspicious IPs</h3>
+					<p className="text-2xl font-bold text-yellow-600">{data.stats.suspiciousIps}</p>
 				</div>
 			</div>
 
@@ -163,6 +180,8 @@ export default function AdminIpAddressesPage() {
 							<TableHead>Status</TableHead>
 							<TableHead>Requests</TableHead>
 							<TableHead>Last Request</TableHead>
+							<TableHead>Suspicious Score</TableHead>
+							<TableHead>Users</TableHead>
 							<TableHead>First Seen</TableHead>
 							<TableHead>Actions</TableHead>
 						</TableRow>
@@ -170,7 +189,14 @@ export default function AdminIpAddressesPage() {
 					<TableBody>
 						{data.ipAddresses.map((ip) => (
 							<TableRow key={ip.id}>
-								<TableCell className="font-mono">{ip.ip}</TableCell>
+								<TableCell className="font-mono">
+									<Link 
+										to={`/admin/ip-addresses/${ip.ip}`}
+										className="text-blue-600 hover:text-blue-800 hover:underline"
+									>
+										{ip.ip}
+									</Link>
+								</TableCell>
 								<TableCell>
 									{ip.country && ip.city ? (
 										<span>{ip.city}, {ip.country}</span>
@@ -183,16 +209,48 @@ export default function AdminIpAddressesPage() {
 								<TableCell>
 									{ip.isBlacklisted ? (
 										<Badge variant="destructive">Blacklisted</Badge>
+									) : ip.suspiciousScore > 0 ? (
+										<Badge variant="secondary">Suspicious</Badge>
 									) : (
-										<Badge variant="secondary">Active</Badge>
+										<Badge variant="outline">Active</Badge>
 									)}
 								</TableCell>
 								<TableCell>{ip.requestCount}</TableCell>
 								<TableCell>
-									{ip.lastRequest ? (
-										<span className="text-sm">{formatDate(ip.lastRequest)}</span>
+									{ip.lastRequestAt ? (
+										<span className="text-sm">{formatDate(ip.lastRequestAt)}</span>
 									) : (
 										<span className="text-muted-foreground">-</span>
+									)}
+								</TableCell>
+								<TableCell>
+									{ip.suspiciousScore > 0 ? (
+										<Badge variant="destructive">{ip.suspiciousScore}</Badge>
+									) : (
+										<span className="text-muted-foreground">0</span>
+									)}
+								</TableCell>
+								<TableCell>
+									{ip.ipAddressUsers && ip.ipAddressUsers.length > 0 ? (
+										<div className="space-y-1">
+											{ip.ipAddressUsers.slice(0, 3).map((userConnection) => (
+												<div key={userConnection.user.id} className="text-sm">
+													<span className="font-medium">
+														{userConnection.user.name || userConnection.user.username}
+													</span>
+													<div className="text-xs text-muted-foreground">
+														{userConnection.requestCount} requests
+													</div>
+												</div>
+											))}
+											{ip.ipAddressUsers.length > 3 && (
+												<div className="text-xs text-muted-foreground">
+													+{ip.ipAddressUsers.length - 3} more users
+												</div>
+											)}
+										</div>
+									) : (
+										<span className="text-muted-foreground text-sm">No users</span>
 									)}
 								</TableCell>
 								<TableCell>

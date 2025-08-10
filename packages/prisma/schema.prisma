@@ -44,7 +44,7 @@ model User {
   orgNoteFavorites       OrganizationNoteFavorite[]
   Feedback               Feedback[]
   blacklistedIps         IpAddress[]                @relation("IpBlacklists")
-  requests               IpRequestLog[]             @relation("UserRequests")
+  ipAddressUsers         IpAddressUser[]
 }
 
 model Note {
@@ -546,39 +546,41 @@ model Feedback {
 }
 
 model IpAddress {
-  id              String         @id @default(cuid())
-  ip              String         @unique
+  id              String            @id @default(cuid())
+  ip              String            @unique
   country         String?
   region          String?
   city            String?
-  isBlacklisted   Boolean        @default(false)
+  isBlacklisted   Boolean           @default(false)
   blacklistReason String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
   blacklistedAt   DateTime?
   blacklistedById String?
-  blacklistedBy   User?          @relation("IpBlacklists", fields: [blacklistedById], references: [id])
-  requests        IpRequestLog[]
+  blacklistedBy   User?             @relation("IpBlacklists", fields: [blacklistedById], references: [id])
+  // Simple tracking fields instead of storing every request
+  requestCount    Int               @default(0)
+  lastRequestAt   DateTime?
+  lastUserAgent   String?
+  suspiciousScore Int               @default(0) // For future fraud detection
+  ipAddressUsers  IpAddressUser[]
 
   @@index([ip])
   @@index([isBlacklisted])
+  @@index([suspiciousScore])
 }
 
-model IpRequestLog {
-  id         String    @id @default(cuid())
-  ipId       String
-  ip         IpAddress @relation(fields: [ipId], references: [id], onDelete: Cascade)
-  method     String
-  path       String
-  userAgent  String?
-  referer    String?
-  statusCode Int?
-  userId     String?
-  user       User?     @relation("UserRequests", fields: [userId], references: [id], onDelete: SetNull)
-  createdAt  DateTime  @default(now())
+model IpAddressUser {
+  id          String    @id @default(cuid())
+  userId      String
+  ipAddressId String
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  requestCount Int      @default(1)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress   IpAddress @relation(fields: [ipAddressId], references: [id], onDelete: Cascade)
 
-  @@index([ipId])
+  @@unique([userId, ipAddressId])
   @@index([userId])
-  @@index([createdAt])
-  @@index([ipId, createdAt])
+  @@index([ipAddressId])
 }

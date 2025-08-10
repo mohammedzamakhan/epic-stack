@@ -2,6 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { useLoaderData } from 'react-router'
 import { UserDetailView } from '#app/components/admin-user-detail'
 import { prisma } from '#app/utils/db.server.ts'
+import { getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({
@@ -157,6 +158,9 @@ export async function loader({
 		}),
 	])
 
+	// Get IP addresses used by this user
+	const userIpAddresses = await getIpAddressesByUser(user.id)
+
 	return Response.json({
 		user: {
 			...user,
@@ -166,6 +170,7 @@ export async function loader({
 			comments: recentNoteComments,
 			activityLogs: recentActivityLogs,
 		},
+		ipAddresses: userIpAddresses,
 	})
 }
 
@@ -174,7 +179,11 @@ export default function AdminUserDetailPage() {
 
 	return (
 		<div className="space-y-6">
-			<UserDetailView user={data.user} recentActivity={data.recentActivity} />
+			<UserDetailView 
+				user={data.user} 
+				recentActivity={data.recentActivity}
+				ipAddresses={data.ipAddresses}
+			/>
 		</div>
 	)
 }

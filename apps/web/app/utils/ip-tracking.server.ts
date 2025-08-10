@@ -38,6 +38,9 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 			'/resources/healthcheck',
 			'/favicon.ico',
 			'/site.webmanifest',
+			'__manifest',
+			'/admin',
+			'.data'
 		]
 
 		const shouldSkip = skipPaths.some(path => data.path.indexOf(path) === 0)
@@ -60,31 +63,95 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 					country: geoData?.country,
 					region: geoData?.region,
 					city: geoData?.city,
+					requestCount: 1,
+					lastRequestAt: new Date(),
+					lastUserAgent: data.userAgent,
+				},
+			})
+		} else {
+			// Update existing record with simple counting
+			const updateData: any = {
+				requestCount: { increment: 1 },
+				lastRequestAt: new Date(),
+			}
+
+			// Update user agent if provided
+			if (data.userAgent) {
+				updateData.lastUserAgent = data.userAgent
+			}
+
+			// Simple suspicious activity detection
+			const isHighFrequency = await checkHighFrequencyRequests(data.ip)
+			if (isHighFrequency) {
+				updateData.suspiciousScore = { increment: 1 }
+			}
+
+			await prisma.ipAddress.update({
+				where: { ip: data.ip },
+				data: updateData,
+			})
+		}
+
+		// Track user-IP relationship if user is logged in
+		if (data.userId) {
+			await prisma.ipAddressUser.upsert({
+				where: {
+					userId_ipAddressId: {
+						userId: data.userId,
+						ipAddressId: ipRecord.id,
+					},
+				},
+				update: {
+					lastSeenAt: new Date(),
+					requestCount: { increment: 1 },
+				},
+				create: {
+					userId: data.userId,
+					ipAddressId: ipRecord.id,
+					firstSeenAt: new Date(),
+					lastSeenAt: new Date(),
+					requestCount: 1,
 				},
 			})
 		}
 
 		// Check if IP is blacklisted
 		if (ipRecord.isBlacklisted) {
-			// You might want to handle blacklisted IPs differently
 			console.log(`Blacklisted IP ${data.ip} attempted to access ${data.path}`)
 		}
-
-		// Log the request
-		await prisma.ipRequestLog.create({
-			data: {
-				ipId: ipRecord.id,
-				method: data.method,
-				path: data.path,
-				userAgent: data.userAgent,
-				referer: data.referer,
-				statusCode: data.statusCode,
-				userId: data.userId,
-			},
-		})
 	} catch (error) {
 		// Don't let IP tracking errors break the application
 		console.error('Error tracking IP request:', error)
+	}
+}
+
+// Simple rate limiting check using in-memory tracking
+const requestCounts = new Map<string, { count: number; resetTime: number }>()
+
+async function checkHighFrequencyRequests(ip: string): Promise<boolean> {
+	const now = Date.now()
+	const resetWindow = 60 * 1000 // 1 minute window
+	const maxRequests = 100 // Max requests per minute before considering suspicious
+
+	const current = requestCounts.get(ip)
+	
+	if (!current || now > current.resetTime) {
+		// Reset or initialize counter
+		requestCounts.set(ip, { count: 1, resetTime: now + resetWindow })
+		return false
+	}
+
+	current.count++
+	return current.count > maxRequests
+}
+
+// Clean up old entries periodically (call this in a background job)
+export function cleanupRequestCounts(): void {
+	const now = Date.now()
+	for (const [ip, data] of requestCounts.entries()) {
+		if (now > data.resetTime) {
+			requestCounts.delete(ip)
+		}
 	}
 }
 
@@ -150,6 +217,7 @@ export async function blacklistIp(
 			blacklistReason: reason,
 			blacklistedAt: new Date(),
 			blacklistedById,
+			requestCount: 0,
 		},
 	})
 }
@@ -162,6 +230,7 @@ export async function unblacklistIp(ip: string): Promise<void> {
 			blacklistReason: null,
 			blacklistedAt: null,
 			blacklistedById: null,
+			suspiciousScore: 0, // Reset suspicious score
 		},
 	})
 }
@@ -172,4 +241,86 @@ export async function isIpBlacklisted(ip: string): Promise<boolean> {
 		select: { isBlacklisted: true },
 	})
 	return ipRecord?.isBlacklisted || false
+}
+
+// Get IP statistics for admin dashboard
+export async function getIpStats() {
+	const stats = await prisma.ipAddress.aggregate({
+		_count: { _all: true },
+		_sum: { requestCount: true },
+		where: { isBlacklisted: false },
+	})
+
+	const blacklistedCount = await prisma.ipAddress.count({
+		where: { isBlacklisted: true },
+	})
+
+	const suspiciousCount = await prisma.ipAddress.count({
+		where: { 
+			suspiciousScore: { gt: 0 },
+			isBlacklisted: false 
+		},
+	})
+
+	return {
+		totalIps: stats._count._all || 0,
+		totalRequests: stats._sum.requestCount || 0,
+		blacklistedIps: blacklistedCount,
+		suspiciousIps: suspiciousCount,
+	}
+}
+
+// Get users who have used a specific IP address - for admin use
+export async function getUsersByIpAddress(ip: string) {
+	const ipRecord = await prisma.ipAddress.findUnique({
+		where: { ip },
+		include: {
+			ipAddressUsers: {
+				include: {
+					user: {
+						select: {
+							id: true,
+							name: true,
+							username: true,
+							email: true,
+							createdAt: true,
+							isBanned: true,
+						},
+					},
+				},
+				orderBy: {
+					lastSeenAt: 'desc',
+				},
+			},
+		},
+	})
+
+	return ipRecord?.ipAddressUsers || []
+}
+
+// Get IP addresses used by a specific user - for admin use
+export async function getIpAddressesByUser(userId: string) {
+	const userIpConnections = await prisma.ipAddressUser.findMany({
+		where: { userId },
+		include: {
+			ipAddress: {
+				select: {
+					id: true,
+					ip: true,
+					country: true,
+					region: true,
+					city: true,
+					isBlacklisted: true,
+					suspiciousScore: true,
+					createdAt: true,
+					lastRequestAt: true,
+				},
+			},
+		},
+		orderBy: {
+			lastSeenAt: 'desc',
+		},
+	})
+
+	return userIpConnections
 }

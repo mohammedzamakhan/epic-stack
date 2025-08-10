@@ -187,6 +187,16 @@ app.use(async (req, res, next) => {
 	next()
 })
 
+// Periodic cleanup of in-memory request counts (every 5 minutes)
+setInterval(async () => {
+	try {
+		const ipTracking = await import('../app/utils/ip-tracking.server.js')
+		ipTracking.cleanupRequestCounts()
+	} catch (error) {
+		console.error('Error cleaning up request counts:', error)
+	}
+}, 5 * 60 * 1000)
+
 // When running tests or running in development, we want to effectively disable
 // rate limiting because playwright tests are very fast and we don't want to
 // have to wait for the rate limit to reset between tests.
