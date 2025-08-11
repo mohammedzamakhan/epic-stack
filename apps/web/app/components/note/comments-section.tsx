@@ -29,6 +29,7 @@ interface CommentsSectionProps {
 	comments: Comment[]
 	currentUserId: string
 	users: MentionUser[]
+	organizationId: string
 }
 
 export function CommentsSection({
@@ -36,6 +37,7 @@ export function CommentsSection({
 	comments,
 	currentUserId,
 	users,
+	organizationId
 }: CommentsSectionProps) {
 	const [newComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -176,6 +178,7 @@ export function CommentsSection({
 							users={users}
 							onReply={handleReply}
 							onDelete={handleDelete}
+							organizationId={organizationId}
 						/>
 					))
 				) : (

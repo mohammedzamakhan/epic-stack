@@ -23,6 +23,7 @@ interface MultiImageUploadProps {
 		altText: string | null
 		objectKey: string
 	}>
+	organizationId: string
 }
 
 export function MultiImageUpload({
@@ -33,6 +34,7 @@ export function MultiImageUpload({
 	meta,
 	formId,
 	existingImages = [],
+	organizationId
 }: MultiImageUploadProps) {
 	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
@@ -156,6 +158,7 @@ export function MultiImageUpload({
 								previewUrl={previewUrls.get(key)}
 								file={fileRefs.get(key)}
 								existingImage={existingImage}
+								organizationId={organizationId}
 								onRemove={() => {
 									// Remove preview URL and file ref first
 									setPreviewUrls((prev) => {
@@ -232,7 +235,7 @@ function ImagePreview({
 	previewUrl,
 	file,
 	existingImage,
-
+	organizationId,
 	onRemove,
 	disabled,
 }: {
@@ -244,7 +247,7 @@ function ImagePreview({
 		altText: string | null
 		objectKey: string
 	}
-
+	organizationId: string
 	onRemove: () => void
 	disabled?: boolean
 }) {
@@ -252,7 +255,7 @@ function ImagePreview({
 
 	// Handle existing images using the passed existingImage data
 	const existingImageUrl = existingImage?.objectKey
-		? getNoteImgSrc(existingImage.objectKey)
+		? getNoteImgSrc(existingImage.objectKey, organizationId)
 		: null
 
 	const imageUrl = existingImageUrl ?? previewUrl

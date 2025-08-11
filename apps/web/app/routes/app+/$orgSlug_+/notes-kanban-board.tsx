@@ -79,10 +79,12 @@ export function NotesKanbanBoard({
   notes,
   statuses,
   orgSlug,
+  organizationId
 }: {
   notes: LoaderNote[]
   statuses: Status[]
   orgSlug: string
+  organizationId: string
 }) {
   // --- Optimistic overlays from Remix fetchers ---
   const fetchers = useFetchers()
@@ -328,6 +330,7 @@ export function NotesKanbanBoard({
             orgSlug={orgSlug}
             activeNote={activeNote}
             dragDestination={dragDestination}
+            organizationId={organizationId}
           />
         ))}
         <NewColumnButton orgSlug={orgSlug} />
@@ -336,7 +339,7 @@ export function NotesKanbanBoard({
         <DragOverlay>
           {activeNote ? (
             <div className="rotate-3 shadow-lg">
-              <NoteCard note={activeNote} />
+              <NoteCard note={activeNote} organizationId={organizationId} />
             </div>
           ) : null}
         </DragOverlay>,
@@ -355,13 +358,15 @@ function KanbanColumn({
   notes,
   orgSlug,
   activeNote,
-  dragDestination
+  dragDestination,
+  organizationId
 }: {
   column: Column
   notes: Note[]
   orgSlug: string
   activeNote: Note | null
   dragDestination: { columnId: string; position?: number } | null
+  organizationId: string
 }) {
   const { setNodeRef } = useDroppable({ id: column.id })
   const renameFetcher = useFetcher()
@@ -460,7 +465,7 @@ function KanbanColumn({
                   key={`preview-${originalId}`}
                   className="opacity-30 scale-95"
                 >
-                  <NoteCard note={{ ...n, id: originalId }} />
+                  <NoteCard note={{ ...n, id: originalId }} organizationId={organizationId} />
                 </div>
               )
             }
@@ -472,7 +477,7 @@ function KanbanColumn({
                   key={makeDragId(column.id, n.id)}
                   className="opacity-30"
                 >
-                  <SortableNote note={n} dragId={makeDragId(column.id, n.id)} />
+                  <SortableNote note={n} dragId={makeDragId(column.id, n.id)} organizationId={organizationId} />
                 </div>
               )
             }
@@ -482,6 +487,7 @@ function KanbanColumn({
                 key={makeDragId(column.id, n.id)}
                 note={n}
                 dragId={makeDragId(column.id, n.id)}
+                organizationId={organizationId}
               />
             )
           })}
@@ -499,7 +505,7 @@ function KanbanColumn({
 /*  Note Card wrapper                                                         */
 /* -------------------------------------------------------------------------- */
 
-function SortableNote({ note, dragId }: { note: Note; dragId: string }) {
+function SortableNote({ note, dragId, organizationId }: { note: Note; dragId: string, organizationId: string }) {
   const {
     attributes,
     listeners,
@@ -532,7 +538,7 @@ function SortableNote({ note, dragId }: { note: Note; dragId: string }) {
       {...attributes}
       {...listeners}
     >
-      <NoteCard note={note} />
+      <NoteCard note={note} organizationId={organizationId} />
     </div>
   )
 }

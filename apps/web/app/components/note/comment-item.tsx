@@ -35,6 +35,7 @@ interface CommentItemProps {
 	depth?: number
 	onReply?: (commentId: string, content: string, images?: File[]) => void
 	onDelete?: (commentId: string) => void
+	organizationId: string
 }
 
 export function CommentItem({
@@ -45,6 +46,7 @@ export function CommentItem({
 	depth = 0,
 	onReply,
 	onDelete,
+	organizationId
 }: CommentItemProps) {
 	const [showReplyForm, setShowReplyForm] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
@@ -118,13 +120,13 @@ export function CommentItem({
 								{comment.images.map((image) => (
 									<a
 										key={image.id}
-										href={getNoteImgSrc(image.objectKey)}
+										href={getNoteImgSrc(image.objectKey, organizationId)}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="block"
 									>
 										<Img
-											src={getNoteImgSrc(image.objectKey)}
+											src={getNoteImgSrc(image.objectKey, organizationId)}
 											alt={image.altText ?? ''}
 											className="h-24 w-24 rounded-lg border object-cover transition-opacity hover:opacity-90"
 											width={96}
@@ -173,6 +175,7 @@ export function CommentItem({
 							key={reply.id}
 							comment={reply}
 							noteId={noteId}
+							organizationId={organizationId}
 							currentUserId={currentUserId}
 							users={users}
 							depth={depth + 1}

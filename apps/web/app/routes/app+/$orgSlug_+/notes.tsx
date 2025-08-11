@@ -261,9 +261,10 @@ export default function NotesRoute({
 							notes={loaderData.notes}
 							orgSlug={loaderData.organization.slug}
 							statuses={loaderData.statuses}
+							organizationId={loaderData.organization.id}
 						/>
 					) : (
-						<NotesCards notes={loaderData.notes} />
+						<NotesCards notes={loaderData.notes} organizationId={loaderData.organization.id} />
 					)
 				) : (
 					<>

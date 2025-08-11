@@ -33,6 +33,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
 
 	const objectKey = searchParams.get('objectKey')
+	const organizationId = searchParams.get('organizationId')
 
 	return getImgResponse(request, {
 		headers,
@@ -44,7 +45,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		getImgSource: () => {
 			if (objectKey) {
 				const { url: signedUrl, headers: signedHeaders } =
-					getSignedGetRequestInfo(objectKey)
+					getSignedGetRequestInfo(objectKey, organizationId)
 				return {
 					type: 'fetch',
 					url: signedUrl,

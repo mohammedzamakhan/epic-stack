@@ -4,6 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "npx mint dev --port 3004",
-    "build": "npx mint build"
+    "lint": "mintlify broken-links"
   }
 }

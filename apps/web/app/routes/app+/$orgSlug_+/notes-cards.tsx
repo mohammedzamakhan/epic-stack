@@ -30,9 +30,10 @@ export type Note = {
 interface NoteCardProps {
 	note: Note
 	isHovered?: boolean
+	organizationId: string
 }
 
-export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
+export const NoteCard = ({ note, isHovered = false, organizationId }: NoteCardProps) => {
 	const [hovered, setHovered] = useState(isHovered)
 	const [copied, setCopied] = useState(false)
 	const navigate = useNavigate()
@@ -83,9 +84,9 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 							<Img
 								src={
 									isVideo && firstVideo?.thumbnailKey
-										? getNoteImgSrc(firstVideo.thumbnailKey)
+										? getNoteImgSrc(firstVideo.thumbnailKey, organizationId)
 										: firstImage
-											? getNoteImgSrc(firstImage.objectKey)
+											? getNoteImgSrc(firstImage.objectKey, organizationId)
 											: ''
 								}
 								alt={
@@ -179,7 +180,7 @@ export const NoteCard = ({ note, isHovered = false }: NoteCardProps) => {
 	)
 }
 
-export function NotesCards({ notes }: { notes: Note[] }) {
+export function NotesCards({ notes, organizationId }: { notes: Note[], organizationId: string }) {
 	if (notes.length === 0) {
 		return null
 	}
@@ -187,7 +188,7 @@ export function NotesCards({ notes }: { notes: Note[] }) {
 	return (
 		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 p-1">
 			{notes.map((note) => (
-				<NoteCard key={note.id} note={note} />
+				<NoteCard key={note.id} note={note} organizationId={organizationId} />
 			))}
 		</div>
 	)

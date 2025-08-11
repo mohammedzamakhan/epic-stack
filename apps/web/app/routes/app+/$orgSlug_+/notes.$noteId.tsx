@@ -69,6 +69,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			organization: {
 				select: {
 					slug: true,
+					id: true
 				},
 			},
 			noteAccess: {
@@ -1224,7 +1225,7 @@ type NoteLoaderData = {
 		createdById: string
 		isPublic: boolean
 		images: { altText: string | null; objectKey: string }[]
-		organization: { slug: string }
+		organization: { slug: string, id: string }
 		noteAccess: Array<{
 			id: string
 			user: {
@@ -1401,9 +1402,9 @@ export default function NoteRoute() {
 									.filter((upload) => upload.type === 'image')
 									.map((image) => (
 										<li key={image.objectKey}>
-											<a href={getNoteImgSrc(image.objectKey)}>
+											<a href={getNoteImgSrc(image.objectKey, note.organization.id)}>
 												<Img
-													src={getNoteImgSrc(image.objectKey)}
+													src={getNoteImgSrc(image.objectKey, note.organization.id)}
 													alt={image.altText ?? ''}
 													className="size-32 rounded-lg object-cover"
 													width={512}
@@ -1423,7 +1424,7 @@ export default function NoteRoute() {
 										<li key={video.objectKey}>
 											<div className="relative">
 												<Img
-													src={getNoteImgSrc(video.thumbnailKey!)}
+													src={getNoteImgSrc(video.thumbnailKey!, note.organization.id)}
 													alt={video.altText ?? 'Video thumbnail'}
 													className="size-32 rounded-lg object-cover"
 													width={512}
@@ -1461,6 +1462,7 @@ export default function NoteRoute() {
 							comments={comments}
 							currentUserId={currentUserId}
 							users={mentionUsers}
+							organizationId={note.id}
 						/>
 					</TabsContent>
 

@@ -51,7 +51,7 @@ export async function loader({
 		},
 	})
 	invariantResponse(note, 'Not found', { status: 404 })
-	return { note }
+	return { note, organizationId: organization.id }
 }
 
 type NoteEditProps = {
@@ -69,6 +69,7 @@ type NoteEditProps = {
 				status: string
 			}>
 		}
+		organizationId: string
 	}
 	actionData?: { result: any }
 }
@@ -85,7 +86,7 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 				aria-labelledby="edit-note-title"
 				tabIndex={-1}
 			>
-				<OrgNoteEditor note={loaderData.note} actionData={actionData} />
+				<OrgNoteEditor note={loaderData.note} actionData={actionData} organizationId={loaderData.organizationId} />
 			</section>
 		</>
 	)

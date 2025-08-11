@@ -94,12 +94,14 @@ type OrgNoteEditorProps = {
 		result: any
 	}
 	onSuccess?: () => void
+	organizationId: string
 }
 
 export function OrgNoteEditor({
 	note,
 	actionData,
 	onSuccess,
+	organizationId
 }: OrgNoteEditorProps) {
 	const isPending = useIsPending()
 	const params = useParams<{ orgSlug: string }>()
@@ -208,6 +210,7 @@ export function OrgNoteEditor({
 								existingVideos={note?.uploads?.filter(
 									(u) => u.type === 'video',
 								)}
+								organizationId={note}
 							/>
 						</div>
 						<ErrorList id={form.errorId} errors={form.errors} />

@@ -30,6 +30,7 @@ interface MultiMediaUploadProps {
 		thumbnailKey?: string | null
 		status: string
 	}>
+	organizationId: string
 }
 
 export function MultiMediaUpload({
@@ -41,6 +42,7 @@ export function MultiMediaUpload({
 	formId,
 	existingImages = [],
 	existingVideos = [],
+	organizationId
 }: MultiMediaUploadProps) {
 	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
@@ -188,6 +190,7 @@ export function MultiMediaUpload({
 								file={fileRefs.get(key)}
 								existingImage={existingImage}
 								existingVideo={existingVideo}
+								organizationId={organizationId}
 								onRemove={() => {
 									setPreviewUrls((prev) => {
 										const newMap = new Map(prev)
@@ -262,6 +265,7 @@ function MediaPreview({
 	file,
 	existingImage,
 	existingVideo,
+	organizationId,
 	onRemove,
 	disabled,
 }: {
@@ -280,6 +284,7 @@ function MediaPreview({
 		thumbnailKey?: string | null
 		status: string
 	}
+	organizationId: string
 	onRemove: () => void
 	disabled?: boolean
 }) {
@@ -288,11 +293,11 @@ function MediaPreview({
 
 	// Handle existing media
 	const existingImageUrl = existingImage?.objectKey
-		? getNoteImgSrc(existingImage.objectKey)
+		? getNoteImgSrc(existingImage.objectKey, organizationId)
 		: null
 
 	const existingVideoThumbnail = existingVideo?.thumbnailKey
-		? getNoteImgSrc(existingVideo.thumbnailKey)
+		? getNoteImgSrc(existingVideo.thumbnailKey, organizationId)
 		: null
 
 	const mediaUrl = existingImageUrl ?? existingVideoThumbnail ?? previewUrl
