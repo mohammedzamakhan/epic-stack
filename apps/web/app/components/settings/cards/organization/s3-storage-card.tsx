@@ -1,4 +1,4 @@
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getFormProps, getInputProps, useForm, useInputControl } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
@@ -7,7 +7,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '#app/compo
 import { Icon } from '#app/components/ui/icon'
 import { Label } from '#app/components/ui/label'
 import { StatusButton } from '#app/components/ui/status-button'
-import { Switch } from '#app/components/ui/switch'
+import { Switch as ShadcnSwitch } from '#app/components/ui/switch'
+import { useRef } from 'react'
 
 export const S3StorageSchema = z.object({
 	s3Enabled: z.boolean().default(false),
@@ -41,6 +42,42 @@ interface Organization {
 	} | null
 }
 
+type SwitchProps = {
+	formId: string;
+	id?: string;
+	name: string;
+	value?: string;
+	defaultChecked?: boolean;
+	['aria-describedby']?: string;
+};
+
+function Switch({ name, formId, value, defaultChecked, ...props }: SwitchProps) {
+	const switchRef = useRef<React.ElementRef<typeof ShadcnSwitch>>(null);
+	const control = useInputControl({
+		formId,
+		key: props.id,
+		name,
+		initialValue: value,
+	});
+
+	return (
+		<>
+			{/* <input name={name} id={props.id} hidden /> */}
+			<ShadcnSwitch
+				{...props}
+				ref={switchRef}
+				name={name}
+				checked={control.value === 'on' ? true : false}
+				onCheckedChange={(checked) => {
+					console.log(checked)
+					control.change(checked ? 'on' : 'off')
+				}}
+				onBlur={() => control.blur()}
+			/>
+		</>
+	);
+}
+
 export function S3StorageCard({
 	organization,
 	actionData,
@@ -58,7 +95,7 @@ export function S3StorageCard({
 			return parseWithZod(formData, { schema: S3StorageSchema })
 		},
 		defaultValue: {
-			s3Enabled: organization.s3Config?.isEnabled || false,
+			s3Enabled: organization.s3Config?.isEnabled || 'on',
 			s3Endpoint: organization.s3Config?.endpoint || '',
 			s3BucketName: organization.s3Config?.bucketName || '',
 			s3AccessKeyId: organization.s3Config?.accessKeyId || '',
@@ -73,59 +110,54 @@ export function S3StorageCard({
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<Icon name="settings" className="h-5 w-5" />
+					<Icon name="database" className="h-5 w-5" />
 					S3 Storage Configuration
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="space-y-4">
-					<div className="flex items-center justify-between">
-						<div className="space-y-0.5">
-							<Label htmlFor="s3-enabled">Enable Custom S3 Storage</Label>
-							<p className="text-sm text-muted-foreground">
-								Use your own S3-compatible storage instead of the default storage
-							</p>
+					<fetcher.Form method="POST" {...getFormProps(form)} className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label htmlFor="s3-enabled">Enable Custom S3 Storage</Label>
+								<p className="text-sm text-muted-foreground">
+									Use your own S3-compatible storage instead of the default storage
+								</p>
+							</div>
+							<Switch
+								formId={form.id}
+								id={fields.s3Enabled.id}
+								name={fields.s3Enabled.name}
+								defaultChecked={organization.s3Config?.isEnabled}
+							/>
 						</div>
-						<Switch
-							id="s3-enabled"
-							name="s3Enabled"
-							form={form.id}
-							defaultChecked={organization.s3Config?.isEnabled}
-						/>
-					</div>
 
-					{(fields.s3Enabled.value === 'on' || organization.s3Config?.isEnabled) && (
-						<div className="space-y-4 pt-4 border-t">
-							<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-								<div className="flex items-start gap-2">
-									<Icon name="alert-triangle" className="h-5 w-5 text-yellow-600 mt-0.5" />
-									<div className="text-sm">
-										<p className="font-medium text-yellow-800">Important Security Note</p>
-										<p className="text-yellow-700 mt-1">
-											Your S3 credentials will be encrypted and stored securely. However, we recommend using 
-											IAM credentials with minimal required permissions (read/write access to the specific bucket only).
-										</p>
+						{(fields.s3Enabled.value === 'on' || organization.s3Config?.isEnabled) && (
+							<div className="space-y-4 pt-4 border-t">
+								<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+									<div className="flex items-start gap-2">
+										<Icon name="alert-triangle" className="h-5 w-5 text-yellow-600 mt-0.5" />
+										<div className="text-sm">
+											<p className="font-medium text-yellow-800">Important Security Note</p>
+											<p className="text-yellow-700 mt-1">
+												Your S3 credentials will be encrypted and stored securely. However, we recommend using
+												IAM credentials with minimal required permissions (read/write access to the specific bucket only).
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
 
-							<fetcher.Form method="POST" {...getFormProps(form)} className="space-y-4">
 								<input
 									type="hidden"
 									name="intent"
 									value={s3StorageActionIntent}
 								/>
-								<input
-									type="hidden"
-									name="s3Enabled"
-									value={fields.s3Enabled.value === 'on' ? 'true' : 'false'}
-								/>
 
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<Field
-										labelProps={{ 
-											htmlFor: fields.s3Endpoint.id, 
-											children: 'S3 Endpoint URL' 
+										labelProps={{
+											htmlFor: fields.s3Endpoint.id,
+											children: 'S3 Endpoint URL'
 										}}
 										inputProps={{
 											...getInputProps(fields.s3Endpoint, { type: 'url' }),
@@ -134,9 +166,9 @@ export function S3StorageCard({
 										errors={fields.s3Endpoint.errors}
 									/>
 									<Field
-										labelProps={{ 
-											htmlFor: fields.s3Region.id, 
-											children: 'Region' 
+										labelProps={{
+											htmlFor: fields.s3Region.id,
+											children: 'Region'
 										}}
 										inputProps={{
 											...getInputProps(fields.s3Region, { type: 'text' }),
@@ -147,9 +179,9 @@ export function S3StorageCard({
 								</div>
 
 								<Field
-									labelProps={{ 
-										htmlFor: fields.s3BucketName.id, 
-										children: 'Bucket Name' 
+									labelProps={{
+										htmlFor: fields.s3BucketName.id,
+										children: 'Bucket Name'
 									}}
 									inputProps={{
 										...getInputProps(fields.s3BucketName, { type: 'text' }),
@@ -160,9 +192,9 @@ export function S3StorageCard({
 
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<Field
-										labelProps={{ 
-											htmlFor: fields.s3AccessKeyId.id, 
-											children: 'Access Key ID' 
+										labelProps={{
+											htmlFor: fields.s3AccessKeyId.id,
+											children: 'Access Key ID'
 										}}
 										inputProps={{
 											...getInputProps(fields.s3AccessKeyId, { type: 'text' }),
@@ -171,14 +203,14 @@ export function S3StorageCard({
 										errors={fields.s3AccessKeyId.errors}
 									/>
 									<Field
-										labelProps={{ 
-											htmlFor: fields.s3SecretAccessKey.id, 
-											children: 'Secret Access Key' 
+										labelProps={{
+											htmlFor: fields.s3SecretAccessKey.id,
+											children: 'Secret Access Key'
 										}}
 										inputProps={{
 											...getInputProps(fields.s3SecretAccessKey, { type: 'password' }),
-											placeholder: organization.s3Config?.secretAccessKey 
-												? '••••••••••••••••••••••••••••••••••••••••••' 
+											placeholder: organization.s3Config?.secretAccessKey
+												? '••••••••••••••••••••••••••••••••••••••••••'
 												: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 										}}
 										errors={fields.s3SecretAccessKey.errors}
@@ -191,71 +223,9 @@ export function S3StorageCard({
 								</div>
 
 								<ErrorList id={form.errorId} errors={form.errors} />
-							</fetcher.Form>
-
-							{(fields.s3Endpoint.value && fields.s3BucketName.value && 
-							  fields.s3AccessKeyId.value && fields.s3SecretAccessKey.value && 
-							  fields.s3Region.value) && (
-								<div className="pt-4 border-t">
-									<testConnectionFetcher.Form method="POST" className="flex items-center gap-2">
-										<input type="hidden" name="intent" value="test-s3-connection" />
-										<input type="hidden" name="s3Endpoint" value={fields.s3Endpoint.value} />
-										<input type="hidden" name="s3BucketName" value={fields.s3BucketName.value} />
-										<input type="hidden" name="s3AccessKeyId" value={fields.s3AccessKeyId.value} />
-										<input type="hidden" name="s3SecretAccessKey" value={fields.s3SecretAccessKey.value} />
-										<input type="hidden" name="s3Region" value={fields.s3Region.value} />
-										
-										<StatusButton
-											type="submit"
-											variant="outline"
-											size="sm"
-											status={testConnectionFetcher.state !== 'idle' ? 'pending' : 'idle'}
-										>
-											<Icon name="link-2" className="h-4 w-4 mr-1" />
-											Test Connection
-										</StatusButton>
-									</testConnectionFetcher.Form>
-
-									{testConnectionFetcher.data?.connectionTest && (
-										<div className={`mt-2 p-3 rounded-lg border ${
-											testConnectionFetcher.data.connectionTest.success 
-												? 'bg-green-50 border-green-200' 
-												: 'bg-red-50 border-red-200'
-										}`}>
-											<div className="flex items-center gap-2">
-												<Icon 
-													name={testConnectionFetcher.data.connectionTest.success ? "check" : "x"} 
-													className={`h-4 w-4 ${
-														testConnectionFetcher.data.connectionTest.success 
-															? 'text-green-600' 
-															: 'text-red-600'
-													}`} 
-												/>
-												<p className={`text-sm font-medium ${
-													testConnectionFetcher.data.connectionTest.success 
-														? 'text-green-800' 
-														: 'text-red-800'
-												}`}>
-													{testConnectionFetcher.data.connectionTest.success 
-														? 'Connection successful!' 
-														: 'Connection failed'}
-												</p>
-											</div>
-											{testConnectionFetcher.data.connectionTest.message && (
-												<p className={`text-sm mt-1 ${
-													testConnectionFetcher.data.connectionTest.success 
-														? 'text-green-700' 
-														: 'text-red-700'
-												}`}>
-													{testConnectionFetcher.data.connectionTest.message}
-												</p>
-											)}
-										</div>
-									)}
-								</div>
-							)}
-						</div>
-					)}
+							</div>
+						)}
+					</fetcher.Form>
 				</div>
 			</CardContent>
 			<CardFooter className="border-t pt-4">
@@ -271,6 +241,63 @@ export function S3StorageCard({
 				>
 					Save S3 Configuration
 				</StatusButton>
+				{(fields.s3Endpoint.value && fields.s3BucketName.value &&
+					fields.s3AccessKeyId.value && fields.s3SecretAccessKey.value &&
+					fields.s3Region.value) && (
+						<div className="pt-4 border-t">
+							<testConnectionFetcher.Form method="POST" className="flex items-center gap-2">
+								<input type="hidden" name="intent" value="test-s3-connection" />
+								<input type="hidden" name="s3Endpoint" value={fields.s3Endpoint.value} />
+								<input type="hidden" name="s3BucketName" value={fields.s3BucketName.value} />
+								<input type="hidden" name="s3AccessKeyId" value={fields.s3AccessKeyId.value} />
+								<input type="hidden" name="s3SecretAccessKey" value={fields.s3SecretAccessKey.value} />
+								<input type="hidden" name="s3Region" value={fields.s3Region.value} />
+
+								<StatusButton
+									type="submit"
+									variant="outline"
+									size="sm"
+									status={testConnectionFetcher.state !== 'idle' ? 'pending' : 'idle'}
+								>
+									<Icon name="link-2" className="h-4 w-4 mr-1" />
+									Test Connection
+								</StatusButton>
+							</testConnectionFetcher.Form>
+
+							{testConnectionFetcher.data?.connectionTest && (
+								<div className={`mt-2 p-3 rounded-lg border ${testConnectionFetcher.data.connectionTest.success
+										? 'bg-green-50 border-green-200'
+										: 'bg-red-50 border-red-200'
+									}`}>
+									<div className="flex items-center gap-2">
+										<Icon
+											name={testConnectionFetcher.data.connectionTest.success ? "check" : "x"}
+											className={`h-4 w-4 ${testConnectionFetcher.data.connectionTest.success
+													? 'text-green-600'
+													: 'text-red-600'
+												}`}
+										/>
+										<p className={`text-sm font-medium ${testConnectionFetcher.data.connectionTest.success
+												? 'text-green-800'
+												: 'text-red-800'
+											}`}>
+											{testConnectionFetcher.data.connectionTest.success
+												? 'Connection successful!'
+												: 'Connection failed'}
+										</p>
+									</div>
+									{testConnectionFetcher.data.connectionTest.message && (
+										<p className={`text-sm mt-1 ${testConnectionFetcher.data.connectionTest.success
+												? 'text-green-700'
+												: 'text-red-700'
+											}`}>
+											{testConnectionFetcher.data.connectionTest.message}
+										</p>
+									)}
+								</div>
+							)}
+						</div>
+					)}
 			</CardFooter>
 		</Card>
 	)

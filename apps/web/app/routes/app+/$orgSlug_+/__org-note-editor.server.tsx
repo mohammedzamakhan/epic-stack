@@ -96,8 +96,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 								upload.type === 'video' ||
 								upload.file?.type?.startsWith('video/')
 							const objectKey = isVideo
-								? await uploadNoteVideo(userId, noteId, upload.file)
-								: await uploadNoteImage(userId, noteId, upload.file)
+								? await uploadNoteVideo(userId, noteId, upload.file, organization.id)
+								: await uploadNoteImage(userId, noteId, upload.file, organization.id)
 
 							return {
 								id: upload.id,
@@ -125,8 +125,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 								upload.type === 'video' ||
 								upload.file?.type?.startsWith('video/')
 							const objectKey = isVideo
-								? await uploadNoteVideo(userId, noteId, upload.file)
-								: await uploadNoteImage(userId, noteId, upload.file)
+								? await uploadNoteVideo(userId, noteId, upload.file, organization.id)
+								: await uploadNoteImage(userId, noteId, upload.file, organization.id)
 
 							return {
 								type: isVideo ? 'video' : 'image',

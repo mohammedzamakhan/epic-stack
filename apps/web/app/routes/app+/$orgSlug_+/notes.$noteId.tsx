@@ -1017,7 +1017,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					const imageFile = formData.get(`image-${i}`) as File
 					if (imageFile && imageFile.size > 0) {
 						imagePromises.push(
-							uploadCommentImage(userId, comment.id, imageFile).then(
+							uploadCommentImage(userId, comment.id, imageFile, note.organizationId).then(
 								(objectKey) => ({
 									commentId: comment.id,
 									objectKey,
