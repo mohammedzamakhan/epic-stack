@@ -1,10 +1,8 @@
 import { google } from '@ai-sdk/google'
-import { frontendTools } from '@assistant-ui/react-ai-sdk'
 import { invariant } from '@epic-web/invariant'
 import { prisma } from '@repo/prisma'
 import { streamText } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
-import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server'
 import { markStepCompleted } from '#app/utils/onboarding'
 
@@ -55,9 +53,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		console.error('Failed to track AI chat onboarding step:', error)
 	}
 
-	const { messages, tools } = (await request.json()) as {
+	const { messages } = (await request.json()) as {
 		messages: any
-		tools: any
 	}
 
 	const result = streamText({
@@ -91,19 +88,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     Comments: ${note.comments.map((comment: any) => `${comment.user.name}: ${comment.content}`).join('\n')}
     `,
 		messages,
-		toolCallStreaming: true,
-		tools: {
-			...frontendTools(tools),
-			weather: {
-				description: 'Get weather information',
-				parameters: z.object({
-					location: z.string().describe('Location to get weather for'),
-				}),
-				execute: async ({ location }) => {
-					return `The weather in ${location} is sunny.`
-				},
-			},
-		},
 	})
 
 	return result.toDataStreamResponse()
