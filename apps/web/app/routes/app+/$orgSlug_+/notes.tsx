@@ -24,7 +24,10 @@ import {
 } from '#app/components/ui/tooltip.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { getNotesViewMode, setNotesViewMode } from '#app/utils/notes-view-cookie.server.ts'
+import {
+	getNotesViewMode,
+	setNotesViewMode,
+} from '#app/utils/notes-view-cookie.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { NotesCards } from './notes-cards.tsx'
 
@@ -98,11 +101,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				{ noteAccess: { some: { userId } } },
 			],
 		},
-		orderBy: [
-			{ statusId: 'asc' },
-			{ position: 'asc' },
-			{ createdAt: 'desc' },
-		],
+		orderBy: [{ statusId: 'asc' }, { position: 'asc' }, { createdAt: 'desc' }],
 	})
 
 	const formattedNotes = notes.map((note) => ({
@@ -112,7 +111,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		statusId: note.statusId ?? null,
 		statusName: note.status?.name ?? null,
 		position: note.position ?? null,
-		uploads: note.uploads.map(upload => ({
+		uploads: note.uploads.map((upload) => ({
 			...upload,
 			thumbnailKey: upload.thumbnailKey ?? null,
 			status: upload.status ?? 'pending',
@@ -122,7 +121,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const statuses = await prisma.organizationNoteStatus.findMany({
 		where: { organizationId: organization.id },
 		orderBy: { position: 'asc' },
-		select: { id: true, name: true, color: true, position: true }
+		select: { id: true, name: true, color: true, position: true },
 	})
 
 	// Get the current view mode from cookie
@@ -222,12 +221,9 @@ export default function NotesRoute({
 				<div className="flex items-center gap-4">
 					<Tabs
 						value={viewMode}
-						onValueChange={val => {
+						onValueChange={(val) => {
 							if (val === 'cards' || val === 'kanban') {
-								void fetcher.submit(
-									{ viewMode: val },
-									{ method: 'POST' }
-								)
+								void fetcher.submit({ viewMode: val }, { method: 'POST' })
 							}
 						}}
 					>
@@ -276,7 +272,10 @@ export default function NotesRoute({
 							organizationId={loaderData.organization.id}
 						/>
 					) : (
-						<NotesCards notes={loaderData.notes} organizationId={loaderData.organization.id} />
+						<NotesCards
+							notes={loaderData.notes}
+							organizationId={loaderData.organization.id}
+						/>
 					)
 				) : (
 					<>

@@ -46,7 +46,7 @@ export function CommentItem({
 	depth = 0,
 	onReply,
 	onDelete,
-	organizationId
+	organizationId,
 }: CommentItemProps) {
 	const [showReplyForm, setShowReplyForm] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)

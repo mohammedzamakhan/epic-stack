@@ -288,7 +288,7 @@ export default function CreateOrganizationPage() {
 			{/* Progress indicator */}
 			<div className="mb-8 text-center">
 				<div className="mb-2 flex items-center justify-center gap-2">
-					{steps.map(step => (
+					{steps.map((step) => (
 						<div
 							key={step.number}
 							className={`h-2 w-2 rounded-full ${

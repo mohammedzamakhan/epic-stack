@@ -1,4 +1,9 @@
-import { useLoaderData, Form, LoaderFunctionArgs, ActionFunctionArgs } from 'react-router'
+import {
+	useLoaderData,
+	Form,
+	LoaderFunctionArgs,
+	ActionFunctionArgs,
+} from 'react-router'
 import { requireUserWithRole } from '#app/utils/permissions.server'
 import { prisma } from '#app/utils/db.server'
 import { blacklistIp, unblacklistIp } from '#app/utils/ip-tracking.server'
@@ -85,9 +90,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		where: { isBlacklisted: true },
 	})
 	const suspiciousCount = await prisma.ipAddress.count({
-		where: { 
+		where: {
 			suspiciousScore: { gt: 0 },
-			isBlacklisted: false 
+			isBlacklisted: false,
 		},
 	})
 
@@ -127,7 +132,10 @@ export async function action({ request }: ActionFunctionArgs) {
 			return { success: true, message: `IP ${ip} has been blacklisted` }
 		} else if (intent === 'unblacklist') {
 			await unblacklistIp(ip)
-			return { success: true, message: `IP ${ip} has been removed from blacklist` }
+			return {
+				success: true,
+				message: `IP ${ip} has been removed from blacklist`,
+			}
 		}
 	} catch (error) {
 		console.error('Error processing IP action:', error)
@@ -155,18 +163,28 @@ export default function AdminIpAddressesPage() {
 			</div>
 
 			{/* Stats */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="bg-card p-4 rounded-lg border">
-					<h3 className="text-sm font-medium text-muted-foreground">Total IPs</h3>
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+				<div className="bg-card rounded-lg border p-4">
+					<h3 className="text-muted-foreground text-sm font-medium">
+						Total IPs
+					</h3>
 					<p className="text-2xl font-bold">{data.stats.totalIps}</p>
 				</div>
-				<div className="bg-card p-4 rounded-lg border">
-					<h3 className="text-sm font-medium text-muted-foreground">Blacklisted IPs</h3>
-					<p className="text-2xl font-bold text-red-600">{data.stats.blacklistedIps}</p>
+				<div className="bg-card rounded-lg border p-4">
+					<h3 className="text-muted-foreground text-sm font-medium">
+						Blacklisted IPs
+					</h3>
+					<p className="text-2xl font-bold text-red-600">
+						{data.stats.blacklistedIps}
+					</p>
 				</div>
-				<div className="bg-card p-4 rounded-lg border">
-					<h3 className="text-sm font-medium text-muted-foreground">Suspicious IPs</h3>
-					<p className="text-2xl font-bold text-yellow-600">{data.stats.suspiciousIps}</p>
+				<div className="bg-card rounded-lg border p-4">
+					<h3 className="text-muted-foreground text-sm font-medium">
+						Suspicious IPs
+					</h3>
+					<p className="text-2xl font-bold text-yellow-600">
+						{data.stats.suspiciousIps}
+					</p>
 				</div>
 			</div>
 
@@ -199,7 +217,9 @@ export default function AdminIpAddressesPage() {
 								</TableCell>
 								<TableCell>
 									{ip.country && ip.city ? (
-										<span>{ip.city}, {ip.country}</span>
+										<span>
+											{ip.city}, {ip.country}
+										</span>
 									) : ip.country ? (
 										<span>{ip.country}</span>
 									) : (
@@ -218,7 +238,9 @@ export default function AdminIpAddressesPage() {
 								<TableCell>{ip.requestCount}</TableCell>
 								<TableCell>
 									{ip.lastRequestAt ? (
-										<span className="text-sm">{formatDate(ip.lastRequestAt)}</span>
+										<span className="text-sm">
+											{formatDate(ip.lastRequestAt)}
+										</span>
 									) : (
 										<span className="text-muted-foreground">-</span>
 									)}
@@ -236,21 +258,24 @@ export default function AdminIpAddressesPage() {
 											{ip.ipAddressUsers.slice(0, 3).map((userConnection) => (
 												<div key={userConnection.user.id} className="text-sm">
 													<span className="font-medium">
-														{userConnection.user.name || userConnection.user.username}
+														{userConnection.user.name ||
+															userConnection.user.username}
 													</span>
-													<div className="text-xs text-muted-foreground">
+													<div className="text-muted-foreground text-xs">
 														{userConnection.requestCount} requests
 													</div>
 												</div>
 											))}
 											{ip.ipAddressUsers.length > 3 && (
-												<div className="text-xs text-muted-foreground">
+												<div className="text-muted-foreground text-xs">
 													+{ip.ipAddressUsers.length - 3} more users
 												</div>
 											)}
 										</div>
 									) : (
-										<span className="text-muted-foreground text-sm">No users</span>
+										<span className="text-muted-foreground text-sm">
+											No users
+										</span>
 									)}
 								</TableCell>
 								<TableCell>
@@ -260,7 +285,11 @@ export default function AdminIpAddressesPage() {
 									<div className="flex gap-2">
 										{ip.isBlacklisted ? (
 											<Form method="post">
-												<input type="hidden" name="intent" value="unblacklist" />
+												<input
+													type="hidden"
+													name="intent"
+													value="unblacklist"
+												/>
 												<input type="hidden" name="ip" value={ip.ip} />
 												<Button variant="outline" size="sm" type="submit">
 													Unblacklist
@@ -277,13 +306,17 @@ export default function AdminIpAddressesPage() {
 													<DialogHeader>
 														<DialogTitle>Blacklist IP Address</DialogTitle>
 														<DialogDescription>
-															Are you sure you want to blacklist {ip.ip}? This will prevent all future requests from this IP address.
+															Are you sure you want to blacklist {ip.ip}? This
+															will prevent all future requests from this IP
+															address.
 														</DialogDescription>
 													</DialogHeader>
 													<Form method="post">
 														<div className="space-y-4">
 															<div>
-																<Label htmlFor="reason">Reason for blacklisting</Label>
+																<Label htmlFor="reason">
+																	Reason for blacklisting
+																</Label>
 																<Textarea
 																	id="reason"
 																	name="reason"
@@ -292,7 +325,11 @@ export default function AdminIpAddressesPage() {
 																/>
 															</div>
 														</div>
-														<input type="hidden" name="intent" value="blacklist" />
+														<input
+															type="hidden"
+															name="intent"
+															value="blacklist"
+														/>
 														<input type="hidden" name="ip" value={ip.ip} />
 														<DialogFooter className="mt-4">
 															<Button type="submit" variant="destructive">
@@ -312,7 +349,7 @@ export default function AdminIpAddressesPage() {
 			</div>
 
 			{data.ipAddresses.length === 0 && (
-				<div className="text-center py-8">
+				<div className="py-8 text-center">
 					<p className="text-muted-foreground">No IP addresses found</p>
 				</div>
 			)}

@@ -42,7 +42,7 @@ export function MultiMediaUpload({
 	formId,
 	existingImages = [],
 	existingVideos = [],
-	organizationId
+	organizationId,
 }: MultiMediaUploadProps) {
 	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)

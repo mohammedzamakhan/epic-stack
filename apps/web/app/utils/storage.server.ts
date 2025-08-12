@@ -21,7 +21,9 @@ interface StorageConfig {
 }
 
 // Get storage configuration for an organization
-async function getStorageConfig(organizationId?: string): Promise<StorageConfig> {
+async function getStorageConfig(
+	organizationId?: string,
+): Promise<StorageConfig> {
 	// If organization ID is provided, check for custom S3 configuration
 	if (organizationId) {
 		const s3Config = await prisma.organizationS3Config.findUnique({
@@ -50,7 +52,11 @@ async function getStorageConfig(organizationId?: string): Promise<StorageConfig>
 	}
 }
 
-async function uploadToStorage(file: File | FileUpload, key: string, organizationId?: string) {
+async function uploadToStorage(
+	file: File | FileUpload,
+	key: string,
+	organizationId?: string,
+) {
 	const config = await getStorageConfig(organizationId)
 	const { url, headers } = getSignedPutRequestInfo(file, key, config)
 
@@ -143,9 +149,13 @@ export async function uploadVideoThumbnail(
 	const key = `orgs/${organizationId}/notes/${noteId}/videos/thumbnails/${timestamp}-${videoId}-${fileId}.jpg`
 
 	// Create a File-like object from the buffer
-	const thumbnailFile = new File([new Uint8Array(thumbnailBuffer)], 'thumbnail.jpg', {
-		type: 'image/jpeg',
-	})
+	const thumbnailFile = new File(
+		[new Uint8Array(thumbnailBuffer)],
+		'thumbnail.jpg',
+		{
+			type: 'image/jpeg',
+		},
+	)
 
 	return uploadToStorage(thumbnailFile, key, organizationId)
 }
@@ -250,7 +260,11 @@ function getBaseSignedRequestInfo({
 	return { url, baseHeaders }
 }
 
-function getSignedPutRequestInfo(file: File | FileUpload, key: string, config: StorageConfig) {
+function getSignedPutRequestInfo(
+	file: File | FileUpload,
+	key: string,
+	config: StorageConfig,
+) {
 	const uploadDate = new Date().toISOString()
 	const { url, baseHeaders } = getBaseSignedRequestInfo({
 		method: 'PUT',
@@ -294,7 +308,10 @@ export function getSignedGetRequestInfo(key: string, _organizationId?: string) {
 }
 
 // Add a new async function for getting signed GET URLs with org-specific config
-export async function getSignedGetRequestInfoAsync(key: string, organizationId?: string) {
+export async function getSignedGetRequestInfoAsync(
+	key: string,
+	organizationId?: string,
+) {
 	const config = await getStorageConfig(organizationId)
 	const { url, baseHeaders } = getBaseSignedRequestInfo({
 		method: 'GET',
@@ -309,12 +326,14 @@ export async function getSignedGetRequestInfoAsync(key: string, organizationId?:
 }
 
 // Add S3 connection test function
-export async function testS3Connection(config: StorageConfig): Promise<{ success: boolean; message?: string }> {
+export async function testS3Connection(
+	config: StorageConfig,
+): Promise<{ success: boolean; message?: string }> {
 	try {
 		// Test connection by trying to list objects in the bucket
 		const testKey = `test-connection-${Date.now()}.txt`
 		const testFile = new File(['test'], 'test.txt', { type: 'text/plain' })
-		
+
 		const { url, headers } = getSignedPutRequestInfo(testFile, testKey, config)
 
 		const response = await fetch(url, {
@@ -331,21 +350,22 @@ export async function testS3Connection(config: StorageConfig): Promise<{ success
 			} catch {
 				// Ignore delete errors
 			}
-			
-			return { 
-				success: true, 
-				message: 'Successfully connected to S3 bucket and verified write permissions.' 
+
+			return {
+				success: true,
+				message:
+					'Successfully connected to S3 bucket and verified write permissions.',
 			}
 		} else {
-			return { 
-				success: false, 
-				message: `Failed to upload test file: ${response.status} ${response.statusText}` 
+			return {
+				success: false,
+				message: `Failed to upload test file: ${response.status} ${response.statusText}`,
 			}
 		}
 	} catch (error) {
-		return { 
-			success: false, 
-			message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
+		return {
+			success: false,
+			message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		}
 	}
 }

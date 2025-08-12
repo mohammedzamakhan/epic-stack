@@ -15,7 +15,7 @@ import { markStepCompleted } from '#app/utils/onboarding.ts'
 import {
 	uploadNoteImage,
 	uploadNoteVideo,
-	getSignedGetRequestInfo
+	getSignedGetRequestInfo,
 } from '#app/utils/storage.server.ts'
 import {
 	MAX_UPLOAD_SIZE,
@@ -23,7 +23,6 @@ import {
 	type ImageFieldset,
 	type MediaFieldset,
 } from './__org-note-editor'
-
 
 type UploadFieldset = (ImageFieldset | MediaFieldset) & { type?: string }
 
@@ -98,8 +97,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 								upload.type === 'video' ||
 								upload.file?.type?.startsWith('video/')
 							const objectKey = isVideo
-								? await uploadNoteVideo(userId, noteId, upload.file, organization.id)
-								: await uploadNoteImage(userId, noteId, upload.file, organization.id)
+								? await uploadNoteVideo(
+										userId,
+										noteId,
+										upload.file,
+										organization.id,
+									)
+								: await uploadNoteImage(
+										userId,
+										noteId,
+										upload.file,
+										organization.id,
+									)
 
 							return {
 								id: upload.id,
@@ -127,8 +136,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 								upload.type === 'video' ||
 								upload.file?.type?.startsWith('video/')
 							const objectKey = isVideo
-								? await uploadNoteVideo(userId, noteId, upload.file, organization.id)
-								: await uploadNoteImage(userId, noteId, upload.file, organization.id)
+								? await uploadNoteVideo(
+										userId,
+										noteId,
+										upload.file,
+										organization.id,
+									)
+								: await uploadNoteImage(
+										userId,
+										noteId,
+										upload.file,
+										organization.id,
+									)
 
 							return {
 								type: isVideo ? 'video' : 'image',
@@ -160,25 +179,48 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		tags,
 		uploadUpdates = [],
 		newUploads = [],
-		actionType
+		actionType,
 	} = submission.value
 
 	// Process tags - convert comma-separated string to JSON array
 	const processedTags = tags
-		? JSON.stringify(tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0))
+		? JSON.stringify(
+				tags
+					.split(',')
+					.map((tag) => tag.trim())
+					.filter((tag) => tag.length > 0),
+			)
 		: null
 
 	// Process priority - convert empty string to null and validate
-	const processedPriority = priority && priority !== '' && ['low', 'medium', 'high', 'urgent', 'no-priority'].includes(priority) ? priority : null
+	const processedPriority =
+		priority &&
+		priority !== '' &&
+		['low', 'medium', 'high', 'urgent', 'no-priority'].includes(priority)
+			? priority
+			: null
 
 	// Check if this is a new note or an update
 	const existingNote = await prisma.organizationNote.findUnique({
 		where: { id: noteId },
-		select: { id: true, title: true, content: true, priority: true, tags: true },
+		select: {
+			id: true,
+			title: true,
+			content: true,
+			priority: true,
+			tags: true,
+		},
 	})
 
 	const isNewNote = !existingNote
-	let beforeSnapshot: { title: string; content: string; priority: string | null; tags: string | null } | undefined
+	let beforeSnapshot:
+		| {
+				title: string
+				content: string
+				priority: string | null
+				tags: string | null
+		  }
+		| undefined
 
 	if (!isNewNote && existingNote) {
 		beforeSnapshot = {
@@ -202,29 +244,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			createdBy: { connect: { id: userId } },
 			uploads: { create: newUploads },
 		},
-		update: actionType === 'inline-edit'
-			? {
-				title,
-				content,
-			}
-			: {
-				title,
-				content,
-				priority: processedPriority,
-				tags: processedTags,
-				uploads: {
-					deleteMany: { id: { notIn: uploadUpdates.map((u) => u.id) } },
-					updateMany: uploadUpdates.map((updates) => ({
-						where: { id: updates.id },
-						data: {
-							...updates,
-							// If the upload is new, we need to generate a new ID to bust the cache.
-							id: updates.objectKey ? cuid() : updates.id,
+		update:
+			actionType === 'inline-edit'
+				? {
+						title,
+						content,
+					}
+				: {
+						title,
+						content,
+						priority: processedPriority,
+						tags: processedTags,
+						uploads: {
+							deleteMany: { id: { notIn: uploadUpdates.map((u) => u.id) } },
+							updateMany: uploadUpdates.map((updates) => ({
+								where: { id: updates.id },
+								data: {
+									...updates,
+									// If the upload is new, we need to generate a new ID to bust the cache.
+									id: updates.objectKey ? cuid() : updates.id,
+								},
+							})),
+							create: newUploads,
 						},
-					})),
-					create: newUploads,
-				},
-			},
+					},
 	})
 
 	// Trigger video processing for new video uploads

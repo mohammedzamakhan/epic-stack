@@ -55,7 +55,7 @@ export const DEFAULT_ONBOARDING_STEPS = [
 		title: 'Try the AI chat feature',
 		description:
 			'Experience AI-powered assistance for your notes (auto-completes when you use AI)',
-        icon: 'sparkles',
+		icon: 'sparkles',
 		actionConfig: {
 			type: 'navigate' as const,
 			target: '/notes',
@@ -110,7 +110,7 @@ export async function initializeOnboardingSteps() {
 				title: step.title,
 				description: step.description,
 				actionConfig: JSON.stringify(step.actionConfig),
-                icon: step.icon,
+				icon: step.icon,
 				autoDetect: step.autoDetect,
 				detectConfig: step.detectConfig
 					? JSON.stringify(step.detectConfig)
@@ -122,7 +122,7 @@ export async function initializeOnboardingSteps() {
 				title: step.title,
 				description: step.description,
 				actionConfig: JSON.stringify(step.actionConfig),
-                icon: step.icon,
+				icon: step.icon,
 				autoDetect: step.autoDetect,
 				detectConfig: step.detectConfig
 					? JSON.stringify(step.detectConfig)

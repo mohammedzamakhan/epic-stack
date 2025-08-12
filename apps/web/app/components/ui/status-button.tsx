@@ -89,20 +89,21 @@ export const StatusButton = ({
 	}
 
 	const getButtonClassName = () => {
-		const baseClasses = 'transition-all duration-200 flex justify-center items-center'
+		const baseClasses =
+			'transition-all duration-200 flex justify-center items-center'
 
 		switch (internalStatus) {
 			case 'success':
 				return cn(
 					baseClasses,
-					'bg-green-600 hover:bg-green-700 text-white hover:text-white border-green-600',
-					className
+					'border-green-600 bg-green-600 text-white hover:bg-green-700 hover:text-white',
+					className,
 				)
 			case 'error':
 				return cn(
 					baseClasses,
-					'bg-destructive hover:bg-destructive/90 text-white hover:text-white border-destructive',
-					className
+					'bg-destructive hover:bg-destructive/90 border-destructive text-white hover:text-white',
+					className,
 				)
 			default:
 				return cn(baseClasses, className)

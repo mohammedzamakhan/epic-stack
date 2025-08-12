@@ -220,7 +220,6 @@ export default function CacheAdminRoute() {
 	const cacheType = searchParams.get('type') ?? 'all'
 	const instance = searchParams.get('instance') ?? data.instance
 
-
 	const handleSearch = (value: string) => {
 		setSearchQuery(value)
 		const newSearchParams = new URLSearchParams(searchParams)

@@ -1,7 +1,7 @@
 import { computePosition } from '@floating-ui/dom'
-import  { type EmojiItem } from '@tiptap/extension-emoji'
-import { ReactRenderer, type Editor  } from '@tiptap/react'
-import  { type SuggestionOptions } from '@tiptap/suggestion'
+import { type EmojiItem } from '@tiptap/extension-emoji'
+import { ReactRenderer, type Editor } from '@tiptap/react'
+import { type SuggestionOptions } from '@tiptap/suggestion'
 
 import { EmojiList } from './emoji-list'
 
@@ -44,14 +44,10 @@ export default function getEmojiSuggestion(): Omit<
 					},
 				}
 
-				void computePosition(
-					virtualElement,
-					component.element as HTMLElement,
-					{
-						placement: 'bottom-start',
-						strategy: 'fixed',
-					},
-				).then((pos) => {
+				void computePosition(virtualElement, component.element as HTMLElement, {
+					placement: 'bottom-start',
+					strategy: 'fixed',
+				}).then((pos) => {
 					if (component?.element) {
 						const element = component.element as HTMLElement
 						Object.assign(element.style, {

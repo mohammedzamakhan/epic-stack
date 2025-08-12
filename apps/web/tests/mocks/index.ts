@@ -17,7 +17,10 @@ export const server = setupServer(
 // Add request interceptor to completely bypass Stripe requests
 server.events.on('request:start', ({ request }) => {
 	if (request.url.includes('api.stripe.com')) {
-		console.log('MSW: Intercepted Stripe request, attempting to bypass:', request.url)
+		console.log(
+			'MSW: Intercepted Stripe request, attempting to bypass:',
+			request.url,
+		)
 	}
 })
 
@@ -27,21 +30,21 @@ const bypassUrls = [
 	'stripe.com',
 	'.sentry.io',
 	'__rrdt',
-	'api.novu.co'
+	'api.novu.co',
 ]
 
 server.listen({
 	onUnhandledRequest(request, print) {
 		const url = request.url
-		
+
 		// Check if this request should be bypassed entirely
-		if (bypassUrls.some(pattern => url.includes(pattern))) {
+		if (bypassUrls.some((pattern) => url.includes(pattern))) {
 			if (url.includes('api.stripe.com')) {
 				console.log('MSW: Bypassing Stripe request:', url)
 			}
 			return // Don't print warning, just let it pass through
 		}
-		
+
 		// Print the regular MSW unhandled request warning for other requests
 		print.warning()
 	},

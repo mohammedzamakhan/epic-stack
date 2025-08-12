@@ -1,7 +1,13 @@
 'use client'
 
-import  { type Variants, motion, useAnimation  } from 'motion/react'
-import  { type HTMLAttributes, forwardRef, useCallback, useImperativeHandle, useRef  } from 'react'
+import { type Variants, motion, useAnimation } from 'motion/react'
+import {
+	type HTMLAttributes,
+	forwardRef,
+	useCallback,
+	useImperativeHandle,
+	useRef,
+} from 'react'
 import { cn } from '#app/utils/misc.tsx'
 
 export interface MessageSquareMoreIconHandle {
@@ -48,8 +54,8 @@ const MessageSquareMoreIcon = forwardRef<
 		isControlledRef.current = true
 
 		return {
-				startAnimation: () => void controls.start('animate'),
-				stopAnimation: () => void controls.start('normal'),
+			startAnimation: () => void controls.start('animate'),
+			stopAnimation: () => void controls.start('normal'),
 		}
 	})
 

@@ -106,7 +106,7 @@ export function OrgNoteEditor({
 	note,
 	actionData,
 	onSuccess,
-	organizationId
+	organizationId,
 }: OrgNoteEditorProps) {
 	const isPending = useIsPending()
 	const params = useParams<{ orgSlug: string }>()
@@ -186,18 +186,21 @@ export function OrgNoteEditor({
 								}}
 								errors={fields.title.errors}
 							/>
-							
+
 							{/* Priority and Tags Row */}
 							<div className="flex gap-4">
 								<div className="flex-1">
-									<label htmlFor={fields.priority.id} className="text-sm leading-none font-medium">
+									<label
+										htmlFor={fields.priority.id}
+										className="text-sm leading-none font-medium"
+									>
 										Priority
 									</label>
 									<select
 										id={fields.priority.id}
 										name={fields.priority.name}
 										defaultValue={fields.priority.initialValue}
-										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+										className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 									>
 										<option value="">Select priority</option>
 										<option value="no-priority">No priority</option>
@@ -215,7 +218,7 @@ export function OrgNoteEditor({
 										</div>
 									)}
 								</div>
-								
+
 								<div className="flex-1">
 									<Field
 										labelProps={{ children: 'Tags (comma-separated)' }}

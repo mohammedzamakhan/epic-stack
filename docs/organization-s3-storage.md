@@ -1,18 +1,24 @@
 # Organization S3 Storage Configuration
 
-This feature allows organizations to configure their own S3-compatible storage instead of using the default system storage.
+This feature allows organizations to configure their own S3-compatible storage
+instead of using the default system storage.
 
 ## Features
 
-- **Secure Storage**: S3 credentials are encrypted before being stored in the database
-- **Flexible Configuration**: Support for any S3-compatible storage service (AWS S3, DigitalOcean Spaces, MinIO, etc.)
-- **Connection Testing**: Built-in connection testing to verify credentials before saving
-- **Fallback Support**: Automatically falls back to default storage if custom configuration is not available
+- **Secure Storage**: S3 credentials are encrypted before being stored in the
+  database
+- **Flexible Configuration**: Support for any S3-compatible storage service (AWS
+  S3, DigitalOcean Spaces, MinIO, etc.)
+- **Connection Testing**: Built-in connection testing to verify credentials
+  before saving
+- **Fallback Support**: Automatically falls back to default storage if custom
+  configuration is not available
 - **Per-Organization**: Each organization can have its own storage configuration
 
 ## Configuration
 
-Organizations can configure their S3 storage from the organization settings page:
+Organizations can configure their S3 storage from the organization settings
+page:
 
 1. Go to your organization settings (`/app/{org-slug}/settings`)
 2. Navigate to the "Storage Configuration" section
@@ -28,9 +34,11 @@ Organizations can configure their S3 storage from the organization settings page
 
 ## Security
 
-- **Encryption**: Secret access keys are encrypted using AES-256-GCM before being stored
+- **Encryption**: Secret access keys are encrypted using AES-256-GCM before
+  being stored
 - **Masked Display**: Existing secret keys are masked in the UI for security
-- **Minimal Permissions**: We recommend using IAM credentials with minimal required permissions (read/write access to the specific bucket only)
+- **Minimal Permissions**: We recommend using IAM credentials with minimal
+  required permissions (read/write access to the specific bucket only)
 
 ## Environment Variables
 
@@ -66,7 +74,8 @@ model OrganizationS3Config {
 
 The system follows this priority order when selecting storage configuration:
 
-1. If an organization has S3 enabled and properly configured → Use organization's S3
+1. If an organization has S3 enabled and properly configured → Use
+   organization's S3
 2. Otherwise → Use default system storage
 
 ### File Upload Flow

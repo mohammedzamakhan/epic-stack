@@ -7,7 +7,9 @@ export const notesViewCookie = createCookie('notes-view', {
 	httpOnly: true,
 })
 
-export async function getNotesViewMode(request: Request): Promise<'cards' | 'kanban'> {
+export async function getNotesViewMode(
+	request: Request,
+): Promise<'cards' | 'kanban'> {
 	const cookieHeader = request.headers.get('Cookie')
 	const cookie = (await notesViewCookie.parse(cookieHeader)) || {}
 	return cookie.viewMode === 'kanban' ? 'kanban' : 'cards'

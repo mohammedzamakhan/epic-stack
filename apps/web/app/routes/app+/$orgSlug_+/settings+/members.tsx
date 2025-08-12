@@ -239,7 +239,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (!requester || requester.role !== 'admin' || !requester.active) {
 			return Response.json(
 				{ error: 'Only admins can change member roles' },
-				{ status: 403 }
+				{ status: 403 },
 			)
 		}
 
@@ -269,7 +269,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			if (activeAdminCount === 1) {
 				return Response.json(
 					{ error: 'Cannot demote the last admin of the organization' },
-					{ status: 400 }
+					{ status: 400 },
 				)
 			}
 		}
@@ -291,7 +291,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			console.error('Error updating member role:', error)
 			return Response.json(
 				{ error: 'Failed to update member role' },
-				{ status: 500 }
+				{ status: 500 },
 			)
 		}
 	}

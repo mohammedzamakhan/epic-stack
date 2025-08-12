@@ -37,7 +37,7 @@ export function CommentsSection({
 	comments,
 	currentUserId,
 	users,
-	organizationId
+	organizationId,
 }: CommentsSectionProps) {
 	const [newComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)

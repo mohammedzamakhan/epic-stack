@@ -2,7 +2,12 @@ import { prisma } from '@repo/prisma'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { Badge } from '#app/components/ui/badge'
 import { Button } from '#app/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '#app/components/ui/card'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '#app/components/ui/card'
 import {
 	Table,
 	TableBody,
@@ -16,7 +21,7 @@ import { requireUserWithRole } from '#app/utils/permissions.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
-	
+
 	const ip = params.ip
 	if (!ip) {
 		throw new Response('IP address is required', { status: 400 })
@@ -51,9 +56,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function AdminIpDetailPage() {
 	const { ipAddress, userConnections } = useLoaderData<typeof loader>()
 
-    if (!ipAddress) {
-        return null
-    }
+	if (!ipAddress) {
+		return null
+	}
 
 	const formatDate = (date: string | Date | null) => {
 		if (!date) return '-'
@@ -77,21 +82,21 @@ export default function AdminIpDetailPage() {
 			</div>
 
 			{/* IP Address Information */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>IP Information</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								IP Address
 							</label>
 							<p className="font-mono text-lg">{ipAddress.ip}</p>
 						</div>
-						
+
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Location
 							</label>
 							<p>
@@ -106,7 +111,7 @@ export default function AdminIpDetailPage() {
 						</div>
 
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Status
 							</label>
 							<div className="mt-1">
@@ -121,17 +126,23 @@ export default function AdminIpDetailPage() {
 						</div>
 
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Total Requests
 							</label>
 							<p className="text-2xl font-bold">{ipAddress.requestCount}</p>
 						</div>
 
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Suspicious Score
 							</label>
-							<p className={ipAddress.suspiciousScore > 0 ? "text-red-600 font-semibold" : ""}>
+							<p
+								className={
+									ipAddress.suspiciousScore > 0
+										? 'font-semibold text-red-600'
+										: ''
+								}
+							>
 								{ipAddress.suspiciousScore}
 							</p>
 						</div>
@@ -144,21 +155,21 @@ export default function AdminIpDetailPage() {
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								First Seen
 							</label>
 							<p>{formatDate(ipAddress.createdAt)}</p>
 						</div>
 
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Last Request
 							</label>
 							<p>{formatDate(ipAddress.lastRequestAt)}</p>
 						</div>
 
 						<div>
-							<label className="text-sm font-medium text-muted-foreground">
+							<label className="text-muted-foreground text-sm font-medium">
 								Last User Agent
 							</label>
 							<p className="text-sm break-all">
@@ -169,14 +180,14 @@ export default function AdminIpDetailPage() {
 						{ipAddress.isBlacklisted && (
 							<>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">
+									<label className="text-muted-foreground text-sm font-medium">
 										Blacklisted At
 									</label>
 									<p>{formatDate(ipAddress.blacklistedAt)}</p>
 								</div>
 
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">
+									<label className="text-muted-foreground text-sm font-medium">
 										Blacklist Reason
 									</label>
 									<p>{ipAddress.blacklistReason}</p>
@@ -184,11 +195,12 @@ export default function AdminIpDetailPage() {
 
 								{ipAddress.blacklistedBy && (
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">
+										<label className="text-muted-foreground text-sm font-medium">
 											Blacklisted By
 										</label>
 										<p>
-											{ipAddress.blacklistedBy.name || ipAddress.blacklistedBy.username}
+											{ipAddress.blacklistedBy.name ||
+												ipAddress.blacklistedBy.username}
 										</p>
 									</div>
 								)}
@@ -227,7 +239,7 @@ export default function AdminIpDetailPage() {
 												<p className="font-medium">
 													{connection.user.name || connection.user.username}
 												</p>
-												<p className="text-sm text-muted-foreground">
+												<p className="text-muted-foreground text-sm">
 													@{connection.user.username}
 												</p>
 											</div>
@@ -265,7 +277,7 @@ export default function AdminIpDetailPage() {
 							</TableBody>
 						</Table>
 					) : (
-						<div className="text-center py-8">
+						<div className="py-8 text-center">
 							<p className="text-muted-foreground">
 								No users have been tracked for this IP address
 							</p>

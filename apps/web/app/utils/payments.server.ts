@@ -39,8 +39,12 @@ export async function getPlansAndPrices() {
 		const plusPlan = products.find((product) => product.name === 'Plus')
 
 		// Fetch the specific prices using the defaultPriceId from products
-		const basePrice = prices.find((price) => price.id === basePlan?.defaultPriceId)
-		let plusPrice = prices.find((price) => price.id === plusPlan?.defaultPriceId)
+		const basePrice = prices.find(
+			(price) => price.id === basePlan?.defaultPriceId,
+		)
+		let plusPrice = prices.find(
+			(price) => price.id === plusPlan?.defaultPriceId,
+		)
 
 		const result = {
 			plans: { base: basePlan, plus: plusPlan },
@@ -50,7 +54,7 @@ export async function getPlansAndPrices() {
 		return result
 	} catch (error) {
 		console.error('Error in getPlansAndPrices:', error)
-		
+
 		// Return fallback data to prevent the app from hanging
 		return {
 			plans: { base: undefined, plus: undefined },
@@ -300,33 +304,31 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 }
 
 export async function getStripePrices() {
-	
 	try {
 		const prices = await stripe.prices.list({
 			active: true,
 			limit: 100,
 			type: 'recurring',
 		})
-				
+
 		const mappedPrices = prices.data.map((price) => ({
 			id: price.id,
-			productId: typeof price.product === 'string' ? price.product : price.product.id,
+			productId:
+				typeof price.product === 'string' ? price.product : price.product.id,
 			unitAmount: price.unit_amount,
 			currency: price.currency,
 			interval: price.recurring?.interval,
 			trialPeriodDays: price.recurring?.trial_period_days,
 		}))
-		
+
 		return mappedPrices
 	} catch (error: any) {
 		console.error('getStripePrices: Failed to fetch prices:', error)
-		throw new Error(
-			`Failed to fetch Stripe prices: ${error?.message || error}`,
-		)
+		throw new Error(`Failed to fetch Stripe prices: ${error?.message || error}`)
 	}
 }
 
-export async function getStripeProducts() {	
+export async function getStripeProducts() {
 	try {
 		const products = await stripe.products.list({
 			active: true,
@@ -339,7 +341,7 @@ export async function getStripeProducts() {
 			description: product.description,
 			defaultPriceId: product.default_price as string | undefined,
 		}))
-		
+
 		return mappedProducts
 	} catch (error: any) {
 		console.error('getStripeProducts: Failed to fetch products:', error)

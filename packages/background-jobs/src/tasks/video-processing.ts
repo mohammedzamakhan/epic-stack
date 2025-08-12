@@ -338,7 +338,7 @@ export const videoProcessingTask = task({
 				videoId,
 				thumbnailBuffer,
 				'jpg',
-				organizationId
+				organizationId,
 			)
 
 			// Update video upload record with thumbnail and metadata

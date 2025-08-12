@@ -73,24 +73,27 @@ export default function FeedbackModal({
 					<Textarea
 						placeholder="Your feedback"
 						value={feedback}
-						onChange={e => setFeedback(e.target.value)}
+						onChange={(e) => setFeedback(e.target.value)}
 						className="min-h-[120px] resize-none"
 					/>
 					<div className="flex items-center justify-between">
 						<div className="flex gap-2">
-							{icons.map(iconItem => {
+							{icons.map((iconItem) => {
 								return (
 									<button
 										key={iconItem.id}
 										onClick={() => setSelectedIcon(iconItem.id)}
-										className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors ${
+										className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
 											selectedIcon === iconItem.id
 												? 'border-primary bg-primary/10'
 												: 'border-border hover:border-primary/50'
 										}`}
 										aria-label={iconItem.label}
 									>
-										<Icon name={iconItem.icon as any} className="size-5 text-muted-foreground" />
+										<Icon
+											name={iconItem.icon as any}
+											className="text-muted-foreground size-5"
+										/>
 									</button>
 								)
 							})}

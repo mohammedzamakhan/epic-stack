@@ -2,17 +2,25 @@ import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
-import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar.tsx'
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from '#app/components/ui/avatar.tsx'
 import { Portal } from '@radix-ui/react-portal'
 import { Button } from '#app/components/ui/button.tsx'
 import { Card, CardContent } from '#app/components/ui/card.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { Input } from '#app/components/ui/input.tsx'
 import { Textarea } from '#app/components/ui/textarea.tsx'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '#app/components/ui/tooltip.tsx'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '#app/components/ui/tooltip.tsx'
 import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 import { loader } from './notes'
-
 
 type LoaderNote = {
 	id: string
@@ -68,13 +76,22 @@ interface NoteCardProps {
 	setEditingNote?: (noteId: string | null) => void
 }
 
-export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNote }: NoteCardProps) => {
+export const NoteCard = ({
+	note,
+	organizationId,
+	isEditing = false,
+	setEditingNote,
+}: NoteCardProps) => {
 	const [copied, setCopied] = useState(false)
 	const [editTitle, setEditTitle] = useState(note.title)
-	const [editContent, setEditContent] = useState(note.content ? note.content.replace(/<[^>]*>/g, '') : '')
+	const [editContent, setEditContent] = useState(
+		note.content ? note.content.replace(/<[^>]*>/g, '') : '',
+	)
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
-	const loaderData = useRouteLoaderData<typeof loader>('routes/app+/$orgSlug_+/notes')
+	const loaderData = useRouteLoaderData<typeof loader>(
+		'routes/app+/$orgSlug_+/notes',
+	)
 	const titleInputRef = useRef<HTMLInputElement>(null)
 	const isKanbanView = loaderData?.viewMode === 'kanban'
 
@@ -168,11 +185,15 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 			const parsed = JSON.parse(note.tags)
 			if (Array.isArray(parsed)) {
 				// Ensure all items are strings
-				return parsed.map(tag =>
-					typeof tag === 'string' ? tag :
-						typeof tag === 'object' && tag?.name ? tag.name :
-							String(tag)
-				).filter(Boolean)
+				return parsed
+					.map((tag) =>
+						typeof tag === 'string'
+							? tag
+							: typeof tag === 'object' && tag?.name
+								? tag.name
+								: String(tag),
+					)
+					.filter(Boolean)
 			}
 			return []
 		} catch {
@@ -180,14 +201,12 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 		}
 	})()
 
-
-
 	return (
 		<Card
-			className="cursor-pointer group overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 py-0 h-full flex flex-col"
+			className="group flex h-full cursor-pointer flex-col overflow-hidden border py-0 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
 			onClick={handleCardClick}
 		>
-			<CardContent className="p-0 flex flex-col h-full">
+			<CardContent className="flex h-full flex-col p-0">
 				{/* Compact Media Header */}
 				<div className="relative h-32 overflow-hidden">
 					{firstMedia ? (
@@ -204,16 +223,16 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 									firstMedia.altText ||
 									(isVideo ? 'Video thumbnail' : 'Note image')
 								}
-								className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+								className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105"
 								width={350}
 								height={128}
 							/>
 
 							{/* Minimal video play overlay */}
 							{isVideo && (
-								<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-									<div className="rounded-full bg-black/20 backdrop-blur-sm p-2">
-										<Icon name="arrow-right" className="text-white h-4 w-4" />
+								<div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+									<div className="rounded-full bg-black/20 p-2 backdrop-blur-sm">
+										<Icon name="arrow-right" className="h-4 w-4 text-white" />
 									</div>
 								</div>
 							)}
@@ -222,33 +241,46 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 							<div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 						</>
 					) : (
-						<div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+						<div className="from-primary/5 to-primary/10 flex h-full items-center justify-center bg-gradient-to-br">
 							<Icon name="file-text" className="text-primary/40 h-6 w-6" />
 						</div>
 					)}
 
 					{/* Status and Priority indicators - Top Left */}
-					{!isKanbanView && <div className="absolute top-2 left-2 flex items-center gap-1">
-						{/* Status indicator */}
-						{note.status && (
-							<div className="flex items-center gap-1.5 px-2 py-1 bg-muted backdrop-blur-sm rounded-full shadow-sm border border-white/20">
-								{(() => {
-									const status = typeof note.status === 'string' ? { name: note.status, color: '#6b7280' } : note.status as { name: string; color?: string }
-									const color = status.color || '#6b7280'
-									return <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-								})()}
-								<span className="text-muted-foreground text-xs font-medium">
+					{!isKanbanView && (
+						<div className="absolute top-2 left-2 flex items-center gap-1">
+							{/* Status indicator */}
+							{note.status && (
+								<div className="bg-muted flex items-center gap-1.5 rounded-full border border-white/20 px-2 py-1 shadow-sm backdrop-blur-sm">
 									{(() => {
-										const statusName = typeof note.status === 'string' ? note.status : (note.status as { name: string })?.name
-										return statusName ? statusName.replace('-', ' ') : ''
+										const status =
+											typeof note.status === 'string'
+												? { name: note.status, color: '#6b7280' }
+												: (note.status as { name: string; color?: string })
+										const color = status.color || '#6b7280'
+										return (
+											<div
+												className="h-1.5 w-1.5 rounded-full"
+												style={{ backgroundColor: color }}
+											/>
+										)
 									})()}
-								</span>
-							</div>
-						)}
-					</div>}
+									<span className="text-muted-foreground text-xs font-medium">
+										{(() => {
+											const statusName =
+												typeof note.status === 'string'
+													? note.status
+													: (note.status as { name: string })?.name
+											return statusName ? statusName.replace('-', ' ') : ''
+										})()}
+									</span>
+								</div>
+							)}
+						</div>
+					)}
 
 					{/* Floating action buttons - only show on hover */}
-					<div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1">
+					<div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-all duration-300 group-hover:opacity-100">
 						{setEditingNote && (
 							<Button
 								size="sm"
@@ -259,11 +291,7 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 								<Icon name="pencil" className="h-3 w-3" />
 							</Button>
 						)}
-						<Button
-							size="sm"
-							variant="secondary"
-							onClick={handleCopyLink}
-						>
+						<Button size="sm" variant="secondary" onClick={handleCopyLink}>
 							{copied ? (
 								<Icon name="check" className="h-3 w-3" />
 							) : (
@@ -276,15 +304,19 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 					{note.uploads.length > 0 && (
 						<div className="absolute bottom-2 left-2 flex gap-1">
 							{note.uploads.filter((u) => u.type === 'image').length > 0 && (
-								<div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/20 backdrop-blur-sm rounded text-white text-xs">
+								<div className="flex items-center gap-1 rounded bg-black/20 px-1.5 py-0.5 text-xs text-white backdrop-blur-sm">
 									<Icon name="image" className="h-2.5 w-2.5" />
-									<span>{note.uploads.filter((u) => u.type === 'image').length}</span>
+									<span>
+										{note.uploads.filter((u) => u.type === 'image').length}
+									</span>
 								</div>
 							)}
 							{note.uploads.filter((u) => u.type === 'video').length > 0 && (
-								<div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/20 backdrop-blur-sm rounded text-white text-xs">
+								<div className="flex items-center gap-1 rounded bg-black/20 px-1.5 py-0.5 text-xs text-white backdrop-blur-sm">
 									<Icon name="camera" className="h-2.5 w-2.5" />
-									<span>{note.uploads.filter((u) => u.type === 'video').length}</span>
+									<span>
+										{note.uploads.filter((u) => u.type === 'video').length}
+									</span>
 								</div>
 							)}
 						</div>
@@ -292,9 +324,9 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 				</div>
 
 				{/* Content Section - Flex container */}
-				<div className="flex flex-col flex-1">
+				<div className="flex flex-1 flex-col">
 					{/* Main content area */}
-					<div className="p-4 py-2  space-y-2 flex-1">
+					<div className="flex-1 space-y-2 p-4 py-2">
 						{/* Title and Content */}
 						{isEditing ? (
 							<div className="space-y-2">
@@ -304,7 +336,7 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 										value={editTitle}
 										onChange={(e) => setEditTitle(e.target.value)}
 										onKeyDown={handleKeyDown}
-										className="flex-1 font-medium h-8 px-2"
+										className="h-8 flex-1 px-2 font-medium"
 										placeholder="Note title..."
 									/>
 									<div className="flex gap-1">
@@ -333,7 +365,7 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 									onChange={(e) => setEditContent(e.target.value)}
 									onKeyDown={handleKeyDown}
 									placeholder="Note content..."
-									className="resize-none text-sm min-h-16"
+									className="min-h-16 resize-none text-sm"
 									rows={2}
 								/>
 							</div>
@@ -353,33 +385,62 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 													{(() => {
 														switch (note.priority) {
 															case 'urgent':
-																return <Icon name="octagon-alert" className="w-4 h-4 text-red-600" />
+																return (
+																	<Icon
+																		name="octagon-alert"
+																		className="h-4 w-4 text-red-600"
+																	/>
+																)
 															case 'high':
-																return <Icon name="signal-high" className="w-4 h-4 text-red-500" />
+																return (
+																	<Icon
+																		name="signal-high"
+																		className="h-4 w-4 text-red-500"
+																	/>
+																)
 															case 'medium':
-																return <Icon name="signal-medium" className="w-4 h-4 text-yellow-500" />
+																return (
+																	<Icon
+																		name="signal-medium"
+																		className="h-4 w-4 text-yellow-500"
+																	/>
+																)
 															case 'low':
-																return <Icon name="signal-low" className="w-4 h-4 text-green-500" />
+																return (
+																	<Icon
+																		name="signal-low"
+																		className="h-4 w-4 text-green-500"
+																	/>
+																)
 															default:
-																return <Icon name="minus" className="w-4 h-4 text-gray-400" />
+																return (
+																	<Icon
+																		name="minus"
+																		className="h-4 w-4 text-gray-400"
+																	/>
+																)
 														}
 													})()}
 												</Button>
 											</TooltipTrigger>
 											<Portal>
-											<TooltipContent>
-												<p className="capitalize">{note.priority} priority</p>
-											</TooltipContent>
+												<TooltipContent>
+													<p className="capitalize">{note.priority} priority</p>
+												</TooltipContent>
 											</Portal>
 										</Tooltip>
 									)}
-									<h4 className="text-foreground text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-200 flex-1">
+									<h4 className="text-foreground group-hover:text-primary line-clamp-2 flex-1 text-sm leading-tight transition-colors duration-200">
 										{note.title}
 									</h4>
 								</div>
-								<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-									{note.content ? note.content.replace(/<[^>]*>/g, '').substring(0, 100) : 'No content'}
-									{note.content && note.content.replace(/<[^>]*>/g, '').length > 100 && '...'}
+								<p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
+									{note.content
+										? note.content.replace(/<[^>]*>/g, '').substring(0, 100)
+										: 'No content'}
+									{note.content &&
+										note.content.replace(/<[^>]*>/g, '').length > 100 &&
+										'...'}
 								</p>
 							</div>
 						)}
@@ -390,13 +451,13 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 								{tags.slice(0, 3).map((tag: any, index: number) => (
 									<span
 										key={index}
-										className="inline-flex items-center px-2 py-0.5 bg-primary/8 text-primary text-xs rounded-md"
+										className="bg-primary/8 text-primary inline-flex items-center rounded-md px-2 py-0.5 text-xs"
 									>
 										{typeof tag === 'string' ? tag : tag?.name || String(tag)}
 									</span>
 								))}
 								{tags.length > 3 && (
-									<span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-md">
+									<span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-xs">
 										+{tags.length - 3}
 									</span>
 								)}
@@ -404,24 +465,28 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 						)}
 					</div>
 
-					<div className="border-t mt-auto font-mono">
+					<div className="mt-auto border-t font-mono">
 						<div className="flex items-center justify-between px-4 py-2">
 							<div className="flex items-center gap-2">
 								<Avatar className="h-5 w-5">
 									<AvatarImage
-										src={note.createdBy?.image?.objectKey ? getUserImgSrc(note.createdBy.image.objectKey) : undefined}
+										src={
+											note.createdBy?.image?.objectKey
+												? getUserImgSrc(note.createdBy.image.objectKey)
+												: undefined
+										}
 										alt={createdBy}
 									/>
 									<AvatarFallback className="text-xs font-medium">
 										{createdByInitials}
 									</AvatarFallback>
 								</Avatar>
-								<span className="text-xs text-muted-foreground font-medium">
+								<span className="text-muted-foreground text-xs font-medium">
 									{createdBy.split(' ')[0]}
 								</span>
 							</div>
 
-							<span className="text-xs text-muted-foreground tracking-tighter">
+							<span className="text-muted-foreground text-xs tracking-tighter">
 								{timeAgo}
 							</span>
 						</div>
@@ -432,7 +497,13 @@ export const NoteCard = ({ note, organizationId, isEditing = false, setEditingNo
 	)
 }
 
-export function NotesCards({ notes, organizationId }: { notes: LoaderNote[], organizationId: string }) {
+export function NotesCards({
+	notes,
+	organizationId,
+}: {
+	notes: LoaderNote[]
+	organizationId: string
+}) {
 	const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
 
 	if (notes.length === 0) {
@@ -440,7 +511,7 @@ export function NotesCards({ notes, organizationId }: { notes: LoaderNote[], org
 	}
 
 	return (
-		<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 p-1">
+		<div className="grid gap-6 p-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
 			{notes.map((note) => (
 				<NoteCard
 					key={note.id}

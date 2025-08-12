@@ -90,7 +90,11 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 				aria-labelledby="edit-note-title"
 				tabIndex={-1}
 			>
-				<OrgNoteEditor note={loaderData.note} actionData={actionData} organizationId={loaderData.organizationId} />
+				<OrgNoteEditor
+					note={loaderData.note}
+					actionData={actionData}
+					organizationId={loaderData.organizationId}
+				/>
 			</section>
 		</>
 	)

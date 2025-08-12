@@ -46,7 +46,6 @@ export async function loader({
 	})
 }
 
-
 export const profileUpdateActionIntent = 'update-profile'
 export const changeEmailActionIntent = 'change-email'
 export const uploadPhotoActionIntent = 'upload-photo'

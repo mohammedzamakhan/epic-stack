@@ -111,7 +111,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	if (!note.isPublic) {
 		const hasAccess =
 			note.createdById === userId ||
-			note.noteAccess.some(access => access.user.id === userId)
+			note.noteAccess.some((access) => access.user.id === userId)
 
 		if (!hasAccess) {
 			throw new Response('Not authorized', { status: 403 })
@@ -173,12 +173,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		const rootComments: any[] = []
 
 		// First pass: create map of all comments
-		comments.forEach(comment => {
+		comments.forEach((comment) => {
 			commentMap.set(comment.id, { ...comment, replies: [] })
 		})
 
 		// Second pass: organize into tree structure
-		comments.forEach(comment => {
+		comments.forEach((comment) => {
 			if (comment.parentId) {
 				const parent = commentMap.get(comment.parentId)
 				if (parent) {
@@ -213,7 +213,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		organizationMembers,
 		comments: organizedComments,
 		activityLogs,
-		connections: connections.map(conn => ({
+		connections: connections.map((conn) => ({
 			id: conn.id,
 			externalId: conn.externalId,
 			config: conn.config ? JSON.parse(conn.config as string) : {},
@@ -224,7 +224,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				isActive: conn.integration.isActive,
 			},
 		})),
-		availableIntegrations: availableIntegrations.map(int => ({
+		availableIntegrations: availableIntegrations.map((int) => ({
 			id: int.id,
 			providerName: int.providerName,
 			providerType: int.providerType,
@@ -260,7 +260,7 @@ const ShareNoteSchema = z.object({
 	noteId: z.string(),
 	isPublic: z
 		.string()
-		.transform(val => val === 'true')
+		.transform((val) => val === 'true')
 		.pipe(z.boolean()),
 })
 
@@ -281,7 +281,7 @@ const BatchUpdateNoteAccessSchema = z.object({
 	noteId: z.string(),
 	isPublic: z
 		.string()
-		.transform(val => val === 'true')
+		.transform((val) => val === 'true')
 		.pipe(z.boolean()),
 	usersToAdd: z.array(z.string()).optional().default([]),
 	usersToRemove: z.array(z.string()).optional().default([]),
@@ -830,7 +830,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		try {
 			// Use a transaction to ensure all operations succeed or fail together
-			await prisma.$transaction(async tx => {
+			await prisma.$transaction(async (tx) => {
 				console.log(
 					'Starting transaction. Current note.isPublic:',
 					note.isPublic,
@@ -899,9 +899,9 @@ export async function action({ request }: ActionFunctionArgs) {
 						select: { userId: true },
 					})
 
-					const validUserIds = validOrgMembers.map(member => member.userId)
+					const validUserIds = validOrgMembers.map((member) => member.userId)
 					const invalidUsers = validUsersToAdd.filter(
-						id => !validUserIds.includes(id),
+						(id) => !validUserIds.includes(id),
 					)
 
 					if (invalidUsers.length > 0) {
@@ -990,7 +990,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		if (!note.isPublic) {
 			const hasAccess =
 				note.createdById === userId ||
-				note.noteAccess.some(access => access.userId === userId)
+				note.noteAccess.some((access) => access.userId === userId)
 
 			if (!hasAccess) {
 				throw new Response('Not authorized', { status: 403 })
@@ -1038,7 +1038,7 @@ export async function action({ request }: ActionFunctionArgs) {
 								comment.id,
 								imageFile,
 								note.organizationId,
-							).then(objectKey => ({
+							).then((objectKey) => ({
 								commentId: comment.id,
 								objectKey,
 								altText: null,
@@ -1183,7 +1183,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		if (!note.isPublic) {
 			const hasAccess =
 				note.createdById === userId ||
-				note.noteAccess.some(access => access.userId === userId)
+				note.noteAccess.some((access) => access.userId === userId)
 
 			if (!hasAccess) {
 				throw new Response('Not authorized', { status: 403 })
@@ -1349,7 +1349,7 @@ export default function NoteRoute() {
 	}, [note.id])
 
 	// Convert organization members to mention users format
-	const mentionUsers = organizationMembers.map(member => ({
+	const mentionUsers = organizationMembers.map((member) => ({
 		id: member.user.id,
 		name: member.user.name || member.user.username,
 		email: member.user.username, // Using username as email placeholder
@@ -1417,11 +1417,14 @@ export default function NoteRoute() {
 						{note.uploads.length > 0 && (
 							<ul className="mb-6 flex flex-wrap gap-5">
 								{note.uploads
-									.filter(upload => upload.type === 'image')
-									.map(image => (
+									.filter((upload) => upload.type === 'image')
+									.map((image) => (
 										<li key={image.objectKey}>
 											<a
-												href={getNoteImgSrc(image.objectKey, note.organization.id)}
+												href={getNoteImgSrc(
+													image.objectKey,
+													note.organization.id,
+												)}
 											>
 												<Img
 													src={getNoteImgSrc(
@@ -1438,12 +1441,12 @@ export default function NoteRoute() {
 									))}
 								{note.uploads
 									.filter(
-										upload =>
+										(upload) =>
 											upload.type === 'video' &&
 											upload.thumbnailKey &&
 											upload.status === 'completed',
 									)
-									.map(video => (
+									.map((video) => (
 										<li key={video.objectKey}>
 											<div className="relative">
 												<Img
@@ -1530,7 +1533,7 @@ export default function NoteRoute() {
 
 				<div className="bg-background flex-shrink-0 border-t px-6 py-4">
 					<div className="flex items-center justify-between">
-						<span className="text-foreground/90 max-[524px]:hidden text-sm">
+						<span className="text-foreground/90 text-sm max-[524px]:hidden">
 							<Icon name="clock" className="mr-1 h-4 w-4">
 								{timeAgo} ago
 							</Icon>
@@ -1590,7 +1593,7 @@ export function FavoriteButton({
 				value="toggle-favorite"
 				variant="outline"
 				size="sm"
-				status={isPending ? 'pending' : form.status ?? 'idle'}
+				status={isPending ? 'pending' : (form.status ?? 'idle')}
 				disabled={isPending}
 				className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 			>
@@ -1623,7 +1626,7 @@ export function DeleteNote({ id }: { id: string }) {
 				value="delete-note"
 				variant="destructive"
 				size="sm"
-				status={isPending ? 'pending' : form.status ?? 'idle'}
+				status={isPending ? 'pending' : (form.status ?? 'idle')}
 				disabled={isPending}
 			>
 				<Icon name="trash-2" className="h-4 w-4">

@@ -34,7 +34,10 @@ import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
 import { encrypt } from '#app/utils/encryption.server'
 import { markStepCompleted } from '#app/utils/onboarding'
-import { uploadOrganizationImage, testS3Connection } from '#app/utils/storage.server.ts'
+import {
+	uploadOrganizationImage,
+	testS3Connection,
+} from '#app/utils/storage.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -421,7 +424,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ result: submission.reply() })
 		}
 
-		const { s3Enabled, s3Endpoint, s3BucketName, s3AccessKeyId, s3SecretAccessKey, s3Region } = submission.value
+		const {
+			s3Enabled,
+			s3Endpoint,
+			s3BucketName,
+			s3AccessKeyId,
+			s3SecretAccessKey,
+			s3Region,
+		} = submission.value
 
 		try {
 			if (s3Enabled) {
@@ -430,8 +440,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					where: { organizationId: organization.id },
 				})
 
-				const secretToUse = s3SecretAccessKey 
-					? encrypt(s3SecretAccessKey) 
+				const secretToUse = s3SecretAccessKey
+					? encrypt(s3SecretAccessKey)
 					: existingConfig?.secretAccessKey || ''
 
 				// Create or update S3 configuration
@@ -476,7 +486,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 			return redirectWithToast(`/app/${organization.slug}/settings`, {
 				title: 'S3 Storage updated',
-				description: s3Enabled 
+				description: s3Enabled
 					? 'Your custom S3 storage configuration has been saved.'
 					: 'S3 storage has been disabled. Using default storage.',
 				type: 'success',
@@ -485,7 +495,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			console.error('Error updating S3 storage:', error)
 			return Response.json({
 				result: submission.reply({
-					formErrors: ['Failed to update S3 storage settings. Please try again.'],
+					formErrors: [
+						'Failed to update S3 storage settings. Please try again.',
+					],
 				}),
 			})
 		}
@@ -498,7 +510,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const s3SecretAccessKey = formData.get('s3SecretAccessKey') as string
 		const s3Region = formData.get('s3Region') as string
 
-		if (!s3Endpoint || !s3BucketName || !s3AccessKeyId || !s3SecretAccessKey || !s3Region) {
+		if (
+			!s3Endpoint ||
+			!s3BucketName ||
+			!s3AccessKeyId ||
+			!s3SecretAccessKey ||
+			!s3Region
+		) {
 			return Response.json({
 				connectionTest: {
 					success: false,
@@ -556,10 +574,7 @@ export default function GeneralSettings() {
 				title="Storage Configuration"
 				description="Configure custom S3-compatible storage for your organization's files."
 			>
-				<S3StorageCard
-					organization={organization}
-					actionData={actionData}
-				/>
+				<S3StorageCard organization={organization} actionData={actionData} />
 			</AnnotatedSection>
 
 			<AnnotatedSection

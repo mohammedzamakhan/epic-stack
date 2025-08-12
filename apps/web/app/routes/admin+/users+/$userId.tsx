@@ -179,8 +179,8 @@ export default function AdminUserDetailPage() {
 
 	return (
 		<div className="space-y-6">
-			<UserDetailView 
-				user={data.user} 
+			<UserDetailView
+				user={data.user}
 				recentActivity={data.recentActivity}
 				ipAddresses={data.ipAddresses}
 			/>

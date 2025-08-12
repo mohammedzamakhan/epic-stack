@@ -40,10 +40,10 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 			'/site.webmanifest',
 			'__manifest',
 			'/admin',
-			'.data'
+			'.data',
 		]
 
-		const shouldSkip = skipPaths.some(path => data.path.indexOf(path) === 0)
+		const shouldSkip = skipPaths.some((path) => data.path.indexOf(path) === 0)
 		if (shouldSkip) {
 			return
 		}
@@ -56,7 +56,7 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 		if (!ipRecord) {
 			// Try to get geolocation data (you can integrate with a service like ipapi.co)
 			const geoData = await getIpGeolocation(data.ip)
-			
+
 			ipRecord = await prisma.ipAddress.create({
 				data: {
 					ip: data.ip,
@@ -134,7 +134,7 @@ async function checkHighFrequencyRequests(ip: string): Promise<boolean> {
 	const maxRequests = 100 // Max requests per minute before considering suspicious
 
 	const current = requestCounts.get(ip)
-	
+
 	if (!current || now > current.resetTime) {
 		// Reset or initialize counter
 		requestCounts.set(ip, { count: 1, resetTime: now + resetWindow })
@@ -164,9 +164,10 @@ interface GeolocationData {
 async function getIpGeolocation(ip: string): Promise<GeolocationData | null> {
 	try {
 		// Skip geolocation for local/private IPs
-		const isLocalIp = ip === '127.0.0.1' || 
-			ip.indexOf('192.168.') === 0 || 
-			ip.indexOf('10.') === 0 || 
+		const isLocalIp =
+			ip === '127.0.0.1' ||
+			ip.indexOf('192.168.') === 0 ||
+			ip.indexOf('10.') === 0 ||
 			ip.indexOf('172.') === 0
 
 		if (isLocalIp) {
@@ -177,7 +178,7 @@ async function getIpGeolocation(ip: string): Promise<GeolocationData | null> {
 		// - ipapi.co
 		// - ipgeolocation.io
 		// - MaxMind GeoIP
-		
+
 		// Example integration with ipapi.co (commented out):
 		/*
 		const response = await fetch(`http://ipapi.co/${ip}/json/`)
@@ -190,7 +191,7 @@ async function getIpGeolocation(ip: string): Promise<GeolocationData | null> {
 			}
 		}
 		*/
-		
+
 		return null
 	} catch (error) {
 		console.error('Error getting IP geolocation:', error)
@@ -199,9 +200,9 @@ async function getIpGeolocation(ip: string): Promise<GeolocationData | null> {
 }
 
 export async function blacklistIp(
-	ip: string, 
-	reason: string, 
-	blacklistedById: string
+	ip: string,
+	reason: string,
+	blacklistedById: string,
 ): Promise<void> {
 	await prisma.ipAddress.upsert({
 		where: { ip },
@@ -256,9 +257,9 @@ export async function getIpStats() {
 	})
 
 	const suspiciousCount = await prisma.ipAddress.count({
-		where: { 
+		where: {
 			suspiciousScore: { gt: 0 },
-			isBlacklisted: false 
+			isBlacklisted: false,
 		},
 	})
 

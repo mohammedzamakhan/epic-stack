@@ -367,7 +367,7 @@ export const imageProcessingTask = task({
 				imageId,
 				thumbnailBuffer,
 				'jpg',
-				organizationId
+				organizationId,
 			)
 
 			// Update image upload record with thumbnail and metadata

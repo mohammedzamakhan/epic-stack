@@ -34,7 +34,7 @@ export function MultiImageUpload({
 	meta,
 	formId,
 	existingImages = [],
-	organizationId
+	organizationId,
 }: MultiImageUploadProps) {
 	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)

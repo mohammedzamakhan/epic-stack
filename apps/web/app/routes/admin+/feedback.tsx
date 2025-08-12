@@ -56,7 +56,7 @@ export default function AdminFeedbackPage() {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{feedback.map(item => (
+						{feedback.map((item) => (
 							<TableRow key={item.id}>
 								<TableCell>
 									<div>{item.user.name}</div>

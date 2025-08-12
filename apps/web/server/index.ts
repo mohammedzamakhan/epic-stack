@@ -148,20 +148,20 @@ app.use(async (req, res, next) => {
 		// Check if IP is blacklisted first
 		const ipTracking = await import('../app/utils/ip-tracking.server.js')
 		const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
-		
+
 		const isBlacklisted = await ipTracking.isIpBlacklisted(ip)
 		if (isBlacklisted) {
-			return res.status(403).json({ 
-				error: 'Access denied', 
+			return res.status(403).json({
+				error: 'Access denied',
 				message: 'Your IP address has been blocked due to suspicious activity.',
-				code: 'IP_BLACKLISTED'
+				code: 'IP_BLACKLISTED',
 			})
 		}
 	} catch (error) {
 		// If there's an error checking blacklist, log it but don't block the request
 		console.error('Error checking IP blacklist:', error)
 	}
-	
+
 	// Track the request after the response is finished
 	res.on('finish', () => {
 		// Track the request asynchronously
@@ -183,19 +183,22 @@ app.use(async (req, res, next) => {
 			}
 		})
 	})
-	
+
 	next()
 })
 
 // Periodic cleanup of in-memory request counts (every 5 minutes)
-setInterval(async () => {
-	try {
-		const ipTracking = await import('../app/utils/ip-tracking.server.js')
-		ipTracking.cleanupRequestCounts()
-	} catch (error) {
-		console.error('Error cleaning up request counts:', error)
-	}
-}, 5 * 60 * 1000)
+setInterval(
+	async () => {
+		try {
+			const ipTracking = await import('../app/utils/ip-tracking.server.js')
+			ipTracking.cleanupRequestCounts()
+		} catch (error) {
+			console.error('Error cleaning up request counts:', error)
+		}
+	},
+	5 * 60 * 1000,
+)
 
 // When running tests or running in development, we want to effectively disable
 // rate limiting because playwright tests are very fast and we don't want to

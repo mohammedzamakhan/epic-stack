@@ -120,7 +120,9 @@ export function IntegrationControls({
 											const formData = new FormData()
 											formData.append('intent', disconnectNoteActionIntent)
 											formData.append('connectionId', connection.id)
-											void disconnectFetcher.submit(formData, { method: 'POST' })
+											void disconnectFetcher.submit(formData, {
+												method: 'POST',
+											})
 										}}
 										isDisconnecting={
 											disconnectFetcher.state !== 'idle' &&

@@ -34,37 +34,45 @@ npx epicli
 
 ## Monorepo Structure
 
-This project is a monorepo managed by Turborepo. The code is organized into two main directories: `apps` and `packages`.
+This project is a monorepo managed by Turborepo. The code is organized into two
+main directories: `apps` and `packages`.
 
 - **`apps`**: Contains the different applications that make up the Epic Stack.
-- **`packages`**: Contains reusable packages that are shared across the different applications.
+- **`packages`**: Contains reusable packages that are shared across the
+  different applications.
 
 ### Applications
 
-| Application         | Description                                       | Dev Command              |
-| ------------------- | ------------------------------------------------- | ------------------------|
-| `web`               | The main Remix application.                       | `npm run dev:web`        |
-| `background-jobs`   | Trigger.dev app for background jobs.              | `npm run dev:trigger`    |
-| `docs`              | Mintlify app for documentation.                   | `npm run docs:dev`       |
-| `email`             | React Email app for developing & previewing emails. | `cd apps/email && npm run dev` |
-| `notifications`     | Novu app for managing notifications.              | `cd apps/notifications && npm run dev` |
-| `studio`            | Prisma Studio for database viewing and editing.   | `cd apps/studio && npm run dev` |
+| Application       | Description                                         | Dev Command                            |
+| ----------------- | --------------------------------------------------- | -------------------------------------- |
+| `web`             | The main Remix application.                         | `npm run dev:web`                      |
+| `background-jobs` | Trigger.dev app for background jobs.                | `npm run dev:trigger`                  |
+| `docs`            | Mintlify app for documentation.                     | `npm run docs:dev`                     |
+| `email`           | React Email app for developing & previewing emails. | `cd apps/email && npm run dev`         |
+| `notifications`   | Novu app for managing notifications.                | `cd apps/notifications && npm run dev` |
+| `studio`          | Prisma Studio for database viewing and editing.     | `cd apps/studio && npm run dev`        |
 
 ### Packages
 
-The `packages` directory contains reusable packages that are shared across the different applications.
+The `packages` directory contains reusable packages that are shared across the
+different applications.
 
-- **`@repo/prisma`**: Contains the database schema, Prisma client, and migrations.
-- **`@repo/ui`**: Contains the UI components that are shared across the applications.
-- **`@repo/config`**: Contains the shared configuration for the applications (e.g. ESLint, Prettier, etc.).
+- **`@repo/prisma`**: Contains the database schema, Prisma client, and
+  migrations.
+- **`@repo/ui`**: Contains the UI components that are shared across the
+  applications.
+- **`@repo/config`**: Contains the shared configuration for the applications
+  (e.g. ESLint, Prettier, etc.).
 - **`@repo/email`**: Contains the email templates and logic for sending emails.
 - **`@repo/background-jobs`**: Contains the background job definitions.
-- **`@repo/integrations`**: Contains the code for integrating with third-party services.
+- **`@repo/integrations`**: Contains the code for integrating with third-party
+  services.
 - **`@repo/notifications`**: Contains the notification workflows.
 
 ### Development
 
-To run all the applications in development mode, run the following command from the root of the repository:
+To run all the applications in development mode, run the following command from
+the root of the repository:
 
 ```sh
 npm run dev
@@ -79,7 +87,8 @@ This will start the following applications:
 - `notifications`
 - `studio`
 
-You can also run each application individually. Refer to the "Applications" section for the specific commands.
+You can also run each application individually. Refer to the "Applications"
+section for the specific commands.
 
 ## Support
 

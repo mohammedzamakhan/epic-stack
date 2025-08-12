@@ -106,7 +106,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ error: 'Organization not found' }, { status: 404 })
 		}
 
-		return checkoutAction(request, organizationWithBilling, priceId ?? undefined)
+		return checkoutAction(
+			request,
+			organizationWithBilling,
+			priceId ?? undefined,
+		)
 	}
 
 	if (intent === 'customer-portal') {

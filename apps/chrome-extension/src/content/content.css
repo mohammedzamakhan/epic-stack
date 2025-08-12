@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Define CSS variables for Shadow DOM - these need to be on :host instead of :root */
 :host {
@@ -227,7 +227,6 @@
 }
 
 @layer base {
-
 	*,
 	::before,
 	::after {
