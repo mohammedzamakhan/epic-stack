@@ -167,7 +167,12 @@ async function uploadVideoThumbnail(
 	// Upload thumbnail to storage
 
 	const thumbnailFile = {
-		type: fileExtension === 'svg' ? 'image/svg+xml' : 'image/jpeg',
+		type:
+			fileExtension === 'svg'
+				? 'image/svg+xml'
+				: fileExtension === 'gif'
+					? 'image/gif'
+					: 'image/jpeg',
 		name: `thumbnail.${fileExtension}`,
 	}
 
@@ -215,7 +220,11 @@ export const videoProcessingTask = task({
 		const tempDirectory = os.tmpdir()
 		const thumbnailPath = path.join(
 			tempDirectory,
-			`thumbnail_${videoId}_${Date.now()}.jpg`,
+			`thumbnail_${videoId}_${Date.now()}.gif`,
+		)
+		const palettePath = path.join(
+			tempDirectory,
+			`palette_${videoId}_${Date.now()}.png`,
 		)
 		const tempVideoPath = path.join(
 			tempDirectory,
@@ -270,6 +279,7 @@ export const videoProcessingTask = task({
 			const videoMetadata = await new Promise<{
 				width: number
 				height: number
+				duration: number
 			}>((resolve, reject) => {
 				ffmpeg.ffprobe(tempVideoPath, (err, metadata) => {
 					if (err) {
@@ -280,24 +290,32 @@ export const videoProcessingTask = task({
 					const videoStream = metadata.streams.find(
 						(stream) => stream.codec_type === 'video',
 					)
-					if (!videoStream || !videoStream.width || !videoStream.height) {
-						reject(new Error('Could not determine video dimensions'))
+					if (
+						!videoStream ||
+						!videoStream.width ||
+						!videoStream.height ||
+						!videoStream.duration
+					) {
+						reject(new Error('Could not determine video dimensions or duration'))
 						return
 					}
 
 					resolve({
 						width: videoStream.width,
 						height: videoStream.height,
+						duration: parseFloat(videoStream.duration),
 					})
 				})
 			})
 
-			// Calculate thumbnail size maintaining aspect ratio (max width 400px)
-			const maxWidth = 400
+			// Calculate thumbnail size maintaining aspect ratio (max width 320px for GIF)
+			const maxWidth = 320
 			const aspectRatio = videoMetadata.width / videoMetadata.height
 			const thumbnailWidth = Math.min(maxWidth, videoMetadata.width)
 			const thumbnailHeight = Math.round(thumbnailWidth / aspectRatio)
 			const thumbnailSize = `${thumbnailWidth}x${thumbnailHeight}`
+			const gifDuration = Math.min(videoMetadata.duration, 3) // 3 second GIF max
+			const gifStartTime = Math.max(0, videoMetadata.duration / 2 - gifDuration / 2) // Center the GIF
 
 			logger.info('Processing video thumbnail', {
 				videoId,
@@ -305,27 +323,46 @@ export const videoProcessingTask = task({
 				thumbnailSize,
 			})
 
-			// Generate thumbnail at 2 seconds mark using the temporary file
+			// Generate a color palette for the GIF
 			await new Promise<void>((resolve, reject) => {
 				ffmpeg(tempVideoPath)
-					.screenshots({
-						count: 1,
-						folder: tempDirectory,
-						filename: path.basename(thumbnailPath),
-						size: thumbnailSize,
-						timemarks: ['2'], // 2 seconds
-					})
-					.on('end', () => {
-						resolve()
-					})
+					.setStartTime(gifStartTime)
+					.duration(gifDuration)
+					.outputOptions([
+						'-vf',
+						`fps=10,scale=${thumbnailWidth}:-1:flags=lanczos,palettegen`,
+					])
+					.output(palettePath)
+					.on('end', resolve)
 					.on('error', (err) => {
-						logger.error('Failed to generate thumbnail', {
+						logger.error('Failed to generate palette', {
 							videoId,
 							error: err.message,
-							thumbnailSize,
 						})
 						reject(err)
 					})
+					.run()
+			})
+
+			// Generate the GIF using the palette
+			await new Promise<void>((resolve, reject) => {
+				ffmpeg(tempVideoPath)
+					.input(palettePath)
+					.setStartTime(gifStartTime)
+					.duration(gifDuration)
+					.complexFilter(
+						`[0:v]fps=10,scale=${thumbnailWidth}:-1:flags=lanczos[x];[x][1:v]paletteuse`,
+					)
+					.output(thumbnailPath)
+					.on('end', resolve)
+					.on('error', (err) => {
+						logger.error('Failed to generate GIF', {
+							videoId,
+							error: err.message,
+						})
+						reject(err)
+					})
+					.run()
 			})
 
 			// Read the generated thumbnail
@@ -337,7 +374,7 @@ export const videoProcessingTask = task({
 				noteId,
 				videoId,
 				thumbnailBuffer,
-				'jpg',
+				'gif',
 				organizationId,
 			)
 
@@ -354,6 +391,7 @@ export const videoProcessingTask = task({
 
 			// Clean up temporary files
 			await fs.unlink(thumbnailPath)
+			await fs.unlink(palettePath)
 			await fs.unlink(tempVideoPath)
 
 			const result = {
@@ -396,6 +434,11 @@ export const videoProcessingTask = task({
 			// Clean up temporary files on error
 			try {
 				await fs.unlink(thumbnailPath)
+			} catch (cleanupError) {
+				// Ignore cleanup errors
+			}
+			try {
+				await fs.unlink(palettePath)
 			} catch (cleanupError) {
 				// Ignore cleanup errors
 			}
