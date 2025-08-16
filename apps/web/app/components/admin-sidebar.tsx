@@ -13,10 +13,10 @@ import {
 	SidebarHeader,
 } from '#app/components/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
+import { GlobeIcon } from './icons/globe-icon'
 import { Logo } from './icons/logo'
 import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { ShieldCheckIcon } from './icons/shield-check-icon'
-import { GlobeIcon } from './icons/globe-icon'
 
 export function AdminSidebar({
 	...props

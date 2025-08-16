@@ -1,10 +1,9 @@
 'use client'
 
-import { Button } from '#app/components/ui/button'
 import { ArrowDownIcon } from 'lucide-react'
-import type { ComponentProps } from 'react'
-import { useCallback } from 'react'
+import  { type ComponentProps, useCallback  } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
+import { Button } from '#app/components/ui/button'
 import { cn } from '#app/utils/misc'
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
@@ -38,8 +37,8 @@ export const ConversationScrollButton = ({
 }: ConversationScrollButtonProps) => {
 	const { isAtBottom, scrollToBottom } = useStickToBottomContext()
 
-	const handleScrollToBottom = useCallback(() => {
-		scrollToBottom()
+	const handleScrollToBottom = useCallback(async () => {
+		await scrollToBottom()
 	}, [scrollToBottom])
 
 	return (

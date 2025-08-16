@@ -33,10 +33,10 @@ import { ArrowLeftIcon } from './icons/arrow-left-icon'
 import { BuildingIcon } from './icons/building-icon'
 import { CircleHelpIcon } from './icons/circle-help'
 import { Logo } from './icons/logo'
+import { McpIcon } from './icons/mcp-icon'
 import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { NavSecondary } from './nav-secondary'
-import { McpIcon } from './icons/mcp-icon'
 
 // Upgrade Account Card Component
 function UpgradeAccountCard({

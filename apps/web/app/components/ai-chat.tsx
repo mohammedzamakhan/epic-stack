@@ -1,13 +1,14 @@
 'use client'
 
 import { useChat } from 'ai/react'
-import { useState, useEffect } from 'react'
 import { SparklesIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import {
 	Conversation,
 	ConversationContent,
 	ConversationScrollButton,
 } from '#app/components/ai-elements/conversation'
+import { Loader } from '#app/components/ai-elements/loader'
 import {
 	Message,
 	MessageContent,
@@ -19,14 +20,13 @@ import {
 	PromptInputToolbar,
 	PromptInputSubmit,
 } from '#app/components/ai-elements/prompt-input'
-import { Suggestions, Suggestion } from '#app/components/ai-elements/suggestion'
-import { Response } from '#app/components/ai-elements/response'
-import { Loader } from '#app/components/ai-elements/loader'
 import {
 	Reasoning,
 	ReasoningContent,
 	ReasoningTrigger,
 } from '#app/components/ai-elements/reasoning'
+import { Response } from '#app/components/ai-elements/response'
+import { Suggestions, Suggestion } from '#app/components/ai-elements/suggestion'
 
 interface AIChatProps {
 	noteId: string

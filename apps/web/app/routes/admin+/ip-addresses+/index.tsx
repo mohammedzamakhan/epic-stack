@@ -1,23 +1,11 @@
 import {
 	useLoaderData,
 	Form,
-	LoaderFunctionArgs,
-	ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs, Link
 } from 'react-router'
-import { requireUserWithRole } from '#app/utils/permissions.server'
-import { prisma } from '#app/utils/db.server'
-import { blacklistIp, unblacklistIp } from '#app/utils/ip-tracking.server'
-import { getUserId } from '#app/utils/auth.server'
-import { Button } from '#app/components/ui/button'
 import { Badge } from '#app/components/ui/badge'
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '#app/components/ui/table'
+import { Button } from '#app/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
@@ -28,8 +16,19 @@ import {
 	DialogTrigger,
 } from '#app/components/ui/dialog'
 import { Label } from '#app/components/ui/label'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '#app/components/ui/table'
 import { Textarea } from '#app/components/ui/textarea'
-import { Link } from 'react-router'
+import { getUserId } from '#app/utils/auth.server'
+import { prisma } from '#app/utils/db.server'
+import { blacklistIp, unblacklistIp } from '#app/utils/ip-tracking.server'
+import { requireUserWithRole } from '#app/utils/permissions.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')

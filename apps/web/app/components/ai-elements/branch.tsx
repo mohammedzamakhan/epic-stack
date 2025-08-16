@@ -1,11 +1,10 @@
 'use client'
 
+import  { type UIMessage } from 'ai'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import type { ComponentProps, HTMLAttributes, ReactElement } from 'react'
-import { createContext, useContext, useEffect, useState } from 'react'
+import  { type ComponentProps, type HTMLAttributes, type ReactElement, createContext, useContext, useEffect, useState  } from 'react'
 import { Button } from '#app/components/ui/button'
 import { cn } from '#app/utils/misc'
-import type { UIMessage } from 'ai'
 
 type BranchContextType = {
 	currentBranch: number

@@ -8,7 +8,7 @@ import {
 	WrenchIcon,
 	XCircleIcon,
 } from 'lucide-react'
-import type { ComponentProps, ReactNode } from 'react'
+import  { type ComponentProps, type ReactNode } from 'react'
 import { Badge } from '#app/components/ui/badge'
 import {
 	Collapsible,

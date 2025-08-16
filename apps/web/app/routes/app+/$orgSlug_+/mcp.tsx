@@ -1,6 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { useEffect, useState } from 'react'
 import { Form, useActionData, useLoaderData, useSubmit, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import {
+	AnnotatedLayout,
+	AnnotatedSection,
+} from '#app/components/ui/annotated-layout'
 import { Button } from '#app/components/ui/button'
 import {
 	Card,
@@ -24,14 +28,10 @@ import { Input } from '#app/components/ui/input'
 import { Label } from '#app/components/ui/label'
 import { PageTitle } from '#app/components/ui/page-title'
 import { Textarea } from '#app/components/ui/textarea'
-import {
-	AnnotatedLayout,
-	AnnotatedSection,
-} from '#app/components/ui/annotated-layout'
+import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
-import { generateApiKey } from '#app/utils/api-key.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const { orgSlug } = params

@@ -1,12 +1,11 @@
 'use client'
 
 import { Loader2Icon, SendIcon, SquareIcon, XIcon } from 'lucide-react'
-import type {
-	ComponentProps,
-	HTMLAttributes,
-	KeyboardEventHandler,
+import  {
+	type ComponentProps,
+	type HTMLAttributes,
+	type KeyboardEventHandler, Children
 } from 'react'
-import { Children } from 'react'
 import { Button } from '#app/components/ui/button'
 import {
 	Select,

@@ -1,3 +1,4 @@
+import { Portal } from '@radix-ui/react-portal'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect } from 'react'
@@ -7,7 +8,6 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from '#app/components/ui/avatar.tsx'
-import { Portal } from '@radix-ui/react-portal'
 import { Button } from '#app/components/ui/button.tsx'
 import { Card, CardContent } from '#app/components/ui/card.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
@@ -20,7 +20,7 @@ import {
 	TooltipTrigger,
 } from '#app/components/ui/tooltip.tsx'
 import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
-import { loader } from './notes'
+import { type loader } from './notes'
 
 type LoaderNote = {
 	id: string

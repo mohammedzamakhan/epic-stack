@@ -1,6 +1,6 @@
 'use client'
 
-import type { ComponentProps } from 'react'
+import  { type ComponentProps } from 'react'
 import { Button } from '#app/components/ui/button'
 import { ScrollArea, ScrollBar } from '#app/components/ui/scroll-area'
 import { cn } from '#app/utils/misc'

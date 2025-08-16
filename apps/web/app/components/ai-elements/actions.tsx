@@ -1,6 +1,6 @@
 'use client'
 
-import type { ComponentProps } from 'react'
+import  { type ComponentProps } from 'react'
 import { Button } from '#app/components/ui/button'
 import {
 	Tooltip,

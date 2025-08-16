@@ -1,21 +1,21 @@
 'use client'
 
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 import * as React from 'react'
-import type { ComponentProps } from 'react'
-import { cn } from '#app/utils/misc'
+import  { type ComponentProps } from 'react'
 import { Badge } from '#app/components/ui/badge'
-import {
-	HoverCard,
-	HoverCardTrigger,
-	HoverCardContent,
-} from '#app/components/ui/hover-card'
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
 	useCarousel,
 } from '#app/components/ui/carousel'
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
+import {
+	HoverCard,
+	HoverCardTrigger,
+	HoverCardContent,
+} from '#app/components/ui/hover-card'
+import { cn } from '#app/utils/misc'
 
 export type InlineCitationProps = ComponentProps<'span'>
 

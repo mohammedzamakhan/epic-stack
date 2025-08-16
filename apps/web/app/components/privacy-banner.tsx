@@ -1,5 +1,5 @@
-import { Form, useFetcher } from 'react-router'
 import { useEffect } from 'react'
+import { Form, useFetcher } from 'react-router'
 import { Button } from './ui/button'
 
 export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
@@ -36,7 +36,7 @@ export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 									variant="secondary"
 									className="w-1/3"
 									onClick={() => {
-										fetcher.submit(
+										void fetcher.submit(
 											{ consent: 'false' },
 											{ method: 'POST', action: '/resources/cookie-consent' },
 										)
@@ -48,7 +48,7 @@ export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 									type="button"
 									className="w-2/3"
 									onClick={() => {
-										fetcher.submit(
+										void fetcher.submit(
 											{ consent: 'true' },
 											{ method: 'POST', action: '/resources/cookie-consent' },
 										)

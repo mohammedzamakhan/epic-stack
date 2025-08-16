@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import browser from 'webextension-polyfill'
 import { Button } from './components/ui/button'
 import {
 	Card,
@@ -9,7 +10,6 @@ import {
 	CardTitle,
 } from './components/ui/card'
 import contentScript from './content/index.tsx?script'
-import browser from 'webextension-polyfill'
 
 function App() {
 	const [url, setUrl] = useState('')
@@ -42,7 +42,7 @@ function App() {
 				setUrl('Invalid URL.')
 			}
 		}
-		init()
+		void init()
 	}, [])
 
 	const handleAllow = async () => {
