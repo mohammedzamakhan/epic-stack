@@ -461,7 +461,7 @@ export const checkoutAction = async (
 	organization: Organization,
 	priceIdArg?: string,
 ) => {
-	let priceId = priceIdArg
+	let priceId: string | undefined | null = priceIdArg
 	if (!priceId) {
 		const formData = await request.formData()
 		priceId = formData.get('priceId') as string | null

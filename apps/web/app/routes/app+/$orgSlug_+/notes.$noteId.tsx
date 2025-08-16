@@ -1328,7 +1328,7 @@ export default function NoteRoute() {
 					{!note.isPublic && (
 						<>
 							<span>•</span>
-							<Icon name="lock-closed" className="h-3.5 w-3.5" />
+							<Icon name="lock" className="h-3.5 w-3.5" />
 							<span>Private</span>
 						</>
 					)}

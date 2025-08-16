@@ -67,7 +67,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 				currentPos++
 			}
 			// Update existing note position
-			updates.push({ id: notesInDestColumn?.[i]?.id, position: currentPos })
+			const note = notesInDestColumn[i]
+			if (note && note.id) {
+				updates.push({ id: note.id, position: currentPos })
+			}
 			currentPos++
 		}
 

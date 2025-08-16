@@ -256,7 +256,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 						priority: processedPriority,
 						tags: processedTags,
 						uploads: {
-							deleteMany: { id: { notIn: uploadUpdates.map((u) => u.id) } },
+							deleteMany: {
+								id: {
+									notIn: uploadUpdates
+										.map((u) => u.id)
+										.filter((id): id is string => Boolean(id)),
+								},
+							},
 							updateMany: uploadUpdates.map((updates) => ({
 								where: { id: updates.id },
 								data: {

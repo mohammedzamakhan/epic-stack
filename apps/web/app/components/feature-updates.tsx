@@ -127,7 +127,6 @@ export function FeatureUpdates({
 							transition={{
 								duration: 0.4,
 								ease: [0.25, 0.46, 0.45, 0.94],
-								exit: { duration: 0.3, ease: 'easeIn' } as any,
 							}}
 							className="bg-sidebar-accent border-sidebar-border relative z-20 flex flex-col justify-between rounded-md border p-3"
 							style={{

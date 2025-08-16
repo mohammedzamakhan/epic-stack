@@ -337,7 +337,7 @@ function Step1({ actionData }: { actionData: any }) {
 	// Auto-generate slug from name when name changes (but not when user is editing slug or has manually edited it)
 	useEffect(() => {
 		if (nameControl.value && !isSlugFocused && !hasManuallyEditedSlug) {
-			const generatedSlug = slugify(nameControl.value, {
+			const generatedSlug = slugify(nameControl.value ?? '', {
 				lowercase: true,
 			})
 			slugControl.change(generatedSlug)
@@ -809,7 +809,7 @@ function CreateInviteFieldset({
 								index,
 							})}
 						>
-							<Icon name="trash" className="size-4" />
+							<Icon name="trash-2" className="size-4" />
 						</Button>
 					)}
 				</div>

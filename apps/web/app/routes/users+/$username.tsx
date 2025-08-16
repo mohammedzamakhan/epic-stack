@@ -71,8 +71,8 @@ export default function ProfileRoute() {
 					</p>
 					{isLoggedInUser ? (
 						<Form action="/logout" method="POST" className="mt-3">
-							<Button type="submit" variant="link" size="pill">
-								<Icon name="exit" className="scale-125 max-md:scale-150">
+							<Button type="submit" variant="link" size="default">
+								<Icon name="log-out" className="scale-125 max-md:scale-150">
 									Logout
 								</Icon>
 							</Button>

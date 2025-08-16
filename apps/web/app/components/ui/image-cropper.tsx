@@ -155,7 +155,7 @@ export function ImageCropper({
 							variant="outline"
 							onClick={onCancel}
 						>
-							<Icon name="trash" className="mr-1.5 size-4" />
+							<Icon name="trash-2" className="mr-1.5 size-4" />
 							Cancel
 						</Button>
 					</DialogClose>
@@ -166,7 +166,7 @@ export function ImageCropper({
 						onClick={onCrop}
 						disabled={!croppedImageUrl}
 					>
-						<Icon name="pencil-1" className="mr-1.5 size-4" />
+						<Icon name="pencil" className="mr-1.5 size-4" />
 						Apply Crop
 					</Button>
 				</DialogFooter>

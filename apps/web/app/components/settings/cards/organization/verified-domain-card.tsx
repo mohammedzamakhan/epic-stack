@@ -90,10 +90,8 @@ export default function VerifiedDomainCard({
 							}}
 							className="w-full pt-2"
 							errors={fields.verifiedDomain.errors}
-							errorListClassName="mb-4"
 						/>
 						<ErrorList
-							className="mb-4"
 							id={form.errorId}
 							errors={form.errors}
 						/>

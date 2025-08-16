@@ -153,7 +153,7 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 						>
 							<div className="flex flex-col gap-2">
 								<div className="flex items-center gap-2">
-									<Icon name="lock-closed" />
+									<Icon name="lock" />
 									<span className="font-semibold">
 										{passkey.deviceType === 'platform'
 											? 'Device'
@@ -175,7 +175,7 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 									size="sm"
 									className="flex items-center gap-2"
 								>
-									<Icon name="trash">Delete</Icon>
+									<Icon name="trash-2">Delete</Icon>
 								</Button>
 							</Form>
 						</li>

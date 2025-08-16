@@ -26,7 +26,7 @@ export function SignOutOfSessions({ data }: SignOutOfSessionsProps) {
 	if (otherSessionsCount <= 0) {
 		return (
 			<div className="flex items-center">
-				<Icon name="avatar" className="mr-2" />
+				<Icon name="user" className="mr-2" />
 				<span>This is your only active session</span>
 			</div>
 		)
@@ -35,7 +35,7 @@ export function SignOutOfSessions({ data }: SignOutOfSessionsProps) {
 	return (
 		<div className="flex items-center justify-between">
 			<div className="flex items-center">
-				<Icon name="avatar" className="mr-2" />
+				<Icon name="user" className="mr-2" />
 				<span>
 					You have {otherSessionsCount} other active{' '}
 					{otherSessionsCount === 1 ? 'session' : 'sessions'}
@@ -71,7 +71,7 @@ export function DeleteData() {
 	return (
 		<div className="flex items-center justify-between">
 			<div className="flex items-center">
-				<Icon name="trash" className="mr-2" />
+				<Icon name="trash-2" className="mr-2" />
 				<span>Delete all your data and account</span>
 			</div>
 			<fetcher.Form method="POST">

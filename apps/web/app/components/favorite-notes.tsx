@@ -81,7 +81,7 @@ export default function FavoriteNotes({
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuAction showOnHover className="rounded-sm">
-									<Icon name="dots-horizontal" />
+									<Icon name="more-horizontal" />
 									<span className="sr-only">More</span>
 								</SidebarMenuAction>
 							</DropdownMenuTrigger>
@@ -98,7 +98,7 @@ export default function FavoriteNotes({
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild className="gap-2">
 									<Link to={`/app/${orgSlug}/notes/${favorite.note.id}/edit`}>
-										<Icon name="pencil-1" />
+										<Icon name="pencil" />
 										<span>Edit</span>
 									</Link>
 								</DropdownMenuItem>

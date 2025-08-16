@@ -22,7 +22,7 @@ import { type Route } from './+types/profile.photo.ts'
 import { type BreadcrumbHandle } from './profile.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="avatar">Photo</Icon>,
+	breadcrumb: <Icon name="user">Photo</Icon>,
 	getSitemapEntries: () => null,
 }
 
@@ -179,7 +179,7 @@ export default function PhotoRoute({
 						className="cursor-pointer peer-valid:hidden peer-focus-within:ring-2 peer-focus-visible:ring-2"
 					>
 						<label htmlFor={fields.photoFile.id}>
-							<Icon name="pencil-1">Change</Icon>
+							<Icon name="pencil">Change</Icon>
 						</label>
 					</Button>
 					<StatusButton
@@ -202,7 +202,7 @@ export default function PhotoRoute({
 						className="peer-invalid:hidden"
 						{...form.reset.getButtonProps()}
 					>
-						<Icon name="trash">Reset</Icon>
+						<Icon name="trash-2">Reset</Icon>
 					</Button>
 					{loaderData.user.image ? (
 						<StatusButton
@@ -221,7 +221,7 @@ export default function PhotoRoute({
 										: 'idle'
 							}
 						>
-							<Icon name="trash">
+							<Icon name="trash-2">
 								{doubleCheckDeleteImage.doubleCheck
 									? 'Are you sure?'
 									: 'Delete'}
