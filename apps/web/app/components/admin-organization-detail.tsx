@@ -18,110 +18,14 @@ import {
 	TableHeader,
 	TableRow,
 } from '#app/components/ui/table'
+import { loader } from '#app/routes/admin+/organizations+/$organizationId.tsx'
 
-export interface AdminOrganizationDetail {
-	id: string
-	name: string
-	slug: string
-	description: string | null
-	active: boolean
-	createdAt: string
-	updatedAt: string
-	planName: string | null
-	subscriptionStatus: string | null
-	size: string | null
-	stripeCustomerId: string | null
-	stripeSubscriptionId: string | null
-	stripeProductId: string | null
-	memberCount: number
-	totalMembers: number
-	activeIntegrations: number
-	totalIntegrations: number
-	pendingInvitations: number
-	image?: {
-		id: string
-		altText: string | null
-	} | null
-	users: Array<{
-		id: string
-		userId: string
-		role: string
-		active: boolean
-		isDefault: boolean
-		createdAt: string
-		updatedAt: string
-		department: string | null
-		user: {
-			id: string
-			name: string | null
-			email: string
-			username: string
-			image?: {
-				id: string
-				altText: string | null
-			} | null
-		}
-	}>
-	notes: Array<{
-		id: string
-		title: string
-		createdAt: string
-		updatedAt: string
-		isPublic: boolean
-		createdBy: {
-			id: string
-			name: string | null
-			username: string
-		}
-	}>
-	integrations: Array<{
-		id: string
-		providerName: string
-		providerType: string
-		isActive: boolean
-		lastSyncAt: string | null
-		createdAt: string
-		updatedAt: string
-	}>
-	invitations: Array<{
-		id: string
-		email: string
-		role: string
-		createdAt: string
-		expiresAt: string | null
-		inviter: {
-			id: string
-			name: string | null
-			username: string
-		} | null
-	}>
-	_count: {
-		users: number
-		notes: number
-		integrations: number
-		invitations: number
-	}
-}
-
-export interface RecentActivity {
-	id: string
-	action: string
-	createdAt: string
-	metadata: any
-	user: {
-		id: string
-		name: string | null
-		username: string
-	}
-	note: {
-		id: string
-		title: string
-	}
-}
+export type AdminOrganizationDetail = Awaited<ReturnType<typeof loader>>['organization']
+export type RecentActivity = Awaited<ReturnType<typeof loader>>['recentActivity']
 
 interface AdminOrganizationDetailProps {
 	organization: AdminOrganizationDetail
-	recentActivity: RecentActivity[]
+	recentActivity: RecentActivity
 }
 
 const getSubscriptionStatusBadge = (status: string | null) => {
@@ -304,7 +208,7 @@ export function AdminOrganizationDetail({
 						<div className="space-y-4">
 							{organization.users.slice(0, 10).map((member) => (
 								<div
-									key={member.id}
+									key={member.userId}
 									className="flex items-center justify-between"
 								>
 									<div className="flex items-center gap-3">

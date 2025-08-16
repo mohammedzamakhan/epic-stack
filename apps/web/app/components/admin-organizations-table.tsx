@@ -40,30 +40,9 @@ import {
 	TableHeader,
 	TableRow,
 } from '#app/components/ui/table'
+import { loader } from '#app/routes/admin+/organizations+/index.tsx'
 
-export interface AdminOrganization {
-	id: string
-	name: string
-	slug: string
-	description: string | null
-	active: boolean
-	createdAt: string
-	updatedAt: string
-	planName: string | null
-	subscriptionStatus: string | null
-	size: string | null
-	stripeCustomerId: string | null
-	stripeSubscriptionId: string | null
-	memberCount: number
-	totalMembers: number
-	noteCount: number
-	activeIntegrations: number
-	totalIntegrations: number
-	image?: {
-		id: string
-		altText: string | null
-	} | null
-}
+export type AdminOrganizations = Awaited<ReturnType<typeof loader>>['organizations']
 
 export interface Pagination {
 	page: number
@@ -79,7 +58,7 @@ export interface Filters {
 }
 
 interface AdminOrganizationsTableProps {
-	organizations: AdminOrganization[]
+	organizations: AdminOrganizations
 	subscriptionStatuses: string[]
 	planNames: string[]
 	pagination: Pagination
@@ -110,7 +89,7 @@ const getSubscriptionStatusBadge = (status: string | null) => {
 	}
 }
 
-const columns: ColumnDef<AdminOrganization>[] = [
+const columns: ColumnDef<AdminOrganizations[0]>[] = [
 	{
 		accessorKey: 'organization',
 		header: 'Organization',
