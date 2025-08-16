@@ -338,7 +338,7 @@ export const videoProcessingTask = task({
 						`fps=10,scale=${thumbnailWidth}:-1:flags=lanczos,palettegen`,
 					])
 					.output(palettePath)
-					.on('end', resolve)
+					.on('end', () => resolve())
 					.on('error', (err) => {
 						logger.error('Failed to generate palette', {
 							videoId,
@@ -359,7 +359,7 @@ export const videoProcessingTask = task({
 						`[0:v]fps=10,scale=${thumbnailWidth}:-1:flags=lanczos[x];[x][1:v]paletteuse`,
 					)
 					.output(thumbnailPath)
-					.on('end', resolve)
+					.on('end', () => resolve())
 					.on('error', (err) => {
 						logger.error('Failed to generate GIF', {
 							videoId,

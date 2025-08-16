@@ -2,7 +2,10 @@ import path from 'node:path'
 import { execaCommand } from 'execa'
 import fsExtra from 'fs-extra'
 import 'dotenv/config'
-import '#app/utils/env.server.ts'
+import { init as initEnv } from '#app/utils/env.server.ts'
+
+initEnv()
+
 import '#app/utils/cache.server.ts'
 
 export const BASE_DATABASE_PATH = path.join(
@@ -17,7 +20,7 @@ export async function setup() {
 		const databaseLastModifiedAt = (await fsExtra.stat(BASE_DATABASE_PATH))
 			.mtime
 		const prismaSchemaLastModifiedAt = (
-			await fsExtra.stat('./prisma/schema.prisma')
+			await fsExtra.stat('../../packages/prisma/schema.prisma')
 		).mtime
 
 		if (prismaSchemaLastModifiedAt < databaseLastModifiedAt) {
