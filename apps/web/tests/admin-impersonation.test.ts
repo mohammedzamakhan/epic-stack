@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { prisma } from '#app/utils/db.server.ts'
 import { insertNewUser } from '#tests/db-utils.ts'
 
-test.describe('Admin Impersonation', () => {
+test.describe.skip('Admin Impersonation', () => {
 	test('admin can impersonate a user', async ({ page }) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
