@@ -200,8 +200,10 @@ describe('ProviderRegistry', () => {
 
 		it('should return multiple providers of same type', () => {
 			// Create another communication provider
-			const anotherCommProvider = new MockCommunicationProvider()
-			anotherCommProvider.name = 'another-communication'
+			class AnotherMockCommunicationProvider extends MockCommunicationProvider {
+				readonly name = 'another-communication'
+			}
+			const anotherCommProvider = new AnotherMockCommunicationProvider()
 			registry.register(anotherCommProvider)
 
 			const communicationProviders = registry.getByType('communication')

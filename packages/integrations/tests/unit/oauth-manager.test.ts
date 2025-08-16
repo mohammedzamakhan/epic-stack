@@ -10,11 +10,8 @@ import {
 	OAuthFlowManager,
 } from '../../src/oauth-manager'
 import { providerRegistry } from '../../src/provider'
-import type {
-	OAuthCallbackParams,
-	TokenData,
-	IntegrationProvider,
-} from '../../src/types'
+import type { OAuthCallbackParams, TokenData } from '../../src/types'
+import type { IntegrationProvider } from '../../src/provider'
 
 // Mock environment variables
 const mockEnv = {
@@ -415,7 +412,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 3600000),
 			}
 
-			vi.mocked(mockProvider.refreshToken)
+			vi.mocked(mockProvider.refreshToken!)
 				.mockRejectedValueOnce(new Error('network timeout'))
 				.mockRejectedValueOnce(new Error('connection refused'))
 				.mockResolvedValue(newTokenData)
@@ -432,7 +429,7 @@ describe('TokenRefreshManager', () => {
 		it('should fail after max retries', async () => {
 			const refreshToken = 'refresh-token'
 
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('network timeout'),
 			)
 
@@ -451,7 +448,7 @@ describe('TokenRefreshManager', () => {
 		it('should not retry on non-retryable errors', async () => {
 			const refreshToken = 'refresh-token'
 
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('invalid_grant'),
 			)
 
@@ -491,7 +488,7 @@ describe('TokenRefreshManager', () => {
 				refreshToken: 'new-refresh-token',
 			}
 
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(
 				invalidTokenData as TokenData,
 			)
 
@@ -606,7 +603,10 @@ describe('OAuthFlowManager', () => {
 			const redirectUri = 'https://app.com/callback'
 			const expectedUrl = 'https://provider.com/oauth/authorize'
 
-			vi.mocked(mockProvider.getAuthUrl).mockResolvedValue(expectedUrl)
+			vi.mocked(mockProvider.getAuthUrl!).mockResolvedValue(expectedUrl)
+			vi.mocked(mockProvider.getAuthUrl!).mockResolvedValue(expectedUrl)
+			vi.mocked(mockProvider.getAuthUrl!).mockResolvedValue(expectedUrl)
+			vi.mocked(mockProvider.getAuthUrl!).mockResolvedValue(expectedUrl)
 
 			const result = await OAuthFlowManager.startOAuthFlow(
 				organizationId,
@@ -675,7 +675,7 @@ describe('OAuthFlowManager', () => {
 				expiresAt: new Date(Date.now() + 3600000),
 			}
 
-			vi.mocked(mockProvider.handleCallback).mockResolvedValue(mockTokenData)
+			vi.mocked(mockProvider.handleCallback!).mockResolvedValue(mockTokenData)
 
 			const params: OAuthCallbackParams = {
 				organizationId,
@@ -723,7 +723,7 @@ describe('OAuthFlowManager', () => {
 				expiresAt: new Date(Date.now() + 3600000),
 			}
 
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(newTokenData)
 
 			const result = await OAuthFlowManager.ensureValidToken(
 				'test-provider',

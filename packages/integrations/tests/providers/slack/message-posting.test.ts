@@ -19,13 +19,15 @@ describe('SlackProvider - Message Posting', () => {
 			providerName: 'slack',
 			accessToken: 'xoxb-real-slack-token',
 			refreshToken: null,
-			expiresAt: null,
+			tokenExpiresAt: null,
+			providerType: 'OAUTH',
 			config: JSON.stringify({
 				teamId: 'T1234567890',
 				teamName: 'Test Team',
 				botUserId: 'U1234567890',
 			}),
-			status: 'active',
+			isActive: true,
+			lastSyncAt: null,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		}
@@ -43,6 +45,8 @@ describe('SlackProvider - Message Posting', () => {
 				postFormat: 'blocks',
 				includeContent: true,
 			}),
+			isActive: true,
+			lastPostedAt: null,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			integration: mockIntegration,
@@ -335,7 +339,7 @@ describe('SlackProvider - Message Posting', () => {
 		})
 
 		it('should make correct API request with proper headers', async () => {
-			let requestHeaders: Headers
+			let requestHeaders: Headers = new Headers()
 			server.use(
 				http.post('https://slack.com/api/chat.postMessage', ({ request }) => {
 					requestHeaders = request.headers
@@ -391,7 +395,7 @@ describe('SlackProvider - Message Posting', () => {
 			)
 
 			// Should use default settings (blocks format, include content)
-			await provider.postMessage(connectionWithoutConfig, mockMessageData)
+			await provider.postMessage(connectionWithoutConfig as any, mockMessageData)
 
 			expect(requestBody.blocks).toBeDefined()
 			expect(requestBody.blocks[1].text.text).toContain(

@@ -183,7 +183,7 @@ describe('TokenManager', () => {
 				accessToken: null,
 				refreshToken: null,
 				tokenExpiresAt: null,
-				config: {},
+				config: '{}',
 			}
 
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue(
@@ -261,7 +261,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: false,
-				expiresAt: tokenData.expiresAt,
+				isExpired: false,
 				timeUntilExpiry: 3600000,
 			})
 
@@ -306,10 +306,10 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: true,
-				expiresAt: tokenData.expiresAt,
+				isExpired: false,
 				timeUntilExpiry: 300000,
 			})
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(newTokenData)
 			vi.mocked(integrationEncryption.encryptTokenData).mockResolvedValue(
 				encryptedData,
 			)
@@ -343,7 +343,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: false,
 				needsRefresh: false,
-				expiresAt: new Date(),
+				isExpired: true,
 				timeUntilExpiry: -1000,
 			})
 
@@ -377,7 +377,7 @@ describe('TokenManager', () => {
 				accessToken: 'encrypted-access',
 				refreshToken: 'encrypted-refresh',
 				tokenExpiresAt: tokenData.expiresAt,
-				config: {},
+				config: '{}',
 			} as any)
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,
@@ -385,10 +385,10 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: true,
-				expiresAt: tokenData.expiresAt,
+				isExpired: false,
 				timeUntilExpiry: 300000,
 			})
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('Refresh failed'),
 			)
 			vi.mocked(prisma.integrationLog.create).mockResolvedValue({} as any)
@@ -442,7 +442,7 @@ describe('TokenManager', () => {
 				iv: 'test-iv',
 			}
 
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(newTokenData)
 			vi.mocked(integrationEncryption.encryptTokenData).mockResolvedValue(
 				encryptedData,
 			)
@@ -457,7 +457,7 @@ describe('TokenManager', () => {
 
 			expect(result.success).toBe(true)
 			expect(result.tokenData).toEqual(newTokenData)
-			expect(mockProvider.refreshToken).toHaveBeenCalledWith('refresh-token')
+			expect(mockProvider.refreshToken!).toHaveBeenCalledWith('refresh-token')
 		})
 
 		it('should handle provider without refresh support', async () => {
@@ -478,7 +478,7 @@ describe('TokenManager', () => {
 		})
 
 		it('should handle refresh token failure', async () => {
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('invalid_grant'),
 			)
 			vi.mocked(prisma.integrationLog.create).mockResolvedValue({} as any)
@@ -527,7 +527,7 @@ describe('TokenManager', () => {
 			const validationResult = {
 				isValid: true,
 				needsRefresh: false,
-				expiresAt: tokenData.expiresAt,
+				isExpired: false,
 				timeUntilExpiry: 3600000,
 			}
 
@@ -642,7 +642,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,
 			)
-			vi.mocked(mockProvider.revokeToken).mockResolvedValue()
+			vi.mocked(mockProvider.revokeToken!).mockResolvedValue()
 			vi.mocked(prisma.integration.update).mockResolvedValue({} as any)
 			vi.mocked(prisma.integrationLog.create).mockResolvedValue({} as any)
 
@@ -678,7 +678,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,
 			)
-			vi.mocked(mockProvider.revokeToken).mockRejectedValue(
+			vi.mocked(mockProvider.revokeToken!).mockRejectedValue(
 				new Error('Provider revocation failed'),
 			)
 			vi.mocked(prisma.integration.update).mockResolvedValue({} as any)

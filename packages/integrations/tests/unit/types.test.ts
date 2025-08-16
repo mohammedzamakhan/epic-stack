@@ -157,7 +157,7 @@ describe('Type Definitions', () => {
 			expect(config.cloudId).toBe('cloud-123')
 			expect(config.user.accountId).toBe('account-123')
 			expect(config.useBotUser).toBe(true)
-			expect(config.botUser?.accountId).toBe('bot-account-123')
+			expect(config.botUser!.accountId).toBe('bot-account-123')
 		})
 
 		it('should accept valid LinearConfig', () => {
@@ -254,7 +254,7 @@ describe('Type Definitions', () => {
 			expect(config.user.gid).toBe('user-123')
 			expect(config.user.name).toBe('John Doe')
 			expect(config.workspaces).toHaveLength(1)
-			expect(config.workspaces[0].gid).toBe('workspace-123')
+			expect(config.workspaces[0]!.gid).toBe('workspace-123')
 		})
 
 		it('should accept valid TrelloConfig', () => {

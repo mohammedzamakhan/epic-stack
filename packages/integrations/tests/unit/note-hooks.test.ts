@@ -35,7 +35,7 @@ vi.mock('../../src/note-event-handler', () => ({
 global.setImmediate = vi.fn((callback) => {
 	// Execute callback synchronously for testing
 	Promise.resolve().then(callback)
-})
+}) as any
 
 describe('NoteHooks', () => {
 	beforeEach(() => {
@@ -232,6 +232,15 @@ describe('NoteHooks', () => {
 				id: 'note-123',
 				title: 'Test Note',
 				organizationId: 'org-123',
+				content: 'Test Content',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 
@@ -308,6 +317,14 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				content: 'Test Content',
 				organizationId: 'org-123',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
@@ -329,12 +346,28 @@ describe('NoteHooks', () => {
 				title: 'Old Title',
 				content: 'Old Content',
 				organizationId: 'org-123',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 			const afterSnapshot = {
 				id: 'note-123',
 				title: 'New Title',
 				content: 'New Content',
 				organizationId: 'org-123',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
@@ -362,6 +395,14 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				content: 'Test Content',
 				organizationId: 'org-123',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(noteData)
@@ -383,6 +424,14 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				content: 'Test Content',
 				organizationId: 'org-123',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
@@ -440,6 +489,14 @@ describe('NoteHooks', () => {
 						title: 'Note 1',
 						content: 'Content 1',
 						organizationId: 'org-123',
+						createdById: 'user-123',
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						isPublic: true,
+						priority: null,
+						tags: null,
+						statusId: null,
+						position: null,
 					},
 				},
 				{
@@ -451,12 +508,28 @@ describe('NoteHooks', () => {
 						title: 'Old Title',
 						content: 'Old Content',
 						organizationId: 'org-123',
+						createdById: 'user-123',
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						isPublic: true,
+						priority: null,
+						tags: null,
+						statusId: null,
+						position: null,
 					},
 					afterSnapshot: {
 						id: 'note-2',
 						title: 'New Title',
 						content: 'New Content',
 						organizationId: 'org-123',
+						createdById: 'user-123',
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						isPublic: true,
+						priority: null,
+						tags: null,
+						statusId: null,
+						position: null,
 					},
 				},
 				{
@@ -468,6 +541,14 @@ describe('NoteHooks', () => {
 						title: 'Deleted Note',
 						content: 'Deleted Content',
 						organizationId: 'org-123',
+						createdById: 'user-123',
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						isPublic: true,
+						priority: null,
+						tags: null,
+						statusId: null,
+						position: null,
 					},
 				},
 			]
@@ -547,6 +628,15 @@ describe('NoteHooks', () => {
 				id: 'note-123',
 				title: 'Test Note',
 				organizationId: 'org-123',
+				content: 'Test Content',
+				createdById: 'user-123',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				isPublic: true,
+				priority: null,
+				tags: null,
+				statusId: null,
+				position: null,
 			}
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
 

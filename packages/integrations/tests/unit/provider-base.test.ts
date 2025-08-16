@@ -91,28 +91,31 @@ describe('BaseIntegrationProvider', () => {
 			const organizationId = 'org-123'
 			const additionalData = { redirectUri: 'https://example.com/callback' }
 
-			const state = provider.generateOAuthState(organizationId, additionalData)
+			const state = (provider as any).generateOAuthState(
+				organizationId,
+				additionalData,
+			)
 			expect(state).toBeTruthy()
 			expect(state).toContain('.')
 
-			const parsedState = provider.parseOAuthState(state)
+			const parsedState = (provider as any).parseOAuthState(state)
 			expect(parsedState.organizationId).toBe(organizationId)
 			expect(parsedState.redirectUri).toBe(additionalData.redirectUri)
 		})
 
 		it('should throw error for invalid state format', () => {
 			expect(() => {
-				provider.parseOAuthState('invalid-state')
+				;(provider as any).parseOAuthState('invalid-state')
 			}).toThrow('Invalid state: malformed structure')
 		})
 
 		it('should throw error for invalid state signature', () => {
-			const validState = provider.generateOAuthState('org-123', {})
+			const validState = (provider as any).generateOAuthState('org-123', {})
 			const [payload] = validState.split('.')
 			const invalidState = `${payload}.invalid-signature`
 
 			expect(() => {
-				provider.parseOAuthState(invalidState)
+				;(provider as any).parseOAuthState(invalidState)
 			}).toThrow('Invalid state: signature verification failed')
 		})
 	})
@@ -139,9 +142,10 @@ describe('BaseIntegrationProvider', () => {
 		})
 
 		it('should implement handleCallback', async () => {
-			const params = {
+			const params: OAuthCallbackParams = {
+				organizationId: 'org-123',
 				code: 'test-code',
-				state: provider.generateOAuthState('org-123', {}),
+				state: (provider as any).generateOAuthState('org-123', {}),
 			}
 
 			const tokenData = await provider.handleCallback(params)
@@ -152,8 +156,8 @@ describe('BaseIntegrationProvider', () => {
 		it('should implement getAvailableChannels', async () => {
 			const channels = await provider.getAvailableChannels()
 			expect(channels).toHaveLength(1)
-			expect(channels[0].id).toBe('channel-1')
-			expect(channels[0].name).toBe('Test Channel')
+			expect(channels[0]!.id).toBe('channel-1')
+			expect(channels[0]!.name).toBe('Test Channel')
 		})
 
 		it('should implement postMessage', async () => {
@@ -214,7 +218,7 @@ describe('BaseIntegrationProvider', () => {
 			delete process.env.INTEGRATIONS_OAUTH_STATE_SECRET
 
 			expect(() => {
-				provider.generateOAuthState('org-123', {})
+				;(provider as any).generateOAuthState('org-123', {})
 			}).toThrow(
 				'INTEGRATIONS_OAUTH_STATE_SECRET environment variable is required',
 			)

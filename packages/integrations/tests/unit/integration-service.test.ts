@@ -13,8 +13,8 @@ import type {
 	IntegrationStatus,
 	ProviderType,
 	IntegrationLogEntry,
-	IntegrationProvider,
 } from '../../src/types'
+import type { IntegrationProvider } from '../../src/provider'
 import type {
 	Integration,
 	NoteIntegrationConnection,
@@ -262,9 +262,39 @@ describe('IntegrationService', () => {
 			it('should get note connections', async () => {
 				const noteId = 'note-123'
 				const expectedConnections = [
-					{ id: 'connection-1', noteId, integrationId: 'integration-1' },
-					{ id: 'connection-2', noteId, integrationId: 'integration-2' },
-				] as NoteIntegrationConnection[]
+					{
+						id: 'connection-1',
+						noteId,
+						integrationId: 'integration-1',
+						externalId: 'channel-1',
+						config: '{}',
+						isActive: true,
+						lastPostedAt: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						integration: {
+							id: 'integration-1',
+							providerName: 'slack',
+							providerType: 'communication',
+						},
+					},
+					{
+						id: 'connection-2',
+						noteId,
+						integrationId: 'integration-2',
+						externalId: 'channel-2',
+						config: '{}',
+						isActive: true,
+						lastPostedAt: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						integration: {
+							id: 'integration-2',
+							providerName: 'jira',
+							providerType: 'productivity',
+						},
+					},
+				] as (NoteIntegrationConnection & { integration: Partial<Integration> })[]
 
 				vi.mocked(integrationManager.getNoteConnections).mockResolvedValue(
 					expectedConnections,
@@ -507,6 +537,11 @@ describe('IntegrationService', () => {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					createdById: 'user-123',
+					isPublic: true,
+					priority: null,
+					tags: null,
+					statusId: null,
+					position: null,
 				}
 				const changeType = 'created'
 				const author = { name: 'John Doe' }
@@ -532,6 +567,11 @@ describe('IntegrationService', () => {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					createdById: 'user-123',
+					isPublic: true,
+					priority: null,
+					tags: null,
+					statusId: null,
+					position: null,
 				}
 				const changeType = 'updated'
 				const author = { name: 'John Doe' }
@@ -551,6 +591,11 @@ describe('IntegrationService', () => {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					createdById: 'user-123',
+					isPublic: true,
+					priority: null,
+					tags: null,
+					statusId: null,
+					position: null,
 				}
 				const changeType = 'deleted'
 				const author = { name: 'John Doe' }
@@ -567,8 +612,12 @@ describe('IntegrationService', () => {
 			it('should register a provider', () => {
 				const mockProvider = {
 					name: 'test-provider',
+					displayName: 'Test Provider',
+					description: 'Test provider description',
+					logoPath: '/test.svg',
 					type: 'communication',
-				} as IntegrationProvider
+					getConfigSchema: () => ({ type: 'object' }),
+				} as unknown as IntegrationProvider
 
 				service.registerProvider(mockProvider)
 
@@ -583,8 +632,12 @@ describe('IntegrationService', () => {
 				const providerName = 'slack'
 				const mockProvider = {
 					name: 'slack',
+					displayName: 'Slack',
+					description: 'Slack integration',
+					logoPath: '/slack.svg',
 					type: 'communication',
-				} as IntegrationProvider
+					getConfigSchema: () => ({ type: 'object' }),
+				} as unknown as IntegrationProvider
 
 				vi.mocked(integrationManager.getProvider).mockReturnValue(mockProvider)
 
@@ -600,9 +653,23 @@ describe('IntegrationService', () => {
 		describe('getAllProviders', () => {
 			it('should get all providers', () => {
 				const mockProviders = [
-					{ name: 'slack', type: 'communication' },
-					{ name: 'jira', type: 'ticketing' },
-				] as IntegrationProvider[]
+					{
+						name: 'slack',
+						type: 'communication',
+						displayName: 'Slack',
+						description: 'Slack integration',
+						logoPath: '/slack.svg',
+						getConfigSchema: () => ({ type: 'object' }),
+					},
+					{
+						name: 'jira',
+						type: 'ticketing',
+						displayName: 'Jira',
+						description: 'Jira integration',
+						logoPath: '/jira.svg',
+						getConfigSchema: () => ({ type: 'object' }),
+					},
+				] as unknown as IntegrationProvider[]
 
 				vi.mocked(integrationManager.getAllProviders).mockReturnValue(
 					mockProviders,
@@ -619,8 +686,15 @@ describe('IntegrationService', () => {
 			it('should get providers by type', () => {
 				const type: ProviderType = 'communication'
 				const mockProviders = [
-					{ name: 'slack', type: 'communication' },
-				] as IntegrationProvider[]
+					{
+						name: 'slack',
+						type: 'communication',
+						displayName: 'Slack',
+						description: 'Slack integration',
+						logoPath: '/slack.svg',
+						getConfigSchema: () => ({ type: 'object' }),
+					},
+				] as unknown as IntegrationProvider[]
 
 				vi.mocked(integrationManager.getProvidersByType).mockReturnValue(
 					mockProviders,
@@ -641,6 +715,16 @@ describe('IntegrationService', () => {
 				const mockIntegration = {
 					id: integrationId,
 					organizationId: 'org-123',
+					providerName: 'slack',
+					providerType: 'OAUTH',
+					accessToken: 'test-token',
+					refreshToken: 'test-refresh-token',
+					tokenExpiresAt: new Date(Date.now() + 3600 * 1000),
+					config: '{}',
+					isActive: true,
+					lastSyncAt: new Date(),
+					createdAt: new Date(),
+					updatedAt: new Date(),
 				}
 
 				vi.mocked(integrationManager.getIntegration).mockResolvedValue(
@@ -660,8 +744,28 @@ describe('IntegrationService', () => {
 			it('should get integration connections', async () => {
 				const integrationId = 'integration-123'
 				const mockConnections = [
-					{ id: 'connection-1', integrationId },
-					{ id: 'connection-2', integrationId },
+					{
+						id: 'connection-1',
+						integrationId,
+						noteId: 'note-1',
+						externalId: 'channel-1',
+						config: '{}',
+						isActive: true,
+						lastPostedAt: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
+					{
+						id: 'connection-2',
+						integrationId,
+						noteId: 'note-2',
+						externalId: 'channel-2',
+						config: '{}',
+						isActive: true,
+						lastPostedAt: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
 				]
 
 				vi.mocked(
@@ -706,7 +810,17 @@ describe('IntegrationService', () => {
 				const config = { setting1: 'value1', setting2: 'value2' }
 				const mockIntegration = {
 					id: integrationId,
+					organizationId: 'org-123',
+					providerName: 'slack',
+					providerType: 'OAUTH',
+					accessToken: 'test-token',
+					refreshToken: 'test-refresh-token',
+					tokenExpiresAt: new Date(Date.now() + 3600 * 1000),
 					config: JSON.stringify(config),
+					isActive: true,
+					lastSyncAt: new Date(),
+					createdAt: new Date(),
+					updatedAt: new Date(),
 				}
 
 				vi.mocked(integrationManager.updateIntegrationConfig).mockResolvedValue(

@@ -6,12 +6,13 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "db:generate": "prisma generate --sql",
+    "db:generate": "prisma generate",
     "db:push": "prisma db push --skip-generate",
     "db:seed": "tsx seed.ts",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "setup": "npm run db:migrate:deploy && npm run db:generate"
+    "setup": "npm run db:migrate:deploy && npm run db:generate",
+    "typecheck": "echo 'prisma: no typecheck'"
   },
   "dependencies": {
     "@epic-web/remember": "^1.1.0",

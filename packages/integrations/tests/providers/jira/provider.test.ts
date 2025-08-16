@@ -234,8 +234,8 @@ describe('JiraProvider', () => {
 			const users = await provider.searchUsers(mockIntegration, 'john')
 
 			expect(users).toHaveLength(2)
-			expect(users[0].displayName).toBe('John Doe')
-			expect(users[1].displayName).toBe('Jane Smith')
+			expect(users[0]!.displayName).toBe('John Doe')
+			expect(users[1]!.displayName).toBe('Jane Smith')
 
 			expect(fetch).toHaveBeenCalledWith(
 				'https://test.atlassian.net/rest/api/3/user/search?query=john',
@@ -424,8 +424,8 @@ describe('JiraProvider', () => {
 			expect(provider).toBeInstanceOf(
 				Object.getPrototypeOf(provider).constructor,
 			)
-			expect(typeof provider.generateOAuthState).toBe('function')
-			expect(typeof provider.parseOAuthState).toBe('function')
+			expect(typeof (provider as any).generateOAuthState).toBe('function')
+			expect(typeof (provider as any).parseOAuthState).toBe('function')
 		})
 
 		it('should generate and parse OAuth state correctly', async () => {
@@ -440,8 +440,8 @@ describe('JiraProvider', () => {
 
 			const statePayload = state!.split('.')[0]
 			const decodedState = JSON.parse(
-				Buffer.from(statePayload, 'base64').toString(),
-			)
+				Buffer.from(statePayload!, 'base64').toString(),
+			) as { organizationId: string; providerName: string; redirectUri: string }
 			expect(decodedState.organizationId).toBe(organizationId)
 			expect(decodedState.providerName).toBe('jira')
 			expect(decodedState.redirectUri).toBe(redirectUri)

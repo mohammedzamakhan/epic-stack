@@ -11,7 +11,7 @@ import {
 	encryptToken,
 	decryptToken,
 } from '../../src/encryption'
-import type { TokenData, EncryptedTokenData } from '../../src/types'
+import type { TokenData } from '../../src/types'
 
 // Mock environment variables
 const mockEncryptionKey =
@@ -164,7 +164,7 @@ describe('IntegrationEncryptionService', () => {
 		})
 
 		it('should throw error when encrypted data is corrupted', async () => {
-			const corruptedData: EncryptedTokenData = {
+			const corruptedData = {
 				encryptedAccessToken: 'corrupted-data',
 				iv: 'invalid-iv',
 			}
