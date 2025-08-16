@@ -93,6 +93,19 @@ export {
 
 export { getAvailableProviders } from './providers'
 
+// Re-export providers for convenience
+export {
+	AsanaProvider,
+	ClickUpProvider,
+	GitHubProvider,
+	GitLabProvider,
+	JiraProvider,
+	LinearProvider,
+	NotionProvider,
+	SlackProvider,
+	TrelloProvider,
+} from './providers'
+
 // Re-export commonly used types for convenience
 export type {
 	Integration,

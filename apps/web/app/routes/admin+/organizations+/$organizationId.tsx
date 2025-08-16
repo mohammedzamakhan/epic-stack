@@ -152,7 +152,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		take: 20,
 	})
 
-	return {
+	return Response.json({
 		organization: {
 			...organization,
 			memberCount: organization.users.filter((u) => u.active).length,
@@ -168,7 +168,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			...activity,
 			metadata: activity.metadata ? JSON.parse(activity.metadata) : null,
 		})),
-	}
+	})
 }
 
 export default function AdminOrganizationDetailPage() {

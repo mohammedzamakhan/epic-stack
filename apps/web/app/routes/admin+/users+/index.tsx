@@ -1,5 +1,5 @@
 import { useLoaderData } from 'react-router'
-import { type User, type Organization, type Image } from '@prisma/client'
+import { type User, type Organization, type UserImage } from '@prisma/client'
 import { AdminUsersTable } from '#app/components/admin-users-table'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -118,7 +118,7 @@ type LoaderData = {
 		updatedAt: string
 		banExpiresAt: string | null
 		bannedAt: string | null
-		image: Pick<Image, 'id' | 'altText'> | null
+		image: Pick<UserImage, 'id' | 'altText'> | null
 		organizations: {
 			organization: Pick<Organization, 'id' | 'name'>
 		}[]

@@ -289,11 +289,8 @@ app.all('/api/novu*', (req, res, next) => {
 	const originalWriteHead = res.writeHead
 
 	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (statusCode: number, reasonPhraseOrHeaders?: string | OutgoingHttpHeaders | OutgoingHttpHeader[], maybeHeaders?: OutgoingHttpHeaders | OutgoingHttpHeader[]) {
-		const headers =
-			typeof reasonPhraseOrHeaders === 'string'
-				? maybeHeaders
-				: reasonPhraseOrHeaders
+	res.writeHead = function (statusCode: number, ...args: any[]) {
+		const headers = typeof args[0] === 'string' ? args[1] : args[0]
 
 		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
 			// Clear existing access-control-* headers
@@ -313,15 +310,7 @@ app.all('/api/novu*', (req, res, next) => {
 			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
 		)
 
-		if (typeof reasonPhraseOrHeaders === 'string') {
-			if (maybeHeaders) {
-				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders, maybeHeaders)
-			} else {
-				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
-			}
-		} else {
-			return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
-		}
+		return originalWriteHead.call(res, statusCode, ...args)
 	}
 
 	return createRequestHandler({
