@@ -77,7 +77,7 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 						</Button>
 						<Button variant="ghost" size="icon" asChild>
 							<Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
-								<Icon name="pencil-1" className="size-4" />
+								<Icon name="pencil" className="size-4" />
 							</Link>
 						</Button>
 					</div>

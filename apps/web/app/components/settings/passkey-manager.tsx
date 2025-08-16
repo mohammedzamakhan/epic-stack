@@ -111,7 +111,7 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 						>
 							<div className="flex flex-col gap-2">
 								<div className="flex items-center gap-2">
-									<Icon name="lock-closed" />
+									<Icon name="lock" />
 									<span className="font-semibold">
 										{passkey.deviceType === 'platform'
 											? 'Device'
@@ -133,7 +133,7 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 									size="sm"
 									className="flex items-center gap-2"
 								>
-									<Icon name="trash" />
+									<Icon name="trash-2" />
 									<span>Delete</span>
 								</Button>
 							</Form>

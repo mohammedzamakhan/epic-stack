@@ -174,7 +174,7 @@ export default function NoteRoute({
 							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 						>
 							<Link to="edit">
-								<Icon name="pencil-1" className="scale-125 max-md:scale-150">
+								<Icon name="pencil" className="scale-125 max-md:scale-150">
 									<span className="max-md:hidden">Edit</span>
 								</Icon>
 							</Link>
@@ -211,7 +211,7 @@ export function DeleteNote({
 				disabled={isPending}
 				className="w-full max-md:aspect-square max-md:px-0"
 			>
-				<Icon name="trash" className="scale-125 max-md:scale-150">
+				<Icon name="trash-2" className="scale-125 max-md:scale-150">
 					<span className="max-md:hidden">Delete</span>
 				</Icon>
 			</StatusButton>

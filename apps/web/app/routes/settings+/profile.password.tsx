@@ -21,7 +21,7 @@ import { type Route } from './+types/profile.password.ts'
 import { type BreadcrumbHandle } from './profile.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="dots-horizontal">Password</Icon>,
+	breadcrumb: <Icon name="more-horizontal">Password</Icon>,
 	getSitemapEntries: () => null,
 }
 

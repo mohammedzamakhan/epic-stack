@@ -166,7 +166,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 				{isBanned && (
 					<div className="border-destructive bg-destructive/10 mb-4 rounded-lg border p-4">
 						<div className="text-destructive flex items-center gap-2">
-							<Icon name="lock-closed" className="h-5 w-5" />
+							<Icon name="lock" className="h-5 w-5" />
 							<h3 className="font-semibold">Account Suspended</h3>
 						</div>
 						<p className="text-destructive/80 mt-2 text-sm">

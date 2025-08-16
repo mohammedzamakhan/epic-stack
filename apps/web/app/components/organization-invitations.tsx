@@ -281,7 +281,7 @@ export function OrganizationInvitations({
 													value={invitation.id}
 												/>
 												<Button type="submit" variant="ghost" size="sm">
-													<Icon name="trash" className="h-4 w-4" />
+													<Icon name="trash-2" className="h-4 w-4" />
 												</Button>
 											</Form>
 										</div>

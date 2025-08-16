@@ -138,15 +138,15 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 				<div>
 					<Link to="two-factor">
 						{loaderData.isTwoFactorEnabled ? (
-							<Icon name="lock-closed">2FA is enabled</Icon>
+							<Icon name="lock">2FA is enabled</Icon>
 						) : (
-							<Icon name="lock-open-1">Enable 2FA</Icon>
+							<Icon name="lock-open">Enable 2FA</Icon>
 						)}
 					</Link>
 				</div>
 				<div>
 					<Link to={loaderData.hasPassword ? 'password' : 'password/create'}>
-						<Icon name="dots-horizontal">
+						<Icon name="more-horizontal">
 							{loaderData.hasPassword ? 'Change Password' : 'Create a Password'}
 						</Icon>
 					</Link>
@@ -258,7 +258,7 @@ function UpdateProfile({ loaderData }: { loaderData: Info['loaderData'] }) {
 			<div className="mt-8 flex justify-center">
 				<StatusButton
 					type="submit"
-					size="wide"
+					size="lg"
 					name="intent"
 					value={profileUpdateActionIntent}
 					status={
@@ -316,7 +316,7 @@ function SignOutOfSessions({
 								: (fetcher.data?.status ?? 'idle')
 						}
 					>
-						<Icon name="avatar">
+						<Icon name="user">
 							{dc.doubleCheck
 								? `Are you sure?`
 								: `Sign out of ${otherSessionsCount} other sessions`}
@@ -324,7 +324,7 @@ function SignOutOfSessions({
 					</StatusButton>
 				</fetcher.Form>
 			) : (
-				<Icon name="avatar">This is your only session</Icon>
+				<Icon name="user">This is your only session</Icon>
 			)}
 		</div>
 	)
@@ -355,7 +355,7 @@ function DeleteData() {
 					variant={dc.doubleCheck ? 'destructive' : 'default'}
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				>
-					<Icon name="trash">
+					<Icon name="trash-2">
 						{dc.doubleCheck ? `Are you sure?` : `Delete all your data`}
 					</Icon>
 				</StatusButton>

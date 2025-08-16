@@ -23,14 +23,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 			},
 			notes: {
 				include: {
-					uploads: {
+					images: {
 						select: {
 							id: true,
-							type: true,
 							createdAt: true,
 							updatedAt: true,
 							objectKey: true,
-							thumbnailKey: true,
 						},
 					},
 				},
@@ -54,12 +52,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 				: null,
 			notes: user.notes.map((note) => ({
 				...note,
-				uploads: note.uploads.map((upload) => ({
-					...upload,
-					url: domain + getNoteImgSrc(upload.objectKey),
-					thumbnailUrl: upload.thumbnailKey
-						? domain + getNoteImgSrc(upload.thumbnailKey)
-						: null,
+				images: note.images.map((image) => ({
+					...image,
+					url: domain + getUserImgSrc(image.objectKey),
 				})),
 			})),
 		},

@@ -332,7 +332,7 @@ function AddConnectionForm({
 							{isLoadingChannels ? (
 								<SelectItem value="loading" disabled>
 									<div className="flex items-center space-x-2">
-										<Icon name="update" className="h-3 w-3 animate-spin" />
+										<Icon name="rotate-cw" className="h-3 w-3 animate-spin" />
 										<span>Loading channels...</span>
 									</div>
 								</SelectItem>
