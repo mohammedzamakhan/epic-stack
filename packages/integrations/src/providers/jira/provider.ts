@@ -196,7 +196,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 				throw new Error(`Token exchange failed: ${errorText}`)
 			}
 
-			const tokenData = (await tokenResponse.json()) as JiraOAuthResponse
+			const tokenData = await tokenResponse.json() as JiraOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -264,7 +264,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 				throw new Error(`Token refresh failed: ${errorText}`)
 			}
 
-			const tokenData = (await response.json()) as JiraOAuthResponse
+			const tokenData = await response.json() as JiraOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -387,9 +387,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 					`Failed to fetch bot user details: ${response.statusText}`,
 				)
 			}
-
-			const botUser = (await response.json()) as JiraUser
-			return botUser
+			const botUser = await response.json() as JiraUser
 		})
 	}
 
@@ -441,7 +439,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 					}
 				}
 
-				const permissions = (await permissionResponse.json()) as any[]
+				const permissions = await permissionResponse.json() as any[]
+
 				const hasCreatePermission = permissions.some(
 					(p: any) =>
 						p.permission === 'CREATE_ISSUES' && p.havePermission === true,
@@ -579,7 +578,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get user info: ${response.statusText}`)
 		}
 
-		return response.json() as Promise<JiraCurrentUserResponse>
+		return await response.json() as JiraCurrentUserResponse
 	}
 
 	/**
@@ -656,7 +655,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		return response.json() as Promise<any[]>
+		return await response.json() as any[]
 	}
 
 	/**
@@ -679,7 +678,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get projects: ${response.statusText}`)
 		}
 
-		const data = (await response.json()) as JiraProjectsResponse
+		const data = await response.json() as JiraProjectsResponse
 		return data.values
 	}
 
@@ -706,7 +705,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get project: ${response.statusText}`)
 		}
 
-		return response.json() as Promise<JiraProject>
+		return await response.json() as JiraProject
 	}
 
 	/**
@@ -771,7 +770,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to create issue: ${errorText}`)
 		}
 
-		return response.json() as Promise<JiraCreateIssueResponse>
+		return await response.json() as JiraCreateIssueResponse
 	}
 
 	/**

@@ -289,7 +289,21 @@ app.all('/api/novu*', (req, res, next) => {
 	const originalWriteHead = res.writeHead
 
 	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (statusCode, reasonPhraseOrHeaders, maybeHeaders) {
+	res.writeHead = function (statusCode: number, reasonPhraseOrHeaders?: string | OutgoingHttpHeaders | OutgoingHttpHeader[], maybeHeaders?: OutgoingHttpHeaders | OutgoingHttpHeader[]) {
+		const headers =
+			typeof reasonPhraseOrHeaders === 'string'
+				? maybeHeaders
+				: reasonPhraseOrHeaders
+
+		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
+			// Clear existing access-control-* headers
+			for (const key of Object.keys(headers)) {
+				if (key.toLowerCase().startsWith('access-control-')) {
+					delete (headers as Record<string, any>)[key]
+				}
+			}
+		}
+
 		// Our own CORS headers
 		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
 		res.setHeader('Access-Control-Allow-Credentials', 'true')
@@ -300,32 +314,13 @@ app.all('/api/novu*', (req, res, next) => {
 		)
 
 		if (typeof reasonPhraseOrHeaders === 'string') {
-			const headers = maybeHeaders
-			if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
-				// Clear existing access-control-* headers
-				for (const key of Object.keys(headers)) {
-					if (key.toLowerCase().startsWith('access-control-')) {
-						delete headers[key]
-					}
-				}
+			if (maybeHeaders) {
+				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders, maybeHeaders)
+			} else {
+				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
 			}
-			return originalWriteHead.call(
-				res,
-				statusCode,
-				reasonPhraseOrHeaders,
-				headers,
-			)
 		} else {
-			const headers = reasonPhraseOrHeaders
-			if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
-				// Clear existing access-control-* headers
-				for (const key of Object.keys(headers)) {
-					if (key.toLowerCase().startsWith('access-control-')) {
-						delete headers[key]
-					}
-				}
-			}
-			return originalWriteHead.call(res, statusCode, headers)
+			return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
 		}
 	}
 
