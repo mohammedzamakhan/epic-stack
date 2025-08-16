@@ -1,4 +1,4 @@
-import { json, useLoaderData } from 'react-router'
+import { useLoaderData } from 'react-router'
 import { AdminOrganizationsTable } from '#app/components/admin-organizations-table'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -97,7 +97,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const totalPages = Math.ceil(totalCount / pageSize)
 
-	return json({
+	return {
 		organizations: organizations.map((org) => ({
 			...org,
 			memberCount: org.users.filter((u) => u.active).length,
@@ -125,7 +125,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			subscriptionStatus: subscriptionStatusFilter,
 			plan: planFilter,
 		},
-	})
+	}
 }
 
 export default function AdminOrganizationsPage() {
