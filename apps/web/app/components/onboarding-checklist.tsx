@@ -178,7 +178,7 @@ export function OnboardingChecklist({
 						<div className="flex-shrink-0">
 							{step.isCompleted ? (
 								<span className="text-muted-foreground text-sm font-medium">
-									{step.completedLabel || 'Completed'}
+									{step.actionConfig?.completedLabel || 'Completed'}
 								</span>
 							) : (
 								step.actionConfig && (

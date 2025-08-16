@@ -13,7 +13,7 @@ import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
-	useCarousel,
+	useCarousel as useCarouselApi,
 } from '#app/components/ui/carousel'
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 
@@ -62,7 +62,7 @@ export const InlineCitationCardTrigger = ({
 			className={cn('ml-1 rounded-full', className)}
 			{...props}
 		>
-			{sources.length ? (
+			{sources.length && sources[0] ? (
 				<>
 					{new URL(sources[0]).hostname}{' '}
 					{sources.length > 1 && `+${sources.length - 1}`}
@@ -129,7 +129,7 @@ export const InlineCitationCarouselIndex = ({
 	className,
 	...props
 }: InlineCitationCarouselIndexProps) => {
-	const { api } = useCarousel()
+	const { api } = useCarouselApi()
 	const [current, setCurrent] = React.useState(0)
 	const [count, setCount] = React.useState(0)
 
@@ -165,7 +165,7 @@ export const InlineCitationCarouselPrev = ({
 	className,
 	...props
 }: InlineCitationCarouselPrevProps) => {
-	const { api } = useCarousel()
+	const { api } = useCarouselApi()
 
 	const handleClick = React.useCallback(() => {
 		if (api) {
@@ -192,7 +192,7 @@ export const InlineCitationCarouselNext = ({
 	className,
 	...props
 }: InlineCitationCarouselNextProps) => {
-	const { api } = useCarousel()
+	const { api } = useCarouselApi()
 
 	const handleClick = React.useCallback(() => {
 		if (api) {

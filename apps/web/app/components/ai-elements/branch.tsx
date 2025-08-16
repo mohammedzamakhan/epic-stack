@@ -82,7 +82,9 @@ export type BranchMessagesProps = HTMLAttributes<HTMLDivElement>
 
 export const BranchMessages = ({ children, ...props }: BranchMessagesProps) => {
 	const { currentBranch, setBranches, branches } = useBranch()
-	const childrenArray = Array.isArray(children) ? children : [children]
+	const childrenArray = (
+		Array.isArray(children) ? children : [children]
+	) as ReactElement[]
 
 	// Use useEffect to update branches when they change
 	useEffect(() => {
@@ -91,7 +93,7 @@ export const BranchMessages = ({ children, ...props }: BranchMessagesProps) => {
 		}
 	}, [childrenArray, branches, setBranches])
 
-	return childrenArray.map((branch, index) => (
+	return childrenArray.map((branch: ReactElement, index) => (
 		<div
 			className={cn(
 				'grid gap-2 overflow-hidden [&>div]:pb-0',

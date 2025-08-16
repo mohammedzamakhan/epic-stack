@@ -4,6 +4,7 @@ import type { Experimental_GeneratedImage } from 'ai'
 export type ImageProps = Experimental_GeneratedImage & {
 	className?: string
 	alt?: string
+	mediaType?: string
 }
 
 export const Image = ({

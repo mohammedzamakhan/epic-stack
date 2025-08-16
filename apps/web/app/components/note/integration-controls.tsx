@@ -35,6 +35,10 @@ interface Channel {
 	id: string
 	name: string
 	type: 'public' | 'private' | 'dm'
+	metadata?: {
+		member_count?: number
+		bot_needs_invite?: boolean
+	}
 }
 
 interface Connection {

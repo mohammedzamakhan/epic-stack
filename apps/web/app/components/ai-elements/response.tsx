@@ -15,9 +15,9 @@ import hardenReactMarkdown from 'harden-react-markdown'
  * Parses markdown text and removes incomplete tokens to prevent partial rendering
  * of links, images, bold, and italic formatting during streaming.
  */
-function parseIncompleteMarkdown(text: string): string {
+function parseIncompleteMarkdown(text: string | undefined): string {
 	if (!text || typeof text !== 'string') {
-		return text
+		return ''
 	}
 
 	let result = text

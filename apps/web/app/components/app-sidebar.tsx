@@ -166,7 +166,7 @@ function OrganizationSidebar({
 }: {
 	user: any
 	location: any
-	onboardingProgress: OnboardingProgressData | null
+	onboardingProgress: OnboardingProgressData | null | undefined
 	orgSlug: string | undefined
 	organizationId: string | undefined
 	favoriteNotes: any

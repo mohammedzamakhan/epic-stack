@@ -4,6 +4,7 @@ export interface OnboardingStepAction {
 	type: 'navigate' | 'modal' | 'external'
 	target: string
 	label: string
+	completedLabel?: string
 }
 
 export interface OnboardingStepDetectConfig {

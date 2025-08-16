@@ -175,7 +175,7 @@ export function UserDetailView({ user, recentActivity }: UserDetailViewProps) {
 									</h1>
 									{user.isBanned && (
 										<Badge variant="destructive" className="gap-1">
-											<IconBan className="h-3 w-3" />
+											<Icon name="ban" className="h-3 w-3" />
 											{isBanExpired ? 'Ban Expired' : 'Banned'}
 										</Badge>
 									)}
