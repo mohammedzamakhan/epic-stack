@@ -23,7 +23,8 @@ interface OrganizationMember {
 		name: string | null
 		email: string
 		image?: {
-			objectKey: string
+			id: string
+			altText: string | null
 		} | null
 	}
 }
@@ -115,7 +116,7 @@ export function OrganizationMembers({
 								<div className="flex items-center gap-3">
 									<Avatar className="h-8 w-8">
 										<AvatarImage
-											src={getUserImgSrc(member.user.image?.objectKey)}
+											src={getUserImgSrc(member.user.image?.id)}
 											alt={member.user.name ?? member.user.email}
 										/>
 										<AvatarFallback>

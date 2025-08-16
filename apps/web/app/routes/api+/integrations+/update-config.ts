@@ -1,4 +1,4 @@
-import { integrationManager } from '@repo/integrations'
+import { integrationManager, JiraProvider } from '@repo/integrations'
 import { prisma } from '@repo/prisma'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -32,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		return Response.json({ error: 'Config is required' }, { status: 400 })
 	}
 
-	let config
+	let config: any
 	try {
 		config = JSON.parse(configString)
 	} catch {
@@ -57,7 +57,9 @@ export async function action({ request }: ActionFunctionArgs) {
 			// Validate bot user if enabled
 			if (config.useBotUser && config.botUser?.accountId) {
 				// Get Jira provider
-				const jiraProvider = integrationManager.getProvider('jira')
+				const jiraProvider = integrationManager.getProvider(
+					'jira',
+				) as JiraProvider
 
 				try {
 					// Fetch bot user to validate it exists

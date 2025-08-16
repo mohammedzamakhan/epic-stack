@@ -99,6 +99,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				stripeProductId: true,
 				planName: true,
 				subscriptionStatus: true,
+				verifiedDomain: true,
 			},
 		})
 
@@ -130,6 +131,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				stripeProductId: true,
 				planName: true,
 				subscriptionStatus: true,
+				verifiedDomain: true,
 			},
 		})
 

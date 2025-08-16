@@ -289,20 +289,6 @@ app.all('/api/novu*', (req, res, next) => {
 
 	// Force our desired CORS headers right before response is sent
 	res.writeHead = function (statusCode, reasonPhraseOrHeaders, maybeHeaders) {
-		const headers =
-			typeof reasonPhraseOrHeaders === 'string'
-				? maybeHeaders
-				: reasonPhraseOrHeaders
-
-		if (headers) {
-			// Clear existing access-control-* headers
-			for (const key of Object.keys(headers)) {
-				if (key.toLowerCase().startsWith('access-control-')) {
-					delete headers[key]
-				}
-			}
-		}
-
 		// Our own CORS headers
 		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
 		res.setHeader('Access-Control-Allow-Credentials', 'true')
@@ -312,7 +298,34 @@ app.all('/api/novu*', (req, res, next) => {
 			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
 		)
 
-		return originalWriteHead.apply(res, arguments)
+		if (typeof reasonPhraseOrHeaders === 'string') {
+			const headers = maybeHeaders
+			if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
+				// Clear existing access-control-* headers
+				for (const key of Object.keys(headers)) {
+					if (key.toLowerCase().startsWith('access-control-')) {
+						delete headers[key]
+					}
+				}
+			}
+			return originalWriteHead.call(
+				res,
+				statusCode,
+				reasonPhraseOrHeaders,
+				headers,
+			)
+		} else {
+			const headers = reasonPhraseOrHeaders
+			if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
+				// Clear existing access-control-* headers
+				for (const key of Object.keys(headers)) {
+					if (key.toLowerCase().startsWith('access-control-')) {
+						delete headers[key]
+					}
+				}
+			}
+			return originalWriteHead.call(res, statusCode, headers)
+		}
 	}
 
 	return createRequestHandler({

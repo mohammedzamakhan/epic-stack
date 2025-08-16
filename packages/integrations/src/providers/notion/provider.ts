@@ -155,6 +155,15 @@ interface NotionErrorResponse {
 	request_id: string
 }
 
+interface NotionConnectionConfig {
+	databaseId?: string
+	channelMetadata?: {
+		url: string
+	}
+	defaultProperties?: Record<string, any>
+	includeNoteContent?: boolean
+}
+
 /**
  * Notion integration provider
  */
@@ -255,7 +264,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const tokenData: NotionOAuthResponse = await tokenResponse.json()
+		const tokenData = (await tokenResponse.json()) as NotionOAuthResponse
 
 		if (tokenData.error) {
 			throw new Error(
@@ -337,7 +346,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			const searchData: NotionSearchResponse = await response.json()
+			const searchData = (await response.json()) as NotionSearchResponse
 
 			return searchData.results.map((database) => ({
 				id: database.id,
@@ -366,10 +375,10 @@ export class NotionProvider extends BaseIntegrationProvider {
 			throw new Error('No access token available')
 		}
 
-		const connectionConfig =
+		const connectionConfig: NotionConnectionConfig =
 			typeof connection.config === 'string'
 				? JSON.parse(connection.config)
-				: connection.config
+				: connection.config ?? {}
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId
@@ -440,7 +449,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			const createdPage: NotionCreatePageResponse = await response.json()
+			const createdPage = (await response.json()) as NotionCreatePageResponse
 			console.log(`Successfully created Notion page: ${createdPage.url}`)
 		} catch (error) {
 			console.error('Error creating Notion page:', error)
@@ -458,10 +467,10 @@ export class NotionProvider extends BaseIntegrationProvider {
 			return false
 		}
 
-		const connectionConfig =
+		const connectionConfig: NotionConnectionConfig =
 			typeof connection.config === 'string'
 				? JSON.parse(connection.config)
-				: connection.config
+				: connection.config ?? {}
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId

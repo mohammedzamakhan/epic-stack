@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import { useLoaderData } from 'react-router'
+import { json, useLoaderData } from 'react-router'
 import { AdminOrganizationDetail } from '#app/components/admin-organization-detail'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -152,7 +152,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		take: 20,
 	})
 
-	return {
+	return json({
 		organization: {
 			...organization,
 			memberCount: organization.users.filter((u) => u.active).length,
@@ -168,7 +168,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			...activity,
 			metadata: activity.metadata ? JSON.parse(activity.metadata) : null,
 		})),
-	}
+	})
 }
 
 export default function AdminOrganizationDetailPage() {

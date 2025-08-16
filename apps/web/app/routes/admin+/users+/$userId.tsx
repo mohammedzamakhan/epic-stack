@@ -1,6 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { useLoaderData } from 'react-router'
-import { UserDetailView } from '#app/components/admin-user-detail'
+import {
+	UserDetailView,
+	type AdminUserDetail,
+	type RecentActivity,
+} from '#app/components/admin-user-detail'
 import { prisma } from '#app/utils/db.server.ts'
 import { getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -174,8 +178,14 @@ export async function loader({
 	})
 }
 
+type LoaderData = {
+	user: AdminUserDetail
+	recentActivity: RecentActivity
+	ipAddresses: Awaited<ReturnType<typeof getIpAddressesByUser>>
+}
+
 export default function AdminUserDetailPage() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData() as LoaderData
 
 	return (
 		<div className="space-y-6">

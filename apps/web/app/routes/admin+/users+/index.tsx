@@ -1,4 +1,5 @@
 import { useLoaderData } from 'react-router'
+import { type User, type Organization, type Image } from '@prisma/client'
 import { AdminUsersTable } from '#app/components/admin-users-table'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -111,8 +112,34 @@ export async function loader({ request }: Route.LoaderArgs) {
 	})
 }
 
+type LoaderData = {
+	users: (Omit<User, 'createdAt' | 'updatedAt' | 'banExpiresAt' | 'bannedAt'> & {
+		createdAt: string
+		updatedAt: string
+		banExpiresAt: string | null
+		bannedAt: string | null
+		image: Pick<Image, 'id' | 'altText'> | null
+		organizations: {
+			organization: Pick<Organization, 'id' | 'name'>
+		}[]
+		organizationCount: number
+		lastLoginAt: string | null
+	})[]
+	pagination: {
+		page: number
+		pageSize: number
+		totalCount: number
+		totalPages: number
+	}
+	organizations: Pick<Organization, 'id' | 'name'>[]
+	filters: {
+		search: string
+		organization: string
+	}
+}
+
 export default function AdminUsersPage() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData() as LoaderData
 
 	return (
 		<div className="space-y-6">
