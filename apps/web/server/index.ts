@@ -1,4 +1,5 @@
 import { styleText } from 'node:util'
+import { type OutgoingHttpHeaders, type OutgoingHttpHeader } from 'node:http'
 import { helmet } from '@nichtsam/helmet/node-http'
 import { createRequestHandler } from '@react-router/express'
 import * as Sentry from '@sentry/react-router'

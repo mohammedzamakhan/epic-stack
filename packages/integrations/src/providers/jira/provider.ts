@@ -118,7 +118,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
 				: integration.config
-		const instanceUrl = config?.instanceUrl as string
+		const instanceUrl = (config as any)?.instanceUrl as string
 		if (!instanceUrl) {
 			throw new Error('Jira instance URL is required in integration config')
 		}
@@ -337,12 +337,12 @@ export class JiraProvider extends BaseIntegrationProvider {
 		const config =
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
-				: integration.config
+				: integration.config as any
 		const connectionConfig = connection
 			? typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config
-			: null
+			: null as any
 
 		// Check connection-level bot user setting first
 		if (connectionConfig?.reporterAccountId) {
@@ -369,7 +369,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config
+					: integration.config as any
 
 			// Fetch bot user details from Jira
 			const response = await fetch(
@@ -405,7 +405,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config
+					: integration.config as any
 
 			try {
 				// Check if bot user exists
@@ -734,7 +734,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 
 		const data = (await response.json()) as any
 
-		const project = data.projects?.[0]
+		const project = (data as any).projects?.[0]
 		if (!project || !project.issuetypes) {
 			throw new Error('No issue types found for project')
 		}
@@ -785,7 +785,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config
+					: integration.config as any
 			const response = await fetch(`${config.instanceUrl}/rest/api/3/myself`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
@@ -821,7 +821,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config
+					: integration.config as any
 
 			// First try to get from siteUrl in config
 			if (config?.siteUrl) {
@@ -878,7 +878,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 		const config =
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
-				: integration.config
+				: integration.config as any
 		const includeContent = config?.includeNoteContent !== false
 		const preferredIssueType = config?.defaultIssueType || 'Task'
 

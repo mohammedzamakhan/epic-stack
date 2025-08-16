@@ -159,7 +159,7 @@ export function OnboardingChecklist({
 							) : (
 								<div className="flex h-8 w-8 items-center justify-center">
 									<Icon
-										name={step.icon || 'circle'}
+										name={(step.icon as any) || 'check-circle'}
 										className="text-muted-foreground h-5 w-5"
 									/>
 								</div>

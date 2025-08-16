@@ -87,7 +87,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 		return (
 			<Button
 				variant={isPrimary ? 'default' : 'outline'}
-				size="xs"
+				size="sm"
 				className={`${isDisabled ? 'cursor-not-allowed opacity-50' : ''} ${action.isCompleted ? 'bg-primary hover:bg-primary/90' : ''}`}
 				onClick={() => handleRedirect(action.redirect)}
 				disabled={isDisabled}
@@ -138,7 +138,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 											<TooltipTrigger asChild>
 												<Button
 													variant="ghost"
-													size="xs"
+													size="sm"
 													onClick={handleMarkAsReadUnread}
 												>
 													{notification.isRead ? (

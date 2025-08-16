@@ -140,7 +140,7 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 						{loaderData.isTwoFactorEnabled ? (
 							<Icon name="lock">2FA is enabled</Icon>
 						) : (
-							<Icon name="lock-open">Enable 2FA</Icon>
+							<Icon name="unlock">Enable 2FA</Icon>
 						)}
 					</Link>
 				</div>

@@ -315,7 +315,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 				throw new Error(`Token exchange failed: ${errorText}`)
 			}
 
-			const tokenData: ClickUpOAuthResponse = await tokenResponse.json()
+			const tokenData = await tokenResponse.json() as ClickUpOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -542,7 +542,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get ClickUp user: ${response.statusText}`)
 		}
 
-		const data = await response.json()
+		const data = await response.json() as { user: any }
 		return data.user
 	}
 
@@ -587,7 +587,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get ClickUp teams: ${response.statusText}`)
 		}
 
-		const data = await response.json()
+		const data = await response.json() as { teams: any[] }
 		return data.teams
 	}
 
@@ -612,7 +612,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get ClickUp spaces: ${response.statusText}`)
 		}
 
-		const data = await response.json()
+		const data = await response.json() as { spaces: any[] }
 		return data.spaces
 	}
 
@@ -637,7 +637,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get ClickUp lists: ${response.statusText}`)
 		}
 
-		const data = await response.json()
+		const data = await response.json() as { lists: any[] }
 		return data.lists
 	}
 
@@ -659,7 +659,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get ClickUp list: ${response.statusText}`)
 		}
 
-		return response.json()
+		return response.json() as Promise<ClickUpList>
 	}
 
 	/**
@@ -685,7 +685,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to create ClickUp task: ${errorText}`)
 		}
 
-		return response.json()
+		return response.json() as Promise<ClickUpCreateTaskResponse>
 	}
 
 	/**
@@ -701,7 +701,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			? typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config
-			: {}
+			: {} as any
 
 		// Format task title
 		const title = this.formatTaskTitle(message)

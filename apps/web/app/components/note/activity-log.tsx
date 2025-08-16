@@ -95,7 +95,7 @@ function getActivityIcon(action: string) {
 		case 'deleted':
 			return 'trash-2'
 		case 'sharing_changed':
-			return 'lock-open'
+			return 'unlock'
 		case 'access_granted':
 		case 'access_revoked':
 			return 'person'
