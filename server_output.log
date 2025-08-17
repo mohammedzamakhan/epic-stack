@@ -1,0 +1,9 @@
+
+> dev
+> turbo run dev
+
+turbo 2.5.5
+
+  x Invalid task configuration
+  `->   x You have 11 persistent tasks but `turbo` is configured for
+        | concurrency of 10. Set --concurrency to at least 12

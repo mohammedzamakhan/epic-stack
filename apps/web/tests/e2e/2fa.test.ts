@@ -13,14 +13,17 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	const main = page.getByRole('main')
 	await main.getByRole('button', { name: /enable 2fa/i }).click()
 
-	const otpUriString = await main
+	await page.waitForSelector('[role="dialog"]', { state: 'visible' })
+	const dialog = page.locator('[role="dialog"]')
+
+	const otpUriString = await dialog
 		.getByLabel(/One-Time Password URI/i)
 		.innerText()
 
 	const otpUri = new URL(otpUriString)
 	const options = Object.fromEntries(otpUri.searchParams)
 
-	await main.getByRole('textbox', { name: /authentication code/i }).fill(
+	await dialog.getByRole('textbox', { name: /authentication code/i }).fill(
 		(
 			await generateTOTP({
 				...options,
@@ -29,7 +32,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 			})
 		).otp,
 	)
-	await main.getByRole('button', { name: /enable 2fa/i }).click()
+	await dialog.getByRole('button', { name: /enable 2fa/i }).click()
 
 	await expect(page.getByText(/2FA enabled/i)).toBeVisible()
 	await expect(main.getByRole('button', { name: /disable 2fa/i })).toBeVisible()

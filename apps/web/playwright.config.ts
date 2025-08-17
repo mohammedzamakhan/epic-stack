@@ -29,7 +29,7 @@ export default defineConfig({
 	],
 
 	webServer: {
-		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
+		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev:web',
 		port: Number(PORT),
 		reuseExistingServer: true,
 		stdout: 'pipe',
@@ -37,6 +37,7 @@ export default defineConfig({
 		env: {
 			PORT,
 			NODE_ENV: 'test',
+			CACHE_DATABASE_PATH: './tests/temp/cache.db',
 		},
 	},
 })
