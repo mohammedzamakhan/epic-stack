@@ -22,15 +22,9 @@ import { type Route, type Info } from './+types/notes.$noteId.ts'
 import { type Info as notesInfo } from './+types/notes.ts'
 
 export async function loader({ params }: Route.LoaderArgs) {
-	const { orgSlug, noteId } = params
+	const { username, noteId } = params
 	invariantResponse(noteId, 'noteId is required')
-
-	const organization = await prisma.organization.findUnique({
-		where: { slug: orgSlug },
-		select: { id: true },
-	})
-
-	invariantResponse(organization, 'Organization not found', { status: 404 })
+	invariantResponse(username, 'username is required')
 
 	const note = await prisma.note.findUnique({
 		where: { id: params.noteId },
@@ -54,7 +48,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 	const date = new Date(note.updatedAt)
 	const timeAgo = formatDistanceToNow(date)
 
-	return { note, timeAgo, organization }
+	return { note, timeAgo }
 }
 
 const DeleteFormSchema = z.object({
@@ -135,16 +129,10 @@ export default function NoteRoute({
 					{loaderData.note.images.map((image) => (
 						<li key={image.objectKey}>
 							<a
-								href={getNoteImgSrc(
-									image.objectKey,
-									loaderData.organization.id,
-								)}
+								href={getNoteImgSrc(image.objectKey)}
 							>
 								<Img
-									src={getNoteImgSrc(
-										image.objectKey,
-										loaderData.organization.id,
-									)}
+									src={getNoteImgSrc(image.objectKey)}
 									alt={image.altText ?? ''}
 									className="size-32 rounded-lg object-cover"
 									width={512}

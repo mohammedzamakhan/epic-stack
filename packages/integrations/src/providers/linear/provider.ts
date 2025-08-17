@@ -483,7 +483,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 		}
 
 		try {
-			const data: LinearOAuthResponse = await response.json()
+			const data = (await response.json()) as LinearOAuthResponse
 
 			if (data.error) {
 				throw new Error(
@@ -530,7 +530,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const data: LinearGraphQLResponse<T> = await response.json()
+		const data = (await response.json()) as LinearGraphQLResponse<T>
 
 		if (data.errors && data.errors.length > 0) {
 			throw new Error(

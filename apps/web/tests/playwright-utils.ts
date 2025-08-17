@@ -6,6 +6,7 @@ import {
 	getSessionExpirationDate,
 	sessionKey,
 } from '#app/utils/auth.server.ts'
+import { cookieConsentCookie } from '#app/utils/cookie-consent.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { MOCK_CODE_GITHUB_HEADER } from '#app/utils/providers/constants.js'
 import { normalizeEmail } from '#app/utils/providers/provider.js'
@@ -63,11 +64,30 @@ async function getOrInsertUser({
 	}
 }
 
+async function setCookieConsent(page: any, isCollapsed: boolean = true) {
+	const cookieValue = await cookieConsentCookie.serialize({ isCollapsed })
+	const cookieConfig = setCookieParser.parseString(cookieValue)
+	const newConfig = {
+		name: cookieConfig.name,
+		value: cookieConfig.value,
+		path: cookieConfig.path,
+		domain: 'localhost',
+		expires: cookieConfig.expires?.getTime(),
+		sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
+	}
+	await page.context().addCookies([newConfig])
+}
+
 export const test = base.extend<{
 	insertNewUser(options?: GetOrInsertUserOptions): Promise<User>
 	login(options?: GetOrInsertUserOptions): Promise<User>
 	prepareGitHubUser(): Promise<GitHubUser>
 }>({
+	page: async ({ page }, use) => {
+		// Set cookie consent for all tests to prevent the banner from blocking interactions
+		await setCookieConsent(page)
+		await use(page)
+	},
 	insertNewUser: async ({}, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
@@ -102,6 +122,7 @@ export const test = base.extend<{
 				sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
 			}
 			await page.context().addCookies([newConfig])
+			await setCookieConsent(page)
 			return user
 		})
 		await prisma.user.deleteMany({ where: { id: userId } })

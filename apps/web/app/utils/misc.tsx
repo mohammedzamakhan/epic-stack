@@ -11,8 +11,12 @@ export function getUserImgSrc(objectKey?: string | null) {
 		: '/img/user.png'
 }
 
-export function getNoteImgSrc(objectKey: string, organizationId: string) {
-	return `/resources/images?objectKey=${encodeURIComponent(objectKey)}&organizationId=${organizationId}`
+export function getNoteImgSrc(objectKey: string, organizationId?: string) {
+	const params = new URLSearchParams({ objectKey })
+	if (organizationId) {
+		params.set('organizationId', organizationId)
+	}
+	return `/resources/images?${params.toString()}`
 }
 
 export function getImgSrc({

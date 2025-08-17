@@ -21,6 +21,7 @@ import {
 	TabsTrigger,
 } from '#app/components/ui/tabs'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { type getIpAddressesByUser } from '#app/utils/ip-tracking.server'
 
 export interface AdminUserDetail {
 	id: string
@@ -107,9 +108,14 @@ export interface RecentActivity {
 interface UserDetailViewProps {
 	user: AdminUserDetail
 	recentActivity: RecentActivity
+	ipAddresses: Awaited<ReturnType<typeof getIpAddressesByUser>>
 }
 
-export function UserDetailView({ user, recentActivity }: UserDetailViewProps) {
+export function UserDetailView({
+	user,
+	recentActivity,
+	ipAddresses,
+}: UserDetailViewProps) {
 	const navigate = useNavigate()
 	const submit = useSubmit()
 	const [showBanDialog, setShowBanDialog] = useState(false)
@@ -307,6 +313,7 @@ export function UserDetailView({ user, recentActivity }: UserDetailViewProps) {
 						<TabsTrigger value="organizations">Organizations</TabsTrigger>
 						<TabsTrigger value="activity">Activity</TabsTrigger>
 						<TabsTrigger value="security">Security</TabsTrigger>
+						<TabsTrigger value="ip-addresses">IP Addresses</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="overview" className="space-y-4">
@@ -716,6 +723,49 @@ export function UserDetailView({ user, recentActivity }: UserDetailViewProps) {
 								) : (
 									<p className="text-muted-foreground text-sm">
 										No active sessions
+									</p>
+								)}
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					<TabsContent value="ip-addresses" className="space-y-4">
+						<Card>
+							<CardHeader>
+								<CardTitle>IP Addresses</CardTitle>
+								<CardDescription>
+									IP addresses used by this user
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								{ipAddresses.length > 0 ? (
+									<div className="space-y-2">
+										{ipAddresses.map((conn) => (
+											<div
+												key={conn.id}
+												className="flex items-center justify-between rounded border p-3"
+											>
+												<div>
+													<p className="font-mono text-sm">
+														{conn.ipAddress.ip}
+													</p>
+													<p className="text-muted-foreground text-xs">
+														{conn.ipAddress.city}, {conn.ipAddress.region},{' '}
+														{conn.ipAddress.country}
+													</p>
+												</div>
+												<div className="text-right">
+													<p className="text-muted-foreground text-xs">
+														Last Seen:{' '}
+														{new Date(conn.lastSeenAt).toLocaleString()}
+													</p>
+												</div>
+											</div>
+										))}
+									</div>
+								) : (
+									<p className="text-muted-foreground text-sm">
+										No IP addresses recorded for this user
 									</p>
 								)}
 							</CardContent>

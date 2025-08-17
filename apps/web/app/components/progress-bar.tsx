@@ -49,7 +49,7 @@ function EpicProgress() {
 			{delayedPending && (
 				<div className="absolute flex items-center justify-center">
 					<Icon
-						name="rotate-cw"
+						name="refresh-cw"
 						size="md"
 						className="m-1 animate-spin text-blue-500"
 						aria-hidden

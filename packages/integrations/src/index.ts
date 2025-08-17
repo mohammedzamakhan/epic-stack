@@ -91,7 +91,7 @@ export {
 	NoteOperationWrapper,
 } from './note-hooks'
 
-export { getAvailableProviders } from './providers'
+export * from './providers'
 
 // Re-export commonly used types for convenience
 export type {

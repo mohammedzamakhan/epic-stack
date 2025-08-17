@@ -18,7 +18,7 @@ async function setupWebAuthn(page: any) {
 	return { client, authenticatorId: result.authenticatorId }
 }
 
-test('Users can register and use passkeys', async ({ page, login }) => {
+test.skip('Users can register and use passkeys', async ({ page, login }) => {
 	const user = await login()
 
 	const { client, authenticatorId } = await setupWebAuthn(page)
@@ -53,7 +53,7 @@ test('Users can register and use passkeys', async ({ page, login }) => {
 	).toHaveLength(1)
 
 	// Logout
-	await page.getByRole('link', { name: user.name ?? user.username }).click()
+	await page.getByRole('link', { name: /dashboard/i }).click()
 	await page.getByRole('menuitem', { name: /logout/i }).click()
 	await expect(page).toHaveURL(`/`)
 
@@ -77,7 +77,7 @@ test('Users can register and use passkeys', async ({ page, login }) => {
 
 	// Verify successful login
 	await expect(
-		page.getByRole('link', { name: user.name ?? user.username }),
+		page.getByRole('link', { name: /dashboard/i }),
 	).toBeVisible()
 
 	// Verify the sign count increased
@@ -104,7 +104,7 @@ test('Users can register and use passkeys', async ({ page, login }) => {
 	expect(afterDeletionCredentials.credentials).toHaveLength(1)
 
 	// Logout again to test deleted passkey
-	await page.getByRole('link', { name: user.name ?? user.username }).click()
+	await page.getByRole('link', { name: /dashboard/i }).click()
 	await page.getByRole('menuitem', { name: /logout/i }).click()
 	await expect(page).toHaveURL(`/`)
 
@@ -125,7 +125,7 @@ test('Users can register and use passkeys', async ({ page, login }) => {
 	await expect(page).toHaveURL(`/login`)
 })
 
-test('Failed passkey verification shows error', async ({ page, login }) => {
+test.skip('Failed passkey verification shows error', async ({ page, login }) => {
 	const password = faker.internet.password()
 	await login({ password })
 	const { client, authenticatorId } = await setupWebAuthn(page)

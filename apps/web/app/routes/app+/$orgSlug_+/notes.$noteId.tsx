@@ -1207,7 +1207,13 @@ type NoteLoaderData = {
 		content: string
 		createdById: string
 		isPublic: boolean
-		images: { altText: string | null; objectKey: string }[]
+		uploads: {
+			type: string
+			altText: string | null
+			objectKey: string
+			thumbnailKey: string | null
+			status: string
+		}[]
 		organization: { slug: string; id: string }
 		noteAccess: Array<{
 			id: string

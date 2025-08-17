@@ -208,29 +208,29 @@ export default function SignupRoute({
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form method="POST" {...getFormProps(form)}>
-					<HoneypotInputs />
-					<div className="grid gap-6">
-						{/* Social Signup Buttons */}
-						<div className="flex flex-col gap-4">
-							{providerNames.map((providerName) => (
-								<ProviderConnectionForm
-									key={providerName}
-									type="Signup"
-									providerName={providerName}
-									redirectTo={redirectTo}
-								/>
-							))}
-						</div>
+				<div className="grid gap-6">
+					{/* Social Signup Buttons */}
+					<div className="flex flex-col gap-4">
+						{providerNames.map((providerName) => (
+							<ProviderConnectionForm
+								key={providerName}
+								type="Signup"
+								providerName={providerName}
+								redirectTo={redirectTo}
+							/>
+						))}
+					</div>
 
-						{/* Divider */}
-						<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-							<span className="bg-card text-muted-foreground relative z-10 px-2">
-								Or continue with
-							</span>
-						</div>
+					{/* Divider */}
+					<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+						<span className="bg-card text-muted-foreground relative z-10 px-2">
+							Or continue with
+						</span>
+					</div>
 
-						{/* Email Signup Form */}
+					{/* Email Signup Form */}
+					<Form method="POST" {...getFormProps(form)}>
+						<HoneypotInputs />
 						<div className="grid gap-6">
 							<div className="grid gap-3">
 								<Label htmlFor={fields.email.id}>Email</Label>
@@ -269,8 +269,8 @@ export default function SignupRoute({
 								Sign in
 							</Link>
 						</div>
-					</div>
-				</Form>
+					</Form>
+				</div>
 			</CardContent>
 		</Card>
 	)

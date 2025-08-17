@@ -53,13 +53,13 @@ export default function TwoFactorRoute({ loaderData }: Route.ComponentProps) {
 						</Icon>
 					</p>
 					<Link to="disable">
-						<Icon name="lock-open">Disable 2FA</Icon>
+						<Icon name="unlock">Disable 2FA</Icon>
 					</Link>
 				</>
 			) : (
 				<>
 					<p>
-						<Icon name="lock-open">
+						<Icon name="unlock">
 							You have not enabled two-factor authentication yet.
 						</Icon>
 					</p>

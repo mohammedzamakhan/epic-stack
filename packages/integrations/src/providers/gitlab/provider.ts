@@ -148,7 +148,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				? JSON.parse(integration.config)
 				: integration.config
 			: null
-		const instanceUrl = config?.instanceUrl as string
+		const instanceUrl = (config as any)?.instanceUrl as string
 
 		if (instanceUrl) {
 			return instanceUrl.endsWith('/')
@@ -236,7 +236,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				throw new Error(`Token exchange failed: ${errorText}`)
 			}
 
-			const tokenData: GitLabOAuthResponse = await tokenResponse.json()
+			const tokenData = await tokenResponse.json() as GitLabOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -310,7 +310,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				throw new Error(`Token refresh failed: ${errorText}`)
 			}
 
-			const tokenData: GitLabOAuthResponse = await tokenResponse.json()
+			const tokenData = await tokenResponse.json() as GitLabOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -379,7 +379,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				const config =
 					typeof connection.config === 'string'
 						? JSON.parse(connection.config)
-						: connection.config
+						: connection.config as any
 
 				const projectId = config?.projectId || connection.externalId
 				if (!projectId) {
@@ -415,7 +415,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 					const config =
 						typeof connection.config === 'string'
 							? JSON.parse(connection.config)
-							: connection.config
+							: connection.config as any
 
 					const projectId = config?.projectId || connection.externalId
 					if (!projectId) {
@@ -490,7 +490,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const userData = await response.json()
+		const userData = await response.json() as GitLabUser
 		return userData
 	}
 
@@ -565,7 +565,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		return response.json()
+		return await response.json() as GitLabProject[]
 	}
 
 	/**
@@ -592,7 +592,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get GitLab project: ${response.statusText}`)
 		}
 
-		return response.json()
+		return await response.json() as GitLabProject
 	}
 
 	/**
@@ -624,7 +624,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to create GitLab issue: ${errorText}`)
 		}
 
-		return response.json()
+		return await response.json() as GitLabCreateIssueResponse
 	}
 
 	/**
@@ -640,7 +640,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			? typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config
-			: {}
+			: {} as any
 
 		const includeContent = config.includeNoteContent !== false
 		const labels = config.defaultLabels || []
@@ -725,7 +725,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			return response.json()
+			return await response.json() as GitLabLabel[]
 		})
 	}
 
@@ -756,7 +756,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			return response.json()
+			return await response.json() as GitLabMilestone[]
 		})
 	}
 
@@ -793,7 +793,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			return response.json()
+			return await response.json() as GitLabUser[]
 		})
 	}
 
@@ -804,7 +804,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		const config =
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
-				: integration.config
+				: integration.config as any
 		return config?.instanceUrl
 	}
 }

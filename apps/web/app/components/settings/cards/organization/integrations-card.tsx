@@ -151,7 +151,7 @@ function ConnectedIntegrationItem({
 				<div className="flex items-center space-x-3">
 					<div className="flex-shrink-0">
 						<Icon
-							name={providerInfo.icon}
+							name={providerInfo.icon as any}
 							className="text-muted-foreground h-8 w-8"
 						/>
 					</div>
@@ -234,7 +234,7 @@ function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
 	return (
 		<div className="hover:bg-muted/50 flex items-center gap-3 rounded-lg border p-4 transition-colors">
 			<div className="flex-shrink-0">
-				<Icon name={provider.icon} className="text-muted-foreground h-8 w-8" />
+				<Icon name={provider.icon as any} className="text-muted-foreground h-8 w-8" />
 			</div>
 			<div className="min-w-0 flex-1">
 				<p className="text-foreground truncate text-sm font-medium">

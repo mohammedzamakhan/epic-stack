@@ -407,7 +407,7 @@ export async function clearCacheByType(
 ): Promise<number> {
 	if (type === 'sqlite') {
 		const result = cacheDb.prepare('DELETE FROM cache').run()
-		return result.changes || 0
+		return Number(result.changes) || 0
 	} else {
 		const count = lru.size
 		lru.clear()

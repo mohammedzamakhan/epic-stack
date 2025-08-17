@@ -122,28 +122,28 @@ jobs:
         id: db-cache
         uses: actions/cache@v4
         with:
-          path: prisma/data.db
+          path: packages/prisma/db/data.db
           key:
-            db-cache-schema_${{ hashFiles('./prisma/schema.prisma')
-            }}-migrations_${{ hashFiles('./prisma/migrations/*/migration.sql')
+            db-cache-schema_${{ hashFiles('./packages/prisma/schema.prisma')
+            }}-migrations_${{ hashFiles('./packages/prisma/migrations/*/migration.sql')
             }}
 
       - name: 🌱 Seed Database
         if: steps.db-cache.outputs.cache-hit != 'true'
-        run: npx prisma migrate reset --force
+        run: npx prisma migrate reset --force --schema=packages/prisma/schema.prisma
 
       - name: 🏗 Build
         run: npm run build
 
       - name: 🎭 Playwright tests
-        run: npx playwright test
+        run: cd apps/web && npx playwright test
 
       - name: 📊 Upload report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: apps/web/playwright-report/
           retention-days: 30
 
   container:

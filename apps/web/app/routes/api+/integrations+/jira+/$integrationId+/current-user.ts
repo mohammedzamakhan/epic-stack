@@ -1,4 +1,4 @@
-import { integrationManager } from '@repo/integrations'
+import { integrationManager, JiraProvider } from '@repo/integrations'
 import { prisma } from '@repo/prisma'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -36,7 +36,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		}
 
 		// Get Jira provider
-		const jiraProvider = integrationManager.getProvider('jira')
+		const jiraProvider = integrationManager.getProvider('jira') as JiraProvider
 
 		// Get current user details
 		const userDetails = await jiraProvider.getCurrentUserDetails(integration)

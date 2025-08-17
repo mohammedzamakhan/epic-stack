@@ -402,7 +402,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				let errorMessage = `Failed to fetch boards (${boardsResponse.status} ${boardsResponse.statusText})`
 				try {
 					// Try to parse as JSON first
-					const errorData: TrelloApiError = await boardsResponse.json()
+					const errorData = (await boardsResponse.json()) as TrelloApiError
 					errorMessage = `Failed to fetch boards: ${errorData.message || errorData.error || 'Unknown error'}`
 				} catch {
 					// If JSON parsing fails, try to get plain text error
@@ -418,7 +418,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				throw new Error(errorMessage)
 			}
 
-			const boards: TrelloBoard[] = await boardsResponse.json()
+			const boards = (await boardsResponse.json()) as TrelloBoard[]
 
 			// For each board, get its lists
 			for (const board of boards) {
@@ -431,7 +431,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				const listsResponse = await fetch(listsUrl.toString())
 
 				if (listsResponse.ok) {
-					const lists: TrelloList[] = await listsResponse.json()
+					const lists = (await listsResponse.json()) as TrelloList[]
 
 					for (const list of lists) {
 						channels.push({
@@ -547,7 +547,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				let errorDetails = ''
 				try {
 					// Try to parse as JSON first
-					const errorData: TrelloApiError = await response.json()
+					const errorData = (await response.json()) as TrelloApiError
 					errorMessage = `Failed to create card: ${errorData.message || errorData.error || 'Unknown error'}`
 					errorDetails = JSON.stringify(errorData, null, 2)
 				} catch {
@@ -670,13 +670,13 @@ export class TrelloProvider extends BaseIntegrationProvider {
 		)
 
 		if (!response.ok) {
-			const errorData: TrelloApiError = await response.json()
+			const errorData = (await response.json()) as TrelloApiError
 			throw new Error(
 				`Failed to get user info: ${errorData.message || 'Unknown error'}`,
 			)
 		}
 
-		return await response.json()
+		return (await response.json()) as TrelloUser
 	}
 
 	/**
@@ -688,12 +688,12 @@ export class TrelloProvider extends BaseIntegrationProvider {
 		)
 
 		if (!response.ok) {
-			const errorData: TrelloApiError = await response.json()
+			const errorData = (await response.json()) as TrelloApiError
 			throw new Error(
 				`Failed to get boards: ${errorData.message || 'Unknown error'}`,
 			)
 		}
 
-		return await response.json()
+		return (await response.json()) as TrelloBoard[]
 	}
 }

@@ -188,9 +188,10 @@ export const NoteCard = ({
 		try {
 			if (!note.tags) return []
 			const parsed = JSON.parse(note.tags)
+			type Tag = string | { name: string }
 			if (Array.isArray(parsed)) {
 				// Ensure all items are strings
-				return parsed
+				return (parsed as Tag[])
 					.map((tag) =>
 						typeof tag === 'string'
 							? tag
@@ -462,12 +463,12 @@ export const NoteCard = ({
 					{/* Tags section */}
 					{tags && tags.length > 0 && (
 						<div className="mt-2 flex flex-wrap gap-1 px-1">
-							{tags.slice(0, 2).map((tag: any, index: number) => (
+							{tags.slice(0, 2).map((tag: string, index: number) => (
 								<span
 									key={index}
 									className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
 								>
-									{typeof tag === 'string' ? tag : tag?.name || String(tag)}
+									{tag}
 								</span>
 							))}
 							{tags.length > 2 && (

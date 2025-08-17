@@ -125,5 +125,10 @@ export async function action({ request }: ActionFunctionArgs) {
 		},
 	})
 
-	return redirect(`/app/test/notes`)
+	const note = await prisma.note.findUniqueOrThrow({
+		where: { id: noteId },
+		select: { id: true, owner: { select: { username: true } } },
+	})
+
+	return redirect(`/users/${note.owner.username}/notes/${noteId}`)
 }

@@ -1,4 +1,5 @@
 import { styleText } from 'node:util'
+import { type OutgoingHttpHeaders, type OutgoingHttpHeader } from 'node:http'
 import { helmet } from '@nichtsam/helmet/node-http'
 import { createRequestHandler } from '@react-router/express'
 import * as Sentry from '@sentry/react-router'
@@ -288,17 +289,21 @@ app.all('/api/novu*', (req, res, next) => {
 	const originalWriteHead = res.writeHead
 
 	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (statusCode, reasonPhraseOrHeaders, maybeHeaders) {
+	res.writeHead = function (
+		statusCode: number,
+		reasonPhraseOrHeaders?: any,
+		maybeHeaders?: any,
+	) {
 		const headers =
 			typeof reasonPhraseOrHeaders === 'string'
 				? maybeHeaders
 				: reasonPhraseOrHeaders
 
-		if (headers) {
+		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
 			// Clear existing access-control-* headers
 			for (const key of Object.keys(headers)) {
 				if (key.toLowerCase().startsWith('access-control-')) {
-					delete headers[key]
+					delete (headers as Record<string, any>)[key]
 				}
 			}
 		}
@@ -312,7 +317,20 @@ app.all('/api/novu*', (req, res, next) => {
 			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
 		)
 
-		return originalWriteHead.apply(res, arguments)
+		if (typeof reasonPhraseOrHeaders === 'string') {
+			if (maybeHeaders) {
+				return originalWriteHead.call(
+					res,
+					statusCode,
+					reasonPhraseOrHeaders,
+					maybeHeaders,
+				)
+			} else {
+				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+			}
+		} else {
+			return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+		}
 	}
 
 	return createRequestHandler({

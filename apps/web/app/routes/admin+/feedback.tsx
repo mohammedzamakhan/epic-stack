@@ -1,4 +1,5 @@
 import { useLoaderData } from 'react-router'
+import { type Feedback, type Organization, type User } from '@prisma/client'
 import {
 	Table,
 	TableBody,
@@ -33,8 +34,17 @@ export async function loader({ request }: { request: Request }) {
 	return Response.json({ feedback })
 }
 
+type LoaderData = {
+	feedback: (Omit<Feedback, 'createdAt' | 'updatedAt'> & {
+		createdAt: string
+		updatedAt: string
+		user: Pick<User, 'name' | 'email'>
+		organization: Pick<Organization, 'name'>
+	})[]
+}
+
 export default function AdminFeedbackPage() {
-	const { feedback } = useLoaderData<typeof loader>()
+	const { feedback } = useLoaderData() as LoaderData
 
 	return (
 		<div className="space-y-6">

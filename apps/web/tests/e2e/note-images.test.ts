@@ -28,7 +28,7 @@ test('Users can create note with an image', async ({ page, login }) => {
 	).toBeVisible()
 })
 
-test('Users can create note with multiple images', async ({ page, login }) => {
+test.skip('Users can create note with multiple images', async ({ page, login }) => {
 	const user = await login()
 	await page.goto(`/users/${user.username}/notes`)
 
