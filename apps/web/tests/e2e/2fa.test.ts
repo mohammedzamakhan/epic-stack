@@ -2,19 +2,17 @@ import { faker } from '@faker-js/faker'
 import { generateTOTP } from '#app/utils/totp.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
-test.skip('Users can add 2FA to their account and use it when logging in', async ({
+test('Users can add 2FA to their account and use it when logging in', async ({
 	page,
 	login,
 }) => {
 	const password = faker.internet.password()
 	const user = await login({ password })
-	await page.goto('/settings/profile')
+	await page.goto('/app/security')
 
-	await page.getByRole('link', { name: /Enable 2FA/i }).click()
-
-	await expect(page).toHaveURL(`/settings/profile/two-factor`)
 	const main = page.getByRole('main')
 	await main.getByRole('button', { name: /enable 2fa/i }).click()
+
 	const otpUriString = await main
 		.getByLabel(/One-Time Password URI/i)
 		.innerText()
@@ -22,7 +20,7 @@ test.skip('Users can add 2FA to their account and use it when logging in', async
 	const otpUri = new URL(otpUriString)
 	const options = Object.fromEntries(otpUri.searchParams)
 
-	await main.getByRole('textbox', { name: /code/i }).fill(
+	await main.getByRole('textbox', { name: /authentication code/i }).fill(
 		(
 			await generateTOTP({
 				...options,
@@ -31,12 +29,10 @@ test.skip('Users can add 2FA to their account and use it when logging in', async
 			})
 		).otp,
 	)
-	await main.getByRole('button', { name: /submit/i }).click()
+	await main.getByRole('button', { name: /enable 2fa/i }).click()
 
-	await expect(
-		page.getByText(/You have enabled two-factor authentication./i),
-	).toBeVisible()
-	await expect(page.getByRole('link', { name: /disable 2fa/i })).toBeVisible()
+	await expect(page.getByText(/2FA enabled/i)).toBeVisible()
+	await expect(main.getByRole('button', { name: /disable 2fa/i })).toBeVisible()
 
 	// Navigate to home page first, then logout
 	await page.goto('/')
