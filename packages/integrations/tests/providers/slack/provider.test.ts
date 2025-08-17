@@ -12,7 +12,7 @@ describe('SlackProvider - General Provider Tests', () => {
 	describe('Provider Properties', () => {
 		it('should have correct provider metadata', () => {
 			expect(provider.name).toBe('slack')
-			expect(provider.type).toBe('productivity')
+			expect(provider.type).toBe('communication')
 			expect(provider.displayName).toBe('Slack')
 			expect(provider.description).toBe(
 				'Connect notes to Slack channels for team collaboration',
@@ -27,11 +27,13 @@ describe('SlackProvider - General Provider Tests', () => {
 				id: 'integration-123',
 				organizationId: 'org-123',
 				providerName: 'slack',
+				providerType: 'communication',
 				accessToken: 'xoxb-test-token',
 				refreshToken: null,
-				expiresAt: null,
+				tokenExpiresAt: null,
 				config: JSON.stringify({}),
-				status: 'active',
+				isActive: true,
+				lastSyncAt: null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			}
@@ -44,6 +46,8 @@ describe('SlackProvider - General Provider Tests', () => {
 				integrationId: 'integration-123',
 				externalId: 'C1234567890',
 				config: JSON.stringify({}),
+				isActive: true,
+				lastPostedAt: null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 				integration: mockIntegration,

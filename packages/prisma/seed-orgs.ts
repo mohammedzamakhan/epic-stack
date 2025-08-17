@@ -54,15 +54,17 @@ async function seedOrganizations() {
 			const adminUser = users[0] // First user is admin
 			const memberUsers = users.slice(1) // Rest are regular members
 
-			// Add admin user
-			await prisma.userOrganization.create({
-				data: {
-					userId: adminUser.id,
-					organizationId: organization.id,
-					role: 'admin',
-					isDefault: i === 0, // First org is default for admin
-				},
-			})
+			if (adminUser) {
+				// Add admin user
+				await prisma.userOrganization.create({
+					data: {
+						userId: adminUser.id,
+						organizationId: organization.id,
+						role: 'admin',
+						isDefault: i === 0, // First org is default for admin
+					},
+				})
+			}
 
 			// Add some members
 			for (const user of memberUsers) {
@@ -95,7 +97,7 @@ async function seedOrganizations() {
 				where: {
 					userId_organizationId: {
 						userId: user.id,
-						organizationId: userOrgs[0].organizationId,
+						organizationId: userOrgs[0]!.organizationId,
 					},
 				},
 				data: { isDefault: true },

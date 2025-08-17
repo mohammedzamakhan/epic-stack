@@ -312,8 +312,8 @@ describe('NoteEventHandler', () => {
 			const results = await noteEventHandler.processBatchEvents(events)
 
 			expect(results).toHaveLength(2)
-			expect(results[0].success).toBe(true)
-			expect(results[1].success).toBe(true)
+			expect(results[0]?.success).toBe(true)
+			expect(results[1]?.success).toBe(true)
 		})
 
 		it('should handle errors in batch processing', async () => {
@@ -334,8 +334,8 @@ describe('NoteEventHandler', () => {
 			const results = await noteEventHandler.processBatchEvents(events)
 
 			expect(results).toHaveLength(1)
-			expect(results[0].success).toBe(false)
-			expect(results[0].errors).toEqual(['Batch error'])
+			expect(results[0]?.success).toBe(false)
+			expect(results[0]?.errors).toEqual(['Batch error'])
 		})
 	})
 

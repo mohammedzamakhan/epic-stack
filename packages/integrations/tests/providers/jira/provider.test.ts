@@ -144,7 +144,7 @@ describe('JiraProvider', () => {
 		it('should return false when external ID is missing', async () => {
 			const connectionWithoutExternalId = {
 				...mockConnection,
-				externalId: null,
+				externalId: '',
 			} as NoteIntegrationConnection & { integration: Integration }
 
 			const isValid = await provider.validateConnection(
@@ -424,8 +424,8 @@ describe('JiraProvider', () => {
 			expect(provider).toBeInstanceOf(
 				Object.getPrototypeOf(provider).constructor,
 			)
-			expect(typeof provider.generateOAuthState).toBe('function')
-			expect(typeof provider.parseOAuthState).toBe('function')
+			expect(typeof (provider as any).generateOAuthState).toBe('function')
+			expect(typeof (provider as any).parseOAuthState).toBe('function')
 		})
 
 		it('should generate and parse OAuth state correctly', async () => {
@@ -441,7 +441,11 @@ describe('JiraProvider', () => {
 			const statePayload = state!.split('.')[0]
 			const decodedState = JSON.parse(
 				Buffer.from(statePayload, 'base64').toString(),
-			)
+			) as {
+				organizationId: string
+				providerName: string
+				redirectUri: string
+			}
 			expect(decodedState.organizationId).toBe(organizationId)
 			expect(decodedState.providerName).toBe('jira')
 			expect(decodedState.redirectUri).toBe(redirectUri)

@@ -261,6 +261,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: false,
+				isExpired: false,
 				expiresAt: tokenData.expiresAt,
 				timeUntilExpiry: 3600000,
 			})
@@ -306,6 +307,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: true,
+				isExpired: false,
 				expiresAt: tokenData.expiresAt,
 				timeUntilExpiry: 300000,
 			})
@@ -343,6 +345,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: false,
 				needsRefresh: false,
+				isExpired: true,
 				expiresAt: new Date(),
 				timeUntilExpiry: -1000,
 			})
@@ -385,6 +388,7 @@ describe('TokenManager', () => {
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue({
 				isValid: true,
 				needsRefresh: true,
+				isExpired: false,
 				expiresAt: tokenData.expiresAt,
 				timeUntilExpiry: 300000,
 			})
@@ -527,6 +531,7 @@ describe('TokenManager', () => {
 			const validationResult = {
 				isValid: true,
 				needsRefresh: false,
+				isExpired: false,
 				expiresAt: tokenData.expiresAt,
 				timeUntilExpiry: 3600000,
 			}
@@ -535,13 +540,13 @@ describe('TokenManager', () => {
 				accessToken: 'encrypted-access',
 				refreshToken: null,
 				tokenExpiresAt: tokenData.expiresAt,
-				config: {},
+				config: '',
 			} as any)
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,
 			)
 			vi.mocked(integrationEncryption.validateToken).mockReturnValue(
-				validationResult,
+				validationResult as any,
 			)
 
 			const result =
@@ -578,9 +583,13 @@ describe('TokenManager', () => {
 			const notExpiring = new Date(now.getTime() + 60 * 60 * 1000) // 1 hour from now
 
 			const mockIntegrations = [
-				{ id: 'int-1', tokenExpiresAt: soonToExpire },
-				{ id: 'int-2', tokenExpiresAt: notExpiring },
-				{ id: 'int-3', tokenExpiresAt: new Date(now.getTime() - 1000) }, // Already expired
+				{ id: 'int-1', tokenExpiresAt: soonToExpire, providerName: 'test' },
+				{ id: 'int-2', tokenExpiresAt: notExpiring, providerName: 'test' },
+				{
+					id: 'int-3',
+					tokenExpiresAt: new Date(now.getTime() - 1000),
+					providerName: 'test',
+				}, // Already expired
 			]
 
 			vi.mocked(prisma.integration.findMany).mockResolvedValue(
@@ -637,7 +646,7 @@ describe('TokenManager', () => {
 				accessToken: 'encrypted-access',
 				refreshToken: null,
 				tokenExpiresAt: null,
-				config: {},
+				config: '',
 			} as any)
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,
@@ -673,7 +682,7 @@ describe('TokenManager', () => {
 				accessToken: 'encrypted-access',
 				refreshToken: null,
 				tokenExpiresAt: null,
-				config: {},
+				config: '',
 			} as any)
 			vi.mocked(integrationEncryption.decryptTokenData).mockResolvedValue(
 				tokenData,

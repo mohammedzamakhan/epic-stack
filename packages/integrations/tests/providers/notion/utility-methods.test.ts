@@ -47,7 +47,7 @@ describe('NotionProvider - Utility Methods', () => {
 			}
 
 			expect(richTextBlock.type).toBe('paragraph')
-			expect(richTextBlock.paragraph.rich_text[0].text.content).toBe(content)
+			expect(richTextBlock.paragraph.rich_text[0]?.text.content).toBe(content)
 		})
 
 		it('should handle empty content', () => {
@@ -67,7 +67,7 @@ describe('NotionProvider - Utility Methods', () => {
 				},
 			}
 
-			expect(richTextBlock.paragraph.rich_text[0].text.content).toBe(
+			expect(richTextBlock.paragraph.rich_text[0]?.text.content).toBe(
 				'No content',
 			)
 		})
@@ -82,7 +82,7 @@ describe('NotionProvider - Utility Methods', () => {
 
 			const filtered = databases.filter((db) => db.object === 'database')
 			expect(filtered).toHaveLength(1)
-			expect(filtered[0].id).toBe('1')
+			expect(filtered[0]?.id).toBe('1')
 		})
 	})
 })
