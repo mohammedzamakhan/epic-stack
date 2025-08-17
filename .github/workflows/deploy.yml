@@ -121,7 +121,7 @@ jobs:
         run: |
           npx prisma migrate deploy --schema=packages/prisma/schema.prisma
           npx prisma db seed --schema=packages/prisma/schema.prisma
-          npx prisma generate --schema=packages/prisma/schema.prisma
+          npx prisma generate --sql --schema=packages/prisma/schema.prisma
 
       - name: 🏗 Build
         run: npm run build
