@@ -1,5 +1,5 @@
-import  { type UIMessage } from 'ai'
-import  { type ComponentProps, type HTMLAttributes } from 'react'
+import { type UIMessage } from 'ai'
+import { type ComponentProps, type HTMLAttributes } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '#app/components/ui/avatar'
 import { cn } from '#app/utils/misc'
 

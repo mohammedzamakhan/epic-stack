@@ -5,11 +5,13 @@ Model Context Protocol server for Epic Notes organization.
 ## Installation
 
 Install globally:
+
 ```bash
 npm install -g epic-notes-mcp
 ```
 
 Or use directly with npx (recommended):
+
 ```bash
 npx epic-notes-mcp <your-api-key>
 ```
@@ -37,14 +39,14 @@ Add this to your `.kiro/settings/mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "epic-notes-test-organization": {
-      "command": "npx",
-      "args": ["epic-notes-mcp", "your-api-key-here"],
-      "disabled": false,
-      "autoApprove": ["find_user", "get_user_notes"]
-    }
-  }
+	"mcpServers": {
+		"epic-notes-test-organization": {
+			"command": "npx",
+			"args": ["epic-notes-mcp", "your-api-key-here"],
+			"disabled": false,
+			"autoApprove": ["find_user", "get_user_notes"]
+		}
+	}
 }
 ```
 
@@ -68,7 +70,9 @@ To publish this package:
 3. Run `npm run build` to create the bundled executable in `build/`
 4. Run `npm publish` from the package directory
 
-The package is built as a single bundled executable with no runtime dependencies. The `build/` folder is excluded from git but included in the npm package.
+The package is built as a single bundled executable with no runtime
+dependencies. The `build/` folder is excluded from git but included in the npm
+package.
 
 ## Requirements
 

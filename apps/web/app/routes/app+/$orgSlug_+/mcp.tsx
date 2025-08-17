@@ -1,6 +1,13 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { useEffect, useState } from 'react'
-import { Form, useActionData, useLoaderData, useSubmit, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import {
+	Form,
+	useActionData,
+	useLoaderData,
+	useSubmit,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from 'react-router'
 import {
 	AnnotatedLayout,
 	AnnotatedSection,
@@ -157,11 +164,7 @@ function copyToClipboard(text: string) {
 }
 
 // Code block with copy button component
-function CodeBlock({
-	code,
-}: {
-	code: string
-}) {
+function CodeBlock({ code }: { code: string }) {
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = () => {
@@ -172,7 +175,7 @@ function CodeBlock({
 
 	return (
 		<div className="relative">
-			<div className="overflow-x-auto rounded bg-muted p-4 font-mono text-sm">
+			<div className="bg-muted overflow-x-auto rounded p-4 font-mono text-sm">
 				<pre>{code}</pre>
 			</div>
 			<Button
@@ -537,10 +540,7 @@ function SetupInstructionsCard({
 				[`epic-notes-${organization.name.toLowerCase().replace(/\s+/g, '-')}`]:
 					{
 						command: 'npx',
-						args: [
-							'epic-notes-mcp',
-							`YOUR_API_KEY_HERE`,
-						],
+						args: ['epic-notes-mcp', `YOUR_API_KEY_HERE`],
 						env: {},
 					},
 			},
@@ -555,10 +555,7 @@ function SetupInstructionsCard({
 				[`epic-notes-${organization.name.toLowerCase().replace(/\s+/g, '-')}`]:
 					{
 						command: 'npx',
-						args: [
-							'epic-notes-mcp',
-							`YOUR_API_KEY_HERE`,
-						],
+						args: ['epic-notes-mcp', `YOUR_API_KEY_HERE`],
 						disabled: false,
 						autoApprove: ['find_user', 'get_user_notes'],
 					},

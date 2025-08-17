@@ -562,7 +562,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const result = await response.json() as { data: AsanaUser }
+		const result = (await response.json()) as { data: AsanaUser }
 		return result.data
 	}
 
@@ -585,7 +585,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const result = await response.json() as { data: AsanaWorkspace[] }
+		const result = (await response.json()) as { data: AsanaWorkspace[] }
 		return result.data
 	}
 

@@ -432,7 +432,7 @@ describe('TokenRefreshManager', () => {
 		it('should fail after max retries', async () => {
 			const refreshToken = 'refresh-token'
 
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('network timeout'),
 			)
 
@@ -451,7 +451,7 @@ describe('TokenRefreshManager', () => {
 		it('should not retry on non-retryable errors', async () => {
 			const refreshToken = 'refresh-token'
 
-			vi.mocked(mockProvider.refreshToken).mockRejectedValue(
+			vi.mocked(mockProvider.refreshToken!).mockRejectedValue(
 				new Error('invalid_grant'),
 			)
 
@@ -491,7 +491,7 @@ describe('TokenRefreshManager', () => {
 				refreshToken: 'new-refresh-token',
 			}
 
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(
 				invalidTokenData as TokenData,
 			)
 
@@ -723,7 +723,7 @@ describe('OAuthFlowManager', () => {
 				expiresAt: new Date(Date.now() + 3600000),
 			}
 
-			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
+			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(newTokenData)
 
 			const result = await OAuthFlowManager.ensureValidToken(
 				'test-provider',

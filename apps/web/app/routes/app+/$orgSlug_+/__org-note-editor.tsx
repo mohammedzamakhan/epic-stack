@@ -136,7 +136,10 @@ export function OrgNoteEditor({
 			tags: (() => {
 				try {
 					if (typeof note?.tags === 'string') {
-						return JSON.parse(note.tags).join(', ')
+						const tags = JSON.parse(note.tags)
+						if (Array.isArray(tags)) {
+							return tags.join(', ')
+						}
 					}
 					return ''
 				} catch {

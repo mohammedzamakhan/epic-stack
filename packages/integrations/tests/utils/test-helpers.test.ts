@@ -70,11 +70,13 @@ describe('Test Helpers', () => {
 			const integration = await repo.create({
 				organizationId: 'org-123',
 				providerName: 'test',
+				providerType: 'productivity',
 				accessToken: 'token',
 				refreshToken: null,
-				expiresAt: null,
+				tokenExpiresAt: null,
 				config: '{}',
-				status: 'active',
+				isActive: true,
+				lastSyncAt: null,
 			})
 
 			expect(integration.id).toBeDefined()
@@ -88,15 +90,17 @@ describe('Test Helpers', () => {
 			const integration = await repo.create({
 				organizationId: 'org-123',
 				providerName: 'test',
+				providerType: 'productivity',
 				accessToken: 'token',
 				refreshToken: null,
-				expiresAt: null,
+				tokenExpiresAt: null,
 				config: '{}',
-				status: 'active',
+				isActive: true,
+				lastSyncAt: null,
 			})
 
-			const updated = await repo.update(integration.id, { status: 'inactive' })
-			expect(updated.status).toBe('inactive')
+			const updated = await repo.update(integration.id, { isActive: false })
+			expect(updated.isActive).toBe(false)
 		})
 	})
 
@@ -127,9 +131,9 @@ describe('Test Helpers', () => {
 		it('should create test channels', () => {
 			const channels = createTestChannels(3)
 			expect(channels).toHaveLength(3)
-			expect(channels[0].name).toBe('Test Channel 1')
-			expect(channels[0].type).toBe('public')
-			expect(channels[1].type).toBe('private')
+			expect(channels[0]?.name).toBe('Test Channel 1')
+			expect(channels[0]?.type).toBe('public')
+			expect(channels[1]?.type).toBe('private')
 		})
 	})
 

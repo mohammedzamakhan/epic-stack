@@ -33,7 +33,9 @@ test.skip('Users can add 2FA to their account and use it when logging in', async
 	)
 	await main.getByRole('button', { name: /submit/i }).click()
 
-	await expect(page.getByText(/You have enabled two-factor authentication./i)).toBeVisible()
+	await expect(
+		page.getByText(/You have enabled two-factor authentication./i),
+	).toBeVisible()
 	await expect(page.getByRole('link', { name: /disable 2fa/i })).toBeVisible()
 
 	// Navigate to home page first, then logout
@@ -45,7 +47,9 @@ test.skip('Users can add 2FA to their account and use it when logging in', async
 	await expect(page).toHaveURL(`/login`)
 	await page.getByRole('textbox', { name: /username/i }).fill(user.username)
 	await page.getByLabel(/^password$/i).fill(password)
-	await page.getByRole('button', { name: 'Login', exact: true }).click({ force: true })
+	await page
+		.getByRole('button', { name: 'Login', exact: true })
+		.click({ force: true })
 
 	await page.getByRole('textbox', { name: /code/i }).fill(
 		(

@@ -54,7 +54,10 @@ test.describe('Admin Impersonation', () => {
 		).not.toBeVisible()
 	})
 
-	test('non-admin cannot access impersonation routes', async ({ page, insertNewUser }) => {
+	test('non-admin cannot access impersonation routes', async ({
+		page,
+		insertNewUser,
+	}) => {
 		// Create a regular user
 		const regularUser = await insertNewUser({ username: 'regular-user' })
 		const targetUser = await insertNewUser({ username: 'target-user' })

@@ -2,7 +2,8 @@ import {
 	useLoaderData,
 	Form,
 	type LoaderFunctionArgs,
-	type ActionFunctionArgs, Link
+	type ActionFunctionArgs,
+	Link,
 } from 'react-router'
 import { Badge } from '#app/components/ui/badge'
 import { Button } from '#app/components/ui/button'

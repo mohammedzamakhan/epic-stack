@@ -315,9 +315,17 @@ export async function expectToThrow(
 	} catch (error) {
 		if (expectedMessage) {
 			if (typeof expectedMessage === 'string') {
-				expect(error).toHaveProperty('message', expectedMessage)
+				if ((error as Error).message !== expectedMessage) {
+					throw new Error(
+						`Expected error message "${expectedMessage}" but got "${(error as Error).message}"`,
+					)
+				}
 			} else {
-				expect((error as Error).message).toMatch(expectedMessage)
+				if (!expectedMessage.test((error as Error).message)) {
+					throw new Error(
+						`Expected error message to match ${expectedMessage} but got "${(error as Error).message}"`,
+					)
+				}
 			}
 		}
 		return error as Error

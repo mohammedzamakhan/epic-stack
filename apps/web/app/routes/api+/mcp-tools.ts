@@ -47,14 +47,18 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
 	{
 		name: 'find_user',
 		title: 'Find users',
-		description: 'Search for users in your organization by their name or username',
+		description:
+			'Search for users in your organization by their name or username',
 		inputSchema: {
 			type: 'object',
 			properties: {
-				query: { type: 'string', description: 'Search query for user name or username' }
+				query: {
+					type: 'string',
+					description: 'Search query for user name or username',
+				},
 			},
-			required: ['query']
-		}
+			required: ['query'],
+		},
 	},
 	{
 		name: 'get_user_notes',
@@ -63,11 +67,14 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
 		inputSchema: {
 			type: 'object',
 			properties: {
-				username: { type: 'string', description: 'Username of the user whose notes to retrieve' }
+				username: {
+					type: 'string',
+					description: 'Username of the user whose notes to retrieve',
+				},
 			},
-			required: ['username']
-		}
-	}
+			required: ['username'],
+		},
+	},
 ]
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -75,23 +82,23 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const apiKey = url.searchParams.get('apiKey')
 
 	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), { 
+		return new Response(JSON.stringify({ error: 'API key required' }), {
 			status: 401,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
 	}
 
 	const authData = await validateApiKey(apiKey)
 	if (!authData) {
-		return new Response(JSON.stringify({ error: 'Invalid API key' }), { 
+		return new Response(JSON.stringify({ error: 'Invalid API key' }), {
 			status: 401,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
 	}
 
 	// Return available tools
 	return new Response(JSON.stringify({ tools: TOOL_DEFINITIONS }), {
-		headers: { 'Content-Type': 'application/json' }
+		headers: { 'Content-Type': 'application/json' },
 	})
 }
 
@@ -100,29 +107,29 @@ export async function action({ request }: Route.ActionArgs) {
 	const apiKey = url.searchParams.get('apiKey')
 
 	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), { 
+		return new Response(JSON.stringify({ error: 'API key required' }), {
 			status: 401,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
 	}
 
 	const authData = await validateApiKey(apiKey)
 	if (!authData) {
-		return new Response(JSON.stringify({ error: 'Invalid API key' }), { 
+		return new Response(JSON.stringify({ error: 'Invalid API key' }), {
 			status: 401,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
 	}
 
 	try {
-		const body = await request.json() as ToolRequest
+		const body = (await request.json()) as ToolRequest
 		const { tool, args } = body
 
 		if (tool === 'find_user') {
 			const { query } = args
 
 			console.log(tool, query, body)
-			
+
 			const users = await prisma.user.findMany({
 				where: {
 					organizations: {
@@ -167,18 +174,18 @@ export async function action({ request }: Route.ActionArgs) {
 			if (!content.length) {
 				content.push({
 					type: 'text',
-					text: 'No users found in your organization'
+					text: 'No users found in your organization',
 				})
 			}
 
 			return new Response(JSON.stringify({ content }), {
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json' },
 			})
 		}
 
 		if (tool === 'get_user_notes') {
 			const { username } = args
-			
+
 			const user = await prisma.user.findFirst({
 				where: {
 					username,
@@ -197,11 +204,16 @@ export async function action({ request }: Route.ActionArgs) {
 			})
 
 			if (!user) {
-				return new Response(JSON.stringify({
-					content: [{ type: 'text', text: 'User not found in your organization' }]
-				}), {
-					headers: { 'Content-Type': 'application/json' }
-				})
+				return new Response(
+					JSON.stringify({
+						content: [
+							{ type: 'text', text: 'User not found in your organization' },
+						],
+					}),
+					{
+						headers: { 'Content-Type': 'application/json' },
+					},
+				)
 			}
 
 			const notes = await prisma.organizationNote.findMany({
@@ -226,11 +238,19 @@ export async function action({ request }: Route.ActionArgs) {
 			})
 
 			if (!notes?.length) {
-				return new Response(JSON.stringify({
-					content: [{ type: 'text', text: `No accessible notes found for ${user.name}` }]
-				}), {
-					headers: { 'Content-Type': 'application/json' }
-				})
+				return new Response(
+					JSON.stringify({
+						content: [
+							{
+								type: 'text',
+								text: `No accessible notes found for ${user.name}`,
+							},
+						],
+					}),
+					{
+						headers: { 'Content-Type': 'application/json' },
+					},
+				)
 			}
 
 			const content = notes.map((note: any) => ({
@@ -239,20 +259,19 @@ export async function action({ request }: Route.ActionArgs) {
 			}))
 
 			return new Response(JSON.stringify({ content }), {
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json' },
 			})
 		}
 
-		return new Response(JSON.stringify({ error: 'Unknown tool' }), { 
+		return new Response(JSON.stringify({ error: 'Unknown tool' }), {
 			status: 400,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
-
 	} catch (error) {
 		console.error('API error:', error)
-		return new Response(JSON.stringify({ error: 'Internal server error' }), { 
+		return new Response(JSON.stringify({ error: 'Internal server error' }), {
 			status: 500,
-			headers: { 'Content-Type': 'application/json' }
+			headers: { 'Content-Type': 'application/json' },
 		})
 	}
 }

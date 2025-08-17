@@ -76,9 +76,7 @@ test.skip('Users can register and use passkeys', async ({ page, login }) => {
 	await Promise.race([passkeyAssertedPromise, errorPromise])
 
 	// Verify successful login
-	await expect(
-		page.getByRole('link', { name: /dashboard/i }),
-	).toBeVisible()
+	await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible()
 
 	// Verify the sign count increased
 	const afterLoginCredentials = await client.send('WebAuthn.getCredentials', {
@@ -125,7 +123,10 @@ test.skip('Users can register and use passkeys', async ({ page, login }) => {
 	await expect(page).toHaveURL(`/login`)
 })
 
-test.skip('Failed passkey verification shows error', async ({ page, login }) => {
+test.skip('Failed passkey verification shows error', async ({
+	page,
+	login,
+}) => {
 	const password = faker.internet.password()
 	await login({ password })
 	const { client, authenticatorId } = await setupWebAuthn(page)

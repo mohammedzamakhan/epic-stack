@@ -8,7 +8,7 @@ import {
 	WrenchIcon,
 	XCircleIcon,
 } from 'lucide-react'
-import  { type ComponentProps, type ReactNode } from 'react'
+import { type ComponentProps, type ReactNode } from 'react'
 import { Badge } from '#app/components/ui/badge'
 import {
 	Collapsible,
@@ -18,7 +18,11 @@ import {
 import { cn } from '#app/utils/misc'
 type ToolUIPart = {
 	type: 'tool-code'
-	state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'
+	state:
+		| 'input-streaming'
+		| 'input-available'
+		| 'output-available'
+		| 'output-error'
 	input: any
 	output: any
 	errorText?: string

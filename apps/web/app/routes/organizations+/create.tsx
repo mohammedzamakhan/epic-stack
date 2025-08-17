@@ -488,9 +488,12 @@ function Step1({ actionData }: { actionData: any }) {
 											<button
 												type="button"
 												onClick={() => {
-													const generatedSlug = slugify(nameControl.value || '', {
-														lowercase: true,
-													})
+													const generatedSlug = slugify(
+														nameControl.value || '',
+														{
+															lowercase: true,
+														},
+													)
 													slugControl.change(generatedSlug)
 													setHasManuallyEditedSlug(false)
 												}}

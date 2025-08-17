@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowDownIcon } from 'lucide-react'
-import  { type ComponentProps, useCallback  } from 'react'
+import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { Button } from '#app/components/ui/button'
 import { cn } from '#app/utils/misc'

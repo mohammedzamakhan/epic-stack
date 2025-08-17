@@ -1,6 +1,6 @@
 'use client'
 
-import  { type ComponentProps, type HTMLAttributes, memo  } from 'react'
+import { type ComponentProps, type HTMLAttributes, memo } from 'react'
 import ReactMarkdown, { type Options } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'

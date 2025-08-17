@@ -254,7 +254,7 @@ describe('Type Definitions', () => {
 			expect(config.user.gid).toBe('user-123')
 			expect(config.user.name).toBe('John Doe')
 			expect(config.workspaces).toHaveLength(1)
-			expect(config.workspaces[0].gid).toBe('workspace-123')
+			expect(config.workspaces[0]?.gid).toBe('workspace-123')
 		})
 
 		it('should accept valid TrelloConfig', () => {
@@ -278,7 +278,7 @@ describe('Type Definitions', () => {
 			expect(config.user.id).toBe('user-123')
 			expect(config.user.username).toBe('johndoe')
 			expect(config.boards).toHaveLength(1)
-			expect(config.boards[0].id).toBe('board-123')
+			expect(config.boards[0]?.id).toBe('board-123')
 		})
 
 		it('should accept valid GitHubConfig', () => {

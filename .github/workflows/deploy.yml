@@ -34,7 +34,9 @@ jobs:
         run: cp .env.example .env && cp apps/web/.env.example apps/web/.env
 
       - name: 🛠 Setup Database
-        run: npx prisma migrate deploy --schema=packages/prisma/schema.prisma && npx prisma generate --sql --schema=packages/prisma/schema.prisma
+        run:
+          npx prisma migrate deploy --schema=packages/prisma/schema.prisma &&
+          npx prisma generate --sql --schema=packages/prisma/schema.prisma
 
       - name: 🔬 Lint
         run: npm run lint
@@ -58,7 +60,9 @@ jobs:
         run: cp .env.example .env && cp apps/web/.env.example apps/web/.env
 
       - name: 🛠 Setup Database
-        run: npx prisma migrate deploy --schema=packages/prisma/schema.prisma && npx prisma generate --sql --schema=packages/prisma/schema.prisma
+        run:
+          npx prisma migrate deploy --schema=packages/prisma/schema.prisma &&
+          npx prisma generate --sql --schema=packages/prisma/schema.prisma
 
       - name: 🏗 Build
         run: npm run build
@@ -88,7 +92,9 @@ jobs:
         run: cp .env.example .env && cp apps/web/.env.example apps/web/.env
 
       - name: 🛠 Setup Database
-        run: npx prisma migrate deploy --schema=packages/prisma/schema.prisma && npx prisma generate --sql --schema=packages/prisma/schema.prisma
+        run:
+          npx prisma migrate deploy --schema=packages/prisma/schema.prisma &&
+          npx prisma generate --sql --schema=packages/prisma/schema.prisma
 
       - name: ⚡ Run vitest
         run: npm run test -- -- --coverage

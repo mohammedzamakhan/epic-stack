@@ -91,10 +91,7 @@ export default function VerifiedDomainCard({
 							className="w-full pt-2"
 							errors={fields.verifiedDomain.errors}
 						/>
-						<ErrorList
-							id={form.errorId}
-							errors={form.errors}
-						/>
+						<ErrorList id={form.errorId} errors={form.errors} />
 						<div className="text-primary flex items-center text-xs">
 							<InfoIcon className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0" />
 							<p className="text-muted-foreground">

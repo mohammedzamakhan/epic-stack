@@ -218,7 +218,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const tokenData = await tokenResponse.json() as GitHubOAuthResponse
+		const tokenData = (await tokenResponse.json()) as GitHubOAuthResponse
 
 		if (tokenData.error) {
 			throw new Error(
@@ -291,7 +291,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				const config =
 					typeof connection.config === 'string'
 						? JSON.parse(connection.config)
-						: connection.config as any
+						: (connection.config as any)
 
 				// Use repositoryFullName from config (either direct or from channelMetadata), or fall back to externalId
 				const repositoryFullName =
@@ -321,7 +321,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			const config =
 				typeof connection.config === 'string'
 					? JSON.parse(connection.config)
-					: connection.config as any
+					: (connection.config as any)
 
 			const repositoryFullName = config?.repositoryFullName
 
@@ -386,7 +386,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get GitHub user: ${response.statusText}`)
 		}
 
-		return await response.json() as GitHubUser
+		return (await response.json()) as GitHubUser
 	}
 
 	/**
@@ -444,7 +444,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			const repositories = await response.json() as GitHubRepository[]
+			const repositories = (await response.json()) as GitHubRepository[]
 
 			if (repositories.length === 0) {
 				break
@@ -485,7 +485,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get GitHub repository: ${response.statusText}`)
 		}
 
-		return await response.json() as GitHubRepository
+		return (await response.json()) as GitHubRepository
 	}
 
 	/**
@@ -518,7 +518,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		return await response.json() as GitHubCreateIssueResponse
+		return (await response.json()) as GitHubCreateIssueResponse
 	}
 
 	/**
@@ -531,7 +531,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 		const config =
 			typeof connection.config === 'string'
 				? JSON.parse(connection.config)
-				: connection.config as any
+				: (connection.config as any)
 
 		const includeContent = config?.includeNoteContent ?? true
 
@@ -615,7 +615,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			return await response.json() as GitHubLabel[]
+			return (await response.json()) as GitHubLabel[]
 		})
 	}
 
@@ -645,7 +645,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			return await response.json() as GitHubMilestone[]
+			return (await response.json()) as GitHubMilestone[]
 		})
 	}
 
@@ -676,7 +676,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				)
 			}
 
-			const collaborators = await response.json() as GitHubUser[]
+			const collaborators = (await response.json()) as GitHubUser[]
 
 			// Filter collaborators by query if provided
 			if (query) {

@@ -109,7 +109,10 @@ test.skip('onboarding with link', async ({ page, getOnboardingData }) => {
 	await expect(page).toHaveURL(`/`)
 })
 
-test.skip('onboarding with a short code', async ({ page, getOnboardingData }) => {
+test.skip('onboarding with a short code', async ({
+	page,
+	getOnboardingData,
+}) => {
 	const onboardingData = getOnboardingData()
 
 	await page.goto('/signup')
@@ -153,7 +156,12 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 
 	await expect(page).toHaveURL(/\/onboarding\/github/)
 	await expect(
-		page.getByText(new RegExp(`Hi ${ghUser.primaryEmail}, just a few more details to get started`, 'i')),
+		page.getByText(
+			new RegExp(
+				`Hi ${ghUser.primaryEmail}, just a few more details to get started`,
+				'i',
+			),
+		),
 	).toBeVisible()
 
 	// fields are pre-populated for the user, so we only need to accept
@@ -244,7 +252,12 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 
 	await expect(page).toHaveURL(/\/onboarding\/github/)
 	await expect(
-		page.getByText(new RegExp(`Hi ${ghUser.primaryEmail}, just a few more details to get started`, 'i')),
+		page.getByText(
+			new RegExp(
+				`Hi ${ghUser.primaryEmail}, just a few more details to get started`,
+				'i',
+			),
+		),
 	).toBeVisible()
 
 	const usernameInput = page.getByRole('textbox', { name: /username/i })
@@ -260,7 +273,9 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 	await usernameInput.fill('U$er_name') // $ is invalid char, see app/utils/user-validation.ts.
 	await createAccountButton.click()
 
-	await expect(createAccountButton.locator('svg[class*="animate-spin"], svg')).toBeVisible()
+	await expect(
+		createAccountButton.locator('svg[class*="animate-spin"], svg'),
+	).toBeVisible()
 	await expect(
 		page.getByText(
 			/username can only include letters, numbers, and underscores/i,
@@ -328,8 +343,10 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	await page.goto('/login')
 	await page.getByRole('textbox', { name: /^username$/i }).fill(user.username)
 	await page.getByLabel(/^password$/i).fill(password)
-	await page.getByRole('button', { name: 'Login', exact: true }).click({ force: true })
-	
+	await page
+		.getByRole('button', { name: 'Login', exact: true })
+		.click({ force: true })
+
 	// Wait for navigation or error message
 	try {
 		// Wait for either successful redirect to home page or stay on login page
@@ -337,25 +354,27 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	} catch (error) {
 		// If we didn't redirect to home, we're probably still on login page
 		console.log('Login did not redirect to home page. Current URL:', page.url())
-		
+
 		// Check if there are any error messages (but don't wait too long)
-		const errorElements = page.locator('[role="alert"], .error, .text-red-500, .text-destructive')
+		const errorElements = page.locator(
+			'[role="alert"], .error, .text-red-500, .text-destructive',
+		)
 		const errorCount = await errorElements.count()
-		
+
 		if (errorCount > 0) {
 			const errorMessage = await errorElements.first().textContent()
 			console.log('Error message found:', errorMessage)
 		} else {
 			console.log('No error messages found on page')
 		}
-		
+
 		// Take a screenshot for debugging
 		await page.screenshot({ path: 'login-failure-debug.png' })
-		
+
 		// Re-throw the error to fail the test
 		throw error
 	}
-	
+
 	// After login, user should be redirected and see the Dashboard button in header
 	await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible()
 })
@@ -365,22 +384,28 @@ test.skip('reset password with a link', async ({ page, insertNewUser }) => {
 	const user = await insertNewUser({ password: originalPassword })
 	invariant(user.name, 'User name not found')
 	await page.goto('/login')
-	
+
 	// Handle cookie consent banner
-	await page.context().addCookies([{
-		name: 'cconsent',
-		value: 'true',
-		domain: 'localhost',
-		path: '/',
-	}])
+	await page.context().addCookies([
+		{
+			name: 'cconsent',
+			value: 'true',
+			domain: 'localhost',
+			path: '/',
+		},
+	])
 	await page.reload()
 
 	await page.getByRole('link', { name: /forgot your password/i }).click()
 	await expect(page).toHaveURL('/forgot-password')
 
 	await expect(page.getByText(/forgot password/i)).toBeVisible()
-	await page.getByRole('textbox', { name: /username or email/i }).fill(user.username)
-	await page.getByRole('button', { name: /send reset instructions/i }).click({ force: true })
+	await page
+		.getByRole('textbox', { name: /username or email/i })
+		.fill(user.username)
+	await page
+		.getByRole('button', { name: /send reset instructions/i })
+		.click({ force: true })
 	await expect(page).toHaveURL(/\/verify/)
 
 	const email = await readEmail(user.email)
@@ -409,37 +434,50 @@ test.skip('reset password with a link', async ({ page, insertNewUser }) => {
 	await expect(page).toHaveURL('/login')
 	await page.getByRole('textbox', { name: /^username$/i }).fill(user.username)
 	await page.getByLabel(/^password$/i).fill(originalPassword)
-	await page.getByRole('button', { name: 'Login', exact: true }).click({ force: true })
+	await page
+		.getByRole('button', { name: 'Login', exact: true })
+		.click({ force: true })
 
 	await expect(page.getByText(/invalid username or password/i)).toBeVisible()
 
 	await page.getByLabel(/^password$/i).fill(newPassword)
-	await page.getByRole('button', { name: 'Login', exact: true }).click({ force: true })
+	await page
+		.getByRole('button', { name: 'Login', exact: true })
+		.click({ force: true })
 
 	await expect(page).toHaveURL(`/`)
 
 	await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible()
 })
 
-test.skip('reset password with a short code', async ({ page, insertNewUser }) => {
+test.skip('reset password with a short code', async ({
+	page,
+	insertNewUser,
+}) => {
 	const user = await insertNewUser()
 	await page.goto('/login')
-	
+
 	// Handle cookie consent banner
-	await page.context().addCookies([{
-		name: 'cconsent',
-		value: 'true',
-		domain: 'localhost',
-		path: '/',
-	}])
+	await page.context().addCookies([
+		{
+			name: 'cconsent',
+			value: 'true',
+			domain: 'localhost',
+			path: '/',
+		},
+	])
 	await page.reload()
 
 	await page.getByRole('link', { name: /forgot your password/i }).click()
 	await expect(page).toHaveURL('/forgot-password')
 
 	await expect(page.getByText(/forgot password/i)).toBeVisible()
-	await page.getByRole('textbox', { name: /username or email/i }).fill(user.username)
-	await page.getByRole('button', { name: /send reset instructions/i }).click({ force: true })
+	await page
+		.getByRole('textbox', { name: /username or email/i })
+		.fill(user.username)
+	await page
+		.getByRole('button', { name: /send reset instructions/i })
+		.click({ force: true })
 	await expect(page).toHaveURL(/\/verify/)
 
 	const email = await readEmail(user.email)

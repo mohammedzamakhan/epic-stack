@@ -20,7 +20,7 @@ interface McpIconProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const pathVariants: Variants = {
-	normal: { 
+	normal: {
 		pathLength: 1,
 		opacity: 1,
 	},

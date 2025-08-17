@@ -67,7 +67,7 @@ interface SlackPostMessageResponse {
  */
 export class SlackProvider extends BaseIntegrationProvider {
 	readonly name = 'slack'
-	readonly type = 'productivity' as const
+	readonly type = 'communication' as const
 	readonly displayName = 'Slack'
 	readonly description =
 		'Connect notes to Slack channels for team collaboration'

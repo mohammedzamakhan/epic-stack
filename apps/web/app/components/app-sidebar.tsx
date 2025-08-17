@@ -192,7 +192,7 @@ function OrganizationSidebar({
 			title: 'MCP Server',
 			url: `/app/${orgSlug}/mcp`,
 			isActive: location.pathname.includes(`/app/${orgSlug}/mcp`),
-			icon: McpIcon
+			icon: McpIcon,
 		},
 		{
 			title: 'Settings',
@@ -327,19 +327,19 @@ export function AppSidebar({
 
 	const userData = rootData?.user
 		? {
-			name: rootData.user.name || rootData.user.username || 'User',
-			email: rootData.user.username,
-			avatar: rootData.user.image
-				? `/resources/images?objectKey=${rootData.user.image.objectKey}`
-				: '/avatars/user.jpg',
-			roles: rootData.user.roles,
-		}
+				name: rootData.user.name || rootData.user.username || 'User',
+				email: rootData.user.username,
+				avatar: rootData.user.image
+					? `/resources/images?objectKey=${rootData.user.image.objectKey}`
+					: '/avatars/user.jpg',
+				roles: rootData.user.roles,
+			}
 		: {
-			name: 'Guest',
-			email: '',
-			avatar: '/avatars/user.jpg',
-			roles: [],
-		}
+				name: 'Guest',
+				email: '',
+				avatar: '/avatars/user.jpg',
+				roles: [],
+			}
 
 	return (
 		<Sidebar collapsible="offcanvas" {...props} className="overflow-hidden">

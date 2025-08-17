@@ -1,7 +1,13 @@
 'use client'
 
 import { ChevronDownIcon } from 'lucide-react'
-import  { type ComponentProps, type ReactNode, createContext, useContext, useState  } from 'react'
+import {
+	type ComponentProps,
+	type ReactNode,
+	createContext,
+	useContext,
+	useState,
+} from 'react'
 import { Button } from '#app/components/ui/button'
 import {
 	Collapsible,

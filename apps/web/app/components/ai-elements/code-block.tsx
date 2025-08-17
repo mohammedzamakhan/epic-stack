@@ -1,7 +1,14 @@
 'use client'
 
 import { CheckIcon, CopyIcon } from 'lucide-react'
-import  { type ComponentProps, type HTMLAttributes, type ReactNode, createContext, useContext, useState  } from 'react'
+import {
+	type ComponentProps,
+	type HTMLAttributes,
+	type ReactNode,
+	createContext,
+	useContext,
+	useState,
+} from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import {
 	oneDark,

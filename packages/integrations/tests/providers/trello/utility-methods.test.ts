@@ -55,7 +55,7 @@ describe('TrelloProvider - Utility Methods', () => {
 
 			const filtered = lists.filter((list) => !list.closed)
 			expect(filtered).toHaveLength(1)
-			expect(filtered[0].name).toBe('Active List')
+			expect(filtered[0]?.name).toBe('Active List')
 		})
 	})
 

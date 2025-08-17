@@ -2,7 +2,7 @@
 
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 import * as React from 'react'
-import  { type ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 import { Badge } from '#app/components/ui/badge'
 import {
 	Carousel,

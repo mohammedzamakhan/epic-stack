@@ -196,7 +196,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 				throw new Error(`Token exchange failed: ${errorText}`)
 			}
 
-			const tokenData = await tokenResponse.json() as JiraOAuthResponse
+			const tokenData = (await tokenResponse.json()) as JiraOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -264,7 +264,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 				throw new Error(`Token refresh failed: ${errorText}`)
 			}
 
-			const tokenData = await response.json() as JiraOAuthResponse
+			const tokenData = (await response.json()) as JiraOAuthResponse
 
 			if (tokenData.error) {
 				throw new Error(
@@ -337,12 +337,12 @@ export class JiraProvider extends BaseIntegrationProvider {
 		const config =
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
-				: integration.config as any
+				: (integration.config as any)
 		const connectionConfig = connection
 			? typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config
-			: null as any
+			: (null as any)
 
 		// Check connection-level bot user setting first
 		if (connectionConfig?.reporterAccountId) {
@@ -369,7 +369,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config as any
+					: (integration.config as any)
 
 			// Fetch bot user details from Jira
 			const response = await fetch(
@@ -387,7 +387,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 					`Failed to fetch bot user details: ${response.statusText}`,
 				)
 			}
-			const botUser = await response.json() as JiraUser
+			const botUser = (await response.json()) as JiraUser
 			return botUser
 		})
 	}
@@ -404,7 +404,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config as any
+					: (integration.config as any)
 
 			try {
 				// Check if bot user exists
@@ -440,7 +440,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 					}
 				}
 
-				const permissions = await permissionResponse.json() as any[]
+				const permissions = (await permissionResponse.json()) as any[]
 
 				const hasCreatePermission = permissions.some(
 					(p: any) =>
@@ -579,7 +579,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get user info: ${response.statusText}`)
 		}
 
-		return await response.json() as JiraCurrentUserResponse
+		return (await response.json()) as JiraCurrentUserResponse
 	}
 
 	/**
@@ -656,7 +656,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		return await response.json() as any[]
+		return (await response.json()) as any[]
 	}
 
 	/**
@@ -679,7 +679,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get projects: ${response.statusText}`)
 		}
 
-		const data = await response.json() as JiraProjectsResponse
+		const data = (await response.json()) as JiraProjectsResponse
 		return data.values
 	}
 
@@ -706,7 +706,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to get project: ${response.statusText}`)
 		}
 
-		return await response.json() as JiraProject
+		return (await response.json()) as JiraProject
 	}
 
 	/**
@@ -771,7 +771,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			throw new Error(`Failed to create issue: ${errorText}`)
 		}
 
-		return await response.json() as JiraCreateIssueResponse
+		return (await response.json()) as JiraCreateIssueResponse
 	}
 
 	/**
@@ -785,7 +785,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config as any
+					: (integration.config as any)
 			const response = await fetch(`${config.instanceUrl}/rest/api/3/myself`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
@@ -821,7 +821,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 			const config =
 				typeof integration.config === 'string'
 					? JSON.parse(integration.config)
-					: integration.config as any
+					: (integration.config as any)
 
 			// First try to get from siteUrl in config
 			if (config?.siteUrl) {
@@ -878,7 +878,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 		const config =
 			typeof integration.config === 'string'
 				? JSON.parse(integration.config)
-				: integration.config as any
+				: (integration.config as any)
 		const includeContent = config?.includeNoteContent !== false
 		const preferredIssueType = config?.defaultIssueType || 'Task'
 

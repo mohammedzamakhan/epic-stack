@@ -47,8 +47,8 @@ export interface AdminOrganization {
 	slug: string
 	description: string | null
 	active: boolean
-	createdAt: string
-	updatedAt: string
+	createdAt: Date
+	updatedAt: Date
 	planName: string | null
 	subscriptionStatus: string | null
 	size: string | null
