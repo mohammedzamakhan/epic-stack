@@ -97,8 +97,6 @@ jobs:
     name: 🎭 Playwright
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    env:
-      DATABASE_URL: "file:${{ github.workspace }}/packages/prisma/db/data.db"
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
