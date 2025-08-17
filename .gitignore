@@ -6,7 +6,8 @@ node_modules
 .env
 .cache
 
-/packages/prisma/db/
+/prisma/data.db
+/prisma/data.db-journal
 /tests/prisma
 
 /test-results/
@@ -36,4 +37,3 @@ data.db
 reference-saas-app/
 
 .trigger
-packages/prisma/db/data.db-journal
