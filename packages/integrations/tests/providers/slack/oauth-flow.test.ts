@@ -42,15 +42,7 @@ describe('SlackProvider - OAuth Flow', () => {
 			expect(state).toBeTruthy()
 
 			// Decode and parse state
-			const decodedState = JSON.parse(
-				Buffer.from(state!, 'base64').toString(),
-			) as {
-				organizationId: string
-				providerName: string
-				redirectUri: string
-				timestamp: number
-				nonce: string
-			}
+			const decodedState = JSON.parse(Buffer.from(state!, 'base64').toString())
 			expect(decodedState.organizationId).toBe(organizationId)
 			expect(decodedState.providerName).toBe('slack')
 			expect(decodedState.redirectUri).toBe(redirectUri)

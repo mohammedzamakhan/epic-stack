@@ -63,14 +63,6 @@ describe('NoteEventHandler', () => {
 				organizationId: 'org-123',
 				title: 'Test Note',
 				content: 'Test content',
-				createdById: 'user-123',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				isPublic: true,
-				priority: null,
-				tags: null,
-				statusId: null,
-				position: null,
 			}
 
 			const mockIntegrations = [{ id: 'int-123', providerName: 'slack' }]
@@ -119,14 +111,6 @@ describe('NoteEventHandler', () => {
 				organizationId: 'org-123',
 				title: 'Test Note',
 				content: 'Test content',
-				createdById: 'user-123',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				isPublic: true,
-				priority: null,
-				tags: null,
-				statusId: null,
-				position: null,
 			}
 
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
@@ -167,14 +151,6 @@ describe('NoteEventHandler', () => {
 				organizationId: 'org-123',
 				title: 'Updated Note',
 				content: 'Updated content',
-				createdById: 'user-123',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				isPublic: true,
-				priority: null,
-				tags: null,
-				statusId: null,
-				position: null,
 			}
 
 			const previousData = {
@@ -216,14 +192,6 @@ describe('NoteEventHandler', () => {
 				organizationId: 'org-123',
 				title: 'Updated Note',
 				content: 'Original content',
-				createdById: 'user-123',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				isPublic: true,
-				priority: null,
-				tags: null,
-				statusId: null,
-				position: null,
 			}
 
 			const previousData = {
@@ -344,8 +312,8 @@ describe('NoteEventHandler', () => {
 			const results = await noteEventHandler.processBatchEvents(events)
 
 			expect(results).toHaveLength(2)
-			expect(results[0]!.success).toBe(true)
-			expect(results[1]!.success).toBe(true)
+			expect(results[0].success).toBe(true)
+			expect(results[1].success).toBe(true)
 		})
 
 		it('should handle errors in batch processing', async () => {
@@ -366,8 +334,8 @@ describe('NoteEventHandler', () => {
 			const results = await noteEventHandler.processBatchEvents(events)
 
 			expect(results).toHaveLength(1)
-			expect(results[0]!.success).toBe(false)
-			expect(results[0]!.errors).toEqual(['Batch error'])
+			expect(results[0].success).toBe(false)
+			expect(results[0].errors).toEqual(['Batch error'])
 		})
 	})
 

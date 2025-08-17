@@ -43,7 +43,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 		// Setup default mocks
 		mockIntegrationManager.getOrganizationIntegrations.mockResolvedValue([])
 		mockIntegrationManager.getNoteConnections.mockResolvedValue([])
-		;(mockPrisma.organizationNote.findUnique as any).mockResolvedValue({
+		mockPrisma.organizationNote.findUnique.mockResolvedValue({
 			id: 'note-123',
 			title: 'Test Note',
 			content: 'Test content',
@@ -79,7 +79,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 		})
 
 		it('should handle missing note data', async () => {
-			;(mockPrisma.organizationNote.findUnique as any).mockResolvedValue(null)
+			mockPrisma.organizationNote.findUnique.mockResolvedValue(null)
 
 			const result = await handler.handleNoteCreated(
 				'nonexistent-note',
@@ -92,7 +92,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 		})
 
 		it('should handle database errors', async () => {
-			;(mockPrisma.organizationNote.findUnique as any).mockRejectedValue(
+			mockPrisma.organizationNote.findUnique.mockRejectedValue(
 				new Error('Database error'),
 			)
 
@@ -154,7 +154,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 				{ id: 'int-1', providerName: 'slack' } as any,
 			])
 
-			;(mockPrisma.noteIntegrationConnection.findMany as any).mockResolvedValue([
+			mockPrisma.noteIntegrationConnection.findMany.mockResolvedValue([
 				{
 					id: 'conn-1',
 					integrationId: 'int-1',
@@ -181,7 +181,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 
 	describe('Data Transformation', () => {
 		it('should handle notes with empty content', async () => {
-			;(mockPrisma.organizationNote.findUnique as any).mockResolvedValue({
+			mockPrisma.organizationNote.findUnique.mockResolvedValue({
 				id: 'note-123',
 				title: 'Test Note',
 				content: '',
@@ -206,7 +206,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 		})
 
 		it('should handle notes with null content', async () => {
-			;(mockPrisma.organizationNote.findUnique as any).mockResolvedValue({
+			mockPrisma.organizationNote.findUnique.mockResolvedValue({
 				id: 'note-123',
 				title: 'Test Note',
 				content: null,
@@ -223,7 +223,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 
 		it('should handle very long note titles', async () => {
 			const longTitle = 'A'.repeat(1000)
-			;(mockPrisma.organizationNote.findUnique as any).mockResolvedValue({
+			mockPrisma.organizationNote.findUnique.mockResolvedValue({
 				id: 'note-123',
 				title: longTitle,
 				content: 'Test content',
@@ -242,7 +242,7 @@ describe('NoteEventHandler - Extended Coverage', () => {
 	describe('Concurrent Processing', () => {
 		it('should handle multiple simultaneous events', async () => {
 			// Setup different mock responses for different notes
-			;(mockPrisma.organizationNote.findUnique as any)
+			mockPrisma.organizationNote.findUnique
 				.mockResolvedValueOnce({
 					id: 'note-123',
 					title: 'Test Note 1',

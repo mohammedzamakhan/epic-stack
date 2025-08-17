@@ -2,7 +2,7 @@
  * Test helper functions and utilities
  */
 
-import { vi, expect } from 'vitest'
+import { vi } from 'vitest'
 import {
 	type Integration,
 	type NoteIntegrationConnection,

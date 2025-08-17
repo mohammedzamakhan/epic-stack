@@ -11,11 +11,7 @@ describe('MSW Mocks', () => {
 			body: JSON.stringify({ code: 'test-code' }),
 		})
 
-		const data = (await response.json()) as {
-			ok: boolean
-			access_token: string
-			team: { name: string }
-		}
+		const data = await response.json()
 
 		expect(response.ok).toBe(true)
 		expect(data.ok).toBe(true)
@@ -29,11 +25,7 @@ describe('MSW Mocks', () => {
 			body: JSON.stringify({ code: 'test-code' }),
 		})
 
-		const data = (await response.json()) as {
-			access_token: string
-			refresh_token: string
-			expires_in: number
-		}
+		const data = await response.json()
 
 		expect(response.ok).toBe(true)
 		expect(data.access_token).toBe('test-jira-access-token')
@@ -44,16 +36,13 @@ describe('MSW Mocks', () => {
 	it('should mock Slack channels response', async () => {
 		const response = await fetch('https://slack.com/api/conversations.list')
 
-		const data = (await response.json()) as {
-			ok: boolean
-			channels: { name: string }[]
-		}
+		const data = await response.json()
 
 		expect(response.ok).toBe(true)
 		expect(data.ok).toBe(true)
 		expect(data.channels).toHaveLength(2)
-		expect(data.channels[0]!.name).toBe('general')
-		expect(data.channels[1]!.name).toBe('random')
+		expect(data.channels[0].name).toBe('general')
+		expect(data.channels[1].name).toBe('random')
 	})
 
 	it('should mock Jira projects response', async () => {
@@ -61,14 +50,12 @@ describe('MSW Mocks', () => {
 			'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/project/search',
 		)
 
-		const data = (await response.json()) as {
-			values: { key: string; name: string }[]
-		}
+		const data = await response.json()
 
 		expect(response.ok).toBe(true)
 		expect(data.values).toHaveLength(2)
-		expect(data.values[0]!.key).toBe('TEST')
-		expect(data.values[0]!.name).toBe('Test Project')
-		expect(data.values[1]!.key).toBe('DEMO')
+		expect(data.values[0].key).toBe('TEST')
+		expect(data.values[0].name).toBe('Test Project')
+		expect(data.values[1].key).toBe('DEMO')
 	})
 })

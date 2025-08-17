@@ -395,7 +395,7 @@ describe('SlackProvider - Message Posting', () => {
 			)
 
 			// Should use default settings (blocks format, include content)
-			await provider.postMessage(connectionWithoutConfig as any, mockMessageData)
+			await provider.postMessage(connectionWithoutConfig, mockMessageData)
 
 			expect(requestBody.blocks).toBeDefined()
 			expect(requestBody.blocks[1].text.text).toContain(
