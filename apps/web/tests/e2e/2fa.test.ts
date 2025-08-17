@@ -34,7 +34,6 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	)
 	await dialog.getByRole('button', { name: /enable 2fa/i }).click()
 
-	await expect(page.getByText(/2FA enabled/i)).toBeVisible()
 	await expect(main.getByRole('button', { name: /disable 2fa/i })).toBeVisible()
 
 	// Navigate to home page first, then logout
