@@ -289,11 +289,7 @@ app.all('/api/novu*', (req, res, next) => {
 	const originalWriteHead = res.writeHead
 
 	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (
-		statusCode: number,
-		reasonPhraseOrHeaders?: any,
-		maybeHeaders?: any,
-	) {
+	res.writeHead = function (statusCode: number, reasonPhraseOrHeaders?: string | OutgoingHttpHeaders | OutgoingHttpHeader[], maybeHeaders?: OutgoingHttpHeaders | OutgoingHttpHeader[]) {
 		const headers =
 			typeof reasonPhraseOrHeaders === 'string'
 				? maybeHeaders
@@ -319,17 +315,25 @@ app.all('/api/novu*', (req, res, next) => {
 
 		if (typeof reasonPhraseOrHeaders === 'string') {
 			if (maybeHeaders) {
-				return originalWriteHead.call(
+				return (originalWriteHead as any).call(
 					res,
 					statusCode,
 					reasonPhraseOrHeaders,
 					maybeHeaders,
 				)
 			} else {
-				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+				return (originalWriteHead as any).call(
+					res,
+					statusCode,
+					reasonPhraseOrHeaders,
+				)
 			}
 		} else {
-			return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+			return (originalWriteHead as any).call(
+				res,
+				statusCode,
+				reasonPhraseOrHeaders,
+			)
 		}
 	}
 
