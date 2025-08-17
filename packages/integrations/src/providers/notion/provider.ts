@@ -375,10 +375,11 @@ export class NotionProvider extends BaseIntegrationProvider {
 			throw new Error('No access token available')
 		}
 
-		const connectionConfig: NotionConnectionConfig =
+		const connectionConfig = (
 			typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config ?? {}
+		) as NotionConnectionConfig
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId
@@ -467,10 +468,11 @@ export class NotionProvider extends BaseIntegrationProvider {
 			return false
 		}
 
-		const connectionConfig: NotionConnectionConfig =
+		const connectionConfig = (
 			typeof connection.config === 'string'
 				? JSON.parse(connection.config)
 				: connection.config ?? {}
+		) as NotionConnectionConfig
 
 		// Extract database ID from the channel metadata URL
 		let databaseId = connectionConfig?.databaseId

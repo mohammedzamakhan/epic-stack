@@ -37,3 +37,4 @@ data.db
 reference-saas-app/
 
 .trigger
+packages/prisma/db/data.db-journal

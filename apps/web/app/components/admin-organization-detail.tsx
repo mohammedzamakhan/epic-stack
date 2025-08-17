@@ -25,8 +25,8 @@ export interface AdminOrganizationDetail {
 	slug: string
 	description: string | null
 	active: boolean
-	createdAt: string
-	updatedAt: string
+	createdAt: Date
+	updatedAt: Date
 	planName: string | null
 	subscriptionStatus: string | null
 	size: string | null
@@ -43,13 +43,12 @@ export interface AdminOrganizationDetail {
 		altText: string | null
 	} | null
 	users: Array<{
-		id: string
 		userId: string
 		role: string
 		active: boolean
 		isDefault: boolean
-		createdAt: string
-		updatedAt: string
+		createdAt: Date
+		updatedAt: Date
 		department: string | null
 		user: {
 			id: string
@@ -65,8 +64,8 @@ export interface AdminOrganizationDetail {
 	notes: Array<{
 		id: string
 		title: string
-		createdAt: string
-		updatedAt: string
+		createdAt: Date
+		updatedAt: Date
 		isPublic: boolean
 		createdBy: {
 			id: string
@@ -79,16 +78,16 @@ export interface AdminOrganizationDetail {
 		providerName: string
 		providerType: string
 		isActive: boolean
-		lastSyncAt: string | null
-		createdAt: string
-		updatedAt: string
+		lastSyncAt: Date | null
+		createdAt: Date
+		updatedAt: Date
 	}>
 	invitations: Array<{
 		id: string
 		email: string
 		role: string
-		createdAt: string
-		expiresAt: string | null
+		createdAt: Date
+		expiresAt: Date | null
 		inviter: {
 			id: string
 			name: string | null
@@ -106,7 +105,7 @@ export interface AdminOrganizationDetail {
 export interface RecentActivity {
 	id: string
 	action: string
-	createdAt: string
+	createdAt: Date
 	metadata: any
 	user: {
 		id: string
@@ -304,7 +303,7 @@ export function AdminOrganizationDetail({
 						<div className="space-y-4">
 							{organization.users.slice(0, 10).map((member) => (
 								<div
-									key={member.id}
+									key={member.userId}
 									className="flex items-center justify-between"
 								>
 									<div className="flex items-center gap-3">
