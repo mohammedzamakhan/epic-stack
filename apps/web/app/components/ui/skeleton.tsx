@@ -1,13 +1,2 @@
-import { cn } from '#app/utils/misc'
-
-function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
-	return (
-		<div
-			data-slot="skeleton"
-			className={cn('bg-accent animate-pulse rounded-md', className)}
-			{...props}
-		/>
-	)
-}
-
-export { Skeleton }
+// Re-export skeleton components from the UI package
+export { Skeleton } from '@repo/ui'

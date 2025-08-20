@@ -2,7 +2,7 @@
 	"$schema": "https://sly-cli.fly.dev/registry/config.v2.json",
 	"config": {
 		"icons": {
-			"directory": "./apps/web/other/svg-icons",
+			"directory": "./packages/ui/other/svg-icons",
 			"transformers": ["transform-icon.ts"]
 		},
 		"components": {},

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:web": "turbo run dev --filter @repo/integrations --filter web",
+    "dev:web": "turbo run dev --filter @repo/integrations --filter web --filter @repo/ui",
     "dev:trigger": "turbo run dev --filter background-jobs",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

@@ -1,32 +1,21 @@
+// Web app Icon component - integrates sly-generated sprites with generic Icon component
 import { type SVGProps } from 'react'
-import { cn } from '#app/utils/misc.tsx'
+import { Icon as BaseIcon, type IconName as UIIconName, type IconSize } from '@repo/ui'
 import href from './icons/sprite.svg'
 import { type IconName } from '@/icon-name'
 
 export { href }
 export { IconName }
-
-const sizeClassName = {
-	font: 'size-[1em]',
-	xs: 'size-3',
-	sm: 'size-4',
-	md: 'size-5',
-	lg: 'size-6',
-	xl: 'size-7',
-} as const
-
-type Size = keyof typeof sizeClassName
-
-const childrenSizeClassName = {
-	font: 'gap-1.5',
-	xs: 'gap-1.5',
-	sm: 'gap-1.5',
-	md: 'gap-2',
-	lg: 'gap-2',
-	xl: 'gap-3',
-} satisfies Record<Size, string>
+export type Size = IconSize
 
 /**
+ * Web app Icon component with full type safety from sly-generated IconName types.
+ * 
+ * This component wraps the generic Icon from @repo/ui and provides:
+ * - Automatic sprite URL from sly build system
+ * - Type-safe icon names from generated types
+ * - All the same props and behavior as the original Icon
+ * 
  * Renders an SVG icon. The icon defaults to the size of the font. To make it
  * align vertically with neighboring text, you can pass the text as a child of
  * the icon and it will be automatically aligned.
@@ -46,32 +35,18 @@ export function Icon({
 	...props
 }: SVGProps<SVGSVGElement> & {
 	name: IconName
-	size?: Size
+	size?: IconSize
 	title?: string
 }) {
-	if (children) {
-		return (
-			<span
-				className={`inline-flex items-center ${childrenSizeClassName[size]}`}
-			>
-				<Icon
-					name={name}
-					size={size}
-					className={className}
-					title={title}
-					{...props}
-				/>
-				{children}
-			</span>
-		)
-	}
 	return (
-		<svg
+		<BaseIcon
+			name={name as UIIconName}
+			size={size}
+			className={className}
+			title={title}
 			{...props}
-			className={cn(sizeClassName[size], 'inline self-center', className)}
 		>
-			{title ? <title>{title}</title> : null}
-			<use href={`${href}#${name}`} />
-		</svg>
+			{children}
+		</BaseIcon>
 	)
 }
