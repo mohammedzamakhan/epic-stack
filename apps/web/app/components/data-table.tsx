@@ -314,6 +314,34 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 	)
 }
 
+function DraggableRowStyled({ row }: { row: Row<z.infer<typeof schema>> }) {
+	const { transform, transition, setNodeRef, isDragging } = useSortable({
+		id: row.original.id,
+	})
+
+	return (
+		<tr
+			data-state={row.getIsSelected() && 'selected'}
+			data-dragging={isDragging}
+			ref={setNodeRef}
+			className="group/table-row hover:bg-muted/50 [&+&]:border-border relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80 [&+&]:border-t"
+			style={{
+				transform: CSS.Transform.toString(transform),
+				transition: transition,
+			}}
+		>
+			{row.getVisibleCells().map((cell) => (
+				<td
+					key={cell.id}
+					className="overflow-hidden border-0 px-4 py-4 text-left"
+				>
+					{flexRender(cell.column.columnDef.cell, cell.getContext())}
+				</td>
+			))}
+		</tr>
+	)
+}
+
 export function DataTable({
 	data: initialData,
 }: {
@@ -457,57 +485,73 @@ export function DataTable({
 				value="outline"
 				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 			>
-				<div className="overflow-hidden rounded-lg border">
-					<DndContext
-						collisionDetection={closestCenter}
-						modifiers={[restrictToVerticalAxis]}
-						onDragEnd={handleDragEnd}
-						sensors={sensors}
-						id={sortableId}
-					>
-						<Table>
-							<TableHeader className="bg-muted sticky top-0 z-10">
-								{table.getHeaderGroups().map((headerGroup) => (
-									<TableRow key={headerGroup.id}>
-										{headerGroup.headers.map((header) => {
-											return (
-												<TableHead key={header.id} colSpan={header.colSpan}>
-													{header.isPlaceholder
-														? null
-														: flexRender(
-																header.column.columnDef.header,
-																header.getContext(),
-															)}
-												</TableHead>
-											)
-										})}
-									</TableRow>
-								))}
-							</TableHeader>
-							<TableBody className="**:data-[slot=table-cell]:first:w-8">
-								{table.getRowModel().rows?.length ? (
-									<SortableContext
-										items={dataIds}
-										strategy={verticalListSortingStrategy}
+				<section className="bg-muted dark:bg-background relative isolate mx-auto flex max-w-none flex-col overflow-hidden rounded-2xl p-1.5">
+					<div className="before:from-muted after:from-muted relative isolate order-1 -m-1 before:absolute before:top-0 before:left-0 before:z-10 before:h-12 before:w-4 before:bg-gradient-to-r before:to-transparent after:absolute after:top-0 after:right-0 after:z-10 after:h-12 after:w-4 after:bg-gradient-to-l after:to-transparent">
+						<div className="after:bg-card dark:after:bg-muted after:absolute after:inset-0 after:top-10 after:z-[-1] after:rounded-xl">
+							<div className="before:ring-muted dark:before:ring-background after:border-border overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:top-10 before:z-10 before:rounded-xl before:ring-2 after:pointer-events-none after:absolute after:inset-0 after:top-10 after:z-20 after:rounded-xl after:border">
+								<div className="relative overflow-x-auto rounded-xl">
+									<DndContext
+										collisionDetection={closestCenter}
+										modifiers={[restrictToVerticalAxis]}
+										onDragEnd={handleDragEnd}
+										sensors={sensors}
+										id={sortableId}
 									>
-										{table.getRowModel().rows.map((row) => (
-											<DraggableRow key={row.id} row={row} />
-										))}
-									</SortableContext>
-								) : (
-									<TableRow>
-										<TableCell
-											colSpan={columns.length}
-											className="h-24 text-center"
-										>
-											No results.
-										</TableCell>
-									</TableRow>
-								)}
-							</TableBody>
-						</Table>
-					</DndContext>
-				</div>
+										<table className="relative min-w-full table-fixed whitespace-nowrap">
+											<thead>
+												{table.getHeaderGroups().map((headerGroup) => (
+													<tr key={headerGroup.id} className="group">
+														{headerGroup.headers.map((header) => {
+															return (
+																<th
+																	key={header.id}
+																	colSpan={header.colSpan}
+																	className="text-foreground overflow-hidden px-4 pt-3 pb-2 text-left text-sm font-medium"
+																>
+																	<span className="inline-flex">
+																		{header.isPlaceholder
+																			? null
+																			: flexRender(
+																					header.column.columnDef.header,
+																					header.getContext(),
+																				)}
+																	</span>
+																</th>
+															)
+														})}
+													</tr>
+												))}
+											</thead>
+											<tbody className="relative">
+												{table.getRowModel().rows?.length ? (
+													<SortableContext
+														items={dataIds}
+														strategy={verticalListSortingStrategy}
+													>
+														{table.getRowModel().rows.map((row) => (
+															<DraggableRowStyled key={row.id} row={row} />
+														))}
+													</SortableContext>
+												) : (
+													<tr className="group/table-row hover:bg-muted/50 [&+&]:border-border [&+&]:border-t">
+														<td
+															colSpan={columns.length}
+															className="overflow-hidden border-0 px-4 py-8 text-center"
+														>
+															<span className="text-muted-foreground text-sm">
+																No results.
+															</span>
+														</td>
+													</tr>
+												)}
+											</tbody>
+										</table>
+									</DndContext>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 				<div className="flex items-center justify-between px-4">
 					<div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
 						{table.getFilteredSelectedRowModel().rows.length} of{' '}

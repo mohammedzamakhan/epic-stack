@@ -4,16 +4,28 @@ import { cn } from '../utils/cn'
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
 	return (
-		<div className="bg-card ring-border overflow-hidden rounded-xl shadow-sm ring-1">
-			<div className="relative w-full overflow-x-auto">
-				<table className={cn('w-full', className)} {...props} />
+		<section className="bg-muted dark:bg-background relative isolate mx-auto flex max-w-none flex-col overflow-hidden rounded-2xl p-1.5">
+			<div className="relative isolate order-1 -m-1">
+				<div className="after:bg-card dark:after:bg-muted after:absolute after:inset-0 after:top-10 after:z-[-1] after:rounded-xl">
+					<div className="before:ring-muted dark:before:ring-background after:border-border overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:top-10 before:z-10 before:rounded-xl before:ring-2 after:pointer-events-none after:absolute after:inset-0 after:top-10 after:z-20 after:rounded-xl after:border">
+						<div className="relative overflow-x-auto rounded-xl">
+							<table
+								className={cn(
+									'relative min-w-full table-fixed whitespace-nowrap',
+									className,
+								)}
+								{...props}
+							/>
+						</div>
+					</div>
+				</div>
 			</div>
-		</div>
+		</section>
 	)
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
-	return <thead className={cn('bg-background', className)} {...props} />
+	return <thead className={cn('', className)} {...props} />
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
@@ -33,7 +45,7 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
 	return (
 		<tr
 			className={cn(
-				'hover:bg-muted/40 border-border/20 border-b transition-colors last:border-b-0',
+				'group/table-row hover:bg-muted/50 [&+&]:border-border [&+&]:border-t',
 				className,
 			)}
 			{...props}
@@ -45,7 +57,7 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
 	return (
 		<th
 			className={cn(
-				'text-muted-foreground overflow-hidden px-6 pt-4 pb-3.5 text-left text-xs font-medium [&_[data-table-sort-spacer]]:hidden [&:has([data-table-sort])_[data-table-sort-spacer]]:hidden',
+				'text-foreground overflow-hidden px-4 pt-3 pb-2 text-left text-sm font-medium',
 				className,
 			)}
 			{...props}
@@ -57,7 +69,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
 	return (
 		<td
 			className={cn(
-				'text-foreground bg-card px-6 py-2 text-left text-sm',
+				'text-foreground overflow-hidden border-0 px-4 py-4 text-left text-sm',
 				className,
 			)}
 			{...props}

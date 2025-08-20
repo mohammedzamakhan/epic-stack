@@ -527,7 +527,7 @@ function CacheTable({
 					<CacheClearButton type={type} />
 				</div>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="p-0">
 				<div>
 					<Table>
 						<TableHeader>

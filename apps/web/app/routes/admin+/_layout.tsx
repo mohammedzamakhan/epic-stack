@@ -40,8 +40,8 @@ export default function AdminLayout() {
 				}
 			>
 				<div className="flex flex-1 flex-col">
-					<div className="@container/main flex flex-1 flex-col gap-2 md:px-2">
-						<div className="bg-muted/50 container mx-auto px-4 py-8">
+					<div className="bg-muted/20 dark:bg-muted/50 @container/main flex flex-1 flex-col gap-2 md:px-2">
+						<div className="container mx-auto px-4 py-8">
 							<Outlet />
 						</div>
 					</div>
