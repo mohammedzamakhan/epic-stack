@@ -33,7 +33,7 @@ import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
 } from '#app/utils/organization-invitation.server'
-import { createOrganization } from '#app/utils/organizations.server'
+import { createOrganization, type OrganizationRoleName } from '#app/utils/organizations.server'
 import { uploadOrganizationImage } from '#app/utils/storage.server'
 import {
 	Button,
@@ -100,12 +100,23 @@ const Step1Schema = z.object({
 })
 
 // Step 2: Invitations (handled by OrganizationInvitations component)
+// Using default roles for organization creation since we don't have a loader
+const DEFAULT_AVAILABLE_ROLES = ['admin', 'member', 'viewer', 'guest'] as const
+
+// Create role descriptions map
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+	admin: 'Full access to organization settings and member management.',
+	member: 'Standard organization member with basic permissions.',
+	viewer: 'Read-only access to organization content.',
+	guest: 'Limited access for temporary collaborators.',
+}
+
 const InviteSchema = z.object({
 	invites: z
 		.array(
 			z.object({
 				email: z.string().email('Invalid email address'),
-				role: z.enum(['admin', 'member']),
+				role: z.enum(DEFAULT_AVAILABLE_ROLES),
 			}),
 		)
 		.optional(),
@@ -789,16 +800,18 @@ function CreateInviteFieldset({
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="admin">
-									<div className="flex flex-col">
-										<span className="font-medium">Admin</span>
-									</div>
-								</SelectItem>
-								<SelectItem value="member">
-									<div className="flex flex-col">
-										<span className="font-medium">Member</span>
-									</div>
-								</SelectItem>
+								{DEFAULT_AVAILABLE_ROLES.map(role => (
+									<SelectItem key={role} value={role}>
+										<div className="flex flex-col">
+											<span className="font-medium">
+												{role.charAt(0).toUpperCase() + role.slice(1)}
+											</span>
+											<span className="text-sm text-muted-foreground">
+												{ROLE_DESCRIPTIONS[role] || `${role} role`}
+											</span>
+										</div>
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<ErrorList

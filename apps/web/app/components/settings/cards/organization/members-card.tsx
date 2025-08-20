@@ -2,7 +2,11 @@ import { OrganizationMembers } from '#app/components/organization-members'
 
 interface OrganizationMember {
 	userId: string
-	role: string
+	organizationRole: {
+		id: string
+		name: string
+		level: number
+	}
 	active: boolean
 	user: {
 		id: string

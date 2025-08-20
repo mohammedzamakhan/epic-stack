@@ -362,7 +362,10 @@ export async function action({ request }: ActionFunctionArgs) {
 			where: {
 				userId,
 				organizationId: note.organizationId,
-				OR: [{ role: 'admin' }, { userId: note.createdById }],
+				OR: [
+					{ organizationRole: { name: 'admin' } },
+					{ userId: note.createdById }
+				],
 			},
 		})
 

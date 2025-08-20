@@ -3,6 +3,21 @@ import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from '#app/utils/db.server'
 import { sendEmail } from '#app/utils/email.server'
 import { markStepCompleted } from '#app/utils/onboarding'
+import { type OrganizationRoleName } from './organizations.server'
+
+// Helper function to get organization role ID by name
+async function getOrganizationRoleId(roleName: OrganizationRoleName): Promise<string> {
+	const role = await prisma.organizationRole.findUnique({
+		where: { name: roleName },
+		select: { id: true },
+	})
+	
+	if (!role) {
+		throw new Error(`Organization role '${roleName}' not found`)
+	}
+	
+	return role.id
+}
 
 export async function createOrganizationInvitation({
 	organizationId,
@@ -12,11 +27,12 @@ export async function createOrganizationInvitation({
 }: {
 	organizationId: string
 	email: string
-	role?: string
+	role?: OrganizationRoleName
 	inviterId: string
 }) {
 	const token = crypto.randomUUID()
 	const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
+	const organizationRoleId = await getOrganizationRoleId(role)
 
 	// Check if invitation already exists
 	const existingInvitation = await prisma.organizationInvitation.findUnique({
@@ -37,7 +53,7 @@ export async function createOrganizationInvitation({
 		},
 		update: {
 			token,
-			role,
+			organizationRoleId,
 			expiresAt,
 			inviterId,
 		},
@@ -45,9 +61,16 @@ export async function createOrganizationInvitation({
 			email,
 			organizationId,
 			token,
-			role,
+			organizationRoleId,
 			expiresAt,
 			inviterId,
+		},
+		include: {
+			organizationRole: {
+				select: {
+					name: true,
+				},
+			},
 		},
 	})
 
@@ -57,7 +80,7 @@ export async function createOrganizationInvitation({
 			await markStepCompleted(inviterId, organizationId, 'invite_members', {
 				completedVia: 'member_invitation',
 				invitedEmail: email,
-				role,
+				role: invitation.organizationRole.name,
 			})
 		} catch (error) {
 			// Don't fail the invitation if onboarding tracking fails
@@ -110,6 +133,12 @@ export async function getOrganizationInvitations(organizationId: string) {
 					email: true,
 				},
 			},
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 		orderBy: {
 			createdAt: 'desc',
@@ -135,6 +164,12 @@ export async function getPendingInvitationsByEmail(email: string) {
 		},
 		include: {
 			organization: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 		orderBy: {
 			createdAt: 'desc',
@@ -178,7 +213,7 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 					data: {
 						userId,
 						organizationId: invitation.organizationId,
-						role: invitation.role,
+						organizationRoleId: invitation.organizationRoleId,
 						active: true,
 					},
 				}),
@@ -204,6 +239,12 @@ export async function validateAndAcceptInvitation(
 		where: { token },
 		include: {
 			organization: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 	})
 
@@ -239,7 +280,7 @@ export async function validateAndAcceptInvitation(
 			data: {
 				userId,
 				organizationId: invitation.organizationId,
-				role: invitation.role,
+				organizationRoleId: invitation.organizationRoleId,
 				active: true,
 			},
 		}),
@@ -258,10 +299,11 @@ export async function createOrganizationInviteLink({
 	createdById,
 }: {
 	organizationId: string
-	role?: string
+	role?: OrganizationRoleName
 	createdById: string
 }) {
 	const token = crypto.randomUUID()
+	const organizationRoleId = await getOrganizationRoleId(role)
 
 	const inviteLink = await prisma.organizationInviteLink.upsert({
 		where: {
@@ -272,14 +314,22 @@ export async function createOrganizationInviteLink({
 		},
 		update: {
 			token,
-			role,
+			organizationRoleId,
 			isActive: true,
 		},
 		create: {
 			organizationId,
 			token,
-			role,
+			organizationRoleId,
 			createdById,
+		},
+		include: {
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 	})
 
@@ -297,6 +347,14 @@ export async function getOrganizationInviteLink(
 				createdById,
 			},
 		},
+		include: {
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+		},
 	})
 }
 
@@ -312,6 +370,12 @@ export async function getAllOrganizationInviteLinks(organizationId: string) {
 					id: true,
 					name: true,
 					email: true,
+				},
+			},
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
 				},
 			},
 		},
@@ -340,6 +404,12 @@ export async function validateInviteLink(token: string) {
 		where: { token },
 		include: {
 			organization: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 	})
 
@@ -369,7 +439,7 @@ export async function createInvitationFromLink(
 			},
 		},
 		update: {
-			role: inviteLink.role,
+			organizationRoleId: inviteLink.organizationRoleId,
 			token: crypto.randomUUID(),
 			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
 			inviterId: inviteLink.createdById, // Track who invited them
@@ -377,13 +447,19 @@ export async function createInvitationFromLink(
 		create: {
 			email: userEmail.toLowerCase(),
 			organizationId: inviteLink.organizationId,
-			role: inviteLink.role,
+			organizationRoleId: inviteLink.organizationRoleId,
 			token: crypto.randomUUID(),
 			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
 			inviterId: inviteLink.createdById, // Track who invited them
 		},
 		include: {
 			organization: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 			inviter: {
 				select: {
 					name: true,
@@ -404,6 +480,12 @@ export async function validateAndAcceptInviteLink(
 		where: { token },
 		include: {
 			organization: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 		},
 	})
 
@@ -434,7 +516,7 @@ export async function validateAndAcceptInviteLink(
 		data: {
 			userId,
 			organizationId: inviteLink.organizationId,
-			role: inviteLink.role,
+			organizationRoleId: inviteLink.organizationRoleId,
 			active: true,
 		},
 	})

@@ -36,11 +36,4 @@ export async function setupRoles() {
 	console.log('Roles setup complete')
 }
 
-setupRoles()
-	.catch((e) => {
-		console.error(e)
-		process.exit(1)
-	})
-	.finally(async () => {
-		await prisma.$disconnect()
-	})
+// This function is called by seed.ts - do not run standalone

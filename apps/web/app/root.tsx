@@ -119,7 +119,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			const { getUserOrganizations, getUserDefaultOrganization } = await import(
 				'./utils/organizations.server'
 			)
-			const orgs = await getUserOrganizations(user.id)
+			const orgs = await getUserOrganizations(user.id, true) // Include permissions
 			const defaultOrg = await getUserDefaultOrganization(user.id)
 			userOrganizations = {
 				organizations: orgs,

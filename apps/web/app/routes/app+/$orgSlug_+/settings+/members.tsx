@@ -23,6 +23,8 @@ import {
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
 } from '#app/utils/organization-invitation.server'
+import { requireUserWithOrganizationPermission, ORG_PERMISSIONS } from '#app/utils/organization-permissions.server'
+import { type OrganizationRoleName } from '#app/utils/organizations.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -48,7 +50,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	const [pendingInvitations, members, inviteLink] = await Promise.all([
+	// Check if user has permission to view members
+	await requireUserWithOrganizationPermission(
+		request,
+		organization.id,
+		ORG_PERMISSIONS.READ_MEMBER_ANY
+	)
+
+	const [pendingInvitations, members, inviteLink, availableRoles] = await Promise.all([
 		getOrganizationInvitations(organization.id),
 		prisma.userOrganization.findMany({
 			where: {
@@ -69,12 +78,20 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 						},
 					},
 				},
+				organizationRole: {
+					select: {
+						id: true,
+						name: true,
+						level: true,
+					},
+				},
 			},
 			orderBy: {
 				createdAt: 'asc',
 			},
 		}),
 		getOrganizationInviteLink(organization.id, userId),
+		getAvailableRoles(),
 	])
 
 	return {
@@ -82,8 +99,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		pendingInvitations,
 		members,
 		inviteLink,
+		availableRoles,
 		currentUserId: userId,
 	}
+}
+
+// Get available roles from the database
+async function getAvailableRoles() {
+	const roles = await prisma.organizationRole.findMany({
+		select: { name: true },
+		orderBy: { level: 'desc' },
+	})
+	return roles.map(r => r.name) as OrganizationRoleName[]
 }
 
 const InviteSchema = z.object({
@@ -91,7 +118,7 @@ const InviteSchema = z.object({
 		.array(
 			z.object({
 				email: z.string().email('Invalid email address'),
-				role: z.enum(['admin', 'member']),
+				role: z.enum(['admin', 'member', 'viewer', 'guest'] as const),
 			}),
 		)
 		.min(1, 'At least one invite is required'),
@@ -121,6 +148,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const intent = formData.get('intent')
 
 	if (intent === 'send-invitations') {
+		// Check if user has permission to invite members
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.CREATE_MEMBER_ANY
+		)
+
 		const submission = parseWithZod(formData, { schema: InviteSchema })
 
 		if (submission.status !== 'success') {
@@ -167,6 +201,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'remove-invitation') {
+		// Check if user has permission to manage members
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.DELETE_MEMBER_ANY
+		)
+
 		const invitationId = formData.get('invitationId') as string
 
 		try {
@@ -182,6 +223,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'remove-member') {
+		// Check if user has permission to remove members
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.DELETE_MEMBER_ANY
+		)
+
 		const memberUserId = formData.get('userId') as string
 
 		if (memberUserId === userId) {
@@ -233,9 +281,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					organizationId: organization.id,
 				},
 			},
-			select: { role: true, active: true },
+			include: {
+				organizationRole: {
+					select: { name: true },
+				},
+			},
 		})
-		if (!requester || requester.role !== 'admin' || !requester.active) {
+		if (!requester || requester.organizationRole.name !== 'admin' || !requester.active) {
 			return Response.json(
 				{ error: 'Only admins can change member roles' },
 				{ status: 403 },
@@ -250,18 +302,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					organizationId: organization.id,
 				},
 			},
-			select: { role: true, active: true },
+			include: {
+				organizationRole: {
+					select: { name: true },
+				},
+			},
 		})
 		if (
 			memberToUpdate &&
-			memberToUpdate.role === 'admin' &&
+			memberToUpdate.organizationRole.name === 'admin' &&
 			memberToUpdate.active &&
 			newRole === 'member'
 		) {
 			const activeAdminCount = await prisma.userOrganization.count({
 				where: {
 					organizationId: organization.id,
-					role: 'admin',
+					organizationRole: {
+						name: 'admin',
+					},
 					active: true,
 				},
 			})
@@ -273,6 +331,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 		}
 
+		// Get the organization role ID for the new role name
+		const organizationRole = await prisma.organizationRole.findUnique({
+			where: { name: newRole },
+			select: { id: true },
+		})
+		
+		if (!organizationRole) {
+			return Response.json({ error: 'Role not found' }, { status: 400 })
+		}
+
 		try {
 			await prisma.userOrganization.update({
 				where: {
@@ -282,7 +350,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					},
 				},
 				data: {
-					role: newRole,
+					organizationRoleId: organizationRole.id,
 				},
 			})
 			return Response.json({ success: true })
@@ -346,7 +414,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function MembersSettings() {
-	const { pendingInvitations, members, inviteLink, currentUserId } =
+	const { pendingInvitations, members, inviteLink, availableRoles, currentUserId } =
 		useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
@@ -361,6 +429,7 @@ export default function MembersSettings() {
 					pendingInvitations={pendingInvitations}
 					inviteLink={inviteLink}
 					actionData={actionData}
+					availableRoles={availableRoles}
 				/>
 			</AnnotatedSection>
 		</AnnotatedLayout>

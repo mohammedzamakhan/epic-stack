@@ -102,16 +102,18 @@ model Session {
 }
 
 model Permission {
-  id          String   @id @default(cuid())
-  action      String
-  entity      String
-  access      String
-  description String   @default("")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  roles       Role[]   @relation("PermissionToRole")
+  id                String             @id @default(cuid())
+  action            String // create, read, update, delete, manage
+  entity            String // note, user, org_note, org_member, org_settings
+  access            String // own, any, org
+  context           String             @default("system") // system, organization
+  description       String             @default("")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  roles             Role[]             @relation("PermissionToRole")
+  organizationRoles OrganizationRole[] @relation("OrganizationPermissionToRole")
 
-  @@unique([action, entity, access])
+  @@unique([action, entity, access, context])
 }
 
 model Role {
@@ -205,21 +207,39 @@ model Organization {
   apiKeys                ApiKey[]
 }
 
+model OrganizationRole {
+  id          String   @id @default(cuid())
+  name        String   @unique // admin, member, viewer, guest
+  description String   @default("")
+  level       Int // Hierarchy: admin=4, member=3, viewer=2, guest=1
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions Permission[]             @relation("OrganizationPermissionToRole")
+  users       UserOrganization[]
+  invitations OrganizationInvitation[]
+  inviteLinks OrganizationInviteLink[]
+
+  @@index([level])
+}
+
 model UserOrganization {
-  userId         String
-  organizationId String
-  role           String
-  active         Boolean      @default(true)
-  isDefault      Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  department     String?
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String
+  organizationId     String
+  organizationRoleId String
+  organizationRole   OrganizationRole @relation(fields: [organizationRoleId], references: [id])
+  active             Boolean          @default(true)
+  isDefault          Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  department         String?
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, organizationId])
   @@index([userId])
   @@index([organizationId])
+  @@index([organizationRoleId])
 }
 
 model OrganizationImage {
@@ -247,37 +267,41 @@ model OrganizationS3Config {
 }
 
 model OrganizationInvitation {
-  id             String       @id @default(cuid())
-  email          String
-  role           String       @default("member")
-  token          String       @unique
-  expiresAt      DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  organizationId String
-  inviterId      String?
-  inviter        User?        @relation("inviter", fields: [inviterId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                 String           @id @default(cuid())
+  email              String
+  organizationRoleId String
+  organizationRole   OrganizationRole @relation(fields: [organizationRoleId], references: [id])
+  token              String           @unique
+  expiresAt          DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  organizationId     String
+  inviterId          String?
+  inviter            User?            @relation("inviter", fields: [inviterId], references: [id])
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([email, organizationId])
   @@index([organizationId])
+  @@index([organizationRoleId])
 }
 
 model OrganizationInviteLink {
-  id             String       @id @default(cuid())
-  token          String       @unique
-  role           String       @default("member")
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  organizationId String
-  createdById    String
-  createdBy      User         @relation(fields: [createdById], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                 String           @id @default(cuid())
+  token              String           @unique
+  organizationRoleId String
+  organizationRole   OrganizationRole @relation(fields: [organizationRoleId], references: [id])
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  organizationId     String
+  createdById        String
+  createdBy          User             @relation(fields: [createdById], references: [id])
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, createdById])
   @@index([organizationId])
   @@index([createdById])
+  @@index([organizationRoleId])
 }
 
 model UtmSource {

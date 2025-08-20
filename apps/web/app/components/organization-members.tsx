@@ -23,7 +23,11 @@ import { getUserImgSrc } from '#app/utils/misc'
 
 interface OrganizationMember {
 	userId: string
-	role: string
+	organizationRole: {
+		id: string
+		name: string
+		level: number
+	}
 	active: boolean
 	user: {
 		id: string
@@ -46,23 +50,23 @@ function OrganizationMemberRoleEditor({
 	members: OrganizationMember[]
 }) {
 	const currentMember = members.find((m) => m.userId === currentUserId)
-	const isAdmin = currentMember?.role === 'admin' && currentMember.active
+	const isAdmin = currentMember?.organizationRole.name === 'admin' && currentMember.active
 	const isSelf = member.userId === currentUserId
-	const [role, setRole] = useState(member.role)
+	const [role, setRole] = useState(member.organizationRole.name)
 
 	if (!isAdmin || isSelf) {
 		return (
 			<Badge
-				variant={member.role === 'admin' ? 'default' : 'secondary'}
+				variant={member.organizationRole.name === 'admin' ? 'default' : 'secondary'}
 				className="text-xs"
 			>
-				{member.role === 'admin' && (
+				{member.organizationRole.name === 'admin' && (
 					<Icon name="settings" className="mr-1 h-3 w-3" />
 				)}
-				{member.role === 'member' && (
+				{member.organizationRole.name === 'member' && (
 					<Icon name="user" className="mr-1 h-3 w-3" />
 				)}
-				{member.role}
+				{member.organizationRole.name}
 			</Badge>
 		)
 	}
@@ -74,7 +78,7 @@ function OrganizationMemberRoleEditor({
 			<input type="hidden" name="role" value={role} />
 			<Select
 				name="role"
-				defaultValue={member.role}
+				defaultValue={member.organizationRole.name}
 				value={role}
 				onValueChange={setRole}
 			>

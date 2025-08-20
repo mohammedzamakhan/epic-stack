@@ -205,8 +205,8 @@ export async function action({ request }: Route.ActionArgs) {
 	try {
 		const emailDomain = email.split('@')[1]
 		if (emailDomain) {
-			const organizationsWithMatchingDomain =
-				await prisma.organization.findMany({
+			const [organizationsWithMatchingDomain, memberRole] = await Promise.all([
+				prisma.organization.findMany({
 					where: {
 						verifiedDomain: emailDomain,
 						users: {
@@ -220,15 +220,21 @@ export async function action({ request }: Route.ActionArgs) {
 						name: true,
 						slug: true,
 					},
+				}),
+				// Get the default member role
+				prisma.organizationRole.findUnique({
+					where: { name: 'member' },
+					select: { id: true },
 				})
+			])
 
-			if (organizationsWithMatchingDomain.length > 0) {
+			if (organizationsWithMatchingDomain.length > 0 && memberRole) {
 				// Auto-add user to organizations with matching verified domains
 				await prisma.userOrganization.createMany({
 					data: organizationsWithMatchingDomain.map((org) => ({
 						userId: session.userId,
 						organizationId: org.id,
-						role: 'MEMBER', // Default role
+						organizationRoleId: memberRole.id, // Use proper organization role
 					})),
 				})
 

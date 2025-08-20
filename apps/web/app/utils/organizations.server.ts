@@ -1,4 +1,5 @@
 import { type User } from '@prisma/client'
+import { data } from 'react-router'
 import { prisma } from '@repo/prisma'
 import { getUserId } from './auth.server.ts'
 
@@ -12,15 +13,40 @@ export type OrganizationWithImage = {
 
 export type UserOrganizationWithRole = {
 	organization: OrganizationWithImage
-	role: string
+	organizationRole: {
+		id: string
+		name: string
+		level: number
+		permissions?: {
+			action: string
+			entity: string
+			access: string
+		}[]
+	}
 	isDefault: boolean
+	// Keep for backward compatibility during transition
+	role?: string
 }
 
-export async function getUserOrganizations(userId: User['id']) {
+export async function getUserOrganizations(userId: User['id'], includePermissions: boolean = false) {
 	const userOrganizations = await prisma.userOrganization.findMany({
 		where: { userId, active: true },
 		select: {
-			role: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+					level: true,
+					permissions: includePermissions ? {
+						where: { context: 'organization' },
+						select: {
+							action: true,
+							entity: true,
+							access: true,
+						},
+					} : false,
+				},
+			},
 			isDefault: true,
 			organization: {
 				select: {
@@ -67,7 +93,13 @@ export async function getUserDefaultOrganization(userId: User['id']) {
 					},
 				},
 			},
-			role: true,
+			organizationRole: {
+				select: {
+					id: true,
+					name: true,
+					level: true,
+				},
+			},
 			isDefault: true,
 		},
 	})
@@ -98,7 +130,13 @@ export async function getUserDefaultOrganization(userId: User['id']) {
 						},
 					},
 				},
-				role: true,
+				organizationRole: {
+					select: {
+						id: true,
+						name: true,
+						level: true,
+					},
+				},
 				isDefault: true,
 			},
 			orderBy: { createdAt: 'asc' },
@@ -163,6 +201,16 @@ export async function createOrganization({
 	imageObjectKey?: string
 }) {
 	return prisma.$transaction(async (tx) => {
+		// Get the admin role first
+		const adminRole = await tx.organizationRole.findUnique({
+			where: { name: 'admin' },
+			select: { id: true },
+		})
+
+		if (!adminRole) {
+			throw new Error('Admin role not found')
+		}
+
 		const organization = await tx.organization.create({
 			data: {
 				name,
@@ -171,7 +219,7 @@ export async function createOrganization({
 				users: {
 					create: {
 						userId,
-						role: 'admin',
+						organizationRoleId: adminRole.id,
 						isDefault: true,
 					},
 				},
@@ -243,9 +291,70 @@ export async function checkUserOrganizationAccess(
 			},
 			active: true,
 		},
+		include: {
+			organizationRole: true,
+		},
 	})
 
-	return !!userOrg
+	return userOrg
+}
+
+// Role level constants for server-side use
+export const ORGANIZATION_ROLE_LEVELS = {
+	admin: 4,
+	member: 3,
+	viewer: 2,
+	guest: 1,
+} as const
+
+export type OrganizationRoleName = keyof typeof ORGANIZATION_ROLE_LEVELS
+
+/**
+ * Check if user has minimum required role level in organization
+ */
+export async function userHasOrganizationRole(
+	userId: string,
+	organizationId: string,
+	requiredRole: OrganizationRoleName,
+): Promise<boolean> {
+	const userOrg = await checkUserOrganizationAccess(userId, organizationId)
+	if (!userOrg) return false
+
+	const userRoleLevel = userOrg.organizationRole.level
+	const requiredRoleLevel = ORGANIZATION_ROLE_LEVELS[requiredRole]
+
+	return userRoleLevel >= requiredRoleLevel
+}
+
+/**
+ * Require user to have minimum organization role - throws 403 if not
+ */
+export async function requireUserWithOrganizationRole(
+	request: Request,
+	organizationId: string,
+	requiredRole: OrganizationRoleName,
+): Promise<string> {
+	const userId = await getUserId(request)
+	if (!userId) {
+		throw data(
+			{ error: 'Unauthorized', message: 'Authentication required' },
+			{ status: 401 }
+		)
+	}
+
+	const hasRole = await userHasOrganizationRole(userId, organizationId, requiredRole)
+	if (!hasRole) {
+		throw data(
+			{
+				error: 'Unauthorized',
+				requiredRole,
+				message: `Insufficient permissions: required ${requiredRole} role in organization`
+			},
+			{ status: 403 }
+		)
+	}
+
+	return userId
 }
 
 /**

@@ -28,52 +28,67 @@ import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms'
+import { type OrganizationRoleName } from '#app/utils/organizations.server'
 
-const roles = [
-	{
-		value: 'admin',
-		label: 'Admin',
-		description: 'Full access to organization settings and member management.',
-	},
-	{
-		value: 'member',
-		label: 'Member',
-		description: 'Standard organization member with basic permissions.',
-	},
-]
+// Create role descriptions map
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+	admin: 'Full access to organization settings and member management.',
+	member: 'Standard organization member with basic permissions.',
+	viewer: 'Read-only access to organization content.',
+	guest: 'Limited access for temporary collaborators.',
+}
 
-const InviteSchema = z.object({
-	invites: z
-		.array(
-			z.object({
-				email: z.string().email('Invalid email address'),
-				role: z.enum(['admin', 'member']),
-			}),
-		)
-		.min(1, 'At least one invite is required'),
-})
+// Create dynamic invite schema based on available roles
+function createInviteSchema(availableRoles: OrganizationRoleName[]) {
+	return z.object({
+		invites: z
+			.array(
+				z.object({
+					email: z.string().email('Invalid email address'),
+					role: z.enum(availableRoles as [OrganizationRoleName, ...OrganizationRoleName[]]),
+				}),
+			)
+			.min(1, 'At least one invite is required'),
+	})
+}
 
 export function OrganizationInvitations({
 	pendingInvitations = [],
 	inviteLink,
 	actionData,
+	availableRoles = ['admin', 'member'], // Default fallback for backwards compatibility
 }: {
 	pendingInvitations?: Array<{
 		id: string
 		email: string
-		role: string
+		organizationRole: {
+			id: string
+			name: string
+		}
 		createdAt: Date
 		inviter?: { name: string | null; email: string } | null
 	}>
 	inviteLink?: {
 		id: string
 		token: string
-		role: string
+		organizationRole: {
+			id: string
+			name: string
+		}
 		isActive: boolean
 		createdAt: Date
 	} | null
 	actionData?: any
+	availableRoles?: OrganizationRoleName[]
 }) {
+	// Create dynamic schema and roles based on available roles
+	const InviteSchema = createInviteSchema(availableRoles)
+	const roles = availableRoles.map(role => ({
+		value: role,
+		label: role.charAt(0).toUpperCase() + role.slice(1),
+		description: ROLE_DESCRIPTIONS[role] || `${role} role`,
+	}))
+
 	const [form, fields] = useForm({
 		id: 'invite-form',
 		constraint: getZodConstraint(InviteSchema),
@@ -82,7 +97,7 @@ export function OrganizationInvitations({
 			return parseWithZod(formData, { schema: InviteSchema })
 		},
 		defaultValue: {
-			invites: [{ email: '', role: 'member' }],
+			invites: [{ email: '', role: availableRoles[0] || 'member' }], // Use first available role as default
 		},
 		shouldRevalidate: 'onBlur',
 	})
@@ -211,6 +226,7 @@ export function OrganizationInvitations({
 										fields={fields}
 										form={form}
 										index={index}
+										roles={roles}
 									/>
 								))}
 
@@ -256,7 +272,7 @@ export function OrganizationInvitations({
 														{invitation.email}
 													</span>
 													<Badge variant="secondary" className="text-xs">
-														{invitation.role}
+														{invitation.organizationRole.name}
 													</Badge>
 												</div>
 												{invitation.inviter && (
@@ -299,6 +315,7 @@ function InviteFieldset({
 	fields,
 	form,
 	index,
+	roles,
 }: {
 	meta: FieldMetadata<
 		{
@@ -330,6 +347,11 @@ function InviteFieldset({
 	}>
 	form: any
 	index: number
+	roles: Array<{
+		value: string
+		label: string
+		description: string
+	}>
 }) {
 	const inviteFields = meta.getFieldset()
 	const role = useInputControl(inviteFields.role)

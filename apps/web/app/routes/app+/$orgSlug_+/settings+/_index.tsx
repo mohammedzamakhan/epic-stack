@@ -345,11 +345,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 				// Auto-add these users to the organization
 				if (usersWithMatchingDomain.length > 0) {
+					// Get the member role first
+					const memberRole = await tx.organizationRole.findUnique({
+						where: { name: 'member' },
+						select: { id: true },
+					})
+
+					if (!memberRole) {
+						throw new Error('Member role not found')
+					}
+
 					await tx.userOrganization.createMany({
 						data: usersWithMatchingDomain.map((user) => ({
 							userId: user.id,
 							organizationId: organization.id,
-							role: 'MEMBER', // Default role
+							organizationRoleId: memberRole.id,
 						})),
 					})
 				}

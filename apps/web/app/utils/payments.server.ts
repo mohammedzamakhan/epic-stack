@@ -277,7 +277,9 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 	const admins = await prisma.userOrganization.findMany({
 		where: {
 			organizationId: organization?.id,
-			role: 'admin',
+			organizationRole: {
+				name: 'admin',
+			},
 		},
 		include: {
 			user: true,
