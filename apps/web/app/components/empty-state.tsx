@@ -32,7 +32,7 @@ export function EmptyState({
 				className,
 			)}
 		>
-			<div className="bg-background dark:bg-muted/50 hover:dark:bg-muted/70 group rounded-xl p-14 transition duration-500 hover:duration-200">
+			<div className="bg-background shadow-sm ring-1 ring-border dark:bg-muted/50 hover:dark:bg-muted/70 group rounded-xl p-14 transition duration-500 hover:duration-200">
 				<div className="isolate flex justify-center">
 					{icons.length === 3 ? (
 						<>

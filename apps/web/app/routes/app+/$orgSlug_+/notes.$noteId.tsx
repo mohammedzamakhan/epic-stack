@@ -1379,7 +1379,7 @@ export default function NoteRoute() {
 							<span className="hidden sm:inline">Overview</span>
 						</TabsTrigger>
 						<TabsTrigger value="comments" className="flex-1 gap-2">
-							<Icon name="mail" className="h-4 w-4" />
+							<Icon name="message-square" className="h-4 w-4" />
 							<span className="hidden sm:inline">Comments</span>
 							{comments.length > 0 && (
 								<span className="bg-muted-foreground/20 rounded-full px-1.5 py-0.5 text-xs">

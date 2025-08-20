@@ -145,8 +145,8 @@ export function CommentsSection({
 	return (
 		<div>
 			{/* Section Header */}
-			<div className="mb-6 flex items-center gap-2">
-				<Icon name="chat-bubble" className="text-muted-foreground h-5 w-5" />
+			<div className="mb-2 flex items-center gap-2">
+				<Icon name="message-square" className="text-muted-foreground h-5 w-5" />
 				<h2 className="text-lg font-semibold">Comments</h2>
 				{comments.length > 0 && (
 					<span className="text-muted-foreground bg-muted rounded-full px-2 py-0.5 text-sm">

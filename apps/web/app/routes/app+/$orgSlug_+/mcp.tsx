@@ -517,7 +517,7 @@ function ApiKeysCard({
 							title="No API keys created yet"
 							description="Create your first API key to get started"
 							icons={['key']}
-							className="m-0"
+							className="-m-1 w-[calc(100%+12px)]"
 						/>
 					)}
 				</div>
