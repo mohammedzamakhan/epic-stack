@@ -16,17 +16,14 @@ describe('SlackProvider - Callback Handling', () => {
 
 	describe('handleCallback', () => {
 		it('should return mock token data when using demo credentials', async () => {
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			const tokenData = await provider.handleCallback(params)
@@ -53,17 +50,14 @@ describe('SlackProvider - Callback Handling', () => {
 				}),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			const tokenData = await provider.handleCallback(params)
@@ -114,17 +108,14 @@ describe('SlackProvider - Callback Handling', () => {
 				}),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			await expect(provider.handleCallback(params)).rejects.toThrow(
@@ -143,17 +134,14 @@ describe('SlackProvider - Callback Handling', () => {
 				}),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			await expect(provider.handleCallback(params)).rejects.toThrow(
@@ -176,17 +164,14 @@ describe('SlackProvider - Callback Handling', () => {
 				}),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			await expect(provider.handleCallback(params)).rejects.toThrow(
@@ -201,10 +186,10 @@ describe('SlackProvider - Callback Handling', () => {
 				state: 'invalid-base64-state',
 			}
 
-			// The current implementation doesn't validate state, it returns mock data for demo credentials
-			// This test documents the current behavior
-			const tokenData = await provider.handleCallback(params)
-			expect(tokenData.accessToken).toMatch(/^mock-slack-token-\d+$/)
+			// The current implementation properly validates state and should throw an error
+			await expect(provider.handleCallback(params)).rejects.toThrow(
+				'Invalid OAuth state'
+			)
 		})
 
 		it('should make correct API request with real credentials', async () => {
@@ -222,17 +207,14 @@ describe('SlackProvider - Callback Handling', () => {
 				),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'test-auth-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			await provider.handleCallback(params)
