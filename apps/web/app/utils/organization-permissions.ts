@@ -11,8 +11,8 @@ export function parseOrganizationPermissionString(
 ) {
 	const [action, entity, access] = permissionString.split(':')
 	return {
-		action: action.trim(),
-		entity: entity.trim(),
+		action: action?.trim() || '',
+		entity: entity?.trim() || '',
 		access: access ? access.split(',').map((a) => a.trim()) : undefined,
 	}
 }

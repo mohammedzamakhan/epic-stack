@@ -186,7 +186,7 @@ export default function AdminSystemRoleDetailPage() {
 			if (!acc[permission.entity]) {
 				acc[permission.entity] = []
 			}
-			acc[permission.entity].push(permission)
+			acc[permission.entity]!.push(permission)
 			return acc
 		},
 		{} as Record<string, typeof allPermissions>,

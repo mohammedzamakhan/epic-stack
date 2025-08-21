@@ -321,15 +321,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 					return {
 						result: submission.reply({
 							fieldErrors: {
-								permissionAction: !permissionAction
-									? ['Action is required']
-									: undefined,
-								selectedEntity: !selectedEntity
-									? ['Entity is required']
-									: undefined,
-								permissionAccess: !permissionAccess
-									? ['Access level is required']
-									: undefined,
+								...((!permissionAction) && { permissionAction: ['Action is required'] }),
+								...((!selectedEntity) && { selectedEntity: ['Entity is required'] }),
+								...((!permissionAccess) && { permissionAccess: ['Access level is required'] }),
 							},
 						}),
 						success: false,
