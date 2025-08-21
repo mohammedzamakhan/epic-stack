@@ -88,17 +88,14 @@ describe('SlackProvider - Callback Handling', () => {
 				}),
 			)
 
+			// Generate proper state using OAuthStateManager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const state = OAuthStateManager.generateState('org-123', 'slack')
+
 			const params = {
 				organizationId: 'org-123',
 				code: 'error-code',
-				state: Buffer.from(
-					JSON.stringify({
-						organizationId: 'org-123',
-						providerName: 'slack',
-						timestamp: Date.now(),
-						nonce: 'test-nonce',
-					}),
-				).toString('base64'),
+				state,
 			}
 
 			await expect(provider.handleCallback(params)).rejects.toThrow(

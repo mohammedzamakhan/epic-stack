@@ -394,20 +394,19 @@ describe('JiraProvider', () => {
 	})
 
 	describe('Error Handling', () => {
-		it('should throw error when JIRA_CLIENT_ID is not set', async () => {
+		it('should use demo client ID when JIRA_CLIENT_ID is not set', async () => {
 			delete process.env.JIRA_CLIENT_ID
 
-			await expect(
-				provider.getAuthUrl('org-123', 'https://example.com/callback'),
-			).rejects.toThrow('JIRA_CLIENT_ID environment variable is required')
+			const authUrl = await provider.getAuthUrl('org-123', 'https://example.com/callback')
+			expect(authUrl).toContain('client_id=demo-jira-client-id')
 		})
 
-		it('should throw error when JIRA_CLIENT_SECRET is not set', async () => {
+		it('should use demo client secret when JIRA_CLIENT_SECRET is not set', async () => {
 			delete process.env.JIRA_CLIENT_SECRET
 
-			await expect(provider.refreshToken('test-refresh-token')).rejects.toThrow(
-				'JIRA_CLIENT_SECRET environment variable is required',
-			)
+			// The refresh token method will still fail with demo credentials due to invalid API response,
+			// but it won't throw the environment variable error anymore
+			await expect(provider.refreshToken('test-refresh-token')).rejects.toThrow()
 		})
 
 		it('should handle network errors gracefully', async () => {

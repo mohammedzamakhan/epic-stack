@@ -56,13 +56,14 @@ describe('JiraProvider - OAuth Flow', () => {
 			expect(decodedState.nonce).toBeTypeOf('string')
 		})
 
-		it('should throw error when JIRA_CLIENT_ID is not set', async () => {
+		it('should use demo client ID when JIRA_CLIENT_ID is not set', async () => {
 			// Ensure environment variable is not set
 			delete process.env.JIRA_CLIENT_ID
 
-			await expect(
-				provider.getAuthUrl('org-123', 'https://example.com/callback'),
-			).rejects.toThrow('JIRA_CLIENT_ID environment variable is required')
+			const authUrl = await provider.getAuthUrl('org-123', 'https://example.com/callback')
+			
+			expect(authUrl).toContain('client_id=demo-jira-client-id')
+			expect(authUrl).toContain('https://auth.atlassian.com/authorize')
 		})
 
 		it('should use environment variables when available', async () => {

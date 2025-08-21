@@ -103,16 +103,11 @@ export class SlackProvider extends BaseIntegrationProvider {
 		redirectUri: string,
 		additionalParams?: Record<string, any>,
 	): Promise<string> {
-		// Create state with organization and provider info
-		const state = Buffer.from(
-			JSON.stringify({
-				organizationId,
-				providerName: this.name,
-				timestamp: Date.now(),
-				nonce: Math.random().toString(36).substring(7),
-				redirectUri, // Include redirect URI in state for validation
-			}),
-		).toString('base64')
+		// Create state with organization and provider info using the standardized format
+		const state = this.generateOAuthState(organizationId, {
+			redirectUri, // Include redirect URI in state for validation
+			...additionalParams,
+		})
 
 		const params = new URLSearchParams({
 			client_id: this.clientId,
@@ -133,10 +128,12 @@ export class SlackProvider extends BaseIntegrationProvider {
 	async handleCallback(params: OAuthCallbackParams): Promise<TokenData> {
 		const { code, state } = params
 
-		// Parse our simplified state
+		// Parse and validate the OAuth state using the standardized format
+		let stateData
 		try {
+			stateData = this.parseOAuthState(state)
 		} catch (error) {
-			throw new Error('Invalid OAuth state')
+			throw new Error(`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`)
 		}
 
 		// Check if we have real Slack credentials

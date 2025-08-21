@@ -41,16 +41,10 @@ describe('SlackProvider - OAuth Flow', () => {
 			const state = urlParams.get('state')
 			expect(state).toBeTruthy()
 
-			// Decode and parse state
-			const decodedState = JSON.parse(
-				Buffer.from(state!, 'base64').toString(),
-			) as {
-				organizationId: string
-				providerName: string
-				redirectUri: string
-				timestamp: number
-				nonce: string
-			}
+			// Validate and parse state using the standardized OAuth state manager
+			const { OAuthStateManager } = await import('../../../src/oauth-manager')
+			const decodedState = OAuthStateManager.validateState(state!)
+			
 			expect(decodedState.organizationId).toBe(organizationId)
 			expect(decodedState.providerName).toBe('slack')
 			expect(decodedState.redirectUri).toBe(redirectUri)
