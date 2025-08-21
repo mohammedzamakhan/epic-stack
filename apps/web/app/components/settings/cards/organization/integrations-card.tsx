@@ -9,9 +9,12 @@ import {
 	CardDescription,
 	Icon,
 	StatusButton,
+	CardFooter,
+	CardBody,
 } from '@repo/ui'
 import { useFetcher, Form } from 'react-router'
 
+import { CircleHelpIcon } from '#app/components/icons/circle-help'
 import { JiraIntegrationSettings } from './jira-integration-settings'
 
 export const connectIntegrationActionIntent = 'connect-integration'
@@ -46,234 +49,177 @@ export function IntegrationsCard({
 }: IntegrationsCardProps) {
 	const fetcher = useFetcher()
 
-	const connectedProviders = new Set(integrations.map((i) => i.providerName))
-	const availableToConnect = availableProviders.filter(
-		(p) => !connectedProviders.has(p.name),
+	// Create a map of integrations by provider name for easy lookup
+	const integrationsMap = new Map(
+		integrations.map((integration) => [integration.providerName, integration]),
 	)
+
+	// Show all available providers, merging with connected ones
+	const allProviders = availableProviders.map((provider) => ({
+		...provider,
+		integration: integrationsMap.get(provider.name) || null,
+	}))
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Third-Party Integrations</CardTitle>
-				<CardDescription>
-					Connect your organization to external services to sync notes and
-					collaborate across platforms.
-				</CardDescription>
-			</CardHeader>
+		<div className="space-y-6">
+			<header className="space-y-1">
+				<h2 className="text-2xl font-semibold tracking-tight">Integrations</h2>
+			</header>
 
-			<CardContent className="space-y-6">
-				{/* Connected Integrations */}
-				{integrations.length > 0 && (
-					<div className="space-y-4">
-						<h4 className="text-muted-foreground text-sm font-medium">
-							Connected Services
-						</h4>
-						<div className="space-y-3">
-							{integrations.map((integration) => (
-								<ConnectedIntegrationItem
-									availableProviders={availableProviders}
-									key={integration.id}
-									integration={integration}
-									isDisconnecting={
-										fetcher.state !== 'idle' &&
-										fetcher.formData?.get('integrationId') === integration.id
-									}
-								/>
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Available Integrations */}
-				{availableToConnect.length > 0 && (
-					<div className="space-y-4">
-						<h4 className="text-muted-foreground text-sm font-medium">
-							{integrations.length > 0
-								? 'Available Services'
-								: 'Connect a Service'}
-						</h4>
-						<div className="flex flex-col gap-3">
-							{availableToConnect.map((provider) => (
-								<AvailableIntegrationItem
-									key={provider.name}
-									provider={provider}
-								/>
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Empty State */}
-				{integrations.length === 0 && availableToConnect.length === 0 && (
-					<div className="py-8 text-center">
-						<Icon
-							name="link-2"
-							className="text-muted-foreground/50 mx-auto h-12 w-12"
-						/>
-						<h3 className="text-muted-foreground mt-4 text-sm font-medium">
-							No integrations available
-						</h3>
-						<p className="text-muted-foreground mt-2 text-sm">
-							Contact your administrator to enable integrations for your
-							organization.
-						</p>
-					</div>
-				)}
-			</CardContent>
-		</Card>
-	)
-}
-
-interface ConnectedIntegrationItemProps {
-	availableProviders: IntegrationsCardProps['availableProviders']
-	integration: Integration
-	isDisconnecting: boolean
-}
-
-function ConnectedIntegrationItem({
-	integration,
-	isDisconnecting,
-	availableProviders,
-}: ConnectedIntegrationItemProps) {
-	const fetcher = useFetcher()
-	const providerInfo = getProviderInfo(
-		integration.providerName,
-		availableProviders,
-	)
-	const connectionCount = integration._count?.connections || 0
-	const [showSettings, setShowSettings] = useState(false)
-
-	// Check if this is a Jira integration
-	const isJira = integration.providerName === 'jira'
-
-	return (
-		<div className="overflow-hidden rounded-lg border">
-			<div className="flex items-center justify-between p-4">
-				<div className="flex items-center space-x-3">
-					<div className="flex-shrink-0">
-						<Icon
-							name={providerInfo.icon as any}
-							className="text-muted-foreground h-8 w-8"
-						/>
-					</div>
-					<div className="min-w-0 flex-1">
-						<div className="flex items-center space-x-2">
-							<p className="text-foreground truncate text-sm font-medium">
-								{providerInfo.displayName}
-							</p>
-							<Badge
-								variant={integration.isActive ? 'default' : 'secondary'}
-								className="text-xs"
-							>
-								{integration.isActive ? 'Active' : 'Inactive'}
-							</Badge>
-						</div>
-						<div className="mt-1 flex items-center space-x-4">
-							<p className="text-muted-foreground text-xs">
-								{connectionCount}{' '}
-								{connectionCount === 1 ? 'connection' : 'connections'}
-							</p>
-							{integration.lastSyncAt && (
-								<p className="text-muted-foreground text-xs">
-									Last sync:{' '}
-									{new Date(integration.lastSyncAt).toLocaleDateString()}
-								</p>
-							)}
-						</div>
-					</div>
-				</div>
-				<div className="flex items-center space-x-2">
-					{isJira && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setShowSettings(!showSettings)}
-						>
-							{showSettings ? 'Hide Settings' : 'Settings'}
-						</Button>
-					)}
-					<fetcher.Form method="POST">
-						<input
-							type="hidden"
-							name="intent"
-							value={disconnectIntegrationActionIntent}
-						/>
-						<input type="hidden" name="integrationId" value={integration.id} />
-						<StatusButton
-							type="submit"
-							variant="outline"
-							size="sm"
-							status={isDisconnecting ? 'pending' : 'idle'}
-						>
-							Disconnect
-						</StatusButton>
-					</fetcher.Form>
-				</div>
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+				{allProviders.map((provider) => (
+					<IntegrationCard
+						key={provider.name}
+						provider={provider}
+						integration={provider.integration}
+						fetcher={fetcher}
+					/>
+				))}
 			</div>
 
-			{/* Show Jira settings if this is a Jira integration and settings are expanded */}
-			{isJira && showSettings && (
-				<div className="bg-muted/10 border-t px-4 py-4">
-					<JiraIntegrationSettings integration={integration} />
+			{/* Request Integration Banner */}
+			<div className="relative flex w-full items-baseline gap-2 rounded-md p-2 px-6 text-sm bg-muted">
+				<div className="relative w-4 flex-shrink-0">
+					<Icon name="badge-question-mark" className="h-4 w-4" />
 				</div>
-			)}
+				<div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-2">
+					<div className="text-pretty">
+						Need an integration but don't see it here?
+					</div>
+					<div className="flex items-center justify-start gap-3">
+						<a
+							href="mailto:support@yourcompany.com?subject=Integration%20request"
+							className=" font-medium"
+						>
+							Request integration
+						</a>
+					</div>
+				</div>
+			</div>
 		</div>
 	)
 }
 
-interface AvailableIntegrationItemProps {
+interface IntegrationCardProps {
 	provider: {
 		name: string
 		type: string
 		displayName: string
 		description: string
 		icon: string
+		integration?: Integration | null
 	}
+	integration: Integration | null
+	fetcher: ReturnType<typeof useFetcher>
 }
 
-function AvailableIntegrationItem({ provider }: AvailableIntegrationItemProps) {
+function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProps) {
+	const [showSettings, setShowSettings] = useState(false)
+	const isConnected = !!integration
+	const isJira = provider.name === 'jira'
+	
+	// Check if we're currently processing this integration
+	const isProcessing = 
+		fetcher.state !== 'idle' && (
+			fetcher.formData?.get('integrationId') === integration?.id ||
+			fetcher.formData?.get('providerName') === provider.name
+		)
+
 	return (
-		<div className="hover:bg-muted/50 flex items-center gap-3 rounded-lg border p-4 transition-colors">
-			<div className="flex-shrink-0">
-				<Icon
-					name={provider.icon as any}
-					className="text-muted-foreground h-8 w-8"
-				/>
-			</div>
-			<div className="min-w-0 flex-1">
-				<p className="text-foreground truncate text-sm font-medium">
-					{provider.displayName}
-				</p>
-				<p className="text-muted-foreground text-xs">{provider.description}</p>
-			</div>
-			<div className="flex-shrink-0">
-				<Form method="POST">
-					<input
-						type="hidden"
-						name="intent"
-						value={connectIntegrationActionIntent}
-					/>
-					<input type="hidden" name="providerName" value={provider.name} />
-					<Button type="submit" variant="outline" size="sm">
-						Connect
-					</Button>
-				</Form>
-			</div>
-		</div>
+		<Card className="h-full flex flex-col">
+			<CardContent className="p-4 flex flex-col flex-1">
+				{/* Header with icon, title and domain */}
+				<header className="flex w-full items-center gap-3 mb-3">
+					<div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md after:absolute after:inset-0 after:h-full after:w-full after:rounded-[inherit] after:ring-1 after:ring-inset after:ring-black/8 dark:after:ring-white/8">
+						<Icon
+							name={provider.icon as any}
+							className="h-6 w-6"
+						/>
+					</div>
+					<div className="flex flex-col min-w-0 flex-1">
+						<h2 className="text-sm font-medium truncate">
+							{provider.displayName}
+						</h2>
+						<span className="text-xs text-muted-foreground">
+							{provider.name === 'jira' && 'atlassian.com'}
+							{!['jira'].includes(provider.name) && `${provider.name}.com`}
+						</span>
+					</div>
+				</header>
+
+				{/* Description - takes up flexible space */}
+				<div className="flex-1 min-h-[3rem]">
+					<p className="text-sm text-muted-foreground leading-5">
+						{provider.description}
+					</p>
+				</div>
+
+				{/* Button - fixed at bottom */}
+				<div className="pt-2">
+					{provider.name !== 'google-analytics' && (
+						<Form method="POST">
+							{isConnected ? (
+								<>
+									<input
+										type="hidden"
+										name="intent"
+										value={disconnectIntegrationActionIntent}
+									/>
+									<input type="hidden" name="integrationId" value={integration.id} />
+									<StatusButton
+										type="submit"
+										variant="outline"
+										size="sm"
+										status={isProcessing ? 'pending' : 'idle'}
+										className="w-full"
+									>
+										Disconnect
+									</StatusButton>
+								</>
+							) : (
+								<>
+									<input
+										type="hidden"
+										name="intent"
+										value={connectIntegrationActionIntent}
+									/>
+									<input type="hidden" name="providerName" value={provider.name} />
+									<StatusButton
+										type="submit"
+										variant="outline"
+										size="sm"
+										status={isProcessing ? 'pending' : 'idle'}
+										className="w-full"
+									>
+										Connect
+									</StatusButton>
+								</>
+							)}
+						</Form>
+					)}
+				</div>
+			</CardContent>
+			
+			<CardFooter className="px-4 py-1 pt-2">
+				<a
+					href={`/integrations/${provider.name}`}
+					target="_blank"
+					rel="noreferrer"
+					className="flex w-full items-center justify-between text-xs text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
+				>
+					<span className="flex items-center gap-1.5">Read documentation</span>
+					<Icon name="chevron-right" className="h-3.5 w-3.5" />
+				</a>
+			</CardFooter>
+
+			{/* Show Jira settings if this is a connected Jira integration and settings are expanded */}
+			{isJira && isConnected && showSettings && (
+				<div className="border-t px-4 py-4">
+					<JiraIntegrationSettings integration={integration} />
+				</div>
+			)}
+		</Card>
 	)
 }
 
-// Helper function to get provider display information
-function getProviderInfo(
-	providerName: string,
-	availableProviders: IntegrationsCardProps['availableProviders'],
-) {
-	const provider = availableProviders.find((p) => p.name === providerName)
-	return (
-		provider || {
-			displayName: providerName,
-			icon: 'link-2',
-			description: 'Third-party service integration',
-		}
-	)
-}
+

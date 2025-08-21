@@ -1,5 +1,4 @@
 import { invariant } from '@epic-web/invariant'
-import { AnnotatedLayout, AnnotatedSection } from '@repo/ui'
 import { integrationManager, getAvailableProviders } from '@repo/integrations'
 import {
 	type ActionFunctionArgs,
@@ -140,13 +139,9 @@ export default function IntegrationsSettings() {
 	const { integrations, availableProviders } = useLoaderData<typeof loader>()
 
 	return (
-		<AnnotatedLayout>
-			<AnnotatedSection>
-				<IntegrationsCard
-					integrations={integrations}
-					availableProviders={availableProviders}
-				/>
-			</AnnotatedSection>
-		</AnnotatedLayout>
+		<IntegrationsCard
+			integrations={integrations}
+			availableProviders={availableProviders}
+		/>
 	)
 }

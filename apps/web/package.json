@@ -13,7 +13,7 @@
     "build": "run-s build:*",
     "build:remix": "react-router build",
     "build:server": "tsx ./other/build-server.ts",
-    "dev": "cross-env NODE_ENV=development MOCKS=true DISABLE_STRIPE_MOCKS=false tsx ./index.js",
+    "dev": "cross-env NODE_ENV=development MOCKS=true DISABLE_STRIPE_MOCKS=true tsx ./index.js",
     "dev:no-mocks": "cross-env NODE_ENV=development node ./server/dev-server.js",
     "dev:all-mocks": "cross-env NODE_ENV=development MOCKS=true tsx ./index.js",
     "format": "prettier --write .",
