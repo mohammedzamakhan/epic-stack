@@ -46,7 +46,11 @@ export interface AdminUserDetail {
 		altText: string | null
 	} | null
 	organizations: Array<{
-		role: string
+		organizationRole: {
+			id: string
+			name: string
+			level: number
+		}
 		active: boolean
 		isDefault: boolean
 		createdAt: string
@@ -490,7 +494,7 @@ export function UserDetailView({
 															'No description'}
 													</p>
 													<div className="text-muted-foreground flex items-center gap-4 text-xs">
-														<span>Role: {membership.role}</span>
+														<span>Role: {membership.organizationRole.name}</span>
 														{membership.department && (
 															<span>Department: {membership.department}</span>
 														)}

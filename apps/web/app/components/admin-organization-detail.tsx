@@ -44,7 +44,11 @@ export interface AdminOrganizationDetail {
 	} | null
 	users: Array<{
 		userId: string
-		role: string
+		organizationRole: {
+			id: string
+			name: string
+			level: number
+		}
 		active: boolean
 		isDefault: boolean
 		createdAt: Date
@@ -85,7 +89,11 @@ export interface AdminOrganizationDetail {
 	invitations: Array<{
 		id: string
 		email: string
-		role: string
+		organizationRole: {
+			id: string
+			name: string
+			level: number
+		}
 		createdAt: Date
 		expiresAt: Date | null
 		inviter: {
@@ -341,7 +349,7 @@ export function AdminOrganizationDetail({
 										</div>
 									</div>
 									<div className="flex items-center gap-2">
-										{getRoleBadge(member.role)}
+										{getRoleBadge(member.organizationRole.name)}
 										{!member.active && (
 											<Badge variant="outline" className="text-xs">
 												Inactive
@@ -603,7 +611,7 @@ export function AdminOrganizationDetail({
 										<TableCell className="font-medium">
 											{invitation.email}
 										</TableCell>
-										<TableCell>{getRoleBadge(invitation.role)}</TableCell>
+										<TableCell>{getRoleBadge(invitation.organizationRole.name)}</TableCell>
 										<TableCell>
 											{invitation.inviter?.name ||
 												invitation.inviter?.username ||

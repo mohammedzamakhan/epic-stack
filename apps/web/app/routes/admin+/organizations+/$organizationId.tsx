@@ -37,7 +37,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				select: {
 					organizationId: true,
 					userId: true,
-					role: true,
+					organizationRole: {
+						select: {
+							id: true,
+							name: true,
+							level: true,
+						},
+					},
 					active: true,
 					isDefault: true,
 					createdAt: true,
@@ -94,7 +100,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				select: {
 					id: true,
 					email: true,
-					role: true,
+					organizationRole: {
+						select: {
+							id: true,
+							name: true,
+							level: true,
+						},
+					},
 					createdAt: true,
 					expiresAt: true,
 					inviter: {

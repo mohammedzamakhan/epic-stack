@@ -50,7 +50,13 @@ export async function loader({
 			},
 			organizations: {
 				select: {
-					role: true,
+					organizationRole: {
+						select: {
+							id: true,
+							name: true,
+							level: true,
+						},
+					},
 					active: true,
 					isDefault: true,
 					createdAt: true,
