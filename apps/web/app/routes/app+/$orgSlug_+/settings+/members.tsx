@@ -23,7 +23,7 @@ import {
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
 } from '#app/utils/organization-invitation.server'
-import { requireUserWithOrganizationPermission, ORG_PERMISSIONS } from '#app/utils/organization-permissions.server'
+import { requireUserWithOrganizationPermission, ORG_PERMISSIONS, getUserOrganizationPermissionsForClient } from '#app/utils/organization-permissions.server'
 import { type OrganizationRoleName } from '#app/utils/organizations.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -57,7 +57,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		ORG_PERMISSIONS.READ_MEMBER_ANY
 	)
 
-	const [pendingInvitations, members, inviteLink, availableRoles] = await Promise.all([
+	const [pendingInvitations, members, inviteLink, availableRoles, userPermissions] = await Promise.all([
 		getOrganizationInvitations(organization.id),
 		prisma.userOrganization.findMany({
 			where: {
@@ -92,6 +92,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		}),
 		getOrganizationInviteLink(organization.id, userId),
 		getAvailableRoles(),
+		getUserOrganizationPermissionsForClient(userId, organization.id),
 	])
 
 	return {
@@ -101,6 +102,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		inviteLink,
 		availableRoles,
 		currentUserId: userId,
+		userPermissions,
 	}
 }
 

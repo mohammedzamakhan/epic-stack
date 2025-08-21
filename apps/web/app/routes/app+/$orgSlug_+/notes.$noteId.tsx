@@ -31,6 +31,7 @@ import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { CommentsSection } from '#app/components/note/comments-section.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
+import { CanEditNote, CanDeleteNote } from '#app/components/permissions/permission-guard.tsx'
 
 import {
 	logNoteActivity,
@@ -40,6 +41,11 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { 
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+	getUserOrganizationPermissionsForClient 
+} from '#app/utils/organization-permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { data } from 'react-router'
 
@@ -89,17 +95,33 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	invariantResponse(note, 'Not found', { status: 404 })
 
-	// Check if the user has access to this organization
-	await userHasOrgAccess(request, note.organizationId)
+	// Check if user has permission to read notes in this organization
+	// This will automatically verify organization access and specific permissions
+	await requireUserWithOrganizationPermission(
+		request, 
+		note.organizationId, 
+		ORG_PERMISSIONS.READ_NOTE_OWN // Users need at least read access to own notes
+	)
 
-	// Check if user has access to this specific note
+	// Enhanced permission-based access check for private notes
 	if (!note.isPublic) {
-		const hasAccess =
-			note.createdById === userId ||
-			note.noteAccess.some((access) => access.user.id === userId)
+		try {
+			// Try to get READ_NOTE_ORG permission (can read all org notes)
+			await requireUserWithOrganizationPermission(
+				request,
+				note.organizationId,
+				ORG_PERMISSIONS.READ_NOTE_ANY
+			)
+			// If we reach here, user can read all organization notes
+		} catch {
+			// User doesn't have org-wide read access, check for personal access
+			const hasPersonalAccess =
+				note.createdById === userId ||
+				note.noteAccess.some((access) => access.user.id === userId)
 
-		if (!hasAccess) {
-			throw new Response('Not authorized', { status: 403 })
+			if (!hasPersonalAccess) {
+				throw new Response('Not authorized - insufficient note permissions', { status: 403 })
+			}
 		}
 	}
 
@@ -209,6 +231,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		},
 	})
 
+	// Get user permissions for client-side permission checks
+	const userPermissions = await getUserOrganizationPermissionsForClient(userId, note.organizationId)
+
 	return {
 		note,
 		timeAgo,
@@ -234,6 +259,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			providerType: int.providerType,
 			isActive: int.isActive,
 		})),
+		userPermissions,
 	}
 }
 
@@ -353,24 +379,34 @@ export async function action({ request }: ActionFunctionArgs) {
 		})
 		invariantResponse(note, 'Not found', { status: 404 })
 
-		// Check if user has access to this organization
-		await userHasOrgAccess(request, note.organizationId)
+		// Use role-based permissions for note deletion
+		// First check if user can delete any organization notes (admin-level)
+		let canDelete = false
+		try {
+			await requireUserWithOrganizationPermission(
+				request,
+				note.organizationId,
+				ORG_PERMISSIONS.DELETE_NOTE_ANY
+			)
+			canDelete = true
+		} catch {
+			// If not admin-level delete, check if they can delete their own note
+			if (note.createdById === userId) {
+				try {
+					await requireUserWithOrganizationPermission(
+						request,
+						note.organizationId,
+						ORG_PERMISSIONS.DELETE_NOTE_OWN
+					)
+					canDelete = true
+				} catch {
+					// User doesn't have delete permissions at all
+				}
+			}
+		}
 
-		// Only the note creator or organization admin can delete
-		// Check if user is creator or admin
-		const userOrg = await prisma.userOrganization.findFirst({
-			where: {
-				userId,
-				organizationId: note.organizationId,
-				OR: [
-					{ organizationRole: { name: 'admin' } },
-					{ userId: note.createdById }
-				],
-			},
-		})
-
-		if (!userOrg) {
-			throw new Response('Not authorized', { status: 403 })
+		if (!canDelete) {
+			throw new Response('Not authorized - insufficient delete permissions', { status: 403 })
 		}
 
 		// Log deletion activity before deleting
@@ -972,17 +1008,31 @@ export async function action({ request }: ActionFunctionArgs) {
 		})
 		invariantResponse(note, 'Note not found', { status: 404 })
 
-		// Check if user has access to this organization
-		await userHasOrgAccess(request, note.organizationId)
+		// Check if user can create comments using role-based permissions
+		await requireUserWithOrganizationPermission(
+			request,
+			note.organizationId,
+			ORG_PERMISSIONS.CREATE_NOTE_OWN // Users need create permission to add comments
+		)
 
-		// Check if user has access to this specific note
+		// For private notes, verify specific note access with enhanced permissions
 		if (!note.isPublic) {
-			const hasAccess =
-				note.createdById === userId ||
-				note.noteAccess.some((access) => access.userId === userId)
+			try {
+				// Check if user can read all org notes (admin/member level)
+				await requireUserWithOrganizationPermission(
+					request,
+					note.organizationId,
+					ORG_PERMISSIONS.READ_NOTE_ANY
+				)
+			} catch {
+				// Check personal access to this specific note
+				const hasPersonalAccess =
+					note.createdById === userId ||
+					note.noteAccess.some((access) => access.userId === userId)
 
-			if (!hasAccess) {
-				throw new Response('Not authorized', { status: 403 })
+				if (!hasPersonalAccess) {
+					throw new Response('Not authorized - cannot comment on this note', { status: 403 })
+				}
 			}
 		}
 
@@ -1165,17 +1215,31 @@ export async function action({ request }: ActionFunctionArgs) {
 		})
 		invariantResponse(note, 'Note not found', { status: 404 })
 
-		// Check if user has access to this organization
-		await userHasOrgAccess(request, note.organizationId)
+		// Check role-based permissions for favoriting notes
+		await requireUserWithOrganizationPermission(
+			request,
+			note.organizationId,
+			ORG_PERMISSIONS.READ_NOTE_OWN // Need read permission to favorite
+		)
 
-		// Check if user has access to this specific note
+		// For private notes, verify specific note access with role-based permissions
 		if (!note.isPublic) {
-			const hasAccess =
-				note.createdById === userId ||
-				note.noteAccess.some((access) => access.userId === userId)
+			try {
+				// Check if user can read all org notes (admin/member level)
+				await requireUserWithOrganizationPermission(
+					request,
+					note.organizationId,
+					ORG_PERMISSIONS.READ_NOTE_ANY
+				)
+			} catch {
+				// Check personal access to this specific note
+				const hasPersonalAccess =
+					note.createdById === userId ||
+					note.noteAccess.some((access) => access.userId === userId)
 
-			if (!hasAccess) {
-				throw new Response('Not authorized', { status: 403 })
+				if (!hasPersonalAccess) {
+					throw new Response('Not authorized - cannot favorite this note', { status: 403 })
+				}
 			}
 		}
 
@@ -1313,6 +1377,22 @@ type NoteLoaderData = {
 		providerType: string
 		isActive: boolean
 	}>
+	userPermissions: {
+		userId: string
+		organizationId: string
+		organizationRole: {
+			id: string
+			name: string
+			level: number
+			permissions: Array<{
+				id: string
+				action: string
+				entity: string
+				access: string
+				description: string
+			}>
+		}
+	} | null
 }
 
 export default function NoteRoute() {
@@ -1326,6 +1406,7 @@ export default function NoteRoute() {
 		activityLogs,
 		connections,
 		availableIntegrations,
+		userPermissions,
 	} = useLoaderData() as NoteLoaderData
 
 	// Add ref for auto-focusing
@@ -1521,19 +1602,29 @@ export default function NoteRoute() {
 								connections={connections}
 								availableIntegrations={availableIntegrations}
 							/>
-							<Button
-								asChild
-								variant="outline"
-								size="sm"
-								className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+							<CanEditNote 
+								noteOwnerId={note.createdById} 
+								currentUserId={currentUserId}
 							>
-								<Link to="edit">
-									<Icon name="pencil" className="h-4 w-4">
-										<span className="max-md:hidden">Edit</span>
-									</Icon>
-								</Link>
-							</Button>
-							<DeleteNote id={note.id} />
+								<Button
+									asChild
+									variant="outline"
+									size="sm"
+									className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+								>
+									<Link to="edit">
+										<Icon name="pencil" className="h-4 w-4">
+											<span className="max-md:hidden">Edit</span>
+										</Icon>
+									</Link>
+								</Button>
+							</CanEditNote>
+							<CanDeleteNote 
+								noteOwnerId={note.createdById} 
+								currentUserId={currentUserId}
+							>
+								<DeleteNote id={note.id} />
+							</CanDeleteNote>
 						</div>
 					</div>
 				</div>

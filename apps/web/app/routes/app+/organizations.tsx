@@ -59,6 +59,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 							},
 						},
 					},
+					organizationRole: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
 					inviter: {
 						select: {
 							name: true,
@@ -85,7 +91,10 @@ export async function action({ request }: ActionFunctionArgs) {
 		try {
 			const invitation = await prisma.organizationInvitation.findUnique({
 				where: { id: invitationId },
-				include: { organization: true },
+				include: { 
+					organization: true,
+					organizationRole: true,
+				},
 			})
 
 			if (!invitation) {
@@ -103,12 +112,12 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			if (!existingMember) {
-				// Add user to organization
+				// Add user to organization with the correct role
 				await prisma.userOrganization.create({
 					data: {
 						userId,
 						organizationId: invitation.organizationId,
-						role: invitation.role,
+						organizationRoleId: invitation.organizationRoleId,
 						active: true,
 					},
 				})
@@ -238,7 +247,7 @@ export default function OrganizationsPage() {
 											</div>
 											<div className="text-muted-foreground flex items-center gap-2 text-sm">
 												<Badge variant="secondary" className="text-xs">
-													{invitation.role}
+													{invitation.organizationRole.name}
 												</Badge>
 												{invitation.inviter && (
 													<span>

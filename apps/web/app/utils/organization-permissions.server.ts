@@ -10,8 +10,8 @@ export type OrganizationPermissionString = `${string}:${string}:${string}`
 export function parseOrganizationPermissionString(permissionString: OrganizationPermissionString) {
 	const [action, entity, access] = permissionString.split(':')
 	return {
-		action: action.trim(),
-		entity: entity.trim(),
+		action: action?.trim() || '',
+		entity: entity?.trim() || '',
 		access: access ? access.split(',').map(a => a.trim()) : undefined,
 	}
 }
@@ -151,3 +151,69 @@ export const ORG_PERMISSIONS = {
 	// Analytics permissions
 	READ_ANALYTICS_ANY: 'read:analytics:any' as const,
 } as const
+
+/**
+ * Get user's organization permissions with role details for client-side use
+ * Returns null if user doesn't have access to the organization
+ */
+export async function getUserOrganizationPermissionsForClient(
+	userId: string,
+	organizationId: string,
+): Promise<{
+	userId: string
+	organizationId: string
+	organizationRole: {
+		id: string
+		name: string
+		level: number
+		permissions: Array<{
+			id: string
+			action: string
+			entity: string
+			access: string
+			description: string
+		}>
+	}
+} | null> {
+	const userOrg = await prisma.userOrganization.findUnique({
+		where: {
+			userId_organizationId: {
+				userId,
+				organizationId,
+			},
+		},
+		include: {
+			organizationRole: {
+				include: {
+					permissions: {
+						where: {
+							context: 'organization',
+						},
+						select: {
+							id: true,
+							action: true,
+							entity: true,
+							access: true,
+							description: true,
+						},
+					},
+				},
+			},
+		},
+	})
+
+	if (!userOrg || !userOrg.active) {
+		return null
+	}
+
+	return {
+		userId,
+		organizationId,
+		organizationRole: {
+			id: userOrg.organizationRole.id,
+			name: userOrg.organizationRole.name,
+			level: userOrg.organizationRole.level,
+			permissions: userOrg.organizationRole.permissions,
+		},
+	}
+}
