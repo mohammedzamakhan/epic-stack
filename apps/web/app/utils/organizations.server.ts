@@ -28,7 +28,10 @@ export type UserOrganizationWithRole = {
 	role?: string
 }
 
-export async function getUserOrganizations(userId: User['id'], includePermissions: boolean = false) {
+export async function getUserOrganizations(
+	userId: User['id'],
+	includePermissions: boolean = false,
+) {
 	const userOrganizations = await prisma.userOrganization.findMany({
 		where: { userId, active: true },
 		select: {
@@ -37,14 +40,16 @@ export async function getUserOrganizations(userId: User['id'], includePermission
 					id: true,
 					name: true,
 					level: true,
-					permissions: includePermissions ? {
-						where: { context: 'organization' },
-						select: {
-							action: true,
-							entity: true,
-							access: true,
-						},
-					} : false,
+					permissions: includePermissions
+						? {
+								where: { context: 'organization' },
+								select: {
+									action: true,
+									entity: true,
+									access: true,
+								},
+							}
+						: false,
 				},
 			},
 			isDefault: true,
@@ -338,19 +343,23 @@ export async function requireUserWithOrganizationRole(
 	if (!userId) {
 		throw data(
 			{ error: 'Unauthorized', message: 'Authentication required' },
-			{ status: 401 }
+			{ status: 401 },
 		)
 	}
 
-	const hasRole = await userHasOrganizationRole(userId, organizationId, requiredRole)
+	const hasRole = await userHasOrganizationRole(
+		userId,
+		organizationId,
+		requiredRole,
+	)
 	if (!hasRole) {
 		throw data(
 			{
 				error: 'Unauthorized',
 				requiredRole,
-				message: `Insufficient permissions: required ${requiredRole} role in organization`
+				message: `Insufficient permissions: required ${requiredRole} role in organization`,
 			},
-			{ status: 403 }
+			{ status: 403 },
 		)
 	}
 

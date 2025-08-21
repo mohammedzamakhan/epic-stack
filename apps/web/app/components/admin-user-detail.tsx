@@ -494,7 +494,9 @@ export function UserDetailView({
 															'No description'}
 													</p>
 													<div className="text-muted-foreground flex items-center gap-4 text-xs">
-														<span>Role: {membership.organizationRole.name}</span>
+														<span>
+															Role: {membership.organizationRole.name}
+														</span>
 														{membership.department && (
 															<span>Department: {membership.department}</span>
 														)}

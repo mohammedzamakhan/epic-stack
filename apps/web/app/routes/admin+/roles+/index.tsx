@@ -31,9 +31,14 @@ import {
 	Textarea,
 } from '@repo/ui'
 import { useState } from 'react'
-import { Form, Link, redirect, useActionData, useNavigation } from 'react-router'
+import {
+	Form,
+	Link,
+	redirect,
+	useActionData,
+	useNavigation,
+} from 'react-router'
 import { z } from 'zod'
-
 
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -62,12 +67,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 				where: {
 					context: 'organization',
 				},
-					},
-		_count: {
-			select: {
-				users: true,
 			},
-		},
+			_count: {
+				select: {
+					users: true,
+				},
+			},
 		},
 		orderBy: {
 			level: 'desc',
@@ -119,18 +124,20 @@ export async function action({ request }: Route.ActionArgs) {
 			if (type === 'organization') {
 				const existingRole = await prisma.organizationRole.findUnique({
 					where: { name },
-					select: { id: true, name: true }
+					select: { id: true, name: true },
 				})
-				
+
 				if (existingRole) {
-					return { 
-						result: submission.reply({ 
-							formErrors: [`An organization role with the name "${name}" already exists.`] 
-						}), 
-						success: false 
+					return {
+						result: submission.reply({
+							formErrors: [
+								`An organization role with the name "${name}" already exists.`,
+							],
+						}),
+						success: false,
 					}
 				}
-				
+
 				const role = await prisma.organizationRole.create({
 					data: {
 						name,
@@ -142,18 +149,20 @@ export async function action({ request }: Route.ActionArgs) {
 			} else {
 				const existingRole = await prisma.role.findUnique({
 					where: { name },
-					select: { id: true, name: true }
+					select: { id: true, name: true },
 				})
-				
+
 				if (existingRole) {
-					return { 
-						result: submission.reply({ 
-							formErrors: [`A system role with the name "${name}" already exists.`] 
-						}), 
-						success: false 
+					return {
+						result: submission.reply({
+							formErrors: [
+								`A system role with the name "${name}" already exists.`,
+							],
+						}),
+						success: false,
 					}
 				}
-				
+
 				const role = await prisma.role.create({
 					data: {
 						name,
@@ -164,22 +173,22 @@ export async function action({ request }: Route.ActionArgs) {
 			}
 		} catch (error: any) {
 			console.error('Error creating role:', error)
-			
+
 			// Handle specific Prisma unique constraint errors
 			if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
-				return { 
-					result: submission.reply({ 
-						formErrors: [`A role with the name "${name}" already exists.`] 
-					}), 
-					success: false 
+				return {
+					result: submission.reply({
+						formErrors: [`A role with the name "${name}" already exists.`],
+					}),
+					success: false,
 				}
 			}
-			
-			return { 
-				result: submission.reply({ 
-					formErrors: ['Failed to create role. Please try again.'] 
-				}), 
-				success: false 
+
+			return {
+				result: submission.reply({
+					formErrors: ['Failed to create role. Please try again.'],
+				}),
+				success: false,
 			}
 		}
 	}
@@ -191,7 +200,9 @@ function CreateRoleDialog() {
 	const [open, setOpen] = useState(false)
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
-	const isSubmitting = navigation.formAction === '/admin/roles' && navigation.state === 'submitting'
+	const isSubmitting =
+		navigation.formAction === '/admin/roles' &&
+		navigation.state === 'submitting'
 
 	// Close dialog on successful submission
 	if (actionData?.success && open) {
@@ -200,11 +211,9 @@ function CreateRoleDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-					<DialogTrigger asChild>
-			<Button>
-				+ New Role
-			</Button>
-		</DialogTrigger>
+			<DialogTrigger asChild>
+				<Button>+ New Role</Button>
+			</DialogTrigger>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Create New Role</DialogTitle>
@@ -218,7 +227,7 @@ function CreateRoleDialog() {
 
 					{/* Show form errors */}
 					{actionData?.result?.error?.formErrors && (
-						<div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+						<div className="text-destructive bg-destructive/10 rounded-md p-3 text-sm">
 							{actionData.result.error.formErrors.map((error, index) => (
 								<div key={index}>{error}</div>
 							))}
@@ -237,8 +246,9 @@ function CreateRoleDialog() {
 								<SelectItem value="system">System Role</SelectItem>
 							</SelectContent>
 						</Select>
-						<p className="text-xs text-muted-foreground">
-							Organization roles apply within specific organizations, while system roles are global.
+						<p className="text-muted-foreground text-xs">
+							Organization roles apply within specific organizations, while
+							system roles are global.
 						</p>
 					</div>
 
@@ -252,7 +262,7 @@ function CreateRoleDialog() {
 							required
 							disabled={isSubmitting}
 						/>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							Use lowercase letters, numbers, and hyphens only
 						</p>
 					</div>
@@ -282,7 +292,7 @@ function CreateRoleDialog() {
 							defaultValue="1"
 							disabled={isSubmitting}
 						/>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							Higher level roles can manage lower level roles
 						</p>
 					</div>
@@ -370,7 +380,10 @@ export default function AdminRolesPage() {
 							))}
 							{organizationRoles.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={6} className="text-center text-muted-foreground">
+									<TableCell
+										colSpan={6}
+										className="text-muted-foreground text-center"
+									>
 										No organization roles found
 									</TableCell>
 								</TableRow>
@@ -424,7 +437,10 @@ export default function AdminRolesPage() {
 							))}
 							{systemRoles.length === 0 && (
 								<TableRow>
-									<TableCell colSpan={5} className="text-center text-muted-foreground">
+									<TableCell
+										colSpan={5}
+										className="text-muted-foreground text-center"
+									>
 										No system roles found
 									</TableCell>
 								</TableRow>

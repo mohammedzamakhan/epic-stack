@@ -40,7 +40,12 @@ export const handle: SEOHandle = {
 }
 
 const UpdateSystemRoleSchema = z.object({
-	intent: z.enum(['update-basic', 'add-permission', 'remove-permission', 'delete-role']),
+	intent: z.enum([
+		'update-basic',
+		'add-permission',
+		'remove-permission',
+		'delete-role',
+	]),
 	name: z.string().min(1).optional(),
 	description: z.string().optional(),
 	permissionId: z.string().optional(),
@@ -103,7 +108,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 			case 'add-permission': {
 				if (!permissionId) {
-					return { result: submission.reply({ fieldErrors: { permissionId: ['Permission is required'] } }), success: false }
+					return {
+						result: submission.reply({
+							fieldErrors: { permissionId: ['Permission is required'] },
+						}),
+						success: false,
+					}
 				}
 
 				await prisma.role.update({
@@ -119,7 +129,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 			case 'remove-permission': {
 				if (!permissionId) {
-					return { result: submission.reply({ fieldErrors: { permissionId: ['Permission is required'] } }), success: false }
+					return {
+						result: submission.reply({
+							fieldErrors: { permissionId: ['Permission is required'] },
+						}),
+						success: false,
+					}
 				}
 
 				await prisma.role.update({
@@ -136,9 +151,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 			case 'delete-role': {
 				// Don't allow deletion of core system roles
 				if (['admin', 'user'].includes(params.roleId)) {
-					return { result: submission.reply({ formErrors: ['Cannot delete core system roles'] }), success: false }
+					return {
+						result: submission.reply({
+							formErrors: ['Cannot delete core system roles'],
+						}),
+						success: false,
+					}
 				}
-				
+
 				await prisma.role.delete({
 					where: { id: params.roleId },
 				})
@@ -147,7 +167,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 		}
 	} catch (error) {
 		console.error('Error updating system role:', error)
-		return { result: submission.reply({ formErrors: ['Failed to update role'] }), success: false }
+		return {
+			result: submission.reply({ formErrors: ['Failed to update role'] }),
+			success: false,
+		}
 	}
 
 	return { result: submission.reply(), success: false }
@@ -158,15 +181,18 @@ export default function AdminSystemRoleDetailPage() {
 	const [selectedTab, setSelectedTab] = useState('system')
 
 	// Group permissions by entity for better organization
-	const permissionsByEntity = allPermissions.reduce((acc, permission) => {
-		if (!acc[permission.entity]) {
-			acc[permission.entity] = []
-		}
-		acc[permission.entity].push(permission)
-		return acc
-	}, {} as Record<string, typeof allPermissions>)
+	const permissionsByEntity = allPermissions.reduce(
+		(acc, permission) => {
+			if (!acc[permission.entity]) {
+				acc[permission.entity] = []
+			}
+			acc[permission.entity].push(permission)
+			return acc
+		},
+		{} as Record<string, typeof allPermissions>,
+	)
 
-	const rolePermissionIds = new Set(role.permissions.map(p => p.id))
+	const rolePermissionIds = new Set(role.permissions.map((p) => p.id))
 	const isCoreRole = ['admin', 'user'].includes(role.id)
 
 	return (
@@ -195,15 +221,11 @@ export default function AdminSystemRoleDetailPage() {
 				<div>
 					<div className="flex items-center gap-3">
 						<h1 className="text-3xl font-bold">{role.name}</h1>
-						{isCoreRole && (
-							<Badge variant="default">
-								Core System Role
-							</Badge>
-						)}
+						{isCoreRole && <Badge variant="default">Core System Role</Badge>}
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					<div className="text-right text-sm text-muted-foreground">
+					<div className="text-muted-foreground text-right text-sm">
 						<p>Key</p>
 						<p className="font-mono">{role.name}</p>
 					</div>
@@ -215,7 +237,11 @@ export default function AdminSystemRoleDetailPage() {
 								size="sm"
 								type="submit"
 								onClick={(e) => {
-									if (!confirm('Are you sure you want to delete this system role?')) {
+									if (
+										!confirm(
+											'Are you sure you want to delete this system role?',
+										)
+									) {
 										e.preventDefault()
 									}
 								}}
@@ -235,7 +261,7 @@ export default function AdminSystemRoleDetailPage() {
 				<CardContent>
 					<Form method="post" className="space-y-4">
 						<input type="hidden" name="intent" value="update-basic" />
-						
+
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
 								<Label htmlFor="name">Name</Label>
@@ -278,13 +304,16 @@ export default function AdminSystemRoleDetailPage() {
 					</Form>
 
 					{/* Role Statistics */}
-					<div className="mt-6 pt-4 border-t">
-						<div className="flex items-center justify-between text-sm text-muted-foreground">
-							<span>Created {new Date(role.createdAt).toLocaleDateString('en-US', { 
-								year: 'numeric', 
-								month: 'long', 
-								day: 'numeric' 
-							})}</span>
+					<div className="mt-6 border-t pt-4">
+						<div className="text-muted-foreground flex items-center justify-between text-sm">
+							<span>
+								Created{' '}
+								{new Date(role.createdAt).toLocaleDateString('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric',
+								})}
+							</span>
 							<span>{role._count.users} users</span>
 						</div>
 					</div>
@@ -316,16 +345,18 @@ export default function AdminSystemRoleDetailPage() {
 							</div>
 
 							<div className="space-y-4">
-								{Object.entries(permissionsByEntity).map(([entity, permissions]) => (
-									<SystemPermissionGroup
-										key={entity}
-										entity={entity}
-										permissions={permissions}
-										rolePermissionIds={rolePermissionIds}
-										roleId={role.id}
-										disabled={isCoreRole}
-									/>
-								))}
+								{Object.entries(permissionsByEntity).map(
+									([entity, permissions]) => (
+										<SystemPermissionGroup
+											key={entity}
+											entity={entity}
+											permissions={permissions}
+											rolePermissionIds={rolePermissionIds}
+											roleId={role.id}
+											disabled={isCoreRole}
+										/>
+									),
+								)}
 							</div>
 						</TabsContent>
 					</Tabs>
@@ -343,7 +374,12 @@ function SystemPermissionGroup({
 	disabled = false,
 }: {
 	entity: string
-	permissions: Array<{ id: string; action: string; access: string; description: string }>
+	permissions: Array<{
+		id: string
+		action: string
+		access: string
+		description: string
+	}>
 	rolePermissionIds: Set<string>
 	roleId: string
 	disabled?: boolean
@@ -351,9 +387,9 @@ function SystemPermissionGroup({
 	const [isOpen, setIsOpen] = useState(true)
 
 	return (
-		<div className="border rounded-lg">
+		<div className="rounded-lg border">
 			<Collapsible open={isOpen} onOpenChange={setIsOpen}>
-				<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
+				<CollapsibleTrigger className="hover:bg-muted/50 flex w-full items-center justify-between p-4">
 					<div className="flex items-center gap-2">
 						<span className="font-medium capitalize">{entity}</span>
 						<Badge variant="outline" className="text-xs">
@@ -371,11 +407,15 @@ function SystemPermissionGroup({
 								<Form
 									method="post"
 									key={permission.id}
-									onChange={!disabled ? (e) => {
-										// Auto-submit when checkbox changes
-										const form = e.currentTarget
-										setTimeout(() => form.requestSubmit(), 0)
-									} : undefined}
+									onChange={
+										!disabled
+											? (e) => {
+													// Auto-submit when checkbox changes
+													const form = e.currentTarget
+													setTimeout(() => form.requestSubmit(), 0)
+												}
+											: undefined
+									}
 								>
 									<input
 										type="hidden"
@@ -387,7 +427,7 @@ function SystemPermissionGroup({
 										name="permissionId"
 										value={permission.id}
 									/>
-									
+
 									<div className="flex items-center justify-between">
 										<div className="flex items-center space-x-2">
 											<Checkbox
@@ -397,14 +437,14 @@ function SystemPermissionGroup({
 												disabled={disabled}
 												onChange={() => {}} // Handled by form onChange
 											/>
-											<Label 
-												htmlFor={permission.id} 
+											<Label
+												htmlFor={permission.id}
 												className={`font-medium ${disabled ? 'text-muted-foreground' : ''}`}
 											>
 												{permission.action}
 											</Label>
 										</div>
-										<code className="text-xs bg-muted px-2 py-1 rounded">
+										<code className="bg-muted rounded px-2 py-1 text-xs">
 											{permissionString}
 										</code>
 									</div>

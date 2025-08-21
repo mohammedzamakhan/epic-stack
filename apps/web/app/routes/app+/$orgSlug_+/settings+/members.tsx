@@ -23,7 +23,11 @@ import {
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
 } from '#app/utils/organization-invitation.server'
-import { requireUserWithOrganizationPermission, ORG_PERMISSIONS, getUserOrganizationPermissionsForClient } from '#app/utils/organization-permissions.server'
+import {
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+	getUserOrganizationPermissionsForClient,
+} from '#app/utils/organization-permissions.server'
 import { type OrganizationRoleName } from '#app/utils/organizations.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -54,10 +58,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.READ_MEMBER_ANY
+		ORG_PERMISSIONS.READ_MEMBER_ANY,
 	)
 
-	const [pendingInvitations, members, inviteLink, availableRoles, userPermissions] = await Promise.all([
+	const [
+		pendingInvitations,
+		members,
+		inviteLink,
+		availableRoles,
+		userPermissions,
+	] = await Promise.all([
 		getOrganizationInvitations(organization.id),
 		prisma.userOrganization.findMany({
 			where: {
@@ -112,7 +122,7 @@ async function getAvailableRoles() {
 		select: { name: true },
 		orderBy: { level: 'desc' },
 	})
-	return roles.map(r => r.name) as OrganizationRoleName[]
+	return roles.map((r) => r.name) as OrganizationRoleName[]
 }
 
 const InviteSchema = z.object({
@@ -154,7 +164,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await requireUserWithOrganizationPermission(
 			request,
 			organization.id,
-			ORG_PERMISSIONS.CREATE_MEMBER_ANY
+			ORG_PERMISSIONS.CREATE_MEMBER_ANY,
 		)
 
 		const submission = parseWithZod(formData, { schema: InviteSchema })
@@ -207,7 +217,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await requireUserWithOrganizationPermission(
 			request,
 			organization.id,
-			ORG_PERMISSIONS.DELETE_MEMBER_ANY
+			ORG_PERMISSIONS.DELETE_MEMBER_ANY,
 		)
 
 		const invitationId = formData.get('invitationId') as string
@@ -229,7 +239,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await requireUserWithOrganizationPermission(
 			request,
 			organization.id,
-			ORG_PERMISSIONS.DELETE_MEMBER_ANY
+			ORG_PERMISSIONS.DELETE_MEMBER_ANY,
 		)
 
 		const memberUserId = formData.get('userId') as string
@@ -289,7 +299,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				},
 			},
 		})
-		if (!requester || requester.organizationRole.name !== 'admin' || !requester.active) {
+		if (
+			!requester ||
+			requester.organizationRole.name !== 'admin' ||
+			!requester.active
+		) {
 			return Response.json(
 				{ error: 'Only admins can change member roles' },
 				{ status: 403 },
@@ -338,7 +352,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			where: { name: newRole },
 			select: { id: true },
 		})
-		
+
 		if (!organizationRole) {
 			return Response.json({ error: 'Role not found' }, { status: 400 })
 		}
@@ -416,8 +430,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function MembersSettings() {
-	const { pendingInvitations, members, inviteLink, availableRoles, currentUserId } =
-		useLoaderData<typeof loader>()
+	const {
+		pendingInvitations,
+		members,
+		inviteLink,
+		availableRoles,
+		currentUserId,
+	} = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (

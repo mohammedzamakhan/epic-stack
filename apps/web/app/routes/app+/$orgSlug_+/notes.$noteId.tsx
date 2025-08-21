@@ -31,7 +31,10 @@ import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { CommentsSection } from '#app/components/note/comments-section.tsx'
 import { IntegrationControls } from '#app/components/note/integration-controls'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
-import { CanEditNote, CanDeleteNote } from '#app/components/permissions/permission-guard.tsx'
+import {
+	CanEditNote,
+	CanDeleteNote,
+} from '#app/components/permissions/permission-guard.tsx'
 
 import {
 	logNoteActivity,
@@ -41,10 +44,10 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
-import { 
+import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
-	getUserOrganizationPermissionsForClient 
+	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization-permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { data } from 'react-router'
@@ -98,9 +101,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	// Check if user has permission to read notes in this organization
 	// This will automatically verify organization access and specific permissions
 	await requireUserWithOrganizationPermission(
-		request, 
-		note.organizationId, 
-		ORG_PERMISSIONS.READ_NOTE_OWN // Users need at least read access to own notes
+		request,
+		note.organizationId,
+		ORG_PERMISSIONS.READ_NOTE_OWN, // Users need at least read access to own notes
 	)
 
 	// Enhanced permission-based access check for private notes
@@ -110,7 +113,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			await requireUserWithOrganizationPermission(
 				request,
 				note.organizationId,
-				ORG_PERMISSIONS.READ_NOTE_ANY
+				ORG_PERMISSIONS.READ_NOTE_ANY,
 			)
 			// If we reach here, user can read all organization notes
 		} catch {
@@ -120,7 +123,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				note.noteAccess.some((access) => access.user.id === userId)
 
 			if (!hasPersonalAccess) {
-				throw new Response('Not authorized - insufficient note permissions', { status: 403 })
+				throw new Response('Not authorized - insufficient note permissions', {
+					status: 403,
+				})
 			}
 		}
 	}
@@ -232,7 +237,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	})
 
 	// Get user permissions for client-side permission checks
-	const userPermissions = await getUserOrganizationPermissionsForClient(userId, note.organizationId)
+	const userPermissions = await getUserOrganizationPermissionsForClient(
+		userId,
+		note.organizationId,
+	)
 
 	return {
 		note,
@@ -386,7 +394,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			await requireUserWithOrganizationPermission(
 				request,
 				note.organizationId,
-				ORG_PERMISSIONS.DELETE_NOTE_ANY
+				ORG_PERMISSIONS.DELETE_NOTE_ANY,
 			)
 			canDelete = true
 		} catch {
@@ -396,7 +404,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					await requireUserWithOrganizationPermission(
 						request,
 						note.organizationId,
-						ORG_PERMISSIONS.DELETE_NOTE_OWN
+						ORG_PERMISSIONS.DELETE_NOTE_OWN,
 					)
 					canDelete = true
 				} catch {
@@ -406,7 +414,9 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		if (!canDelete) {
-			throw new Response('Not authorized - insufficient delete permissions', { status: 403 })
+			throw new Response('Not authorized - insufficient delete permissions', {
+				status: 403,
+			})
 		}
 
 		// Log deletion activity before deleting
@@ -1012,7 +1022,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		await requireUserWithOrganizationPermission(
 			request,
 			note.organizationId,
-			ORG_PERMISSIONS.CREATE_NOTE_OWN // Users need create permission to add comments
+			ORG_PERMISSIONS.CREATE_NOTE_OWN, // Users need create permission to add comments
 		)
 
 		// For private notes, verify specific note access with enhanced permissions
@@ -1022,7 +1032,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				await requireUserWithOrganizationPermission(
 					request,
 					note.organizationId,
-					ORG_PERMISSIONS.READ_NOTE_ANY
+					ORG_PERMISSIONS.READ_NOTE_ANY,
 				)
 			} catch {
 				// Check personal access to this specific note
@@ -1031,7 +1041,9 @@ export async function action({ request }: ActionFunctionArgs) {
 					note.noteAccess.some((access) => access.userId === userId)
 
 				if (!hasPersonalAccess) {
-					throw new Response('Not authorized - cannot comment on this note', { status: 403 })
+					throw new Response('Not authorized - cannot comment on this note', {
+						status: 403,
+					})
 				}
 			}
 		}
@@ -1219,7 +1231,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		await requireUserWithOrganizationPermission(
 			request,
 			note.organizationId,
-			ORG_PERMISSIONS.READ_NOTE_OWN // Need read permission to favorite
+			ORG_PERMISSIONS.READ_NOTE_OWN, // Need read permission to favorite
 		)
 
 		// For private notes, verify specific note access with role-based permissions
@@ -1229,7 +1241,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				await requireUserWithOrganizationPermission(
 					request,
 					note.organizationId,
-					ORG_PERMISSIONS.READ_NOTE_ANY
+					ORG_PERMISSIONS.READ_NOTE_ANY,
 				)
 			} catch {
 				// Check personal access to this specific note
@@ -1238,7 +1250,9 @@ export async function action({ request }: ActionFunctionArgs) {
 					note.noteAccess.some((access) => access.userId === userId)
 
 				if (!hasPersonalAccess) {
-					throw new Response('Not authorized - cannot favorite this note', { status: 403 })
+					throw new Response('Not authorized - cannot favorite this note', {
+						status: 403,
+					})
 				}
 			}
 		}
@@ -1602,8 +1616,8 @@ export default function NoteRoute() {
 								connections={connections}
 								availableIntegrations={availableIntegrations}
 							/>
-							<CanEditNote 
-								noteOwnerId={note.createdById} 
+							<CanEditNote
+								noteOwnerId={note.createdById}
 								currentUserId={currentUserId}
 							>
 								<Button
@@ -1619,8 +1633,8 @@ export default function NoteRoute() {
 									</Link>
 								</Button>
 							</CanEditNote>
-							<CanDeleteNote 
-								noteOwnerId={note.createdById} 
+							<CanDeleteNote
+								noteOwnerId={note.createdById}
 								currentUserId={currentUserId}
 							>
 								<DeleteNote id={note.id} />

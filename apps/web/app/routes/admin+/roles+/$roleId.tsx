@@ -53,7 +53,14 @@ export const handle: SEOHandle = {
 }
 
 const UpdateRoleSchema = z.object({
-	intent: z.enum(['update-basic', 'add-permission', 'remove-permission', 'delete-role', 'create-feature', 'create-permission']),
+	intent: z.enum([
+		'update-basic',
+		'add-permission',
+		'remove-permission',
+		'delete-role',
+		'create-feature',
+		'create-permission',
+	]),
 	name: z.string().min(1).optional(),
 	description: z.string().optional(),
 	permissionId: z.string().optional(),
@@ -77,7 +84,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 	// Determine if this is a system role or organization role
 	const isSystemRole = params.roleId.startsWith('sys_')
-	
+
 	if (isSystemRole) {
 		// Load system role
 		const role = await prisma.role.findUnique({
@@ -146,13 +153,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 		return { result: submission.reply(), success: false }
 	}
 
-	const { 
-		intent, 
-		name, 
-		description, 
-		permissionId, 
-		action, 
-		entity, 
+	const {
+		intent,
+		name,
+		description,
+		permissionId,
+		action,
+		entity,
 		access,
 		featureName,
 		featureKey,
@@ -190,7 +197,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 			case 'add-permission': {
 				if (!permissionId) {
-					return { result: submission.reply({ fieldErrors: { permissionId: ['Permission is required'] } }), success: false }
+					return {
+						result: submission.reply({
+							fieldErrors: { permissionId: ['Permission is required'] },
+						}),
+						success: false,
+					}
 				}
 
 				if (params.roleId.startsWith('sys_')) {
@@ -217,7 +229,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 			case 'remove-permission': {
 				if (!permissionId) {
-					return { result: submission.reply({ fieldErrors: { permissionId: ['Permission is required'] } }), success: false }
+					return {
+						result: submission.reply({
+							fieldErrors: { permissionId: ['Permission is required'] },
+						}),
+						success: false,
+					}
 				}
 
 				if (params.roleId.startsWith('sys_')) {
@@ -258,17 +275,20 @@ export async function action({ request, params }: Route.ActionArgs) {
 			case 'create-feature': {
 				if (!featureName || !featureKey) {
 					const fieldErrors: Record<string, string[]> = {}
-					if (!featureName) fieldErrors.featureName = ['Feature name is required']
+					if (!featureName)
+						fieldErrors.featureName = ['Feature name is required']
 					if (!featureKey) fieldErrors.featureKey = ['Feature key is required']
-					
-					return { 
-						result: submission.reply({ fieldErrors }), 
-						success: false 
+
+					return {
+						result: submission.reply({ fieldErrors }),
+						success: false,
 					}
 				}
 
-				const roleType = params.roleId.startsWith('sys_') ? 'system' : 'organization'
-				
+				const roleType = params.roleId.startsWith('sys_')
+					? 'system'
+					: 'organization'
+
 				// Create basic permissions for the new feature
 				const basicPermissions = [
 					{ action: 'create', access: 'own' },
@@ -279,17 +299,18 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 				// Create permissions for this feature
 				const createdPermissions = await Promise.all(
-					basicPermissions.map(perm => 
+					basicPermissions.map((perm) =>
 						prisma.permission.create({
 							data: {
 								action: perm.action,
 								entity: featureKey!,
 								access: perm.access,
 								context: roleType,
-								description: featureDescription || `${perm.action} ${featureName!}`,
+								description:
+									featureDescription || `${perm.action} ${featureName!}`,
 							},
-						})
-					)
+						}),
+					),
 				)
 
 				return { result: submission.reply(), success: true, createdPermissions }
@@ -297,19 +318,27 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 			case 'create-permission': {
 				if (!permissionAction || !selectedEntity || !permissionAccess) {
-					return { 
-						result: submission.reply({ 
-							fieldErrors: { 
-								permissionAction: !permissionAction ? ['Action is required'] : undefined,
-								selectedEntity: !selectedEntity ? ['Entity is required'] : undefined,
-								permissionAccess: !permissionAccess ? ['Access level is required'] : undefined,
-							} 
-						}), 
-						success: false 
+					return {
+						result: submission.reply({
+							fieldErrors: {
+								permissionAction: !permissionAction
+									? ['Action is required']
+									: undefined,
+								selectedEntity: !selectedEntity
+									? ['Entity is required']
+									: undefined,
+								permissionAccess: !permissionAccess
+									? ['Access level is required']
+									: undefined,
+							},
+						}),
+						success: false,
 					}
 				}
 
-				const roleType = params.roleId.startsWith('sys_') ? 'system' : 'organization'
+				const roleType = params.roleId.startsWith('sys_')
+					? 'system'
+					: 'organization'
 
 				// Check if permission already exists
 				const existingPermission = await prisma.permission.findUnique({
@@ -319,16 +348,16 @@ export async function action({ request, params }: Route.ActionArgs) {
 							entity: selectedEntity!,
 							access: permissionAccess!,
 							context: roleType,
-						}
-					}
+						},
+					},
 				})
 
 				if (existingPermission) {
-					return { 
-						result: submission.reply({ 
-							formErrors: ['This permission already exists'] 
-						}), 
-						success: false 
+					return {
+						result: submission.reply({
+							formErrors: ['This permission already exists'],
+						}),
+						success: false,
 					}
 				}
 
@@ -338,7 +367,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 						entity: selectedEntity!,
 						access: permissionAccess!,
 						context: roleType,
-						description: permissionDescription || `${permissionAction!} ${selectedEntity!}`,
+						description:
+							permissionDescription ||
+							`${permissionAction!} ${selectedEntity!}`,
 					},
 				})
 
@@ -347,7 +378,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 		}
 	} catch (error) {
 		console.error('Error updating role:', error)
-		return { result: submission.reply({ formErrors: ['Failed to update role'] }), success: false }
+		return {
+			result: submission.reply({ formErrors: ['Failed to update role'] }),
+			success: false,
+		}
 	}
 
 	return { result: submission.reply(), success: false }
@@ -359,15 +393,18 @@ export default function AdminRoleDetailPage() {
 	const [selectedTab, setSelectedTab] = useState('feature')
 
 	// Group permissions by entity for better organization
-	const permissionsByEntity = allPermissions.reduce((acc, permission) => {
-		if (!acc[permission.entity]) {
-			acc[permission.entity] = []
-		}
-		acc[permission.entity]!.push(permission)
-		return acc
-	}, {} as Record<string, typeof allPermissions>)
+	const permissionsByEntity = allPermissions.reduce(
+		(acc, permission) => {
+			if (!acc[permission.entity]) {
+				acc[permission.entity] = []
+			}
+			acc[permission.entity]!.push(permission)
+			return acc
+		},
+		{} as Record<string, typeof allPermissions>,
+	)
 
-	const rolePermissionIds = new Set(role.permissions?.map(p => p.id) ?? [])
+	const rolePermissionIds = new Set(role.permissions?.map((p) => p.id) ?? [])
 
 	return (
 		<div className="space-y-6">
@@ -398,7 +435,7 @@ export default function AdminRoleDetailPage() {
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					<div className="text-right text-sm text-muted-foreground">
+					<div className="text-muted-foreground text-right text-sm">
 						<p>Key</p>
 						<p className="font-mono">{role.name}</p>
 					</div>
@@ -428,7 +465,7 @@ export default function AdminRoleDetailPage() {
 				<CardContent>
 					<Form method="post" className="space-y-4">
 						<input type="hidden" name="intent" value="update-basic" />
-						
+
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
 								<Label htmlFor="name">Name</Label>
@@ -467,18 +504,20 @@ export default function AdminRoleDetailPage() {
 					</Form>
 
 					{/* Role Statistics */}
-					<div className="mt-6 pt-4 border-t">
-						<div className="flex items-center justify-between text-sm text-muted-foreground">
-							<span>Created {new Date(role.createdAt).toLocaleDateString('en-US', { 
-								year: 'numeric', 
-								month: 'long', 
-								day: 'numeric' 
-							})}</span>
+					<div className="mt-6 border-t pt-4">
+						<div className="text-muted-foreground flex items-center justify-between text-sm">
 							<span>
-								{roleType === 'organization' 
+								Created{' '}
+								{new Date(role.createdAt).toLocaleDateString('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric',
+								})}
+							</span>
+							<span>
+								{roleType === 'organization'
 									? `${role._count.users} users`
-									: `${role._count.users} users`
-								}
+									: `${role._count.users} users`}
 							</span>
 						</div>
 					</div>
@@ -504,21 +543,23 @@ export default function AdminRoleDetailPage() {
 							</div>
 
 							<div className="space-y-4">
-								{Object.entries(permissionsByEntity).map(([entity, permissions]) => (
-									<PermissionGroup
-										key={entity}
-										entity={entity}
-										permissions={permissions}
-										rolePermissionIds={rolePermissionIds}
-										roleId={role.id}
-										availableEntities={Object.keys(permissionsByEntity)}
-									/>
-								))}
+								{Object.entries(permissionsByEntity).map(
+									([entity, permissions]) => (
+										<PermissionGroup
+											key={entity}
+											entity={entity}
+											permissions={permissions}
+											rolePermissionIds={rolePermissionIds}
+											roleId={role.id}
+											availableEntities={Object.keys(permissionsByEntity)}
+										/>
+									),
+								)}
 							</div>
 						</TabsContent>
 
 						<TabsContent value="system">
-							<div className="text-center py-8 text-muted-foreground">
+							<div className="text-muted-foreground py-8 text-center">
 								<p>System permissions management coming soon</p>
 							</div>
 						</TabsContent>
@@ -537,7 +578,12 @@ function PermissionGroup({
 	availableEntities,
 }: {
 	entity: string
-	permissions: Array<{ id: string; action: string; access: string; description: string }>
+	permissions: Array<{
+		id: string
+		action: string
+		access: string
+		description: string
+	}>
 	rolePermissionIds: Set<string>
 	roleId: string
 	availableEntities: string[]
@@ -545,9 +591,9 @@ function PermissionGroup({
 	const [isOpen, setIsOpen] = useState(true)
 
 	return (
-		<div className="border rounded-lg">
+		<div className="rounded-lg border">
 			<Collapsible open={isOpen} onOpenChange={setIsOpen}>
-				<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
+				<CollapsibleTrigger className="hover:bg-muted/50 flex w-full items-center justify-between p-4">
 					<div className="flex items-center gap-2">
 						<span className="font-medium capitalize">{entity}</span>
 						<Badge variant="secondary" className="text-xs">
@@ -581,7 +627,7 @@ function PermissionGroup({
 										name="permissionId"
 										value={permission.id}
 									/>
-									
+
 									<div className="flex items-center justify-between">
 										<div className="flex items-center space-x-2">
 											<Checkbox
@@ -594,7 +640,7 @@ function PermissionGroup({
 												{permission.action}
 											</Label>
 										</div>
-										<code className="text-xs bg-muted px-2 py-1 rounded">
+										<code className="bg-muted rounded px-2 py-1 text-xs">
 											{permissionString}
 										</code>
 									</div>
@@ -602,7 +648,10 @@ function PermissionGroup({
 							)
 						})}
 
-						<CreatePermissionDialog selectedEntity={entity} availableEntities={availableEntities} />
+						<CreatePermissionDialog
+							selectedEntity={entity}
+							availableEntities={availableEntities}
+						/>
 					</div>
 				</CollapsibleContent>
 			</Collapsible>
@@ -622,10 +671,10 @@ function CreateFeatureDialog() {
 				<DialogHeader>
 					<DialogTitle>New feature</DialogTitle>
 				</DialogHeader>
-				
+
 				<Form method="post" className="space-y-4">
 					<input type="hidden" name="intent" value="create-feature" />
-					
+
 					<div className="space-y-2">
 						<Label htmlFor="featureName">Name</Label>
 						<Input
@@ -635,10 +684,10 @@ function CreateFeatureDialog() {
 							required
 						/>
 					</div>
-					
+
 					<div className="space-y-2">
 						<Label htmlFor="featureKey">Key</Label>
-						<DialogDescription className="text-sm text-muted-foreground">
+						<DialogDescription className="text-muted-foreground text-sm">
 							Use this in your codebase to refer to this feature.
 						</DialogDescription>
 						<Input
@@ -648,11 +697,11 @@ function CreateFeatureDialog() {
 							required
 						/>
 					</div>
-					
+
 					<div className="space-y-2">
 						<Label htmlFor="featureDescription">Description</Label>
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-sm text-muted-foreground">Optional</span>
+						<div className="mb-1 flex items-center gap-2">
+							<span className="text-muted-foreground text-sm">Optional</span>
 						</div>
 						<Textarea
 							id="featureDescription"
@@ -661,7 +710,7 @@ function CreateFeatureDialog() {
 							rows={3}
 						/>
 					</div>
-					
+
 					<Button type="submit" className="w-full">
 						Add feature
 					</Button>
@@ -671,10 +720,10 @@ function CreateFeatureDialog() {
 	)
 }
 
-function CreatePermissionDialog({ 
-	selectedEntity, 
-	availableEntities 
-}: { 
+function CreatePermissionDialog({
+	selectedEntity,
+	availableEntities,
+}: {
 	selectedEntity: string
 	availableEntities: string[]
 }) {
@@ -688,7 +737,7 @@ function CreatePermissionDialog({
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>New permission</DialogTitle>
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+					<div className="text-muted-foreground flex items-center gap-2 text-sm">
 						<span className="inline-flex items-center gap-1">
 							<svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 								<path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
@@ -697,11 +746,11 @@ function CreatePermissionDialog({
 						</span>
 					</div>
 				</DialogHeader>
-				
+
 				<Form method="post" className="space-y-4">
 					<input type="hidden" name="intent" value="create-permission" />
 					<input type="hidden" name="selectedEntity" value={selectedEntity} />
-					
+
 					<div className="space-y-2">
 						<Label htmlFor="permissionName">Name</Label>
 						<Input
@@ -711,7 +760,7 @@ function CreatePermissionDialog({
 							required
 						/>
 					</div>
-					
+
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="permissionAction">Action</Label>
@@ -722,7 +771,7 @@ function CreatePermissionDialog({
 								required
 							/>
 						</div>
-						
+
 						<div className="space-y-2">
 							<Label htmlFor="permissionAccess">Access Level</Label>
 							<Select name="permissionAccess" required>
@@ -730,18 +779,22 @@ function CreatePermissionDialog({
 									<SelectValue placeholder="Select access level" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="own">own - User's own resources</SelectItem>
-									<SelectItem value="org">org - Organization resources</SelectItem>
+									<SelectItem value="own">
+										own - User's own resources
+									</SelectItem>
+									<SelectItem value="org">
+										org - Organization resources
+									</SelectItem>
 									<SelectItem value="any">any - Any resources</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 					</div>
-					
+
 					<div className="space-y-2">
 						<Label htmlFor="permissionDescription">Description</Label>
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-sm text-muted-foreground">Optional</span>
+						<div className="mb-1 flex items-center gap-2">
+							<span className="text-muted-foreground text-sm">Optional</span>
 						</div>
 						<Textarea
 							id="permissionDescription"
@@ -750,7 +803,7 @@ function CreatePermissionDialog({
 							rows={3}
 						/>
 					</div>
-					
+
 					<Button type="submit" className="w-full">
 						Add permission
 					</Button>

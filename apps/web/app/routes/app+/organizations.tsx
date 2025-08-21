@@ -91,7 +91,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		try {
 			const invitation = await prisma.organizationInvitation.findUnique({
 				where: { id: invitationId },
-				include: { 
+				include: {
 					organization: true,
 					organizationRole: true,
 				},

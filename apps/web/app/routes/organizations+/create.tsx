@@ -33,7 +33,10 @@ import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
 } from '#app/utils/organization-invitation.server'
-import { createOrganization, type OrganizationRoleName } from '#app/utils/organizations.server'
+import {
+	createOrganization,
+	type OrganizationRoleName,
+} from '#app/utils/organizations.server'
 import { uploadOrganizationImage } from '#app/utils/storage.server'
 import {
 	Button,
@@ -800,13 +803,13 @@ function CreateInviteFieldset({
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								{DEFAULT_AVAILABLE_ROLES.map(role => (
+								{DEFAULT_AVAILABLE_ROLES.map((role) => (
 									<SelectItem key={role} value={role}>
 										<div className="flex flex-col">
 											<span className="font-medium">
 												{role.charAt(0).toUpperCase() + role.slice(1)}
 											</span>
-											<span className="text-sm text-muted-foreground">
+											<span className="text-muted-foreground text-sm">
 												{ROLE_DESCRIPTIONS[role] || `${role} role`}
 											</span>
 										</div>

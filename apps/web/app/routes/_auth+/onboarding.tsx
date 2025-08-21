@@ -225,7 +225,7 @@ export async function action({ request }: Route.ActionArgs) {
 				prisma.organizationRole.findUnique({
 					where: { name: 'member' },
 					select: { id: true },
-				})
+				}),
 			])
 
 			if (organizationsWithMatchingDomain.length > 0 && memberRole) {

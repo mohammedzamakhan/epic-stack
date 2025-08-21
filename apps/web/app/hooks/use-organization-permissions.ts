@@ -30,16 +30,22 @@ export interface UserOrganizationPermissions {
  */
 export function useOrganizationPermissions(): UserOrganizationPermissions | null {
 	// Try to get permissions from various potential loader data locations
-	const orgLayoutData = useRouteLoaderData('routes/app+/$orgSlug_+/_layout') as any
+	const orgLayoutData = useRouteLoaderData(
+		'routes/app+/$orgSlug_+/_layout',
+	) as any
 	const appLayoutData = useRouteLoaderData('routes/app+/_layout') as any
 	const currentRouteData = useRouteLoaderData('root') as any
-	
+
 	// Also check current route data (for pages like notes that provide their own permissions)
-	const noteRouteData = useRouteLoaderData('routes/app+/$orgSlug_+/notes.$noteId') as any
-	const membersRouteData = useRouteLoaderData('routes/app+/$orgSlug_+/settings+/members') as any
+	const noteRouteData = useRouteLoaderData(
+		'routes/app+/$orgSlug_+/notes.$noteId',
+	) as any
+	const membersRouteData = useRouteLoaderData(
+		'routes/app+/$orgSlug_+/settings+/members',
+	) as any
 
 	// Look for permissions in the most likely places
-	const permissions = 
+	const permissions =
 		orgLayoutData?.userPermissions ||
 		appLayoutData?.userPermissions ||
 		noteRouteData?.userPermissions ||
@@ -60,11 +66,9 @@ export function useHasPermission() {
 		if (!permissions) return false
 
 		const [action, entity, access] = permission.split(':')
-		
-		return permissions.organizationRole.permissions.some(p => 
-			p.action === action && 
-			p.entity === entity && 
-			p.access === access
+
+		return permissions.organizationRole.permissions.some(
+			(p) => p.action === action && p.entity === entity && p.access === access,
 		)
 	}
 }
@@ -76,7 +80,7 @@ export function useHasAllPermissions() {
 	const hasPermission = useHasPermission()
 
 	return (permissions: PermissionString[]): boolean => {
-		return permissions.every(permission => hasPermission(permission))
+		return permissions.every((permission) => hasPermission(permission))
 	}
 }
 
@@ -87,7 +91,7 @@ export function useHasAnyPermission() {
 	const hasPermission = useHasPermission()
 
 	return (permissions: PermissionString[]): boolean => {
-		return permissions.some(permission => hasPermission(permission))
+		return permissions.some((permission) => hasPermission(permission))
 	}
 }
 
@@ -140,13 +144,15 @@ export function useSettingsPermissions() {
 export function useOrganizationRole() {
 	const permissions = useOrganizationPermissions()
 
-	return permissions ? {
-		id: permissions.organizationRole.id,
-		name: permissions.organizationRole.name,
-		level: permissions.organizationRole.level,
-		isAdmin: permissions.organizationRole.name === 'admin',
-		isMember: permissions.organizationRole.name === 'member',
-		isViewer: permissions.organizationRole.name === 'viewer',
-		isGuest: permissions.organizationRole.name === 'guest',
-	} : null
+	return permissions
+		? {
+				id: permissions.organizationRole.id,
+				name: permissions.organizationRole.name,
+				level: permissions.organizationRole.level,
+				isAdmin: permissions.organizationRole.name === 'admin',
+				isMember: permissions.organizationRole.name === 'member',
+				isViewer: permissions.organizationRole.name === 'viewer',
+				isGuest: permissions.organizationRole.name === 'guest',
+			}
+		: null
 }

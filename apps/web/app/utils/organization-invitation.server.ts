@@ -6,16 +6,18 @@ import { markStepCompleted } from '#app/utils/onboarding'
 import { type OrganizationRoleName } from './organizations.server'
 
 // Helper function to get organization role ID by name
-async function getOrganizationRoleId(roleName: OrganizationRoleName): Promise<string> {
+async function getOrganizationRoleId(
+	roleName: OrganizationRoleName,
+): Promise<string> {
 	const role = await prisma.organizationRole.findUnique({
 		where: { name: roleName },
 		select: { id: true },
 	})
-	
+
 	if (!role) {
 		throw new Error(`Organization role '${roleName}' not found`)
 	}
-	
+
 	return role.id
 }
 

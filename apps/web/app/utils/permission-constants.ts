@@ -13,20 +13,20 @@ export const PERMISSIONS = {
 	UPDATE_NOTE_ANY: 'update:note:org',
 	DELETE_NOTE_OWN: 'delete:note:own',
 	DELETE_NOTE_ANY: 'delete:note:org',
-	
+
 	// Member permissions
 	READ_MEMBER_ANY: 'read:member:any',
 	CREATE_MEMBER_ANY: 'create:member:any',
 	UPDATE_MEMBER_ANY: 'update:member:any',
 	DELETE_MEMBER_ANY: 'delete:member:any',
-	
+
 	// Settings permissions
 	READ_SETTINGS_ANY: 'read:settings:any',
 	UPDATE_SETTINGS_ANY: 'update:settings:any',
-	
+
 	// Analytics permissions
 	READ_ANALYTICS_ANY: 'read:analytics:any',
 } as const
 
 export type PermissionKey = keyof typeof PERMISSIONS
-export type PermissionValue = typeof PERMISSIONS[PermissionKey]
+export type PermissionValue = (typeof PERMISSIONS)[PermissionKey]

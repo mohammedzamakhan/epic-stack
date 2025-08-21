@@ -53,9 +53,13 @@ export function useUserHasOrganizationRole(
 	if (!currentOrganization) return false
 
 	// Use the level from the organizationRole relationship if available
-	const userRoleLevel = currentOrganization.organizationRole?.level || 
-		ORGANIZATION_ROLE_LEVELS[currentOrganization.organizationRole?.name as OrganizationRoleName] || 0
-		
+	const userRoleLevel =
+		currentOrganization.organizationRole?.level ||
+		ORGANIZATION_ROLE_LEVELS[
+			currentOrganization.organizationRole?.name as OrganizationRoleName
+		] ||
+		0
+
 	const requiredRoleLevel = ORGANIZATION_ROLE_LEVELS[requiredRole]
 
 	return userRoleLevel >= requiredRoleLevel
@@ -67,10 +71,10 @@ export function useUserHasMinimumOrganizationRole(
 	orgId?: string,
 ): boolean {
 	const { organizations, currentOrganization } = useUserOrganizations()
-	const targetOrg = orgId 
-		? organizations.find(org => org.organization.id === orgId)
+	const targetOrg = orgId
+		? organizations.find((org) => org.organization.id === orgId)
 		: currentOrganization
-		
+
 	if (!targetOrg) return false
 
 	const userRoleLevel = targetOrg.organizationRole?.level || 0
@@ -83,8 +87,8 @@ export function getUserOrganizationRole(
 	organizations: UserOrganizationWithRole[],
 	orgId: string,
 ): OrganizationRoleName | null {
-	const org = organizations.find(o => o.organization.id === orgId)
-	return org?.organizationRole?.name as OrganizationRoleName || null
+	const org = organizations.find((o) => o.organization.id === orgId)
+	return (org?.organizationRole?.name as OrganizationRoleName) || null
 }
 
 export function userHasExactOrganizationRole(

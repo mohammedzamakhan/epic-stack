@@ -611,7 +611,9 @@ export function AdminOrganizationDetail({
 										<TableCell className="font-medium">
 											{invitation.email}
 										</TableCell>
-										<TableCell>{getRoleBadge(invitation.organizationRole.name)}</TableCell>
+										<TableCell>
+											{getRoleBadge(invitation.organizationRole.name)}
+										</TableCell>
 										<TableCell>
 											{invitation.inviter?.name ||
 												invitation.inviter?.username ||

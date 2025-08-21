@@ -7,12 +7,14 @@ export type OrganizationPermissionString = `${string}:${string}:${string}`
 /**
  * Parse organization permission string like "create:org_note:own"
  */
-export function parseOrganizationPermissionString(permissionString: OrganizationPermissionString) {
+export function parseOrganizationPermissionString(
+	permissionString: OrganizationPermissionString,
+) {
 	const [action, entity, access] = permissionString.split(':')
 	return {
 		action: action?.trim() || '',
 		entity: entity?.trim() || '',
-		access: access ? access.split(',').map(a => a.trim()) : undefined,
+		access: access ? access.split(',').map((a) => a.trim()) : undefined,
 	}
 }
 
@@ -24,8 +26,9 @@ export async function userHasOrganizationPermission(
 	organizationId: string,
 	permission: OrganizationPermissionString,
 ): Promise<boolean> {
-	const { action, entity, access } = parseOrganizationPermissionString(permission)
-	
+	const { action, entity, access } =
+		parseOrganizationPermissionString(permission)
+
 	const userOrg = await prisma.userOrganization.findFirst({
 		where: {
 			userId,
@@ -65,11 +68,15 @@ export async function requireUserWithOrganizationPermission(
 		throw new Response('Authentication required', { status: 401 })
 	}
 
-	const hasPermission = await userHasOrganizationPermission(userId, organizationId, permission)
+	const hasPermission = await userHasOrganizationPermission(
+		userId,
+		organizationId,
+		permission,
+	)
 	if (!hasPermission) {
 		throw new Response(
 			`Insufficient permissions: required ${permission} in organization`,
-			{ status: 403 }
+			{ status: 403 },
 		)
 	}
 
@@ -118,12 +125,14 @@ export function userHasOrganizationPermissionClient(
 	userPermissions: { action: string; entity: string; access: string }[],
 	permission: OrganizationPermissionString,
 ): boolean {
-	const { action, entity, access } = parseOrganizationPermissionString(permission)
-	
-	return userPermissions.some(p => 
-		p.action === action && 
-		p.entity === entity && 
-		(!access || access.includes(p.access))
+	const { action, entity, access } =
+		parseOrganizationPermissionString(permission)
+
+	return userPermissions.some(
+		(p) =>
+			p.action === action &&
+			p.entity === entity &&
+			(!access || access.includes(p.access)),
 	)
 }
 
@@ -137,17 +146,17 @@ export const ORG_PERMISSIONS = {
 	UPDATE_NOTE_ANY: 'update:note:org' as const,
 	DELETE_NOTE_OWN: 'delete:note:own' as const,
 	DELETE_NOTE_ANY: 'delete:note:org' as const,
-	
+
 	// Member permissions
 	READ_MEMBER_ANY: 'read:member:any' as const,
 	CREATE_MEMBER_ANY: 'create:member:any' as const,
 	UPDATE_MEMBER_ANY: 'update:member:any' as const,
 	DELETE_MEMBER_ANY: 'delete:member:any' as const,
-	
+
 	// Settings permissions
 	READ_SETTINGS_ANY: 'read:settings:any' as const,
 	UPDATE_SETTINGS_ANY: 'update:settings:any' as const,
-	
+
 	// Analytics permissions
 	READ_ANALYTICS_ANY: 'read:analytics:any' as const,
 } as const

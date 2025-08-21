@@ -45,7 +45,9 @@ function createInviteSchema(availableRoles: OrganizationRoleName[]) {
 			.array(
 				z.object({
 					email: z.string().email('Invalid email address'),
-					role: z.enum(availableRoles as [OrganizationRoleName, ...OrganizationRoleName[]]),
+					role: z.enum(
+						availableRoles as [OrganizationRoleName, ...OrganizationRoleName[]],
+					),
 				}),
 			)
 			.min(1, 'At least one invite is required'),
@@ -83,7 +85,7 @@ export function OrganizationInvitations({
 }) {
 	// Create dynamic schema and roles based on available roles
 	const InviteSchema = createInviteSchema(availableRoles)
-	const roles = availableRoles.map(role => ({
+	const roles = availableRoles.map((role) => ({
 		value: role,
 		label: role.charAt(0).toUpperCase() + role.slice(1),
 		description: ROLE_DESCRIPTIONS[role] || `${role} role`,

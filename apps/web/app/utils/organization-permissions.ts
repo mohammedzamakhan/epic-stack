@@ -6,12 +6,14 @@ export type OrganizationPermissionString = `${string}:${string}:${string}`
 /**
  * Parse organization permission string like "create:org_note:own"
  */
-export function parseOrganizationPermissionString(permissionString: OrganizationPermissionString) {
+export function parseOrganizationPermissionString(
+	permissionString: OrganizationPermissionString,
+) {
 	const [action, entity, access] = permissionString.split(':')
 	return {
 		action: action.trim(),
 		entity: entity.trim(),
-		access: access ? access.split(',').map(a => a.trim()) : undefined,
+		access: access ? access.split(',').map((a) => a.trim()) : undefined,
 	}
 }
 
@@ -23,15 +25,19 @@ export function userHasOrganizationPermission(
 	organizationId: string,
 	permission: OrganizationPermissionString,
 ): boolean {
-	const userOrg = organizations.find(org => org.organization.id === organizationId)
+	const userOrg = organizations.find(
+		(org) => org.organization.id === organizationId,
+	)
 	if (!userOrg?.organizationRole.permissions) return false
 
-	const { action, entity, access } = parseOrganizationPermissionString(permission)
-	
-	return userOrg.organizationRole.permissions.some(p => 
-		p.action === action && 
-		p.entity === entity && 
-		(!access || access.includes(p.access))
+	const { action, entity, access } =
+		parseOrganizationPermissionString(permission)
+
+	return userOrg.organizationRole.permissions.some(
+		(p) =>
+			p.action === action &&
+			p.entity === entity &&
+			(!access || access.includes(p.access)),
 	)
 }
 
@@ -44,9 +50,9 @@ export function useUserHasOrganizationPermission(
 ): boolean {
 	const { organizations, currentOrganization } = useUserOrganizations()
 	const targetOrgId = organizationId || currentOrganization?.organization.id
-	
+
 	if (!targetOrgId) return false
-	
+
 	return userHasOrganizationPermission(organizations, targetOrgId, permission)
 }
 
@@ -67,11 +73,11 @@ export function useUserHasAnyOrganizationPermission(
 ): boolean {
 	const { organizations, currentOrganization } = useUserOrganizations()
 	const targetOrgId = organizationId || currentOrganization?.organization.id
-	
+
 	if (!targetOrgId) return false
-	
-	return permissions.some(permission => 
-		userHasOrganizationPermission(organizations, targetOrgId, permission)
+
+	return permissions.some((permission) =>
+		userHasOrganizationPermission(organizations, targetOrgId, permission),
 	)
 }
 
@@ -84,11 +90,11 @@ export function useUserHasAllOrganizationPermissions(
 ): boolean {
 	const { organizations, currentOrganization } = useUserOrganizations()
 	const targetOrgId = organizationId || currentOrganization?.organization.id
-	
+
 	if (!targetOrgId) return false
-	
-	return permissions.every(permission => 
-		userHasOrganizationPermission(organizations, targetOrgId, permission)
+
+	return permissions.every((permission) =>
+		userHasOrganizationPermission(organizations, targetOrgId, permission),
 	)
 }
 
