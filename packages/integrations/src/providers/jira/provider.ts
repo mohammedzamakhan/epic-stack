@@ -190,23 +190,32 @@ export class JiraProvider extends BaseIntegrationProvider {
 				accessToken: `mock-jira-token-${Date.now()}`,
 				refreshToken: 'mock-jira-refresh-token',
 				expiresAt: new Date(Date.now() + 3600 * 1000), // 1 hour from now
-				scope: 'read:jira-work write:jira-work manage:jira-project read:me offline_access',
+				scope:
+					'read:jira-work write:jira-work manage:jira-project read:me offline_access',
 				metadata: {
 					user: {
 						account_id: '123456789012345678901234',
 						display_name: 'Demo User',
 						avatar_urls: {
-							'24x24': 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-24.png',
-							'32x32': 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-32.png',
-							'48x48': 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-48.png',
+							'24x24':
+								'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-24.png',
+							'32x32':
+								'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-32.png',
+							'48x48':
+								'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-48.png',
 						},
 					},
 					resources: [
 						{
 							id: '12345678-1234-1234-1234-123456789012',
 							name: 'Demo Company',
-							scopes: ['read:jira-work', 'write:jira-work', 'manage:jira-project'],
-							avatarUrl: 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-24.png',
+							scopes: [
+								'read:jira-work',
+								'write:jira-work',
+								'manage:jira-project',
+							],
+							avatarUrl:
+								'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-24.png',
 						},
 					],
 				},
@@ -351,7 +360,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 						key: 'DEMO',
 						projectTypeKey: 'software',
 						leadDisplayName: 'Demo User',
-						description: 'This is a demo project for testing integration features',
+						description:
+							'This is a demo project for testing integration features',
 						demo: true,
 					},
 				},

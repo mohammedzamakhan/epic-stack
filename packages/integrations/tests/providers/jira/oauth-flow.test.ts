@@ -60,8 +60,11 @@ describe('JiraProvider - OAuth Flow', () => {
 			// Ensure environment variable is not set
 			delete process.env.JIRA_CLIENT_ID
 
-			const authUrl = await provider.getAuthUrl('org-123', 'https://example.com/callback')
-			
+			const authUrl = await provider.getAuthUrl(
+				'org-123',
+				'https://example.com/callback',
+			)
+
 			expect(authUrl).toContain('client_id=demo-jira-client-id')
 			expect(authUrl).toContain('https://auth.atlassian.com/authorize')
 		})

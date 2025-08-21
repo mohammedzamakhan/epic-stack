@@ -133,7 +133,9 @@ export class SlackProvider extends BaseIntegrationProvider {
 		try {
 			stateData = this.parseOAuthState(state)
 		} catch (error) {
-			throw new Error(`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`)
+			throw new Error(
+				`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			)
 		}
 
 		// Check if we have real Slack credentials

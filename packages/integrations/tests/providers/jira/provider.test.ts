@@ -397,7 +397,10 @@ describe('JiraProvider', () => {
 		it('should use demo client ID when JIRA_CLIENT_ID is not set', async () => {
 			delete process.env.JIRA_CLIENT_ID
 
-			const authUrl = await provider.getAuthUrl('org-123', 'https://example.com/callback')
+			const authUrl = await provider.getAuthUrl(
+				'org-123',
+				'https://example.com/callback',
+			)
 			expect(authUrl).toContain('client_id=demo-jira-client-id')
 		})
 
@@ -406,7 +409,9 @@ describe('JiraProvider', () => {
 
 			// The refresh token method will still fail with demo credentials due to invalid API response,
 			// but it won't throw the environment variable error anymore
-			await expect(provider.refreshToken('test-refresh-token')).rejects.toThrow()
+			await expect(
+				provider.refreshToken('test-refresh-token'),
+			).rejects.toThrow()
 		})
 
 		it('should handle network errors gracefully', async () => {
