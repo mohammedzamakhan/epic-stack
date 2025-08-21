@@ -66,7 +66,7 @@ export function IntegrationsCard({
 				<h2 className="text-2xl font-semibold tracking-tight">Integrations</h2>
 			</header>
 
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+			<div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{allProviders.map((provider) => (
 					<IntegrationCard
 						key={provider.name}
@@ -78,7 +78,7 @@ export function IntegrationsCard({
 			</div>
 
 			{/* Request Integration Banner */}
-			<div className="relative flex w-full items-baseline gap-2 rounded-md p-2 px-6 text-sm bg-muted">
+			<div className="bg-muted relative flex w-full items-baseline gap-2 rounded-md p-2 px-6 text-sm">
 				<div className="relative w-4 flex-shrink-0">
 					<Icon name="badge-question-mark" className="h-4 w-4" />
 				</div>
@@ -89,7 +89,7 @@ export function IntegrationsCard({
 					<div className="flex items-center justify-start gap-3">
 						<a
 							href="mailto:support@yourcompany.com?subject=Integration%20request"
-							className=" font-medium"
+							className="font-medium"
 						>
 							Request integration
 						</a>
@@ -113,34 +113,34 @@ interface IntegrationCardProps {
 	fetcher: ReturnType<typeof useFetcher>
 }
 
-function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProps) {
+function IntegrationCard({
+	provider,
+	integration,
+	fetcher,
+}: IntegrationCardProps) {
 	const [showSettings, setShowSettings] = useState(false)
 	const isConnected = !!integration
 	const isJira = provider.name === 'jira'
-	
+
 	// Check if we're currently processing this integration
-	const isProcessing = 
-		fetcher.state !== 'idle' && (
-			fetcher.formData?.get('integrationId') === integration?.id ||
-			fetcher.formData?.get('providerName') === provider.name
-		)
+	const isProcessing =
+		fetcher.state !== 'idle' &&
+		(fetcher.formData?.get('integrationId') === integration?.id ||
+			fetcher.formData?.get('providerName') === provider.name)
 
 	return (
-		<Card className="h-full flex flex-col">
-			<CardContent className="p-4 flex flex-col flex-1">
+		<Card className="flex h-full flex-col">
+			<CardContent className="flex flex-1 flex-col p-4">
 				{/* Header with icon, title and domain */}
-				<header className="flex w-full items-center gap-3 mb-3">
-					<div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md after:absolute after:inset-0 after:h-full after:w-full after:rounded-[inherit] after:ring-1 after:ring-inset after:ring-black/8 dark:after:ring-white/8">
-						<Icon
-							name={provider.icon as any}
-							className="h-6 w-6"
-						/>
+				<header className="mb-3 flex w-full items-center gap-3">
+					<div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md after:absolute after:inset-0 after:h-full after:w-full after:rounded-[inherit] after:ring-1 after:ring-black/8 after:ring-inset dark:after:ring-white/8">
+						<Icon name={provider.icon as any} className="h-6 w-6" />
 					</div>
-					<div className="flex flex-col min-w-0 flex-1">
-						<h2 className="text-sm font-medium truncate">
+					<div className="flex min-w-0 flex-1 flex-col">
+						<h2 className="truncate text-sm font-medium">
 							{provider.displayName}
 						</h2>
-						<span className="text-xs text-muted-foreground">
+						<span className="text-muted-foreground text-xs">
 							{provider.name === 'jira' && 'atlassian.com'}
 							{!['jira'].includes(provider.name) && `${provider.name}.com`}
 						</span>
@@ -148,8 +148,8 @@ function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProp
 				</header>
 
 				{/* Description - takes up flexible space */}
-				<div className="flex-1 min-h-[3rem]">
-					<p className="text-sm text-muted-foreground leading-5">
+				<div className="min-h-[3rem] flex-1">
+					<p className="text-muted-foreground text-sm leading-5">
 						{provider.description}
 					</p>
 				</div>
@@ -165,7 +165,11 @@ function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProp
 										name="intent"
 										value={disconnectIntegrationActionIntent}
 									/>
-									<input type="hidden" name="integrationId" value={integration.id} />
+									<input
+										type="hidden"
+										name="integrationId"
+										value={integration.id}
+									/>
 									<StatusButton
 										type="submit"
 										variant="outline"
@@ -183,7 +187,11 @@ function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProp
 										name="intent"
 										value={connectIntegrationActionIntent}
 									/>
-									<input type="hidden" name="providerName" value={provider.name} />
+									<input
+										type="hidden"
+										name="providerName"
+										value={provider.name}
+									/>
 									<StatusButton
 										type="submit"
 										variant="outline"
@@ -199,13 +207,13 @@ function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProp
 					)}
 				</div>
 			</CardContent>
-			
+
 			<CardFooter className="px-4 py-1 pt-2">
 				<a
 					href={`/integrations/${provider.name}`}
 					target="_blank"
 					rel="noreferrer"
-					className="flex w-full items-center justify-between text-xs text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
+					className="flex w-full items-center justify-between text-xs text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
 				>
 					<span className="flex items-center gap-1.5">Read documentation</span>
 					<Icon name="chevron-right" className="h-3.5 w-3.5" />
@@ -221,5 +229,3 @@ function IntegrationCard({ provider, integration, fetcher }: IntegrationCardProp
 		</Card>
 	)
 }
-
-
