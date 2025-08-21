@@ -69,7 +69,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
 	return (
 		<td
 			className={cn(
-				'text-foreground overflow-hidden border-0 px-4 py-4 text-left text-sm',
+				'text-foreground overflow-hidden border-0 px-4 py-2 text-left text-sm',
 				className,
 			)}
 			{...props}

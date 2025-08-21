@@ -40,6 +40,12 @@ export function AdminSidebar({
 			icon: BuildingIcon,
 		},
 		{
+			title: 'Roles',
+			url: '/admin/roles',
+			isActive: location.pathname.startsWith('/admin/roles'),
+			icon: ShieldCheckIcon,
+		},
+		{
 			title: 'IP Addresses',
 			url: '/admin/ip-addresses',
 			isActive: location.pathname.startsWith('/admin/ip-addresses'),
