@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "npm-run-all --parallel dev:proxy \"turbo run dev\"",
+    "dev:proxy": "node dev-proxy.js",
     "dev:web": "turbo run dev --filter @repo/integrations --filter web --filter @repo/ui",
     "dev:trigger": "turbo run dev --filter background-jobs",
     "lint": "turbo run lint",
@@ -28,7 +29,10 @@
   },
   "devDependencies": {
     "@epic-web/config": "^1.20.1",
+    "@types/http-proxy": "^1.17.16",
     "ajv": "^8.17.1",
+    "http-proxy": "^1.18.1",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.5.3",
     "prettier-plugin-sql": "^0.19.0",
     "prettier-plugin-tailwindcss": "^0.6.11",

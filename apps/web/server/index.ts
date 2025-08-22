@@ -368,7 +368,7 @@ app.all(
 	}),
 )
 
-const desiredPort = Number(process.env.PORT || 3001)
+const desiredPort = Number(process.env.PORT || 3002)
 const portToUse = await getPort({
 	port: portNumbers(desiredPort, desiredPort + 100),
 })
