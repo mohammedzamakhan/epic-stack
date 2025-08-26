@@ -13,11 +13,11 @@
     "./eslint-preset": "./eslint-preset.js"
   },
   "dependencies": {
-    "@epic-web/config": "^1.20.1"
+    "@epic-web/config": "^1.21.3"
   },
   "devDependencies": {
-    "eslint": "^9.26.0",
-    "typescript": "^5.8.3"
+    "eslint": "^9.34.0",
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "eslint": "^9.26.0"
