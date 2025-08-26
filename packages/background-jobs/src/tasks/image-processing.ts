@@ -282,7 +282,7 @@ export const imageProcessingTask = task({
 			let jimp: any
 
 			try {
-				jimp = (await import('jimp')).default
+				jimp = await import('jimp')
 				const jimpImage = await jimp.read(imageBuffer)
 				metadata = {
 					width: jimpImage.getWidth(),
@@ -328,7 +328,7 @@ export const imageProcessingTask = task({
 
 			try {
 				if (!jimp) {
-					jimp = (await import('jimp')).default
+					jimp = await import('jimp')
 				}
 
 				const jimpImage = await jimp.read(imageBuffer)

@@ -49,6 +49,6 @@
   "dependencies": {
     "motion": "^12.23.12",
     "react-image-crop": "^11.0.10",
-    "zod": "^4.1.3"
+    "zod": "^3.22.4"
   }
 }
