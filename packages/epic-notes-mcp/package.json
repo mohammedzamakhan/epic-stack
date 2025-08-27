@@ -15,6 +15,7 @@
     "build": "mkdir -p build && esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=build/index.cjs --banner:js='#!/usr/bin/env node'",
     "dev": "mkdir -p build && esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=build/index.cjs --banner:js='#!/usr/bin/env node' --watch",
     "start": "node build/index.cjs",
+    "test": "exit 0",
     "prepublishOnly": "npm run build && chmod +x build/index.cjs"
   },
   "keywords": [
@@ -35,11 +36,11 @@
   },
   "homepage": "https://github.com/your-username/your-repo#readme",
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.4",
-    "esbuild": "^0.25.9",
+    "@modelcontextprotocol/sdk": "^1.17.2",
+    "esbuild": "^0.25.7",
     "typescript": "^5.9.2",
-    "@types/node": "^24.3.0",
-    "zod": "^3.22.4"
+    "@types/node": "^24.2.1",
+    "zod": "^3.25.76"
   },
   "engines": {
     "node": ">=18.0.0"

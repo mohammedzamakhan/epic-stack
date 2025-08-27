@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "node generate-icons.js --watch",
     "build": "node generate-icons.js && tsc",
+    "test": "exit 0",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "icons": "node generate-icons.js",

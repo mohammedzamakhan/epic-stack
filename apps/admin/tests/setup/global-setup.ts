@@ -2,7 +2,6 @@ import path from 'node:path'
 import { execaCommand } from 'execa'
 import fsExtra from 'fs-extra'
 import dotenv from 'dotenv'
-import path from 'node:path'
 dotenv.config({ path: path.resolve(process.cwd(), '../../.env') })
 import { init as initEnv } from '#app/utils/env.server.ts'
 

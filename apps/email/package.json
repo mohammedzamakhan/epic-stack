@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "email dev --port 3002 --dir ../../packages/email/src/templates",
     "export": "email export",
+    "test": "exit 0",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {

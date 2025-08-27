@@ -8,6 +8,7 @@
     "build": "npm run build:chrome",
     "build:chrome": "BROWSER=chrome vite build --mode production",
     "build:firefox": "BROWSER=firefox vite build --mode production",
+    "test": "exit 0",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

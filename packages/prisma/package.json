@@ -11,6 +11,7 @@
     "db:seed": "tsx seed.ts",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "test": "exit 0",
     "setup": "npm run db:migrate:deploy && npm run db:generate"
   },
   "dependencies": {
