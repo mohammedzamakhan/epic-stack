@@ -1,0 +1,34 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+---
+
+<MarketingLayout>
+    <div class="container mx-auto py-16">
+        <h1 class="text-4xl font-bold mb-8">Simple, transparent pricing</h1>
+        <p class="text-xl text-gray-600 mb-12">Choose the plan that's right for you and your team</p>
+        <!-- Add pricing cards and features here -->
+        <div class="grid gap-8 lg:grid-cols-2">
+            <div class="border rounded-lg p-8">
+                <h2 class="text-2xl font-bold mb-4">Base Plan</h2>
+                <p class="text-3xl font-bold mb-6">$7.99<span class="text-lg font-normal">/month</span></p>
+                <ul class="space-y-2 mb-6">
+                    <li>✓ Unlimited Usage</li>
+                    <li>✓ Email Support</li>
+                    <li>✓ Core Features</li>
+                </ul>
+                <button class="w-full bg-blue-600 text-white py-2 px-4 rounded">Get Started</button>
+            </div>
+            <div class="border rounded-lg p-8 bg-blue-50">
+                <h2 class="text-2xl font-bold mb-4">Plus Plan</h2>
+                <p class="text-3xl font-bold mb-6">$49.99<span class="text-lg font-normal">/month</span></p>
+                <ul class="space-y-2 mb-6">
+                    <li>✓ Everything in Base</li>
+                    <li>✓ Early Access to New Features</li>
+                    <li>✓ 24/7 Support</li>
+                    <li>✓ Advanced Analytics</li>
+                </ul>
+                <button class="w-full bg-blue-600 text-white py-2 px-4 rounded">Get Started</button>
+            </div>
+        </div>
+    </div>
+</MarketingLayout>

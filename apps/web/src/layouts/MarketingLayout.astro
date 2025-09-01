@@ -1,0 +1,29 @@
+---
+import '../styles/tailwind.css'
+---
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marketing</title>
+</head>
+<body>
+    <nav class="border-b">
+        <div class="container mx-auto flex justify-between items-center py-4">
+            <a href="/" class="text-xl font-bold">Epic Stack</a>
+            <div class="flex gap-4">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/pricing">Pricing</a>
+                <a href="/support">Support</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/tos">Terms</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <slot />
+    </main>
+</body>
+</html>
