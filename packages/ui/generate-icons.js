@@ -18,7 +18,7 @@ async function generateIcons() {
 			'..',
 			'..',
 			'apps',
-			'web',
+			'app',
 			'app',
 			'components',
 			'ui',
