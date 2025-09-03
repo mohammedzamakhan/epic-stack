@@ -44,8 +44,6 @@ jobs:
   typecheck:
     name: ʦ TypeScript
     runs-on: ubuntu-22.04
-    env:
-      DATABASE_URI: ${{ secrets.DATABASE_URI }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -60,6 +58,9 @@ jobs:
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+
+      - name: 🔑 Inject CMS DATABASE_URI
+        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
 
       - name: 🛠 Setup Database
         run:
@@ -102,14 +103,15 @@ jobs:
     name: 🎭 Playwright
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    env:
-      DATABASE_URI: ${{ secrets.DATABASE_URI }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+
+      - name: 🔑 Inject CMS DATABASE_URI
+        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
