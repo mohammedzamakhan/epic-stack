@@ -44,6 +44,8 @@ jobs:
   typecheck:
     name: ʦ TypeScript
     runs-on: ubuntu-22.04
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -66,8 +68,6 @@ jobs:
 
       - name: 🏗 Build
         run: npm run build
-        env:
-          DATABASE_URI: ${{ secrets.DATABASE_URI }}
 
       - name: 🔎 Type check
         run: npm run typecheck --if-present
@@ -102,6 +102,8 @@ jobs:
     name: 🎭 Playwright
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -128,8 +130,6 @@ jobs:
 
       - name: 🏗 Build
         run: npm run build
-        env:
-          DATABASE_URI: ${{ secrets.DATABASE_URI }}
 
       - name: 🎭 Playwright tests
         run: cd apps/app && npx playwright test
