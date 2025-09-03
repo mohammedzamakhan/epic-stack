@@ -66,6 +66,8 @@ jobs:
 
       - name: 🏗 Build
         run: npm run build
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
 
       - name: 🔎 Type check
         run: npm run typecheck --if-present
@@ -126,6 +128,8 @@ jobs:
 
       - name: 🏗 Build
         run: npm run build
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
 
       - name: 🎭 Playwright tests
         run: cd apps/app && npx playwright test
