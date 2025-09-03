@@ -17,7 +17,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@novu/node": "^2.6.6",
     "@novu/react": "^3.7.0"
   },
   "devDependencies": {
