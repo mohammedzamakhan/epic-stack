@@ -8,18 +8,18 @@ interface Props {
 const { richText, links } = Astro.props
 
 // Simple content renderer for Lexical content
-const renderLexicalContent = (content) => {
+const renderLexicalContent = (content: any) => {
   if (!content || !content.root || !content.root.children) {
     return ''
   }
   
-  return content.root.children.map((node) => {
+  return content.root.children.map((node: any) => {
     if (node.type === 'paragraph' && node.children) {
-      const text = node.children.map(child => child.text || '').join('')
+      const text = node.children.map((child: any) => child.text || '').join('')
       return `<p>${text}</p>`
     }
     if (node.type === 'heading' && node.children) {
-      const text = node.children.map(child => child.text || '').join('')
+      const text = node.children.map((child: any) => child.text || '').join('')
       const tag = node.tag || 'h2'
       return `<${tag}>${text}</${tag}>`
     }
@@ -38,9 +38,8 @@ const renderLexicalContent = (content) => {
     
     {links && links.length > 0 && (
       <div class="flex flex-wrap justify-center gap-4">
-        {links.map((link, index) => (
+        {links.map((link) => (
           <a 
-            key={index}
             href={link.url || '#'}
             class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
           >

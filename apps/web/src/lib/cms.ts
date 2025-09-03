@@ -26,6 +26,7 @@ export interface Post {
   slug: string
   content?: any
   categories?: any[]
+  heroImage?: any
   meta?: {
     title?: string
     description?: string

@@ -17,20 +17,20 @@ if (!blocks || !Array.isArray(blocks)) {
 ---
 
 <div class="blocks">
-  {blocks.map((block, index) => {
+  {blocks.map((block) => {
     switch (block.blockType) {
       case 'content':
-        return <Content {...block} key={index} />
+        return <Content {...block} />
       case 'mediaBlock':
-        return <MediaBlock {...block} key={index} />
+        return <MediaBlock {...block} />
       case 'cta':
-        return <CallToAction {...block} key={index} />
+        return <CallToAction {...block} />
       case 'archive':
-        return <Archive {...block} key={index} />
+        return <Archive {...block} />
       case 'formBlock':
-        return <FormBlock {...block} key={index} />
+        return <FormBlock {...block} />
       default:
-        return <div key={index} class="unsupported-block">Unsupported block type: {block.blockType}</div>
+        return <div class="unsupported-block">Unsupported block type: {block.blockType}</div>
     }
   })}
 </div>

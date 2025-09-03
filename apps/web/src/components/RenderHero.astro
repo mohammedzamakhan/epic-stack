@@ -9,18 +9,18 @@ interface Props {
 const { type, richText, media, links } = Astro.props
 
 // Simple content renderer for Lexical content similar to posts
-const renderLexicalContent = (content) => {
+const renderLexicalContent = (content: any) => {
   if (!content || !content.root || !content.root.children) {
     return ''
   }
   
-  return content.root.children.map((node) => {
+  return content.root.children.map((node: any) => {
     if (node.type === 'paragraph' && node.children) {
-      const text = node.children.map(child => child.text || '').join('')
+      const text = node.children.map((child: any) => child.text || '').join('')
       return `<p>${text}</p>`
     }
     if (node.type === 'heading' && node.children) {
-      const text = node.children.map(child => child.text || '').join('')
+      const text = node.children.map((child: any) => child.text || '').join('')
       const tag = node.tag || 'h2'
       return `<${tag}>${text}</${tag}>`
     }
@@ -51,9 +51,8 @@ const renderLexicalContent = (content) => {
         
         {links && links.length > 0 && (
           <div class="flex flex-wrap justify-center gap-4">
-            {links.map((link, index) => (
+            {links.map((link) => (
               <a 
-                key={index}
                 href={link.url || '#'}
                 class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
               >
@@ -75,9 +74,8 @@ const renderLexicalContent = (content) => {
         
         {links && links.length > 0 && (
           <div class="flex flex-wrap justify-center gap-4 mb-8">
-            {links.map((link, index) => (
+            {links.map((link) => (
               <a 
-                key={index}
                 href={link.url || '#'}
                 class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
               >
@@ -109,9 +107,8 @@ const renderLexicalContent = (content) => {
         
         {links && links.length > 0 && (
           <div class="flex flex-wrap justify-center gap-6 mb-12">
-            {links.map((link, index) => (
+            {links.map((link) => (
               <a 
-                key={index}
                 href={link.url || '#'}
                 class="inline-flex items-center px-10 py-5 border border-transparent text-xl font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
               >
