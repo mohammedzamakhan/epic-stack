@@ -1,0 +1,20 @@
+---
+interface Props {
+  populateBy?: string
+  relationTo?: string
+  blockType: 'archive'
+}
+
+const { populateBy, relationTo } = Astro.props
+---
+
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    <div class="prose prose-lg max-w-none">
+      <h2>Archive Block</h2>
+      <p>This is a placeholder for the archive block. Implementation depends on your specific archive requirements.</p>
+      {populateBy && <p><strong>Populate by:</strong> {populateBy}</p>}
+      {relationTo && <p><strong>Relation to:</strong> {relationTo}</p>}
+    </div>
+  </div>
+</section>

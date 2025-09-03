@@ -1,0 +1,136 @@
+---
+interface Props {
+  type?: string
+  richText?: any
+  media?: any
+  links?: any[]
+}
+
+const { type, richText, media, links } = Astro.props
+
+// Simple content renderer for Lexical content similar to posts
+const renderLexicalContent = (content) => {
+  if (!content || !content.root || !content.root.children) {
+    return ''
+  }
+  
+  return content.root.children.map((node) => {
+    if (node.type === 'paragraph' && node.children) {
+      const text = node.children.map(child => child.text || '').join('')
+      return `<p>${text}</p>`
+    }
+    if (node.type === 'heading' && node.children) {
+      const text = node.children.map(child => child.text || '').join('')
+      const tag = node.tag || 'h2'
+      return `<${tag}>${text}</${tag}>`
+    }
+    return ''
+  }).join('')
+}
+---
+
+<div class="hero py-24 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+  <div class="container mx-auto px-4 text-center">
+    {type === 'lowImpact' && (
+      <div class="max-w-4xl mx-auto">
+        {richText && (
+          <div class="prose prose-lg prose-invert max-w-none mb-8">
+            <div set:html={renderLexicalContent(richText)} />
+          </div>
+        )}
+        
+        {media && typeof media === 'object' && media.url && (
+          <div class="mb-8">
+            <img 
+              src={media.url} 
+              alt={media.alt || 'Hero image'} 
+              class="w-full max-w-2xl mx-auto h-64 md:h-96 object-cover rounded-lg shadow-xl"
+            />
+          </div>
+        )}
+        
+        {links && links.length > 0 && (
+          <div class="flex flex-wrap justify-center gap-4">
+            {links.map((link, index) => (
+              <a 
+                key={index}
+                href={link.url || '#'}
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+    
+    {type === 'mediumImpact' && (
+      <div class="max-w-3xl mx-auto">
+        {richText && (
+          <div class="prose prose-xl prose-invert max-w-none mb-12">
+            <div set:html={renderLexicalContent(richText)} />
+          </div>
+        )}
+        
+        {links && links.length > 0 && (
+          <div class="flex flex-wrap justify-center gap-4 mb-8">
+            {links.map((link, index) => (
+              <a 
+                key={index}
+                href={link.url || '#'}
+                class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
+        
+        {media && typeof media === 'object' && media.url && (
+          <div>
+            <img 
+              src={media.url} 
+              alt={media.alt || 'Hero image'} 
+              class="w-full max-w-4xl mx-auto h-96 md:h-[500px] object-cover rounded-lg shadow-xl"
+            />
+          </div>
+        )}
+      </div>
+    )}
+    
+    {type === 'highImpact' && (
+      <div class="max-w-5xl mx-auto">
+        {richText && (
+          <div class="prose prose-2xl prose-invert max-w-none mb-16">
+            <div set:html={renderLexicalContent(richText)} />
+          </div>
+        )}
+        
+        {links && links.length > 0 && (
+          <div class="flex flex-wrap justify-center gap-6 mb-12">
+            {links.map((link, index) => (
+              <a 
+                key={index}
+                href={link.url || '#'}
+                class="inline-flex items-center px-10 py-5 border border-transparent text-xl font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
+        
+        {media && typeof media === 'object' && media.url && (
+          <div>
+            <img 
+              src={media.url} 
+              alt={media.alt || 'Hero image'} 
+              class="w-full h-96 md:h-[600px] object-cover rounded-lg shadow-xl"
+            />
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>

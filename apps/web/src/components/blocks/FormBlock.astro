@@ -1,0 +1,18 @@
+---
+interface Props {
+  form?: any
+  blockType: 'formBlock'
+}
+
+const { form } = Astro.props
+---
+
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    <div class="prose prose-lg max-w-none">
+      <h2>Form Block</h2>
+      <p>This is a placeholder for the form block. Implementation depends on your form handling requirements.</p>
+      {form && <p><strong>Form ID:</strong> {typeof form === 'object' ? form.id : form}</p>}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,38 @@
+---
+interface Props {
+  richText?: any
+  blockType: 'content'
+}
+
+const { richText } = Astro.props
+
+// Simple content renderer for Lexical content
+const renderLexicalContent = (content) => {
+  if (!content || !content.root || !content.root.children) {
+    return ''
+  }
+  
+  return content.root.children.map((node) => {
+    if (node.type === 'paragraph' && node.children) {
+      const text = node.children.map(child => child.text || '').join('')
+      return `<p>${text}</p>`
+    }
+    if (node.type === 'heading' && node.children) {
+      const text = node.children.map(child => child.text || '').join('')
+      const tag = node.tag || 'h2'
+      return `<${tag}>${text}</${tag}>`
+    }
+    return ''
+  }).join('')
+}
+---
+
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    {richText && (
+      <div class="prose prose-lg max-w-none">
+        <div set:html={renderLexicalContent(richText)} />
+      </div>
+    )}
+  </div>
+</section>

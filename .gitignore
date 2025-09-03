@@ -6,6 +6,7 @@ node_modules
 .env
 .cache
 .astro/
+.next/
 
 /prisma/data.db
 /prisma/data.db-journal

@@ -2,7 +2,7 @@
 
 HOSTS_FILE="/etc/hosts"
 IP="127.0.0.1"
-HOSTNAMES=("epic-stack.me" "docs.epic-stack.me" "studio.epic-stack.me" "admin.epic-stack.me")
+HOSTNAMES=("epic-stack.me" "docs.epic-stack.me" "studio.epic-stack.me" "admin.epic-stack.me", "cms.epic-stack.me", "app.epic-stack.me")
 
 echo "This script will add entries to your /etc/hosts file for local development."
 echo "Sudo password may be required."

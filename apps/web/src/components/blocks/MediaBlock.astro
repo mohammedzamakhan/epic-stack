@@ -1,0 +1,22 @@
+---
+interface Props {
+  media?: any
+  blockType: 'mediaBlock'
+}
+
+const { media } = Astro.props
+---
+
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    {media && typeof media === 'object' && media.url && (
+      <div class="text-center">
+        <img 
+          src={media.url} 
+          alt={media.alt || 'Media image'} 
+          class="w-full max-w-4xl mx-auto h-auto object-cover rounded-lg shadow-lg"
+        />
+      </div>
+    )}
+  </div>
+</section>

@@ -7,6 +7,7 @@ import '../styles/tailwind.css'
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Marketing</title>
+    <slot name="head" />
 </head>
 <body>
     <nav class="border-b">
@@ -14,6 +15,7 @@ import '../styles/tailwind.css'
             <a href="/" class="text-xl font-bold font-title">Epic Stack</a>
             <div class="flex gap-4">
                 <a href="/">Home</a>
+                <a href="/posts">Blog</a>
                 <a href="/about">About</a>
                 <a href="/pricing">Pricing</a>
                 <a href="/support">Support</a>
