@@ -3,17 +3,29 @@ import React, { Fragment } from 'react'
 import type { Page } from '@/payload-types'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
+import { BuildForBlock } from '@/blocks/BuildFor/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { FeaturedBlock } from '@/blocks/Featured/Component'
+import { FeatureListBlock } from '@/blocks/FeatureList/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { LogosBlock } from '@/blocks/Logos/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { PricingBlock } from '@/blocks/Pricing/Component'
+import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
+  buildFor: BuildForBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  featured: FeaturedBlock,
+  featureList: FeatureListBlock,
   formBlock: FormBlock,
+  logos: LogosBlock,
   mediaBlock: MediaBlock,
+  pricing: PricingBlock,
+  testimonials: TestimonialsBlock,
 }
 
 export const RenderBlocks: React.FC<{

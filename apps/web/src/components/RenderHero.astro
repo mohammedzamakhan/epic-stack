@@ -1,133 +1,170 @@
 ---
+import GridDesign from './GridDesign.astro'
+
 interface Props {
-  type?: string
-  richText?: any
-  media?: any
-  links?: any[]
+	type?: string
+	richText?: any
+	media?: any
+	links?: any[]
+	videoUrl?: string
+	isClosedBeta?: boolean
 }
 
-const { type, richText, media, links } = Astro.props
+const { type, richText, media, links, videoUrl, isClosedBeta } = Astro.props
 
 // Simple content renderer for Lexical content similar to posts
 const renderLexicalContent = (content: any) => {
-  if (!content || !content.root || !content.root.children) {
-    return ''
-  }
-  
-  return content.root.children.map((node: any) => {
-    if (node.type === 'paragraph' && node.children) {
-      const text = node.children.map((child: any) => child.text || '').join('')
-      return `<p>${text}</p>`
-    }
-    if (node.type === 'heading' && node.children) {
-      const text = node.children.map((child: any) => child.text || '').join('')
-      const tag = node.tag || 'h2'
-      return `<${tag}>${text}</${tag}>`
-    }
-    return ''
-  }).join('')
+	if (!content || !content.root || !content.root.children) {
+		return ''
+	}
+
+	return content.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				return `<p class="text-lg">${text}</p>`
+			}
+			if (node.type === 'heading' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				return `<h1 class="text-4xl font-light leading-[1.1] tracking-tighter sm:text-6xl md:text-7xl lg:text-[5rem]">${text}</h1>`
+			}
+			return ''
+		})
+		.join('')
 }
 ---
 
-<div class="hero py-24 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-  <div class="container mx-auto px-4 text-center">
-    {type === 'lowImpact' && (
-      <div class="max-w-4xl mx-auto">
-        {richText && (
-          <div class="prose prose-lg prose-invert max-w-none mb-8">
-            <div set:html={renderLexicalContent(richText)} />
-          </div>
-        )}
-        
-        {media && typeof media === 'object' && media.url && (
-          <div class="mb-8">
-            <img 
-              src={media.url} 
-              alt={media.alt || 'Hero image'} 
-              class="w-full max-w-2xl mx-auto h-64 md:h-96 object-cover rounded-lg shadow-xl"
-            />
-          </div>
-        )}
-        
-        {links && links.length > 0 && (
-          <div class="flex flex-wrap justify-center gap-4">
-            {links.map((link) => (
-              <a 
-                href={link.url || '#'}
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-    
-    {type === 'mediumImpact' && (
-      <div class="max-w-3xl mx-auto">
-        {richText && (
-          <div class="prose prose-xl prose-invert max-w-none mb-12">
-            <div set:html={renderLexicalContent(richText)} />
-          </div>
-        )}
-        
-        {links && links.length > 0 && (
-          <div class="flex flex-wrap justify-center gap-4 mb-8">
-            {links.map((link) => (
-              <a 
-                href={link.url || '#'}
-                class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        )}
-        
-        {media && typeof media === 'object' && media.url && (
-          <div>
-            <img 
-              src={media.url} 
-              alt={media.alt || 'Hero image'} 
-              class="w-full max-w-4xl mx-auto h-96 md:h-[500px] object-cover rounded-lg shadow-xl"
-            />
-          </div>
-        )}
-      </div>
-    )}
-    
-    {type === 'highImpact' && (
-      <div class="max-w-5xl mx-auto">
-        {richText && (
-          <div class="prose prose-2xl prose-invert max-w-none mb-16">
-            <div set:html={renderLexicalContent(richText)} />
-          </div>
-        )}
-        
-        {links && links.length > 0 && (
-          <div class="flex flex-wrap justify-center gap-6 mb-12">
-            {links.map((link) => (
-              <a 
-                href={link.url || '#'}
-                class="inline-flex items-center px-10 py-5 border border-transparent text-xl font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        )}
-        
-        {media && typeof media === 'object' && media.url && (
-          <div>
-            <img 
-              src={media.url} 
-              alt={media.alt || 'Hero image'} 
-              class="w-full h-96 md:h-[600px] object-cover rounded-lg shadow-xl"
-            />
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-</div>
+<section class="relative w-full py-12 md:py-12">
+	<!-- Grid Design Background -->
+	<GridDesign />
+
+	<div class="container relative px-4 md:px-6">
+		<div class="grid gap-0 lg:grid-cols-12">
+			<div class="col-span-6 flex flex-col justify-center">
+				<div class="space-y-6">
+					<div>
+						<span
+							class="font-mono text-sm uppercase tracking-wide text-muted-foreground border border-dashed border-[#d1d1d1] p-1 px-2 bg-background"
+						>
+							// BY THE MAKERS OF BUGBASHES.DEV
+						</span>
+					</div>
+					{
+						richText ? (
+							<div set:html={renderLexicalContent(richText)} />
+						) : (
+							<h1 class="text-4xl font-light leading-[1.1] tracking-tighter sm:text-6xl md:text-7xl lg:text-[5rem]">
+								Build your next
+								<br />
+								Startup even{' '}
+								<span class="bg-gradient-to-r from-[#8b5cf6] from-[28%] via-[#d946ef] via-[70%] to-[#f43f5e] bg-clip-text text-transparent dark:from-[#fff1be] dark:from-[28%] dark:via-[#ee87cb] dark:via-[70%] dark:to-[#b060ff]">
+									faster.
+								</span>
+							</h1>
+						)
+					}
+				</div>
+				<div class="mt-8">
+					{
+						!isClosedBeta && (
+							<>
+								{links && links.length > 0 ? (
+									<>
+										<a
+											href={links[0]?.url || '#'}
+											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 w-1/2 transition-colors hover:bg-primary/90"
+										>
+											{links[0]?.link?.label || 'Get started'}
+										</a>
+										{links[1] && (
+											<a
+												href={links[1]?.url || '#'}
+												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 w-1/2 transition-colors hover:bg-accent hover:text-accent-foreground"
+											>
+												{links[1]?.link?.label || 'Learn more'}
+											</a>
+										)}
+									</>
+								) : (
+									<>
+										<a
+											href="/get-started"
+											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 rounded-md transition-colors hover:bg-primary/90"
+										>
+											Get started
+										</a>
+										<a
+											href="/learn-more"
+											class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
+										>
+											Learn more
+										</a>
+									</>
+								)}
+							</>
+						)
+					}
+
+					{
+						isClosedBeta && (
+							<>
+								<form
+									method="post"
+									class="flex w-full flex-col gap-2 md:flex-row"
+								>
+									<input
+										type="hidden"
+										name="intent"
+										value="signup-for-closed-beta"
+									/>
+									<div class="w-full">
+										<fieldset class="flex w-full gap-2">
+											<input
+												type="email"
+												name="email"
+												placeholder="Email address"
+												class="flex-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+												required
+											/>
+											<button
+												type="submit"
+												class="mt-2 inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-sm py-2 px-4 rounded-md transition-colors hover:bg-primary/90"
+											>
+												Sign up for Beta
+											</button>
+										</fieldset>
+									</div>
+									<button
+										type="button"
+										class="md:mt-2 inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-sm py-2 px-4 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
+									>
+										Learn more
+									</button>
+								</form>
+							</>
+						)
+					}
+				</div>
+			</div>
+			<div class="col-span-5 flex flex-col justify-center space-y-4">
+				{
+					!richText && (
+						<p class="text-lg">
+							Epic Startup is a modern SaaS boilerplate that helps developers
+							and founders launch production-ready applications in minutes.
+							Built with React, TypeScript, and the latest web technologies, it
+							includes everything you need to build, deploy, and scale your next
+							big idea.
+						</p>
+					)
+				}
+
+				<div class="flex flex-col gap-4 min-[400px]:flex-row"></div>
+			</div>
+		</div>
+	</div>
+</section>

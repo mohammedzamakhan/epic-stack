@@ -3,29 +3,283 @@ import '../styles/tailwind.css'
 ---
 
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Marketing</title>
-    <slot name="head" />
-</head>
-<body>
-    <nav class="border-b">
-        <div class="container mx-auto flex justify-between items-center py-4">
-            <a href="/" class="text-xl font-bold font-title">Epic Stack</a>
-            <div class="flex gap-4">
-                <a href="/">Home</a>
-                <a href="/posts">Blog</a>
-                <a href="/about">About</a>
-                <a href="/pricing">Pricing</a>
-                <a href="/support">Support</a>
-                <a href="/privacy">Privacy</a>
-                <a href="/tos">Terms</a>
-            </div>
-        </div>
-    </nav>
-    <main>
-        <slot />
-    </main>
-</body>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Marketing</title>
+		<slot name="head" />
+	</head>
+	<body>
+		<nav class="border-b text-foreground overscroll-none bg-background">
+			<header
+				class="fixed top-0 inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b"
+			>
+				<div class="container flex h-16 items-center justify-between">
+					<div class="flex items-center space-x-12">
+						<a href="/" class="flex items-center space-x-2">
+							<div class="h-8 rounded flex gap-2 items-center justify-center">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="lucide lucide-rocket-icon lucide-rocket"
+									><path
+										d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
+									></path><path
+										d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"
+									></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"
+									></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"
+									></path></svg
+								>
+								<span class="font-bold text-sm font-title">Epic Startup</span>
+							</div>
+						</a>
+
+						<!-- Desktop Navigation -->
+						<div class="hidden lg:flex items-center space-x-8">
+							<!-- <div class="relative">
+								<button
+									id="operation-types-trigger"
+									class="flex items-center space-x-1 text-sm font-medium hover:text-primary transition-colors"
+								>
+									<span>Operation Types</span>
+									<svg
+										class="h-4 w-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M19 9l-7 7-7-7"></path>
+									</svg>
+								</button>
+								<div
+									id="operation-types-content"
+									class="absolute top-full left-0 mt-2 w-64 bg-background border rounded-md shadow-lg opacity-0 invisible transition-all duration-200 z-50"
+								>
+									<div class="p-4">
+										<div class="grid gap-2">
+											<a
+												href="/operations/brokerages"
+												class="block p-2 hover:bg-accent rounded-md"
+											>
+												Freight Brokerages
+											</a>
+											<a
+												href="/operations/forwarders"
+												class="block p-2 hover:bg-accent rounded-md"
+											>
+												Freight Forwarders
+											</a>
+											<a
+												href="/operations/carriers"
+												class="block p-2 hover:bg-accent rounded-md"
+											>
+												Carriers
+											</a>
+											<a
+												href="/operations/shippers"
+												class="block p-2 hover:bg-accent rounded-md"
+											>
+												Shippers
+											</a>
+										</div>
+									</div>
+								</div>
+							</div> -->
+
+							<a
+								href="/blog"
+								class="text-sm font-medium hover:text-primary transition-colors"
+							>
+								Blog
+							</a>
+							<a
+								href="/pricing"
+								class="text-sm font-medium hover:text-primary transition-colors"
+							>
+								Pricing
+							</a>
+						</div>
+					</div>
+
+					<div class="hidden lg:flex items-center space-x-4">
+						<a
+							href="/demo"
+							class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+						>
+							Book a demo
+						</a>
+					</div>
+
+					<!-- Mobile Navigation -->
+					<button
+						id="mobile-menu-trigger"
+						class="lg:hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10"
+					>
+						<svg
+							class="h-6 w-6"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 6h16M4 12h16M4 18h16"></path>
+						</svg>
+					</button>
+				</div>
+			</header>
+
+			<!-- Mobile Menu Overlay -->
+			<div
+				id="mobile-menu-overlay"
+				class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300 lg:hidden"
+			>
+				<div
+					id="mobile-menu-content"
+					class="fixed right-0 top-0 h-full w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300"
+				>
+					<div class="flex flex-col space-y-6 p-6 mt-8">
+						<div class="space-y-4">
+							<div>
+								<button
+									id="mobile-operation-types-trigger"
+									class="w-full flex justify-between items-center text-lg py-2"
+								>
+									<span>Operation Types</span>
+									<svg
+										class="h-4 w-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M19 9l-7 7-7-7"></path>
+									</svg>
+								</button>
+								<div
+									id="mobile-operation-types-content"
+									class="ml-4 mt-2 space-y-2 hidden"
+								>
+									<a href="/operations/brokerages" class="block py-2 text-base">
+										Freight Brokerages
+									</a>
+									<a href="/operations/forwarders" class="block py-2 text-base">
+										Freight Forwarders
+									</a>
+									<a href="/operations/carriers" class="block py-2 text-base">
+										Carriers
+									</a>
+									<a href="/operations/shippers" class="block py-2 text-base">
+										Shippers
+									</a>
+								</div>
+							</div>
+							<a href="/product" class="block text-lg py-2"> Product </a>
+							<a href="/company" class="block text-lg py-2"> Company </a>
+						</div>
+
+						<div class="space-y-3 pt-6 border-t">
+							<a
+								href="/demo"
+								class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+							>
+								Book a demo
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<main class="mt-16">
+			<slot />
+		</main>
+	</body>
 </html>
+
+<script>
+	// Desktop dropdown menu
+	const operationTypesTrigger = document.getElementById(
+		'operation-types-trigger',
+	)
+	const operationTypesContent = document.getElementById(
+		'operation-types-content',
+	)
+
+	if (operationTypesTrigger && operationTypesContent) {
+		operationTypesTrigger.addEventListener('mouseenter', () => {
+			operationTypesContent.classList.remove('opacity-0', 'invisible')
+			operationTypesContent.classList.add('opacity-100', 'visible')
+		})
+
+		operationTypesTrigger.addEventListener('mouseleave', () => {
+			setTimeout(() => {
+				if (!operationTypesContent.matches(':hover')) {
+					operationTypesContent.classList.add('opacity-0', 'invisible')
+					operationTypesContent.classList.remove('opacity-100', 'visible')
+				}
+			}, 100)
+		})
+
+		operationTypesContent.addEventListener('mouseleave', () => {
+			operationTypesContent.classList.add('opacity-0', 'invisible')
+			operationTypesContent.classList.remove('opacity-100', 'visible')
+		})
+	}
+
+	// Mobile menu
+	const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
+	const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')
+	const mobileMenuContent = document.getElementById('mobile-menu-content')
+
+	if (mobileMenuTrigger && mobileMenuOverlay && mobileMenuContent) {
+		mobileMenuTrigger.addEventListener('click', () => {
+			mobileMenuOverlay.classList.remove('opacity-0', 'invisible')
+			mobileMenuOverlay.classList.add('opacity-100', 'visible')
+			mobileMenuContent.classList.remove('translate-x-full')
+			document.body.style.overflow = 'hidden'
+		})
+
+		mobileMenuOverlay.addEventListener('click', (e) => {
+			if (e.target === mobileMenuOverlay) {
+				closeMobileMenu()
+			}
+		})
+
+		function closeMobileMenu() {
+			mobileMenuOverlay?.classList.add('opacity-0', 'invisible')
+			mobileMenuOverlay?.classList.remove('opacity-100', 'visible')
+			mobileMenuContent?.classList.add('translate-x-full')
+			document.body.style.overflow = ''
+		}
+	}
+
+	// Mobile dropdown
+	const mobileOperationTypesTrigger = document.getElementById(
+		'mobile-operation-types-trigger',
+	)
+	const mobileOperationTypesContent = document.getElementById(
+		'mobile-operation-types-content',
+	)
+
+	if (mobileOperationTypesTrigger && mobileOperationTypesContent) {
+		mobileOperationTypesTrigger.addEventListener('click', () => {
+			mobileOperationTypesContent.classList.toggle('hidden')
+		})
+	}
+</script>

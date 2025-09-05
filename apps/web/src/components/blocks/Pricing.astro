@@ -1,0 +1,304 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface Feature {
+	name: string
+	icon: string
+	iconColor?: string
+}
+
+interface Plan {
+	id: string
+	title: string
+	description: string
+	highlight?: boolean
+	currency?: string
+	monthlyPrice: string
+	yearlyPrice: string
+	buttonText: string
+	badge?: string
+	features: Feature[]
+}
+
+interface Props {
+	title?: string
+	subtitle?: string
+	plans?: Plan[]
+	showFooter?: boolean
+	footerText?: string
+	footerButtonText?: string
+	blockType: 'pricing'
+}
+
+const {
+	title = 'Choose your plan',
+	subtitle = 'Select the perfect plan for your needs',
+	plans = [
+		{
+			id: 'starter',
+			title: 'Starter',
+			description: 'For developers testing out locally.',
+			currency: '$',
+			monthlyPrice: '0',
+			yearlyPrice: '0',
+			buttonText: 'Start today for free',
+			features: [
+				{ name: 'Authentication', icon: 'check' },
+				{ name: 'Basic Support', icon: 'check' },
+				{ name: 'Core Features', icon: 'check' },
+			],
+		},
+		{
+			id: 'pro',
+			title: 'Pro',
+			description: 'For companies in production.',
+			currency: '$',
+			monthlyPrice: '20',
+			yearlyPrice: '199',
+			buttonText: 'Sign up',
+			badge: 'Most popular',
+			highlight: true,
+			features: [
+				{ name: 'Everything in Starter', icon: 'check' },
+				{ name: 'Priority Support', icon: 'check' },
+				{ name: 'Advanced Analytics', icon: 'check' },
+				{ name: 'Team Collaboration', icon: 'check' },
+			],
+		},
+		{
+			id: 'enterprise',
+			title: 'Enterprise',
+			description: 'For organizations with advanced needs.',
+			currency: '$',
+			monthlyPrice: 'Custom',
+			yearlyPrice: 'Custom',
+			buttonText: 'Contact sales',
+			features: [
+				{ name: 'Everything in Pro', icon: 'check' },
+				{ name: 'Custom Integration', icon: 'check' },
+				{ name: 'Dedicated Support', icon: 'check' },
+				{ name: 'SLA & Compliance', icon: 'check' },
+			],
+		},
+	],
+	showFooter = true,
+	footerText = 'Pre-negotiated discounts are available to early-stage startups and nonprofits.',
+	footerButtonText = 'Apply now',
+} = Astro.props
+
+// Calculate discount percentage
+const calculateDiscount = (monthlyPrice: string, yearlyPrice: string): number => {
+	const monthly = parseFloat(monthlyPrice)
+	const yearly = parseFloat(yearlyPrice)
+
+	if (
+		monthlyPrice.toLowerCase() === 'custom' ||
+		yearlyPrice.toLowerCase() === 'custom' ||
+		isNaN(monthly) ||
+		isNaN(yearly) ||
+		monthly === 0
+	) {
+		return 0
+	}
+
+	const discount = ((monthly * 12 - yearly) / (monthly * 12)) * 100
+	return Math.round(discount)
+}
+
+const yearlyDiscount = plans.length
+	? Math.max(...plans.map((plan) => calculateDiscount(plan.monthlyPrice, plan.yearlyPrice)))
+	: 0
+---
+
+<section class="relative w-full py-16 md:py-24">
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6">
+		<!-- Header -->
+		<div class="text-center mb-12">
+			<h3 class="font-mono text-sm uppercase tracking-wide text-muted-foreground mb-6">
+				// PRICING PLANS
+			</h3>
+			<h2 class="text-4xl md:text-6xl font-light text-primary mb-4">
+				{title}
+			</h2>
+			<p class="text-xl text-muted-foreground max-w-[600px] mx-auto">
+				{subtitle}
+			</p>
+		</div>
+
+		<!-- Pricing Toggle -->
+		<div class="flex flex-col justify-center items-center mb-12">
+			<div class="inline-flex items-center justify-center bg-muted p-1 text-muted-foreground border border-dashed border-border" id="pricing-toggle">
+				<button 
+					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground hover:text-accent-foreground border border-border" 
+					data-period="monthly"
+					id="monthly-btn"
+				>
+					Monthly
+				</button>
+				<button 
+					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground hover:text-accent-foreground" 
+					data-period="yearly"
+					id="yearly-btn"
+				>
+					Yearly
+				</button>
+			</div>
+			{yearlyDiscount > 0 && (
+				<div class="flex items-center gap-2 mt-3">
+					<div class="w-2 h-2 bg-primary rounded-sm"></div>
+					<span class="text-xs text-muted-foreground font-mono uppercase tracking-wide" id="discount-text">
+						Save up to {yearlyDiscount}% with yearly plan
+					</span>
+				</div>
+			)}
+		</div>
+
+		<!-- Pricing Cards -->
+		<div class={`grid gap-0 border-l border-t border-dashed ${
+			plans.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
+			plans.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' :
+			plans.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
+			'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+		}`}>
+			{plans.map((plan) => (
+				<div class={`border-b border-r border-dashed bg-background relative transition-all duration-200 ${
+					plan.highlight 
+						? 'bg-muted/30 hover:bg-gradient-to-b from-muted/10 to-muted/60' 
+						: 'hover:bg-gradient-to-b from-muted/5 to-muted/50'
+				} transition-colors`}>
+					{plan.badge && (
+						<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-secondary text-secondary-foreground px-3 py-1 text-xs rounded-full border border-border">
+							{plan.badge}
+						</div>
+					)}
+					
+					<!-- Card Header -->
+					<div class="pt-6 pb-4 border-b border-dashed">
+						<div class="space-y-2 mb-4">
+							<h3 class="text-xl font-semibold text-primary border-l-2 border-primary pl-4">
+								{plan.title}
+							</h3>
+							<p class="text-sm text-muted-foreground pl-4">
+								{plan.description}
+							</p>
+						</div>
+						<div class="space-y-1 pl-4">
+							<!-- Monthly Price -->
+							<div class="pricing-monthly">
+								<span class="text-4xl font-medium text-primary">
+									{parseFloat(plan.monthlyPrice) >= 0 && plan.currency}
+									{plan.monthlyPrice}
+								</span>
+								<p class="text-muted-foreground">Per month</p>
+							</div>
+							<!-- Yearly Price -->
+							<div class="pricing-yearly hidden">
+								<span class="text-4xl font-medium text-primary">
+									{parseFloat(plan.yearlyPrice) >= 0 && plan.currency}
+									{plan.yearlyPrice}
+									{calculateDiscount(plan.monthlyPrice, plan.yearlyPrice) > 0 && (
+										<span class="text-xs ml-2 underline">
+											{calculateDiscount(plan.monthlyPrice, plan.yearlyPrice)}% off
+										</span>
+									)}
+								</span>
+								<p class="text-muted-foreground">Per year</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Features -->
+					<div class="p-6 space-y-4 flex-1">
+						{plan.features.map((feature) => (
+							<div class="flex items-center gap-3">
+								<div class="w-2 h-2 bg-primary rounded-sm flex-shrink-0"></div>
+								<span class="text-sm">{feature.name}</span>
+								<span class="ml-auto text-sm text-muted-foreground">Included</span>
+							</div>
+						))}
+					</div>
+
+					<!-- CTA Button -->
+					<div class="p-6 pt-0">
+						<a
+							href={`#plan-${plan.id}`}
+							class={`w-full inline-flex items-center justify-center font-medium text-sm py-3 px-6 transition-colors ${
+								plan.highlight
+									? 'bg-primary text-primary-foreground hover:bg-primary/90'
+									: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border'
+							}`}
+						>
+							{plan.buttonText}
+						</a>
+					</div>
+				</div>
+			))}
+		</div>
+
+		<!-- Footer -->
+		{showFooter && (
+			<div class={`flex items-center justify-between bg-muted/50 p-6 border border-dashed mt-12 ${
+				plans.length === 1 ? 'max-w-md mx-auto' :
+				plans.length === 2 ? 'max-w-4xl mx-auto' : ''
+			}`}>
+				<div class="flex flex-col md:flex-row gap-4 justify-between w-full">
+					<p class="text-lg font-medium text-card-foreground text-left w-full my-auto">
+						{footerText}
+					</p>
+					<a
+						href="#apply"
+						class="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 py-2 transition-colors font-medium text-sm whitespace-nowrap"
+					>
+						{footerButtonText}
+					</a>
+				</div>
+			</div>
+		)}
+	</div>
+</section>
+
+<script>
+	// Pricing toggle functionality
+	document.addEventListener('DOMContentLoaded', function() {
+		const monthlyBtn = document.getElementById('monthly-btn')
+		const yearlyBtn = document.getElementById('yearly-btn')
+		const discountText = document.getElementById('discount-text')
+		
+		if (!monthlyBtn || !yearlyBtn) return
+
+		function setActiveButton(activeBtn: HTMLElement, inactiveBtn: HTMLElement) {
+			// Update active button styles
+			activeBtn.classList.add('bg-background', 'text-foreground', 'border', 'border-border')
+			activeBtn.classList.remove('text-muted-foreground')
+			
+			// Update inactive button styles
+			inactiveBtn.classList.remove('bg-background', 'text-foreground', 'border', 'border-border')
+			inactiveBtn.classList.add('text-muted-foreground')
+		}
+
+		function togglePricing(period: string) {
+			const monthlyPrices = document.querySelectorAll('.pricing-monthly')
+			const yearlyPrices = document.querySelectorAll('.pricing-yearly')
+			
+			if (period === 'yearly') {
+				monthlyPrices.forEach(el => el.classList.add('hidden'))
+				yearlyPrices.forEach(el => el.classList.remove('hidden'))
+				setActiveButton(yearlyBtn as HTMLElement, monthlyBtn as HTMLElement)
+				if (discountText) discountText.style.opacity = '1'
+			} else {
+				yearlyPrices.forEach(el => el.classList.add('hidden'))
+				monthlyPrices.forEach(el => el.classList.remove('hidden'))
+				setActiveButton(monthlyBtn as HTMLElement, yearlyBtn as HTMLElement)
+				if (discountText) discountText.style.opacity = '0.7'
+			}
+		}
+
+		// Add click event listeners
+		monthlyBtn.addEventListener('click', () => togglePricing('monthly'))
+		yearlyBtn.addEventListener('click', () => togglePricing('yearly'))
+		
+		// Initialize with monthly view
+		togglePricing('monthly')
+	})
+</script>

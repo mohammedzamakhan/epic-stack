@@ -1,0 +1,296 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface Feature {
+	title: string
+	description: string
+	image?: string
+	backgroundImage?: string
+	testimonial?: {
+		logo?: string
+		logoAlt?: string
+		text: string
+		companyName?: string
+	}
+}
+
+interface Props {
+	title?: string
+	subtitle?: string
+	features?: Feature[]
+	blockType: 'featureList'
+}
+
+const {
+	title = 'Data for every industry',
+	subtitle = 'Regardless of your industry, get the most relevant type of data for you.',
+	features = [
+		{
+			title: 'Authentication & Security',
+			description: 'Complete auth system with social logins, role-based access, and session management built with industry best practices.',
+			image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Google.svg',
+				logoAlt: 'Google',
+				text: 'Secure authentication that just works out of the box',
+				companyName: 'Google'
+			}
+		},
+		{
+			title: 'Payment Processing',
+			description: 'Stripe integration with subscription management, usage-based billing, and comprehensive invoicing system.',
+			image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Stripe.svg',
+				logoAlt: 'Stripe',
+				text: 'Seamless payment processing with enterprise-grade security',
+				companyName: 'Stripe'
+			}
+		},
+		{
+			title: 'Database & API',
+			description: 'Production-ready setup with TypeScript, Prisma ORM, and RESTful APIs with comprehensive documentation.',
+			image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Microsoft.svg',
+				logoAlt: 'Microsoft',
+				text: 'Robust database architecture that scales with your business',
+				companyName: 'Microsoft'
+			}
+		},
+		{
+			title: 'Email & Notifications',
+			description: 'Automated email campaigns, transactional emails, and real-time notifications with multiple provider support.',
+			image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Slack.svg',
+				logoAlt: 'Slack',
+				text: 'Reliable email delivery and notification system',
+				companyName: 'Slack'
+			}
+		},
+		{
+			title: 'Analytics & Monitoring',
+			description: 'Built-in analytics dashboard, error tracking, and performance monitoring with real-time insights.',
+			image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Netflix.svg',
+				logoAlt: 'Netflix',
+				text: 'Comprehensive analytics that drive business decisions',
+				companyName: 'Netflix'
+			}
+		},
+		{
+			title: 'Deployment & DevOps',
+			description: 'One-click deployment to multiple platforms with CI/CD pipelines, automated testing, and environment management.',
+			image: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=600&h=400&fit=crop',
+			backgroundImage: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=800&h=600&fit=crop',
+			testimonial: {
+				logo: 'https://cdn.magicui.design/companies/Amazon.svg',
+				logoAlt: 'Amazon',
+				text: 'Scalable infrastructure that grows with your needs',
+				companyName: 'Amazon'
+			}
+		}
+	],
+} = Astro.props
+---
+
+<section class="relative w-full py-16 md:py-24">
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6">
+		<!-- Header -->
+		<div class="mb-8 md:mb-11 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+			<div>
+				<h2 class="text-4xl md:text-6xl font-light text-primary mb-4">
+					{title}
+				</h2>
+				<p class="text-lg text-muted-foreground max-w-[600px]">
+					{subtitle}
+				</p>
+			</div>
+			<!-- Navigation Controls -->
+			<div class="flex items-center gap-1.5">
+				<button 
+					id="prev-btn"
+					class="w-10 h-10 bg-muted flex items-center justify-center hover:bg-muted/80 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-muted-foreground border border-dashed border-border"
+					aria-label="Previous feature"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="m15 18-6-6 6-6"></path>
+					</svg>
+				</button>
+				<!-- Pagination Dots -->
+				<div class="flex items-center gap-2 bg-muted p-4 border border-dashed border-border" id="pagination-dots">
+					{features.map((_, index) => (
+						<button 
+							class="w-1.5 h-1.5 transition-all duration-200 pagination-dot"
+							data-index={index}
+							aria-label={`Go to feature ${index + 1}`}
+						></button>
+					))}
+				</div>
+				<button 
+					id="next-btn"
+					class="w-10 h-10 bg-muted flex items-center justify-center hover:bg-muted/80 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 text-muted-foreground border border-dashed border-border"
+					aria-label="Next feature"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="m9 18 6-6-6-6"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<!-- Feature Cards Container -->
+		<div class="relative overflow-hidden">
+			<div 
+				id="features-container"
+				class="flex transition-transform duration-500 ease-in-out gap-5"
+				style="transform: translateX(0px);"
+			>
+				{features.map((feature, index) => (
+					<div class="flex-shrink-0 w-[90vw] md:w-[600px] feature-card" data-index={index}>
+						<!-- Content Section -->
+						<div class="py-6 min-h-[150px]">
+							<h5 class="mb-3 text-primary text-2xl md:text-3xl font-medium border-l-2 border-primary pl-4">
+								{feature.title}
+							</h5>
+							<p class="text-muted-foreground leading-relaxed max-w-[500px] pl-4">
+								{feature.description}
+							</p>
+						</div>
+
+						<!-- Image Section -->
+						<div class="relative">
+							{feature.backgroundImage && (
+								<div 
+									class="h-80 relative bg-cover bg-center bg-no-repeat border border-dashed border-border overflow-hidden"
+									style={`background-image: url(${feature.backgroundImage})`}
+								>
+									{feature.testimonial && (
+										<div class="absolute top-0 left-0 right-0 bg-background/90 backdrop-blur-sm border-t border-dashed border-border p-4">
+											<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+												<div class="max-w-[420px]">
+													<p class="text-sm text-muted-foreground leading-tight">
+														{feature.testimonial.text}
+													</p>
+												</div>
+                                                <div class="flex items-center gap-3">
+													
+													{!feature.testimonial.logo && feature.testimonial.companyName && (
+														<div class="text-sm font-medium text-primary">
+															{feature.testimonial.companyName}
+														</div>
+													)}
+                                                    {feature.testimonial.logo && (
+														<img 
+															src={feature.testimonial.logo}
+															alt={feature.testimonial.logoAlt || feature.testimonial.companyName}
+															class="h-8 w-auto object-contain"
+														/>
+													)}
+												</div>
+												
+											</div>
+										</div>
+									)}
+								</div>
+							)}
+
+							{feature.image && (
+								<div class="absolute left-1/2 transform -translate-x-1/2 top-8 md:top-16 w-[260px] md:w-[380px]">
+									<div class="bg-background overflow-hidden h-[260px] md:h-[380px] border border-dashed border-border shadow-lg">
+										<img
+											src={feature.image}
+											alt={feature.title}
+											class="w-full h-full object-cover"
+										/>
+									</div>
+								</div>
+							)}
+							<div class="hidden md:block h-20"></div>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const container = document.getElementById('features-container') as HTMLElement | null
+		const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement | null
+		const nextBtn = document.getElementById('next-btn') as HTMLButtonElement | null
+		const paginationDots = document.querySelectorAll('.pagination-dot')
+		const featureCards = document.querySelectorAll('.feature-card')
+		
+		if (!container || !prevBtn || !nextBtn) return
+		
+		let currentIndex = 0
+		const totalFeatures = featureCards.length
+		const cardWidth = window.innerWidth < 768 ? window.innerWidth * 0.9 + 20 : 620 // card width + gap
+		
+		function updateCarousel() {
+			const translateX = -currentIndex * cardWidth
+			container!.style.transform = `translateX(${translateX}px)`
+			
+			// Update pagination dots
+			paginationDots.forEach((dot, index: number) => {
+				if (index === currentIndex) {
+					dot.classList.add('bg-primary', 'w-4')
+					dot.classList.remove('bg-muted-foreground', 'hover:bg-primary/60')
+				} else {
+					dot.classList.remove('bg-primary', 'w-4')
+					dot.classList.add('bg-muted-foreground', 'hover:bg-primary/60')
+				}
+			})
+			
+			// Update button states
+			prevBtn!.disabled = currentIndex === 0
+			nextBtn!.disabled = currentIndex === totalFeatures - 1
+		}
+		
+		function goToSlide(index: number) {
+			currentIndex = Math.max(0, Math.min(index, totalFeatures - 1))
+			updateCarousel()
+		}
+		
+		// Navigation button events
+		prevBtn.addEventListener('click', () => {
+			if (currentIndex > 0) {
+				goToSlide(currentIndex - 1)
+			}
+		})
+		
+		nextBtn.addEventListener('click', () => {
+			if (currentIndex < totalFeatures - 1) {
+				goToSlide(currentIndex + 1)
+			}
+		})
+		
+		// Pagination dot events
+		paginationDots.forEach((dot, index: number) => {
+			dot.addEventListener('click', () => {
+				goToSlide(index)
+			})
+		})
+		
+		// Handle window resize
+		window.addEventListener('resize', () => {
+			const newCardWidth = window.innerWidth < 768 ? window.innerWidth * 0.9 + 20 : 620
+			if (newCardWidth !== cardWidth) {
+				location.reload() // Simple solution for resize handling
+			}
+		})
+		
+		// Initialize
+		updateCarousel()
+	})
+</script>

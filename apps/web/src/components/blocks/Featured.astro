@@ -1,0 +1,104 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface Props {
+	title?: string
+	description?: string
+	buttonText?: string
+	buttonUrl?: string
+	features?: Array<{
+		title: string
+		description: string
+	}>
+	blockType: 'featured'
+}
+
+const {
+	title = 'Launch your SaaS faster than ever',
+	description = 'Everything you need to build a production-ready SaaS. Authentication, payments, emails, and more - all pre-built and ready to go.',
+	buttonText = 'View features',
+	buttonUrl = '#features',
+	features = [
+		{
+			title: 'Authentication',
+			description:
+				'Complete auth system with social logins, role-based access, and session management.',
+		},
+		{
+			title: 'Payments',
+			description:
+				'Stripe integration with subscription management, usage-based billing, and invoicing.',
+		},
+		{
+			title: 'Integrations',
+			description:
+				'Ready-to-use API integrations and webhooks for popular third-party services.',
+		},
+		{
+			title: 'Infrastructure',
+			description:
+				'Production-ready setup with TypeScript, Remix, Prisma, and modern tooling.',
+		},
+	],
+} = Astro.props
+---
+
+<section class="w-full text-foreground py-16 md:py-24 relative">
+	<GridDesign />
+	<div class="container px-4 md:px-6 relative">
+		<div class="grid lg:grid-cols-12 gap-8 lg:gap-0">
+			<div class="space-y-6 col-span-6">
+				<h2 class="text-4xl md:text-6xl font-light text-primary">
+					{title}
+				</h2>
+				<p class="text-xl text-muted-foreground max-w-[600px]">
+					{description}
+				</p>
+				<a
+					href={buttonUrl}
+					class="inline-flex items-center text-lg font-medium text-primary hover:text-primary/80 border-b-2 border-transparent hover:border-primary/80 transition-colors"
+				>
+					{buttonText}
+				</a>
+			</div>
+			<div class="grid sm:grid-cols-4 col-span-6">
+				<div class="col-span-2 border-l border-muted">
+					{
+						features.slice(0, 2).map((feature, idx) => (
+							<div
+								class={`space-y-2 border-b border-muted py-4 hover:bg-gradient-to-${idx === 0 ? 'b' : 't'} from-muted/5 to-muted/50 transition-colors`}
+							>
+								<div class="flex items-center gap-2">
+									<h3 class="text-lg font-semibold text-primary pl-4 border-l-2 border-primary">
+										{feature.title}
+									</h3>
+								</div>
+								<p class="text-md text-muted-foreground pl-4">
+									{feature.description}
+								</p>
+							</div>
+						))
+					}
+				</div>
+				<div class="col-span-2 border-r border-muted">
+					{
+						features.slice(2, 4).map((feature, idx) => (
+							<div
+								class={`space-y-2 border-b border-muted py-4 hover:bg-gradient-to-${idx === 0 ? 'b' : 't'} from-muted/5 to-muted/50 transition-colors`}
+							>
+								<div class="flex items-center gap-2">
+									<h3 class="text-lg font-semibold text-primary pl-4 border-l-2 border-primary">
+										{feature.title}
+									</h3>
+								</div>
+								<p class="text-md text-muted-foreground pl-4">
+									{feature.description}
+								</p>
+							</div>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

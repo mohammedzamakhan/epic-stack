@@ -4,33 +4,57 @@ import MediaBlock from './blocks/MediaBlock.astro'
 import CallToAction from './blocks/CallToAction.astro'
 import Archive from './blocks/Archive.astro'
 import FormBlock from './blocks/FormBlock.astro'
+import Featured from './blocks/Featured.astro'
+import Logos from './blocks/Logos.astro'
+import Pricing from './blocks/Pricing.astro'
+import Testimonials from './blocks/Testimonials.astro'
+import FeatureList from './blocks/FeatureList.astro'
+import BuildFor from './blocks/BuildFor.astro'
 
 interface Props {
-  blocks?: any[]
+	blocks?: any[]
 }
 
 const { blocks } = Astro.props
 
 if (!blocks || !Array.isArray(blocks)) {
-  return null
+	return null
 }
 ---
 
 <div class="blocks">
-  {blocks.map((block) => {
-    switch (block.blockType) {
-      case 'content':
-        return <Content {...block} />
-      case 'mediaBlock':
-        return <MediaBlock {...block} />
-      case 'cta':
-        return <CallToAction {...block} />
-      case 'archive':
-        return <Archive {...block} />
-      case 'formBlock':
-        return <FormBlock {...block} />
-      default:
-        return <div class="unsupported-block">Unsupported block type: {block.blockType}</div>
-    }
-  })}
+	{
+		blocks.map((block) => {
+			switch (block.blockType) {
+				case 'content':
+					return <Content {...block} />
+				case 'mediaBlock':
+					return <MediaBlock {...block} />
+				case 'cta':
+					return <CallToAction {...block} />
+				case 'archive':
+					return <Archive {...block} />
+				case 'formBlock':
+					return <FormBlock {...block} />
+				case 'featured':
+					return <Featured {...block} />
+				case 'logos':
+					return <Logos {...block} />
+				case 'pricing':
+					return <Pricing {...block} />
+				case 'testimonials':
+					return <Testimonials {...block} />
+				case 'featureList':
+					return <FeatureList {...block} />
+				case 'buildFor':
+					return <BuildFor {...block} />
+				default:
+					return (
+						<div class="unsupported-block">
+							Unsupported block type: {block.blockType}
+						</div>
+					)
+			}
+		})
+	}
 </div>

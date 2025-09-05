@@ -1,38 +1,168 @@
 ---
+import GridDesign from '../GridDesign.astro'
+
 interface Props {
-  richText?: any
-  blockType: 'content'
+	richText?: any
+	title?: string
+	subtitle?: string
+	columns?: Array<{
+		richText?: any
+		size?: 'oneThird' | 'half' | 'twoThirds' | 'full'
+		enableLink?: boolean
+		link?: any
+	}>
+	blockType: 'content'
 }
 
-const { richText } = Astro.props
+const { richText, title, subtitle, columns } = Astro.props
 
-// Simple content renderer for Lexical content
+// Enhanced content renderer for Lexical content
 const renderLexicalContent = (content: any) => {
-  if (!content || !content.root || !content.root.children) {
-    return ''
-  }
-  
-  return content.root.children.map((node: any) => {
-    if (node.type === 'paragraph' && node.children) {
-      const text = node.children.map((child: any) => child.text || '').join('')
-      return `<p>${text}</p>`
-    }
-    if (node.type === 'heading' && node.children) {
-      const text = node.children.map((child: any) => child.text || '').join('')
-      const tag = node.tag || 'h2'
-      return `<${tag}>${text}</${tag}>`
-    }
-    return ''
-  }).join('')
+	if (!content || !content.root || !content.root.children) {
+		return ''
+	}
+
+	return content.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.format && child.format > 0) {
+							// Handle bold, italic, etc.
+							let formattedText = child.text || ''
+							if (child.format & 1)
+								formattedText = `<strong>${formattedText}</strong>` // Bold
+							if (child.format & 2) formattedText = `<em>${formattedText}</em>` // Italic
+							return formattedText
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<p class="text-lg text-foreground leading-relaxed mb-6">${text}</p>`
+			}
+			if (node.type === 'heading' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				const tag = node.tag || 'h2'
+				const headingClasses = {
+					h1: 'text-4xl md:text-6xl font-light text-primary mb-8 border-l-2 border-primary pl-6',
+					h2: 'text-3xl md:text-4xl font-light text-primary mb-6 border-l-2 border-primary pl-6',
+					h3: 'text-2xl md:text-3xl font-medium text-primary mb-4 border-l-2 border-primary pl-4',
+					h4: 'text-xl md:text-2xl font-medium text-primary mb-4 border-l-2 border-primary pl-4',
+					h5: 'text-lg md:text-xl font-semibold text-primary mb-3 border-l-2 border-primary pl-4',
+					h6: 'text-base md:text-lg font-semibold text-primary mb-3 border-l-2 border-primary pl-4',
+				}
+				const className =
+					headingClasses[tag as keyof typeof headingClasses] ||
+					headingClasses.h2
+				return `<${tag} class="${className}">${text}</${tag}>`
+			}
+			if (node.type === 'list' && node.children) {
+				const listItems = node.children
+					.map((item: any) => {
+						if (item.type === 'listitem' && item.children) {
+							const itemText = item.children
+								.map((child: any) => {
+									if (child.type === 'paragraph' && child.children) {
+										return child.children
+											.map((textChild: any) => textChild.text || '')
+											.join('')
+									}
+									return child.text || ''
+								})
+								.join('')
+							return `<li class="text-lg text-foreground leading-relaxed mb-2 pl-2">${itemText}</li>`
+						}
+						return ''
+					})
+					.join('')
+
+				if (node.listType === 'number') {
+					return `<ol class="list-decimal list-inside mb-6 space-y-2 border-l-2 border-muted pl-6">${listItems}</ol>`
+				} else {
+					return `<ul class="list-disc list-inside mb-6 space-y-2 border-l-2 border-muted pl-6">${listItems}</ul>`
+				}
+			}
+			if (node.type === 'quote' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.type === 'paragraph' && child.children) {
+							return child.children
+								.map((textChild: any) => textChild.text || '')
+								.join('')
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<blockquote class="border-l-4 border-primary bg-muted/50 p-6 my-8 text-lg italic text-muted-foreground">"${text}"</blockquote>`
+			}
+			return ''
+		})
+		.join('')
 }
 ---
 
-<section class="py-16">
-  <div class="container mx-auto px-4">
-    {richText && (
-      <div class="prose prose-lg max-w-none">
-        <div set:html={renderLexicalContent(richText)} />
-      </div>
-    )}
-  </div>
-</section>
+{richText && (
+	<!-- New design with richText field -->
+	<section class="w-full py-16 md:py-24 relative">
+		<GridDesign />
+		<div class="container relative mx-auto px-4 md:px-6">
+			{
+				(title || subtitle) && (
+					<div class="text-center mb-12">
+						{title && (
+							<h3 class="font-mono text-sm uppercase tracking-wide text-muted-foreground mb-6">
+								// {title}
+							</h3>
+						)}
+						{subtitle && (
+							<h2 class="text-4xl md:text-6xl font-light text-primary mb-4">
+								{subtitle}
+							</h2>
+						)}
+					</div>
+				)
+			}
+
+			<div class="max-w-4xl mx-auto">
+				<div class="border border-dashed border-border p-8 md:p-12">
+					<div set:html={renderLexicalContent(richText)} />
+				</div>
+			</div>
+		</div>
+	</section>
+)} 
+
+{columns && columns.length > 0 && (
+	<!-- Legacy column-based design -->
+	<section class="py-16 relative">
+    <GridDesign />
+		<div class="container mx-auto px-4 md:px-6">
+			<div class="grid grid-cols-4 lg:grid-cols-12 gap-y-8">
+				{columns.map((col, index) => {
+					const colsSpanClasses = {
+						full: 'col-span-4 lg:col-span-12',
+						half: 'col-span-4 lg:col-span-6 md:col-span-2',
+						oneThird: 'col-span-4 lg:col-span-4 md:col-span-2',
+						twoThirds: 'col-span-4 lg:col-span-8 md:col-span-2',
+					}
+					const colClass = colsSpanClasses[col.size || 'full']
+					
+					return (
+						<div class={colClass}>
+							{col.richText && (
+								<div set:html={renderLexicalContent(col.richText)} />
+							)}
+							{col.enableLink && col.link && (
+								<a href={col.link.url} class="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
+									{col.link.label}
+								</a>
+							)}
+						</div>
+					)
+				})}
+			</div>
+		</div>
+	</section>
+)}

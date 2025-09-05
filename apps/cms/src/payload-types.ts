@@ -191,7 +191,19 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | FeaturedBlock
+    | FeatureListBlock
+    | LogosBlock
+    | PricingBlock
+    | TestimonialsBlock
+    | BuildForBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -445,6 +457,32 @@ export interface CallToActionBlock {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
+  /**
+   * Optional title shown above the content in monospace style
+   */
+  title?: string | null;
+  /**
+   * Optional large subtitle shown below the title
+   */
+  subtitle?: string | null;
+  richText: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Legacy column support - will be rendered differently if used
+   */
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -733,6 +771,168 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedBlock".
+ */
+export interface FeaturedBlock {
+  title: string;
+  description: string;
+  buttonText?: string | null;
+  buttonUrl?: string | null;
+  features?:
+    | {
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featured';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureListBlock".
+ */
+export interface FeatureListBlock {
+  title: string;
+  subtitle: string;
+  features?:
+    | {
+        title: string;
+        description: string;
+        /**
+         * URL for the main feature image (overlaid on background)
+         */
+        image?: string | null;
+        /**
+         * URL for the background image
+         */
+        backgroundImage?: string | null;
+        testimonial?: {
+          logo?: string | null;
+          logoAlt?: string | null;
+          text?: string | null;
+          /**
+           * Used as fallback if no logo is provided
+           */
+          companyName?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureList';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogosBlock".
+ */
+export interface LogosBlock {
+  title?: string | null;
+  companies?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'logos';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock".
+ */
+export interface PricingBlock {
+  title: string;
+  subtitle: string;
+  plans?:
+    | {
+        id: string;
+        title: string;
+        description: string;
+        highlight?: boolean | null;
+        badge?: string | null;
+        currency?: string | null;
+        monthlyPrice: string;
+        yearlyPrice: string;
+        buttonText: string;
+        features?:
+          | {
+              name: string;
+              icon?: 'check' | null;
+              iconColor?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+      }[]
+    | null;
+  showFooter?: boolean | null;
+  footerText?: string | null;
+  footerButtonText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricing';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  title: string;
+  subtitle: string;
+  testimonials?:
+    | {
+        quote: string;
+        authorName: string;
+        authorTitle: string;
+        authorCompany: string;
+        authorImage: string;
+        variant?: ('default' | 'stripe' | 'vercel') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BuildForBlock".
+ */
+export interface BuildForBlock {
+  /**
+   * The main text before the highlighted portion
+   */
+  title: string;
+  /**
+   * The text that will be displayed with gradient colors
+   */
+  highlightText: string;
+  /**
+   * Advanced settings for the background ripple effect
+   */
+  rippleSettings?: {
+    /**
+     * Size of the innermost circle in pixels
+     */
+    mainCircleSize?: number | null;
+    /**
+     * Opacity of the innermost circle (0-1)
+     */
+    mainCircleOpacity?: number | null;
+    /**
+     * Total number of ripple circles
+     */
+    numCircles?: number | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'buildFor';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1025,6 +1225,12 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        featured?: T | FeaturedBlockSelect<T>;
+        featureList?: T | FeatureListBlockSelect<T>;
+        logos?: T | LogosBlockSelect<T>;
+        pricing?: T | PricingBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        buildFor?: T | BuildForBlockSelect<T>;
       };
   meta?:
     | T
@@ -1069,6 +1275,9 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
  * via the `definition` "ContentBlock_select".
  */
 export interface ContentBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  richText?: T;
   columns?:
     | T
     | {
@@ -1121,6 +1330,139 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeaturedBlock_select".
+ */
+export interface FeaturedBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  buttonText?: T;
+  buttonUrl?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureListBlock_select".
+ */
+export interface FeatureListBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        backgroundImage?: T;
+        testimonial?:
+          | T
+          | {
+              logo?: T;
+              logoAlt?: T;
+              text?: T;
+              companyName?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogosBlock_select".
+ */
+export interface LogosBlockSelect<T extends boolean = true> {
+  title?: T;
+  companies?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingBlock_select".
+ */
+export interface PricingBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  plans?:
+    | T
+    | {
+        id?: T;
+        title?: T;
+        description?: T;
+        highlight?: T;
+        badge?: T;
+        currency?: T;
+        monthlyPrice?: T;
+        yearlyPrice?: T;
+        buttonText?: T;
+        features?:
+          | T
+          | {
+              name?: T;
+              icon?: T;
+              iconColor?: T;
+              id?: T;
+            };
+      };
+  showFooter?: T;
+  footerText?: T;
+  footerButtonText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  testimonials?:
+    | T
+    | {
+        quote?: T;
+        authorName?: T;
+        authorTitle?: T;
+        authorCompany?: T;
+        authorImage?: T;
+        variant?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BuildForBlock_select".
+ */
+export interface BuildForBlockSelect<T extends boolean = true> {
+  title?: T;
+  highlightText?: T;
+  rippleSettings?:
+    | T
+    | {
+        mainCircleSize?: T;
+        mainCircleOpacity?: T;
+        numCircles?: T;
+      };
   id?: T;
   blockName?: T;
 }

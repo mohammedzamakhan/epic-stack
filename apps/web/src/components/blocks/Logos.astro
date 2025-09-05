@@ -1,0 +1,57 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface Props {
+	companies?: Array<{ name: string }>
+	title?: string
+	blockType: 'logos'
+}
+
+const {
+	companies = [
+		{ name: 'Google' },
+		{ name: 'Microsoft' },
+		{ name: 'Amazon' },
+		{ name: 'Netflix' },
+		{ name: 'YouTube' },
+		{ name: 'Instagram' },
+		{ name: 'Uber' },
+		{ name: 'Spotify' },
+		{ name: 'Tesla' },
+		{ name: 'Airbnb' },
+		{ name: 'Dropbox' },
+		{ name: 'Slack' },
+	],
+	title = '// TRUSTED BY LEADING TEAMS',
+} = Astro.props
+---
+
+<section id="logos" class="relative">
+	<GridDesign />
+	<div class="container relative mx-auto px-4 py-12 md:px-6">
+		<h3
+			class="text-center font-mono text-sm uppercase tracking-wide text-muted-foreground"
+		>
+			{title}
+		</h3>
+		<div class="relative mt-6">
+			<div
+				class="grid grid-cols-4 border-l border-t border-dashed md:grid-cols-12"
+			>
+				{
+					companies.map((company, idx) => (
+						<div class="col-span-2 flex items-center justify-center border-b border-r border-dashed bg-background">
+							<img
+								width={112}
+								height={40}
+								src={`https://cdn.magicui.design/companies/${company.name}.svg`}
+								class="my-4 h-10 w-28"
+								alt={company.name}
+							/>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</section>

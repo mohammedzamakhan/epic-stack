@@ -68,10 +68,43 @@ export const Content: Block = {
   interfaceName: 'ContentBlock',
   fields: [
     {
+      name: 'title',
+      type: 'text',
+      label: 'Section Title (optional)',
+      admin: {
+        description: 'Optional title shown above the content in monospace style'
+      }
+    },
+    {
+      name: 'subtitle',
+      type: 'text',
+      label: 'Section Subtitle (optional)',
+      admin: {
+        description: 'Optional large subtitle shown below the title'
+      }
+    },
+    {
+      name: 'richText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+          ]
+        },
+      }),
+      label: 'Content',
+      required: true,
+    },
+    {
       name: 'columns',
       type: 'array',
       admin: {
         initCollapsed: true,
+        description: 'Legacy column support - will be rendered differently if used'
       },
       fields: columnFields,
     },

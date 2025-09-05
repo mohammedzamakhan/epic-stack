@@ -6,14 +6,11 @@ import RenderBlocks from '../components/RenderBlocks.astro'
 
 const { title, hero, layout, meta } = Astro.props
 
-console.log("aaya kya yaha")
 
 export async function getStaticPaths() {
   const pages = await cmsClient.getPages()
-  console.log(pages)
   
   return pages
-    .filter((page) => page.slug !== 'home') // Exclude home page as it might have its own route
     .map((page) => {
       return {
         params: { slug: page.slug },

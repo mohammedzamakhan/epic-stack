@@ -3,10 +3,16 @@ import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock/config'
+import { BuildFor } from '../../blocks/BuildFor/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
+import { Featured } from '../../blocks/Featured/config'
+import { FeatureList } from '../../blocks/FeatureList/config'
 import { FormBlock } from '../../blocks/Form/config'
+import { Logos } from '../../blocks/Logos/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { Pricing } from '../../blocks/Pricing/config'
+import { Testimonials } from '../../blocks/Testimonials/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -75,7 +81,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, Logos, Pricing, Testimonials, BuildFor],
               required: true,
               admin: {
                 initCollapsed: true,

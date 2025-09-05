@@ -1,0 +1,84 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface RippleSettings {
+	mainCircleSize?: number
+	mainCircleOpacity?: number
+	numCircles?: number
+}
+
+interface Props {
+	title?: string
+	highlightText?: string
+	rippleSettings?: RippleSettings
+	blockType: 'buildFor'
+}
+
+const {
+	title = 'Build by developers,',
+	highlightText = 'crafted for developers',
+	rippleSettings,
+} = Astro.props
+
+const mainCircleSize = rippleSettings?.mainCircleSize || 210
+const mainCircleOpacity = rippleSettings?.mainCircleOpacity || 0.24
+const numCircles = rippleSettings?.numCircles || 8
+---
+
+<section class="relative bg-muted">
+	<GridDesign />
+	<!-- Ripple Effect positioned at section level -->
+	<div
+		class="pointer-events-none select-none absolute top-0 left-0 inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_bottom,white,transparent)]"
+	>
+		{
+			Array.from({ length: numCircles }, (_, i) => {
+				const size = mainCircleSize + i * 70
+				const opacity = mainCircleOpacity - i * 0.03
+				const animationDelay = `${i * 0.06}s`
+				const borderOpacity = 5 + i * 5
+
+				return (
+					<div
+						class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-ripple"
+						style={`
+						width: ${size}px;
+						height: ${size}px;
+						opacity: ${opacity};
+						animation-delay: ${animationDelay};
+					`}
+					>
+						<svg
+							viewBox="0 0 24 24"
+							class="h-full w-full"
+							style="filter: drop-shadow(0 20px 13px rgb(0 0 0 / 0.03)) drop-shadow(0 8px 5px rgb(0 0 0 / 0.08));"
+						>
+							<path
+								d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+								class="fill-foreground/25"
+								style={`
+								stroke: hsl(var(--foreground), ${borderOpacity / 100});
+								stroke-width: 0.5px;
+							`}
+							/>
+						</svg>
+					</div>
+				)
+			})
+		}
+	</div>
+
+	<div class="container px-4 relative py-36">
+		<h2
+			class="text-4xl md:text-6xl font-normal text-center relative tracking-wide"
+		>
+			{title}
+			<br />
+			<span
+				class="bg-gradient-to-r from-[#8b5cf6] from-[28%] via-[#d946ef] via-[70%] to-[#f43f5e] dark:from-[#fff1be] dark:from-[28%] dark:via-[#ee87cb] dark:via-[70%] dark:to-[#b060ff] bg-clip-text text-transparent"
+			>
+				{highlightText}
+			</span>
+		</h2>
+	</div>
+</section>
