@@ -114,7 +114,7 @@ export const FeatureListBlock: React.FC<FeatureListBlockProps> = (props) => {
           <div 
             className="flex transition-transform duration-500 ease-in-out gap-5"
             style={{
-              transform: `translateX(-${currentIndex * (window.innerWidth < 768 ? window.innerWidth * 0.9 + 20 : 620)}px)`
+              transform: `translateX(-${currentIndex * (window?.innerWidth < 768 ? window?.innerWidth * 0.9 + 20 : 620)}px)`
             }}
           >
             {transformedFeatures.map((feature, index) => (

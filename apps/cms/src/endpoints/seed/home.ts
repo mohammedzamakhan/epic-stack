@@ -143,6 +143,16 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       {
         blockName: 'Content Block',
         blockType: 'content',
+        richText: {
+          root: {
+            type: 'root',
+            children: [],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
         columns: [
           {
             richText: {
