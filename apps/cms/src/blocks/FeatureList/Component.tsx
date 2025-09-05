@@ -24,10 +24,10 @@ export const FeatureListBlock: React.FC<FeatureListBlockProps> = (props) => {
   } = props
 
   const [currentIndex, setCurrentIndex] = useState(0)
-  const totalFeatures = features.length
+  const totalFeatures = features?.length || 0
 
   // Transform the CMS data structure to match our component interface
-  const transformedFeatures: Feature[] = features.map((feature) => ({
+  const transformedFeatures: Feature[] = (features || []).map((feature) => ({
     title: feature.title || '',
     description: feature.description || '',
     image: feature.image || undefined,

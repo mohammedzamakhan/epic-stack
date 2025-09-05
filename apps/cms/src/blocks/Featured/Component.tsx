@@ -31,7 +31,7 @@ export const FeaturedBlock: React.FC<FeaturedBlockProps> = (props) => {
           </div>
           <div className="grid sm:grid-cols-4 col-span-6">
             <div className="col-span-2 border-l border-muted">
-              {features.slice(0, 2).map((feature, idx) => (
+              {features?.slice(0, 2).map((feature, idx) => (
                 <div
                   key={idx}
                   className={`space-y-2 border-b border-muted py-4 hover:bg-gradient-to-${
@@ -50,7 +50,7 @@ export const FeaturedBlock: React.FC<FeaturedBlockProps> = (props) => {
               ))}
             </div>
             <div className="col-span-2 border-r border-muted">
-              {features.slice(2, 4).map((feature, idx) => (
+              {features?.slice(2, 4).map((feature, idx) => (
                 <div
                   key={idx}
                   className={`space-y-2 border-b border-muted py-4 hover:bg-gradient-to-${
