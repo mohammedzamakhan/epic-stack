@@ -1,5 +1,6 @@
 ---
 import GridDesign from '../GridDesign.astro'
+import Badge from '../ui/Badge.astro'
 
 interface Props {
 	companies?: Array<{ name: string }>
@@ -28,12 +29,12 @@ const {
 
 <section id="logos" class="relative">
 	<GridDesign />
-	<div class="container relative mx-auto px-4 py-12 md:px-6">
-		<h3
-			class="text-center font-mono text-sm uppercase tracking-wide text-muted-foreground"
-		>
+	<div
+		class="container relative mx-auto px-4 py-12 md:px-6 flex justify-center flex-col"
+	>
+		<Badge class="mx-auto text-center" variant="outline" size="sm">
 			{title}
-		</h3>
+		</Badge>
 		<div class="relative mt-6">
 			<div
 				class="grid grid-cols-4 border-l border-t border-dashed md:grid-cols-12"

@@ -1,15 +1,11 @@
 ---
 interface Props {
 	className?: string
-	borderColor?: string
-	darkBorderColor?: string
 	showBorder?: boolean
 }
 
 const {
-	className = 'absolute left-0 top-0 h-full w-full border-b border-dashed border-[#d1d1d1]',
-	borderColor = '#f2eded',
-	darkBorderColor = '#d1d1d1',
+	className = 'absolute left-0 top-0 h-full w-full border-b border-dashed border-border',
 	showBorder = true,
 } = Astro.props
 ---
@@ -20,12 +16,9 @@ const {
 			{
 				Array.from({ length: 12 }, (_, i) => (
 					<div
-						class={`col-span-1 border-l-[1px] border-dashed ${
-							i === 11 ? 'border-r-[1px]' : ''
-						}`}
-						style={`border-left-color: ${i === 0 ? darkBorderColor : borderColor}; ${
-							i === 11 ? `border-right-color: ${darkBorderColor};` : ''
-						}`}
+						class={`col-span-1 border-l border-dashed ${
+							i === 0 ? 'border-l border-l-foreground/20' : 'border-border'
+						} ${i === 11 ? 'border-r border-r-foreground/20' : ''}`}
 					/>
 				))
 			}

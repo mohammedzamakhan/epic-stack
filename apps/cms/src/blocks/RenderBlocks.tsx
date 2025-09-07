@@ -13,6 +13,7 @@ import { LogosBlock } from '@/blocks/Logos/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { PricingBlock } from '@/blocks/Pricing/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
+import { BlogBlock } from '@/blocks/Blog/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -26,6 +27,7 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   pricing: PricingBlock,
   testimonials: TestimonialsBlock,
+  blog: BlogBlock,
 }
 
 export const RenderBlocks: React.FC<{

@@ -199,10 +199,29 @@ export interface Page {
     | FormBlock
     | FeaturedBlock
     | FeatureListBlock
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        features?:
+          | {
+              title: string;
+              description: string;
+              /**
+               * Paste your SVG icon code here
+               */
+              icon: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featureGrid';
+      }
     | LogosBlock
     | PricingBlock
     | TestimonialsBlock
     | BuildForBlock
+    | BlogBlock
   )[];
   meta?: {
     title?: string | null;
@@ -936,6 +955,37 @@ export interface BuildForBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlogBlock".
+ */
+export interface BlogBlock {
+  title?: string | null;
+  subtitle?: string | null;
+  description?: string | null;
+  showViewAll?: boolean | null;
+  viewAllUrl?: string | null;
+  /**
+   * How to populate the blog posts
+   */
+  populateBy?: ('collection' | 'selection') | null;
+  relationTo?: 'posts' | null;
+  /**
+   * Filter posts by categories (optional)
+   */
+  categories?: (string | Category)[] | null;
+  /**
+   * Maximum number of posts to display
+   */
+  limit?: number | null;
+  /**
+   * Select specific posts to display
+   */
+  selectedPosts?: (string | Post)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blog';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1227,10 +1277,27 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         featured?: T | FeaturedBlockSelect<T>;
         featureList?: T | FeatureListBlockSelect<T>;
+        featureGrid?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              features?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
         logos?: T | LogosBlockSelect<T>;
         pricing?: T | PricingBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         buildFor?: T | BuildForBlockSelect<T>;
+        blog?: T | BlogBlockSelect<T>;
       };
   meta?:
     | T
@@ -1463,6 +1530,24 @@ export interface BuildForBlockSelect<T extends boolean = true> {
         mainCircleOpacity?: T;
         numCircles?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlogBlock_select".
+ */
+export interface BlogBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  description?: T;
+  showViewAll?: T;
+  viewAllUrl?: T;
+  populateBy?: T;
+  relationTo?: T;
+  categories?: T;
+  limit?: T;
+  selectedPosts?: T;
   id?: T;
   blockName?: T;
 }

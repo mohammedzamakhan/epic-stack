@@ -1,5 +1,6 @@
 ---
 import GridDesign from './GridDesign.astro'
+import Badge from './ui/Badge.astro'
 
 interface Props {
 	type?: string
@@ -24,13 +25,13 @@ const renderLexicalContent = (content: any) => {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				return `<p class="text-lg">${text}</p>`
+				return `<p class="text-lg text-muted-foreground">${text}</p>`
 			}
 			if (node.type === 'heading' && node.children) {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				return `<h1 class="text-4xl font-light leading-[1.1] tracking-tighter sm:text-6xl md:text-7xl lg:text-[5rem]">${text}</h1>`
+				return `<h1 class="text-6xl tracking-tight sm:text-8xl text-pretty">${text}</h1>`
 			}
 			return ''
 		})
@@ -43,32 +44,25 @@ const renderLexicalContent = (content: any) => {
 	<GridDesign />
 
 	<div class="container relative px-4 md:px-6">
-		<div class="grid gap-0 lg:grid-cols-12">
-			<div class="col-span-6 flex flex-col justify-center">
-				<div class="space-y-6">
-					<div>
-						<span
-							class="font-mono text-sm uppercase tracking-wide text-muted-foreground border border-dashed border-[#d1d1d1] p-1 px-2 bg-background"
-						>
-							// BY THE MAKERS OF BUGBASHES.DEV
-						</span>
-					</div>
+		<div class="lg:flex lg:gap-8">
+			<div class="mx-auto max-w-2xl lg:mx-0 lg:shrink-0 lg:pt-8">
+				<div class="space-y-2">
+					<Badge variant="outline" size="sm">
+						// BY THE MAKERS OF BUGBASHES.DEV
+					</Badge>
 					{
-						richText ? (
-							<div set:html={renderLexicalContent(richText)} />
-						) : (
-							<h1 class="text-4xl font-light leading-[1.1] tracking-tighter sm:text-6xl md:text-7xl lg:text-[5rem]">
-								Build your next
-								<br />
-								Startup even{' '}
-								<span class="bg-gradient-to-r from-[#8b5cf6] from-[28%] via-[#d946ef] via-[70%] to-[#f43f5e] bg-clip-text text-transparent dark:from-[#fff1be] dark:from-[28%] dark:via-[#ee87cb] dark:via-[70%] dark:to-[#b060ff]">
-									faster.
-								</span>
-							</h1>
+						richText && (
+							<div
+								class="space-y-4"
+								set:html={renderLexicalContent(richText)}
+							/>
 						)
 					}
 				</div>
-				<div class="mt-8">
+
+				<div
+					class="mt-8 relative before:absolute before:top-0 before:h-px before:w-[200vw] before:bg-gray-950/5 dark:before:bg-white/10 before:-left-[100vw] after:absolute after:bottom-0 after:h-px after:w-[200vw] after:bg-gray-950/5 dark:after:bg-white/10 after:-left-[100vw]"
+				>
 					{
 						!isClosedBeta && (
 							<>
@@ -76,14 +70,14 @@ const renderLexicalContent = (content: any) => {
 									<>
 										<a
 											href={links[0]?.url || '#'}
-											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 w-1/2 transition-colors hover:bg-primary/90"
+											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 w-full md:w-1/2 transition-colors hover:bg-primary/90"
 										>
 											{links[0]?.link?.label || 'Get started'}
 										</a>
 										{links[1] && (
 											<a
 												href={links[1]?.url || '#'}
-												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 w-1/2 transition-colors hover:bg-accent hover:text-accent-foreground"
+												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 w-full md:w-1/2 transition-colors hover:bg-accent hover:text-accent-foreground"
 											>
 												{links[1]?.link?.label || 'Learn more'}
 											</a>
@@ -150,21 +144,24 @@ const renderLexicalContent = (content: any) => {
 					}
 				</div>
 			</div>
-			<div class="col-span-5 flex flex-col justify-center space-y-4">
-				{
-					!richText && (
-						<p class="text-lg">
-							Epic Startup is a modern SaaS boilerplate that helps developers
-							and founders launch production-ready applications in minutes.
-							Built with React, TypeScript, and the latest web technologies, it
-							includes everything you need to build, deploy, and scale your next
-							big idea.
-						</p>
-					)
-				}
 
-				<div class="flex flex-col gap-4 min-[400px]:flex-row"></div>
-			</div>
+			{
+				media && (
+					<div class="mx-auto mt-16 flex max-w-xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-8 lg:max-w-none lg:flex-none xl:ml-16">
+						<div class="max-w-2xl flex-none sm:max-w-3xl lg:max-w-none">
+							<div class="-m-2 bg-white/2.5 p-2 ring-1 ring-white/10 ring-inset lg:-m-4 lg:p-4">
+								<img
+									src={`http://localhost:3000${media.url}`}
+									alt={media.alt || 'Hero image'}
+									width={media.width || 2432}
+									height={media.height || 1442}
+									class="w-full max-h-[35rem] object-cover bg-white/5 shadow-xl ring-1 ring-white/10"
+								/>
+							</div>
+						</div>
+					</div>
+				)
+			}
 		</div>
 	</div>
 </section>
