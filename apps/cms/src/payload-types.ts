@@ -217,6 +217,37 @@ export interface Page {
         blockName?: string | null;
         blockType: 'featureGrid';
       }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        description?: string | null;
+        integrations?:
+          | {
+              name: string;
+              /**
+               * Paste your SVG icon code here
+               */
+              icon: string;
+              /**
+               * Advanced positioning for the grid layout. Leave empty for automatic positioning.
+               */
+              position?: {
+                /**
+                 * Tailwind CSS column classes (e.g., "col-start-2", "col-span-2")
+                 */
+                col?: string | null;
+                /**
+                 * Tailwind CSS row classes (e.g., "row-start-2", "md:row-start-1")
+                 */
+                row?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'integration';
+      }
     | LogosBlock
     | PricingBlock
     | TestimonialsBlock
@@ -1288,6 +1319,28 @@ export interface PagesSelect<T extends boolean = true> {
                     title?: T;
                     description?: T;
                     icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        integration?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              description?: T;
+              integrations?:
+                | T
+                | {
+                    name?: T;
+                    icon?: T;
+                    position?:
+                      | T
+                      | {
+                          col?: T;
+                          row?: T;
+                        };
                     id?: T;
                   };
               id?: T;
