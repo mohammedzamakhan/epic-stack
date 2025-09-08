@@ -1,0 +1,64 @@
+---
+import PageContent from './PageContent.astro'
+import PostContent from './PostContent.astro'
+
+interface Props {
+  data: any
+}
+
+const { data } = Astro.props
+
+// Posts have content field, Pages have hero or layout fields
+const isPost = data.content && !data.hero && !data.layout
+const isPage = data.hero || data.layout
+---
+
+{isPage && (
+  <div>
+    <PageContent 
+      title={data.title}
+      hero={data.hero}
+      layout={data.layout}
+      meta={data.meta}
+    />
+  </div>
+)}
+
+{isPost && (
+  <div>
+    <PostContent 
+      title={data.title}
+      content={data.content}
+      meta={data.meta}
+      publishedAt={data.publishedAt}
+      categories={data.categories}
+      heroImage={data.heroImage}
+    />
+  </div>
+)}
+
+{!isPage && !isPost && (
+  <div class="p-8 text-center">
+    <div class="mb-4 text-xs text-red-600 bg-red-50 px-3 py-2 rounded inline-block">
+      ❓ Unknown Content Type
+    </div>
+    <h1 class="text-2xl font-bold mb-4">{data.title || 'Unknown Content'}</h1>
+    <p class="text-gray-600">Unable to determine content type for preview.</p>
+    
+    <!-- Debug info -->
+    <div class="mt-8 p-4 bg-gray-100 rounded text-left text-xs">
+      <strong>Debug Info:</strong><br>
+      Available keys: {Object.keys(data).join(', ')}<br>
+      Has content: {data.content ? 'yes' : 'no'}<br>
+      Has hero: {data.hero ? 'yes' : 'no'}<br>
+      Has layout: {data.layout ? 'yes' : 'no'}<br>
+      Content type: {typeof data.content}<br>
+      Hero type: {typeof data.hero}<br>
+      Layout type: {typeof data.layout}<br>
+      <details class="mt-2">
+        <summary class="cursor-pointer">Full Data</summary>
+        <pre class="mt-2 text-xs overflow-auto max-h-40">{JSON.stringify(data, null, 2)}</pre>
+      </details>
+    </div>
+  </div>
+)}

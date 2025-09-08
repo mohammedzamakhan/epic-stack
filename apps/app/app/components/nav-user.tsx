@@ -46,6 +46,18 @@ export function NavUser({
 	// Check if user has admin role
 	const isAdmin = user.roles?.some((role) => role.name === 'admin') ?? false
 
+	// Generate admin URL by replacing app. with admin.
+	const getAdminUrl = () => {
+		if (typeof window === 'undefined') return ''
+
+		const { protocol, hostname, port } = window.location
+		const adminHostname = hostname.startsWith('app.')
+			? hostname.replace('app.', 'admin.')
+			: `admin.${hostname}`
+
+		return `${protocol}//${adminHostname}${port ? `:${port}` : ''}`
+	}
+
 	// Theme switching logic
 	const optimisticMode = useOptimisticThemeMode()
 	const mode = optimisticMode ?? userPreference ?? 'system'
@@ -136,7 +148,7 @@ export function NavUser({
 									onMouseEnter={() => handleMenuItemMouseEnter('admin')}
 									onMouseLeave={() => handleMenuItemMouseLeave('admin')}
 								>
-									<Link to="/admin">
+									<Link to={getAdminUrl()} target="_blank">
 										<SettingsGearIcon
 											ref={(ref: any) => (iconRefs.current['admin'] = ref)}
 											size={16}

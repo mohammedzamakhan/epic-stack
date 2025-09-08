@@ -42,6 +42,9 @@ export const Posts: CollectionConfig<'posts'> = {
     title: true,
     slug: true,
     categories: true,
+    content: true, // Add content for live preview
+    heroImage: true, // Add hero image for preview
+    publishedAt: true, // Add publish date for preview
     meta: {
       image: true,
       description: true,
@@ -227,7 +230,7 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 2000, // 2 seconds - more reasonable for live preview
       },
       schedulePublish: true,
     },

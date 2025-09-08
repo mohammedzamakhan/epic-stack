@@ -6,6 +6,7 @@ export const cookieConsentCookie = createCookie('cconsent', {
 	sameSite: 'lax',
 	path: '/',
 	httpOnly: true,
+	domain: '.epic-stack.me',
 })
 
 export async function getCookieConsentState(request: Request) {

@@ -71,9 +71,9 @@ export const AdminBar: React.FC<{
           logo={<Title />}
           onAuthChange={onAuthChange}
           onPreviewExit={() => {
-            fetch('/next/exit-preview').then(() => {
-              router.push('/')
-              router.refresh()
+            const webAppUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'http://localhost:4321'
+            fetch(`${webAppUrl}/api/exit-preview`).then(() => {
+              window.location.href = webAppUrl
             })
           }}
           style={{

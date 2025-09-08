@@ -1,6 +1,8 @@
 ---
 import GridDesign from '../GridDesign.astro'
 
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 interface Props {
 	media?: any
 	blockType: 'mediaBlock'
@@ -16,7 +18,7 @@ const { media } = Astro.props
 			media && typeof media === 'object' && media.url && (
 				<div class="text-center">
 					<img
-						src={`http://localhost:3000/${media.url}`}
+						src={`${CMS_URL}/${media.url}`}
 						alt={media.alt || 'Media image'}
 						class="w-full max-w-4xl mx-auto h-auto object-cover relative z-10"
 					/>

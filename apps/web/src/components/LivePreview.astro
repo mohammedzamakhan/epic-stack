@@ -1,0 +1,57 @@
+<div id="live-preview">
+  <div class="p-8 text-center text-gray-500">
+    Loading preview...
+  </div>
+</div>
+
+<script>
+  const CMS_URL = import.meta.env.PUBLIC_CMS_URL
+
+  import { subscribe, unsubscribe, ready } from '@payloadcms/live-preview';
+
+  const previewElement = document.getElementById('live-preview') as HTMLElement;
+
+  const onChange = async (mergedData: any) => {
+    if (!mergedData) {
+      console.error('No data received');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ post: mergedData }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const html = await response.text();
+      if (html) {
+        (previewElement as HTMLElement).innerHTML = html;
+      } else {
+        console.error('Received empty HTML response');
+      }
+    } catch (error) {
+      console.error('Failed to update preview:', error);
+      (previewElement as HTMLElement).innerHTML = `<div class="error p-4 bg-red-50 text-red-600 rounded">Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
+    }
+  };
+
+  const subscription = subscribe({
+    callback: onChange,
+    depth: 2,
+    initialData: {},
+    serverURL: CMS_URL,
+  });
+
+  ready({ serverURL: CMS_URL });
+
+  document.addEventListener('astro:unmount', () => {
+    unsubscribe(subscription);
+  });
+</script>

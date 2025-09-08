@@ -3,7 +3,7 @@
  * Combines the benefits of the official Astro guide patterns with proper TypeScript and error handling
  */
 
-const CMS_URL = (import.meta as any).env?.CMS_URL || 'http://localhost:3000'
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
 
 export interface Page {
   id: string

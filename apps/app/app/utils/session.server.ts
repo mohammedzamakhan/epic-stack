@@ -6,6 +6,7 @@ export const authSessionStorage = createCookieSessionStorage({
 		sameSite: 'lax', // CSRF protection is advised if changing to 'none'
 		path: '/',
 		httpOnly: true,
+		domain: '.epic-stack.me',
 		secrets: process.env.SESSION_SECRET.split(','),
 		secure: process.env.NODE_ENV === 'production',
 	},

@@ -35,6 +35,7 @@ export default defineConfig((config) => ({
 		noExternal: ['@repo/email'],
 	},
 	server: {
+		allowedHosts: ['app.epic-stack.me', 'localhost'],
 		watch: {
 			ignored: ['**/playwright-report/**', '**/node_modules/.vite-temp/**'],
 		},

@@ -1,6 +1,16 @@
 ---
 import GridDesign from '~/components/GridDesign.astro'
 import '../styles/tailwind.css'
+
+// Get the current URL and transform it for the app subdomain
+const currentUrl = Astro.url
+const protocol = currentUrl.protocol
+const hostname = currentUrl.hostname
+const port = currentUrl.port
+
+// Create app subdomain URL - works with any domain
+const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
+const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 ---
 
 <html class="" lang="en">
@@ -112,10 +122,11 @@ import '../styles/tailwind.css'
 
 					<div class="hidden lg:flex items-center space-x-4 relative z-10">
 						<a
-							href="/demo"
+							href={demoUrl}
+                            target="_blank"
 							class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
 						>
-							Book a demo
+							Get started
 						</a>
 					</div>
 
@@ -214,7 +225,7 @@ import '../styles/tailwind.css'
 
 						<div class="space-y-3 pt-6 border-t">
 							<a
-								href="/demo"
+								href={demoUrl}
 								class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
 							>
 								Book a demo
@@ -273,7 +284,7 @@ import '../styles/tailwind.css'
 									in minutes.
 								</p>
 								<a
-									href="/demo"
+									href={demoUrl}
 									class="inline-flex items-center justify-center bg-muted text-foreground font-medium text-sm py-3 px-6 transition-colors hover:bg-muted/80"
 								>
 									Get started
@@ -575,4 +586,6 @@ import '../styles/tailwind.css'
 			mobileOperationTypesContent.classList.toggle('hidden')
 		})
 	}
+
+
 </script>

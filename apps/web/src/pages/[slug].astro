@@ -1,11 +1,9 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
 import { cmsClient } from '../lib/cms'
-import RenderHero from '../components/RenderHero.astro'
-import RenderBlocks from '../components/RenderBlocks.astro'
-
+import PageContent from '../components/PageContent.astro'
+export const prerender = true;
 const { title, hero, layout, meta } = Astro.props
-
 
 export async function getStaticPaths() {
   const pages = await cmsClient.getPages()
@@ -25,8 +23,6 @@ export async function getStaticPaths() {
       }
     })
 }
-
-
 ---
 
 <MarketingLayout>
@@ -42,25 +38,5 @@ export async function getStaticPaths() {
     )}
   </Fragment>
 
-  <article class="min-h-screen">
-    {/* Render Hero Section */}
-    {hero && <RenderHero {...hero} />}
-    
-    {/* Render Layout Blocks */}
-    {layout && layout.length > 0 && (
-      <RenderBlocks blocks={layout} />
-    )}
-    
-    {/* If no layout blocks, show a basic content structure */}
-    {(!layout || layout.length === 0) && (
-      <section class="py-24">
-        <div class="container mx-auto px-4 max-w-4xl">
-          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{title}</h1>
-          <div class="prose prose-lg max-w-none">
-            <p>This page has no content blocks configured.</p>
-          </div>
-        </div>
-      </section>
-    )}
-  </article>
+  <PageContent title={title} hero={hero} layout={layout} meta={meta} />
 </MarketingLayout>

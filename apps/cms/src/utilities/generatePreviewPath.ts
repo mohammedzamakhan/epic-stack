@@ -19,7 +19,9 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
     previewSecret: process.env.PREVIEW_SECRET || '',
   })
 
-  const url = `/next/preview?${encodedParams.toString()}`
+  // Point to Astro web app preview endpoint
+  const webAppUrl = process.env.WEB_APP_URL || 'http://localhost:3002'
+  const url = `${webAppUrl}/preview?${encodedParams.toString()}`
 
   return url
 }
