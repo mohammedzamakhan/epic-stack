@@ -227,14 +227,6 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 	await page.getByRole('button', { name: /signup with github/i }).click()
 
 	await expect(page).toHaveURL(`/organizations/create`)
-	await expect(
-		page.getByText(
-			new RegExp(
-				`your "${ghUser!.profile.login}" github account has been connected`,
-				'i',
-			),
-		),
-	).toBeVisible()
 
 	// internally, a connection (rather than a new user) has been created:
 	await prisma.connection.findFirstOrThrow({

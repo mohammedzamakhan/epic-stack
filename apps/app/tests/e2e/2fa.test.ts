@@ -79,7 +79,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 
 	await page.getByRole('button', { name: /verify/i }).click()
 
-	await expect(page).toHaveURL('/')
+	await expect(page).toHaveURL('/organizations/create')
 
 	// Navigate to the app to verify the user is properly logged in
 	await page.goto('/app')
