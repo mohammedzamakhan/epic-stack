@@ -1,5 +1,5 @@
 import { useFetcher } from 'react-router'
-import { disconnectProviderActionIntent } from '#app/routes/app+/security.tsx'
+import { disconnectProviderActionIntent } from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { Icon, IconName, StatusButton } from '@repo/ui'
 

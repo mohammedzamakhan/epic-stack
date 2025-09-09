@@ -43,5 +43,5 @@ export async function action({ request }: ActionFunctionArgs) {
 	await setUserDefaultOrganization(userId, organizationId)
 
 	// Redirect back to the previous page or a default location
-	return redirect(`/app/${hasAccess.organization.slug}`)
+	return redirect(`/${hasAccess.organization.slug}`)
 }

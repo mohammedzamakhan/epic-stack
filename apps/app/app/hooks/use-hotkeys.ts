@@ -42,14 +42,14 @@ export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 		},
 		{
 			key: 'cmd+a,ctrl+a',
-			action: () => void navigate('/app/profile'),
+			action: () => void navigate('/profile'),
 			description: 'Go to account settings',
 		},
 		{
 			key: 'cmd+b,ctrl+b',
 			action: () => {
 				if (orgSlug) {
-					void navigate(`/app/${orgSlug}/settings/billing`)
+					void navigate(`/${orgSlug}/settings/billing`)
 				}
 			},
 			description: 'Go to billing',
@@ -58,7 +58,7 @@ export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 			key: 'cmd+s,ctrl+s',
 			action: () => {
 				if (orgSlug) {
-					void navigate(`/app/${orgSlug}/settings`)
+					void navigate(`/${orgSlug}/settings`)
 				}
 			},
 			description: 'Go to settings',

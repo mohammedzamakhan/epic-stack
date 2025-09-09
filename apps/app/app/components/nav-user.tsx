@@ -117,7 +117,7 @@ export function NavUser({
 								onMouseEnter={() => handleMenuItemMouseEnter('account')}
 								onMouseLeave={() => handleMenuItemMouseLeave('account')}
 							>
-								<Link to="/app/profile">
+								<Link to="/profile">
 									<UserIcon
 										ref={(ref: any) => (iconRefs.current['account'] = ref)}
 										size={16}
@@ -131,7 +131,7 @@ export function NavUser({
 								onMouseEnter={() => handleMenuItemMouseEnter('organizations')}
 								onMouseLeave={() => handleMenuItemMouseLeave('organizations')}
 							>
-								<Link to="/app/organizations">
+								<Link to="/organizations">
 									<BuildingIcon
 										ref={(ref: any) =>
 											(iconRefs.current['organizations'] = ref)

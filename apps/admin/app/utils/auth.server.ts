@@ -46,7 +46,7 @@ export async function getUserId(request: Request) {
 		where: { id: sessionId, expirationDate: { gt: new Date() } },
 	})
 	if (!session?.userId) {
-		throw redirect('/', {
+		throw redirect('/login', {
 			headers: {
 				'set-cookie': await authSessionStorage.destroySession(authSession),
 			},
@@ -109,7 +109,7 @@ export async function requireUserId(
 export async function requireAnonymous(request: Request) {
 	const userId = await getUserId(request)
 	if (userId) {
-		throw redirect('/')
+		throw redirect('/login')
 	}
 }
 

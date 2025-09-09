@@ -105,7 +105,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 				<CommandGroup heading="Actions">
 					<CommandItem asChild>
 						<Link
-							to={`/app/${orgSlug}/notes/new`}
+							to={`/${orgSlug}/notes/new`}
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="plus" />
@@ -114,7 +114,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 					</CommandItem>
 					<CommandItem asChild>
 						<Link
-							to={`/app/${orgSlug}/settings/members`}
+							to={`/${orgSlug}/settings/members`}
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="user-plus" />
@@ -128,7 +128,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 						{notes.map((note) => (
 							<CommandItem key={note.id} asChild>
 								<Link
-									to={`/app/${orgSlug}/notes/${note.id}`}
+									to={`/${orgSlug}/notes/${note.id}`}
 									onClick={() => onOpenChange(false)}
 								>
 									<Icon name="file-text" />
@@ -145,7 +145,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 				)}
 				<CommandGroup heading="Settings">
 					<CommandItem asChild>
-						<Link to="/app/profile" onClick={() => onOpenChange(false)}>
+						<Link to="/profile" onClick={() => onOpenChange(false)}>
 							<Icon name="user" />
 							<span>Account settings</span>
 							<CommandShortcut>⌘P</CommandShortcut>
@@ -153,7 +153,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 					</CommandItem>
 					<CommandItem asChild>
 						<Link
-							to={`/app/${orgSlug}/settings/billing`}
+							to={`/${orgSlug}/settings/billing`}
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="credit-card" />
@@ -163,7 +163,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 					</CommandItem>
 					<CommandItem asChild>
 						<Link
-							to={`/app/${orgSlug}/settings`}
+							to={`/${orgSlug}/settings`}
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="settings" />

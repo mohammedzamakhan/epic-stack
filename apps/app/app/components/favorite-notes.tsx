@@ -69,7 +69,7 @@ export default function FavoriteNotes({
 							onMouseEnter={() => handleMenuItemMouseEnter(favorite.note.id)}
 							onMouseLeave={() => handleMenuItemMouseLeave(favorite.note.id)}
 						>
-							<Link to={`/app/${orgSlug}/notes/${favorite.note.id}`}>
+							<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
 								<FileTextIcon
 									ref={(ref: any) => (iconRefs.current[favorite.note.id] = ref)}
 									size={16}
@@ -90,13 +90,13 @@ export default function FavoriteNotes({
 								align={isMobile ? 'end' : 'start'}
 							>
 								<DropdownMenuItem asChild className="gap-2">
-									<Link to={`/app/${orgSlug}/notes/${favorite.note.id}`}>
+									<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
 										<Icon name="folder" />
 										<span>Open</span>
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild className="gap-2">
-									<Link to={`/app/${orgSlug}/notes/${favorite.note.id}/edit`}>
+									<Link to={`/${orgSlug}/notes/${favorite.note.id}/edit`}>
 										<Icon name="pencil" />
 										<span>Edit</span>
 									</Link>
@@ -105,7 +105,7 @@ export default function FavoriteNotes({
 								<DropdownMenuItem asChild>
 									<Form
 										method="post"
-										action={`/app/${orgSlug}/notes/${favorite.note.id}`}
+										action={`/${orgSlug}/notes/${favorite.note.id}`}
 									>
 										<input
 											type="hidden"

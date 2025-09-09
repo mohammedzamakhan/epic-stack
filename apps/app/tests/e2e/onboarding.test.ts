@@ -45,7 +45,7 @@ test('onboarding with link', async ({ page, getOnboardingData }) => {
 
 	await page.goto('/')
 
-	await page.getByRole('link', { name: /login/i }).click()
+	await page.getByRole('link', { name: /sign in/i }).click()
 	await expect(page).toHaveURL(`/login`)
 
 	const createAccountLink = page.getByRole('link', {

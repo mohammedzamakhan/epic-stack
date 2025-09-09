@@ -45,14 +45,14 @@ export function UserDropdown() {
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="end">
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/app/profile`}>
+						<Link prefetch="intent" to={`/profile`}>
 							<Icon className="text-body-md" name="user">
 								Profile
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/app/${organization.slug}`}>
+						<Link prefetch="intent" to={`/${organization.slug}`}>
 							<Icon className="text-body-md" name="clock">
 								Dashboard
 							</Icon>

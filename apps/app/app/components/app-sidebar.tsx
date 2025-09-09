@@ -62,7 +62,7 @@ function UpgradeAccountCard({
 					className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/70 w-full"
 					asChild
 				>
-					<Link to={`/app/${orgSlug}/settings/billing`}>Upgrade</Link>
+					<Link to={`/${orgSlug}/settings/billing`}>Upgrade</Link>
 				</Button>
 				<Button
 					variant="link"
@@ -88,32 +88,32 @@ function AccountSidebar({
 	orgSlug: string | undefined
 	onFeedbackClick: () => void
 }) {
-	const isProfileRoute = location.pathname === '/app/profile'
-	const isSecurityRoute = location.pathname === '/app/security'
-	const isOrganizationsRoute = location.pathname === '/app/organizations'
+	const isProfileRoute = location.pathname === '/profile'
+	const isSecurityRoute = location.pathname === '/security'
+	const isOrganizationsRoute = location.pathname === '/organizations'
 
 	const navMain = [
 		{
 			title: 'Dashboard',
-			url: orgSlug ? `/app/${orgSlug}` : '/app/organizations',
+			url: orgSlug ? `/${orgSlug}` : '/organizations',
 			isActive: false,
 			icon: ArrowLeftIcon,
 		},
 		{
 			title: 'Profile',
-			url: '/app/profile',
+			url: '/profile',
 			isActive: isProfileRoute,
 			icon: UserIcon,
 		},
 		{
 			title: 'Security',
-			url: '/app/security',
+			url: '/security',
 			isActive: isSecurityRoute,
 			icon: LockOpenIcon,
 		},
 		{
 			title: 'Organizations',
-			url: '/app/organizations',
+			url: '/organizations',
 			isActive: isOrganizationsRoute,
 			icon: BuildingIcon,
 		},
@@ -174,48 +174,48 @@ function OrganizationSidebar({
 	const navMain = [
 		{
 			title: 'Dashboard',
-			url: `/app/${orgSlug}`,
-			isActive: location.pathname === `/app/${orgSlug}`,
+			url: `/${orgSlug}`,
+			isActive: location.pathname === `/${orgSlug}`,
 			icon: HomeIcon,
 		},
 		{
 			title: 'Notes',
-			url: `/app/${orgSlug}/notes`,
-			isActive: location.pathname.includes(`/app/${orgSlug}/notes`),
+			url: `/${orgSlug}/notes`,
+			isActive: location.pathname.includes(`/${orgSlug}/notes`),
 			icon: FoldersIcon,
 		},
 		{
 			title: 'MCP Server',
-			url: `/app/${orgSlug}/mcp`,
-			isActive: location.pathname.includes(`/app/${orgSlug}/mcp`),
+			url: `/${orgSlug}/mcp`,
+			isActive: location.pathname.includes(`/${orgSlug}/mcp`),
 			icon: McpIcon,
 		},
 		{
 			title: 'Settings',
-			url: `/app/${orgSlug}/settings`,
-			isActive: location.pathname.includes(`/app/${orgSlug}/settings`),
+			url: `/${orgSlug}/settings`,
+			isActive: location.pathname.includes(`/${orgSlug}/settings`),
 			icon: SettingsGearIcon,
 			items: [
 				{
 					title: 'General',
-					url: `/app/${orgSlug}/settings`,
-					isActive: location.pathname === `/app/${orgSlug}/settings`,
+					url: `/${orgSlug}/settings`,
+					isActive: location.pathname === `/${orgSlug}/settings`,
 				},
 				{
 					title: 'Members',
-					url: `/app/${orgSlug}/settings/members`,
-					isActive: location.pathname === `/app/${orgSlug}/settings/members`,
+					url: `/${orgSlug}/settings/members`,
+					isActive: location.pathname === `/${orgSlug}/settings/members`,
 				},
 				{
 					title: 'Integrations',
-					url: `/app/${orgSlug}/settings/integrations`,
+					url: `/${orgSlug}/settings/integrations`,
 					isActive:
-						location.pathname === `/app/${orgSlug}/settings/integrations`,
+						location.pathname === `/${orgSlug}/settings/integrations`,
 				},
 				{
 					title: 'Billing',
-					url: `/app/${orgSlug}/settings/billing`,
-					isActive: location.pathname === `/app/${orgSlug}/settings/billing`,
+					url: `/${orgSlug}/settings/billing`,
+					isActive: location.pathname === `/${orgSlug}/settings/billing`,
 				},
 			],
 		},
@@ -224,7 +224,7 @@ function OrganizationSidebar({
 	const navSecondary = [
 		{
 			title: 'Add members',
-			url: `/app/${orgSlug}/settings/members`,
+			url: `/${orgSlug}/settings/members`,
 			icon: UserRoundPlusIcon,
 		},
 		{
@@ -255,7 +255,7 @@ function OrganizationSidebar({
 					onboardingProgress.isVisible &&
 					orgSlug &&
 					organizationId && (
-						<Link to={`/app/${orgSlug}`}>
+						<Link to={`/${orgSlug}`}>
 							<OnboardingChecklist
 								progress={onboardingProgress}
 								orgSlug={orgSlug}
@@ -315,9 +315,9 @@ export function AppSidebar({
 		rootData?.userOrganizations?.currentOrganization?.organization.id
 
 	// Check if we're on profile or organizations routes
-	const isProfileRoute = location.pathname === '/app/profile'
-	const isSecurityRoute = location.pathname === '/app/security'
-	const isOrganizationsRoute = location.pathname === '/app/organizations'
+	const isProfileRoute = location.pathname === '/profile'
+	const isSecurityRoute = location.pathname === '/security'
+	const isOrganizationsRoute = location.pathname === '/organizations'
 	const isAccountRoute =
 		isProfileRoute || isSecurityRoute || isOrganizationsRoute
 

@@ -1,0 +1,884 @@
+import { Button, ColorPicker, Input, StatusButton, Icon } from '@repo/ui'
+import {
+	DndContext,
+	KeyboardSensor,
+	MouseSensor,
+	TouchSensor,
+	pointerWithin,
+	rectIntersection,
+	useSensor,
+	useSensors,
+	useDroppable,
+	DragOverlay,
+	type DragStartEvent,
+	type DragEndEvent,
+	type DragOverEvent,
+	type Announcements,
+} from '@dnd-kit/core'
+import {
+	SortableContext,
+	verticalListSortingStrategy,
+	horizontalListSortingStrategy,
+	useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useFetcher, useFetchers } from 'react-router'
+
+import { useDoubleCheck } from '#app/utils/misc.tsx'
+import { NoteCard } from './notes-cards.tsx'
+
+type Note = LoaderNote & {
+	position?: number | null
+}
+type LoaderNote = {
+	id: string
+	title: string
+	content: string
+	createdAt: string
+	updatedAt: string
+	createdById: string
+	createdByName: string
+	statusId: string | null
+	statusName: string | null
+	uploads: Array<{
+		id: string
+		type: string
+		altText: string | null
+		objectKey: string
+		thumbnailKey: string | null
+		status: string
+	}>
+}
+
+type Status = {
+	id: string
+	name: string
+	color?: string
+	position: number | null
+}
+type Column = { id: string; name: string; color?: string }
+
+const UNCATEGORISED = '__uncategorised'
+const SEPARATOR = ':::'
+const COLUMN_PREFIX = 'column-'
+function makeDragId(columnId: string, noteId: string) {
+	return `${columnId}${SEPARATOR}${noteId}`
+}
+function makeColumnDragId(columnId: string) {
+	return `${COLUMN_PREFIX}${columnId}`
+}
+function parseDragId(
+	id: unknown,
+): { columnId: string; noteId?: string; isColumn?: boolean } | null {
+	if (!id || typeof id !== 'string') return null
+
+	// Check if it's a column drag
+	if (id.startsWith(COLUMN_PREFIX)) {
+		const columnId = id.substring(COLUMN_PREFIX.length)
+		return { columnId, isColumn: true }
+	}
+
+	// Check if it's a note drag
+	if (id.includes(SEPARATOR)) {
+		const [columnId, noteId] = id.split(SEPARATOR)
+		return { columnId: columnId || '', noteId }
+	}
+	return { columnId: id }
+}
+
+const collisionStrategy = (args: any) => {
+	const pointer = pointerWithin(args)
+	return pointer.length > 0 ? pointer : rectIntersection(args)
+}
+
+export function NotesKanbanBoard({
+	notes,
+	statuses,
+	orgSlug,
+	organizationId,
+}: {
+	notes: LoaderNote[]
+	statuses: Status[]
+	orgSlug: string
+	organizationId: string
+}) {
+	// --- Optimistic overlays from Remix fetchers ---
+	const fetchers = useFetchers()
+
+	// Pending note moves / creates
+	const pendingNotes = fetchers
+		.filter((f) => f.formData?.get('intent') === 'reorder-note')
+		.map((f) => ({
+			id: String(f.formData!.get('noteId')),
+			statusId: (f.formData!.get('statusId') as string) ?? null,
+			position: Number(f.formData!.get('position')),
+		}))
+
+	const pendingNoteCreates = fetchers
+		.filter((f) => f.formData?.get('intent') === 'create-note')
+		.map(
+			(f) =>
+				({
+					id: String(f.formData!.get('noteId')),
+					title: String(f.formData!.get('title')),
+					content: '',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+					createdById: '',
+					createdByName: 'You',
+					statusId: (f.formData!.get('statusId') as string) ?? null,
+					statusName: null,
+					uploads: [],
+				}) as LoaderNote,
+		)
+
+	// Pending status creates / renames / deletes
+	const renameMap: Record<string, string> = {}
+	fetchers
+		.filter((f) => f.formData?.get('intent') === 'rename-status')
+		.forEach((f) => {
+			renameMap[String(f.formData!.get('statusId'))] = String(
+				f.formData!.get('name'),
+			)
+		})
+
+	const pendingCreatesStatus = fetchers
+		.filter((f) => f.formData?.get('intent') === 'create-status')
+		.map((f) => {
+			const name = String(f.formData!.get('name'))
+			return { id: name, name }
+		})
+
+	const pendingDeletes = new Set<string>()
+	for (const f of fetchers) {
+		if (f.formMethod === 'DELETE' && f.formAction?.includes('/notes/status/')) {
+			const statusId = f.formAction.split('/').pop()
+			if (statusId) pendingDeletes.add(statusId)
+		}
+	}
+
+	// Build columns
+	const columns: Column[] = [
+		...statuses
+			.filter((s) => !pendingDeletes.has(s.id))
+			.map((s) => ({
+				id: s.id,
+				name: renameMap[s.id] ?? s.name,
+				color: s.color,
+			})),
+		...pendingCreatesStatus,
+	]
+	if (notes.some((n) => !n.statusId))
+		columns.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+
+	// Build notes
+	const noteMap = new Map<string, Note>()
+	notes.forEach((n) => noteMap.set(n.id, { ...n }))
+	pendingNotes.forEach((p) => {
+		const n = noteMap.get(p.id)
+		if (n) {
+			n.statusId = p.statusId
+			n.position = p.position
+		}
+	})
+	pendingNoteCreates.forEach((n) => noteMap.set(n.id, n))
+
+	// Group by statusId
+	const grouped: Record<string, Note[]> = {}
+	columns.forEach((c) => (grouped[c.id] = []))
+	noteMap.forEach((n) => {
+		const bucket =
+			grouped[n.statusId ?? UNCATEGORISED] ??
+			(grouped[n.statusId ?? UNCATEGORISED] = [])
+		bucket.push(n)
+	})
+	Object.values(grouped).forEach((arr) =>
+		arr.sort((a, b) => {
+			const posA = a.position ?? Number.POSITIVE_INFINITY
+			const posB = b.position ?? Number.POSITIVE_INFINITY
+			if (posA === posB) {
+				// Fallback to creation date if positions are equal
+				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+			}
+			return posA - posB
+		}),
+	)
+
+	// --- DnD-kit setup ---
+	const sensors = useSensors(
+		useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+		useSensor(TouchSensor, {
+			activationConstraint: { delay: 250, tolerance: 5 },
+		}),
+		useSensor(KeyboardSensor),
+	)
+	const reorderFetcher = useFetcher()
+	const columnReorderFetcher = useFetcher()
+	const [activeNote, setActiveNote] = useState<Note | null>(null)
+	const [activeColumn, setActiveColumn] = useState<Column | null>(null)
+	const [dragDestination, setDragDestination] = useState<{
+		columnId: string
+		position?: number
+	} | null>(null)
+
+	function handleDragStart(ev: DragStartEvent) {
+		const info = parseDragId(ev.active.id)
+		if (info?.isColumn) {
+			// Column drag
+			const column = columns.find((c) => c.id === info.columnId)
+			setActiveColumn(column ?? null)
+			setActiveNote(null)
+		} else if (info?.noteId && info.noteId !== '__placeholder') {
+			// Note drag
+			setActiveNote(noteMap.get(info.noteId) ?? null)
+			setActiveColumn(null)
+		} else {
+			setActiveNote(null)
+			setActiveColumn(null)
+		}
+		setDragDestination(null)
+	}
+
+	function handleDragOver(ev: DragOverEvent) {
+		const { active, over } = ev
+		if (!over) return
+
+		const activeParsed = parseDragId(active.id)
+
+		// Handle column drag over
+		if (activeParsed?.isColumn) {
+			// Column dragging - no preview needed for now
+			return
+		}
+
+		// Handle note drag over (existing logic)
+		if (!activeNote) return
+
+		const overParsed = parseDragId(over.id)
+		const destColId = overParsed?.columnId ?? String(over.id)
+		const overNoteId =
+			overParsed?.noteId && overParsed.noteId !== '__placeholder'
+				? overParsed.noteId
+				: null
+
+		if (!destColId || !activeParsed?.noteId) return
+
+		const list = grouped[destColId] ?? []
+		let destIndex = list.length
+
+		if (overNoteId) {
+			const overIndex = list.findIndex((n) => n.id === overNoteId)
+			if (overIndex >= 0) destIndex = overIndex
+
+			// If moving within same column and after itself, adjust index
+			if (
+				activeParsed.columnId === destColId &&
+				overIndex > list.findIndex((n) => n.id === activeParsed.noteId)
+			) {
+				destIndex--
+			}
+		}
+
+		// Only update if destination changed
+		if (
+			dragDestination?.columnId !== destColId ||
+			dragDestination?.position !== destIndex
+		) {
+			setDragDestination({ columnId: destColId, position: destIndex })
+		}
+	}
+
+	function handleDragEnd(ev: DragEndEvent) {
+		const { active, over } = ev
+		setActiveNote(null)
+		setActiveColumn(null)
+		setDragDestination(null)
+		if (!over) return
+
+		const activeParsed = parseDragId(active.id)
+
+		// Handle column reordering
+		if (activeParsed?.isColumn) {
+			const overParsed = parseDragId(over.id)
+			if (!overParsed?.isColumn) return
+
+			const activeIndex = columns.findIndex(
+				(c) => c.id === activeParsed.columnId,
+			)
+			const overIndex = columns.findIndex((c) => c.id === overParsed.columnId)
+
+			if (activeIndex !== overIndex && activeIndex !== -1 && overIndex !== -1) {
+				const formData = new FormData()
+				formData.append('statusId', activeParsed.columnId)
+				formData.append('position', String(overIndex))
+				void columnReorderFetcher.submit(formData, {
+					method: 'post',
+					action: `/${orgSlug}/notes/statuses/reorder`,
+				})
+			}
+			return
+		}
+
+		// Handle note reordering (existing logic)
+		const overParsed = parseDragId(over.id)
+		const destColId = overParsed?.columnId ?? String(over.id)
+		const overNoteId =
+			overParsed?.noteId && overParsed.noteId !== '__placeholder'
+				? overParsed.noteId
+				: null
+		if (!destColId || !activeParsed?.noteId) return
+		const list = grouped[destColId] ?? []
+		let destIndex = list.length
+
+		if (overNoteId) {
+			const overIndex = list.findIndex((n) => n.id === overNoteId)
+			if (overIndex >= 0) destIndex = overIndex
+
+			// If moving within same column and after itself, adjust index
+			if (
+				activeParsed.columnId === destColId &&
+				overIndex > list.findIndex((n) => n.id === activeParsed.noteId)
+			) {
+				destIndex--
+			}
+		}
+
+		const formData = new FormData()
+		formData.append('intent', 'reorder-note')
+		formData.append('noteId', activeParsed.noteId)
+		formData.append('position', String(destIndex))
+		if (destColId !== UNCATEGORISED) formData.append('statusId', destColId)
+		void reorderFetcher.submit(formData, {
+			method: 'post',
+			action: `/${orgSlug}/notes/reorder`,
+		})
+	}
+
+	// Accessibility announcements for screen readers
+	const announcements: Announcements = {
+		onDragStart({ active }) {
+			const info = parseDragId(active.id)
+			if (info?.isColumn) {
+				const column = columns.find((c) => c.id === info.columnId)
+				return `Picked up column "${column?.name}"`
+			} else if (info?.noteId && info.noteId !== '__placeholder') {
+				const note = noteMap.get(info.noteId)
+				const column = columns.find((c) => c.id === info.columnId)
+				return `Picked up note "${note?.title}" from column "${column?.name}"`
+			}
+			return 'Picked up draggable item'
+		},
+		onDragOver({ active, over }) {
+			if (!over) return
+			const activeInfo = parseDragId(active.id)
+			const overInfo = parseDragId(over.id)
+
+			if (activeInfo?.isColumn && overInfo?.isColumn) {
+				const overColumn = columns.find((c) => c.id === overInfo.columnId)
+				return `Moving column over "${overColumn?.name}"`
+			}
+
+			const destColumn = columns.find(
+				(c) => c.id === (overInfo?.columnId ?? over.id),
+			)
+
+			if (activeInfo?.noteId && destColumn) {
+				return `Moving note over column "${destColumn.name}"`
+			}
+			return 'Moving item'
+		},
+		onDragEnd({ active, over }) {
+			if (!over) return 'Item dropped'
+			const activeInfo = parseDragId(active.id)
+			const overInfo = parseDragId(over.id)
+
+			if (activeInfo?.isColumn && overInfo?.isColumn) {
+				const activeColumn = columns.find((c) => c.id === activeInfo.columnId)
+				const overColumn = columns.find((c) => c.id === overInfo.columnId)
+				return `Column "${activeColumn?.name}" moved next to "${overColumn?.name}"`
+			}
+
+			const destColumn = columns.find(
+				(c) => c.id === (overInfo?.columnId ?? over.id),
+			)
+
+			if (activeInfo?.noteId && destColumn) {
+				const note = noteMap.get(activeInfo.noteId)
+				return `Note "${note?.title}" dropped in column "${destColumn.name}"`
+			}
+			return 'Item dropped'
+		},
+		onDragCancel() {
+			return 'Dragging cancelled'
+		},
+	}
+
+	// --- Render ---
+	return (
+		<DndContext
+			sensors={sensors}
+			collisionDetection={collisionStrategy}
+			onDragStart={handleDragStart}
+			onDragOver={handleDragOver}
+			onDragEnd={handleDragEnd}
+			onDragCancel={() => {
+				setActiveNote(null)
+				setActiveColumn(null)
+				setDragDestination(null)
+			}}
+			accessibility={{ announcements }}
+		>
+			<SortableContext
+				items={columns.map((col) => makeColumnDragId(col.id))}
+				strategy={horizontalListSortingStrategy}
+			>
+				<div className="flex snap-x snap-mandatory gap-2 overflow-x-auto py-2">
+					{columns.map((col) => (
+						<SortableKanbanColumn
+							key={col.id}
+							column={col}
+							notes={grouped[col.id] ?? []}
+							orgSlug={orgSlug}
+							activeNote={activeNote}
+							dragDestination={dragDestination}
+							organizationId={organizationId}
+							isActive={activeColumn?.id === col.id}
+						/>
+					))}
+					<NewColumnButton orgSlug={orgSlug} />
+				</div>
+			</SortableContext>
+			{typeof window !== 'undefined' &&
+				createPortal(
+					<DragOverlay>
+						{activeNote ? (
+							<div className="rotate-3 shadow-lg">
+								<NoteCard note={activeNote} organizationId={organizationId} />
+							</div>
+						) : activeColumn ? (
+							<div className="scale-105 rotate-3 shadow-2xl">
+								<KanbanColumn
+									column={activeColumn}
+									notes={grouped[activeColumn.id] ?? []}
+									orgSlug={orgSlug}
+									activeNote={null}
+									dragDestination={null}
+									organizationId={organizationId}
+								/>
+							</div>
+						) : null}
+					</DragOverlay>,
+					document.body,
+				)}
+		</DndContext>
+	)
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Sortable Column Wrapper                                                   */
+/* -------------------------------------------------------------------------- */
+
+function SortableKanbanColumn({
+	column,
+	notes,
+	orgSlug,
+	activeNote,
+	dragDestination,
+	organizationId,
+	isActive,
+}: {
+	column: Column
+	notes: Note[]
+	orgSlug: string
+	activeNote: Note | null
+	dragDestination: { columnId: string; position?: number } | null
+	organizationId: string
+	isActive: boolean
+}) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id: makeColumnDragId(column.id),
+		data: {
+			type: 'Column',
+			column,
+		},
+	})
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+		opacity: isDragging ? 0.5 : 1,
+		zIndex: isDragging ? 1000 : 'auto',
+	}
+
+	return (
+		<div ref={setNodeRef} style={style}>
+			<KanbanColumn
+				column={column}
+				notes={notes}
+				orgSlug={orgSlug}
+				activeNote={activeNote}
+				dragDestination={dragDestination}
+				organizationId={organizationId}
+				dragHandleProps={{ ...attributes, ...listeners }}
+				isActive={isActive}
+			/>
+		</div>
+	)
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Column                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function KanbanColumn({
+	column,
+	notes,
+	orgSlug,
+	activeNote,
+	dragDestination,
+	organizationId,
+	dragHandleProps,
+	isActive,
+}: {
+	column: Column
+	notes: Note[]
+	orgSlug: string
+	activeNote: Note | null
+	dragDestination: { columnId: string; position?: number } | null
+	organizationId: string
+	dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
+	isActive?: boolean
+}) {
+	const { setNodeRef } = useDroppable({ id: column.id })
+	const renameFetcher = useFetcher()
+	const deleteFetcher = useFetcher()
+	const dc = useDoubleCheck()
+	const [editing, setEditing] = useState(false)
+
+	const placeholderId = makeDragId(column.id, '__placeholder')
+	const sortableItems = notes.length
+		? notes.map((n) => makeDragId(column.id, n.id))
+		: [placeholderId]
+
+	// Check if this column is the drag destination
+	const isDestination = dragDestination?.columnId === column.id
+	const dragPosition = dragDestination?.position ?? 0
+
+	// Create display notes with preview
+	const displayNotes = [...notes]
+	if (
+		isDestination &&
+		activeNote &&
+		!notes.find((n) => n.id === activeNote.id)
+	) {
+		// Insert preview note at the correct position
+		const previewNote = { ...activeNote, id: `${activeNote.id}-preview` }
+		displayNotes.splice(dragPosition, 0, previewNote)
+	}
+
+	return (
+		<div
+			ref={setNodeRef}
+			className={`bg-muted/30 flex max-w-[320px] min-w-[320px] flex-shrink-0 snap-center flex-col rounded p-2 shadow-xs ${
+				isActive ? 'ring-primary/50 ring-2' : ''
+			}`}
+		>
+			{/* header ------------------------------------------------------- */}
+			<div className="group mb-1 flex w-full items-center gap-2 font-semibold">
+				{/* Drag handle for column */}
+				{dragHandleProps && (
+					<div
+						{...dragHandleProps}
+						className="cursor-grab touch-none opacity-50 hover:opacity-100 active:cursor-grabbing"
+						title="Drag to reorder column"
+					>
+						<Icon name="grip-vertical" size="sm" />
+					</div>
+				)}
+				{editing ? (
+					<EditColumnForm
+						column={column}
+						orgSlug={orgSlug}
+						onCancel={() => setEditing(false)}
+					/>
+				) : (
+					<div className="flex w-full items-center justify-between gap-2">
+						<button
+							className="flex items-center gap-2 hover:underline"
+							onClick={() => setEditing(true)}
+						>
+							{column.id !== UNCATEGORISED && column.color && (
+								<div
+									className="h-3 w-3 flex-shrink-0 rounded-full"
+									style={{ backgroundColor: column.color }}
+								/>
+							)}
+							<span className="text-sm">{column.name}</span>
+							{column.id !== UNCATEGORISED && (
+								<button className="invisible p-1 px-2 group-hover:visible">
+									<Icon name="pencil" size="xs" />
+								</button>
+							)}
+						</button>
+						{column.id !== UNCATEGORISED && (
+							<deleteFetcher.Form
+								method="delete"
+								action={`/${orgSlug}/notes/status/${column.id}`}
+								className="invisible group-hover:visible"
+							>
+								<StatusButton
+									{...dc.getButtonProps({ type: 'submit' })}
+									variant={dc.doubleCheck ? 'destructive' : 'ghost'}
+									size="sm"
+									className="h-auto p-1"
+									status={deleteFetcher.state !== 'idle' ? 'pending' : 'idle'}
+								>
+									{dc.doubleCheck && 'Are you sure?'}
+									<Icon name={dc.doubleCheck ? 'check' : 'trash-2'} size="xs" />
+								</StatusButton>
+							</deleteFetcher.Form>
+						)}
+					</div>
+				)}
+			</div>
+
+			{/* list --------------------------------------------------------- */}
+			<SortableContext
+				id={column.id}
+				items={sortableItems}
+				strategy={verticalListSortingStrategy}
+			>
+				<div className="flex min-h-screen flex-col gap-3 overflow-y-auto p-1">
+					{displayNotes.map((n) => {
+						const isPreview = n.id.endsWith('-preview')
+						const originalId = isPreview ? n.id.replace('-preview', '') : n.id
+
+						if (isPreview) {
+							return (
+								<div
+									key={`preview-${originalId}`}
+									className="scale-95 opacity-30"
+								>
+									<NoteCard
+										note={{ ...n, id: originalId }}
+										organizationId={organizationId}
+									/>
+								</div>
+							)
+						}
+
+						// Hide the original note if it's being dragged
+						if (activeNote?.id === n.id) {
+							return (
+								<div key={makeDragId(column.id, n.id)} className="opacity-30">
+									<SortableNote
+										note={n}
+										dragId={makeDragId(column.id, n.id)}
+										organizationId={organizationId}
+									/>
+								</div>
+							)
+						}
+
+						return (
+							<SortableNote
+								key={makeDragId(column.id, n.id)}
+								note={n}
+								dragId={makeDragId(column.id, n.id)}
+								organizationId={organizationId}
+							/>
+						)
+					})}
+					{notes.length === 0 && !isDestination && (
+						<div className="text-muted-foreground border-muted-foreground/30 flex h-20 min-h-screen items-center justify-center rounded border-2 border-dashed text-sm"></div>
+					)}
+				</div>
+			</SortableContext>
+		</div>
+	)
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Note Card wrapper                                                         */
+/* -------------------------------------------------------------------------- */
+
+function SortableNote({
+	note,
+	dragId,
+	organizationId,
+}: {
+	note: Note
+	dragId: string
+	organizationId: string
+}) {
+	const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+		isOver,
+	} = useSortable({
+		id: dragId,
+		data: {
+			type: 'Note',
+			note,
+		},
+	})
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+		opacity: isDragging ? 0.3 : 1,
+		cursor: isDragging ? 'grabbing' : 'grab',
+		zIndex: isDragging ? 1000 : 'auto',
+	}
+
+	return (
+		<div
+			ref={setNodeRef}
+			style={style}
+			className={`${isDragging ? 'scale-105 shadow-2xl' : ''} ${isOver ? 'ring-primary/50 ring-2' : ''}`}
+			{...attributes}
+			{...listeners}
+		>
+			<NoteCard
+				note={note}
+				organizationId={organizationId}
+				isEditing={editingNoteId === note.id}
+				setEditingNote={setEditingNoteId}
+			/>
+		</div>
+	)
+}
+
+/* -------------------------------------------------------------------------- */
+/*  “+ column” button – stateless (details element manages open/close)    */
+/* -------------------------------------------------------------------------- */
+
+function EditColumnForm({
+	column,
+	orgSlug,
+	onCancel,
+}: {
+	column: Column
+	orgSlug: string
+	onCancel: () => void
+}) {
+	const fetcher = useFetcher()
+	const [selectedColor, setSelectedColor] = useState(column.color || '#6b7280')
+
+	// Close editing when fetcher is done
+	React.useEffect(() => {
+		if (fetcher.state === 'idle' && fetcher.data) {
+			onCancel()
+		}
+	}, [fetcher.state, fetcher.data, onCancel])
+
+	return (
+		<fetcher.Form
+			className="w-full space-y-2"
+			method="patch"
+			action={`/${orgSlug}/notes/status/${column.id}`}
+		>
+			<input type="hidden" name="intent" value="rename-status" />
+			<input type="hidden" name="statusId" value={column.id} />
+			<input type="hidden" name="color" value={selectedColor} />
+			<div className="flex gap-2">
+				<Input
+					name="name"
+					defaultValue={column.name}
+					autoFocus
+					className="h-8 flex-1 px-2"
+					onKeyDown={(e) => e.key === 'Escape' && onCancel()}
+				/>
+				<ColorPicker value={selectedColor} onChange={setSelectedColor} />
+			</div>
+			<div className="flex gap-2">
+				<Button type="submit" variant="default" size="sm" className="flex-1">
+					Save
+				</Button>
+				<Button type="button" variant="outline" size="sm" onClick={onCancel}>
+					Cancel
+				</Button>
+			</div>
+		</fetcher.Form>
+	)
+}
+
+function NewColumnButton({ orgSlug }: { orgSlug: string }) {
+	const fetcher = useFetcher()
+	const [editing, setEditing] = useState(false)
+	const [selectedColor, setSelectedColor] = useState('#6b7280')
+
+	// Close editing when fetcher is done
+	React.useEffect(() => {
+		if (fetcher.state === 'idle' && fetcher.data) {
+			setEditing(false)
+		}
+	}, [fetcher.state, fetcher.data])
+
+	return (
+		<div className="flex min-w-[270px] flex-col justify-start">
+			{editing ? (
+				<fetcher.Form
+					method="post"
+					action={`/${orgSlug}/notes/statuses`}
+					onSubmit={() => (document.activeElement as HTMLElement)?.blur()}
+					className="mt-2 space-y-2"
+				>
+					<input type="hidden" name="intent" value="create-status" />
+					<input type="hidden" name="color" value={selectedColor} />
+					<div className="flex gap-2">
+						<Input
+							autoFocus
+							name="name"
+							placeholder="Column name"
+							maxLength={24}
+							className="flex-1"
+						/>
+						<ColorPicker value={selectedColor} onChange={setSelectedColor} />
+					</div>
+					<div className="flex gap-2">
+						<Button
+							type="submit"
+							variant="default"
+							size="sm"
+							className="flex-1"
+						>
+							Create
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => setEditing(false)}
+						>
+							Cancel
+						</Button>
+					</div>
+				</fetcher.Form>
+			) : (
+				<Button
+					type="button"
+					variant="secondary"
+					className="mt-2"
+					onClick={() => setEditing(true)}
+				>
+					<Icon name="plus" className="mr-1" /> Add column
+				</Button>
+			)}
+		</div>
+	)
+}

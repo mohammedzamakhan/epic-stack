@@ -31,17 +31,17 @@ export interface UserOrganizationPermissions {
 export function useOrganizationPermissions(): UserOrganizationPermissions | null {
 	// Try to get permissions from various potential loader data locations
 	const orgLayoutData = useRouteLoaderData(
-		'routes/app+/$orgSlug_+/_layout',
+		'routes/_app+/$orgSlug_+/_layout',
 	) as any
-	const appLayoutData = useRouteLoaderData('routes/app+/_layout') as any
+	const appLayoutData = useRouteLoaderData('routes/_app+/_layout') as any
 	const currentRouteData = useRouteLoaderData('root') as any
 
 	// Also check current route data (for pages like notes that provide their own permissions)
 	const noteRouteData = useRouteLoaderData(
-		'routes/app+/$orgSlug_+/notes.$noteId',
+		'routes/_app+/$orgSlug_+/notes.$noteId',
 	) as any
 	const membersRouteData = useRouteLoaderData(
-		'routes/app+/$orgSlug_+/settings+/members',
+		'routes/_app+/$orgSlug_+/settings+/members',
 	) as any
 
 	// Look for permissions in the most likely places

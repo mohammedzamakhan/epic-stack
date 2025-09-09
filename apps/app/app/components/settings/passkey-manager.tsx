@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
 
-import { deletePasskeyActionIntent } from '#app/routes/app+/security.tsx'
+import { deletePasskeyActionIntent } from '#app/routes/_app+/security.tsx'
 import { Button, Icon } from '@repo/ui'
 
 // Registration options schema for passkeys

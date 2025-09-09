@@ -144,7 +144,7 @@ export function TeamSwitcher() {
 							</DropdownMenuItem>
 						))}
 						<DropdownMenuItem asChild className="gap-2 p-2">
-							<Link to={`/app/${activeTeam.slug}/settings/members`}>
+							<Link to={`/${activeTeam.slug}/settings/members`}>
 								<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
 									<Icon name="user-plus" className="size-4" />
 								</div>

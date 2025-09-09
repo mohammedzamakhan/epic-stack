@@ -145,7 +145,7 @@ export const HeroHeader = () => {
 											<Link
 												to={
 													currentOrganization
-														? `/app/${currentOrganization.organization.slug}`
+														? `/${currentOrganization.organization.slug}`
 														: '/app'
 												}
 											>

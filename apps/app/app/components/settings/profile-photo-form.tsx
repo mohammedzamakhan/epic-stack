@@ -2,7 +2,7 @@ import {
 	PhotoCropForm,
 	type PhotoCropFormConfig,
 } from '#app/components/ui/photo-crop-form.tsx'
-import { uploadPhotoActionIntent } from '#app/routes/app+/profile.tsx'
+import { uploadPhotoActionIntent } from '#app/routes/_app+/profile.tsx'
 
 interface ProfilePhotoFormProps {
 	setIsOpen: (open: boolean) => void

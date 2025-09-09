@@ -83,7 +83,7 @@ CREATE TABLE "NoteCommentImage" (
 
 ### Backend
 
-- `apps/web/app/routes/app+/$orgSlug_+/notes.$noteId.tsx` - Updated comment
+- `apps/web/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx` - Updated comment
   actions
 - `apps/web/app/utils/storage.server.ts` - Added uploadCommentImage function
 

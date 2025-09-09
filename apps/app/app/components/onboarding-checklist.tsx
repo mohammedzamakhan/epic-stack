@@ -203,7 +203,7 @@ export function OnboardingChecklist({
 										<div>
 											{step.actionConfig.type === 'navigate' ? (
 												<Link
-													to={`/app/${orgSlug}${step.actionConfig.target}`}
+													to={`/${orgSlug}${step.actionConfig.target}`}
 													onClick={() => handleStepAction(step)}
 												>
 													<Button

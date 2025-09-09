@@ -7,7 +7,7 @@ import {
 import { Label } from '@radix-ui/react-label'
 import React, { useState, useRef, useCallback } from 'react'
 import { Button, Icon } from '@repo/ui'
-import { type ImageFieldset } from '#app/routes/app+/$orgSlug_+/__org-note-editor.tsx'
+import { type ImageFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 import { cn, getNoteImgSrc } from '#app/utils/misc.tsx'
 
 interface MultiImageUploadProps {

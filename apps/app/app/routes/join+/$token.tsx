@@ -42,7 +42,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		})
 
 		if (existingMember) {
-			return redirectWithToast(`/app/${inviteLink.organization.slug}`, {
+			return redirectWithToast(`/${inviteLink.organization.slug}`, {
 				title: 'Already a member',
 				description: `You're already a member of ${inviteLink.organization.name}`,
 			})
@@ -54,7 +54,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		// Redirect to settings/organizations where they can accept/decline
 		const inviterName =
 			invitation.inviter?.name || invitation.inviter?.email || 'Someone'
-		return redirectWithToast('/app/organizations', {
+		return redirectWithToast('/organizations', {
 			title: 'Organization Invitation',
 			description: `${inviterName} has invited you to join ${inviteLink.organization.name}. Review the invitation below.`,
 		})

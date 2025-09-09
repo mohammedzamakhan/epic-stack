@@ -146,7 +146,7 @@ export async function createCheckoutSession(
 		success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
 		cancel_url:
 			from === 'checkout'
-				? `${process.env.BASE_URL}/app/${organization.slug}/settings/billing`
+				? `${process.env.BASE_URL}/${organization.slug}/settings/billing`
 				: `${process.env.BASE_URL}/pricing`,
 		customer: organization.stripeCustomerId || customer?.id || undefined,
 		client_reference_id: userId.toString(),
@@ -234,7 +234,7 @@ export async function createCustomerPortalSession(organization: Organization) {
 
 	return stripe.billingPortal.sessions.create({
 		customer: organization.stripeCustomerId,
-		return_url: `${process.env.BASE_URL}/app/${organization.slug}/settings`,
+		return_url: `${process.env.BASE_URL}/${organization.slug}/settings`,
 		configuration: configuration.id,
 	})
 }

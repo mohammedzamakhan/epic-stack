@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
 import { Button, StatusButton } from '@repo/ui'
-import { setPasswordActionIntent } from '#app/routes/app+/security.tsx'
+import { setPasswordActionIntent } from '#app/routes/_app+/security.tsx'
 import {
 	PasswordSchema,
 	PasswordAndConfirmPasswordSchema,

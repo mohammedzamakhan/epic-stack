@@ -117,7 +117,7 @@ trigger/
 apps/web/app/
 ├── components/ui/
 │   └── multi-media-upload.tsx      # New component for image/video upload
-├── routes/app+/$orgSlug_+/
+├── routes/_app+/$orgSlug_+/
 │   ├── __org-note-editor.tsx       # Updated with video support
 │   ├── __org-note-editor.server.tsx # Updated with video processing
 │   ├── notes.tsx                   # Updated loader with video data

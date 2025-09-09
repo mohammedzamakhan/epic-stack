@@ -8,7 +8,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 }) => {
 	const password = faker.internet.password()
 	const user = await login({ password })
-	await page.goto('/app/security')
+	await page.goto('/security')
 
 	// Wait for the page to be fully loaded
 	await page.waitForLoadState('networkidle')

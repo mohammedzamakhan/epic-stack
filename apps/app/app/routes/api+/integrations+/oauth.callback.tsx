@@ -125,7 +125,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 		invariant(organization, 'Organization not found')
 
-		return redirectWithToast(`/app/${organization.slug}/settings`, {
+		return redirectWithToast(`/${organization.slug}/settings`, {
 			title: 'Integration connected',
 			description: `Successfully connected to ${providerName}`,
 			type: 'success',

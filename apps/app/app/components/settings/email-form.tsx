@@ -4,7 +4,7 @@ import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
-import { changeEmailActionIntent } from '#app/routes/app+/profile.tsx'
+import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
 import { EmailSchema } from '#app/utils/user-validation.ts'
 import { Button, StatusButton } from '@repo/ui'
 

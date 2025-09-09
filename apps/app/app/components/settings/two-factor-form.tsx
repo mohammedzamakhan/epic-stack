@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
 import { Button, StatusButton } from '@repo/ui'
-import { enable2FAActionIntent } from '#app/routes/app+/security.tsx'
+import { enable2FAActionIntent } from '#app/routes/_app+/security.tsx'
 import { disable2FAActionIntent } from './cards/security-card'
 
 export const Enable2FASchema = z.object({

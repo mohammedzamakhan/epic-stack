@@ -270,7 +270,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				select: { slug: true },
 			})
 
-			return redirect(`/app/${organization?.slug}`)
+			return redirect(`/${organization?.slug}`)
 		} catch (error) {
 			console.error('Failed to complete setup', error)
 			return submission.reply({
@@ -544,7 +544,7 @@ function Step1({ actionData }: { actionData: any }) {
 
 						<div className="flex justify-end gap-4 pt-4">
 							<Button variant="outline" asChild>
-								<Link to="/app/organizations">Cancel</Link>
+								<Link to="/organizations">Cancel</Link>
 							</Button>
 							<Button type="submit">Continue</Button>
 						</div>

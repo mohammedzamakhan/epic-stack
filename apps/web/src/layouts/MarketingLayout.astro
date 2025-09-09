@@ -10,7 +10,9 @@ const port = currentUrl.port
 
 // Create app subdomain URL - works with any domain
 const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
+const docsHostname = hostname.startsWith('docs.') ? hostname : `docs.${hostname}`
 const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
+const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 ---
 
 <html class="" lang="en">
@@ -116,6 +118,13 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 								class="text-sm font-medium hover:text-primary transition-colors"
 							>
 								Pricing
+							</a>
+                            <a
+								href={docsUrl}
+                                target="_blank"
+								class="text-sm font-medium hover:text-primary transition-colors"
+							>
+								Docs
 							</a>
 						</div>
 					</div>

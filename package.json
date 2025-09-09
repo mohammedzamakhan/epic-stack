@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "npm-run-all --parallel dev:proxy \"turbo run dev\"",
+    "dev": "npm-run-all --parallel dev:proxy dev:all",
+    "dev:all": "turbo run dev --filter app --filter web --filter cms --filter admin --filter studio --filter docs --concurrency 20",
     "dev:proxy": "node dev-proxy.js",
     "dev:web": "turbo run dev --filter web --filter cms",
     "dev:app": "turbo run dev --filter app",
