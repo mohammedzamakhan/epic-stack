@@ -184,7 +184,7 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 		.check()
 	await createAccountButton.click()
 
-	await expect(page).toHaveURL('/')
+	await expect(page).toHaveURL('/organizations')
 	await expect(page.getByText(/thanks for signing up/i)).toBeVisible()
 
 	// internally, a user has been created:
@@ -226,7 +226,7 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 	await page.goto('/signup')
 	await page.getByRole('button', { name: /signup with github/i }).click()
 
-	await expect(page).toHaveURL(`/`)
+	await expect(page).toHaveURL(`/organizations/create`)
 	await expect(
 		page.getByText(
 			new RegExp(
@@ -351,7 +351,7 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	// Wait for navigation or error message
 	try {
 		// Wait for either successful redirect to home page or stay on login page
-		await page.waitForURL('/')
+		await page.waitForURL('/organizations/create')
 	} catch (error) {
 		// If we didn't redirect to home, we're probably still on login page
 		console.log('Login did not redirect to home page. Current URL:', page.url())
@@ -377,7 +377,9 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	}
 
 	// After login, user should be redirected and see the Dashboard button in header
-	await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible()
+	await expect(
+		page.getByRole('heading', { name: 'Create a new organization' }),
+	).toBeVisible()
 })
 
 test('reset password with a link', async ({ page, insertNewUser }) => {
@@ -459,9 +461,11 @@ test('reset password with a link', async ({ page, insertNewUser }) => {
 		.click({ force: true })
 
 	// Wait for login to complete and redirect to home page
-	await expect(page).toHaveURL(`/`)
+	await expect(page).toHaveURL(`/organizations/create`)
 
-	await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible()
+	await expect(
+		page.getByRole('heading', { name: 'Create a new organization' }),
+	).toBeVisible()
 })
 
 test('reset password with a short code', async ({ page, insertNewUser }) => {
