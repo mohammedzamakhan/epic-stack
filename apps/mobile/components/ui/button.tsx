@@ -32,7 +32,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const handlePress = async (event: any) => {
     if (isDisabled) return
-    
+
     if (hapticFeedback) {
       await triggerButtonHaptic()
     }

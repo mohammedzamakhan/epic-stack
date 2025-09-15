@@ -84,7 +84,7 @@ describe('Input', () => {
   })
 
   it('should focus next input when nextInputRef is provided', () => {
-    const nextInputRef = { current: { focus: jest.fn() } }
+    const nextInputRef = { current: { focus: jest.fn() } as any }
     
     const { getByDisplayValue } = render(
       <Input 
