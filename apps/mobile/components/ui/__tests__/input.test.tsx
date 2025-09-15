@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
-import { TextInput, Text } from 'react-native'
+import { Text } from 'react-native'
 import { Input } from '../input'
 
 describe('Input', () => {
@@ -84,7 +84,7 @@ describe('Input', () => {
   })
 
   it('should focus next input when nextInputRef is provided', () => {
-    const nextInputRef = { current: { focus: jest.fn() } as any }
+    const nextInputRef = { current: { focus: jest.fn() } }
     
     const { getByDisplayValue } = render(
       <Input 

@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import {
-  View,
   Text,
   StyleSheet,
   Animated,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native'
 
@@ -70,7 +68,7 @@ const Toast: React.FC<ToastProps> = ({
     } else {
       hideToast()
     }
-  }, [visible, duration, hideToast])
+  }, [visible, duration, fadeAnim, slideAnim])
 
   // Don't render if not visible and animation hasn't started
   if (!visible) {

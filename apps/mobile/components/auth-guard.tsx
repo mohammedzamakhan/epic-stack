@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSegments, useRootNavigationState, useLocalSearchParams } from 'expo-router'
 import { useAuth } from '../lib/auth/hooks/use-auth'
 

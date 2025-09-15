@@ -3,7 +3,7 @@ import { TextInput } from 'react-native'
 import { dismissKeyboard } from '../lib/keyboard'
 
 export interface UseFocusManagerReturn {
-  refs: React.MutableRefObject<(TextInput | null)[]>
+  refs: React.RefObject<(TextInput | null)[]>
   focusNext: (currentIndex: number) => void
   focusPrevious: (currentIndex: number) => void
   dismissKeyboard: () => void

@@ -19,7 +19,7 @@ export function OAuthDemo() {
     error, 
     clearError 
   } = useOAuth({
-    onSuccess: (result) => {
+    onSuccess: (_result) => {
       Alert.alert(
         'OAuth Success', 
         `Successfully authenticated with ${selectedProvider}!`,
@@ -38,7 +38,7 @@ export function OAuthDemo() {
   const handleOAuthLogin = async (provider: string) => {
     setSelectedProvider(provider)
     clearError()
-    await authenticate(provider)
+    void authenticate(provider)
   }
 
   const handleLogout = async () => {
@@ -95,7 +95,6 @@ export function OAuthDemo() {
       <View style={styles.providersContainer}>
         {configuredProviders.length > 0 ? (
           configuredProviders.map((provider) => {
-            const providerInfo = getProviderInfo(provider)
             return (
               <SocialButton
                 key={provider}

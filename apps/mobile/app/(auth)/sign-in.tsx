@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, TextInput } from 'react-native'
-import { Link, useLocalSearchParams, router } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MobileLoginFormSchema } from '@repo/validation'
@@ -50,7 +50,6 @@ export default function SignInScreen() {
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger,
   } = useForm<LoginFormData>({
     resolver: zodResolver(MobileLoginFormSchema),
     mode: 'onChange',

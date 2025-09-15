@@ -10,7 +10,7 @@ import {
   Button,
   ErrorText,
 } from '../../components/ui'
-import { navigateToSignIn, navigateAfterAuth } from '../../lib/navigation'
+import { navigateToSignIn } from '../../lib/navigation'
 
 export default function VerifyEmailScreen() {
   const { token, email, redirectTo } = useLocalSearchParams<{
@@ -26,7 +26,7 @@ export default function VerifyEmailScreen() {
   useEffect(() => {
     // If we have a token, automatically attempt verification
     if (token) {
-      handleVerifyEmail(token)
+      void handleVerifyEmail(token)
     }
   }, [token])
 
@@ -56,9 +56,9 @@ export default function VerifyEmailScreen() {
           },
         ]
       )
-    } catch (error) {
+    } catch (_error) {
       setVerificationError(
-        error instanceof Error ? error.message : 'Email verification failed'
+        _error instanceof Error ? _error.message : 'Email verification failed'
       )
     } finally {
       setIsVerifying(false)
@@ -80,7 +80,7 @@ export default function VerifyEmailScreen() {
         'We\'ve sent another verification email to your inbox. Please check your email and click the verification link.',
         [{ text: 'OK' }]
       )
-    } catch (error) {
+    } catch {
       Alert.alert(
         'Error',
         'Failed to resend verification email. Please try again later.'

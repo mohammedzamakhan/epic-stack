@@ -52,7 +52,7 @@ const OnboardingSchema = z.object({
 type OnboardingFormData = z.infer<typeof OnboardingSchema>
 
 export default function OnboardingScreen() {
-  const { email, verified, redirectTo } = useLocalSearchParams<{
+  const { email, redirectTo } = useLocalSearchParams<{
     email?: string
     verified?: string
     redirectTo?: string

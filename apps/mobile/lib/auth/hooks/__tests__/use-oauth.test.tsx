@@ -1,6 +1,5 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react-native'
 import { useOAuth, useOAuthCallback, useOAuthProviders } from '../use-oauth'
-import { useAuth } from '../use-auth'
 import { oauthService, type OAuthResult } from '../../oauth-service'
 
 // Mock dependencies
@@ -34,7 +33,6 @@ jest.mock('../../oauth-service', () => ({
   },
 }))
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 const mockOAuthService = oauthService as jest.Mocked<typeof oauthService>
 
 describe('useOAuth', () => {
@@ -54,7 +52,7 @@ describe('useOAuth', () => {
     const { result } = renderHook(() => useOAuth())
 
     expect(result.current.isLoading).toBe(false)
-    expect(result.current.error).toBe(null)
+    expect(result.current.error).toBeNull()
     expect(result.current.availableProviders).toEqual(['github', 'google'])
   })
 
@@ -137,7 +135,7 @@ describe('useOAuth', () => {
       result.current.clearError()
     })
 
-    expect(result.current.error).toBe(null)
+    expect(result.current.error).toBeNull()
   })
 
   it('should check if provider is configured', () => {
@@ -159,8 +157,8 @@ describe('useOAuth', () => {
 
     const { result } = renderHook(() => useOAuth())
 
-    act(() => {
-      result.current.authenticate('github')
+    void act(async () => {
+      await result.current.authenticate('github')
     })
 
     expect(result.current.isLoading).toBe(true)
@@ -249,8 +247,8 @@ describe('useOAuthCallback', () => {
 
     const { result } = renderHook(() => useOAuthCallback())
 
-    act(() => {
-      result.current.handleCallback('epicnotes://auth/callback?code=test-code', 'github')
+    void act(async () => {
+      await result.current.handleCallback('epicnotes://auth/callback?code=test-code', 'github')
     })
 
     expect(result.current.isProcessing).toBe(true)
@@ -307,7 +305,7 @@ describe('useOAuthProviders', () => {
     })
 
     const unknownInfo = result.current.getProviderInfo('unknown')
-    expect(unknownInfo).toBe(null)
+    expect(unknownInfo).toBeNull()
   })
 
   it('should check if provider is configured', () => {

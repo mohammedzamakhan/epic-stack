@@ -68,7 +68,7 @@ export class TokenManager {
         needsRefresh: needsRefresh && !isExpired,
         tokens
       }
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         isExpired: false,
@@ -85,8 +85,8 @@ export class TokenManager {
   async storeTokens(tokens: TokenData): Promise<void> {
     try {
       await this.storage.storeTokens(tokens)
-    } catch (error) {
-      throw new Error(`Failed to store tokens: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch (_error) {
+      throw new Error(`Failed to store tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
     }
   }
 
@@ -97,8 +97,8 @@ export class TokenManager {
   async storeUser(user: any): Promise<void> {
     try {
       await this.storage.storeUser(user)
-    } catch (error) {
-      throw new Error(`Failed to store user: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch (_error) {
+      throw new Error(`Failed to store user: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
     }
   }
 
@@ -109,7 +109,7 @@ export class TokenManager {
   async getUser(): Promise<any | null> {
     try {
       return await this.storage.getUser()
-    } catch (error) {
+    } catch {
       return null
     }
   }
@@ -167,10 +167,10 @@ export class TokenManager {
       await this.storeTokens(newTokens)
       
       return newTokens
-    } catch (error) {
+    } catch (_error) {
       // If refresh fails, clear all token data
       await this.clearTokens()
-      throw error
+      throw _error
     }
   }
 
@@ -180,8 +180,8 @@ export class TokenManager {
   async clearTokens(): Promise<void> {
     try {
       await this.storage.clearAll()
-    } catch (error) {
-      throw new Error(`Failed to clear tokens: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch (_error) {
+      throw new Error(`Failed to clear tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
     }
   }
 
@@ -193,7 +193,7 @@ export class TokenManager {
     try {
       const tokens = await this.storage.getTokens()
       return tokens !== null
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -216,8 +216,8 @@ export class TokenManager {
       }
 
       await this.storage.storeTokens(updatedTokens)
-    } catch (error) {
-      throw new Error(`Failed to update token expiration: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch {
+      throw new Error('Failed to update token expiration')
     }
   }
 
@@ -238,7 +238,7 @@ export class TokenManager {
       const timeRemaining = expiresAt.getTime() - now.getTime()
       
       return Math.max(0, timeRemaining)
-    } catch (error) {
+    } catch {
       return 0
     }
   }
@@ -254,7 +254,7 @@ export class TokenManager {
       const thresholdMs = thresholdMinutes * 60 * 1000
       
       return timeRemaining > 0 && timeRemaining <= thresholdMs
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -270,7 +270,7 @@ export class TokenManager {
       if (validation.isExpired) {
         await this.clearTokens()
       }
-    } catch (error) {
+    } catch {
       // If there's an error validating, clear the tokens to be safe
       await this.clearTokens()
     }
@@ -292,7 +292,7 @@ export class TokenManager {
         expiresAt: tokens.expiresAt,
         expiresIn: tokens.expiresIn
       }
-    } catch (error) {
+    } catch {
       return null
     }
   }

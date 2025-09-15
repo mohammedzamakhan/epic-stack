@@ -53,8 +53,8 @@ export class SecureStorage {
       const tokensJson = JSON.stringify(tokens)
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       await storage.setItemAsync(StorageKeys.TOKEN_DATA, tokensJson)
-    } catch (error) {
-      throw this.createStorageError('Failed to store token data', 'STORAGE_ERROR', error)
+    } catch (_error) {
+      throw this.createStorageError('Failed to store token data', 'STORAGE_ERROR', _error)
     }
   }
 
@@ -70,13 +70,13 @@ export class SecureStorage {
         return null
       }
       return JSON.parse(tokensJson) as TokenData
-    } catch (error) {
-      if (error instanceof SyntaxError) {
+    } catch (_error) {
+      if (_error instanceof SyntaxError) {
         // Invalid JSON, clear corrupted data
         await this.clearTokens()
         return null
       }
-      throw this.createStorageError('Failed to retrieve token data', 'DECRYPTION_ERROR', error)
+      throw this.createStorageError('Failed to retrieve token data', 'DECRYPTION_ERROR', _error)
     }
   }
 
@@ -87,10 +87,10 @@ export class SecureStorage {
     try {
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       await storage.deleteItemAsync(StorageKeys.TOKEN_DATA)
-    } catch (error) {
+    } catch (_error) {
       // Don't throw error if key doesn't exist
-      if (error instanceof Error && !error.message.includes('not found')) {
-        throw this.createStorageError('Failed to clear token data', 'STORAGE_ERROR', error)
+      if (_error instanceof Error && !_error.message.includes('not found')) {
+        throw this.createStorageError('Failed to clear token data', 'STORAGE_ERROR', _error)
       }
     }
   }
@@ -104,8 +104,8 @@ export class SecureStorage {
       const userJson = JSON.stringify(user)
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       await storage.setItemAsync(StorageKeys.USER_DATA, userJson)
-    } catch (error) {
-      throw this.createStorageError('Failed to store user data', 'STORAGE_ERROR', error)
+    } catch (_error) {
+      throw this.createStorageError('Failed to store user data', 'STORAGE_ERROR', _error)
     }
   }
 
@@ -121,13 +121,13 @@ export class SecureStorage {
         return null
       }
       return JSON.parse(userJson)
-    } catch (error) {
-      if (error instanceof SyntaxError) {
+    } catch (_error) {
+      if (_error instanceof SyntaxError) {
         // Invalid JSON, clear corrupted data
         await this.clearUser()
         return null
       }
-      throw this.createStorageError('Failed to retrieve user data', 'DECRYPTION_ERROR', error)
+      throw this.createStorageError('Failed to retrieve user data', 'DECRYPTION_ERROR', _error)
     }
   }
 
@@ -138,10 +138,10 @@ export class SecureStorage {
     try {
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       await storage.deleteItemAsync(StorageKeys.USER_DATA)
-    } catch (error) {
+    } catch (_error) {
       // Don't throw error if key doesn't exist
-      if (error instanceof Error && !error.message.includes('not found')) {
-        throw this.createStorageError('Failed to clear user data', 'STORAGE_ERROR', error)
+      if (_error instanceof Error && !_error.message.includes('not found')) {
+        throw this.createStorageError('Failed to clear user data', 'STORAGE_ERROR', _error)
       }
     }
   }
@@ -208,7 +208,7 @@ export class SecureStorage {
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       const enabled = await storage.getItemAsync(StorageKeys.BIOMETRIC_ENABLED)
       return enabled === 'true'
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -221,8 +221,8 @@ export class SecureStorage {
     try {
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       await storage.setItemAsync(StorageKeys.BIOMETRIC_ENABLED, enabled.toString())
-    } catch (error) {
-      throw this.createStorageError('Failed to set biometric preference', 'STORAGE_ERROR', error)
+    } catch (_error) {
+      throw this.createStorageError('Failed to set biometric preference', 'STORAGE_ERROR', _error)
     }
   }
 
@@ -238,8 +238,8 @@ export class SecureStorage {
     
     try {
       await Promise.all(clearOperations)
-    } catch (error) {
-      throw this.createStorageError('Failed to clear all data', 'STORAGE_ERROR', error)
+    } catch (_error) {
+      throw this.createStorageError('Failed to clear all data', 'STORAGE_ERROR', _error)
     }
   }
 
@@ -253,7 +253,7 @@ export class SecureStorage {
       const storage = Platform.OS === 'web' ? WebStorage : SecureStore
       const value = await storage.getItemAsync(key)
       return value !== null
-    } catch (error) {
+    } catch {
       return false
     }
   }

@@ -1,4 +1,4 @@
-import { KeyboardTypeOptions, ReturnKeyTypeOptions } from 'react-native'
+import { KeyboardTypeOptions, ReturnKeyTypeOptions, Keyboard } from 'react-native'
 
 export type InputType = 'email' | 'password' | 'username' | 'text' | 'number' | 'phone'
 
@@ -8,6 +8,15 @@ export interface KeyboardConfig {
   autoCapitalize: 'none' | 'sentences' | 'words' | 'characters'
   autoCorrect: boolean
   secureTextEntry?: boolean
+  textContentType?: string
+  autoComplete?: string
+}
+
+/**
+ * Dismisses the keyboard
+ */
+export function dismissKeyboard(): void {
+  Keyboard.dismiss()
 }
 
 export function getKeyboardConfig(inputType: InputType = 'text'): KeyboardConfig {
@@ -18,6 +27,8 @@ export function getKeyboardConfig(inputType: InputType = 'text'): KeyboardConfig
         returnKeyType: 'next',
         autoCapitalize: 'none',
         autoCorrect: false,
+        textContentType: 'emailAddress',
+        autoComplete: 'email',
       }
     case 'password':
       return {
@@ -26,6 +37,8 @@ export function getKeyboardConfig(inputType: InputType = 'text'): KeyboardConfig
         autoCapitalize: 'none',
         autoCorrect: false,
         secureTextEntry: true,
+        textContentType: 'password',
+        autoComplete: 'password',
       }
     case 'username':
       return {
@@ -33,6 +46,8 @@ export function getKeyboardConfig(inputType: InputType = 'text'): KeyboardConfig
         returnKeyType: 'next',
         autoCapitalize: 'none',
         autoCorrect: false,
+        textContentType: 'username',
+        autoComplete: 'username',
       }
     case 'number':
       return {
@@ -47,6 +62,8 @@ export function getKeyboardConfig(inputType: InputType = 'text'): KeyboardConfig
         returnKeyType: 'done',
         autoCapitalize: 'none',
         autoCorrect: false,
+        textContentType: 'telephoneNumber',
+        autoComplete: 'tel',
       }
     case 'text':
     default:

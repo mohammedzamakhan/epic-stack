@@ -52,7 +52,7 @@ export default function OAuthCallbackScreen() {
       }
     }
 
-    processCallback()
+    void processCallback()
   }, [code, state, error, provider, handleCallback])
 
   const handleRetry = () => {

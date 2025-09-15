@@ -4,10 +4,10 @@ import { Checkbox } from '../checkbox'
 
 describe('Checkbox', () => {
   it('renders correctly when unchecked', () => {
-    const { UNSAFE_getByType } = render(
+    const { getByRole } = render(
       <Checkbox checked={false} onCheckedChange={() => {}} />
     )
-    expect(UNSAFE_getByType('TouchableOpacity')).toBeTruthy()
+    expect(getByRole('button')).toBeTruthy()
   })
 
   it('renders correctly when checked', () => {
@@ -30,11 +30,11 @@ describe('Checkbox', () => {
 
   it('calls onCheckedChange when pressed', async () => {
     const mockOnCheckedChange = jest.fn()
-    const { UNSAFE_getByType } = render(
+    const { getByRole } = render(
       <Checkbox checked={false} onCheckedChange={mockOnCheckedChange} />
     )
     
-    fireEvent.press(UNSAFE_getByType('TouchableOpacity'))
+    fireEvent.press(getByRole('button'))
     
     // Wait for async operations to complete
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -44,11 +44,11 @@ describe('Checkbox', () => {
 
   it('calls onCheckedChange with opposite value', async () => {
     const mockOnCheckedChange = jest.fn()
-    const { UNSAFE_getByType } = render(
+    const { getByRole } = render(
       <Checkbox checked={true} onCheckedChange={mockOnCheckedChange} />
     )
     
-    fireEvent.press(UNSAFE_getByType('TouchableOpacity'))
+    fireEvent.press(getByRole('button'))
     
     // Wait for async operations to complete
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -58,7 +58,7 @@ describe('Checkbox', () => {
 
   it('does not call onCheckedChange when disabled', () => {
     const mockOnCheckedChange = jest.fn()
-    const { UNSAFE_getByType } = render(
+    const { getByRole } = render(
       <Checkbox 
         checked={false} 
         onCheckedChange={mockOnCheckedChange} 
@@ -66,12 +66,12 @@ describe('Checkbox', () => {
       />
     )
     
-    fireEvent.press(UNSAFE_getByType('TouchableOpacity'))
+    fireEvent.press(getByRole('button'))
     expect(mockOnCheckedChange).not.toHaveBeenCalled()
   })
 
   it('applies disabled styling when disabled', () => {
-    const { UNSAFE_getByType } = render(
+    const { getByRole } = render(
       <Checkbox 
         checked={false} 
         onCheckedChange={() => {}} 
@@ -79,8 +79,8 @@ describe('Checkbox', () => {
       />
     )
     
-    const button = UNSAFE_getByType('TouchableOpacity')
-    expect(button.props.disabled).toBe(true)
+    const button = getByRole('button')
+    expect(button).toBeDisabled()
   })
 
   it('shows checkmark when checked', () => {

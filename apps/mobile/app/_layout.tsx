@@ -19,17 +19,17 @@ export default function RootLayout() {
         console.log('Initial URL:', initialUrl)
         // Handle the deep link after a short delay to ensure navigation is ready
         setTimeout(() => {
-          handleDeepLink(initialUrl)
+          void handleDeepLink(initialUrl)
         }, 500)
       }
     }
     
-    handleInitialURL()
+    void handleInitialURL()
     
     // Listen for incoming links while app is running
     const subscription = Linking.addEventListener('url', (event) => {
       console.log('Incoming URL:', event.url)
-      handleDeepLink(event.url)
+      void handleDeepLink(event.url)
     })
     
     return () => {

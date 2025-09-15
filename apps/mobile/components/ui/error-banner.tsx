@@ -24,7 +24,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
   onDismiss,
   actionText,
   onAction,
-  persistent = false,
+  persistent: _persistent = false,
   style,
   ...props
 }) => {

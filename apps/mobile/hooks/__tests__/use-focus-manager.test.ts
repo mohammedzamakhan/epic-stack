@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react-native'
 import { useFocusManager } from '../use-focus-manager'
 import { dismissKeyboard } from '../../lib/keyboard'
 
@@ -16,7 +16,7 @@ describe('useFocusManager', () => {
     const { result } = renderHook(() => useFocusManager(3))
     
     expect(result.current.refs.current).toHaveLength(3)
-    expect(result.current.refs.current.every(ref => ref === null)).toBe(true)
+    expect(result.current.refs.current.every((ref: any) => ref === null)).toBe(true)
   })
 
   it('should set refs correctly', () => {

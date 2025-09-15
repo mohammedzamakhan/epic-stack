@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import type {
-  User,
-  SessionData,
-  AuthState,
-  LoginCredentials,
-  SignupData,
-  AuthResponse,
-  AuthError,
-  ProviderName,
-  AuthContextType,
+import {
+  type User,
+  type SessionData,
+  type AuthState,
+  type LoginCredentials,
+  type SignupData,
+  type AuthResponse,
+  type AuthError,
+  type ProviderName,
+  type AuthContextType,
 } from '../auth.js'
 
 describe('Auth Types', () => {

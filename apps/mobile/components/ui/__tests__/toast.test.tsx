@@ -3,7 +3,7 @@ import { render } from '@testing-library/react-native'
 
 // Mock the Toast component to avoid React hooks compatibility issues
 jest.mock('../toast', () => ({
-  Toast: ({ message, type, onHide, visible, testID }: any) => {
+  Toast: ({ message, type: _type, onHide, visible, testID }: any) => {
     const mockReact = require('react')
     if (!visible) return null
     return mockReact.createElement('View', { testID: testID || 'toast' }, [

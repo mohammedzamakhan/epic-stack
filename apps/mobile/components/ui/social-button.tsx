@@ -54,7 +54,7 @@ export function SocialButton({
     if (onPress) {
       onPress()
     } else {
-      authenticate(provider)
+      void authenticate(provider)
     }
   }
 

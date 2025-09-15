@@ -1,4 +1,4 @@
-import type { User, SessionData } from './auth.js'
+import { type User, type SessionData } from './auth.js'
 
 // Base API response structure
 export interface ApiResponse<T = any> {

@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import type {
-  ApiResponse,
-  LoginRequest,
-  LoginApiResponse,
-  SignupRequest,
-  SignupApiResponse,
-  NetworkError,
-  ValidationErrorResponse,
-  HttpMethod,
-  RequestConfig,
+import {
+  type ApiResponse,
+  type LoginRequest,
+  type LoginApiResponse,
+  type SignupRequest,
+  type SignupApiResponse,
+  type NetworkError,
+  type ValidationErrorResponse,
+  type HttpMethod,
+  type RequestConfig,
 } from '../api.js'
 
 describe('API Types', () => {
@@ -83,6 +83,7 @@ describe('API Types', () => {
       success: true,
       status: 200,
       data: {
+        email: 'test@example.com',
         verificationRequired: true,
         redirectTo: '/verify-email',
       },
@@ -127,7 +128,7 @@ describe('API Types', () => {
     expect(response.success).toBe(false)
     expect(response.error).toBe('validation_error')
     expect(response.errors).toHaveLength(2)
-    expect(response.errors[0].field).toBe('email')
+    expect(response.errors[0]?.field).toBe('email')
   })
 
   it('should define HttpMethod type correctly', () => {

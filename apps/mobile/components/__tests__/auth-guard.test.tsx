@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, act } from '@testing-library/react-native'
+import { render } from '@testing-library/react-native'
 import { AuthGuard } from '../auth-guard'
 
 // Mock expo-router
@@ -54,9 +54,7 @@ describe('AuthGuard', () => {
     render(<AuthGuard />)
 
     // Wait for navigation to be ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150))
-    })
+    await new Promise(resolve => setTimeout(resolve, 150))
 
     expect(mockReplace).toHaveBeenCalledWith({
       pathname: '/(auth)/sign-in',
@@ -74,9 +72,7 @@ describe('AuthGuard', () => {
     render(<AuthGuard />)
 
     // Wait for navigation to be ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150))
-    })
+    await new Promise(resolve => setTimeout(resolve, 150))
 
     expect(mockReplace).toHaveBeenCalledWith('/(dashboard)')
   })
@@ -94,9 +90,7 @@ describe('AuthGuard', () => {
     render(<AuthGuard />)
 
     // Wait for navigation to be ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150))
-    })
+    await new Promise(resolve => setTimeout(resolve, 150))
 
     expect(mockReplace).toHaveBeenCalledWith('/(dashboard)/profile')
   })
@@ -111,9 +105,7 @@ describe('AuthGuard', () => {
     render(<AuthGuard />)
 
     // Wait for navigation to be ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150))
-    })
+    await new Promise(resolve => setTimeout(resolve, 150))
 
     expect(mockReplace).not.toHaveBeenCalled()
   })
@@ -128,9 +120,7 @@ describe('AuthGuard', () => {
     render(<AuthGuard />)
 
     // Wait for navigation to be ready
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 150))
-    })
+    await new Promise(resolve => setTimeout(resolve, 150))
 
     expect(mockReplace).toHaveBeenCalledWith('/(auth)/sign-in')
   })

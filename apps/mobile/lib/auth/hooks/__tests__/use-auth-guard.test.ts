@@ -64,7 +64,7 @@ describe('Auth Guard Hooks Logic', () => {
     it('should deny access when condition returns false', () => {
       const user = { email: 'test@example.com' }
       const isAuthenticated = true
-      const condition = (user: any, isAuthenticated: boolean) => 
+      const condition = (user: any, _isAuthenticated: boolean) => 
         user?.email === 'admin@example.com'
       
       const canAccess = condition(user, isAuthenticated)

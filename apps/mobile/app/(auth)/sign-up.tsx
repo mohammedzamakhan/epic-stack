@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, TextInput } from 'react-native'
-import { Link, useLocalSearchParams, router } from 'expo-router'
+import { useLocalSearchParams, router } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MobileSignupSchema } from '@repo/validation'
@@ -46,7 +46,6 @@ export default function SignUpScreen() {
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger,
   } = useForm<SignupFormData>({
     resolver: zodResolver(MobileSignupSchema),
     mode: 'onChange',
@@ -63,7 +62,7 @@ export default function SignUpScreen() {
       // Dismiss keyboard before submitting
       dismissKeyboard()
       
-      const result = await signup(data.email)
+      await signup(data.email)
       
       // Show success alert
       Alert.alert(

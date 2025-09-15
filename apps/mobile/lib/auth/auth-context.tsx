@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Try to refresh tokens
             try {
               await refreshTokens()
-            } catch (error) {
+            } catch {
               // Refresh failed, clear storage
               await tokenManager.clearTokens()
               jwtAuthApi.clearAuthToken()
@@ -56,8 +56,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             jwtAuthApi.clearAuthToken()
           }
         }
-      } catch (error) {
-        console.error('Failed to initialize auth:', error)
+      } catch {
+        console.error('Failed to initialize auth')
         dispatch({
           type: 'AUTH_ERROR',
           payload: { error: 'Failed to initialize authentication' },
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    initializeAuth()
+    void initializeAuth()
   }, [])
 
   // Login function
@@ -168,7 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     provider: string,
     code?: string,
     state?: string,
-    redirectTo?: string
+    _redirectTo?: string
   ) => {
     try {
       dispatch({ type: 'AUTH_START' })

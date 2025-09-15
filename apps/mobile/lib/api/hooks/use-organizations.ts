@@ -33,8 +33,8 @@ export function useOrganizations() {
   }
 
   useEffect(() => {
-    fetchOrganizations()
-  }, [isAuthenticated, user])
+    void fetchOrganizations()
+  }, [isAuthenticated, user, fetchOrganizations])
 
   return {
     organizations,

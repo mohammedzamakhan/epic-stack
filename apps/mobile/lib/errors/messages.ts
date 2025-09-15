@@ -1,4 +1,4 @@
-import { ErrorCategory, AppErrorType, NetworkError, AuthenticationError, ValidationError, OAuthError, RateLimitError, BotDetectionError, ServerError } from './types'
+import { ErrorCategory, AppErrorType, NetworkError, AuthenticationError, ValidationError, OAuthError, RateLimitError, ServerError } from './types'
 
 // User-friendly error messages
 const ERROR_MESSAGES: Record<ErrorCategory, Record<string, string>> = {

@@ -91,7 +91,7 @@ export async function action({ request }: Route.ActionArgs) {
 		
 		// Check honeypot
 		try {
-			checkHoneypot(formData)
+			await checkHoneypot(formData)
 		} catch (error) {
 			return data(
 				{

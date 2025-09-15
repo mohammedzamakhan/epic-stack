@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
@@ -122,7 +122,7 @@ export default function VerifyCodeScreen() {
         'We\'ve sent a new verification code to your email address.',
         [{ text: 'OK' }]
       )
-    } catch (error) {
+    } catch {
       Alert.alert(
         'Error',
         'Failed to resend verification code. Please try again later.'
@@ -188,7 +188,7 @@ export default function VerifyCodeScreen() {
                         returnKeyType="done"
                         onSubmitEditing={() => {
                           if (value.length === 6) {
-                            handleSubmit(onSubmit)()
+                            void handleSubmit(onSubmit)()
                           }
                         }}
                       />

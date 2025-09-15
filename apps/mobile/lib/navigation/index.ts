@@ -8,18 +8,17 @@ export const handleDeepLink = (url: string): void => {
     console.log('Handling deep link:', url)
 
     // Handle different URL formats (custom scheme vs http)
-    let parsedUrl: URL
     let pathname: string
     let searchParams: URLSearchParams
 
     if (url.startsWith('http')) {
       // HTTP URL format
-      parsedUrl = new URL(url)
+      const parsedUrl = new URL(url)
       pathname = parsedUrl.pathname
       searchParams = parsedUrl.searchParams
     } else {
       // Custom scheme format (myapp://path?params)
-      const [scheme, rest] = url.split('://')
+      const [, rest] = url.split('://')
       if (!rest) {
         console.warn('Invalid deep link format:', url)
         return

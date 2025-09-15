@@ -64,7 +64,7 @@ export class JWTHttpClient extends HttpClient {
         
         // Retry the request with the new token (already set via setDefaultHeader)
         response = await super.request<T>(url, options)
-      } catch (error) {
+      } catch {
         // Refresh failed, call auth error handler
         this.onAuthError?.()
       }

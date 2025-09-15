@@ -18,6 +18,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@repo/types": "*",
     "@repo/validation": "*",
+    "@repo/config": "*",
     "expo": "~54.0.3",
     "expo-auth-session": "~7.0.7",
     "expo-constants": "~18.0.8",

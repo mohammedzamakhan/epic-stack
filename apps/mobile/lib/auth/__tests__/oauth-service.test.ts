@@ -73,7 +73,7 @@ describe('OAuthService', () => {
         Platform: { OS: 'ios' },
       }))
 
-      const redirectUri = OAuthService.getRedirectUri()
+      OAuthService.getRedirectUri()
       expect(mockAuthSession.makeRedirectUri).toHaveBeenCalledWith({
         scheme: 'epicnotes',
         path: 'auth/callback',
