@@ -37,6 +37,7 @@ model User {
   passkey                Passkey[]
   password               Password?
   sessions               Session[]
+  refreshTokens          RefreshToken[]
   image                  UserImage?
   organizations          UserOrganization[]
   utmSource              UtmSource?
@@ -100,6 +101,23 @@ model Session {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    // Hashed refresh token for security
+  userId    String
+  userAgent String?   // Device/browser info
+  ipAddress String?   // IP address for security tracking
+  revoked   Boolean   @default(false)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, revoked])
+  @@index([expiresAt])
 }
 
 model Permission {

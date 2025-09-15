@@ -4,7 +4,7 @@
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": ["build/**", "public/build/**", "server-build/**", "dist/**"]
+			"outputs": ["build/**", "public/build/**", "server-build/**", "dist/**", ".expo/**"]
 		},
 		"lint": {},
 		"typecheck": {

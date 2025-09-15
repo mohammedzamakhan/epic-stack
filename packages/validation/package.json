@@ -1,0 +1,27 @@
+{
+  "type": "module",
+  "name": "@repo/validation",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@repo/config": "*",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.8"
+  }
+}
