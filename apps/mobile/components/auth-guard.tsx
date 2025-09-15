@@ -32,7 +32,7 @@ export function AuthGuard() {
 
     const inAuthGroup = segments[0] === '(auth)'
     const inDashboardGroup = segments[0] === '(dashboard)'
-    const inOAuthCallback = segments[0] === 'auth' && segments[1] === 'callback'
+    const inOAuthCallback = segments[0] === 'auth'
     const onIndexScreen = segments[0] === '(dashboard)' || segments.length === 1
 
     // Don't redirect if we're in the OAuth callback flow
