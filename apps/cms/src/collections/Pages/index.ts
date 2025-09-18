@@ -16,6 +16,7 @@ import { Logos } from '../../blocks/Logos/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { Pricing } from '../../blocks/Pricing/config'
 import { Testimonials } from '../../blocks/Testimonials/config'
+import { FAQ } from '../../blocks/FAQ/config'
 import { Blog } from '../../blocks/Blog/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -85,7 +86,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, StatsGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, StatsGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog, FAQ],
               required: true,
               admin: {
                 initCollapsed: true,

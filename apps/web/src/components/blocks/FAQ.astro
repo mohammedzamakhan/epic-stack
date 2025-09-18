@@ -1,0 +1,115 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface FAQItem {
+	question: string
+	answer: string
+}
+
+interface Props {
+	title?: string
+	subtitle?: string
+	fAQs?: FAQItem[]
+	supportText?: string
+	supportLinkLabel?: string
+	supportLinkUrl?: string
+	blockType: 'faq'
+}
+
+const {
+	title = 'FAQs',
+	subtitle = 'Your questions answered',
+	fAQs: items = [
+		{
+			question: 'How long does shipping take?',
+			answer:
+				'Standard shipping takes 3-5 business days, depending on your location. Express shipping options are available at checkout for 1-2 business day delivery.',
+		},
+		{
+			question: 'What payment methods do you accept?',
+			answer:
+				'We accept major credit cards, Apple Pay, Google Pay, and PayPal. For enterprise plans, we also support invoices and wire transfers.',
+		},
+		{
+			question: 'Can I change or cancel my order?',
+			answer:
+				'Orders can be changed or canceled within 2 hours of placement. Contact support with your order number and we will assist you.',
+		},
+	],
+	supportText = "Can't find what you're looking for? Contact our",
+	supportLinkLabel = 'customer support team',
+	supportLinkUrl = '#',
+} = Astro.props
+---
+
+<section class="relative py-16 md:py-24">
+	<GridDesign />
+	<div class="relative z-10 mx-auto max-w-5xl px-6">
+		<div class="grid gap-8 md:grid-cols-5 md:gap-12">
+			<div class="md:col-span-2">
+				<h2 class="text-foreground text-4xl font-semibold">{title}</h2>
+				{
+					subtitle && (
+						<p class="text-muted-foreground mt-4 text-balance text-lg">
+							{subtitle}
+						</p>
+					)
+				}
+				{
+					supportText && supportLinkLabel && supportLinkUrl && (
+						<p class="text-muted-foreground mt-6 hidden md:block">
+							{supportText}
+							<a
+								class="text-primary font-medium hover:underline"
+								href={supportLinkUrl}
+							>
+								{supportLinkLabel}
+							</a>
+						</p>
+					)
+				}
+			</div>
+			<div class="md:col-span-3">
+				<div class="divide-y">
+					{
+						items.map((faq, idx) => (
+							<details class="group py-2" open={idx === 0}>
+								<summary class="flex cursor-pointer items-start justify-between gap-4 py-2 text-left font-medium outline-none text-base">
+									{faq.question}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										class="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200 group-open:rotate-180"
+									>
+										<path d="m6 9 6 6 6-6" />
+									</svg>
+								</summary>
+								<div class="pb-4 text-base">{faq.answer}</div>
+							</details>
+						))
+					}
+				</div>
+			</div>
+			{
+				supportText && supportLinkLabel && supportLinkUrl && (
+					<p class="text-muted-foreground mt-6 md:hidden">
+						{supportText}
+						<a
+							class="text-primary font-medium hover:underline"
+							href={supportLinkUrl}
+						>
+							{supportLinkLabel}
+						</a>
+					</p>
+				)
+			}
+		</div>
+	</div>
+</section>

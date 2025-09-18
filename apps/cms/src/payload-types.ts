@@ -289,6 +289,7 @@ export interface Page {
     | TestimonialsBlock
     | BuildForBlock
     | BlogBlock
+    | FAQBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1053,6 +1054,27 @@ export interface BlogBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock".
+ */
+export interface FAQBlock {
+  title: string;
+  subtitle?: string | null;
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  supportText?: string | null;
+  supportLinkLabel?: string | null;
+  supportLinkUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1415,6 +1437,7 @@ export interface PagesSelect<T extends boolean = true> {
         testimonials?: T | TestimonialsBlockSelect<T>;
         buildFor?: T | BuildForBlockSelect<T>;
         blog?: T | BlogBlockSelect<T>;
+        faq?: T | FAQBlockSelect<T>;
       };
   meta?:
     | T
@@ -1665,6 +1688,26 @@ export interface BlogBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedPosts?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock_select".
+ */
+export interface FAQBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  supportText?: T;
+  supportLinkLabel?: T;
+  supportLinkUrl?: T;
   id?: T;
   blockName?: T;
 }
