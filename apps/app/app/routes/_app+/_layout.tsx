@@ -33,11 +33,11 @@ export async function loader({ request }: { request: Request }) {
 		// Don't throw, just continue without onboarding progress
 	}
 
-	return { isCollapsed, onboardingProgress }
+	return { isCollapsed, onboardingProgress, extensionId: process.env.EXTENSION_ID }
 }
 
 export default function MarketingLayoutRoute() {
-	const { isCollapsed, onboardingProgress } = useLoaderData<{
+	const { isCollapsed, onboardingProgress, extensionId } = useLoaderData<{
 		isCollapsed: boolean
 		onboardingProgress: OnboardingProgressData | null
 	}>()
@@ -46,6 +46,7 @@ export default function MarketingLayoutRoute() {
 		<MarketingLayout
 			isCollapsed={isCollapsed}
 			onboardingProgress={onboardingProgress}
+			extensionId={extensionId}
 		>
 			<Outlet />
 		</MarketingLayout>

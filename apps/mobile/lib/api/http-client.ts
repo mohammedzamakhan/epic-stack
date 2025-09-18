@@ -71,8 +71,8 @@ export class HttpClient {
         const data = await this.parseResponse<T>(response)
         return {
           success: true,
-          data,
           status: response.status,
+          ...data
         }
       } catch (error) {
         lastError = error as Error

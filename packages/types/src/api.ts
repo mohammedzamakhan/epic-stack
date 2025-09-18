@@ -90,19 +90,22 @@ export interface LoginApiResponse extends ApiResponse {
 // JWT Login API response (for mobile apps)
 export interface JWTLoginApiResponse extends ApiResponse {
     data?: {
-        user: {
-            id: string
-            email: string
-            username: string
-            name: string | null
-            image?: string | null
-            createdAt: string
-            updatedAt: string
+        data: {
+            user: {
+                id: string
+                email: string
+                username: string
+                name: string | null
+                image?: string | null
+                createdAt: string
+                updatedAt: string
+            }
+            
         }
         accessToken: string
-        refreshToken: string
-        expiresIn: number
-        expiresAt: string
+            refreshToken: string
+            expiresIn: number
+            expiresAt: string
     }
     redirectTo?: string
 }

@@ -27,7 +27,7 @@ export default function ForgotPasswordEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Reset your Epic Notes password</Preview>
+				<Preview>Reset your Epic Startup password</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}
@@ -37,7 +37,7 @@ export default function ForgotPasswordEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We received a request to reset your Epic Notes password. If you
+								We received a request to reset your Epic Startup password. If you
 								didn't make this request, you can safely ignore this email.
 							</Text>
 
@@ -67,20 +67,20 @@ export default function ForgotPasswordEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Stay secure!
 								<br />
-								The Epic Notes Team
+								The Epic Startup Team
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Notes
+								Organize your thoughts with Epic Startup
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								If the button doesn't work, copy this link: {onboardingUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Notes
+								Copyright © 2025 Epic Startup
 							</Text>
 						</Section>
 					</Container>

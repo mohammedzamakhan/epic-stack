@@ -1,6 +1,6 @@
-# Epic Notes MCP
+# Epic Startup MCP
 
-Model Context Protocol server for Epic Notes organization.
+Model Context Protocol server for Epic Startup organization.
 
 ## Installation
 
@@ -77,4 +77,4 @@ package.
 ## Requirements
 
 - Node.js >= 18.0.0
-- Valid Epic Notes API key
+- Valid Epic Startup API key

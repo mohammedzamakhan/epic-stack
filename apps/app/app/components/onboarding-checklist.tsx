@@ -77,29 +77,24 @@ export function OnboardingChecklist({
 	if (variant === 'sidebar') {
 		return (
 			<div
-				className={`group relative overflow-hidden rounded-lg border border-slate-600/50 bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-slate-800/20 px-4 py-3 backdrop-blur-sm transition-all duration-300 hover:border-slate-500/60 hover:shadow-lg hover:shadow-blue-500/10 ${className}`}
+				className={`group relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 bg-background ${className}`}
 				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
 				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
 			>
-				<ShineBorder shineColor={['#A07CFE', '#FE8FB5', '#FFBE7B']} />
-				{/* Subtle background pattern with hover animation */}
-				<div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/5 to-transparent opacity-40 transition-all duration-500 group-hover:via-blue-400/8 group-hover:opacity-60" />
-				<div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-300/0 to-blue-400/0 opacity-0 transition-all duration-700 group-hover:via-blue-300/3 group-hover:opacity-100" />
-
 				<div className="relative z-10">
 					<div className="mb-3 flex w-full items-center justify-between">
 						<div className="flex items-center gap-2">
 							<ListTodoIcon
 								ref={listTodoIconRef}
 								size={16}
-								className="text-blue-400"
+								className="text-primary"
 							/>
-							<span className="text-sm font-semibold text-white">
+							<span className="text-sm font-semibold">
 								Get Started
 							</span>
 						</div>
 						<div className="flex items-center gap-1">
-							<span className="rounded border border-slate-600/50 bg-slate-700/80 px-1.5 py-0.5 text-xs font-medium text-white">
+							<span className="rounded border bg-muted px-1.5 py-0.5 text-xs font-medium">
 								{progress.completedCount}/{progress.totalSteps}
 							</span>
 						</div>
@@ -108,14 +103,14 @@ export function OnboardingChecklist({
 					<div className="space-y-2">
 						<Progress
 							value={progressPercentage}
-							className="border-muted-foreground h-2.5 border shadow-inner"
+							className="border-muted-foreground h-2 border"
 						/>
 						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium text-slate-200">
+							<span className="text-xs font-medium">
 								{Math.round(progressPercentage)}% complete
 							</span>
 							{progressPercentage === 100 && (
-								<div className="flex items-center gap-1 rounded-full border border-green-500/50 bg-green-600/80 px-2 py-0.5 text-xs font-medium text-white">
+								<div className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
 									<Icon name="check" className="h-3 w-3" />
 									Done!
 								</div>

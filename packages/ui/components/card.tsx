@@ -69,7 +69,7 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
 		<div
 			data-slot="card-content"
 			className={cn(
-				'bg-card ring-border overflow-hidden rounded-xl p-6 shadow-sm ring-1',
+				'bg-card ring-border overflow-hidden rounded-2lg p-6 shadow-sm ring-1',
 				className,
 			)}
 			{...props}

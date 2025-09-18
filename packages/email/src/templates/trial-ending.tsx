@@ -28,7 +28,7 @@ export default function TrialEndingEmail({
 			<Tailwind>
 				<Head />
 				<Preview>
-					Your Epic Notes trial ends in {daysRemaining.toString()}{' '}
+					Your Epic Startup trial ends in {daysRemaining.toString()}{' '}
 					{daysRemaining === 1 ? 'day' : 'days'}
 				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
@@ -40,14 +40,14 @@ export default function TrialEndingEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								Your Epic Notes trial is ending in {daysRemaining}{' '}
+								Your Epic Startup trial is ending in {daysRemaining}{' '}
 								{daysRemaining === 1 ? 'day' : 'days'}. We hope you've enjoyed
 								organizing your thoughts and collaborating with your team using
 								our powerful note-taking platform.
 							</Text>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								To continue using Epic Notes without interruption and keep all
+								To continue using Epic Startup without interruption and keep all
 								your valuable notes and collaborations, please upgrade your
 								account:
 							</Text>
@@ -78,16 +78,16 @@ export default function TrialEndingEmail({
 							</Text>
 
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
-								Thank you for trying Epic Notes!
+								Thank you for trying Epic Startup!
 								<br />
-								The Epic Notes Team
+								The Epic Startup Team
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Notes
+								Organize your thoughts with Epic Startup
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
@@ -100,7 +100,7 @@ export default function TrialEndingEmail({
 								If the button doesn't work, copy this link: {portalUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Notes
+								Copyright © 2025 Epic Startup
 							</Text>
 						</Section>
 					</Container>

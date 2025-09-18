@@ -4,7 +4,7 @@ import * as React from 'react'
 import { cn } from '../utils/cn'
 
 const buttonVariants = cva(
-	"focus-visible:ring-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-1 focus-visible:outline-none active:scale-97 disabled:pointer-events-none disabled:opacity-50 data-[theme=light]:text-shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:drop-shadow-sm [&_svg:not([class*='size-'])]:size-4",
+	"focus-visible:ring-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-1 focus-visible:outline-none active:scale-97 disabled:pointer-events-none disabled:opacity-50 data-[theme=light]:text-shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 	{
 		variants: {
 			variant: {

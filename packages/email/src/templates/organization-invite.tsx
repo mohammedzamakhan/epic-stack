@@ -30,7 +30,7 @@ export default function OrganizationInviteEmail({
 			<Tailwind>
 				<Head />
 				<Preview>
-					You're invited to join {organizationName} on Epic Notes
+					You're invited to join {organizationName} on Epic Startup
 				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
@@ -42,7 +42,7 @@ export default function OrganizationInviteEmail({
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
 								Great news! {inviterName} has invited you to collaborate with{' '}
-								{organizationName} on Epic Notes. You'll be able to share notes,
+								{organizationName} on Epic Startup. You'll be able to share notes,
 								collaborate on projects, and stay organized together.
 							</Text>
 
@@ -77,20 +77,20 @@ export default function OrganizationInviteEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Welcome to the team!
 								<br />
-								The Epic Notes Team
+								The Epic Startup Team
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Notes
+								Organize your thoughts with Epic Startup
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								If the button doesn't work, copy this link: {inviteUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Notes
+								Copyright © 2025 Epic Startup
 							</Text>
 						</Section>
 					</Container>

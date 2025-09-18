@@ -9,12 +9,14 @@ type MarketingLayoutProps = {
 	children: ReactNode
 	isCollapsed?: boolean
 	onboardingProgress?: OnboardingProgressData | null
+	extensionId?: string | null
 }
 
 export function MarketingLayout({
 	children,
 	isCollapsed = false,
 	onboardingProgress,
+	extensionId = null,
 }: MarketingLayoutProps) {
 	return (
 		<>
@@ -31,6 +33,7 @@ export function MarketingLayout({
 					variant="inset"
 					onboardingProgress={onboardingProgress}
 					trialStatus={{ isActive: true, daysRemaining: 7 }}
+					extensionId={extensionId}
 				/>
 				<SidebarInset
 					style={

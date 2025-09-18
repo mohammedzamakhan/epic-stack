@@ -33,6 +33,7 @@ import { McpIcon } from './icons/mcp-icon'
 import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { NavSecondary } from './nav-secondary'
+import { ExternalLinkIcon } from './icons/external-link-icon'
 
 // Upgrade Account Card Component
 function UpgradeAccountCard({
@@ -45,7 +46,7 @@ function UpgradeAccountCard({
 	if (!trialStatus.isActive || trialStatus.daysRemaining < 0) return null
 
 	return (
-		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 p-2 shadow-md">
+		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 p-2 border">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
 					There are{' '}
@@ -159,6 +160,7 @@ function OrganizationSidebar({
 	trialStatus,
 	rootData,
 	onFeedbackClick,
+	extensionId
 }: {
 	user: any
 	location: any
@@ -170,6 +172,7 @@ function OrganizationSidebar({
 	trialStatus?: { isActive: boolean; daysRemaining: number }
 	rootData: any
 	onFeedbackClick: () => void
+	extensionId?: string
 }) {
 	const navMain = [
 		{
@@ -223,14 +226,21 @@ function OrganizationSidebar({
 
 	const navSecondary = [
 		{
+			title: 'Get chrome extension',
+			url: `https://chrome.google.com/webstore/detail/${extensionId}`,
+			icon: ExternalLinkIcon,
+			target: '_blank',
+		},
+		{
 			title: 'Add members',
 			url: `/${orgSlug}/settings/members`,
 			icon: UserRoundPlusIcon,
 		},
 		{
 			title: 'Get help',
-			url: '#',
+			url: 'http://docs.epic-stack.me:2999',
 			icon: CircleHelpIcon,
+			target: '_blank',
 		},
 		{
 			title: 'Give feedback',
@@ -241,9 +251,9 @@ function OrganizationSidebar({
 
 	return (
 		<>
-			<SidebarHeader className="p-2">
+			<SidebarHeader className="px-0">
 				<Link to="/">
-					<Logo className="text-md mb-0" />
+					<Logo className="text-md m-1 mx-4" />
 				</Link>
 				<TeamSwitcher />
 			</SidebarHeader>
@@ -299,10 +309,12 @@ function OrganizationSidebar({
 export function AppSidebar({
 	onboardingProgress,
 	trialStatus,
+	extensionId,
 	...props
 }: React.ComponentProps<typeof Sidebar> & {
 	onboardingProgress?: OnboardingProgressData | null
 	trialStatus?: { isActive: boolean; daysRemaining: number }
+	extensionId?: string
 }) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
@@ -399,6 +411,7 @@ export function AppSidebar({
 						trialStatus={trialStatus}
 						rootData={rootData}
 						onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+						extensionId={extensionId}
 					/>
 				</motion.div>
 			</div>

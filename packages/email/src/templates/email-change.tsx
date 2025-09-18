@@ -27,7 +27,7 @@ export default function EmailChangeEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Verify your new Epic Notes email address</Preview>
+				<Preview>Verify your new Epic Startup email address</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}
@@ -38,7 +38,7 @@ export default function EmailChangeEmail({
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
 								We need to verify your new email address to complete the change
-								to your Epic Notes account. This helps keep your account secure.
+								to your Epic Startup account. This helps keep your account secure.
 							</Text>
 
 							<Text className="mb-[16px] text-[16px] leading-[24px] text-[#020304]">
@@ -67,20 +67,20 @@ export default function EmailChangeEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Stay secure!
 								<br />
-								The Epic Notes Team
+								The Epic Startup Team
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Notes
+								Organize your thoughts with Epic Startup
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								If the button doesn't work, copy this link: {verifyUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Notes
+								Copyright © 2025 Epic Startup
 							</Text>
 						</Section>
 					</Container>

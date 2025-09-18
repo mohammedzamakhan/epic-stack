@@ -16,14 +16,14 @@ const SERVER_URL = 'http://localhost:3001/api/mcp-tools'
 const server = new McpServer(
 	{
 		name: 'epic-notes-proxy',
-		title: 'Epic Notes Proxy',
+		title: 'Epic Startup Proxy',
 		version: '1.0.0',
 	},
 	{
 		capabilities: {
 			tools: {},
 		},
-		instructions: 'Lets you connect to Epic Notes system',
+		instructions: 'Lets you connect to Epic Startup system',
 	},
 )
 

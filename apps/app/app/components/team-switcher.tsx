@@ -53,13 +53,13 @@ export function TeamSwitcher() {
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="group hover:bg-sidebar-accent/50 data-[state=open]:bg-sidebar-accent/70 border-sidebar-border/50 from-sidebar-accent/20 to-sidebar-accent/10 relative h-14 rounded-xl border bg-gradient-to-r px-3 py-2 backdrop-blur-sm transition-all duration-200"
+							className="group bg-background relative h-14 rounded-xl border px-3 py-2 transition-all duration-200"
 						>
 							<div className="relative flex w-full items-center gap-3">
 								{/* Enhanced Avatar Container */}
 								<div className="relative">
-									<div className="from-sidebar-primary/20 to-sidebar-primary/40 absolute inset-0 rounded bg-gradient-to-br blur-sm" />
-									<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded bg-gradient-to-br shadow-lg ring-1">
+									<div className="from-sidebar-primary/20 to-sidebar-primary/40 absolute inset-0 rounded bg-gradient-to-br" />
+									<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded bg-gradient-to-br ring-1">
 										<Avatar className="size-8 rounded">
 											{activeTeam.image?.objectKey ? (
 												<AvatarImage

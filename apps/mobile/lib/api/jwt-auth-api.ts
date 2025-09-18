@@ -137,7 +137,7 @@ export class JWTAuthApi {
 
       return {
         success: true,
-        data: response.data, // Use the response data directly
+        data: response?.data, // Use the response data directly
         status: response.status,
       }
     } catch (error) {
@@ -418,9 +418,7 @@ export class JWTAuthApi {
       return {
         success: true,
         data: { 
-          data: { 
-            organizations: response.data?.data?.organizations || [] 
-          } 
+          organizations: response.data?.organizations || [] 
         },
         status: response.status,
       }

@@ -34,9 +34,7 @@ export interface UserOrganization {
 export interface OrganizationsApiResponse {
   success: true
   data: {
-    data: {
-      organizations: UserOrganization[]
-    }
+    organizations: UserOrganization[]
   }
   status: number
 }

@@ -24,7 +24,7 @@ export default function EmailChangeNoticeEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Your Epic Notes email has been changed</Preview>
+				<Preview>Your Epic Startup email has been changed</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}
@@ -34,7 +34,7 @@ export default function EmailChangeNoticeEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We're writing to let you know that your Epic Notes email address
+								We're writing to let you know that your Epic Startup email address
 								has been successfully changed. This is an important security
 								notification.
 							</Text>
@@ -58,14 +58,14 @@ export default function EmailChangeNoticeEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Stay secure!
 								<br />
-								The Epic Notes Team
+								The Epic Startup Team
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Notes
+								Organize your thoughts with Epic Startup
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
@@ -83,7 +83,7 @@ export default function EmailChangeNoticeEmail({
 								</Link>
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Notes
+								Copyright © 2025 Epic Startup
 							</Text>
 						</Section>
 					</Container>

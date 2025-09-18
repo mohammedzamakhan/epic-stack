@@ -8,192 +8,22 @@ export function Logo({
 	size?: number
 }) {
 	return (
-		<div className={cn('flex items-center gap-3', className)}>
+		<div className={cn('flex items-center gap-2', className)}>
 			<svg
-				fill="none"
-				height={size}
-				viewBox="0 0 48 48"
-				width={size}
-				xmlns="http://www.w3.org/2000/svg"
-				xmlnsXlink="http://www.w3.org/1999/xlink"
-			>
-				<filter
-					id="a"
-					colorInterpolationFilters="sRGB"
-					filterUnits="userSpaceOnUse"
-					height="54"
-					width="48"
-					x="0"
-					y="-3"
-				>
-					<feFlood floodOpacity="0" result="BackgroundImageFix" />
-					<feBlend
-						in="SourceGraphic"
-						in2="BackgroundImageFix"
-						mode="normal"
-						result="shape"
-					/>
-					<feColorMatrix
-						in="SourceAlpha"
-						result="hardAlpha"
-						type="matrix"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-					/>
-					<feOffset dy="-3" />
-					<feGaussianBlur stdDeviation="1.5" />
-					<feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic" />
-					<feColorMatrix
-						type="matrix"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-					/>
-					<feBlend
-						in2="shape"
-						mode="normal"
-						result="effect1_innerShadow_3051_46903"
-					/>
-					<feColorMatrix
-						in="SourceAlpha"
-						result="hardAlpha"
-						type="matrix"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-					/>
-					<feOffset dy="3" />
-					<feGaussianBlur stdDeviation="1.5" />
-					<feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic" />
-					<feColorMatrix
-						type="matrix"
-						values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.1 0"
-					/>
-					<feBlend
-						in2="effect1_innerShadow_3051_46903"
-						mode="normal"
-						result="effect2_innerShadow_3051_46903"
-					/>
-					<feColorMatrix
-						in="SourceAlpha"
-						result="hardAlpha"
-						type="matrix"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-					/>
-					<feMorphology
-						in="SourceAlpha"
-						operator="erode"
-						radius="1"
-						result="effect3_innerShadow_3051_46903"
-					/>
-					<feOffset />
-					<feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic" />
-					<feColorMatrix
-						type="matrix"
-						values="0 0 0 0 0.0627451 0 0 0 0 0.0941176 0 0 0 0 0.156863 0 0 0 0.24 0"
-					/>
-					<feBlend
-						in2="effect2_innerShadow_3051_46903"
-						mode="normal"
-						result="effect3_innerShadow_3051_46903"
-					/>
-				</filter>
-				<filter
-					id="b"
-					colorInterpolationFilters="sRGB"
-					filterUnits="userSpaceOnUse"
-					height="44"
-					width="38"
-					x="5"
-					y="5"
-				>
-					<feFlood floodOpacity="0" result="BackgroundImageFix" />
-					<feColorMatrix
-						in="SourceAlpha"
-						result="hardAlpha"
-						type="matrix"
-						values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-					/>
-					<feMorphology
-						in="SourceAlpha"
-						operator="erode"
-						radius="2"
-						result="effect1_dropShadow_3051_46903"
-					/>
-					<feOffset dy="3" />
-					<feGaussianBlur stdDeviation="3" />
-					<feComposite in2="hardAlpha" operator="out" />
-					<feColorMatrix
-						type="matrix"
-						values="0 0 0 0 0.141176 0 0 0 0 0.141176 0 0 0 0 0.141176 0 0 0 0.1 0"
-					/>
-					<feBlend
-						in2="BackgroundImageFix"
-						mode="normal"
-						result="effect1_dropShadow_3051_46903"
-					/>
-					<feBlend
-						in="SourceGraphic"
-						in2="effect1_dropShadow_3051_46903"
-						mode="normal"
-						result="shape"
-					/>
-				</filter>
-				<linearGradient
-					id="c"
-					gradientUnits="userSpaceOnUse"
-					x1="24"
-					x2="26"
-					y1=".000001"
-					y2="48"
-				>
-					<stop offset="0" stopColor="#fff" stopOpacity="0" />
-					<stop offset="1" stopColor="#fff" stopOpacity=".12" />
-				</linearGradient>
-				<linearGradient
-					id="d"
-					gradientUnits="userSpaceOnUse"
-					x1="24.0002"
-					x2="24.0002"
-					y1="9.71429"
-					y2="38.2857"
-				>
-					<stop offset="0" stopColor="#fff" stopOpacity=".8" />
-					<stop offset="1" stopColor="#fff" stopOpacity=".5" />
-				</linearGradient>
-				<linearGradient
-					id="e"
-					gradientUnits="userSpaceOnUse"
-					x1="24"
-					x2="24"
-					y1="0"
-					y2="48"
-				>
-					<stop offset="0" stopColor="#fff" stopOpacity=".12" />
-					<stop offset="1" stopColor="#fff" stopOpacity="0" />
-				</linearGradient>
-				<clipPath id="f">
-					<rect height="48" rx="12" width="48" />
-				</clipPath>
-				<g filter="url(#a)">
-					<g clipPath="url(#f)">
-						<rect fill="#6927da" height="48" rx="12" width="48" />
-						<path d="m0 0h48v48h-48z" fill="url(#c)" />
-						<g fill="url(#d)" filter="url(#b)">
-							<path d="m23.7005 9.71429c-2.6.00001-4.7 2.07451-4.7 4.64291 0 2.5486 2.1 4.623 4.68 4.6428-.64-.0198-1.14-.5334-1.14-1.1657 0-.6322.52-1.1656 1.18-1.1656h11.76c1.94 0 3.52-1.5608 3.52-3.4772s-1.58-3.47721-3.52-3.47721z" />
-							<path d="m17.9861 19c-2.6 0-4.7 2.0745-4.7 4.6428 0 2.5487 2.1 4.6231 4.68 4.6429-.64-.0198-1.14-.5334-1.14-1.1657 0-.6322.52-1.1656 1.1801-1.1656h11.7599c1.94 0 3.52-1.5608 3.52-3.4772s-1.58-3.4772-3.52-3.4772z" />
-							<path d="m14.0357 28.2857c-2.7857 0-5.0357 2.2341-5.0357 5 0 2.7447 2.25 4.9787 5.0143 5-.6857-.0213-1.2214-.5744-1.2214-1.2553s.5571-1.2553 1.2643-1.2553h12.6c2.0785 0 3.7714-1.6809 3.7714-3.7447s-1.6929-3.7447-3.7714-3.7447z" />
-						</g>
-					</g>
-					<rect
-						height="46"
-						rx="11"
-						stroke="url(#e)"
-						strokeWidth="2"
-						width="46"
-						x="1"
-						y="1"
-					/>
-				</g>
-			</svg>
-			<div className="flex gap-1 font-bold">
-				<span>Epic</span>
-				<span>SaaS</span>
+									xmlns="http://www.w3.org/2000/svg"
+									height="18"
+									width="18"
+									viewBox="0 0 18 18"
+									><title>rocket</title><g className="nc-icon-wrapper"
+										><path
+											d="M3.504,17H1.75c-.414,0-.75-.336-.75-.75v-1.754c0-.981,.578-1.877,1.473-2.282,.375-.171,.821-.004,.992,.374,.171,.377,.003,.822-.374,.992-.359,.163-.591,.522-.591,.916v1.004h1.004c.394,0,.753-.232,.916-.591,.17-.377,.616-.544,.992-.374,.377,.171,.545,.615,.374,.992-.405,.895-1.301,1.473-2.282,1.473Z"
+											data-color="color-2"></path><path
+											d="M13.775,10.712c3.636-3.994,3.236-8.497,3.175-9.006-.041-.345-.312-.616-.657-.657-.511-.063-5.011-.461-9.006,3.175l-1.013-.181c-1.536-.273-3.107,.37-4.008,1.641L.388,8.336c-.191,.27-.183,.632,.019,.893,.146,.188,.366,.291,.593,.291,.09,0,.181-.016,.268-.049,.013-.005,1.068-.391,2.636-.329-.17,.438-.291,.825-.377,1.139-.071,.26,.002,.538,.193,.729l3.272,3.272c.143,.143,.334,.22,.53,.22,.066,0,.133-.009,.198-.027,.313-.086,.7-.207,1.137-.377,.058,1.555-.324,2.625-.328,2.636-.118,.309-.02,.658,.241,.86,.135,.104,.297,.157,.459,.157,.152,0,.304-.046,.434-.138l2.654-1.88c1.27-.899,1.913-2.471,1.639-4.003l-.182-1.016Zm-2.525-5.712c.966,0,1.75,.783,1.75,1.75s-.784,1.75-1.75,1.75-1.75-.783-1.75-1.75,.784-1.75,1.75-1.75ZM2.7,7.668l.791-1.116c.566-.799,1.551-1.206,2.521-1.032l.034,.006c-.615,.74-1.106,1.482-1.477,2.173-.688-.067-1.331-.079-1.868-.032Zm8.751,6.84l-1.119,.792c.048-.536,.036-1.18-.032-1.868,.691-.371,1.433-.862,2.173-1.477l.007,.038c.172,.963-.232,1.95-1.03,2.515Z"
+											fill="currentColor"></path></g
+									></svg
+								>
+			<div className="font-bold font-title">
+				Epic Startup
 			</div>
 		</div>
 	)

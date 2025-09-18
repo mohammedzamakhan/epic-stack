@@ -94,12 +94,7 @@ export function FeatureUpdates({
 											animate={{ opacity: 0.5, scale: 0.85, y: -24 }}
 											exit={{ opacity: 0, scale: 0.8, y: -10 }}
 											transition={{ duration: 0.3, ease: 'easeOut' }}
-											className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-gray-800"
-											style={{
-												boxShadow:
-													'0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03)',
-												filter: 'blur(0.25px)',
-											}}
+											className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-muted"
 										/>
 									)}
 									<motion.div
@@ -107,12 +102,7 @@ export function FeatureUpdates({
 										animate={{ opacity: 0.7, scale: 0.92, y: -12 }}
 										exit={{ opacity: 0, scale: 0.88, y: -5 }}
 										transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
-										className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-gray-700"
-										style={{
-											boxShadow:
-												'0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03)',
-											filter: 'blur(0.25px)',
-										}}
+										className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-muted/80"
 									/>
 								</>
 							)}
@@ -129,10 +119,6 @@ export function FeatureUpdates({
 								ease: [0.25, 0.46, 0.45, 0.94],
 							}}
 							className="bg-sidebar-accent border-sidebar-border relative z-20 flex flex-col justify-between rounded-md border p-3"
-							style={{
-								boxShadow:
-									'0 30px 60px -12px rgba(0, 0, 0, 0.7), 0 8px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08)',
-							}}
 							whileHover={{
 								scale: 1.02,
 								transition: { duration: 0.2 },

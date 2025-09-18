@@ -13,7 +13,7 @@ import {
 type NavItem = {
 	title: string
 	icon: React.ComponentType<any>
-} & ({ url: string; onClick?: never } | { url?: never; onClick: () => void })
+} & ({ url: string; onClick?: never, target?: string } | { url?: never; onClick: () => void })
 
 export function NavSecondary({
 	items,
@@ -50,7 +50,7 @@ export function NavSecondary({
 								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
 							>
 								{item.url ? (
-									<Link to={item.url}>
+									<Link to={item.url} target={item.target}>
 										<item.icon
 											ref={(ref: any) => (iconRefs.current[item.title] = ref)}
 											size={16}

@@ -19,9 +19,8 @@ export function useOrganizations() {
 
     try {
       const response = await jwtAuthApi.getOrganizations()
-      console.log(response)
       if (response.success && response.data) {
-        setOrganizations(response.data.data.organizations)
+        setOrganizations(response.data.organizations)
       } else {
         setError('message' in response ? response.message : 'Failed to fetch organizations')
       }
@@ -34,7 +33,7 @@ export function useOrganizations() {
 
   useEffect(() => {
     void fetchOrganizations()
-  }, [isAuthenticated, user, fetchOrganizations])
+  }, [])
 
   return {
     organizations,
