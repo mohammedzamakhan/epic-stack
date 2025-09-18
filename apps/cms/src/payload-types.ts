@@ -220,6 +220,42 @@ export interface Page {
     | {
         title?: string | null;
         subtitle?: string | null;
+        stats?:
+          | {
+              title: string;
+              /**
+               * Optional large value to display (like 100%)
+               */
+              value?: string | null;
+              description: string;
+              variant: 'default' | 'icon' | 'chart' | 'chat' | 'dashboard';
+              /**
+               * SVG icon code for icon, default, and dashboard variants
+               */
+              icon?: string | null;
+              /**
+               * SVG chart code for chart and dashboard variants
+               */
+              chartSvg?: string | null;
+              avatars?:
+                | {
+                    name: string;
+                    avatar: string;
+                    position: 'left' | 'right';
+                    id?: string | null;
+                  }[]
+                | null;
+              colSpan?: ('auto' | 'full' | 'half' | '2' | '3') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'statsGrid';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
         description?: string | null;
         integrations?:
           | {
@@ -1319,6 +1355,34 @@ export interface PagesSelect<T extends boolean = true> {
                     title?: T;
                     description?: T;
                     icon?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        statsGrid?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              stats?:
+                | T
+                | {
+                    title?: T;
+                    value?: T;
+                    description?: T;
+                    variant?: T;
+                    icon?: T;
+                    chartSvg?: T;
+                    avatars?:
+                      | T
+                      | {
+                          name?: T;
+                          avatar?: T;
+                          position?: T;
+                          id?: T;
+                        };
+                    colSpan?: T;
                     id?: T;
                   };
               id?: T;

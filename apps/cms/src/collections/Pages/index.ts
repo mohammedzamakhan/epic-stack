@@ -9,6 +9,7 @@ import { Content } from '../../blocks/Content/config'
 import { Featured } from '../../blocks/Featured/config'
 import { FeatureList } from '../../blocks/FeatureList/config'
 import { FeatureGrid } from '../../blocks/FeatureGrid/config'
+import { StatsGrid } from '../../blocks/StatsGrid/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { Integration } from '../../blocks/Integration/config'
 import { Logos } from '../../blocks/Logos/config'
@@ -84,7 +85,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, StatsGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog],
               required: true,
               admin: {
                 initCollapsed: true,
