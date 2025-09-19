@@ -23,7 +23,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 		<slot name="head" />
 	</head>
 	<body>
-		<nav class="border-b text-foreground overscroll-none bg-background">
+		<nav class="border-b text-foreground bg-background">
 			<header
 				class="fixed top-0 inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-dashed border-border"
 			>
@@ -244,7 +244,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 				</div>
 			</div>
 		</nav>
-		<main class="mt-16 max-w-screen overflow-x-hidden">
+		<main class="mt-16 max-w-screen">
 			<slot />
 		</main>
 

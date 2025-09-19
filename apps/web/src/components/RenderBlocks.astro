@@ -15,6 +15,8 @@ import FeatureGrid from './blocks/FeatureGrid.astro'
 import StatsGrid from './blocks/StatsGrid.astro'
 import Integration from './blocks/Integration.astro'
 import FAQ from './blocks/FAQ.astro'
+import Tabs from './blocks/Tabs.astro'
+import StickyCards from './blocks/StickyCards.astro'
 
 interface Props {
 	blocks?: any[]
@@ -64,6 +66,10 @@ console.log(blocks)
 					return <Integration {...block} />
 				case 'faq':
 					return <FAQ {...block} />
+				case 'tabs':
+					return <Tabs {...block} />
+				case 'stickyCards':
+					return <StickyCards {...block} />
 				default:
 					return (
 						<div class="unsupported-block">

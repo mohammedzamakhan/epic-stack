@@ -18,6 +18,8 @@ import { Pricing } from '../../blocks/Pricing/config'
 import { Testimonials } from '../../blocks/Testimonials/config'
 import { FAQ } from '../../blocks/FAQ/config'
 import { Blog } from '../../blocks/Blog/config'
+import { Tabs } from '../../blocks/Tabs/config'
+import { StickyCards } from '../../blocks/StickyCards/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -86,7 +88,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, StatsGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog, FAQ],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, Featured, FeatureList, FeatureGrid, StatsGrid, Integration, Logos, Pricing, Testimonials, BuildFor, Blog, FAQ, Tabs, StickyCards],
               required: true,
               admin: {
                 initCollapsed: true,

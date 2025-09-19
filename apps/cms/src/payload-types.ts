@@ -290,6 +290,62 @@ export interface Page {
     | BuildForBlock
     | BlogBlock
     | FAQBlock
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        description?: string | null;
+        tabs?:
+          | {
+              title: string;
+              description: string;
+              /**
+               * Paste your SVG icon code here
+               */
+              icon: string;
+              contentType?: ('image' | 'video') | null;
+              /**
+               * URL for the tab content image
+               */
+              image?: string | null;
+              /**
+               * YouTube embed URL or video URL
+               */
+              videoUrl?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        buttonText?: string | null;
+        buttonUrl?: string | null;
+        secondaryButtonText?: string | null;
+        secondaryButtonUrl?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'tabs';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        description?: string | null;
+        cards?:
+          | {
+              tagline: string;
+              title: string;
+              description: string;
+              /**
+               * URL for the card image
+               */
+              image: string;
+              primaryButtonText?: string | null;
+              primaryButtonUrl?: string | null;
+              secondaryButtonText?: string | null;
+              secondaryButtonUrl?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'stickyCards';
+      }
   )[];
   meta?: {
     title?: string | null;
@@ -1438,6 +1494,52 @@ export interface PagesSelect<T extends boolean = true> {
         buildFor?: T | BuildForBlockSelect<T>;
         blog?: T | BlogBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
+        tabs?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              description?: T;
+              tabs?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    icon?: T;
+                    contentType?: T;
+                    image?: T;
+                    videoUrl?: T;
+                    id?: T;
+                  };
+              buttonText?: T;
+              buttonUrl?: T;
+              secondaryButtonText?: T;
+              secondaryButtonUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+        stickyCards?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              description?: T;
+              cards?:
+                | T
+                | {
+                    tagline?: T;
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    primaryButtonText?: T;
+                    primaryButtonUrl?: T;
+                    secondaryButtonText?: T;
+                    secondaryButtonUrl?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
       };
   meta?:
     | T

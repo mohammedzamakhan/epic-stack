@@ -1,0 +1,278 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface Tab {
+	title: string
+	description: string
+	icon: string
+	image?: string
+	videoUrl?: string
+}
+
+interface Props {
+	title?: string
+	subtitle?: string
+	description?: string
+	tabs?: Tab[]
+	buttonText?: string
+	buttonUrl?: string
+	secondaryButtonText?: string
+	secondaryButtonUrl?: string
+	blockType: 'tabs'
+}
+
+const {
+	title = 'Medium length section heading goes here',
+	subtitle = 'Tagline',
+	description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
+	tabs = [
+		{
+			title: 'Short heading goes here',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M8 9l3 3l-3 3" />
+				<path d="M13 15l3 0" />
+				<path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" />
+			</svg>`,
+			image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop'
+		},
+		{
+			title: 'Video content example',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polygon points="5,3 19,12 5,21" />
+			</svg>`,
+			videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+		},
+		{
+			title: 'Another feature tab',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+				<path d="M12 17l0 .01" />
+				<path d="M12 13.5a1.5 1.5 0 0 1 1 -1.5a2.6 2.6 0 1 0 -3 -4" />
+			</svg>`,
+			image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop'
+		}
+	],
+	buttonText = 'Button',
+	buttonUrl = '#',
+	secondaryButtonText = 'Button',
+	secondaryButtonUrl = '#',
+} = Astro.props
+---
+
+<section class="relative w-full py-16 md:py-24">
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+			<!-- Left Content -->
+			<div class="flex flex-col">
+				<!-- Header -->
+				<div class="mb-8">
+					<div class="mb-4">
+						<span class="font-mono text-sm uppercase tracking-wide text-muted-foreground">
+							// {subtitle}
+						</span>
+					</div>
+					<div class="mb-6">
+						<h2 class="text-4xl md:text-5xl text-primary font-light leading-tight">
+							{title}
+						</h2>
+					</div>
+					<p class="text-lg text-muted-foreground leading-relaxed">
+						{description}
+					</p>
+				</div>
+
+				<!-- Tabs Navigation -->
+				<div class="flex-1 mb-8">
+					<div class="space-y-0 border-l border-dashed border-border">
+						{tabs.map((tab, index) => (
+							<button 
+								class="tab-button w-full text-left p-6 border-b border-dashed border-border hover:bg-muted/20 transition-all duration-200 group"
+								data-tab={index}
+								data-active={index === 0 ? 'true' : 'false'}
+							>
+								<div class="flex items-start gap-4">
+									<div class="flex-shrink-0 w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors">
+										<div set:html={tab.icon} />
+									</div>
+									<div class="flex-1">
+										<h3 class="text-xl font-medium text-primary mb-2 group-hover:translate-x-1 transition-transform duration-200">
+											{tab.title}
+										</h3>
+										<div class="tab-description overflow-hidden transition-all duration-300" style="max-height: 0;">
+											<p class="text-sm text-muted-foreground pb-2">
+												{tab.description}
+											</p>
+										</div>
+									</div>
+								</div>
+							</button>
+						))}
+					</div>
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="flex flex-wrap items-center gap-4">
+					<a 
+						href={buttonUrl}
+						class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border border-primary"
+					>
+						{buttonText}
+					</a>
+					<a 
+						href={secondaryButtonUrl}
+						class="inline-flex items-center gap-2 px-6 py-3 text-primary hover:text-primary/80 transition-colors group"
+					>
+						<span>{secondaryButtonText}</span>
+						<svg 
+							xmlns="http://www.w3.org/2000/svg" 
+							width="16" 
+							height="16" 
+							viewBox="0 0 16 16" 
+							fill="none" 
+							stroke="currentColor" 
+							stroke-width="1.5"
+							class="group-hover:translate-x-1 transition-transform duration-200"
+						>
+							<path d="M6 3L11 8L6 13" />
+						</svg>
+					</a>
+				</div>
+			</div>
+
+			<!-- Right Content - Tab Panels -->
+			<div class="relative">
+				<div class="tab-content-container border border-dashed border-border bg-background overflow-hidden">
+					{tabs.map((tab, index) => (
+						<div 
+							class="tab-panel absolute inset-0 transition-opacity duration-300"
+							data-panel={index}
+							style={index === 0 ? 'opacity: 1;' : 'opacity: 0; pointer-events: none;'}
+						>
+							{tab.image && (
+								<div class="w-full h-full">
+									<img
+										src={tab.image}
+										alt={tab.title}
+										class="w-full h-full object-cover"
+										loading="lazy"
+									/>
+								</div>
+							)}
+							{tab.videoUrl && (
+								<div class="relative w-full h-full bg-muted flex items-center justify-center">
+									<button 
+										class="video-play-button absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
+										data-video-url={tab.videoUrl}
+									>
+										<div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+											<svg 
+												width="24" 
+												height="24" 
+												viewBox="0 0 24 24" 
+												fill="none" 
+												xmlns="http://www.w3.org/2000/svg"
+												class="text-black ml-1"
+											>
+												<path 
+													fill-rule="evenodd" 
+													clip-rule="evenodd" 
+													d="M8 5v14l11-7L8 5z" 
+													fill="currentColor" 
+												/>
+											</svg>
+										</div>
+									</button>
+									<img
+										src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=400&fit=crop"
+										alt="Video thumbnail"
+										class="w-full h-full object-cover"
+										loading="lazy"
+									/>
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLElement>
+		const tabPanels = document.querySelectorAll('.tab-panel') as NodeListOf<HTMLElement>
+		
+		function setActiveTab(activeIndex: number) {
+			// Update buttons
+			tabButtons.forEach((button, index) => {
+				const isActive = index === activeIndex
+				button.setAttribute('data-active', isActive.toString())
+				
+				// Handle description visibility
+				const description = button.querySelector('.tab-description') as HTMLElement
+				if (description) {
+					if (isActive) {
+						description.style.maxHeight = description.scrollHeight + 'px'
+						button.classList.add('bg-muted/10')
+					} else {
+						description.style.maxHeight = '0'
+						button.classList.remove('bg-muted/10')
+					}
+				}
+			})
+			
+			// Update panels
+			tabPanels.forEach((panel, index) => {
+				const isActive = index === activeIndex
+				if (isActive) {
+					panel.style.opacity = '1'
+					panel.style.pointerEvents = 'auto'
+				} else {
+					panel.style.opacity = '0'
+					panel.style.pointerEvents = 'none'
+				}
+			})
+		}
+		
+		// Add click handlers
+		tabButtons.forEach((button, index) => {
+			button.addEventListener('click', () => {
+				setActiveTab(index)
+			})
+		})
+		
+		// Handle video play buttons
+		const videoButtons = document.querySelectorAll('.video-play-button') as NodeListOf<HTMLElement>
+		videoButtons.forEach(button => {
+			button.addEventListener('click', (e) => {
+				e.stopPropagation()
+				const videoUrl = button.getAttribute('data-video-url')
+				if (videoUrl) {
+					// Simple video modal or redirect - you can enhance this
+					window.open(videoUrl, '_blank')
+				}
+			})
+		})
+		
+		// Initialize first tab
+		setActiveTab(0)
+	})
+</script>
+
+<style>
+	.tab-content-container {
+		aspect-ratio: 1;
+		min-height: 400px;
+	}
+	
+	@media (max-width: 768px) {
+		.tab-content-container {
+			min-height: 300px;
+		}
+	}
+</style>
