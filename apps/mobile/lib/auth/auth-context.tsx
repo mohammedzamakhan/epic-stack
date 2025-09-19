@@ -81,7 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log('📡 Auth Context: Full response:', response)
       console.log('📡 Auth Context: Response data:', response.data)
 
-      if (response.success && response.data?.user && response.data?.accessToken) {
+      if (response.success && response?.data?.user && response.data?.accessToken) {
         console.log('✅ Auth Context: Login successful, setting user and tokens')
 
         // Transform API response to match mobile app types

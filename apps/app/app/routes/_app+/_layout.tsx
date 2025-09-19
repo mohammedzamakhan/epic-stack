@@ -40,6 +40,7 @@ export default function MarketingLayoutRoute() {
 	const { isCollapsed, onboardingProgress, extensionId } = useLoaderData<{
 		isCollapsed: boolean
 		onboardingProgress: OnboardingProgressData | null
+		extensionId: string | null
 	}>()
 
 	return (

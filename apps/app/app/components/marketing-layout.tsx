@@ -33,7 +33,7 @@ export function MarketingLayout({
 					variant="inset"
 					onboardingProgress={onboardingProgress}
 					trialStatus={{ isActive: true, daysRemaining: 7 }}
-					extensionId={extensionId}
+					extensionId={extensionId || undefined}
 				/>
 				<SidebarInset
 					style={

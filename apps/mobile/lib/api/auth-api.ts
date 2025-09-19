@@ -379,9 +379,7 @@ export class AuthApi {
       return {
         success: true,
         data: { 
-          data: { 
-            organizations: response.data?.data?.organizations || [] 
-          } 
+          organizations: response.data?.organizations || [] 
         },
         status: response.status,
       }
