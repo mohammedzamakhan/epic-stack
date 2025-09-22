@@ -64,7 +64,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 			if (redirect.target === '_blank') {
 				window.open(redirect.url, '_blank')
 			} else {
-				navigate(redirect.url)
+				void navigate(redirect.url)
 			}
 		}
 	}

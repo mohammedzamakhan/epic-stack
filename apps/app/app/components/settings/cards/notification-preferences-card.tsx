@@ -63,7 +63,7 @@ export function NotificationPreferencesCard() {
 
 	// Force refetch when component mounts to ensure fresh data
 	useEffect(() => {
-		handleRefetch()
+		void handleRefetch()
 	}, [])
 
 	// Listen for preference updates from Novu

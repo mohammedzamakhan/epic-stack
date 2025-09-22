@@ -198,7 +198,7 @@ const tableOfContents = generateTableOfContents(content)
             <h3 class="!text-pretty font-sans text-lg font-semibold">Table of contents</h3>
             <div class="relative flex flex-1 min-h-0">
               <ul class="flex flex-col overflow-y-auto min-h-[auto] flex-1">
-                {tableOfContents.map((item, index) => (
+                {tableOfContents.map((item: { id: string; text: string; level: number }, index: number) => (
                   <li class="transition-all duration-200 relative pl-1 before:absolute before:bg-border before:w-[4px] before:h-full before:left-0 before:top-0 after:absolute after:bg-primary after:w-[4px] after:h-0 after:top-0 after:left-0 after:transition-all after:duration-100 bg-background hover:bg-muted text-muted-foreground hover:text-foreground">
                     <a class="block p-2 overflow-hidden font-mono font-normal leading-none text-sm font-semibold" href={`#${item.id}`}>
                       {item.text}
