@@ -27,13 +27,13 @@ const renderLexicalContent = (content: any) => {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				return `<p class="text-lg text-muted-foreground">${text}</p>`
+				return `<p class="text-lg">${text}</p>`
 			}
 			if (node.type === 'heading' && node.children) {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				return `<h1 class="text-6xl tracking-tight sm:text-8xl text-pretty">${text}</h1>`
+				return `<h1 class="text-6xl tracking-tight">${text}</h1>`
 			}
 			return ''
 		})
@@ -45,9 +45,9 @@ const renderLexicalContent = (content: any) => {
 	<!-- Grid Design Background -->
 	<GridDesign />
 
-	<div class="container relative px-4 md:px-6">
+	<div class="container relative px-4 md:px-10">
 		<div class="lg:flex lg:gap-8">
-			<div class="mx-auto max-w-2xl lg:mx-0 lg:shrink-0 lg:pt-8">
+			<div class="mx-auto max-w-2xl lg:mx-0 lg:shrink-0 md:pt-8">
 				<div class="space-y-2">
 					<Badge variant="outline" size="sm">
 						// BY THE MAKERS OF BUGBASHES.DEV
@@ -68,79 +68,24 @@ const renderLexicalContent = (content: any) => {
 					{
 						!isClosedBeta && (
 							<>
-								{links && links.length > 0 ? (
+								{links && links.length > 0 && (
 									<>
 										<a
 											href={links[0]?.url || '#'}
-											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 w-full md:w-1/2 transition-colors hover:bg-primary/90"
+											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 transition-colors hover:bg-primary/90 rounded-full"
 										>
 											{links[0]?.link?.label || 'Get started'}
 										</a>
 										{links[1] && (
 											<a
 												href={links[1]?.url || '#'}
-												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 w-full md:w-1/2 transition-colors hover:bg-accent hover:text-accent-foreground"
+												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 transition-colors hover:bg-accent hover:text-accent-foreground rounded-full"
 											>
 												{links[1]?.link?.label || 'Learn more'}
 											</a>
 										)}
 									</>
-								) : (
-									<>
-										<a
-											href="/get-started"
-											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 rounded-md transition-colors hover:bg-primary/90"
-										>
-											Get started
-										</a>
-										<a
-											href="/learn-more"
-											class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
-										>
-											Learn more
-										</a>
-									</>
 								)}
-							</>
-						)
-					}
-
-					{
-						isClosedBeta && (
-							<>
-								<form
-									method="post"
-									class="flex w-full flex-col gap-2 md:flex-row"
-								>
-									<input
-										type="hidden"
-										name="intent"
-										value="signup-for-closed-beta"
-									/>
-									<div class="w-full">
-										<fieldset class="flex w-full gap-2">
-											<input
-												type="email"
-												name="email"
-												placeholder="Email address"
-												class="flex-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-												required
-											/>
-											<button
-												type="submit"
-												class="mt-2 inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-sm py-2 px-4 rounded-md transition-colors hover:bg-primary/90"
-											>
-												Sign up for Beta
-											</button>
-										</fieldset>
-									</div>
-									<button
-										type="button"
-										class="md:mt-2 inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-sm py-2 px-4 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
-									>
-										Learn more
-									</button>
-								</form>
 							</>
 						)
 					}

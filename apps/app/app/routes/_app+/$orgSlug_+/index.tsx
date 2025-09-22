@@ -1,8 +1,9 @@
 import { invariant } from '@epic-web/invariant'
 import { Novu } from '@novu/api'
-import { testWorkflow } from '@repo/notifications'
+import { testWorkflow, commentMentionWorkflow, noteCommentWorkflow } from '@repo/notifications'
 import {
 	type ActionFunctionArgs,
+	Form,
 	type LoaderFunctionArgs,
 	useLoaderData,
 	useRouteLoaderData,
@@ -174,20 +175,28 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		select: { id: true },
 	})
 
+	const user = await prisma.user.findFirst({
+		where: { id: userId },
+		select: { id: true, email: true },
+	})
+
+	invariant(user, 'User is not found');
+
 	invariant(organization, 'organization is required')
 
 	//subscriber id = org id + customner id
-	const subscriberId = `${organization.id}-${userId}`
+	const subscriberId = `${organization.id}_${userId}`
 
 	try {
 		await novu.trigger({
-			workflowId: 'demo-verify-otp',
+			workflowId: 'test-workflow',
 			to: {
 				subscriberId: subscriberId,
-				email: 'mohammed.zama.khan@gmail.com',
+				email: user.email,
 			},
 			payload: {},
 		})
+		console.log('Workflow triggered successfully')
 	} catch (err) {
 		console.error('Error triggering workflow', err)
 	}
@@ -226,6 +235,10 @@ export default function OrganizationDashboard() {
 				title={`Welcome ${user?.name || 'User'}!`}
 				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 			/>
+
+			<Form method="post">
+			<button type="submit">Submit</button>
+			</Form>
 
 			<div className="flex flex-wrap gap-8 md:flex-nowrap">
 				{/* Onboarding Checklist */}

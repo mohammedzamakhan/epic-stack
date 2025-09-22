@@ -149,13 +149,13 @@ export function OnboardingChecklist({
 				</CardAction>
 			</CardHeader>
 
-			<CardContent className="space-y-6 p-2">
-				<div className="space-y-1">
+			<CardContent className="space-y-6 p-2 py-0">
+				<div>
 					{progress.steps.map((step, index) => (
 						<div
 							key={step.id}
 							className={`group hover:bg-muted/50 flex items-center gap-4 rounded-lg p-2 transition-colors ${
-								index > 0 ? 'border-border/50 border-t' : ''
+								index > 0 ? 'border-border border-dashed border-t' : ''
 							}`}
 						>
 							<div className="flex-shrink-0">

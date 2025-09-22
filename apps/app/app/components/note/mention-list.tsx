@@ -27,6 +27,7 @@ export const MentionList = forwardRef<MentionListRef, MentionListProps>(
 		const selectItem = (index: number) => {
 			const item = props.items[index]
 			if (item) {
+				// Keep the name as label for display, but the id will be stored in data-id attribute
 				props.command({ id: item.id, label: item.name })
 			}
 		}

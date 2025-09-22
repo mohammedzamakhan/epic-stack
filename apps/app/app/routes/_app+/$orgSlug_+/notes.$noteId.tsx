@@ -42,6 +42,10 @@ import {
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
+import { 
+	notifyCommentMentions, 
+	notifyNoteOwner 
+} from '#app/utils/notifications.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import {
@@ -1115,6 +1119,52 @@ export async function action({ request }: ActionFunctionArgs) {
 				commentId: comment.id,
 				metadata: { parentId, hasImages: imageCount > 0 },
 			})
+
+			// Get additional data needed for notifications
+			const [commenter, noteWithTitle, organization] = await Promise.all([
+				prisma.user.findUnique({
+					where: { id: userId },
+					select: { name: true, username: true },
+				}),
+				prisma.organizationNote.findUnique({
+					where: { id: noteId },
+					select: { title: true, createdById: true },
+				}),
+				prisma.organization.findUnique({
+					where: { id: note.organizationId },
+					select: { slug: true },
+				}),
+			])
+
+			if (commenter && noteWithTitle && organization) {
+				const commenterName = commenter.name || commenter.username
+				const noteTitle = noteWithTitle.title || 'Untitled Note'
+
+				// Send notifications for mentions in the comment
+				await notifyCommentMentions({
+					commentContent: content,
+					commentId: comment.id,
+					noteId,
+					noteTitle,
+					commenterUserId: userId,
+					commenterName,
+					organizationId: note.organizationId,
+					organizationSlug: organization.slug,
+				})
+
+				// Send notification to note owner (if different from commenter)
+				await notifyNoteOwner({
+					noteId,
+					noteTitle,
+					noteOwnerId: noteWithTitle.createdById,
+					commentId: comment.id,
+					commenterUserId: userId,
+					commenterName,
+					commentContent: content,
+					organizationId: note.organizationId,
+					organizationSlug: organization.slug,
+				})
+			}
 
 			return data({ result: { status: 'success' } })
 		} catch (error) {

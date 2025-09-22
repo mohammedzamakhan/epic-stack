@@ -2,6 +2,7 @@
 import GridDesign from '../GridDesign.astro'
 import Badge from '../ui/Badge.astro'
 import { cmsClient } from '../../lib/cms'
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
 
 interface Post {
 	id: string
@@ -63,7 +64,7 @@ const {
 							{post.meta?.image && (
 								<div class="aspect-video overflow-hidden border-b border-dashed">
 									<img
-										src={post.meta.image.url}
+										src={`${CMS_URL}${post.meta.image.url}`}
 										alt={post.meta.image.alt || post.title}
 										class="w-full h-full object-cover"
 									/>

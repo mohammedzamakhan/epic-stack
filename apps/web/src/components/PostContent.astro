@@ -1,4 +1,7 @@
 ---
+import GridDesign from './GridDesign.astro'
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 interface Props {
   title: string
   content: any
@@ -27,7 +30,7 @@ const formattedDate = publishedAt
     })
   : null
 
-// Simple content renderer for Lexical content
+// Enhanced content renderer for Lexical content
 const renderLexicalContent = (content: any) => {
   if (!content || !content.root || !content.root.children) {
     return ''
@@ -37,91 +40,270 @@ const renderLexicalContent = (content: any) => {
     .map((node: any) => {
       if (node.type === 'paragraph' && node.children) {
         const text = node.children
-          .map((child: any) => child.text || '')
+          .map((child: any) => {
+            if (child.format && child.format > 0) {
+              let formattedText = child.text || ''
+              if (child.format & 1) formattedText = `<strong>${formattedText}</strong>`
+              if (child.format & 2) formattedText = `<em>${formattedText}</em>`
+              return formattedText
+            }
+            return child.text || ''
+          })
           .join('')
-        return `<p>${text}</p>`
+        return `<p class="text-lg leading-relaxed mb-6 text-foreground">${text}</p>`
       }
       if (node.type === 'heading' && node.children) {
         const text = node.children
           .map((child: any) => child.text || '')
           .join('')
         const tag = node.tag || 'h2'
-        return `<${tag}>${text}</${tag}>`
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        const headingClasses = {
+          h1: 'text-4xl md:text-5xl font-semibold mb-8 text-foreground scroll-mt-24 relative',
+          h2: 'text-3xl md:text-4xl font-semibold mb-6 text-foreground scroll-mt-24 relative',
+          h3: 'text-2xl md:text-3xl font-medium mb-4 text-foreground scroll-mt-24 relative',
+          h4: 'text-xl md:text-2xl font-medium mb-4 text-foreground scroll-mt-24 relative',
+          h5: 'text-lg md:text-xl font-semibold mb-3 text-foreground scroll-mt-24 relative',
+          h6: 'text-base md:text-lg font-semibold mb-3 text-foreground scroll-mt-24 relative',
+        }
+        const className = headingClasses[tag as keyof typeof headingClasses] || headingClasses.h2
+        return `<${tag} id="${id}" class="${className}"><strong>${text}</strong><a aria-hidden="true" class="absolute top-0 left-0 w-full h-full" href="#${id}"></a></${tag}>`
+      }
+      if (node.type === 'list' && node.children) {
+        const listItems = node.children
+          .map((item: any) => {
+            if (item.type === 'listitem' && item.children) {
+              const itemText = item.children
+                .map((child: any) => {
+                  if (child.type === 'paragraph' && child.children) {
+                    return child.children
+                      .map((textChild: any) => textChild.text || '')
+                      .join('')
+                  }
+                  return child.text || ''
+                })
+                .join('')
+              return `<li class="text-lg leading-relaxed mb-2">${itemText}</li>`
+            }
+            return ''
+          })
+          .join('')
+
+        if (node.listType === 'number') {
+          return `<ol class="list-decimal list-inside mb-6 space-y-2 pl-6">${listItems}</ol>`
+        } else {
+          return `<ul class="list-disc list-inside mb-6 space-y-2 pl-6">${listItems}</ul>`
+        }
+      }
+      if (node.type === 'quote' && node.children) {
+        const text = node.children
+          .map((child: any) => {
+            if (child.type === 'paragraph' && child.children) {
+              return child.children
+                .map((textChild: any) => textChild.text || '')
+                .join('')
+            }
+            return child.text || ''
+          })
+          .join('')
+        return `<blockquote class="border-l-4 border-primary bg-muted/50 p-6 my-8 text-lg italic text-muted-foreground">"${text}"</blockquote>`
       }
       return ''
     })
     .join('')
 }
+
+// Generate table of contents from content
+const generateTableOfContents = (content: any) => {
+  if (!content || !content.root || !content.root.children) {
+    return []
+  }
+
+  return content.root.children
+    .filter((node: any) => node.type === 'heading' && node.children)
+    .map((node: any, index: number) => {
+      const text = node.children
+        .map((child: any) => child.text || '')
+        .join('')
+      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      return {
+        id,
+        text,
+        level: parseInt(node.tag?.replace('h', '') || '2')
+      }
+    })
+}
+
+const tableOfContents = generateTableOfContents(content)
 ---
 
-<article class="min-h-screen py-24">
-  <div class="container mx-auto px-4 max-w-4xl">
-    <!-- Header -->
-    <header class="mb-12 text-center">
-      {
-        categories && categories.length > 0 && (
-          <div class="mb-4">
-            {categories.map((category) => (
-              <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full mr-2">
-                {typeof category === 'object' ? category.title : category}
-              </span>
-            ))}
-          </div>
-        )
-      }
-
-      <h1
-        class="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
-        set:html={title}
-      />
-
-      {
-        meta?.description && (
-          <p class="text-xl text-gray-600 mb-6" set:html={meta.description} />
-        )
-      }
-
-      {
-        formattedDate && (
-          <time class="text-gray-500" datetime={publishedAt}>
-            Published on {formattedDate}
-          </time>
-        )
-      }
-    </header>
-
-    <!-- Hero Image -->
-    {
-      heroImage && typeof heroImage === 'object' && heroImage.url && (
-        <div class="mb-12">
-          <img
-            src={heroImage.url}
-            alt={heroImage.alt || title}
-            class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-          />
+<!-- Hero Section -->
+<section class="relative overflow-hidden">
+    <GridDesign />
+  <div class="container w-full px-4 md:px-10 relative items-center h-full text-left py-10 grid-layout place-content-center">
+    <div class="grid [grid-auto-rows:max-content] gap-4 md:gap-8 relative text-left ml-0 w-full max-w-none [grid-area:1/1/2/13]">
+      <div class="relative w-full">
+        {categories && categories.length > 0 && (
+          <a class="relative grid w-fit translate-x-[1px]" href="/blog">
+            <span class="px-2 pt-1 pb-1 font-mono text-base font-normal leading-none uppercase border select-none text-foreground bg-muted border-border relative z-30 grid w-fit">
+              {typeof categories[0] === 'object' ? categories[0].title : categories[0]}
+            </span>
+          </a>
+        )}
+      </div>
+      
+      <div class="relative z-20 w-full">
+        <h1 class="font-sans text-4xl md:text-6xl font-semibold pb-1 pt-1 md:pt-0 translate-y-[-1px] z-30 !text-balance md:max-w-[770px] md:!max-w-none">
+          {title}
+        </h1>
+      </div>
+      
+      {meta?.description && (
+        <div class="relative z-20 w-full">
+          <p class="font-sans text-lg md:text-xl text-muted-foreground translate-x-[1px] md:max-w-[770px] md:!max-w-none !text-pretty">
+            {meta.description}
+          </p>
         </div>
-      )
-    }
-
-    <!-- Content - using set:html as recommended in the guide -->
-    <div class="prose prose-lg max-w-none">
-      {
-        content ? (
-          <div set:html={renderLexicalContent(content)} />
-        ) : (
-          <p>No content available.</p>
-        )
-      }
-    </div>
-
-    <!-- Back to posts -->
-    <div class="mt-12 pt-8 border-t border-gray-200">
-      <a
-        href="/blog"
-        class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-      >
-        ← Back to all posts
-      </a>
+      )}
     </div>
   </div>
-</article>
+</section>
+
+<!-- Main Content Section -->
+<section class="relative">
+  <div class="container w-full px-4 relative">
+    <GridDesign />
+    
+    <!-- Grid Layout: Sidebar left, Content right -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+      <!-- Sidebar -->
+      <div class="md:col-span-4 sticky hidden md:flex flex-col gap-8 pt-10 pl-6 pb-36 top-20 h-fit max-h-screen">
+        {formattedDate && (
+          <div class="flex flex-col gap-2">
+            <h3 class="!text-pretty font-sans text-lg font-semibold">Last updated</h3>
+            <p class="font-mono text-sm uppercase flex gap-2 items-center !leading-none text-muted-foreground">
+              <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              {formattedDate}
+            </p>
+          </div>
+        )}
+        
+        {tableOfContents.length > 0 && (
+          <nav aria-label="Table of contents" class="flex flex-col gap-4 flex-1 min-h-0">
+            <h3 class="!text-pretty font-sans text-lg font-semibold">Table of contents</h3>
+            <div class="relative flex flex-1 min-h-0">
+              <ul class="flex flex-col overflow-y-auto min-h-[auto] flex-1">
+                {tableOfContents.map((item, index) => (
+                  <li class="transition-all duration-200 relative pl-1 before:absolute before:bg-border before:w-[4px] before:h-full before:left-0 before:top-0 after:absolute after:bg-primary after:w-[4px] after:h-0 after:top-0 after:left-0 after:transition-all after:duration-100 bg-background hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <a class="block p-2 overflow-hidden font-mono font-normal leading-none text-sm font-semibold" href={`#${item.id}`}>
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        )}
+        
+        <div>
+          <h3 class="!text-pretty font-sans text-lg font-semibold">Share</h3>
+          <ul class="flex gap-3 items-center pt-4 text-foreground">
+            <li>
+              <a class="hover:text-primary transition-colors duration-200 size-6" href={`https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.href)}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 17" class="w-6 h-6">
+                  <path fill="currentColor" d="m.039 1.173 6.177 8.26L0 16.147h1.4l5.442-5.88 4.397 5.88H16L9.475 7.424l5.786-6.251h-1.4L8.85 6.588 4.8 1.173H.039Zm2.057 1.03h2.188l9.658 12.915h-2.187L2.096 2.203Z"></path>
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors duration-200 size-6" href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.url.href)}&title=${encodeURIComponent(title)}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6">
+                  <path fill="currentColor" d="M22.223 0H1.772C.792 0 0 .773 0 1.73v20.536C0 23.222.792 24 1.772 24h20.451c.98 0 1.777-.778 1.777-1.73V1.73C24 .773 23.203 0 22.223 0ZM7.12 20.452H3.558V8.995H7.12v11.457ZM5.34 7.434a2.064 2.064 0 1 1 0-4.125 2.063 2.063 0 0 1 0 4.125Zm15.112 13.018h-3.558v-5.57c0-1.326-.024-3.037-1.852-3.037-1.851 0-2.133 1.449-2.133 2.944v5.663H9.356V8.995h3.413v1.566h.047c.473-.9 1.636-1.852 3.365-1.852 3.605 0 4.27 2.372 4.27 5.457v6.286Z"></path>
+                </svg>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="md:col-span-8">
+        <article class="relative px-4 pt-10 overflow-clip pb-36 md:px-6 md:pl-3">
+          {heroImage && typeof heroImage === 'object' && heroImage.url && (
+            <img
+              alt={heroImage.alt || title}
+              draggable="false"
+              loading="lazy"
+              width="1200"
+              height="575"
+              decoding="async"
+              class="w-full h-auto mb-8 relative z-10"
+              src={`${CMS_URL}${heroImage.url}`}
+            />
+          )}
+          
+          <div class="prose max-w-none prose-p:!text-foreground prose-a:underline prose-a:transition-colors prose-a:duration-100 prose-a:underline-offset-4 hover:prose-a:text-primary prose-blockquote:my-6 prose-headings:mb-4 prose-headings:mt-6 prose-h1:mt-8 prose-h2:mt-8 prose-inline-code:before:content-none prose-inline-code:after:content-none relative z-10">
+            {content ? (
+              <div set:html={renderLexicalContent(content)} />
+            ) : (
+              <p class="text-lg leading-relaxed mb-6 text-foreground">No content available.</p>
+            )}
+          </div>
+          
+          <!-- Back to posts -->
+          <div class="mt-12 pt-8 border-t border-border relative z-10">
+            <a
+              href="/blog"
+              class="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              ← Back to all posts
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Table of contents active section highlighting
+  document.addEventListener('DOMContentLoaded', function() {
+    const tocLinks = document.querySelectorAll('nav[aria-label="Table of contents"] a');
+    const headings = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+    
+    if (tocLinks.length === 0 || headings.length === 0) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.getAttribute('id');
+        const tocLink = document.querySelector(`nav[aria-label="Table of contents"] a[href="#${id}"]`);
+        
+        if (entry.isIntersecting) {
+          // Remove active class from all links
+          tocLinks.forEach(link => {
+            link.parentElement?.classList.remove('toc-active');
+            link.parentElement?.classList.add('bg-background', 'hover:bg-muted', 'text-muted-foreground', 'hover:text-foreground');
+          });
+          
+          // Add active class to current link
+          if (tocLink) {
+            tocLink.parentElement?.classList.add('toc-active');
+            tocLink.parentElement?.classList.remove('bg-background', 'hover:bg-muted', 'text-muted-foreground', 'hover:text-foreground');
+          }
+        }
+      });
+    }, {
+      rootMargin: '-20% 0% -35% 0%',
+      threshold: 0
+    });
+    
+    headings.forEach((heading) => {
+      observer.observe(heading);
+    });
+  });
+</script>

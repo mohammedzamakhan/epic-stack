@@ -1,4 +1,3 @@
-import { NovuProvider } from '@novu/react/hooks'
 import { EpicToaster, TooltipProvider } from '@repo/ui'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
@@ -281,19 +280,14 @@ function AppWithProviders() {
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
 			>
-				<NovuProvider
-					subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
-					applicationIdentifier="XQdYIaaQAOv5"
-				>
-					{data.impersonationInfo && (
-						<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-					)}
-					<TooltipProvider>
-						<Outlet />
-					</TooltipProvider>
-					<EpicToaster />
-					<CookieConsentBanner consent={data.cookieConsent} />
-				</NovuProvider>
+				{data.impersonationInfo && (
+					<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
+				)}
+				<TooltipProvider>
+					<Outlet />
+				</TooltipProvider>
+				<EpicToaster />
+				<CookieConsentBanner consent={data.cookieConsent} />
 			</OpenImgContextProvider>
 		</HoneypotProvider>
 	)

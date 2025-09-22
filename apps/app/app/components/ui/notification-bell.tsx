@@ -27,6 +27,7 @@ import {
 	DropdownMenuTrigger,
 	Icon,
 } from '@repo/ui'
+import { useNavigate } from 'react-router'
 
 interface Action {
 	label: string
@@ -54,10 +55,16 @@ function formatRelativeTime(timestamp: string): string {
 
 function NotificationItem({ notification }: { notification: Notification }) {
 	const [isHovered, setIsHovered] = useState(false)
+	const navigate = useNavigate()
+
 
 	const handleRedirect = (redirect?: Redirect) => {
 		if (redirect?.url) {
-			window.open(redirect.url, redirect.target || '_self')
+			if (redirect.target === '_blank') {
+				window.open(redirect.url, '_blank')
+			} else {
+				navigate(redirect.url)
+			}
 		}
 	}
 
@@ -103,13 +110,13 @@ function NotificationItem({ notification }: { notification: Notification }) {
 	}
 
 	return (
-		<Card
+		<div
 			className={`${notification.isRead ? 'bg-background' : 'bg-accent'}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			onClick={handlePress}
 		>
-			<CardContent className="flex items-start p-4">
+			<div className="flex items-start p-2 border-b border-dashed">
 				<Avatar className="mr-2 h-8 w-8">
 					<AvatarImage src={notification.avatar} alt="Avatar" />
 					<AvatarFallback>{notification.subject?.[0] || 'N'}</AvatarFallback>
@@ -166,8 +173,8 @@ function NotificationItem({ notification }: { notification: Notification }) {
 						</div>
 					</div>
 				</div>
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	)
 }
 
@@ -290,7 +297,7 @@ export default function NotificationBell() {
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
 				<motion.button
-					className="relative flex h-8 w-8 items-center justify-center rounded-2xl border p-0.5"
+					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 				>
@@ -303,7 +310,7 @@ export default function NotificationBell() {
 								exit={{ scale: 0 }}
 								className="absolute -top-2 -right-3"
 							>
-								<Badge variant="destructive" className="px-2 py-1 text-xs">
+								<Badge variant="destructive" className="px-1 py-0 text-xs rounded-full">
 									{unreadCount}
 								</Badge>
 							</motion.div>
@@ -385,7 +392,7 @@ export default function NotificationBell() {
 									{notifications?.length === 0 ? (
 										<EmptyState />
 									) : (
-										<div className="flex flex-col gap-4 p-4">
+										<div className="flex flex-col">
 											{notifications?.map((notification: Notification) => (
 												<motion.div
 													key={notification.id}

@@ -5,11 +5,13 @@ import PostContent from '../../components/PostContent.astro'
 
 const { title, content, meta, publishedAt, categories, heroImage } = Astro.props
 
+export const prerender = true;
 // Use cmsClient but follow guide patterns for getStaticPaths
 export async function getStaticPaths() {
 	const posts = await cmsClient.getPosts(1, 100) // Get all posts for static generation
 
 	return posts.docs.map((post) => {
+		console.log(post)
 		return {
 			params: { slug: post.slug },
 			props: {
