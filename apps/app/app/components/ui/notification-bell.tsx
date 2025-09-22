@@ -3,6 +3,7 @@ import { useNotifications, useNovu } from '@novu/react/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
+import { BellIcon } from '#app/components/icons/bell-icon'
 
 import {
 	Avatar,
@@ -301,7 +302,7 @@ export default function NotificationBell() {
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 				>
-					<Icon name="bell" className="h-4 w-4" />
+					<BellIcon size={16} />
 					<AnimatePresence>
 						{unreadCount > 0 && (
 							<motion.div

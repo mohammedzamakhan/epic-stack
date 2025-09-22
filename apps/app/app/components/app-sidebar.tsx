@@ -14,6 +14,7 @@ import { HomeIcon } from '#app/components/icons/home-icon'
 import { LockOpenIcon } from '#app/components/icons/lock-open-icon.tsx'
 import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon'
 import { UserIcon } from '#app/components/icons/user-icon'
+import { BellIcon } from '#app/components/icons/bell-icon'
 import { NavMain } from '#app/components/nav-main'
 import { NavUser } from '#app/components/nav-user'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist'
@@ -91,6 +92,7 @@ function AccountSidebar({
 }) {
 	const isProfileRoute = location.pathname === '/profile'
 	const isSecurityRoute = location.pathname === '/security'
+	const isNotificationsRoute = location.pathname === '/notifications'
 	const isOrganizationsRoute = location.pathname === '/organizations'
 
 	const navMain = [
@@ -111,6 +113,12 @@ function AccountSidebar({
 			url: '/security',
 			isActive: isSecurityRoute,
 			icon: LockOpenIcon,
+		},
+		{
+			title: 'Notifications',
+			url: '/notifications',
+			isActive: isNotificationsRoute,
+			icon: BellIcon,
 		},
 		{
 			title: 'Organizations',
@@ -329,9 +337,10 @@ export function AppSidebar({
 	// Check if we're on profile or organizations routes
 	const isProfileRoute = location.pathname === '/profile'
 	const isSecurityRoute = location.pathname === '/security'
+	const isNotificationsRoute = location.pathname === '/notifications'
 	const isOrganizationsRoute = location.pathname === '/organizations'
 	const isAccountRoute =
-		isProfileRoute || isSecurityRoute || isOrganizationsRoute
+		isProfileRoute || isSecurityRoute || isNotificationsRoute || isOrganizationsRoute
 
 	const userData = rootData?.user
 		? {
