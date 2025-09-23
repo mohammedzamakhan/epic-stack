@@ -6,122 +6,123 @@ import { AuthGuard } from '../auth-guard'
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    replace: mockReplace,
-    push: mockPush,
-  }),
-  useSegments: jest.fn(),
-  useRootNavigationState: jest.fn(),
-  useLocalSearchParams: jest.fn(),
+	useRouter: () => ({
+		replace: mockReplace,
+		push: mockPush,
+	}),
+	useSegments: jest.fn(),
+	useRootNavigationState: jest.fn(),
+	useLocalSearchParams: jest.fn(),
 }))
 
 // Mock auth hook
 const mockUseAuth = jest.fn()
 jest.mock('../../lib/auth/hooks/use-auth', () => ({
-  useAuth: () => mockUseAuth(),
+	useAuth: () => mockUseAuth(),
 }))
 
 describe('AuthGuard', () => {
-  const mockUseSegments = require('expo-router').useSegments
-  const mockUseRootNavigationState = require('expo-router').useRootNavigationState
-  const mockUseLocalSearchParams = require('expo-router').useLocalSearchParams
+	const mockUseSegments = require('expo-router').useSegments
+	const mockUseRootNavigationState =
+		require('expo-router').useRootNavigationState
+	const mockUseLocalSearchParams = require('expo-router').useLocalSearchParams
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseSegments.mockReturnValue([])
-    mockUseRootNavigationState.mockReturnValue({ key: 'test' })
-    mockUseLocalSearchParams.mockReturnValue({})
-  })
+	beforeEach(() => {
+		jest.clearAllMocks()
+		mockUseSegments.mockReturnValue([])
+		mockUseRootNavigationState.mockReturnValue({ key: 'test' })
+		mockUseLocalSearchParams.mockReturnValue({})
+	})
 
-  it('should not redirect while loading', () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      isLoading: true,
-    })
+	it('should not redirect while loading', () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: true,
+		})
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    expect(mockReplace).not.toHaveBeenCalled()
-  })
+		expect(mockReplace).not.toHaveBeenCalled()
+	})
 
-  it('should redirect unauthenticated user from dashboard to sign-in', async () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      isLoading: false,
-    })
-    mockUseSegments.mockReturnValue(['(dashboard)'])
+	it('should redirect unauthenticated user from dashboard to sign-in', async () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: false,
+		})
+		mockUseSegments.mockReturnValue(['(dashboard)'])
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    // Wait for navigation to be ready
-    await new Promise(resolve => setTimeout(resolve, 150))
+		// Wait for navigation to be ready
+		await new Promise((resolve) => setTimeout(resolve, 150))
 
-    expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/(auth)/sign-in',
-      params: { redirectTo: '/(dashboard)' },
-    })
-  })
+		expect(mockReplace).toHaveBeenCalledWith({
+			pathname: '/(auth)/sign-in',
+			params: { redirectTo: '/(dashboard)' },
+		})
+	})
 
-  it('should redirect authenticated user from auth to dashboard', async () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: true,
-      isLoading: false,
-    })
-    mockUseSegments.mockReturnValue(['(auth)', 'sign-in'])
+	it('should redirect authenticated user from auth to dashboard', async () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		})
+		mockUseSegments.mockReturnValue(['(auth)', 'sign-in'])
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    // Wait for navigation to be ready
-    await new Promise(resolve => setTimeout(resolve, 150))
+		// Wait for navigation to be ready
+		await new Promise((resolve) => setTimeout(resolve, 150))
 
-    expect(mockReplace).toHaveBeenCalledWith('/(dashboard)')
-  })
+		expect(mockReplace).toHaveBeenCalledWith('/(dashboard)')
+	})
 
-  it('should redirect authenticated user to specified redirectTo', async () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: true,
-      isLoading: false,
-    })
-    mockUseSegments.mockReturnValue(['(auth)', 'sign-in'])
-    mockUseLocalSearchParams.mockReturnValue({
-      redirectTo: '/(dashboard)/profile',
-    })
+	it('should redirect authenticated user to specified redirectTo', async () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		})
+		mockUseSegments.mockReturnValue(['(auth)', 'sign-in'])
+		mockUseLocalSearchParams.mockReturnValue({
+			redirectTo: '/(dashboard)/profile',
+		})
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    // Wait for navigation to be ready
-    await new Promise(resolve => setTimeout(resolve, 150))
+		// Wait for navigation to be ready
+		await new Promise((resolve) => setTimeout(resolve, 150))
 
-    expect(mockReplace).toHaveBeenCalledWith('/(dashboard)/profile')
-  })
+		expect(mockReplace).toHaveBeenCalledWith('/(dashboard)/profile')
+	})
 
-  it('should not redirect during OAuth callback', async () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      isLoading: false,
-    })
-    mockUseSegments.mockReturnValue(['auth', 'callback'])
+	it('should not redirect during OAuth callback', async () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: false,
+		})
+		mockUseSegments.mockReturnValue(['auth', 'callback'])
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    // Wait for navigation to be ready
-    await new Promise(resolve => setTimeout(resolve, 150))
+		// Wait for navigation to be ready
+		await new Promise((resolve) => setTimeout(resolve, 150))
 
-    expect(mockReplace).not.toHaveBeenCalled()
-  })
+		expect(mockReplace).not.toHaveBeenCalled()
+	})
 
-  it('should redirect from index screen based on auth state', async () => {
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: false,
-      isLoading: false,
-    })
-    mockUseSegments.mockReturnValue(['index'])
+	it('should redirect from index screen based on auth state', async () => {
+		mockUseAuth.mockReturnValue({
+			isAuthenticated: false,
+			isLoading: false,
+		})
+		mockUseSegments.mockReturnValue(['index'])
 
-    render(<AuthGuard />)
+		render(<AuthGuard />)
 
-    // Wait for navigation to be ready
-    await new Promise(resolve => setTimeout(resolve, 150))
+		// Wait for navigation to be ready
+		await new Promise((resolve) => setTimeout(resolve, 150))
 
-    expect(mockReplace).toHaveBeenCalledWith('/(auth)/sign-in')
-  })
+		expect(mockReplace).toHaveBeenCalledWith('/(auth)/sign-in')
+	})
 })

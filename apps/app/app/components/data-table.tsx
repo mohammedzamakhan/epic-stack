@@ -270,7 +270,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 		cell: ({ row }) => {
 			const reviewers = row.original.reviewers || []
 			const availableReviewers = AVAILABLE_REVIEWERS.filter(
-				(reviewer) => !reviewers.includes(reviewer)
+				(reviewer) => !reviewers.includes(reviewer),
 			)
 
 			const addReviewer = (newReviewer: string) => {
@@ -280,16 +280,19 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 			}
 
 			return (
-				<div className="flex items-center gap-1 max-w-44">
+				<div className="flex max-w-44 items-center gap-1">
 					{/* Existing reviewer avatars */}
 					{reviewers.map((reviewer) => (
-						<Avatar key={reviewer} className="size-7 border-2 border-background">
-							<AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+						<Avatar
+							key={reviewer}
+							className="border-background size-7 border-2"
+						>
+							<AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
 								{getInitials(reviewer)}
 							</AvatarFallback>
 						</Avatar>
 					))}
-					
+
 					{/* Plus button to add new reviewer */}
 					{availableReviewers.length > 0 && (
 						<DropdownMenu>
@@ -297,7 +300,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 								<Button
 									variant="ghost"
 									size="icon"
-									className="size-7 rounded-full border-2 border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+									className="border-muted-foreground/30 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 size-7 rounded-full border-2 border-dashed"
 								>
 									<Icon name="plus" className="size-3" />
 									<span className="sr-only">Add reviewer</span>
@@ -311,7 +314,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 									>
 										<div className="flex items-center gap-2">
 											<Avatar className="size-6">
-												<AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+												<AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
 													{getInitials(reviewer)}
 												</AvatarFallback>
 											</Avatar>
@@ -322,7 +325,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 							</DropdownMenuContent>
 						</DropdownMenu>
 					)}
-					
+
 					{/* Show message if no reviewers and no available reviewers */}
 					{reviewers.length === 0 && availableReviewers.length === 0 && (
 						<span className="text-muted-foreground text-sm">All assigned</span>
@@ -477,59 +480,57 @@ export function DataTable({
 
 	return (
 		<Card>
-			<CardHeader className="md:grid md:grid-cols-[1fr_auto] items-start">
+			<CardHeader className="items-start md:grid md:grid-cols-[1fr_auto]">
 				<CardHeaderContent>
-					<CardTitle>
-						Data Table
-					</CardTitle>
+					<CardTitle>Data Table</CardTitle>
 					<CardDescription>
 						Data Table is a table that displays data in a grid format.
 					</CardDescription>
 				</CardHeaderContent>
 				<CardAction className="flex items-center gap-2 pt-2 md:pt-0">
-				<div className="flex items-center gap-2">
-		 			<DropdownMenu>
-		 				<DropdownMenuTrigger asChild>
-		 					<Button variant="outline" size="sm">
-		 						<Icon name="activity" />
-		 						<span className="hidden lg:inline">Customize Columns</span>
-		 						<span className="lg:hidden">Columns</span>
-		 						<Icon name="chevron-down" />
-		 					</Button>
-		 				</DropdownMenuTrigger>
-		 				<DropdownMenuContent align="end" className="w-56">
-		 					{table
-		 						.getAllColumns()
-		 						.filter(
-		 							(column) =>
-		 								typeof column.accessorFn !== 'undefined' &&
-		 								column.getCanHide(),
-		 						)
-		 						.map((column) => {
-		 							return (
-		 								<DropdownMenuCheckboxItem
-		 									key={column.id}
-		 									className="capitalize"
-		 									checked={column.getIsVisible()}
-		 									onCheckedChange={(value) =>
-		 										column.toggleVisibility(!!value)
-		 									}
-		 								>
-		 									{column.id}
-		 								</DropdownMenuCheckboxItem>
-		 							)
-		 						})}
-		 				</DropdownMenuContent>
-		 			</DropdownMenu>
-		 			<Button variant="outline" size="sm">
-		 				<Icon name="plus" />
-		 				<span className="hidden lg:inline">Add Section</span>
-		 			</Button>
-		 		</div>
+					<div className="flex items-center gap-2">
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="outline" size="sm">
+									<Icon name="activity" />
+									<span className="hidden lg:inline">Customize Columns</span>
+									<span className="lg:hidden">Columns</span>
+									<Icon name="chevron-down" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-56">
+								{table
+									.getAllColumns()
+									.filter(
+										(column) =>
+											typeof column.accessorFn !== 'undefined' &&
+											column.getCanHide(),
+									)
+									.map((column) => {
+										return (
+											<DropdownMenuCheckboxItem
+												key={column.id}
+												className="capitalize"
+												checked={column.getIsVisible()}
+												onCheckedChange={(value) =>
+													column.toggleVisibility(!!value)
+												}
+											>
+												{column.id}
+											</DropdownMenuCheckboxItem>
+										)
+									})}
+							</DropdownMenuContent>
+						</DropdownMenu>
+						<Button variant="outline" size="sm">
+							<Icon name="plus" />
+							<span className="hidden lg:inline">Add Section</span>
+						</Button>
+					</div>
 				</CardAction>
 			</CardHeader>
 			<CardContent className="p-0">
-			<section className="bg-muted dark:bg-background relative isolate mx-auto flex max-w-none flex-col overflow-hidden rounded-2xl w-full px-1.5">
+				<section className="bg-muted dark:bg-background relative isolate mx-auto flex w-full max-w-none flex-col overflow-hidden rounded-2xl px-1.5">
 					<div className="relative isolate order-1 -m-1">
 						<div className="after:bg-card dark:after:bg-muted after:absolute after:inset-0 after:top-10 after:z-[-1] after:rounded-xl">
 							<div className="before:ring-muted dark:before:ring-background after:border-border overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:top-10 before:z-10 before:rounded-xl before:ring-2 after:pointer-events-none after:absolute after:inset-0 after:top-10 after:z-20 after:rounded-xl after:border">
@@ -552,7 +553,13 @@ export function DataTable({
 																	colSpan={header.colSpan}
 																	className="text-foreground overflow-hidden px-2 pt-3 pb-2 text-left text-sm font-medium"
 																>
-																	<span className={cn('inline-flex', header.id === 'select' && 'flex justify-center')}>
+																	<span
+																		className={cn(
+																			'inline-flex',
+																			header.id === 'select' &&
+																				'flex justify-center',
+																		)}
+																	>
 																		{header.isPlaceholder
 																			? null
 																			: flexRender(
@@ -836,10 +843,10 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								{item.reviewers.map((reviewer) => (
 									<div
 										key={reviewer}
-										className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
+										className="bg-primary/10 text-primary flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
 									>
 										<Avatar className="size-5">
-											<AvatarFallback className="text-xs bg-primary/20 text-primary font-medium">
+											<AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
 												{getInitials(reviewer)}
 											</AvatarFallback>
 										</Avatar>
@@ -848,7 +855,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 											type="button"
 											variant="ghost"
 											size="icon"
-											className="size-4 hover:bg-primary/20 rounded-full ml-1"
+											className="hover:bg-primary/20 ml-1 size-4 rounded-full"
 											onClick={() => {
 												// Remove reviewer functionality would go here
 												toast.success(`Removed ${reviewer}`)
@@ -859,7 +866,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 										</Button>
 									</div>
 								))}
-								
+
 								{/* Add reviewer button */}
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
@@ -867,15 +874,15 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 											type="button"
 											variant="outline"
 											size="sm"
-											className="border-dashed text-muted-foreground hover:text-primary"
+											className="text-muted-foreground hover:text-primary border-dashed"
 										>
-											<Icon name="plus" className="size-4 mr-1" />
+											<Icon name="plus" className="mr-1 size-4" />
 											Add Reviewer
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="start" className="w-52">
 										{AVAILABLE_REVIEWERS.filter(
-											(reviewer) => !item.reviewers.includes(reviewer)
+											(reviewer) => !item.reviewers.includes(reviewer),
 										).map((reviewer) => (
 											<DropdownMenuItem
 												key={reviewer}
@@ -886,7 +893,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 											>
 												<div className="flex items-center gap-2">
 													<Avatar className="size-6">
-														<AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+														<AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
 															{getInitials(reviewer)}
 														</AvatarFallback>
 													</Avatar>

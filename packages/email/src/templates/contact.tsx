@@ -35,8 +35,8 @@ export const ContactTemplate = ({
 						</Heading>
 
 						<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-							You've received a new contact message through Epic Startup. Here are
-							the details:
+							You've received a new contact message through Epic Startup. Here
+							are the details:
 						</Text>
 
 						<Section className="mb-[24px] rounded-[6px] bg-[#F6F8FA] p-[20px]">

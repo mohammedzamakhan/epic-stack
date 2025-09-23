@@ -15,7 +15,8 @@ export const Featured: Block = {
       name: 'description',
       type: 'textarea',
       label: 'Description',
-      defaultValue: 'Everything you need to build a production-ready SaaS. Authentication, payments, emails, and more - all pre-built and ready to go.',
+      defaultValue:
+        'Everything you need to build a production-ready SaaS. Authentication, payments, emails, and more - all pre-built and ready to go.',
       required: true,
     },
     {
@@ -53,15 +54,18 @@ export const Featured: Block = {
       defaultValue: [
         {
           title: 'Authentication',
-          description: 'Complete auth system with social logins, role-based access, and session management.',
+          description:
+            'Complete auth system with social logins, role-based access, and session management.',
         },
         {
           title: 'Payments',
-          description: 'Stripe integration with subscription management, usage-based billing, and invoicing.',
+          description:
+            'Stripe integration with subscription management, usage-based billing, and invoicing.',
         },
         {
           title: 'Integrations',
-          description: 'Ready-to-use API integrations and webhooks for popular third-party services.',
+          description:
+            'Ready-to-use API integrations and webhooks for popular third-party services.',
         },
         {
           title: 'Infrastructure',

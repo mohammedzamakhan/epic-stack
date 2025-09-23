@@ -13,13 +13,13 @@ export const commentMentionWorkflow = workflow(
 					organizationSlug: payload.organizationSlug,
 					type: 'comment-mention',
 				},
-                primaryAction: {
-                    label: 'View Comment',
-                    redirect: {
-                        target: '_self',
-                        url: payload.noteUrl
-                    }
-                }
+				primaryAction: {
+					label: 'View Comment',
+					redirect: {
+						target: '_self',
+						url: payload.noteUrl,
+					},
+				},
 			}
 		})
 
@@ -42,15 +42,15 @@ export const commentMentionWorkflow = workflow(
 			}
 		})
 	},
-    {
-        payloadSchema: z.object({
-            noteId: z.string(),
-            noteTitle: z.string(),
-            noteUrl: z.string(),
-            commentId: z.string(),
-            commenterName: z.string(),
-            commentContent: z.string(),
-            organizationSlug: z.string(),
-        }),
-    }
+	{
+		payloadSchema: z.object({
+			noteId: z.string(),
+			noteTitle: z.string(),
+			noteUrl: z.string(),
+			commentId: z.string(),
+			commenterName: z.string(),
+			commentContent: z.string(),
+			organizationSlug: z.string(),
+		}),
+	},
 )

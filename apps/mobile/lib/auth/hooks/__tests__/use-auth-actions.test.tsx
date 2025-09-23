@@ -1,9 +1,9 @@
 import {
-  useAuthActions,
-  useAuthState,
-  useLogin,
-  useSignup,
-  useSocialLogin,
+	useAuthActions,
+	useAuthState,
+	useLogin,
+	useSignup,
+	useSocialLogin,
 } from '../use-auth-actions'
 import { useAuth } from '../use-auth'
 
@@ -13,191 +13,208 @@ jest.mock('../use-auth')
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 
 describe('useAuthActions', () => {
-  const mockContextValue = {
-    user: null,
-    tokens: null,
-    isLoading: false,
-    error: null,
-    isAuthenticated: false,
-    login: jest.fn(),
-    signup: jest.fn(),
-    verify: jest.fn(),
-    onboarding: jest.fn(),
-    socialLogin: jest.fn(),
-    logout: jest.fn(),
-    refreshTokens: jest.fn(),
-    clearError: jest.fn(),
-  }
+	const mockContextValue = {
+		user: null,
+		tokens: null,
+		isLoading: false,
+		error: null,
+		isAuthenticated: false,
+		login: jest.fn(),
+		signup: jest.fn(),
+		verify: jest.fn(),
+		onboarding: jest.fn(),
+		socialLogin: jest.fn(),
+		logout: jest.fn(),
+		refreshTokens: jest.fn(),
+		clearError: jest.fn(),
+	}
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseAuth.mockReturnValue(mockContextValue)
-  })
+	beforeEach(() => {
+		jest.clearAllMocks()
+		mockUseAuth.mockReturnValue(mockContextValue)
+	})
 
-  describe('useAuthActions', () => {
-    it('should return authentication actions', () => {
-      const result = useAuthActions()
+	describe('useAuthActions', () => {
+		it('should return authentication actions', () => {
+			const result = useAuthActions()
 
-      expect(result).toEqual({
-        login: mockContextValue.login,
-        signup: mockContextValue.signup,
-        socialLogin: mockContextValue.socialLogin,
-        logout: mockContextValue.logout,
-        refreshTokens: mockContextValue.refreshTokens,
-        clearError: mockContextValue.clearError,
-      })
-    })
-  })
+			expect(result).toEqual({
+				login: mockContextValue.login,
+				signup: mockContextValue.signup,
+				socialLogin: mockContextValue.socialLogin,
+				logout: mockContextValue.logout,
+				refreshTokens: mockContextValue.refreshTokens,
+				clearError: mockContextValue.clearError,
+			})
+		})
+	})
 
-  describe('useAuthState', () => {
-    it('should return authentication state', () => {
-      const result = useAuthState()
+	describe('useAuthState', () => {
+		it('should return authentication state', () => {
+			const result = useAuthState()
 
-      expect(result).toEqual({
-        user: mockContextValue.user,
-        tokens: mockContextValue.tokens,
-        isLoading: mockContextValue.isLoading,
-        error: mockContextValue.error,
-        isAuthenticated: mockContextValue.isAuthenticated,
-      })
-    })
-  })
+			expect(result).toEqual({
+				user: mockContextValue.user,
+				tokens: mockContextValue.tokens,
+				isLoading: mockContextValue.isLoading,
+				error: mockContextValue.error,
+				isAuthenticated: mockContextValue.isAuthenticated,
+			})
+		})
+	})
 
-  describe('useLogin', () => {
-    it('should return login utilities', () => {
-      const result = useLogin()
+	describe('useLogin', () => {
+		it('should return login utilities', () => {
+			const result = useLogin()
 
-      expect(result).toEqual({
-        login: expect.any(Function),
-        isLoading: mockContextValue.isLoading,
-        error: mockContextValue.error,
-        clearError: mockContextValue.clearError,
-      })
-    })
+			expect(result).toEqual({
+				login: expect.any(Function),
+				isLoading: mockContextValue.isLoading,
+				error: mockContextValue.error,
+				clearError: mockContextValue.clearError,
+			})
+		})
 
-    it('should clear error before login', async () => {
-      const contextWithError = {
-        ...mockContextValue,
-        error: 'Previous error',
-      }
-      
-      mockUseAuth.mockReturnValue(contextWithError)
+		it('should clear error before login', async () => {
+			const contextWithError = {
+				...mockContextValue,
+				error: 'Previous error',
+			}
 
-      const { login } = useLogin()
+			mockUseAuth.mockReturnValue(contextWithError)
 
-      await login({
-        username: 'test@example.com',
-        password: 'password',
-      })
+			const { login } = useLogin()
 
-      expect(contextWithError.clearError).toHaveBeenCalled()
-      expect(contextWithError.login).toHaveBeenCalledWith({
-        username: 'test@example.com',
-        password: 'password',
-      })
-    })
+			await login({
+				username: 'test@example.com',
+				password: 'password',
+			})
 
-    it('should handle login errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      
-      mockContextValue.login.mockRejectedValue(new Error('Login failed'))
+			expect(contextWithError.clearError).toHaveBeenCalled()
+			expect(contextWithError.login).toHaveBeenCalledWith({
+				username: 'test@example.com',
+				password: 'password',
+			})
+		})
 
-      const { login } = useLogin()
+		it('should handle login errors gracefully', async () => {
+			const consoleSpy = jest
+				.spyOn(console, 'error')
+				.mockImplementation(() => {})
 
-      await login({
-        username: 'test@example.com',
-        password: 'password',
-      })
+			mockContextValue.login.mockRejectedValue(new Error('Login failed'))
 
-      expect(consoleSpy).toHaveBeenCalledWith('Login failed:', expect.any(Error))
-      
-      consoleSpy.mockRestore()
-    })
-  })
+			const { login } = useLogin()
 
-  describe('useSignup', () => {
-    it('should return signup utilities', () => {
-      const result = useSignup()
+			await login({
+				username: 'test@example.com',
+				password: 'password',
+			})
 
-      expect(result).toEqual({
-        signup: expect.any(Function),
-        isLoading: mockContextValue.isLoading,
-        error: mockContextValue.error,
-        clearError: mockContextValue.clearError,
-      })
-    })
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Login failed:',
+				expect.any(Error),
+			)
 
-    it('should clear error before signup', async () => {
-      const contextWithError = {
-        ...mockContextValue,
-        error: 'Previous error',
-      }
-      
-      mockUseAuth.mockReturnValue(contextWithError)
+			consoleSpy.mockRestore()
+		})
+	})
 
-      const { signup } = useSignup()
+	describe('useSignup', () => {
+		it('should return signup utilities', () => {
+			const result = useSignup()
 
-      await signup('test@example.com')
+			expect(result).toEqual({
+				signup: expect.any(Function),
+				isLoading: mockContextValue.isLoading,
+				error: mockContextValue.error,
+				clearError: mockContextValue.clearError,
+			})
+		})
 
-      expect(contextWithError.clearError).toHaveBeenCalled()
-      expect(contextWithError.signup).toHaveBeenCalledWith('test@example.com')
-    })
+		it('should clear error before signup', async () => {
+			const contextWithError = {
+				...mockContextValue,
+				error: 'Previous error',
+			}
 
-    it('should handle signup errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      
-      mockContextValue.signup.mockRejectedValue(new Error('Signup failed'))
+			mockUseAuth.mockReturnValue(contextWithError)
 
-      const { signup } = useSignup()
+			const { signup } = useSignup()
 
-      await signup('test@example.com')
+			await signup('test@example.com')
 
-      expect(consoleSpy).toHaveBeenCalledWith('Signup failed:', expect.any(Error))
-      
-      consoleSpy.mockRestore()
-    })
-  })
+			expect(contextWithError.clearError).toHaveBeenCalled()
+			expect(contextWithError.signup).toHaveBeenCalledWith('test@example.com')
+		})
 
-  describe('useSocialLogin', () => {
-    it('should return social login utilities', () => {
-      const result = useSocialLogin()
+		it('should handle signup errors gracefully', async () => {
+			const consoleSpy = jest
+				.spyOn(console, 'error')
+				.mockImplementation(() => {})
 
-      expect(result).toEqual({
-        socialLogin: expect.any(Function),
-        isLoading: mockContextValue.isLoading,
-        error: mockContextValue.error,
-        clearError: mockContextValue.clearError,
-      })
-    })
+			mockContextValue.signup.mockRejectedValue(new Error('Signup failed'))
 
-    it('should clear error before social login', async () => {
-      const contextWithError = {
-        ...mockContextValue,
-        error: 'Previous error',
-      }
-      
-      mockUseAuth.mockReturnValue(contextWithError)
+			const { signup } = useSignup()
 
-      const { socialLogin } = useSocialLogin()
+			await signup('test@example.com')
 
-      await socialLogin('google')
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Signup failed:',
+				expect.any(Error),
+			)
 
-      expect(contextWithError.clearError).toHaveBeenCalled()
-      expect(contextWithError.socialLogin).toHaveBeenCalledWith('google')
-    })
+			consoleSpy.mockRestore()
+		})
+	})
 
-    it('should handle social login errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      
-      mockContextValue.socialLogin.mockRejectedValue(new Error('Social login failed'))
+	describe('useSocialLogin', () => {
+		it('should return social login utilities', () => {
+			const result = useSocialLogin()
 
-      const { socialLogin } = useSocialLogin()
+			expect(result).toEqual({
+				socialLogin: expect.any(Function),
+				isLoading: mockContextValue.isLoading,
+				error: mockContextValue.error,
+				clearError: mockContextValue.clearError,
+			})
+		})
 
-      await socialLogin('google')
+		it('should clear error before social login', async () => {
+			const contextWithError = {
+				...mockContextValue,
+				error: 'Previous error',
+			}
 
-      expect(consoleSpy).toHaveBeenCalledWith('Social login failed:', expect.any(Error))
-      
-      consoleSpy.mockRestore()
-    })
-  })
+			mockUseAuth.mockReturnValue(contextWithError)
+
+			const { socialLogin } = useSocialLogin()
+
+			await socialLogin('google')
+
+			expect(contextWithError.clearError).toHaveBeenCalled()
+			expect(contextWithError.socialLogin).toHaveBeenCalledWith('google')
+		})
+
+		it('should handle social login errors gracefully', async () => {
+			const consoleSpy = jest
+				.spyOn(console, 'error')
+				.mockImplementation(() => {})
+
+			mockContextValue.socialLogin.mockRejectedValue(
+				new Error('Social login failed'),
+			)
+
+			const { socialLogin } = useSocialLogin()
+
+			await socialLogin('google')
+
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Social login failed:',
+				expect.any(Error),
+			)
+
+			consoleSpy.mockRestore()
+		})
+	})
 })

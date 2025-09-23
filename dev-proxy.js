@@ -1,47 +1,46 @@
-const http = require('http');
-const httpProxy = require('http-proxy');
+const http = require('http')
+const httpProxy = require('http-proxy')
 
 const proxy = httpProxy.createProxyServer({
-  ws: true,
-});
+	ws: true,
+})
 
 const targets = {
-  'epic-stack.me:2999': 'http://localhost:3002',
-  'app.epic-stack.me:2999': 'http://localhost:3001',
-  'studio.epic-stack.me:2999': 'http://localhost:3003',
-  'docs.epic-stack.me:2999': 'http://localhost:3004',
-  'admin.epic-stack.me:2999': 'http://localhost:3005',
-  'cms.epic-stack.me:2999': 'http://localhost:3006',
-};
+	'epic-stack.me:2999': 'http://localhost:3002',
+	'app.epic-stack.me:2999': 'http://localhost:3001',
+	'studio.epic-stack.me:2999': 'http://localhost:3003',
+	'docs.epic-stack.me:2999': 'http://localhost:3004',
+	'admin.epic-stack.me:2999': 'http://localhost:3005',
+	'cms.epic-stack.me:2999': 'http://localhost:3006',
+}
 
 const server = http.createServer((req, res) => {
-  const host = req.headers.host;
-  const target = targets[host];
+	const host = req.headers.host
+	const target = targets[host]
 
-  if (target) {
-    proxy.web(req, res, { target }, (err) => {
-      console.error('Proxy error:', err);
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Proxy error');
-    });
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
-  }
-});
+	if (target) {
+		proxy.web(req, res, { target }, (err) => {
+			console.error('Proxy error:', err)
+			res.writeHead(500, { 'Content-Type': 'text/plain' })
+			res.end('Proxy error')
+		})
+	} else {
+		res.writeHead(404, { 'Content-Type': 'text/plain' })
+		res.end('Not Found')
+	}
+})
 
 server.on('upgrade', function (req, socket, head) {
-  const host = req.headers.host;
-  const target = targets[host];
-  if (target) {
-    proxy.ws(req, socket, head, { target });
-  } else {
-    socket.destroy();
-  }
-});
+	const host = req.headers.host
+	const target = targets[host]
+	if (target) {
+		proxy.ws(req, socket, head, { target })
+	} else {
+		socket.destroy()
+	}
+})
 
-
-const port = 2999;
+const port = 2999
 server.listen(port, '127.0.0.1', () => {
-  console.log(`Reverse proxy listening on port ${port}`);
-});
+	console.log(`Reverse proxy listening on port ${port}`)
+})

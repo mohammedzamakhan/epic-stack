@@ -1,28 +1,80 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { Button } from '../components/ui/button'
 import {
+	Button,
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from '../components/ui/card'
+} from '@repo/ui'
+import {
+	getAuthStatus,
+	MessageHandler,
+	MessageType,
+	type ExtensionMessage,
+	type AuthStatus,
+} from '../lib/auth'
 
 // Import CSS as text using Vite's ?inline query
 import cssText from './content.css?inline'
 
 // React component to render inside the shadow DOM
 function ContentApp({ onClose }: { onClose: () => void }) {
-	const [clicked, setClicked] = React.useState(false)
+	const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+	const [isLoading, setIsLoading] = React.useState(true)
+
+	React.useEffect(() => {
+		let mounted = true
+
+		// Get initial auth status
+		const loadAuthStatus = async () => {
+			try {
+				const authStatus = await getAuthStatus()
+				if (mounted && authStatus) {
+					setIsLoggedIn(authStatus.isLoggedIn)
+				}
+			} catch (error) {
+				console.error('Error getting auth status in content script:', error)
+			} finally {
+				if (mounted) {
+					setIsLoading(false)
+				}
+			}
+		}
+
+		// Listen for auth status changes
+		const handleAuthStatusChange = (message: ExtensionMessage) => {
+			if (mounted && message.payload) {
+				const authStatus = message.payload as AuthStatus
+				setIsLoggedIn(authStatus.isLoggedIn)
+			}
+		}
+
+		// Set up message listener
+		MessageHandler.addListener(
+			MessageType.AUTH_STATUS_CHANGED,
+			handleAuthStatusChange,
+		)
+
+		// Load initial status
+		void loadAuthStatus()
+
+		return () => {
+			mounted = false
+			MessageHandler.removeListener(
+				MessageType.AUTH_STATUS_CHANGED,
+				handleAuthStatusChange,
+			)
+		}
+	}, [])
 
 	return (
-		<Card className="m-4 w-80 shadow-lg">
+		<Card className="w-80 shadow-lg">
 			<CardHeader className="pb-3">
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle className="text-lg">Epic SaaS Extension</CardTitle>
-						<CardDescription>Injected with Shadow DOM</CardDescription>
+						<CardTitle className="text-lg">Epic Startup Extension</CardTitle>
 					</div>
 					<Button
 						variant="ghost"
@@ -34,24 +86,21 @@ function ContentApp({ onClose }: { onClose: () => void }) {
 					</Button>
 				</div>
 			</CardHeader>
-			<CardContent className="pt-0">
-				<p className="text-muted-foreground mb-4 text-sm">
-					This component uses Tailwind CSS v4 with isolated styles in Shadow
-					DOM.
-				</p>
-				<div className="space-y-2">
-					<Button
-						className="w-full"
-						onClick={() => setClicked(!clicked)}
-						variant={clicked ? 'secondary' : 'default'}
-					>
-						{clicked ? 'Clicked! 🎉' : 'Click me!'}
-					</Button>
-					{clicked && (
-						<p className="text-center text-xs font-medium text-green-600">
-							React state and Tailwind classes working perfectly!
-						</p>
-					)}
+			<CardContent>
+				{/* Auth Status Display */}
+				<div>
+					<div className="flex items-center justify-between">
+						<span className="text-xs font-medium">Status:</span>
+						{isLoading ? (
+							<span className="text-muted-foreground text-xs">Loading...</span>
+						) : (
+							<span
+								className={`text-xs font-semibold ${isLoggedIn ? 'text-green-600' : 'text-red-600'}`}
+							>
+								{isLoggedIn ? 'Logged In' : 'Not Logged In'}
+							</span>
+						)}
+					</div>
 				</div>
 			</CardContent>
 		</Card>
@@ -60,12 +109,12 @@ function ContentApp({ onClose }: { onClose: () => void }) {
 
 // Create and inject the Web Component with Shadow DOM
 class EpicSaasWidget extends HTMLElement {
-	private shadowRoot: ShadowRoot
+	private shadow: ShadowRoot
 	private reactRoot: any
 
 	constructor() {
 		super()
-		this.shadowRoot = this.attachShadow({ mode: 'open' })
+		this.shadow = this.attachShadow({ mode: 'open' })
 	}
 
 	connectedCallback() {
@@ -78,8 +127,8 @@ class EpicSaasWidget extends HTMLElement {
 		style.textContent = cssText
 
 		// Append styles and container to shadow root
-		this.shadowRoot.appendChild(style)
-		this.shadowRoot.appendChild(container)
+		this.shadow.appendChild(style)
+		this.shadow.appendChild(container)
 
 		// Render React component
 		this.reactRoot = createRoot(container)
@@ -221,6 +270,46 @@ function initializeWidget() {
 		createShadowWidget()
 	}
 }
+
+function destroyWidget() {
+	const widget = document.querySelector('epic-saas-widget')
+	if (widget) {
+		widget.remove()
+	}
+}
+
+// Set up message listener for content script
+import browser from 'webextension-polyfill'
+
+browser.runtime.onMessage.addListener((message: unknown) => {
+	try {
+		// Type guard to ensure message is our expected format
+		if (!message || typeof message !== 'object' || !('type' in message)) {
+			console.warn('Invalid message format:', message)
+			return Promise.resolve()
+		}
+
+		const extensionMessage = message as ExtensionMessage
+		console.log('Received message in content script:', extensionMessage)
+		// Handle content script ready check
+		if (extensionMessage.type === MessageType.CONTENT_SCRIPT_READY) {
+			initializeWidget()
+			return Promise.resolve({ ready: true })
+		}
+
+		if (extensionMessage.type === MessageType.DESTROY_CONTENT_SCRIPT) {
+			destroyWidget()
+			return Promise.resolve()
+		}
+
+		// Pass message to MessageHandler
+		MessageHandler.handleMessage(extensionMessage)
+		return Promise.resolve()
+	} catch (error) {
+		console.error('Error handling message in content script:', error)
+		return Promise.resolve()
+	}
+})
 
 // Wait for DOM to be ready and then initialize
 if (document.readyState === 'loading') {

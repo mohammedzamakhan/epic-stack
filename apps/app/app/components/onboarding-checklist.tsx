@@ -77,7 +77,7 @@ export function OnboardingChecklist({
 	if (variant === 'sidebar') {
 		return (
 			<div
-				className={`group relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 bg-background ${className}`}
+				className={`group bg-background relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 ${className}`}
 				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
 				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
 			>
@@ -89,12 +89,10 @@ export function OnboardingChecklist({
 								size={16}
 								className="text-primary"
 							/>
-							<span className="text-sm font-semibold">
-								Get Started
-							</span>
+							<span className="text-sm font-semibold">Get Started</span>
 						</div>
 						<div className="flex items-center gap-1">
-							<span className="rounded border bg-muted px-1.5 py-0.5 text-xs font-medium">
+							<span className="bg-muted rounded border px-1.5 py-0.5 text-xs font-medium">
 								{progress.completedCount}/{progress.totalSteps}
 							</span>
 						</div>
@@ -155,7 +153,7 @@ export function OnboardingChecklist({
 						<div
 							key={step.id}
 							className={`group hover:bg-muted/50 flex items-center gap-4 rounded-lg p-2 transition-colors ${
-								index > 0 ? 'border-border border-dashed border-t' : ''
+								index > 0 ? 'border-border border-t border-dashed' : ''
 							}`}
 						>
 							<div className="flex-shrink-0">

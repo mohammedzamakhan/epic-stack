@@ -37,8 +37,8 @@ export default function ForgotPasswordEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We received a request to reset your Epic Startup password. If you
-								didn't make this request, you can safely ignore this email.
+								We received a request to reset your Epic Startup password. If
+								you didn't make this request, you can safely ignore this email.
 							</Text>
 
 							<Text className="mb-[16px] text-[16px] leading-[24px] text-[#020304]">

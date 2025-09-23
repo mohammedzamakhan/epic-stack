@@ -72,16 +72,16 @@ export const Content: Block = {
       type: 'text',
       label: 'Section Title (optional)',
       admin: {
-        description: 'Optional title shown above the content in monospace style'
-      }
+        description: 'Optional title shown above the content in monospace style',
+      },
     },
     {
       name: 'subtitle',
       type: 'text',
       label: 'Section Subtitle (optional)',
       admin: {
-        description: 'Optional large subtitle shown below the title'
-      }
+        description: 'Optional large subtitle shown below the title',
+      },
     },
     {
       name: 'richText',
@@ -104,7 +104,7 @@ export const Content: Block = {
       type: 'array',
       admin: {
         initCollapsed: true,
-        description: 'Legacy column support - will be rendered differently if used'
+        description: 'Legacy column support - will be rendered differently if used',
       },
       fields: columnFields,
     },

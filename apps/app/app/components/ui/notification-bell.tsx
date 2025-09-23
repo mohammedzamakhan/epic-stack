@@ -58,7 +58,6 @@ function NotificationItem({ notification }: { notification: Notification }) {
 	const [isHovered, setIsHovered] = useState(false)
 	const navigate = useNavigate()
 
-
 	const handleRedirect = (redirect?: Redirect) => {
 		if (redirect?.url) {
 			if (redirect.target === '_blank') {
@@ -117,7 +116,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 			onMouseLeave={() => setIsHovered(false)}
 			onClick={handlePress}
 		>
-			<div className="flex items-start p-2 border-b border-dashed">
+			<div className="flex items-start border-b border-dashed p-2">
 				<Avatar className="mr-2 h-8 w-8">
 					<AvatarImage src={notification.avatar} alt="Avatar" />
 					<AvatarFallback>{notification.subject?.[0] || 'N'}</AvatarFallback>
@@ -311,7 +310,10 @@ export default function NotificationBell() {
 								exit={{ scale: 0 }}
 								className="absolute -top-2 -right-3"
 							>
-								<Badge variant="destructive" className="px-1 py-0 text-xs rounded-full">
+								<Badge
+									variant="destructive"
+									className="rounded-full px-1 py-0 text-xs"
+								>
 									{unreadCount}
 								</Badge>
 							</motion.div>

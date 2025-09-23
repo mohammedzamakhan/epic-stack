@@ -63,7 +63,12 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   collections: [Pages, Posts, Media, Categories, Users],
-  cors: [getServerSideURL(), 'http://localhost:3002', 'https://*.vercel.app', 'https://glorious-space-spork-jr6jrp7r4p3p7pj-3000.app.github.dev'].filter(Boolean),
+  cors: [
+    getServerSideURL(),
+    'http://localhost:3002',
+    'https://*.vercel.app',
+    'https://glorious-space-spork-jr6jrp7r4p3p7pj-3000.app.github.dev',
+  ].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
     ...plugins,

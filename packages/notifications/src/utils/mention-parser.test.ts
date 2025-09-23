@@ -40,7 +40,10 @@ const mockOrganizationMembers = [
 
 // Example of resolving mentions
 async function testResolution() {
-	const userIds = await resolveMentionsToUserIds(mentions, mockOrganizationMembers)
+	const userIds = await resolveMentionsToUserIds(
+		mentions,
+		mockOrganizationMembers,
+	)
 	console.log('Resolved user IDs:', userIds)
 	// Output: ['user-1', 'user-2', 'user-3']
 }

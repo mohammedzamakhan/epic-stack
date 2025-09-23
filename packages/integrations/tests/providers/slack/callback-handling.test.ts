@@ -188,7 +188,7 @@ describe('SlackProvider - Callback Handling', () => {
 
 			// The current implementation properly validates state and should throw an error
 			await expect(provider.handleCallback(params)).rejects.toThrow(
-				'Invalid OAuth state'
+				'Invalid OAuth state',
 			)
 		})
 

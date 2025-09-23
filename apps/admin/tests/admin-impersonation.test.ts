@@ -69,12 +69,9 @@ test.describe('Admin Impersonation', () => {
 		await page.click('[type="submit"]')
 
 		// Try to access impersonation route directly
-		const response = await page.goto(
-			`/users/${targetUser.id}/impersonate`,
-			{
-				waitUntil: 'networkidle',
-			},
-		)
+		const response = await page.goto(`/users/${targetUser.id}/impersonate`, {
+			waitUntil: 'networkidle',
+		})
 
 		// Should get 403 or be redirected
 		expect(response?.status()).toBe(403)

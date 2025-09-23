@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source './../../../../packages/ui/**/*.{js,jsx,ts,tsx}';
 
 /* Define CSS variables for Shadow DOM - these need to be on :host instead of :root */
 :host {
@@ -224,6 +225,18 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--radius-2lg: calc(var(--radius) + 2px);
+	--spacing: 4px;
+	--text-xs: 12px;
+	--text-xs--line-height: calc(16 / 12);
+	--text-sm: 14px;
+	--text-sm--line-height: calc(20 / 14);
+	--text-base: 16px;
+	--text-base--line-height: calc(24 / 16);
+	--text-lg: 18px;
+	--text-lg--line-height: calc(28 / 18);
+	--text-2xl: 24px;
+	--text-2xl--line-height: calc(32 / 24);
 }
 
 @layer base {

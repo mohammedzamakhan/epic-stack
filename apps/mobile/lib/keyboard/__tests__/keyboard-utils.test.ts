@@ -3,99 +3,99 @@ import { Keyboard } from 'react-native'
 
 // Mock React Native Keyboard
 jest.mock('react-native', () => ({
-  Keyboard: {
-    dismiss: jest.fn(),
-    addListener: jest.fn(),
-  },
+	Keyboard: {
+		dismiss: jest.fn(),
+		addListener: jest.fn(),
+	},
 }))
 
 describe('keyboard-utils', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
+	beforeEach(() => {
+		jest.clearAllMocks()
+	})
 
-  describe('getKeyboardConfig', () => {
-    it('should return correct config for email input', () => {
-      const config = getKeyboardConfig('email')
-      
-      expect(config).toEqual({
-        keyboardType: 'email-address',
-        autoCapitalize: 'none',
-        autoCorrect: false,
-        returnKeyType: 'next',
-        textContentType: 'emailAddress',
-        autoComplete: 'email',
-      })
-    })
+	describe('getKeyboardConfig', () => {
+		it('should return correct config for email input', () => {
+			const config = getKeyboardConfig('email')
 
-    it('should return correct config for password input', () => {
-      const config = getKeyboardConfig('password')
-      
-      expect(config).toEqual({
-        keyboardType: 'default',
-        autoCapitalize: 'none',
-        autoCorrect: false,
-        returnKeyType: 'done',
-        textContentType: 'password',
-        autoComplete: 'current-password',
-      })
-    })
+			expect(config).toEqual({
+				keyboardType: 'email-address',
+				autoCapitalize: 'none',
+				autoCorrect: false,
+				returnKeyType: 'next',
+				textContentType: 'emailAddress',
+				autoComplete: 'email',
+			})
+		})
 
-    it('should return correct config for username input', () => {
-      const config = getKeyboardConfig('username')
-      
-      expect(config).toEqual({
-        keyboardType: 'default',
-        autoCapitalize: 'none',
-        autoCorrect: false,
-        returnKeyType: 'next',
-        textContentType: 'username',
-        autoComplete: 'username',
-      })
-    })
+		it('should return correct config for password input', () => {
+			const config = getKeyboardConfig('password')
 
-    it('should return correct config for search input', () => {
-      const config = getKeyboardConfig('search')
-      
-      expect(config).toEqual({
-        keyboardType: 'default',
-        autoCapitalize: 'none',
-        autoCorrect: true,
-        returnKeyType: 'search',
-        textContentType: 'none',
-      })
-    })
+			expect(config).toEqual({
+				keyboardType: 'default',
+				autoCapitalize: 'none',
+				autoCorrect: false,
+				returnKeyType: 'done',
+				textContentType: 'password',
+				autoComplete: 'current-password',
+			})
+		})
 
-    it('should return correct config for text input', () => {
-      const config = getKeyboardConfig('text')
-      
-      expect(config).toEqual({
-        keyboardType: 'default',
-        autoCapitalize: 'sentences',
-        autoCorrect: true,
-        returnKeyType: 'done',
-        textContentType: 'none',
-      })
-    })
+		it('should return correct config for username input', () => {
+			const config = getKeyboardConfig('username')
 
-    it('should return default config for unknown input type', () => {
-      const config = getKeyboardConfig('unknown' as any)
-      
-      expect(config).toEqual({
-        keyboardType: 'default',
-        autoCapitalize: 'sentences',
-        autoCorrect: true,
-        returnKeyType: 'done',
-        textContentType: 'none',
-      })
-    })
-  })
+			expect(config).toEqual({
+				keyboardType: 'default',
+				autoCapitalize: 'none',
+				autoCorrect: false,
+				returnKeyType: 'next',
+				textContentType: 'username',
+				autoComplete: 'username',
+			})
+		})
 
-  describe('dismissKeyboard', () => {
-    it('should call Keyboard.dismiss', () => {
-      dismissKeyboard()
-      
-      expect(Keyboard.dismiss).toHaveBeenCalledTimes(1)
-    })
-  })
+		it('should return correct config for search input', () => {
+			const config = getKeyboardConfig('search')
+
+			expect(config).toEqual({
+				keyboardType: 'default',
+				autoCapitalize: 'none',
+				autoCorrect: true,
+				returnKeyType: 'search',
+				textContentType: 'none',
+			})
+		})
+
+		it('should return correct config for text input', () => {
+			const config = getKeyboardConfig('text')
+
+			expect(config).toEqual({
+				keyboardType: 'default',
+				autoCapitalize: 'sentences',
+				autoCorrect: true,
+				returnKeyType: 'done',
+				textContentType: 'none',
+			})
+		})
+
+		it('should return default config for unknown input type', () => {
+			const config = getKeyboardConfig('unknown' as any)
+
+			expect(config).toEqual({
+				keyboardType: 'default',
+				autoCapitalize: 'sentences',
+				autoCorrect: true,
+				returnKeyType: 'done',
+				textContentType: 'none',
+			})
+		})
+	})
+
+	describe('dismissKeyboard', () => {
+		it('should call Keyboard.dismiss', () => {
+			dismissKeyboard()
+
+			expect(Keyboard.dismiss).toHaveBeenCalledTimes(1)
+		})
+	})
 })

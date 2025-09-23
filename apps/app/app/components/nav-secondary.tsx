@@ -13,7 +13,10 @@ import {
 type NavItem = {
 	title: string
 	icon: React.ComponentType<any>
-} & ({ url: string; onClick?: never, target?: string } | { url?: never; onClick: () => void })
+} & (
+	| { url: string; onClick?: never; target?: string }
+	| { url?: never; onClick: () => void }
+)
 
 export function NavSecondary({
 	items,

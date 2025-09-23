@@ -11,7 +11,7 @@ export async function action({ request }: Route.ActionArgs) {
 	try {
 		const body = await request.json()
 		const result = LogoutSchema.safeParse(body)
-		
+
 		if (result.success && result.data.refreshToken) {
 			// Revoke the refresh token
 			await revokeRefreshToken(result.data.refreshToken)
@@ -24,23 +24,23 @@ export async function action({ request }: Route.ActionArgs) {
 	} catch (error) {
 		console.error('Logout error:', error)
 		return data(
-			{ 
+			{
 				success: false,
 				error: 'logout_failed',
-				message: 'Failed to logout'
+				message: 'Failed to logout',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }
 
 export async function loader() {
 	return data(
-		{ 
+		{
 			success: false,
 			error: 'method_not_allowed',
-			message: 'Use POST method for logout'
+			message: 'Use POST method for logout',
 		},
-		{ status: 405 }
+		{ status: 405 },
 	)
 }

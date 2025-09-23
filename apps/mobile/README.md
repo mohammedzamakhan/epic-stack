@@ -1,6 +1,7 @@
 # Epic Stack Mobile App
 
-A React Native mobile application built with Expo that provides authentication functionality integrated with the Epic Stack backend.
+A React Native mobile application built with Expo that provides authentication
+functionality integrated with the Epic Stack backend.
 
 ## Features
 
@@ -44,11 +45,13 @@ apps/mobile/
 ### Getting Started
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -91,6 +94,7 @@ EXPO_PUBLIC_APP_ENV=development
 ### App Configuration
 
 The app is configured in `app.json` with:
+
 - App name and bundle identifiers
 - Expo Router plugin
 - Platform-specific settings
@@ -107,6 +111,7 @@ The app is configured in `app.json` with:
 ## Integration with Backend
 
 The mobile app integrates with the existing Epic Stack backend:
+
 - Uses same authentication endpoints
 - Shares validation schemas
 - Follows same error handling patterns
@@ -115,6 +120,7 @@ The mobile app integrates with the existing Epic Stack backend:
 ## Package Compatibility
 
 The project uses Expo SDK 54 compatible package versions:
+
 - `expo-router@~6.0.0` (updated from 4.0.x for compatibility)
 - `expo-secure-store@~15.0.6` (updated from 14.0.x)
 - `expo-auth-session@~7.0.7` (updated from 6.0.x)
@@ -125,11 +131,13 @@ The project uses Expo SDK 54 compatible package versions:
 - `react-native-screens@~4.16.0` (updated from 4.4.0)
 - `jest-expo@~54.0.10` (updated from 52.0.x)
 
-These versions ensure compatibility with Expo SDK 54 and prevent version mismatch warnings.
+These versions ensure compatibility with Expo SDK 54 and prevent version
+mismatch warnings.
 
 ## Next Steps
 
 This is the basic project structure. The next tasks will implement:
+
 1. Shared validation and type packages
 2. Authentication API client
 3. Secure storage management

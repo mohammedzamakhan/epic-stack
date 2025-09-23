@@ -13,15 +13,15 @@ export async function action({ request }: Route.ActionArgs) {
 	try {
 		const body = await request.json()
 		const result = RefreshSchema.safeParse(body)
-		
+
 		if (!result.success) {
 			return data(
-				{ 
+				{
 					success: false,
 					error: 'invalid_request',
-					message: 'Missing refreshToken or userId'
+					message: 'Missing refreshToken or userId',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -43,29 +43,32 @@ export async function action({ request }: Route.ActionArgs) {
 
 		if (!user) {
 			return data(
-				{ 
+				{
 					success: false,
 					error: 'user_not_found',
-					message: 'Invalid user'
+					message: 'Invalid user',
 				},
-				{ status: 401 }
+				{ status: 401 },
 			)
 		}
 
 		// Rotate refresh token and get new tokens
 		const userAgent = request.headers.get('user-agent') ?? undefined
 		const ip = request.headers.get('x-forwarded-for') ?? undefined
-		
-		const rotated = await rotateRefreshToken(refreshToken, userId, { userAgent, ip })
-		
+
+		const rotated = await rotateRefreshToken(refreshToken, userId, {
+			userAgent,
+			ip,
+		})
+
 		if (!rotated) {
 			return data(
-				{ 
+				{
 					success: false,
 					error: 'invalid_refresh_token',
-					message: 'Invalid or expired refresh token'
+					message: 'Invalid or expired refresh token',
 				},
-				{ status: 401 }
+				{ status: 401 },
 			)
 		}
 
@@ -97,23 +100,23 @@ export async function action({ request }: Route.ActionArgs) {
 	} catch (error) {
 		console.error('Refresh token error:', error)
 		return data(
-			{ 
+			{
 				success: false,
 				error: 'refresh_failed',
-				message: 'Failed to refresh tokens'
+				message: 'Failed to refresh tokens',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }
 
 export async function loader() {
 	return data(
-		{ 
+		{
 			success: false,
 			error: 'method_not_allowed',
-			message: 'Use POST method for refresh'
+			message: 'Use POST method for refresh',
 		},
-		{ status: 405 }
+		{ status: 405 },
 	)
 }

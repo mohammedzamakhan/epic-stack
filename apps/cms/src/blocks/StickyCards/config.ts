@@ -35,43 +35,47 @@ export const StickyCards: Block = {
         {
           tagline: 'Tagline',
           title: 'Medium length section heading goes here',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
           image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
-          secondaryButtonUrl: '#'
+          secondaryButtonUrl: '#',
         },
         {
           tagline: 'Tagline',
           title: 'Medium length section heading goes here',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
           image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
-          secondaryButtonUrl: '#'
+          secondaryButtonUrl: '#',
         },
         {
           tagline: 'Tagline',
           title: 'Medium length section heading goes here',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
           image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
-          secondaryButtonUrl: '#'
+          secondaryButtonUrl: '#',
         },
         {
           tagline: 'Tagline',
           title: 'Medium length section heading goes here',
-          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
           image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
-          secondaryButtonUrl: '#'
-        }
+          secondaryButtonUrl: '#',
+        },
       ],
       fields: [
         {

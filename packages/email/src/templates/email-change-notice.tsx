@@ -34,9 +34,9 @@ export default function EmailChangeNoticeEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We're writing to let you know that your Epic Startup email address
-								has been successfully changed. This is an important security
-								notification.
+								We're writing to let you know that your Epic Startup email
+								address has been successfully changed. This is an important
+								security notification.
 							</Text>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">

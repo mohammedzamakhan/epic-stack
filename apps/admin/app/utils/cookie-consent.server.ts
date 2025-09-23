@@ -6,7 +6,7 @@ export const cookieConsentCookie = createCookie('cconsent', {
 	sameSite: 'lax',
 	path: '/',
 	httpOnly: true,
-	domain: process.env.ROOT_APP ? `.${process.env.ROOT_APP}`: undefined
+	domain: process.env.ROOT_APP ? `.${process.env.ROOT_APP}` : undefined,
 })
 
 export async function getCookieConsentState(request: Request) {

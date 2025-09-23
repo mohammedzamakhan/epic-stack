@@ -169,7 +169,8 @@ export const Pricing: Block = {
       name: 'footerText',
       type: 'textarea',
       label: 'Footer Text',
-      defaultValue: 'Pre-negotiated discounts are available to early-stage startups and nonprofits.',
+      defaultValue:
+        'Pre-negotiated discounts are available to early-stage startups and nonprofits.',
       admin: {
         condition: (data, siblingData) => siblingData.showFooter,
       },

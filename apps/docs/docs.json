@@ -51,9 +51,7 @@
 			}
 		],
 		"global": {
-			"anchors": [
-				
-			]
+			"anchors": []
 		}
 	},
 	"logo": {

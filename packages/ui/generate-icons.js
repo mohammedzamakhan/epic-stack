@@ -9,7 +9,7 @@ async function generateIcons() {
 	console.log('Generating icon sprite and types...')
 
 	const inputDir = path.join(__dirname, 'other', 'svg-icons')
-	
+
 	// Array of output directories - add new ones here as needed
 	const outputDirs = [
 		// Web app icons

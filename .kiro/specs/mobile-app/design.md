@@ -2,9 +2,15 @@
 
 ## Overview
 
-The mobile application will be built using React Native with Expo, following the existing monorepo patterns and integrating with the current backend authentication system. The app will provide a native mobile experience while reusing the same API endpoints, validation schemas, and authentication flows as the web application.
+The mobile application will be built using React Native with Expo, following the
+existing monorepo patterns and integrating with the current backend
+authentication system. The app will provide a native mobile experience while
+reusing the same API endpoints, validation schemas, and authentication flows as
+the web application.
 
-The mobile app will be structured as a new workspace in the monorepo (`apps/mobile`) and will leverage existing shared packages for consistency and code reuse.
+The mobile app will be structured as a new workspace in the monorepo
+(`apps/mobile`) and will leverage existing shared packages for consistency and
+code reuse.
 
 ## Architecture
 
@@ -18,20 +24,20 @@ graph TB
         C[State Management]
         D[Secure Storage]
     end
-    
+
     subgraph "Shared Packages"
         E[@repo/ui - Adapted Components]
         F[Validation Schemas]
         G[Type Definitions]
     end
-    
+
     subgraph "Backend APIs"
         H[Login Endpoint]
         I[Signup Endpoint]
         J[OAuth Endpoints]
         K[WebAuthn Endpoints]
     end
-    
+
     A --> B
     B --> H
     B --> I
@@ -61,6 +67,7 @@ graph TB
 #### 1. Authentication Screens
 
 **SignInScreen**
+
 - Username/email and password input fields
 - Social login buttons (Google, GitHub, etc.)
 - "Remember me" checkbox
@@ -69,6 +76,7 @@ graph TB
 - Error handling and loading states
 
 **SignUpScreen**
+
 - Email input field
 - Social signup buttons
 - Terms and privacy policy links
@@ -79,62 +87,66 @@ graph TB
 #### 2. API Client
 
 **AuthAPI**
+
 ```typescript
 interface AuthAPI {
-  login(credentials: LoginCredentials): Promise<AuthResponse>
-  signup(email: string): Promise<SignupResponse>
-  socialAuth(provider: string, redirectTo?: string): Promise<AuthResponse>
-  refreshToken(): Promise<AuthResponse>
-  logout(): Promise<void>
+	login(credentials: LoginCredentials): Promise<AuthResponse>
+	signup(email: string): Promise<SignupResponse>
+	socialAuth(provider: string, redirectTo?: string): Promise<AuthResponse>
+	refreshToken(): Promise<AuthResponse>
+	logout(): Promise<void>
 }
 
 interface LoginCredentials {
-  username: string
-  password: string
-  remember?: boolean
-  redirectTo?: string
+	username: string
+	password: string
+	remember?: boolean
+	redirectTo?: string
 }
 
 interface AuthResponse {
-  success: boolean
-  session?: SessionData
-  error?: string
-  redirectTo?: string
+	success: boolean
+	session?: SessionData
+	error?: string
+	redirectTo?: string
 }
 ```
 
 #### 3. Authentication Context
 
 **AuthProvider**
+
 ```typescript
 interface AuthContextType {
-  user: User | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (credentials: LoginCredentials) => Promise<void>
-  signup: (email: string) => Promise<void>
-  socialLogin: (provider: string) => Promise<void>
-  logout: () => Promise<void>
-  refreshSession: () => Promise<void>
+	user: User | null
+	isAuthenticated: boolean
+	isLoading: boolean
+	login: (credentials: LoginCredentials) => Promise<void>
+	signup: (email: string) => Promise<void>
+	socialLogin: (provider: string) => Promise<void>
+	logout: () => Promise<void>
+	refreshSession: () => Promise<void>
 }
 ```
 
 #### 4. Secure Storage Manager
 
 **SecureStorage**
+
 ```typescript
 interface SecureStorage {
-  storeSession(session: SessionData): Promise<void>
-  getSession(): Promise<SessionData | null>
-  clearSession(): Promise<void>
-  storeRefreshToken(token: string): Promise<void>
-  getRefreshToken(): Promise<string | null>
+	storeSession(session: SessionData): Promise<void>
+	getSession(): Promise<SessionData | null>
+	clearSession(): Promise<void>
+	storeRefreshToken(token: string): Promise<void>
+	getRefreshToken(): Promise<string | null>
 }
 ```
 
 ### UI Components (Adapted from @repo/ui)
 
 #### Form Components
+
 - **Input**: Text input with validation styling
 - **Button**: Primary and secondary button variants
 - **ErrorText**: Error message display
@@ -142,6 +154,7 @@ interface SecureStorage {
 - **Checkbox**: Checkbox with label
 
 #### Layout Components
+
 - **Screen**: Base screen wrapper with safe area
 - **Card**: Container for form sections
 - **Divider**: Visual separator with text
@@ -156,27 +169,27 @@ interface SecureStorage {
 import { LoginFormSchema, SignupSchema } from '@repo/validation'
 
 interface User {
-  id: string
-  email: string
-  username: string
-  name?: string
-  image?: string
-  createdAt: string
-  updatedAt: string
+	id: string
+	email: string
+	username: string
+	name?: string
+	image?: string
+	createdAt: string
+	updatedAt: string
 }
 
 interface SessionData {
-  userId: string
-  sessionId: string
-  expiresAt: string
-  remember: boolean
+	userId: string
+	sessionId: string
+	expiresAt: string
+	remember: boolean
 }
 
 interface AuthState {
-  user: User | null
-  session: SessionData | null
-  isLoading: boolean
-  error: string | null
+	user: User | null
+	session: SessionData | null
+	isLoading: boolean
+	error: string | null
 }
 ```
 
@@ -184,25 +197,25 @@ interface AuthState {
 
 ```typescript
 interface LoginResponse {
-  status: 'success' | 'error'
-  user?: User
-  session?: SessionData
-  redirectTo?: string
-  error?: string
+	status: 'success' | 'error'
+	user?: User
+	session?: SessionData
+	redirectTo?: string
+	error?: string
 }
 
 interface SignupResponse {
-  status: 'success' | 'error'
-  redirectTo?: string
-  error?: string
+	status: 'success' | 'error'
+	redirectTo?: string
+	error?: string
 }
 
 interface SocialAuthResponse {
-  status: 'success' | 'error'
-  authUrl?: string
-  user?: User
-  session?: SessionData
-  error?: string
+	status: 'success' | 'error'
+	authUrl?: string
+	user?: User
+	session?: SessionData
+	error?: string
 }
 ```
 
@@ -235,24 +248,25 @@ interface SocialAuthResponse {
 
 ```typescript
 interface ErrorHandler {
-  handleNetworkError(error: NetworkError): string
-  handleAuthError(error: AuthError): string
-  handleValidationError(error: ValidationError): string[]
-  handleOAuthError(error: OAuthError): string
+	handleNetworkError(error: NetworkError): string
+	handleAuthError(error: AuthError): string
+	handleValidationError(error: ValidationError): string[]
+	handleOAuthError(error: OAuthError): string
 }
 
 // Error display patterns
 const ErrorDisplay = {
-  toast: 'For temporary errors (network issues)',
-  inline: 'For form validation errors',
-  modal: 'For critical errors requiring user action',
-  banner: 'For account status issues (banned, suspended)'
+	toast: 'For temporary errors (network issues)',
+	inline: 'For form validation errors',
+	modal: 'For critical errors requiring user action',
+	banner: 'For account status issues (banned, suspended)',
 }
 ```
 
 ## Testing Strategy
 
 ### Unit Testing
+
 - **Components**: Test rendering and user interactions
 - **API Client**: Mock HTTP requests and responses
 - **Authentication Logic**: Test state transitions
@@ -260,18 +274,21 @@ const ErrorDisplay = {
 - **Storage**: Test secure storage operations
 
 ### Integration Testing
+
 - **Authentication Flow**: End-to-end login/signup
 - **OAuth Integration**: Social login flows
 - **API Integration**: Real API calls in test environment
 - **Navigation**: Screen transitions and deep linking
 
 ### E2E Testing
+
 - **User Journeys**: Complete authentication flows
 - **Cross-Platform**: iOS and Android testing
 - **Performance**: App startup and response times
 - **Offline Scenarios**: Network connectivity issues
 
 ### Testing Tools
+
 - **Jest**: Unit and integration tests
 - **React Native Testing Library**: Component testing
 - **Detox**: E2E testing framework
@@ -280,18 +297,21 @@ const ErrorDisplay = {
 ## Security Considerations
 
 ### Authentication Security
+
 - **Token Storage**: Use Expo SecureStore for sensitive data
 - **Session Management**: Implement proper token refresh
 - **Biometric Authentication**: Optional fingerprint/face unlock
 - **Certificate Pinning**: Prevent man-in-the-middle attacks
 
 ### Data Protection
+
 - **Input Validation**: Client-side validation with server verification
 - **Secure Communication**: HTTPS only for API calls
 - **Sensitive Data**: Never log passwords or tokens
 - **App State**: Clear sensitive data when app backgrounds
 
 ### OAuth Security
+
 - **PKCE**: Use Proof Key for Code Exchange
 - **State Parameter**: Prevent CSRF attacks
 - **Redirect Validation**: Verify redirect URLs
@@ -300,18 +320,21 @@ const ErrorDisplay = {
 ## Performance Optimization
 
 ### App Performance
+
 - **Bundle Size**: Code splitting and lazy loading
 - **Image Optimization**: Compressed images and caching
 - **Memory Management**: Proper cleanup of listeners
 - **Startup Time**: Minimize initial load time
 
 ### Network Performance
+
 - **Request Caching**: Cache non-sensitive API responses
 - **Retry Logic**: Exponential backoff for failed requests
 - **Offline Support**: Basic offline functionality
 - **Request Deduplication**: Prevent duplicate API calls
 
 ### User Experience
+
 - **Loading States**: Immediate feedback for user actions
 - **Error Recovery**: Clear error messages and retry options
 - **Accessibility**: Screen reader support and keyboard navigation
@@ -320,6 +343,7 @@ const ErrorDisplay = {
 ## Development Workflow
 
 ### Project Structure
+
 ```
 apps/mobile/
 ├── app/                    # Expo Router screens
@@ -339,12 +363,14 @@ apps/mobile/
 ```
 
 ### Build and Deployment
+
 - **Development**: Expo CLI for local development
 - **Preview**: EAS Build for internal testing
 - **Production**: App Store and Google Play deployment
 - **CI/CD**: GitHub Actions for automated builds
 
 ### Environment Configuration
+
 - **Development**: Local API endpoints
 - **Staging**: Staging API endpoints
 - **Production**: Production API endpoints

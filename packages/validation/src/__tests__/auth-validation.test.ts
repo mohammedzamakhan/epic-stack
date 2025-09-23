@@ -16,7 +16,7 @@ describe('LoginFormSchema', () => {
 			redirectTo: '/dashboard',
 			remember: true,
 		}
-		
+
 		const result = LoginFormSchema.safeParse(validData)
 		expect(result.success).toBe(true)
 		if (result.success) {
@@ -32,7 +32,7 @@ describe('LoginFormSchema', () => {
 			username: 'testuser',
 			password: 'password123',
 		}
-		
+
 		const result = LoginFormSchema.safeParse(minimalData)
 		expect(result.success).toBe(true)
 	})
@@ -42,7 +42,7 @@ describe('LoginFormSchema', () => {
 			username: '', // empty username
 			password: 'password123',
 		}
-		
+
 		const result = LoginFormSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -53,7 +53,7 @@ describe('SignupSchema', () => {
 		const validData = {
 			email: 'test@example.com',
 		}
-		
+
 		const result = SignupSchema.safeParse(validData)
 		expect(result.success).toBe(true)
 		if (result.success) {
@@ -65,7 +65,7 @@ describe('SignupSchema', () => {
 		const invalidData = {
 			email: 'invalid-email',
 		}
-		
+
 		const result = SignupSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -78,7 +78,7 @@ describe('MobileLoginFormSchema', () => {
 			password: 'password123',
 			remember: true,
 		}
-		
+
 		const result = MobileLoginFormSchema.safeParse(validData)
 		expect(result.success).toBe(true)
 	})
@@ -89,7 +89,7 @@ describe('MobileLoginFormSchema', () => {
 			username: 'u', // shorter than web validation
 			password: 'p', // shorter than web validation
 		}
-		
+
 		const result = MobileLoginFormSchema.safeParse(data)
 		expect(result.success).toBe(true)
 	})
@@ -99,7 +99,7 @@ describe('MobileLoginFormSchema', () => {
 			username: '',
 			password: '',
 		}
-		
+
 		const result = MobileLoginFormSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -110,7 +110,7 @@ describe('MobileSignupSchema', () => {
 		const validData = {
 			email: 'test@example.com',
 		}
-		
+
 		const result = MobileSignupSchema.safeParse(validData)
 		expect(result.success).toBe(true)
 	})
@@ -119,7 +119,7 @@ describe('MobileSignupSchema', () => {
 		const invalidData = {
 			email: 'invalid-email',
 		}
-		
+
 		const result = MobileSignupSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -131,7 +131,7 @@ describe('OAuthCallbackSchema', () => {
 			code: 'auth_code_123',
 			state: 'random_state',
 		}
-		
+
 		const result = OAuthCallbackSchema.safeParse(validData)
 		expect(result.success).toBe(true)
 	})
@@ -142,7 +142,7 @@ describe('OAuthCallbackSchema', () => {
 			error: 'access_denied',
 			error_description: 'User denied access',
 		}
-		
+
 		const result = OAuthCallbackSchema.safeParse(errorData)
 		expect(result.success).toBe(true)
 	})
@@ -151,7 +151,7 @@ describe('OAuthCallbackSchema', () => {
 		const invalidData = {
 			state: 'random_state',
 		}
-		
+
 		const result = OAuthCallbackSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -160,13 +160,13 @@ describe('OAuthCallbackSchema', () => {
 describe('SocialAuthSchema', () => {
 	it('should accept valid social auth data', () => {
 		const validProviders = ['google', 'github', 'discord']
-		
-		validProviders.forEach(provider => {
+
+		validProviders.forEach((provider) => {
 			const data = {
 				provider,
 				redirectTo: '/dashboard',
 			}
-			
+
 			const result = SocialAuthSchema.safeParse(data)
 			expect(result.success).toBe(true)
 		})
@@ -177,7 +177,7 @@ describe('SocialAuthSchema', () => {
 			provider: 'facebook', // not in enum
 			redirectTo: '/dashboard',
 		}
-		
+
 		const result = SocialAuthSchema.safeParse(invalidData)
 		expect(result.success).toBe(false)
 	})
@@ -186,7 +186,7 @@ describe('SocialAuthSchema', () => {
 		const minimalData = {
 			provider: 'google',
 		}
-		
+
 		const result = SocialAuthSchema.safeParse(minimalData)
 		expect(result.success).toBe(true)
 	})

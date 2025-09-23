@@ -42,8 +42,8 @@ export default function OrganizationInviteEmail({
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
 								Great news! {inviterName} has invited you to collaborate with{' '}
-								{organizationName} on Epic Startup. You'll be able to share notes,
-								collaborate on projects, and stay organized together.
+								{organizationName} on Epic Startup. You'll be able to share
+								notes, collaborate on projects, and stay organized together.
 							</Text>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">

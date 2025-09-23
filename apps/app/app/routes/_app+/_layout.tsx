@@ -33,7 +33,11 @@ export async function loader({ request }: { request: Request }) {
 		// Don't throw, just continue without onboarding progress
 	}
 
-	return { isCollapsed, onboardingProgress, extensionId: process.env.EXTENSION_ID }
+	return {
+		isCollapsed,
+		onboardingProgress,
+		extensionId: process.env.EXTENSION_ID,
+	}
 }
 
 export default function MarketingLayoutRoute() {

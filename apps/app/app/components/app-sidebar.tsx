@@ -6,7 +6,7 @@ import {
 	CardDescription,
 	CardHeader,
 } from '@repo/ui'
-import * as React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { FoldersIcon } from '#app/components/icons/folders-icon'
@@ -47,7 +47,7 @@ function UpgradeAccountCard({
 	if (!trialStatus.isActive || trialStatus.daysRemaining < 0) return null
 
 	return (
-		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 p-2 border">
+		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 border p-2">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
 					There are{' '}
@@ -168,7 +168,7 @@ function OrganizationSidebar({
 	trialStatus,
 	rootData,
 	onFeedbackClick,
-	extensionId
+	extensionId,
 }: {
 	user: any
 	location: any
@@ -182,6 +182,25 @@ function OrganizationSidebar({
 	onFeedbackClick: () => void
 	extensionId?: string
 }) {
+	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
+
+	useEffect(() => {
+		// Type assertion for Chrome extension API
+		const chromeWindow = window as any
+		if (chromeWindow?.chrome?.runtime) {
+			chromeWindow.chrome.runtime.sendMessage(
+				extensionId,
+				{ type: 'PING' },
+				() => {
+					if (chromeWindow.chrome.runtime.lastError) {
+						setIsExtensionInstalled(false)
+					} else {
+						setIsExtensionInstalled(true)
+					}
+				},
+			)
+		}
+	}, [extensionId])
 	const navMain = [
 		{
 			title: 'Dashboard',
@@ -220,8 +239,7 @@ function OrganizationSidebar({
 				{
 					title: 'Integrations',
 					url: `/${orgSlug}/settings/integrations`,
-					isActive:
-						location.pathname === `/${orgSlug}/settings/integrations`,
+					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
 				},
 				{
 					title: 'Billing',
@@ -233,12 +251,16 @@ function OrganizationSidebar({
 	]
 
 	const navSecondary = [
-		{
-			title: 'Get chrome extension',
-			url: `https://chrome.google.com/webstore/detail/${extensionId}`,
-			icon: ExternalLinkIcon,
-			target: '_blank',
-		},
+		...(!isExtensionInstalled
+			? [
+					{
+						title: 'Get chrome extension',
+						url: `https://chrome.google.com/webstore/detail/${extensionId}`,
+						icon: ExternalLinkIcon,
+						target: '_blank',
+					},
+				]
+			: []),
 		{
 			title: 'Add members',
 			url: `/${orgSlug}/settings/members`,
@@ -340,7 +362,10 @@ export function AppSidebar({
 	const isNotificationsRoute = location.pathname === '/notifications'
 	const isOrganizationsRoute = location.pathname === '/organizations'
 	const isAccountRoute =
-		isProfileRoute || isSecurityRoute || isNotificationsRoute || isOrganizationsRoute
+		isProfileRoute ||
+		isSecurityRoute ||
+		isNotificationsRoute ||
+		isOrganizationsRoute
 
 	const userData = rootData?.user
 		? {

@@ -31,7 +31,10 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: 🏄 Copy test env vars
-        run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+        run:
+          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
+          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
+          apps/cms/.env
 
       - name: 🛠 Setup Database
         run:
@@ -57,7 +60,10 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: 🏄 Copy test env vars
-        run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+        run:
+          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
+          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
+          apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
@@ -89,7 +95,10 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: 🏄 Copy test env vars
-        run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+        run:
+          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
+          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
+          apps/cms/.env
 
       - name: 🛠 Setup Database
         run:
@@ -108,7 +117,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🏄 Copy test env vars
-        run: cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example apps/cms/.env
+        run:
+          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
+          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
+          apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env

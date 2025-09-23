@@ -1,6 +1,10 @@
 import { invariant } from '@epic-web/invariant'
 import { Novu } from '@novu/api'
-import { testWorkflow, commentMentionWorkflow, noteCommentWorkflow } from '@repo/notifications'
+import {
+	testWorkflow,
+	commentMentionWorkflow,
+	noteCommentWorkflow,
+} from '@repo/notifications'
 import {
 	type ActionFunctionArgs,
 	Form,
@@ -180,7 +184,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		select: { id: true, email: true },
 	})
 
-	invariant(user, 'User is not found');
+	invariant(user, 'User is not found')
 
 	invariant(organization, 'organization is required')
 
@@ -237,7 +241,7 @@ export default function OrganizationDashboard() {
 			/>
 
 			<Form method="post">
-			<button type="submit">Submit</button>
+				<button type="submit">Submit</button>
 			</Form>
 
 			<div className="flex flex-wrap gap-8 md:flex-nowrap">
@@ -260,7 +264,7 @@ export default function OrganizationDashboard() {
 					<LeadershipCard className="order-2 mt-8 md:w-1/2" leaders={leaders} />
 				)}
 
-				<div className="mt-8 lg:w-1/2 w-full">
+				<div className="mt-8 w-full lg:w-1/2">
 					<NotesChart data={chartData} daysShown={daysToShow} />
 					{onboardingProgress &&
 						!onboardingProgress.isCompleted &&

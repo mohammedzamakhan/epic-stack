@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Page } from '@/payload-types'
 
-
 type LowImpactHeroType =
   | {
       children?: React.ReactNode
@@ -16,8 +15,7 @@ type LowImpactHeroType =
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText }) => {
   return (
     <div className="container mt-16">
-      <div className="max-w-[48rem]">
-      </div>
+      <div className="max-w-[48rem]"></div>
     </div>
   )
 }

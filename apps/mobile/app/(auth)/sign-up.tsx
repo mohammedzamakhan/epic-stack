@@ -1,23 +1,31 @@
 import React, { useState, useRef } from 'react'
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, TextInput } from 'react-native'
+import {
+	View,
+	Text,
+	StyleSheet,
+	ScrollView,
+	Alert,
+	TouchableOpacity,
+	TextInput,
+} from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MobileSignupSchema } from '@repo/validation'
 import type { z } from 'zod'
 import {
-  Screen,
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-  Input,
-  Button,
-  ErrorText,
-  Divider,
-  SocialButton,
-  LoadingOverlay,
-  SuccessAnimation,
+	Screen,
+	Card,
+	CardHeader,
+	CardContent,
+	CardFooter,
+	Input,
+	Button,
+	ErrorText,
+	Divider,
+	SocialButton,
+	LoadingOverlay,
+	SuccessAnimation,
 } from '../../components/ui'
 import { useSignup } from '../../lib/auth/hooks/use-auth-actions'
 import { useOAuthProviders } from '../../lib/auth/hooks/use-oauth'
@@ -28,355 +36,370 @@ import { triggerSuccessHaptic, triggerErrorHaptic } from '../../lib/haptics'
 type SignupFormData = z.infer<typeof MobileSignupSchema>
 
 export default function SignUpScreen() {
-  const { redirectTo, inviteToken } = useLocalSearchParams<{
-    redirectTo?: string
-    inviteToken?: string
-  }>()
-  
-  const { signup, isLoading: isSignupLoading, error: signupError, clearError } = useSignup()
-  const { configuredProviders } = useOAuthProviders()
-  
-  const [showSuccess, setShowSuccess] = useState(false)
-  
-  // Input ref for focus management
-  const emailRef = useRef<TextInput>(null)
-  
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-    reset,
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(MobileSignupSchema),
-    mode: 'onChange',
-    defaultValues: {
-      email: '',
-    },
-  })
+	const { redirectTo, inviteToken } = useLocalSearchParams<{
+		redirectTo?: string
+		inviteToken?: string
+	}>()
 
-  const onSubmit = async (data: SignupFormData) => {
-    try {
-      // Clear any previous errors
-      clearError()
-      
-      // Dismiss keyboard before submitting
-      dismissKeyboard()
-      
-      await signup(data.email)
-      
-      // Show success alert
-      Alert.alert(
-        'Check your email',
-        "We've sent you a verification link to complete your signup.",
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Navigate to verification screen with email parameter
-              router.push({
-                pathname: '/(auth)/verify-code',
-                params: {
-                  email: data.email,
-                  type: 'onboarding',
-                  ...(redirectTo && { redirectTo }),
-                },
-              })
-            },
-          },
-        ]
-      )
-      
-      // Show success animation and haptic feedback
-      await triggerSuccessHaptic()
-      setShowSuccess(true)
-      
-      // Reset form on success
-      reset()
-    } catch (error) {
-      // Trigger error haptic feedback
-      await triggerErrorHaptic()
-      console.error('Signup submission error:', error)
-    }
-  }
+	const {
+		signup,
+		isLoading: isSignupLoading,
+		error: signupError,
+		clearError,
+	} = useSignup()
+	const { configuredProviders } = useOAuthProviders()
 
-  const handleSocialSuccess = async () => {
-    // Show success animation and haptic feedback
-    await triggerSuccessHaptic()
-    setShowSuccess(true)
-    
-    // Navigate after a brief delay to show success animation
-    setTimeout(() => {
-      setShowSuccess(false)
-      navigateAfterAuth(redirectTo)
-    }, 1500)
-    
-    clearError()
-  }
+	const [showSuccess, setShowSuccess] = useState(false)
 
-  const handleSocialError = async (error: string) => {
-    await triggerErrorHaptic()
-    Alert.alert('Authentication Error', error)
-  }
+	// Input ref for focus management
+	const emailRef = useRef<TextInput>(null)
 
-  const handleNavigateToSignIn = () => {
-    navigateToSignIn(redirectTo)
-  }
+	const {
+		control,
+		handleSubmit,
+		formState: { errors, isValid },
+		reset,
+	} = useForm<SignupFormData>({
+		resolver: zodResolver(MobileSignupSchema),
+		mode: 'onChange',
+		defaultValues: {
+			email: '',
+		},
+	})
 
-  const currentError = signupError
-  const isLoading = isSignupLoading
+	const onSubmit = async (data: SignupFormData) => {
+		try {
+			// Clear any previous errors
+			clearError()
 
-  // Determine if this is an organization invite signup
-  const isInviteSignup = !!inviteToken
+			// Dismiss keyboard before submitting
+			dismissKeyboard()
 
-  return (
-    <Screen>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.container}>
-          <Card style={styles.card}>
-            <CardHeader>
-              <Text style={styles.title}>
-                {isInviteSignup ? 'Join organization' : 'Create an account'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {isInviteSignup 
-                  ? 'Complete your signup to join the organization'
-                  : 'Sign up with your social account or email'
-                }
-              </Text>
-            </CardHeader>
-            
-            <CardContent>
-              {/* Organization Invite Message */}
-              {isInviteSignup && (
-                <View style={styles.inviteContainer}>
-                  <View style={styles.inviteHeader}>
-                    <Text style={styles.inviteIcon}>📧</Text>
-                    <Text style={styles.inviteTitle}>Organization Invite</Text>
-                  </View>
-                  <Text style={styles.inviteMessage}>
-                    You've been invited to join an organization. Complete your signup to get started.
-                  </Text>
-                </View>
-              )}
+			await signup(data.email)
 
-              {/* Social Signup Buttons */}
-              <View style={styles.socialContainer}>
-                {configuredProviders.map((provider) => (
-                  <SocialButton
-                    key={provider}
-                    provider={provider as 'github' | 'google'}
-                    type="signup"
-                    disabled={isLoading}
-                    redirectTo={redirectTo}
-                    onSuccess={handleSocialSuccess}
-                    onError={handleSocialError}
-                  />
-                ))}
-              </View>
+			// Show success alert
+			Alert.alert(
+				'Check your email',
+				"We've sent you a verification link to complete your signup.",
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							// Navigate to verification screen with email parameter
+							router.push({
+								pathname: '/(auth)/verify-code',
+								params: {
+									email: data.email,
+									type: 'onboarding',
+									...(redirectTo && { redirectTo }),
+								},
+							})
+						},
+					},
+				],
+			)
 
-              {/* Divider */}
-              <Divider text="Or continue with email" />
+			// Show success animation and haptic feedback
+			await triggerSuccessHaptic()
+			setShowSuccess(true)
 
-              {/* Error Display */}
-              {currentError && (
-                <ErrorText style={styles.errorContainer}>
-                  {currentError}
-                </ErrorText>
-              )}
+			// Reset form on success
+			reset()
+		} catch (error) {
+			// Trigger error haptic feedback
+			await triggerErrorHaptic()
+			console.error('Signup submission error:', error)
+		}
+	}
 
-              {/* Signup Form */}
-              <View style={styles.formContainer}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Email</Text>
-                  <Controller
-                    control={control}
-                    name="email"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Input
-                        ref={emailRef}
-                        placeholder="m@example.com"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        inputType="email"
-                        onSubmitEditing={handleSubmit(onSubmit)}
-                        editable={!isLoading}
-                        error={!!errors.email}
-                        autoFocus
-                      />
-                    )}
-                  />
-                  {errors.email && (
-                    <ErrorText>{errors.email.message}</ErrorText>
-                  )}
-                </View>
+	const handleSocialSuccess = async () => {
+		// Show success animation and haptic feedback
+		await triggerSuccessHaptic()
+		setShowSuccess(true)
 
-                {/* Submit Button */}
-                <Button
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={!isValid || isLoading}
-                  loading={isSignupLoading}
-                  style={styles.submitButton}
-                >
-                  Sign up
-                </Button>
-              </View>
+		// Navigate after a brief delay to show success animation
+		setTimeout(() => {
+			setShowSuccess(false)
+			navigateAfterAuth(redirectTo)
+		}, 1500)
 
-              {/* Terms and Privacy */}
-              <Text style={styles.termsText}>
-                By signing up, you agree to our{' '}
-                <Text 
-                  style={styles.termsLink}
-                  onPress={() => Alert.alert('Terms of Service', 'Terms of Service will be available soon.')}
-                >
-                  Terms of Service
-                </Text>
-                {' '}and{' '}
-                <Text 
-                  style={styles.termsLink}
-                  onPress={() => Alert.alert('Privacy Policy', 'Privacy Policy will be available soon.')}
-                >
-                  Privacy Policy
-                </Text>
-                .
-              </Text>
-            </CardContent>
+		clearError()
+	}
 
-            <CardFooter>
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity onPress={handleNavigateToSignIn}>
-                  <Text style={styles.footerLinkText}>Sign in</Text>
-                </TouchableOpacity>
-              </View>
-            </CardFooter>
-          </Card>
-        </View>
-      </ScrollView>
-      
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        visible={isSignupLoading} 
-        message="Creating your account..." 
-      />
-      
-      {/* Success Animation */}
-      <SuccessAnimation
-        visible={showSuccess}
-        message="Account created!"
-        onComplete={() => setShowSuccess(false)}
-      />
-    </Screen>
-  )
+	const handleSocialError = async (error: string) => {
+		await triggerErrorHaptic()
+		Alert.alert('Authentication Error', error)
+	}
+
+	const handleNavigateToSignIn = () => {
+		navigateToSignIn(redirectTo)
+	}
+
+	const currentError = signupError
+	const isLoading = isSignupLoading
+
+	// Determine if this is an organization invite signup
+	const isInviteSignup = !!inviteToken
+
+	return (
+		<Screen>
+			<ScrollView
+				contentContainerStyle={styles.scrollContainer}
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
+			>
+				<View style={styles.container}>
+					<Card style={styles.card}>
+						<CardHeader>
+							<Text style={styles.title}>
+								{isInviteSignup ? 'Join organization' : 'Create an account'}
+							</Text>
+							<Text style={styles.subtitle}>
+								{isInviteSignup
+									? 'Complete your signup to join the organization'
+									: 'Sign up with your social account or email'}
+							</Text>
+						</CardHeader>
+
+						<CardContent>
+							{/* Organization Invite Message */}
+							{isInviteSignup && (
+								<View style={styles.inviteContainer}>
+									<View style={styles.inviteHeader}>
+										<Text style={styles.inviteIcon}>📧</Text>
+										<Text style={styles.inviteTitle}>Organization Invite</Text>
+									</View>
+									<Text style={styles.inviteMessage}>
+										You've been invited to join an organization. Complete your
+										signup to get started.
+									</Text>
+								</View>
+							)}
+
+							{/* Social Signup Buttons */}
+							<View style={styles.socialContainer}>
+								{configuredProviders.map((provider) => (
+									<SocialButton
+										key={provider}
+										provider={provider as 'github' | 'google'}
+										type="signup"
+										disabled={isLoading}
+										redirectTo={redirectTo}
+										onSuccess={handleSocialSuccess}
+										onError={handleSocialError}
+									/>
+								))}
+							</View>
+
+							{/* Divider */}
+							<Divider text="Or continue with email" />
+
+							{/* Error Display */}
+							{currentError && (
+								<ErrorText style={styles.errorContainer}>
+									{currentError}
+								</ErrorText>
+							)}
+
+							{/* Signup Form */}
+							<View style={styles.formContainer}>
+								<View style={styles.inputContainer}>
+									<Text style={styles.label}>Email</Text>
+									<Controller
+										control={control}
+										name="email"
+										render={({ field: { onChange, onBlur, value } }) => (
+											<Input
+												ref={emailRef}
+												placeholder="m@example.com"
+												value={value}
+												onChangeText={onChange}
+												onBlur={onBlur}
+												inputType="email"
+												onSubmitEditing={handleSubmit(onSubmit)}
+												editable={!isLoading}
+												error={!!errors.email}
+												autoFocus
+											/>
+										)}
+									/>
+									{errors.email && (
+										<ErrorText>{errors.email.message}</ErrorText>
+									)}
+								</View>
+
+								{/* Submit Button */}
+								<Button
+									onPress={handleSubmit(onSubmit)}
+									disabled={!isValid || isLoading}
+									loading={isSignupLoading}
+									style={styles.submitButton}
+								>
+									Sign up
+								</Button>
+							</View>
+
+							{/* Terms and Privacy */}
+							<Text style={styles.termsText}>
+								By signing up, you agree to our{' '}
+								<Text
+									style={styles.termsLink}
+									onPress={() =>
+										Alert.alert(
+											'Terms of Service',
+											'Terms of Service will be available soon.',
+										)
+									}
+								>
+									Terms of Service
+								</Text>{' '}
+								and{' '}
+								<Text
+									style={styles.termsLink}
+									onPress={() =>
+										Alert.alert(
+											'Privacy Policy',
+											'Privacy Policy will be available soon.',
+										)
+									}
+								>
+									Privacy Policy
+								</Text>
+								.
+							</Text>
+						</CardContent>
+
+						<CardFooter>
+							<View style={styles.footer}>
+								<Text style={styles.footerText}>Already have an account? </Text>
+								<TouchableOpacity onPress={handleNavigateToSignIn}>
+									<Text style={styles.footerLinkText}>Sign in</Text>
+								</TouchableOpacity>
+							</View>
+						</CardFooter>
+					</Card>
+				</View>
+			</ScrollView>
+
+			{/* Loading Overlay */}
+			<LoadingOverlay
+				visible={isSignupLoading}
+				message="Creating your account..."
+			/>
+
+			{/* Success Animation */}
+			<SuccessAnimation
+				visible={showSuccess}
+				message="Account created!"
+				onComplete={() => setShowSuccess(false)}
+			/>
+		</Screen>
+	)
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  card: {
-    maxWidth: 400,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#1a1a1a',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  inviteContainer: {
-    backgroundColor: '#f0f9ff',
-    borderColor: '#bae6fd',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 24,
-  },
-  inviteHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  inviteIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  inviteTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0369a1',
-  },
-  inviteMessage: {
-    fontSize: 14,
-    color: '#0c4a6e',
-    lineHeight: 20,
-  },
-  socialContainer: {
-    gap: 8,
-    marginBottom: 24,
-  },
-  errorContainer: {
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  formContainer: {
-    gap: 16,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  submitButton: {
-    marginTop: 8,
-  },
-  termsText: {
-    fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginTop: 16,
-    lineHeight: 18,
-  },
-  termsLink: {
-    color: '#3b82f6',
-    fontWeight: '500',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 16,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  footerLink: {
-    // Link styles are handled by the Link component
-  },
-  footerLinkText: {
-    fontSize: 14,
-    color: '#3b82f6',
-    fontWeight: '600',
-  },
+	scrollContainer: {
+		flexGrow: 1,
+	},
+	container: {
+		flex: 1,
+		justifyContent: 'center',
+		padding: 20,
+	},
+	card: {
+		maxWidth: 400,
+		alignSelf: 'center',
+		width: '100%',
+	},
+	title: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		marginBottom: 8,
+		color: '#1a1a1a',
+	},
+	subtitle: {
+		fontSize: 16,
+		color: '#666',
+		textAlign: 'center',
+		marginBottom: 24,
+	},
+	inviteContainer: {
+		backgroundColor: '#f0f9ff',
+		borderColor: '#bae6fd',
+		borderWidth: 1,
+		borderRadius: 8,
+		padding: 16,
+		marginBottom: 24,
+	},
+	inviteHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 8,
+	},
+	inviteIcon: {
+		fontSize: 20,
+		marginRight: 8,
+	},
+	inviteTitle: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#0369a1',
+	},
+	inviteMessage: {
+		fontSize: 14,
+		color: '#0c4a6e',
+		lineHeight: 20,
+	},
+	socialContainer: {
+		gap: 8,
+		marginBottom: 24,
+	},
+	errorContainer: {
+		marginBottom: 16,
+		textAlign: 'center',
+	},
+	formContainer: {
+		gap: 16,
+	},
+	inputContainer: {
+		gap: 8,
+	},
+	label: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#374151',
+	},
+	submitButton: {
+		marginTop: 8,
+	},
+	termsText: {
+		fontSize: 12,
+		color: '#6b7280',
+		textAlign: 'center',
+		marginTop: 16,
+		lineHeight: 18,
+	},
+	termsLink: {
+		color: '#3b82f6',
+		fontWeight: '500',
+	},
+	footer: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingTop: 16,
+	},
+	footerText: {
+		fontSize: 14,
+		color: '#6b7280',
+	},
+	footerLink: {
+		// Link styles are handled by the Link component
+	},
+	footerLinkText: {
+		fontSize: 14,
+		color: '#3b82f6',
+		fontWeight: '600',
+	},
 })

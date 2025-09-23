@@ -44,12 +44,12 @@ export async function action({ request }: Route.ActionArgs) {
 
 	if (submission.status !== 'success' || !submission.value.session) {
 		return data(
-			{ 
+			{
 				success: false,
 				error: 'authentication_failed',
-				message: 'Invalid username or password'
+				message: 'Invalid username or password',
 			},
-			{ status: 400 }
+			{ status: 400 },
 		)
 	}
 
@@ -71,26 +71,26 @@ export async function action({ request }: Route.ActionArgs) {
 
 	if (!user) {
 		return data(
-			{ 
+			{
 				success: false,
 				error: 'user_not_found',
-				message: 'User not found'
+				message: 'User not found',
 			},
-			{ status: 400 }
+			{ status: 400 },
 		)
 	}
 
 	// Create JWT tokens for mobile authentication
 	const userAgent = request.headers.get('user-agent') ?? undefined
 	const ip = request.headers.get('x-forwarded-for') ?? undefined
-	
+
 	const tokens = await createTokenPair(
 		{
 			id: user.id,
 			email: user.email,
 			username: user.username,
 		},
-		{ userAgent, ip }
+		{ userAgent, ip },
 	)
 
 	return data({

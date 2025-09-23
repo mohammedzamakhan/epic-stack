@@ -9,180 +9,176 @@ jest.mock('../../../lib/auth/hooks/use-oauth')
 const mockUseOAuth = useOAuth as jest.MockedFunction<typeof useOAuth>
 
 describe('SocialButton', () => {
-  const mockOnPress = jest.fn()
-  const mockAuthenticate = jest.fn()
-  const mockIsProviderConfigured = jest.fn()
+	const mockOnPress = jest.fn()
+	const mockAuthenticate = jest.fn()
+	const mockIsProviderConfigured = jest.fn()
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    
-    mockUseOAuth.mockReturnValue({
-      authenticate: mockAuthenticate,
-      isLoading: false,
-      error: null,
-      clearError: jest.fn(),
-      availableProviders: ['github', 'google'],
-      isProviderConfigured: mockIsProviderConfigured,
-    })
-    
-    mockIsProviderConfigured.mockReturnValue(true)
-  })
+	beforeEach(() => {
+		jest.clearAllMocks()
 
-  it('renders GitHub button correctly', () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} />
-    )
+		mockUseOAuth.mockReturnValue({
+			authenticate: mockAuthenticate,
+			isLoading: false,
+			error: null,
+			clearError: jest.fn(),
+			availableProviders: ['github', 'google'],
+			isProviderConfigured: mockIsProviderConfigured,
+		})
 
-    expect(getByText('Sign in with GitHub')).toBeTruthy()
-  })
+		mockIsProviderConfigured.mockReturnValue(true)
+	})
 
-  it('renders Google button correctly', () => {
-    const { getByText } = render(
-      <SocialButton provider="google" onPress={mockOnPress} />
-    )
+	it('renders GitHub button correctly', () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} />,
+		)
 
-    expect(getByText('Sign in with Google')).toBeTruthy()
-  })
+		expect(getByText('Sign in with GitHub')).toBeTruthy()
+	})
 
-  it('shows signup text when type is signup', () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} type="signup" />
-    )
+	it('renders Google button correctly', () => {
+		const { getByText } = render(
+			<SocialButton provider="google" onPress={mockOnPress} />,
+		)
 
-    expect(getByText('Sign up with GitHub')).toBeTruthy()
-  })
+		expect(getByText('Sign in with Google')).toBeTruthy()
+	})
 
-  it('calls onPress when pressed and onPress is provided', () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} />
-    )
+	it('shows signup text when type is signup', () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} type="signup" />,
+		)
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    expect(mockOnPress).toHaveBeenCalledTimes(1)
-  })
+		expect(getByText('Sign up with GitHub')).toBeTruthy()
+	})
 
-  it('calls OAuth authenticate when no onPress is provided', () => {
-    const { getByText } = render(
-      <SocialButton provider="github" />
-    )
+	it('calls onPress when pressed and onPress is provided', () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} />,
+		)
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    expect(mockAuthenticate).toHaveBeenCalledWith('github')
-  })
+		fireEvent.press(getByText('Sign in with GitHub'))
+		expect(mockOnPress).toHaveBeenCalledTimes(1)
+	})
 
-  it('is disabled when disabled prop is true', () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} disabled />
-    )
+	it('calls OAuth authenticate when no onPress is provided', () => {
+		const { getByText } = render(<SocialButton provider="github" />)
 
-    // Check that the component renders (disabled state is handled internally)
-    expect(getByText('Sign in with GitHub')).toBeTruthy()
-  })
+		fireEvent.press(getByText('Sign in with GitHub'))
+		expect(mockAuthenticate).toHaveBeenCalledWith('github')
+	})
 
-  it('is disabled when provider is not configured', () => {
-    mockIsProviderConfigured.mockReturnValue(false)
-    
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} />
-    )
+	it('is disabled when disabled prop is true', () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} disabled />,
+		)
 
-    // Check that the component renders (disabled state is handled internally)
-    expect(getByText('Sign in with GitHub')).toBeTruthy()
-  })
+		// Check that the component renders (disabled state is handled internally)
+		expect(getByText('Sign in with GitHub')).toBeTruthy()
+	})
 
-  it('shows loading state when loading prop is true', () => {
-    const { queryByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} loading />
-    )
+	it('is disabled when provider is not configured', () => {
+		mockIsProviderConfigured.mockReturnValue(false)
 
-    // Should show loading indicator instead of icon
-    expect(queryByText('Sign in with GitHub')).toBeTruthy()
-    // The ActivityIndicator should be present (we can't easily test for it without testID)
-  })
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} />,
+		)
 
-  it('shows loading state when OAuth is loading', () => {
-    mockUseOAuth.mockReturnValue({
-      authenticate: mockAuthenticate,
-      isLoading: true,
-      error: null,
-      clearError: jest.fn(),
-      availableProviders: ['github', 'google'],
-      isProviderConfigured: mockIsProviderConfigured,
-    })
-    
-    const { queryByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} />
-    )
+		// Check that the component renders (disabled state is handled internally)
+		expect(getByText('Sign in with GitHub')).toBeTruthy()
+	})
 
-    expect(queryByText('Sign in with GitHub')).toBeTruthy()
-  })
+	it('shows loading state when loading prop is true', () => {
+		const { queryByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} loading />,
+		)
 
-  it('does not call onPress when disabled', async () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} disabled />
-    )
+		// Should show loading indicator instead of icon
+		expect(queryByText('Sign in with GitHub')).toBeTruthy()
+		// The ActivityIndicator should be present (we can't easily test for it without testID)
+	})
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    
-    // Wait for async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
-    
-    expect(mockOnPress).not.toHaveBeenCalled()
-  })
+	it('shows loading state when OAuth is loading', () => {
+		mockUseOAuth.mockReturnValue({
+			authenticate: mockAuthenticate,
+			isLoading: true,
+			error: null,
+			clearError: jest.fn(),
+			availableProviders: ['github', 'google'],
+			isProviderConfigured: mockIsProviderConfigured,
+		})
 
-  it('does not call onPress when loading', async () => {
-    const { getByText } = render(
-      <SocialButton provider="github" onPress={mockOnPress} loading />
-    )
+		const { queryByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} />,
+		)
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    
-    // Wait for async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
-    
-    expect(mockOnPress).not.toHaveBeenCalled()
-  })
+		expect(queryByText('Sign in with GitHub')).toBeTruthy()
+	})
 
-  it('calls OAuth success callback', async () => {
-    const mockOnSuccess = jest.fn()
-    const { getByText } = render(
-      <SocialButton provider="github" onSuccess={mockOnSuccess} />
-    )
+	it('does not call onPress when disabled', async () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} disabled />,
+		)
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    
-    // Simulate OAuth success by calling the success callback passed to useOAuth
-    const oauthOptions = mockUseOAuth.mock.calls[0][0]
-    if (oauthOptions?.onSuccess) {
-      oauthOptions.onSuccess({ success: true, code: 'test-code' })
-    }
+		fireEvent.press(getByText('Sign in with GitHub'))
 
-    expect(mockOnSuccess).toHaveBeenCalled()
-  })
+		// Wait for async operations to complete
+		await new Promise((resolve) => setTimeout(resolve, 0))
 
-  it('calls OAuth error callback', async () => {
-    const mockOnError = jest.fn()
-    const { getByText } = render(
-      <SocialButton provider="github" onError={mockOnError} />
-    )
+		expect(mockOnPress).not.toHaveBeenCalled()
+	})
 
-    fireEvent.press(getByText('Sign in with GitHub'))
-    
-    // Simulate OAuth error by calling the error callback passed to useOAuth
-    const oauthOptions = mockUseOAuth.mock.calls[0][0]
-    if (oauthOptions?.onError) {
-      oauthOptions.onError('Authentication failed')
-    }
+	it('does not call onPress when loading', async () => {
+		const { getByText } = render(
+			<SocialButton provider="github" onPress={mockOnPress} loading />,
+		)
 
-    expect(mockOnError).toHaveBeenCalledWith('Authentication failed')
-  })
+		fireEvent.press(getByText('Sign in with GitHub'))
 
-  it('passes redirectTo to OAuth hook', () => {
-    render(
-      <SocialButton provider="github" redirectTo="/dashboard" />
-    )
+		// Wait for async operations to complete
+		await new Promise((resolve) => setTimeout(resolve, 0))
 
-    const oauthOptions = mockUseOAuth.mock.calls[0][0]
-    expect(oauthOptions?.redirectTo).toBe('/dashboard')
-  })
+		expect(mockOnPress).not.toHaveBeenCalled()
+	})
+
+	it('calls OAuth success callback', async () => {
+		const mockOnSuccess = jest.fn()
+		const { getByText } = render(
+			<SocialButton provider="github" onSuccess={mockOnSuccess} />,
+		)
+
+		fireEvent.press(getByText('Sign in with GitHub'))
+
+		// Simulate OAuth success by calling the success callback passed to useOAuth
+		const oauthOptions = mockUseOAuth.mock.calls[0][0]
+		if (oauthOptions?.onSuccess) {
+			oauthOptions.onSuccess({ success: true, code: 'test-code' })
+		}
+
+		expect(mockOnSuccess).toHaveBeenCalled()
+	})
+
+	it('calls OAuth error callback', async () => {
+		const mockOnError = jest.fn()
+		const { getByText } = render(
+			<SocialButton provider="github" onError={mockOnError} />,
+		)
+
+		fireEvent.press(getByText('Sign in with GitHub'))
+
+		// Simulate OAuth error by calling the error callback passed to useOAuth
+		const oauthOptions = mockUseOAuth.mock.calls[0][0]
+		if (oauthOptions?.onError) {
+			oauthOptions.onError('Authentication failed')
+		}
+
+		expect(mockOnError).toHaveBeenCalledWith('Authentication failed')
+	})
+
+	it('passes redirectTo to OAuth hook', () => {
+		render(<SocialButton provider="github" redirectTo="/dashboard" />)
+
+		const oauthOptions = mockUseOAuth.mock.calls[0][0]
+		expect(oauthOptions?.redirectTo).toBe('/dashboard')
+	})
 })

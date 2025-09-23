@@ -3,7 +3,10 @@ import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
-import { normalizeEmail, normalizeUsername } from '#app/utils/providers/provider.ts'
+import {
+	normalizeEmail,
+	normalizeUsername,
+} from '#app/utils/providers/provider.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -16,9 +19,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			{
 				success: false,
 				error: 'auth_failed',
-				message: 'Authentication failed'
+				message: 'Authentication failed',
 			},
-			{ status: 400 }
+			{ status: 400 },
 		)
 	}
 
@@ -36,9 +39,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				{
 					success: false,
 					error: 'auth_failed',
-					message: 'Authentication failed'
+					message: 'Authentication failed',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -63,9 +66,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					{
 						success: false,
 						error: 'user_banned',
-						message: 'User account is banned'
+						message: 'User account is banned',
 					},
-					{ status: 403 }
+					{ status: 403 },
 				)
 			}
 
@@ -87,9 +90,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					{
 						success: false,
 						error: 'user_not_found',
-						message: 'User not found'
+						message: 'User not found',
 					},
-					{ status: 400 }
+					{ status: 400 },
 				)
 			}
 
@@ -103,7 +106,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					email: user.email,
 					username: user.username,
 				},
-				{ userAgent, ip }
+				{ userAgent, ip },
 			)
 
 			return data({
@@ -141,9 +144,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					{
 						success: false,
 						error: 'user_banned',
-						message: 'User account is banned'
+						message: 'User account is banned',
 					},
-					{ status: 403 }
+					{ status: 403 },
 				)
 			}
 
@@ -174,9 +177,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					{
 						success: false,
 						error: 'user_not_found',
-						message: 'User not found'
+						message: 'User not found',
 					},
-					{ status: 400 }
+					{ status: 400 },
 				)
 			}
 
@@ -190,7 +193,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 					email: user.email,
 					username: user.username,
 				},
-				{ userAgent, ip }
+				{ userAgent, ip },
 			)
 
 			return data({
@@ -219,13 +222,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 		// Generate unique username
 		let username = normalizeUsername(
-			profile.username || profile.email?.split('@')[0] || 'user'
+			profile.username || profile.email?.split('@')[0] || 'user',
 		)
 
 		// Ensure username is unique
 		let uniqueUsername = username
 		let counter = 1
-		while (await prisma.user.findUnique({ where: { username: uniqueUsername } })) {
+		while (
+			await prisma.user.findUnique({ where: { username: uniqueUsername } })
+		) {
 			uniqueUsername = `${username}${counter}`
 			counter++
 		}
@@ -257,9 +262,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				{
 					success: false,
 					error: 'user_creation_failed',
-					message: 'Failed to create user'
+					message: 'Failed to create user',
 				},
-				{ status: 500 }
+				{ status: 500 },
 			)
 		}
 
@@ -273,7 +278,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				email: user.email,
 				username: user.username,
 			},
-			{ userAgent, ip }
+			{ userAgent, ip },
 		)
 
 		return data({
@@ -295,16 +300,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				expiresAt: tokens.expiresAt.toISOString(),
 			},
 		})
-
 	} catch (error) {
 		console.error('OAuth callback error:', error)
 		return data(
 			{
 				success: false,
 				error: 'callback_failed',
-				message: 'Failed to process authentication callback'
+				message: 'Failed to process authentication callback',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }

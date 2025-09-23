@@ -42,9 +42,9 @@ import {
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { 
-	notifyCommentMentions, 
-	notifyNoteOwner 
+import {
+	notifyCommentMentions,
+	notifyNoteOwner,
 } from '#app/utils/notifications.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'

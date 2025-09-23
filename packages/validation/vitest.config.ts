@@ -1,9 +1,9 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  test: {
-    environment: 'node',
-    coverage: {
+	test: {
+		environment: 'node',
+		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html', 'lcov', 'text-summary'],
 			reportsDirectory: './coverage',
@@ -36,5 +36,5 @@ export default defineConfig({
 				lines: [50, 80],
 			},
 		},
-  },
+	},
 })

@@ -8,36 +8,36 @@ import { useAuth } from '../lib/auth/hooks/use-auth'
  * This screen acts as the entry point and redirects users to the appropriate screen
  */
 export default function IndexScreen() {
-  const { isAuthenticated, isLoading } = useAuth()
+	const { isAuthenticated, isLoading } = useAuth()
 
-  // Show loading screen while determining auth state
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    )
-  }
+	// Show loading screen while determining auth state
+	if (isLoading) {
+		return (
+			<View style={styles.loadingContainer}>
+				<ActivityIndicator size="large" color="#3b82f6" />
+				<Text style={styles.loadingText}>Loading...</Text>
+			</View>
+		)
+	}
 
-  // Redirect based on authentication state
-  if (isAuthenticated) {
-    return <Redirect href="/(dashboard)" />
-  } else {
-    return <Redirect href="/(auth)/sign-in" />
-  }
+	// Redirect based on authentication state
+	if (isAuthenticated) {
+		return <Redirect href="/(dashboard)" />
+	} else {
+		return <Redirect href="/(auth)/sign-in" />
+	}
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginTop: 12,
-  },
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#ffffff',
+	},
+	loadingText: {
+		fontSize: 16,
+		color: '#6b7280',
+		marginTop: 12,
+	},
 })

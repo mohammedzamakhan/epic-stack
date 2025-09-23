@@ -2,300 +2,315 @@ import { TokenData } from '../../types'
 import { SecureStorage } from './secure-storage'
 
 export interface TokenValidationResult {
-  isValid: boolean
-  isExpired: boolean
-  needsRefresh: boolean
-  tokens: TokenData | null
+	isValid: boolean
+	isExpired: boolean
+	needsRefresh: boolean
+	tokens: TokenData | null
 }
 
 export interface TokenRefreshOptions {
-  refreshToken: string
-  userId: string
-  onRefreshSuccess?: (newTokens: TokenData) => void
-  onRefreshFailure?: (error: Error) => void
+	refreshToken: string
+	userId: string
+	onRefreshSuccess?: (newTokens: TokenData) => void
+	onRefreshFailure?: (error: Error) => void
 }
 
 /**
  * TokenManager handles JWT token persistence, validation, and lifecycle management
  */
 export class TokenManager {
-  private static instance: TokenManager
-  private storage: SecureStorage
-  private refreshPromise: Promise<TokenData | null> | null = null
+	private static instance: TokenManager
+	private storage: SecureStorage
+	private refreshPromise: Promise<TokenData | null> | null = null
 
-  private constructor() {
-    this.storage = SecureStorage.getInstance()
-  }
+	private constructor() {
+		this.storage = SecureStorage.getInstance()
+	}
 
-  /**
-   * Get singleton instance of TokenManager
-   */
-  static getInstance(): TokenManager {
-    if (!TokenManager.instance) {
-      TokenManager.instance = new TokenManager()
-    }
-    return TokenManager.instance
-  }
+	/**
+	 * Get singleton instance of TokenManager
+	 */
+	static getInstance(): TokenManager {
+		if (!TokenManager.instance) {
+			TokenManager.instance = new TokenManager()
+		}
+		return TokenManager.instance
+	}
 
-  /**
-   * Validate current tokens and check expiration
-   * @returns Token validation result
-   */
-  async validateTokens(): Promise<TokenValidationResult> {
-    try {
-      const tokens = await this.storage.getTokens()
-      
-      if (!tokens) {
-        return {
-          isValid: false,
-          isExpired: false,
-          needsRefresh: false,
-          tokens: null
-        }
-      }
+	/**
+	 * Validate current tokens and check expiration
+	 * @returns Token validation result
+	 */
+	async validateTokens(): Promise<TokenValidationResult> {
+		try {
+			const tokens = await this.storage.getTokens()
 
-      const now = new Date()
-      const expiresAt = new Date(tokens.expiresAt)
-      const isExpired = now >= expiresAt
-      
-      // Consider tokens need refresh if they expire within 2 minutes
-      const refreshThreshold = new Date(now.getTime() + 2 * 60 * 1000)
-      const needsRefresh = expiresAt <= refreshThreshold
+			if (!tokens) {
+				return {
+					isValid: false,
+					isExpired: false,
+					needsRefresh: false,
+					tokens: null,
+				}
+			}
 
-      return {
-        isValid: !isExpired,
-        isExpired,
-        needsRefresh: needsRefresh && !isExpired,
-        tokens
-      }
-    } catch {
-      return {
-        isValid: false,
-        isExpired: false,
-        needsRefresh: false,
-        tokens: null
-      }
-    }
-  }
+			const now = new Date()
+			const expiresAt = new Date(tokens.expiresAt)
+			const isExpired = now >= expiresAt
 
-  /**
-   * Store tokens securely
-   * @param tokens - Token data to store
-   */
-  async storeTokens(tokens: TokenData): Promise<void> {
-    try {
-      await this.storage.storeTokens(tokens)
-    } catch (_error) {
-      throw new Error(`Failed to store tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
-    }
-  }
+			// Consider tokens need refresh if they expire within 2 minutes
+			const refreshThreshold = new Date(now.getTime() + 2 * 60 * 1000)
+			const needsRefresh = expiresAt <= refreshThreshold
 
-  /**
-   * Store user data separately from session
-   * @param user - User data to store
-   */
-  async storeUser(user: any): Promise<void> {
-    try {
-      await this.storage.storeUser(user)
-    } catch (_error) {
-      throw new Error(`Failed to store user: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
-    }
-  }
+			return {
+				isValid: !isExpired,
+				isExpired,
+				needsRefresh: needsRefresh && !isExpired,
+				tokens,
+			}
+		} catch {
+			return {
+				isValid: false,
+				isExpired: false,
+				needsRefresh: false,
+				tokens: null,
+			}
+		}
+	}
 
-  /**
-   * Get stored user data
-   * @returns User data or null
-   */
-  async getUser(): Promise<any | null> {
-    try {
-      return await this.storage.getUser()
-    } catch {
-      return null
-    }
-  }
+	/**
+	 * Store tokens securely
+	 * @param tokens - Token data to store
+	 */
+	async storeTokens(tokens: TokenData): Promise<void> {
+		try {
+			await this.storage.storeTokens(tokens)
+		} catch (_error) {
+			throw new Error(
+				`Failed to store tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+			)
+		}
+	}
 
-  /**
-   * Get current tokens if valid, otherwise return null
-   * @returns Valid token data or null
-   */
-  async getCurrentTokens(): Promise<TokenData | null> {
-    const validation = await this.validateTokens()
-    return validation.isValid ? validation.tokens : null
-  }
+	/**
+	 * Store user data separately from session
+	 * @param user - User data to store
+	 */
+	async storeUser(user: any): Promise<void> {
+		try {
+			await this.storage.storeUser(user)
+		} catch (_error) {
+			throw new Error(
+				`Failed to store user: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+			)
+		}
+	}
 
-  /**
-   * Refresh tokens using stored refresh token
-   * @param refreshCallback - Function to call backend refresh endpoint
-   * @returns New token data or null if refresh failed
-   */
-  async refreshTokens(
-    refreshCallback: (refreshToken: string, userId: string) => Promise<TokenData>
-  ): Promise<TokenData | null> {
-    // Prevent multiple concurrent refresh attempts
-    if (this.refreshPromise) {
-      return this.refreshPromise
-    }
+	/**
+	 * Get stored user data
+	 * @returns User data or null
+	 */
+	async getUser(): Promise<any | null> {
+		try {
+			return await this.storage.getUser()
+		} catch {
+			return null
+		}
+	}
 
-    this.refreshPromise = this._performRefresh(refreshCallback)
-    
-    try {
-      const result = await this.refreshPromise
-      return result
-    } finally {
-      this.refreshPromise = null
-    }
-  }
+	/**
+	 * Get current tokens if valid, otherwise return null
+	 * @returns Valid token data or null
+	 */
+	async getCurrentTokens(): Promise<TokenData | null> {
+		const validation = await this.validateTokens()
+		return validation.isValid ? validation.tokens : null
+	}
 
-  /**
-   * Internal method to perform token refresh
-   */
-  private async _performRefresh(
-    refreshCallback: (refreshToken: string, userId: string) => Promise<TokenData>
-  ): Promise<TokenData | null> {
-    try {
-      const tokens = await this.storage.getTokens()
-      const user = await this.storage.getUser()
-      
-      if (!tokens?.refreshToken || !user?.id) {
-        await this.clearTokens()
-        return null
-      }
+	/**
+	 * Refresh tokens using stored refresh token
+	 * @param refreshCallback - Function to call backend refresh endpoint
+	 * @returns New token data or null if refresh failed
+	 */
+	async refreshTokens(
+		refreshCallback: (
+			refreshToken: string,
+			userId: string,
+		) => Promise<TokenData>,
+	): Promise<TokenData | null> {
+		// Prevent multiple concurrent refresh attempts
+		if (this.refreshPromise) {
+			return this.refreshPromise
+		}
 
-      const newTokens = await refreshCallback(tokens.refreshToken, user.id)
-      
-      // Store new tokens
-      await this.storeTokens(newTokens)
-      
-      return newTokens
-    } catch (_error) {
-      // If refresh fails, clear all token data
-      await this.clearTokens()
-      throw _error
-    }
-  }
+		this.refreshPromise = this._performRefresh(refreshCallback)
 
-  /**
-   * Clear all token data (logout)
-   */
-  async clearTokens(): Promise<void> {
-    try {
-      await this.storage.clearAll()
-    } catch (_error) {
-      throw new Error(`Failed to clear tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`)
-    }
-  }
+		try {
+			const result = await this.refreshPromise
+			return result
+		} finally {
+			this.refreshPromise = null
+		}
+	}
 
-  /**
-   * Check if user has stored tokens
-   * @returns Boolean indicating if tokens exist
-   */
-  async hasStoredTokens(): Promise<boolean> {
-    try {
-      const tokens = await this.storage.getTokens()
-      return tokens !== null
-    } catch {
-      return false
-    }
-  }
+	/**
+	 * Internal method to perform token refresh
+	 */
+	private async _performRefresh(
+		refreshCallback: (
+			refreshToken: string,
+			userId: string,
+		) => Promise<TokenData>,
+	): Promise<TokenData | null> {
+		try {
+			const tokens = await this.storage.getTokens()
+			const user = await this.storage.getUser()
 
-  /**
-   * Update token expiration time
-   * @param newExpirationTime - New expiration time
-   */
-  async updateTokenExpiration(newExpirationTime: string): Promise<void> {
-    try {
-      const tokens = await this.storage.getTokens()
-      
-      if (!tokens) {
-        throw new Error('No active tokens to update')
-      }
+			if (!tokens?.refreshToken || !user?.id) {
+				await this.clearTokens()
+				return null
+			}
 
-      const updatedTokens: TokenData = {
-        ...tokens,
-        expiresAt: newExpirationTime
-      }
+			const newTokens = await refreshCallback(tokens.refreshToken, user.id)
 
-      await this.storage.storeTokens(updatedTokens)
-    } catch {
-      throw new Error('Failed to update token expiration')
-    }
-  }
+			// Store new tokens
+			await this.storeTokens(newTokens)
 
-  /**
-   * Get token time remaining in milliseconds
-   * @returns Time remaining or 0 if expired/no tokens
-   */
-  async getTokenTimeRemaining(): Promise<number> {
-    try {
-      const tokens = await this.storage.getTokens()
-      
-      if (!tokens) {
-        return 0
-      }
+			return newTokens
+		} catch (_error) {
+			// If refresh fails, clear all token data
+			await this.clearTokens()
+			throw _error
+		}
+	}
 
-      const now = new Date()
-      const expiresAt = new Date(tokens.expiresAt)
-      const timeRemaining = expiresAt.getTime() - now.getTime()
-      
-      return Math.max(0, timeRemaining)
-    } catch {
-      return 0
-    }
-  }
+	/**
+	 * Clear all token data (logout)
+	 */
+	async clearTokens(): Promise<void> {
+		try {
+			await this.storage.clearAll()
+		} catch (_error) {
+			throw new Error(
+				`Failed to clear tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
+			)
+		}
+	}
 
-  /**
-   * Check if tokens need refresh based on time threshold
-   * @param thresholdMinutes - Minutes before expiration to trigger refresh (default: 2)
-   * @returns Boolean indicating if refresh is needed
-   */
-  async needsRefresh(thresholdMinutes: number = 2): Promise<boolean> {
-    try {
-      const timeRemaining = await this.getTokenTimeRemaining()
-      const thresholdMs = thresholdMinutes * 60 * 1000
-      
-      return timeRemaining > 0 && timeRemaining <= thresholdMs
-    } catch {
-      return false
-    }
-  }
+	/**
+	 * Check if user has stored tokens
+	 * @returns Boolean indicating if tokens exist
+	 */
+	async hasStoredTokens(): Promise<boolean> {
+		try {
+			const tokens = await this.storage.getTokens()
+			return tokens !== null
+		} catch {
+			return false
+		}
+	}
 
-  /**
-   * Perform automatic token cleanup for expired tokens
-   * This should be called on app startup or periodically
-   */
-  async performCleanup(): Promise<void> {
-    try {
-      const validation = await this.validateTokens()
-      
-      if (validation.isExpired) {
-        await this.clearTokens()
-      }
-    } catch {
-      // If there's an error validating, clear the tokens to be safe
-      await this.clearTokens()
-    }
-  }
+	/**
+	 * Update token expiration time
+	 * @param newExpirationTime - New expiration time
+	 */
+	async updateTokenExpiration(newExpirationTime: string): Promise<void> {
+		try {
+			const tokens = await this.storage.getTokens()
 
-  /**
-   * Get token metadata without sensitive data
-   * @returns Token metadata or null
-   */
-  async getTokenMetadata(): Promise<{ expiresAt: string; expiresIn: number } | null> {
-    try {
-      const tokens = await this.storage.getTokens()
-      
-      if (!tokens) {
-        return null
-      }
+			if (!tokens) {
+				throw new Error('No active tokens to update')
+			}
 
-      return {
-        expiresAt: tokens.expiresAt,
-        expiresIn: tokens.expiresIn
-      }
-    } catch {
-      return null
-    }
-  }
+			const updatedTokens: TokenData = {
+				...tokens,
+				expiresAt: newExpirationTime,
+			}
+
+			await this.storage.storeTokens(updatedTokens)
+		} catch {
+			throw new Error('Failed to update token expiration')
+		}
+	}
+
+	/**
+	 * Get token time remaining in milliseconds
+	 * @returns Time remaining or 0 if expired/no tokens
+	 */
+	async getTokenTimeRemaining(): Promise<number> {
+		try {
+			const tokens = await this.storage.getTokens()
+
+			if (!tokens) {
+				return 0
+			}
+
+			const now = new Date()
+			const expiresAt = new Date(tokens.expiresAt)
+			const timeRemaining = expiresAt.getTime() - now.getTime()
+
+			return Math.max(0, timeRemaining)
+		} catch {
+			return 0
+		}
+	}
+
+	/**
+	 * Check if tokens need refresh based on time threshold
+	 * @param thresholdMinutes - Minutes before expiration to trigger refresh (default: 2)
+	 * @returns Boolean indicating if refresh is needed
+	 */
+	async needsRefresh(thresholdMinutes: number = 2): Promise<boolean> {
+		try {
+			const timeRemaining = await this.getTokenTimeRemaining()
+			const thresholdMs = thresholdMinutes * 60 * 1000
+
+			return timeRemaining > 0 && timeRemaining <= thresholdMs
+		} catch {
+			return false
+		}
+	}
+
+	/**
+	 * Perform automatic token cleanup for expired tokens
+	 * This should be called on app startup or periodically
+	 */
+	async performCleanup(): Promise<void> {
+		try {
+			const validation = await this.validateTokens()
+
+			if (validation.isExpired) {
+				await this.clearTokens()
+			}
+		} catch {
+			// If there's an error validating, clear the tokens to be safe
+			await this.clearTokens()
+		}
+	}
+
+	/**
+	 * Get token metadata without sensitive data
+	 * @returns Token metadata or null
+	 */
+	async getTokenMetadata(): Promise<{
+		expiresAt: string
+		expiresIn: number
+	} | null> {
+		try {
+			const tokens = await this.storage.getTokens()
+
+			if (!tokens) {
+				return null
+			}
+
+			return {
+				expiresAt: tokens.expiresAt,
+				expiresIn: tokens.expiresIn,
+			}
+		} catch {
+			return null
+		}
+	}
 }
 
 // Export both names for backward compatibility

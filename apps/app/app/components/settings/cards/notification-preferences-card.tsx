@@ -33,7 +33,8 @@ const channelLabels: Record<string, string> = {
 
 const WORKFLOW_LABELS: Record<string, string> = {
 	'test-workflow': 'Testing notifications',
-	'comment-mention-workflow': 'Notifications when you are mentioned in a comment',
+	'comment-mention-workflow':
+		'Notifications when you are mentioned in a comment',
 	'note-comment-workflow': 'Notifications when someone comments on your notes',
 }
 
@@ -88,7 +89,7 @@ export function NotificationPreferencesCard() {
 		enabled: boolean,
 	) => {
 		const preferenceId = preference.workflow?.id || 'global'
-		setUpdatingPreferences(prev => new Set(prev).add(preferenceId))
+		setUpdatingPreferences((prev) => new Set(prev).add(preferenceId))
 
 		try {
 			await preference.update({
@@ -100,7 +101,7 @@ export function NotificationPreferencesCard() {
 		} catch (error) {
 			console.error('Failed to update preference:', error)
 		} finally {
-			setUpdatingPreferences(prev => {
+			setUpdatingPreferences((prev) => {
 				const newSet = new Set(prev)
 				newSet.delete(preferenceId)
 				return newSet
@@ -122,7 +123,7 @@ export function NotificationPreferencesCard() {
 					<div className="flex items-center justify-center py-8">
 						<div className="flex items-center gap-2">
 							<Icon name="loader" className="h-4 w-4 animate-spin" />
-							<span className="text-sm text-muted-foreground">
+							<span className="text-muted-foreground text-sm">
 								Loading preferences...
 							</span>
 						</div>
@@ -143,7 +144,7 @@ export function NotificationPreferencesCard() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="flex items-center gap-2 p-4 border border-red-200 bg-red-50 rounded-lg">
+					<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
 						<Icon name="octagon-alert" className="h-4 w-4 text-red-600" />
 						<p className="text-sm text-red-800">
 							Failed to load notification preferences: {error.message}
@@ -178,9 +179,12 @@ export function NotificationPreferencesCard() {
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-col items-center justify-center py-8 text-center">
-						<Icon name="bell" className="h-12 w-12 text-muted-foreground mb-4" />
-						<h3 className="text-lg font-medium mb-2">No preferences found</h3>
-						<p className="text-sm text-muted-foreground mb-4">
+						<Icon
+							name="bell"
+							className="text-muted-foreground mb-4 h-12 w-12"
+						/>
+						<h3 className="mb-2 text-lg font-medium">No preferences found</h3>
+						<p className="text-muted-foreground mb-4 text-sm">
 							No notification preferences are configured yet.
 						</p>
 						<Button
@@ -203,8 +207,8 @@ export function NotificationPreferencesCard() {
 
 	// Group preferences by channel type for better organization
 	const channels = ['email', 'sms', 'in_app', 'push', 'chat']
-	const availableChannels = channels.filter(channel =>
-		preferences.some(pref => channel in pref.channels),
+	const availableChannels = channels.filter((channel) =>
+		preferences.some((pref) => channel in pref.channels),
 	)
 
 	return (
@@ -219,8 +223,8 @@ export function NotificationPreferencesCard() {
 			<CardContent className="space-y-6">
 				{/* Global Preferences */}
 				{preferences
-					.filter(pref => !pref.workflow)
-					.map(preference => {
+					.filter((pref) => !pref.workflow)
+					.map((preference) => {
 						const preferenceId = 'global'
 						const isUpdating = updatingPreferences.has(preferenceId)
 
@@ -240,7 +244,7 @@ export function NotificationPreferencesCard() {
 												<div className="flex items-center gap-3">
 													<Icon
 														name={getChannelIcon(channel)}
-														className="h-4 w-4 text-muted-foreground"
+														className="text-muted-foreground h-4 w-4"
 													/>
 													<span className="text-sm font-medium">
 														{channelLabels[channel] || channel}
@@ -248,7 +252,7 @@ export function NotificationPreferencesCard() {
 												</div>
 												<Switch
 													checked={enabled}
-													onCheckedChange={checked =>
+													onCheckedChange={(checked) =>
 														updatePreference(preference, channel, checked)
 													}
 													disabled={isUpdating}
@@ -264,8 +268,8 @@ export function NotificationPreferencesCard() {
 
 				{/* Workflow-specific Preferences */}
 				{preferences
-					.filter(pref => pref.workflow)
-					.map(preference => {
+					.filter((pref) => pref.workflow)
+					.map((preference) => {
 						const preferenceId = preference.workflow?.id || 'unknown'
 						const isUpdating = updatingPreferences.has(preferenceId)
 
@@ -274,7 +278,9 @@ export function NotificationPreferencesCard() {
 								<div className="flex items-center gap-2">
 									<Icon name="cog" className="h-5 w-5" />
 									<h3 className="text-lg font-medium">
-										{preference.workflow?.name ? WORKFLOW_LABELS[preference.workflow?.name] : preference.workflow?.name}
+										{preference.workflow?.name
+											? WORKFLOW_LABELS[preference.workflow?.name]
+											: preference.workflow?.name}
 									</h3>
 									{preference.workflow?.critical && (
 										<Badge variant="destructive" className="text-xs">
@@ -292,7 +298,7 @@ export function NotificationPreferencesCard() {
 												<div className="flex items-center gap-3">
 													<Icon
 														name={getChannelIcon(channel)}
-														className="h-4 w-4 text-muted-foreground"
+														className="text-muted-foreground h-4 w-4"
 													/>
 													<span className="text-sm font-medium">
 														{channelLabels[channel] || channel}
@@ -300,12 +306,10 @@ export function NotificationPreferencesCard() {
 												</div>
 												<Switch
 													checked={enabled}
-													onCheckedChange={checked =>
+													onCheckedChange={(checked) =>
 														updatePreference(preference, channel, checked)
 													}
-													disabled={
-														preference.workflow?.critical || isUpdating
-													}
+													disabled={preference.workflow?.critical || isUpdating}
 												/>
 											</div>
 										),
@@ -323,17 +327,18 @@ export function NotificationPreferencesCard() {
 					<div className="mt-8 space-y-4">
 						<h3 className="text-lg font-medium">Channel Overview</h3>
 						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-							{availableChannels.map(channel => {
+							{availableChannels.map((channel) => {
 								const enabledCount = preferences.filter(
-									pref => pref.channels[channel as keyof typeof pref.channels],
+									(pref) =>
+										pref.channels[channel as keyof typeof pref.channels],
 								).length
 								const totalCount = preferences.filter(
-									pref => channel in pref.channels,
+									(pref) => channel in pref.channels,
 								).length
 
 								return (
 									<Card key={channel} className="p-4">
-										<div className="flex items-center gap-3 mb-2">
+										<div className="mb-2 flex items-center gap-3">
 											<Icon
 												name={getChannelIcon(channel)}
 												className="h-5 w-5"
@@ -342,7 +347,7 @@ export function NotificationPreferencesCard() {
 												{channelLabels[channel] || channel}
 											</span>
 										</div>
-										<p className="text-sm text-muted-foreground">
+										<p className="text-muted-foreground text-sm">
 											{enabledCount} of {totalCount} notifications enabled
 										</p>
 									</Card>

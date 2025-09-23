@@ -201,8 +201,7 @@ function CreateRoleDialog() {
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
 	const isSubmitting =
-		navigation.formAction === '/roles' &&
-		navigation.state === 'submitting'
+		navigation.formAction === '/roles' && navigation.state === 'submitting'
 
 	// Close dialog on successful submission
 	if (actionData?.success && open) {
@@ -356,10 +355,7 @@ export default function AdminRolesPage() {
 							{organizationRoles.map((role) => (
 								<TableRow key={role.id}>
 									<TableCell className="font-medium">
-										<Link
-											to={`/roles/${role.id}`}
-											className="hover:underline"
-										>
+										<Link to={`/roles/${role.id}`} className="hover:underline">
 											{role.name}
 										</Link>
 									</TableCell>

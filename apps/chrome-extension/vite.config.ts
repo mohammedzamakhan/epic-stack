@@ -7,10 +7,10 @@ const BROWSER = process.env.BROWSER || 'chrome'
 
 const baseManifest: ManifestV3Export = {
 	manifest_version: 3,
-	name: 'Epic SaaS Extension',
+	name: 'Epic Startup Extension',
 	version: '1.0',
-	description: 'Injects a script into a domain after user permission.',
-	permissions: ['storage', 'activeTab', 'scripting', 'tabs'],
+	description: 'Chrome extension for Epic Startup',
+	permissions: ['storage', 'activeTab', 'scripting', 'tabs', 'cookies'],
 	host_permissions: ['<all_urls>'],
 	action: {
 		default_popup: 'index.html',
@@ -21,11 +21,14 @@ const baseManifest: ManifestV3Export = {
 			matches: ['<all_urls>'],
 		},
 	],
+	externally_connectable: {
+		matches: ['*://*.epic-stack.me/*'],
+	},
 }
 
 const chromeManifest: Partial<ManifestV3Export> = {
 	...baseManifest,
-	name: 'Epic SaaS Chrome Extension',
+	name: 'Epic Startup Chrome Extension',
 	background: {
 		service_worker: 'src/background/index.ts',
 		type: 'module',
@@ -34,7 +37,7 @@ const chromeManifest: Partial<ManifestV3Export> = {
 
 const firefoxManifest: Partial<ManifestV3Export> = {
 	...baseManifest,
-	name: 'Epic SaaS Firefox Extension',
+	name: 'Epic Startup Firefox Extension',
 	background: {
 		scripts: ['src/background/index.ts'],
 		type: 'module',

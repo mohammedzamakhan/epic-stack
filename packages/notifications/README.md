@@ -1,13 +1,17 @@
 # Notifications Package
 
-This package contains Novu workflow definitions and utilities for handling notifications in the application.
+This package contains Novu workflow definitions and utilities for handling
+notifications in the application.
 
 ## Workflows
 
 ### Comment Mention Workflow (`comment-mention-workflow`)
-Triggered when a user is mentioned in a comment using `@username` or `@[User Name]` syntax.
+
+Triggered when a user is mentioned in a comment using `@username` or
+`@[User Name]` syntax.
 
 **Payload:**
+
 - `noteId`: ID of the note
 - `commentId`: ID of the comment
 - `noteTitle`: Title of the note
@@ -17,9 +21,11 @@ Triggered when a user is mentioned in a comment using `@username` or `@[User Nam
 - `noteUrl`: Direct URL to the note
 
 ### Note Comment Workflow (`note-comment-workflow`)
+
 Triggered when someone comments on a note (sent to the note owner).
 
 **Payload:**
+
 - `noteId`: ID of the note
 - `commentId`: ID of the comment
 - `noteTitle`: Title of the note
@@ -31,12 +37,15 @@ Triggered when someone comments on a note (sent to the note owner).
 ## Utilities
 
 ### Mention Parser
+
 - `extractMentions(content: string)`: Extracts mentions from comment content
-- `resolveMentionsToUserIds(mentions, organizationMembers)`: Resolves mention strings to user IDs
+- `resolveMentionsToUserIds(mentions, organizationMembers)`: Resolves mention
+  strings to user IDs
 
 ## Usage
 
-The notification system is automatically triggered when comments are added to notes. The system:
+The notification system is automatically triggered when comments are added to
+notes. The system:
 
 1. Extracts mentions from comment content
 2. Resolves mentions to actual user IDs

@@ -43,11 +43,13 @@ app.use((req, res, next) => {
 	const allowedOrigins = [
 		'https://dashboard-v0.novu.co',
 		// Allow localhost origins for development (mobile app)
-		...(IS_DEV ? [
-			'http://localhost:8081',
-			'http://localhost:8082',
-			'http://localhost:19006', // Default Expo web port
-		] : [])
+		...(IS_DEV
+			? [
+					'http://localhost:8081',
+					'http://localhost:8082',
+					'http://localhost:19006', // Default Expo web port
+				]
+			: []),
 	]
 
 	if (allowedOrigins.includes(origin || '')) {

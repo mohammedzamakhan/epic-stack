@@ -4,256 +4,273 @@ import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 
 export interface OAuthProvider {
-  name: string
-  displayName: string
-  authorizationEndpoint: string
-  tokenEndpoint: string
-  clientId: string
-  scopes: string[]
-  additionalParameters?: Record<string, string>
+	name: string
+	displayName: string
+	authorizationEndpoint: string
+	tokenEndpoint: string
+	clientId: string
+	scopes: string[]
+	additionalParameters?: Record<string, string>
 }
 
 export interface OAuthResult {
-  success: boolean
-  code?: string
-  state?: string
-  error?: string
-  errorDescription?: string
+	success: boolean
+	code?: string
+	state?: string
+	error?: string
+	errorDescription?: string
 }
 
 export interface OAuthConfig {
-  providers: Record<string, OAuthProvider>
-  redirectUri: string
+	providers: Record<string, OAuthProvider>
+	redirectUri: string
 }
 
 /**
  * OAuth service for handling social authentication flows using Expo AuthSession
  */
 export class OAuthService {
-  private config: OAuthConfig
-  private discovery: Record<string, AuthSession.DiscoveryDocument> = {}
+	private config: OAuthConfig
+	private discovery: Record<string, AuthSession.DiscoveryDocument> = {}
 
-  constructor(config: OAuthConfig) {
-    this.config = config
-  }
+	constructor(config: OAuthConfig) {
+		this.config = config
+	}
 
-  /**
-   * Get the redirect URI for OAuth callbacks
-   */
-  static getRedirectUri(): string {
-    if (Platform.OS === 'web') {
-      return `${window.location.origin}/auth/callback`
-    }
-    
-    // For native apps, use the app scheme
-    const scheme = Constants.expoConfig?.scheme
-    const schemeString = Array.isArray(scheme) ? scheme[0] : scheme || 'epicnotes'
-    
-    return AuthSession.makeRedirectUri({
-      scheme: schemeString,
-      path: 'auth/callback',
-    })
-  }
+	/**
+	 * Get the redirect URI for OAuth callbacks
+	 */
+	static getRedirectUri(): string {
+		if (Platform.OS === 'web') {
+			return `${window.location.origin}/auth/callback`
+		}
 
-  /**
-   * Initialize OAuth provider discovery documents
-   */
-  async initializeProvider(providerName: string): Promise<void> {
-    const provider = this.config.providers[providerName]
-    if (!provider) {
-      throw new Error(`OAuth provider '${providerName}' not configured`)
-    }
+		// For native apps, use the app scheme
+		const scheme = Constants.expoConfig?.scheme
+		const schemeString = Array.isArray(scheme)
+			? scheme[0]
+			: scheme || 'epicnotes'
 
-    if (!this.discovery[providerName]) {
-      this.discovery[providerName] = {
-        authorizationEndpoint: provider.authorizationEndpoint,
-        tokenEndpoint: provider.tokenEndpoint,
-      }
-    }
-  }
+		return AuthSession.makeRedirectUri({
+			scheme: schemeString,
+			path: 'auth/callback',
+		})
+	}
 
-  /**
-   * Start OAuth authentication flow for a provider
-   */
-  async authenticate(providerName: string, state?: string): Promise<OAuthResult> {
-    try {
-      await this.initializeProvider(providerName)
-      
-      const provider = this.config.providers[providerName]
-      const discovery = this.discovery[providerName]
+	/**
+	 * Initialize OAuth provider discovery documents
+	 */
+	async initializeProvider(providerName: string): Promise<void> {
+		const provider = this.config.providers[providerName]
+		if (!provider) {
+			throw new Error(`OAuth provider '${providerName}' not configured`)
+		}
 
-      if (!discovery) {
-        throw new Error(`Provider '${providerName}' not initialized`)
-      }
+		if (!this.discovery[providerName]) {
+			this.discovery[providerName] = {
+				authorizationEndpoint: provider.authorizationEndpoint,
+				tokenEndpoint: provider.tokenEndpoint,
+			}
+		}
+	}
 
-      // Create the authorization request
-      const request = new AuthSession.AuthRequest({
-        clientId: provider.clientId,
-        scopes: provider.scopes,
-        redirectUri: this.config.redirectUri,
-        responseType: AuthSession.ResponseType.Code,
-        state: state || this.generateState(),
-        extraParams: provider.additionalParameters,
-      })
+	/**
+	 * Start OAuth authentication flow for a provider
+	 */
+	async authenticate(
+		providerName: string,
+		state?: string,
+	): Promise<OAuthResult> {
+		try {
+			await this.initializeProvider(providerName)
 
-      // Start the authentication session
-      const result = await request.promptAsync(discovery)
+			const provider = this.config.providers[providerName]
+			const discovery = this.discovery[providerName]
 
-      if (result.type === 'success') {
-        return {
-          success: true,
-          code: result.params.code,
-          state: result.params.state,
-        }
-      } else if (result.type === 'error') {
-        return {
-          success: false,
-          error: result.params.error || 'authentication_failed',
-          errorDescription: result.params.error_description || 'OAuth authentication failed',
-        }
-      } else {
-        // User cancelled or dismissed
-        return {
-          success: false,
-          error: 'user_cancelled',
-          errorDescription: 'User cancelled the authentication flow',
-        }
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: 'oauth_error',
-        errorDescription: error instanceof Error ? error.message : 'Unknown OAuth error',
-      }
-    }
-  }
+			if (!discovery) {
+				throw new Error(`Provider '${providerName}' not initialized`)
+			}
 
-  /**
-   * Handle OAuth callback URL (for deep linking)
-   */
-  async handleCallback(url: string): Promise<OAuthResult> {
-    try {
-      const { queryParams } = Linking.parse(url)
-      
-      if (queryParams?.error) {
-        return {
-          success: false,
-          error: queryParams.error as string,
-          errorDescription: queryParams.error_description as string,
-        }
-      }
+			// Create the authorization request
+			const request = new AuthSession.AuthRequest({
+				clientId: provider.clientId,
+				scopes: provider.scopes,
+				redirectUri: this.config.redirectUri,
+				responseType: AuthSession.ResponseType.Code,
+				state: state || this.generateState(),
+				extraParams: provider.additionalParameters,
+			})
 
-      if (queryParams?.code) {
-        return {
-          success: true,
-          code: queryParams.code as string,
-          state: queryParams.state as string,
-        }
-      }
+			// Start the authentication session
+			const result = await request.promptAsync(discovery)
 
-      return {
-        success: false,
-        error: 'invalid_callback',
-        errorDescription: 'Invalid callback URL parameters',
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: 'callback_error',
-        errorDescription: error instanceof Error ? error.message : 'Callback handling error',
-      }
-    }
-  }
+			if (result.type === 'success') {
+				return {
+					success: true,
+					code: result.params.code,
+					state: result.params.state,
+				}
+			} else if (result.type === 'error') {
+				return {
+					success: false,
+					error: result.params.error || 'authentication_failed',
+					errorDescription:
+						result.params.error_description || 'OAuth authentication failed',
+				}
+			} else {
+				// User cancelled or dismissed
+				return {
+					success: false,
+					error: 'user_cancelled',
+					errorDescription: 'User cancelled the authentication flow',
+				}
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: 'oauth_error',
+				errorDescription:
+					error instanceof Error ? error.message : 'Unknown OAuth error',
+			}
+		}
+	}
 
-  /**
-   * Generate a random state parameter for CSRF protection
-   */
-  private generateState(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15)
-  }
+	/**
+	 * Handle OAuth callback URL (for deep linking)
+	 */
+	async handleCallback(url: string): Promise<OAuthResult> {
+		try {
+			const { queryParams } = Linking.parse(url)
 
-  /**
-   * Get provider configuration
-   */
-  getProvider(name: string): OAuthProvider | undefined {
-    return this.config.providers[name]
-  }
+			if (queryParams?.error) {
+				return {
+					success: false,
+					error: queryParams.error as string,
+					errorDescription: queryParams.error_description as string,
+				}
+			}
 
-  /**
-   * Get all configured provider names
-   */
-  getProviderNames(): string[] {
-    return Object.keys(this.config.providers)
-  }
+			if (queryParams?.code) {
+				return {
+					success: true,
+					code: queryParams.code as string,
+					state: queryParams.state as string,
+				}
+			}
 
-  /**
-   * Check if a provider is configured
-   */
-  isProviderConfigured(name: string): boolean {
-    return name in this.config.providers && !!this.config.providers[name].clientId
-  }
+			return {
+				success: false,
+				error: 'invalid_callback',
+				errorDescription: 'Invalid callback URL parameters',
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: 'callback_error',
+				errorDescription:
+					error instanceof Error ? error.message : 'Callback handling error',
+			}
+		}
+	}
+
+	/**
+	 * Generate a random state parameter for CSRF protection
+	 */
+	private generateState(): string {
+		return (
+			Math.random().toString(36).substring(2, 15) +
+			Math.random().toString(36).substring(2, 15)
+		)
+	}
+
+	/**
+	 * Get provider configuration
+	 */
+	getProvider(name: string): OAuthProvider | undefined {
+		return this.config.providers[name]
+	}
+
+	/**
+	 * Get all configured provider names
+	 */
+	getProviderNames(): string[] {
+		return Object.keys(this.config.providers)
+	}
+
+	/**
+	 * Check if a provider is configured
+	 */
+	isProviderConfigured(name: string): boolean {
+		return (
+			name in this.config.providers && !!this.config.providers[name].clientId
+		)
+	}
 }
 
 /**
  * OAuth provider configurations for supported providers
  */
-export const OAUTH_PROVIDERS: Record<string, Omit<OAuthProvider, 'clientId'>> = {
-  github: {
-    name: 'github',
-    displayName: 'GitHub',
-    authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-    tokenEndpoint: 'https://github.com/login/oauth/access_token',
-    scopes: ['user:email'],
-    additionalParameters: {
-      allow_signup: 'true',
-    },
-  },
-  google: {
-    name: 'google',
-    displayName: 'Google',
-    authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-    tokenEndpoint: 'https://oauth2.googleapis.com/token',
-    scopes: ['openid', 'profile', 'email'],
-    additionalParameters: {
-      access_type: 'offline',
-      prompt: 'consent',
-    },
-  },
+export const OAUTH_PROVIDERS: Record<
+	string,
+	Omit<OAuthProvider, 'clientId'>
+> = {
+	github: {
+		name: 'github',
+		displayName: 'GitHub',
+		authorizationEndpoint: 'https://github.com/login/oauth/authorize',
+		tokenEndpoint: 'https://github.com/login/oauth/access_token',
+		scopes: ['user:email'],
+		additionalParameters: {
+			allow_signup: 'true',
+		},
+	},
+	google: {
+		name: 'google',
+		displayName: 'Google',
+		authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+		tokenEndpoint: 'https://oauth2.googleapis.com/token',
+		scopes: ['openid', 'profile', 'email'],
+		additionalParameters: {
+			access_type: 'offline',
+			prompt: 'consent',
+		},
+	},
 }
 
 /**
  * Create OAuth service with default configuration
  */
 export function createOAuthService(): OAuthService {
-  const redirectUri = OAuthService.getRedirectUri()
-  
-  const providers: Record<string, OAuthProvider> = {}
-  
-  // Configure GitHub if client ID is available
-  const githubClientId = Constants.expoConfig?.extra?.EXPO_PUBLIC_GITHUB_CLIENT_ID || 
-                        process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID
-  if (githubClientId) {
-    providers.github = {
-      ...OAUTH_PROVIDERS.github,
-      clientId: githubClientId,
-    }
-  }
+	const redirectUri = OAuthService.getRedirectUri()
 
-  // Configure Google if client ID is available
-  const googleClientId = Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_CLIENT_ID || 
-                        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID
-  if (googleClientId) {
-    providers.google = {
-      ...OAUTH_PROVIDERS.google,
-      clientId: googleClientId,
-    }
-  }
+	const providers: Record<string, OAuthProvider> = {}
 
-  return new OAuthService({
-    providers,
-    redirectUri,
-  })
+	// Configure GitHub if client ID is available
+	const githubClientId =
+		Constants.expoConfig?.extra?.EXPO_PUBLIC_GITHUB_CLIENT_ID ||
+		process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID
+	if (githubClientId) {
+		providers.github = {
+			...OAUTH_PROVIDERS.github,
+			clientId: githubClientId,
+		}
+	}
+
+	// Configure Google if client ID is available
+	const googleClientId =
+		Constants.expoConfig?.extra?.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+		process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID
+	if (googleClientId) {
+		providers.google = {
+			...OAUTH_PROVIDERS.google,
+			clientId: googleClientId,
+		}
+	}
+
+	return new OAuthService({
+		providers,
+		redirectUri,
+	})
 }
 
 /**

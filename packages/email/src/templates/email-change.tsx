@@ -38,7 +38,8 @@ export default function EmailChangeEmail({
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
 								We need to verify your new email address to complete the change
-								to your Epic Startup account. This helps keep your account secure.
+								to your Epic Startup account. This helps keep your account
+								secure.
 							</Text>
 
 							<Text className="mb-[16px] text-[16px] leading-[24px] text-[#020304]">

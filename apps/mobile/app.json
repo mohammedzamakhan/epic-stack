@@ -1,63 +1,61 @@
 {
-  "expo": {
-    "name": "Epic Stack Mobile",
-    "slug": "epic-stack-mobile",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "scheme": "epicnotes",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.epicstack.mobile"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.epicstack.mobile"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    },
-    "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCanary": true
-    },
-    "linking": {
-      "prefixes": ["epicnotes://", "https://epicnotes.app"],
-      "config": {
-        "screens": {
-          "index": "",
-          "(auth)": {
-            "screens": {
-              "sign-in": "sign-in",
-              "sign-up": "sign-up",
-              "forgot-password": "forgot-password",
-              "verify-email": "verify-email"
-            }
-          },
-          "(dashboard)": {
-            "screens": {
-              "index": "dashboard"
-            }
-          },
-          "auth/callback": "auth/callback"
-        }
-      }
-    }
-  }
+	"expo": {
+		"name": "Epic Stack Mobile",
+		"slug": "epic-stack-mobile",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "light",
+		"newArchEnabled": true,
+		"scheme": "epicnotes",
+		"splash": {
+			"image": "./assets/splash-icon.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.epicstack.mobile"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.epicstack.mobile"
+		},
+		"web": {
+			"favicon": "./assets/favicon.png",
+			"bundler": "metro"
+		},
+		"plugins": ["expo-router"],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCanary": true
+		},
+		"linking": {
+			"prefixes": ["epicnotes://", "https://epicnotes.app"],
+			"config": {
+				"screens": {
+					"index": "",
+					"(auth)": {
+						"screens": {
+							"sign-in": "sign-in",
+							"sign-up": "sign-up",
+							"forgot-password": "forgot-password",
+							"verify-email": "verify-email"
+						}
+					},
+					"(dashboard)": {
+						"screens": {
+							"index": "dashboard"
+						}
+					},
+					"auth/callback": "auth/callback"
+				}
+			}
+		}
+	}
 }

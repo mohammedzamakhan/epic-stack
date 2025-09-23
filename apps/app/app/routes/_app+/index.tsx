@@ -10,7 +10,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	}
 
 	try {
-		const { getUserDefaultOrganization } = await import('#app/utils/organizations.server')
+		const { getUserDefaultOrganization } = await import(
+			'#app/utils/organizations.server'
+		)
 		const defaultOrg = await getUserDefaultOrganization(userId)
 
 		if (defaultOrg?.organization?.slug) {

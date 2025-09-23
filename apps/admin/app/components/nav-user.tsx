@@ -99,7 +99,7 @@ export function NavUser({
 						side={isMobile ? 'bottom' : 'top'}
 						align="start"
 						sideOffset={4}
-					>					
+					>
 						<DropdownMenuSub>
 							<DropdownMenuSubTrigger
 								className="gap-2"

@@ -2,31 +2,31 @@ import { workflow } from '@novu/framework'
 import z from 'zod'
 
 export const noteCommentWorkflow = workflow(
-    'note-comment-workflow',
-    async ({ step, payload }) => {
-        await step.inApp('note-comment-notification', async () => {
-            return {
-                body: `${payload.commenterName} commented on your note "${payload.noteTitle}"`,
-                data: {
-                    noteId: payload.noteId,
-                    commentId: payload.commentId,
-                    organizationSlug: payload.organizationSlug,
-                    type: 'note-comment',
-                },
-                primaryAction: {
-                    label: 'View Comment',
-                    redirect: {
-                        target: '_self',
-                        url: payload.noteUrl
-                    }
-                }
-            }
-        })
+	'note-comment-workflow',
+	async ({ step, payload }) => {
+		await step.inApp('note-comment-notification', async () => {
+			return {
+				body: `${payload.commenterName} commented on your note "${payload.noteTitle}"`,
+				data: {
+					noteId: payload.noteId,
+					commentId: payload.commentId,
+					organizationSlug: payload.organizationSlug,
+					type: 'note-comment',
+				},
+				primaryAction: {
+					label: 'View Comment',
+					redirect: {
+						target: '_self',
+						url: payload.noteUrl,
+					},
+				},
+			}
+		})
 
-        await step.email('note-comment-email', async () => {
-            return {
-                subject: `New comment on your note "${payload.noteTitle}"`,
-                body: `
+		await step.email('note-comment-email', async () => {
+			return {
+				subject: `New comment on your note "${payload.noteTitle}"`,
+				body: `
 					<h2>New comment on your note</h2>
 					<p><strong>${payload.commenterName}</strong> left a comment on your note "<strong>${payload.noteTitle}</strong>".</p>
 					<p><strong>Comment:</strong></p>
@@ -39,18 +39,18 @@ export const noteCommentWorkflow = workflow(
 						</a>
 					</p>
 				`,
-            }
-        })
-    },
-    {
-        payloadSchema: z.object({
-            noteId: z.string(),
-            noteTitle: z.string(),
-            noteUrl: z.string(),
-            commentId: z.string(),
-            commenterName: z.string(),
-            commentContent: z.string(),
-            organizationSlug: z.string(),
-        }),
-    }
+			}
+		})
+	},
+	{
+		payloadSchema: z.object({
+			noteId: z.string(),
+			noteTitle: z.string(),
+			noteUrl: z.string(),
+			commentId: z.string(),
+			commenterName: z.string(),
+			commentContent: z.string(),
+			organizationSlug: z.string(),
+		}),
+	},
 )

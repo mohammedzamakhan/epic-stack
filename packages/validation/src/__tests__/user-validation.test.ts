@@ -11,7 +11,7 @@ describe('UsernameSchema', () => {
 	it('should accept valid usernames', () => {
 		const validUsernames = ['user123', 'test_user', 'USERNAME', 'a_1']
 
-		validUsernames.forEach(username => {
+		validUsernames.forEach((username) => {
 			const result = UsernameSchema.safeParse(username)
 			expect(result.success).toBe(true)
 			if (result.success) {
@@ -30,7 +30,7 @@ describe('UsernameSchema', () => {
 			'user@name', // contains special char
 		]
 
-		invalidUsernames.forEach(username => {
+		invalidUsernames.forEach((username) => {
 			const result = UsernameSchema.safeParse(username)
 			expect(result.success).toBe(false)
 		})
@@ -49,7 +49,7 @@ describe('PasswordSchema', () => {
 	it('should accept valid passwords', () => {
 		const validPasswords = ['password123', 'mySecureP@ss', 'a'.repeat(72)]
 
-		validPasswords.forEach(password => {
+		validPasswords.forEach((password) => {
 			const result = PasswordSchema.safeParse(password)
 			expect(result.success).toBe(true)
 		})
@@ -62,7 +62,7 @@ describe('PasswordSchema', () => {
 			'a'.repeat(73), // too long (over 72 bytes)
 		]
 
-		invalidPasswords.forEach(password => {
+		invalidPasswords.forEach((password) => {
 			const result = PasswordSchema.safeParse(password)
 			expect(result.success).toBe(false)
 		})
@@ -77,7 +77,7 @@ describe('EmailSchema', () => {
 			'user+tag@example.org',
 		]
 
-		validEmails.forEach(email => {
+		validEmails.forEach((email) => {
 			const result = EmailSchema.safeParse(email)
 			expect(result.success).toBe(true)
 			if (result.success) {
@@ -96,7 +96,7 @@ describe('EmailSchema', () => {
 			'a'.repeat(101) + '@example.com', // too long
 		]
 
-		invalidEmails.forEach(email => {
+		invalidEmails.forEach((email) => {
 			const result = EmailSchema.safeParse(email)
 			expect(result.success).toBe(false)
 		})
@@ -115,7 +115,7 @@ describe('NameSchema', () => {
 	it('should accept valid names', () => {
 		const validNames = ['John Doe', 'Jane', 'A'.repeat(40)]
 
-		validNames.forEach(name => {
+		validNames.forEach((name) => {
 			const result = NameSchema.safeParse(name)
 			expect(result.success).toBe(true)
 		})
@@ -128,7 +128,7 @@ describe('NameSchema', () => {
 			'A'.repeat(41), // too long
 		]
 
-		invalidNames.forEach(name => {
+		invalidNames.forEach((name) => {
 			const result = NameSchema.safeParse(name)
 			expect(result.success).toBe(false)
 		})

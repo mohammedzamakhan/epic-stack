@@ -94,7 +94,7 @@ export function FeatureUpdates({
 											animate={{ opacity: 0.5, scale: 0.85, y: -24 }}
 											exit={{ opacity: 0, scale: 0.8, y: -10 }}
 											transition={{ duration: 0.3, ease: 'easeOut' }}
-											className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-muted"
+											className="border-sidebar-border/60 bg-muted absolute inset-0 rounded-md border"
 										/>
 									)}
 									<motion.div
@@ -102,7 +102,7 @@ export function FeatureUpdates({
 										animate={{ opacity: 0.7, scale: 0.92, y: -12 }}
 										exit={{ opacity: 0, scale: 0.88, y: -5 }}
 										transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
-										className="border-sidebar-border/60 absolute inset-0 rounded-md border bg-muted/80"
+										className="border-sidebar-border/60 bg-muted/80 absolute inset-0 rounded-md border"
 									/>
 								</>
 							)}

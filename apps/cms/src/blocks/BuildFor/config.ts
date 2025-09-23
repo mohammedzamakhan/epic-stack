@@ -11,8 +11,8 @@ export const BuildFor: Block = {
       defaultValue: 'Build by developers,',
       required: true,
       admin: {
-        description: 'The main text before the highlighted portion'
-      }
+        description: 'The main text before the highlighted portion',
+      },
     },
     {
       name: 'highlightText',
@@ -21,15 +21,15 @@ export const BuildFor: Block = {
       defaultValue: 'crafted for developers',
       required: true,
       admin: {
-        description: 'The text that will be displayed with gradient colors'
-      }
+        description: 'The text that will be displayed with gradient colors',
+      },
     },
     {
       name: 'rippleSettings',
       type: 'group',
       label: 'Ripple Animation Settings',
       admin: {
-        description: 'Advanced settings for the background ripple effect'
+        description: 'Advanced settings for the background ripple effect',
       },
       fields: [
         {

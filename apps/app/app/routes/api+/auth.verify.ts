@@ -23,7 +23,7 @@ export const VerifySchema = z.object({
 export async function action({ request }: Route.ActionArgs) {
 	try {
 		const formData = await request.formData()
-		
+
 		// Check honeypot
 		try {
 			await checkHoneypot(formData)
@@ -32,34 +32,34 @@ export async function action({ request }: Route.ActionArgs) {
 				{
 					success: false,
 					error: 'spam_detected',
-					message: 'Form submission failed security check'
+					message: 'Form submission failed security check',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
 		// Use the existing validateRequest function from the web app
 		try {
 			const result = await validateRequest(request, formData)
-			
+
 			// If validateRequest returns a redirect (successful verification),
 			// we convert it to a success response for the API
 			if (result instanceof Response && result.status === 302) {
 				const location = result.headers.get('Location')
-				
+
 				// Preserve the session cookie from the redirect
 				const responseData = data({
 					success: true,
 					data: {
 						verified: true,
 						redirectTo: location,
-						message: 'Verification successful'
+						message: 'Verification successful',
 					},
 				})
-				
+
 				return responseData
 			}
-			
+
 			// If it returns data, pass it through
 			return result
 		} catch (error) {
@@ -72,9 +72,9 @@ export async function action({ request }: Route.ActionArgs) {
 						{
 							success: false,
 							error: 'verification_failed',
-							message: 'Verification failed'
+							message: 'Verification failed',
 						},
-						{ status: 400 }
+						{ status: 400 },
 					)
 				}
 			}
@@ -86,20 +86,20 @@ export async function action({ request }: Route.ActionArgs) {
 			{
 				success: false,
 				error: 'internal_error',
-				message: 'An unexpected error occurred. Please try again.'
+				message: 'An unexpected error occurred. Please try again.',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }
 
 export async function loader() {
 	return data(
-		{ 
+		{
 			success: false,
 			error: 'method_not_allowed',
-			message: 'Use POST method for verification'
+			message: 'Use POST method for verification',
 		},
-		{ status: 405 }
+		{ status: 405 },
 	)
 }

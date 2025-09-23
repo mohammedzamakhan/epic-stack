@@ -106,51 +106,60 @@ export const FeatureList: Block = {
       defaultValue: [
         {
           title: 'Authentication & Security',
-          description: 'Complete auth system with social logins, role-based access, and session management built with industry best practices.',
+          description:
+            'Complete auth system with social logins, role-based access, and session management built with industry best practices.',
           image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop',
-          backgroundImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
+          backgroundImage:
+            'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
           testimonial: {
             logo: 'https://cdn.magicui.design/companies/Google.svg',
             logoAlt: 'Google',
             text: 'Secure authentication that just works out of the box',
-            companyName: 'Google'
-          }
+            companyName: 'Google',
+          },
         },
         {
           title: 'Payment Processing',
-          description: 'Stripe integration with subscription management, usage-based billing, and comprehensive invoicing system.',
+          description:
+            'Stripe integration with subscription management, usage-based billing, and comprehensive invoicing system.',
           image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
-          backgroundImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
+          backgroundImage:
+            'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
           testimonial: {
             logo: 'https://cdn.magicui.design/companies/Stripe.svg',
             logoAlt: 'Stripe',
             text: 'Seamless payment processing with enterprise-grade security',
-            companyName: 'Stripe'
-          }
+            companyName: 'Stripe',
+          },
         },
         {
           title: 'Database & API',
-          description: 'Production-ready setup with TypeScript, Prisma ORM, and RESTful APIs with comprehensive documentation.',
+          description:
+            'Production-ready setup with TypeScript, Prisma ORM, and RESTful APIs with comprehensive documentation.',
           image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
-          backgroundImage: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop',
+          backgroundImage:
+            'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop',
           testimonial: {
             logo: 'https://cdn.magicui.design/companies/Microsoft.svg',
             logoAlt: 'Microsoft',
             text: 'Robust database architecture that scales with your business',
-            companyName: 'Microsoft'
-          }
+            companyName: 'Microsoft',
+          },
         },
         {
           title: 'Email & Notifications',
-          description: 'Automated email campaigns, transactional emails, and real-time notifications with multiple provider support.',
-          image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=600&h=400&fit=crop',
-          backgroundImage: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
+          description:
+            'Automated email campaigns, transactional emails, and real-time notifications with multiple provider support.',
+          image:
+            'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=600&h=400&fit=crop',
+          backgroundImage:
+            'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
           testimonial: {
             logo: 'https://cdn.magicui.design/companies/Slack.svg',
             logoAlt: 'Slack',
             text: 'Reliable email delivery and notification system',
-            companyName: 'Slack'
-          }
+            companyName: 'Slack',
+          },
         },
       ],
     },

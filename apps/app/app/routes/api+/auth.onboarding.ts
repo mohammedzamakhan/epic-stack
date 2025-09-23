@@ -6,10 +6,10 @@ import { checkIsCommonPassword, signup } from '#app/utils/auth.server.ts'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
-import { 
-	NameSchema, 
-	PasswordAndConfirmPasswordSchema, 
-	UsernameSchema 
+import {
+	NameSchema,
+	PasswordAndConfirmPasswordSchema,
+	UsernameSchema,
 } from '#app/utils/user-validation.ts'
 import { type Route } from './+types/auth.onboarding.ts'
 
@@ -58,10 +58,10 @@ async function requireOnboardingEmail(request: Request) {
 export async function action({ request }: Route.ActionArgs) {
 	try {
 		const formData = await request.formData()
-		
+
 		// First, try to get email from the form data (mobile app approach)
 		let email: string | undefined = formData.get('email')?.toString()
-		
+
 		// If no email in form data, try to get it from the verification session (web app approach)
 		if (!email) {
 			try {
@@ -71,24 +71,25 @@ export async function action({ request }: Route.ActionArgs) {
 					{
 						success: false,
 						error: 'no_verification_session',
-						message: 'No verification session found. Please start the signup process again.'
+						message:
+							'No verification session found. Please start the signup process again.',
 					},
-					{ status: 400 }
+					{ status: 400 },
 				)
 			}
 		}
-		
+
 		if (!email) {
 			return data(
 				{
 					success: false,
 					error: 'no_email',
-					message: 'Email is required for account creation.'
+					message: 'Email is required for account creation.',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
-		
+
 		// Check honeypot
 		try {
 			await checkHoneypot(formData)
@@ -97,9 +98,9 @@ export async function action({ request }: Route.ActionArgs) {
 				{
 					success: false,
 					error: 'spam_detected',
-					message: 'Form submission failed security check'
+					message: 'Form submission failed security check',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -124,7 +125,8 @@ export async function action({ request }: Route.ActionArgs) {
 						ctx.addIssue({
 							path: ['password'],
 							code: z.ZodIssueCode.custom,
-							message: 'This password is commonly used and not secure. Please choose a different password.',
+							message:
+								'This password is commonly used and not secure. Please choose a different password.',
 						})
 						return
 					}
@@ -135,13 +137,13 @@ export async function action({ request }: Route.ActionArgs) {
 
 		if (submission.status !== 'success') {
 			return data(
-				{ 
+				{
 					success: false,
 					error: 'validation_failed',
 					message: 'Validation failed',
-					issues: submission.status === 'error' ? submission.error : undefined
+					issues: submission.status === 'error' ? submission.error : undefined,
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
@@ -172,26 +174,26 @@ export async function action({ request }: Route.ActionArgs) {
 
 		if (!user) {
 			return data(
-				{ 
+				{
 					success: false,
 					error: 'user_not_found',
-					message: 'User not found after creation'
+					message: 'User not found after creation',
 				},
-				{ status: 400 }
+				{ status: 400 },
 			)
 		}
 
 		// Create JWT tokens for mobile authentication
 		const userAgent = request.headers.get('user-agent') ?? undefined
 		const ip = request.headers.get('x-forwarded-for') ?? undefined
-		
+
 		const tokens = await createTokenPair(
 			{
 				id: user.id,
 				email: user.email,
 				username: user.username,
 			},
-			{ userAgent, ip }
+			{ userAgent, ip },
 		)
 
 		return data({
@@ -219,20 +221,20 @@ export async function action({ request }: Route.ActionArgs) {
 			{
 				success: false,
 				error: 'internal_error',
-				message: 'An unexpected error occurred. Please try again.'
+				message: 'An unexpected error occurred. Please try again.',
 			},
-			{ status: 500 }
+			{ status: 500 },
 		)
 	}
 }
 
 export async function loader() {
 	return data(
-		{ 
+		{
 			success: false,
 			error: 'method_not_allowed',
-			message: 'Use POST method for onboarding'
+			message: 'Use POST method for onboarding',
 		},
-		{ status: 405 }
+		{ status: 405 },
 	)
 }

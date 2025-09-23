@@ -27,7 +27,9 @@ export default function SignupEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Welcome to Epic Startup - Get started with your account</Preview>
+				<Preview>
+					Welcome to Epic Startup - Get started with your account
+				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}

@@ -100,7 +100,8 @@ export const Testimonials: Block = {
       ],
       defaultValue: [
         {
-          quote: 'I was going to build my own authentication system using blockchain, AI, and quantum computing... then I discovered this and saved 3 years of my life.',
+          quote:
+            'I was going to build my own authentication system using blockchain, AI, and quantum computing... then I discovered this and saved 3 years of my life.',
           authorName: 'Captain Deploy',
           authorTitle: 'Chief Meme Officer',
           authorCompany: 'Deploy or Die Inc.',
@@ -108,7 +109,8 @@ export const Testimonials: Block = {
           variant: 'vercel',
         },
         {
-          quote: 'The integrations are incredible. We connected all our tools in minutes instead of spending weeks building custom solutions.',
+          quote:
+            'The integrations are incredible. We connected all our tools in minutes instead of spending weeks building custom solutions.',
           authorName: 'Bugs Bunyan',
           authorTitle: 'Lead Developer',
           authorCompany: 'Log Overflow',
@@ -124,7 +126,7 @@ export const Testimonials: Block = {
           variant: 'default',
         },
         {
-          quote: 'The TypeScript setup is so good, it caught errors I hadn\'t even made yet...',
+          quote: "The TypeScript setup is so good, it caught errors I hadn't even made yet...",
           authorName: 'Null Pointer',
           authorTitle: 'Duck Whisperer',
           authorCompany: 'Try-Catch Paradise',
@@ -132,7 +134,8 @@ export const Testimonials: Block = {
           variant: 'default',
         },
         {
-          quote: 'Implementing auth used to take longer than explaining why I still use PHP. Not anymore! Well, at least the auth part.',
+          quote:
+            'Implementing auth used to take longer than explaining why I still use PHP. Not anymore! Well, at least the auth part.',
           authorName: 'Legacy Larry',
           authorTitle: 'Time Optimization Specialist',
           authorCompany: '404 Found',
@@ -140,7 +143,8 @@ export const Testimonials: Block = {
           variant: 'stripe',
         },
         {
-          quote: 'Our sprint planning used to be "Fix auth bugs" every week. Now we actually build features! What a concept!',
+          quote:
+            'Our sprint planning used to be "Fix auth bugs" every week. Now we actually build features! What a concept!',
           authorName: 'Agile Gandalf',
           authorTitle: 'Sprint Survivor',
           authorCompany: 'You Shall Not Crash',
