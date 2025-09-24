@@ -236,8 +236,6 @@ export {
 	SidebarSeparator,
 	SidebarTrigger,
 	useSidebar,
-	sidebarMenuButtonVariants,
-	type SidebarPersistenceCallbacks,
 } from './components/sidebar'
 
 // Icon system

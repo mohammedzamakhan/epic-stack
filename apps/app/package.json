@@ -3,7 +3,7 @@
   "private": true,
   "sideEffects": false,
   "license": "MIT",
-  "author": "Kent C. Dodds <me@kentcdodds.com> (https://kentcdodds.com/)",
+  "author": "Zama Khan Mohammed <mohammed.zama.khan@gmail.com>",
   "type": "module",
   "imports": {
     "#app/*": "./app/*",

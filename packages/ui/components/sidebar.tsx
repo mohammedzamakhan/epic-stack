@@ -1,6 +1,7 @@
-import { Slot } from '@radix-ui/react-slot'
-import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
+import { Slot } from '@radix-ui/react-slot'
+import { cva, VariantProps } from 'class-variance-authority'
+import { PanelLeftIcon } from 'lucide-react'
 
 import { Button } from './button'
 import { Input } from './input'
@@ -20,31 +21,21 @@ import {
 	TooltipTrigger,
 } from './tooltip'
 import { cn } from '../utils/cn'
-import { Icon } from './icon'
+import { useIsMobile } from '../utils/use-mobile'
 
 const SIDEBAR_WIDTH = '16rem'
 const SIDEBAR_WIDTH_MOBILE = '18rem'
 const SIDEBAR_WIDTH_ICON = '3rem'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
 
-// Icon dependency injection interface
-interface SidebarIconProps {
-	name: string
-	className?: string
-}
-
-interface SidebarPersistenceCallbacks {
-	onOpenChange?: (isCollapsed: boolean) => void
-}
-
 type SidebarContextProps = {
 	state: 'expanded' | 'collapsed'
 	open: boolean
-	toggleSidebar: () => void
-	setOpen: (value: boolean | ((value: boolean) => boolean)) => void
-	isMobile: boolean
+	setOpen: (open: boolean) => void
 	openMobile: boolean
-	setOpenMobile: (value: boolean | ((value: boolean) => boolean)) => void
+	setOpenMobile: (open: boolean) => void
+	isMobile: boolean
+	toggleSidebar: () => void
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -60,71 +51,40 @@ function useSidebar() {
 
 function SidebarProvider({
 	defaultOpen = true,
-	open: openProp = defaultOpen,
+	open: openProp,
 	onOpenChange: setOpenProp,
 	className,
 	style,
 	children,
-	isMobile = false,
-	persistenceCallbacks,
 	...props
 }: React.ComponentProps<'div'> & {
 	defaultOpen?: boolean
 	open?: boolean
 	onOpenChange?: (open: boolean) => void
-	isMobile?: boolean
-	persistenceCallbacks?: SidebarPersistenceCallbacks
 }) {
+	const isMobile = useIsMobile()
 	const [openMobile, setOpenMobile] = React.useState(false)
 
-	// Track if we're in the middle of an optimistic update
-	const isOptimistic = React.useRef(false)
-
-	// Use local state for optimistic updates
-	const [optimisticOpen, setOptimisticOpen] = React.useState(openProp)
-
-	// Sync local state with props when they change
-	React.useEffect(() => {
-		// Only update from props if we're not in the middle of an optimistic update
-		if (!isOptimistic.current) {
-			setOptimisticOpen(openProp)
-		}
-	}, [openProp])
-
+	// This is the internal state of the sidebar.
+	// We use openProp and setOpenProp for control from outside the component.
+	const [_open, _setOpen] = React.useState(defaultOpen)
+	const open = openProp ?? _open
 	const setOpen = React.useCallback(
 		(value: boolean | ((value: boolean) => boolean)) => {
-			const newOpenState =
-				typeof value === 'function' ? value(optimisticOpen) : value
-
-			// Optimistically update the UI
-			isOptimistic.current = true
-			setOptimisticOpen(newOpenState)
-
+			const openState = typeof value === 'function' ? value(open) : value
 			if (setOpenProp) {
-				setOpenProp(newOpenState)
+				setOpenProp(openState)
+			} else {
+				_setOpen(openState)
 			}
-
-			// Call the persistence callback if provided
-			if (persistenceCallbacks?.onOpenChange) {
-				persistenceCallbacks.onOpenChange(!newOpenState)
-			}
-
-			// Reset optimistic flag after a delay
-			setTimeout(() => {
-				isOptimistic.current = false
-			}, 300)
 		},
-		[setOpenProp, optimisticOpen, persistenceCallbacks],
+		[setOpenProp, open],
 	)
 
 	// Helper to toggle the sidebar.
 	const toggleSidebar = React.useCallback(() => {
-		if (isMobile) {
-			setOpenMobile((open) => !open)
-		} else {
-			setOpen((open) => !open)
-		}
-	}, [setOpen, setOpenMobile, isMobile])
+		return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
+	}, [isMobile, setOpen, setOpenMobile])
 
 	// Adds a keyboard shortcut to toggle the sidebar.
 	React.useEffect(() => {
@@ -137,24 +97,26 @@ function SidebarProvider({
 				toggleSidebar()
 			}
 		}
+
 		window.addEventListener('keydown', handleKeyDown)
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [toggleSidebar])
 
-	// Determine the display state - use optimistic state when loading, otherwise use prop
-	const displayOpen = isOptimistic.current ? optimisticOpen : openProp
+	// We add a state so that we can do data-state="expanded" or "collapsed".
+	// This makes it easier to style the sidebar with Tailwind classes.
+	const state = open ? 'expanded' : 'collapsed'
 
 	const contextValue = React.useMemo<SidebarContextProps>(
 		() => ({
-			state: displayOpen ? 'expanded' : 'collapsed',
-			open: displayOpen,
+			state,
+			open,
 			setOpen,
 			isMobile,
 			openMobile,
 			setOpenMobile,
 			toggleSidebar,
 		}),
-		[displayOpen, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
 	)
 
 	return (
@@ -304,7 +266,7 @@ function SidebarTrigger({
 			}}
 			{...props}
 		>
-			<Icon name="panel-left" className="size-5" />
+			<PanelLeftIcon />
 			<span className="sr-only">Toggle Sidebar</span>
 		</Button>
 	)
@@ -341,7 +303,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
 			data-slot="sidebar-inset"
 			className={cn(
 				'bg-background relative flex w-full flex-1 flex-col',
-				'ring-border ring-1 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
+				'md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
 				className,
 			)}
 			{...props}
@@ -540,7 +502,7 @@ function SidebarMenuButton({
 	tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
 	const Comp = asChild ? Slot : 'button'
-	const { state } = useSidebar()
+	const { isMobile, state, toggleSidebar } = useSidebar()
 
 	const button = (
 		<Comp
@@ -549,6 +511,9 @@ function SidebarMenuButton({
 			data-size={size}
 			data-active={isActive}
 			className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+			onClick={() => {
+				isMobile && toggleSidebar()
+			}}
 			{...props}
 		/>
 	)
@@ -569,7 +534,7 @@ function SidebarMenuButton({
 			<TooltipContent
 				side="right"
 				align="center"
-				hidden={state !== 'collapsed'}
+				hidden={state !== 'collapsed' || isMobile}
 				{...tooltip}
 			/>
 		</Tooltip>
@@ -709,6 +674,7 @@ function SidebarMenuSubButton({
 	isActive?: boolean
 }) {
 	const Comp = asChild ? Slot : 'a'
+	const { isMobile, toggleSidebar } = useSidebar()
 
 	return (
 		<Comp
@@ -724,6 +690,9 @@ function SidebarMenuSubButton({
 				'group-data-[collapsible=icon]:hidden',
 				className,
 			)}
+			onClick={() => {
+				isMobile && toggleSidebar()
+			}}
 			{...props}
 		/>
 	)
@@ -754,6 +723,4 @@ export {
 	SidebarSeparator,
 	SidebarTrigger,
 	useSidebar,
-	sidebarMenuButtonVariants,
-	type SidebarPersistenceCallbacks,
 }

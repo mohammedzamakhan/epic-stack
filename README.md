@@ -6,7 +6,7 @@
   <p>
     This is an opinionated project starter and reference that allows teams to
     ship their ideas to production faster and on a more stable foundation based
-    on the experience of <a href="https://kentcdodds.com">Kent C. Dodds</a> and
+    on the experience of <a href="https://kentcdodds.com">Zama Khan Mohammed</a> and
     <a href="https://github.com/epicweb-dev/epic-stack/graphs/contributors">contributors</a>.
   </p>
 </div>
@@ -25,7 +25,7 @@ npx epicli
 
 [![Epic Stack Talk slide showing Flynn Rider with knives, the text "I've been around and I've got opinions" and Kent speaking in the corner](https://github-production-user-asset-6210df.s3.amazonaws.com/1500684/277818553-47158e68-4efc-43ae-a477-9d1670d4217d.png)](https://www.epicweb.dev/talks/the-epic-stack)
 
-["The Epic Stack" by Kent C. Dodds](https://www.epicweb.dev/talks/the-epic-stack)
+["The Epic Stack" by Zama Khan Mohammed](https://www.epicweb.dev/talks/the-epic-stack)
 
 ## Docs
 
