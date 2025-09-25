@@ -77,7 +77,7 @@ export function OnboardingChecklist({
 	if (variant === 'sidebar') {
 		return (
 			<div
-				className={`group bg-background relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 ${className}`}
+				className={`group bg-background relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 group-data-[collapsible=icon]:hidden ${className}`}
 				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
 				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
 			>

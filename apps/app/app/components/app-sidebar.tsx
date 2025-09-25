@@ -47,7 +47,7 @@ function UpgradeAccountCard({
 	if (!trialStatus.isActive || trialStatus.daysRemaining < 0) return null
 
 	return (
-		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 border p-2">
+		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 border p-2 group-data-[collapsible=icon]:hidden">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
 					There are{' '}
@@ -384,7 +384,7 @@ export function AppSidebar({
 			}
 
 	return (
-		<Sidebar collapsible="offcanvas" {...props} className="overflow-hidden">
+		<Sidebar collapsible="icon" {...props} className="overflow-hidden">
 			<FeedbackModal
 				isOpen={isFeedbackModalOpen}
 				onOpenChange={setIsFeedbackModalOpen}

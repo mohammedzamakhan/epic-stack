@@ -53,7 +53,7 @@ export function TeamSwitcher() {
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="group bg-background relative h-14 rounded-xl border px-3 py-2 transition-all duration-200"
+							className="group bg-background relative h-14 rounded-xl border px-3 py-2 transition-all duration-200 group-data-[collapsible=icon]:ml-2"
 						>
 							<div className="relative flex w-full items-center gap-3">
 								{/* Enhanced Avatar Container */}
