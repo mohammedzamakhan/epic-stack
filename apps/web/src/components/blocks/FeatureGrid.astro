@@ -97,54 +97,56 @@ const {
 } = Astro.props
 ---
 
-<section class="relative w-full py-16 md:py-24">
-	<GridDesign />
-	<div class="container relative mx-auto px-4 md:px-6">
-		<!-- Header -->
-		<div class="text-center mb-12">
-			<Badge variant="outline" size="sm">
-				// {subtitle.toUpperCase()}
-			</Badge>
-			<h2 class="text-4xl md:text-6xl text-primary my-4">
-				{title}
-			</h2>
-		</div>
+<div class="dark">
+	<section class="bg-background text-foreground relative w-full py-16 md:py-24">
+		<GridDesign />
+		<div class="container relative mx-auto px-4 md:px-6">
+			<!-- Header -->
+			<div class="text-center mb-12">
+				<Badge variant="outline" size="sm">
+					// {subtitle.toUpperCase()}
+				</Badge>
+				<h2 class="text-4xl md:text-6xl tracking-tight font-title">
+					{title}
+				</h2>
+			</div>
 
-		<!-- Feature Grid -->
-		<div
-			class="grid grid-cols-2 lg:grid-cols-4 border-l border-t border-dashed gap-0 mx-auto"
-		>
-			{
-				features.map((feature, index) => {
-					// Determine if this is in the first row (top 4) or second row (bottom 4)
-					const isFirstRow = index < 4
-					const isLastInRow = (index + 1) % 4 === 0
-					const isFirstInRow = index % 4 === 0
+			<!-- Feature Grid -->
+			<div
+				class="grid grid-cols-2 lg:grid-cols-4 border-l border-t border-dashed gap-0 mx-auto"
+			>
+				{
+					features.map((feature, index) => {
+						// Determine if this is in the first row (top 4) or second row (bottom 4)
+						const isFirstRow = index < 4
+						const isLastInRow = (index + 1) % 4 === 0
+						const isFirstInRow = index % 4 === 0
 
-					return (
-						<div
-							class={`flex flex-col py-10 relative group/feature border-b border-r border-dashed bg-background hover:bg-gradient-to-b from-muted/5 to-muted/50 transition-colors ${
-								isFirstRow ? 'lg:border-b' : ''
-							} ${isFirstInRow ? 'lg:border-l' : ''}`}
-						>
-							<div class="mb-4 relative z-10 px-10 text-muted-foreground">
-								<div set:html={feature.icon} />
+						return (
+							<div
+								class={`flex flex-col py-10 relative group/feature border-b border-r border-dashed bg-background hover:bg-gradient-to-b from-muted/5 to-muted/50 transition-colors ${
+									isFirstRow ? 'lg:border-b' : ''
+								} ${isFirstInRow ? 'lg:border-l' : ''}`}
+							>
+								<div class="mb-4 relative z-10 px-4 text-muted-foreground">
+									<div set:html={feature.icon} />
+								</div>
+
+								<div class="text-lg font-semibold mb-2 relative z-10 px-4">
+									<div class="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-muted group-hover/feature:bg-primary transition-all duration-200 origin-center" />
+									<span class="group-hover/feature:translate-x-2 transition duration-200 inline-block text-primary font-title">
+										{feature.title}
+									</span>
+								</div>
+
+								<p class="text-sm text-muted-foreground max-w-xs relative z-10 px-10 pl-4">
+									{feature.description}
+								</p>
 							</div>
-
-							<div class="text-lg font-semibold mb-2 relative z-10 px-10">
-								<div class="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-muted group-hover/feature:bg-primary transition-all duration-200 origin-center" />
-								<span class="group-hover/feature:translate-x-2 transition duration-200 inline-block text-primary">
-									{feature.title}
-								</span>
-							</div>
-
-							<p class="text-sm text-muted-foreground max-w-xs relative z-10 px-10 pl-4">
-								{feature.description}
-							</p>
-						</div>
-					)
-				})
-			}
+						)
+					})
+				}
+			</div>
 		</div>
-	</div>
-</section>
+	</section>
+</div>

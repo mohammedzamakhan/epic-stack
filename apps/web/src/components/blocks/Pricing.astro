@@ -1,5 +1,6 @@
 ---
 import GridDesign from '../GridDesign.astro'
+import Button from '../ui/Button.astro'
 
 interface Feature {
 	name: string
@@ -118,7 +119,7 @@ const yearlyDiscount = plans.length
 			<h3 class="font-mono text-sm uppercase tracking-wide text-muted-foreground mb-6">
 				// PRICING PLANS
 			</h3>
-			<h2 class="text-4xl md:text-6xl tracking-tighter text-primary mb-4">
+			<h2 class="text-4xl md:text-6xl tracking-tight font-title mb-4">
 				{title}
 			</h2>
 			<p class="text-xl text-muted-foreground max-w-[600px] mx-auto">
@@ -128,16 +129,16 @@ const yearlyDiscount = plans.length
 
 		<!-- Pricing Toggle -->
 		<div class="flex flex-col justify-center items-center mb-12">
-			<div class="inline-flex items-center justify-center bg-muted p-0.5 text-muted-foreground border border-dashed border-border" id="pricing-toggle">
+			<div class="inline-flex items-center justify-center bg-muted p-0.5 text-muted-foreground border border-dashed border-border rounded-full" id="pricing-toggle">
 				<button 
-					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground hover:text-accent-foreground border border-border" 
+					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground hover:text-accent-foreground border border-border rounded-full" 
 					data-period="monthly"
 					id="monthly-btn"
 				>
 					Monthly
 				</button>
 				<button 
-					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground hover:text-accent-foreground" 
+					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground hover:text-accent-foreground rounded-full" 
 					data-period="yearly"
 					id="yearly-btn"
 				>
@@ -221,16 +222,14 @@ const yearlyDiscount = plans.length
 
 					<!-- CTA Button -->
 					<div class="p-6 pt-0">
-						<a
+						<Button
 							href={`#plan-${plan.id}`}
-							class={`w-full inline-flex items-center justify-center font-medium text-sm py-3 px-6 transition-colors ${
-								plan.highlight
-									? 'bg-primary text-primary-foreground hover:bg-primary/90'
-									: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border'
-							}`}
+							variant={plan.highlight ? 'primary' : 'secondary'}
+							size="md"
+							class="w-full"
 						>
 							{plan.buttonText}
-						</a>
+						</Button>
 					</div>
 				</div>
 			))}
@@ -246,12 +245,14 @@ const yearlyDiscount = plans.length
 					<p class="text-lg font-medium text-card-foreground text-left w-full my-auto">
 						{footerText}
 					</p>
-					<a
+					<Button
 						href="#apply"
-						class="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 py-2 transition-colors font-medium text-sm whitespace-nowrap"
+						variant="secondary"
+						size="sm"
+						class="whitespace-nowrap"
 					>
 						{footerButtonText}
-					</a>
+					</Button>
 				</div>
 			</div>
 		)}

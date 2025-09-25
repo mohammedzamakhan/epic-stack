@@ -59,12 +59,12 @@ const renderLexicalContent = (content: any) => {
         const tag = node.tag || 'h2'
         const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
         const headingClasses = {
-          h1: 'text-4xl md:text-5xl font-semibold mb-8 text-foreground scroll-mt-24 relative',
-          h2: 'text-3xl md:text-4xl font-semibold mb-6 text-foreground scroll-mt-24 relative',
-          h3: 'text-2xl md:text-3xl font-medium mb-4 text-foreground scroll-mt-24 relative',
-          h4: 'text-xl md:text-2xl font-medium mb-4 text-foreground scroll-mt-24 relative',
-          h5: 'text-lg md:text-xl font-semibold mb-3 text-foreground scroll-mt-24 relative',
-          h6: 'text-base md:text-lg font-semibold mb-3 text-foreground scroll-mt-24 relative',
+          h1: 'text-4xl md:text-5xl font-title font-semibold mb-8 text-foreground scroll-mt-24 relative',
+          h2: 'text-3xl md:text-4xl font-title font-semibold mb-6 text-foreground scroll-mt-24 relative',
+          h3: 'text-2xl md:text-3xl font-title font-medium mb-4 text-foreground scroll-mt-24 relative',
+          h4: 'text-xl md:text-2xl font-title font-medium mb-4 text-foreground scroll-mt-24 relative',
+          h5: 'text-lg md:text-xl font-title font-semibold mb-3 text-foreground scroll-mt-24 relative',
+          h6: 'text-base md:text-lg font-title font-semibold mb-3 text-foreground scroll-mt-24 relative',
         }
         const className = headingClasses[tag as keyof typeof headingClasses] || headingClasses.h2
         return `<${tag} id="${id}" class="${className}"><strong>${text}</strong><a aria-hidden="true" class="absolute top-0 left-0 w-full h-full" href="#${id}"></a></${tag}>`
@@ -153,7 +153,7 @@ const tableOfContents = generateTableOfContents(content)
       </div>
       
       <div class="relative z-20 w-full">
-        <h1 class="font-sans text-4xl md:text-6xl font-semibold pb-1 pt-1 md:pt-0 translate-y-[-1px] z-30 !text-balance md:max-w-[770px] md:!max-w-none">
+        <h1 class="font-title text-4xl md:text-6xl font-semibold pb-1 pt-1 md:pt-0 translate-y-[-1px] z-30 !text-balance md:max-w-[770px] md:!max-w-none">
           {title}
         </h1>
       </div>
@@ -200,7 +200,7 @@ const tableOfContents = generateTableOfContents(content)
               <ul class="flex flex-col overflow-y-auto min-h-[auto] flex-1">
                 {tableOfContents.map((item: { id: string; text: string; level: number }, index: number) => (
                   <li class="transition-all duration-200 relative pl-1 before:absolute before:bg-border before:w-[4px] before:h-full before:left-0 before:top-0 after:absolute after:bg-primary after:w-[4px] after:h-0 after:top-0 after:left-0 after:transition-all after:duration-100 bg-background hover:bg-muted text-muted-foreground hover:text-foreground">
-                    <a class="block p-2 overflow-hidden font-mono font-normal leading-none text-sm font-semibold" href={`#${item.id}`}>
+                    <a class="block p-2 overflow-hidden font-mono font-normal leading-none text-sm" href={`#${item.id}`}>
                       {item.text}
                     </a>
                   </li>

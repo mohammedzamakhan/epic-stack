@@ -1,5 +1,6 @@
 ---
 import GridDesign from '../GridDesign.astro'
+import Button from '../ui/Button.astro'
 
 interface Tab {
 	title: string
@@ -69,14 +70,14 @@ const {
 			<!-- Left Content -->
 			<div class="flex flex-col">
 				<!-- Header -->
-				<div class="mb-8">
+				<div class="mb-8 px-4">
 					<div class="mb-4">
 						<span class="font-mono text-sm uppercase tracking-wide text-muted-foreground">
 							// {subtitle}
 						</span>
 					</div>
 					<div class="mb-6">
-						<h2 class="text-4xl md:text-5xl text-primary font-light leading-tight">
+						<h2 class="text-4xl md:text-6xl tracking-tight font-title">
 							{title}
 						</h2>
 					</div>
@@ -116,15 +117,18 @@ const {
 
 				<!-- Action Buttons -->
 				<div class="flex flex-wrap items-center gap-4">
-					<a 
+					<Button 
 						href={buttonUrl}
-						class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border border-primary"
+						variant="primary"
+						size="md"
 					>
 						{buttonText}
-					</a>
-					<a 
+					</Button>
+					<Button 
 						href={secondaryButtonUrl}
-						class="inline-flex items-center gap-2 px-6 py-3 text-primary hover:text-primary/80 transition-colors group"
+						variant="ghost"
+						size="md"
+						class="group"
 					>
 						<span>{secondaryButtonText}</span>
 						<svg 
@@ -135,11 +139,11 @@ const {
 							fill="none" 
 							stroke="currentColor" 
 							stroke-width="1.5"
-							class="group-hover:translate-x-1 transition-transform duration-200"
+							class="ml-2 group-hover:translate-x-1 transition-transform duration-200"
 						>
 							<path d="M6 3L11 8L6 13" />
 						</svg>
-					</a>
+					</Button>
 				</div>
 			</div>
 

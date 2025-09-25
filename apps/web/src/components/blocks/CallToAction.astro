@@ -1,4 +1,6 @@
 ---
+import Button from '../ui/Button.astro'
+
 interface Props {
   richText?: any
   links?: any[]
@@ -39,12 +41,13 @@ const renderLexicalContent = (content: any) => {
     {links && links.length > 0 && (
       <div class="flex flex-wrap justify-center gap-4">
         {links.map((link) => (
-          <a 
+          <Button 
             href={link.url || '#'}
-            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+            variant="primary"
+            size="md"
           >
             {link.label}
-          </a>
+          </Button>
         ))}
       </div>
     )}

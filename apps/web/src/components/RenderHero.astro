@@ -1,6 +1,7 @@
 ---
 import GridDesign from './GridDesign.astro'
 import Badge from './ui/Badge.astro'
+import Button from './ui/Button.astro'
 
 const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
 
@@ -33,7 +34,7 @@ const renderLexicalContent = (content: any) => {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				return `<h1 class="text-6xl tracking-tight">${text}</h1>`
+				return `<h1 class="text-4xl md:text-6xl tracking-tight font-title">${text}</h1>`
 			}
 			return ''
 		})
@@ -70,19 +71,21 @@ const renderLexicalContent = (content: any) => {
 							<>
 								{links && links.length > 0 && (
 									<>
-										<a
+										<Button
 											href={links[0]?.url || '#'}
-											class="inline-flex items-center justify-center bg-primary text-primary-foreground font-medium text-base py-3 px-6 transition-colors hover:bg-primary/90 rounded-full"
+											variant="primary"
+											size="md"
 										>
 											{links[0]?.link?.label || 'Get started'}
-										</a>
+										</Button>
 										{links[1] && (
-											<a
+											<Button
 												href={links[1]?.url || '#'}
-												class="inline-flex items-center justify-center border border-input bg-background text-foreground font-medium text-base py-3 px-6 transition-colors hover:bg-accent hover:text-accent-foreground rounded-full"
+												variant="outline"
+												size="md"
 											>
 												{links[1]?.link?.label || 'Learn more'}
-											</a>
+											</Button>
 										)}
 									</>
 								)}

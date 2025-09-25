@@ -1,5 +1,6 @@
 ---
 import GridDesign from '../GridDesign.astro'
+import Button from '../ui/Button.astro'
 
 interface Card {
 	tagline: string
@@ -82,7 +83,7 @@ const {
 					</span>
 				</div>
 				<div class="mb-6">
-					<h2 class="text-4xl md:text-6xl text-primary font-light leading-tight">
+					<h2 class="text-4xl md:text-6xl tracking-tight font-title">
 						{title}
 					</h2>
 				</div>
@@ -108,7 +109,7 @@ const {
 										</span>
 									</div>
 									<div class="mb-6">
-										<h3 class="text-2xl md:text-3xl lg:text-4xl text-primary font-light leading-tight">
+										<h3 class="text-4xl tracking-tight font-title">
 											{card.title}
 										</h3>
 									</div>
@@ -118,15 +119,18 @@ const {
 									
 									<!-- Action Buttons -->
 									<div class="flex flex-wrap items-center gap-4">
-										<a 
+										<Button 
 											href={card.primaryButtonUrl}
-											class="inline-flex items-center px-6 py-3 bg-transparent border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+											variant="outline"
+											size="md"
 										>
 											{card.primaryButtonText}
-										</a>
-										<a 
+										</Button>
+										<Button 
 											href={card.secondaryButtonUrl}
-											class="inline-flex items-center gap-2 px-6 py-3 text-primary hover:text-primary/80 transition-colors group"
+											variant="ghost"
+											size="md"
+											class="group"
 										>
 											<span>{card.secondaryButtonText}</span>
 											<svg 
@@ -137,11 +141,11 @@ const {
 												fill="none" 
 												stroke="currentColor" 
 												stroke-width="1.5"
-												class="group-hover:translate-x-1 transition-transform duration-200"
+												class="ml-2 group-hover:translate-x-1 transition-transform duration-200"
 											>
 												<path d="M6 3L11 8L6 13" />
 											</svg>
-										</a>
+										</Button>
 									</div>
 								</div>
 							</div>
