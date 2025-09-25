@@ -15,6 +15,7 @@ import {
 import { prisma } from '#app/utils/db.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
+import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import {
@@ -237,6 +238,15 @@ export async function action({ request }: Route.ActionArgs) {
 						organizationRoleId: memberRole.id, // Use proper organization role
 					})),
 				})
+
+				// Update seat quantity for billing for each organization
+				for (const org of organizationsWithMatchingDomain) {
+					try {
+						await updateSeatQuantity(org.id)
+					} catch (error) {
+						console.error(`Failed to update seat quantity for organization ${org.id} after domain-based auto-join:`, error)
+					}
+				}
 
 				const orgNames = organizationsWithMatchingDomain
 					.map((org) => org.name)

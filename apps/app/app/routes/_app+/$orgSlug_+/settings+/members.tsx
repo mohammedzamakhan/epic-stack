@@ -28,6 +28,7 @@ import {
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization-permissions.server'
+import { updateSeatQuantity } from '#app/utils/payments.server'
 import { type OrganizationRoleName } from '#app/utils/organizations.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -263,6 +264,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					active: false,
 				},
 			})
+
+			// Update seat quantity for billing
+			try {
+				await updateSeatQuantity(organization.id)
+			} catch (error) {
+				console.error('Failed to update seat quantity after removing user:', error)
+			}
+
 			return Response.json({ success: true })
 		} catch (error) {
 			console.error('Error removing member:', error)

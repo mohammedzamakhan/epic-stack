@@ -32,6 +32,7 @@ import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
 import { encrypt } from '#app/utils/encryption.server'
 import { markStepCompleted } from '#app/utils/onboarding'
+import { updateSeatQuantity } from '#app/utils/payments.server'
 import {
 	uploadOrganizationImage,
 	testS3Connection,
@@ -367,6 +368,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				console.log(
 					`Auto-added ${usersWithMatchingDomain.length} users to organization ${organization.name} based on verified domain ${verifiedDomain}`,
 				)
+
+				// Update seat quantity for billing if users were added
+				if (usersWithMatchingDomain.length > 0) {
+					try {
+						await updateSeatQuantity(organization.id)
+					} catch (error) {
+						console.error('Failed to update seat quantity after domain-based auto-add:', error)
+					}
+				}
 			})
 
 			return redirectWithToast(`/${organization.slug}/settings`, {

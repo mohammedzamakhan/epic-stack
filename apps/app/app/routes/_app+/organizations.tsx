@@ -21,6 +21,7 @@ import {
 
 import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
+import { updateSeatQuantity } from '#app/utils/payments.server'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
@@ -121,6 +122,13 @@ export async function action({ request }: ActionFunctionArgs) {
 						active: true,
 					},
 				})
+
+				// Update seat quantity for billing
+				try {
+					await updateSeatQuantity(invitation.organizationId)
+				} catch (error) {
+					console.error('Failed to update seat quantity after accepting invitation:', error)
+				}
 			}
 
 			// Delete the invitation

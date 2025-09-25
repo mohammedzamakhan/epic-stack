@@ -3,6 +3,7 @@ import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from '#app/utils/db.server'
 import { sendEmail } from '#app/utils/email.server'
 import { markStepCompleted } from '#app/utils/onboarding'
+import { updateSeatQuantity } from '#app/utils/payments.server'
 import { type OrganizationRoleName } from './organizations.server'
 
 // Helper function to get organization role ID by name
@@ -223,6 +224,14 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 					where: { id: invitation.id },
 				}),
 			])
+
+			// Update seat quantity for billing
+			try {
+				await updateSeatQuantity(invitation.organizationId)
+			} catch (error) {
+				console.error('Failed to update seat quantity after adding user:', error)
+			}
+
 			results.push({
 				organization: invitation.organization,
 				alreadyMember: false,
@@ -290,6 +299,13 @@ export async function validateAndAcceptInvitation(
 			where: { id: invitation.id },
 		}),
 	])
+
+	// Update seat quantity for billing
+	try {
+		await updateSeatQuantity(invitation.organizationId)
+	} catch (error) {
+		console.error('Failed to update seat quantity after adding user:', error)
+	}
 
 	return { organization: invitation.organization, alreadyMember: false }
 }
@@ -522,6 +538,13 @@ export async function validateAndAcceptInviteLink(
 			active: true,
 		},
 	})
+
+	// Update seat quantity for billing
+	try {
+		await updateSeatQuantity(inviteLink.organizationId)
+	} catch (error) {
+		console.error('Failed to update seat quantity after adding user:', error)
+	}
 
 	return { organization: inviteLink.organization, alreadyMember: false }
 }
