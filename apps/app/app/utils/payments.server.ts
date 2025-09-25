@@ -5,6 +5,7 @@ import Stripe from 'stripe'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
+import { getTrialConfig, calculateManualTrialDaysRemaining } from './trial-config.server'
 
 if (!process.env.STRIPE_SECRET_KEY) {
 	const errorMsg = 'STRIPE_SECRET_KEY environment variable is not set!'
@@ -106,10 +107,9 @@ export async function createCheckoutSession(
 ) {
 	const userId = await requireUserId(request)
 
-	if (
-		from === 'pricing' &&
-		process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-	) {
+	const trialConfig = getTrialConfig()
+
+	if (from === 'pricing' && trialConfig.creditCardRequired === 'manual') {
 		return redirect('/signup')
 	}
 
@@ -152,17 +152,14 @@ export async function createCheckoutSession(
 		client_reference_id: userId.toString(),
 		allow_promotion_codes: true,
 		subscription_data: {
-			...(process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
+			...(trialConfig.creditCardRequired === 'manual'
 				? {}
 				: {
-						trial_period_days:
-							process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-								? 0
-								: parseInt(process.env.TRIAL_DAYS || '0', 10),
+						trial_period_days: trialConfig.trialDays,
 					}),
 		},
 		payment_method_collection:
-			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'stripe'
+			trialConfig.creditCardRequired === 'stripe'
 				? 'if_required'
 				: 'always',
 	})
@@ -286,6 +283,13 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 		},
 	})
 
+	// Calculate actual days remaining from trial end date
+	const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+	const now = new Date()
+	const daysRemaining = trialEnd 
+		? Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+		: 3 // fallback to 3 days if trial_end is not available
+
 	await Promise.all(
 		admins.map(async (admin) => {
 			const user = admin.user
@@ -298,7 +302,7 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 				react: TrialEndingEmail({
 					portalUrl: process.env.STRIPE_PORTAL_URL!,
 					userName: user.name || undefined,
-					daysRemaining: 3, // You can make this dynamic based on actual trial end date
+					daysRemaining: Math.max(0, daysRemaining), // Ensure non-negative
 				}),
 			})
 		}),
@@ -363,18 +367,17 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 			where: { slug: organizationSlug },
 		})
 
-		if (process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual') {
+		const trialConfig = getTrialConfig()
+
+		if (trialConfig.creditCardRequired === 'manual') {
+			if (!organization?.createdAt) {
+				return { isActive: false, daysRemaining: 0 }
+			}
+
+			const daysRemaining = calculateManualTrialDaysRemaining(organization.createdAt)
 			return {
-				isActive: true,
-				daysRemaining:
-					parseInt(process.env.TRIAL_DAYS!, 10) -
-					(organization?.createdAt
-						? Math.ceil(
-								(new Date().getTime() - organization.createdAt.getTime()) /
-									(1000 * 60 * 60 * 24),
-							)
-						: 0) +
-					1,
+				isActive: daysRemaining > 0,
+				daysRemaining,
 			}
 		}
 
