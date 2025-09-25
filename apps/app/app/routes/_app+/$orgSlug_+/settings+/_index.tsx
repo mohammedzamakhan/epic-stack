@@ -32,7 +32,7 @@ import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
 import { encrypt } from '#app/utils/encryption.server'
 import { markStepCompleted } from '#app/utils/onboarding'
-import { updateSeatQuantity } from '#app/utils/payments.server'
+import { updateSeatQuantity, deleteSubscription } from '#app/utils/payments.server'
 import {
 	uploadOrganizationImage,
 	testS3Connection,
@@ -58,6 +58,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			slug: true,
 			size: true,
 			verifiedDomain: true,
+			stripeSubscriptionId: true,
 			s3Config: {
 				select: {
 					id: true,
@@ -110,6 +111,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			slug: true,
 			size: true,
 			verifiedDomain: true,
+			stripeSubscriptionId: true,
 			s3Config: {
 				select: {
 					id: true,
@@ -417,6 +419,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	if (intent === 'delete-organization') {
 		try {
+			// Cancel Stripe subscription if it exists
+			if (organization.stripeSubscriptionId) {
+				try {
+					await deleteSubscription(organization.stripeSubscriptionId)
+					console.log(`Cancelled subscription: ${organization.stripeSubscriptionId}`)
+				} catch (error) {
+					console.error('Error cancelling subscription during organization deletion:', error)
+					// Don't fail the deletion if subscription cancellation fails
+				}
+			}
+
 			// Delete the organization - cascade deletes will handle all related data
 			await prisma.organization.delete({
 				where: { id: organization.id },
