@@ -20,7 +20,7 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 						onClick={() => {
 							const formData = new FormData()
 							formData.append('isCollapsed', isCollapsed ? 'false' : 'true')
-							sidebar.submit(formData, {
+							void sidebar.submit(formData, {
 								method: 'POST',
 								action: '/resources/sidebar-state',
 							})
