@@ -83,9 +83,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			},
 		})
 
-		// You might want to set some session data here if needed
-		// For example, you could use the authSessionStorage from your auth.server.ts
+		// Check if this is part of organization creation flow
+		const isCreationFlow = url.searchParams.get('creation') === 'true'
 
+		if (isCreationFlow) {
+			// Continue with organization creation flow
+			return redirect(`/organizations/create?step=3&orgId=${organizationId}`)
+		}
+
+		// Regular checkout flow - go to dashboard
 		return redirect(`/${tenant.slug}/dashboard`)
 	} catch (error) {
 		console.error('Error handling successful checkout:', error)

@@ -14,6 +14,7 @@ import {
 	type ActionFunctionArgs,
 	Link,
 	useActionData,
+	useLoaderData,
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
@@ -38,6 +39,11 @@ import {
 	type OrganizationRoleName,
 } from '#app/utils/organizations.server'
 import { uploadOrganizationImage } from '#app/utils/storage.server'
+import { getTrialConfig } from '#app/utils/trial-config.server'
+import {
+	getPlansAndPrices,
+	createCheckoutSession,
+} from '#app/utils/payments.server'
 import {
 	Button,
 	Input,
@@ -125,18 +131,43 @@ const InviteSchema = z.object({
 		.optional(),
 })
 
-// Step 3: Additional info
-const Step3Schema = z.object({
+// Step 3: Subscription (only for stripe mode)
+const SubscriptionSchema = z.object({
+	priceId: z.string().min(1, { message: 'Please select a plan' }),
+})
+
+// Step 4: Additional info (previously step 3)
+const Step4Schema = z.object({
 	organizationSize: z
 		.string()
 		.min(1, { message: 'Organization size is required' }),
 	userDepartment: z.string().min(1, { message: 'Department is required' }),
 })
 
+export async function loader() {
+	const trialConfig = getTrialConfig()
+	let plansAndPrices = null
+
+	// Only fetch plans if we need Stripe subscription
+	if (trialConfig.creditCardRequired === 'stripe') {
+		try {
+			plansAndPrices = await getPlansAndPrices()
+		} catch (error) {
+			console.error('Failed to fetch plans and prices:', error)
+		}
+	}
+
+	return {
+		trialConfig,
+		plansAndPrices,
+	}
+}
+
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
 	const intent = formData.get('intent') as string
+	const trialConfig = getTrialConfig()
 	formData.get('step') as string
 
 	// Handle step 1: Create organization
@@ -167,8 +198,11 @@ export async function action({ request }: ActionFunctionArgs) {
 				imageObjectKey,
 			})
 
-			// Store organization data in session for next steps
-			return redirect(`/organizations/create?step=2&orgId=${organization.id}`)
+			// Determine next step based on trial configuration
+			const nextStep = trialConfig.creditCardRequired === 'stripe' ? 2 : 3
+			return redirect(
+				`/organizations/create?step=${nextStep}&orgId=${organization.id}`,
+			)
 		} catch (error) {
 			console.error('Failed to create organization', error)
 			return submission.reply({
@@ -233,13 +267,50 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 		}
 
-		return redirect(`/organizations/create?step=3&orgId=${orgId}`)
+		// Determine next step based on trial configuration
+		const nextStep = trialConfig.creditCardRequired === 'stripe' ? 4 : 3
+		return redirect(`/organizations/create?step=${nextStep}&orgId=${orgId}`)
 	}
 
-	// Handle step 3: Complete setup
+	// Handle step 3: Subscription (only for stripe mode)
+	if (intent === 'subscribe') {
+		const orgId = formData.get('orgId') as string
+		const submission = parseWithZod(formData, { schema: SubscriptionSchema })
+
+		if (submission.status !== 'success') {
+			return submission.reply()
+		}
+
+		const { priceId } = submission.value
+
+		try {
+			const organization = await prisma.organization.findUnique({
+				where: { id: orgId },
+			})
+
+			if (!organization) {
+				throw new Error('Organization not found')
+			}
+
+			// Create Stripe checkout session
+			return await createCheckoutSession(request, {
+				organization,
+				priceId,
+				from: 'checkout',
+				isCreationFlow: true,
+			})
+		} catch (error) {
+			console.error('Failed to create checkout session', error)
+			return submission.reply({
+				formErrors: ['Failed to create subscription'],
+			})
+		}
+	}
+
+	// Handle step 4: Complete setup (previously step 3)
 	if (intent === 'complete-setup') {
 		const orgId = formData.get('orgId') as string
-		const submission = parseWithZod(formData, { schema: Step3Schema })
+		const submission = parseWithZod(formData, { schema: Step4Schema })
 
 		if (submission.status !== 'success') {
 			return submission.reply()
@@ -284,20 +355,53 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function CreateOrganizationPage() {
 	const actionData = useActionData<typeof action>()
+	const { trialConfig, plansAndPrices } = useLoaderData<typeof loader>()
 	const [searchParams] = useSearchParams()
 	const currentStep = parseInt(searchParams.get('step') || '1')
 	const orgId = searchParams.get('orgId')
 
-	// Step progress indicator
-	const steps = [
-		{
-			number: 1,
-			title: 'Organization Details',
-			description: 'Basic information',
-		},
-		{ number: 2, title: 'Invite Members', description: 'Add team members' },
-		{ number: 3, title: 'Additional Info', description: 'Complete setup' },
-	]
+	// Dynamic step configuration based on trial mode
+	const steps =
+		trialConfig.creditCardRequired === 'stripe'
+			? [
+					{
+						number: 1,
+						title: 'Organization Details',
+						description: 'Basic information',
+					},
+					{
+						number: 2,
+						title: 'Choose Plan',
+						description: 'Select subscription',
+					},
+					{
+						number: 3,
+						title: 'Invite Members',
+						description: 'Add team members',
+					},
+					{
+						number: 4,
+						title: 'Additional Info',
+						description: 'Complete setup',
+					},
+				]
+			: [
+					{
+						number: 1,
+						title: 'Organization Details',
+						description: 'Basic information',
+					},
+					{
+						number: 2,
+						title: 'Invite Members',
+						description: 'Add team members',
+					},
+					{
+						number: 3,
+						title: 'Additional Info',
+						description: 'Complete setup',
+					},
+				]
 
 	return (
 		<div className="container max-w-xl px-4 py-8">
@@ -322,11 +426,31 @@ export default function CreateOrganizationPage() {
 
 			{/* Step content */}
 			{currentStep === 1 && <Step1 actionData={actionData} />}
-			{currentStep === 2 && orgId && (
-				<Step2 orgId={orgId} actionData={actionData} />
-			)}
-			{currentStep === 3 && orgId && (
-				<Step3 orgId={orgId} actionData={actionData} />
+			{trialConfig.creditCardRequired === 'stripe' ? (
+				<>
+					{currentStep === 2 && orgId && plansAndPrices && (
+						<SubscriptionStep
+							orgId={orgId}
+							plansAndPrices={plansAndPrices}
+							actionData={actionData}
+						/>
+					)}
+					{currentStep === 3 && orgId && (
+						<Step3 orgId={orgId} actionData={actionData} />
+					)}
+					{currentStep === 4 && orgId && (
+						<Step4 orgId={orgId} actionData={actionData} />
+					)}
+				</>
+			) : (
+				<>
+					{currentStep === 2 && orgId && (
+						<Step3 orgId={orgId} actionData={actionData} />
+					)}
+					{currentStep === 3 && orgId && (
+						<Step4 orgId={orgId} actionData={actionData} />
+					)}
+				</>
 			)}
 		</div>
 	)
@@ -555,7 +679,145 @@ function Step1({ actionData }: { actionData: any }) {
 	)
 }
 
-function Step2({ orgId, actionData }: { orgId: string; actionData: any }) {
+function SubscriptionStep({
+	orgId,
+	plansAndPrices,
+	actionData,
+}: {
+	orgId: string
+	plansAndPrices: Awaited<ReturnType<typeof getPlansAndPrices>>
+	actionData: any
+}) {
+	const [form, fields] = useForm({
+		id: 'create-organization-subscription',
+		constraint: getZodConstraint(SubscriptionSchema),
+		lastResult: actionData,
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema: SubscriptionSchema })
+		},
+	})
+
+	const [selectedPriceId, setSelectedPriceId] = useState<string>('')
+
+	const PLANS = {
+		Base: {
+			name: 'Base plan',
+			seats: 3,
+			price: 7.99,
+			additionalSeatPrice: 4.99,
+		},
+		Plus: {
+			name: 'Plus plan',
+			seats: 5,
+			price: 49.99,
+			additionalSeatPrice: 9.99,
+		},
+	}
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Choose your plan</CardTitle>
+				<CardDescription>
+					Select a subscription plan to get started with your organization. Your
+					trial will begin after payment setup.
+				</CardDescription>
+			</CardHeader>
+
+			<CardContent>
+				<form method="post" className="space-y-6" {...getFormProps(form)}>
+					<input type="hidden" name="intent" value="subscribe" />
+					<input type="hidden" name="orgId" value={orgId} />
+					<input type="hidden" name="priceId" value={selectedPriceId} />
+
+					<div className="grid gap-6 lg:grid-cols-2">
+						{/* Base Plan */}
+						{plansAndPrices?.prices.base && (
+							<div
+								className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+									selectedPriceId === plansAndPrices.prices.base.id
+										? 'border-primary bg-primary/5'
+										: 'border-border hover:border-primary/50'
+								}`}
+								onClick={() =>
+									setSelectedPriceId(plansAndPrices.prices.base?.id || '')
+								}
+							>
+								<div className="mb-4">
+									<div className="flex items-baseline gap-2">
+										<span className="text-2xl font-bold">
+											${PLANS.Base.price}
+										</span>
+										<span className="text-muted-foreground text-sm">
+											per month
+										</span>
+									</div>
+									<h3 className="text-lg font-semibold">{PLANS.Base.name}</h3>
+								</div>
+								<ul className="text-muted-foreground space-y-2 text-sm">
+									<li>Includes {PLANS.Base.seats} user seats</li>
+									<li>
+										Additional seats: ${PLANS.Base.additionalSeatPrice}
+										/seat/month
+									</li>
+									<li>All core features included</li>
+								</ul>
+							</div>
+						)}
+
+						{/* Plus Plan */}
+						{plansAndPrices?.prices.plus && (
+							<div
+								className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${
+									selectedPriceId === plansAndPrices.prices.plus.id
+										? 'border-primary bg-primary/5'
+										: 'border-border hover:border-primary/50'
+								}`}
+								onClick={() =>
+									setSelectedPriceId(plansAndPrices.prices.plus?.id || '')
+								}
+							>
+								<div className="mb-4">
+									<div className="flex items-baseline gap-2">
+										<span className="text-2xl font-bold">
+											${PLANS.Plus.price}
+										</span>
+										<span className="text-muted-foreground text-sm">
+											per month
+										</span>
+									</div>
+									<h3 className="text-lg font-semibold">{PLANS.Plus.name}</h3>
+								</div>
+								<ul className="text-muted-foreground space-y-2 text-sm">
+									<li>Includes {PLANS.Plus.seats} user seats</li>
+									<li>
+										Additional seats: ${PLANS.Plus.additionalSeatPrice}
+										/seat/month
+									</li>
+									<li>All core features included</li>
+									<li>Priority support</li>
+								</ul>
+							</div>
+						)}
+					</div>
+
+					<ErrorList errors={form.errors} id={form.errorId} />
+
+					<div className="flex justify-between pt-4">
+						<Button variant="outline" asChild>
+							<Link to="/organizations">Cancel</Link>
+						</Button>
+						<Button type="submit" disabled={!selectedPriceId}>
+							Continue to Payment
+						</Button>
+					</div>
+				</form>
+			</CardContent>
+		</Card>
+	)
+}
+
+function Step3({ orgId, actionData }: { orgId: string; actionData: any }) {
 	return (
 		<Card>
 			<CardHeader>
@@ -589,13 +851,13 @@ function Step2({ orgId, actionData }: { orgId: string; actionData: any }) {
 	)
 }
 
-function Step3({ orgId, actionData }: { orgId: string; actionData: any }) {
+function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 	const [form, fields] = useForm({
-		id: 'create-organization-step3',
-		constraint: getZodConstraint(Step3Schema),
+		id: 'create-organization-step4',
+		constraint: getZodConstraint(Step4Schema),
 		lastResult: actionData,
 		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: Step3Schema })
+			return parseWithZod(formData, { schema: Step4Schema })
 		},
 	})
 

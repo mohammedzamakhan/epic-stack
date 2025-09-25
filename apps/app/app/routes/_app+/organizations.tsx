@@ -127,7 +127,10 @@ export async function action({ request }: ActionFunctionArgs) {
 				try {
 					await updateSeatQuantity(invitation.organizationId)
 				} catch (error) {
-					console.error('Failed to update seat quantity after accepting invitation:', error)
+					console.error(
+						'Failed to update seat quantity after accepting invitation:',
+						error,
+					)
 				}
 			}
 

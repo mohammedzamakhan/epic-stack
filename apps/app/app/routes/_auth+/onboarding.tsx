@@ -244,7 +244,10 @@ export async function action({ request }: Route.ActionArgs) {
 					try {
 						await updateSeatQuantity(org.id)
 					} catch (error) {
-						console.error(`Failed to update seat quantity for organization ${org.id} after domain-based auto-join:`, error)
+						console.error(
+							`Failed to update seat quantity for organization ${org.id} after domain-based auto-join:`,
+							error,
+						)
 					}
 				}
 

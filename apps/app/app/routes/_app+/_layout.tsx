@@ -52,12 +52,13 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export default function MarketingLayoutRoute() {
-	const { isCollapsed, onboardingProgress, trialStatus, extensionId } = useLoaderData<{
-		isCollapsed: boolean
-		onboardingProgress: OnboardingProgressData | null
-		trialStatus: { isActive: boolean; daysRemaining: number } | null
-		extensionId: string | null
-	}>()
+	const { isCollapsed, onboardingProgress, trialStatus, extensionId } =
+		useLoaderData<{
+			isCollapsed: boolean
+			onboardingProgress: OnboardingProgressData | null
+			trialStatus: { isActive: boolean; daysRemaining: number } | null
+			extensionId: string | null
+		}>()
 
 	return (
 		<MarketingLayout

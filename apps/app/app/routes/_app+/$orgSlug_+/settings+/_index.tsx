@@ -374,7 +374,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					try {
 						await updateSeatQuantity(organization.id)
 					} catch (error) {
-						console.error('Failed to update seat quantity after domain-based auto-add:', error)
+						console.error(
+							'Failed to update seat quantity after domain-based auto-add:',
+							error,
+						)
 					}
 				}
 			})

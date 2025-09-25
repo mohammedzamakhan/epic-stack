@@ -1,11 +1,14 @@
 import { type Organization } from '@prisma/client'
 import { TrialEndingEmail } from '@repo/email'
-import { redirect } from 'react-router'
+import { data, redirect } from 'react-router'
 import Stripe from 'stripe'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
-import { getTrialConfig, calculateManualTrialDaysRemaining } from './trial-config.server'
+import {
+	getTrialConfig,
+	calculateManualTrialDaysRemaining,
+} from './trial-config.server'
 
 if (!process.env.STRIPE_SECRET_KEY) {
 	const errorMsg = 'STRIPE_SECRET_KEY environment variable is not set!'
@@ -93,16 +96,70 @@ export async function updateOrganizationSubscription(
 	})
 }
 
+export async function upgradeSubscription(
+	organization: Organization,
+	newPriceId: string,
+) {
+	if (!organization.stripeCustomerId || !organization.stripeSubscriptionId) {
+		throw new Error('Organization must have existing subscription to upgrade')
+	}
+
+	const quantity = await getOrganizationSeatQuantity(organization.id)
+
+	// Get current subscription
+	const subscription = await stripe.subscriptions.retrieve(
+		organization.stripeSubscriptionId,
+	)
+
+	// Prepare update parameters
+	const updateParams: Stripe.SubscriptionUpdateParams = {
+		items: [
+			{
+				id: subscription.items.data[0]?.id,
+				price: newPriceId,
+				quantity,
+			},
+		],
+		proration_behavior: 'create_prorations',
+	}
+
+	// Preserve trial period if the subscription is currently trialing
+	if (subscription.status === 'trialing' && subscription.trial_end) {
+		updateParams.trial_end = subscription.trial_end
+	}
+
+	// Update the subscription to the new price
+	const updatedSubscription = await stripe.subscriptions.update(
+		organization.stripeSubscriptionId,
+		updateParams,
+	)
+
+	// Update organization with new subscription details
+	const plan = updatedSubscription.items.data[0]?.plan
+	if (plan) {
+		await updateOrganizationSubscription(organization.id, {
+			stripeSubscriptionId: updatedSubscription.id,
+			stripeProductId: plan.product as string,
+			planName: (plan.product as Stripe.Product).name,
+			subscriptionStatus: updatedSubscription.status,
+		})
+	}
+
+	return updatedSubscription
+}
+
 export async function createCheckoutSession(
 	request: Request,
 	{
 		organization,
 		priceId,
 		from,
+		isCreationFlow = false,
 	}: {
 		organization: Organization | null
 		priceId: string
 		from: 'checkout' | 'pricing'
+		isCreationFlow?: boolean
 	},
 ) {
 	const userId = await requireUserId(request)
@@ -115,6 +172,33 @@ export async function createCheckoutSession(
 
 	if (!organization || !userId) {
 		return redirect(`/signup?redirect=checkout&priceId=${priceId}`)
+	}
+
+	// Check if organization has existing active subscription
+	if (
+		organization.stripeCustomerId &&
+		organization.stripeSubscriptionId &&
+		from === 'checkout'
+	) {
+		try {
+			const subscription = await stripe.subscriptions.retrieve(
+				organization.stripeSubscriptionId,
+			)
+
+			if (
+				subscription.status === 'active' ||
+				subscription.status === 'trialing'
+			) {
+				// This is an upgrade - modify existing subscription instead of creating new one
+				await upgradeSubscription(organization, priceId)
+				return data({
+					success: true,
+				})
+			}
+		} catch (error) {
+			console.error('Error checking existing subscription:', error)
+			// Continue with checkout if we can't retrieve subscription
+		}
 	}
 
 	const quantity = await getOrganizationSeatQuantity(organization.id)
@@ -143,7 +227,7 @@ export async function createCheckoutSession(
 			},
 		],
 		mode: 'subscription',
-		success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
+		success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}${isCreationFlow ? '&creation=true' : ''}`,
 		cancel_url:
 			from === 'checkout'
 				? `${process.env.BASE_URL}/${organization.slug}/settings/billing`
@@ -155,13 +239,11 @@ export async function createCheckoutSession(
 			...(trialConfig.creditCardRequired === 'manual'
 				? {}
 				: {
-						trial_period_days: trialConfig.trialDays,
-					}),
+					trial_period_days: trialConfig.trialDays,
+				}),
 		},
 		payment_method_collection:
-			trialConfig.creditCardRequired === 'stripe'
-				? 'if_required'
-				: 'always',
+			trialConfig.creditCardRequired === 'stripe' ? 'if_required' : 'always',
 	})
 
 	return redirect(session.url!)
@@ -200,6 +282,9 @@ export async function createCustomerPortalSession(organization: Organization) {
 				headline: 'Manage your subscription',
 			},
 			features: {
+				payment_method_update: {
+					enabled: true,
+				},
 				subscription_update: {
 					enabled: true,
 					default_allowed_updates: ['price', 'quantity', 'promotion_code'],
@@ -251,6 +336,23 @@ export async function handleSubscriptionChange(
 
 	if (status === 'active' || status === 'trialing') {
 		const plan = subscription.items.data[0]?.plan
+
+		// If this is a new active subscription and the organization has a different subscription ID,
+		// cancel the old one to prevent multiple active subscriptions
+		if (
+			organization.stripeSubscriptionId &&
+			organization.stripeSubscriptionId !== subscriptionId
+		) {
+			try {
+				await stripe.subscriptions.cancel(organization.stripeSubscriptionId)
+				console.log(
+					`Cancelled old subscription: ${organization.stripeSubscriptionId}`,
+				)
+			} catch (error) {
+				console.error('Error cancelling old subscription:', error)
+			}
+		}
+
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: subscriptionId,
 			stripeProductId: plan?.product as string,
@@ -258,12 +360,15 @@ export async function handleSubscriptionChange(
 			subscriptionStatus: status,
 		})
 	} else if (status === 'canceled' || status === 'unpaid') {
-		await updateOrganizationSubscription(organization.id, {
-			stripeSubscriptionId: null,
-			stripeProductId: null,
-			planName: null,
-			subscriptionStatus: status,
-		})
+		// Only update to null if this is the current subscription
+		if (organization.stripeSubscriptionId === subscriptionId) {
+			await updateOrganizationSubscription(organization.id, {
+				stripeSubscriptionId: null,
+				stripeProductId: null,
+				planName: null,
+				subscriptionStatus: status,
+			})
+		}
 	}
 }
 
@@ -284,9 +389,11 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 	})
 
 	// Calculate actual days remaining from trial end date
-	const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+	const trialEnd = subscription.trial_end
+		? new Date(subscription.trial_end * 1000)
+		: null
 	const now = new Date()
-	const daysRemaining = trialEnd 
+	const daysRemaining = trialEnd
 		? Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 		: 3 // fallback to 3 days if trial_end is not available
 
@@ -374,7 +481,9 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 				return { isActive: false, daysRemaining: 0 }
 			}
 
-			const daysRemaining = calculateManualTrialDaysRemaining(organization.createdAt)
+			const daysRemaining = calculateManualTrialDaysRemaining(
+				organization.createdAt,
+			)
 			return {
 				isActive: daysRemaining > 0,
 				daysRemaining,
@@ -486,4 +595,55 @@ export const customerPortalAction = async (
 ) => {
 	const portalSession = await createCustomerPortalSession(organization)
 	return redirect(portalSession.url)
+}
+
+export async function cleanupDuplicateSubscriptions(
+	organization: Organization,
+) {
+	if (!organization.stripeCustomerId) {
+		return
+	}
+
+	try {
+		// Get all subscriptions for this customer
+		const subscriptions = await stripe.subscriptions.list({
+			customer: organization.stripeCustomerId,
+			status: 'active',
+		})
+
+		if (subscriptions.data.length <= 1) {
+			return // No duplicates
+		}
+
+		// Sort by created date (newest first)
+		const sortedSubscriptions = subscriptions.data.sort(
+			(a, b) => b.created - a.created,
+		)
+
+		// Keep the newest subscription, cancel the rest
+		const [keepSubscription, ...cancelSubscriptions] = sortedSubscriptions
+
+		if (!keepSubscription) {
+			console.error('No subscription to keep after sorting')
+			return
+		}
+
+		for (const sub of cancelSubscriptions) {
+			await stripe.subscriptions.cancel(sub.id)
+			console.log(`Cancelled duplicate subscription: ${sub.id}`)
+		}
+
+		// Update organization with the kept subscription
+		const plan = keepSubscription.items.data[0]?.plan
+		await updateOrganizationSubscription(organization.id, {
+			stripeSubscriptionId: keepSubscription.id,
+			stripeProductId: plan?.product as string,
+			planName: (plan?.product as Stripe.Product).name,
+			subscriptionStatus: keepSubscription.status,
+		})
+
+		console.log(`Kept subscription: ${keepSubscription.id}`)
+	} catch (error) {
+		console.error('Error cleaning up duplicate subscriptions:', error)
+	}
 }

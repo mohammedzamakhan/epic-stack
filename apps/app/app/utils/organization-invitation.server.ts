@@ -229,7 +229,10 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 			try {
 				await updateSeatQuantity(invitation.organizationId)
 			} catch (error) {
-				console.error('Failed to update seat quantity after adding user:', error)
+				console.error(
+					'Failed to update seat quantity after adding user:',
+					error,
+				)
 			}
 
 			results.push({

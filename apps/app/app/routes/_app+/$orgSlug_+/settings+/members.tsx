@@ -269,7 +269,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			try {
 				await updateSeatQuantity(organization.id)
 			} catch (error) {
-				console.error('Failed to update seat quantity after removing user:', error)
+				console.error(
+					'Failed to update seat quantity after removing user:',
+					error,
+				)
 			}
 
 			return Response.json({ success: true })
