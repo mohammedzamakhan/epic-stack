@@ -7,6 +7,7 @@ import {
 } from 'react-router'
 
 import { BillingCard } from '#app/components/settings/cards/organization/billing-card'
+import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card'
 
 import { requireUserId } from '#app/utils/auth.server'
 import { prisma } from '#app/utils/db.server'
@@ -14,6 +15,7 @@ import {
 	checkoutAction,
 	customerPortalAction,
 	getPlansAndPrices,
+	getOrganizationInvoices,
 } from '#app/utils/payments.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -48,10 +50,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	const isClosedBeta = process.env.LAUNCH_STATUS === 'CLOSED_BETA'
 	const plansAndPrices = isClosedBeta ? null : await getPlansAndPrices()
+	const invoices = await getOrganizationInvoices(organization)
 
 	return {
 		organization,
 		plansAndPrices,
+		invoices,
 		isClosedBeta,
 	}
 }
@@ -144,7 +148,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function BillingSettings() {
-	const { organization, plansAndPrices, isClosedBeta } =
+	const { organization, plansAndPrices, invoices, isClosedBeta } =
 		useLoaderData<typeof loader>()
 
 	return (
@@ -156,6 +160,12 @@ export default function BillingSettings() {
 					isClosedBeta={isClosedBeta}
 				/>
 			</AnnotatedSection>
+			
+			{!isClosedBeta && (
+				<AnnotatedSection>
+					<InvoicesCard invoices={invoices} />
+				</AnnotatedSection>
+			)}
 		</AnnotatedLayout>
 	)
 }

@@ -597,6 +597,37 @@ export const customerPortalAction = async (
 	return redirect(portalSession.url)
 }
 
+export async function getOrganizationInvoices(organization: Organization) {
+	if (!organization.stripeCustomerId) {
+		return []
+	}
+
+	try {
+		const invoices = await stripe.invoices.list({
+			customer: organization.stripeCustomerId,
+			limit: 20,
+		})
+
+		return invoices.data.map((invoice) => ({
+			id: invoice.id,
+			number: invoice.number,
+			status: invoice.status,
+			amountPaid: invoice.amount_paid,
+			amountDue: invoice.amount_due,
+			currency: invoice.currency,
+			created: invoice.created,
+			dueDate: invoice.due_date,
+			hostedInvoiceUrl: invoice.hosted_invoice_url,
+			invoicePdf: invoice.invoice_pdf,
+			periodStart: invoice.period_start,
+			periodEnd: invoice.period_end,
+		}))
+	} catch (error) {
+		console.error('Error fetching invoices:', error)
+		return []
+	}
+}
+
 export async function cleanupDuplicateSubscriptions(
 	organization: Organization,
 ) {
