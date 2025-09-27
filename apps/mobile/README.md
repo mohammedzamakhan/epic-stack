@@ -8,6 +8,7 @@ functionality integrated with the Epic Stack backend.
 - React Native with Expo SDK 54+
 - Expo Router for file-based navigation
 - TypeScript configuration
+- Landing pages for new users
 - Authentication screens (Sign In / Sign Up)
 - Integration with existing backend APIs
 - Monorepo integration with Turbo
@@ -18,6 +19,8 @@ functionality integrated with the Epic Stack backend.
 apps/mobile/
 ├── app/                    # Expo Router screens
 │   ├── (auth)/            # Authentication screens
+│   │   ├── landing.tsx    # Main landing page
+│   │   ├── welcome.tsx    # Alternative welcome page
 │   │   ├── sign-in.tsx    # Sign in screen
 │   │   ├── sign-up.tsx    # Sign up screen
 │   │   └── _layout.tsx    # Auth layout

@@ -13,10 +13,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Input,
 	Button,
 	ErrorText,
@@ -140,189 +136,202 @@ export default function OnboardingScreen() {
 	}
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>Complete your profile</Text>
-							<Text style={styles.subtitle}>
-								{email
-									? `Almost done! Create your profile for ${email}`
-									: 'Just a few more details to complete your account setup.'}
-							</Text>
-						</CardHeader>
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>Complete your profile</Text>
+					<Text style={styles.subtitle}>
+						{email
+							? `Almost done! Create your profile for ${email}`
+							: 'Just a few more details to complete your account setup.'}
+					</Text>
+				</View>
 
-						<CardContent>
-							<View style={styles.formContainer}>
-								<View style={styles.inputGroup}>
-									<Text style={styles.label}>Username</Text>
-									<Controller
-										control={control}
-										name="username"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={usernameRef}
-												placeholder="Enter your username"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												autoCapitalize="none"
-												autoCorrect={false}
-												returnKeyType="next"
-												onSubmitEditing={() => nameRef.current?.focus()}
-												error={!!errors.username}
-											/>
-										)}
+				{/* Content */}
+				<View style={styles.content}>
+					<View style={styles.formContainer}>
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Username</Text>
+							<Controller
+								control={control}
+								name="username"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={usernameRef}
+										placeholder="Enter your username"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										autoCapitalize="none"
+										autoCorrect={false}
+										returnKeyType="next"
+										onSubmitEditing={() => nameRef.current?.focus()}
+										error={!!errors.username}
 									/>
-									{errors.username && (
-										<ErrorText>{errors.username.message}</ErrorText>
-									)}
-								</View>
+								)}
+							/>
+							{errors.username && (
+								<ErrorText>{errors.username.message}</ErrorText>
+							)}
+						</View>
 
-								<View style={styles.inputGroup}>
-									<Text style={styles.label}>Full Name</Text>
-									<Controller
-										control={control}
-										name="name"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={nameRef}
-												placeholder="Enter your full name"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												autoCapitalize="words"
-												returnKeyType="next"
-												onSubmitEditing={() => passwordRef.current?.focus()}
-												error={!!errors.name}
-											/>
-										)}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Full Name</Text>
+							<Controller
+								control={control}
+								name="name"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={nameRef}
+										placeholder="Enter your full name"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										autoCapitalize="words"
+										returnKeyType="next"
+										onSubmitEditing={() => passwordRef.current?.focus()}
+										error={!!errors.name}
 									/>
-									{errors.name && <ErrorText>{errors.name.message}</ErrorText>}
-								</View>
+								)}
+							/>
+							{errors.name && <ErrorText>{errors.name.message}</ErrorText>}
+						</View>
 
-								<View style={styles.inputGroup}>
-									<Text style={styles.label}>Password</Text>
-									<Controller
-										control={control}
-										name="password"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={passwordRef}
-												placeholder="Create a password"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												secureTextEntry={!showPassword}
-												autoCapitalize="none"
-												autoCorrect={false}
-												returnKeyType="next"
-												onSubmitEditing={() =>
-													confirmPasswordRef.current?.focus()
-												}
-												error={!!errors.password}
-												rightIcon={showPassword ? 'eye-off' : 'eye'}
-												onRightIconPress={() => setShowPassword(!showPassword)}
-											/>
-										)}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Password</Text>
+							<Controller
+								control={control}
+								name="password"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={passwordRef}
+										placeholder="Create a password"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										secureTextEntry={!showPassword}
+										autoCapitalize="none"
+										autoCorrect={false}
+										returnKeyType="next"
+										onSubmitEditing={() =>
+											confirmPasswordRef.current?.focus()
+										}
+										error={!!errors.password}
+										rightIcon={
+											<TouchableOpacity
+												onPress={() => setShowPassword(!showPassword)}
+												style={styles.eyeButton}
+											>
+												<Text style={styles.eyeIcon}>
+													{showPassword ? '🙈' : '👁️'}
+												</Text>
+											</TouchableOpacity>
+										}
 									/>
-									{errors.password && (
-										<ErrorText>{errors.password.message}</ErrorText>
-									)}
-								</View>
+								)}
+							/>
+							{errors.password && (
+								<ErrorText>{errors.password.message}</ErrorText>
+							)}
+						</View>
 
-								<View style={styles.inputGroup}>
-									<Text style={styles.label}>Confirm Password</Text>
-									<Controller
-										control={control}
-										name="confirmPassword"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={confirmPasswordRef}
-												placeholder="Confirm your password"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												secureTextEntry={!showConfirmPassword}
-												autoCapitalize="none"
-												autoCorrect={false}
-												returnKeyType="done"
-												onSubmitEditing={handleSubmit(onSubmit)}
-												error={!!errors.confirmPassword}
-												rightIcon={showConfirmPassword ? 'eye-off' : 'eye'}
-												onRightIconPress={() =>
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Confirm Password</Text>
+							<Controller
+								control={control}
+								name="confirmPassword"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={confirmPasswordRef}
+										placeholder="Confirm your password"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										secureTextEntry={!showConfirmPassword}
+										autoCapitalize="none"
+										autoCorrect={false}
+										returnKeyType="done"
+										onSubmitEditing={handleSubmit(onSubmit)}
+										error={!!errors.confirmPassword}
+										rightIcon={
+											<TouchableOpacity
+												onPress={() =>
 													setShowConfirmPassword(!showConfirmPassword)
 												}
-											/>
-										)}
+												style={styles.eyeButton}
+											>
+												<Text style={styles.eyeIcon}>
+													{showConfirmPassword ? '🙈' : '👁️'}
+												</Text>
+											</TouchableOpacity>
+										}
 									/>
-									{errors.confirmPassword && (
-										<ErrorText>{errors.confirmPassword.message}</ErrorText>
-									)}
-								</View>
-
-								<View style={styles.checkboxGroup}>
-									<Controller
-										control={control}
-										name="agreeToTermsOfServiceAndPrivacyPolicy"
-										render={({ field: { onChange, value } }) => (
-											<Checkbox
-												checked={value}
-												onCheckedChange={onChange}
-												label="I agree to the Terms of Service and Privacy Policy"
-												error={!!errors.agreeToTermsOfServiceAndPrivacyPolicy}
-											/>
-										)}
-									/>
-									{errors.agreeToTermsOfServiceAndPrivacyPolicy && (
-										<ErrorText style={styles.checkboxError}>
-											{errors.agreeToTermsOfServiceAndPrivacyPolicy.message}
-										</ErrorText>
-									)}
-								</View>
-
-								<View style={styles.checkboxGroup}>
-									<Controller
-										control={control}
-										name="remember"
-										render={({ field: { onChange, value } }) => (
-											<Checkbox
-												checked={value}
-												onCheckedChange={onChange}
-												label="Keep me signed in"
-											/>
-										)}
-									/>
-								</View>
-
-								{error && (
-									<ErrorText style={styles.formError}>{error}</ErrorText>
 								)}
+							/>
+							{errors.confirmPassword && (
+								<ErrorText>{errors.confirmPassword.message}</ErrorText>
+							)}
+						</View>
 
-								<Button
-									onPress={handleSubmit(onSubmit)}
-									disabled={!isValid || isLoading}
-									style={styles.submitButton}
-								>
-									{isLoading ? 'Creating account...' : 'Create account'}
-								</Button>
-							</View>
-						</CardContent>
+						<View style={styles.checkboxGroup}>
+							<Controller
+								control={control}
+								name="agreeToTermsOfServiceAndPrivacyPolicy"
+								render={({ field: { onChange, value } }) => (
+									<Checkbox
+										checked={value}
+										onCheckedChange={onChange}
+										label="I agree to the Terms of Service and Privacy Policy"
+										error={!!errors.agreeToTermsOfServiceAndPrivacyPolicy}
+									/>
+								)}
+							/>
+							{errors.agreeToTermsOfServiceAndPrivacyPolicy && (
+								<ErrorText style={styles.checkboxError}>
+									{errors.agreeToTermsOfServiceAndPrivacyPolicy.message}
+								</ErrorText>
+							)}
+						</View>
 
-						<CardFooter>
-							<View style={styles.footer}>
-								<TouchableOpacity onPress={handleBackToVerification}>
-									<Text style={styles.footerLinkText}>
-										Back to verification
-									</Text>
-								</TouchableOpacity>
-							</View>
-						</CardFooter>
-					</Card>
+						<View style={styles.checkboxGroup}>
+							<Controller
+								control={control}
+								name="remember"
+								render={({ field: { onChange, value } }) => (
+									<Checkbox
+										checked={value}
+										onCheckedChange={onChange}
+										label="Keep me signed in"
+									/>
+								)}
+							/>
+						</View>
+
+						{error && (
+							<ErrorText style={styles.formError}>{error}</ErrorText>
+						)}
+
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							disabled={!isValid || isLoading}
+							style={styles.submitButton}
+						>
+							{isLoading ? 'Creating account...' : 'Create account'}
+						</Button>
+					</View>
+				</View>
+
+				{/* Footer */}
+				<View style={styles.footer}>
+					<TouchableOpacity onPress={handleBackToVerification}>
+						<Text style={styles.footerLinkText}>
+							Back to verification
+						</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
@@ -337,32 +346,34 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
-	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
-		lineHeight: 22,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	formContainer: {
 		gap: 20,
@@ -389,12 +400,19 @@ const styles = StyleSheet.create({
 	submitButton: {
 		marginTop: 8,
 	},
+	eyeButton: {
+		padding: 4,
+	},
+	eyeIcon: {
+		fontSize: 18,
+	},
 	footer: {
 		alignItems: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},

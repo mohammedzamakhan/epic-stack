@@ -14,10 +14,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Button,
 	ErrorText,
 	LoadingOverlay,
@@ -156,117 +152,114 @@ export default function VerifyCodeScreen() {
 	}
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>Enter verification code</Text>
-							<Text style={styles.subtitle}>
-								{email
-									? `We've sent a 6-character code to ${email}. Enter it below to verify your account.`
-									: 'Enter the 6-character verification code sent to your email.'}
-							</Text>
-						</CardHeader>
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>Enter verification code</Text>
+					<Text style={styles.subtitle}>
+						{email
+							? `We've sent a 6-character code to ${email}. Enter it below to verify your account.`
+							: 'Enter the 6-character verification code sent to your email.'}
+					</Text>
+				</View>
 
-						<CardContent>
-							<View style={styles.formContainer}>
-								<Controller
-									control={control}
-									name="code"
-									render={({ field: { onChange, value } }) => (
-										<View style={styles.otpContainer}>
-											<Text style={styles.otpLabel}>
-												Enter 6-character code:
-											</Text>
-											<TextInput
-												style={[
-													styles.singleOtpInput,
-													errors.code && styles.singleOtpInputError,
-													isLoading && styles.singleOtpInputDisabled,
-												]}
-												value={value}
-												onChangeText={(text) => {
-													// Allow alphanumeric characters and limit to 6 characters
-													const code = text
-														.replace(/[^A-Za-z0-9]/g, '')
-														.slice(0, 6)
-														.toUpperCase()
-													console.log('OTP Input changed:', code)
-													onChange(code)
-												}}
-												placeholder="ABC123"
-												keyboardType="default"
-												maxLength={6}
-												editable={!isLoading}
-												autoFocus={true}
-												selectTextOnFocus={true}
-												returnKeyType="done"
-												onSubmitEditing={() => {
-													if (value.length === 6) {
-														void handleSubmit(onSubmit)()
-													}
-												}}
-											/>
-										</View>
-									)}
-								/>
-
-								{errors.code && (
-									<ErrorText style={styles.errorText}>
-										{errors.code.message}
-									</ErrorText>
-								)}
-
-								{error && (
-									<ErrorText style={styles.errorText}>{error}</ErrorText>
-								)}
-
-								<View style={styles.actionsContainer}>
-									<Button
-										onPress={handleSubmit(onSubmit)}
-										disabled={isLoading || !codeValue || codeValue.length !== 6}
-										style={styles.actionButton}
-									>
-										{isLoading ? 'Verifying...' : 'Verify Code'}
-									</Button>
-
-									<Text style={styles.helpText}>
-										Didn't receive the code? Check your spam folder or request a
-										new one.
+				{/* Content */}
+				<View style={styles.content}>
+					<View style={styles.formContainer}>
+						<Controller
+							control={control}
+							name="code"
+							render={({ field: { onChange, value } }) => (
+								<View style={styles.otpContainer}>
+									<Text style={styles.otpLabel}>
+										Enter 6-character code:
 									</Text>
-
-									<Button
-										onPress={handleResendCode}
-										variant="outline"
-										style={styles.actionButton}
-										disabled={isResending}
-									>
-										{isResending ? 'Sending...' : 'Resend code'}
-									</Button>
+									<TextInput
+										style={[
+											styles.singleOtpInput,
+											errors.code && styles.singleOtpInputError,
+											isLoading && styles.singleOtpInputDisabled,
+										]}
+										value={value}
+										onChangeText={(text) => {
+											// Allow alphanumeric characters and limit to 6 characters
+											const code = text
+												.replace(/[^A-Za-z0-9]/g, '')
+												.slice(0, 6)
+												.toUpperCase()
+											console.log('OTP Input changed:', code)
+											onChange(code)
+										}}
+										placeholder="ABC123"
+										keyboardType="default"
+										maxLength={6}
+										editable={!isLoading}
+										autoFocus={true}
+										selectTextOnFocus={true}
+										returnKeyType="done"
+										onSubmitEditing={() => {
+											if (value.length === 6) {
+												void handleSubmit(onSubmit)()
+											}
+										}}
+									/>
 								</View>
-							</View>
-						</CardContent>
+							)}
+						/>
 
-						<CardFooter>
-							<View style={styles.footer}>
-								<TouchableOpacity onPress={handleBackToSignUp}>
-									<Text style={styles.footerLinkText}>Back to sign up</Text>
-								</TouchableOpacity>
+						{errors.code && (
+							<ErrorText style={styles.errorText}>
+								{errors.code.message}
+							</ErrorText>
+						)}
 
-								<Text style={styles.footerSeparator}>•</Text>
+						{error && (
+							<ErrorText style={styles.errorText}>{error}</ErrorText>
+						)}
 
-								<TouchableOpacity onPress={handleGoToSignIn}>
-									<Text style={styles.footerLinkText}>
-										Already have an account?
-									</Text>
-								</TouchableOpacity>
-							</View>
-						</CardFooter>
-					</Card>
+						<View style={styles.actionsContainer}>
+							<Button
+								onPress={handleSubmit(onSubmit)}
+								disabled={isLoading || !codeValue || codeValue.length !== 6}
+								style={styles.actionButton}
+							>
+								{isLoading ? 'Verifying...' : 'Verify Code'}
+							</Button>
+
+							<Text style={styles.helpText}>
+								Didn't receive the code? Check your spam folder or request a
+								new one.
+							</Text>
+
+							<Button
+								onPress={handleResendCode}
+								variant="outline"
+								style={styles.actionButton}
+								disabled={isResending}
+							>
+								{isResending ? 'Sending...' : 'Resend code'}
+							</Button>
+						</View>
+					</View>
+				</View>
+
+				{/* Footer */}
+				<View style={styles.footer}>
+					<TouchableOpacity onPress={handleBackToSignUp}>
+						<Text style={styles.footerLinkText}>Back to sign up</Text>
+					</TouchableOpacity>
+
+					<Text style={styles.footerSeparator}>•</Text>
+
+					<TouchableOpacity onPress={handleGoToSignIn}>
+						<Text style={styles.footerLinkText}>
+							Already have an account?
+						</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
@@ -278,32 +271,34 @@ export default function VerifyCodeScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
-	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
-		lineHeight: 22,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	formContainer: {
 		gap: 20,
@@ -362,16 +357,17 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 		gap: 8,
 	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},
 	footerSeparator: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#9ca3af',
 	},
 })

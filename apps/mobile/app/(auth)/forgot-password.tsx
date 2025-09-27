@@ -12,10 +12,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Input,
 	Button,
 	ErrorText,
@@ -62,70 +58,67 @@ export default function ForgotPasswordScreen() {
 	}
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>Reset your password</Text>
-							<Text style={styles.subtitle}>
-								Enter your email address and we'll send you a link to reset your
-								password.
-							</Text>
-						</CardHeader>
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>Reset your password</Text>
+					<Text style={styles.subtitle}>
+						Enter your email address and we'll send you a link to reset your
+						password.
+					</Text>
+				</View>
 
-						<CardContent>
-							<View style={styles.formContainer}>
-								<View style={styles.inputContainer}>
-									<Text style={styles.label}>Email</Text>
-									<Controller
-										control={control}
-										name="email"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												placeholder="m@example.com"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												autoCapitalize="none"
-												autoCorrect={false}
-												autoComplete="email"
-												keyboardType="email-address"
-												returnKeyType="done"
-												onSubmitEditing={handleSubmit(onSubmit)}
-												error={!!errors.email}
-												autoFocus
-											/>
-										)}
+				{/* Content */}
+				<View style={styles.content}>
+					<View style={styles.formContainer}>
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>Email</Text>
+							<Controller
+								control={control}
+								name="email"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										placeholder="m@example.com"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										autoCapitalize="none"
+										autoCorrect={false}
+										autoComplete="email"
+										keyboardType="email-address"
+										returnKeyType="done"
+										onSubmitEditing={handleSubmit(onSubmit)}
+										error={!!errors.email}
+										autoFocus
 									/>
-									{errors.email && (
-										<ErrorText>{errors.email.message}</ErrorText>
-									)}
-								</View>
+								)}
+							/>
+							{errors.email && (
+								<ErrorText>{errors.email.message}</ErrorText>
+							)}
+						</View>
 
-								<Button
-									onPress={handleSubmit(onSubmit)}
-									disabled={!isValid}
-									style={styles.submitButton}
-								>
-									Send reset link
-								</Button>
-							</View>
-						</CardContent>
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							disabled={!isValid}
+							style={styles.submitButton}
+						>
+							Send reset link
+						</Button>
+					</View>
+				</View>
 
-						<CardFooter>
-							<View style={styles.footer}>
-								<Text style={styles.footerText}>Remember your password? </Text>
-								<TouchableOpacity onPress={handleBackToSignIn}>
-									<Text style={styles.footerLinkText}>Back to sign in</Text>
-								</TouchableOpacity>
-							</View>
-						</CardFooter>
-					</Card>
+				{/* Footer */}
+				<View style={styles.footer}>
+					<Text style={styles.footerText}>Remember your password? </Text>
+					<TouchableOpacity onPress={handleBackToSignIn}>
+						<Text style={styles.footerLinkText}>Back to sign in</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</Screen>
@@ -133,32 +126,34 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
-	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
-		lineHeight: 22,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	formContainer: {
 		gap: 16,
@@ -178,14 +173,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 	},
 	footerText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#6b7280',
 	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},

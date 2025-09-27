@@ -597,7 +597,7 @@ export const customerPortalAction = async (
 	return redirect(portalSession.url)
 }
 
-export async function getOrganizationInvoices(organization: Organization) {
+export async function getOrganizationInvoices(organization: { stripeCustomerId: string | null }) {
 	if (!organization.stripeCustomerId) {
 		return []
 	}
@@ -617,8 +617,8 @@ export async function getOrganizationInvoices(organization: Organization) {
 			currency: invoice.currency,
 			created: invoice.created,
 			dueDate: invoice.due_date,
-			hostedInvoiceUrl: invoice.hosted_invoice_url,
-			invoicePdf: invoice.invoice_pdf,
+			hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+			invoicePdf: invoice.invoice_pdf ?? null,
 			periodStart: invoice.period_start,
 			periodEnd: invoice.period_end,
 		}))

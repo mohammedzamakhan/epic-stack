@@ -10,10 +10,6 @@ import {
 import { useLocalSearchParams } from 'expo-router'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Button,
 	ErrorText,
 } from '../../components/ui'
@@ -106,19 +102,15 @@ export default function VerifyEmailScreen() {
 
 	if (isVerifying) {
 		return (
-			<Screen>
+			<Screen style={styles.screen}>
 				<View style={styles.centerContainer}>
-					<Card style={styles.card}>
-						<CardContent>
-							<View style={styles.loadingContainer}>
-								<Text style={styles.loadingIcon}>⏳</Text>
-								<Text style={styles.title}>Verifying your email...</Text>
-								<Text style={styles.subtitle}>
-									Please wait while we verify your email address.
-								</Text>
-							</View>
-						</CardContent>
-					</Card>
+					<View style={styles.loadingContainer}>
+						<Text style={styles.loadingIcon}>⏳</Text>
+						<Text style={styles.title}>Verifying your email...</Text>
+						<Text style={styles.subtitle}>
+							Please wait while we verify your email address.
+						</Text>
+					</View>
 				</View>
 			</Screen>
 		)
@@ -126,82 +118,75 @@ export default function VerifyEmailScreen() {
 
 	if (isVerified) {
 		return (
-			<Screen>
+			<Screen style={styles.screen}>
 				<View style={styles.centerContainer}>
-					<Card style={styles.card}>
-						<CardContent>
-							<View style={styles.successContainer}>
-								<Text style={styles.successIcon}>✅</Text>
-								<Text style={styles.title}>Email Verified!</Text>
-								<Text style={styles.subtitle}>
-									Your email has been successfully verified. You can now sign in
-									to your account.
-								</Text>
+					<View style={styles.successContainer}>
+						<Text style={styles.successIcon}>✅</Text>
+						<Text style={styles.title}>Email Verified!</Text>
+						<Text style={styles.subtitle}>
+							Your email has been successfully verified. You can now sign in
+							to your account.
+						</Text>
 
-								<Button
-									onPress={handleBackToSignIn}
-									style={styles.actionButton}
-								>
-									Continue to Sign In
-								</Button>
-							</View>
-						</CardContent>
-					</Card>
+						<Button
+							onPress={handleBackToSignIn}
+							style={styles.actionButton}
+						>
+							Continue to Sign In
+						</Button>
+					</View>
 				</View>
 			</Screen>
 		)
 	}
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>Verify your email</Text>
-							<Text style={styles.subtitle}>
-								{email
-									? `We've sent a verification link to ${email}. Click the link in your email to verify your account.`
-									: 'Check your email for a verification link to complete your account setup.'}
-							</Text>
-						</CardHeader>
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>Verify your email</Text>
+					<Text style={styles.subtitle}>
+						{email
+							? `We've sent a verification link to ${email}. Click the link in your email to verify your account.`
+							: 'Check your email for a verification link to complete your account setup.'}
+					</Text>
+				</View>
 
-						<CardContent>
-							{verificationError && (
-								<ErrorText style={styles.errorContainer}>
-									{verificationError}
-								</ErrorText>
-							)}
+				{/* Content */}
+				<View style={styles.content}>
+					{verificationError && (
+						<ErrorText style={styles.errorContainer}>
+							{verificationError}
+						</ErrorText>
+					)}
 
-							<View style={styles.actionsContainer}>
-								<Text style={styles.helpText}>
-									Didn't receive the email? Check your spam folder or request a
-									new one.
-								</Text>
+					<View style={styles.actionsContainer}>
+						<Text style={styles.helpText}>
+							Didn't receive the email? Check your spam folder or request a
+							new one.
+						</Text>
 
-								{email && (
-									<Button
-										onPress={handleResendVerification}
-										variant="outline"
-										style={styles.actionButton}
-									>
-										Resend verification email
-									</Button>
-								)}
-							</View>
-						</CardContent>
+						{email && (
+							<Button
+								onPress={handleResendVerification}
+								variant="outline"
+								style={styles.actionButton}
+							>
+								Resend verification email
+							</Button>
+						)}
+					</View>
+				</View>
 
-						<CardFooter>
-							<View style={styles.footer}>
-								<TouchableOpacity onPress={handleBackToSignIn}>
-									<Text style={styles.footerLinkText}>Back to sign in</Text>
-								</TouchableOpacity>
-							</View>
-						</CardFooter>
-					</Card>
+				{/* Footer */}
+				<View style={styles.footer}>
+					<TouchableOpacity onPress={handleBackToSignIn}>
+						<Text style={styles.footerLinkText}>Back to sign in</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</Screen>
@@ -209,37 +194,40 @@ export default function VerifyEmailScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
-	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
 	centerContainer: {
 		flex: 1,
 		justifyContent: 'center',
-		padding: 20,
+		alignItems: 'center',
+		paddingHorizontal: 24,
 	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
-		lineHeight: 22,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	loadingContainer: {
 		alignItems: 'center',
@@ -277,10 +265,11 @@ const styles = StyleSheet.create({
 	},
 	footer: {
 		alignItems: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},

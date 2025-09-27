@@ -15,10 +15,6 @@ import { MobileSignupSchema } from '@repo/validation'
 import type { z } from 'zod'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Input,
 	Button,
 	ErrorText,
@@ -142,142 +138,139 @@ export default function SignUpScreen() {
 	const isInviteSignup = !!inviteToken
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>
-								{isInviteSignup ? 'Join organization' : 'Create an account'}
-							</Text>
-							<Text style={styles.subtitle}>
-								{isInviteSignup
-									? 'Complete your signup to join the organization'
-									: 'Sign up with your social account or email'}
-							</Text>
-						</CardHeader>
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>
+						{isInviteSignup ? 'Join organization' : 'Create an account'}
+					</Text>
+					<Text style={styles.subtitle}>
+						{isInviteSignup
+							? 'Complete your signup to join the organization'
+							: 'Sign up with your social account or email'}
+					</Text>
+				</View>
 
-						<CardContent>
-							{/* Organization Invite Message */}
-							{isInviteSignup && (
-								<View style={styles.inviteContainer}>
-									<View style={styles.inviteHeader}>
-										<Text style={styles.inviteIcon}>📧</Text>
-										<Text style={styles.inviteTitle}>Organization Invite</Text>
-									</View>
-									<Text style={styles.inviteMessage}>
-										You've been invited to join an organization. Complete your
-										signup to get started.
-									</Text>
-								</View>
-							)}
+				{/* Content */}
+				<View style={styles.content}>
+					{/* Organization Invite Message */}
+					{isInviteSignup && (
+						<View style={styles.inviteContainer}>
+							<View style={styles.inviteHeader}>
+								<Text style={styles.inviteIcon}>📧</Text>
+								<Text style={styles.inviteTitle}>Organization Invite</Text>
+							</View>
+							<Text style={styles.inviteMessage}>
+								You've been invited to join an organization. Complete your
+								signup to get started.
+							</Text>
+						</View>
+					)}
 
-							{/* Social Signup Buttons */}
-							<View style={styles.socialContainer}>
-								{configuredProviders.map((provider) => (
-									<SocialButton
-										key={provider}
-										provider={provider as 'github' | 'google'}
-										type="signup"
-										disabled={isLoading}
-										redirectTo={redirectTo}
-										onSuccess={handleSocialSuccess}
-										onError={handleSocialError}
+					{/* Social Signup Buttons */}
+					<View style={styles.socialContainer}>
+						{configuredProviders.map((provider) => (
+							<SocialButton
+								key={provider}
+								provider={provider as 'github' | 'google'}
+								type="signup"
+								disabled={isLoading}
+								redirectTo={redirectTo}
+								onSuccess={handleSocialSuccess}
+								onError={handleSocialError}
+							/>
+						))}
+					</View>
+
+					{/* Divider */}
+					<Divider text="Or continue with email" />
+
+					{/* Error Display */}
+					{currentError && (
+						<ErrorText style={styles.errorContainer}>
+							{currentError}
+						</ErrorText>
+					)}
+
+					{/* Signup Form */}
+					<View style={styles.formContainer}>
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>Email</Text>
+							<Controller
+								control={control}
+								name="email"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={emailRef}
+										placeholder="m@example.com"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										inputType="email"
+										onSubmitEditing={handleSubmit(onSubmit)}
+										editable={!isLoading}
+										error={!!errors.email}
+										autoFocus
 									/>
-								))}
-							</View>
-
-							{/* Divider */}
-							<Divider text="Or continue with email" />
-
-							{/* Error Display */}
-							{currentError && (
-								<ErrorText style={styles.errorContainer}>
-									{currentError}
-								</ErrorText>
+								)}
+							/>
+							{errors.email && (
+								<ErrorText>{errors.email.message}</ErrorText>
 							)}
+						</View>
 
-							{/* Signup Form */}
-							<View style={styles.formContainer}>
-								<View style={styles.inputContainer}>
-									<Text style={styles.label}>Email</Text>
-									<Controller
-										control={control}
-										name="email"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={emailRef}
-												placeholder="m@example.com"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												inputType="email"
-												onSubmitEditing={handleSubmit(onSubmit)}
-												editable={!isLoading}
-												error={!!errors.email}
-												autoFocus
-											/>
-										)}
-									/>
-									{errors.email && (
-										<ErrorText>{errors.email.message}</ErrorText>
-									)}
-								</View>
+						{/* Submit Button */}
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							disabled={!isValid || isLoading}
+							loading={isSignupLoading}
+							style={styles.submitButton}
+						>
+							Sign up
+						</Button>
+					</View>
 
-								{/* Submit Button */}
-								<Button
-									onPress={handleSubmit(onSubmit)}
-									disabled={!isValid || isLoading}
-									loading={isSignupLoading}
-									style={styles.submitButton}
-								>
-									Sign up
-								</Button>
-							</View>
+					{/* Terms and Privacy */}
+					<Text style={styles.termsText}>
+						By signing up, you agree to our{' '}
+						<Text
+							style={styles.termsLink}
+							onPress={() =>
+								Alert.alert(
+									'Terms of Service',
+									'Terms of Service will be available soon.',
+								)
+							}
+						>
+							Terms of Service
+						</Text>{' '}
+						and{' '}
+						<Text
+							style={styles.termsLink}
+							onPress={() =>
+								Alert.alert(
+									'Privacy Policy',
+									'Privacy Policy will be available soon.',
+								)
+							}
+						>
+							Privacy Policy
+						</Text>
+						.
+					</Text>
+				</View>
 
-							{/* Terms and Privacy */}
-							<Text style={styles.termsText}>
-								By signing up, you agree to our{' '}
-								<Text
-									style={styles.termsLink}
-									onPress={() =>
-										Alert.alert(
-											'Terms of Service',
-											'Terms of Service will be available soon.',
-										)
-									}
-								>
-									Terms of Service
-								</Text>{' '}
-								and{' '}
-								<Text
-									style={styles.termsLink}
-									onPress={() =>
-										Alert.alert(
-											'Privacy Policy',
-											'Privacy Policy will be available soon.',
-										)
-									}
-								>
-									Privacy Policy
-								</Text>
-								.
-							</Text>
-						</CardContent>
-
-						<CardFooter>
-							<View style={styles.footer}>
-								<Text style={styles.footerText}>Already have an account? </Text>
-								<TouchableOpacity onPress={handleNavigateToSignIn}>
-									<Text style={styles.footerLinkText}>Sign in</Text>
-								</TouchableOpacity>
-							</View>
-						</CardFooter>
-					</Card>
+				{/* Footer */}
+				<View style={styles.footer}>
+					<Text style={styles.footerText}>Already have an account? </Text>
+					<TouchableOpacity onPress={handleNavigateToSignIn}>
+						<Text style={styles.footerLinkText}>Sign in</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
@@ -298,31 +291,34 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
-	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	inviteContainer: {
 		backgroundColor: '#f0f9ff',
@@ -388,17 +384,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 	},
 	footerText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#6b7280',
 	},
-	footerLink: {
-		// Link styles are handled by the Link component
-	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},

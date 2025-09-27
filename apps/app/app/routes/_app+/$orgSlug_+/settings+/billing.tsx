@@ -160,7 +160,7 @@ export default function BillingSettings() {
 					isClosedBeta={isClosedBeta}
 				/>
 			</AnnotatedSection>
-			
+
 			{!isClosedBeta && (
 				<AnnotatedSection>
 					<InvoicesCard invoices={invoices} />

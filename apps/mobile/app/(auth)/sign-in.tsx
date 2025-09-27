@@ -15,10 +15,6 @@ import { MobileLoginFormSchema } from '@repo/validation'
 import type { z } from 'zod'
 import {
 	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
 	Input,
 	Button,
 	ErrorText,
@@ -151,177 +147,174 @@ export default function SignInScreen() {
 	const isLoading = isLoginLoading
 
 	return (
-		<Screen>
+		<Screen style={styles.screen}>
 			<ScrollView
 				contentContainerStyle={styles.scrollContainer}
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
-				<View style={styles.container}>
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.title}>Welcome back</Text>
-							<Text style={styles.subtitle}>
-								Sign in with your social account or username
+				{/* Header */}
+				<View style={styles.header}>
+					<Text style={styles.title}>Welcome back</Text>
+					<Text style={styles.subtitle}>
+						Sign in with your social account or username
+					</Text>
+				</View>
+
+				{/* Content */}
+				<View style={styles.content}>
+					{/* Banned Account Warning */}
+					{isBanned && (
+						<View style={styles.bannedContainer}>
+							<View style={styles.bannedHeader}>
+								<Text style={styles.bannedIcon}>🔒</Text>
+								<Text style={styles.bannedTitle}>Account Suspended</Text>
+							</View>
+							<Text style={styles.bannedMessage}>
+								Your account has been suspended. Please contact support if
+								you believe this is an error.
 							</Text>
-						</CardHeader>
+							<TouchableOpacity
+								style={styles.supportButton}
+								onPress={() =>
+									Alert.alert(
+										'Contact Support',
+										'Please email support@example.com for assistance.',
+									)
+								}
+							>
+								<Text style={styles.supportButtonText}>
+									Contact Support
+								</Text>
+							</TouchableOpacity>
+						</View>
+					)}
 
-						<CardContent>
-							{/* Banned Account Warning */}
-							{isBanned && (
-								<View style={styles.bannedContainer}>
-									<View style={styles.bannedHeader}>
-										<Text style={styles.bannedIcon}>🔒</Text>
-										<Text style={styles.bannedTitle}>Account Suspended</Text>
-									</View>
-									<Text style={styles.bannedMessage}>
-										Your account has been suspended. Please contact support if
-										you believe this is an error.
-									</Text>
-									<TouchableOpacity
-										style={styles.supportButton}
-										onPress={() =>
-											Alert.alert(
-												'Contact Support',
-												'Please email support@example.com for assistance.',
-											)
-										}
-									>
-										<Text style={styles.supportButtonText}>
-											Contact Support
-										</Text>
-									</TouchableOpacity>
-								</View>
+					{/* Social Login Buttons */}
+					<View style={styles.socialContainer}>
+						{configuredProviders.map((provider) => (
+							<SocialButton
+								key={provider}
+								provider={provider as 'github' | 'google'}
+								type="login"
+								disabled={isLoading || isBanned}
+								redirectTo={redirectTo}
+								onSuccess={handleSocialSuccess}
+								onError={handleSocialError}
+							/>
+						))}
+					</View>
+
+					{/* Divider */}
+					<Divider text="Or continue with username" />
+
+					{/* Error Display */}
+					{currentError && (
+						<ErrorText style={styles.errorContainer}>
+							{currentError}
+						</ErrorText>
+					)}
+
+					{/* Login Form */}
+					<View style={styles.formContainer}>
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>Username</Text>
+							<Controller
+								control={control}
+								name="username"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={usernameRef}
+										placeholder="Enter your username"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										inputType="username"
+										nextInputRef={passwordRef}
+										editable={!isLoading && !isBanned}
+										error={!!errors.username}
+									/>
+								)}
+							/>
+							{errors.username && (
+								<ErrorText>{errors.username.message}</ErrorText>
 							)}
+						</View>
 
-							{/* Social Login Buttons */}
-							<View style={styles.socialContainer}>
-								{configuredProviders.map((provider) => (
-									<SocialButton
-										key={provider}
-										provider={provider as 'github' | 'google'}
-										type="login"
-										disabled={isLoading || isBanned}
-										redirectTo={redirectTo}
-										onSuccess={handleSocialSuccess}
-										onError={handleSocialError}
-									/>
-								))}
-							</View>
-
-							{/* Divider */}
-							<Divider text="Or continue with username" />
-
-							{/* Error Display */}
-							{currentError && (
-								<ErrorText style={styles.errorContainer}>
-									{currentError}
-								</ErrorText>
-							)}
-
-							{/* Login Form */}
-							<View style={styles.formContainer}>
-								<View style={styles.inputContainer}>
-									<Text style={styles.label}>Username</Text>
-									<Controller
-										control={control}
-										name="username"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={usernameRef}
-												placeholder="Enter your username"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												inputType="username"
-												nextInputRef={passwordRef}
-												editable={!isLoading && !isBanned}
-												error={!!errors.username}
-											/>
-										)}
-									/>
-									{errors.username && (
-										<ErrorText>{errors.username.message}</ErrorText>
-									)}
-								</View>
-
-								<View style={styles.inputContainer}>
-									<View style={styles.passwordHeader}>
-										<Text style={styles.label}>Password</Text>
-										<TouchableOpacity onPress={handleForgotPassword}>
-											<Text style={styles.forgotLink}>Forgot password?</Text>
-										</TouchableOpacity>
-									</View>
-									<Controller
-										control={control}
-										name="password"
-										render={({ field: { onChange, onBlur, value } }) => (
-											<Input
-												ref={passwordRef}
-												placeholder="Enter your password"
-												value={value}
-												onChangeText={onChange}
-												onBlur={onBlur}
-												secureTextEntry={!showPassword}
-												inputType="password"
-												onSubmitEditing={handleSubmit(onSubmit)}
-												editable={!isLoading && !isBanned}
-												error={!!errors.password}
-												rightIcon={
-													<TouchableOpacity
-														onPress={() => setShowPassword(!showPassword)}
-														style={styles.eyeButton}
-													>
-														<Text style={styles.eyeIcon}>
-															{showPassword ? '🙈' : '👁️'}
-														</Text>
-													</TouchableOpacity>
-												}
-											/>
-										)}
-									/>
-									{errors.password && (
-										<ErrorText>{errors.password.message}</ErrorText>
-									)}
-								</View>
-
-								{/* Remember Me Checkbox */}
-								<View style={styles.checkboxContainer}>
-									<Controller
-										control={control}
-										name="remember"
-										render={({ field: { onChange, value } }) => (
-											<Checkbox
-												checked={value}
-												onCheckedChange={onChange}
-												label="Remember me"
-												disabled={isLoading || isBanned}
-											/>
-										)}
-									/>
-								</View>
-
-								{/* Submit Button */}
-								<Button
-									onPress={handleSubmit(onSubmit)}
-									disabled={!isValid || isLoading || isBanned}
-									loading={isLoginLoading}
-									style={styles.submitButton}
-								>
-									Sign In
-								</Button>
-							</View>
-						</CardContent>
-
-						<CardFooter>
-							<View style={styles.footer}>
-								<Text style={styles.footerText}>Don't have an account? </Text>
-								<TouchableOpacity onPress={handleNavigateToSignUp}>
-									<Text style={styles.footerLinkText}>Create account</Text>
+						<View style={styles.inputContainer}>
+							<View style={styles.passwordHeader}>
+								<Text style={styles.label}>Password</Text>
+								<TouchableOpacity onPress={handleForgotPassword}>
+									<Text style={styles.forgotLink}>Forgot password?</Text>
 								</TouchableOpacity>
 							</View>
-						</CardFooter>
-					</Card>
+							<Controller
+								control={control}
+								name="password"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										ref={passwordRef}
+										placeholder="Enter your password"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										secureTextEntry={!showPassword}
+										inputType="password"
+										onSubmitEditing={handleSubmit(onSubmit)}
+										editable={!isLoading && !isBanned}
+										error={!!errors.password}
+										rightIcon={
+											<TouchableOpacity
+												onPress={() => setShowPassword(!showPassword)}
+												style={styles.eyeButton}
+											>
+												<Text style={styles.eyeIcon}>
+													{showPassword ? '🙈' : '👁️'}
+												</Text>
+											</TouchableOpacity>
+										}
+									/>
+								)}
+							/>
+							{errors.password && (
+								<ErrorText>{errors.password.message}</ErrorText>
+							)}
+						</View>
+
+						{/* Remember Me Checkbox */}
+						<View style={styles.checkboxContainer}>
+							<Controller
+								control={control}
+								name="remember"
+								render={({ field: { onChange, value } }) => (
+									<Checkbox
+										checked={value}
+										onCheckedChange={onChange}
+										label="Remember me"
+										disabled={isLoading || isBanned}
+									/>
+								)}
+							/>
+						</View>
+
+						{/* Submit Button */}
+						<Button
+							onPress={handleSubmit(onSubmit)}
+							disabled={!isValid || isLoading || isBanned}
+							loading={isLoginLoading}
+							style={styles.submitButton}
+						>
+							Sign In
+						</Button>
+					</View>
+				</View>
+
+				{/* Footer */}
+				<View style={styles.footer}>
+					<Text style={styles.footerText}>Don't have an account? </Text>
+					<TouchableOpacity onPress={handleNavigateToSignUp}>
+						<Text style={styles.footerLinkText}>Create account</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
@@ -339,31 +332,34 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: '#ffffff',
+	},
 	scrollContainer: {
 		flexGrow: 1,
+		paddingHorizontal: 24,
+		paddingTop: 60,
+		paddingBottom: 40,
 	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 20,
-	},
-	card: {
-		maxWidth: 400,
-		alignSelf: 'center',
-		width: '100%',
+	header: {
+		marginBottom: 40,
+		alignItems: 'center',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 32,
+		fontWeight: '700',
 		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1a1a1a',
+		marginBottom: 12,
+		color: '#1f2937',
 	},
 	subtitle: {
 		fontSize: 16,
-		color: '#666',
+		color: '#6b7280',
 		textAlign: 'center',
-		marginBottom: 24,
+		lineHeight: 24,
+	},
+	content: {
+		flex: 1,
 	},
 	bannedContainer: {
 		backgroundColor: '#fef2f2',
@@ -450,17 +446,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		paddingTop: 16,
+		paddingTop: 32,
+		marginTop: 'auto',
 	},
 	footerText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#6b7280',
 	},
-	footerLink: {
-		// Link styles are handled by the Link component
-	},
 	footerLinkText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: '#3b82f6',
 		fontWeight: '600',
 	},
