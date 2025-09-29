@@ -11,7 +11,7 @@ import {
 } from '@repo/ui'
 
 type Invoice = {
-    id: string
+    id?: string
     number: string | null
     status: string | null
     amountPaid: number
@@ -87,7 +87,7 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
                                     <div className="flex items-center gap-3">
                                         <div>
                                             <p className="font-medium">
-                                                {invoice.number || `Invoice ${invoice.id.slice(-8)}`}
+                                                {invoice.number || `Invoice ${invoice.id?.slice(-8)}`}
                                             </p>
                                             <p className="text-muted-foreground text-sm">
                                                 {formatDate(invoice.created)}
