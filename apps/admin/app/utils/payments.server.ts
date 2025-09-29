@@ -20,9 +20,8 @@ if (!process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
 let stripe: Stripe
 try {
 	stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-		apiVersion: '2024-06-20',
-		timeout: 10000, // 10 second timeout (same as test)
-		maxNetworkRetries: 2,
+		apiVersion: '2024-12-18.acacia',
+		httpClient: Stripe.createFetchHttpClient(),
 	})
 } catch (error) {
 	throw error
