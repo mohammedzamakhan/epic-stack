@@ -28,7 +28,7 @@ import {
 	DropdownMenuTrigger,
 	Icon,
 } from '@repo/ui'
-import { useNavigate } from 'react-router'
+import { useNavigate, useLocation } from 'react-router'
 
 interface Action {
 	label: string
@@ -237,6 +237,7 @@ export default function NotificationBell() {
 		})
 	const novu = useNovu()
 	const [isOpen, setIsOpen] = useState(false)
+	const location = useLocation()
 
 	const unreadCount = notifications?.filter((n) => !n.isRead).length || 0
 
@@ -246,11 +247,17 @@ export default function NotificationBell() {
 		}
 
 		novu.on('notifications.notification_received', listener)
+		novu.on("notifications.unread_count_changed", listener);
 
 		return () => {
 			novu.off('notifications.notification_received', listener)
+			novu.off("notifications.unread_count_changed", listener);
 		}
 	}, [novu, refetch])
+
+	useEffect(() => {
+		setTimeout(() => void refetch(), 200)
+	}, [location.pathname])
 
 	const handleLoadMore = () => {
 		if (hasMore) {
