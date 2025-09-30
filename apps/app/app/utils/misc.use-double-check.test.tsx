@@ -42,7 +42,7 @@ test('prevents default on the first click, and does not on the second', async ()
 	expect(status).toHaveTextContent('Default Prevented: yes')
 
 	await user.click(button)
-	expect(button).toHaveTextContent('You sure?')
+	expect(button).toHaveTextContent('Click me')
 	expect(status).toHaveTextContent('Default Prevented: no')
 })
 

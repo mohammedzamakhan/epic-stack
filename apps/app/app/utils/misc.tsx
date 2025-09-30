@@ -215,7 +215,7 @@ export function useDoubleCheck() {
 
 		const onClick: React.ButtonHTMLAttributes<HTMLButtonElement>['onClick'] =
 			doubleCheck
-				? undefined
+				? () => setDoubleCheck(false)
 				: (e) => {
 						e.preventDefault()
 						setDoubleCheck(true)
@@ -290,7 +290,7 @@ export async function downloadFile(url: string, retries: number = 0) {
 		})
 		return file
 	} catch (e) {
-		if (retries > MAX_RETRIES) throw e
+		if (retries >= MAX_RETRIES) throw e
 		return downloadFile(url, retries + 1)
 	}
 }

@@ -4,6 +4,23 @@ const ENCRYPTION_KEY =
 	process.env.ENCRYPTION_KEY || 'your-32-character-secret-key-here'
 const ALGORITHM = 'aes-256-gcm'
 
+// Validate encryption key at module load time
+function validateEncryptionKey(key: string): void {
+	// AES-256 requires a 32-byte (256-bit) key
+	// When represented as hex, that's 64 characters
+	const hexPattern = /^[0-9a-fA-F]{64}$/
+
+	if (!hexPattern.test(key)) {
+		throw new Error(
+			'ENCRYPTION_KEY must be a 64-character hexadecimal string (32 bytes). ' +
+			'Generate one using: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
+		)
+	}
+}
+
+// Validate the key when the module is loaded
+validateEncryptionKey(ENCRYPTION_KEY)
+
 export function encrypt(text: string): string {
 	if (!text) return text
 
