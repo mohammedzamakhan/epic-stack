@@ -103,6 +103,36 @@ describe('IntegrationEncryptionService', () => {
 				'INTEGRATION_ENCRYPTION_KEY must be exactly 64 hex characters',
 			)
 		})
+
+		it('should throw error when encryption key is whitespace-only', async () => {
+			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', '   ')
+
+			const tokenData: TokenData = {
+				accessToken: 'access-token-123',
+			}
+
+			await expect(
+				encryptionService.encryptTokenData(tokenData),
+			).rejects.toThrow(
+				'INTEGRATION_ENCRYPTION_KEY environment variable cannot be empty or whitespace-only',
+			)
+		})
+
+		it('should handle encryption key with surrounding whitespace', async () => {
+			// Key with spaces around it should work after trimming
+			const validKey =
+				'1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', `  ${validKey}  `)
+
+			const tokenData: TokenData = {
+				accessToken: 'access-token-123',
+			}
+
+			const encrypted = await encryptionService.encryptTokenData(tokenData)
+
+			expect(encrypted).toBeDefined()
+			expect(encrypted.encryptedAccessToken).toBeDefined()
+		})
 	})
 
 	describe('decryptTokenData', () => {
@@ -412,6 +442,40 @@ describe('Utility functions', () => {
 			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', '')
 			const result = isEncryptionConfigured()
 			expect(result).toBe(false)
+		})
+
+		it('should return false when encryption key is whitespace-only', () => {
+			vi.unstubAllEnvs()
+			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', '   ')
+			const result = isEncryptionConfigured()
+			expect(result).toBe(false)
+		})
+
+		it('should return false when encryption key has wrong length', () => {
+			vi.unstubAllEnvs()
+			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', 'short-key')
+			const result = isEncryptionConfigured()
+			expect(result).toBe(false)
+		})
+
+		it('should return false when encryption key is not valid hex', () => {
+			vi.unstubAllEnvs()
+			// 64 characters but not valid hex
+			vi.stubEnv(
+				'INTEGRATION_ENCRYPTION_KEY',
+				'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
+			)
+			const result = isEncryptionConfigured()
+			expect(result).toBe(false)
+		})
+
+		it('should return true when encryption key is valid with surrounding whitespace', () => {
+			vi.unstubAllEnvs()
+			const validKey =
+				'1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+			vi.stubEnv('INTEGRATION_ENCRYPTION_KEY', `  ${validKey}  `)
+			const result = isEncryptionConfigured()
+			expect(result).toBe(true)
 		})
 	})
 

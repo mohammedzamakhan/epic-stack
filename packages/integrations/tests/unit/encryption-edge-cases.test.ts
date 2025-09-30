@@ -547,7 +547,7 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 			const tokenData: TokenData = { accessToken: 'token' }
 
 			await expect(newService.encryptTokenData(tokenData)).rejects.toThrow(
-				'environment variable is required',
+				'INTEGRATION_ENCRYPTION_KEY environment variable cannot be empty or whitespace-only',
 			)
 		})
 	})

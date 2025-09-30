@@ -252,7 +252,7 @@ export class TokenManager {
 				if (integration.tokenExpiresAt) {
 					const timeUntilExpiry =
 						integration.tokenExpiresAt.getTime() - now.getTime()
-					if (timeUntilExpiry <= refreshThreshold && timeUntilExpiry > 0) {
+					if (timeUntilExpiry <= refreshThreshold) {
 						needingRefresh.push(integration.id)
 					}
 				}

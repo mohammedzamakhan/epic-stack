@@ -599,7 +599,7 @@ describe('TokenManager', () => {
 
 			const result = await tokenManager.checkTokensNeedingRefresh('org-123')
 
-			expect(result).toEqual(['int-1'])
+			expect(result).toEqual(['int-1', 'int-3'])
 			expect(prisma.integration.findMany).toHaveBeenCalledWith({
 				where: {
 					organizationId: 'org-123',
@@ -613,6 +613,40 @@ describe('TokenManager', () => {
 					tokenExpiresAt: true,
 				},
 			})
+		})
+
+		it('should include tokens that have just expired (timeUntilExpiry = 0)', async () => {
+			const now = new Date()
+			const justExpired = new Date(now.getTime()) // Expires exactly now
+
+			const mockIntegrations = [
+				{ id: 'int-just-expired', tokenExpiresAt: justExpired, providerName: 'test' },
+			]
+
+			vi.mocked(prisma.integration.findMany).mockResolvedValue(
+				mockIntegrations as any,
+			)
+
+			const result = await tokenManager.checkTokensNeedingRefresh('org-123')
+
+			expect(result).toContain('int-just-expired')
+		})
+
+		it('should include tokens that expired 1 second ago', async () => {
+			const now = new Date()
+			const expiredRecently = new Date(now.getTime() - 1000) // 1 second ago
+
+			const mockIntegrations = [
+				{ id: 'int-expired', tokenExpiresAt: expiredRecently, providerName: 'test' },
+			]
+
+			vi.mocked(prisma.integration.findMany).mockResolvedValue(
+				mockIntegrations as any,
+			)
+
+			const result = await tokenManager.checkTokensNeedingRefresh('org-123')
+
+			expect(result).toContain('int-expired')
 		})
 
 		it('should handle database errors', async () => {

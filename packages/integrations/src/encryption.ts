@@ -53,21 +53,28 @@ export class IntegrationEncryptionService {
 		}
 
 		const keyString = process.env[ENCRYPTION_KEY_ENV]
-		if (!keyString || keyString.trim() === '') {
+		if (!keyString) {
 			throw new Error(
 				`${ENCRYPTION_KEY_ENV} environment variable is required for token encryption`,
 			)
 		}
 
+		const trimmedKey = keyString.trim()
+		if (trimmedKey === '') {
+			throw new Error(
+				`${ENCRYPTION_KEY_ENV} environment variable cannot be empty or whitespace-only`,
+			)
+		}
+
 		// Ensure key is exactly 32 bytes for AES-256
-		if (keyString.length !== 64) {
+		if (trimmedKey.length !== 64) {
 			// 32 bytes = 64 hex characters
 			throw new Error(
 				`${ENCRYPTION_KEY_ENV} must be exactly 64 hex characters (32 bytes)`,
 			)
 		}
 
-		this.encryptionKey = Buffer.from(keyString, 'hex')
+		this.encryptionKey = Buffer.from(trimmedKey, 'hex')
 		return this.encryptionKey
 	}
 
@@ -327,7 +334,14 @@ export const integrationEncryption = new IntegrationEncryptionService()
  * Utility function to check if encryption is properly configured
  */
 export function isEncryptionConfigured(): boolean {
-	return !!process.env[ENCRYPTION_KEY_ENV]
+	const keyString = process.env[ENCRYPTION_KEY_ENV]
+	if (!keyString) {
+		return false
+	}
+
+	const trimmedKey = keyString.trim()
+	// Validate that the key is exactly 64 hex characters (32 bytes for AES-256)
+	return trimmedKey.length === 64 && /^[0-9a-fA-F]{64}$/.test(trimmedKey)
 }
 
 /**
