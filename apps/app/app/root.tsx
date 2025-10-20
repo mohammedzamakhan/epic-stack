@@ -219,7 +219,7 @@ export const headers: Route.HeadersFunction = pipeHeaders
 function Document({
 	children,
 	nonce,
-	theme = 'light',
+	theme = 'dark',
 	env = {},
 }: {
 	children: React.ReactNode
@@ -261,7 +261,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
 	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
-	const theme = useOptionalTheme() || 'light'
+	const theme = useOptionalTheme() || 'dark'
 	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
