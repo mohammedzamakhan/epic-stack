@@ -1,5 +1,7 @@
+import { rateLimit } from '@arcjet/remix'
 import { invariantResponse } from '@epic-web/invariant'
 import { data, redirect } from 'react-router'
+import aj from '#app/utils/arcjet.server.ts'
 import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -16,6 +18,36 @@ export async function action({
 	const adminUserId = await requireUserWithRole(request, 'admin')
 	const { userId } = params
 	invariantResponse(userId, 'User ID is required')
+
+	// Apply rate limiting to prevent abuse of impersonation feature
+	// Only 5 impersonation attempts per admin per 10 minutes
+	const decision = await aj
+		.withRule(
+			rateLimit({
+				mode: 'LIVE',
+				characteristics: [`userId:${adminUserId}`],
+				max: 5,
+				interval: '10m',
+			}),
+		)
+		.protect(request)
+
+	if (decision.isDenied()) {
+		if (decision.reason.isRateLimit()) {
+			throw data(
+				{ error: 'Too many impersonation attempts' },
+				{
+					status: 429,
+					headers: await createToastHeaders({
+						type: 'error',
+						title: 'Rate Limit Exceeded',
+						description:
+							'Too many impersonation attempts. Please wait before trying again.',
+					}),
+				},
+			)
+		}
+	}
 
 	// Get the target user to impersonate
 	const targetUser = await prisma.user.findUnique({

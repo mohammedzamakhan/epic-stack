@@ -29,6 +29,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 			content: true,
 			title: true,
 			organizationId: true,
+			organization: {
+				select: {
+					members: {
+						where: { userId },
+						select: { id: true },
+					},
+				},
+			},
 			comments: {
 				select: {
 					content: true,
@@ -44,6 +52,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	if (!note) {
 		invariant(note, 'Note not found')
+	}
+
+	// Verify user has access to this note's organization
+	if (note.organization.members.length === 0) {
+		throw new Response('Unauthorized', { status: 403 })
 	}
 
 	// Track AI chat usage for onboarding
