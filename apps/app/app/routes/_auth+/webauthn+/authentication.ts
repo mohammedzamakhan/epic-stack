@@ -87,6 +87,12 @@ export async function action({ request }: Route.ActionArgs) {
 			)
 		}
 
+		// Update last login method
+		await prisma.user.update({
+			where: { id: passkey.userId },
+			data: { lastLoginMethod: 'passkey' },
+		})
+
 		const session = await prisma.session.create({
 			select: { id: true, expirationDate: true, userId: true },
 			data: {

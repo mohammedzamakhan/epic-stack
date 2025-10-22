@@ -123,7 +123,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 	// Connection exists already? Make a new session
 	if (existingConnection) {
-		return makeSession({ request, userId: existingConnection.userId })
+		return makeSession({ request, userId: existingConnection.userId, providerName })
 	}
 
 	// if the email matches a user in the db, then link the account and
@@ -141,7 +141,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			},
 		})
 		return makeSession(
-			{ request, userId: user.id },
+			{ request, userId: user.id, providerName },
 			{
 				headers: await createToastHeaders({
 					title: 'Connected',
@@ -182,7 +182,8 @@ async function makeSession(
 		request,
 		userId,
 		redirectTo,
-	}: { request: Request; userId: string; redirectTo?: string | null },
+		providerName,
+	}: { request: Request; userId: string; redirectTo?: string | null; providerName: string },
 	responseInit?: ResponseInit,
 ) {
 	redirectTo ??= '/'
@@ -194,6 +195,12 @@ async function makeSession(
 			headers: combineHeaders(responseInit?.headers, destroyRedirectTo),
 		})
 	}
+
+	// Update last login method with provider name
+	await prisma.user.update({
+		where: { id: userId },
+		data: { lastLoginMethod: providerName },
+	})
 
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },

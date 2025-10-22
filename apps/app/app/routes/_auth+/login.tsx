@@ -5,7 +5,7 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { type PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server'
-import { useOptimistic, useState, useTransition } from 'react'
+import { useEffect, useOptimistic, useState, useTransition } from 'react'
 import { data, Form, Link, useNavigate, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
@@ -81,7 +81,27 @@ const aj = arcjet
 
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireAnonymous(request)
-	return {}
+
+	// Try to get last login method from username cookie
+	const cookieHeader = request.headers.get('Cookie')
+	const lastUsername = cookieHeader
+		?.split(';')
+		.find((c) => c.trim().startsWith('lastUsername='))
+		?.split('=')[1]
+
+	let lastLoginMethod: string | null = null
+
+	// If username is stored in cookie, fetch the user's last login method
+	if (lastUsername) {
+		const { prisma } = await import('#app/utils/db.server.ts')
+		const user = await prisma.user.findFirst({
+			where: { username: decodeURIComponent(lastUsername).toLowerCase() },
+			select: { lastLoginMethod: true },
+		})
+		lastLoginMethod = user?.lastLoginMethod ?? null
+	}
+
+	return { lastLoginMethod }
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -147,11 +167,24 @@ export async function action({ request }: Route.ActionArgs) {
 	})
 }
 
-export default function LoginPage({ actionData }: Route.ComponentProps) {
+export default function LoginPage({ loaderData, actionData }: Route.ComponentProps) {
 	const isPending = useIsPending()
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')
 	const isBanned = searchParams.get('banned') === 'true'
+	const [lastUsername, setLastUsername] = useState<string>('')
+
+	// Load last username from localStorage on mount
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const stored = localStorage.getItem('lastUsername')
+			if (stored) {
+				setLastUsername(stored)
+				// Set as cookie for server-side access
+				document.cookie = `lastUsername=${encodeURIComponent(stored)}; path=/; max-age=${60 * 60 * 24 * 365}`
+			}
+		}
+	}, [])
 
 	const [form, fields] = useForm({
 		id: 'login-form',
@@ -162,7 +195,34 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 			return parseWithZod(formData, { schema: LoginFormSchema })
 		},
 		shouldRevalidate: 'onBlur',
+		onSubmit(event, context) {
+			// Save username to localStorage when submitting
+			const formData = context.formData
+			const username = formData.get('username') as string
+			if (username && typeof window !== 'undefined') {
+				localStorage.setItem('lastUsername', username)
+				document.cookie = `lastUsername=${encodeURIComponent(username)}; path=/; max-age=${60 * 60 * 24 * 365}`
+			}
+		},
 	})
+
+	const lastLoginMethod = loaderData?.lastLoginMethod
+
+	const getLastLoginMethodLabel = (method: string | null) => {
+		if (!method) return null
+		switch (method) {
+			case 'password':
+				return 'Username & Password'
+			case 'github':
+				return 'GitHub'
+			case 'google':
+				return 'Google'
+			case 'passkey':
+				return 'Passkey'
+			default:
+				return method
+		}
+	}
 
 	return (
 		<Card className="bg-muted/80 border-0 shadow-2xl">
@@ -173,6 +233,16 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
+				{lastLoginMethod && (
+					<div className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900 mb-4 rounded-lg border p-3">
+						<div className="text-blue-700 dark:text-blue-300 flex items-center gap-2">
+							<Icon name="info" className="h-4 w-4" />
+							<span className="text-sm">
+								Last login: <strong>{getLastLoginMethodLabel(lastLoginMethod)}</strong>
+							</span>
+						</div>
+					</div>
+				)}
 				{isBanned && (
 					<div className="border-destructive bg-destructive/10 mb-4 rounded-lg border p-4">
 						<div className="text-destructive flex items-center gap-2">

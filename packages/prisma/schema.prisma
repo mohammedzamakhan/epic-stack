@@ -16,6 +16,7 @@ model User {
   name                   String?
   createdAt              DateTime                   @default(now())
   updatedAt              DateTime                   @updatedAt
+  lastLoginMethod        String?                    // tracks last used login method: "password", "github", "google", "passkey"
   isBanned               Boolean                    @default(false)
   banReason              String?
   banExpiresAt           DateTime?

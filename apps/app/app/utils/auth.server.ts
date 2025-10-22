@@ -156,6 +156,12 @@ export async function login({
 	const canLogin = await canUserLogin(user.id)
 	if (!canLogin) return null
 
+	// Update last login method
+	await prisma.user.update({
+		where: { id: user.id },
+		data: { lastLoginMethod: 'password' },
+	})
+
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
