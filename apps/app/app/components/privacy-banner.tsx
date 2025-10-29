@@ -1,11 +1,10 @@
-import { useEffect } from 'react'
-import { Form, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 import { Button } from '@repo/ui'
 
 export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 	const fetcher = useFetcher()
 
-	if (consent !== undefined) {
+	if (consent !== null) {
 		return null
 	}
 
