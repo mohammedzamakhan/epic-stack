@@ -78,14 +78,20 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
 ]
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const url = new URL(request.url)
-	const apiKey = url.searchParams.get('apiKey')
+	// Extract API key from Authorization header instead of query parameters
+	const authHeader = request.headers.get('Authorization')
+	const apiKey = authHeader?.replace(/^Bearer\s+/i, '')
 
 	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
+		return new Response(
+			JSON.stringify({
+				error: 'API key required in Authorization header (Bearer token)',
+			}),
+			{
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			},
+		)
 	}
 
 	const authData = await validateApiKey(apiKey)
@@ -103,14 +109,20 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	const url = new URL(request.url)
-	const apiKey = url.searchParams.get('apiKey')
+	// Extract API key from Authorization header instead of query parameters
+	const authHeader = request.headers.get('Authorization')
+	const apiKey = authHeader?.replace(/^Bearer\s+/i, '')
 
 	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
+		return new Response(
+			JSON.stringify({
+				error: 'API key required in Authorization header (Bearer token)',
+			}),
+			{
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			},
+		)
 	}
 
 	const authData = await validateApiKey(apiKey)
@@ -128,7 +140,8 @@ export async function action({ request }: Route.ActionArgs) {
 		if (tool === 'find_user') {
 			const { query } = args
 
-			console.log(tool, query, body)
+			// Removed sensitive logging that could expose API keys
+			console.log('Tool requested:', tool)
 
 			const users = await prisma.user.findMany({
 				where: {

@@ -14,6 +14,44 @@ export function sanitizeHtml(input: string): string {
 }
 
 /**
+ * Sanitize rich text content while allowing safe HTML formatting tags
+ * Use this for user-generated content like notes and comments
+ */
+export function sanitizeRichText(input: string): string {
+	if (!input || typeof input !== 'string') return ''
+
+	return DOMPurify.sanitize(input, {
+		ALLOWED_TAGS: [
+			'p',
+			'br',
+			'strong',
+			'em',
+			'u',
+			's',
+			'blockquote',
+			'code',
+			'pre',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'ul',
+			'ol',
+			'li',
+			'a',
+			'span',
+			'div',
+		],
+		ALLOWED_ATTR: ['href', 'class', 'id'],
+		ALLOWED_URI_REGEXP:
+			/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+		KEEP_CONTENT: true,
+	})
+}
+
+/**
  * Sanitize and validate URL inputs
  */
 export function sanitizeUrl(input: string): string {

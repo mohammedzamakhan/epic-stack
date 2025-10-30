@@ -361,7 +361,14 @@ export default function CreateOrganizationPage() {
 	const actionData = useActionData<typeof action>()
 	const { trialConfig, plansAndPrices } = useLoaderData<typeof loader>()
 	const [searchParams] = useSearchParams()
-	const currentStep = parseInt(searchParams.get('step') || '1')
+	// Use Zod to safely parse and validate the step parameter to prevent attacks
+	const currentStep = z.coerce
+		.number()
+		.int()
+		.min(1)
+		.max(5)
+		.catch(1)
+		.parse(searchParams.get('step') ?? '1')
 	const orgId = searchParams.get('orgId')
 
 	// Dynamic step configuration based on trial mode

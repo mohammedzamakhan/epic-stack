@@ -48,6 +48,7 @@ import {
 } from '#app/utils/notifications.server.ts'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { sanitizeRichText } from '#app/utils/sso-sanitization.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
@@ -246,13 +247,25 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		note.organizationId,
 	)
 
+	// Sanitize comments recursively to prevent XSS
+	const sanitizeComments = (comments: any[]): any[] => {
+		return comments.map((comment) => ({
+			...comment,
+			content: sanitizeRichText(comment.content),
+			replies: comment.replies ? sanitizeComments(comment.replies) : [],
+		}))
+	}
+
 	return {
-		note,
+		note: {
+			...note,
+			content: sanitizeRichText(note.content),
+		},
 		timeAgo,
 		currentUserId: userId,
 		isFavorited: !!isFavorited,
 		organizationMembers,
-		comments: organizedComments,
+		comments: sanitizeComments(organizedComments),
 		activityLogs,
 		connections: connections.map((conn) => ({
 			id: conn.id,
@@ -1077,7 +1090,14 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			// Handle image uploads if present
-			const imageCount = parseInt(formData.get('imageCount') as string) || 0
+			// Use Zod to safely parse and validate the imageCount to prevent integer overflow attacks
+			const imageCount = z.coerce
+				.number()
+				.int()
+				.min(0)
+				.max(10)
+				.catch(0)
+				.parse(formData.get('imageCount') ?? '0')
 			if (imageCount > 0) {
 				const { uploadCommentImage } = await import(
 					'#app/utils/storage.server.ts'
