@@ -3,12 +3,17 @@ import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '#app/utils/db.server.ts'
 
-const JWT_SECRET = process.env.JWT_SECRET
-if (!JWT_SECRET) {
-	throw new Error(
-		'JWT_SECRET environment variable must be set for security. Please add it to your .env file.',
-	)
+// Validate and extract JWT_SECRET at startup
+function getJWTSecret(): string {
+	if (!process.env.JWT_SECRET) {
+		throw new Error(
+			'JWT_SECRET environment variable must be set for security. Please add it to your .env file.',
+		)
+	}
+	return process.env.JWT_SECRET
 }
+
+const JWT_SECRET = getJWTSecret()
 const ACCESS_TOKEN_EXPIRES_IN = '15m' // 15 minutes
 const REFRESH_TOKEN_BYTES = 48
 const REFRESH_TOKEN_EXPIRES_DAYS = 30
