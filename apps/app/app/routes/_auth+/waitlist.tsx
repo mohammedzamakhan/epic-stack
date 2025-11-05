@@ -148,7 +148,7 @@ export default function WaitlistPage({
 				<div className="space-y-3">
 					<div className="flex items-start gap-3">
 						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-							<Icon name="avatar" className="h-4 w-4 text-primary" />
+							<Icon name="users" className="h-4 w-4 text-primary" />
 						</div>
 						<div className="flex-1 min-w-0">
 							<div className="flex items-baseline gap-2 mb-2">
@@ -162,6 +162,7 @@ export default function WaitlistPage({
 									type="text"
 									value={referralUrl}
 									readOnly
+									aria-label="Your referral link"
 									className="flex-1 min-w-0 px-3 py-2 text-sm border rounded-md bg-background"
 								/>
 								<button
@@ -184,7 +185,7 @@ export default function WaitlistPage({
 					{/* Discord Section */}
 					<div className="flex items-start gap-3">
 						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-							<Icon name="discord-logo" className="h-4 w-4 text-primary" />
+							<Icon name="message-circle" className="h-4 w-4 text-primary" />
 						</div>
 						<div className="flex-1">
 							<div className="flex items-baseline gap-2 mb-2">
@@ -198,17 +199,20 @@ export default function WaitlistPage({
 									✓ Discord points claimed
 								</p>
 							) : (
-								<Form method="post" className="flex gap-2">
-									<input type="hidden" name="intent" value="discord" />
+								<div className="flex flex-col gap-2">
 									<a
 										href="https://discord.gg/your-server"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
+										className="px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
 									>
 										Go to Discord server
 									</a>
-								</Form>
+									<p className="text-xs text-muted-foreground">
+										Note: Discord verification is currently manual. Contact support
+										after joining to claim your points.
+									</p>
+								</div>
 							)}
 						</div>
 					</div>

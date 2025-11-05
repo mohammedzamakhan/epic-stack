@@ -10,8 +10,20 @@ export const REFERRAL_CODE_SESSION_KEY = 'referralCode'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
 	const referralCode = params.code
-	if (!referralCode) {
+
+	// Validate referral code parameter
+	if (!referralCode || typeof referralCode !== 'string') {
 		throw new Response('Not Found', { status: 404 })
+	}
+
+	// Enforce expected format (username-XXXX) and max length to prevent potential issues
+	const referralCodeRegex = /^[\w-]{1,96}-\d{4}$/
+	if (!referralCodeRegex.test(referralCode) || referralCode.length > 100) {
+		return redirectWithToast('/signup', {
+			title: 'Invalid referral link',
+			description: 'The referral link format is invalid.',
+			type: 'error',
+		})
 	}
 
 	// Check if referral code exists

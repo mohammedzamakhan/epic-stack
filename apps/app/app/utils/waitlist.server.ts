@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto'
 import { prisma } from '#app/utils/db.server.ts'
 
 const REFERRAL_POINTS = 5
@@ -6,13 +7,15 @@ const DISCORD_POINTS = 2
 /**
  * Generate a unique referral code for a user
  * Format: username-random4digits
+ * Uses cryptographically secure random number generation
  */
 export async function generateReferralCode(username: string): Promise<string> {
-	let referralCode: string
+	let referralCode = ''
 	let isUnique = false
 
 	while (!isUnique) {
-		const randomDigits = Math.floor(1000 + Math.random() * 9000)
+		// Use crypto.randomInt for cryptographically secure random generation
+		const randomDigits = randomInt(1000, 10000)
 		referralCode = `${username}-${randomDigits}`
 
 		const existing = await prisma.waitlistEntry.findUnique({
@@ -24,7 +27,7 @@ export async function generateReferralCode(username: string): Promise<string> {
 		}
 	}
 
-	return referralCode!
+	return referralCode
 }
 
 /**
@@ -126,22 +129,16 @@ export async function awardReferralPoints(referrerId: string) {
 
 /**
  * Award points for joining Discord
+ * Uses atomic update to prevent race conditions
  */
 export async function awardDiscordPoints(userId: string) {
-	const waitlistEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId },
-	})
-
-	if (!waitlistEntry) {
-		throw new Error('Waitlist entry not found')
-	}
-
-	if (waitlistEntry.hasJoinedDiscord) {
-		throw new Error('Discord points already awarded')
-	}
-
-	await prisma.waitlistEntry.update({
-		where: { userId },
+	// Use updateMany with a condition to make this atomic and prevent race conditions
+	// Only updates if hasJoinedDiscord is still false
+	const result = await prisma.waitlistEntry.updateMany({
+		where: {
+			userId,
+			hasJoinedDiscord: false, // Only update if still false
+		},
 		data: {
 			hasJoinedDiscord: true,
 			points: {
@@ -149,10 +146,24 @@ export async function awardDiscordPoints(userId: string) {
 			},
 		},
 	})
+
+	// If no rows were updated, either the entry doesn't exist or points were already awarded
+	if (result.count === 0) {
+		const entry = await prisma.waitlistEntry.findUnique({
+			where: { userId },
+		})
+
+		if (!entry) {
+			throw new Error('Waitlist entry not found')
+		}
+
+		throw new Error('Discord points already awarded')
+	}
 }
 
 /**
  * Link a user to their referrer by referral code
+ * Uses a transaction to ensure atomicity between linking and awarding points
  */
 export async function linkReferral(userId: string, referralCode: string) {
 	const referrerEntry = await prisma.waitlistEntry.findUnique({
@@ -177,15 +188,25 @@ export async function linkReferral(userId: string, referralCode: string) {
 		return { success: false, message: 'Already referred by someone' }
 	}
 
-	// Link the referral and award points
-	await prisma.waitlistEntry.update({
-		where: { userId },
-		data: {
-			referredById: referrerEntry.id,
-		},
-	})
+	// Link the referral and award points atomically in a transaction
+	// This prevents race conditions where the link succeeds but points fail
+	await prisma.$transaction(async (tx) => {
+		await tx.waitlistEntry.update({
+			where: { userId },
+			data: {
+				referredById: referrerEntry.id,
+			},
+		})
 
-	await awardReferralPoints(referrerEntry.userId)
+		await tx.waitlistEntry.update({
+			where: { userId: referrerEntry.userId },
+			data: {
+				points: {
+					increment: REFERRAL_POINTS,
+				},
+			},
+		})
+	})
 
 	return { success: true, message: 'Referral linked successfully' }
 }

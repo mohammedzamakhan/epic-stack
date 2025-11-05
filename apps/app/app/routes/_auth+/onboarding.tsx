@@ -297,7 +297,11 @@ export async function action({ request }: Route.ActionArgs) {
 	const referralCode = await getOnboardingReferralCode(request)
 	if (referralCode) {
 		try {
-			const { linkReferral } = await import('#app/utils/waitlist.server.ts')
+			const { getOrCreateWaitlistEntry, linkReferral } = await import(
+				'#app/utils/waitlist.server.ts'
+			)
+			// Ensure waitlist entry exists before linking referral
+			await getOrCreateWaitlistEntry(session.userId)
 			await linkReferral(session.userId, referralCode)
 		} catch (error) {
 			// Don't fail the signup if referral linking fails
