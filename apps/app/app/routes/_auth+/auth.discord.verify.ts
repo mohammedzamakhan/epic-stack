@@ -4,6 +4,24 @@ import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/auth.discord.verify.ts'
 
+// Discord API response types
+interface DiscordTokenResponse {
+	access_token: string
+	token_type: string
+	expires_in: number
+	refresh_token: string
+	scope: string
+}
+
+interface DiscordGuild {
+	id: string
+	name: string
+	icon: string | null
+	owner: boolean
+	permissions: string
+	features: string[]
+}
+
 /**
  * Discord OAuth verification route for waitlist
  * This route handles the OAuth callback from Discord and verifies
@@ -81,7 +99,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			throw new Error('Failed to exchange code for token')
 		}
 
-		const tokenData = await tokenResponse.json()
+		const tokenData = (await tokenResponse.json()) as DiscordTokenResponse
 		const accessToken = tokenData.access_token
 
 		// Fetch user's guilds (servers)
@@ -98,10 +116,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 			throw new Error('Failed to fetch user guilds')
 		}
 
-		const guilds = await guildsResponse.json()
+		const guilds = (await guildsResponse.json()) as DiscordGuild[]
 
 		// Check if user is in the specified guild
-		const isInGuild = guilds.some((guild: any) => guild.id === guildId)
+		const isInGuild = guilds.some((guild) => guild.id === guildId)
 
 		if (!isInGuild) {
 			return redirectWithToast('/waitlist', {
