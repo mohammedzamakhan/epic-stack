@@ -1,8 +1,14 @@
+import * as React from 'react'
 import { getPageTitle } from '@repo/config/brand'
-import { redirect } from 'react-router'
+import { redirect, data, Form } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
+import {
+	getOrCreateWaitlistEntry,
+	calculateUserRank,
+	awardDiscordPoints,
+} from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/waitlist.ts'
 import {
 	Card,
@@ -30,15 +36,80 @@ export async function loader({ request }: Route.LoaderArgs) {
 		throw redirect('/organizations')
 	}
 
-	return { user }
+	// Get or create waitlist entry
+	const waitlistEntry = await getOrCreateWaitlistEntry(userId)
+
+	// Calculate rank
+	const { rank, totalUsers } = await calculateUserRank(userId)
+
+	// Get the base URL for referral links
+	const url = new URL(request.url)
+	const baseUrl = `${url.protocol}//${url.host}`
+	const referralUrl = `${baseUrl}/r/${waitlistEntry.referralCode}`
+
+	return {
+		user,
+		waitlistEntry: {
+			points: waitlistEntry.points,
+			referralCode: waitlistEntry.referralCode,
+			hasJoinedDiscord: waitlistEntry.hasJoinedDiscord,
+			referralCount: waitlistEntry.referrals.length,
+		},
+		rank,
+		totalUsers,
+		referralUrl,
+	}
+}
+
+export async function action({ request }: Route.ActionArgs) {
+	const userId = await requireUserId(request)
+	const formData = await request.formData()
+	const intent = formData.get('intent')
+
+	if (intent === 'discord') {
+		try {
+			await awardDiscordPoints(userId)
+			return data(
+				{ success: true, message: 'Discord points awarded!' },
+				{ status: 200 },
+			)
+		} catch (error) {
+			return data(
+				{
+					success: false,
+					message:
+						error instanceof Error
+							? error.message
+							: 'Failed to award Discord points',
+				},
+				{ status: 400 },
+			)
+		}
+	}
+
+	return data({ success: false, message: 'Invalid intent' }, { status: 400 })
 }
 
 export function meta() {
 	return [{ title: getPageTitle('You are on the Waitlist') }]
 }
 
-export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
-	const { user } = loaderData
+export default function WaitlistPage({
+	loaderData,
+	actionData,
+}: Route.ComponentProps) {
+	const { user, waitlistEntry, rank, totalUsers, referralUrl } = loaderData
+	const [copied, setCopied] = React.useState(false)
+
+	const copyToClipboard = async () => {
+		try {
+			await navigator.clipboard.writeText(referralUrl)
+			setCopied(true)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (err) {
+			console.error('Failed to copy:', err)
+		}
+	}
 
 	return (
 		<Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur">
@@ -50,26 +121,119 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 					You're on the Waitlist!
 				</CardTitle>
 				<CardDescription className="text-base">
-					Thank you for your interest, {user.name}
+					We'll notify you by email as soon as the waitlist opens.
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4">
-				<div className="rounded-lg bg-muted p-4 text-center">
-					<p className="text-sm text-muted-foreground">
-						We're currently in closed beta and carefully onboarding new users.
+			<CardContent className="space-y-6">
+				{/* Points and Rank Display */}
+				<div className="rounded-lg bg-muted p-4">
+					<p className="text-sm font-medium text-center mb-4">
+						Want to go to the top of the waitlist? Here's how to do it:
 					</p>
+					<div className="grid grid-cols-2 gap-4">
+						<div className="text-center">
+							<p className="text-xs text-muted-foreground mb-1">Your points</p>
+							<p className="text-3xl font-bold">{waitlistEntry.points}</p>
+						</div>
+						<div className="text-center">
+							<p className="text-xs text-muted-foreground mb-1">Your rank</p>
+							<p className="text-3xl font-bold">
+								{rank} / {totalUsers}
+							</p>
+						</div>
+					</div>
 				</div>
-				<div className="space-y-2">
-					<p className="text-sm">
-						We've registered your interest and will send you an email at{' '}
+
+				{/* Referral Section */}
+				<div className="space-y-3">
+					<div className="flex items-start gap-3">
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
+							<Icon name="avatar" className="h-4 w-4 text-primary" />
+						</div>
+						<div className="flex-1 min-w-0">
+							<div className="flex items-baseline gap-2 mb-2">
+								<p className="text-sm font-medium">Share with others</p>
+								<span className="text-xs text-green-600 font-semibold">
+									+5 points/referral
+								</span>
+							</div>
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={referralUrl}
+									readOnly
+									className="flex-1 min-w-0 px-3 py-2 text-sm border rounded-md bg-background"
+								/>
+								<button
+									onClick={copyToClipboard}
+									className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shrink-0"
+								>
+									{copied ? 'Copied!' : 'Copy'}
+								</button>
+							</div>
+							{waitlistEntry.referralCount > 0 && (
+								<p className="text-xs text-muted-foreground mt-2">
+									{waitlistEntry.referralCount}{' '}
+									{waitlistEntry.referralCount === 1 ? 'person' : 'people'}{' '}
+									joined using your link
+								</p>
+							)}
+						</div>
+					</div>
+
+					{/* Discord Section */}
+					<div className="flex items-start gap-3">
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
+							<Icon name="discord-logo" className="h-4 w-4 text-primary" />
+						</div>
+						<div className="flex-1">
+							<div className="flex items-baseline gap-2 mb-2">
+								<p className="text-sm font-medium">Join our Discord</p>
+								<span className="text-xs text-green-600 font-semibold">
+									+2 points
+								</span>
+							</div>
+							{waitlistEntry.hasJoinedDiscord ? (
+								<p className="text-xs text-green-600 font-medium">
+									✓ Discord points claimed
+								</p>
+							) : (
+								<Form method="post" className="flex gap-2">
+									<input type="hidden" name="intent" value="discord" />
+									<a
+										href="https://discord.gg/your-server"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
+									>
+										Go to Discord server
+									</a>
+								</Form>
+							)}
+						</div>
+					</div>
+				</div>
+
+				{/* Email Notification Info */}
+				<div className="pt-4 border-t">
+					<p className="text-sm text-muted-foreground text-center">
+						We'll send you an email at{' '}
 						<span className="font-semibold">{user.email}</span> when we're ready
 						to welcome you.
 					</p>
-					<p className="text-sm text-muted-foreground">
-						We appreciate your patience and look forward to having you join us
-						soon!
-					</p>
 				</div>
+
+				{actionData && 'message' in actionData && (
+					<div
+						className={`p-3 rounded-md text-sm ${
+							actionData.success
+								? 'bg-green-50 text-green-800'
+								: 'bg-red-50 text-red-800'
+						}`}
+					>
+						{actionData.message}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	)

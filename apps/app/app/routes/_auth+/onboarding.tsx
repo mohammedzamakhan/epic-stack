@@ -49,6 +49,7 @@ import {
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
 export const onboardingInviteTokenSessionKey = 'onboardingInviteToken'
+export const onboardingReferralCodeSessionKey = 'referralCode'
 
 const SignupFormSchema = z
 	.object({
@@ -81,6 +82,14 @@ async function getOnboardingInviteToken(request: Request) {
 	)
 	const inviteToken = verifySession.get(onboardingInviteTokenSessionKey)
 	return typeof inviteToken === 'string' ? inviteToken : null
+}
+
+async function getOnboardingReferralCode(request: Request) {
+	const verifySession = await verifySessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	const referralCode = verifySession.get(onboardingReferralCodeSessionKey)
+	return typeof referralCode === 'string' ? referralCode : null
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -282,6 +291,18 @@ export async function action({ request }: Route.ActionArgs) {
 			'Error processing domain-based organization joining during signup:',
 			error,
 		)
+	}
+
+	// Handle referral code if present
+	const referralCode = await getOnboardingReferralCode(request)
+	if (referralCode) {
+		try {
+			const { linkReferral } = await import('#app/utils/waitlist.server.ts')
+			await linkReferral(session.userId, referralCode)
+		} catch (error) {
+			// Don't fail the signup if referral linking fails
+			console.error('Error linking referral code during signup:', error)
+		}
 	}
 
 	// Check launch status and redirect accordingly

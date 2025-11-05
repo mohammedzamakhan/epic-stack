@@ -50,6 +50,7 @@ model User {
   configFlags            ConfigFlag[]
   createdSSOConfigs      SSOConfiguration[]         @relation("SSOConfigCreatedBy")
   auditLogs              AuditLog[]                 @relation("AuditLogUser")
+  waitlistEntry          WaitlistEntry?
 }
 
 model Note {
@@ -767,17 +768,35 @@ model AuditLog {
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String?
   user           User?        @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
-  
+
   // Action details
   action         String       // e.g., "sso_login", "sso_config_updated", etc.
   details        String       // Human-readable description
   metadata       String?      // JSON metadata for additional context
-  
+
   // Timestamps
   createdAt      DateTime     @default(now())
-  
+
   @@index([organizationId])
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+}
+
+model WaitlistEntry {
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points           Int              @default(1)
+  referralCode     String           @unique
+  hasJoinedDiscord Boolean          @default(false)
+  referredById     String?
+  referredBy       WaitlistEntry?   @relation("Referrals", fields: [referredById], references: [id])
+  referrals        WaitlistEntry[]  @relation("Referrals")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([referralCode])
+  @@index([points, createdAt])
 }
