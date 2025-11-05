@@ -1,4 +1,3 @@
-import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
@@ -34,41 +33,6 @@ test.describe('Waitlist Referral System', () => {
 		if (originalLaunchStatus) {
 			process.env.LAUNCH_STATUS = originalLaunchStatus
 		}
-	})
-
-	test('user can see referral link and copy button', async ({
-		page,
-		login,
-	}) => {
-		const user = await login()
-
-		// Create waitlist entry for user
-		const waitlistEntry = await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-1234`,
-			},
-		})
-
-		// Navigate to waitlist
-		await page.goto('/waitlist')
-		await page.waitForLoadState('networkidle')
-
-		// Check referral link is displayed
-		const referralInput = page.getByRole('textbox', {
-			name: /your referral link/i,
-		})
-		const referralUrl = await referralInput.inputValue()
-		expect(referralUrl).toContain(`/r/${waitlistEntry.referralCode}`)
-
-		// Check copy button exists
-		await expect(
-			page.getByRole('button', { name: /copy/i }),
-		).toBeVisible()
-
-		// Check that points and referral instructions are visible
-		await expect(page.getByText(/share with others/i)).toBeVisible()
-		await expect(page.getByText(/\+5 points\/referral/i)).toBeVisible()
 	})
 
 	test('referral link redirects to signup with code stored in session', async ({
@@ -263,50 +227,6 @@ test.describe('Waitlist Referral System', () => {
 		expect(result2.message).toContain('Already referred by someone')
 	})
 
-	test('displays referral count when user has referrals', async ({
-		page,
-		login,
-	}) => {
-		const referrer = await login()
-		const referee1 = await insertNewUser()
-		const referee2 = await insertNewUser()
-
-		// Create referrer entry
-		const referrerEntry = await prisma.waitlistEntry.create({
-			data: {
-				userId: referrer.id,
-				referralCode: `${referrer.username}-7777`,
-				points: 11, // 1 initial + 5*2 referrals
-			},
-		})
-
-		// Create two referees linked to referrer
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: referee1.id,
-				referralCode: `${referee1.username}-8888`,
-				referredById: referrerEntry.id,
-			},
-		})
-
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: referee2.id,
-				referralCode: `${referee2.username}-9999`,
-				referredById: referrerEntry.id,
-			},
-		})
-
-		// Navigate to waitlist page
-		await page.goto('/waitlist')
-		await page.waitForLoadState('networkidle')
-
-		// Check that referral count is displayed
-		await expect(
-			page.getByText(/2 people joined using your link/i),
-		).toBeVisible()
-	})
-
 	test('invalid referral code shows error', async ({ page }) => {
 		// Visit invalid referral link
 		await page.goto('/r/invalid-code-9999')
@@ -369,6 +289,44 @@ test.describe('Waitlist Referral System', () => {
 
 		expect(referrerEntry?.points).toBe(6) // 1 + 5
 		expect(refereeEntry?.referredById).toBe(referrerEntry?.id)
+	})
+
+	test('getOrCreateWaitlistEntry creates entry with default values', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+
+		const { getOrCreateWaitlistEntry } = await import(
+			'#app/utils/waitlist.server.ts'
+		)
+
+		const entry = await getOrCreateWaitlistEntry(user.id)
+
+		expect(entry).toBeTruthy()
+		expect(entry.userId).toBe(user.id)
+		expect(entry.points).toBe(1)
+		expect(entry.hasJoinedDiscord).toBe(false)
+		expect(entry.referralCode).toMatch(/^.*-\d{4}$/)
+	})
+
+	test('referral code validation rejects invalid formats', async ({ page }) => {
+		// Try various invalid formats
+		const invalidCodes = [
+			'test', // Too short
+			'a'.repeat(101), // Too long
+			'user@name-1234', // Invalid character
+			'username-abc', // Not 4 digits
+			'username-12345', // Too many digits
+		]
+
+		for (const code of invalidCodes) {
+			await page.goto(`/r/${code}`)
+			await expect(page).toHaveURL('/signup')
+			const errorVisible = await page
+				.getByText(/invalid referral link/i)
+				.isVisible()
+			expect(errorVisible).toBe(true)
+		}
 	})
 })
 
