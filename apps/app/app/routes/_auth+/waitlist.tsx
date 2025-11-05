@@ -3,11 +3,10 @@ import { getPageTitle } from '@repo/config/brand'
 import { redirect, data, Form } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { getLaunchStatus } from '#app/utils/env.server.ts'
+import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,
 	calculateUserRank,
-	awardDiscordPoints,
 } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/waitlist.ts'
 import {
@@ -47,6 +46,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const baseUrl = `${url.protocol}//${url.host}`
 	const referralUrl = `${baseUrl}/r/${waitlistEntry.referralCode}`
 
+	// Get Discord configuration
+	const discordInviteUrl = getDiscordInviteUrl()
+	const hasDiscordOAuth =
+		!!process.env.DISCORD_CLIENT_ID &&
+		!!process.env.DISCORD_CLIENT_SECRET &&
+		!!process.env.DISCORD_GUILD_ID
+
 	return {
 		user,
 		waitlistEntry: {
@@ -58,47 +64,25 @@ export async function loader({ request }: Route.LoaderArgs) {
 		rank,
 		totalUsers,
 		referralUrl,
+		discordInviteUrl,
+		hasDiscordOAuth,
 	}
-}
-
-export async function action({ request }: Route.ActionArgs) {
-	const userId = await requireUserId(request)
-	const formData = await request.formData()
-	const intent = formData.get('intent')
-
-	if (intent === 'discord') {
-		try {
-			await awardDiscordPoints(userId)
-			return data(
-				{ success: true, message: 'Discord points awarded!' },
-				{ status: 200 },
-			)
-		} catch (error) {
-			return data(
-				{
-					success: false,
-					message:
-						error instanceof Error
-							? error.message
-							: 'Failed to award Discord points',
-				},
-				{ status: 400 },
-			)
-		}
-	}
-
-	return data({ success: false, message: 'Invalid intent' }, { status: 400 })
 }
 
 export function meta() {
 	return [{ title: getPageTitle('You are on the Waitlist') }]
 }
 
-export default function WaitlistPage({
-	loaderData,
-	actionData,
-}: Route.ComponentProps) {
-	const { user, waitlistEntry, rank, totalUsers, referralUrl } = loaderData
+export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
+	const {
+		user,
+		waitlistEntry,
+		rank,
+		totalUsers,
+		referralUrl,
+		discordInviteUrl,
+		hasDiscordOAuth,
+	} = loaderData
 	const [copied, setCopied] = React.useState(false)
 
 	const copyToClipboard = async () => {
@@ -200,18 +184,35 @@ export default function WaitlistPage({
 								</p>
 							) : (
 								<div className="flex flex-col gap-2">
-									<a
-										href="https://discord.gg/your-server"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
-									>
-										Go to Discord server
-									</a>
-									<p className="text-xs text-muted-foreground">
-										Note: Discord verification is currently manual. Contact support
-										after joining to claim your points.
-									</p>
+									{discordInviteUrl && (
+										<a
+											href={discordInviteUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
+										>
+											Join Discord server
+										</a>
+									)}
+									{hasDiscordOAuth ? (
+										<>
+											<a
+												href="/auth/discord/verify"
+												className="px-4 py-2 text-sm font-medium text-center border border-[#5865F2] text-[#5865F2] rounded-md hover:bg-[#5865F2]/10 transition-colors"
+											>
+												Verify Discord membership
+											</a>
+											<p className="text-xs text-muted-foreground">
+												Click "Verify Discord membership" after joining to claim
+												your points automatically.
+											</p>
+										</>
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Note: Discord verification is currently manual. Contact
+											support after joining to claim your points.
+										</p>
+									)}
 								</div>
 							)}
 						</div>
@@ -226,18 +227,6 @@ export default function WaitlistPage({
 						to welcome you.
 					</p>
 				</div>
-
-				{actionData && 'message' in actionData && (
-					<div
-						className={`p-3 rounded-md text-sm ${
-							actionData.success
-								? 'bg-green-50 text-green-800'
-								: 'bg-red-50 text-red-800'
-						}`}
-					>
-						{actionData.message}
-					</div>
-				)}
 			</CardContent>
 		</Card>
 	)

@@ -42,6 +42,14 @@ const schema = z.object({
 	AWS_REGION: z.string(),
 	AWS_ENDPOINT_URL_S3: z.string().url(),
 	BUCKET_NAME: z.string(),
+
+	// Discord Integration
+	DISCORD_INVITE_URL: z.string().url().optional(),
+	DISCORD_CLIENT_ID: z.string().optional(),
+	DISCORD_CLIENT_SECRET: z.string().optional(),
+	DISCORD_REDIRECT_URI: z.string().url().optional(),
+	DISCORD_BOT_TOKEN: z.string().optional(),
+	DISCORD_GUILD_ID: z.string().optional(),
 })
 
 declare global {
@@ -97,6 +105,14 @@ export function getLaunchStatus() {
 	}
 	// Return default value as defined in schema
 	return 'LAUNCHED' as const
+}
+
+/**
+ * Gets the Discord invite URL from environment variables.
+ * @returns The Discord invite URL or undefined if not set
+ */
+export function getDiscordInviteUrl() {
+	return process.env.DISCORD_INVITE_URL
 }
 
 type ENV = ReturnType<typeof getEnv>
