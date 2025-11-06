@@ -51,6 +51,7 @@ model User {
   createdSSOConfigs      SSOConfiguration[]         @relation("SSOConfigCreatedBy")
   auditLogs              AuditLog[]                 @relation("AuditLogUser")
   waitlistEntry          WaitlistEntry?
+  grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
 }
 
 model Note {
@@ -793,6 +794,7 @@ model WaitlistEntry {
   hasEarlyAccess   Boolean          @default(false)
   grantedAccessAt  DateTime?
   grantedAccessBy  String?
+  grantedByUser    User?            @relation("AccessGranter", fields: [grantedAccessBy], references: [id], onDelete: SetNull)
   referredById     String?
   referredBy       WaitlistEntry?   @relation("Referrals", fields: [referredById], references: [id])
   referrals        WaitlistEntry[]  @relation("Referrals")
@@ -803,4 +805,5 @@ model WaitlistEntry {
   @@index([referralCode])
   @@index([points, createdAt])
   @@index([hasEarlyAccess])
+  @@index([grantedAccessBy])
 }

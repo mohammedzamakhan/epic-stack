@@ -23,8 +23,6 @@ import {
 	TableHeader,
 	TableRow,
 	Icon,
-	Alert,
-	AlertDescription,
 } from '@repo/ui'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
@@ -32,6 +30,7 @@ import {
 	revokeEarlyAccess,
 } from '#app/utils/waitlist.server.ts'
 import { Img } from 'openimg/react'
+import { useEffect, useState } from 'react'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireUserWithRole(request, 'admin')
@@ -75,8 +74,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 		orderBy = [{ points: 'desc' }, { createdAt: 'asc' }]
 	}
 
-	// Get waitlist entries with pagination
-	const [entries, totalCount] = await Promise.all([
+	// Get all entries for rank calculation (we need to calculate ranks across ALL entries, not just the current page)
+	// Then we'll slice for pagination
+	const [allEntries, totalCount] = await Promise.all([
 		prisma.waitlistEntry.findMany({
 			where,
 			include: {
@@ -102,40 +102,36 @@ export async function loader({ request }: Route.LoaderArgs) {
 				},
 			},
 			orderBy,
-			skip: (page - 1) * pageSize,
-			take: pageSize,
 		}),
 		prisma.waitlistEntry.count({ where }),
 	])
 
-	// Calculate ranks for the entries (considering filters)
-	const entriesWithRanks = await Promise.all(
-		entries.map(async (entry) => {
-			// Count users ahead of this user (higher points or same points but earlier)
-			const rank = await prisma.waitlistEntry.count({
-				where: {
-					OR: [
-						{ points: { gt: entry.points } },
-						{
-							points: entry.points,
-							createdAt: { lt: entry.createdAt },
-						},
-					],
-				},
-			})
+	// Calculate ranks for ALL entries in memory (more efficient than N queries)
+	// Sort by points DESC, then createdAt ASC for ranking
+	const sortedEntries = [...allEntries].sort((a, b) => {
+		if (b.points !== a.points) {
+			return b.points - a.points
+		}
+		return a.createdAt.getTime() - b.createdAt.getTime()
+	})
 
-			return {
-				...entry,
-				rank: rank + 1,
-				referralCount: entry.referrals.length,
-			}
-		}),
+	// Assign ranks
+	const entriesWithRanks = sortedEntries.map((entry, index) => ({
+		...entry,
+		rank: index + 1,
+		referralCount: entry.referrals.length,
+	}))
+
+	// Apply pagination to the ranked entries
+	const paginatedEntries = entriesWithRanks.slice(
+		(page - 1) * pageSize,
+		page * pageSize,
 	)
 
 	const totalPages = Math.ceil(totalCount / pageSize)
 
 	return Response.json({
-		entries: entriesWithRanks,
+		entries: paginatedEntries,
 		pagination: {
 			page,
 			pageSize,
@@ -208,8 +204,19 @@ export default function AdminWaitlistPage() {
 	const data = useLoaderData() as LoaderData
 	const navigation = useNavigation()
 	const [searchParams, setSearchParams] = useSearchParams()
+	const [searchValue, setSearchValue] = useState(data.filters.search)
 
 	const isProcessing = navigation.state === 'submitting'
+
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (searchValue !== data.filters.search) {
+				handleFilterChange('search', searchValue)
+			}
+		}, 300)
+		return () => clearTimeout(timer)
+	}, [searchValue])
 
 	const handleFilterChange = (key: string, value: string) => {
 		const newParams = new URLSearchParams(searchParams)
@@ -238,13 +245,17 @@ export default function AdminWaitlistPage() {
 			</div>
 
 			{data.launchStatus !== 'CLOSED_BETA' && (
-				<Alert>
-					<Icon name="info-circled" className="h-4 w-4" />
-					<AlertDescription>
-						Launch status is currently <strong>{data.launchStatus}</strong>. The
-						waitlist is only active when LAUNCH_STATUS is set to CLOSED_BETA.
-					</AlertDescription>
-				</Alert>
+				<Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
+					<CardContent className="pt-6">
+						<div className="flex items-start gap-2">
+							<Icon name="info-circled" className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+							<div className="text-sm text-yellow-800 dark:text-yellow-200">
+								Launch status is currently <strong>{data.launchStatus}</strong>. The
+								waitlist is only active when LAUNCH_STATUS is set to CLOSED_BETA.
+							</div>
+						</div>
+					</CardContent>
+				</Card>
 			)}
 
 			<Card>
@@ -257,8 +268,8 @@ export default function AdminWaitlistPage() {
 							<Input
 								type="search"
 								placeholder="Search by name, email, or username..."
-								defaultValue={data.filters.search}
-								onChange={(e) => handleFilterChange('search', e.target.value)}
+								value={searchValue}
+								onChange={(e) => setSearchValue(e.target.value)}
 							/>
 						</div>
 
