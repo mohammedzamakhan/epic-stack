@@ -26,7 +26,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { PasswordAndConfirmPasswordSchema } from '#app/utils/user-validation.ts'
 import { type Route } from './+types/profile.password_.create.ts'
-import { type BreadcrumbHandle } from './profile.tsx'
+import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="more-horizontal">Password</Icon>,

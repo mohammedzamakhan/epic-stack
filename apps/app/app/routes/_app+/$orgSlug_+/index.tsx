@@ -250,7 +250,7 @@ export default function OrganizationDashboard() {
 			const animationEnd = Date.now() + duration
 			const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }
 
-			const interval = setInterval(() => {
+			const interval = setInterval(async () => {
 				const timeLeft = animationEnd - Date.now()
 
 				if (timeLeft <= 0) {
@@ -261,7 +261,7 @@ export default function OrganizationDashboard() {
 				const particleCount = 50 * (timeLeft / duration)
 
 				// Fire confetti from the top center
-				confetti({
+				await confetti({
 					...defaults,
 					particleCount,
 					origin: { x: 0.5, y: 0 },
@@ -271,7 +271,7 @@ export default function OrganizationDashboard() {
 			// Clean up query parameter after animation starts
 			const newSearchParams = new URLSearchParams(searchParams)
 			newSearchParams.delete('celebrate')
-			navigate(
+			void navigate(
 				{
 					search: newSearchParams.toString(),
 				},

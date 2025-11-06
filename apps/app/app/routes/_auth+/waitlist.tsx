@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { getPageTitle } from '@repo/config/brand'
-import { redirect, data, Form } from 'react-router'
+import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
@@ -13,9 +13,16 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 	Icon,
+	Field,
+	FieldContent,
+	InputGroup,
+	InputGroupInput,
+	InputGroupAddon,
+	InputGroupButton,
 } from '@repo/ui'
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -92,16 +99,29 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 			setTimeout(() => setCopied(false), 2000)
 		} catch (err) {
 			console.error('Failed to copy:', err)
+			// Fallback for browsers that don't support clipboard API
+			const textArea = document.createElement('textarea')
+			textArea.value = referralUrl
+			document.body.appendChild(textArea)
+			textArea.select()
+			try {
+				document.execCommand('copy')
+				setCopied(true)
+				setTimeout(() => setCopied(false), 2000)
+			} catch (fallbackErr) {
+				console.error('Fallback copy failed:', fallbackErr)
+			}
+			document.body.removeChild(textArea)
 		}
 	}
 
 	return (
-		<Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur">
+		<Card className="mx-auto w-full max-w-md bg-white/95 backdrop-blur">
 			<CardHeader className="text-center">
 				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
 					<Icon name="check" className="h-8 w-8 text-green-600" />
 				</div>
-				<CardTitle className="text-2xl font-bold">
+				<CardTitle className="justify-center text-2xl font-bold">
 					You're on the Waitlist!
 				</CardTitle>
 				<CardDescription className="text-base">
@@ -110,19 +130,23 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{/* Points and Rank Display */}
-				<div className="rounded-lg bg-muted p-4">
-					<p className="text-sm font-medium text-center mb-4">
-						Want to go to the top of the waitlist? Here's how to do it:
+				<div>
+					<p className="mb-1 text-center font-medium">
+						Want to go to the top of the waitlist?
+					</p>
+					<p className="text-muted-foreground mb-4 text-center text-sm">
+						Here's how to do it:
 					</p>
 					<div className="grid grid-cols-2 gap-4">
 						<div className="text-center">
-							<p className="text-xs text-muted-foreground mb-1">Your points</p>
+							<p className="text-muted-foreground mb-1 text-xs">Your points</p>
 							<p className="text-3xl font-bold">{waitlistEntry.points}</p>
 						</div>
 						<div className="text-center">
-							<p className="text-xs text-muted-foreground mb-1">Your rank</p>
-							<p className="text-3xl font-bold">
-								{rank} / {totalUsers}
+							<p className="text-muted-foreground mb-1 text-xs">Your rank</p>
+							<p className="text-3xl font-bold">#{rank}</p>
+							<p className="text-muted-foreground text-xs">
+								of {totalUsers} people
 							</p>
 						</div>
 					</div>
@@ -131,36 +155,43 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 				{/* Referral Section */}
 				<div className="space-y-3">
 					<div className="flex items-start gap-3">
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-							<Icon name="users" className="h-4 w-4 text-primary" />
+						<div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+							<Icon name="users" className="text-primary h-4 w-4" />
 						</div>
-						<div className="flex-1 min-w-0">
-							<div className="flex items-baseline gap-2 mb-2">
+						<div className="min-w-0 flex-1">
+							<div className="my-2 flex items-baseline justify-between gap-2">
 								<p className="text-sm font-medium">Share with others</p>
-								<span className="text-xs text-green-600 font-semibold">
+								<span className="text-xs font-semibold text-green-600">
 									+5 points/referral
 								</span>
 							</div>
-							<div className="flex gap-2">
-								<input
-									type="text"
-									value={referralUrl}
-									readOnly
-									aria-label="Your referral link"
-									className="flex-1 min-w-0 px-3 py-2 text-sm border rounded-md bg-background"
-								/>
-								<button
-									onClick={copyToClipboard}
-									className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors shrink-0"
-								>
-									{copied ? 'Copied!' : 'Copy'}
-								</button>
-							</div>
+							<Field>
+								<FieldContent>
+									<InputGroup>
+										<InputGroupInput
+											type="text"
+											value={referralUrl}
+											readOnly
+											aria-label="Your referral link"
+										/>
+										<InputGroupAddon align="inline-end">
+											<InputGroupButton
+												onClick={copyToClipboard}
+												variant="ghost"
+												size="xs"
+											>
+												<Icon name={copied ? 'check' : 'copy'} />
+												{copied ? 'Copied!' : 'Copy'}
+											</InputGroupButton>
+										</InputGroupAddon>
+									</InputGroup>
+								</FieldContent>
+							</Field>
 							{waitlistEntry.referralCount > 0 && (
-								<p className="text-xs text-muted-foreground mt-2">
+								<p className="mt-2 text-xs text-green-600">
 									{waitlistEntry.referralCount}{' '}
 									{waitlistEntry.referralCount === 1 ? 'person' : 'people'}{' '}
-									joined using your link
+									joined using your link! Thanks for referring.
 								</p>
 							)}
 						</div>
@@ -168,18 +199,18 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 
 					{/* Discord Section */}
 					<div className="flex items-start gap-3">
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-							<Icon name="message-circle" className="h-4 w-4 text-primary" />
+						<div className="bg-primary/10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+							<Icon name="message-circle" className="text-primary h-4 w-4" />
 						</div>
 						<div className="flex-1">
-							<div className="flex items-baseline gap-2 mb-2">
+							<div className="my-2 flex items-baseline justify-between gap-2">
 								<p className="text-sm font-medium">Join our Discord</p>
-								<span className="text-xs text-green-600 font-semibold">
+								<span className="text-xs font-semibold text-green-600">
 									+2 points
 								</span>
 							</div>
 							{waitlistEntry.hasJoinedDiscord ? (
-								<p className="text-xs text-green-600 font-medium">
+								<p className="text-xs font-medium text-green-600">
 									✓ Discord points claimed
 								</p>
 							) : (
@@ -189,7 +220,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 											href={discordInviteUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="px-4 py-2 text-sm font-medium text-center text-white bg-[#5865F2] rounded-md hover:bg-[#4752C4] transition-colors"
+											className="rounded-md bg-[#5865F2] px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
 										>
 											Join Discord server
 										</a>
@@ -198,17 +229,17 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 										<>
 											<a
 												href="/auth/discord/verify"
-												className="px-4 py-2 text-sm font-medium text-center border border-[#5865F2] text-[#5865F2] rounded-md hover:bg-[#5865F2]/10 transition-colors"
+												className="rounded-md border border-[#5865F2] px-4 py-2 text-center text-sm font-medium text-[#5865F2] transition-colors hover:bg-[#5865F2]/10"
 											>
 												Verify Discord membership
 											</a>
-											<p className="text-xs text-muted-foreground">
+											<p className="text-muted-foreground text-xs">
 												Click "Verify Discord membership" after joining to claim
 												your points automatically.
 											</p>
 										</>
 									) : (
-										<p className="text-xs text-muted-foreground">
+										<p className="text-muted-foreground text-xs">
 											Note: Discord verification is currently manual. Contact
 											support after joining to claim your points.
 										</p>
@@ -218,16 +249,15 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 						</div>
 					</div>
 				</div>
-
-				{/* Email Notification Info */}
-				<div className="pt-4 border-t">
-					<p className="text-sm text-muted-foreground text-center">
-						We'll send you an email at{' '}
-						<span className="font-semibold">{user.email}</span> when we're ready
-						to welcome you.
-					</p>
-				</div>
 			</CardContent>
+			{/* Email Notification Info */}
+			<CardFooter>
+				<p className="text-muted-foreground text-sm">
+					We'll send you an email at{' '}
+					<span className="font-semibold">{user.email}</span> when we're ready
+					to welcome you.
+				</p>
+			</CardFooter>
 		</Card>
 	)
 }

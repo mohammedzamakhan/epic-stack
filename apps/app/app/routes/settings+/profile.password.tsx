@@ -29,7 +29,7 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { PasswordSchema } from '#app/utils/user-validation.ts'
 import { type Route } from './+types/profile.password.ts'
-import { type BreadcrumbHandle } from './profile.tsx'
+import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="more-horizontal">Password</Icon>,

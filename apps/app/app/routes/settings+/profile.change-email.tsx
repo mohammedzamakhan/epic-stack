@@ -20,7 +20,6 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { EmailSchema } from '#app/utils/user-validation.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/profile.change-email.ts'
-import { type BreadcrumbHandle } from './profile.tsx'
 import {
 	Icon,
 	StatusButton,
@@ -30,6 +29,9 @@ import {
 	FieldGroup,
 	Input,
 } from '@repo/ui'
+
+export const BreadcrumbHandle = z.object({ breadcrumb: z.any() })
+export type BreadcrumbHandle = z.infer<typeof BreadcrumbHandle>
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="mail">Change Email</Icon>,

@@ -1,6 +1,7 @@
 import { LoaderFunctionArgs, redirect } from 'react-router'
 import { getUserId } from '#app/utils/auth.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await getUserId(request)
@@ -20,6 +21,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 	} catch (error) {
 		console.error('Failed to get user default organization:', error)
+	}
+
+	const onWaitlist = await shouldBeOnWaitlist(userId)
+	if (onWaitlist) {
+		throw redirect('/waitlist')
 	}
 
 	// If no organization found, redirect to create one
