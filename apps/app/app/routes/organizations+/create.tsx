@@ -45,6 +45,7 @@ import {
 	getPlansAndPrices,
 	createCheckoutSession,
 } from '#app/utils/payments.server'
+import { shouldBeOnWaitlist } from '#app/utils/waitlist.server'
 import {
 	Button,
 	Input,
@@ -149,7 +150,15 @@ const Step4Schema = z.object({
 	userDepartment: z.string().min(1, { message: 'Department is required' }),
 })
 
-export async function loader() {
+export async function loader({ request }: { request: Request }) {
+	const userId = await requireUserId(request)
+
+	// Check if user should be on waitlist
+	const onWaitlist = await shouldBeOnWaitlist(userId)
+	if (onWaitlist) {
+		throw redirect('/waitlist')
+	}
+
 	const trialConfig = getTrialConfig()
 	const launchStatus = getLaunchStatus()
 	let plansAndPrices = null
@@ -177,6 +186,13 @@ export async function loader() {
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
+
+	// Check if user should be on waitlist
+	const onWaitlist = await shouldBeOnWaitlist(userId)
+	if (onWaitlist) {
+		throw redirect('/waitlist')
+	}
+
 	const formData = await request.formData()
 	const intent = formData.get('intent') as string
 	const trialConfig = getTrialConfig()

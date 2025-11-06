@@ -1,5 +1,6 @@
 import { randomInt } from 'node:crypto'
 import { prisma } from '#app/utils/db.server.ts'
+import { getLaunchStatus } from './env.server.ts'
 
 const REFERRAL_POINTS = 5
 const DISCORD_POINTS = 2
@@ -209,4 +210,62 @@ export async function linkReferral(userId: string, referralCode: string) {
 	})
 
 	return { success: true, message: 'Referral linked successfully' }
+}
+
+/**
+ * Check if a user should be restricted to the waitlist
+ * Returns true if the user should be redirected to /waitlist
+ */
+export async function shouldBeOnWaitlist(userId: string): Promise<boolean> {
+	const launchStatus = getLaunchStatus()
+
+	// If not in closed beta, no one should be on waitlist
+	if (launchStatus !== 'CLOSED_BETA') {
+		return false
+	}
+
+	// Check if user has a waitlist entry and if they have early access
+	const waitlistEntry = await prisma.waitlistEntry.findUnique({
+		where: { userId },
+		select: { hasEarlyAccess: true },
+	})
+
+	// If no waitlist entry exists, user is on waitlist
+	if (!waitlistEntry) {
+		return true
+	}
+
+	// If user has early access, they shouldn't be on waitlist
+	return !waitlistEntry.hasEarlyAccess
+}
+
+/**
+ * Grant early access to a user on the waitlist
+ */
+export async function grantEarlyAccess(
+	userId: string,
+	grantedBy: string,
+): Promise<void> {
+	await prisma.waitlistEntry.update({
+		where: { userId },
+		data: {
+			hasEarlyAccess: true,
+			grantedAccessAt: new Date(),
+			grantedAccessBy: grantedBy,
+		},
+	})
+}
+
+/**
+ * Revoke early access from a user
+ */
+export async function revokeEarlyAccess(userId: string): Promise<void> {
+	await prisma.waitlistEntry.update({
+		where: { userId },
+		data: {
+			hasEarlyAccess: false,
+			grantedAccessAt: null,
+			grantedAccessBy: null,
+		},
+	})
 }

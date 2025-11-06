@@ -790,6 +790,9 @@ model WaitlistEntry {
   points           Int              @default(1)
   referralCode     String           @unique
   hasJoinedDiscord Boolean          @default(false)
+  hasEarlyAccess   Boolean          @default(false)
+  grantedAccessAt  DateTime?
+  grantedAccessBy  String?
   referredById     String?
   referredBy       WaitlistEntry?   @relation("Referrals", fields: [referredById], references: [id])
   referrals        WaitlistEntry[]  @relation("Referrals")
@@ -799,4 +802,5 @@ model WaitlistEntry {
   @@index([userId])
   @@index([referralCode])
   @@index([points, createdAt])
+  @@index([hasEarlyAccess])
 }

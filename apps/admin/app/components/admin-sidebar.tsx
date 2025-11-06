@@ -34,6 +34,12 @@ export function AdminSidebar({
 			icon: UserIcon,
 		},
 		{
+			title: 'Waitlist',
+			url: '/waitlist',
+			isActive: location.pathname.startsWith('/waitlist'),
+			icon: UserIcon,
+		},
+		{
 			title: 'Organizations',
 			url: '/organizations',
 			isActive: location.pathname.startsWith('/organizations'),

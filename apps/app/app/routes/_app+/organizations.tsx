@@ -26,9 +26,17 @@ import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
 } from '#app/utils/organizations.server'
+import { shouldBeOnWaitlist } from '#app/utils/waitlist.server'
+import { redirect } from 'react-router'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
+
+	// Check if user should be on waitlist
+	const onWaitlist = await shouldBeOnWaitlist(userId)
+	if (onWaitlist) {
+		throw redirect('/waitlist')
+	}
 
 	const [organizations, user] = await Promise.all([
 		getUserOrganizations(userId),
