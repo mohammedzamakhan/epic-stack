@@ -30,6 +30,11 @@ const schema = z.object({
 
 	ALLOW_INDEXING: z.enum(['true', 'false']).optional(),
 
+	// Launch status for controlling access to the application
+	LAUNCH_STATUS: z
+		.enum(['CLOSED_BETA', 'PUBLIC_BETA', 'LAUNCHED'])
+		.optional(),
+
 	// Tigris Object Storage Configuration
 	AWS_ACCESS_KEY_ID: z.string(),
 	AWS_SECRET_ACCESS_KEY: z.string(),
@@ -81,4 +86,20 @@ declare global {
 	interface Window {
 		ENV: ENV
 	}
+}
+
+/**
+ * Get the current launch status
+ * @returns 'CLOSED_BETA' | 'PUBLIC_BETA' | 'LAUNCHED'
+ */
+export function getLaunchStatus(): 'CLOSED_BETA' | 'PUBLIC_BETA' | 'LAUNCHED' {
+	const status = process.env.LAUNCH_STATUS
+	if (
+		status === 'CLOSED_BETA' ||
+		status === 'PUBLIC_BETA' ||
+		status === 'LAUNCHED'
+	) {
+		return status
+	}
+	return 'LAUNCHED' // Default to launched if not set
 }
