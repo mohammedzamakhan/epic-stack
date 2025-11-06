@@ -148,7 +148,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	const adminUser = await requireUserWithRole(request, 'admin')
+	const adminUserId = await requireUserWithRole(request, 'admin')
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
@@ -160,7 +160,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	try {
 		if (intent === 'grant-access') {
-			await grantEarlyAccess(userId, adminUser.id)
+			await grantEarlyAccess(userId, adminUserId)
 			return Response.json({ success: true, message: 'Access granted' })
 		} else if (intent === 'revoke-access') {
 			await revokeEarlyAccess(userId)
@@ -248,7 +248,7 @@ export default function AdminWaitlistPage() {
 				<Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
 					<CardContent className="pt-6">
 						<div className="flex items-start gap-2">
-							<Icon name="info-circled" className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+							<Icon name="help-circle" className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
 							<div className="text-sm text-yellow-800 dark:text-yellow-200">
 								Launch status is currently <strong>{data.launchStatus}</strong>. The
 								waitlist is only active when LAUNCH_STATUS is set to CLOSED_BETA.
@@ -335,6 +335,8 @@ export default function AdminWaitlistPage() {
 														className="h-8 w-8 rounded-full object-cover"
 														src={entry.user.image.objectKey}
 														alt={entry.user.image.altText ?? entry.user.name ?? 'User'}
+														width={32}
+														height={32}
 													/>
 												)}
 												<div>
@@ -354,7 +356,7 @@ export default function AdminWaitlistPage() {
 											{entry.hasJoinedDiscord ? (
 												<Icon name="check" className="h-4 w-4 text-green-600" />
 											) : (
-												<Icon name="cross-1" className="h-4 w-4 text-gray-400" />
+												<Icon name="x" className="h-4 w-4 text-gray-400" />
 											)}
 										</TableCell>
 										<TableCell>
@@ -379,7 +381,7 @@ export default function AdminWaitlistPage() {
 														size="sm"
 														disabled={isProcessing}
 													>
-														<Icon name="cross-1" className="mr-1 h-3 w-3" />
+														<Icon name="x" className="mr-1 h-3 w-3" />
 														Revoke
 													</Button>
 												) : (
@@ -438,7 +440,8 @@ export default function AdminWaitlistPage() {
 											)
 										})
 										.map((page, index, array) => {
-											if (index > 0 && page - array[index - 1] > 1) {
+											const prevPage = array[index - 1]
+											if (index > 0 && prevPage && page - prevPage > 1) {
 												return (
 													<span key={`ellipsis-${page}`} className="px-2">
 														...
