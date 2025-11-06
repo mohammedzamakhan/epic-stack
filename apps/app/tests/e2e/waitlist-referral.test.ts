@@ -306,7 +306,132 @@ test.describe('Waitlist Referral System', () => {
 		expect(entry.userId).toBe(user.id)
 		expect(entry.points).toBe(1)
 		expect(entry.hasJoinedDiscord).toBe(false)
+		expect(entry.hasEarlyAccess).toBe(false)
 		expect(entry.referralCode).toMatch(/^.*-\d{4}$/)
+	})
+
+	test('shouldBeOnWaitlist returns true for users without early access', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+
+		// Create waitlist entry without early access
+		await prisma.waitlistEntry.create({
+			data: {
+				userId: user.id,
+				referralCode: `${user.username}-7777`,
+				hasEarlyAccess: false,
+			},
+		})
+
+		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')
+		const onWaitlist = await shouldBeOnWaitlist(user.id)
+
+		expect(onWaitlist).toBe(true)
+	})
+
+	test('shouldBeOnWaitlist returns false for users with early access', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+
+		// Create waitlist entry with early access
+		await prisma.waitlistEntry.create({
+			data: {
+				userId: user.id,
+				referralCode: `${user.username}-8888`,
+				hasEarlyAccess: true,
+			},
+		})
+
+		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')
+		const onWaitlist = await shouldBeOnWaitlist(user.id)
+
+		expect(onWaitlist).toBe(false)
+	})
+
+	test('shouldBeOnWaitlist returns false when not in CLOSED_BETA', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+
+		// Create waitlist entry without early access
+		await prisma.waitlistEntry.create({
+			data: {
+				userId: user.id,
+				referralCode: `${user.username}-9999`,
+				hasEarlyAccess: false,
+			},
+		})
+
+		// Temporarily change LAUNCH_STATUS
+		const originalStatus = process.env.LAUNCH_STATUS
+		process.env.LAUNCH_STATUS = 'PUBLIC_BETA'
+
+		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')
+		const onWaitlist = await shouldBeOnWaitlist(user.id)
+
+		// Restore original status
+		process.env.LAUNCH_STATUS = originalStatus
+
+		expect(onWaitlist).toBe(false)
+	})
+
+	test('grantEarlyAccess grants access to a user', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+		const admin = await insertNewUser()
+
+		// Create waitlist entry without early access
+		await prisma.waitlistEntry.create({
+			data: {
+				userId: user.id,
+				referralCode: `${user.username}-1001`,
+				hasEarlyAccess: false,
+			},
+		})
+
+		const { grantEarlyAccess } = await import('#app/utils/waitlist.server.ts')
+		await grantEarlyAccess(user.id, admin.id)
+
+		// Verify access was granted
+		const entry = await prisma.waitlistEntry.findUnique({
+			where: { userId: user.id },
+		})
+
+		expect(entry?.hasEarlyAccess).toBe(true)
+		expect(entry?.grantedAccessBy).toBe(admin.id)
+		expect(entry?.grantedAccessAt).toBeTruthy()
+	})
+
+	test('revokeEarlyAccess revokes access from a user', async ({
+		insertNewUser,
+	}) => {
+		const user = await insertNewUser()
+
+		// Create waitlist entry with early access
+		await prisma.waitlistEntry.create({
+			data: {
+				userId: user.id,
+				referralCode: `${user.username}-1002`,
+				hasEarlyAccess: true,
+				grantedAccessAt: new Date(),
+				grantedAccessBy: 'admin-id',
+			},
+		})
+
+		const { revokeEarlyAccess } = await import('#app/utils/waitlist.server.ts')
+		await revokeEarlyAccess(user.id)
+
+		// Verify access was revoked
+		const entry = await prisma.waitlistEntry.findUnique({
+			where: { userId: user.id },
+		})
+
+		expect(entry?.hasEarlyAccess).toBe(false)
+		expect(entry?.grantedAccessBy).toBeNull()
+		expect(entry?.grantedAccessAt).toBeNull()
 	})
 
 	test('referral code validation rejects invalid formats', async ({ page }) => {
