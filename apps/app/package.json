@@ -108,6 +108,7 @@
     "@repo/email": "*",
     "@repo/integrations": "*",
     "@repo/notifications": "*",
+    "@repo/observability": "*",
     "@repo/prisma": "*",
     "@repo/ui": "*",
     "@sentry/profiling-node": "9.15.0",
