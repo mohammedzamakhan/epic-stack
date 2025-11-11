@@ -7,11 +7,11 @@ import { expect, test } from '#tests/playwright-utils.ts'
 import path from 'path'
 
 test.describe('File Operations', () => {
-	test('Users can upload profile photos', async ({ page, login }) => {
+	test('Users can upload profile photos', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for profile photo upload section
@@ -43,14 +43,14 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can upload organization logos', async ({ page, login }) => {
+	test('Users can upload organization logos', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization settings
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for organization logo upload section
@@ -82,14 +82,14 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can upload images to notes', async ({ page, login }) => {
+	test('Users can upload images to notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to create new note
-		await page.goto(`/${org.slug}/notes/new`)
+		await navigate('/:slug/notes/new', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Fill in note details
@@ -137,11 +137,11 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can download their data', async ({ page, login }) => {
+	test('Users can download their data', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for data download section
@@ -166,11 +166,11 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('File upload validates file types', async ({ page, login }) => {
+	test('File upload validates file types', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for profile photo upload
@@ -192,11 +192,11 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('File upload validates file size', async ({ page, login }) => {
+	test('File upload validates file size', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for profile photo upload
@@ -229,11 +229,11 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can remove uploaded images', async ({ page, login }) => {
+	test('Users can remove uploaded images', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for existing profile photo and remove button
@@ -258,11 +258,11 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('File upload shows progress indicator', async ({ page, login }) => {
+	test('File upload shows progress indicator', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Look for profile photo upload
@@ -288,14 +288,14 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can preview images before upload', async ({ page, login }) => {
+	test('Users can preview images before upload', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to create new note
-		await page.goto(`/${org.slug}/notes/new`)
+		await navigate('/:slug/notes/new', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for image upload with preview
@@ -326,11 +326,12 @@ test.describe('File Operations', () => {
 	test('File upload handles network errors gracefully', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
 		// Navigate to profile settings
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Simulate network failure during upload
@@ -359,14 +360,14 @@ test.describe('File Operations', () => {
 		}
 	})
 
-	test('Users can bulk download organization data', async ({ page, login }) => {
+	test('Users can bulk download organization data', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization settings
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for organization data export

@@ -5,7 +5,7 @@ import { createTestOrganization, createTestOrganizationWithMultipleUsers } from 
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Search Functionality', () => {
-	test('Users can search for notes by title', async ({ page, login }) => {
+	test('Users can search for notes by title', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -42,7 +42,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search for notes containing "Important"
@@ -59,7 +59,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText(otherTitle)).not.toBeVisible()
 	})
 
-	test('Users can search for notes by content', async ({ page, login }) => {
+	test('Users can search for notes by content', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -89,7 +89,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search for notes containing "React"
@@ -105,7 +105,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText('Backend Development')).not.toBeVisible()
 	})
 
-	test('Search shows no results message when no matches found', async ({ page, login }) => {
+	test('Search shows no results message when no matches found', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -123,7 +123,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search for something that doesn't exist
@@ -139,7 +139,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText('Sample Note')).not.toBeVisible()
 	})
 
-	test('Search is case insensitive', async ({ page, login }) => {
+	test('Search is case insensitive', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -157,7 +157,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search using lowercase
@@ -172,7 +172,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText('JavaScript Development Guide')).toBeVisible()
 	})
 
-	test('Search respects note permissions', async ({ page, login }) => {
+	test('Search respects note permissions', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create another user
@@ -209,7 +209,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search for "searchable"
@@ -225,7 +225,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText('Private Searchable Note')).not.toBeVisible()
 	})
 
-	test('Search input maintains value after search', async ({ page, login }) => {
+	test('Search input maintains value after search', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -243,7 +243,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Perform search
@@ -259,7 +259,7 @@ test.describe('Search Functionality', () => {
 		await expect(searchInput).toHaveValue(searchTerm)
 	})
 
-	test('Search can be cleared to show all notes', async ({ page, login }) => {
+	test('Search can be cleared to show all notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -286,7 +286,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify both notes are initially visible
@@ -313,7 +313,7 @@ test.describe('Search Functionality', () => {
 		await expect(page.getByText('Another Note')).toBeVisible()
 	})
 
-	test('Search works with special characters', async ({ page, login }) => {
+	test('Search works with special characters', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -331,7 +331,7 @@ test.describe('Search Functionality', () => {
 		})
 
 		// Navigate to organization notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Search for content with special characters

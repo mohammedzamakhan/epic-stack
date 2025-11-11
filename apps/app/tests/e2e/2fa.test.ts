@@ -5,10 +5,11 @@ import { expect, test } from '#tests/playwright-utils.ts'
 test('Users can add 2FA to their account and use it when logging in', async ({
 	page,
 	login,
+	navigate,
 }) => {
 	const password = faker.internet.password()
 	const user = await login({ password })
-	await page.goto('/security')
+	await navigate('/security')
 
 	// Wait for the page to be fully loaded
 	await page.waitForLoadState('networkidle')
@@ -62,7 +63,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 		.click()
 	await page.getByRole('button', { name: /log out/i }).click()
 
-	await page.goto('/login')
+	await navigate('/login')
 	await expect(page).toHaveURL(`/login`)
 	await page
 		.getByRole('textbox', { name: /email or username/i })
@@ -88,7 +89,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	await page.waitForURL(/\/(organizations\/create|$)/)
 
 	// Navigate to the app to verify the user is properly logged in
-	await page.goto('/')
+	await navigate('/')
 
 	// User should be redirected to organization creation page (authenticated area)
 	await page.waitForURL('/organizations/create')

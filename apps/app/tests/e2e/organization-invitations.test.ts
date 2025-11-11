@@ -9,14 +9,14 @@ import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 
 test.describe('Organization Invitations', () => {
-	test('Organization owners can send invitations', async ({ page, login }) => {
+	test('Organization owners can send invitations', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization members page
-		await page.goto(`/${org.slug}/settings/members`)
+		await navigate('/:slug/settings/members', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Wait for page to fully load
@@ -61,7 +61,7 @@ test.describe('Organization Invitations', () => {
 		)
 	})
 
-	test('Users can accept organization invitations', async ({ page, login }) => {
+	test('Users can accept organization invitations', async ({ page, login, navigate }) => {
 		const invitedUser = await login()
 
 		// Create organization owner
@@ -102,7 +102,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Navigate directly to organizations page where pending invitations are shown
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Verify invitation details are displayed in pending invitations section
@@ -126,7 +126,7 @@ test.describe('Organization Invitations', () => {
 		).toBeVisible()
 
 		// Navigate to the organization to verify membership
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify user is now a member in database
@@ -204,7 +204,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Navigate to organizations page where pending invitations are shown
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Verify invitation is displayed
@@ -266,7 +266,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Navigate to organization members page
-		await page.goto(`/${org.slug}/settings/members`)
+		await navigate('/:slug/settings/members', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Find and revoke the invitation (look for the trash button in pending invitations)
@@ -300,7 +300,7 @@ test.describe('Organization Invitations', () => {
 		expect(deletedInvitation).toBeNull()
 	})
 
-	test('Users can view their pending invitations', async ({ page, login }) => {
+	test('Users can view their pending invitations', async ({ page, login, navigate }) => {
 		const invitedUser = await login()
 
 		// Create organization owner
@@ -365,7 +365,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Navigate to organizations page
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Verify pending invitations section is displayed
@@ -383,7 +383,7 @@ test.describe('Organization Invitations', () => {
 		// Just verify the invitations are displayed correctly
 	})
 
-	test('Expired invitations cannot be accepted', async ({ page, login }) => {
+	test('Expired invitations cannot be accepted', async ({ page, login, navigate }) => {
 		const invitedUser = await login()
 
 		// Create organization owner
@@ -428,7 +428,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Navigate to organizations page where pending invitations are shown
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Verify expired invitation does NOT appear in pending invitations
@@ -453,7 +453,7 @@ test.describe('Organization Invitations', () => {
 		await login()
 
 		// Navigate to invalid invitation page
-		await page.goto('/join/invalid-token-123')
+		await navigate('/join/invalid-token-123')
 		await page.waitForLoadState('networkidle')
 
 		// Verify error message is displayed (check for the actual error message from the join route)
