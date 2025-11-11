@@ -178,7 +178,7 @@ export const test = base.extend<{
 		await deleteGitHubUser(ghUser!.primaryEmail)
 	},
 	navigate: async ({ page }, use) => {
-		await use((route, params) => {
+		await use((route, params?) => {
 			const url = buildRoute(route, params)
 			return page.goto(url)
 		})
