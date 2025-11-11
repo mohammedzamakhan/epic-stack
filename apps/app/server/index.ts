@@ -11,6 +11,7 @@ import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
 import morgan from 'morgan'
 import { type ServerBuild } from 'react-router'
+import { logger, sentryLogger } from '../app/utils/logger.server.js'
 
 const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
@@ -170,7 +171,7 @@ app.use(async (req, res, next) => {
 		}
 	} catch (error) {
 		// If there's an error checking blacklist, log it but don't block the request
-		console.error('Error checking IP blacklist:', error)
+		logger.error({ err: error }, 'Error checking IP blacklist')
 	}
 
 	// Track the request after the response is finished
@@ -190,7 +191,7 @@ app.use(async (req, res, next) => {
 				})
 			} catch (error) {
 				// Silently fail to not break the app
-				console.error('IP tracking error:', error)
+				logger.error({ err: error }, 'IP tracking error')
 			}
 		})
 	})
@@ -205,7 +206,7 @@ setInterval(
 			const ipTracking = await import('../app/utils/ip-tracking.server.js')
 			ipTracking.cleanupRequestCounts()
 		} catch (error) {
-			console.error('Error cleaning up request counts:', error)
+			logger.error({ err: error }, 'Error cleaning up request counts')
 		}
 	},
 	5 * 60 * 1000,
@@ -282,7 +283,7 @@ async function getBuild() {
 		return { build: build as unknown as ServerBuild, error: null }
 	} catch (error) {
 		// Catch error and return null to make express happy and avoid an unrecoverable crash
-		console.error('Error creating build:', error)
+		sentryLogger.error({ err: error }, 'Error creating build')
 		return { error: error, build: null as unknown as ServerBuild }
 	}
 }
@@ -384,12 +385,16 @@ const portToUse = await getPort({
 })
 const portAvailable = desiredPort === portToUse
 if (!portAvailable && !IS_DEV) {
-	console.log(`⚠️ Port ${desiredPort} is not available.`)
+	logger.warn({ desiredPort, portToUse }, 'Port not available')
 	process.exit(1)
 }
 
 const server = app.listen(portToUse, () => {
 	if (!portAvailable) {
+		logger.warn(
+			{ desiredPort, portToUse },
+			`Port ${desiredPort} is not available, using ${portToUse} instead`,
+		)
 		console.warn(
 			styleText(
 				'yellow',
@@ -397,7 +402,7 @@ const server = app.listen(portToUse, () => {
 			),
 		)
 	}
-	console.log(`🚀  We have liftoff!`)
+
 	const localUrl = `http://localhost:${portToUse}`
 	let lanUrl: string | null = null
 	const localIp = ipAddress() ?? 'Unknown'
@@ -408,6 +413,12 @@ const server = app.listen(portToUse, () => {
 		lanUrl = `http://${localIp}:${portToUse}`
 	}
 
+	logger.info(
+		{ port: portToUse, localUrl, lanUrl, mode: MODE },
+		'Server started successfully',
+	)
+
+	console.log(`🚀  We have liftoff!`)
 	console.log(
 		`
 ${styleText('bold', 'Local:')}            ${styleText('cyan', localUrl)}
@@ -422,11 +433,13 @@ closeWithGrace(async ({ err }) => {
 		server.close((e) => (e ? reject(e) : resolve('ok')))
 	})
 	if (err) {
+		sentryLogger.fatal({ err }, 'Server shutting down with error')
 		console.error(styleText('red', String(err)))
 		console.error(styleText('red', String(err.stack)))
 		if (SENTRY_ENABLED) {
-			Sentry.captureException(err)
 			await Sentry.flush(500)
 		}
+	} else {
+		logger.info('Server shutting down gracefully')
 	}
 })

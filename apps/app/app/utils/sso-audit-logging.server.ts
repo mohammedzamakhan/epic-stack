@@ -1,4 +1,5 @@
 import { prisma } from './db.server.ts'
+import { logger, sentryLogger } from './logger.server.ts'
 
 // SSO-specific audit event types
 export enum SSOAuditEventType {
@@ -99,7 +100,7 @@ export class SSOAuditLogger {
 				await this.handleCriticalEvent(logEntry)
 			}
 		} catch (error) {
-			console.error('Failed to log SSO audit event:', error)
+			logger.error({ err: error }, 'Failed to log SSO audit event')
 		}
 	}
 
@@ -293,16 +294,9 @@ export class SSOAuditLogger {
 	}
 
 	/**
-	 * Log to console with structured format
+	 * Log to console with structured format using Pino
 	 */
 	private logToConsole(entry: SSOAuditLogEntry): void {
-		const logLevel =
-			entry.severity === 'critical' || entry.severity === 'error'
-				? 'error'
-				: entry.severity === 'warning'
-					? 'warn'
-					: 'log'
-
 		// Sanitize sensitive data from metadata
 		const sanitizedMetadata = this.sanitizeMetadata(entry.metadata)
 
@@ -313,21 +307,28 @@ export class SSOAuditLogger {
 		const sanitizedIP = this.sanitizeIPAddress(entry.ipAddress)
 
 		const logData = {
-			timestamp: entry.timestamp.toISOString(),
+			ssoAuditEvent: true,
 			eventType: entry.eventType,
 			organizationId: entry.organizationId,
 			userId: this.sanitizeUserId(entry.userId),
 			sessionId: entry.sessionId,
 			ssoConfigId: entry.ssoConfigId,
 			ipAddress: sanitizedIP,
-			details: sanitizedDetails,
 			severity: entry.severity,
 			metadata: sanitizedMetadata,
 		}
 
-		// Use console[logLevel] but ensure it exists
-		const consoleFn = (console as any)[logLevel] || console.log
-		consoleFn('SSO Audit Event:', JSON.stringify(logData))
+		// Use appropriate logger method based on severity
+		// Use sentryLogger for errors/critical to automatically capture in Sentry
+		if (entry.severity === 'critical') {
+			sentryLogger.fatal(logData, `SSO Audit: ${sanitizedDetails}`)
+		} else if (entry.severity === 'error') {
+			sentryLogger.error(logData, `SSO Audit: ${sanitizedDetails}`)
+		} else if (entry.severity === 'warning') {
+			sentryLogger.warn(logData, `SSO Audit: ${sanitizedDetails}`)
+		} else {
+			logger.info(logData, `SSO Audit: ${sanitizedDetails}`)
+		}
 	}
 
 	/**
@@ -445,7 +446,7 @@ export class SSOAuditLogger {
 			//   },
 			// })
 		} catch (error) {
-			console.error('Failed to store audit log in database:', error)
+			logger.error({ err: error }, 'Failed to store audit log in database')
 		}
 	}
 
@@ -469,7 +470,7 @@ export class SSOAuditLogger {
 				// await sendToSentry(entry)
 			}
 		} catch (error) {
-			console.error('Failed to send audit log to monitoring:', error)
+			logger.error({ err: error }, 'Failed to send audit log to monitoring')
 		}
 	}
 
@@ -479,7 +480,7 @@ export class SSOAuditLogger {
 	private async handleCriticalEvent(entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// Send immediate alerts for critical events
-			console.error('CRITICAL SSO EVENT:', entry)
+			// This is already logged via logToConsole with sentryLogger.fatal
 
 			// Send to alerting systems
 			if (process.env.SLACK_WEBHOOK_URL) {
@@ -489,16 +490,8 @@ export class SSOAuditLogger {
 			if (process.env.PAGERDUTY_INTEGRATION_KEY) {
 				// await sendPagerDutyAlert(entry)
 			}
-
-			// Log to error tracking
-			if (process.env.SENTRY_DSN) {
-				// Sentry.captureException(new Error(entry.details), {
-				//   tags: { sso_event: entry.eventType },
-				//   extra: entry.metadata,
-				// })
-			}
 		} catch (error) {
-			console.error('Failed to handle critical SSO event:', error)
+			logger.error({ err: error }, 'Failed to handle critical SSO event')
 		}
 	}
 

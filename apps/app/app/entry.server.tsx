@@ -1,6 +1,5 @@
 import crypto from 'node:crypto'
 import { PassThrough } from 'node:stream'
-import { styleText } from 'node:util'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { contentSecurity } from '@nichtsam/helmet/content'
@@ -18,6 +17,7 @@ import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
 import { getEnv, init } from './utils/env.server.ts'
 import { getInstanceInfo } from './utils/litefs.server.ts'
+import { sentryLogger } from './utils/logger.server.ts'
 import { NonceProvider } from './utils/nonce-provider.ts'
 import { makeTimings } from './utils/timing.server.ts'
 
@@ -185,11 +185,15 @@ export function handleError(
 		return
 	}
 
-	if (error instanceof Error) {
-		console.error(styleText('red', String(error.stack)))
-	} else {
-		console.error(error)
-	}
+	// Log with context and automatically send to Sentry
+	const requestLogger = sentryLogger.child({
+		url: request.url,
+		method: request.method,
+	})
 
-	Sentry.captureException(error)
+	if (error instanceof Error) {
+		requestLogger.error({ err: error }, 'Request handling error')
+	} else {
+		requestLogger.error({ error }, 'Unknown error in request handling')
+	}
 }

@@ -1,4 +1,5 @@
 import { prisma } from '#app/utils/db.server.ts'
+import { logger } from './logger.server.ts'
 
 export type ActivityAction =
 	| 'viewed'
@@ -48,7 +49,10 @@ export async function logNoteActivity(options: ActivityLogOptions) {
 		})
 	} catch (error) {
 		// Log the error but don't throw - activity logging shouldn't break the main functionality
-		console.error('Failed to log note activity:', error)
+		logger.error(
+			{ err: error, noteId, userId, action },
+			'Failed to log note activity',
+		)
 	}
 }
 
