@@ -158,7 +158,7 @@ function validateIpAddress(ip: string): string {
 	const ipv4Match = trimmed.match(ipv4Regex)
 	if (ipv4Match) {
 		// Verify each octet is 0-255
-		const octets = [ipv4Match[1], ipv4Match[2], ipv4Match[3], ipv4Match[4]]
+		const octets = [ipv4Match[1]!, ipv4Match[2]!, ipv4Match[3]!, ipv4Match[4]!]
 		const valid = octets.every(octet => {
 			const num = parseInt(octet, 10)
 			return num >= 0 && num <= 255
@@ -378,7 +378,7 @@ export function sanitizeIpAddress(ip: string): string {
 	const ipv4Match = ip.match(ipv4Regex)
 	if (ipv4Match) {
 		// Verify valid octets
-		const octets = [ipv4Match[1], ipv4Match[2], ipv4Match[3]]
+		const octets = [ipv4Match[1]!, ipv4Match[2]!, ipv4Match[3]!]
 		const valid = octets.every(octet => {
 			const num = parseInt(octet, 10)
 			return num >= 0 && num <= 255
