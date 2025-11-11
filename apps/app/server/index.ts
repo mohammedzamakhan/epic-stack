@@ -433,12 +433,21 @@ closeWithGrace(async ({ err }) => {
 		server.close((e) => (e ? reject(e) : resolve('ok')))
 	})
 	if (err) {
-		sentryLogger.fatal({ err }, 'Server shutting down with error')
+		// Log to console first for immediate visibility
 		console.error(styleText('red', String(err)))
 		console.error(styleText('red', String(err.stack)))
+
+		// Capture to Sentry with explicit call to ensure it completes before flush
 		if (SENTRY_ENABLED) {
+			Sentry.captureException(err, {
+				level: 'fatal',
+				extra: { context: 'server_shutdown' },
+			})
 			await Sentry.flush(500)
 		}
+
+		// Also log via pino for structured logging
+		sentryLogger.fatal({ err }, 'Server shutting down with error')
 	} else {
 		logger.info('Server shutting down gracefully')
 	}

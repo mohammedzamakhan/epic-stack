@@ -319,13 +319,14 @@ export class SSOAuditLogger {
 		}
 
 		// Use appropriate logger method based on severity
-		// Use sentryLogger for errors/critical to automatically capture in Sentry
+		// Use sentryLogger only for errors/critical to avoid Sentry noise
+		// SSO warnings (failed logins, validation errors) are frequent during normal operations
 		if (entry.severity === 'critical') {
 			sentryLogger.fatal(logData, `SSO Audit: ${sanitizedDetails}`)
 		} else if (entry.severity === 'error') {
 			sentryLogger.error(logData, `SSO Audit: ${sanitizedDetails}`)
 		} else if (entry.severity === 'warning') {
-			sentryLogger.warn(logData, `SSO Audit: ${sanitizedDetails}`)
+			logger.warn(logData, `SSO Audit: ${sanitizedDetails}`)
 		} else {
 			logger.info(logData, `SSO Audit: ${sanitizedDetails}`)
 		}
