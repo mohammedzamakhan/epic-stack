@@ -3,7 +3,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Accessibility', () => {
-	test('All pages have proper heading structure', async ({ page, login }) => {
+	test('All pages have proper heading structure', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -11,7 +11,7 @@ test.describe('Accessibility', () => {
 
 		// Test dashboard page
 		try {
-			await page.goto(`/${org.slug}`)
+			await navigate('/:slug', { slug: org.slug })
 			await page.waitForLoadState('networkidle')
 
 			// Verify h1 exists and is unique
@@ -30,7 +30,7 @@ test.describe('Accessibility', () => {
 		}
 
 		// Test notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify proper heading hierarchy
@@ -39,7 +39,7 @@ test.describe('Accessibility', () => {
 		expect(headingCount).toBeGreaterThan(0)
 
 		// Test settings page
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify h1 exists
@@ -56,7 +56,7 @@ test.describe('Accessibility', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Test note creation form
-		await page.goto(`/${org.slug}/notes/new`)
+		await navigate('/:slug/notes/new', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify form inputs have labels
@@ -77,7 +77,7 @@ test.describe('Accessibility', () => {
 		await expect(contentEditor).toBeVisible()
 
 		// Test profile settings form
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 
 		// Verify profile form inputs have proper labels
@@ -99,7 +99,7 @@ test.describe('Accessibility', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test keyboard navigation through interactive elements
@@ -134,14 +134,14 @@ test.describe('Accessibility', () => {
 		}
 	})
 
-	test('Images have alt text', async ({ page, login }) => {
+	test('Images have alt text', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check all images have alt attributes
@@ -158,7 +158,7 @@ test.describe('Accessibility', () => {
 
 		// Test profile page images
 		try {
-			await page.goto('/profile')
+			await navigate('/profile')
 			await page.waitForLoadState('networkidle')
 
 			const profileImages = page.locator('img')
@@ -201,7 +201,7 @@ test.describe('Accessibility', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test both light and dark themes
@@ -234,7 +234,7 @@ test.describe('Accessibility', () => {
 		}
 	})
 
-	test('Focus indicators are visible', async ({ page, login }) => {
+	test('Focus indicators are visible', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -242,7 +242,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		try {
-			await page.goto(`/${org.slug}`)
+			await navigate('/:slug', { slug: org.slug })
 			await page.waitForLoadState('networkidle')
 		} catch (error: unknown) {
 			if (error instanceof Error && error.message.includes('crashed')) {
@@ -307,14 +307,14 @@ test.describe('Accessibility', () => {
 		expect(focusableElementsFound).toBeGreaterThan(0)
 	})
 
-	test('ARIA landmarks are properly used', async ({ page, login }) => {
+	test('ARIA landmarks are properly used', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check for main landmark
@@ -349,7 +349,7 @@ test.describe('Accessibility', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check for ARIA live regions
@@ -377,14 +377,14 @@ test.describe('Accessibility', () => {
 		}
 	})
 
-	test('Skip links are available', async ({ page, login }) => {
+	test('Skip links are available', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Tab to first element to reveal skip links
@@ -410,11 +410,11 @@ test.describe('Accessibility', () => {
 		}
 	})
 
-	test('Error messages are accessible', async ({ page, login }) => {
+	test('Error messages are accessible', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to login page to test form validation
-		await page.goto('/login')
+		await navigate('/login')
 		await page.waitForLoadState('networkidle')
 
 		// Submit form without filling required fields
@@ -445,14 +445,14 @@ test.describe('Accessibility', () => {
 		}
 	})
 
-	test('Modal dialogs are accessible', async ({ page, login }) => {
+	test('Modal dialogs are accessible', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu (modal dialog)
@@ -488,7 +488,7 @@ test.describe('Accessibility', () => {
 		await expect(dialog).not.toBeVisible()
 	})
 
-	test('Tables have proper headers and captions', async ({ page, login }) => {
+	test('Tables have proper headers and captions', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -506,7 +506,7 @@ test.describe('Accessibility', () => {
 		})
 
 		// Navigate to notes page (likely has a table)
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check for tables

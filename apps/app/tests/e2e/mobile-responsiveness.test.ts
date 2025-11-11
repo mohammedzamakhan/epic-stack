@@ -7,7 +7,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Mobile Responsiveness', () => {
-	test('Dashboard is responsive on mobile devices', async ({ page, login }) => {
+	test('Dashboard is responsive on mobile devices', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -15,7 +15,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Test on mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 }) // iPhone SE
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 		await page.waitForTimeout(500) // Allow responsive layout to settle
 
@@ -50,7 +50,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Navigation menu works on mobile', async ({ page, login }) => {
+	test('Navigation menu works on mobile', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -58,7 +58,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for sidebar trigger button (the sidebar should be collapsible on mobile)
@@ -97,7 +97,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Forms are usable on mobile devices', async ({ page, login }) => {
+	test('Forms are usable on mobile devices', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -105,7 +105,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}/notes/new`)
+		await navigate('/:slug/notes/new', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test form inputs are properly sized for mobile
@@ -145,7 +145,7 @@ test.describe('Mobile Responsiveness', () => {
 		await expect(page.getByText('Mobile Test Note').first()).toBeVisible()
 	})
 
-	test('Tables are responsive on mobile', async ({ page, login }) => {
+	test('Tables are responsive on mobile', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -164,7 +164,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check if tables are present
@@ -184,7 +184,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Touch interactions work correctly', async ({ page, login }) => {
+	test('Touch interactions work correctly', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -192,7 +192,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test tap interactions on buttons
@@ -252,7 +252,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Text is readable on mobile devices', async ({ page, login }) => {
+	test('Text is readable on mobile devices', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -260,7 +260,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check font sizes are appropriate for mobile
@@ -281,7 +281,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Images scale properly on mobile', async ({ page, login }) => {
+	test('Images scale properly on mobile', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -289,7 +289,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check that images don't overflow the viewport
@@ -310,7 +310,7 @@ test.describe('Mobile Responsiveness', () => {
 		}
 	})
 
-	test('Modal dialogs work on mobile', async ({ page, login }) => {
+	test('Modal dialogs work on mobile', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -318,7 +318,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu modal
@@ -350,13 +350,13 @@ test.describe('Mobile Responsiveness', () => {
 		await expect(dialog).not.toBeVisible()
 	})
 
-	test('Viewport meta tag is present', async ({ page, login }) => {
+	test('Viewport meta tag is present', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Check for viewport meta tag
@@ -367,6 +367,7 @@ test.describe('Mobile Responsiveness', () => {
 	test('Orientation changes are handled gracefully', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -375,7 +376,7 @@ test.describe('Mobile Responsiveness', () => {
 
 		// Start in portrait mode
 		await page.setViewportSize({ width: 375, height: 667 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify content is visible in portrait - just check page loaded
@@ -397,7 +398,7 @@ test.describe('Mobile Responsiveness', () => {
 		expect(bodyScrollWidth).toBeLessThanOrEqual(viewportWidth + 1)
 	})
 
-	test('Loading states are appropriate for mobile', async ({ page, login }) => {
+	test('Loading states are appropriate for mobile', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -411,7 +412,7 @@ test.describe('Mobile Responsiveness', () => {
 			setTimeout(() => route.continue(), 100) // Add 100ms delay
 		})
 
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 
 		// Look for loading indicators
 		const loadingIndicators = page.locator(

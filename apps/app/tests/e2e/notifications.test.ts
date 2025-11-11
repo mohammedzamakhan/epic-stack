@@ -8,11 +8,11 @@ import {
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Notifications', () => {
-	test('Users can access notification settings', async ({ page, login }) => {
+	test('Users can access notification settings', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Verify notification settings page loads - use first() to avoid strict mode
@@ -29,7 +29,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for email notification toggles
@@ -59,7 +59,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for push notification toggles
@@ -89,7 +89,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for notification frequency settings
@@ -113,14 +113,14 @@ test.describe('Notifications', () => {
 		}
 	})
 
-	test('Users can view notification history', async ({ page, login }) => {
+	test('Users can view notification history', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page first
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for notifications bell or indicator
@@ -181,7 +181,7 @@ test.describe('Notifications', () => {
 		})
 
 		// Navigate to organizations page
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Verify invitation notification is displayed
@@ -193,14 +193,14 @@ test.describe('Notifications', () => {
 		await expect(page.getByText(org.name)).toBeVisible()
 	})
 
-	test('Users can mark notifications as read', async ({ page, login }) => {
+	test('Users can mark notifications as read', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for notifications bell
@@ -232,7 +232,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for specific notification type toggles
@@ -262,7 +262,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Toggle a notification setting
@@ -292,11 +292,11 @@ test.describe('Notifications', () => {
 		}
 	})
 
-	test('Users can configure notification channels', async ({ page, login }) => {
+	test('Users can configure notification channels', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for notification channel options
@@ -316,7 +316,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Verify that notification settings page is displayed
@@ -351,11 +351,11 @@ test.describe('Notifications', () => {
 		expect(hasToggles || isLoading || hasNoPreferences || hasError).toBe(true)
 	})
 
-	test('Users can test notification delivery', async ({ page, login }) => {
+	test('Users can test notification delivery', async ({ page, login, navigate }) => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Look for test notification button
@@ -378,7 +378,7 @@ test.describe('Notifications', () => {
 		await login()
 
 		// Navigate to notification settings
-		await page.goto('/notifications')
+		await navigate('/notifications')
 		await page.waitForLoadState('networkidle')
 
 		// Test keyboard navigation through toggles

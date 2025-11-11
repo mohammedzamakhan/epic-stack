@@ -38,6 +38,7 @@ test.describe('Waitlist Referral System', () => {
 	test('referral link redirects to signup with code stored in session', async ({
 		page,
 		insertNewUser,
+		navigate,
 	}) => {
 		const referrer = await insertNewUser()
 
@@ -50,7 +51,7 @@ test.describe('Waitlist Referral System', () => {
 		})
 
 		// Visit referral link as unauthenticated user
-		await page.goto(`/r/${referrerEntry.referralCode}`)
+		await navigate('/r/:code', { code: referrerEntry.referralCode })
 
 		// Should redirect to signup
 		await expect(page).toHaveURL('/signup')
@@ -227,9 +228,9 @@ test.describe('Waitlist Referral System', () => {
 		expect(result2.message).toContain('Already referred by someone')
 	})
 
-	test('invalid referral code shows error', async ({ page }) => {
+	test('invalid referral code shows error', async ({ page, navigate }) => {
 		// Visit invalid referral link
-		await page.goto('/r/invalid-code-9999')
+		await navigate('/r/invalid-code-9999')
 
 		// Should redirect to signup with error
 		await expect(page).toHaveURL('/signup')
@@ -434,7 +435,7 @@ test.describe('Waitlist Referral System', () => {
 		expect(entry?.grantedAccessAt).toBeNull()
 	})
 
-	test('referral code validation rejects invalid formats', async ({ page }) => {
+	test('referral code validation rejects invalid formats', async ({ page, navigate }) => {
 		// Try various invalid formats - all should redirect to signup
 		const invalidCodes = [
 			'test', // Too short
@@ -445,7 +446,7 @@ test.describe('Waitlist Referral System', () => {
 		]
 
 		for (const code of invalidCodes) {
-			await page.goto(`/r/${code}`)
+			await navigate('/r/:code', { code })
 			// Invalid codes should redirect to signup page
 			// (toast messages are unreliable to verify in test environment)
 			await expect(page).toHaveURL(/\/signup/, { timeout: 5000 })

@@ -40,10 +40,10 @@ const test = base.extend<{
 	},
 })
 
-test('onboarding with link', async ({ page, getOnboardingData }) => {
+test('onboarding with link', async ({ page, getOnboardingData , navigate }) => {
 	const onboardingData = getOnboardingData()
 
-	await page.goto('/')
+	await navigate('/')
 
 	await page.getByRole('link', { name: /sign in/i }).click()
 	await expect(page).toHaveURL(`/login`)
@@ -104,10 +104,10 @@ test('onboarding with link', async ({ page, getOnboardingData }) => {
 	await expect(page.getByText(/thanks for signing up/i)).toBeVisible()
 })
 
-test('onboarding with a short code', async ({ page, getOnboardingData }) => {
+test('onboarding with a short code', async ({ page, getOnboardingData , navigate }) => {
 	const onboardingData = getOnboardingData()
 
-	await page.goto('/signup')
+	await navigate('/signup')
 
 	const emailTextbox = page.getByRole('textbox', { name: /email/i })
 	await emailTextbox.click()
@@ -144,7 +144,7 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 		}),
 	).toBeNull()
 
-	await page.goto('/signup')
+	await navigate('/signup')
 
 	// Wait for the page to be fully loaded
 	await page.waitForLoadState('networkidle')
@@ -223,7 +223,7 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 	})
 	expect(connection).toBeNull()
 
-	await page.goto('/signup')
+	await navigate('/signup')
 	await page.getByRole('button', { name: /signup with github/i }).click()
 
 	await expect(page).toHaveURL(`/organizations/create`)
@@ -240,7 +240,7 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 }) => {
 	const ghUser = await prepareGitHubUser()
 
-	await page.goto('/signup')
+	await navigate('/signup')
 	await page.getByRole('button', { name: /signup with github/i }).click()
 
 	await expect(page).toHaveURL(/\/onboarding\/github/)
@@ -329,11 +329,11 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 	await expect(page.getByText(/thanks for signing up/i)).toBeVisible()
 })
 
-test('login as existing user', async ({ page, insertNewUser }) => {
+test('login as existing user', async ({ page, insertNewUser , navigate }) => {
 	const password = faker.internet.password()
 	const user = await insertNewUser({ password })
 	invariant(user.name, 'User name not found')
-	await page.goto('/login')
+	await navigate('/login')
 	await page
 		.getByRole('textbox', { name: /^email or username$/i })
 		.fill(user.username)
@@ -377,12 +377,12 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	).toBeVisible()
 })
 
-test('reset password with a link', async ({ page, insertNewUser }) => {
+test('reset password with a link', async ({ page, insertNewUser , navigate }) => {
 	const originalPassword = faker.internet.password()
 	const user = await insertNewUser({ password: originalPassword })
 	invariant(user.name, 'User name not found')
 
-	await page.goto('/login')
+	await navigate('/login')
 	await page
 		.getByRole('textbox', { name: /email or username/i })
 		.fill(user.username)
@@ -469,9 +469,9 @@ test('reset password with a link', async ({ page, insertNewUser }) => {
 	).toBeVisible()
 })
 
-test('reset password with a short code', async ({ page, insertNewUser }) => {
+test('reset password with a short code', async ({ page, insertNewUser , navigate }) => {
 	const user = await insertNewUser()
-	await page.goto('/login')
+	await navigate('/login')
 	await page
 		.getByRole('textbox', { name: /email or username/i })
 		.fill(user.username)

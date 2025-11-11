@@ -78,10 +78,34 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 	await page.context().addCookies([newConfig])
 }
 
+type RouteParams = Record<string, string | number>
+
+/**
+ * Type-safe navigation utility for Playwright tests.
+ *
+ * @param route - A route pattern with optional parameters (e.g., '/users/:username/notes/:noteId')
+ * @param params - An object with parameter values to substitute in the route
+ * @returns A Promise that resolves when navigation completes
+ *
+ * @example
+ * await navigate('/users/:username/notes', { username: user.username })
+ * await navigate('/security') // Static routes don't need params
+ */
+function buildRoute(route: string, params?: RouteParams): string {
+	if (!params) return route
+
+	let result = route
+	for (const [key, value] of Object.entries(params)) {
+		result = result.replace(`:${key}`, String(value))
+	}
+	return result
+}
+
 export const test = base.extend<{
 	insertNewUser(options?: GetOrInsertUserOptions): Promise<User>
 	login(options?: GetOrInsertUserOptions): Promise<User>
 	prepareGitHubUser(): Promise<GitHubUser>
+	navigate(route: string, params?: RouteParams): Promise<Response | null>
 }>({
 	page: async ({ page }, use) => {
 		// Set cookie consent for all tests to prevent the banner from blocking interactions
@@ -152,6 +176,12 @@ export const test = base.extend<{
 			await prisma.session.deleteMany({ where: { userId: user.id } })
 		}
 		await deleteGitHubUser(ghUser!.primaryEmail)
+	},
+	navigate: async ({ page }, use) => {
+		await use((route, params) => {
+			const url = buildRoute(route, params)
+			return page.goto(url)
+		})
 	},
 })
 export const { expect } = test
