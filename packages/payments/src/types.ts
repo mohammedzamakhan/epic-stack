@@ -26,9 +26,9 @@ export interface Price {
 }
 
 export interface PriceTier {
-	upTo: number | null
-	unitAmount: number | null
-	flatAmount: number | null
+	up_to: number | null
+	unit_amount: number | null
+	flat_amount: number | null
 }
 
 export interface PlansAndPrices {

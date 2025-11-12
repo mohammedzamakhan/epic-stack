@@ -85,9 +85,9 @@ export class StripeProvider implements PaymentProvider {
 				trialPeriodDays: price.recurring?.trial_period_days,
 				currency: price.currency,
 				tiers: price.tiers?.map((tier) => ({
-					upTo: tier.up_to,
-					unitAmount: tier.unit_amount,
-					flatAmount: tier.flat_amount,
+					up_to: tier.up_to,
+					unit_amount: tier.unit_amount,
+					flat_amount: tier.flat_amount,
 				})),
 			}))
 		} catch (error: any) {
