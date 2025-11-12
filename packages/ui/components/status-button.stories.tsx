@@ -60,7 +60,6 @@ export const WithMessage: Story = {
 };
 
 export const Interactive: Story = {
-  args: {},
   render: () => {
     const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
