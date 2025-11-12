@@ -15,6 +15,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {
+    maxLength: 6,
+  },
   render: () => (
     <InputOTP maxLength={6}>
       <InputOTPGroup>
@@ -30,6 +33,9 @@ export const Default: Story = {
 };
 
 export const WithSeparator: Story = {
+  args: {
+    maxLength: 6,
+  },
   render: () => (
     <InputOTP maxLength={6}>
       <InputOTPGroup>
@@ -48,6 +54,9 @@ export const WithSeparator: Story = {
 };
 
 export const DigitsOnly: Story = {
+  args: {
+    maxLength: 6,
+  },
   render: () => (
     <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS}>
       <InputOTPGroup>
@@ -63,6 +72,9 @@ export const DigitsOnly: Story = {
 };
 
 export const CharsOnly: Story = {
+  args: {
+    maxLength: 6,
+  },
   render: () => (
     <InputOTP maxLength={6} pattern={REGEXP_ONLY_CHARS}>
       <InputOTPGroup>
@@ -78,6 +90,9 @@ export const CharsOnly: Story = {
 };
 
 export const Disabled: Story = {
+  args: {
+    maxLength: 6,
+  },
   render: () => (
     <InputOTP maxLength={6} disabled>
       <InputOTPGroup>

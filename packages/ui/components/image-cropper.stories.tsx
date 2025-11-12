@@ -16,6 +16,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {
+    dialogOpen: false,
+    setDialogOpen: () => {},
+    selectedFile: null,
+    onCropComplete: () => {},
+    children: null,
+  },
   render: () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,6 +78,13 @@ export const Default: Story = {
 };
 
 export const CustomAspectRatio: Story = {
+  args: {
+    dialogOpen: false,
+    setDialogOpen: () => {},
+    selectedFile: null,
+    onCropComplete: () => {},
+    children: null,
+  },
   render: () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
