@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../styles/tailwind.css';
 
 const preview: Preview = {
@@ -25,11 +25,24 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story) => (
-      <div className="p-8">
-        <Story />
-      </div>
-    ),
+    (Story, context) => {
+      const theme = context.globals.theme || 'light';
+
+      useEffect(() => {
+        const htmlElement = document.documentElement;
+        if (theme === 'dark') {
+          htmlElement.classList.add('dark');
+        } else {
+          htmlElement.classList.remove('dark');
+        }
+      }, [theme]);
+
+      return (
+        <div className="p-8 min-h-screen bg-background text-foreground">
+          <Story />
+        </div>
+      );
+    },
   ],
   globalTypes: {
     theme: {
