@@ -3,7 +3,7 @@ import { createTestOrganization } from '#tests/test-utils.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Theme Switching', () => {
-	test('Users can switch to dark theme', async ({ page, login }) => {
+	test('Users can switch to dark theme', async ({ page, login, navigate }) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
 
@@ -13,7 +13,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// First open the user dropdown menu in the sidebar
@@ -38,7 +38,7 @@ test.describe('Theme Switching', () => {
 		await expect(htmlElement).toHaveClass(/dark/)
 	})
 
-	test('Users can switch to light theme', async ({ page, login }) => {
+	test('Users can switch to light theme', async ({ page, login, navigate }) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
 
@@ -48,7 +48,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Switch to light theme
@@ -68,7 +68,7 @@ test.describe('Theme Switching', () => {
 		await expect(htmlElement).not.toHaveClass(/dark/)
 	})
 
-	test('Users can switch to system theme', async ({ page, login }) => {
+	test('Users can switch to system theme', async ({ page, login, navigate }) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
 
@@ -78,7 +78,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Find and click theme switcher
@@ -120,7 +120,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme
@@ -160,7 +160,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme
@@ -180,14 +180,14 @@ test.describe('Theme Switching', () => {
 		await expect(htmlElement).toHaveClass(/dark/)
 
 		// Navigate to settings page
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify dark theme is still applied after navigation
 		await expect(htmlElement).toHaveClass(/dark/)
 
 		// Navigate to notes page
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify dark theme is still applied
@@ -207,7 +207,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme and verify it works
@@ -229,7 +229,7 @@ test.describe('Theme Switching', () => {
 		await expect(htmlElement).toHaveClass(/dark/)
 	})
 
-	test('Theme switching works on different pages', async ({ page, login }) => {
+	test('Theme switching works on different pages', async ({ page, login, navigate }) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
 
@@ -239,7 +239,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Test theme switching on organization page first
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
@@ -258,11 +258,11 @@ test.describe('Theme Switching', () => {
 		await expect(htmlElement).toHaveClass(/dark/)
 
 		// Navigate to different pages and verify theme persists
-		await page.goto('/profile')
+		await navigate('/profile')
 		await page.waitForLoadState('networkidle')
 		await expect(htmlElement).toHaveClass(/dark/)
 
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 		await expect(htmlElement).toHaveClass(/dark/)
 	})
@@ -280,7 +280,7 @@ test.describe('Theme Switching', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Use mouse interaction for more reliable theme switching

@@ -8,13 +8,13 @@ import {
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Notes CRUD Operations', () => {
-	test('Users can create notes', async ({ page, login }) => {
+	test('Users can create notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		const newNote = createNote()
@@ -40,7 +40,7 @@ test.describe('Notes CRUD Operations', () => {
 		await expect(page.getByText(newNote.title).first()).toBeVisible()
 	})
 
-	test('Users can edit notes', async ({ page, login }) => {
+	test('Users can edit notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -55,7 +55,7 @@ test.describe('Notes CRUD Operations', () => {
 				isPublic: true,
 			},
 		})
-		await page.goto(`/${org.slug}/notes/${note.id}`)
+		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
 		// edit the note
@@ -83,7 +83,7 @@ test.describe('Notes CRUD Operations', () => {
 		).toBeVisible()
 	})
 
-	test('Users can delete notes', async ({ page, login }) => {
+	test('Users can delete notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -98,7 +98,7 @@ test.describe('Notes CRUD Operations', () => {
 				isPublic: true,
 			},
 		})
-		await page.goto(`/${org.slug}/notes/${note.id}`)
+		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
 		// delete the note
@@ -114,7 +114,7 @@ test.describe('Notes CRUD Operations', () => {
 		await expect(page).toHaveURL(`/${org.slug}/notes`)
 	})
 
-	test('Users can view note details', async ({ page, login }) => {
+	test('Users can view note details', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -131,7 +131,7 @@ test.describe('Notes CRUD Operations', () => {
 			},
 		})
 
-		await page.goto(`/${org.slug}/notes/${note.id}`)
+		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
 		// Verify note details are displayed
@@ -141,7 +141,7 @@ test.describe('Notes CRUD Operations', () => {
 		await expect(page.getByText(noteData.content)).toBeVisible()
 	})
 
-	test('Users can list all notes', async ({ page, login }) => {
+	test('Users can list all notes', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -158,7 +158,7 @@ test.describe('Notes CRUD Operations', () => {
 			})),
 		})
 
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify all notes are displayed
@@ -167,7 +167,7 @@ test.describe('Notes CRUD Operations', () => {
 		}
 	})
 
-	test('Users can filter notes by status', async ({ page, login }) => {
+	test('Users can filter notes by status', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -194,7 +194,7 @@ test.describe('Notes CRUD Operations', () => {
 			],
 		})
 
-		await page.goto(`/${org.slug}/notes`)
+		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test filtering by published status
@@ -216,7 +216,7 @@ test.describe('Notes CRUD Operations', () => {
 		}
 	})
 
-	test('Users can change note visibility', async ({ page, login }) => {
+	test('Users can change note visibility', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -232,7 +232,7 @@ test.describe('Notes CRUD Operations', () => {
 			},
 		})
 
-		await page.goto(`/${org.slug}/notes/${note.id}/edit`)
+		await navigate('/:slug/notes/:id/edit', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
 		// Change visibility to public

@@ -3,9 +3,13 @@ import { type NoteImage, type Note } from '@prisma/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
-test.skip('Users can create note with an image', async ({ page, login }) => {
+test.skip('Users can create note with an image', async ({
+	page,
+	login,
+	navigate,
+}) => {
 	const user = await login()
-	await page.goto(`/users/${user.username}/notes`)
+	await navigate('/users/:username/notes', { username: user.username })
 
 	const newNote = createNote()
 	const altText = 'cute koala'
@@ -31,9 +35,10 @@ test.skip('Users can create note with an image', async ({ page, login }) => {
 test.skip('Users can create note with multiple images', async ({
 	page,
 	login,
+	navigate,
 }) => {
 	const user = await login()
-	await page.goto(`/users/${user.username}/notes`)
+	await navigate('/users/:username/notes', { username: user.username })
 
 	const newNote = createNote()
 	const altText1 = 'cute koala'
@@ -63,7 +68,7 @@ test.skip('Users can create note with multiple images', async ({
 	await expect(page.getByAltText(altText2)).toBeVisible()
 })
 
-test.skip('Users can edit note image', async ({ page, login }) => {
+test.skip('Users can edit note image', async ({ page, login, navigate }) => {
 	const user = await login()
 
 	const note = await prisma.note.create({
@@ -73,7 +78,10 @@ test.skip('Users can edit note image', async ({ page, login }) => {
 			ownerId: user.id,
 		},
 	})
-	await page.goto(`/users/${user.username}/notes/${note.id}`)
+	await navigate('/users/:username/notes/:noteId', {
+		username: user.username,
+		noteId: note.id,
+	})
 
 	// edit the image
 	await page.getByRole('link', { name: 'Edit', exact: true }).click()
@@ -89,7 +97,7 @@ test.skip('Users can edit note image', async ({ page, login }) => {
 	await expect(page.getByAltText(updatedImage.altText)).toBeVisible()
 })
 
-test.skip('Users can delete note image', async ({ page, login }) => {
+test.skip('Users can delete note image', async ({ page, login, navigate }) => {
 	const user = await login()
 
 	const note = await prisma.note.create({
@@ -99,7 +107,10 @@ test.skip('Users can delete note image', async ({ page, login }) => {
 			ownerId: user.id,
 		},
 	})
-	await page.goto(`/users/${user.username}/notes/${note.id}`)
+	await navigate('/users/:username/notes/:noteId', {
+		username: user.username,
+		noteId: note.id,
+	})
 
 	await expect(page.getByRole('heading', { name: note.title })).toBeVisible()
 	const images = page

@@ -78,10 +78,16 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 	await page.context().addCookies([newConfig])
 }
 
+type Navigate = (
+	route: string,
+	params?: Record<string, string | number>,
+) => ReturnType<(typeof base.extend<any>)['prototype']['page']['goto']>
+
 export const test = base.extend<{
 	insertNewUser(options?: GetOrInsertUserOptions): Promise<User>
 	login(options?: GetOrInsertUserOptions): Promise<User>
 	prepareGitHubUser(): Promise<GitHubUser>
+	navigate: Navigate
 }>({
 	page: async ({ page }, use) => {
 		// Set cookie consent for all tests to prevent the banner from blocking interactions
@@ -152,6 +158,17 @@ export const test = base.extend<{
 			await prisma.session.deleteMany({ where: { userId: user.id } })
 		}
 		await deleteGitHubUser(ghUser!.primaryEmail)
+	},
+	navigate: async ({ page }, use) => {
+		await use((route, params) => {
+			let path = route
+			if (params) {
+				for (const [key, value] of Object.entries(params)) {
+					path = path.replace(`:${key}`, String(value))
+				}
+			}
+			return page.goto(path)
+		})
 	},
 })
 export const { expect } = test

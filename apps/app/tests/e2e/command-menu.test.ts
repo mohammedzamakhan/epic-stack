@@ -5,14 +5,14 @@ import { createTestOrganization, createTestOrganizationWithMultipleUsers } from 
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Command Menu', () => {
-	test('Command menu opens with Cmd+K shortcut', async ({ page, login }) => {
+	test('Command menu opens with Cmd+K shortcut', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu with keyboard shortcut
@@ -23,14 +23,14 @@ test.describe('Command Menu', () => {
 		await expect(page.getByPlaceholder(/search/i)).toBeVisible()
 	})
 
-	test('Command menu opens with Ctrl+K shortcut on Windows/Linux', async ({ page, login }) => {
+	test('Command menu opens with Ctrl+K shortcut on Windows/Linux', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu with keyboard shortcut
@@ -41,14 +41,14 @@ test.describe('Command Menu', () => {
 		await expect(page.getByPlaceholder(/search/i)).toBeVisible()
 	})
 
-	test('Command menu can be closed with Escape key', async ({ page, login }) => {
+	test('Command menu can be closed with Escape key', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu
@@ -60,14 +60,14 @@ test.describe('Command Menu', () => {
 		await expect(page.getByRole('dialog')).not.toBeVisible()
 	})
 
-	test('Command menu search functionality', async ({ page, login }) => {
+	test('Command menu search functionality', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu
@@ -86,14 +86,14 @@ test.describe('Command Menu', () => {
 		await expect(searchInput).toHaveValue('test')
 	})
 
-	test('Command menu basic navigation', async ({ page, login }) => {
+	test('Command menu basic navigation', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu
@@ -105,14 +105,14 @@ test.describe('Command Menu', () => {
 		await expect(page.getByRole('dialog')).not.toBeVisible()
 	})
 
-	test('Command menu interface elements', async ({ page, login }) => {
+	test('Command menu interface elements', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu
@@ -124,14 +124,14 @@ test.describe('Command Menu', () => {
 		await expect(page.getByRole('listbox')).toBeVisible()
 	})
 
-	test('Command menu keyboard interaction', async ({ page, login }) => {
+	test('Command menu keyboard interaction', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu
@@ -149,14 +149,14 @@ test.describe('Command Menu', () => {
 
 	// Remove duplicate test - functionality covered in previous test
 
-	test('Command menu shows empty state when no results', async ({ page, login }) => {
+	test('Command menu shows empty state when no results', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization page
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Open command menu

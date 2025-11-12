@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
-test.skip('Users can create notes', async ({ page, login }) => {
+test.skip('Users can create notes', async ({ page, login, navigate }) => {
 	const user = await login()
-	await page.goto(`/users/${user.username}/notes`)
+	await navigate('/users/:username/notes', { username: user.username })
 
 	const newNote = createNote()
 	await page.getByRole('link', { name: /New Note/i }).click()
@@ -17,14 +17,17 @@ test.skip('Users can create notes', async ({ page, login }) => {
 	await expect(page).toHaveURL(new RegExp(`/users/${user.username}/notes/.*`))
 })
 
-test.skip('Users can edit notes', async ({ page, login }) => {
+test.skip('Users can edit notes', async ({ page, login, navigate }) => {
 	const user = await login()
 
 	const note = await prisma.note.create({
 		select: { id: true },
 		data: { ...createNote(), ownerId: user.id },
 	})
-	await page.goto(`/users/${user.username}/notes/${note.id}`)
+	await navigate('/users/:username/notes/:noteId', {
+		username: user.username,
+		noteId: note.id,
+	})
 
 	// edit the note
 	await page.getByRole('link', { name: 'Edit', exact: true }).click()
@@ -41,14 +44,17 @@ test.skip('Users can edit notes', async ({ page, login }) => {
 	).toBeVisible()
 })
 
-test.skip('Users can delete notes', async ({ page, login }) => {
+test.skip('Users can delete notes', async ({ page, login, navigate }) => {
 	const user = await login()
 
 	const note = await prisma.note.create({
 		select: { id: true },
 		data: { ...createNote(), ownerId: user.id },
 	})
-	await page.goto(`/users/${user.username}/notes/${note.id}`)
+	await navigate('/users/:username/notes/:noteId', {
+		username: user.username,
+		noteId: note.id,
+	})
 
 	// find links with href prefix
 	const noteLinks = page

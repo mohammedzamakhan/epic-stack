@@ -3,7 +3,11 @@ import { prisma } from '#app/utils/db.server.ts'
 import { test } from '#tests/playwright-utils.ts'
 
 test.describe('Admin Impersonation', () => {
-	test('admin can impersonate a user', async ({ page, insertNewUser }) => {
+	test('admin can impersonate a user', async ({
+		page,
+		insertNewUser,
+		navigate,
+	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
 		await prisma.user.update({
@@ -19,13 +23,13 @@ test.describe('Admin Impersonation', () => {
 		const targetUser = await insertNewUser({ username: 'target-user' })
 
 		// Login as admin
-		await page.goto('/login')
+		await navigate('/login')
 		await page.fill('[name="username"]', adminUser.username)
 		await page.fill('[name="password"]', 'password')
 		await page.click('[type="submit"]')
 
 		// Navigate to admin users page
-		await page.goto('/admin/users')
+		await navigate('/admin/users')
 		await expect(page).toHaveURL('/admin/users')
 
 		// Find and click on the target user
@@ -57,30 +61,33 @@ test.describe('Admin Impersonation', () => {
 	test('non-admin cannot access impersonation routes', async ({
 		page,
 		insertNewUser,
+		navigate,
 	}) => {
 		// Create a regular user
 		const regularUser = await insertNewUser({ username: 'regular-user' })
 		const targetUser = await insertNewUser({ username: 'target-user' })
 
 		// Login as regular user
-		await page.goto('/login')
+		await navigate('/login')
 		await page.fill('[name="username"]', regularUser.username)
 		await page.fill('[name="password"]', 'password')
 		await page.click('[type="submit"]')
 
 		// Try to access impersonation route directly
-		const response = await page.goto(
-			`/admin/users/${targetUser.id}/impersonate`,
-			{
-				waitUntil: 'networkidle',
-			},
+		const response = await navigate(
+			'/admin/users/:userId/impersonate',
+			{ userId: targetUser.id },
 		)
 
 		// Should get 403 or be redirected
 		expect(response?.status()).toBe(403)
 	})
 
-	test('cannot impersonate banned user', async ({ page, insertNewUser }) => {
+	test('cannot impersonate banned user', async ({
+		page,
+		insertNewUser,
+		navigate,
+	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
 		await prisma.user.update({
@@ -104,13 +111,13 @@ test.describe('Admin Impersonation', () => {
 		})
 
 		// Login as admin
-		await page.goto('/login')
+		await navigate('/login')
 		await page.fill('[name="username"]', adminUser.username)
 		await page.fill('[name="password"]', 'password')
 		await page.click('[type="submit"]')
 
 		// Navigate to banned user's page
-		await page.goto(`/admin/users/${bannedUser.id}`)
+		await navigate('/admin/users/:userId', { userId: bannedUser.id })
 
 		// Impersonate button should be disabled
 		const impersonateButton = page.locator('button:has-text("Impersonate")')

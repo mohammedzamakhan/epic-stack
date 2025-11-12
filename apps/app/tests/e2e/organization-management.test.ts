@@ -7,11 +7,15 @@ import {
 } from '#tests/test-utils.ts'
 
 test.describe('Organization Management', () => {
-	test('Users can create a new organization', async ({ page, login }) => {
+	test('Users can create a new organization', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Navigate to organizations page
-		await page.goto('/organizations')
+		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
 		// Click create organization button (it's labeled "Add organization")
@@ -72,7 +76,11 @@ test.describe('Organization Management', () => {
 		expect(createdOrg?.users[0]?.userId).toBe(user.id)
 	})
 
-	test('Users can switch between organizations', async ({ page, login }) => {
+	test('Users can switch between organizations', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create two organizations for the user
@@ -105,7 +113,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Navigate to first organization
-		await page.goto(`/${org1.slug}`)
+		await navigate('/:slug', { slug: org1.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify we're in the first organization
@@ -122,14 +130,18 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(org2.name).first()).toBeVisible()
 	})
 
-	test('Users can view organization settings', async ({ page, login }) => {
+	test('Users can view organization settings', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization settings
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify settings page loads with organization details
@@ -140,14 +152,18 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText('General Settings')).toBeVisible()
 	})
 
-	test('Users can update organization details', async ({ page, login }) => {
+	test('Users can update organization details', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization settings
-		await page.goto(`/${org.slug}/settings`)
+		await navigate('/:slug/settings', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Update organization details (only name and slug are available in the form)
@@ -168,7 +184,11 @@ test.describe('Organization Management', () => {
 		expect(updatedOrg?.name).toBe(newName)
 	})
 
-	test('Users can view organization members', async ({ page, login }) => {
+	test('Users can view organization members', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create additional users
@@ -207,7 +227,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Navigate to organization members page
-		await page.goto(`/${org.slug}/settings/members`)
+		await navigate('/:slug/settings/members', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify all members are displayed (use first occurrence to avoid strict mode violations)
@@ -226,7 +246,11 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText('member').first()).toBeVisible()
 	})
 
-	test('Organization owners can remove members', async ({ page, login }) => {
+	test('Organization owners can remove members', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create additional user
@@ -255,7 +279,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Navigate to organization members page
-		await page.goto(`/${org.slug}/settings/members`)
+		await navigate('/:slug/settings/members', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Find and click remove button for the member
@@ -295,6 +319,7 @@ test.describe('Organization Management', () => {
 	test('Users cannot leave an organization themselves', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -324,7 +349,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Navigate to organization members page
-		await page.goto(`/${org.slug}/settings/members`)
+		await navigate('/:slug/settings/members', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify that the current user is displayed in the members list

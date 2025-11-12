@@ -15,14 +15,14 @@ async function ensureOnboardingStepsExist() {
 }
 
 test.describe('Dashboard', () => {
-	test('Dashboard displays organization overview', async ({ page, login }) => {
+	test('Dashboard displays organization overview', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify organization name is displayed
@@ -33,7 +33,7 @@ test.describe('Dashboard', () => {
 		await expect(page.locator('main')).toBeVisible()
 	})
 
-	test('Dashboard shows notes chart with data', async ({ page, login }) => {
+	test('Dashboard shows notes chart with data', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -76,7 +76,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify notes statistics are displayed (based on actual UI)
@@ -89,6 +89,7 @@ test.describe('Dashboard', () => {
 	test('Dashboard shows onboarding checklist for new organizations', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Ensure onboarding steps exist in database
 		await ensureOnboardingStepsExist()
@@ -111,7 +112,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify onboarding checklist is displayed - use specific heading
@@ -124,7 +125,7 @@ test.describe('Dashboard', () => {
 		await expect(page.getByText(/invite team members/i)).toBeVisible()
 	})
 
-	test('Dashboard shows recent activity', async ({ page, login }) => {
+	test('Dashboard shows recent activity', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -151,7 +152,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify activity is reflected in the dashboard stats
@@ -161,6 +162,7 @@ test.describe('Dashboard', () => {
 	test('Dashboard displays organization statistics', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -211,7 +213,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify statistics are displayed - use more specific selectors
@@ -219,14 +221,14 @@ test.describe('Dashboard', () => {
 		await expect(page.getByText(/5 notes/i)).toBeVisible()
 	})
 
-	test('Dashboard allows quick note creation', async ({ page, login }) => {
+	test('Dashboard allows quick note creation', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Look for quick note creation button or link - use first() to avoid strict mode
@@ -245,6 +247,7 @@ test.describe('Dashboard', () => {
 	test('Dashboard shows empty state for new organizations', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Ensure onboarding steps exist in database
 		await ensureOnboardingStepsExist()
@@ -267,7 +270,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify empty state messaging - use specific selectors
@@ -277,14 +280,14 @@ test.describe('Dashboard', () => {
 		await expect(page.getByRole('heading', { name: /welcome/i })).toBeVisible()
 	})
 
-	test('Dashboard navigation works correctly', async ({ page, login }) => {
+	test('Dashboard navigation works correctly', async ({ page, login, navigate }) => {
 		const user = await login()
 
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Navigate to organization dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test navigation to notes section - use first() to avoid strict mode
@@ -297,7 +300,7 @@ test.describe('Dashboard', () => {
 		}
 
 		// Navigate back to dashboard
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Test navigation to settings - it's a sidebar link (collapsible menu)
@@ -312,6 +315,7 @@ test.describe('Dashboard', () => {
 	test('Dashboard is responsive on different screen sizes', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -320,7 +324,7 @@ test.describe('Dashboard', () => {
 
 		// Test desktop view
 		await page.setViewportSize({ width: 1200, height: 800 })
-		await page.goto(`/${org.slug}`)
+		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
 		// Verify dashboard loads properly on desktop
