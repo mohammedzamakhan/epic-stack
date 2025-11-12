@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@epic-web/config": "^1.20.1",
+    "@storybook/addon-docs": "10.0.6",
     "@storybook/addon-links": "10.0.6",
     "@storybook/react-vite": "10.0.6",
     "@types/canvas-confetti": "^1.9.0",
