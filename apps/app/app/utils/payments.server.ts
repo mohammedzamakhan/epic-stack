@@ -1,103 +1,67 @@
+/**
+ * Payment utilities for the app
+ * Uses @repo/payments for provider abstraction
+ */
+
 import { type Organization } from '@prisma/client'
 import { TrialEndingEmail } from '@repo/email'
+import {
+	createStripeProvider,
+	getTrialConfig,
+	calculateManualTrialDaysRemaining,
+	type StripeProvider,
+} from '@repo/payments'
 import { data, redirect } from 'react-router'
-import Stripe from 'stripe'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
-import {
-	getTrialConfig,
-	calculateManualTrialDaysRemaining,
-} from './trial-config.server'
 
 if (!process.env.STRIPE_SECRET_KEY) {
 	const errorMsg = 'STRIPE_SECRET_KEY environment variable is not set!'
 	throw new Error(errorMsg)
 }
 
-if (!process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
-	const errorMsg =
-		'STRIPE_SECRET_KEY does not appear to be a valid Stripe secret key (should start with sk_)'
-	throw new Error(errorMsg)
-}
+// Create payment provider instance
+const paymentProvider = createStripeProvider(process.env.STRIPE_SECRET_KEY)
 
-let stripe: Stripe
-try {
-	stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-		apiVersion: '2025-08-27.basil',
-		httpClient: Stripe.createFetchHttpClient(),
-	})
-} catch (error) {
-	throw error
-}
+// Export for advanced usage
+export const stripe = paymentProvider.getClient()
 
-export { stripe }
+// Re-export trial config functions
+export { getTrialConfig, calculateManualTrialDaysRemaining }
 
+/**
+ * Get plans and prices from payment provider
+ */
 export async function getPlansAndPrices() {
-	try {
-		const products = await getStripeProducts()
-		const prices = await getStripePrices()
-
-		const basePlan = products.find((product) => product.name === 'Base')
-		const plusPlan = products.find((product) => product.name === 'Plus')
-
-		// Filter for monthly and yearly prices
-		const monthlyPrices = prices.filter(
-			(price) => price.interval === 'month' && price.currency === 'usd',
-		)
-		const yearlyPrices = prices.filter(
-			(price) => price.interval === 'year' && price.currency === 'usd',
-		)
-
-		console.log('monthlyPrices', monthlyPrices)
-		console.log('yearlyPrices', yearlyPrices)
-
-		const basePrice = prices.filter(
-			(price) => price.id === basePlan?.defaultPriceId,
-		)
-		console.log('basePrice', basePrice)
-		// Find prices for each plan and interval
-		const basePriceMonthly = monthlyPrices.find(
-			(price) => price.productId === basePlan?.id,
-		)
-		const basePriceYearly = yearlyPrices.find(
-			(price) => price.productId === basePlan?.id,
-		)
-		const plusPriceMonthly = monthlyPrices.find(
-			(price) => price.productId === plusPlan?.id,
-		)
-		const plusPriceYearly = yearlyPrices.find(
-			(price) => price.productId === plusPlan?.id,
-		)
-
-		const result = {
-			plans: { base: basePlan, plus: plusPlan },
-			prices: {
-				base: {
-					monthly: basePriceMonthly,
-					yearly: basePriceYearly,
-				},
-				plus: {
-					monthly: plusPriceMonthly,
-					yearly: plusPriceYearly,
-				},
-			},
-		}
-
-		return result
-	} catch (error) {
-		console.error('Error in getPlansAndPrices:', error)
-
-		// Return fallback data to prevent the app from hanging
-		return {
-			plans: { base: undefined, plus: undefined },
-			prices: {
-				base: { monthly: undefined, yearly: undefined },
-				plus: { monthly: undefined, yearly: undefined },
-			},
-		}
-	}
+	return paymentProvider.getPlansAndPrices()
 }
+
+/**
+ * Get Stripe products (for backwards compatibility)
+ */
+export async function getStripeProducts() {
+	return paymentProvider.getProducts()
+}
+
+/**
+ * Get Stripe prices (for backwards compatibility)
+ */
+export async function getStripePrices() {
+	const prices = await paymentProvider.getPrices()
+	// Map to include additional properties for backwards compatibility
+	return prices.map((price) => ({
+		...price,
+		productId: price.productId,
+		unitAmount: price.unitAmount,
+		interval: price.interval,
+		trialPeriodDays: price.trialPeriodDays,
+	}))
+}
+
+/**
+ * Database operations
+ */
 
 export async function getOrganizationByStripeCustomerId(customerId: string) {
 	const result = await prisma.organization.findFirst({
@@ -128,6 +92,10 @@ export async function updateOrganizationSubscription(
 	})
 }
 
+/**
+ * Subscription management
+ */
+
 export async function upgradeSubscription(
 	organization: Organization,
 	newPriceId: string,
@@ -139,43 +107,33 @@ export async function upgradeSubscription(
 	const quantity = await getOrganizationSeatQuantity(organization.id)
 
 	// Get current subscription
-	const subscription = await stripe.subscriptions.retrieve(
+	const subscription = await paymentProvider.retrieveSubscription(
 		organization.stripeSubscriptionId,
 	)
-
-	// Prepare update parameters
-	const updateParams: Stripe.SubscriptionUpdateParams = {
-		items: [
-			{
-				id: subscription.items.data[0]?.id,
-				price: newPriceId,
-				quantity,
-			},
-		],
-		proration_behavior: 'create_prorations',
-	}
 
 	// Preserve trial period if the subscription is currently trialing
-	if (subscription.status === 'trialing' && subscription.trial_end) {
-		updateParams.trial_end = subscription.trial_end
-	}
+	const preserveTrialEnd = subscription.status === 'trialing'
 
 	// Update the subscription to the new price
-	const updatedSubscription = await stripe.subscriptions.update(
-		organization.stripeSubscriptionId,
-		updateParams,
-	)
+	const updatedSubscription = await paymentProvider.updateSubscription({
+		subscriptionId: organization.stripeSubscriptionId,
+		priceId: newPriceId,
+		quantity,
+		preserveTrialEnd,
+		prorationBehavior: 'create_prorations',
+	})
 
 	// Update organization with new subscription details
-	const plan = updatedSubscription.items.data[0]?.plan
-	if (plan) {
-		await updateOrganizationSubscription(organization.id, {
-			stripeSubscriptionId: updatedSubscription.id,
-			stripeProductId: plan.product as string,
-			planName: (plan.product as Stripe.Product).name,
-			subscriptionStatus: updatedSubscription.status,
-		})
-	}
+	// Get product details from Stripe
+	const products = await paymentProvider.getProducts()
+	const product = products.find((p) => p.id === updatedSubscription.productId)
+
+	await updateOrganizationSubscription(organization.id, {
+		stripeSubscriptionId: updatedSubscription.id,
+		stripeProductId: updatedSubscription.productId,
+		planName: product?.name || null,
+		subscriptionStatus: updatedSubscription.status,
+	})
 
 	return updatedSubscription
 }
@@ -213,7 +171,7 @@ export async function createCheckoutSession(
 		from === 'checkout'
 	) {
 		try {
-			const subscription = await stripe.subscriptions.retrieve(
+			const subscription = await paymentProvider.retrieveSubscription(
 				organization.stripeSubscriptionId,
 			)
 
@@ -235,45 +193,39 @@ export async function createCheckoutSession(
 
 	const quantity = await getOrganizationSeatQuantity(organization.id)
 
-	let customer: Stripe.Customer | null = null
+	let testCustomerId: string | undefined
 
-	if (process.env.NODE_ENV !== 'production') {
+	// Create test customer in non-production environments
+	if (
+		process.env.NODE_ENV !== 'production' &&
+		paymentProvider.createTestClock &&
+		paymentProvider.createTestCustomer
+	) {
 		try {
-			const testClock = await stripe.testHelpers.testClocks.create({
-				frozen_time: Math.floor(new Date().getTime() / 1000),
-			})
-			customer = await stripe.customers.create({
-				test_clock: testClock.id,
-			})
+			const testClock = await paymentProvider.createTestClock()
+			const testCustomer = await paymentProvider.createTestCustomer(testClock.id)
+			testCustomerId = testCustomer.id
 		} catch {
 			// Ignore test customer creation errors
 		}
 	}
 
-	const session = await stripe.checkout.sessions.create({
-		payment_method_types: ['card'],
-		line_items: [
-			{
-				price: priceId,
-				quantity,
-			},
-		],
-		mode: 'subscription',
-		success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}${isCreationFlow ? '&creation=true' : ''}`,
-		cancel_url:
+	const session = await paymentProvider.createCheckoutSession({
+		priceId,
+		quantity,
+		successUrl: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}${isCreationFlow ? '&creation=true' : ''}`,
+		cancelUrl:
 			from === 'checkout'
 				? `${process.env.BASE_URL}/${organization.slug}/settings/billing`
 				: `${process.env.BASE_URL}/pricing`,
-		customer: organization.stripeCustomerId || customer?.id || undefined,
-		client_reference_id: userId.toString(),
-		allow_promotion_codes: true,
-		subscription_data:
+		customerId: organization.stripeCustomerId || testCustomerId || undefined,
+		clientReferenceId: userId.toString(),
+		allowPromotionCodes: true,
+		trialPeriodDays:
 			trialConfig.creditCardRequired === 'manual'
-				? {}
-				: {
-						trial_period_days: trialConfig.trialDays,
-					},
-		payment_method_collection:
+				? undefined
+				: trialConfig.trialDays,
+		paymentMethodCollection:
 			trialConfig.creditCardRequired === 'stripe' ? 'if_required' : 'always',
 	})
 
@@ -281,7 +233,7 @@ export async function createCheckoutSession(
 }
 
 export async function deleteSubscription(subscriptionId: string) {
-	await stripe.subscriptions.cancel(subscriptionId)
+	await paymentProvider.cancelSubscription(subscriptionId)
 }
 
 export async function createCustomerPortalSession(organization: Organization) {
@@ -289,73 +241,22 @@ export async function createCustomerPortalSession(organization: Organization) {
 		return redirect('/pricing')
 	}
 
-	let configuration: Stripe.BillingPortal.Configuration
-	const configurations = await stripe.billingPortal.configurations.list()
-
-	if (configurations.data.length > 0) {
-		configuration = configurations.data[0] as Stripe.BillingPortal.Configuration
-	} else {
-		const product = await stripe.products.retrieve(organization.stripeProductId)
-		if (!product.active) {
-			throw new Error("Organization's product is not active in Stripe")
-		}
-
-		const prices = await stripe.prices.list({
-			product: product.id,
-			active: true,
-		})
-		if (prices.data.length === 0) {
-			throw new Error("No active prices found for the organization's product")
-		}
-
-		configuration = await stripe.billingPortal.configurations.create({
-			business_profile: {
-				headline: 'Manage your subscription',
-			},
-			features: {
-				payment_method_update: {
-					enabled: true,
-				},
-				subscription_update: {
-					enabled: true,
-					default_allowed_updates: ['price', 'quantity', 'promotion_code'],
-					proration_behavior: 'create_prorations',
-					products: [
-						{
-							product: product.id,
-							prices: prices.data.map((price) => price.id),
-						},
-					],
-				},
-				subscription_cancel: {
-					enabled: true,
-					mode: 'at_period_end',
-					cancellation_reason: {
-						enabled: true,
-						options: [
-							'too_expensive',
-							'missing_features',
-							'switched_service',
-							'unused',
-							'other',
-						],
-					},
-				},
-			},
-		})
-	}
-
-	return stripe.billingPortal.sessions.create({
-		customer: organization.stripeCustomerId,
-		return_url: `${process.env.BASE_URL}/${organization.slug}/settings`,
-		configuration: configuration.id,
+	return paymentProvider.createCustomerPortalSession({
+		customerId: organization.stripeCustomerId,
+		returnUrl: `${process.env.BASE_URL}/${organization.slug}/settings`,
+		productId: organization.stripeProductId,
 	})
 }
 
-export async function handleSubscriptionChange(
-	subscription: Stripe.Subscription,
-) {
-	const customerId = subscription.customer as string
+export async function handleSubscriptionChange(subscription: {
+	id: string
+	status: string
+	customer: string
+	items: Array<{
+		price: { id: string; product: string }
+	}>
+}) {
+	const customerId = subscription.customer
 	const subscriptionId = subscription.id
 	const status = subscription.status
 
@@ -366,7 +267,7 @@ export async function handleSubscriptionChange(
 	}
 
 	if (status === 'active' || status === 'trialing') {
-		const plan = subscription.items.data[0]?.plan
+		const productId = subscription.items[0]?.price.product
 
 		// If this is a new active subscription and the organization has a different subscription ID,
 		// cancel the old one to prevent multiple active subscriptions
@@ -375,7 +276,9 @@ export async function handleSubscriptionChange(
 			organization.stripeSubscriptionId !== subscriptionId
 		) {
 			try {
-				await stripe.subscriptions.cancel(organization.stripeSubscriptionId)
+				await paymentProvider.cancelSubscription(
+					organization.stripeSubscriptionId,
+				)
 				console.log(
 					`Cancelled old subscription: ${organization.stripeSubscriptionId}`,
 				)
@@ -384,10 +287,14 @@ export async function handleSubscriptionChange(
 			}
 		}
 
+		// Get product name
+		const products = await paymentProvider.getProducts()
+		const product = products.find((p) => p.id === productId)
+
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: subscriptionId,
-			stripeProductId: plan?.product as string,
-			planName: (plan?.product as Stripe.Product).name,
+			stripeProductId: productId || null,
+			planName: product?.name || null,
 			subscriptionStatus: status,
 		})
 	} else if (status === 'canceled' || status === 'unpaid') {
@@ -403,8 +310,12 @@ export async function handleSubscriptionChange(
 	}
 }
 
-export async function handleTrialEnd(subscription: Stripe.Subscription) {
-	const customerId = subscription.customer as string
+export async function handleTrialEnd(subscription: {
+	id: string
+	customer: string
+	trial_end?: number | null
+}) {
+	const customerId = subscription.customer
 
 	const organization = await getOrganizationByStripeCustomerId(customerId)
 	const admins = await prisma.userOrganization.findMany({
@@ -447,54 +358,6 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 	)
 }
 
-export async function getStripePrices() {
-	try {
-		const prices = await stripe.prices.list({
-			active: true,
-			limit: 200,
-			type: 'recurring',
-			expand: ['data.tiers'],
-		})
-
-		const mappedPrices = prices.data.map((price) => ({
-			productId:
-				typeof price.product === 'string' ? price.product : price.product.id,
-			unitAmount: price.unit_amount,
-			interval: price.recurring?.interval,
-			trialPeriodDays: price.recurring?.trial_period_days,
-			...price,
-		}))
-
-		return mappedPrices
-	} catch (error: any) {
-		console.error('getStripePrices: Failed to fetch prices:', error)
-		throw new Error(`Failed to fetch Stripe prices: ${error?.message || error}`)
-	}
-}
-
-export async function getStripeProducts() {
-	try {
-		const products = await stripe.products.list({
-			active: true,
-			limit: 10,
-		})
-
-		const mappedProducts = products.data.map((product) => ({
-			id: product.id,
-			name: product.name,
-			description: product.description,
-			defaultPriceId: product.default_price as string | undefined,
-		}))
-
-		return mappedProducts
-	} catch (error: any) {
-		console.error('getStripeProducts: Failed to fetch products:', error)
-		throw new Error(
-			`Failed to fetch Stripe products: ${error?.message || error}`,
-		)
-	}
-}
-
 export async function getTrialStatus(userId: string, organizationSlug: string) {
 	try {
 		const user = await prisma.user.findUnique({
@@ -525,20 +388,21 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 			return { isActive: false, daysRemaining: 0 }
 		}
 
-		const subscriptions = await stripe.subscriptions.list({
-			customer: organization.stripeCustomerId,
-			status: 'all',
-			limit: 1,
-		})
+		const subscriptions = await paymentProvider.listSubscriptions(
+			organization.stripeCustomerId,
+		)
 
-		if (subscriptions.data.length === 0) {
+		if (subscriptions.length === 0) {
 			return { isActive: false, daysRemaining: 0 }
 		}
 
-		const subscription = subscriptions.data[0]
+		const subscription = subscriptions[0]
 
 		if (subscription && subscription.status === 'trialing') {
-			const trialEnd = new Date(subscription.trial_end! * 1000)
+			const trialEnd = subscription.trialEnd
+			if (!trialEnd) {
+				return { isActive: false, daysRemaining: 0 }
+			}
 			const now = new Date()
 			const daysRemaining = Math.ceil(
 				(trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
@@ -580,24 +444,25 @@ export const updateSeatQuantity = async (organizationId: string) => {
 	const numUsersInOrganization =
 		await getOrganizationSeatQuantity(organizationId)
 
-	// Get the subscription item id
-	const subscription = await stripe.subscriptions.retrieve(
+	// Get the subscription
+	const subscription = await paymentProvider.retrieveSubscription(
 		organization.stripeSubscriptionId,
 	)
-	const subscriptionItems = subscription.items.data
 
-	if (subscriptionItems.length !== 1) {
+	if (subscription.items.length !== 1) {
 		throw new Error('Subscription does not have exactly 1 item')
 	}
 
-	// Update the stripe subscription
-	return stripe.subscriptions.update(organization.stripeSubscriptionId, {
-		items: [
-			{
-				id: subscriptionItems[0]?.id,
-				quantity: numUsersInOrganization,
-			},
-		],
+	const firstItem = subscription.items[0]
+	if (!firstItem) {
+		throw new Error('Subscription item not found')
+	}
+
+	// Update the subscription
+	return paymentProvider.updateSubscription({
+		subscriptionId: organization.stripeSubscriptionId,
+		priceId: firstItem.priceId,
+		quantity: numUsersInOrganization,
 	})
 }
 
@@ -635,30 +500,7 @@ export async function getOrganizationInvoices(organization: {
 		return []
 	}
 
-	try {
-		const invoices = await stripe.invoices.list({
-			customer: organization.stripeCustomerId,
-			limit: 20,
-		})
-
-		return invoices.data.map((invoice) => ({
-			id: invoice.id,
-			number: invoice.number,
-			status: invoice.status,
-			amountPaid: invoice.amount_paid,
-			amountDue: invoice.amount_due,
-			currency: invoice.currency,
-			created: invoice.created,
-			dueDate: invoice.due_date,
-			hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
-			invoicePdf: invoice.invoice_pdf ?? null,
-			periodStart: invoice.period_start,
-			periodEnd: invoice.period_end,
-		}))
-	} catch (error) {
-		console.error('Error fetching invoices:', error)
-		return []
-	}
+	return paymentProvider.listInvoices(organization.stripeCustomerId, 20)
 }
 
 export async function cleanupDuplicateSubscriptions(
@@ -670,18 +512,21 @@ export async function cleanupDuplicateSubscriptions(
 
 	try {
 		// Get all subscriptions for this customer
-		const subscriptions = await stripe.subscriptions.list({
-			customer: organization.stripeCustomerId,
-			status: 'active',
-		})
+		const subscriptions = await paymentProvider.listSubscriptions(
+			organization.stripeCustomerId,
+		)
 
-		if (subscriptions.data.length <= 1) {
+		const activeSubscriptions = subscriptions.filter(
+			(sub) => sub.status === 'active',
+		)
+
+		if (activeSubscriptions.length <= 1) {
 			return // No duplicates
 		}
 
-		// Sort by created date (newest first)
-		const sortedSubscriptions = subscriptions.data.sort(
-			(a, b) => b.created - a.created,
+		// Sort by ID (newer subscriptions have higher IDs in most cases)
+		const sortedSubscriptions = activeSubscriptions.sort((a, b) =>
+			b.id.localeCompare(a.id),
 		)
 
 		// Keep the newest subscription, cancel the rest
@@ -693,16 +538,19 @@ export async function cleanupDuplicateSubscriptions(
 		}
 
 		for (const sub of cancelSubscriptions) {
-			await stripe.subscriptions.cancel(sub.id)
+			await paymentProvider.cancelSubscription(sub.id)
 			console.log(`Cancelled duplicate subscription: ${sub.id}`)
 		}
 
+		// Get product details
+		const products = await paymentProvider.getProducts()
+		const product = products.find((p) => p.id === keepSubscription.productId)
+
 		// Update organization with the kept subscription
-		const plan = keepSubscription.items.data[0]?.plan
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: keepSubscription.id,
-			stripeProductId: plan?.product as string,
-			planName: (plan?.product as Stripe.Product).name,
+			stripeProductId: keepSubscription.productId,
+			planName: product?.name || null,
 			subscriptionStatus: keepSubscription.status,
 		})
 

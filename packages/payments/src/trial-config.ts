@@ -3,10 +3,7 @@
  * Centralizes trial-related environment variable handling
  */
 
-export interface TrialConfig {
-	trialDays: number
-	creditCardRequired: 'stripe' | 'manual'
-}
+import type { TrialConfig } from './types'
 
 export function getTrialConfig(): TrialConfig {
 	const trialDays = parseInt(process.env.TRIAL_DAYS || '14', 10)

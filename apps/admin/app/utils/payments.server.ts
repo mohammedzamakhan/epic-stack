@@ -1,7 +1,16 @@
+/**
+ * Payment utilities for the admin app
+ * Uses @repo/payments for provider abstraction
+ */
+
 import { type Organization } from '@prisma/client'
 import { TrialEndingEmail } from '@repo/email'
+import {
+	createStripeProvider,
+	getTrialConfig,
+	calculateManualTrialDaysRemaining,
+} from '@repo/payments'
 import { redirect } from 'react-router'
-import Stripe from 'stripe'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
@@ -11,56 +20,47 @@ if (!process.env.STRIPE_SECRET_KEY) {
 	throw new Error(errorMsg)
 }
 
-if (!process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
-	const errorMsg =
-		'STRIPE_SECRET_KEY does not appear to be a valid Stripe secret key (should start with sk_)'
-	throw new Error(errorMsg)
-}
+// Create payment provider instance
+const paymentProvider = createStripeProvider(process.env.STRIPE_SECRET_KEY)
 
-let stripe: Stripe
-try {
-	stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-		apiVersion: '2025-08-27.basil',
-		httpClient: Stripe.createFetchHttpClient(),
-	})
-} catch (error) {
-	throw error
-}
+// Export for advanced usage
+export const stripe = paymentProvider.getClient()
 
-export { stripe }
+// Re-export trial config functions
+export { getTrialConfig, calculateManualTrialDaysRemaining }
 
+/**
+ * Get plans and prices from payment provider
+ */
 export async function getPlansAndPrices() {
-	try {
-		const products = await getStripeProducts()
-		const prices = await getStripePrices()
-
-		const basePlan = products.find((product) => product.name === 'Base')
-		const plusPlan = products.find((product) => product.name === 'Plus')
-
-		// Fetch the specific prices using the defaultPriceId from products
-		const basePrice = prices.find(
-			(price) => price.id === basePlan?.defaultPriceId,
-		)
-		let plusPrice = prices.find(
-			(price) => price.id === plusPlan?.defaultPriceId,
-		)
-
-		const result = {
-			plans: { base: basePlan, plus: plusPlan },
-			prices: { base: basePrice, plus: plusPrice },
-		}
-
-		return result
-	} catch (error) {
-		console.error('Error in getPlansAndPrices:', error)
-
-		// Return fallback data to prevent the app from hanging
-		return {
-			plans: { base: undefined, plus: undefined },
-			prices: { base: undefined, plus: undefined },
-		}
-	}
+	return paymentProvider.getPlansAndPrices()
 }
+
+/**
+ * Get Stripe products (for backwards compatibility)
+ */
+export async function getStripeProducts() {
+	return paymentProvider.getProducts()
+}
+
+/**
+ * Get Stripe prices (for backwards compatibility)
+ */
+export async function getStripePrices() {
+	const prices = await paymentProvider.getPrices()
+	// Map to include additional properties for backwards compatibility
+	return prices.map((price) => ({
+		...price,
+		productId: price.productId,
+		unitAmount: price.unitAmount,
+		interval: price.interval,
+		trialPeriodDays: price.trialPeriodDays,
+	}))
+}
+
+/**
+ * Database operations
+ */
 
 export async function getOrganizationByStripeCustomerId(customerId: string) {
 	const result = await prisma.organization.findFirst({
@@ -91,6 +91,10 @@ export async function updateOrganizationSubscription(
 	})
 }
 
+/**
+ * Subscription management
+ */
+
 export async function createCheckoutSession(
 	request: Request,
 	{
@@ -105,10 +109,9 @@ export async function createCheckoutSession(
 ) {
 	const userId = await requireUserId(request)
 
-	if (
-		from === 'pricing' &&
-		process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-	) {
+	const trialConfig = getTrialConfig()
+
+	if (from === 'pricing' && trialConfig.creditCardRequired === 'manual') {
 		return redirect('/signup')
 	}
 
@@ -118,58 +121,47 @@ export async function createCheckoutSession(
 
 	const quantity = await getOrganizationSeatQuantity(organization.id)
 
-	let customer: Stripe.Customer | null = null
+	let testCustomerId: string | undefined
 
-	if (process.env.NODE_ENV !== 'production') {
+	// Create test customer in non-production environments
+	if (
+		process.env.NODE_ENV !== 'production' &&
+		paymentProvider.createTestClock &&
+		paymentProvider.createTestCustomer
+	) {
 		try {
-			const testClock = await stripe.testHelpers.testClocks.create({
-				frozen_time: Math.floor(new Date().getTime() / 1000),
-			})
-			customer = await stripe.customers.create({
-				test_clock: testClock.id,
-			})
+			const testClock = await paymentProvider.createTestClock()
+			const testCustomer = await paymentProvider.createTestCustomer(testClock.id)
+			testCustomerId = testCustomer.id
 		} catch {
 			// Ignore test customer creation errors
 		}
 	}
 
-	const session = await stripe.checkout.sessions.create({
-		payment_method_types: ['card'],
-		line_items: [
-			{
-				price: priceId,
-				quantity,
-			},
-		],
-		mode: 'subscription',
-		success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
-		cancel_url:
+	const session = await paymentProvider.createCheckoutSession({
+		priceId,
+		quantity,
+		successUrl: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
+		cancelUrl:
 			from === 'checkout'
 				? `${process.env.BASE_URL}/${organization.slug}/settings/billing`
 				: `${process.env.BASE_URL}/pricing`,
-		customer: organization.stripeCustomerId || customer?.id || undefined,
-		client_reference_id: userId.toString(),
-		allow_promotion_codes: true,
-		subscription_data:
-			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-				? {}
-				: {
-						trial_period_days:
-							process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual'
-								? 0
-								: parseInt(process.env.TRIAL_DAYS || '0', 10),
-					},
-		payment_method_collection:
-			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'stripe'
-				? 'if_required'
-				: 'always',
+		customerId: organization.stripeCustomerId || testCustomerId || undefined,
+		clientReferenceId: userId.toString(),
+		allowPromotionCodes: true,
+		trialPeriodDays:
+			trialConfig.creditCardRequired === 'manual'
+				? undefined
+				: trialConfig.trialDays,
+		paymentMethodCollection:
+			trialConfig.creditCardRequired === 'stripe' ? 'if_required' : 'always',
 	})
 
 	return redirect(session.url!)
 }
 
 export async function deleteSubscription(subscriptionId: string) {
-	await stripe.subscriptions.cancel(subscriptionId)
+	await paymentProvider.cancelSubscription(subscriptionId)
 }
 
 export async function createCustomerPortalSession(organization: Organization) {
@@ -177,70 +169,22 @@ export async function createCustomerPortalSession(organization: Organization) {
 		return redirect('/pricing')
 	}
 
-	let configuration: Stripe.BillingPortal.Configuration
-	const configurations = await stripe.billingPortal.configurations.list()
-
-	if (configurations.data.length > 0) {
-		configuration = configurations.data[0] as Stripe.BillingPortal.Configuration
-	} else {
-		const product = await stripe.products.retrieve(organization.stripeProductId)
-		if (!product.active) {
-			throw new Error("Organization's product is not active in Stripe")
-		}
-
-		const prices = await stripe.prices.list({
-			product: product.id,
-			active: true,
-		})
-		if (prices.data.length === 0) {
-			throw new Error("No active prices found for the organization's product")
-		}
-
-		configuration = await stripe.billingPortal.configurations.create({
-			business_profile: {
-				headline: 'Manage your subscription',
-			},
-			features: {
-				subscription_update: {
-					enabled: true,
-					default_allowed_updates: ['price', 'quantity', 'promotion_code'],
-					proration_behavior: 'create_prorations',
-					products: [
-						{
-							product: product.id,
-							prices: prices.data.map((price) => price.id),
-						},
-					],
-				},
-				subscription_cancel: {
-					enabled: true,
-					mode: 'at_period_end',
-					cancellation_reason: {
-						enabled: true,
-						options: [
-							'too_expensive',
-							'missing_features',
-							'switched_service',
-							'unused',
-							'other',
-						],
-					},
-				},
-			},
-		})
-	}
-
-	return stripe.billingPortal.sessions.create({
-		customer: organization.stripeCustomerId,
-		return_url: `${process.env.BASE_URL}/${organization.slug}/settings`,
-		configuration: configuration.id,
+	return paymentProvider.createCustomerPortalSession({
+		customerId: organization.stripeCustomerId,
+		returnUrl: `${process.env.BASE_URL}/${organization.slug}/settings`,
+		productId: organization.stripeProductId,
 	})
 }
 
-export async function handleSubscriptionChange(
-	subscription: Stripe.Subscription,
-) {
-	const customerId = subscription.customer as string
+export async function handleSubscriptionChange(subscription: {
+	id: string
+	status: string
+	customer: string
+	items: Array<{
+		price: { id: string; product: string }
+	}>
+}) {
+	const customerId = subscription.customer
 	const subscriptionId = subscription.id
 	const status = subscription.status
 
@@ -251,11 +195,16 @@ export async function handleSubscriptionChange(
 	}
 
 	if (status === 'active' || status === 'trialing') {
-		const plan = subscription.items.data[0]?.plan
+		const productId = subscription.items[0]?.price.product
+
+		// Get product name
+		const products = await paymentProvider.getProducts()
+		const product = products.find((p) => p.id === productId)
+
 		await updateOrganizationSubscription(organization.id, {
 			stripeSubscriptionId: subscriptionId,
-			stripeProductId: plan?.product as string,
-			planName: (plan?.product as Stripe.Product).name,
+			stripeProductId: productId || null,
+			planName: product?.name || null,
 			subscriptionStatus: status,
 		})
 	} else if (status === 'canceled' || status === 'unpaid') {
@@ -268,8 +217,12 @@ export async function handleSubscriptionChange(
 	}
 }
 
-export async function handleTrialEnd(subscription: Stripe.Subscription) {
-	const customerId = subscription.customer as string
+export async function handleTrialEnd(subscription: {
+	id: string
+	customer: string
+	trial_end?: number | null
+}) {
+	const customerId = subscription.customer
 
 	const organization = await getOrganizationByStripeCustomerId(customerId)
 	const admins = await prisma.userOrganization.findMany({
@@ -284,6 +237,15 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 		},
 	})
 
+	// Calculate actual days remaining from trial end date
+	const trialEnd = subscription.trial_end
+		? new Date(subscription.trial_end * 1000)
+		: null
+	const now = new Date()
+	const daysRemaining = trialEnd
+		? Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+		: 3 // fallback to 3 days if trial_end is not available
+
 	await Promise.all(
 		admins.map(async (admin) => {
 			const user = admin.user
@@ -296,59 +258,11 @@ export async function handleTrialEnd(subscription: Stripe.Subscription) {
 				react: TrialEndingEmail({
 					portalUrl: process.env.STRIPE_PORTAL_URL!,
 					userName: user.name || undefined,
-					daysRemaining: 3, // You can make this dynamic based on actual trial end date
+					daysRemaining: Math.max(0, daysRemaining), // Ensure non-negative
 				}),
 			})
 		}),
 	)
-}
-
-export async function getStripePrices() {
-	try {
-		const prices = await stripe.prices.list({
-			active: true,
-			limit: 100,
-			type: 'recurring',
-		})
-
-		const mappedPrices = prices.data.map((price) => ({
-			id: price.id,
-			productId:
-				typeof price.product === 'string' ? price.product : price.product.id,
-			unitAmount: price.unit_amount,
-			currency: price.currency,
-			interval: price.recurring?.interval,
-			trialPeriodDays: price.recurring?.trial_period_days,
-		}))
-
-		return mappedPrices
-	} catch (error: any) {
-		console.error('getStripePrices: Failed to fetch prices:', error)
-		throw new Error(`Failed to fetch Stripe prices: ${error?.message || error}`)
-	}
-}
-
-export async function getStripeProducts() {
-	try {
-		const products = await stripe.products.list({
-			active: true,
-			limit: 10,
-		})
-
-		const mappedProducts = products.data.map((product) => ({
-			id: product.id,
-			name: product.name,
-			description: product.description,
-			defaultPriceId: product.default_price as string | undefined,
-		}))
-
-		return mappedProducts
-	} catch (error: any) {
-		console.error('getStripeProducts: Failed to fetch products:', error)
-		throw new Error(
-			`Failed to fetch Stripe products: ${error?.message || error}`,
-		)
-	}
 }
 
 export async function getTrialStatus(userId: string, organizationSlug: string) {
@@ -361,18 +275,19 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 			where: { slug: organizationSlug },
 		})
 
-		if (process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL === 'manual') {
+		const trialConfig = getTrialConfig()
+
+		if (trialConfig.creditCardRequired === 'manual') {
+			if (!organization?.createdAt) {
+				return { isActive: false, daysRemaining: 0 }
+			}
+
+			const daysRemaining = calculateManualTrialDaysRemaining(
+				organization.createdAt,
+			)
 			return {
-				isActive: true,
-				daysRemaining:
-					parseInt(process.env.TRIAL_DAYS!, 10) -
-					(organization?.createdAt
-						? Math.ceil(
-								(new Date().getTime() - organization.createdAt.getTime()) /
-									(1000 * 60 * 60 * 24),
-							)
-						: 0) +
-					1,
+				isActive: daysRemaining > 0,
+				daysRemaining,
 			}
 		}
 
@@ -380,20 +295,21 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 			return { isActive: false, daysRemaining: 0 }
 		}
 
-		const subscriptions = await stripe.subscriptions.list({
-			customer: organization.stripeCustomerId,
-			status: 'all',
-			limit: 1,
-		})
+		const subscriptions = await paymentProvider.listSubscriptions(
+			organization.stripeCustomerId,
+		)
 
-		if (subscriptions.data.length === 0) {
+		if (subscriptions.length === 0) {
 			return { isActive: false, daysRemaining: 0 }
 		}
 
-		const subscription = subscriptions.data[0]
+		const subscription = subscriptions[0]
 
 		if (subscription && subscription.status === 'trialing') {
-			const trialEnd = new Date(subscription.trial_end! * 1000)
+			const trialEnd = subscription.trialEnd
+			if (!trialEnd) {
+				return { isActive: false, daysRemaining: 0 }
+			}
 			const now = new Date()
 			const daysRemaining = Math.ceil(
 				(trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
@@ -435,24 +351,25 @@ export const updateSeatQuantity = async (organizationId: string) => {
 	const numUsersInOrganization =
 		await getOrganizationSeatQuantity(organizationId)
 
-	// Get the subscription item id
-	const subscription = await stripe.subscriptions.retrieve(
+	// Get the subscription
+	const subscription = await paymentProvider.retrieveSubscription(
 		organization.stripeSubscriptionId,
 	)
-	const subscriptionItems = subscription.items.data
 
-	if (subscriptionItems.length !== 1) {
+	if (subscription.items.length !== 1) {
 		throw new Error('Subscription does not have exactly 1 item')
 	}
 
-	// Update the stripe subscription
-	return stripe.subscriptions.update(organization.stripeSubscriptionId, {
-		items: [
-			{
-				id: subscriptionItems[0]?.id,
-				quantity: numUsersInOrganization,
-			},
-		],
+	const firstItem = subscription.items[0]
+	if (!firstItem) {
+		throw new Error('Subscription item not found')
+	}
+
+	// Update the subscription
+	return paymentProvider.updateSubscription({
+		subscriptionId: organization.stripeSubscriptionId,
+		priceId: firstItem.priceId,
+		quantity: numUsersInOrganization,
 	})
 }
 

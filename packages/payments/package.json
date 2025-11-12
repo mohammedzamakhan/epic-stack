@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "name": "@repo/payments",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "stripe": "^18.5.0"
+  },
+  "devDependencies": {
+    "@repo/config": "*",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.8.3"
+  }
+}
