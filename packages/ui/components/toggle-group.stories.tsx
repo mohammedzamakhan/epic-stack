@@ -107,6 +107,7 @@ export const Large: Story = {
 };
 
 export const TextAlignment: Story = {
+  args: {},
   render: () => (
     <ToggleGroup type="single" variant="outline">
       <ToggleGroupItem value="left" aria-label="Align left">
@@ -126,6 +127,7 @@ export const TextAlignment: Story = {
 };
 
 export const ViewMode: Story = {
+  args: {},
   render: () => {
     const [view, setView] = React.useState('grid');
 
