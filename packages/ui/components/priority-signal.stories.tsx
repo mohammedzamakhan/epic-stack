@@ -42,6 +42,7 @@ export const High: Story = {
 };
 
 export const AllPriorities: Story = {
+  args: {},
   render: () => (
     <div className="flex items-center gap-8">
       <div className="flex flex-col items-center gap-2">
@@ -61,6 +62,7 @@ export const AllPriorities: Story = {
 };
 
 export const WithLabels: Story = {
+  args: {},
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
@@ -80,6 +82,7 @@ export const WithLabels: Story = {
 };
 
 export const InList: Story = {
+  args: {},
   render: () => (
     <div className="w-96 space-y-2">
       {[
@@ -102,6 +105,7 @@ export const InList: Story = {
 };
 
 export const LargeSizes: Story = {
+  args: {},
   render: () => (
     <div className="flex items-center gap-8">
       <div className="flex flex-col items-center gap-2">
@@ -121,6 +125,7 @@ export const LargeSizes: Story = {
 };
 
 export const DarkTheme: Story = {
+  args: {},
   render: () => (
     <div className="bg-slate-900 p-8 rounded-lg">
       <div className="flex items-center gap-8">

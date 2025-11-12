@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StatusButton } from './status-button';
 
 const meta = {
@@ -64,20 +64,32 @@ export const WithMessage: Story = {
 };
 
 export const Interactive: Story = {
+  args: {},
   render: () => {
     const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (status === 'pending') {
+        timeoutId = setTimeout(() => {
+          if (Math.random() > 0.3) {
+            setStatus('success');
+          } else {
+            setStatus('error');
+          }
+        }, 2000);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [status]);
+
     const handleClick = () => {
       setStatus('pending');
-
-      // Simulate API call
-      setTimeout(() => {
-        if (Math.random() > 0.3) {
-          setStatus('success');
-        } else {
-          setStatus('error');
-        }
-      }, 2000);
     };
 
     return (
@@ -101,24 +113,64 @@ export const Interactive: Story = {
 };
 
 export const MultipleButtons: Story = {
+  args: {},
   render: () => {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
     const [deleteStatus, setDeleteStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
     const [publishStatus, setPublishStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (saveStatus === 'pending') {
+        timeoutId = setTimeout(() => setSaveStatus('success'), 1500);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [saveStatus]);
+
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (deleteStatus === 'pending') {
+        timeoutId = setTimeout(() => setDeleteStatus('success'), 1500);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [deleteStatus]);
+
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (publishStatus === 'pending') {
+        timeoutId = setTimeout(() => setPublishStatus('success'), 1500);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [publishStatus]);
+
     const handleSave = () => {
       setSaveStatus('pending');
-      setTimeout(() => setSaveStatus('success'), 1500);
     };
 
     const handleDelete = () => {
       setDeleteStatus('pending');
-      setTimeout(() => setDeleteStatus('success'), 1500);
     };
 
     const handlePublish = () => {
       setPublishStatus('pending');
-      setTimeout(() => setPublishStatus('success'), 1500);
     };
 
     return (
@@ -153,12 +205,26 @@ export const MultipleButtons: Story = {
 };
 
 export const WithCustomDuration: Story = {
+  args: {},
   render: () => {
     const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (status === 'pending') {
+        timeoutId = setTimeout(() => setStatus('success'), 1000);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [status]);
+
     const handleClick = () => {
       setStatus('pending');
-      setTimeout(() => setStatus('success'), 1000);
     };
 
     return (
@@ -181,6 +247,7 @@ export const WithCustomDuration: Story = {
 };
 
 export const AllStates: Story = {
+  args: {},
   render: () => (
     <div className="flex flex-col gap-4">
       <StatusButton status="idle">Idle State</StatusButton>

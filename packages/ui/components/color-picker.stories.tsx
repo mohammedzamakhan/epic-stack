@@ -16,6 +16,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {},
   render: () => {
     const [color, setColor] = useState('#6b7280');
     return <ColorPicker value={color} onChange={setColor} />;
@@ -23,6 +24,7 @@ export const Default: Story = {
 };
 
 export const WithLabel: Story = {
+  args: {},
   render: () => {
     const [color, setColor] = useState('#3b82f6');
     return (
@@ -35,6 +37,7 @@ export const WithLabel: Story = {
 };
 
 export const MultipleColors: Story = {
+  args: {},
   render: () => {
     const [primary, setPrimary] = useState('#3b82f6');
     const [secondary, setSecondary] = useState('#10b981');
@@ -63,6 +66,7 @@ export const MultipleColors: Story = {
 };
 
 export const WithPreview: Story = {
+  args: {},
   render: () => {
     const [color, setColor] = useState('#8b5cf6');
     return (
@@ -81,6 +85,7 @@ export const WithPreview: Story = {
 };
 
 export const Disabled: Story = {
+  args: {},
   render: () => {
     const [color] = useState('#6b7280');
     return <ColorPicker value={color} onChange={() => {}} disabled />;
@@ -88,6 +93,7 @@ export const Disabled: Story = {
 };
 
 export const ThemeCustomization: Story = {
+  args: {},
   render: () => {
     const [bgColor, setBgColor] = useState('#ffffff');
     const [textColor, setTextColor] = useState('#000000');

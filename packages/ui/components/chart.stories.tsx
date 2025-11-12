@@ -41,6 +41,7 @@ const chartConfig = {
 };
 
 export const BarChartExample: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <BarChart data={chartData}>
@@ -62,6 +63,7 @@ export const BarChartExample: Story = {
 };
 
 export const LineChartExample: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <LineChart data={chartData}>
@@ -111,6 +113,7 @@ const salesConfig = {
 };
 
 export const SimpleLine: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={salesConfig} className="min-h-[200px] w-full">
       <LineChart data={salesData}>
@@ -128,6 +131,7 @@ export const SimpleLine: Story = {
 };
 
 export const SimpleBar: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={salesConfig} className="min-h-[200px] w-full">
       <BarChart data={salesData}>
@@ -158,6 +162,7 @@ const revenueConfig = {
 };
 
 export const MultipleDataSets: Story = {
+  args: {},
   render: () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Quarterly Performance</h3>

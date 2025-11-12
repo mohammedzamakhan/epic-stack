@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { REGEXP_ONLY_DIGITS, REGEXP_ONLY_CHARS } from 'input-otp';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   InputOTP,
   InputOTPGroup,
@@ -21,6 +21,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={6}>
       <InputOTPGroup>
@@ -36,6 +37,7 @@ export const Default: Story = {
 };
 
 export const WithSeparator: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={6}>
       <InputOTPGroup>
@@ -54,6 +56,7 @@ export const WithSeparator: Story = {
 };
 
 export const FourDigit: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={4} pattern={REGEXP_ONLY_DIGITS}>
       <InputOTPGroup>
@@ -67,6 +70,7 @@ export const FourDigit: Story = {
 };
 
 export const AlphaOnly: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={6} pattern={REGEXP_ONLY_CHARS}>
       <InputOTPGroup>
@@ -82,6 +86,7 @@ export const AlphaOnly: Story = {
 };
 
 export const MultipleSeparators: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={8}>
       <InputOTPGroup>
@@ -108,6 +113,7 @@ export const MultipleSeparators: Story = {
 };
 
 export const Controlled: Story = {
+  args: {},
   render: () => {
     const [value, setValue] = useState('');
 
@@ -143,6 +149,7 @@ export const Controlled: Story = {
 };
 
 export const Disabled: Story = {
+  args: {},
   render: () => (
     <InputOTP maxLength={6} disabled>
       <InputOTPGroup>
@@ -158,21 +165,32 @@ export const Disabled: Story = {
 };
 
 export const WithValidation: Story = {
+  args: {},
   render: () => {
     const [value, setValue] = useState('');
     const [isValid, setIsValid] = useState<boolean | null>(null);
+
+    useEffect(() => {
+      let timeoutId: NodeJS.Timeout | undefined;
+
+      if (isValid === false) {
+        timeoutId = setTimeout(() => {
+          setValue('');
+          setIsValid(null);
+        }, 1500);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [isValid]);
 
     const handleComplete = (value: string) => {
       // Simulate validation (e.g., checking against server)
       const valid = value === '123456';
       setIsValid(valid);
-
-      if (!valid) {
-        setTimeout(() => {
-          setValue('');
-          setIsValid(null);
-        }, 1500);
-      }
     };
 
     return (

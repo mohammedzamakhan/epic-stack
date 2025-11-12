@@ -58,7 +58,7 @@ export const WithActions: Story = {
           <Icon name="pencil" />
         </Button>
         <Button variant="ghost" size="sm">
-          <Icon name="trash" />
+          <Icon name="trash-2" />
         </Button>
       </ItemActions>
     </Item>

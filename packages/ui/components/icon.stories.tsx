@@ -29,6 +29,7 @@ export const Default: Story = {
 };
 
 export const Sizes: Story = {
+  args: {},
   render: () => (
     <div className="flex items-center gap-4">
       <Icon name="check" size="xs" />
@@ -41,6 +42,7 @@ export const Sizes: Story = {
 };
 
 export const FontSize: Story = {
+  args: {},
   render: () => (
     <div className="flex flex-col gap-4">
       <p className="text-sm">
@@ -60,6 +62,7 @@ export const FontSize: Story = {
 };
 
 export const WithChildren: Story = {
+  args: {},
   render: () => (
     <div className="flex flex-col gap-4">
       <Icon name="check" size="sm">
@@ -76,6 +79,7 @@ export const WithChildren: Story = {
 };
 
 export const CommonIcons: Story = {
+  args: {},
   render: () => (
     <div className="grid grid-cols-6 gap-4">
       <div className="flex flex-col items-center gap-2">
@@ -95,8 +99,8 @@ export const CommonIcons: Story = {
         <span className="text-xs">pencil</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Icon name="trash" size="lg" />
-        <span className="text-xs">trash</span>
+        <Icon name="trash-2" size="lg" />
+        <span className="text-xs">trash-2</span>
       </div>
       <div className="flex flex-col items-center gap-2">
         <Icon name="gear" size="lg" />
@@ -119,35 +123,38 @@ export const CommonIcons: Story = {
         <span className="text-xs">file-text</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Icon name="avatar" size="lg" />
-        <span className="text-xs">avatar</span>
+        <Icon name="person" size="lg" />
+        <span className="text-xs">person</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <Icon name="envelope-closed" size="lg" />
-        <span className="text-xs">envelope</span>
+        <Icon name="mail" size="lg" />
+        <span className="text-xs">mail</span>
       </div>
     </div>
   ),
 };
 
 export const WithCustomStyles: Story = {
+  args: {},
   render: () => (
     <div className="flex gap-4">
       <Icon name="check" size="lg" className="text-green-600" />
       <Icon name="x" size="lg" className="text-red-600" />
-      <Icon name="exclamation-triangle" size="lg" className="text-yellow-600" />
-      <Icon name="info" size="lg" className="text-blue-600" />
+      <Icon name="alert-triangle" size="lg" className="text-yellow-600" />
+      <Icon name="help-circle" size="lg" className="text-blue-600" />
     </div>
   ),
 };
 
 export const WithTitle: Story = {
+  args: {},
   render: () => (
     <Icon name="check" size="lg" title="This task is completed" />
   ),
 };
 
 export const InButtons: Story = {
+  args: {},
   render: () => (
     <div className="flex gap-2">
       <button className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md">
@@ -155,7 +162,7 @@ export const InButtons: Story = {
         Confirm
       </button>
       <button className="inline-flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-md">
-        <Icon name="trash" size="sm" />
+        <Icon name="trash-2" size="sm" />
         Delete
       </button>
       <button className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md">

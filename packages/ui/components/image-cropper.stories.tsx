@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './button';
 import { ImageCropper } from './image-cropper';
 
@@ -16,6 +16,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {},
   render: () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -35,6 +36,14 @@ export const Default: Story = {
       setDialogOpen(false);
     };
 
+    useEffect(() => {
+      return () => {
+        if (croppedImage) {
+          URL.revokeObjectURL(croppedImage);
+        }
+      };
+    }, [croppedImage]);
+
     return (
       <div className="flex flex-col gap-4 items-center">
         <input
@@ -45,7 +54,9 @@ export const Default: Story = {
           id="image-upload"
         />
         <label htmlFor="image-upload">
-          <Button as Component="span">Select Image</Button>
+          <Button asChild>
+            <span>Select Image</span>
+          </Button>
         </label>
 
         {croppedImage && (
@@ -73,6 +84,7 @@ export const Default: Story = {
 };
 
 export const SquareAspect: Story = {
+  args: {},
   render: () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -92,6 +104,14 @@ export const SquareAspect: Story = {
       setDialogOpen(false);
     };
 
+    useEffect(() => {
+      return () => {
+        if (croppedImage) {
+          URL.revokeObjectURL(croppedImage);
+        }
+      };
+    }, [croppedImage]);
+
     return (
       <div className="flex flex-col gap-4 items-center">
         <p className="text-sm text-muted-foreground">1:1 Square Aspect Ratio</p>
@@ -103,7 +123,9 @@ export const SquareAspect: Story = {
           id="image-upload-square"
         />
         <label htmlFor="image-upload-square">
-          <Button asComponent="span">Select Image</Button>
+          <Button asChild>
+            <span>Select Image</span>
+          </Button>
         </label>
 
         {croppedImage && (
@@ -131,6 +153,7 @@ export const SquareAspect: Story = {
 };
 
 export const WideAspect: Story = {
+  args: {},
   render: () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -150,6 +173,14 @@ export const WideAspect: Story = {
       setDialogOpen(false);
     };
 
+    useEffect(() => {
+      return () => {
+        if (croppedImage) {
+          URL.revokeObjectURL(croppedImage);
+        }
+      };
+    }, [croppedImage]);
+
     return (
       <div className="flex flex-col gap-4 items-center">
         <p className="text-sm text-muted-foreground">16:9 Wide Aspect Ratio</p>
@@ -161,7 +192,9 @@ export const WideAspect: Story = {
           id="image-upload-wide"
         />
         <label htmlFor="image-upload-wide">
-          <Button asComponent="span">Select Image</Button>
+          <Button asChild>
+            <span>Select Image</span>
+          </Button>
         </label>
 
         {croppedImage && (

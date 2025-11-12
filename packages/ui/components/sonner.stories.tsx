@@ -130,10 +130,10 @@ export const Promise: Story = {
     <div>
       <Button
         onClick={() => {
-          const promise = () =>
+          const promise = (): Promise<{ name: string }> =>
             new Promise((resolve) => setTimeout(() => resolve({ name: 'Toast' }), 2000));
 
-          toast.promise(promise, {
+          toast.promise(promise(), {
             loading: 'Loading...',
             success: (data) => {
               return `${data.name} has been added`;

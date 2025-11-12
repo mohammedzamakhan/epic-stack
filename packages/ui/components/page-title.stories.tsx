@@ -50,6 +50,7 @@ export const WithLongDescription: Story = {
 };
 
 export const Examples: Story = {
+  args: {},
   render: () => (
     <div className="flex flex-col gap-8">
       <PageTitle title="Home" description="Overview of your account" />
