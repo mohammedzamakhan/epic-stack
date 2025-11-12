@@ -1,5 +1,4 @@
 import type { StorybookConfig } from '@storybook/react-vite';
-import tailwindcss from '@tailwindcss/vite';
 
 const config: StorybookConfig = {
   stories: ['../components/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -16,6 +15,8 @@ const config: StorybookConfig = {
     autodocs: 'tag',
   },
   async viteFinal(config) {
+    // Dynamically import @tailwindcss/vite as it's an ESM-only package
+    const tailwindcss = (await import('@tailwindcss/vite')).default;
     config.plugins = config.plugins || [];
     config.plugins.push(tailwindcss());
     return config;
