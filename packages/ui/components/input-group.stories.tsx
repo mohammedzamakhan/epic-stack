@@ -60,7 +60,7 @@ export const WithIconButton: Story = {
       <InputGroupInput type="password" placeholder="Password" />
       <InputGroupAddon align="inline-end">
         <InputGroupButton size="icon-xs">
-          <Icon name="eye" />
+          <Icon name="lock" />
         </InputGroupButton>
       </InputGroupAddon>
     </InputGroup>

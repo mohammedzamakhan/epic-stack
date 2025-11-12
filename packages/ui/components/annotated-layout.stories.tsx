@@ -17,6 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {},
   render: () => (
     <AnnotatedLayout>
       <AnnotatedSection>
@@ -60,6 +61,7 @@ export const Default: Story = {
 };
 
 export const WithActions: Story = {
+  args: {},
   render: () => (
     <AnnotatedLayout>
       <AnnotatedSection>

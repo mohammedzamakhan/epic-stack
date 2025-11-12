@@ -50,13 +50,13 @@ export const Default: Story = {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
-                    <Icon name="home" />
+                    <Icon name="building" />
                     <span>Home</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
-                    <Icon name="inbox" />
+                    <Icon name="mail" />
                     <span>Inbox</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -122,13 +122,13 @@ export const WithActiveItem: Story = {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton isActive>
-                    <Icon name="home" />
+                    <Icon name="building" />
                     <span>Home</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
-                    <Icon name="inbox" />
+                    <Icon name="mail" />
                     <span>Inbox</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

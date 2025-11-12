@@ -43,7 +43,7 @@ export const WithIcon: Story = {
     <div className="w-96">
       <Item>
         <ItemMedia variant="icon">
-          <Icon name="inbox" />
+          <Icon name="mail" />
         </ItemMedia>
         <ItemContent>
           <ItemTitle>Messages</ItemTitle>
@@ -97,7 +97,7 @@ export const GroupedItems: Story = {
       <ItemGroup>
         <Item variant="outline">
           <ItemMedia variant="icon">
-            <Icon name="inbox" />
+            <Icon name="mail" />
           </ItemMedia>
           <ItemContent>
             <ItemTitle>Inbox</ItemTitle>
@@ -117,7 +117,7 @@ export const GroupedItems: Story = {
         <ItemSeparator />
         <Item variant="outline">
           <ItemMedia variant="icon">
-            <Icon name="trash" />
+            <Icon name="trash-2" />
           </ItemMedia>
           <ItemContent>
             <ItemTitle>Trash</ItemTitle>

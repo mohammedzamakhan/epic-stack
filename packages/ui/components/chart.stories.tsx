@@ -42,6 +42,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export const BarChartExample: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-w-md">
       <BarChart data={chartData}>
@@ -63,6 +64,7 @@ export const BarChartExample: Story = {
 };
 
 export const LineChartExample: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-w-md">
       <LineChart data={chartData}>
@@ -127,6 +129,7 @@ const pieChartConfig = {
 } satisfies ChartConfig;
 
 export const PieChartExample: Story = {
+  args: {},
   render: () => (
     <ChartContainer config={pieChartConfig} className="min-h-[200px] w-full max-w-md">
       <PieChart>
