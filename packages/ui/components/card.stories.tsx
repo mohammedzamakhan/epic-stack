@@ -24,11 +24,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Card Title</CardTitle>
+        <CardDescription>Card description goes here.</CardDescription>
+      </CardHeader>
       <CardContent>
-        <CardHeader>
-          <CardTitle>Card Title</CardTitle>
-          <CardDescription>Card description goes here.</CardDescription>
-        </CardHeader>
+        
       </CardContent>
     </Card>
   ),
@@ -37,13 +38,14 @@ export const Default: Story = {
 export const WithFooter: Story = {
   render: () => (
     <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Create project</CardTitle>
+        <CardDescription>
+          Deploy your new project in one-click.
+        </CardDescription>
+      </CardHeader>
       <CardContent>
-        <CardHeader>
-          <CardTitle>Create project</CardTitle>
-          <CardDescription>
-            Deploy your new project in one-click.
-          </CardDescription>
-        </CardHeader>
+        
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline">Cancel</Button>
@@ -56,14 +58,14 @@ export const WithFooter: Story = {
 export const WithContent: Story = {
   render: () => (
     <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Notifications</CardTitle>
+        <CardDescription>
+          You have 3 unread messages.
+        </CardDescription>
+      </CardHeader>
       <CardContent>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
-            You have 3 unread messages.
-          </CardDescription>
-        </CardHeader>
-        <div className="p-6 pt-0 space-y-2">
+        <div className="space-y-2">
           <div className="flex items-center gap-4 text-sm">
             <div className="font-semibold">Push Notifications</div>
             <div className="text-muted-foreground ml-auto">
@@ -92,14 +94,14 @@ export const Grid: Story = {
   render: () => (
     <div className="grid grid-cols-2 gap-4 max-w-4xl">
       <Card>
+        <CardHeader>
+          <CardTitle>Revenue</CardTitle>
+          <CardDescription>
+            Total revenue this month
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle>Revenue</CardTitle>
-            <CardDescription>
-              Total revenue this month
-            </CardDescription>
-          </CardHeader>
-          <div className="p-6 pt-0">
+          <div>
             <div className="text-2xl font-bold">$45,231.89</div>
             <p className="text-xs text-muted-foreground">
               +20.1% from last month
@@ -108,14 +110,14 @@ export const Grid: Story = {
         </CardContent>
       </Card>
       <Card>
+        <CardHeader>
+          <CardTitle>Sales</CardTitle>
+          <CardDescription>
+            Total sales this month
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle>Sales</CardTitle>
-            <CardDescription>
-              Total sales this month
-            </CardDescription>
-          </CardHeader>
-          <div className="p-6 pt-0">
+          <div>
             <div className="text-2xl font-bold">+12,234</div>
             <p className="text-xs text-muted-foreground">
               +19% from last month
@@ -124,14 +126,14 @@ export const Grid: Story = {
         </CardContent>
       </Card>
       <Card>
+        <CardHeader>
+          <CardTitle>Active Users</CardTitle>
+          <CardDescription>
+            Current active users
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle>Active Users</CardTitle>
-            <CardDescription>
-              Current active users
-            </CardDescription>
-          </CardHeader>
-          <div className="p-6 pt-0">
+          <div>
             <div className="text-2xl font-bold">+573</div>
             <p className="text-xs text-muted-foreground">
               +201 since last hour
@@ -140,14 +142,14 @@ export const Grid: Story = {
         </CardContent>
       </Card>
       <Card>
+        <CardHeader>
+          <CardTitle>Conversion Rate</CardTitle>
+          <CardDescription>
+            Overall conversion rate
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <CardHeader>
-            <CardTitle>Conversion Rate</CardTitle>
-            <CardDescription>
-              Overall conversion rate
-            </CardDescription>
-          </CardHeader>
-          <div className="p-6 pt-0">
+          <div >
             <div className="text-2xl font-bold">24.5%</div>
             <p className="text-xs text-muted-foreground">
               +4.2% from last month
