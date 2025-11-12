@@ -42,6 +42,11 @@ reference-saas-app/
 .trigger
 packages/prisma/db/data.db-journal
 
+# Compiled TypeScript output in packages/ui
+packages/ui/**/*.js
+packages/ui/**/*.d.ts
+!packages/ui/**/*.config.js
+!packages/ui/**/generate-icons.js
 
 .nx/cache
 .nx/workspace-data
