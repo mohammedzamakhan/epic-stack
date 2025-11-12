@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
-} from '../trial-config.server'
+} from '../payments.server'
 
 describe('Trial Configuration', () => {
 	const originalEnv = process.env

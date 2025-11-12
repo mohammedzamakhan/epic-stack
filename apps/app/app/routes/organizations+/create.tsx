@@ -40,8 +40,8 @@ import {
 	type OrganizationRoleName,
 } from '#app/utils/organizations.server'
 import { uploadOrganizationImage } from '#app/utils/storage.server'
-import { getTrialConfig } from '#app/utils/trial-config.server'
 import {
+	getTrialConfig,
 	getPlansAndPrices,
 	createCheckoutSession,
 } from '#app/utils/payments.server'
