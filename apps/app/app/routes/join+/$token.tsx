@@ -1,13 +1,13 @@
 import { type LoaderFunctionArgs, redirect } from 'react-router'
-import { onboardingInviteTokenSessionKey } from '#app/routes/_auth+/onboarding'
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
+import { onboardingInviteTokenSessionKey } from '#app/routes/_auth+/onboarding.tsx'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 import {
 	validateInviteLink,
 	createInvitationFromLink,
-} from '#app/utils/organization-invitation.server'
-import { redirectWithToast } from '#app/utils/toast.server'
-import { verifySessionStorage } from '#app/utils/verification.server'
+} from '#app/utils/organization-invitation.server.ts'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { verifySessionStorage } from '#app/utils/verification.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const token = params.token

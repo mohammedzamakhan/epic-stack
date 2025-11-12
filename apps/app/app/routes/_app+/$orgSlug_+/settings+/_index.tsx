@@ -10,37 +10,37 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 
-import DangerZoneCard from '#app/components/settings/cards/organization/danger-zone-card'
-import { GeneralSettingsCard } from '#app/components/settings/cards/organization/general-settings-card'
+import DangerZoneCard from '#app/components/settings/cards/organization/danger-zone-card.tsx'
+import { GeneralSettingsCard } from '#app/components/settings/cards/organization/general-settings-card.tsx'
 import {
 	uploadOrgPhotoActionIntent,
 	deleteOrgPhotoActionIntent,
-} from '#app/components/settings/cards/organization/organization-photo-card'
+} from '#app/components/settings/cards/organization/organization-photo-card.tsx'
 import {
 	S3StorageCard,
 	S3StorageSchema,
 	s3StorageActionIntent,
-} from '#app/components/settings/cards/organization/s3-storage-card'
+} from '#app/components/settings/cards/organization/s3-storage-card.tsx'
 import TeamSizeCard, {
 	TeamSizeSchema,
-} from '#app/components/settings/cards/organization/team-size-card'
+} from '#app/components/settings/cards/organization/team-size-card.tsx'
 import VerifiedDomainCard, {
 	VerifiedDomainSchema,
-} from '#app/components/settings/cards/organization/verified-domain-card'
+} from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
-import { encrypt, getSSOMasterKey } from '#app/utils/encryption.server'
-import { markStepCompleted } from '#app/utils/onboarding'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { encrypt, getSSOMasterKey } from '#app/utils/encryption.server.ts'
+import { markStepCompleted } from '#app/utils/onboarding.ts'
 import {
 	updateSeatQuantity,
 	deleteSubscription,
-} from '#app/utils/payments.server'
+} from '#app/utils/payments.server.ts'
 import {
 	uploadOrganizationImage,
 	testS3Connection,
 } from '#app/utils/storage.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

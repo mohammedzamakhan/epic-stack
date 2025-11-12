@@ -1,4 +1,4 @@
-import { prisma } from '#app/utils/db.server'
+import { prisma } from '#app/utils/db.server.ts'
 
 async function getFlag(
 	key: string,

@@ -1,8 +1,8 @@
 import { webcrypto as crypto } from 'node:crypto'
 import { OrganizationInviteEmail } from '@repo/email'
-import { prisma } from '#app/utils/db.server'
-import { sendEmail } from '#app/utils/email.server'
-import { markStepCompleted } from '#app/utils/onboarding'
+import { prisma } from '#app/utils/db.server.ts'
+import { sendEmail } from '#app/utils/email.server.ts'
+import { markStepCompleted } from '#app/utils/onboarding.ts'
 import { type OrganizationRoleName } from './organizations.server'
 
 // Helper function to get organization role ID by name

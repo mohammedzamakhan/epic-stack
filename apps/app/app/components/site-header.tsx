@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useGlobalHotkeys } from '#app/hooks/use-hotkeys'
+import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
 import { Button, Separator, SidebarTrigger, Icon, Kbd } from '@repo/ui'
 import NotificationBell from './ui/notification-bell'

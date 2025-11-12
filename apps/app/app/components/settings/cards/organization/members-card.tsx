@@ -1,4 +1,4 @@
-import { OrganizationMembers } from '#app/components/organization-members'
+import { OrganizationMembers } from '#app/components/organization-members.tsx'
 
 interface OrganizationMember {
 	userId: string

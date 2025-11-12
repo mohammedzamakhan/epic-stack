@@ -1,14 +1,14 @@
 import { Outlet, useLoaderData } from 'react-router'
-import { MarketingLayout } from '#app/components/marketing-layout'
-import { requireUserId } from '#app/utils/auth.server'
+import { MarketingLayout } from '#app/components/marketing-layout.tsx'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 	type OnboardingProgressData,
-} from '#app/utils/onboarding'
-import { getUserDefaultOrganization } from '#app/utils/organizations.server'
-import { getSidebarState } from '#app/utils/sidebar-cookie.server'
-import { getTrialStatus } from '#app/utils/payments.server'
+} from '#app/utils/onboarding.ts'
+import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
+import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
+import { getTrialStatus } from '#app/utils/payments.server.ts'
 
 export async function loader({ request }: { request: Request }) {
 	const isCollapsed = await getSidebarState(request)

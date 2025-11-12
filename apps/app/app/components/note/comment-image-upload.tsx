@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { cn } from '#app/utils/misc'
+import { cn } from '#app/utils/misc.tsx'
 
 import { Button, Icon } from '@repo/ui'
 

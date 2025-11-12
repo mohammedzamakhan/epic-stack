@@ -18,8 +18,8 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '@repo/ui'
-import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch'
-import { useOptionalRequestInfo } from '#app/utils/request-info'
+import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
+import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 import { BuildingIcon } from './icons/building-icon'
 import { LogoutIcon } from './icons/logout-icon'
 import { SettingsGearIcon } from './icons/settings-gear-icon'

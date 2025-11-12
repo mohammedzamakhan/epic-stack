@@ -1,8 +1,8 @@
 import { invariant } from '@epic-web/invariant'
 import { integrationManager, OAuthStateManager } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server'
-import { redirectWithToast } from '#app/utils/toast.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserId(request)
@@ -117,7 +117,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 
 		// Get organization slug for redirect
-		const { prisma } = await import('#app/utils/db.server')
+		const { prisma } = await import('#app/utils/db.server.ts')
 		const organization = await prisma.organization.findUnique({
 			where: { id: integration.organizationId },
 			select: { slug: true },

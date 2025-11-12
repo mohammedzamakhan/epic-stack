@@ -18,7 +18,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@repo/ui'
-import { useUserOrganizations } from '#app/utils/organizations'
+import { useUserOrganizations } from '#app/utils/organizations.ts'
 
 export function TeamSwitcher() {
 	const submit = useSubmit()

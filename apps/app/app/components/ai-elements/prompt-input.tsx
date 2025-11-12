@@ -17,7 +17,7 @@ import {
 	Children,
 } from 'react'
 
-import { cn } from '#app/utils/misc'
+import { cn } from '#app/utils/misc.tsx'
 type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error'
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>

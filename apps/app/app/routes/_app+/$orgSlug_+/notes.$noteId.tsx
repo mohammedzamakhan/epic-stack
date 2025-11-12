@@ -29,7 +29,7 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { CommentsSection } from '#app/components/note/comments-section.tsx'
-import { IntegrationControls } from '#app/components/note/integration-controls'
+import { IntegrationControls } from '#app/components/note/integration-controls.tsx'
 import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
 import {
 	CanEditNote,

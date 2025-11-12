@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Play } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { cn } from '#app/utils/misc'
+import { cn } from '#app/utils/misc.tsx'
 
 interface FeatureUpdate {
 	id: string

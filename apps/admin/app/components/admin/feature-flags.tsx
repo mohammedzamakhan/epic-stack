@@ -26,7 +26,7 @@ import {
 } from '@repo/ui'
 import { useState } from 'react'
 import { useFetcher, useLoaderData } from 'react-router'
-import { type loader } from '#app/routes/_admin+/feature-flags'
+import { type loader } from '#app/routes/_admin+/feature-flags.tsx'
 
 type ConfigFlag = {
 	id: string

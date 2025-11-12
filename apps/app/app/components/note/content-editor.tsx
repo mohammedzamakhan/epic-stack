@@ -2,7 +2,7 @@ import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useImperativeHandle, forwardRef } from 'react'
 import { Markdown } from 'tiptap-markdown'
-import { cn } from '#app/utils/misc.js'
+import { cn } from '#app/utils/misc.tsx'
 
 interface ContentEditorProps {
 	value: string

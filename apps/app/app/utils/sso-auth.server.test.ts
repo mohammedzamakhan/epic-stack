@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
-import { server } from '#tests/mocks'
+import { server } from '#tests/mocks/index.ts'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 
 // Generate a mock encryption key

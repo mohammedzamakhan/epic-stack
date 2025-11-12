@@ -20,7 +20,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '#app/utils/misc'
+import { cn } from '#app/utils/misc.tsx'
 
 export type WebPreviewContextValue = {
 	url: string

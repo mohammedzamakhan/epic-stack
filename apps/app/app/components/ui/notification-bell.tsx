@@ -3,7 +3,7 @@ import { useNotifications, useNovu } from '@novu/react/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
-import { BellIcon } from '#app/components/icons/bell-icon'
+import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
 import {
 	Avatar,

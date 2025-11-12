@@ -15,8 +15,8 @@ import {
 } from '@repo/ui'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
 
-import { getUsersByIpAddress } from '#app/utils/ip-tracking.server'
-import { requireUserWithRole } from '#app/utils/permissions.server'
+import { getUsersByIpAddress } from '#app/utils/ip-tracking.server.ts'
+import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')

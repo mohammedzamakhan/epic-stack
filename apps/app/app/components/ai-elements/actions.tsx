@@ -9,7 +9,7 @@ import {
 	TooltipTrigger,
 } from '@repo/ui'
 
-import { cn } from '#app/utils/misc'
+import { cn } from '#app/utils/misc.tsx'
 
 export type ActionsProps = ComponentProps<'div'>
 
