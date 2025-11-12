@@ -152,6 +152,7 @@ export const WithText: Story = {
 };
 
 export const Sizes: Story = {
+  args: {},
   render: () => (
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-center gap-2">
@@ -179,6 +180,7 @@ export const Sizes: Story = {
 };
 
 export const AllIcons: Story = {
+  args: {},
   render: () => (
     <div className="max-w-6xl p-8">
       <h2 className="text-2xl font-bold mb-6">All Available Icons ({allIconNames.length})</h2>
@@ -204,6 +206,7 @@ export const AllIcons: Story = {
 };
 
 export const IconCategories: Story = {
+  args: {},
   render: () => {
     const categories = {
       Navigation: [
