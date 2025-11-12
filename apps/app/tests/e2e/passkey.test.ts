@@ -126,6 +126,7 @@ test.skip('Users can register and use passkeys', async ({ page, login, navigate 
 test.skip('Failed passkey verification shows error', async ({
 	page,
 	login,
+	navigate,
 }) => {
 	const password = faker.internet.password()
 	await login({ password })

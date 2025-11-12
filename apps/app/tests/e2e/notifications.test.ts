@@ -25,6 +25,7 @@ test.describe('Notifications', () => {
 	test('Users can update email notification preferences', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -55,6 +56,7 @@ test.describe('Notifications', () => {
 	test('Users can update push notification preferences', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -85,6 +87,7 @@ test.describe('Notifications', () => {
 	test('Users can configure notification frequency', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -140,6 +143,7 @@ test.describe('Notifications', () => {
 	test('Users receive notifications for organization invitations', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const invitedUser = await login()
 
@@ -228,6 +232,7 @@ test.describe('Notifications', () => {
 	test('Users can disable specific notification types', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -258,6 +263,7 @@ test.describe('Notifications', () => {
 	test('Notification preferences persist across sessions', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -312,6 +318,7 @@ test.describe('Notifications', () => {
 	test('Notification settings show current preferences', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 
@@ -374,6 +381,7 @@ test.describe('Notifications', () => {
 	test('Notification settings are accessible via keyboard', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 

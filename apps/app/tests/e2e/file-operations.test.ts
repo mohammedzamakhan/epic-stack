@@ -326,6 +326,7 @@ test.describe('File Operations', () => {
 	test('File upload handles network errors gracefully', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 

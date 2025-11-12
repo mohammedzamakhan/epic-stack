@@ -38,6 +38,7 @@ test.describe('Waitlist Referral System', () => {
 	test('referral link redirects to signup with code stored in session', async ({
 		page,
 		insertNewUser,
+		navigate,
 	}) => {
 		const referrer = await insertNewUser()
 

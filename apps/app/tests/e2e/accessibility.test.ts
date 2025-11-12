@@ -49,6 +49,7 @@ test.describe('Accessibility', () => {
 	test('Forms have proper labels and ARIA attributes', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -92,6 +93,7 @@ test.describe('Accessibility', () => {
 	test('Interactive elements are keyboard accessible', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -194,6 +196,7 @@ test.describe('Accessibility', () => {
 	test('Color contrast meets accessibility standards', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -342,6 +345,7 @@ test.describe('Accessibility', () => {
 	test('Screen reader announcements work correctly', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 

@@ -163,6 +163,7 @@ test.describe('Organization Invitations', () => {
 	test('Users can decline organization invitations', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const invitedUser = await login()
 
@@ -247,6 +248,7 @@ test.describe('Organization Invitations', () => {
 	test('Organization owners can revoke pending invitations', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
@@ -449,6 +451,7 @@ test.describe('Organization Invitations', () => {
 	test('Invalid invitation tokens show error message', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		await login()
 

@@ -110,6 +110,7 @@ test.describe('Theme Switching', () => {
 	test('Theme preference persists across page reloads', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
@@ -150,6 +151,7 @@ test.describe('Theme Switching', () => {
 	test('Theme preference persists across navigation', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
@@ -197,6 +199,7 @@ test.describe('Theme Switching', () => {
 	test('Theme switcher shows current theme selection', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })
@@ -270,6 +273,7 @@ test.describe('Theme Switching', () => {
 	test('Theme switching is accessible via keyboard', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		// Set a larger viewport to ensure elements are visible
 		await page.setViewportSize({ width: 1280, height: 720 })

@@ -367,6 +367,7 @@ test.describe('Mobile Responsiveness', () => {
 	test('Orientation changes are handled gracefully', async ({
 		page,
 		login,
+		navigate,
 	}) => {
 		const user = await login()
 
