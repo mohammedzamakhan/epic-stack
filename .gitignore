@@ -33,6 +33,7 @@ packages/ui/components/icons/
 dist
 coverage
 build
+storybook-static
 
 data.db
 
