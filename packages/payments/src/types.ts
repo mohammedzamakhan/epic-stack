@@ -19,8 +19,8 @@ export interface Price {
 	id: string
 	productId: string
 	unitAmount: number | null
-	interval?: 'month' | 'year' | 'week' | 'day' | null
-	trialPeriodDays?: number | null
+	interval: 'month' | 'year' | 'week' | 'day' | null | undefined
+	trialPeriodDays: number | null | undefined
 	currency: string
 	tiers?: PriceTier[]
 }

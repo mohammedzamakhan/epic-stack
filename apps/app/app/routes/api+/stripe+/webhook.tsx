@@ -38,13 +38,27 @@ export async function action({ request }: ActionFunctionArgs) {
 			case 'customer.subscription.updated':
 			case 'customer.subscription.deleted': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange(subscription)
+				await handleSubscriptionChange({
+					id: subscription.id,
+					status: subscription.status,
+					customer: subscription.customer as string,
+					items: subscription.items.data.map((item) => ({
+						price: {
+							id: item.price.id,
+							product: item.price.product as string,
+						},
+					})),
+				})
 				break
 			}
 
 			case 'customer.subscription.trial_will_end': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleTrialEnd(subscription)
+				await handleTrialEnd({
+					id: subscription.id,
+					customer: subscription.customer as string,
+					trial_end: subscription.trial_end,
+				})
 				break
 			}
 
@@ -65,13 +79,33 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			case 'customer.subscription.paused': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange(subscription)
+				await handleSubscriptionChange({
+					id: subscription.id,
+					status: subscription.status,
+					customer: subscription.customer as string,
+					items: subscription.items.data.map((item) => ({
+						price: {
+							id: item.price.id,
+							product: item.price.product as string,
+						},
+					})),
+				})
 				break
 			}
 
 			case 'customer.subscription.resumed': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange(subscription)
+				await handleSubscriptionChange({
+					id: subscription.id,
+					status: subscription.status,
+					customer: subscription.customer as string,
+					items: subscription.items.data.map((item) => ({
+						price: {
+							id: item.price.id,
+							product: item.price.product as string,
+						},
+					})),
+				})
 				break
 			}
 
