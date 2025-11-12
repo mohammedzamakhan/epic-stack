@@ -210,10 +210,11 @@ export class StripeProvider implements PaymentProvider {
 			productId: (sub.items.data[0]?.plan.product as string) || '',
 			priceId: sub.items.data[0]?.price.id || '',
 			trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-			currentPeriodEnd: sub.current_period_end
-				? new Date(sub.current_period_end * 1000)
-				: undefined,
-			cancelAtPeriodEnd: sub.cancel_at_period_end,
+			currentPeriodEnd:
+				(sub as any).current_period_end
+					? new Date((sub as any).current_period_end * 1000)
+					: undefined,
+			cancelAtPeriodEnd: (sub as any).cancel_at_period_end,
 			quantity: sub.items.data[0]?.quantity,
 			items: sub.items.data.map((item) => ({
 				id: item.id,
@@ -236,10 +237,11 @@ export class StripeProvider implements PaymentProvider {
 			productId: (sub.items.data[0]?.plan.product as string) || '',
 			priceId: sub.items.data[0]?.price.id || '',
 			trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-			currentPeriodEnd: sub.current_period_end
-				? new Date(sub.current_period_end * 1000)
-				: undefined,
-			cancelAtPeriodEnd: sub.cancel_at_period_end,
+			currentPeriodEnd:
+				(sub as any).current_period_end
+					? new Date((sub as any).current_period_end * 1000)
+					: undefined,
+			cancelAtPeriodEnd: (sub as any).cancel_at_period_end,
 			quantity: sub.items.data[0]?.quantity,
 			items: sub.items.data.map((item) => ({
 				id: item.id,
@@ -291,10 +293,11 @@ export class StripeProvider implements PaymentProvider {
 			trialEnd: updatedSub.trial_end
 				? new Date(updatedSub.trial_end * 1000)
 				: null,
-			currentPeriodEnd: updatedSub.current_period_end
-				? new Date(updatedSub.current_period_end * 1000)
-				: undefined,
-			cancelAtPeriodEnd: updatedSub.cancel_at_period_end,
+			currentPeriodEnd:
+				(updatedSub as any).current_period_end
+					? new Date((updatedSub as any).current_period_end * 1000)
+					: undefined,
+			cancelAtPeriodEnd: (updatedSub as any).cancel_at_period_end,
 			quantity: updatedSub.items.data[0]?.quantity,
 			items: updatedSub.items.data.map((item) => ({
 				id: item.id,
@@ -314,10 +317,11 @@ export class StripeProvider implements PaymentProvider {
 			productId: (sub.items.data[0]?.plan.product as string) || '',
 			priceId: sub.items.data[0]?.price.id || '',
 			trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-			currentPeriodEnd: sub.current_period_end
-				? new Date(sub.current_period_end * 1000)
-				: undefined,
-			cancelAtPeriodEnd: sub.cancel_at_period_end,
+			currentPeriodEnd:
+				(sub as any).current_period_end
+					? new Date((sub as any).current_period_end * 1000)
+					: undefined,
+			cancelAtPeriodEnd: (sub as any).cancel_at_period_end,
 			quantity: sub.items.data[0]?.quantity,
 			items: sub.items.data.map((item) => ({
 				id: item.id,
@@ -408,7 +412,7 @@ export class StripeProvider implements PaymentProvider {
 			})
 
 			return invoices.data.map((invoice) => ({
-				id: invoice.id,
+				id: invoice.id || '',
 				number: invoice.number,
 				status: invoice.status,
 				amountPaid: invoice.amount_paid,
