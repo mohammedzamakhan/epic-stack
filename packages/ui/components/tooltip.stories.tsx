@@ -174,7 +174,7 @@ export const MultipleTooltips: Story = {
   ),
 };
 
-export const Keyboard Shortcut: Story = {
+export const KeyboardShortcut: Story = {
   render: () => (
     <Tooltip>
       <TooltipTrigger asChild>
