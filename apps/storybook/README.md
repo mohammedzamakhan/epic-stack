@@ -26,27 +26,36 @@ npm run preview
 
 ## Known Issues
 
-### Version Compatibility
+### Module Resolution in Monorepo
 
-If you encounter an error like `Cannot find module 'storybook/internal/common'`, this is due to a version mismatch between Storybook packages. To fix this:
+Due to module resolution challenges in this monorepo setup, Storybook may have difficulty finding its packages. If you encounter errors like:
+- `Cannot find module '@storybook/react-vite/preset'`
+- `Cannot find module 'storybook/internal/common'`
+- `Cannot find module '@storybook/core/common'`
 
-1. Remove all Storybook packages from the root node_modules:
+**Recommended Solution:**
+
+The Storybook app has been set up but requires additional configuration to work properly in this monorepo environment. Consider one of these approaches:
+
+1. **Use Storybook in a separate repository**: Extract the storybook app to its own repository outside the monorepo for the most reliable setup.
+
+2. **Run Storybook from the workspace**: Ensure you're running from the workspace directory:
    ```bash
-   rm -rf node_modules/@storybook node_modules/storybook
+   cd apps/storybook
+   npx storybook@8.4.7 dev -p 3007
    ```
 
-2. Clean install dependencies:
+3. **Clean reinstall** if module errors persist:
    ```bash
-   npm install
-   ```
-
-3. If the issue persists, try clearing the entire node_modules and reinstalling:
-   ```bash
+   # From the root directory
    rm -rf node_modules package-lock.json
+   rm -rf apps/storybook/node_modules
    npm install
    ```
 
-This issue is being tracked in Storybook v8.6+ releases and should be resolved in future versions.
+### Alternative: Use Chromatic or Storybook Cloud
+
+For the best experience showcasing components in a monorepo, consider using [Chromatic](https://www.chromatic.com/) or [Storybook Cloud](https://storybook.js.org/docs/sharing/publish-storybook), which handle module resolution automatically.
 
 ## Adding Stories
 
