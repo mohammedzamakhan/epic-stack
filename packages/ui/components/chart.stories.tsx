@@ -44,7 +44,7 @@ const chartConfig = {
 export const BarChartExample: Story = {
   args: {
     config: chartConfig,
-    children: null,
+    children: <></>,
   },
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-w-md">
@@ -69,7 +69,7 @@ export const BarChartExample: Story = {
 export const LineChartExample: Story = {
   args: {
     config: chartConfig,
-    children: null,
+    children: <></>,
   },
   render: () => (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-w-md">
@@ -137,7 +137,7 @@ const pieChartConfig = {
 export const PieChartExample: Story = {
   args: {
     config: pieChartConfig,
-    children: null,
+    children: <></>,
   },
   render: () => (
     <ChartContainer config={pieChartConfig} className="min-h-[200px] w-full max-w-md">
