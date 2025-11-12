@@ -12,6 +12,7 @@ const targets = {
 	'docs.epic-stack.me:2999': 'http://localhost:3004',
 	'admin.epic-stack.me:2999': 'http://localhost:3005',
 	'cms.epic-stack.me:2999': 'http://localhost:3006',
+	'storybook.epic-stack.me:2999': 'http://localhost:3007',
 }
 
 const server = http.createServer((req, res) => {
