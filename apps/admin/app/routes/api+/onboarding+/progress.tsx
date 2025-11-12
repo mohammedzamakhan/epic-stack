@@ -1,10 +1,10 @@
 import { invariant } from '@epic-web/invariant'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
-} from '#app/utils/onboarding'
+} from '#app/utils/onboarding.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

@@ -18,16 +18,16 @@ import { useEffect } from 'react'
 import confetti from 'canvas-confetti'
 import { PageTitle } from '@repo/ui'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
-import { NotesChart } from '#app/components/notes-chart'
-import { OnboardingChecklist } from '#app/components/onboarding-checklist'
+import { NotesChart } from '#app/components/notes-chart.tsx'
+import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
-} from '#app/utils/onboarding'
+} from '#app/utils/onboarding.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 

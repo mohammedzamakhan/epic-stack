@@ -19,10 +19,10 @@ import {
 } from '@repo/ui'
 import { useNavigate, useSubmit } from 'react-router'
 
-import { BanUserDialog } from '#app/components/admin-ban-user-dialog'
+import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
 
 import { getUserImgSrc } from '#app/utils/misc.tsx'
-import { type getIpAddressesByUser } from '#app/utils/ip-tracking.server'
+import { type getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
 
 export interface AdminUserDetail {
 	id: string

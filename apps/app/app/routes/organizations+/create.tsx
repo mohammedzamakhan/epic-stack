@@ -18,7 +18,7 @@ import {
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
-import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms'
+import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 import {
 	Select,
@@ -28,24 +28,24 @@ import {
 	SelectValue,
 } from '@repo/ui'
 
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
-import { getLaunchStatus } from '#app/utils/env.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
-} from '#app/utils/organization-invitation.server'
+} from '#app/utils/organization-invitation.server.ts'
 import {
 	createOrganization,
 	type OrganizationRoleName,
-} from '#app/utils/organizations.server'
-import { uploadOrganizationImage } from '#app/utils/storage.server'
-import { getTrialConfig } from '#app/utils/trial-config.server'
+} from '#app/utils/organizations.server.ts'
+import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
+import { getTrialConfig } from '#app/utils/trial-config.server.ts'
 import {
 	getPlansAndPrices,
 	createCheckoutSession,
-} from '#app/utils/payments.server'
-import { shouldBeOnWaitlist } from '#app/utils/waitlist.server'
+} from '#app/utils/payments.server.ts'
+import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 import {
 	Button,
 	Input,

@@ -12,7 +12,7 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
-import { Field, ErrorList } from '#app/components/forms'
+import { Field, ErrorList } from '#app/components/forms.tsx'
 
 import { OrganizationPhoto } from './organization-photo-card'
 

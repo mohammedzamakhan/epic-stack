@@ -14,7 +14,7 @@ import {
 } from '@repo/ui'
 import { useFetcher, Form } from 'react-router'
 
-import { CircleHelpIcon } from '#app/components/icons/circle-help'
+import { CircleHelpIcon } from '#app/components/icons/circle-help.tsx'
 import { JiraIntegrationSettings } from './jira-integration-settings'
 
 export const connectIntegrationActionIntent = 'connect-integration'

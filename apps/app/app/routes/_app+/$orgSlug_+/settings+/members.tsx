@@ -9,11 +9,11 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 
-import { InvitationsCard } from '#app/components/settings/cards/organization/invitations-card'
-import { MembersCard } from '#app/components/settings/cards/organization/members-card'
+import { InvitationsCard } from '#app/components/settings/cards/organization/invitations-card.tsx'
+import { MembersCard } from '#app/components/settings/cards/organization/members-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
@@ -22,14 +22,14 @@ import {
 	createOrganizationInviteLink,
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
-} from '#app/utils/organization-invitation.server'
+} from '#app/utils/organization-invitation.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
-} from '#app/utils/organization-permissions.server'
-import { updateSeatQuantity } from '#app/utils/payments.server'
-import { type OrganizationRoleName } from '#app/utils/organizations.server'
+} from '#app/utils/organization-permissions.server.ts'
+import { updateSeatQuantity } from '#app/utils/payments.server.ts'
+import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

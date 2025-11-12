@@ -15,7 +15,7 @@ import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { z } from 'zod'
-import { ErrorList, Field } from '#app/components/forms'
+import { ErrorList, Field } from '#app/components/forms.tsx'
 
 export const VerifiedDomainSchema = z.object({
 	verifiedDomain: z.string().min(1, 'Domain is required'),

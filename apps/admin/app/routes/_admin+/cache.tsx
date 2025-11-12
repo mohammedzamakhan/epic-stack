@@ -11,7 +11,7 @@ import {
 	useLoaderData,
 } from 'react-router'
 import { CacheConfirmationDialog } from '#app/components/admin-cache-confirmation-dialog.tsx'
-import { GeneralErrorBoundary } from '#app/components/error-boundary'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { useToast } from '#app/components/toaster.tsx'
 
 import {

@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
-import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc'
+import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 
 import CommentInput, { type MentionUser } from './comment-input'
 import { Avatar, AvatarFallback, AvatarImage, Button, Icon } from '@repo/ui'

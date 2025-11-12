@@ -6,18 +6,18 @@ import {
 	useLoaderData,
 } from 'react-router'
 
-import { BillingCard } from '#app/components/settings/cards/organization/billing-card'
-import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card'
+import { BillingCard } from '#app/components/settings/cards/organization/billing-card.tsx'
+import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
-import { getLaunchStatus } from '#app/utils/env.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	checkoutAction,
 	customerPortalAction,
 	getPlansAndPrices,
 	getOrganizationInvoices,
-} from '#app/utils/payments.server'
+} from '#app/utils/payments.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -74,7 +74,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	let currentPriceId: string | null = null
 	if (organization.stripeSubscriptionId) {
 		try {
-			const { stripe } = await import('#app/utils/payments.server')
+			const { stripe } = await import('#app/utils/payments.server.ts')
 			const subscription = await stripe.subscriptions.retrieve(
 				organization.stripeSubscriptionId,
 			)

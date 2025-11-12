@@ -19,7 +19,7 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Form } from 'react-router'
 import { z } from 'zod'
-import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms'
+import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 export const TeamSizeSchema = z.object({
 	size: z.string().min(1, 'Team size is required'),

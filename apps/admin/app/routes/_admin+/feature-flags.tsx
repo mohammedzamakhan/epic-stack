@@ -1,6 +1,6 @@
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { prisma } from '#app/utils/db.server'
+import { prisma } from '#app/utils/db.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const flags = await prisma.configFlag.findMany()
@@ -115,7 +115,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	return Response.json({ ok: true })
 }
 
-import { FeatureFlags } from '#app/components/admin/feature-flags'
+import { FeatureFlags } from '#app/components/admin/feature-flags.tsx'
 
 export default function FeatureFlagsAdmin() {
 	return <FeatureFlags />

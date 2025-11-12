@@ -31,8 +31,8 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
-import { ErrorList, Field } from '#app/components/forms'
-import { type OrganizationRoleName } from '#app/utils/organizations.server'
+import { ErrorList, Field } from '#app/components/forms.tsx'
+import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
 
 // Create role descriptions map
 const ROLE_DESCRIPTIONS: Record<string, string> = {

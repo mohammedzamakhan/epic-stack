@@ -4,7 +4,7 @@ import {
 	UserDetailView,
 	type AdminUserDetail,
 	type RecentActivity,
-} from '#app/components/admin-user-detail'
+} from '#app/components/admin-user-detail.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'

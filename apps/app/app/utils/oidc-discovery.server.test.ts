@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { server } from '#tests/mocks'
+import { server } from '#tests/mocks/index.ts'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 import { ssoCache } from './sso-cache.server.ts'
 import {

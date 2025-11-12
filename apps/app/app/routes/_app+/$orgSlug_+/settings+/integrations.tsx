@@ -10,11 +10,11 @@ import {
 	IntegrationsCard,
 	connectIntegrationActionIntent,
 	disconnectIntegrationActionIntent,
-} from '#app/components/settings/cards/organization/integrations-card'
+} from '#app/components/settings/cards/organization/integrations-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server'
-import { prisma } from '#app/utils/db.server'
-import { redirectWithToast } from '#app/utils/toast.server'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

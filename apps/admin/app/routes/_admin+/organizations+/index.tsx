@@ -1,5 +1,5 @@
 import { useLoaderData } from 'react-router'
-import { AdminOrganizationsTable } from '#app/components/admin-organizations-table'
+import { AdminOrganizationsTable } from '#app/components/admin-organizations-table.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'

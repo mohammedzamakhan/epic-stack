@@ -1,5 +1,5 @@
-import { OrganizationInvitations } from '#app/components/organization-invitations'
-import { type OrganizationRoleName } from '#app/utils/organizations.server'
+import { OrganizationInvitations } from '#app/components/organization-invitations.tsx'
+import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
 
 interface OrganizationInvitation {
 	id: string
