@@ -49,7 +49,7 @@ export function NotificationPreferencesCard() {
 		new Set(),
 	)
 	const [isRefetching, setIsRefetching] = useState(false)
-	const [hasMounted, setHasMounted] = useState(false)
+	const [_hasMounted, _setHasMounted] = useState(false)
 
 	const handleRefetch = useCallback(async () => {
 		setIsRefetching(true)

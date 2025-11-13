@@ -17,7 +17,6 @@ import {
 	handleSSOError,
 	createSSOError,
 	SSOErrorType,
-	createSSOFallbackResponse,
 } from '#app/utils/sso-error-handling.server.ts'
 import {
 	ssoAuditLogger,

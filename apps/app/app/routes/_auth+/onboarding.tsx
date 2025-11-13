@@ -6,7 +6,6 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react'
 
 import { z } from 'zod'
 import {
-	CheckboxField,
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
@@ -39,7 +38,6 @@ import {
 	CardTitle,
 	Input,
 	StatusButton,
-	Icon,
 	Field,
 	FieldLabel,
 	FieldError,
@@ -449,7 +447,7 @@ export default function OnboardingRoute({
 							<Field orientation="horizontal">
 								<Checkbox
 									{...(() => {
-										const { type, ...props } = getInputProps(
+										const { type: _type, ...props } = getInputProps(
 											fields.agreeToTermsOfServiceAndPrivacyPolicy,
 											{ type: 'checkbox' },
 										)
@@ -473,7 +471,7 @@ export default function OnboardingRoute({
 							<Field orientation="horizontal">
 								<Checkbox
 									{...(() => {
-										const { type, ...props } = getInputProps(fields.remember, {
+										const { type: _type, ...props } = getInputProps(fields.remember, {
 											type: 'checkbox',
 										})
 										return props

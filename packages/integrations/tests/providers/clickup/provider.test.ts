@@ -485,7 +485,7 @@ describe('ClickUpProvider', () => {
 				isActive: true,
 			} as any
 
-			const mockSpacesResponse = {
+			const _mockSpacesResponse = {
 				spaces: [
 					{
 						id: 'space-123',
@@ -529,7 +529,7 @@ describe('ClickUpProvider', () => {
 				isActive: true,
 			} as any
 
-			const mockListsResponse = {
+			const _mockListsResponse = {
 				lists: [
 					{
 						id: 'list-456',

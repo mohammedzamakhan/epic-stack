@@ -1,6 +1,5 @@
 import {
 	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
 import { prisma } from '#app/utils/db.server.ts'
 // Removed prisma import - using test utilities instead

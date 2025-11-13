@@ -446,7 +446,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				throw new Error(errorMessage)
 			}
 
-			const result = (await response.json()) as AsanaCreateTaskResponse
 		} catch (error) {
 			throw new Error(
 				`Failed to create Asana task: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -496,7 +495,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				return false
 			}
 
-			const project = await response.json()
 			return true
 		} catch (error) {
 			return false
@@ -562,7 +560,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const result = (await response.json()) as { data: AsanaUser }
 		return result.data
 	}
 
@@ -585,7 +582,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const result = (await response.json()) as { data: AsanaWorkspace[] }
 		return result.data
 	}
 
@@ -612,7 +608,6 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		const result = (await response.json()) as AsanaProjectsResponse
 		return result.data
 	}
 }

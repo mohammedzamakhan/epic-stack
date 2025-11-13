@@ -2,7 +2,6 @@ import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
-import { ShineBorder } from './magic-ui/shine-border'
 
 import {
 	Button,

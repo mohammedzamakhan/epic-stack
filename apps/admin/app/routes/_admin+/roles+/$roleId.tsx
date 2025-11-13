@@ -6,7 +6,6 @@ import {
 	Button,
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 	Checkbox,
@@ -158,14 +157,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 		name,
 		description,
 		permissionId,
-		action,
-		entity,
-		access,
+		action: _action,
+		entity: _entity,
+		access: _access,
 		featureName,
 		featureKey,
 		featureDescription,
-		permissionName,
-		permissionKey,
+		permissionName: _permissionName,
+		permissionKey: _permissionKey,
 		permissionDescription,
 		permissionAction,
 		permissionAccess,
@@ -389,7 +388,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function AdminRoleDetailPage() {
 	const { role, roleType, allPermissions } = useLoaderData<typeof loader>()
-	const [searchParams] = useSearchParams()
+	const [_searchParams] = useSearchParams()
 	const [selectedTab, setSelectedTab] = useState('feature')
 
 	// Group permissions by entity for better organization
@@ -574,8 +573,8 @@ function PermissionGroup({
 	entity,
 	permissions,
 	rolePermissionIds,
-	roleId,
-	availableEntities,
+	roleId: _roleId,
+	availableEntities: _availableEntities,
 }: {
 	entity: string
 	permissions: Array<{
@@ -722,7 +721,7 @@ function CreateFeatureDialog() {
 
 function CreatePermissionDialog({
 	selectedEntity,
-	availableEntities,
+	availableEntities: _availableEntities,
 }: {
 	selectedEntity: string
 	availableEntities: string[]

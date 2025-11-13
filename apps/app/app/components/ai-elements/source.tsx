@@ -20,7 +20,7 @@ export type SourcesTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {
 }
 
 export const SourcesTrigger = ({
-	className,
+	className: _className,
 	count,
 	children,
 	...props
@@ -38,14 +38,14 @@ export const SourcesTrigger = ({
 export type SourcesContentProps = ComponentProps<typeof CollapsibleContent>
 
 export const SourcesContent = ({
-	className,
+	className: _className,
 	...props
 }: SourcesContentProps) => (
 	<CollapsibleContent
 		className={cn(
 			'mt-3 flex w-fit flex-col gap-2',
 			'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 outline-none',
-			className,
+			_className,
 		)}
 		{...props}
 	/>

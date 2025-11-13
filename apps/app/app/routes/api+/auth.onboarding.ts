@@ -147,7 +147,7 @@ export async function action({ request }: Route.ActionArgs) {
 			)
 		}
 
-		const { username, name, password, remember } = submission.value
+		const { username, name, password, remember: _remember } = submission.value
 
 		// Create the user account
 		const session = await signup({

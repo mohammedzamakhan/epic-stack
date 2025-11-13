@@ -268,9 +268,6 @@ describe('discover-org route', () => {
 
 		it('should handle errors gracefully', async () => {
 			// Mock console.error to prevent test setup from throwing
-			const consoleError = vi
-				.spyOn(console, 'error')
-				.mockImplementation(() => {})
 
 			const email = 'user@example.com'
 			const request = new Request(

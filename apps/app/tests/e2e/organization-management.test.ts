@@ -3,7 +3,6 @@ import { prisma } from '#app/utils/db.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 import {
 	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
 
 test.describe('Organization Management', () => {

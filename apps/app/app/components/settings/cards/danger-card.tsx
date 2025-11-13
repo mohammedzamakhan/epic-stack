@@ -14,7 +14,7 @@ interface DangerCardProps {
 	}
 }
 
-export function DangerCard({ user }: DangerCardProps) {
+export function DangerCard({ user: _user }: DangerCardProps) {
 	return (
 		<Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30 w-full">
 			<CardHeader>

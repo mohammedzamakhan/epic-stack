@@ -370,7 +370,7 @@ function SystemPermissionGroup({
 	entity,
 	permissions,
 	rolePermissionIds,
-	roleId,
+	roleId: _roleId,
 	disabled = false,
 }: {
 	entity: string

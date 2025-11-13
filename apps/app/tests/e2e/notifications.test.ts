@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead
 import { expect, test } from '#tests/playwright-utils.ts'
@@ -277,7 +276,7 @@ test.describe('Notifications', () => {
 			.first()
 
 		if (await emailToggle.isVisible()) {
-			const initialState = await emailToggle.isChecked()
+			const _initialState = await emailToggle.isChecked()
 
 			// Toggle the setting
 			await emailToggle.click()

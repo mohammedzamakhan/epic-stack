@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { prisma } from '#app/utils/db.server.ts'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'

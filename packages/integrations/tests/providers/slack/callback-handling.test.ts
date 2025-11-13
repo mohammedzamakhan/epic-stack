@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { SlackProvider } from '../../../src/providers/slack/provider'
 import { server } from '../../setup'
 import { http, HttpResponse } from 'msw'

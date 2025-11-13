@@ -7,7 +7,6 @@ import { BaseIntegrationProvider } from '../../src/provider'
 import type {
 	TokenData,
 	Channel,
-	MessageData,
 	OAuthCallbackParams,
 } from '../../src/types'
 

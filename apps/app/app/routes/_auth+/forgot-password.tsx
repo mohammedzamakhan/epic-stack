@@ -8,7 +8,6 @@ import {
 	data,
 	redirect,
 	Link,
-	useFetcher,
 	Form,
 	useActionData,
 } from 'react-router'

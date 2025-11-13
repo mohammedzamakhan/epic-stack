@@ -24,10 +24,10 @@ export const FormBlock: React.FC<
   } & FormBlockType
 > = (props) => {
   const {
-    enableIntro,
+    enableIntro: _enableIntro,
     form: formFromProps,
-    form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
-    introContent,
+    form: { id: formID, confirmationMessage: _confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
+    introContent: _introContent,
   } = props
 
   const formMethods = useForm({

@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead
 import { readEmail } from '#tests/mocks/utils.ts'
@@ -90,7 +89,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an invitation for the logged-in user
-		const invitation = await prisma.organizationInvitation.create({
+		const _invitation = await prisma.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,
@@ -193,7 +192,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an invitation for the logged-in user
-		const invitation = await prisma.organizationInvitation.create({
+		const _invitation = await prisma.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,
@@ -256,7 +255,7 @@ test.describe('Organization Invitations', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a pending invitation
-		const invitation = await prisma.organizationInvitation.create({
+		const _invitation = await prisma.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: faker.internet.email(),
@@ -417,7 +416,7 @@ test.describe('Organization Invitations', () => {
 		const expiredDate = new Date()
 		expiredDate.setDate(expiredDate.getDate() - 8)
 
-		const invitation = await prisma.organizationInvitation.create({
+		const _invitation = await prisma.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,

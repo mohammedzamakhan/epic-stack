@@ -129,9 +129,9 @@ export class SlackProvider extends BaseIntegrationProvider {
 		const { code, state } = params
 
 		// Parse and validate the OAuth state using the standardized format
-		let stateData
+		let _stateData
 		try {
-			stateData = this.parseOAuthState(state)
+			_stateData = this.parseOAuthState(state)
 		} catch (error) {
 			throw new Error(
 				`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -204,7 +204,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 	 * Refresh Slack access token
 	 * Note: Slack doesn't use refresh tokens in the same way as other providers
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// Slack doesn't typically use refresh tokens for bot tokens
 		// Bot tokens are long-lived and don't expire
 		throw new Error('Slack bot tokens do not require refresh')

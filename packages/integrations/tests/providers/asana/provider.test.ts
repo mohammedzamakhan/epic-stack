@@ -138,7 +138,7 @@ describe('AsanaProvider', () => {
 		})
 
 		it('should handle OAuth error response', async () => {
-			const mockErrorResponse = {
+			const _mockErrorResponse = {
 				error: 'access_denied',
 				error_description: 'User denied access',
 			}

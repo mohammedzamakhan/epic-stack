@@ -207,7 +207,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>,
+		_additionalParams?: Record<string, any>,
 	): Promise<string> {
 		try {
 			// Step 1: Get request token

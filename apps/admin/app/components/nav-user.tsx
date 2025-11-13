@@ -4,7 +4,6 @@ import {
 	AvatarImage,
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuSub,
@@ -18,15 +17,12 @@ import {
 	useSidebar,
 } from '@repo/ui'
 import { useRef } from 'react'
-import { Link, Form, useFetcher } from 'react-router'
+import { Form, useFetcher } from 'react-router'
 
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
-import { BuildingIcon } from './icons/building-icon'
 import { LogoutIcon } from './icons/logout-icon'
-import { SettingsGearIcon } from './icons/settings-gear-icon'
 import { SunMoonIcon } from './icons/sun-moon-icon'
-import { UserIcon } from './icons/user-icon'
 
 export function NavUser({
 	user,
@@ -46,7 +42,7 @@ export function NavUser({
 	const requestInfo = useOptionalRequestInfo()
 
 	// Check if user has admin role
-	const isAdmin = user.roles?.some((role) => role.name === 'admin') ?? false
+	const _isAdmin = user.roles?.some((role) => role.name === 'admin') ?? false
 
 	// Theme switching logic
 	const optimisticMode = useOptimisticThemeMode()

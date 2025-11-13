@@ -2,7 +2,7 @@
  * Tests for NotionProvider utility methods
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { NotionProvider } from '../../../src/providers/notion/provider'
 
 describe('NotionProvider - Utility Methods', () => {

@@ -44,7 +44,7 @@ interface SSOConfigurationOverviewProps {
 }
 
 export function SSOConfigurationOverview({
-	organizationId,
+	_organizationId,
 	ssoConfig,
 	ssoStats,
 	onEdit,

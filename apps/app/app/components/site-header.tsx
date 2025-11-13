@@ -2,9 +2,9 @@ import { useState } from 'react'
 
 import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
-import { Button, Separator, SidebarTrigger, Icon, Kbd } from '@repo/ui'
+import { Button, SidebarTrigger, Icon, Kbd } from '@repo/ui'
 import NotificationBell from './ui/notification-bell'
-import { Form, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 
 export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 	const [commandOpen, setCommandOpen] = useState(false)

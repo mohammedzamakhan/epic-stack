@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { faker } from '@faker-js/faker'
-import { http, HttpResponse } from 'msw'
 import { server } from '#tests/mocks/index.ts'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 
@@ -8,16 +7,16 @@ import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 const generateMockEncryptionKey = () => 'a'.repeat(64) // 64 hex chars = 32 bytes
 
 // Create mock functions
-const mockUserFindUnique = vi.fn()
-const mockUserCreate = vi.fn()
-const mockUserUpdate = vi.fn()
-const mockUserOrganizationFindUnique = vi.fn()
-const mockUserOrganizationCreate = vi.fn()
-const mockOrganizationRoleFindUnique = vi.fn()
-const mockSSOSessionCreate = vi.fn()
-const mockSSOSessionFindUnique = vi.fn()
-const mockSSOSessionUpdate = vi.fn()
-const mockSSOSessionDelete = vi.fn()
+const _mockUserFindUnique = vi.fn()
+const _mockUserCreate = vi.fn()
+const _mockUserUpdate = vi.fn()
+const _mockUserOrganizationFindUnique = vi.fn()
+const _mockUserOrganizationCreate = vi.fn()
+const _mockOrganizationRoleFindUnique = vi.fn()
+const _mockSSOSessionCreate = vi.fn()
+const _mockSSOSessionFindUnique = vi.fn()
+const _mockSSOSessionUpdate = vi.fn()
+const _mockSSOSessionDelete = vi.fn()
 
 // Mock the entire service module with proper class for Vitest v4
 vi.mock('./sso-auth.server.ts', () => {

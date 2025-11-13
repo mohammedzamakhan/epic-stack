@@ -33,7 +33,7 @@ vi.mock('../../src/note-event-handler', () => ({
 
 // Mock setImmediate for testing - store callbacks to manually flush them
 const pendingCallbacks: Array<() => Promise<void>> = []
-const originalSetImmediate = global.setImmediate
+const _originalSetImmediate = global.setImmediate
 
 // Create a wrapper function that won't be affected by mockClear()
 const setImmediateImpl = (
@@ -44,7 +44,7 @@ const setImmediateImpl = (
 	const asyncCallback = async () => {
 		try {
 			await callback(...args)
-		} catch (error) {
+		} catch (_error) {
 			// Errors are logged in the implementation
 		}
 	}

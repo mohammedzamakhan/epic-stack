@@ -369,7 +369,7 @@ export async function signupWithConnection({
  */
 export async function loginWithSSO({
 	user,
-	organizationId,
+	organizationId: _organizationId,
 }: {
 	user: User
 	organizationId: string
@@ -469,7 +469,7 @@ export async function checkIsCommonPassword(password: string) {
 
 		const data = await response.text()
 		return data.split(/\r?\n/).some((line) => {
-			const [hashSuffix, ignoredPrevalenceCount] = line.split(':')
+			const [hashSuffix, _ignoredPrevalenceCount] = line.split(':')
 			return hashSuffix === suffix
 		})
 	} catch (error) {

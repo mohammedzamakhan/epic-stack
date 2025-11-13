@@ -4,3 +4,5 @@
 // declare module 'some-untyped-pkg' {
 // 	export function foo(): void;
 // }
+
+export {}

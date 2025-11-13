@@ -2,7 +2,7 @@
  * Tests for LinearProvider utility methods
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { LinearProvider } from '../../../src/providers/linear/provider'
 
 describe('LinearProvider - Utility Methods', () => {

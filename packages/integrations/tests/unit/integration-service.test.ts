@@ -2,13 +2,12 @@
  * Unit tests for integration service
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { IntegrationService, integrationService } from '../../src/service'
 import { integrationManager } from '../../src/integration-manager'
 import type {
 	TokenData,
 	Channel,
-	MessageData,
 	OAuthCallbackParams,
 	IntegrationStatus,
 	ProviderType,

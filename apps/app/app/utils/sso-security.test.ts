@@ -362,7 +362,6 @@ describe('SSO Security Tests', () => {
 		it('should generate secure code verifiers', () => {
 			// This would test PKCE implementation
 			// PKCE code verifier should be cryptographically random
-			const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
 
 			expect(codeVerifier).toHaveLength(43) // Base64URL encoded 32 bytes
 			expect(codeVerifier).toMatch(/^[A-Za-z0-9\-._~]+$/) // Valid characters only
@@ -371,7 +370,6 @@ describe('SSO Security Tests', () => {
 		it('should generate correct code challenges', () => {
 			// This would test PKCE code challenge generation
 			// Code challenge should be SHA256 hash of code verifier
-			const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
 			const expectedChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
 
 			// In a real implementation, we'd calculate the actual challenge

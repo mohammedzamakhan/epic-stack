@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { parseWithZod } from '@conform-to/zod'
-import { useLoaderData, useActionData } from 'react-router'
+import { useLoaderData } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
@@ -337,7 +337,7 @@ export default function AdminOrganizationSSOUsersPage() {
 	const data = useLoaderData<typeof loader>()
 	const {
 		organization: org,
-		ssoConfig,
+		_ssoConfig,
 		ssoUsers,
 		availableRoles,
 		auditLogs,

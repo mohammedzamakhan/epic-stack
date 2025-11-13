@@ -9,14 +9,9 @@ import {
 	providerRegistry,
 } from '../../src/provider'
 import type {
-	IntegrationProvider,
-	TokenData,
-	Channel,
-	MessageData,
-	OAuthCallbackParams,
 	ProviderType,
 } from '../../src/types'
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
+import type { Integration } from '@prisma/client'
 
 // Mock providers for testing
 class MockCommunicationProvider extends BaseIntegrationProvider {

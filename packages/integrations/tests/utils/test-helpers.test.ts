@@ -6,12 +6,8 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import {
 	MockProvider,
 	MockIntegrationRepository,
-	MockConnectionRepository,
 	createTestIntegration,
-	createTestConnection,
 	createTestMessage,
-	createTestOAuthParams,
-	createTestTokenData,
 	createTestChannels,
 	setupTestEnvironment,
 	expectToThrow,

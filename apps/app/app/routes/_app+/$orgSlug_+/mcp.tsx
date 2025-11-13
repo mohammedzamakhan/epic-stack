@@ -16,7 +16,6 @@ import {
 	CardAction,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardHeaderContent,
 	CardTitle,
@@ -30,7 +29,6 @@ import {
 	Input,
 	Label,
 	PageTitle,
-	Textarea,
 	Icon,
 	FieldLabel,
 	FieldGroup,
@@ -198,7 +196,7 @@ function CodeBlock({ code }: { code: string }) {
 function CreateApiKeyModal({
 	isOpen,
 	onClose,
-	organization,
+	organization: _organization,
 }: {
 	isOpen: boolean
 	onClose: () => void
@@ -444,9 +442,9 @@ function NewApiKeyModal({
 
 // API Keys Management Card Component
 function ApiKeysCard({
-	organization,
+	organization: _organization,
 	apiKeys,
-	actionData,
+	actionData: _actionData,
 	onCreateClick,
 }: {
 	organization: { name: string }
@@ -531,8 +529,8 @@ function ApiKeysCard({
 
 // Setup Instructions Card Component
 function SetupInstructionsCard({
-	organization,
-	serverUrl,
+	organization: _organization,
+	serverUrl: _serverUrl,
 }: {
 	organization: { name: string }
 	serverUrl: string
@@ -613,7 +611,7 @@ function SetupInstructionsCard({
 
 // Available Tools Card Component
 function AvailableToolsCard({
-	organization,
+	organization: _organization,
 }: {
 	organization: { name: string }
 }) {

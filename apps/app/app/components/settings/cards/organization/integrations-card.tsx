@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import {
-	Badge,
-	Button,
 	Card,
 	CardContent,
-	CardHeader,
-	CardTitle,
-	CardDescription,
 	Icon,
 	StatusButton,
 	CardFooter,
-	CardBody,
 } from '@repo/ui'
 import { useFetcher, Form } from 'react-router'
 
-import { CircleHelpIcon } from '#app/components/icons/circle-help.tsx'
 import { JiraIntegrationSettings } from './jira-integration-settings'
 
 export const connectIntegrationActionIntent = 'connect-integration'
@@ -118,7 +111,7 @@ function IntegrationCard({
 	integration,
 	fetcher,
 }: IntegrationCardProps) {
-	const [showSettings, setShowSettings] = useState(false)
+	const [showSettings, _setShowSettings] = useState(false)
 	const isConnected = !!integration
 	const isJira = provider.name === 'jira'
 

@@ -62,7 +62,7 @@ export async function action({ request }: Route.ActionArgs) {
 		const { email } = submission.value
 
 		// Prepare verification (sends email with 6-digit code)
-		const { verifyUrl, redirectTo, otp } = await prepareVerification({
+		const { verifyUrl, redirectTo: _redirectTo, otp } = await prepareVerification({
 			period: 10 * 60, // 10 minutes
 			request,
 			type: 'onboarding',

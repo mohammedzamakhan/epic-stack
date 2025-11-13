@@ -1,7 +1,6 @@
 import { type SSOConfiguration } from '@repo/prisma'
 import { type OAuth2Strategy } from 'remix-auth-oauth2'
 import { type ProviderUser } from './providers/provider.ts'
-import { ssoConfigurationService } from './sso-configuration.server.ts'
 
 /**
  * In-memory cache for SSO configurations and strategies

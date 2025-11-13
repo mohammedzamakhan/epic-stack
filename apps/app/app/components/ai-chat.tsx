@@ -22,7 +22,6 @@ import {
 } from '#app/components/ai-elements/prompt-input.tsx'
 import { Response } from '#app/components/ai-elements/response.tsx'
 import { Suggestions, Suggestion } from '#app/components/ai-elements/suggestion.tsx'
-import { ClientOnly } from 'remix-utils/client-only'
 
 interface AIChatProps {
 	noteId: string
@@ -64,7 +63,6 @@ const getSmartSuggestions = (messages: any[], hasContent: boolean) => {
 				]
 	}
 
-	const lastMessage = messages[messages.length - 1]
 	const conversationContext = messages
 		.slice(-3)
 		.map((m) => m.content.toLowerCase())

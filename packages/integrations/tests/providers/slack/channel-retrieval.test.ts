@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { SlackProvider } from '../../../src/providers/slack/provider'
 import { server } from '../../setup'
 import { http, HttpResponse } from 'msw'
-import { fixtures } from '../../utils/fixtures'
 import type { Integration } from '@prisma/client'
 
 describe('SlackProvider - Channel Retrieval', () => {

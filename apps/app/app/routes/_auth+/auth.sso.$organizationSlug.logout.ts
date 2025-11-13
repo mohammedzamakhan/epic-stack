@@ -1,4 +1,3 @@
-import { redirect } from 'react-router'
 import { logout, sessionKey } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { prisma } from '#app/utils/db.server.ts'

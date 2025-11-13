@@ -198,8 +198,8 @@ export class SSOAuditLogger {
 	 * Get SSO audit logs for an organization
 	 */
 	async getOrganizationLogs(
-		organizationId: string,
-		options: {
+		_organizationId: string,
+		_options: {
 			eventTypes?: SSOAuditEventType[]
 			startDate?: Date
 			endDate?: Date
@@ -216,8 +216,8 @@ export class SSOAuditLogger {
 	 * Get SSO metrics for monitoring dashboard
 	 */
 	async getSSOMetrics(
-		organizationId?: string,
-		timeRange: { start: Date; end: Date } = {
+		_organizationId?: string,
+		_timeRange: { start: Date; end: Date } = {
 			start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
 			end: new Date(),
 		},
@@ -428,7 +428,7 @@ export class SSOAuditLogger {
 	/**
 	 * Store audit log in database
 	 */
-	private async storeInDatabase(entry: SSOAuditLogEntry): Promise<void> {
+	private async storeInDatabase(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// This would store in AuditLog table when available
 			// For now, we'll use a simple log table or file storage
@@ -454,7 +454,7 @@ export class SSOAuditLogger {
 	/**
 	 * Send audit logs to external monitoring systems
 	 */
-	private async sendToMonitoring(entry: SSOAuditLogEntry): Promise<void> {
+	private async sendToMonitoring(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// Send to monitoring services like DataDog, New Relic, etc.
 			// This would be configured based on environment variables
@@ -478,7 +478,7 @@ export class SSOAuditLogger {
 	/**
 	 * Handle critical events that require immediate attention
 	 */
-	private async handleCriticalEvent(entry: SSOAuditLogEntry): Promise<void> {
+	private async handleCriticalEvent(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// Send immediate alerts for critical events
 			// This is already logged via logToConsole with sentryLogger.fatal

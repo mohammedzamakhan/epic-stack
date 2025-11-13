@@ -4,3 +4,6 @@
 // declare module 'some-untyped-pkg' {
 // 	export function foo(): void;
 // }
+
+// Keep this file non-empty for linting purposes
+export {}

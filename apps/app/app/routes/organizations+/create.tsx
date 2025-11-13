@@ -37,7 +37,6 @@ import {
 } from '#app/utils/organization-invitation.server.ts'
 import {
 	createOrganization,
-	type OrganizationRoleName,
 } from '#app/utils/organizations.server.ts'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import {
@@ -119,7 +118,7 @@ const Step1Schema = z.object({
 const DEFAULT_AVAILABLE_ROLES = ['admin', 'member', 'viewer', 'guest'] as const
 
 // Create role descriptions map
-const ROLE_DESCRIPTIONS: Record<string, string> = {
+const _ROLE_DESCRIPTIONS: Record<string, string> = {
 	admin: 'Full access to organization settings and member management.',
 	member: 'Standard organization member with basic permissions.',
 	viewer: 'Read-only access to organization content.',
@@ -750,7 +749,7 @@ function SubscriptionStep({
 	plansAndPrices: Awaited<ReturnType<typeof getPlansAndPrices>>
 	actionData: any
 }) {
-	const [form, fields] = useForm({
+	const [form, _fields] = useForm({
 		id: 'create-organization-subscription',
 		constraint: getZodConstraint(SubscriptionSchema),
 		lastResult: actionData,
@@ -1173,7 +1172,7 @@ function CreateInviteFieldset({
 }
 
 function PlanCard({
-	plan,
+	plan: _plan,
 	title,
 	seats,
 	stripePrice,

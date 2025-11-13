@@ -4,12 +4,6 @@ import * as React from 'react'
 import { cn } from '../utils/cn'
 import { Icon } from './icon'
 
-// Icon dependency injection interface
-interface DropdownMenuIconProps {
-	name: string
-	className?: string
-}
-
 function DropdownMenu(
 	props: React.ComponentProps<typeof DropdownMenuPrimitive.Root>,
 ) {

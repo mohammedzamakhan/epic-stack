@@ -512,7 +512,7 @@ function SidebarMenuButton({
 			data-active={isActive}
 			className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
 			onClick={() => {
-				isMobile && toggleSidebar()
+				if (isMobile) toggleSidebar()
 			}}
 			{...props}
 		/>
@@ -691,7 +691,7 @@ function SidebarMenuSubButton({
 				className,
 			)}
 			onClick={() => {
-				isMobile && toggleSidebar()
+				if (isMobile) toggleSidebar()
 			}}
 			{...props}
 		/>

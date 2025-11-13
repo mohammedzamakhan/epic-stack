@@ -8,7 +8,7 @@ import { getUptimeStatus } from '@repo/observability'
  * This endpoint fetches the current status from BetterStack
  * and returns it to the client for display.
  */
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request: _request }) => {
 	const apiKey = import.meta.env.BETTERSTACK_API_KEY
 	const statusPageUrl = import.meta.env.BETTERSTACK_URL
 

@@ -57,7 +57,6 @@ export class SSOHealthChecker {
 	 * Perform complete system health check
 	 */
 	async checkSystemHealth(): Promise<SSOHealthStatus> {
-		const startTime = Date.now()
 		const timestamp = new Date().toISOString()
 
 		// Run all health checks in parallel
@@ -102,7 +101,6 @@ export class SSOHealthChecker {
 	 * Check database connectivity and SSO-related tables
 	 */
 	private async checkDatabase(): Promise<HealthCheck> {
-		const startTime = Date.now()
 
 		try {
 			// Test basic database connectivity
@@ -136,7 +134,6 @@ export class SSOHealthChecker {
 	 * Check cache system health
 	 */
 	private async checkCache(): Promise<HealthCheck> {
-		const startTime = Date.now()
 
 		try {
 			const stats = ssoCache.getStats()
@@ -205,7 +202,6 @@ export class SSOHealthChecker {
 	 * Check connection pool health
 	 */
 	private async checkConnectionPool(): Promise<HealthCheck> {
-		const startTime = Date.now()
 
 		try {
 			const poolStats = ssoConnectionPool.getPoolStats()
@@ -257,7 +253,6 @@ export class SSOHealthChecker {
 	 * Check SSO configurations validity
 	 */
 	private async checkConfigurations(): Promise<HealthCheck> {
-		const startTime = Date.now()
 
 		try {
 			const configurations = await ssoConfigurationService.listConfigurations()
@@ -322,7 +317,6 @@ export class SSOHealthChecker {
 	 * Check identity provider connectivity
 	 */
 	private async checkIdentityProviders(): Promise<HealthCheck> {
-		const startTime = Date.now()
 
 		try {
 			const configurations = await ssoConfigurationService.listConfigurations()
@@ -523,7 +517,6 @@ export class SSOHealthChecker {
 	async validateConfiguration(
 		configurationId: string,
 	): Promise<ConfigurationValidationResult> {
-		const startTime = Date.now()
 		const issues: ValidationIssue[] = []
 
 		try {

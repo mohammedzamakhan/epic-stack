@@ -293,7 +293,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		}
 
 		// Validate OAuth state
-		const stateData = this.parseOAuthState(state)
+		const _stateData = this.parseOAuthState(state)
 
 		try {
 			const tokenResponse = await fetch(this.tokenUrl, {
@@ -357,7 +357,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	 * Refresh ClickUp access token
 	 * Note: ClickUp doesn't currently support refresh tokens, so this will throw an error
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// ClickUp doesn't currently support refresh tokens
 		// Users will need to re-authenticate when tokens expire
 		throw new Error(
@@ -438,7 +438,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		return this.makeAuthenticatedApiCall(
 			connection.integration,
 			async (accessToken) => {
-				const connectionConfig = connection.config
+				const _connectionConfig = connection.config
 					? typeof connection.config === 'string'
 						? JSON.parse(connection.config)
 						: connection.config

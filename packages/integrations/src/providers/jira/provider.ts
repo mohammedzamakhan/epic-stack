@@ -1011,7 +1011,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 		}
 
 		// Get the reporter account ID (bot user or connected user)
-		const reporterAccountId = this.getReporterAccountId(integration, connection)
+		const _reporterAccountId = this.getReporterAccountId(integration, connection)
 
 		return {
 			fields: {

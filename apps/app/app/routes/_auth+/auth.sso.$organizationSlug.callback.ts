@@ -16,7 +16,6 @@ import {
 import { SSOCallbackSchema } from '@repo/validation'
 import {
 	sanitizeOrganizationSlug,
-	sanitizeOIDCUserInfo,
 } from '#app/utils/sso-sanitization.server.ts'
 import {
 	trackSuspiciousActivity,
@@ -27,7 +26,6 @@ import {
 	createSSOError,
 	SSOErrorType,
 	handleOAuthError,
-	createSSOFallbackResponse,
 } from '#app/utils/sso-error-handling.server.ts'
 import {
 	ssoAuditLogger,
