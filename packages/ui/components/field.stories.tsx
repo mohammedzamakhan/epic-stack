@@ -104,3 +104,72 @@ export const WithCheckbox: Story = {
     </Field>
   ),
 };
+
+export const ProfileForm: Story = {
+  render: () => (
+    <FieldSet className="w-full max-w-lg">
+      <FieldLegend>Profile Settings</FieldLegend>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="profile-username">Username</FieldLabel>
+          <Input id="profile-username" placeholder="john_doe" defaultValue="john_doe" />
+          <FieldDescription>
+            This is your public display name. It can be your real name or a pseudonym.
+          </FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="profile-name">Full Name</FieldLabel>
+          <Input id="profile-name" placeholder="John Doe" defaultValue="John Doe" />
+        </Field>
+        <Field data-invalid="true">
+          <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+          <Input
+            id="profile-email"
+            type="email"
+            placeholder="john@example.com"
+            defaultValue="invalid-email"
+            aria-invalid="true"
+          />
+          <FieldError>Please enter a valid email address.</FieldError>
+        </Field>
+      </FieldGroup>
+    </FieldSet>
+  ),
+};
+
+export const LoginForm: Story = {
+  render: () => (
+    <div className="w-full max-w-md space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Welcome back</h2>
+        <p className="text-muted-foreground text-sm mt-1">
+          Enter your credentials to access your account
+        </p>
+      </div>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="login-email">Email</FieldLabel>
+          <Input
+            id="login-email"
+            type="email"
+            placeholder="you@example.com"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="login-password">Password</FieldLabel>
+          <Input
+            id="login-password"
+            type="password"
+            placeholder="Enter your password"
+          />
+        </Field>
+        <Field orientation="horizontal">
+          <Checkbox id="remember" />
+          <FieldContent>
+            <FieldLabel htmlFor="remember">Remember me</FieldLabel>
+          </FieldContent>
+        </Field>
+      </FieldGroup>
+    </div>
+  ),
+};

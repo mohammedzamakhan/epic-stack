@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Badge } from './badge';
+import { Icon } from './icon';
 
 const meta = {
   title: 'Components/Badge',
@@ -62,39 +63,77 @@ export const WithIcon: Story = {
   render: () => (
     <div className="flex gap-2 flex-wrap">
       <Badge>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
+        <Icon name="check-circle" size="xs" />
         Success
       </Badge>
       <Badge variant="destructive">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="m15 9-6 6" />
-          <path d="m9 9 6 6" />
-        </svg>
+        <Icon name="x" size="xs" />
         Error
       </Badge>
+      <Badge variant="secondary">
+        <Icon name="clock" size="xs" />
+        Pending
+      </Badge>
+      <Badge variant="outline">
+        <Icon name="loader" size="xs" />
+        Processing
+      </Badge>
+    </div>
+  ),
+};
+
+export const StatusBadges: Story = {
+  render: () => (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-medium mb-2">Project Status</h3>
+        <div className="flex gap-2">
+          <Badge variant="default">
+            <Icon name="check-circle" size="xs" />
+            Active
+          </Badge>
+          <Badge variant="secondary">
+            <Icon name="clock" size="xs" />
+            On Hold
+          </Badge>
+          <Badge variant="outline">
+            <Icon name="circle-check" size="xs" />
+            Completed
+          </Badge>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-medium mb-2">Priority Levels</h3>
+        <div className="flex gap-2">
+          <Badge variant="destructive">
+            <Icon name="alert-triangle" size="xs" />
+            Critical
+          </Badge>
+          <Badge variant="default">
+            <Icon name="trending-up" size="xs" />
+            High
+          </Badge>
+          <Badge variant="secondary">Medium</Badge>
+          <Badge variant="outline">Low</Badge>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-medium mb-2">User Roles</h3>
+        <div className="flex gap-2">
+          <Badge variant="default">
+            <Icon name="shield" size="xs" />
+            Admin
+          </Badge>
+          <Badge variant="secondary">
+            <Icon name="user" size="xs" />
+            Member
+          </Badge>
+          <Badge variant="outline">
+            <Icon name="eye" size="xs" />
+            Viewer
+          </Badge>
+        </div>
+      </div>
     </div>
   ),
 };

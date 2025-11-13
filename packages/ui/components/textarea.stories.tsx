@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { Textarea } from './textarea';
 import { Label } from './label';
+import { Field, FieldLabel, FieldDescription, FieldError } from './field';
 
 const meta = {
   title: 'Components/Textarea',
@@ -118,4 +119,36 @@ export const CharacterCount: Story = {
       </div>
     );
   },
+};
+
+export const WithField: Story = {
+  render: () => (
+    <Field className="w-[500px]">
+      <FieldLabel htmlFor="note-content">Note Content</FieldLabel>
+      <Textarea
+        id="note-content"
+        placeholder="Write your note here..."
+        className="min-h-32"
+      />
+      <FieldDescription>
+        Your note will be saved automatically as you type.
+      </FieldDescription>
+    </Field>
+  ),
+};
+
+export const WithFieldError: Story = {
+  render: () => (
+    <Field className="w-[500px]" data-invalid="true">
+      <FieldLabel htmlFor="feedback">Feedback</FieldLabel>
+      <Textarea
+        id="feedback"
+        placeholder="Share your feedback..."
+        className="min-h-32"
+        aria-invalid="true"
+        defaultValue="Hi"
+      />
+      <FieldError>Feedback must be at least 10 characters long.</FieldError>
+    </Field>
+  ),
 };

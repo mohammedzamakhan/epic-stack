@@ -11,6 +11,9 @@ import {
 import { Button } from './button';
 import { Label } from './label';
 import { Input } from './input';
+import { Icon } from './icon';
+import { Field, FieldLabel, FieldDescription } from './field';
+import { Textarea } from './textarea';
 
 const meta = {
   title: 'Components/Dialog',
@@ -94,6 +97,97 @@ export const Confirmation: Story = {
         <DialogFooter>
           <Button variant="outline">Cancel</Button>
           <Button variant="destructive">Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+};
+
+export const CreateNote: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>
+          <Icon name="plus" />
+          Create Note
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Create New Note</DialogTitle>
+          <DialogDescription>
+            Create a new note to share with your team.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <Field>
+            <FieldLabel htmlFor="note-title">Title</FieldLabel>
+            <Input id="note-title" placeholder="Enter note title..." />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="note-content">Content</FieldLabel>
+            <Textarea
+              id="note-content"
+              placeholder="Write your note here..."
+              className="min-h-32"
+            />
+            <FieldDescription>
+              Use markdown formatting for rich text.
+            </FieldDescription>
+          </Field>
+        </div>
+        <DialogFooter>
+          <Button variant="outline">Cancel</Button>
+          <Button>Create Note</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+};
+
+export const InviteMember: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="secondary">
+          <Icon name="user-plus" />
+          Invite Member
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Invite Team Member</DialogTitle>
+          <DialogDescription>
+            Send an invitation to join your organization.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <Field>
+            <FieldLabel htmlFor="invite-email">Email Address</FieldLabel>
+            <Input
+              id="invite-email"
+              type="email"
+              placeholder="colleague@example.com"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="invite-role">Role</FieldLabel>
+            <select
+              id="invite-role"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none"
+            >
+              <option>Member</option>
+              <option>Admin</option>
+              <option>Viewer</option>
+            </select>
+            <FieldDescription>
+              Choose the role for this team member.
+            </FieldDescription>
+          </Field>
+        </div>
+        <DialogFooter>
+          <Button variant="outline">Cancel</Button>
+          <Button>Send Invitation</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -160,3 +160,65 @@ export const Grid: Story = {
     </div>
   ),
 };
+
+export const UpgradePrompt: Story = {
+  render: () => (
+    <Card className="w-[350px] bg-accent border-border">
+      <CardHeader className="p-4">
+        <CardDescription>
+          There are{' '}
+          <span className="font-bold text-red-400">7 days</span>{' '}
+          left in your trial. Get in touch with questions or feedback.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="-mt-2 flex flex-col gap-2 p-4 pt-0">
+        <Button variant="secondary" size="sm" className="w-full">
+          Upgrade Now
+        </Button>
+        <Button variant="link" size="sm" className="w-full">
+          Get in touch
+        </Button>
+      </CardContent>
+    </Card>
+  ),
+};
+
+export const SettingsCard: Story = {
+  render: () => (
+    <Card className="w-[450px]">
+      <CardHeader>
+        <CardTitle>Account Settings</CardTitle>
+        <CardDescription>
+          Manage your account preferences and settings
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Email Notifications</p>
+            <p className="text-xs text-muted-foreground">
+              Receive emails about your account activity
+            </p>
+          </div>
+          <Button variant="outline" size="sm">
+            Configure
+          </Button>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Two-Factor Authentication</p>
+            <p className="text-xs text-muted-foreground">
+              Add an extra layer of security
+            </p>
+          </div>
+          <Button variant="outline" size="sm">
+            Enable
+          </Button>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button>Save Changes</Button>
+      </CardFooter>
+    </Card>
+  ),
+};
