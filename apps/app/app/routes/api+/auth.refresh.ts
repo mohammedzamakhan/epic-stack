@@ -2,6 +2,7 @@ import { data } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
 import { rotateRefreshToken, createAccessToken } from '#app/utils/jwt.server.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.refresh.ts'
 
 const RefreshSchema = z.object({
@@ -54,7 +55,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 		// Rotate refresh token and get new tokens
 		const userAgent = request.headers.get('user-agent') ?? undefined
-		const ip = request.headers.get('x-forwarded-for') ?? undefined
+		const ip = getClientIp(request)
 
 		const rotated = await rotateRefreshToken(refreshToken, userId, {
 			userAgent,

@@ -23,6 +23,7 @@ import {
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from '#app/utils/sso-audit-logging.server.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.sso.$organizationSlug.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -63,10 +64,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-	const clientIP =
-		request.headers.get('x-forwarded-for') ||
-		request.headers.get('x-real-ip') ||
-		'unknown'
+	const clientIP = getClientIp(request)
 
 	try {
 		// Sanitize and validate organization slug

@@ -11,6 +11,7 @@ import {
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
 } from '#app/utils/user-validation.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.onboarding.ts'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
@@ -185,7 +186,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 		// Create JWT tokens for mobile authentication
 		const userAgent = request.headers.get('user-agent') ?? undefined
-		const ip = request.headers.get('x-forwarded-for') ?? undefined
+		const ip = getClientIp(request)
 
 		const tokens = await createTokenPair(
 			{

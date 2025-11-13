@@ -63,18 +63,22 @@ export async function loader({ request }: Route.LoaderArgs) {
 					url: src,
 				}
 			}
+
+			// Sanitize path to prevent path traversal attacks
+			const normalizedSrc = src.replace(/\\/g, '/').replace(/\.\.+/g, '')
+
 			// Retrieve image from filesystem (public folder)
-			if (src.startsWith('/assets')) {
+			if (normalizedSrc.startsWith('/assets')) {
 				// Files managed by Vite
 				return {
 					type: 'fs',
-					path: '.' + src,
+					path: '.' + normalizedSrc,
 				}
 			}
 			// Fallback to files in public folder
 			return {
 				type: 'fs',
-				path: './public' + src,
+				path: './public' + normalizedSrc,
 			}
 		},
 	})

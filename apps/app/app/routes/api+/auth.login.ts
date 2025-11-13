@@ -6,6 +6,7 @@ import { login } from '#app/utils/auth.server.ts'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { UsernameSchema, PasswordSchema } from '#app/utils/user-validation.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.login.ts'
 
 const LoginFormSchema = z.object({
@@ -82,7 +83,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	// Create JWT tokens for mobile authentication
 	const userAgent = request.headers.get('user-agent') ?? undefined
-	const ip = request.headers.get('x-forwarded-for') ?? undefined
+	const ip = getClientIp(request)
 
 	const tokens = await createTokenPair(
 		{

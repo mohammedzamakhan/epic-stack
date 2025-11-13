@@ -1078,6 +1078,19 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			// Handle image uploads if present
 			const imageCount = parseInt(formData.get('imageCount') as string) || 0
+			// Validate imageCount to prevent DoS attacks
+			if (imageCount < 0 || imageCount > 10) {
+				return data(
+					{
+						result: submission.reply({
+							fieldErrors: {
+								imageCount: ['Invalid image count. Maximum 10 images allowed.'],
+							},
+						}),
+					},
+					{ status: 400 },
+				)
+			}
 			if (imageCount > 0) {
 				const { uploadCommentImage } = await import(
 					'#app/utils/storage.server.ts'

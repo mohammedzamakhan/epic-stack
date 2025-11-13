@@ -62,7 +62,7 @@ export class SSOAuthService {
 				: undefined,
 		}
 
-		console.log('strategy options', strategyOptions)
+		// Security: Never log strategy options as they contain sensitive client secrets
 		return new OAuth2Strategy(strategyOptions, async ({ tokens, request }) => {
 			return this.handleUserInfo(tokens, config, request)
 		})

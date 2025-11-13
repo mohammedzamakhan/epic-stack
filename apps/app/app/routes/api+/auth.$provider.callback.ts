@@ -7,6 +7,7 @@ import {
 	normalizeEmail,
 	normalizeUsername,
 } from '#app/utils/providers/provider.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -270,7 +271,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 		// Create JWT tokens for mobile authentication
 		const userAgent = request.headers.get('user-agent') ?? undefined
-		const ip = request.headers.get('x-forwarded-for') ?? undefined
+		const ip = getClientIp(request)
 
 		const tokens = await createTokenPair(
 			{

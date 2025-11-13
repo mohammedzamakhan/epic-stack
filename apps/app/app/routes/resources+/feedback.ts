@@ -3,7 +3,7 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 
 const FeedbackSchema = z.object({
-	message: z.string().min(1),
+	message: z.string().min(1).max(5000, 'Feedback message is too long'),
 	type: z.enum(['positive', 'neutral', 'negative']),
 })
 

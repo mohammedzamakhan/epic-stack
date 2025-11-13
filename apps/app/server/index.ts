@@ -297,60 +297,8 @@ if (!ALLOW_INDEXING) {
 
 app.all('/api/novu*', (req, res, next) => {
 	// Capture original writeHead
-	const originalWriteHead = res.writeHead
-
-	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (
-		statusCode: number,
-		reasonPhraseOrHeaders?: string | OutgoingHttpHeaders | OutgoingHttpHeader[],
-		maybeHeaders?: OutgoingHttpHeaders | OutgoingHttpHeader[],
-	) {
-		const headers =
-			typeof reasonPhraseOrHeaders === 'string'
-				? maybeHeaders
-				: reasonPhraseOrHeaders
-
-		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
-			// Clear existing access-control-* headers
-			for (const key of Object.keys(headers)) {
-				if (key.toLowerCase().startsWith('access-control-')) {
-					delete (headers as Record<string, any>)[key]
-				}
-			}
-		}
-
-		// Our own CORS headers
-		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
-		res.setHeader('Access-Control-Allow-Credentials', 'true')
-		res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
-		res.setHeader(
-			'Access-Control-Allow-Headers',
-			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
-		)
-
-		if (typeof reasonPhraseOrHeaders === 'string') {
-			if (maybeHeaders) {
-				return (originalWriteHead as any).call(
-					res,
-					statusCode,
-					reasonPhraseOrHeaders,
-					maybeHeaders,
-				)
-			} else {
-				return (originalWriteHead as any).call(
-					res,
-					statusCode,
-					reasonPhraseOrHeaders,
-				)
-			}
-		} else {
-			return (originalWriteHead as any).call(
-				res,
-				statusCode,
-				reasonPhraseOrHeaders,
-			)
-		}
-	}
+	// CORS headers are already handled by the middleware at lines 42-74
+	// Removed hardcoded CORS override to prevent security bypass
 
 	return createRequestHandler({
 		getLoadContext: () => ({ serverBuild: getBuild() }),

@@ -35,6 +35,7 @@ import {
 	auditSSOAuthSuccess,
 	auditSSOAuthFailed,
 } from '#app/utils/sso-audit-logging.server.ts'
+import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.sso.$organizationSlug.callback.ts'
 import { handleNewSession } from './login.server.ts'
 
@@ -45,10 +46,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	// primary instance to avoid writing to a read-only replica
 	await ensurePrimary()
 
-	const clientIP =
-		request.headers.get('x-forwarded-for') ||
-		request.headers.get('x-real-ip') ||
-		'unknown'
+	const clientIP = getClientIp(request)
 
 	try {
 		// Sanitize and validate organization slug

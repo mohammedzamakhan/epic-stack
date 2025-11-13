@@ -3,8 +3,13 @@ import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '#app/utils/db.server.ts'
 
-const JWT_SECRET =
-	process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
+if (!process.env.JWT_SECRET) {
+	throw new Error(
+		'JWT_SECRET environment variable is required. Please set it in your .env file.',
+	)
+}
+
+const JWT_SECRET = process.env.JWT_SECRET
 const ACCESS_TOKEN_EXPIRES_IN = '15m' // 15 minutes
 const REFRESH_TOKEN_BYTES = 48
 const REFRESH_TOKEN_EXPIRES_DAYS = 30

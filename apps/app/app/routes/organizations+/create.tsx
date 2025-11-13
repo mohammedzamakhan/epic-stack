@@ -399,7 +399,9 @@ export default function CreateOrganizationPage() {
 	const actionData = useActionData<typeof action>()
 	const { trialConfig, plansAndPrices } = useLoaderData<typeof loader>()
 	const [searchParams] = useSearchParams()
-	const currentStep = parseInt(searchParams.get('step') || '1')
+	const rawStep = parseInt(searchParams.get('step') || '1')
+	// Validate step to prevent logic bypass
+	const currentStep = Math.max(1, Math.min(rawStep, 5))
 	const orgId = searchParams.get('orgId')
 
 	// Dynamic step configuration based on trial mode
