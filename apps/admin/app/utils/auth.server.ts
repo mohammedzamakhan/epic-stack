@@ -323,7 +323,10 @@ export async function logout(
 }
 
 export async function getPasswordHash(password: string) {
-	const hash = await bcrypt.hash(password, 10)
+	// Using cost factor 12 for enhanced security (OWASP recommendation 2025)
+	// This provides better protection against brute force attacks
+	// while maintaining reasonable performance
+	const hash = await bcrypt.hash(password, 12)
 	return hash
 }
 

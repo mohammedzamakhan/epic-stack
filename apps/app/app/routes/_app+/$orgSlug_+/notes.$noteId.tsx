@@ -41,6 +41,7 @@ import {
 	getNoteActivityLogs,
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	notifyCommentMentions,
@@ -1076,10 +1077,13 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		try {
+			// Sanitize comment content to prevent XSS attacks
+			const sanitizedContent = sanitizeCommentContent(content)
+
 			// Create the comment first
 			const comment = await prisma.noteComment.create({
 				data: {
-					content,
+					content: sanitizedContent,
 					noteId,
 					userId,
 					parentId,

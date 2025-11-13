@@ -1,6 +1,16 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Icon } from '@repo/ui'
 
+/**
+ * Escape HTML special characters to prevent XSS
+ * This is used for user-generated content that needs to be displayed as text
+ */
+function escapeHtml(text: string): string {
+	const div = document.createElement('div')
+	div.textContent = text
+	return div.innerHTML
+}
+
 type ActivityLog = {
 	id: string
 	action: string
@@ -34,9 +44,10 @@ function formatActivityMessage(log: {
 	targetUser?: { name: string | null; username: string } | null
 	integration?: { providerName: string } | null
 }): string {
-	const userName = log.user.name || log.user.username
+	// Escape user-generated content to prevent XSS attacks
+	const userName = escapeHtml(log.user.name || log.user.username)
 	const targetUserName = log.targetUser
-		? log.targetUser.name || log.targetUser.username
+		? escapeHtml(log.targetUser.name || log.targetUser.username)
 		: null
 	const metadata = log.metadata
 		? (JSON.parse(log.metadata) as Record<string, any>)
@@ -69,11 +80,21 @@ function formatActivityMessage(log: {
 		case 'access_revoked':
 			return `<span class="font-bold">${userName}</span> revoked access from ${targetUserName}`
 		case 'integration_connected':
-			const channelName = metadata.channelName || metadata.externalId
-			return `<span class="font-bold">${userName}</span> connected note to ${log.integration?.providerName} channel: ${channelName}`
+			const channelName = escapeHtml(
+				metadata.channelName || metadata.externalId || 'unknown',
+			)
+			const providerName = log.integration?.providerName
+				? escapeHtml(log.integration.providerName)
+				: 'unknown'
+			return `<span class="font-bold">${userName}</span> connected note to ${providerName} channel: ${channelName}`
 		case 'integration_disconnected':
-			const disconnectedChannel = metadata.channelName || metadata.externalId
-			return `<span class="font-bold">${userName}</span> disconnected note from ${log.integration?.providerName} channel: ${disconnectedChannel}`
+			const disconnectedChannel = escapeHtml(
+				metadata.channelName || metadata.externalId || 'unknown',
+			)
+			const disconnectedProvider = log.integration?.providerName
+				? escapeHtml(log.integration.providerName)
+				: 'unknown'
+			return `<span class="font-bold">${userName}</span> disconnected note from ${disconnectedProvider} channel: ${disconnectedChannel}`
 		case 'comment_added':
 			const isReply = metadata.parentId
 			return `<span class="font-bold">${userName}</span> ${isReply ? 'replied to a comment' : 'added a comment'}`
