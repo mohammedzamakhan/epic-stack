@@ -48,6 +48,24 @@ function stubCacheServerPlugin(): Plugin {
 	}
 }
 
+const sentryConfig: SentryReactRouterBuildOptions = {
+	authToken: process.env.SENTRY_AUTH_TOKEN,
+	org: process.env.SENTRY_ORG,
+	project: process.env.SENTRY_PROJECT,
+
+	unstable_sentryVitePluginOptions: {
+		release: {
+			name: process.env.COMMIT_SHA,
+			setCommits: {
+				auto: true,
+			},
+		},
+		sourcemaps: {
+			filesToDeleteAfterUpload: ['./build/**/*.map', '.server-build/**/*.map'],
+		},
+	},
+}
+
 export default defineConfig((config) => ({
 	build: {
 		target: 'es2022',
@@ -111,21 +129,3 @@ export default defineConfig((config) => ({
 		},
 	},
 }))
-
-const sentryConfig: SentryReactRouterBuildOptions = {
-	authToken: process.env.SENTRY_AUTH_TOKEN,
-	org: process.env.SENTRY_ORG,
-	project: process.env.SENTRY_PROJECT,
-
-	unstable_sentryVitePluginOptions: {
-		release: {
-			name: process.env.COMMIT_SHA,
-			setCommits: {
-				auto: true,
-			},
-		},
-		sourcemaps: {
-			filesToDeleteAfterUpload: ['./build/**/*.map', '.server-build/**/*.map'],
-		},
-	},
-}

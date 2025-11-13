@@ -25,7 +25,6 @@ export async function loader({ request }: { request: Request }) {
 			try {
 				await autoDetectCompletedSteps(userId, defaultOrg.organization.id)
 			} catch (autoDetectError) {
-				console.error('Error auto-detecting onboarding steps:', autoDetectError)
 				// Continue without auto-detection if there's an error
 			}
 
@@ -36,7 +35,6 @@ export async function loader({ request }: { request: Request }) {
 					defaultOrg.organization.id,
 				)
 			} catch (onboardingError) {
-				console.error('Error fetching onboarding progress:', onboardingError)
 				// Continue without onboarding progress if there's an error
 				onboardingProgress = null
 			}
@@ -45,12 +43,10 @@ export async function loader({ request }: { request: Request }) {
 			try {
 				trialStatus = await getTrialStatus(userId, defaultOrg.organization.slug)
 			} catch (trialError) {
-				console.error('Error fetching trial status:', trialError)
 				// Continue without trial status if there's an error
 			}
 		}
 	} catch (error) {
-		console.error('Error fetching onboarding progress in app layout:', error)
 		// Don't throw, just continue without onboarding progress
 	}
 

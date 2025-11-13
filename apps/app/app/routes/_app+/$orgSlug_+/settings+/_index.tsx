@@ -171,7 +171,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 				return Response.json({ status: 'success' })
 			} catch (error) {
-				console.error('Error uploading organization logo:', error)
 				return Response.json(
 					{ error: 'Failed to upload organization logo' },
 					{ status: 500 },
@@ -187,7 +186,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 				return Response.json({ status: 'success' })
 			} catch (error) {
-				console.error('Error deleting organization logo:', error)
 				return Response.json(
 					{ error: 'Failed to delete organization logo' },
 					{ status: 500 },
@@ -226,10 +224,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 			} catch (error) {
 				// Don't fail the settings update if onboarding tracking fails
-				console.error(
-					'Failed to track profile completion onboarding step:',
-					error,
-				)
 			}
 
 			return redirectWithToast(`/${slug}/settings`, {
@@ -238,7 +232,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				type: 'success',
 			})
 		} catch (error) {
-			console.error('Error updating organization:', error)
 			return Response.json({
 				result: submission.reply({
 					formErrors: [
@@ -272,7 +265,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				type: 'success',
 			})
 		} catch (error) {
-			console.error('Error updating team size:', error)
 			return Response.json({
 				result: submission.reply({
 					formErrors: ['Failed to update team size. Please try again.'],
@@ -370,22 +362,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					})
 				}
 
-				console.log(
-					`Auto-added ${usersWithMatchingDomain.length} users to organization ${organization.name} based on verified domain ${verifiedDomain}`,
-				)
 
 				// Update seat quantity for billing if users were added
 				if (usersWithMatchingDomain.length > 0) {
 					try {
 						await updateSeatQuantity(organization.id)
 					} catch (error) {
-						console.error(
-							'Failed to update seat quantity after domain-based auto-add:',
-							error,
-						)
-					}
+						// Failed to update seat quantity
 				}
-			})
+			}
+		})
 
 			return redirectWithToast(`/${organization.slug}/settings`, {
 				title: 'Verified domain updated',
@@ -394,7 +380,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				type: 'success',
 			})
 		} catch (error) {
-			console.error('Error updating verified domain:', error)
 			return Response.json({
 				result: submission.reply({
 					formErrors: ['Failed to update verified domain. Please try again.'],
@@ -412,7 +397,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 			return Response.json({ status: 'success' })
 		} catch (error) {
-			console.error('Error removing verified domain:', error)
 			return Response.json(
 				{ error: 'Failed to remove verified domain' },
 				{ status: 500 },
@@ -426,14 +410,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			if (organization.stripeSubscriptionId) {
 				try {
 					await deleteSubscription(organization.stripeSubscriptionId)
-					console.log(
-						`Cancelled subscription: ${organization.stripeSubscriptionId}`,
-					)
 				} catch (error) {
-					console.error(
-						'Error cancelling subscription during organization deletion:',
-						error,
-					)
 					// Don't fail the deletion if subscription cancellation fails
 				}
 			}
@@ -449,7 +426,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				type: 'success',
 			})
 		} catch (error) {
-			console.error('Error deleting organization:', error)
 			return Response.json(
 				{ error: 'Failed to delete organization' },
 				{ status: 500 },
@@ -534,7 +510,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				type: 'success',
 			})
 		} catch (error) {
-			console.error('Error updating S3 storage:', error)
 			return Response.json({
 				result: submission.reply({
 					formErrors: [

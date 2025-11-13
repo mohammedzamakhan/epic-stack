@@ -18,7 +18,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			return redirect(`/${defaultOrg.organization.slug}`)
 		}
 	} catch (error) {
-		console.error('Failed to get user default organization:', error)
+		// Error getting default organization
 	}
 
 	const onWaitlist = await shouldBeOnWaitlist(userId)

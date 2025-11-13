@@ -135,10 +135,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				try {
 					await updateSeatQuantity(invitation.organizationId)
 				} catch (error) {
-					console.error(
-						'Failed to update seat quantity after accepting invitation:',
-						error,
-					)
+					// Failed to update seat quantity
 				}
 			}
 
@@ -149,7 +146,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			return Response.json({ success: true })
 		} catch (error) {
-			console.error('Error accepting invitation:', error)
 			return Response.json(
 				{ error: 'Failed to accept invitation' },
 				{ status: 500 },
@@ -164,7 +160,6 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 			return Response.json({ success: true })
 		} catch (error) {
-			console.error('Error declining invitation:', error)
 			return Response.json(
 				{ error: 'Failed to decline invitation' },
 				{ status: 500 },

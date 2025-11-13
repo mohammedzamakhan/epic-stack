@@ -43,6 +43,15 @@ import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { cn } from '#app/utils/misc.tsx'
 
+// Define ApiKey type based on Prisma query result
+type ApiKeyData = {
+	id: string
+	key: string
+	name: string
+	createdAt: Date
+	expiresAt: Date | null
+}
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const { orgSlug } = params
 	invariantResponse(orgSlug, 'Organization slug is required')
@@ -450,8 +459,8 @@ function ApiKeysCard({
 	onCreateClick,
 }: {
 	organization: { name: string }
-	apiKeys: any[]
-	actionData: any
+	apiKeys: ApiKeyData[]
+	actionData: { success?: boolean; message?: string; newApiKey?: ApiKeyData } | undefined
 	onCreateClick: () => void
 }) {
 	return (
@@ -481,7 +490,7 @@ function ApiKeysCard({
 			>
 				{/* Existing API keys */}
 				<div className="space-y-3">
-					{apiKeys.map((apiKey: any) => (
+					{apiKeys.map((apiKey) => (
 						<div
 							key={apiKey.id}
 							className="flex items-center justify-between rounded-lg border p-4"

@@ -2,6 +2,15 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getSignedGetRequestInfo } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/mcp-tools.ts'
 
+// Define Note type based on Prisma query result
+type NoteData = {
+	id: string
+	title: string
+	content: string
+	createdAt: Date
+	isPublic: boolean
+}
+
 async function validateApiKey(apiKey: string) {
 	const apiKeyRecord = await prisma.apiKey.findUnique({
 		where: { key: apiKey },
@@ -253,7 +262,7 @@ export async function action({ request }: Route.ActionArgs) {
 				)
 			}
 
-			const content = notes.map((note: any) => ({
+			const content = notes.map((note) => ({
 				type: 'text',
 				text: `${note.title}\n\n${note.content}\n\n---\nCreated: ${note.createdAt.toLocaleDateString()}${note.isPublic ? '' : ' (Private)'}`,
 			}))

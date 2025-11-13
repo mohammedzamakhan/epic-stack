@@ -1,6 +1,6 @@
 'use client'
 
-import { useChat } from 'ai/react'
+import { useChat, type Message as AIMessage } from 'ai/react'
 import { SparklesIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import {
@@ -45,7 +45,7 @@ function MessageContentRenderer({
 }
 
 // Smart suggestions based on context and conversation state
-const getSmartSuggestions = (messages: any[], hasContent: boolean) => {
+const getSmartSuggestions = (messages: AIMessage[], hasContent: boolean) => {
 	if (messages.length === 0) {
 		// Initial suggestions when no conversation has started
 		return hasContent

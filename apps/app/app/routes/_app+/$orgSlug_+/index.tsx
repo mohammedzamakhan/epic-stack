@@ -204,9 +204,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 			payload: {},
 		})
-		console.log('Workflow triggered successfully')
 	} catch (err) {
-		console.error('Error triggering workflow', err)
+		// Error triggering workflow
 	}
 
 	return null

@@ -2,10 +2,18 @@ import { google } from '@ai-sdk/google'
 import { invariant } from '@epic-web/invariant'
 import { brand } from '@repo/config/brand'
 import { prisma } from '@repo/prisma'
-import { streamText } from 'ai'
+import { streamText, type Message } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { markStepCompleted } from '#app/utils/onboarding.ts'
+
+// Define Comment type based on Prisma query result
+type CommentData = {
+	content: string
+	user: {
+		name: string | null
+	}
+}
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -57,7 +65,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		console.error('Failed to track AI chat onboarding step:', error)
 	}
 
-	const { messages } = (await request.json()) as { messages: any[] }
+	const { messages } = (await request.json()) as { messages: Message[] }
 
 	// Get additional context for better responses
 	const noteWordCount = note.content ? note.content.split(/\s+/).length : 0
@@ -85,7 +93,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 **Has Comments**: ${hasComments ? `Yes (${commentCount} comments)` : 'No'}
 **Content Preview**: ${note.content ? note.content.substring(0, 500) + (note.content.length > 500 ? '...' : '') : 'No content yet'}
 
-${hasComments ? `**Recent Comments**:\n${note.comments.map((comment: any) => `- ${comment.user.name}: ${comment.content}`).join('\n')}` : ''}
+${hasComments ? `**Recent Comments**:\n${note.comments.map((comment: CommentData) => `- ${comment.user.name}: ${comment.content}`).join('\n')}` : ''}
 
 ## Response Guidelines:
 - Be conversational, helpful, and actionable
