@@ -11,9 +11,22 @@ export const localeCookie = createCookie('lng', {
 
 // Helper to extract fallback language as string
 function getFallbackLanguage(): string {
-	const fallback = config.fallbackLocales?.default
-	if (!fallback) return 'en'
-	if (Array.isArray(fallback)) return fallback[0] || 'en'
+	// Check if fallbackLocales is configured and not false
+	if (!config.fallbackLocales || typeof config.fallbackLocales === 'boolean') {
+		return 'en'
+	}
+
+	const fallback = config.fallbackLocales.default
+	if (!fallback) {
+		return 'en'
+	}
+
+	// Handle array case - return first element
+	if (Array.isArray(fallback)) {
+		return fallback[0] ?? 'en'
+	}
+
+	// Return string directly
 	return fallback
 }
 
