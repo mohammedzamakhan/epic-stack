@@ -9,15 +9,18 @@ export const localeCookie = createCookie('lng', {
 	httpOnly: true,
 })
 
+// Helper to extract fallback language as string
+function getFallbackLanguage(): string {
+	const fallback = config.fallbackLocales?.default
+	if (!fallback) return 'en'
+	if (Array.isArray(fallback)) return fallback[0] || 'en'
+	return fallback
+}
+
 export const linguiServer = new RemixLingui({
 	detection: {
 		supportedLanguages: config.locales,
-		fallbackLanguage: (() => {
-			const fallback =
-				(!!config.fallbackLocales && config.fallbackLocales?.default) || 'en'
-			// Handle case where fallback is an array
-			return Array.isArray(fallback) ? fallback[0] : fallback
-		})(),
+		fallbackLanguage: getFallbackLanguage(),
 		cookie: localeCookie,
 	},
 })
