@@ -80,6 +80,12 @@ type CommentWithReplies = CommentWithUser & {
 	replies: CommentWithReplies[]
 }
 
+// Serialized comment type (what the client receives after loader serialization)
+type SerializedComment = Omit<CommentWithReplies, 'createdAt' | 'replies'> & {
+	createdAt: string
+	replies: SerializedComment[]
+}
+
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 	const noteId = params.noteId
@@ -222,17 +228,24 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			if (comment.parentId) {
 				const parent = commentMap.get(comment.parentId)
 				if (parent) {
-					parent.replies.push(commentMap.get(comment.id))
+					parent.replies.push(commentMap.get(comment.id)!)
 				}
 			} else {
-				rootComments.push(commentMap.get(comment.id))
+				rootComments.push(commentMap.get(comment.id)!)
 			}
 		})
 
 		return rootComments
 	}
 
-	const organizedComments = organizeComments(comments)
+	// Serialize comments for client (convert Date to string)
+	const serializeComment = (comment: CommentWithReplies): SerializedComment => ({
+		...comment,
+		createdAt: comment.createdAt.toISOString(),
+		replies: comment.replies.map(serializeComment),
+	})
+
+	const organizedComments = organizeComments(comments).map(serializeComment)
 
 	// Get recent activity logs for this note
 	const activityLogs = await getNoteActivityLogs(note.id, 20)
@@ -1618,7 +1631,8 @@ export default function NoteRoute() {
 					>
 						<CommentsSection
 							noteId={note.id}
-							comments={comments}
+							// SerializedComment is compatible with Comment interface
+							comments={comments as any}
 							currentUserId={currentUserId}
 							users={mentionUsers}
 							organizationId={note.organization.id}
