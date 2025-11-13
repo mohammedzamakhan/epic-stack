@@ -4,7 +4,6 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { contentSecurity } from '@nichtsam/helmet/content'
 import { createReadableStreamFromReadable } from '@react-router/node'
-import * as Sentry from '@sentry/react-router'
 import { isbot } from 'isbot'
 import { renderToPipeableStream } from 'react-dom/server'
 import {
@@ -52,7 +51,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	await loadCatalog(locale)
 
 	if (request.url.includes('/novu') || request.url.includes('builder.my')) {
-		return new Promise(async (resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			let didError = false
 			// NOTE: this timing will only include things that are rendered in the shell
 			// and will not include suspended components and deferred loaders
@@ -95,7 +94,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 			setTimeout(abort, streamTimeout + 5000)
 		})
 	}
-	return new Promise(async (resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		let didError = false
 		// NOTE: this timing will only include things that are rendered in the shell
 		// and will not include suspended components and deferred loaders

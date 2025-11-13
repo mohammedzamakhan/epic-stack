@@ -123,47 +123,43 @@ async function callRemoteTool(toolName: string, args: Record<string, any>) {
 
 // Dynamically register tools from the API
 async function registerDynamicTools() {
-	try {
-		const tools = await fetchAvailableTools()
+	const tools = await fetchAvailableTools()
 
-		if (!Array.isArray(tools) || tools.length === 0) {
-			return
-		}
+	if (!Array.isArray(tools) || tools.length === 0) {
+		return
+	}
 
-		for (const tool of tools) {
-			try {
-				// Create a Zod object schema from the JSON schema
-				const shape: Record<string, z.ZodType<any>> = {}
-				const required = tool.inputSchema.required || []
+	for (const tool of tools) {
+		try {
+			// Create a Zod object schema from the JSON schema
+			const shape: Record<string, z.ZodType<any>> = {}
+			const required = tool.inputSchema.required || []
 
-				for (const [key, value] of Object.entries(
-					tool.inputSchema.properties || {},
-				)) {
-					let zodType = jsonSchemaToZod(value as any)
+			for (const [key, value] of Object.entries(
+				tool.inputSchema.properties || {},
+			)) {
+				let zodType = jsonSchemaToZod(value as any)
 
-					// Make optional if not in required array
-					if (!required.includes(key)) {
-						zodType = zodType.optional()
-					}
-
-					shape[key] = zodType
+				// Make optional if not in required array
+				if (!required.includes(key)) {
+					zodType = zodType.optional()
 				}
 
-				server.registerTool(
-					tool.name,
-					{
-						title: tool.title,
-						description: tool.description,
-						inputSchema: shape,
-					},
-					async (args: any) => callRemoteTool(tool.name, args),
-				)
-			} catch (toolError) {
-				console.error(`Failed to register tool ${tool.name}:`, toolError)
+				shape[key] = zodType
 			}
+
+			server.registerTool(
+				tool.name,
+				{
+					title: tool.title,
+					description: tool.description,
+					inputSchema: shape,
+				},
+				async (args: any) => callRemoteTool(tool.name, args),
+			)
+		} catch (toolError) {
+			console.error(`Failed to register tool ${tool.name}:`, toolError)
 		}
-	} catch (error) {
-		throw error
 	}
 }
 
