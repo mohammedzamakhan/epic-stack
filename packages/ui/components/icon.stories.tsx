@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Icon, type IconName } from './icon';
 
@@ -185,25 +186,74 @@ export const AllIcons: Story = {
   args: {
     name: 'star',
   },
-  render: () => (
-    <div className="max-w-6xl p-8">
-      <h2 className="text-2xl font-bold mb-6">All Available Icons ({allIconNames.length})</h2>
-      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-        {allIconNames.map((iconName) => (
-          <div
-            key={iconName}
-            className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors group cursor-pointer border border-transparent hover:border-border"
-            title={iconName}
-          >
-            <Icon name={iconName} size="lg" className="mb-2" />
-            <span className="text-[10px] text-center text-muted-foreground group-hover:text-foreground break-all leading-tight">
-              {iconName}
-            </span>
+  render: () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [copiedIcon, setCopiedIcon] = useState<string | null>(null);
+
+    const filteredIcons = allIconNames.filter((iconName) =>
+      iconName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleCopyToClipboard = async (iconName: IconName) => {
+      const componentCode = `<Icon name="${iconName}" size="md" />`;
+      try {
+        await navigator.clipboard.writeText(componentCode);
+        setCopiedIcon(iconName);
+        setTimeout(() => setCopiedIcon(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    };
+
+    return (
+      <div className="max-w-6xl p-8">
+        <h2 className="text-2xl font-bold mb-4">All Available Icons ({allIconNames.length})</h2>
+
+        {/* Search Input */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search icons..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-md px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          {searchTerm && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Found {filteredIcons.length} icon{filteredIcons.length !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+          {filteredIcons.map((iconName) => (
+            <div
+              key={iconName}
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors group cursor-pointer border border-transparent hover:border-border relative"
+              title={`Click to copy: <Icon name="${iconName}" />`}
+              onClick={() => handleCopyToClipboard(iconName)}
+            >
+              <Icon name={iconName} size="lg" className="mb-2" />
+              <span className="text-[10px] text-center text-muted-foreground group-hover:text-foreground break-all leading-tight">
+                {iconName}
+              </span>
+              {copiedIcon === iconName && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded-lg">
+                  <span className="text-xs font-medium text-green-600">Copied!</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {filteredIcons.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No icons found matching "{searchTerm}"</p>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  ),
+    );
+  },
   parameters: {
     layout: 'fullscreen',
   },
@@ -214,6 +264,9 @@ export const IconCategories: Story = {
     name: 'star',
   },
   render: () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [copiedIcon, setCopiedIcon] = useState<string | null>(null);
+
     const categories = {
       Navigation: [
         'arrow-left',
@@ -347,30 +400,83 @@ export const IconCategories: Story = {
       ],
     };
 
+    const handleCopyToClipboard = async (iconName: string) => {
+      const componentCode = `<Icon name="${iconName}" size="md" />`;
+      try {
+        await navigator.clipboard.writeText(componentCode);
+        setCopiedIcon(iconName);
+        setTimeout(() => setCopiedIcon(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    };
+
+    // Filter categories based on search term
+    const filteredCategories = Object.entries(categories).reduce((acc, [category, icons]) => {
+      const filteredIcons = icons.filter((iconName) =>
+        iconName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      if (filteredIcons.length > 0) {
+        acc[category] = filteredIcons;
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    const totalFilteredIcons = Object.values(filteredCategories).flat().length;
+
     return (
       <div className="max-w-6xl p-8">
-        <h2 className="text-2xl font-bold mb-6">Icon Categories</h2>
-        <div className="space-y-8">
-          {Object.entries(categories).map(([category, icons]) => (
-            <div key={category}>
-              <h3 className="text-lg font-semibold mb-4">{category}</h3>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-                {icons.map((iconName) => (
-                  <div
-                    key={iconName}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors group cursor-pointer border border-transparent hover:border-border"
-                    title={iconName}
-                  >
-                    <Icon name={iconName as IconName} size="lg" className="mb-2" />
-                    <span className="text-[10px] text-center text-muted-foreground group-hover:text-foreground break-all leading-tight">
-                      {iconName}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+        <h2 className="text-2xl font-bold mb-4">Icon Categories</h2>
+
+        {/* Search Input */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search icons..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-md px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          {searchTerm && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Found {totalFilteredIcons} icon{totalFilteredIcons !== 1 ? 's' : ''} in {Object.keys(filteredCategories).length} categor{Object.keys(filteredCategories).length !== 1 ? 'ies' : 'y'}
+            </p>
+          )}
         </div>
+
+        {Object.keys(filteredCategories).length > 0 ? (
+          <div className="space-y-8">
+            {Object.entries(filteredCategories).map(([category, icons]) => (
+              <div key={category}>
+                <h3 className="text-lg font-semibold mb-4">{category}</h3>
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+                  {icons.map((iconName) => (
+                    <div
+                      key={iconName}
+                      className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-muted transition-colors group cursor-pointer border border-transparent hover:border-border relative"
+                      title={`Click to copy: <Icon name="${iconName}" />`}
+                      onClick={() => handleCopyToClipboard(iconName)}
+                    >
+                      <Icon name={iconName as IconName} size="lg" className="mb-2" />
+                      <span className="text-[10px] text-center text-muted-foreground group-hover:text-foreground break-all leading-tight">
+                        {iconName}
+                      </span>
+                      {copiedIcon === iconName && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded-lg">
+                          <span className="text-xs font-medium text-green-600">Copied!</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No icons found matching "{searchTerm}"</p>
+          </div>
+        )}
       </div>
     );
   },
