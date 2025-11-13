@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from './button';
-import { Icon } from './icon';
+import { Icon as IconComponent } from './icon';
 
 const meta = {
   title: 'Components/Button',
@@ -122,23 +122,23 @@ export const WithIcons: Story = {
   render: () => (
     <div className="flex gap-2 flex-wrap">
       <Button>
-        <Icon name="plus" />
+        <IconComponent name="plus" />
         Create New
       </Button>
       <Button variant="outline">
-        <Icon name="download" />
+        <IconComponent name="download" />
         Download
       </Button>
       <Button variant="destructive">
-        <Icon name="trash-2" />
+        <IconComponent name="trash-2" />
         Delete
       </Button>
       <Button variant="secondary">
-        <Icon name="settings" />
+        <IconComponent name="settings" />
         Settings
       </Button>
       <Button variant="ghost" size="icon">
-        <Icon name="search" />
+        <IconComponent name="search" />
       </Button>
     </div>
   ),
@@ -165,12 +165,12 @@ export const ActionButtons: Story = {
         <h3 className="font-medium">Navigation</h3>
         <div className="flex gap-2">
           <Button variant="ghost">
-            <Icon name="chevron-left" />
+            <IconComponent name="chevron-left" />
             Back
           </Button>
           <Button>
             Next
-            <Icon name="chevron-right" />
+            <IconComponent name="chevron-right" />
           </Button>
         </div>
       </div>

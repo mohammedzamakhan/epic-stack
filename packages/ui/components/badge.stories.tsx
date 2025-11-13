@@ -129,7 +129,7 @@ export const StatusBadges: Story = {
             Member
           </Badge>
           <Badge variant="outline">
-            <Icon name="eye" size="xs" />
+            <Icon name="user" size="xs" />
             Viewer
           </Badge>
         </div>
