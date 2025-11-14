@@ -111,6 +111,7 @@
     "@repo/observability": "*",
     "@repo/payments": "*",
     "@repo/prisma": "*",
+    "@repo/storage": "*",
     "@repo/ui": "*",
     "@sentry/profiling-node": "9.15.0",
     "@sentry/react-router": "9.15.0",
