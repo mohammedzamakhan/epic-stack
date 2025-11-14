@@ -4,7 +4,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, lazy, Suspense } from 'react'
 import {
 	Button,
 	Tabs,
@@ -24,7 +24,12 @@ import {
 	type LoaderFunctionArgs,
 } from 'react-router'
 import { z } from 'zod'
-import { AIChat } from '#app/components/ai-chat.tsx'
+// Lazy load AIChat component for better performance
+const AIChat = lazy(() =>
+	import('#app/components/ai-chat.tsx').then((module) => ({
+		default: module.AIChat,
+	})),
+)
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { ActivityLog } from '#app/components/note/activity-log.tsx'
@@ -1667,7 +1672,15 @@ export default function NoteRoute() {
 						value="ai-assistant"
 						className="bg-muted/20 flex-1 overflow-hidden"
 					>
-						<AIChat noteId={note.id} />
+						<Suspense
+							fallback={
+								<div className="flex h-full items-center justify-center">
+									<Icon name="update" className="animate-spin" />
+								</div>
+							}
+						>
+							<AIChat noteId={note.id} />
+						</Suspense>
 					</TabsContent>
 				</Tabs>
 

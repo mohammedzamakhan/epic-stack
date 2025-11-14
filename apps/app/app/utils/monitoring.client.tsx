@@ -22,14 +22,13 @@ export function init() {
 			Sentry.browserProfilingIntegration(),
 		],
 
-		// Set tracesSampleRate to 1.0 to capture 100%
-		// of transactions for performance monitoring.
-		// We recommend adjusting this value in production
-		tracesSampleRate: 1.0,
+		// Performance monitoring: 10% in production, 100% in development
+		// Reduced from 100% to significantly improve page load performance
+		tracesSampleRate: ENV.MODE === 'production' ? 0.1 : 1.0,
 
-		// Capture Replay for 10% of all sessions,
+		// Capture Replay for 5% of all sessions in production,
 		// plus for 100% of sessions with an error
-		replaysSessionSampleRate: 0.1,
+		replaysSessionSampleRate: ENV.MODE === 'production' ? 0.05 : 0.1,
 		replaysOnErrorSampleRate: 1.0,
 	})
 }

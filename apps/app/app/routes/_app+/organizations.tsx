@@ -38,54 +38,55 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw redirect('/waitlist')
 	}
 
-	const [organizations, user] = await Promise.all([
-		getUserOrganizations(userId),
-		prisma.user.findUnique({
-			where: { id: userId },
-			select: { email: true },
-		}),
-	])
+	// Fetch user email first to use in parallel invitation query
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { email: true },
+	})
 
-	// Get pending invitations for this user's email
-	const pendingInvitations = user?.email
-		? await prisma.organizationInvitation.findMany({
-				where: {
-					email: user.email.toLowerCase(),
-					expiresAt: {
-						gte: new Date(),
+	// Run organizations and pending invitations queries in parallel for better performance
+	const [organizations, pendingInvitations] = await Promise.all([
+		getUserOrganizations(userId),
+		user?.email
+			? prisma.organizationInvitation.findMany({
+					where: {
+						email: user.email.toLowerCase(),
+						expiresAt: {
+							gte: new Date(),
+						},
 					},
-				},
-				include: {
-					organization: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-							image: {
-								select: {
-									objectKey: true,
+					include: {
+						organization: {
+							select: {
+								id: true,
+								name: true,
+								slug: true,
+								image: {
+									select: {
+										objectKey: true,
+									},
 								},
 							},
 						},
-					},
-					organizationRole: {
-						select: {
-							id: true,
-							name: true,
+						organizationRole: {
+							select: {
+								id: true,
+								name: true,
+							},
+						},
+						inviter: {
+							select: {
+								name: true,
+								email: true,
+							},
 						},
 					},
-					inviter: {
-						select: {
-							name: true,
-							email: true,
-						},
+					orderBy: {
+						createdAt: 'desc',
 					},
-				},
-				orderBy: {
-					createdAt: 'desc',
-				},
-			})
-		: []
+				})
+			: Promise.resolve([]),
+	])
 
 	return { organizations, pendingInvitations }
 }

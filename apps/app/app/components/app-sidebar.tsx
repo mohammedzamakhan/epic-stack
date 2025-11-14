@@ -6,9 +6,9 @@ import {
 	CardDescription,
 	CardHeader,
 } from '@repo/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 
-import { useLocation, useRouteLoaderData, Link } from 'react-router'
+import { useLocation, useRouteLoaderData, Link, Await } from 'react-router'
 import { FoldersIcon } from '#app/components/icons/folders-icon.tsx'
 import { HomeIcon } from '#app/components/icons/home-icon.tsx'
 import { LockOpenIcon } from '#app/components/icons/lock-open-icon.tsx'
@@ -318,9 +318,20 @@ function OrganizationSidebar({
 
 				<NavMain items={navMain} />
 
-				{/* Favorite Notes */}
-				{favoriteNotes && orgSlug && (
-					<FavoriteNotes favoriteNotes={favoriteNotes} orgSlug={orgSlug} />
+				{/* Favorite Notes - Deferred loading */}
+				{orgSlug && (
+					<Suspense fallback={null}>
+						<Await resolve={favoriteNotes}>
+							{(resolvedFavoriteNotes) =>
+								resolvedFavoriteNotes ? (
+									<FavoriteNotes
+										favoriteNotes={resolvedFavoriteNotes}
+										orgSlug={orgSlug}
+									/>
+								) : null
+							}
+						</Await>
+					</Suspense>
 				)}
 
 				<div className="mt-auto">

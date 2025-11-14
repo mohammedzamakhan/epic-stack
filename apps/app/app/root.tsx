@@ -4,6 +4,7 @@ import { EpicToaster, TooltipProvider } from '@repo/ui'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
+	defer,
 	Links,
 	Meta,
 	Outlet,
@@ -25,6 +26,7 @@ import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { getUserId, logout } from './utils/auth.server.ts'
+import { cache, cachified } from './utils/cache.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { getCookieConsentState } from './utils/cookie-consent.server.ts'
 import { prisma } from './utils/db.server.ts'
@@ -79,22 +81,28 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const user = userId
 		? await time(
 				() =>
-					prisma.user.findUnique({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { objectKey: true } },
-							roles: {
+					cachified({
+						key: `user:${userId}`,
+						cache,
+						ttl: 1000 * 60 * 5, // 5 minutes
+						getFreshValue: () =>
+							prisma.user.findUnique({
 								select: {
+									id: true,
 									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
+									username: true,
+									image: { select: { objectKey: true } },
+									roles: {
+										select: {
+											name: true,
+											permissions: {
+												select: { entity: true, action: true, access: true },
+											},
+										},
 									},
 								},
-							},
-						},
-						where: { id: userId },
+								where: { id: userId },
+							}),
 					}),
 				{ timings, type: 'find user', desc: 'find user in root' },
 			)
@@ -112,9 +120,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
-	// Get user organizations if user exists
+	// Load user organizations immediately (required for NovuProvider)
 	let userOrganizations = undefined
-	let favoriteNotes = undefined
 	if (user) {
 		try {
 			const { getUserOrganizations, getUserDefaultOrganization } = await import(
@@ -126,16 +133,23 @@ export async function loader({ request }: Route.LoaderArgs) {
 				organizations: orgs,
 				currentOrganization: defaultOrg,
 			}
+		} catch (error) {
+			console.error('Failed to load user organizations', error)
+		}
+	}
 
-			// Get user's favorite notes for the current organization
-			if (defaultOrg?.organization.id) {
-				favoriteNotes = await time(
+	// Defer favorite notes for faster initial page load (non-critical data)
+	// This loads in the background without blocking page render
+	const favoriteNotesPromise =
+		user && userOrganizations?.currentOrganization?.organization.id
+			? time(
 					() =>
 						prisma.organizationNoteFavorite.findMany({
 							where: {
 								userId: user.id,
 								note: {
-									organizationId: defaultOrg.organization.id,
+									organizationId: userOrganizations.currentOrganization.organization
+										.id,
 									OR: [
 										{ isPublic: true },
 										{ createdById: user.id },
@@ -162,11 +176,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 						desc: 'find favorite notes in root',
 					},
 				)
-			}
-		} catch (error) {
-			console.error('Failed to load user organizations', error)
-		}
-	}
+			: Promise.resolve(undefined)
 
 	const requestInfo = {
 		hints: getHints(request),
@@ -188,7 +198,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const cookieConsent = await getCookieConsentState(request)
 
-	return data(
+	return defer(
 		{
 			user,
 			requestInfo,
@@ -197,7 +207,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 			honeyProps,
 			locale,
 			userOrganizations,
-			favoriteNotes,
+			// Deferred data - loads in the background without blocking page render
+			favoriteNotes: favoriteNotesPromise,
 			impersonationInfo,
 			cookieConsent,
 			launchStatus: getLaunchStatus(),

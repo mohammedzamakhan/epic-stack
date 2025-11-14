@@ -14,7 +14,7 @@ import {
 	useForm,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useFetcher, useParams } from 'react-router'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
@@ -28,7 +28,12 @@ import {
 	type ContentEditorRef,
 } from '#app/components/note/content-editor.tsx'
 
-import { MultiMediaUpload } from '#app/components/ui/multi-media-upload.tsx'
+// Lazy load MultiMediaUpload component for better performance
+const MultiMediaUpload = lazy(() =>
+	import('#app/components/ui/multi-media-upload.tsx').then((module) => ({
+		default: module.MultiMediaUpload,
+	})),
+)
 import { useIsPending } from '#app/utils/misc.tsx'
 
 const titleMinLength = 1
@@ -289,17 +294,19 @@ export function OrgNoteEditor({
 									</div>
 								)}
 							</div>
-							<MultiMediaUpload
-								meta={fields.media}
-								formId={form.id}
-								existingImages={note?.uploads?.filter(
-									(u) => u.type === 'image',
-								)}
-								existingVideos={note?.uploads?.filter(
-									(u) => u.type === 'video',
-								)}
-								organizationId={organizationId}
-							/>
+							<Suspense fallback={<div className="h-20 animate-pulse bg-muted" />}>
+								<MultiMediaUpload
+									meta={fields.media}
+									formId={form.id}
+									existingImages={note?.uploads?.filter(
+										(u) => u.type === 'image',
+									)}
+									existingVideos={note?.uploads?.filter(
+										(u) => u.type === 'video',
+									)}
+									organizationId={organizationId}
+								/>
+							</Suspense>
 						</div>
 						<ErrorList id={form.errorId} errors={form.errors} />
 					</fetcher.Form>
