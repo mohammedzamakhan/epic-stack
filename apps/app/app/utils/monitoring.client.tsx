@@ -22,33 +22,11 @@ export function init() {
 			Sentry.browserProfilingIntegration(),
 		],
 
-		// Performance monitoring with intelligent sampling:
-		// - Always capture security-critical transactions (auth, security routes)
-		// - 10% sampling for other transactions in production
-		// - 100% in development for debugging
-		tracesSampleRate:
-			ENV.MODE === 'production'
-				? (samplingContext) => {
-						const transactionName = samplingContext.transactionContext?.name || ''
-						const url = samplingContext.location?.pathname || ''
-
-						// Always capture security-critical transactions
-						if (
-							transactionName.includes('auth') ||
-							transactionName.includes('security') ||
-							transactionName.includes('login') ||
-							transactionName.includes('signup') ||
-							url.includes('/security') ||
-							url.includes('/login') ||
-							url.includes('/signup')
-						) {
-							return 1.0
-						}
-
-						// 10% sampling for everything else
-						return 0.1
-					}
-				: 1.0,
+		// Performance monitoring: 10% in production, 100% in development
+		// Reduced from 100% to significantly improve page load performance
+		// Note: Sentry's beforeSend hook can be used to filter out non-critical
+		// transactions if more granular control is needed in the future
+		tracesSampleRate: ENV.MODE === 'production' ? 0.1 : 1.0,
 
 		// Capture Replay for 5% of all sessions in production,
 		// plus for 100% of sessions with an error

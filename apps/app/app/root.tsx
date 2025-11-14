@@ -141,15 +141,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	// Load favorite notes
 	const favoriteNotes =
-		user && userOrganizations?.currentOrganization?.organization.id
+		user && userOrganizations?.currentOrganization?.organization?.id
 			? await time(
 					() =>
 						prisma.organizationNoteFavorite.findMany({
 							where: {
 								userId: user.id,
 								note: {
-									organizationId: userOrganizations.currentOrganization.organization
-										.id,
+									organizationId:
+										userOrganizations.currentOrganization?.organization.id ?? '',
 									OR: [
 										{ isPublic: true },
 										{ createdById: user.id },
