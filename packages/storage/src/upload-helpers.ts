@@ -31,7 +31,7 @@ function sanitizeAndExtractExtension(filename: string): string {
 		return '' // No extension
 	}
 
-	const extension = parts[parts.length - 1].toLowerCase()
+	const extension = parts[parts.length - 1]!.toLowerCase()
 
 	// Validate extension against allowlist
 	const allowedExtensions = [
