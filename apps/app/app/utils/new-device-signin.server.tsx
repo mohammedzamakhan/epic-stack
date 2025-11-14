@@ -4,6 +4,7 @@ import { prisma } from './db.server.ts'
 import { sendEmail } from './email.server.ts'
 import { parseUserAgent, getUserAgent } from './user-agent.server.ts'
 import { getClientIp, trackIpRequest } from './ip-tracking.server.ts'
+import { logger } from './logger.server.ts'
 
 interface CheckNewDeviceParams {
 	userId: string
@@ -106,7 +107,10 @@ export async function sendNewDeviceSigninEmail({
 	})
 
 	if (!user) {
-		console.error('User not found for new device signin email:', userId)
+		logger.error(
+			{ userId },
+			'User not found for new device signin email',
+		)
 		return
 	}
 
@@ -143,11 +147,15 @@ export async function sendNewDeviceSigninEmail({
 			),
 		})
 
-		console.log(
-			`New device sign-in email sent to ${user.email} for device: ${deviceInfo.deviceName}`,
+		logger.info(
+			{ email: user.email, device: deviceInfo.deviceName },
+			'New device sign-in email sent',
 		)
 	} catch (error) {
-		console.error('Failed to send new device sign-in email:', error)
+		logger.error(
+			{ error },
+			'Failed to send new device sign-in email',
+		)
 		// Don't throw - we don't want to block login if email fails
 	}
 }
@@ -190,13 +198,17 @@ export async function handleNewDeviceSignin({
 				location,
 			})
 
-			console.log(
-				`New device sign-in detected for user ${userId}: ${deviceInfo.deviceName} from ${ipAddress}`,
+			logger.info(
+				{ userId, device: deviceInfo.deviceName, ipAddress },
+				'New device sign-in detected',
 			)
 		}
 	} catch (error) {
 		// Log error but don't throw - we don't want to block login
-		console.error('Error handling new device sign-in:', error)
+		logger.error(
+			{ error },
+			'Error handling new device sign-in',
+		)
 	}
 }
 

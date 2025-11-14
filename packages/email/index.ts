@@ -7,6 +7,7 @@ export { default as SignupEmail } from './src/templates/signup.tsx'
 export { default as EmailChangeEmail } from './src/templates/email-change.tsx'
 export { default as EmailChangeNoticeEmail } from './src/templates/email-change-notice.tsx'
 export { default as TrialEndingEmail } from './src/templates/trial-ending.tsx'
+export { default as NewDeviceSigninEmail } from './src/templates/new-device-signin.tsx'
 
 // Export types
 export type { OrganizationInviteEmailProps } from './src/templates/organization-invite.tsx'
@@ -17,3 +18,4 @@ export type { SignupEmailProps } from './src/templates/signup.tsx'
 export type { EmailChangeEmailProps } from './src/templates/email-change.tsx'
 export type { EmailChangeNoticeEmailProps } from './src/templates/email-change-notice.tsx'
 export type { TrialEndingEmailProps } from './src/templates/trial-ending.tsx'
+export type { NewDeviceSigninEmailProps } from './src/templates/new-device-signin.tsx'
