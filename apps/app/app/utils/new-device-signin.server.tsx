@@ -1,4 +1,4 @@
-import { NewDeviceSigninEmail } from '@epic-stack/email'
+import { NewDeviceSigninEmail } from '@repo/email'
 import React from 'react'
 import { prisma } from './db.server.ts'
 import { sendEmail } from './email.server.ts'
