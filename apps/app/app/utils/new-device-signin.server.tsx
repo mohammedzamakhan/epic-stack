@@ -171,6 +171,11 @@ export async function handleNewDeviceSignin({
 	userId: string
 	request: Request
 }) {
+	// Skip new device detection in test environment to avoid interfering with test transactions
+	if (process.env.NODE_ENV === 'test') {
+		return
+	}
+
 	try {
 		const { isNewDevice, deviceInfo, ipAddress } = await checkNewDevice({
 			userId,
