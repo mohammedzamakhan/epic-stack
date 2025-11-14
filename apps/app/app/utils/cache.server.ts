@@ -454,3 +454,20 @@ export async function cachified<Value>(
 		mergeReporters(cachifiedTimingReporter(timings), reporter),
 	)
 }
+
+// Cache invalidation helpers for user-related data
+export async function invalidateUserCache(userId: string) {
+	await Promise.all([
+		cache.delete(`user:${userId}`),
+		cache.delete(`user-security:${userId}`),
+		lruCache.delete(`user:${userId}`),
+		lruCache.delete(`user-security:${userId}`),
+	])
+}
+
+export async function invalidateUserSecurityCache(userId: string) {
+	await Promise.all([
+		cache.delete(`user-security:${userId}`),
+		lruCache.delete(`user-security:${userId}`),
+	])
+}

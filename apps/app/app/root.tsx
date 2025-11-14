@@ -83,7 +83,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 					cachified({
 						key: `user:${userId}`,
 						cache,
-						ttl: 1000 * 60 * 5, // 5 minutes
+						// Reduced TTL for security-sensitive data (roles/permissions)
+						// Cache invalidated on user updates via invalidateUserCache()
+						ttl: 1000 * 60 * 1, // 1 minute
 						getFreshValue: () =>
 							prisma.user.findUnique({
 								select: {

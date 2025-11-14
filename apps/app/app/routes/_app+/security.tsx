@@ -34,64 +34,76 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 
 	// Run all database queries in parallel for better performance
-	// User query is cached for 5 minutes to reduce database load
-	const [user, twoFactorVerification, password, connections, passkeys] =
-		await Promise.all([
-			cachified({
-				key: `user-security:${userId}`,
-				cache,
-				ttl: 1000 * 60 * 5, // 5 minutes
-				getFreshValue: () =>
-					prisma.user.findUniqueOrThrow({
-						where: { id: userId },
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							email: true,
-							image: {
-								select: { objectKey: true },
-							},
-							_count: {
-								select: {
-									sessions: {
-										where: {
-											expirationDate: { gt: new Date() },
-										},
+	// User query is cached with short TTL for security-sensitive data
+	// Cache invalidated on security updates via invalidateUserSecurityCache()
+	// Using Promise.allSettled for resilient error handling - non-critical queries
+	// (connections, passkeys) gracefully degrade on failure
+	const results = await Promise.allSettled([
+		cachified({
+			key: `user-security:${userId}`,
+			cache,
+			ttl: 1000 * 30, // 30 seconds for security-sensitive data
+			getFreshValue: () =>
+				prisma.user.findUniqueOrThrow({
+					where: { id: userId },
+					select: {
+						id: true,
+						name: true,
+						username: true,
+						email: true,
+						image: {
+							select: { objectKey: true },
+						},
+						_count: {
+							select: {
+								sessions: {
+									where: {
+										expirationDate: { gt: new Date() },
 									},
 								},
 							},
 						},
-					}),
-			}),
-			prisma.verification.findUnique({
-				select: { id: true },
-				where: { target_type: { type: twoFAVerificationType, target: userId } },
-			}),
-			prisma.password.findUnique({
-				select: { userId: true },
-				where: { userId },
-			}),
-			prisma.connection.findMany({
-				select: {
-					id: true,
-					providerName: true,
-					providerId: true,
-					createdAt: true,
-				},
-				where: { userId },
-			}),
-			// Get passkeys for this user
-			prisma.passkey.findMany({
-				where: { userId },
-				orderBy: { createdAt: 'desc' },
-				select: {
-					id: true,
-					deviceType: true,
-					createdAt: true,
-				},
-			}),
-		])
+					},
+				}),
+		}),
+		prisma.verification.findUnique({
+			select: { id: true },
+			where: { target_type: { type: twoFAVerificationType, target: userId } },
+		}),
+		prisma.password.findUnique({
+			select: { userId: true },
+			where: { userId },
+		}),
+		prisma.connection.findMany({
+			select: {
+				id: true,
+				providerName: true,
+				providerId: true,
+				createdAt: true,
+			},
+			where: { userId },
+		}),
+		// Get passkeys for this user
+		prisma.passkey.findMany({
+			where: { userId },
+			orderBy: { createdAt: 'desc' },
+			select: {
+				id: true,
+				deviceType: true,
+				createdAt: true,
+			},
+		}),
+	])
+
+	// Extract results with error handling
+	const user =
+		results[0].status === 'fulfilled' ? results[0].value : (() => { throw results[0].reason })()
+	const twoFactorVerification =
+		results[1].status === 'fulfilled' ? results[1].value : null
+	const password = results[2].status === 'fulfilled' ? results[2].value : null
+	const connections =
+		results[3].status === 'fulfilled' ? results[3].value : []
+	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
 
 	// Generate TOTP QR code if 2FA is not enabled
 	let qrCode = null

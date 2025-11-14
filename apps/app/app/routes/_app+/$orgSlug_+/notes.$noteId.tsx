@@ -4,7 +4,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
-import { useRef, useEffect, useState, lazy, Suspense } from 'react'
+import { useRef, useEffect, useState, lazy, Suspense, Component } from 'react'
 import {
 	Button,
 	Tabs,
@@ -24,6 +24,29 @@ import {
 	type LoaderFunctionArgs,
 } from 'react-router'
 import { z } from 'zod'
+
+// Simple error boundary for lazy-loaded components
+class LazyLoadErrorBoundary extends Component<
+	{ children: React.ReactNode; fallback: React.ReactNode },
+	{ hasError: boolean }
+> {
+	constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+		super(props)
+		this.state = { hasError: false }
+	}
+
+	static getDerivedStateFromError() {
+		return { hasError: true }
+	}
+
+	render() {
+		if (this.state.hasError) {
+			return this.props.fallback
+		}
+		return this.props.children
+	}
+}
+
 // Lazy load AIChat component for better performance
 const AIChat = lazy(() =>
 	import('#app/components/ai-chat.tsx').then((module) => ({
@@ -1672,15 +1695,35 @@ export default function NoteRoute() {
 						value="ai-assistant"
 						className="bg-muted/20 flex-1 overflow-hidden"
 					>
-						<Suspense
+						<LazyLoadErrorBoundary
 							fallback={
-								<div className="flex h-full items-center justify-center">
-									<div className="text-muted-foreground">Loading AI Assistant...</div>
+								<div className="flex h-full items-center justify-center p-4">
+									<div className="text-center">
+										<div className="text-muted-foreground mb-2">
+											Failed to load AI Assistant
+										</div>
+										<button
+											onClick={() => window.location.reload()}
+											className="text-primary text-sm hover:underline"
+										>
+											Reload page
+										</button>
+									</div>
 								</div>
 							}
 						>
-							<AIChat noteId={note.id} />
-						</Suspense>
+							<Suspense
+								fallback={
+									<div className="flex h-full items-center justify-center">
+										<div className="text-muted-foreground">
+											Loading AI Assistant...
+										</div>
+									</div>
+								}
+							>
+								<AIChat noteId={note.id} />
+							</Suspense>
+						</LazyLoadErrorBoundary>
 					</TabsContent>
 				</Tabs>
 
