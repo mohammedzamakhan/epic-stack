@@ -38,13 +38,18 @@ function getBaseSignedRequestInfo({
 	uploadDate,
 	config,
 }: {
-	method: 'GET' | 'PUT'
+	method: 'GET' | 'PUT' | 'DELETE'
 	key: string
 	contentType?: string
 	uploadDate?: string
 	config: StorageConfig
 }) {
-	const url = `${config.endpoint}/${config.bucket}/${key}`
+	// URI encode the key for proper AWS Signature V4 handling
+	const encodedKey = key
+		.split('/')
+		.map((segment) => encodeURIComponent(segment))
+		.join('/')
+	const url = `${config.endpoint}/${config.bucket}/${encodedKey}`
 	const endpoint = new URL(url)
 
 	// Prepare date strings
@@ -65,7 +70,7 @@ function getBaseSignedRequestInfo({
 
 	const canonicalRequest = [
 		method,
-		`/${config.bucket}/${key}`,
+		`/${config.bucket}/${encodedKey}`,
 		'', // canonicalQueryString
 		canonicalHeaders,
 		signedHeaders,
@@ -127,6 +132,19 @@ function getSignedPutRequestInfo(
 			'Content-Type': file.type,
 			'X-Amz-Meta-Upload-Date': uploadDate,
 		},
+	}
+}
+
+function getSignedDeleteRequestInfo(key: string, config: StorageConfig) {
+	const { url, baseHeaders } = getBaseSignedRequestInfo({
+		method: 'DELETE',
+		key,
+		config,
+	})
+
+	return {
+		url,
+		headers: baseHeaders,
 	}
 }
 
@@ -209,12 +227,13 @@ export async function testS3Connection(
 		})
 
 		if (response.ok) {
-			// Try to delete the test file
+			// Try to delete the test file with proper signing
 			try {
-				const deleteUrl = `${config.endpoint}/${config.bucket}/${testKey}`
-				await fetch(deleteUrl, { method: 'DELETE' })
+				const { url: deleteUrl, headers: deleteHeaders } =
+					getSignedDeleteRequestInfo(testKey, config)
+				await fetch(deleteUrl, { method: 'DELETE', headers: deleteHeaders })
 			} catch {
-				// Ignore delete errors
+				// Ignore delete errors - test file will remain in bucket
 			}
 
 			return {

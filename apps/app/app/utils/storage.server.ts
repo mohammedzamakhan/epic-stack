@@ -7,11 +7,28 @@ import {
 	uploadCommentImage as _uploadCommentImage,
 	uploadNoteVideo as _uploadNoteVideo,
 	uploadVideoThumbnail as _uploadVideoThumbnail,
+	getSignedGetRequestInfo as _getSignedGetRequestInfo,
+	testS3Connection as _testS3Connection,
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
 import { prisma } from './db.server'
 import { decrypt, getSSOMasterKey } from './encryption.server'
+
+// Validate required environment variables
+const requiredEnvVars = [
+	'AWS_ENDPOINT_URL_S3',
+	'BUCKET_NAME',
+	'AWS_ACCESS_KEY_ID',
+	'AWS_SECRET_ACCESS_KEY',
+	'AWS_REGION',
+] as const
+
+for (const envVar of requiredEnvVars) {
+	if (!process.env[envVar]) {
+		throw new Error(`Missing required environment variable: ${envVar}`)
+	}
+}
 
 // Default storage configuration from environment variables
 const DEFAULT_STORAGE_CONFIG: StorageConfig = {
@@ -122,28 +139,30 @@ export async function uploadVideoThumbnail(
 // Export client functions
 export function getSignedGetRequestInfo(key: string, _organizationId?: string) {
 	// For synchronous calls, use default config only
-	const { getSignedGetRequestInfo } = require('@repo/storage')
-	return getSignedGetRequestInfo(key, DEFAULT_STORAGE_CONFIG)
+	return _getSignedGetRequestInfo(key, DEFAULT_STORAGE_CONFIG)
 }
 
 export async function getSignedGetRequestInfoAsync(
 	key: string,
 	organizationId?: string,
 ) {
-	const { url, headers } = await storageClient.getSignedGetUrl(key, organizationId, {
-		getOrganizationConfig: async (orgId) => {
-			return await prisma.organizationS3Config.findUnique({
-				where: { organizationId: orgId },
-			})
+	const { url, headers } = await storageClient.getSignedGetUrl(
+		key,
+		organizationId,
+		{
+			getOrganizationConfig: async (orgId) => {
+				return await prisma.organizationS3Config.findUnique({
+					where: { organizationId: orgId },
+				})
+			},
+			decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
 		},
-		decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
-	})
+	)
 	return { url, headers }
 }
 
 export async function testS3Connection(config: StorageConfig) {
-	const { testS3Connection } = require('@repo/storage')
-	return testS3Connection(config)
+	return _testS3Connection(config)
 }
 
 // Re-export types
