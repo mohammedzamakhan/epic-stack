@@ -7,7 +7,7 @@ import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { UsernameSchema, PasswordSchema } from '#app/utils/user-validation.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { getClientIp } from '#app/utils/ip-tracking.server.ts'
-import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.ts'
+import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.tsx'
 import { type Route } from './+types/auth.login.ts'
 
 const LoginFormSchema = z.object({

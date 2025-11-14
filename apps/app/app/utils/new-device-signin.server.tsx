@@ -1,4 +1,5 @@
 import { NewDeviceSigninEmail } from '@epic-stack/email'
+import React from 'react'
 import { prisma } from './db.server.ts'
 import { sendEmail } from './email.server.ts'
 import { parseUserAgent, getUserAgent } from './user-agent.server.ts'
