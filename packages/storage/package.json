@@ -2,14 +2,14 @@
   "name": "@repo/storage",
   "version": "0.0.0",
   "private": true,
-  "main": "./index.js",
-  "module": "./index.js",
-  "types": "./src/index.ts",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./index.js",
-      "default": "./index.js"
+      "types": "./index.ts",
+      "import": "./index.ts",
+      "default": "./index.ts"
     }
   },
   "scripts": {
