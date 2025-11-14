@@ -1675,7 +1675,7 @@ export default function NoteRoute() {
 						<Suspense
 							fallback={
 								<div className="flex h-full items-center justify-center">
-									<Icon name="update" className="animate-spin" />
+									<div className="text-muted-foreground">Loading AI Assistant...</div>
 								</div>
 							}
 						>

@@ -4,7 +4,6 @@ import { EpicToaster, TooltipProvider } from '@repo/ui'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
-	defer,
 	Links,
 	Meta,
 	Outlet,
@@ -138,11 +137,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		}
 	}
 
-	// Defer favorite notes for faster initial page load (non-critical data)
-	// This loads in the background without blocking page render
-	const favoriteNotesPromise =
+	// Load favorite notes
+	const favoriteNotes =
 		user && userOrganizations?.currentOrganization?.organization.id
-			? time(
+			? await time(
 					() =>
 						prisma.organizationNoteFavorite.findMany({
 							where: {
@@ -176,7 +174,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 						desc: 'find favorite notes in root',
 					},
 				)
-			: Promise.resolve(undefined)
+			: undefined
 
 	const requestInfo = {
 		hints: getHints(request),
@@ -198,7 +196,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const cookieConsent = await getCookieConsentState(request)
 
-	return defer(
+	return data(
 		{
 			user,
 			requestInfo,
@@ -207,8 +205,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			honeyProps,
 			locale,
 			userOrganizations,
-			// Deferred data - loads in the background without blocking page render
-			favoriteNotes: favoriteNotesPromise,
+			favoriteNotes,
 			impersonationInfo,
 			cookieConsent,
 			launchStatus: getLaunchStatus(),
