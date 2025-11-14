@@ -73,6 +73,36 @@ export default defineConfig((config) => ({
 
 		rollupOptions: {
 			external: [/node:.*/, 'fsevents'],
+			output: {
+				// Optimize chunk splitting for better caching and parallel loading
+				manualChunks: (id) => {
+					// Split vendor chunks for better caching
+					if (id.includes('node_modules')) {
+						// Large UI libraries in separate chunks
+						if (id.includes('@radix-ui')) {
+							return 'vendor-radix'
+						}
+						if (id.includes('@tiptap')) {
+							return 'vendor-tiptap'
+						}
+						if (id.includes('recharts') || id.includes('d3-')) {
+							return 'vendor-charts'
+						}
+						if (id.includes('@novu')) {
+							return 'vendor-novu'
+						}
+						if (id.includes('react-router') || id.includes('@react-router')) {
+							return 'vendor-router'
+						}
+						// Core React in its own chunk
+						if (id.includes('react') || id.includes('react-dom')) {
+							return 'vendor-react'
+						}
+						// Other vendor code
+						return 'vendor'
+					}
+				},
+			},
 		},
 
 		assetsInlineLimit: (source: string) => {

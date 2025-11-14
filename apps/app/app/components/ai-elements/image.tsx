@@ -17,6 +17,8 @@ export const Image = ({
 		{...props}
 		src={`data:${mediaType};base64,${base64}`}
 		alt={props.alt}
+		loading="lazy"
+		decoding="async"
 		className={cn(
 			'h-auto max-w-full overflow-hidden rounded-md',
 			props.className,

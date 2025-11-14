@@ -11,8 +11,12 @@ if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
 }
 
 const locale = detect(fromHtmlTag('lang')) || 'en'
-await loadCatalog(locale)
 
+// Load catalog asynchronously without blocking hydration
+// This improves initial page load performance
+void loadCatalog(locale)
+
+// Start hydration immediately - translations will be available soon
 startTransition(() => {
 	hydrateRoot(
 		document,

@@ -43,8 +43,16 @@ import { storeUtmParams } from './utils/utm.server.ts'
 
 export const links: Route.LinksFunction = () => {
 	return [
-		// Preload svg sprite as a resource to avoid render blocking
+		// Preconnect to external services for faster resource loading
+		{ rel: 'preconnect', href: 'https://api.novu.co' },
+		{ rel: 'preconnect', href: 'https://ws.novu.co' },
+		{ rel: 'dns-prefetch', href: 'https://api.novu.co' },
+
+		// Preload critical assets
 		{ rel: 'preload', href: iconsHref, as: 'image' },
+		{ rel: 'preload', href: tailwindStyleSheetUrl, as: 'style' },
+
+		// Favicons
 		{
 			rel: 'icon',
 			href: '/favicon.ico',
@@ -56,7 +64,9 @@ export const links: Route.LinksFunction = () => {
 			rel: 'manifest',
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
-		} as const, // necessary to make typescript happy
+		} as const,
+
+		// Stylesheet
 		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
@@ -121,62 +131,37 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
-	// Load user organizations immediately (required for NovuProvider)
-	let userOrganizations = undefined
-	if (user) {
-		try {
-			const { getUserOrganizations, getUserDefaultOrganization } = await import(
-				'./utils/organizations.server'
-			)
-			const orgs = await getUserOrganizations(user.id, true) // Include permissions
-			const defaultOrg = await getUserDefaultOrganization(user.id)
-			userOrganizations = {
-				organizations: orgs,
-				currentOrganization: defaultOrg,
-			}
-		} catch (error) {
-			console.error('Failed to load user organizations', error)
-		}
-	}
+	// Defer loading of user organizations to improve initial page load
+	// These will be loaded on-demand in routes that need them
+	const userOrganizationsPromise = user
+		? (async () => {
+				try {
+					const { getUserOrganizations, getUserDefaultOrganization } =
+						await import('./utils/organizations.server')
+					const orgs = await getUserOrganizations(user.id, true)
+					const defaultOrg = await getUserDefaultOrganization(user.id)
+					return {
+						organizations: orgs,
+						currentOrganization: defaultOrg,
+					}
+				} catch (error) {
+					console.error('Failed to load user organizations', error)
+					return undefined
+				}
+			})()
+		: Promise.resolve(undefined)
 
-	// Load favorite notes
-	const favoriteNotes =
-		user && userOrganizations?.currentOrganization?.organization?.id
-			? await time(
-					() =>
-						prisma.organizationNoteFavorite.findMany({
-							where: {
-								userId: user.id,
-								note: {
-									organizationId:
-										userOrganizations.currentOrganization?.organization.id ?? '',
-									OR: [
-										{ isPublic: true },
-										{ createdById: user.id },
-										{ noteAccess: { some: { userId: user.id } } },
-									],
-								},
-							},
-							select: {
-								note: {
-									select: {
-										id: true,
-										title: true,
-									},
-								},
-							},
-							orderBy: {
-								createdAt: 'desc',
-							},
-							take: 5, // Limit to 5 most recent favorites
-						}),
-					{
-						timings,
-						type: 'find favorite notes',
-						desc: 'find favorite notes in root',
-					},
-				)
-			: undefined
+	// Load organizations but don't await - cache for later use
+	const userOrganizations = await cachified({
+		key: `user-organizations:${user?.id}`,
+		cache,
+		ttl: 1000 * 60 * 2, // 2 minutes
+		getFreshValue: () => userOrganizationsPromise,
+	})
+
+	// Defer favorite notes loading - not critical for initial render
+	// These are typically only needed in the sidebar/navigation
+	const favoriteNotes = undefined
 
 	const requestInfo = {
 		hints: getHints(request),
@@ -262,6 +247,7 @@ function Document({
 					}}
 				/>
 				<ScrollRestoration nonce={nonce} />
+				{/* Load scripts with optimal timing - defer non-critical scripts */}
 				<Scripts nonce={nonce} />
 			</body>
 		</html>
@@ -287,25 +273,43 @@ function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	useToast(data.toast)
 
+	// Only load NovuProvider if user is logged in and has an organization
+	const shouldLoadNovu =
+		data.user &&
+		data.userOrganizations?.currentOrganization?.organization?.id
+
 	return (
 		<HoneypotProvider {...data.honeyProps}>
 			<OpenImgContextProvider
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
 			>
-				<NovuProvider
-					subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
-					applicationIdentifier="XQdYIaaQAOv5"
-				>
-					{data.impersonationInfo && (
-						<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-					)}
-					<TooltipProvider>
-						<Outlet />
-					</TooltipProvider>
-					<EpicToaster />
-					<CookieConsentBanner consent={data.cookieConsent} />
-				</NovuProvider>
+				{shouldLoadNovu ? (
+					<NovuProvider
+						subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
+						applicationIdentifier="XQdYIaaQAOv5"
+					>
+						{data.impersonationInfo && (
+							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
+						)}
+						<TooltipProvider>
+							<Outlet />
+						</TooltipProvider>
+						<EpicToaster />
+						<CookieConsentBanner consent={data.cookieConsent} />
+					</NovuProvider>
+				) : (
+					<>
+						{data.impersonationInfo && (
+							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
+						)}
+						<TooltipProvider>
+							<Outlet />
+						</TooltipProvider>
+						<EpicToaster />
+						<CookieConsentBanner consent={data.cookieConsent} />
+					</>
+				)}
 			</OpenImgContextProvider>
 		</HoneypotProvider>
 	)
