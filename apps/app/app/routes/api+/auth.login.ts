@@ -7,6 +7,7 @@ import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { UsernameSchema, PasswordSchema } from '#app/utils/user-validation.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.ts'
 import { type Route } from './+types/auth.login.ts'
 
 const LoginFormSchema = z.object({
@@ -93,6 +94,12 @@ export async function action({ request }: Route.ActionArgs) {
 		},
 		{ userAgent, ip },
 	)
+
+	// Check for new device and send notification email
+	void handleNewDeviceSignin({
+		userId: user.id,
+		request,
+	})
 
 	return data({
 		success: true,
