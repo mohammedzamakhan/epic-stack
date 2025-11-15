@@ -40,7 +40,7 @@ import {
 import {
 	saveLastLoginMethod,
 	useLastLoginMethod,
-} from '#app/utils/last-login-method.ts'
+} from '@repo/auth'
 import arcjet from '@repo/server-utils'
 import { login, requireAnonymous } from '@repo/auth'
 import {
