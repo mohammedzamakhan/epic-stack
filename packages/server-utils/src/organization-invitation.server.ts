@@ -1,7 +1,7 @@
 import { webcrypto as crypto } from 'node:crypto'
 import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from './db.server'
-import { sendEmail } from '@repo/email'
+import { sendEmail } from './email.server'
 import { markStepCompleted } from './onboarding'
 import { type OrganizationRoleName } from './organizations.server'
 

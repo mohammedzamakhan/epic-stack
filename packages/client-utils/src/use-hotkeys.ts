@@ -1,7 +1,17 @@
 import hotkeys from 'hotkeys-js'
 import { useEffect } from 'react'
 import { useNavigate, useRouteLoaderData } from 'react-router'
-import { type loader as rootLoader } from '#app/root'
+
+// Type for root loader data
+type RootLoaderData = {
+	userOrganizations?: {
+		currentOrganization?: {
+			organization: {
+				slug: string
+			}
+		}
+	}
+}
 
 interface HotkeyConfig {
 	key: string
@@ -30,7 +40,7 @@ export function useHotkeys(configs: HotkeyConfig[]) {
 
 export function useGlobalHotkeys(setCommandOpen: (open: boolean) => void) {
 	const navigate = useNavigate()
-	const rootData = useRouteLoaderData<typeof rootLoader>('root')
+	const rootData = useRouteLoaderData<RootLoaderData>('root')
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
 

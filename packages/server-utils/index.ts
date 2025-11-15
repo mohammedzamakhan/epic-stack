@@ -3,6 +3,7 @@ export * from './src/cache.server'
 export * from './src/logger.server'
 export * from './src/env.server'
 export * from './src/encryption.server'
+export * from './src/email.server'
 
 // Monitoring and logging
 export * from './src/activity-log.server'

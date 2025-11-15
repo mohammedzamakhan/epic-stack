@@ -15,7 +15,7 @@ import {
 	type NoteIntegrationConnection,
 	type OrganizationNote,
 	type Organization,
-} from '@prisma/client'
+} from '@repo/prisma'
 import { prisma } from '@repo/prisma'
 import { type IntegrationProvider, providerRegistry } from './provider'
 import {

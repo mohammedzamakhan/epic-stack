@@ -1,6 +1,17 @@
 import { invariant } from '@epic-web/invariant'
 import { useRouteLoaderData } from 'react-router'
-import { type loader as rootLoader } from '#app/root'
+
+// Type for root loader data
+type RootLoaderData = {
+	requestInfo: {
+		hints: Record<string, string>
+		origin: string
+		path: string
+		userPrefs: {
+			theme?: string | null
+		}
+	}
+}
 
 /**
  * @returns the request info from the root loader (throws an error if it does not exist)
@@ -13,7 +24,7 @@ export function useRequestInfo() {
 }
 
 export function useOptionalRequestInfo() {
-	const data = useRouteLoaderData<typeof rootLoader>('root')
+	const data = useRouteLoaderData<RootLoaderData>('root')
 
 	return data?.requestInfo
 }

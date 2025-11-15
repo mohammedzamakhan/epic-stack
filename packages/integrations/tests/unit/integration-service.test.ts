@@ -19,7 +19,7 @@ import type {
 	Integration,
 	NoteIntegrationConnection,
 	OrganizationNote,
-} from '@prisma/client'
+} from '@repo/prisma'
 
 // Mock the integration manager
 vi.mock('../../src/integration-manager', () => ({

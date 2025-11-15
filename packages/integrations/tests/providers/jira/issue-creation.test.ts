@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { JiraProvider } from '../../../src/providers/jira/provider'
 import { fixtures } from '../../utils/fixtures'
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
+import type { Integration, NoteIntegrationConnection } from '@repo/prisma'
 import type { MessageData } from '../../../src/types'
 
 // Mock the encryption module

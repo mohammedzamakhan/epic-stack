@@ -5,8 +5,17 @@ export * from './src/session.server'
 // Permissions
 export * from './src/permissions.server'
 export * from './src/permission-constants'
+
+// Organization permissions - export everything from server
 export * from './src/organization-permissions.server'
-export * from './src/organization-permissions'
+
+// Organization permissions - export only hooks from client (not duplicates)
+export {
+	useUserHasOrganizationPermission,
+	useCurrentOrganizationPermissions,
+	useUserHasAnyOrganizationPermission,
+	useUserHasAllOrganizationPermissions,
+} from './src/organization-permissions'
 
 // User utilities
 export * from './src/user'
@@ -33,7 +42,8 @@ export * from './src/sso-connection-pool.server'
 export * from './src/sso-rate-limit.server'
 export * from './src/sso-retry-logic.server'
 export * from './src/sso-error-handling.server'
-export * from './src/sso-monitoring.server'
+// Export sso-monitoring without SSOHealthStatus to avoid conflict
+export { SSOPerformanceMetrics, SSOMonitoringService, ssoMonitoringService } from './src/sso-monitoring.server'
 export * from './src/sso-health-check.server'
 export * from './src/sso-periodic-validation.server'
 export * from './src/sso-audit-logging.server'

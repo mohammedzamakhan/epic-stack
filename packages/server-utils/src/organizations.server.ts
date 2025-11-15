@@ -1,4 +1,4 @@
-import { type User } from '@prisma/client'
+import { type User } from '@repo/prisma'
 import { data } from 'react-router'
 import { prisma } from '@repo/prisma'
 import { getUserId } from '@repo/auth'

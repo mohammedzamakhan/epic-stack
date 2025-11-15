@@ -3,7 +3,7 @@ import { SlackProvider } from '../../../src/providers/slack/provider'
 import { server } from '../../setup'
 import { http, HttpResponse } from 'msw'
 import { fixtures } from '../../utils/fixtures'
-import type { Integration } from '@prisma/client'
+import type { Integration } from '@repo/prisma'
 
 describe('SlackProvider - Channel Retrieval', () => {
 	let provider: SlackProvider

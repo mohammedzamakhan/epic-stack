@@ -1,14 +1,30 @@
 import { useRouteLoaderData } from 'react-router'
-import { type loader as rootLoader } from '#app/root'
 
-function isUser(
-	user: any,
-): user is Awaited<ReturnType<typeof rootLoader>>['data']['user'] {
+// Type for root loader data
+type RootLoaderData = {
+	user: {
+		id: string
+		email: string
+		username: string
+		name: string | null
+		imageId: string | null
+		roles: Array<{
+			name: string
+			permissions: Array<{
+				entity: string
+				action: string
+				access: string
+			}>
+		}>
+	} | null
+}
+
+function isUser(user: any): user is NonNullable<RootLoaderData['user']> {
 	return user && typeof user === 'object' && typeof user.id === 'string'
 }
 
 export function useOptionalUser() {
-	const data = useRouteLoaderData<typeof rootLoader>('root')
+	const data = useRouteLoaderData<RootLoaderData>('root')
 	if (!data || !isUser(data.user)) {
 		return undefined
 	}

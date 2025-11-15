@@ -1,9 +1,9 @@
 import { styleText } from 'node:util'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@repo/prisma'
 import { remember } from '@epic-web/remember'
 
 // Export types
-export * from '@prisma/client'
+export * from '@repo/prisma'
 
 // Changed import due to issue: https://github.com/remix-run/react-router/pull/12644
 export const prisma = remember('prisma', () => {

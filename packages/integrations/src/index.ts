@@ -98,4 +98,4 @@ export type {
 	Integration,
 	NoteIntegrationConnection,
 	OrganizationNote,
-} from '@prisma/client'
+} from '@repo/prisma'

@@ -11,7 +11,7 @@ import {
 } from '../../src/token-manager'
 import { integrationEncryption } from '../../src/encryption'
 import { prisma } from '@repo/prisma'
-import type { Integration } from '@prisma/client'
+import type { Integration } from '@repo/prisma'
 import type { IntegrationProvider, TokenData } from '../../src/types'
 
 // Mock dependencies

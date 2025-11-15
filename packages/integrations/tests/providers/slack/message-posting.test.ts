@@ -3,7 +3,7 @@ import { SlackProvider } from '../../../src/providers/slack/provider'
 import { server } from '../../setup'
 import { http, HttpResponse } from 'msw'
 import { fixtures } from '../../utils/fixtures'
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
+import type { Integration, NoteIntegrationConnection } from '@repo/prisma'
 
 describe('SlackProvider - Message Posting', () => {
 	let provider: SlackProvider
