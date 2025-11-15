@@ -1,6 +1,14 @@
 // Core utilities
 export * from './src/cache.server'
-export * from './src/logger.server'
+// Export logger without getClientIp (use ip-tracking version instead)
+export {
+	sanitizeUrl,
+	logger,
+	createSentryLogger,
+	sentryLogger,
+	createChildLogger,
+	sanitizeIpAddress,
+} from './src/logger.server'
 export * from './src/env.server'
 export * from './src/encryption.server'
 export * from './src/email.server'

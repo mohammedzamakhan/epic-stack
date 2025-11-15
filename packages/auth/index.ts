@@ -43,7 +43,8 @@ export * from './src/sso-rate-limit.server'
 export * from './src/sso-retry-logic.server'
 export * from './src/sso-error-handling.server'
 // Export sso-monitoring without SSOHealthStatus to avoid conflict
-export { SSOPerformanceMetrics, SSOMonitoringService, ssoMonitoringService } from './src/sso-monitoring.server'
+export type { SSOPerformanceMetrics } from './src/sso-monitoring.server'
+export { SSOMonitoringService, ssoMonitoringService } from './src/sso-monitoring.server'
 export * from './src/sso-health-check.server'
 export * from './src/sso-periodic-validation.server'
 export * from './src/sso-audit-logging.server'
@@ -56,8 +57,18 @@ export * from './src/providers/github.server'
 export * from './src/providers/google.server'
 export * from './src/providers/constants'
 
-// Hooks
-export * from './src/use-organization-permissions'
+// Hooks (export without PermissionString to avoid conflict with user.ts)
+export type { UserOrganizationPermissions } from './src/use-organization-permissions'
+export {
+	useOrganizationPermissions,
+	useHasPermission,
+	useHasAllPermissions,
+	useHasAnyPermission,
+	useNotePermissions,
+	useMemberPermissions,
+	useSettingsPermissions,
+	useOrganizationRole,
+} from './src/use-organization-permissions'
 
 // Re-export db
 export * from './src/db.server'
