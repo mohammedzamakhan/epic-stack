@@ -22,6 +22,7 @@ export * from './src/api-key.server'
 // OAuth connections
 export * from './src/connections.server'
 export * from './src/connections'
+export * from './src/last-login-method'
 
 // SSO
 export * from './src/sso-auth.server'
