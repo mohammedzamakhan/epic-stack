@@ -3,7 +3,7 @@ import { type ProviderName } from './connections.tsx'
 import { GitHubProvider } from './providers/github.server.ts'
 import { GoogleProvider } from './providers/google.server.ts'
 import { type AuthProvider } from './providers/provider.ts'
-import { type Timings } from './timing.server.ts'
+import { type Timings } from '@repo/server-utils'
 
 export const providers: Record<ProviderName, AuthProvider> = {
 	github: new GitHubProvider(),
