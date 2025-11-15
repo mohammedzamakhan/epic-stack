@@ -31,7 +31,7 @@ import { requireAnonymous } from '@repo/auth'
 import {
 	ProviderConnectionForm,
 	providerNames,
-} from '#app/utils/connections.tsx'
+} from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '@repo/auth'

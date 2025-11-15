@@ -26,7 +26,7 @@ import {
 	signupWithConnection,
 	requireAnonymous,
 } from '@repo/auth'
-import { ProviderNameSchema } from '#app/utils/connections.tsx'
+import { ProviderNameSchema } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '@repo/client-utils'
 import { authSessionStorage } from '@repo/auth'

@@ -1,7 +1,7 @@
 import { redirect } from 'react-router'
 import { authenticator } from '@repo/auth'
 import { handleMockAction } from '@repo/auth'
-import { ProviderNameSchema } from '#app/utils/connections.tsx'
+import { ProviderNameSchema } from '@repo/auth'
 import { getReferrerRoute } from '@repo/client-utils'
 import { getRedirectCookieHeader } from '@repo/server-utils'
 import { type Route } from './+types/auth_.$provider.ts'

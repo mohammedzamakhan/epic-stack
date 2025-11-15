@@ -46,7 +46,7 @@ import { login, requireAnonymous } from '@repo/auth'
 import {
 	ProviderConnectionForm,
 	providerNames,
-} from '#app/utils/connections.tsx'
+} from '@repo/auth'
 import { checkHoneypot } from '@repo/auth'
 import { getErrorMessage, useIsPending } from '@repo/client-utils'
 import { PasswordSchema } from '@repo/auth'

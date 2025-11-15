@@ -19,7 +19,7 @@ import {
 	ProviderNameSchema,
 	providerIcons,
 	providerNames,
-} from '#app/utils/connections.tsx'
+} from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { pipeHeaders } from '@repo/server-utils'
 import { makeTimings } from '@repo/server-utils'

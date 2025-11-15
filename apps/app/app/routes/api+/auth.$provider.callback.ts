@@ -1,7 +1,7 @@
 import { data } from 'react-router'
 import { authenticator, canUserLogin } from '@repo/auth'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
-import { ProviderNameSchema } from '#app/utils/connections.tsx'
+import { ProviderNameSchema } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	normalizeEmail,

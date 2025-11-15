@@ -4,7 +4,7 @@ import {
 	getSessionExpirationDate,
 	getUserId,
 } from '@repo/auth'
-import { ProviderNameSchema, providerLabels } from '#app/utils/connections.tsx'
+import { ProviderNameSchema, providerLabels } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { ensurePrimary } from '@repo/server-utils'
 import { combineHeaders } from '@repo/client-utils'
