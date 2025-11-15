@@ -7,7 +7,7 @@ import { HydratedRouter } from 'react-router/dom'
 import { loadCatalog } from './modules/lingui/lingui'
 
 if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
-	void import('./utils/monitoring.client.tsx').then(({ init }) => init())
+	void import('@repo/client-utils/src/monitoring.client').then(({ init }) => init())
 }
 
 const locale = detect(fromHtmlTag('lang')) || 'en'
