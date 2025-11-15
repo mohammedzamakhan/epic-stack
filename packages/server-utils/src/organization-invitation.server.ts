@@ -3,7 +3,6 @@ import { OrganizationInviteEmail } from '@repo/email'
 import { prisma } from './db.server'
 import { sendEmail } from '@repo/email'
 import { markStepCompleted } from './onboarding'
-import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { type OrganizationRoleName } from './organizations.server'
 
 // Helper function to get organization role ID by name
@@ -226,13 +225,16 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 			])
 
 			// Update seat quantity for billing
-			try {
-				await updateSeatQuantity(invitation.organizationId)
-			} catch (error) {
-				console.error(
-					'Failed to update seat quantity after adding user:',
-					error,
-				)
+			// Update seat quantity if callback provided
+			if (options?.onSeatQuantityUpdate) {
+				try {
+					await options.onSeatQuantityUpdate(invitation.organizationId)
+				} catch (error) {
+					console.error(
+						'Failed to update seat quantity after adding user:',
+						error,
+					)
+				}
 			}
 
 			results.push({
@@ -248,6 +250,9 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 export async function validateAndAcceptInvitation(
 	token: string,
 	userId: string,
+	options?: {
+		onSeatQuantityUpdate?: (organizationId: string) => Promise<void>
+	},
 ) {
 	const invitation = await prisma.organizationInvitation.findUnique({
 		where: { token },
@@ -303,11 +308,13 @@ export async function validateAndAcceptInvitation(
 		}),
 	])
 
-	// Update seat quantity for billing
-	try {
-		await updateSeatQuantity(invitation.organizationId)
-	} catch (error) {
-		console.error('Failed to update seat quantity after adding user:', error)
+	// Update seat quantity if callback provided
+	if (options?.onSeatQuantityUpdate) {
+		try {
+			await options.onSeatQuantityUpdate(invitation.organizationId)
+		} catch (error) {
+			console.error('Failed to update seat quantity after adding user:', error)
+		}
 	}
 
 	return { organization: invitation.organization, alreadyMember: false }
@@ -496,6 +503,9 @@ export async function createInvitationFromLink(
 export async function validateAndAcceptInviteLink(
 	token: string,
 	userId: string,
+	options?: {
+		onSeatQuantityUpdate?: (organizationId: string) => Promise<void>
+	},
 ) {
 	const inviteLink = await prisma.organizationInviteLink.findUnique({
 		where: { token },
@@ -542,11 +552,13 @@ export async function validateAndAcceptInviteLink(
 		},
 	})
 
-	// Update seat quantity for billing
-	try {
-		await updateSeatQuantity(inviteLink.organizationId)
-	} catch (error) {
-		console.error('Failed to update seat quantity after adding user:', error)
+	// Update seat quantity if callback provided
+	if (options?.onSeatQuantityUpdate) {
+		try {
+			await options.onSeatQuantityUpdate(inviteLink.organizationId)
+		} catch (error) {
+			console.error('Failed to update seat quantity after adding user:', error)
+		}
 	}
 
 	return { organization: inviteLink.organization, alreadyMember: false }
