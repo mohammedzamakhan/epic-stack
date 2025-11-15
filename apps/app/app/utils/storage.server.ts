@@ -12,8 +12,8 @@ import {
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
-import { prisma } from './db.server'
-import { decrypt, getSSOMasterKey } from './encryption.server'
+import { prisma } from '@repo/server-utils'
+import { decrypt, getSSOMasterKey } from '@repo/server-utils'
 
 // Validate required environment variables
 const requiredEnvVars = [
