@@ -145,6 +145,8 @@ const daysRemaining = calculateManualTrialDaysRemaining(
 
 ## Environment Variables
 
+### Stripe
+
 ```env
 # Required
 STRIPE_SECRET_KEY=sk_test_xxx
@@ -153,6 +155,17 @@ STRIPE_SECRET_KEY=sk_test_xxx
 TRIAL_DAYS=14
 CREDIT_CARD_REQUIRED_FOR_TRIAL=manual # or 'stripe'
 STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+
+### Polar
+
+```env
+# Required
+POLAR_ACCESS_TOKEN=polar_at_xxx
+
+# Optional
+TRIAL_DAYS=14
+CREDIT_CARD_REQUIRED_FOR_TRIAL=manual
 ```
 
 ## Switching Payment Providers
@@ -166,10 +179,10 @@ const provider = createPaymentProvider({
   apiKey: process.env.STRIPE_SECRET_KEY!,
 })
 
-// After: Polar (when available)
+// After: Polar
 const provider = createPaymentProvider({
   provider: 'polar',
-  apiKey: process.env.POLAR_SECRET_KEY!,
+  apiKey: process.env.POLAR_ACCESS_TOKEN!,
 })
 
 // After: Lemon Squeezy (when available)
@@ -183,20 +196,32 @@ The rest of your code remains unchanged! 🎉
 
 ## Advanced Usage
 
-### Direct Stripe Client Access
+### Direct Provider Client Access
 
-If you need Stripe-specific functionality, you can access the underlying client:
+If you need provider-specific functionality, you can access the underlying client:
 
 ```typescript
+// Stripe
 import { StripeProvider } from '@repo/payments'
 
-const provider = new StripeProvider({
+const stripeProvider = new StripeProvider({
   apiKey: process.env.STRIPE_SECRET_KEY!,
 })
 
 // Access Stripe client for advanced features
-const stripeClient = provider.getClient()
+const stripeClient = stripeProvider.getClient()
 const charge = await stripeClient.charges.retrieve('ch_xxx')
+
+// Polar
+import { PolarProvider } from '@repo/payments'
+
+const polarProvider = new PolarProvider({
+  apiKey: process.env.POLAR_ACCESS_TOKEN!,
+})
+
+// Access Polar client for advanced features
+const polarClient = polarProvider.getClient()
+const benefits = await polarClient.benefits.list()
 ```
 
 ### Type Safety
@@ -235,10 +260,47 @@ const customer = await provider.createTestCustomer?.(testClock.id)
 │   ├── factory.ts            # Provider factory
 │   ├── trial-config.ts       # Trial configuration utilities
 │   └── providers/
-│       ├── stripe.ts         # Stripe implementation
-│       ├── polar.ts          # Polar implementation (coming soon)
+│       ├── stripe.ts         # Stripe implementation ✓
+│       ├── polar.ts          # Polar implementation ✓
 │       └── lemon-squeezy.ts  # Lemon Squeezy implementation (coming soon)
 └── index.ts                  # Public API
+```
+
+## Provider-Specific Notes
+
+### Polar Limitations
+
+The Polar SDK is more limited compared to Stripe. Some methods have limitations:
+
+- **Organization ID Required**: Most Polar operations require an `organizationId`. Set it when creating the provider or use `setOrganizationId()`.
+- **No Direct Subscription Management**: The Polar SDK doesn't support retrieving, updating, or canceling individual subscriptions through the standard API. Use the Polar client directly for these operations.
+- **No Customer Portal**: Polar doesn't have a customer portal session API like Stripe. You'll need to implement your own billing management page.
+- **Webhook Validation**: Webhook signature verification is not fully implemented. Add proper validation for production use.
+
+Example usage with Polar:
+
+```typescript
+import { createPolarProvider } from '@repo/payments'
+
+const provider = createPolarProvider(
+  process.env.POLAR_ACCESS_TOKEN!,
+  process.env.POLAR_ORGANIZATION_ID! // Required for most operations
+)
+
+// Or set it later
+provider.setOrganizationId(process.env.POLAR_ORGANIZATION_ID!)
+
+// List products and prices works the same as Stripe
+const products = await provider.getProducts()
+const prices = await provider.getPrices()
+
+// Create checkout sessions
+const session = await provider.createCheckoutSession({
+  priceId: 'price_xxx',
+  quantity: 1,
+  successUrl: 'https://example.com/success',
+  cancelUrl: 'https://example.com/cancel',
+})
 ```
 
 ## Contributing

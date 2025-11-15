@@ -39,10 +39,14 @@ export type {
 } from './src/types'
 
 // Factory functions
-export { createPaymentProvider, createStripeProvider } from './src/factory'
+export {
+	createPaymentProvider,
+	createStripeProvider,
+	createPolarProvider,
+} from './src/factory'
 
 // Providers
-export { StripeProvider } from './src/providers'
+export { StripeProvider, PolarProvider } from './src/providers'
 
 // Trial configuration
 export {

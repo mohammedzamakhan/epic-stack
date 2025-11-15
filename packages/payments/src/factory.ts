@@ -5,6 +5,7 @@
 
 import type { PaymentProvider, PaymentProviderConfig } from './types'
 import { StripeProvider } from './providers/stripe'
+import { PolarProvider } from './providers/polar'
 
 /**
  * Create a payment provider instance
@@ -28,9 +29,10 @@ export function createPaymentProvider(
 				apiVersion: config.apiVersion,
 			})
 		case 'polar':
-			throw new Error(
-				'Polar provider not yet implemented. Coming soon! For now, use Stripe.',
-			)
+			return new PolarProvider({
+				apiKey: config.apiKey,
+				organizationId: config.organizationId,
+			})
 		case 'lemon-squeezy':
 			throw new Error(
 				'Lemon Squeezy provider not yet implemented. Coming soon! For now, use Stripe.',
@@ -51,4 +53,17 @@ export function createStripeProvider(
 	apiVersion?: string,
 ): StripeProvider {
 	return new StripeProvider({ apiKey, apiVersion })
+}
+
+/**
+ * Create a Polar payment provider instance (convenience function)
+ * @param apiKey Polar access token
+ * @param organizationId Polar organization ID (optional, can be set later)
+ * @returns PolarProvider instance
+ */
+export function createPolarProvider(
+	apiKey: string,
+	organizationId?: string,
+): PolarProvider {
+	return new PolarProvider({ apiKey, organizationId })
 }

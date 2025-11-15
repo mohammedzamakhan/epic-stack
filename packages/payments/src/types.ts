@@ -179,4 +179,5 @@ export interface PaymentProviderConfig {
 	apiKey: string
 	webhookSecret?: string
 	apiVersion?: string
+	organizationId?: string // Required for Polar
 }
