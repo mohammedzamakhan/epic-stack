@@ -10,6 +10,11 @@
 			"types": "./index.ts",
 			"import": "./index.ts",
 			"default": "./index.ts"
+		},
+		"./monitoring": {
+			"types": "./src/monitoring.client.tsx",
+			"import": "./src/monitoring.client.tsx",
+			"default": "./src/monitoring.client.tsx"
 		}
 	},
 	"scripts": {
