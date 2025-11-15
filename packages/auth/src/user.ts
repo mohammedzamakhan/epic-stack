@@ -72,7 +72,7 @@ export function userHasPermission(
 			(permission) =>
 				permission.entity === entity &&
 				permission.action === action &&
-				(!access || access.includes(permission.access)),
+				(!access || access.includes(permission.access as Access)),
 		),
 	)
 }

@@ -10,7 +10,8 @@ import { combineHeaders, downloadFile } from '@repo/client-utils'
 import { type ProviderUser } from './providers/provider.ts'
 import { authSessionStorage } from './session.server.ts'
 import { ssoAuthService } from './sso-auth.server.ts'
-import { uploadProfileImage } from '@repo/storage'
+// NOTE: uploadProfileImage removed due to circular dependency - apps should handle image uploads
+// import { uploadProfileImage } from '@repo/storage'
 import { getUtmParams } from '@repo/server-utils'
 
 export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30
@@ -338,19 +339,21 @@ export async function signupWithConnection({
 		select: { id: true },
 	})
 
-	if (imageUrl) {
-		const imageFile = await downloadFile(imageUrl)
-		await prisma.user.update({
-			where: { id: user.id },
-			data: {
-				image: {
-					create: {
-						objectKey: await uploadProfileImage(user.id, imageFile),
-					},
-				},
-			},
-		})
-	}
+	// NOTE: Profile image upload removed to avoid circular dependency with @repo/storage
+	// Apps should handle profile image uploads in their own signup flow
+	// if (imageUrl) {
+	// 	const imageFile = await downloadFile(imageUrl)
+	// 	await prisma.user.update({
+	// 		where: { id: user.id },
+	// 		data: {
+	// 			image: {
+	// 				create: {
+	// 					objectKey: await uploadProfileImage(user.id, imageFile),
+	// 				},
+	// 			},
+	// 		},
+	// 	})
+	// }
 
 	// Create and return the session
 	const session = await prisma.session.create({

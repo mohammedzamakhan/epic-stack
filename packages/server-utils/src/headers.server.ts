@@ -77,7 +77,7 @@ export function getConservativeCacheControl(
 ): string {
 	return format(
 		cacheControlHeaders
-			.filter(Boolean)
+			.filter((h): h is string => Boolean(h))
 			.map((header) => parse(header))
 			.reduce<CacheControlValue>((acc, current) => {
 				for (const key in current) {
