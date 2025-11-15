@@ -1,0 +1,33 @@
+{
+	"name": "@repo/client-utils",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"exports": {
+		".": {
+			"types": "./index.ts",
+			"import": "./index.ts",
+			"default": "./index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc",
+		"clean": "git clean -xdf .cache .nx dist node_modules",
+		"typecheck": "tsc --noEmit --emitDeclarationOnly false"
+	},
+	"dependencies": {
+		"@react-router/node": "^7.8.1",
+		"hotkeys-js": "^3.13.15",
+		"zod": "^3.25.76"
+	},
+	"peerDependencies": {
+		"react": "^19.1.1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.15.21",
+		"@types/react": "^19.1.2",
+		"typescript": "^5.8.3"
+	}
+}
