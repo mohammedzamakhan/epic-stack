@@ -1,28 +1,28 @@
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '@repo/auth'
 import { getOrganizationBySlug } from '@repo/server-utils'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
+import { ssoAuthService } from '@repo/auth'
 import { getReferrerRoute } from '@repo/client-utils'
 import { getRedirectCookieHeader } from '@repo/server-utils'
 import { SSOAuthRequestSchema } from '@repo/validation'
 import {
 	sanitizeOrganizationSlug,
 	sanitizeRedirectUrl,
-} from '#app/utils/sso-sanitization.server.ts'
+} from '@repo/auth'
 import {
 	trackSuspiciousActivity,
 	isSuspiciousActivityBlocked,
-} from '#app/utils/sso-rate-limit.server.ts'
+} from '@repo/auth'
 import {
 	handleSSOError,
 	createSSOError,
 	SSOErrorType,
 	createSSOFallbackResponse,
-} from '#app/utils/sso-error-handling.server.ts'
+} from '@repo/auth'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
-} from '#app/utils/sso-audit-logging.server.ts'
+} from '@repo/auth'
 import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.sso.$organizationSlug.ts'
 

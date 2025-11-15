@@ -56,7 +56,7 @@ import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
 } from '@repo/server-utils'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { ssoConfigurationService } from '@repo/auth'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

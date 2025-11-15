@@ -1,7 +1,7 @@
 import { type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { discoverOrganizationFromEmail } from '@repo/server-utils'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { ssoConfigurationService } from '@repo/auth'
 
 const DiscoverOrgSchema = z.object({
 	email: z.string().email('Invalid email format'),

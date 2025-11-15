@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { requireUserWithRole } from '@repo/auth'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { ssoConfigurationService } from '@repo/auth'
 import { type Route } from './+types/organizations.$organizationId.sso.ts'
 
 export async function action({ request, params }: Route.ActionArgs) {

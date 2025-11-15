@@ -7,8 +7,8 @@ import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
 } from '@repo/server-utils'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { ssoAuthService } from '@repo/auth'
+import { ssoConfigurationService } from '@repo/auth'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -17,24 +17,24 @@ import { SSOCallbackSchema } from '@repo/validation'
 import {
 	sanitizeOrganizationSlug,
 	sanitizeOIDCUserInfo,
-} from '#app/utils/sso-sanitization.server.ts'
+} from '@repo/auth'
 import {
 	trackSuspiciousActivity,
 	isSuspiciousActivityBlocked,
-} from '#app/utils/sso-rate-limit.server.ts'
+} from '@repo/auth'
 import {
 	handleSSOError,
 	createSSOError,
 	SSOErrorType,
 	handleOAuthError,
 	createSSOFallbackResponse,
-} from '#app/utils/sso-error-handling.server.ts'
+} from '@repo/auth'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
 	auditSSOAuthSuccess,
 	auditSSOAuthFailed,
-} from '#app/utils/sso-audit-logging.server.ts'
+} from '@repo/auth'
 import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.sso.$organizationSlug.callback.ts'
 import { handleNewSession } from './login.server.ts'
