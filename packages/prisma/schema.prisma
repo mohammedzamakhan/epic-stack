@@ -229,6 +229,7 @@ model Organization {
   s3Config               OrganizationS3Config?
   ssoConfiguration       SSOConfiguration?
   auditLogs              AuditLog[]
+  auditRetentionPolicy   AuditLogRetentionPolicy?
   Feedback               Feedback[]
   apiKeys                ApiKey[]
   configFlags            ConfigFlag[]
@@ -764,24 +765,65 @@ model SSOSession {
 }
 
 model AuditLog {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String?
-  user           User?        @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  user           User?         @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
 
   // Action details
-  action         String       // e.g., "sso_login", "sso_config_updated", etc.
-  details        String       // Human-readable description
-  metadata       String?      // JSON metadata for additional context
+  action         String        // e.g., "user_login", "note_created", etc.
+  details        String        // Human-readable description
+  metadata       String?       // JSON metadata for additional context
 
-  // Timestamps
-  createdAt      DateTime     @default(now())
+  // Request context (for security and compliance)
+  ipAddress      String?       // Source IP address
+  userAgent      String?       // Browser/client user agent
+
+  // Resource tracking (for resource-specific audits)
+  resourceType   String?       // Type of resource (user, note, org, etc.)
+  resourceId     String?       // ID of the affected resource
+  targetUserId   String?       // For user management actions
+
+  // Compliance and retention
+  severity       String        @default("info") // info, warning, error, critical
+  retainUntil    DateTime?     // When this log can be safely deleted (compliance-aware)
+  archived       Boolean       @default(false) // Whether moved to cold storage
+
+  // Timestamps (immutable - do not update after creation)
+  createdAt      DateTime      @default(now())
 
   @@index([organizationId])
   @@index([userId])
   @@index([action])
   @@index([createdAt])
+  @@index([severity])
+  @@index([resourceType, resourceId])
+  @@index([organizationId, createdAt])
+  @@index([archived, retainUntil])
+  @@index([targetUserId])
+}
+
+model AuditLogRetentionPolicy {
+  id               String       @id @default(cuid())
+  organizationId   String       @unique
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Retention configuration
+  retentionDays    Int          @default(365) // Default: 1 year
+  hotStorageDays   Int          @default(180) // Keep 6 months in hot storage
+  archiveEnabled   Boolean      @default(true) // Enable automatic archiving
+  exportEnabled    Boolean      @default(true) // Allow audit log exports
+
+  // Compliance settings
+  complianceType   String?      // "SOC2", "HIPAA", "GDPR", "PCI_DSS", etc.
+  immutable        Boolean      @default(true) // Prevent modifications
+
+  // Timestamps
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([organizationId])
 }
 
 model WaitlistEntry {
