@@ -6,7 +6,7 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "echo 'No build needed for prisma package'",
     "db:generate": "prisma generate --sql",
     "db:push": "prisma db push --skip-generate",
     "db:seed": "tsx seed.ts",
