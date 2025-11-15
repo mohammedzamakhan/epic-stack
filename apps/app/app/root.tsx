@@ -21,25 +21,34 @@ import { ImpersonationBanner } from './components/impersonation-banner.tsx'
 import { CookieConsentBanner } from './components/privacy-banner.tsx'
 import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
+import { getUserId, logout, honeypot, getImpersonationInfo } from '@repo/auth'
+import {
+	ClientHintCheck,
+	getHints,
+	combineHeaders,
+	getDomainUrl,
+	getImgSrc,
+	useNonce,
+} from '@repo/client-utils'
+import {
+	cache,
+	cachified,
+	getCookieConsentState,
+	prisma,
+	getEnv,
+	getLaunchStatus,
+	pipeHeaders,
+	getSidebarState,
+	type Theme,
+	getTheme,
+	makeTimings,
+	time,
+	getToast,
+	storeUtmParams,
+} from '@repo/server-utils'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-import { getUserId, logout } from './utils/auth.server.ts'
-import { cache, cachified } from './utils/cache.server.ts'
-import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
-import { getCookieConsentState } from './utils/cookie-consent.server.ts'
-import { prisma } from './utils/db.server.ts'
-import { getEnv, getLaunchStatus } from './utils/env.server.ts'
-import { pipeHeaders } from './utils/headers.server.ts'
-import { honeypot } from './utils/honeypot.server.ts'
-import { getImpersonationInfo } from './utils/impersonation.server.ts'
-import { combineHeaders, getDomainUrl, getImgSrc } from './utils/misc.tsx'
-import { useNonce } from './utils/nonce-provider.ts'
-import { getSidebarState } from './utils/sidebar-cookie.server.ts'
-import { type Theme, getTheme } from './utils/theme.server.ts'
-import { makeTimings, time } from './utils/timing.server.ts'
-import { getToast } from './utils/toast.server.ts'
-import { storeUtmParams } from './utils/utm.server.ts'
 
 export const links: Route.LinksFunction = () => {
 	return [
