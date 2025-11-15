@@ -5,6 +5,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
+import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 
 export async function action({
 	request,
@@ -74,58 +75,21 @@ export async function action({
 		select: { id: true, expirationDate: true, userId: true },
 	})
 
-	// Create a temporary organization note for audit logging
-	// This is a workaround since we don't have a dedicated admin audit log table
-	const adminOrg = await prisma.organization.findFirst({
-		where: { slug: 'admin-system' },
-		select: { id: true },
-	})
-
-	let auditOrgId = adminOrg?.id
-	if (!auditOrgId) {
-		// Create admin system organization if it doesn't exist
-		const createdAdminOrg = await prisma.organization.create({
-			data: {
-				name: 'Admin System',
-				slug: 'admin-system',
-				description: 'System organization for admin audit logs',
-				active: false, // Hidden from normal users
-			},
-			select: { id: true },
-		})
-		auditOrgId = createdAdminOrg.id
-	}
-
-	// Create audit log entry as an organization note
-	const auditNote = await prisma.organizationNote.create({
-		data: {
-			title: `Admin Impersonation: ${targetUser.name || targetUser.username}`,
-			content: `Admin ${adminUser.name || adminUser.username} started impersonating user ${targetUser.name || targetUser.username} (${targetUser.email})`,
-			isPublic: false,
-			organizationId: auditOrgId,
-			createdById: adminUserId,
-		},
-		select: { id: true },
-	})
-
-	// Log the impersonation action for audit purposes
-	await prisma.noteActivityLog.create({
-		data: {
-			noteId: auditNote.id,
-			userId: adminUserId,
+	// Log the impersonation start using the audit service
+	await auditService.logAdminOperation(
+		AuditAction.ADMIN_IMPERSONATION_START,
+		adminUserId,
+		`Started impersonating user: ${targetUser.name || targetUser.username} (${targetUser.email})`,
+		{
+			adminId: adminUserId,
+			adminName: adminUser.name || adminUser.username,
 			targetUserId: targetUser.id,
-			action: 'ADMIN_IMPERSONATION_START',
-			metadata: JSON.stringify({
-				adminId: adminUserId,
-				adminName: adminUser.name || adminUser.username,
-				targetUserId: targetUser.id,
-				targetName: targetUser.name || targetUser.username,
-				targetEmail: targetUser.email,
-				timestamp: new Date().toISOString(),
-				sessionId: impersonationSession.id,
-			}),
+			targetName: targetUser.name || targetUser.username,
+			targetEmail: targetUser.email,
+			sessionId: impersonationSession.id,
 		},
-	})
+		request,
+	)
 
 	// Get current session to store admin info
 	const authSession = await authSessionStorage.getSession(

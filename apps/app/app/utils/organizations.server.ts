@@ -2,6 +2,7 @@ import { type User } from '@prisma/client'
 import { data } from 'react-router'
 import { prisma } from '@repo/prisma'
 import { getUserId } from './auth.server.ts'
+import { auditService, AuditAction } from './audit.server.ts'
 
 export type OrganizationWithImage = {
 	id: string
@@ -198,14 +199,16 @@ export async function createOrganization({
 	description,
 	userId,
 	imageObjectKey,
+	request,
 }: {
 	name: string
 	slug: string
 	description?: string
 	userId: string
 	imageObjectKey?: string
+	request?: Request
 }) {
-	return prisma.$transaction(async (tx) => {
+	const organization = await prisma.$transaction(async (tx) => {
 		// Get the admin role first
 		const adminRole = await tx.organizationRole.findUnique({
 			where: { name: 'admin' },
@@ -264,6 +267,25 @@ export async function createOrganization({
 
 		return organization
 	})
+
+	// Log the organization creation
+	await auditService.log({
+		action: AuditAction.ORG_CREATED,
+		userId,
+		organizationId: organization.id,
+		details: `Organization created: ${name}`,
+		metadata: {
+			organizationName: name,
+			organizationSlug: slug,
+			description,
+			hasImage: !!imageObjectKey,
+		},
+		request,
+		resourceType: 'organization',
+		resourceId: organization.id,
+	})
+
+	return organization
 }
 
 export async function getOrganizationBySlug(slug: string) {

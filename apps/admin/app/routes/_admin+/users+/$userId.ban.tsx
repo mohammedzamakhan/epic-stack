@@ -3,6 +3,7 @@ import { type ActionFunctionArgs } from 'react-router'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 
 export async function action({ request, params }: ActionFunctionArgs) {
 	const adminUserId = await requireUserWithRole(request, 'admin')
@@ -70,6 +71,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			where: { userId },
 		})
 
+		// Log the ban action
+		await auditService.logUserManagement(
+			AuditAction.USER_BANNED,
+			adminUserId,
+			userId,
+			undefined,
+			`User banned: ${user.name || user.username}`,
+			{
+				reason: reason.trim(),
+				expiresAt: banExpiresAt?.toISOString(),
+				isPermanent: !banExpiresAt,
+			},
+			request,
+		)
+
 		return redirectWithToast(`/users/${userId}`, {
 			type: 'success',
 			title: 'User Banned',
@@ -105,6 +121,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				bannedById: null,
 			},
 		})
+
+		// Log the unban action
+		await auditService.logUserManagement(
+			AuditAction.USER_UNBANNED,
+			adminUserId,
+			userId,
+			undefined,
+			`Ban lifted for user: ${user.name || user.username}`,
+			{},
+			request,
+		)
 
 		return redirectWithToast(`/users/${userId}`, {
 			type: 'success',
