@@ -8,31 +8,20 @@ Audit logs need to be periodically archived to maintain performance and comply w
 
 ### Setup
 
-The task is already created at `packages/background-jobs/src/tasks/audit-log-archival.ts`
+The task is already created at `packages/background-jobs/src/tasks/audit-log-archival.ts` with a declarative cron schedule that runs daily at 2 AM UTC.
 
-1. **Deploy the task to Trigger.dev**
+**Deploy the task to Trigger.dev:**
 ```bash
 npx trigger.dev@latest deploy
 ```
 
-2. **Set up a scheduled trigger in Trigger.dev dashboard**
+That's it! The schedule (`0 2 * * *` - daily at 2 AM UTC) is defined in code and will automatically sync when you deploy. No manual dashboard configuration needed.
 
-Go to your [Trigger.dev dashboard](https://cloud.trigger.dev):
-- Navigate to your project
-- Go to the "Schedules" tab
-- Click "Create Schedule"
-- Configure:
-  - **Task:** `audit-log-archival`
-  - **Cron:** `0 2 * * *` (daily at 2 AM UTC)
-  - **Timezone:** UTC
-  - **Enabled:** Yes
-
-Or use the Trigger.dev CLI:
-```bash
-npx trigger.dev@latest schedules create \
-  --task audit-log-archival \
-  --cron "0 2 * * *"
-```
+The task uses Trigger.dev's declarative scheduling feature, which means:
+- ✅ Schedule is version controlled
+- ✅ Automatically syncs on deploy
+- ✅ No manual dashboard setup required
+- ✅ Can be modified by updating the `cron` property in code
 
 ### Manual Trigger
 
@@ -55,6 +44,27 @@ await auditLogArchival.trigger({ manual: true })
 - Go to `/admin/organizations/{orgId}/audit-retention`
 - Click "Run Archival" button
 
+### Modifying the Schedule
+
+To change when archival runs, edit the `cron` property in `packages/background-jobs/src/tasks/audit-log-archival.ts`:
+
+```typescript
+export const auditLogArchival = schedules.task({
+  id: 'audit-log-archival',
+  cron: '0 3 * * *', // Change to 3 AM instead of 2 AM
+  run: async (payload) => {
+    // ...
+  }
+})
+```
+
+Then redeploy:
+```bash
+npx trigger.dev@latest deploy
+```
+
+The new schedule will automatically sync.
+
 ### Monitoring
 
 View job runs in your Trigger.dev dashboard:
@@ -62,6 +72,7 @@ View job runs in your Trigger.dev dashboard:
 - Number of logs archived
 - Number of logs deleted
 - Execution time
+- Schedule history and next run time
 
 ## Option 2: Simple Cron Job (Alternative)
 
