@@ -10,7 +10,7 @@ import {
 	useHasAnyPermission,
 	useOrganizationRole,
 	type PermissionString,
-} from '@repo/auth'
+} from '@repo/auth/client'
 
 interface PermissionGuardProps {
 	children: ReactNode

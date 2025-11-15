@@ -1,7 +1,7 @@
 import { Form } from 'react-router'
 import { Button, Icon } from '@repo/ui'
 
-import { type ImpersonationInfo } from '@repo/auth'
+import { type ImpersonationInfo } from '@repo/auth/client'
 
 interface ImpersonationBannerProps {
 	impersonationInfo: ImpersonationInfo

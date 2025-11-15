@@ -8,7 +8,7 @@ import {
 } from '#app/components/forms.tsx'
 
 import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
-import { EmailSchema } from '@repo/auth'
+import { EmailSchema } from '@repo/auth/client'
 import {
 	Button,
 	StatusButton,

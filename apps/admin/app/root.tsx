@@ -20,7 +20,7 @@ import { ImpersonationBanner } from './components/impersonation-banner.tsx'
 import { CookieConsentBanner } from './components/privacy-banner.tsx'
 import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
-import { getUserId, logout, honeypot, getImpersonationInfo } from '@repo/auth'
+import { getUserId, logout, honeypot, getImpersonationInfo } from '@repo/auth/client'
 import {
 	ClientHintCheck,
 	getHints,

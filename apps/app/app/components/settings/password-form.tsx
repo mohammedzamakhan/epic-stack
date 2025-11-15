@@ -20,7 +20,7 @@ import { setPasswordActionIntent } from '#app/routes/_app+/security.tsx'
 import {
 	PasswordSchema,
 	PasswordAndConfirmPasswordSchema,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { changePasswordActionIntent } from './cards/security-card'
 
 export const ChangePasswordSchema = z

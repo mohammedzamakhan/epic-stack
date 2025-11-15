@@ -2,7 +2,7 @@ import React from 'react'
 import { Form, Link } from 'react-router'
 import { cn } from '@repo/client-utils'
 import { useOptionalUserOrganizations } from '@repo/client-utils'
-import { useOptionalUser } from '@repo/auth'
+import { useOptionalUser } from '@repo/auth/client'
 import { Logo } from '../icons/logo'
 import { Button, Icon } from '@repo/ui'
 

@@ -7,9 +7,19 @@
 	"types": "./index.ts",
 	"exports": {
 		".": {
-			"types": "./index.ts",
-			"import": "./index.ts",
-			"default": "./index.ts"
+			"types": "./server.ts",
+			"import": "./server.ts",
+			"default": "./server.ts"
+		},
+		"./server": {
+			"types": "./server.ts",
+			"import": "./server.ts",
+			"default": "./server.ts"
+		},
+		"./client": {
+			"types": "./client.ts",
+			"import": "./client.ts",
+			"default": "./client.ts"
 		}
 	},
 	"scripts": {

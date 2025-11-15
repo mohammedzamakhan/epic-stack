@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import { Link, Form } from 'react-router'
 import { getUserImgSrc } from '@repo/client-utils'
 import { useCurrentOrganization } from '@repo/client-utils'
-import { useUser } from '@repo/auth'
+import { useUser } from '@repo/auth/client'
 
 import {
 	Button,

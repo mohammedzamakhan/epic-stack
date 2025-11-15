@@ -6,6 +6,6 @@
 		"declaration": true,
 		"types": ["vite/client"]
 	},
-	"include": ["src/**/*", "index.ts", "../../global.d.ts"],
+	"include": ["src/**/*", "index.ts", "client.ts", "server.ts", "../../global.d.ts"],
 	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }

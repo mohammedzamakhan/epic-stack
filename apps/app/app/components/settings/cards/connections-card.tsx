@@ -2,7 +2,7 @@ import { Connections } from '#app/components/settings/connections.tsx'
 import {
 	ProviderConnectionForm,
 	providerNames,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import {
 	Card,
 	CardContent,
