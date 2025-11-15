@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/prisma'
-import { MOCK_CODE_GITHUB } from '#app/utils/providers/constants'
+import { MOCK_CODE_GITHUB } from '@repo/auth'
 import {
 	createPassword,
 	createUser,
