@@ -405,7 +405,11 @@ export class PolarProvider implements PaymentProvider {
 		try {
 			const payloadString =
 				typeof payload === 'string' ? payload : payload.toString('utf8')
-			const event = JSON.parse(payloadString)
+			const event = JSON.parse(payloadString) as {
+				id?: string
+				type?: string
+				data?: any
+			}
 
 			console.warn(
 				'PolarProvider: Webhook signature verification is not implemented. Please implement proper validation in production.',
