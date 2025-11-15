@@ -1,6 +1,6 @@
 import { Form } from 'react-router'
 import { z } from 'zod'
-import { useIsPending } from './misc.tsx'
+import { useIsPending } from '@repo/client-utils'
 import { Icon, StatusButton } from '@repo/ui'
 import { saveLastLoginMethod, type LoginMethod } from './last-login-method.ts'
 

@@ -1,4 +1,4 @@
-import { type Timings } from '../timing.server.ts'
+import { type Timings } from '@repo/server-utils'
 
 // Define a user type for cleaner typing
 export type ProviderUser = {
