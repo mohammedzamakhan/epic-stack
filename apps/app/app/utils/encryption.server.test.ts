@@ -4,7 +4,7 @@ import {
 	decrypt,
 	generateEncryptionKey,
 	isValidEncryptionKey,
-} from './encryption.server.ts'
+} from '@repo/server-utils'
 
 describe('encryption utilities', () => {
 	const testKey = generateEncryptionKey()
