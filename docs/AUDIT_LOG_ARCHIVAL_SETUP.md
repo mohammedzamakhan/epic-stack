@@ -8,50 +8,52 @@ Audit logs need to be periodically archived to maintain performance and comply w
 
 ### Setup
 
-1. **Install Trigger.dev** (if not already installed)
+The task is already created at `packages/background-jobs/src/tasks/audit-log-archival.ts`
+
+1. **Deploy the task to Trigger.dev**
 ```bash
-npm install @trigger.dev/sdk
+npx trigger.dev@latest deploy
 ```
 
-2. **Configure the scheduled task**
+2. **Set up a scheduled trigger in Trigger.dev dashboard**
 
-The task is already created at `apps/app/app/jobs/audit-log-archival.ts`
+Go to your [Trigger.dev dashboard](https://cloud.trigger.dev):
+- Navigate to your project
+- Go to the "Schedules" tab
+- Click "Create Schedule"
+- Configure:
+  - **Task:** `audit-log-archival`
+  - **Cron:** `0 2 * * *` (daily at 2 AM UTC)
+  - **Timezone:** UTC
+  - **Enabled:** Yes
 
-3. **Register the task** in your Trigger.dev configuration
-
-Add to your `trigger.config.ts`:
-```typescript
-import { auditLogArchivalTask } from './app/jobs/audit-log-archival'
-
-export default defineConfig({
-  project: "your-project-id",
-  // ... other config
-  tasks: [
-    auditLogArchivalTask,
-    // ... other tasks
-  ],
-})
-```
-
-4. **Deploy to Trigger.dev**
+Or use the Trigger.dev CLI:
 ```bash
-npx trigger.dev deploy
+npx trigger.dev@latest schedules create \
+  --task audit-log-archival \
+  --cron "0 2 * * *"
 ```
-
-### Schedule
-
-The task runs **daily at 2:00 AM UTC** with cron: `0 2 * * *`
 
 ### Manual Trigger
 
-You can also trigger archival manually from the admin UI or via API:
+You can trigger archival manually:
 
+**Via Trigger.dev Dashboard:**
+- Go to the task page
+- Click "Test Run"
+- Optional payload: `{ "manual": true }`
+
+**Via Code:**
 ```typescript
-import { manualAuditLogArchivalTask } from '#app/jobs/audit-log-archival.ts'
+import { auditLogArchival } from '@repo/background-jobs/tasks/audit-log-archival'
 
 // Trigger manually
-await manualAuditLogArchivalTask.trigger()
+await auditLogArchival.trigger({ manual: true })
 ```
+
+**Via Admin UI:**
+- Go to `/admin/organizations/{orgId}/audit-retention`
+- Click "Run Archival" button
 
 ### Monitoring
 
@@ -333,6 +335,7 @@ Choose the option that best fits your infrastructure!
 ---
 
 **Files:**
-- Job implementation: `apps/app/app/jobs/audit-log-archival.ts`
+- Job implementation: `packages/background-jobs/src/tasks/audit-log-archival.ts`
 - Archival logic: `apps/app/app/utils/audit.server.ts` (archiveOldLogs method)
 - Admin UI: `apps/admin/app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx`
+- Configuration: `trigger.config.ts`
