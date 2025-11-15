@@ -1,11 +1,21 @@
 {
-	"extends": "@epic-web/config/typescript",
-	"compilerOptions": {
-		"outDir": "./dist",
-		"rootDir": ".",
-		"declaration": true,
-		"jsx": "react-jsx"
-	},
-	"include": ["src/**/*", "index.ts"],
-	"exclude": ["node_modules", "dist"]
+  "extends": "@epic-web/config/typescript",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "jsx": "react-jsx",
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "index.ts",
+    "../../global.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

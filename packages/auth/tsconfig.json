@@ -3,8 +3,9 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": ".",
-		"declaration": true
+		"declaration": true,
+		"types": ["vite/client"]
 	},
-	"include": ["src/**/*", "index.ts"],
+	"include": ["src/**/*", "index.ts", "../../global.d.ts"],
 	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }
