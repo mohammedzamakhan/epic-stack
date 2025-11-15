@@ -179,7 +179,13 @@ export async function getPendingInvitationsByEmail(email: string) {
 	})
 }
 
-export async function acceptInvitationByEmail(email: string, userId: string) {
+export async function acceptInvitationByEmail(
+	email: string,
+	userId: string,
+	options?: {
+		onSeatQuantityUpdate?: (organizationId: string) => Promise<void>
+	},
+) {
 	const invitations = await getPendingInvitationsByEmail(email)
 
 	if (invitations.length === 0) {
@@ -224,7 +230,6 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 				}),
 			])
 
-			// Update seat quantity for billing
 			// Update seat quantity if callback provided
 			if (options?.onSeatQuantityUpdate) {
 				try {
