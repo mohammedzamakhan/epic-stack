@@ -1,4 +1,4 @@
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 import { brand } from '@repo/config/brand'
 
 export function Logo({

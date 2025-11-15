@@ -3,11 +3,11 @@ import { parseWithZod } from '@conform-to/zod'
 import { useLoaderData, useActionData } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { redirectWithToast } from '@repo/server-utils'
 import { type Route } from './+types/$organizationId.sso.users.ts'
 
 const SSOUserActionSchema = z.object({

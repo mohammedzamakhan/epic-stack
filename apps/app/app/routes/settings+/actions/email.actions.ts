@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { prepareVerification } from '#app/routes/_auth+/verify.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
+import { verifySessionStorage } from '@repo/auth'
 import { newEmailAddressSessionKey } from '../profile.change-email'
 
 export const ChangeEmailSchema = z.object({

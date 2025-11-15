@@ -1,6 +1,6 @@
 import { Links, Meta, Scripts, ScrollRestoration } from 'react-router'
-import { ClientHintCheck } from '#app/utils/client-hints.tsx'
-import { type Theme } from '#app/utils/theme.server.ts'
+import { ClientHintCheck } from '@repo/client-utils'
+import { type Theme } from '@repo/server-utils'
 
 interface MarketingDocumentProps {
 	children: React.ReactNode

@@ -1,5 +1,5 @@
 import { data } from 'react-router'
-import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
+import { authenticator, canUserLogin } from '@repo/auth'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
@@ -7,7 +7,7 @@ import {
 	normalizeEmail,
 	normalizeUsername,
 } from '#app/utils/providers/provider.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {

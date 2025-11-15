@@ -10,7 +10,7 @@ import {
 import { type Feedback, type Organization, type User } from '@prisma/client'
 
 import { prisma } from '#app/utils/db.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')

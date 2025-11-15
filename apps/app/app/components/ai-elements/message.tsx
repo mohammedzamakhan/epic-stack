@@ -2,7 +2,7 @@ import { type UIMessage } from 'ai'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui'
 import { type ComponentProps, type HTMLAttributes } from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 	from: UIMessage['role']

@@ -6,7 +6,7 @@ import {
 } from 'react-router'
 import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
 import { prisma } from '#app/utils/db.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 import { type Route } from './+types/waitlist.ts'
 import {
 	Badge,
@@ -24,11 +24,11 @@ import {
 	TableRow,
 	Icon,
 } from '@repo/ui'
-import { getLaunchStatus } from '#app/utils/env.server.ts'
+import { getLaunchStatus } from '@repo/server-utils'
 import {
 	grantEarlyAccess,
 	revokeEarlyAccess,
-} from '#app/utils/waitlist.server.ts'
+} from '@repo/server-utils'
 import { Img } from 'openimg/react'
 import { useEffect, useState } from 'react'
 

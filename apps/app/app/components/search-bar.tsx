@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { Form, useSearchParams, useSubmit } from 'react-router'
-import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
+import { useDebounce, useIsPending } from '@repo/client-utils'
 import { Input, FieldLabel, Icon, StatusButton } from '@repo/ui'
 
 export function SearchBar({

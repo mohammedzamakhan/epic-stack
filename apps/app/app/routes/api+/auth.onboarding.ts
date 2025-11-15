@@ -2,16 +2,16 @@ import { parseWithZod } from '@conform-to/zod'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
-import { checkIsCommonPassword, signup } from '#app/utils/auth.server.ts'
+import { checkIsCommonPassword, signup } from '@repo/auth'
 import { createTokenPair } from '#app/utils/jwt.server.ts'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
+import { checkHoneypot } from '@repo/auth'
+import { verifySessionStorage } from '@repo/auth'
 import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
-} from '#app/utils/user-validation.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+} from '@repo/auth'
+import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.onboarding.ts'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'

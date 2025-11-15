@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs, redirect } from 'react-router'
-import { getUserId } from '#app/utils/auth.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
+import { getUserId } from '@repo/auth'
+import { redirectWithToast } from '@repo/server-utils'
+import { shouldBeOnWaitlist } from '@repo/server-utils'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await getUserId(request)

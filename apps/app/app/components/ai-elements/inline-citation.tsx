@@ -12,7 +12,7 @@ import {
 	useCarousel as useCarouselApi,
 } from '@repo/ui'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 
 export type InlineCitationProps = ComponentProps<'span'>
 

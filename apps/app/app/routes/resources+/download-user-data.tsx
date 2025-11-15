@@ -1,6 +1,6 @@
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { getDomainUrl, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
+import { getDomainUrl, getNoteImgSrc, getUserImgSrc } from '@repo/client-utils'
 import { type Route } from './+types/download-user-data.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {

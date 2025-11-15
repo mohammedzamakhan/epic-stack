@@ -21,10 +21,10 @@ import {
 	checkIsCommonPassword,
 	getPasswordHash,
 	requireUserId,
-} from '#app/utils/auth.server.ts'
+} from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
-import { PasswordAndConfirmPasswordSchema } from '#app/utils/user-validation.ts'
+import { useIsPending } from '@repo/client-utils'
+import { PasswordAndConfirmPasswordSchema } from '@repo/auth'
 import { type Route } from './+types/profile.password_.create.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 

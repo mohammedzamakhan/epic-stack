@@ -1,6 +1,6 @@
 import { type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { discoverOrganizationFromEmail } from '#app/utils/organizations.server.ts'
+import { discoverOrganizationFromEmail } from '@repo/server-utils'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 
 const DiscoverOrgSchema = z.object({

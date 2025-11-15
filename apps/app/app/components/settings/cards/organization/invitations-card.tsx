@@ -1,5 +1,5 @@
 import { OrganizationInvitations } from '#app/components/organization-invitations.tsx'
-import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
+import { type OrganizationRoleName } from '@repo/server-utils'
 
 interface OrganizationInvitation {
 	id: string

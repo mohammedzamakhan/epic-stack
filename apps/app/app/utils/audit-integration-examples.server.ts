@@ -480,7 +480,7 @@ export async function exampleSubscriptionUpdated(
  * HOW TO USE THESE EXAMPLES:
  *
  * 1. Import the audit service in your route:
- *    import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+ *    import { auditService, AuditAction } from '@repo/server-utils'
  *
  * 2. Call the appropriate log method after the operation succeeds:
  *    await auditService.log({ ... })

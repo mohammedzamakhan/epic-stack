@@ -1,7 +1,7 @@
 import { redirect, data } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { requireUserId } from '@repo/auth'
+import { awardDiscordPoints } from '@repo/server-utils'
+import { redirectWithToast } from '@repo/server-utils'
 import { type Route } from './+types/auth.discord.verify.ts'
 
 // Discord API response types

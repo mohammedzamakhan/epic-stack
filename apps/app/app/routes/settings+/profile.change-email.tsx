@@ -13,12 +13,12 @@ import {
 	prepareVerification,
 	requireRecentVerification,
 } from '#app/routes/_auth+/verify.server.ts'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
-import { EmailSchema } from '#app/utils/user-validation.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
+import { useIsPending } from '@repo/client-utils'
+import { EmailSchema } from '@repo/auth'
+import { verifySessionStorage } from '@repo/auth'
 import { type Route } from './+types/profile.change-email.ts'
 import {
 	Icon,

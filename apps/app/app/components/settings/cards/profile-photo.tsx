@@ -3,7 +3,7 @@ import { useState, useRef } from 'react'
 
 import { ProfilePhotoForm } from '#app/components/settings/profile-photo-form.tsx'
 
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/client-utils'
 import {
 	Button,
 	Dialog,

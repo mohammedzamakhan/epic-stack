@@ -1,9 +1,9 @@
 import { redirect } from 'react-router'
-import { getSSOStrategy } from '#app/utils/auth.server.ts'
-import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
+import { getSSOStrategy } from '@repo/auth'
+import { getOrganizationBySlug } from '@repo/server-utils'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
-import { getReferrerRoute } from '#app/utils/misc.tsx'
-import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
+import { getReferrerRoute } from '@repo/client-utils'
+import { getRedirectCookieHeader } from '@repo/server-utils'
 import { SSOAuthRequestSchema } from '@repo/validation'
 import {
 	sanitizeOrganizationSlug,
@@ -23,7 +23,7 @@ import {
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from '#app/utils/sso-audit-logging.server.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.sso.$organizationSlug.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {

@@ -20,7 +20,7 @@ import {
 } from '@repo/ui'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
-import { useIsMobile } from '#app/hooks/use-mobile.ts'
+import { useIsMobile } from '@repo/client-utils'
 
 export const description = 'An interactive area chart'
 

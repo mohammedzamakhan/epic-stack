@@ -1,9 +1,9 @@
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
 import { Link, Form } from 'react-router'
-import { getUserImgSrc } from '#app/utils/misc.tsx'
-import { useCurrentOrganization } from '#app/utils/organizations.ts'
-import { useUser } from '#app/utils/user.ts'
+import { getUserImgSrc } from '@repo/client-utils'
+import { useCurrentOrganization } from '@repo/client-utils'
+import { useUser } from '@repo/auth'
 
 import {
 	Button,

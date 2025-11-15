@@ -2,7 +2,7 @@ import { type ReactNode } from 'react'
 import { AppSidebar } from '#app/components/app-sidebar.tsx'
 import { SiteHeader } from '#app/components/site-header.tsx'
 import { SidebarInset, SidebarProvider } from '@repo/ui'
-import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
+import { type OnboardingProgressData } from '@repo/server-utils'
 import { EpicProgress } from './progress-bar'
 
 type MarketingLayoutProps = {
@@ -66,5 +66,5 @@ export function MarketingLayout({
 }
 
 // Export these hooks to be used in the layout
-export { useNonce } from '#app/utils/nonce-provider.ts'
+export { useNonce } from '@repo/client-utils'
 export { useOptionalTheme } from '#app/routes/resources+/theme-switch.tsx'

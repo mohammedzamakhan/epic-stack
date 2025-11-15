@@ -3,11 +3,11 @@ import {
 	authenticator,
 	getSessionExpirationDate,
 	getUserId,
-} from '#app/utils/auth.server.ts'
+} from '@repo/auth'
 import { ProviderNameSchema, providerLabels } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
-import { ensurePrimary } from '#app/utils/litefs.server.ts'
-import { combineHeaders } from '#app/utils/misc.tsx'
+import { ensurePrimary } from '@repo/server-utils'
+import { combineHeaders } from '@repo/client-utils'
 import {
 	normalizeEmail,
 	normalizeUsername,
@@ -15,12 +15,12 @@ import {
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
-} from '#app/utils/redirect-cookie.server.ts'
+} from '@repo/server-utils'
 import {
 	createToastHeaders,
 	redirectWithToast,
-} from '#app/utils/toast.server.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
+} from '@repo/server-utils'
+import { verifySessionStorage } from '@repo/auth'
 import { type Route } from './+types/auth.$provider.callback.ts'
 import { handleNewSession } from './login.server.ts'
 import { onboardingEmailSessionKey } from './onboarding.tsx'

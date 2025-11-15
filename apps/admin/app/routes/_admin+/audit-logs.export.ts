@@ -1,6 +1,6 @@
 import { type Route } from './+types/audit-logs.export.ts'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { auditService, AuditAction } from '@repo/server-utils'
+import { requireUserWithRole } from '@repo/auth'
 
 /**
  * Export audit logs as CSV or JSON

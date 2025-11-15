@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 
 const FeedbackSchema = z.object({

@@ -10,12 +10,12 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import { requireUserId, sessionKey } from '#app/utils/auth.server.ts'
+import { requireUserId, sessionKey } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { getUserImgSrc, useDoubleCheck } from '#app/utils/misc.tsx'
-import { authSessionStorage } from '#app/utils/session.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { getUserImgSrc, useDoubleCheck } from '@repo/client-utils'
+import { authSessionStorage } from '@repo/auth'
+import { redirectWithToast } from '@repo/server-utils'
+import { NameSchema, UsernameSchema } from '@repo/auth'
 import { type Route } from './+types/profile.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import {

@@ -22,7 +22,7 @@ import { TeamSwitcher } from '#app/components/team-switcher.tsx'
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@repo/ui'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
+import { type OnboardingProgressData } from '@repo/server-utils'
 import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'

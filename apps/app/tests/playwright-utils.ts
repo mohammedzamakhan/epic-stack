@@ -5,12 +5,12 @@ import {
 	getPasswordHash,
 	getSessionExpirationDate,
 	sessionKey,
-} from '#app/utils/auth.server.ts'
-import { cookieConsentCookie } from '#app/utils/cookie-consent.server.ts'
+} from '@repo/auth'
+import { cookieConsentCookie } from '@repo/server-utils'
 import { prisma } from '#app/utils/db.server.ts'
 import { MOCK_CODE_GITHUB_HEADER } from '#app/utils/providers/constants.ts'
 import { normalizeEmail } from '#app/utils/providers/provider.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
+import { authSessionStorage } from '@repo/auth'
 import { createUser } from './db-utils.ts'
 import {
 	type GitHubUser,

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 import type { Variants } from 'motion/react'
 import { motion, useAnimation } from 'motion/react'
 import type { HTMLAttributes } from 'react'

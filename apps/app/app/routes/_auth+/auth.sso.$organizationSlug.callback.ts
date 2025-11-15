@@ -1,18 +1,18 @@
 import { redirect } from 'react-router'
-import { getUserId, loginWithSSO } from '#app/utils/auth.server.ts'
-import { ensurePrimary } from '#app/utils/litefs.server.ts'
-import { combineHeaders } from '#app/utils/misc.tsx'
-import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
+import { getUserId, loginWithSSO } from '@repo/auth'
+import { ensurePrimary } from '@repo/server-utils'
+import { combineHeaders } from '@repo/client-utils'
+import { getOrganizationBySlug } from '@repo/server-utils'
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
-} from '#app/utils/redirect-cookie.server.ts'
+} from '@repo/server-utils'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import {
 	createToastHeaders,
 	redirectWithToast,
-} from '#app/utils/toast.server.ts'
+} from '@repo/server-utils'
 import { SSOCallbackSchema } from '@repo/validation'
 import {
 	sanitizeOrganizationSlug,
@@ -35,7 +35,7 @@ import {
 	auditSSOAuthSuccess,
 	auditSSOAuthFailed,
 } from '#app/utils/sso-audit-logging.server.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.sso.$organizationSlug.callback.ts'
 import { handleNewSession } from './login.server.ts'
 

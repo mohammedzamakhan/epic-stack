@@ -1,6 +1,6 @@
 import { type ActionFunction } from 'react-router'
 import { prisma } from '#app/utils/db.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { userHasOrgAccess } from '@repo/server-utils'
 
 // Helper function to calculate fractional position
 function getFractionalPosition(

@@ -1,6 +1,6 @@
 import * as setCookieParser from 'set-cookie-parser'
-import { sessionKey } from '#app/utils/auth.server.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
+import { sessionKey } from '@repo/auth'
+import { authSessionStorage } from '@repo/auth'
 
 export const BASE_URL = 'https://www.epicstack.dev'
 

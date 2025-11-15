@@ -7,7 +7,7 @@ import {
 import React, { useState, useRef, useCallback } from 'react'
 import { Button, Icon, FieldLabel } from '@repo/ui'
 import { type MediaFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
-import { cn, getNoteImgSrc } from '#app/utils/misc.tsx'
+import { cn, getNoteImgSrc } from '@repo/client-utils'
 
 interface MultiMediaUploadProps {
 	label?: string

@@ -10,7 +10,7 @@ import {
 	useHasAnyPermission,
 	useOrganizationRole,
 	type PermissionString,
-} from '#app/hooks/use-organization-permissions.ts'
+} from '@repo/auth'
 
 interface PermissionGuardProps {
 	children: ReactNode

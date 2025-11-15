@@ -28,10 +28,10 @@ import VerifiedDomainCard, {
 	VerifiedDomainSchema,
 } from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { encrypt, getSSOMasterKey } from '#app/utils/encryption.server.ts'
-import { markStepCompleted } from '#app/utils/onboarding.ts'
+import { encrypt, getSSOMasterKey } from '@repo/server-utils'
+import { markStepCompleted } from '@repo/server-utils'
 import {
 	updateSeatQuantity,
 	deleteSubscription,
@@ -40,7 +40,7 @@ import {
 	uploadOrganizationImage,
 	testS3Connection,
 } from '#app/utils/storage.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { redirectWithToast } from '@repo/server-utils'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

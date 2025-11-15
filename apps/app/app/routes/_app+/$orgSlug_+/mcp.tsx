@@ -36,12 +36,12 @@ import {
 	FieldGroup,
 	FieldDescription,
 } from '@repo/ui'
-import { generateApiKey } from '#app/utils/api-key.server.ts'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { generateApiKey } from '@repo/auth'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { userHasOrgAccess } from '@repo/server-utils'
 import { EmptyState } from '#app/components/empty-state.tsx'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 
 // Define ApiKey type based on Prisma query result
 type ApiKeyData = {

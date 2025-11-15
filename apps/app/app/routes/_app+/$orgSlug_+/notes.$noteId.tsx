@@ -67,22 +67,22 @@ import {
 import {
 	logNoteActivity,
 	getNoteActivityLogs,
-} from '#app/utils/activity-log.server.ts'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
+} from '@repo/server-utils'
+import { requireUserId } from '@repo/auth'
+import { sanitizeCommentContent } from '@repo/server-utils'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	notifyCommentMentions,
 	notifyNoteOwner,
 } from '#app/utils/notifications.server.ts'
-import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { getNoteImgSrc, useIsPending } from '@repo/client-utils'
+import { userHasOrgAccess } from '@repo/server-utils'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
-} from '#app/utils/organization-permissions.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
+} from '@repo/auth'
+import { redirectWithToast } from '@repo/server-utils'
 import { data } from 'react-router'
 
 // Define comment types based on Prisma query structure

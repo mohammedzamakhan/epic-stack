@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { generateTOTP } from '#app/utils/totp.server.ts'
+import { generateTOTP } from '@repo/auth'
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test('Users can add 2FA to their account and use it when logging in', async ({

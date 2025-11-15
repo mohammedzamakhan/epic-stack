@@ -12,7 +12,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 import { Response } from './response'
 
 type ReasoningContextValue = {

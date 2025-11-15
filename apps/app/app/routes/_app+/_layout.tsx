@@ -1,13 +1,13 @@
 import { Outlet, useLoaderData } from 'react-router'
 import { MarketingLayout } from '#app/components/marketing-layout.tsx'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 	type OnboardingProgressData,
-} from '#app/utils/onboarding.ts'
-import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
-import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
+} from '@repo/server-utils'
+import { getUserDefaultOrganization } from '@repo/server-utils'
+import { getSidebarState } from '@repo/server-utils'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
 
 export async function loader({ request }: { request: Request }) {

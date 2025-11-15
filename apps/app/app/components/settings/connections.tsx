@@ -1,6 +1,6 @@
 import { useFetcher } from 'react-router'
 import { disconnectProviderActionIntent } from '#app/routes/_app+/security.tsx'
-import { useDoubleCheck } from '#app/utils/misc.tsx'
+import { useDoubleCheck } from '@repo/client-utils'
 import { Icon, IconName, StatusButton } from '@repo/ui'
 
 interface Connection {

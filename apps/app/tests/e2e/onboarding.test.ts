@@ -8,7 +8,7 @@ import {
 import {
 	USERNAME_MAX_LENGTH,
 	USERNAME_MIN_LENGTH,
-} from '#app/utils/user-validation.ts'
+} from '@repo/auth'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
 

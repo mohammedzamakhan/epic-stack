@@ -15,8 +15,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { auditService, AuditAction } from '@repo/server-utils'
+import { requireUserWithRole } from '@repo/auth'
 import { useState } from 'react'
 
 export async function loader({ request }: { request: Request }) {

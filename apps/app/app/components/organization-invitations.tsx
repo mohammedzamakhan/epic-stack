@@ -32,7 +32,7 @@ import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
 import { ErrorList, Field } from '#app/components/forms.tsx'
-import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
+import { type OrganizationRoleName } from '@repo/server-utils'
 
 // Create role descriptions map
 const ROLE_DESCRIPTIONS: Record<string, string> = {

@@ -1,7 +1,7 @@
 import { parseWithZod } from '@conform-to/zod'
 import { data } from 'react-router'
 import { z } from 'zod'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { checkHoneypot } from '@repo/auth'
 import { validateRequest } from '#app/routes/_auth+/verify.server.ts'
 import { type Route } from './+types/auth.verify.ts'
 

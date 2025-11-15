@@ -6,7 +6,7 @@ import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 
 import { Icon } from '@repo/ui'
 
-import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
+import { cn, getNoteImgSrc, getUserImgSrc } from '@repo/client-utils'
 import { type loader } from './notes'
 import {
 	Avatar,

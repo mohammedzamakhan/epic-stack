@@ -12,7 +12,7 @@ import {
 	type StripeProvider,
 } from '@repo/payments'
 import { data, redirect } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 

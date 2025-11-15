@@ -25,10 +25,10 @@ import {
 	Textarea,
 } from '@repo/ui'
 
-import { getUserId } from '#app/utils/auth.server.ts'
+import { getUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { blacklistIp, unblacklistIp } from '#app/utils/ip-tracking.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { blacklistIp, unblacklistIp } from '@repo/server-utils'
+import { requireUserWithRole } from '@repo/auth'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')

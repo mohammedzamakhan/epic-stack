@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/client-utils'
 import { Icon } from '@repo/ui'
 
 function EpicProgress() {

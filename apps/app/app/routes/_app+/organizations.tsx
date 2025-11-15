@@ -19,14 +19,14 @@ import {
 	Form,
 } from 'react-router'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
-} from '#app/utils/organizations.server.ts'
-import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
+} from '@repo/server-utils'
+import { shouldBeOnWaitlist } from '@repo/server-utils'
 import { redirect } from 'react-router'
 
 export async function loader({ request }: LoaderFunctionArgs) {

@@ -3,7 +3,7 @@ import {
 	deleteDataActionIntent,
 	signOutOfSessionsActionIntent,
 } from '#app/routes/_app+/security.tsx'
-import { useDoubleCheck } from '#app/utils/misc.tsx'
+import { useDoubleCheck } from '@repo/client-utils'
 import { Icon, StatusButton } from '@repo/ui'
 
 interface SignOutOfSessionsProps {

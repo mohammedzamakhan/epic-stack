@@ -2,7 +2,7 @@ import {
 	generateAuthenticationOptions,
 	verifyAuthenticationResponse,
 } from '@simplewebauthn/server'
-import { getSessionExpirationDate } from '#app/utils/auth.server.ts'
+import { getSessionExpirationDate } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { handleNewSession } from '../login.server.ts'
 import { type Route } from './+types/authentication.ts'

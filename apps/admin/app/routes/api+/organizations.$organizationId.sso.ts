@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { type Route } from './+types/organizations.$organizationId.sso.ts'
 

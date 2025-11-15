@@ -1,4 +1,4 @@
-import { cn, getUserImgSrc } from '#app/utils/misc.tsx'
+import { cn, getUserImgSrc } from '@repo/client-utils'
 import {
 	Avatar,
 	AvatarFallback,

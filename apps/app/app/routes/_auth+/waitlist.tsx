@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { getPageTitle } from '@repo/config/brand'
 import { redirect } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
+import { getLaunchStatus, getDiscordInviteUrl } from '@repo/server-utils'
 import {
 	getOrCreateWaitlistEntry,
 	calculateUserRank,
-} from '#app/utils/waitlist.server.ts'
+} from '@repo/server-utils'
 import { type Route } from './+types/waitlist.ts'
 import {
 	Card,

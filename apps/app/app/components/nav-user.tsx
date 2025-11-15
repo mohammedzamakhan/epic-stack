@@ -19,7 +19,7 @@ import {
 	useSidebar,
 } from '@repo/ui'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
-import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
+import { useOptionalRequestInfo } from '@repo/client-utils'
 import { BuildingIcon } from './icons/building-icon'
 import { LogoutIcon } from './icons/logout-icon'
 import { SettingsGearIcon } from './icons/settings-gear-icon'

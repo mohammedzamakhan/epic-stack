@@ -8,14 +8,14 @@ import { data, redirect, Form, useNavigation } from 'react-router'
 import { z } from 'zod'
 import { ErrorList } from '#app/components/forms.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { Button, Icon, StatusButton } from '@repo/ui'
 import {
 	getUserImgSrc,
 	useDoubleCheck,
 	useIsPending,
-} from '#app/utils/misc.tsx'
+} from '@repo/client-utils'
 import { uploadProfileImage } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/profile.photo.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'

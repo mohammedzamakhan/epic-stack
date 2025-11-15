@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { type ActionFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { hideOnboarding } from '#app/utils/onboarding.ts'
+import { requireUserId } from '@repo/auth'
+import { hideOnboarding } from '@repo/server-utils'
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)

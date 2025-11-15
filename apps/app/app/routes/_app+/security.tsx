@@ -8,8 +8,8 @@ import { ConnectionsCard } from '#app/components/settings/cards/connections-card
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { cache, cachified } from '#app/utils/cache.server.ts'
+import { requireUserId } from '@repo/auth'
+import { cache, cachified } from '@repo/server-utils'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	deleteDataAction,

@@ -4,7 +4,7 @@ import { AnnotatedLayout, AnnotatedSection, PageTitle } from '@repo/ui'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import { changeEmailAction } from '../settings+/actions/email.actions'
 import { photoAction } from '../settings+/actions/photo.actions'

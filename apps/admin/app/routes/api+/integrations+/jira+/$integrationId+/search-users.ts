@@ -1,8 +1,8 @@
 import { integrationManager, JiraProvider } from '@repo/integrations'
 import { prisma } from '@repo/prisma'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
+import { requireUserId } from '@repo/auth'
+import { getUserDefaultOrganization } from '@repo/server-utils'
 
 /**
  * API endpoint to search for Jira users

@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google'
 import { generateText } from 'ai'
 import { data, type ActionFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 
 export async function action({ request }: ActionFunctionArgs) {
 	await requireUserId(request)

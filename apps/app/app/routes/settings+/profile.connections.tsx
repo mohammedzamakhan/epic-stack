@@ -3,8 +3,8 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { useState } from 'react'
 import { data, useFetcher } from 'react-router'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { resolveConnectionData } from '#app/utils/connections.server.ts'
+import { requireUserId } from '@repo/auth'
+import { resolveConnectionData } from '@repo/auth'
 import {
 	Tooltip,
 	TooltipContent,
@@ -21,9 +21,9 @@ import {
 	providerNames,
 } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
-import { pipeHeaders } from '#app/utils/headers.server.ts'
-import { makeTimings } from '#app/utils/timing.server.ts'
-import { createToastHeaders } from '#app/utils/toast.server.ts'
+import { pipeHeaders } from '@repo/server-utils'
+import { makeTimings } from '@repo/server-utils'
+import { createToastHeaders } from '@repo/server-utils'
 import { type Route } from './+types/profile.connections.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 

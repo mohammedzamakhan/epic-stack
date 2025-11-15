@@ -32,7 +32,7 @@ import { Form, Link, useLoaderData } from 'react-router'
 import { z } from 'zod'
 
 import { prisma } from '#app/utils/db.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 import { type Route } from './+types/system.$roleId.ts'
 
 export const handle: SEOHandle = {

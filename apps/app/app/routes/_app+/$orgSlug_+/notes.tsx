@@ -16,13 +16,13 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
 import { Sheet, SheetContent, Icon, Input } from '@repo/ui'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	getNotesViewMode,
 	setNotesViewMode,
-} from '#app/utils/notes-view-cookie.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+} from '@repo/server-utils'
+import { userHasOrgAccess } from '@repo/server-utils'
 import { NotesCards } from './notes-cards.tsx'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {

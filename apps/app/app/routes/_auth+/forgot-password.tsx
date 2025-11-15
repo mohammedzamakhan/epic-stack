@@ -33,11 +33,11 @@ import {
 	FieldError,
 	FieldGroup,
 } from '@repo/ui'
-import arcjet from '#app/utils/arcjet.server.ts'
+import arcjet from '@repo/server-utils'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { EmailSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { checkHoneypot } from '@repo/auth'
+import { EmailSchema, UsernameSchema } from '@repo/auth'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.ts'
 

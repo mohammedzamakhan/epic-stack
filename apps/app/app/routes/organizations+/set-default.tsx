@@ -1,10 +1,10 @@
 import { redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import {
 	getUserOrganizations,
 	setUserDefaultOrganization,
-} from '#app/utils/organizations.server.ts'
+} from '@repo/server-utils'
 
 const SetDefaultOrganizationSchema = z.object({
 	organizationId: z.string().min(1, 'Organization ID is required'),

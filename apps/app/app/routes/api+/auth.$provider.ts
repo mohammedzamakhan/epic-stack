@@ -1,6 +1,6 @@
 import { data } from 'react-router'
-import { authenticator } from '#app/utils/auth.server.ts'
-import { handleMockAction } from '#app/utils/connections.server.ts'
+import { authenticator } from '@repo/auth'
+import { handleMockAction } from '@repo/auth'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { type Route } from './+types/auth.$provider.ts'
 

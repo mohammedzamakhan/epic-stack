@@ -2,7 +2,7 @@ import path from 'node:path'
 import { execaCommand } from 'execa'
 import fsExtra from 'fs-extra'
 import 'dotenv/config'
-import { init as initEnv } from '#app/utils/env.server.ts'
+import { init as initEnv } from '@repo/server-utils'
 
 initEnv()
 

@@ -26,7 +26,7 @@ import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFetcher, useFetchers } from 'react-router'
 
-import { useDoubleCheck } from '#app/utils/misc.tsx'
+import { useDoubleCheck } from '@repo/client-utils'
 import { NoteCard } from './notes-cards.tsx'
 
 type Note = LoaderNote & {

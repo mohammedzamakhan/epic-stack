@@ -2,9 +2,9 @@ import {
 	generateRegistrationOptions,
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '#app/utils/db.server.ts'
-import { getDomainUrl, getErrorMessage } from '#app/utils/misc.tsx'
+import { getDomainUrl, getErrorMessage } from '@repo/client-utils'
 import { type Route } from './+types/registration.ts'
 import {
 	PasskeyCookieSchema,

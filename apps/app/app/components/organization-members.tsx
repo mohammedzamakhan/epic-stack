@@ -19,7 +19,7 @@ import {
 } from '@repo/ui'
 import { Form } from 'react-router'
 
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/client-utils'
 
 interface OrganizationMember {
 	userId: string

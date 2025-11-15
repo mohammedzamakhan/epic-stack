@@ -4,12 +4,12 @@ import { invariantResponse } from '@epic-web/invariant'
 import { data, redirect, useFetcher, useFetchers } from 'react-router'
 import { ServerOnly } from 'remix-utils/server-only'
 import { z } from 'zod'
-import { useHints, useOptionalHints } from '#app/utils/client-hints.tsx'
+import { useHints, useOptionalHints } from '@repo/client-utils'
 import {
 	useOptionalRequestInfo,
 	useRequestInfo,
-} from '#app/utils/request-info.ts'
-import { type Theme, setTheme } from '#app/utils/theme.server.ts'
+} from '@repo/client-utils'
+import { type Theme, setTheme } from '@repo/server-utils'
 import { type Route } from './+types/theme-switch.ts'
 import { Icon } from '@repo/ui'
 
