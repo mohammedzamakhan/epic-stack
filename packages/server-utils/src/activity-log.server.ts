@@ -1,4 +1,4 @@
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from './db.server'
 import { logger } from './logger.server.ts'
 
 export type ActivityAction =

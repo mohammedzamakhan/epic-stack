@@ -1,5 +1,5 @@
 import { useRouteLoaderData } from 'react-router'
-import { type UserOrganizationWithRole } from './organizations.server'
+import { type UserOrganizationWithRole } from '@repo/server-utils'
 
 // Keep enum for backward compatibility and type safety
 export enum OrganizationRole {

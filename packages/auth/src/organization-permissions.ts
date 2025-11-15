@@ -1,4 +1,4 @@
-import { type UserOrganizationWithRole } from './organizations.server'
+import { type UserOrganizationWithRole } from '@repo/server-utils'
 import { ORG_PERMISSIONS } from './organization-permissions.server'
 
 export type OrganizationPermissionString = `${string}:${string}:${string}`
@@ -102,4 +102,4 @@ export function useUserHasAllOrganizationPermissions(
 export { ORG_PERMISSIONS }
 
 // Import the hook we need (this would be imported from the organizations utils)
-import { useUserOrganizations } from './organizations'
+import { useUserOrganizations } from '@repo/client-utils'
