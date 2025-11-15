@@ -4,7 +4,7 @@ import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 /**
  * Export audit logs as CSV or JSON
- * GET /admin/audit-logs/export?format=csv&organizationId=xxx&startDate=xxx&endDate=xxx
+ * GET /audit-logs/export?format=csv&organizationId=xxx&startDate=xxx&endDate=xxx
  */
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireUserWithRole(request, 'admin')

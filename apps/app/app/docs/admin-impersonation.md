@@ -10,7 +10,7 @@ proper session management, audit logging, and security controls.
 
 ### 1. Impersonation Action
 
-- **Route**: `/admin/users/{userId}/impersonate`
+- **Route**: `/users/{userId}/impersonate`
 - **Method**: POST
 - **Access**: Admin role required
 - **Functionality**:
@@ -31,7 +31,7 @@ proper session management, audit logging, and security controls.
 
 ### 3. Stop Impersonation
 
-- **Route**: `/admin/stop-impersonation`
+- **Route**: `/stop-impersonation`
 - **Method**: POST
 - **Functionality**:
   - Ends the impersonation session
@@ -55,7 +55,7 @@ proper session management, audit logging, and security controls.
 
 ### 5. Audit Log Viewer
 
-- **Route**: `/admin/audit-logs`
+- **Route**: `/audit-logs`
 - **Access**: Admin role required
 - **Features**:
   - View recent impersonation activities
@@ -75,7 +75,7 @@ proper session management, audit logging, and security controls.
 
 ### For Admins
 
-1. Navigate to `/admin/users`
+1. Navigate to `/users`
 2. Find the user you need to impersonate
 3. Click on the user to view their details
 4. Click the "Impersonate" button
@@ -85,7 +85,7 @@ proper session management, audit logging, and security controls.
 
 ### Audit Review
 
-1. Navigate to `/admin/audit-logs`
+1. Navigate to `/audit-logs`
 2. Review recent impersonation activities
 3. Check duration and details of each session
 

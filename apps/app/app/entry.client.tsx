@@ -14,7 +14,7 @@ const locale = detect(fromHtmlTag('lang')) || 'en'
 
 // Load catalog asynchronously without blocking hydration
 // This improves initial page load performance
-void loadCatalog(locale)
+await loadCatalog(locale)
 
 // Start hydration immediately - translations will be available soon
 startTransition(() => {

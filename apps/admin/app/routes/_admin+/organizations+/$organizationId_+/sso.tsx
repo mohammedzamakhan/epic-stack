@@ -225,7 +225,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					)
 
 					return redirectWithToast(
-						`/admin/organizations/${organizationId}/sso`,
+						`/organizations/${organizationId}/sso`,
 						{
 							type: 'success',
 							title: 'SSO Configuration Updated',
@@ -266,7 +266,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					)
 
 					return redirectWithToast(
-						`/admin/organizations/${organizationId}/sso`,
+						`/organizations/${organizationId}/sso`,
 						{
 							type: 'success',
 							title: 'SSO Configuration Created',
@@ -378,7 +378,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					isEnabled ? 'enabled' : 'disabled',
 				)
 
-				return redirectWithToast(`/admin/organizations/${organizationId}/sso`, {
+				return redirectWithToast(`/organizations/${organizationId}/sso`, {
 					type: 'success',
 					title: `SSO ${isEnabled ? 'Enabled' : 'Disabled'}`,
 					description: `SSO has been ${isEnabled ? 'enabled' : 'disabled'} for this organization.`,

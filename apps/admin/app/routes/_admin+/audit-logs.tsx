@@ -86,7 +86,7 @@ export default function EnhancedAuditLogsPage() {
 			if (filters.startDate) params.set('startDate', filters.startDate)
 			if (filters.endDate) params.set('endDate', filters.endDate)
 
-			const url = `/admin/audit-logs/export?${params.toString()}`
+			const url = `/audit-logs/export?${params.toString()}`
 			window.open(url, '_blank')
 		} finally {
 			setIsExporting(false)

@@ -142,7 +142,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 					const defaultOrg = await getUserDefaultOrganization(user.id)
 					return {
 						organizations: orgs,
-						currentOrganization: defaultOrg,
+						currentOrganization: defaultOrg || orgs[0],
 					}
 				} catch (error) {
 					console.error('Failed to load user organizations', error)

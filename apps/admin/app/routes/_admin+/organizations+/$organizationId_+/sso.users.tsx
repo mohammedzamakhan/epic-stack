@@ -258,7 +258,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 				)
 
 				return redirectWithToast(
-					`/admin/organizations/${params.organizationId}/sso/users`,
+					`/organizations/${params.organizationId}/sso/users`,
 					{
 						type: 'success',
 						title: 'User Role Updated',
@@ -301,7 +301,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 				)
 
 				return redirectWithToast(
-					`/admin/organizations/${params.organizationId}/sso/users`,
+					`/organizations/${params.organizationId}/sso/users`,
 					{
 						type: 'success',
 						title: `User ${active ? 'Activated' : 'Deactivated'}`,

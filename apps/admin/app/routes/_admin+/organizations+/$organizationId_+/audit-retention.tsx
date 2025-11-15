@@ -20,7 +20,6 @@ import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { json } from 'react-router'
 
 export async function loader({
 	request,
@@ -66,7 +65,7 @@ export async function loader({
 
 	const compliancePresets = auditService.constructor.getCompliancePresets()
 
-	return json({
+	return Response.json({
 		organization,
 		retentionPolicy,
 		statistics: {
@@ -122,7 +121,7 @@ export async function action({
 		)
 
 		return redirectWithToast(
-			`/admin/organizations/${params.organizationId}/audit-retention`,
+			`/organizations/${params.organizationId}/audit-retention`,
 			{
 				title: 'Retention Policy Updated',
 				description: 'Audit log retention policy has been updated successfully.',
@@ -137,7 +136,7 @@ export async function action({
 
 		const preset = presets[presetType]
 		if (!preset) {
-			return json({ error: 'Invalid preset type' }, { status: 400 })
+			return Response.json({ error: 'Invalid preset type' }, { status: 400 })
 		}
 
 		await auditService.updateRetentionPolicy(params.organizationId, {
@@ -158,7 +157,7 @@ export async function action({
 		)
 
 		return redirectWithToast(
-			`/admin/organizations/${params.organizationId}/audit-retention`,
+			`/organizations/${params.organizationId}/audit-retention`,
 			{
 				title: 'Preset Applied',
 				description: `${presetType} compliance preset has been applied successfully.`,
@@ -182,7 +181,7 @@ export async function action({
 		)
 
 		return redirectWithToast(
-			`/admin/organizations/${params.organizationId}/audit-retention`,
+			`/organizations/${params.organizationId}/audit-retention`,
 			{
 				title: 'Archival Complete',
 				description: `Archived ${result.archived} logs, deleted ${result.deleted} expired logs.`,
@@ -191,7 +190,7 @@ export async function action({
 		)
 	}
 
-	return json({ error: 'Invalid intent' }, { status: 400 })
+	return Response.json({ error: 'Invalid intent' }, { status: 400 })
 }
 
 export default function AuditRetentionPage() {
