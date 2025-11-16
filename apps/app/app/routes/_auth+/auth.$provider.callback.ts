@@ -11,7 +11,7 @@ import { combineHeaders } from '@repo/client-utils'
 import {
 	normalizeEmail,
 	normalizeUsername,
-} from '#app/utils/providers/provider.ts'
+} from '@repo/auth/server'
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,

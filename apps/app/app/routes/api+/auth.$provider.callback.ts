@@ -6,7 +6,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import {
 	normalizeEmail,
 	normalizeUsername,
-} from '#app/utils/providers/provider.ts'
+} from '@repo/auth/server'
 import { getClientIp } from '@repo/server-utils'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
