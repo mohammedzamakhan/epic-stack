@@ -219,7 +219,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		}
 
 		// Create new user with provider connection
-		const { signupWithConnection } = await import('#app/utils/auth.server.ts')
+		const { signupWithConnection } = await import('@repo/auth/server')
 
 		// Generate unique username
 		let username = normalizeUsername(

@@ -80,7 +80,7 @@ afterEach(async () => {
 })
 
 test('successful SSO logout revokes tokens and performs regular logout', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	// Create user and session
 	const user = await prisma.user.create({
@@ -141,7 +141,7 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 })
 
 test('handles logout when organization not found', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	const mockLogoutResponse = new Response(null, {
 		status: 302,
@@ -171,7 +171,7 @@ test('handles logout when organization not found', async () => {
 })
 
 test('handles logout when SSO not configured', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(null)
 
@@ -199,7 +199,7 @@ test('handles logout when SSO not configured', async () => {
 })
 
 test('handles logout when SSO disabled', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue({
 		...testSSOConfig,
@@ -230,7 +230,7 @@ test('handles logout when SSO disabled', async () => {
 })
 
 test('handles logout when no session exists', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	const mockLogoutResponse = new Response(null, {
 		status: 302,
@@ -259,7 +259,7 @@ test('handles logout when no session exists', async () => {
 })
 
 test('handles logout when no SSO session exists', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	// Create user and session but no SSO session
 	const user = await prisma.user.create({
@@ -303,7 +303,7 @@ test('handles logout when no SSO session exists', async () => {
 })
 
 test('continues logout even if token revocation fails', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	// Mock console.warn since we expect it to be called when token revocation fails
 	const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -376,7 +376,7 @@ test('continues logout even if token revocation fails', async () => {
 })
 
 test('handles custom redirect URL from query params', async () => {
-	const { logout } = await import('#app/utils/auth.server.ts')
+	const { logout } = await import('@repo/auth/server')
 
 	const mockLogoutResponse = new Response(null, {
 		status: 302,

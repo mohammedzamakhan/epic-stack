@@ -74,7 +74,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	let currentPriceId: string | null = null
 	if (organization.stripeSubscriptionId) {
 		try {
-			const { stripe } = await import('#app/utils/payments.server.ts')
+			const { stripe } = await import('@repo/payments')
 			const subscription = await stripe.subscriptions.retrieve(
 				organization.stripeSubscriptionId,
 			)

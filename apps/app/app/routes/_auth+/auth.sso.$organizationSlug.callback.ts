@@ -328,7 +328,7 @@ async function makeSession(
 ) {
 	redirectTo ??= '/'
 
-	const { canUserLogin } = await import('#app/utils/auth.server.ts')
+	const { canUserLogin } = await import('@repo/auth/server')
 	const allowed = await canUserLogin(user.id)
 	if (!allowed) {
 		return redirect('/login?banned=true', {

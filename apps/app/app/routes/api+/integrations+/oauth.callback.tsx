@@ -117,7 +117,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 
 		// Get organization slug for redirect
-		const { prisma } = await import('#app/utils/db.server.ts')
+		const { prisma } = await import('@repo/prisma')
 		const organization = await prisma.organization.findUnique({
 			where: { id: integration.organizationId },
 			select: { slug: true },

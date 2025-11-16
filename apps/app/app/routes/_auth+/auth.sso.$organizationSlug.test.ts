@@ -42,7 +42,7 @@ afterEach(async () => {
 })
 
 test('successful SSO initiation redirects to identity provider', async () => {
-	const { getSSOStrategy } = await import('#app/utils/auth.server.ts')
+	const { getSSOStrategy } = await import('@repo/auth/server')
 
 	// Mock successful strategy retrieval
 	vi.mocked(getSSOStrategy).mockResolvedValue('sso-test-org-id')
@@ -105,7 +105,7 @@ test('handles missing organization slug', async () => {
 })
 
 test('handles SSO not configured for organization', async () => {
-	const { getSSOStrategy } = await import('#app/utils/auth.server.ts')
+	const { getSSOStrategy } = await import('@repo/auth/server')
 
 	// Mock no strategy found (SSO not configured)
 	vi.mocked(getSSOStrategy).mockResolvedValue(null)
@@ -122,7 +122,7 @@ test('handles SSO not configured for organization', async () => {
 })
 
 test('handles SSO authentication service error', async () => {
-	const { getSSOStrategy } = await import('#app/utils/auth.server.ts')
+	const { getSSOStrategy } = await import('@repo/auth/server')
 
 	// Mock successful strategy retrieval
 	vi.mocked(getSSOStrategy).mockResolvedValue('sso-test-org-id')
@@ -144,7 +144,7 @@ test('handles SSO authentication service error', async () => {
 })
 
 test('preserves redirect URL in cookie', async () => {
-	const { getSSOStrategy } = await import('#app/utils/auth.server.ts')
+	const { getSSOStrategy } = await import('@repo/auth/server')
 
 	// Mock successful strategy retrieval
 	vi.mocked(getSSOStrategy).mockResolvedValue('sso-test-org-id')
