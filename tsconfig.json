@@ -16,6 +16,8 @@
 			"@repo/ui/*": ["./packages/ui/*"],
 			"@repo/config": ["./packages/config"],
 			"@repo/config/*": ["./packages/config/*"],
+			"@repo/ai": ["./packages/ai"],
+			"@repo/ai/*": ["./packages/ai/*"],
 			"@repo/integrations": ["./packages/integrations/src"],
 			"@repo/integrations/*": ["./packages/integrations/src/*"],
 			"@repo/notifications": ["./packages/notifications/src"],

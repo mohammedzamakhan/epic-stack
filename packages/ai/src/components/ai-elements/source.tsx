@@ -4,7 +4,7 @@ import { BookIcon, ChevronDownIcon } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@repo/ui'
 import { type ComponentProps } from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 export type SourcesProps = ComponentProps<'div'>
 

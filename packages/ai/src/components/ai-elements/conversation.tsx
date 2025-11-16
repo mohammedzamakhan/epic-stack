@@ -5,7 +5,7 @@ import { Button } from '@repo/ui'
 import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
 

@@ -7,22 +7,21 @@ import {
 	Conversation,
 	ConversationContent,
 	ConversationScrollButton,
-} from '#app/components/ai-elements/conversation.tsx'
-import { Loader } from '#app/components/ai-elements/loader.tsx'
+} from './ai-elements/conversation.js'
+import { Loader } from './ai-elements/loader.js'
 import {
 	Message,
 	MessageContent,
 	MessageAvatar,
-} from '#app/components/ai-elements/message.tsx'
+} from './ai-elements/message.js'
 import {
 	PromptInput,
 	PromptInputTextarea,
 	PromptInputToolbar,
 	PromptInputSubmit,
-} from '#app/components/ai-elements/prompt-input.tsx'
-import { Response } from '#app/components/ai-elements/response.tsx'
-import { Suggestions, Suggestion } from '#app/components/ai-elements/suggestion.tsx'
-import { ClientOnly } from 'remix-utils/client-only'
+} from './ai-elements/prompt-input.js'
+import { Response } from './ai-elements/response.js'
+import { Suggestions, Suggestion } from './ai-elements/suggestion.js'
 
 interface AIChatProps {
 	noteId: string

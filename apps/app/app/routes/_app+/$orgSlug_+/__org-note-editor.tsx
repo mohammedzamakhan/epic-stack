@@ -22,7 +22,7 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import { AIContentGenerator } from '#app/components/note/ai-content-generator.tsx'
+import { AIContentGenerator } from '@repo/ai'
 import {
 	ContentEditor,
 	type ContentEditorRef,

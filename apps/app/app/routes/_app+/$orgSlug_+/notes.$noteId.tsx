@@ -49,7 +49,7 @@ class LazyLoadErrorBoundary extends Component<
 
 // Lazy load AIChat component for better performance
 const AIChat = lazy(() =>
-	import('#app/components/ai-chat.tsx').then((module) => ({
+	import('@repo/ai').then((module) => ({
 		default: module.AIChat,
 	})),
 )

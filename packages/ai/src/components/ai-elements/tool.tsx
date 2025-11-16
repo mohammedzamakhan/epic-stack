@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { type ComponentProps, type ReactNode } from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 type ToolUIPart = {
 	type: 'tool-code'
 	state:

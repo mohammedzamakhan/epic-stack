@@ -4,7 +4,7 @@ import { ChevronDownIcon, SearchIcon } from 'lucide-react'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@repo/ui'
 import { type ComponentProps } from 'react'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 export type TaskItemFileProps = ComponentProps<'div'>
 

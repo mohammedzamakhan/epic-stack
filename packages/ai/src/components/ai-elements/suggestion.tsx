@@ -3,7 +3,7 @@
 import { type ComponentProps } from 'react'
 import { Button, ScrollArea, ScrollBar } from '@repo/ui'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 export type SuggestionsProps = ComponentProps<typeof ScrollArea>
 
