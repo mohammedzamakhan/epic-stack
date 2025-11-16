@@ -1,4 +1,5 @@
 import { prisma } from './db.server'
+import { getClientIp } from '@repo/security'
 
 export interface IpTrackingData {
 	ip: string
@@ -10,36 +11,8 @@ export interface IpTrackingData {
 	userId?: string
 }
 
-export function getClientIp(request: any): string {
-	// Support both Express-style (request.get) and Web API (request.headers.get) requests
-	const getHeader = (name: string): string | null | undefined => {
-		if (typeof request.get === 'function') {
-			// Express-style request
-			return request.get(name)
-		} else if (request.headers && typeof request.headers.get === 'function') {
-			// Web API Request
-			return request.headers.get(name)
-		}
-		return undefined
-	}
-
-	// Check various headers for the real IP address
-	const forwarded = getHeader('X-Forwarded-For')
-	const realIp = getHeader('X-Real-IP')
-	const flyClientIp = getHeader('Fly-Client-IP')
-	const cfConnectingIp = getHeader('CF-Connecting-IP')
-
-	// Prefer more reliable headers first
-	if (flyClientIp) return flyClientIp
-	if (cfConnectingIp) return cfConnectingIp
-	if (realIp) return realIp
-	if (forwarded) {
-		// X-Forwarded-For can contain multiple IPs, take the first one (client IP)
-		return forwarded.split(',')[0]?.trim() || request.ip || '127.0.0.1'
-	}
-
-	return request.ip || '127.0.0.1'
-}
+// Re-export for backward compatibility
+export { getClientIp }
 
 export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 	try {

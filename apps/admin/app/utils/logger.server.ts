@@ -1,6 +1,7 @@
 import pino from 'pino'
 import type { Logger as PinoLogger } from 'pino'
 import * as Sentry from '@sentry/react-router'
+import { getClientIp as extractClientIp } from '@repo/security'
 
 /**
  * Centralized logger utility using Pino
@@ -412,11 +413,7 @@ export function sanitizeIpAddress(ip: string): string {
  * Utility to extract and validate client IP from request headers
  */
 export function getClientIp(request: Request): string {
-    const forwardedFor = request.headers.get('x-forwarded-for')
-    const realIp = request.headers.get('x-real-ip')
-    const cfConnectingIp = request.headers.get('cf-connecting-ip')
-
-    const rawIp = cfConnectingIp || realIp || forwardedFor?.split(',')[0]?.trim() || 'unknown'
+    const rawIp = extractClientIp(request, { fallback: 'unknown' })
 
     // Validate IP to prevent injection attacks
     return validateIpAddress(rawIp)

@@ -1,5 +1,6 @@
 import { prisma } from '#app/utils/db.server.ts'
 import { logger } from './logger.server.ts'
+import { getClientIp } from '@repo/security'
 
 /**
  * Comprehensive audit action types for the entire application
@@ -560,12 +561,7 @@ export class AuditService {
 	private extractIPAddress(request?: Request): string | undefined {
 		if (!request) return undefined
 
-		return (
-			request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-			request.headers.get('x-real-ip') ||
-			request.headers.get('cf-connecting-ip') ||
-			undefined
-		)
+		return getClientIp(request, { returnUndefined: true })
 	}
 
 	private sanitizeMetadata(

@@ -99,7 +99,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 			// Create JWT tokens for mobile authentication
 			const userAgent = request.headers.get('user-agent') ?? undefined
-			const ip = request.headers.get('x-forwarded-for') ?? undefined
+			const ip = getClientIp(request)
 
 			const tokens = await createTokenPair(
 				{
@@ -186,7 +186,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 			// Create JWT tokens for mobile authentication
 			const userAgent = request.headers.get('user-agent') ?? undefined
-			const ip = request.headers.get('x-forwarded-for') ?? undefined
+			const ip = getClientIp(request)
 
 			const tokens = await createTokenPair(
 				{
