@@ -10,7 +10,7 @@ import {
 } from '#app/components/forms.tsx'
 import { EmailChangeForm } from '#app/components/settings/email-form.tsx'
 
-import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { NameSchema, UsernameSchema } from '@repo/validation'
 import { ProfilePhoto } from './profile-photo'
 import {
 	Button,

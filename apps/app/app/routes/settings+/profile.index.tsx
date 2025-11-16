@@ -15,7 +15,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getUserImgSrc, useDoubleCheck } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { NameSchema, UsernameSchema } from '@repo/validation'
 import { type Route } from './+types/profile.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import {

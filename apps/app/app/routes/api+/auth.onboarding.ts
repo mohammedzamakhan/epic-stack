@@ -10,7 +10,7 @@ import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
-} from '#app/utils/user-validation.ts'
+} from '@repo/validation'
 import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.onboarding.ts'
 

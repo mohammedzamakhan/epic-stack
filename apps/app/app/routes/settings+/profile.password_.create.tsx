@@ -24,7 +24,7 @@ import {
 } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
-import { PasswordAndConfirmPasswordSchema } from '#app/utils/user-validation.ts'
+import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { type Route } from './+types/profile.password_.create.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 

@@ -37,7 +37,7 @@ import arcjet from '#app/utils/arcjet.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { EmailSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { EmailSchema, UsernameSchema } from '@repo/validation'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.ts'
 

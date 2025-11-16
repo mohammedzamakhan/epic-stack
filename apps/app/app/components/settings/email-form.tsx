@@ -8,7 +8,7 @@ import {
 } from '#app/components/forms.tsx'
 
 import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
-import { EmailSchema } from '#app/utils/user-validation.ts'
+import { EmailSchema } from '@repo/validation'
 import {
 	Button,
 	StatusButton,

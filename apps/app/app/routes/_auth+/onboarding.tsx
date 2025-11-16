@@ -28,7 +28,7 @@ import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
-} from '#app/utils/user-validation.ts'
+} from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/onboarding.ts'
 import {

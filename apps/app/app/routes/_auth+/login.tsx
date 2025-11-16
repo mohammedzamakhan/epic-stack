@@ -49,7 +49,7 @@ import {
 } from '#app/utils/connections.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
-import { PasswordSchema } from '#app/utils/user-validation.ts'
+import { PasswordSchema } from '@repo/validation'
 import { type Route } from './+types/login.ts'
 import { handleNewSession } from './login.server.ts'
 import {
