@@ -10,7 +10,7 @@ interface DiscoverOrgResponse {
 }
 
 // Mock dependencies
-vi.mock('#app/utils/organizations.server.ts', () => ({
+vi.mock('@repo/server-utils', () => ({
 	discoverOrganizationFromEmail: vi.fn(),
 }))
 
@@ -21,7 +21,7 @@ vi.mock('#app/utils/sso-configuration.server.ts', () => ({
 }))
 
 const { discoverOrganizationFromEmail } = await import(
-	'#app/utils/organizations.server.ts'
+	'@repo/server-utils'
 )
 const { ssoConfigurationService } = await import(
 	'#app/utils/sso-configuration.server.ts'
