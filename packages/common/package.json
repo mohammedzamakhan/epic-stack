@@ -11,6 +11,31 @@
       "types": "./index.ts",
       "import": "./index.ts",
       "default": "./index.ts"
+    },
+    "./cookie-consent": {
+      "types": "./src/cookie-consent.server.ts",
+      "import": "./src/cookie-consent.server.ts",
+      "default": "./src/cookie-consent.server.ts"
+    },
+    "./redirect-cookie": {
+      "types": "./src/redirect-cookie.server.ts",
+      "import": "./src/redirect-cookie.server.ts",
+      "default": "./src/redirect-cookie.server.ts"
+    },
+    "./sidebar-cookie": {
+      "types": "./src/sidebar-cookie.server.ts",
+      "import": "./src/sidebar-cookie.server.ts",
+      "default": "./src/sidebar-cookie.server.ts"
+    },
+    "./toast": {
+      "types": "./src/toast.server.ts",
+      "import": "./src/toast.server.ts",
+      "default": "./src/toast.server.ts"
+    },
+    "./headers": {
+      "types": "./src/headers.server.ts",
+      "import": "./src/headers.server.ts",
+      "default": "./src/headers.server.ts"
     }
   },
   "scripts": {

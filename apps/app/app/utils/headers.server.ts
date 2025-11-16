@@ -1,2 +1,2 @@
 // Re-export from common package
-export * from '@repo/common'
+export * from '@repo/common/headers'
