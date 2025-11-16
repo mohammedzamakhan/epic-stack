@@ -33,6 +33,9 @@ export * from './src/last-login-method'
 // User validation schemas
 export * from './src/user-validation'
 
+// Organization permission constants
+export * from './src/organization-permission-constants'
+
 // Connection types/constants and components (client-safe parts from connections.tsx)
 export {
 	ProviderNameSchema,

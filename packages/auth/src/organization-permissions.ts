@@ -1,5 +1,5 @@
 import { type UserOrganizationWithRole } from '@repo/server-utils'
-import { ORG_PERMISSIONS } from './organization-permissions.server'
+import { ORG_PERMISSIONS } from './organization-permission-constants'
 
 export type OrganizationPermissionString = `${string}:${string}:${string}`
 
