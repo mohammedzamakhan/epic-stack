@@ -6,15 +6,18 @@
   "files": [
     "eslint-preset.js",
     "brand.ts",
-    "manifest.ts"
+    "manifest.ts",
+    "dist"
   ],
   "scripts": {
-    "clean": "rm -rf node_modules"
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf node_modules dist",
+    "prepare": "npm run build"
   },
   "exports": {
     "./eslint-preset": "./eslint-preset.js",
-    "./brand": "./brand.ts",
-    "./manifest": "./manifest.ts"
+    "./brand": "./dist/brand.js",
+    "./manifest": "./dist/manifest.js"
   },
   "dependencies": {
     "@epic-web/config": "^1.20.1"
