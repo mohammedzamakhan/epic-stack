@@ -36,6 +36,11 @@
       "types": "./src/headers.server.ts",
       "import": "./src/headers.server.ts",
       "default": "./src/headers.server.ts"
+    },
+    "./litefs": {
+      "types": "./src/litefs.server.ts",
+      "import": "./src/litefs.server.ts",
+      "default": "./src/litefs.server.ts"
     }
   },
   "scripts": {
