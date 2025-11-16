@@ -1,6 +1,6 @@
 import type { Preference } from '@novu/react'
 import { usePreferences, useNovu } from '@novu/react'
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
 	Button,
 	Card,
@@ -42,7 +42,7 @@ function getChannelIcon(channel: string): IconName {
 	return channelIcons[channel] ?? 'bell'
 }
 
-export function NotificationPreferencesCard() {
+function NotificationPreferencesCardComponent() {
 	const { preferences, isLoading, error, refetch } = usePreferences()
 	const novu = useNovu()
 	const [updatingPreferences, setUpdatingPreferences] = useState<Set<string>>(
@@ -358,5 +358,67 @@ export function NotificationPreferencesCard() {
 				)}
 			</CardContent>
 		</Card>
+	)
+}
+
+// Error boundary wrapper to handle cases where NovuProvider is not available
+class NotificationPreferencesErrorBoundary extends React.Component<
+	{ children: React.ReactNode },
+	{ hasError: boolean }
+> {
+	constructor(props: { children: React.ReactNode }) {
+		super(props)
+		this.state = { hasError: false }
+	}
+
+	static getDerivedStateFromError() {
+		return { hasError: true }
+	}
+
+	componentDidCatch(error: Error) {
+		// Only suppress the Novu provider errors
+		if (
+			!error.message.includes('useNovu must be used within a') &&
+			!error.message.includes('usePreferences')
+		) {
+			console.error('NotificationPreferencesCard error:', error)
+		}
+	}
+
+	render() {
+		if (this.state.hasError) {
+			// Show a fallback UI when Novu is not available
+			return (
+				<Card className="w-full">
+					<CardHeader>
+						<CardTitle>Notification Preferences</CardTitle>
+						<CardDescription>
+							Notification preferences are not available at this time.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="flex flex-col items-center justify-center py-8 text-center">
+							<Icon
+								name="bell"
+								className="text-muted-foreground mb-4 h-12 w-12"
+							/>
+							<p className="text-muted-foreground text-sm">
+								Please ensure you have an active organization to manage
+								notification preferences.
+							</p>
+						</div>
+					</CardContent>
+				</Card>
+			)
+		}
+		return this.props.children
+	}
+}
+
+export function NotificationPreferencesCard() {
+	return (
+		<NotificationPreferencesErrorBoundary>
+			<NotificationPreferencesCardComponent />
+		</NotificationPreferencesErrorBoundary>
 	)
 }

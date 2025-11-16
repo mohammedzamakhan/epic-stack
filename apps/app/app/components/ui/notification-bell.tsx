@@ -229,7 +229,7 @@ function EmptyState() {
 	)
 }
 
-export default function NotificationBell() {
+function NotificationBellComponent() {
 	const [filter, setFilter] = useState<'all' | 'unread'>('all')
 	const { notifications, isLoading, fetchMore, hasMore, readAll, refetch } =
 		useNotifications(filter === 'unread' ? { read: false } : {})
@@ -428,5 +428,42 @@ export default function NotificationBell() {
 				</motion.div>
 			</PopoverContent>
 		</Popover>
+	)
+}
+
+// Error boundary wrapper to handle cases where NovuProvider is not available
+class NotificationBellErrorBoundary extends React.Component<
+	{ children: React.ReactNode },
+	{ hasError: boolean }
+> {
+	constructor(props: { children: React.ReactNode }) {
+		super(props)
+		this.state = { hasError: false }
+	}
+
+	static getDerivedStateFromError() {
+		return { hasError: true }
+	}
+
+	componentDidCatch(error: Error) {
+		// Only suppress the "useNovu must be used within a <NovuProvider />" error
+		if (!error.message.includes('useNovu must be used within a')) {
+			console.error('NotificationBell error:', error)
+		}
+	}
+
+	render() {
+		if (this.state.hasError) {
+			return null
+		}
+		return this.props.children
+	}
+}
+
+export default function NotificationBell() {
+	return (
+		<NotificationBellErrorBoundary>
+			<NotificationBellComponent />
+		</NotificationBellErrorBoundary>
 	)
 }

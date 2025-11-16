@@ -152,12 +152,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 		: Promise.resolve(undefined)
 
 	// Load organizations but don't await - cache for later use
-	const userOrganizations = await cachified({
-		key: `user-organizations:${user?.id}`,
-		cache,
-		ttl: 1000 * 60 * 2, // 2 minutes
-		getFreshValue: () => userOrganizationsPromise,
-	})
+	const userOrganizations = user
+		? await cachified({
+				key: `user-organizations:${user.id}`,
+				cache,
+				ttl: 1000 * 60 * 2, // 2 minutes
+				getFreshValue: () => userOrganizationsPromise,
+			})
+		: undefined
 
 	// Defer favorite notes loading - not critical for initial render
 	// These are typically only needed in the sidebar/navigation
