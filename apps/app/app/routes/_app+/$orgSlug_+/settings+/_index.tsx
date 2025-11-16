@@ -30,7 +30,7 @@ import VerifiedDomainCard, {
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { encrypt, getSSOMasterKey } from '#app/utils/encryption.server.ts'
+import { encrypt, getSSOMasterKey } from '@repo/security'
 import { markStepCompleted } from '#app/utils/onboarding.ts'
 import {
 	updateSeatQuantity,

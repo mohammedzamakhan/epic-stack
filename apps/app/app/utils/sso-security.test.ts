@@ -15,7 +15,7 @@ import {
 	trackSuspiciousActivity,
 	isSuspiciousActivityBlocked,
 } from './sso-rate-limit.server.ts'
-import { encrypt, decrypt, getSSOMasterKey } from './encryption.server.ts'
+import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 
 // Mock the encryption functions
 vi.mock('./encryption.server.ts', () => ({

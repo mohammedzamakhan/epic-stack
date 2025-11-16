@@ -4,7 +4,7 @@ import {
 	decrypt,
 	generateEncryptionKey,
 	isValidEncryptionKey,
-} from './encryption.server.ts'
+} from './encryption.js'
 
 describe('encryption utilities', () => {
 	const testKey = generateEncryptionKey()

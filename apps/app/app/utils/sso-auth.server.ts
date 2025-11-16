@@ -2,7 +2,7 @@ import { type User, type SSOConfiguration, type SSOSession } from '@repo/prisma'
 
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
 import { prisma } from './db.server.ts'
-import { encrypt, decrypt, getSSOMasterKey } from './encryption.server.ts'
+import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import { ssoConfigurationService } from './sso-configuration.server.ts'
 import { type ProviderUser } from './providers/provider.ts'
 import {

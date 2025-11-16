@@ -13,7 +13,7 @@ import {
 	type UploadOptions,
 } from '@repo/storage'
 import { prisma } from './db.server'
-import { decrypt, getSSOMasterKey } from './encryption.server'
+import { decrypt, getSSOMasterKey } from '@repo/security'
 
 // Validate required environment variables
 const requiredEnvVars = [
