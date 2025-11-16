@@ -435,9 +435,8 @@ export const updateSeatQuantity = async (organizationId: string) => {
 		},
 	})
 	if (!organization?.stripeSubscriptionId) {
-		throw new Error(
-			'Organization does not have a stripe subscription. Cannot add user.',
-		)
+		// No subscription to update - return early
+		return null
 	}
 
 	// Get the number of users in the organization
