@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { faker } from '@faker-js/faker'
 import fsExtra from 'fs-extra'
 import { HttpResponse, passthrough, http, type HttpHandler } from 'msw'
-import { USERNAME_MAX_LENGTH } from '#app/utils/user-validation.ts'
+import { USERNAME_MAX_LENGTH } from '@repo/validation'
 
 const { json } = HttpResponse
 
