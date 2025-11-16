@@ -23,11 +23,11 @@ import {
 	getPasswordHash,
 	requireUserId,
 	verifyUserPassword,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '@repo/client-utils'
 import { redirectWithToast } from '@repo/server-utils'
-import { PasswordSchema } from '@repo/auth'
+import { PasswordSchema } from '@repo/auth/client'
 import { type Route } from './+types/profile.password.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 

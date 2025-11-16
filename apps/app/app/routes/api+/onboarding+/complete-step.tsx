@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { type ActionFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { markStepCompleted } from '@repo/server-utils'
 
 export async function action({ request }: ActionFunctionArgs) {

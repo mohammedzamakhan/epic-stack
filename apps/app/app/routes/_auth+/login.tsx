@@ -40,23 +40,19 @@ import {
 import {
 	saveLastLoginMethod,
 	useLastLoginMethod,
-} from '@repo/auth'
-import arcjet from '@repo/server-utils'
-import { login, requireAnonymous } from '@repo/auth'
-import {
 	ProviderConnectionForm,
 	providerNames,
-} from '@repo/auth'
-import { checkHoneypot } from '@repo/auth'
+	PasswordSchema,
+} from '@repo/auth/client'
+import arcjet from '@repo/server-utils'
+import { login, requireAnonymous, checkHoneypot, ssoConfigurationService } from '@repo/auth/server'
 import { getErrorMessage, useIsPending } from '@repo/client-utils'
-import { PasswordSchema } from '@repo/auth'
 import { type Route } from './+types/login.ts'
 import { handleNewSession } from './login.server.ts'
 import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
 } from '@repo/server-utils'
-import { ssoConfigurationService } from '@repo/auth'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

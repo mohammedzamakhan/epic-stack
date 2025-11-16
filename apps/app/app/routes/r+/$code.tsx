@@ -1,9 +1,9 @@
 import { redirect } from 'react-router'
-import { getUserId } from '@repo/auth'
+import { getUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { linkReferral } from '@repo/server-utils'
 import { redirectWithToast } from '@repo/server-utils'
-import { verifySessionStorage } from '@repo/auth'
+import { verifySessionStorage } from '@repo/auth/client'
 import { type Route } from './+types/$code.ts'
 
 export const REFERRAL_CODE_SESSION_KEY = 'referralCode'

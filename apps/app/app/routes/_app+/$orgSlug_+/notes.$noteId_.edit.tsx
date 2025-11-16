@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { SheetHeader, SheetTitle } from '@repo/ui'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '@repo/server-utils'
 import { OrgNoteEditor } from './__org-note-editor.tsx'

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { getPageTitle } from '@repo/config/brand'
 import { redirect } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus, getDiscordInviteUrl } from '@repo/server-utils'
 import {

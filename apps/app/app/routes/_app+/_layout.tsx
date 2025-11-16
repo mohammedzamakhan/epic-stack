@@ -1,6 +1,6 @@
 import { Outlet, useLoaderData } from 'react-router'
 import { MarketingLayout } from '#app/components/marketing-layout.tsx'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,

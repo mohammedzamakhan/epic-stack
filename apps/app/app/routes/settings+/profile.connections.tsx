@@ -3,8 +3,8 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { useState } from 'react'
 import { data, useFetcher } from 'react-router'
 
-import { requireUserId } from '@repo/auth'
-import { resolveConnectionData } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
+import { resolveConnectionData } from '@repo/auth/client'
 import {
 	Tooltip,
 	TooltipContent,
@@ -19,7 +19,7 @@ import {
 	ProviderNameSchema,
 	providerIcons,
 	providerNames,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { pipeHeaders } from '@repo/server-utils'
 import { makeTimings } from '@repo/server-utils'

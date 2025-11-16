@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
-import { checkHoneypot } from '@repo/auth'
+import { checkHoneypot } from '@repo/auth/client'
 import { useIsPending } from '@repo/client-utils'
 import { type Route } from './+types/verify.ts'
 import { validateRequest } from './verify.server.ts'

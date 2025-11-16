@@ -10,11 +10,11 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.ts'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { getDomainUrl, useIsPending } from '@repo/client-utils'
 import { redirectWithToast } from '@repo/server-utils'
-import { getTOTPAuthUri } from '@repo/auth'
+import { getTOTPAuthUri } from '@repo/auth/client'
 import { type Route } from './+types/profile.two-factor.verify.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import { Icon, StatusButton } from '@repo/ui'

@@ -36,8 +36,8 @@ import {
 	FieldGroup,
 	FieldDescription,
 } from '@repo/ui'
-import { generateApiKey } from '@repo/auth'
-import { requireUserId } from '@repo/auth'
+import { generateApiKey } from '@repo/auth/client'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '@repo/server-utils'
 import { EmptyState } from '#app/components/empty-state.tsx'

@@ -1,9 +1,9 @@
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { redirect, Link, useFetcher } from 'react-router'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
-import { generateTOTP } from '@repo/auth'
+import { generateTOTP } from '@repo/auth/client'
 import { type Route } from './+types/profile.two-factor.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import { twoFAVerifyVerificationType } from './profile.two-factor.verify.tsx'

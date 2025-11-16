@@ -1,5 +1,5 @@
 import { redirect } from 'react-router'
-import { logout } from '@repo/auth'
+import { logout } from '@repo/auth/client'
 import { type Route } from './+types/logout.ts'
 
 export async function loader() {

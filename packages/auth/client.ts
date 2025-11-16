@@ -33,5 +33,14 @@ export * from './src/last-login-method'
 // User validation schemas
 export * from './src/user-validation'
 
-// Connection types/constants (client-safe parts from connections.tsx)
-export { ProviderNameSchema, providerLabels, providerIcons, GITHUB_PROVIDER_NAME, GOOGLE_PROVIDER_NAME } from './src/connections'
+// Connection types/constants and components (client-safe parts from connections.tsx)
+export {
+	ProviderNameSchema,
+	providerLabels,
+	providerIcons,
+	providerNames,
+	ProviderConnectionForm,
+	GITHUB_PROVIDER_NAME,
+	GOOGLE_PROVIDER_NAME,
+	type ProviderName,
+} from './src/connections'

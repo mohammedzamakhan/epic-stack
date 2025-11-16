@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { InvitationsCard } from '#app/components/settings/cards/organization/invitations-card.tsx'
 import { MembersCard } from '#app/components/settings/cards/organization/members-card.tsx'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	createOrganizationInvitation,
@@ -27,7 +27,7 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { type OrganizationRoleName } from '@repo/server-utils'
 

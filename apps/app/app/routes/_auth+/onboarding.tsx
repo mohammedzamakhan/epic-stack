@@ -16,20 +16,20 @@ import {
 	requireAnonymous,
 	sessionKey,
 	signup,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '@repo/server-utils'
-import { checkHoneypot } from '@repo/auth'
+import { checkHoneypot } from '@repo/auth/client'
 import { useIsPending } from '@repo/client-utils'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
-import { authSessionStorage } from '@repo/auth'
+import { authSessionStorage } from '@repo/auth/client'
 import { redirectWithToast } from '@repo/server-utils'
 import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
-} from '@repo/auth'
-import { verifySessionStorage } from '@repo/auth'
+} from '@repo/auth/client'
+import { verifySessionStorage } from '@repo/auth/client'
 import { type Route } from './+types/onboarding.ts'
 import {
 	Card,

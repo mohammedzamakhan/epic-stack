@@ -3,7 +3,7 @@ import { AnnotatedLayout, AnnotatedSection, PageTitle } from '@repo/ui'
 import { type LoaderFunctionArgs } from 'react-router'
 import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

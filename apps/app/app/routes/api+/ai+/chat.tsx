@@ -4,7 +4,7 @@ import { brand } from '@repo/config/brand'
 import { prisma } from '@repo/prisma'
 import { streamText, type Message } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { markStepCompleted } from '@repo/server-utils'
 
 // Define Comment type based on Prisma query result

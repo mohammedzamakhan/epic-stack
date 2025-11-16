@@ -16,7 +16,7 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
 import { Sheet, SheetContent, Icon, Input } from '@repo/ui'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	getNotesViewMode,

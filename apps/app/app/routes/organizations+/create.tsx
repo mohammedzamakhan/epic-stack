@@ -28,7 +28,7 @@ import {
 	SelectValue,
 } from '@repo/ui'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '@repo/server-utils'
 import {

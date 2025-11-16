@@ -22,7 +22,7 @@ import { NotesChart } from '#app/components/notes-chart.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	getOnboardingProgress,

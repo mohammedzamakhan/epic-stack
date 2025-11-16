@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, redirect } from 'react-router'
-import { getUserId } from '@repo/auth'
+import { getUserId } from '@repo/auth/client'
 import { redirectWithToast } from '@repo/server-utils'
 import { shouldBeOnWaitlist } from '@repo/server-utils'
 

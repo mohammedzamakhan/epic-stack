@@ -8,7 +8,7 @@ import { data, redirect, Form, useNavigation } from 'react-router'
 import { z } from 'zod'
 import { ErrorList } from '#app/components/forms.tsx'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { Button, Icon, StatusButton } from '@repo/ui'
 import {

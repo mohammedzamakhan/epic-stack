@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { type Route } from './+types/profile.passkeys.ts'
 import { Button, Icon } from '@repo/ui'

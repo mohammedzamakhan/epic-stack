@@ -1,7 +1,7 @@
 import { Outlet, useRouteLoaderData } from 'react-router'
 import { Logo } from '#app/components/icons/logo.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 
 export async function loader({ request }: { request: Request }) {
 	// This ensures users must be logged in to access any organization routes

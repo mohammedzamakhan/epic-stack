@@ -68,7 +68,7 @@ import {
 	logNoteActivity,
 	getNoteActivityLogs,
 } from '@repo/server-utils'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { sanitizeCommentContent } from '@repo/server-utils'
 import { prisma } from '#app/utils/db.server.ts'
 import {
@@ -81,7 +81,7 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { redirectWithToast } from '@repo/server-utils'
 import { data } from 'react-router'
 

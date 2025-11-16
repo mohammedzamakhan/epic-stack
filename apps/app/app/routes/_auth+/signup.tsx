@@ -27,17 +27,17 @@ import {
 	FieldGroup,
 } from '@repo/ui'
 import arcjet from '@repo/server-utils'
-import { requireAnonymous } from '@repo/auth'
+import { requireAnonymous } from '@repo/auth/client'
 import {
 	ProviderConnectionForm,
 	providerNames,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
-import { checkHoneypot } from '@repo/auth'
+import { checkHoneypot } from '@repo/auth/client'
 import { useIsPending } from '@repo/client-utils'
-import { EmailSchema } from '@repo/auth'
-import { verifySessionStorage } from '@repo/auth'
+import { EmailSchema } from '@repo/auth/client'
+import { verifySessionStorage } from '@repo/auth/client'
 import { type Route } from './+types/signup.ts'
 import { onboardingInviteTokenSessionKey } from './onboarding'
 import { prepareVerification } from './verify.server.ts'

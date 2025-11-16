@@ -25,14 +25,14 @@ import {
 	sessionKey,
 	signupWithConnection,
 	requireAnonymous,
-} from '@repo/auth'
-import { ProviderNameSchema } from '@repo/auth'
+} from '@repo/auth/client'
+import { ProviderNameSchema } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '@repo/client-utils'
-import { authSessionStorage } from '@repo/auth'
+import { authSessionStorage } from '@repo/auth/client'
 import { redirectWithToast } from '@repo/server-utils'
-import { NameSchema, UsernameSchema } from '@repo/auth'
-import { verifySessionStorage } from '@repo/auth'
+import { NameSchema, UsernameSchema } from '@repo/auth/client'
+import { verifySessionStorage } from '@repo/auth/client'
 import { type Route } from './+types/onboarding_.$provider.ts'
 import { onboardingEmailSessionKey } from './onboarding'
 import {

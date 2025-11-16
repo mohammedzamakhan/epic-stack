@@ -13,10 +13,10 @@ import {
 	checkIsCommonPassword,
 	requireAnonymous,
 	resetUserPassword,
-} from '@repo/auth'
+} from '@repo/auth/client'
 import { useIsPending } from '@repo/client-utils'
-import { PasswordAndConfirmPasswordSchema } from '@repo/auth'
-import { verifySessionStorage } from '@repo/auth'
+import { PasswordAndConfirmPasswordSchema } from '@repo/auth/client'
+import { verifySessionStorage } from '@repo/auth/client'
 import { type Route } from './+types/reset-password.ts'
 import {
 	Card,

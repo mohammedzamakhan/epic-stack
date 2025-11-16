@@ -28,7 +28,7 @@ import VerifiedDomainCard, {
 	VerifiedDomainSchema,
 } from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { encrypt, getSSOMasterKey } from '@repo/server-utils'
 import { markStepCompleted } from '@repo/server-utils'

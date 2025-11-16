@@ -9,7 +9,7 @@ import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { logNoteActivity } from '@repo/server-utils'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { markStepCompleted } from '@repo/server-utils'
 import {

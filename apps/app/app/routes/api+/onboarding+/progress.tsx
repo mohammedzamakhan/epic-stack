@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,

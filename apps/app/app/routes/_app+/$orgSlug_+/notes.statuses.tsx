@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '@repo/server-utils'
 

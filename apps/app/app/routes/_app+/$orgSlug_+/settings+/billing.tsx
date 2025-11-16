@@ -9,7 +9,7 @@ import {
 import { BillingCard } from '#app/components/settings/cards/organization/billing-card.tsx'
 import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card.tsx'
 
-import { requireUserId } from '@repo/auth'
+import { requireUserId } from '@repo/auth/client'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '@repo/server-utils'
 import {
