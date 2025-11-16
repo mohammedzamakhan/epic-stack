@@ -139,3 +139,66 @@ export function getSSOMasterKey(): string {
 
 	return key
 }
+
+/**
+ * Gets the encryption key from environment variables for integrations
+ * @param envVarName - The name of the environment variable to use (defaults to INTEGRATION_ENCRYPTION_KEY)
+ * @returns The encryption key
+ */
+export function getEncryptionKey(
+	envVarName: string = 'INTEGRATION_ENCRYPTION_KEY',
+): string {
+	const key = process.env[envVarName]
+	if (!key) {
+		throw new Error(`${envVarName} environment variable is not set`)
+	}
+
+	if (!isValidEncryptionKey(key)) {
+		throw new Error(`${envVarName} is not a valid encryption key`)
+	}
+
+	return key
+}
+
+/**
+ * Checks if encryption is properly configured
+ * @param envVarName - The name of the environment variable to check
+ * @returns True if encryption is configured
+ */
+export function isEncryptionConfigured(
+	envVarName: string = 'INTEGRATION_ENCRYPTION_KEY',
+): boolean {
+	const keyString = process.env[envVarName]
+	if (!keyString) {
+		return false
+	}
+
+	const trimmedKey = keyString.trim()
+	return isValidEncryptionKey(trimmedKey)
+}
+
+/**
+ * Async version of encrypt function
+ * @param text - The text to encrypt
+ * @param masterKey - The master encryption key
+ * @returns Promise resolving to base64 encoded encrypted data
+ */
+export async function encryptAsync(
+	text: string,
+	masterKey: string,
+): Promise<string> {
+	return Promise.resolve(encrypt(text, masterKey))
+}
+
+/**
+ * Async version of decrypt function
+ * @param encryptedData - Base64 encoded encrypted data
+ * @param masterKey - The master encryption key
+ * @returns Promise resolving to the decrypted text
+ */
+export async function decryptAsync(
+	encryptedData: string,
+	masterKey: string,
+): Promise<string> {
+	return Promise.resolve(decrypt(encryptedData, masterKey))
+}
