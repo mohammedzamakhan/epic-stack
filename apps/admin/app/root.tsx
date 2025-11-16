@@ -124,7 +124,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	if (user) {
 		try {
 			const { getUserOrganizations, getUserDefaultOrganization } = await import(
-				'./utils/organizations.server'
+				'@repo/server-utils'
 			)
 			const orgs = await getUserOrganizations(user.id, true) // Include permissions
 			const defaultOrg = await getUserDefaultOrganization(user.id)
