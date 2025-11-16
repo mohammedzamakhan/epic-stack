@@ -21,7 +21,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@arcjet/remix": "^1.0.0-alpha.31"
+    "@arcjet/remix": "^1.0.0-alpha.31",
+    "remix-utils": "^8.1.0"
   },
   "devDependencies": {
     "@types/node": "22.15.21",
