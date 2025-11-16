@@ -20,7 +20,9 @@
     "test": "vitest --run",
     "test:watch": "vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@arcjet/remix": "^1.0.0-alpha.31"
+  },
   "devDependencies": {
     "@types/node": "22.15.21",
     "@vitest/coverage-v8": "^4.0.1",
