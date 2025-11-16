@@ -114,11 +114,11 @@ export default defineConfig((config) => ({
 		sourcemap: true,
 	},
 	optimizeDeps: {
-		include: ['@repo/email', '@repo/integrations'],
+		include: ['@repo/ai', '@repo/email', '@repo/integrations'],
 	},
 	...(MODE !== 'test' && {
 		ssr: {
-			noExternal: ['@repo/email'],
+			noExternal: ['@repo/ai', '@repo/email'],
 		},
 	}),
 	server: {
