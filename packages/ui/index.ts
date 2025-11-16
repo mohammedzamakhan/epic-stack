@@ -283,3 +283,7 @@ export { Kbd, KbdGroup } from './components/kbd'
 
 // Export utilities
 export { cn } from './utils/cn'
+
+// Theme and client hints utilities
+export * from './utils/theme.js'
+export * from './utils/client-hints.js'
