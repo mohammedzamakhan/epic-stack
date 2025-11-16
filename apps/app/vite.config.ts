@@ -5,9 +5,13 @@ import {
 	sentryReactRouter,
 } from '@sentry/react-router'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const MODE = process.env.NODE_ENV
 
@@ -67,6 +71,11 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 }
 
 export default defineConfig((config) => ({
+	resolve: {
+		alias: {
+			'@repo/ai': path.resolve(__dirname, '../../packages/ai'),
+		},
+	},
 	build: {
 		target: 'es2022',
 		cssMinify: MODE === 'production',
