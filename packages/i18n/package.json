@@ -11,6 +11,11 @@
       "types": "./index.ts",
       "import": "./index.ts",
       "default": "./index.ts"
+    },
+    "./server": {
+      "types": "./server.ts",
+      "import": "./server.ts",
+      "default": "./server.ts"
     }
   },
   "scripts": {
