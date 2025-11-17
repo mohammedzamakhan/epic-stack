@@ -87,6 +87,10 @@ msgstr ""
 msgid "{workflowName}"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:630
+msgid "*.png, *.jpeg files up to 5 MB"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:740
 msgid "← Back to SSO login"
 msgstr ""
@@ -105,6 +109,7 @@ msgstr ""
 
 #. placeholder {0}: basePrice.toFixed(2)
 #: app/components/settings/cards/organization/billing-card.tsx:419
+#: app/routes/organizations+/create.tsx:1314
 msgid "${0} billed annually"
 msgstr ""
 
@@ -161,6 +166,7 @@ msgid "Add an extra layer of security to your account"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:257
+#: app/routes/organizations+/create.tsx:1100
 msgid "Add another invitation"
 msgstr ""
 
@@ -193,9 +199,16 @@ msgstr ""
 msgid "Add this to your .kiro/settings/mcp.json file:"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:904
+msgid "Add your team members to get started. You can always invite more people later."
+msgstr ""
+
+#. placeholder {0}: billingInterval === 'yearly' ? (additionalUserPrice / 12).toFixed(2) : additionalUserPrice.toFixed(2)
 #. placeholder {0}: billingInterval === 'yearly' ? (additionalUserPrice / 12).toFixed(2) : additionalUserPrice.toFixed(2)
 #. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
+#. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
 #: app/components/settings/cards/organization/billing-card.tsx:431
+#: app/routes/organizations+/create.tsx:1325
 msgid "Additional users: ${0}/user/month{1}"
 msgstr ""
 
@@ -223,6 +236,10 @@ msgstr ""
 msgid "All assigned"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:1340
+msgid "All core features included"
+msgstr ""
+
 #: app/components/ui/notification-bell.tsx:326
 #: app/components/ui/notification-bell.tsx:407
 msgid "All Notifications"
@@ -239,6 +256,10 @@ msgstr ""
 #. placeholder {0}: loaderData.user.email
 #: app/routes/settings+/profile.change-email.tsx:144
 msgid "An email notice will also be sent to your old address {0}."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:554
+msgid "An organization is a workspace where teams collect, organize, and work together."
 msgstr ""
 
 #: app/components/organization-invitations.tsx:151
@@ -327,6 +348,8 @@ msgstr ""
 #: app/components/settings/two-factor-form.tsx:65
 #: app/components/settings/two-factor-form.tsx:194
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:343
+#: app/routes/organizations+/create.tsx:748
+#: app/routes/organizations+/create.tsx:883
 #: app/routes/settings+/profile.password_.create.tsx:161
 #: app/routes/settings+/profile.password.tsx:222
 msgid "Cancel"
@@ -385,6 +408,10 @@ msgstr ""
 msgid "Check your email"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:800
+msgid "Choose your plan"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:617
 msgid "Claude Desktop"
 msgstr ""
@@ -412,6 +439,10 @@ msgstr ""
 
 #: app/components/onboarding-checklist.tsx:145
 msgid "complete"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:1030
+msgid "Complete Setup"
 msgstr ""
 
 #: app/components/settings/two-factor-form.tsx:87
@@ -482,12 +513,21 @@ msgstr ""
 msgid "Connections"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:1286
+msgid "Contact support"
+msgstr ""
+
 #: app/components/settings/cards/organization/billing-card.tsx:397
 msgid "Contact support for pricing"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:662
+#: app/routes/organizations+/create.tsx:752
 msgid "Continue"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:887
+msgid "Continue to Payment"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:575
@@ -516,6 +556,10 @@ msgstr ""
 #. placeholder {0}: organization.name
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:267
 msgid "Create a new API key to connect your AI assistants to {0} data."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:549
+msgid "Create a new organization"
 msgstr ""
 
 #: app/routes/_auth+/onboarding.tsx:434
@@ -678,6 +722,10 @@ msgstr ""
 
 #: app/components/settings/cards/danger-card.tsx:36
 msgid "Deleting your user will permanently delete all user data. You should download any data that you wish to retain."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:727
+msgid "Description"
 msgstr ""
 
 #: app/components/settings/cards/danger-card.tsx:26
@@ -988,6 +1036,10 @@ msgstr ""
 msgid "Includes {includesSeats} user seats"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:1321
+msgid "Includes {seats} user seats"
+msgstr ""
+
 #: app/routes/settings+/profile.password.tsx:91
 msgid "Incorrect password."
 msgstr ""
@@ -1023,6 +1075,10 @@ msgstr ""
 
 #: app/components/command-menu.tsx:124
 msgid "Invite new members"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:901
+msgid "Invite team members"
 msgstr ""
 
 #. placeholder {0}: invitation.inviter.name || invitation.inviter.email
@@ -1109,6 +1165,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:382
 msgid "Login with a passkey"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:577
+msgid "Logo"
 msgstr ""
 
 #: app/components/user-dropdown.tsx:66
@@ -1225,6 +1285,7 @@ msgid "Members"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:208
+#: app/routes/organizations+/create.tsx:831
 msgid "Monthly"
 msgstr ""
 
@@ -1234,6 +1295,7 @@ msgstr ""
 
 #: app/components/settings/cards/organization/general-settings-card.tsx:78
 #: app/components/settings/cards/profile-card.tsx:90
+#: app/routes/organizations+/create.tsx:644
 #: app/routes/settings+/profile.index.tsx:297
 msgid "Name"
 msgstr ""
@@ -1420,6 +1482,10 @@ msgstr ""
 msgid "Or continue with email or username"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:970
+msgid "Organization size"
+msgstr ""
+
 #: app/components/settings/cards/organization/team-size-card.tsx:77
 msgid "Organization Size"
 msgstr ""
@@ -1470,7 +1536,16 @@ msgid "Pending Invitations"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:414
+#: app/routes/organizations+/create.tsx:1309
 msgid "per month"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:1246
+msgid "Plan not available"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:1249
+msgid "Please check configuration"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:354
@@ -1503,11 +1578,16 @@ msgid "Positive feedback"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:394
+#: app/routes/organizations+/create.tsx:1283
 msgid "Price not configured"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:351
 msgid "Pricing not available"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:1344
+msgid "Priority support"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1563
@@ -1619,6 +1699,10 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:711
+msgid "Reset to auto-generated"
+msgstr ""
+
 #: app/components/settings/cards/notification-preferences-card.tsx:181
 msgid "Retry"
 msgstr ""
@@ -1647,6 +1731,7 @@ msgid "Save"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:220
+#: app/routes/organizations+/create.tsx:847
 msgid "Save 20%"
 msgstr ""
 
@@ -1715,6 +1800,10 @@ msgstr ""
 msgid "Select a status"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:803
+msgid "Select a subscription plan to get started with your organization. Your trial will begin after payment setup."
+msgstr ""
+
 #: app/components/data-table.tsx:169
 msgid "Select all"
 msgstr ""
@@ -1728,6 +1817,7 @@ msgid "Send Confirmation"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:264
+#: app/routes/organizations+/create.tsx:1107
 msgid "Send Invitations"
 msgstr ""
 
@@ -1791,7 +1881,12 @@ msgstr ""
 msgid "Single sign-on, custom SLA, private support channel, and more. <0>Learn more</0>"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:924
+msgid "Skip for now"
+msgstr ""
+
 #: app/components/settings/cards/organization/general-settings-card.tsx:83
+#: app/routes/organizations+/create.tsx:665
 msgid "Slug"
 msgstr ""
 
@@ -1806,6 +1901,11 @@ msgstr ""
 #: app/components/data-table.tsx:206
 #: app/components/data-table.tsx:857
 msgid "Status"
+msgstr ""
+
+#. placeholder {0}: steps.length
+#: app/routes/organizations+/create.tsx:469
+msgid "Step {currentStep} of {0}"
 msgstr ""
 
 #: app/components/impersonation-banner.tsx:54
@@ -1850,6 +1950,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/team-size-card.tsx:62
 msgid "Team Size"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:948
+msgid "Tell us more about your organization"
 msgstr ""
 
 #: app/components/settings/cards/notification-preferences-card.tsx:43
@@ -1902,6 +2006,10 @@ msgstr ""
 
 #: app/routes/settings+/profile.change-email.tsx:79
 msgid "This email is already in use."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:951
+msgid "This helps us customize your experience and provide better insights."
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:450
@@ -1985,6 +2093,10 @@ msgstr ""
 #: app/components/app-sidebar.tsx:75
 #: app/components/settings/cards/organization/billing-card.tsx:461
 msgid "Upgrade"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:626
+msgid "Upload your logo"
 msgstr ""
 
 #: app/components/note/comment-input.tsx:151
@@ -2116,6 +2228,7 @@ msgid "Write a reply..."
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:218
+#: app/routes/organizations+/create.tsx:845
 msgid "Yearly"
 msgstr ""
 
@@ -2200,6 +2313,10 @@ msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:120
 msgid "Your connection has been deleted."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:1000
+msgid "Your department"
 msgstr ""
 
 #: app/components/core/feedback-modal.tsx:80
