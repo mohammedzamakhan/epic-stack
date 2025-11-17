@@ -1,5 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { data, redirect, Form, Link } from 'react-router'
 import { z } from 'zod'
@@ -32,7 +33,7 @@ import { type Route } from './+types/profile.password.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="more-horizontal">Password</Icon>,
+	breadcrumb: <Icon name="more-horizontal"><Trans>Password</Trans></Icon>,
 	getSitemapEntries: () => null,
 }
 
@@ -47,7 +48,7 @@ const ChangePasswordForm = z
 			ctx.addIssue({
 				path: ['confirmNewPassword'],
 				code: z.ZodIssueCode.custom,
-				message: 'The passwords must match',
+				message: t`The passwords must match`,
 			})
 		}
 	})
@@ -82,7 +83,7 @@ export async function action({ request }: Route.ActionArgs) {
 						ctx.addIssue({
 							path: ['currentPassword'],
 							code: z.ZodIssueCode.custom,
-							message: 'Incorrect password.',
+							message: t`Incorrect password.`,
 						})
 					}
 					const isCommonPassword = await checkIsCommonPassword(newPassword)
@@ -90,7 +91,7 @@ export async function action({ request }: Route.ActionArgs) {
 						ctx.addIssue({
 							path: ['newPassword'],
 							code: 'custom',
-							message: 'Password is too common',
+							message: t`Password is too common`,
 						})
 					}
 				}
@@ -126,8 +127,8 @@ export async function action({ request }: Route.ActionArgs) {
 		`/settings/profile`,
 		{
 			type: 'success',
-			title: 'Password Changed',
-			description: 'Your password has been changed.',
+			title: t`Password Changed`,
+			description: t`Your password has been changed.`,
 		},
 		{ status: 302 },
 	)
@@ -157,7 +158,7 @@ export default function ChangePasswordRoute({
 					}
 				>
 					<FieldLabel htmlFor={fields.currentPassword.id}>
-						Current Password
+						<Trans>Current Password</Trans>
 					</FieldLabel>
 					<Input
 						{...getInputProps(fields.currentPassword, { type: 'password' })}
@@ -174,7 +175,7 @@ export default function ChangePasswordRoute({
 				<Field
 					data-invalid={fields.newPassword.errors?.length ? true : undefined}
 				>
-					<FieldLabel htmlFor={fields.newPassword.id}>New Password</FieldLabel>
+					<FieldLabel htmlFor={fields.newPassword.id}><Trans>New Password</Trans></FieldLabel>
 					<Input
 						{...getInputProps(fields.newPassword, { type: 'password' })}
 						autoComplete="new-password"
@@ -191,7 +192,7 @@ export default function ChangePasswordRoute({
 					}
 				>
 					<FieldLabel htmlFor={fields.confirmNewPassword.id}>
-						Confirm New Password
+						<Trans>Confirm New Password</Trans>
 					</FieldLabel>
 					<Input
 						{...getInputProps(fields.confirmNewPassword, { type: 'password' })}
@@ -210,13 +211,13 @@ export default function ChangePasswordRoute({
 				<ErrorList id={form.errorId} errors={form.errors} />
 				<div className="grid w-full grid-cols-2 gap-6">
 					<Button variant="secondary" asChild>
-						<Link to="..">Cancel</Link>
+						<Link to=".."><Trans>Cancel</Trans></Link>
 					</Button>
 					<StatusButton
 						type="submit"
 						status={isPending ? 'pending' : (form.status ?? 'idle')}
 					>
-						Change Password
+						<Trans>Change Password</Trans>
 					</StatusButton>
 				</div>
 			</FieldGroup>

@@ -33,11 +33,16 @@ msgstr ""
 msgid "✓ Discord points claimed"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:153
+msgid "2FA is enabled"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
 msgstr ""
 
 #: app/routes/_auth+/onboarding.tsx:117
+#: app/routes/settings+/profile.index.tsx:204
 msgid "A user already exists with this username"
 msgstr ""
 
@@ -45,12 +50,39 @@ msgstr ""
 msgid "Account Suspended"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:368
+msgid "All of your data has been deleted"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:276
 msgid "Already have an account?"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:351
+#: app/routes/settings+/profile.index.tsx:389
+msgid "Are you sure?"
+msgstr ""
+
 #: app/routes/_auth+/forgot-password.tsx:244
 msgid "Back to login"
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:214
+msgid "Cancel"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:147
+msgid "Change email from"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:162
+#: app/routes/settings+/profile.password.tsx:220
+msgid "Change Password"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:133
+#: app/routes/settings+/profile.index.tsx:134
+msgid "Change profile photo"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:70
@@ -71,6 +103,10 @@ msgstr ""
 
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:195
+msgid "Confirm New Password"
 msgstr ""
 
 #: app/routes/_auth+/onboarding.tsx:428
@@ -110,6 +146,10 @@ msgstr ""
 msgid "Create a password"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:162
+msgid "Create a Password"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:354
 #: app/routes/_auth+/onboarding.tsx:501
 msgid "Create account"
@@ -119,8 +159,24 @@ msgstr ""
 msgid "Create an account"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:161
+msgid "Current Password"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:367
+msgid "Data Deleted"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:389
+msgid "Delete all your data"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:182
+msgid "Download your data"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:743
@@ -131,6 +187,10 @@ msgstr ""
 #: app/routes/_auth+/login.tsx:630
 #: app/routes/_auth+/login.tsx:745
 msgid "Email or Username"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:155
+msgid "Enable 2FA"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:636
@@ -195,6 +255,10 @@ msgstr ""
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:86
+msgid "Incorrect password."
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:210
 msgid "Invalid username or password"
 msgstr ""
@@ -236,7 +300,20 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:168
+msgid "Manage connections"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:173
+msgid "Manage passkeys"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:274
+msgid "Name"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:132
+#: app/routes/settings+/profile.password.tsx:178
 msgid "New Password"
 msgstr ""
 
@@ -266,11 +343,17 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:764
 #: app/routes/_auth+/onboarding.tsx:409
+#: app/routes/settings+/profile.password.tsx:36
 msgid "Password"
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:130
+msgid "Password Changed"
 msgstr ""
 
 #: app/routes/_auth+/onboarding.tsx:126
 #: app/routes/_auth+/reset-password.tsx:73
+#: app/routes/settings+/profile.password.tsx:94
 msgid "Password is too common"
 msgstr ""
 
@@ -324,6 +407,10 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:297
+msgid "Save changes"
+msgstr ""
+
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
 msgstr ""
@@ -344,6 +431,10 @@ msgstr ""
 msgid "Sign in to your account"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:352
+msgid "Sign out of {otherSessionsCount} other sessions"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:269
 msgid "Sign up"
 msgstr ""
@@ -357,8 +448,16 @@ msgstr ""
 msgid "Signing in as"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:51
+msgid "The passwords must match"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:357
+msgid "This is your only session"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:591
@@ -367,6 +466,7 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:744
 #: app/routes/_auth+/onboarding.tsx:379
+#: app/routes/settings+/profile.index.tsx:260
 msgid "Username"
 msgstr ""
 
@@ -440,6 +540,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:131
+msgid "Your password has been changed."
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:143

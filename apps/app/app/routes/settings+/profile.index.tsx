@@ -1,6 +1,7 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Img } from 'openimg/react'
 import { data, Link, useFetcher } from 'react-router'
@@ -129,8 +130,8 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 						<Link
 							preventScrollReset
 							to="photo"
-							title="Change profile photo"
-							aria-label="Change profile photo"
+							title={t`Change profile photo`}
+							aria-label={t`Change profile photo`}
 						>
 							<Icon name="camera" className="size-4" />
 						</Link>
@@ -143,33 +144,33 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 			<div className="col-span-full flex flex-col gap-6">
 				<div>
 					<Link to="change-email">
-						<Icon name="mail">Change email from {loaderData.user.email}</Icon>
+						<Icon name="mail"><Trans>Change email from</Trans> {loaderData.user.email}</Icon>
 					</Link>
 				</div>
 				<div>
 					<Link to="two-factor">
 						{loaderData.isTwoFactorEnabled ? (
-							<Icon name="lock">2FA is enabled</Icon>
+							<Icon name="lock"><Trans>2FA is enabled</Trans></Icon>
 						) : (
-							<Icon name="unlock">Enable 2FA</Icon>
+							<Icon name="unlock"><Trans>Enable 2FA</Trans></Icon>
 						)}
 					</Link>
 				</div>
 				<div>
 					<Link to={loaderData.hasPassword ? 'password' : 'password/create'}>
 						<Icon name="more-horizontal">
-							{loaderData.hasPassword ? 'Change Password' : 'Create a Password'}
+							{loaderData.hasPassword ? <Trans>Change Password</Trans> : <Trans>Create a Password</Trans>}
 						</Icon>
 					</Link>
 				</div>
 				<div>
 					<Link to="connections">
-						<Icon name="link-2">Manage connections</Icon>
+						<Icon name="link-2"><Trans>Manage connections</Trans></Icon>
 					</Link>
 				</div>
 				<div>
 					<Link to="passkeys">
-						<Icon name="passkey">Manage passkeys</Icon>
+						<Icon name="passkey"><Trans>Manage passkeys</Trans></Icon>
 					</Link>
 				</div>
 				<div>
@@ -178,7 +179,7 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 						download="my-epic-notes-data.json"
 						to="/resources/download-user-data"
 					>
-						<Icon name="download">Download your data</Icon>
+						<Icon name="download"><Trans>Download your data</Trans></Icon>
 					</Link>
 				</div>
 				<SignOutOfSessions loaderData={loaderData} />
@@ -200,7 +201,7 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
 				ctx.addIssue({
 					path: ['username'],
 					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this username',
+					message: t`A user already exists with this username`,
 				})
 			}
 		}),
@@ -256,7 +257,7 @@ function UpdateProfile({
 						className="col-span-3"
 						data-invalid={fields.username.errors?.length ? true : undefined}
 					>
-						<FieldLabel htmlFor={fields.username.id}>Username</FieldLabel>
+						<FieldLabel htmlFor={fields.username.id}><Trans>Username</Trans></FieldLabel>
 						<Input
 							{...getInputProps(fields.username, { type: 'text' })}
 							aria-invalid={fields.username.errors?.length ? true : undefined}
@@ -270,7 +271,7 @@ function UpdateProfile({
 						className="col-span-3"
 						data-invalid={fields.name.errors?.length ? true : undefined}
 					>
-						<FieldLabel htmlFor={fields.name.id}>Name</FieldLabel>
+						<FieldLabel htmlFor={fields.name.id}><Trans>Name</Trans></FieldLabel>
 						<Input
 							{...getInputProps(fields.name, { type: 'text' })}
 							aria-invalid={fields.name.errors?.length ? true : undefined}
@@ -293,7 +294,7 @@ function UpdateProfile({
 							fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 						}
 					>
-						Save changes
+						<Trans>Save changes</Trans>
 					</StatusButton>
 				</div>
 			</FieldGroup>
@@ -347,13 +348,13 @@ function SignOutOfSessions({
 					>
 						<Icon name="user">
 							{dc.doubleCheck
-								? `Are you sure?`
-								: `Sign out of ${otherSessionsCount} other sessions`}
+								? t`Are you sure?`
+								: t`Sign out of ${otherSessionsCount} other sessions`}
 						</Icon>
 					</StatusButton>
 				</fetcher.Form>
 			) : (
-				<Icon name="user">This is your only session</Icon>
+				<Icon name="user"><Trans>This is your only session</Trans></Icon>
 			)}
 		</div>
 	)
@@ -363,8 +364,8 @@ async function deleteDataAction({ userId }: ProfileActionArgs) {
 	await prisma.user.delete({ where: { id: userId } })
 	return redirectWithToast('/', {
 		type: 'success',
-		title: 'Data Deleted',
-		description: 'All of your data has been deleted',
+		title: t`Data Deleted`,
+		description: t`All of your data has been deleted`,
 	})
 }
 
@@ -385,7 +386,7 @@ function DeleteData() {
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				>
 					<Icon name="trash-2">
-						{dc.doubleCheck ? `Are you sure?` : `Delete all your data`}
+						{dc.doubleCheck ? t`Are you sure?` : t`Delete all your data`}
 					</Icon>
 				</StatusButton>
 			</fetcher.Form>

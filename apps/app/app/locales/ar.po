@@ -33,11 +33,16 @@ msgstr "+٥ نقاط/إحالة"
 msgid "✓ Discord points claimed"
 msgstr "✓ تم المطالبة بنقاط Discord"
 
+#: app/routes/settings+/profile.index.tsx:153
+msgid "2FA is enabled"
+msgstr "المصادقة الثنائية مفعّلة"
+
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
 msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
 
 #: app/routes/_auth+/onboarding.tsx:117
+#: app/routes/settings+/profile.index.tsx:204
 msgid "A user already exists with this username"
 msgstr "يوجد مستخدم بالفعل بهذا الاسم"
 
@@ -45,13 +50,40 @@ msgstr "يوجد مستخدم بالفعل بهذا الاسم"
 msgid "Account Suspended"
 msgstr "الحساب معلق"
 
+#: app/routes/settings+/profile.index.tsx:368
+msgid "All of your data has been deleted"
+msgstr "تم حذف جميع بياناتك"
+
 #: app/routes/_auth+/signup.tsx:276
 msgid "Already have an account?"
 msgstr "هل لديك حساب بالفعل؟"
 
+#: app/routes/settings+/profile.index.tsx:351
+#: app/routes/settings+/profile.index.tsx:389
+msgid "Are you sure?"
+msgstr "هل أنت متأكد؟"
+
 #: app/routes/_auth+/forgot-password.tsx:244
 msgid "Back to login"
 msgstr "العودة لتسجيل الدخول"
+
+#: app/routes/settings+/profile.password.tsx:214
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: app/routes/settings+/profile.index.tsx:147
+msgid "Change email from"
+msgstr "تغيير البريد الإلكتروني من"
+
+#: app/routes/settings+/profile.index.tsx:162
+#: app/routes/settings+/profile.password.tsx:220
+msgid "Change Password"
+msgstr "تغيير كلمة المرور"
+
+#: app/routes/settings+/profile.index.tsx:133
+#: app/routes/settings+/profile.index.tsx:134
+msgid "Change profile photo"
+msgstr "تغيير صورة الملف الشخصي"
 
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
@@ -72,6 +104,10 @@ msgstr "أكمل ملفك الشخصي"
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
+
+#: app/routes/settings+/profile.password.tsx:195
+msgid "Confirm New Password"
+msgstr "تأكيد كلمة المرور الجديدة"
 
 #: app/routes/_auth+/onboarding.tsx:428
 #: app/routes/_auth+/reset-password.tsx:152
@@ -110,6 +146,10 @@ msgstr "نسخ"
 msgid "Create a password"
 msgstr "أنشئ كلمة مرور"
 
+#: app/routes/settings+/profile.index.tsx:162
+msgid "Create a Password"
+msgstr "إنشاء كلمة مرور"
+
 #: app/routes/_auth+/login.tsx:354
 #: app/routes/_auth+/onboarding.tsx:501
 msgid "Create account"
@@ -119,9 +159,25 @@ msgstr "إنشاء حساب"
 msgid "Create an account"
 msgstr "إنشاء حساب"
 
+#: app/routes/settings+/profile.password.tsx:161
+msgid "Current Password"
+msgstr "كلمة المرور الحالية"
+
+#: app/routes/settings+/profile.index.tsx:367
+msgid "Data Deleted"
+msgstr "تم حذف البيانات"
+
+#: app/routes/settings+/profile.index.tsx:389
+msgid "Delete all your data"
+msgstr "حذف جميع بياناتك"
+
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
+
+#: app/routes/settings+/profile.index.tsx:182
+msgid "Download your data"
+msgstr "تنزيل بياناتك"
 
 #: app/routes/_auth+/login.tsx:743
 #: app/routes/_auth+/signup.tsx:247
@@ -132,6 +188,10 @@ msgstr "البريد الإلكتروني"
 #: app/routes/_auth+/login.tsx:745
 msgid "Email or Username"
 msgstr "البريد الإلكتروني / اسم المستخدم"
+
+#: app/routes/settings+/profile.index.tsx:155
+msgid "Enable 2FA"
+msgstr "تفعيل المصادقة الثنائية"
 
 #: app/routes/_auth+/login.tsx:636
 #: app/routes/_auth+/login.tsx:750
@@ -195,6 +255,10 @@ msgstr "مرحباً"
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr "أوافق على شروط الخدمة وسياسة الخصوصية"
 
+#: app/routes/settings+/profile.password.tsx:86
+msgid "Incorrect password."
+msgstr "كلمة مرور غير صحيحة."
+
 #: app/routes/_auth+/login.tsx:210
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
@@ -236,7 +300,20 @@ msgstr "تسجيل الدخول بمفتاح المرور"
 msgid "m@example.com"
 msgstr "م@مثال.com"
 
+#: app/routes/settings+/profile.index.tsx:168
+msgid "Manage connections"
+msgstr "إدارة الاتصالات"
+
+#: app/routes/settings+/profile.index.tsx:173
+msgid "Manage passkeys"
+msgstr "إدارة مفاتيح المرور"
+
+#: app/routes/settings+/profile.index.tsx:274
+msgid "Name"
+msgstr "الاسم"
+
 #: app/routes/_auth+/reset-password.tsx:132
+#: app/routes/settings+/profile.password.tsx:178
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
 
@@ -266,11 +343,17 @@ msgstr "أو تابع باستخدام البريد الإلكتروني أو ا
 
 #: app/routes/_auth+/login.tsx:764
 #: app/routes/_auth+/onboarding.tsx:409
+#: app/routes/settings+/profile.password.tsx:36
 msgid "Password"
 msgstr "كلمة المرور"
 
+#: app/routes/settings+/profile.password.tsx:130
+msgid "Password Changed"
+msgstr "تم تغيير كلمة المرور"
+
 #: app/routes/_auth+/onboarding.tsx:126
 #: app/routes/_auth+/reset-password.tsx:73
+#: app/routes/settings+/profile.password.tsx:94
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
 
@@ -324,6 +407,10 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
+#: app/routes/settings+/profile.index.tsx:297
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
 msgstr "إرسال تعليمات إعادة التعيين"
@@ -344,6 +431,10 @@ msgstr "تسجيل الدخول"
 msgid "Sign in to your account"
 msgstr "تسجيل الدخول إلى حسابك"
 
+#: app/routes/settings+/profile.index.tsx:352
+msgid "Sign out of {otherSessionsCount} other sessions"
+msgstr "تسجيل الخروج من {otherSessionsCount} جلسات أخرى"
+
 #: app/routes/_auth+/signup.tsx:269
 msgid "Sign up"
 msgstr "إنشاء حساب"
@@ -357,9 +448,17 @@ msgstr "أنشئ حساباً باستخدام حساب التواصل الاج�
 msgid "Signing in as"
 msgstr "تسجيل الدخول باسم"
 
+#: app/routes/settings+/profile.password.tsx:51
+msgid "The passwords must match"
+msgstr "يجب أن تتطابق كلمات المرور"
+
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
 msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+#: app/routes/settings+/profile.index.tsx:357
+msgid "This is your only session"
+msgstr "هذه هي جلستك الوحيدة"
 
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
@@ -367,6 +466,7 @@ msgstr "استخدم كلمة المرور بدلاً من ذلك"
 
 #: app/routes/_auth+/login.tsx:744
 #: app/routes/_auth+/onboarding.tsx:379
+#: app/routes/settings+/profile.index.tsx:260
 msgid "Username"
 msgstr "اسم المستخدم"
 
@@ -441,6 +541,10 @@ msgstr "أنت في قائمة الانتظار!"
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr "تم تعليق حسابك. يرجى الاتصال بالدعم إذا كنت تعتقد أن هذا خطأ."
+
+#: app/routes/settings+/profile.password.tsx:131
+msgid "Your password has been changed."
+msgstr "تم تغيير كلمة المرور الخاصة بك."
 
 #: app/routes/_auth+/waitlist.tsx:143
 msgid "Your points"
