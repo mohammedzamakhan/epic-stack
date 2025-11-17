@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { Connections } from '#app/components/settings/connections.tsx'
 import {
 	ProviderConnectionForm,
@@ -32,14 +33,18 @@ export function ConnectionsCard({ connections }: ConnectionsCardProps) {
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<CardTitle>Connected Accounts</CardTitle>
-				<CardDescription>Manage your connected accounts here.</CardDescription>
+				<CardTitle>
+					<Trans>Connected Accounts</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>Manage your connected accounts here.</Trans>
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Connections data={{ connections }} />
 				<div className="border-border mt-5 flex flex-col gap-5 border-t-2 border-b-2 py-3">
 					<h3 className="text-center text-sm font-medium">
-						Add more connections
+						<Trans>Add more connections</Trans>
 					</h3>
 					{providerNames.map((providerName) => (
 						<ProviderConnectionForm

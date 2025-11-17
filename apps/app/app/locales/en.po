@@ -35,6 +35,25 @@ msgstr ""
 msgid "{0}% complete"
 msgstr ""
 
+#. placeholder {0}: Math.floor(diffInSeconds / 86400)
+#: app/components/ui/notification-bell.tsx:72
+msgid "{0}d ago"
+msgstr ""
+
+#. placeholder {0}: Math.floor(diffInSeconds / 3600)
+#: app/components/ui/notification-bell.tsx:65
+msgid "{0}h ago"
+msgstr ""
+
+#. placeholder {0}: Math.floor(diffInSeconds / 60)
+#: app/components/ui/notification-bell.tsx:58
+msgid "{0}m ago"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:55
+msgid "{diffInSeconds}s ago"
+msgstr ""
+
 #: app/components/impersonation-banner.tsx:37
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
 msgstr ""
@@ -103,13 +122,29 @@ msgstr ""
 msgid "Add an extra layer of security to your account"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:257
+msgid "Add another invitation"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:280
 msgid "Add members"
+msgstr ""
+
+#: app/components/settings/cards/connections-card.tsx:47
+msgid "Add more connections"
 msgstr ""
 
 #: app/components/team-switcher.tsx:167
 #: app/routes/_app+/organizations.tsx:219
 msgid "Add organization"
+msgstr ""
+
+#: app/components/data-table.tsx:321
+msgid "Add reviewer"
+msgstr ""
+
+#: app/components/data-table.tsx:562
+msgid "Add Section"
 msgstr ""
 
 #: app/routes/_app+/organizations.tsx:376
@@ -124,6 +159,15 @@ msgstr ""
 msgid "Admin Impersonation Active"
 msgstr ""
 
+#: app/components/data-table.tsx:348
+msgid "All assigned"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:326
+#: app/components/ui/notification-bell.tsx:407
+msgid "All Notifications"
+msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:396
 msgid "All of your data has been deleted"
 msgstr ""
@@ -135,6 +179,10 @@ msgstr ""
 #. placeholder {0}: loaderData.user.email
 #: app/routes/settings+/profile.change-email.tsx:144
 msgid "An email notice will also be sent to your old address {0}."
+msgstr ""
+
+#: app/components/organization-invitations.tsx:151
+msgid "Anyone with this link can join your organization and will know you invited them. By default, they will have the Member role."
 msgstr ""
 
 #: app/components/note/comment-item.tsx:66
@@ -224,6 +272,10 @@ msgstr ""
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr ""
 
+#: app/components/data-table.tsx:530
+msgid "Columns"
+msgstr ""
+
 #: app/components/note/comment-input.tsx:174
 msgid "Comment"
 msgstr ""
@@ -265,6 +317,10 @@ msgstr ""
 msgid "Confirm your password"
 msgstr ""
 
+#: app/components/settings/cards/connections-card.tsx:37
+msgid "Connected Accounts"
+msgstr ""
+
 #: app/routes/settings+/profile.connections.tsx:35
 msgid "Connections"
 msgstr ""
@@ -281,10 +337,15 @@ msgstr ""
 msgid "Continue with your password"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:174
+msgid "Copied"
+msgstr ""
+
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copied!"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:179
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copy"
 msgstr ""
@@ -315,6 +376,10 @@ msgstr ""
 msgid "Create an organization"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:191
+msgid "Create Link"
+msgstr ""
+
 #: app/components/command-menu.tsx:115
 msgid "Create new note"
 msgstr ""
@@ -341,8 +406,16 @@ msgstr ""
 msgid "Current Password"
 msgstr ""
 
+#: app/components/data-table.tsx:527
+msgid "Customize Columns"
+msgstr ""
+
 #: app/components/notes-chart.tsx:58
 msgid "Daily Notes Created"
+msgstr ""
+
+#: app/components/settings/cards/danger-card.tsx:23
+msgid "Danger"
 msgstr ""
 
 #: app/components/nav-user.tsx:71
@@ -359,12 +432,25 @@ msgstr ""
 msgid "Data Deleted"
 msgstr ""
 
+#: app/components/data-table.tsx:514
+msgid "Data Table"
+msgstr ""
+
+#: app/components/data-table.tsx:517
+msgid "Data Table is a table that displays data in a grid format."
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:312
 msgid "Decline"
 msgstr ""
 
+#: app/components/data-table.tsx:383
 #: app/routes/settings+/profile.passkeys.tsx:194
 msgid "Delete"
+msgstr ""
+
+#: app/components/settings/cards/danger-card.tsx:33
+msgid "Delete account"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:420
@@ -375,8 +461,20 @@ msgstr ""
 msgid "Deleted"
 msgstr ""
 
+#: app/components/settings/cards/danger-card.tsx:36
+msgid "Deleting your user will permanently delete all user data. You should download any data that you wish to retain."
+msgstr ""
+
+#: app/components/settings/cards/danger-card.tsx:26
+msgid "Destructive settings that cannot be undone."
+msgstr ""
+
 #: app/routes/settings+/profile.passkeys.tsx:170
 msgid "Device"
+msgstr ""
+
+#: app/components/organization-invitations.tsx:215
+msgid "Disable"
 msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:146
@@ -387,12 +485,19 @@ msgstr ""
 msgid "Disconnect this account"
 msgstr ""
 
-#: app/components/feature-updates.tsx:206
+#: app/components/feature-updates.tsx:134
+#: app/components/feature-updates.tsx:208
 msgid "Dismiss"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
+msgstr ""
+
+#: app/components/data-table.tsx:235
+#: app/components/data-table.tsx:265
+#: app/components/data-table.tsx:964
+msgid "Done"
 msgstr ""
 
 #: app/components/onboarding-checklist.tsx:116
@@ -408,6 +513,11 @@ msgstr ""
 msgid "Download your data"
 msgstr ""
 
+#: app/components/data-table.tsx:147
+msgid "Drag to reorder"
+msgstr ""
+
+#: app/components/data-table.tsx:373
 #: app/components/favorite-notes.tsx:107
 msgid "Edit"
 msgstr ""
@@ -416,6 +526,7 @@ msgstr ""
 msgid "Edit Note"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:386
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
@@ -434,6 +545,10 @@ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:126
 msgid "Enable Two-Factor Authentication"
+msgstr ""
+
+#: app/components/organization-invitations.tsx:385
+msgid "Enter email address"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:641
@@ -467,6 +582,11 @@ msgstr ""
 msgid "Enter your username or email"
 msgstr ""
 
+#: app/components/data-table.tsx:236
+#: app/components/data-table.tsx:266
+msgid "Error"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:426
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr ""
@@ -475,11 +595,15 @@ msgstr ""
 msgid "Failed to create passkey. Please try again."
 msgstr ""
 
+#: app/components/data-table.tsx:379
+msgid "Favorite"
+msgstr ""
+
 #: app/components/favorite-notes.tsx:63
 msgid "Favorites"
 msgstr ""
 
-#: app/components/feature-updates.tsx:178
+#: app/components/feature-updates.tsx:180
 msgid "Feature Preview"
 msgstr ""
 
@@ -525,6 +649,11 @@ msgstr ""
 #: app/components/app-sidebar.tsx:147
 #: app/components/app-sidebar.tsx:291
 msgid "Give feedback"
+msgstr ""
+
+#: app/components/data-table.tsx:187
+#: app/components/data-table.tsx:822
+msgid "Header"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:131
@@ -583,6 +712,10 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:228
+msgid "Invite by email"
+msgstr ""
+
 #: app/components/team-switcher.tsx:156
 msgid "Invite members"
 msgstr ""
@@ -592,6 +725,7 @@ msgid "Invite new members"
 msgstr ""
 
 #. placeholder {0}: invitation.inviter.name || invitation.inviter.email
+#: app/components/organization-invitations.tsx:295
 #: app/routes/_app+/organizations.tsx:274
 msgid "Invited by {0}"
 msgstr ""
@@ -621,12 +755,22 @@ msgstr ""
 msgid "Last used"
 msgstr ""
 
-#: app/components/feature-updates.tsx:197
+#: app/components/feature-updates.tsx:199
 msgid "Learn more"
 msgstr ""
 
 #: app/components/nav-user.tsx:70
 msgid "Light mode"
+msgstr ""
+
+#: app/components/data-table.tsx:255
+#: app/components/data-table.tsx:271
+#: app/components/data-table.tsx:880
+msgid "Limit"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:469
+msgid "Load More"
 msgstr ""
 
 #: app/components/command-menu.tsx:105
@@ -653,6 +797,10 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
+#: app/components/data-table.tsx:376
+msgid "Make a copy"
+msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:183
 msgid "Manage connections"
 msgstr ""
@@ -668,6 +816,10 @@ msgstr ""
 
 #: app/routes/_app+/profile.tsx:91
 msgid "Manage your account settings and set e-mail preferences."
+msgstr ""
+
+#: app/components/settings/cards/connections-card.tsx:40
+msgid "Manage your connected accounts here."
 msgstr ""
 
 #: app/routes/_app+/notifications.tsx:27
@@ -688,6 +840,18 @@ msgstr ""
 
 #: app/routes/_app+/security.tsx:235
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:429
+msgid "Mark all as read"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:192
+msgid "Mark as read"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:190
+msgid "Mark as unread"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:227
@@ -778,6 +942,10 @@ msgstr ""
 msgid "No passkeys registered yet"
 msgstr ""
 
+#: app/components/data-table.tsx:629
+msgid "No results."
+msgstr ""
+
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
 msgstr ""
@@ -812,6 +980,10 @@ msgstr ""
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr ""
 
+#: app/components/ui/notification-bell.tsx:249
+msgid "Nothing here yet!"
+msgstr ""
+
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
 msgstr ""
@@ -826,6 +998,11 @@ msgstr ""
 
 #: app/components/favorite-notes.tsx:99
 msgid "Open"
+msgstr ""
+
+#: app/components/data-table.tsx:367
+#: app/components/ui/notification-bell.tsx:422
+msgid "Open menu"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:236
@@ -872,6 +1049,7 @@ msgstr ""
 msgid "Password is too common"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:276
 #: app/routes/_app+/organizations.tsx:231
 msgid "Pending Invitations"
 msgstr ""
@@ -948,12 +1126,21 @@ msgstr ""
 msgid "Requesting your authorization"
 msgstr ""
 
+#: app/components/organization-invitations.tsx:204
+msgid "Reset"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:180
 msgid "Reset password"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:121
 msgid "Reset Password"
+msgstr ""
+
+#: app/components/data-table.tsx:283
+#: app/components/data-table.tsx:887
+msgid "Reviewers"
 msgstr ""
 
 #: app/components/organization-members.tsx:102
@@ -963,6 +1150,12 @@ msgstr ""
 #: app/components/settings/cards/profile-card.tsx:178
 #: app/routes/settings+/profile.index.tsx:321
 msgid "Save changes"
+msgstr ""
+
+#. placeholder {0}: row.original.header
+#: app/components/data-table.tsx:234
+#: app/components/data-table.tsx:264
+msgid "Saving {0}"
 msgstr ""
 
 #: app/components/search-bar.tsx:39
@@ -984,6 +1177,10 @@ msgstr ""
 msgid "Search..."
 msgstr ""
 
+#: app/components/data-table.tsx:195
+msgid "Section Type"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:121
 msgid "Security"
 msgstr ""
@@ -997,8 +1194,24 @@ msgstr ""
 msgid "Security Settings"
 msgstr ""
 
+#: app/components/data-table.tsx:861
+msgid "Select a status"
+msgstr ""
+
+#: app/components/data-table.tsx:169
+msgid "Select all"
+msgstr ""
+
+#: app/components/data-table.tsx:178
+msgid "Select row"
+msgstr ""
+
 #: app/routes/settings+/profile.change-email.tsx:172
 msgid "Send Confirmation"
+msgstr ""
+
+#: app/components/organization-invitations.tsx:264
+msgid "Send Invitations"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:236
@@ -1014,6 +1227,10 @@ msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:169
 msgid "Share with others"
+msgstr ""
+
+#: app/components/data-table.tsx:758
+msgid "Showing total visitors for the last 6 months"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:285
@@ -1049,10 +1266,16 @@ msgstr ""
 msgid "Start the conversation by adding the first comment."
 msgstr ""
 
+#: app/components/data-table.tsx:206
+#: app/components/data-table.tsx:857
+msgid "Status"
+msgstr ""
+
 #: app/components/impersonation-banner.tsx:54
 msgid "Stop Impersonation"
 msgstr ""
 
+#: app/components/data-table.tsx:960
 #: app/routes/_app+/$orgSlug_+/index.tsx:296
 msgid "Submit"
 msgstr ""
@@ -1063,6 +1286,12 @@ msgstr ""
 
 #: app/components/nav-user.tsx:72
 msgid "System theme"
+msgstr ""
+
+#: app/components/data-table.tsx:225
+#: app/components/data-table.tsx:241
+#: app/components/data-table.tsx:874
+msgid "Target"
 msgstr ""
 
 #: app/components/leadership-card.tsx:71
@@ -1121,6 +1350,10 @@ msgstr ""
 msgid "This is your only session"
 msgstr ""
 
+#: app/components/ui/notification-bell.tsx:375
+msgid "Toggle notifications"
+msgstr ""
+
 #: app/components/leadership-card.tsx:58
 msgid "Top Contributors"
 msgstr ""
@@ -1131,6 +1364,15 @@ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:124
 msgid "Two-Factor Authentication"
+msgstr ""
+
+#: app/components/data-table.tsx:829
+msgid "Type"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:327
+#: app/components/ui/notification-bell.tsx:412
+msgid "Unread Notifications"
 msgstr ""
 
 #: app/components/favorite-notes.tsx:133
@@ -1240,6 +1482,10 @@ msgstr ""
 msgid "Welcome!"
 msgstr ""
 
+#: app/components/ui/notification-bell.tsx:252
+msgid "When you get notifications, they'll show up here."
+msgstr ""
+
 #: app/components/note/comment-item.tsx:228
 msgid "Write a reply..."
 msgstr ""
@@ -1321,6 +1567,10 @@ msgstr ""
 
 #: app/routes/settings+/profile.password.tsx:136
 msgid "Your password has been changed."
+msgstr ""
+
+#: app/components/organization-invitations.tsx:148
+msgid "Your personal invite link"
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:144

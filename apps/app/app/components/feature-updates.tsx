@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Play } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Trans } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '#app/utils/misc.tsx'
 
 interface FeatureUpdate {
@@ -50,6 +51,7 @@ export function FeatureUpdates({
 	className,
 	onVisibilityChange,
 }: FeatureUpdatesProps) {
+	const { _ } = useLingui()
 	const [dismissedUpdates, setDismissedUpdates] = useState<Set<string>>(
 		new Set(),
 	)
@@ -129,7 +131,7 @@ export function FeatureUpdates({
 							<motion.button
 								onClick={() => handleDismiss(currentUpdate.id)}
 								className="hover:bg-sidebar-primary/10 absolute top-2 right-2 rounded-full p-0.5 transition-colors"
-								aria-label="Dismiss"
+								aria-label={_(msg`Dismiss`)}
 								whileHover={{ scale: 1.1 }}
 								whileTap={{ scale: 0.95 }}
 								transition={{ duration: 0.15 }}

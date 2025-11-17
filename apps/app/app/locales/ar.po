@@ -35,6 +35,25 @@ msgstr "{0} من {1} مكتمل"
 msgid "{0}% complete"
 msgstr "{0}٪ مكتمل"
 
+#. placeholder {0}: Math.floor(diffInSeconds / 86400)
+#: app/components/ui/notification-bell.tsx:72
+msgid "{0}d ago"
+msgstr "منذ {0} يوم"
+
+#. placeholder {0}: Math.floor(diffInSeconds / 3600)
+#: app/components/ui/notification-bell.tsx:65
+msgid "{0}h ago"
+msgstr "منذ {0} ساعة"
+
+#. placeholder {0}: Math.floor(diffInSeconds / 60)
+#: app/components/ui/notification-bell.tsx:58
+msgid "{0}m ago"
+msgstr "منذ {0} دقيقة"
+
+#: app/components/ui/notification-bell.tsx:55
+msgid "{diffInSeconds}s ago"
+msgstr "منذ {diffInSeconds} ثانية"
+
 #: app/components/impersonation-banner.tsx:37
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
 msgstr "{duration, plural, one {منذ # دقيقة} other {منذ # دقيقة}}"
@@ -103,14 +122,30 @@ msgstr "أضف تعليقاً..."
 msgid "Add an extra layer of security to your account"
 msgstr "أضف طبقة إضافية من الأمان لحسابك"
 
+#: app/components/organization-invitations.tsx:257
+msgid "Add another invitation"
+msgstr "إضافة دعوة أخرى"
+
 #: app/components/app-sidebar.tsx:280
 msgid "Add members"
 msgstr "إضافة أعضاء"
+
+#: app/components/settings/cards/connections-card.tsx:47
+msgid "Add more connections"
+msgstr "إضافة المزيد من الاتصالات"
 
 #: app/components/team-switcher.tsx:167
 #: app/routes/_app+/organizations.tsx:219
 msgid "Add organization"
 msgstr "إضافة منظمة"
+
+#: app/components/data-table.tsx:321
+msgid "Add reviewer"
+msgstr "إضافة مراجع"
+
+#: app/components/data-table.tsx:562
+msgid "Add Section"
+msgstr "إضافة قسم"
 
 #: app/routes/_app+/organizations.tsx:376
 msgid "Adjust your search query to show more."
@@ -124,6 +159,15 @@ msgstr "مسؤول"
 msgid "Admin Impersonation Active"
 msgstr "انتحال شخصية المسؤول نشط"
 
+#: app/components/data-table.tsx:348
+msgid "All assigned"
+msgstr "جميعهم معينون"
+
+#: app/components/ui/notification-bell.tsx:326
+#: app/components/ui/notification-bell.tsx:407
+msgid "All Notifications"
+msgstr "جميع الإشعارات"
+
 #: app/routes/settings+/profile.index.tsx:396
 msgid "All of your data has been deleted"
 msgstr "تم حذف جميع بياناتك"
@@ -136,6 +180,10 @@ msgstr "هل لديك حساب بالفعل؟"
 #: app/routes/settings+/profile.change-email.tsx:144
 msgid "An email notice will also be sent to your old address {0}."
 msgstr "سيتم أيضًا إرسال إشعار بالبريد الإلكتروني إلى عنوانك القديم {0}."
+
+#: app/components/organization-invitations.tsx:151
+msgid "Anyone with this link can join your organization and will know you invited them. By default, they will have the Member role."
+msgstr "يمكن لأي شخص لديه هذا الرابط الانضمام إلى منظمتك وسيعرف أنك دعوته. افتراضياً، سيكون لديهم دور عضو."
 
 #: app/components/note/comment-item.tsx:66
 msgid "Are you sure you want to delete this comment?"
@@ -224,6 +272,10 @@ msgstr "تحقق من بريدك الإلكتروني"
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr "انقر على \"تحقق من عضوية Discord\" بعد الانضمام للمطالبة بنقاطك تلقائياً."
 
+#: app/components/data-table.tsx:530
+msgid "Columns"
+msgstr "الأعمدة"
+
 #: app/components/note/comment-input.tsx:174
 msgid "Comment"
 msgstr "تعليق"
@@ -265,6 +317,10 @@ msgstr "أكد كلمة المرور الجديدة"
 msgid "Confirm your password"
 msgstr "أكد كلمة المرور"
 
+#: app/components/settings/cards/connections-card.tsx:37
+msgid "Connected Accounts"
+msgstr "الحسابات المتصلة"
+
 #: app/routes/settings+/profile.connections.tsx:35
 msgid "Connections"
 msgstr "الاتصالات"
@@ -281,10 +337,15 @@ msgstr "المتابعة باستخدام"
 msgid "Continue with your password"
 msgstr "تابع باستخدام كلمة المرور الخاصة بك"
 
+#: app/components/organization-invitations.tsx:174
+msgid "Copied"
+msgstr "تم النسخ"
+
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copied!"
 msgstr "تم النسخ!"
 
+#: app/components/organization-invitations.tsx:179
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copy"
 msgstr "نسخ"
@@ -315,6 +376,10 @@ msgstr "إنشاء حساب"
 msgid "Create an organization"
 msgstr "إنشاء منظمة"
 
+#: app/components/organization-invitations.tsx:191
+msgid "Create Link"
+msgstr "إنشاء رابط"
+
 #: app/components/command-menu.tsx:115
 msgid "Create new note"
 msgstr "إنشاء ملاحظة جديدة"
@@ -341,9 +406,17 @@ msgstr "إنشاء كلمة المرور"
 msgid "Current Password"
 msgstr "كلمة المرور الحالية"
 
+#: app/components/data-table.tsx:527
+msgid "Customize Columns"
+msgstr "تخصيص الأعمدة"
+
 #: app/components/notes-chart.tsx:58
 msgid "Daily Notes Created"
 msgstr "الملاحظات اليومية المنشأة"
+
+#: app/components/settings/cards/danger-card.tsx:23
+msgid "Danger"
+msgstr "خطر"
 
 #: app/components/nav-user.tsx:71
 msgid "Dark mode"
@@ -359,13 +432,26 @@ msgstr "لوحة التحكم"
 msgid "Data Deleted"
 msgstr "تم حذف البيانات"
 
+#: app/components/data-table.tsx:514
+msgid "Data Table"
+msgstr "جدول البيانات"
+
+#: app/components/data-table.tsx:517
+msgid "Data Table is a table that displays data in a grid format."
+msgstr "جدول البيانات هو جدول يعرض البيانات بتنسيق شبكة."
+
 #: app/routes/_app+/organizations.tsx:312
 msgid "Decline"
 msgstr "رفض"
 
+#: app/components/data-table.tsx:383
 #: app/routes/settings+/profile.passkeys.tsx:194
 msgid "Delete"
 msgstr "حذف"
+
+#: app/components/settings/cards/danger-card.tsx:33
+msgid "Delete account"
+msgstr "حذف الحساب"
 
 #: app/routes/settings+/profile.index.tsx:420
 msgid "Delete all your data"
@@ -375,9 +461,21 @@ msgstr "حذف جميع بياناتك"
 msgid "Deleted"
 msgstr "تم الحذف"
 
+#: app/components/settings/cards/danger-card.tsx:36
+msgid "Deleting your user will permanently delete all user data. You should download any data that you wish to retain."
+msgstr "سيؤدي حذف المستخدم إلى حذف جميع بيانات المستخدم بشكل دائم. يجب عليك تنزيل أي بيانات تريد الاحتفاظ بها."
+
+#: app/components/settings/cards/danger-card.tsx:26
+msgid "Destructive settings that cannot be undone."
+msgstr "إعدادات مدمرة لا يمكن التراجع عنها."
+
 #: app/routes/settings+/profile.passkeys.tsx:170
 msgid "Device"
 msgstr "جهاز"
+
+#: app/components/organization-invitations.tsx:215
+msgid "Disable"
+msgstr "تعطيل"
 
 #: app/components/settings/cards/security-card.tsx:146
 msgid "Disable 2FA"
@@ -387,13 +485,20 @@ msgstr "تعطيل المصادقة الثنائية"
 msgid "Disconnect this account"
 msgstr "قطع الاتصال بهذا الحساب"
 
-#: app/components/feature-updates.tsx:206
+#: app/components/feature-updates.tsx:134
+#: app/components/feature-updates.tsx:208
 msgid "Dismiss"
 msgstr "تجاهل"
 
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
+
+#: app/components/data-table.tsx:235
+#: app/components/data-table.tsx:265
+#: app/components/data-table.tsx:964
+msgid "Done"
+msgstr "تم"
 
 #: app/components/onboarding-checklist.tsx:116
 msgid "Done!"
@@ -408,6 +513,11 @@ msgstr "انخفض بنسبة {0}٪ في هذه الفترة"
 msgid "Download your data"
 msgstr "تنزيل بياناتك"
 
+#: app/components/data-table.tsx:147
+msgid "Drag to reorder"
+msgstr "اسحب لإعادة الترتيب"
+
+#: app/components/data-table.tsx:373
 #: app/components/favorite-notes.tsx:107
 msgid "Edit"
 msgstr "تعديل"
@@ -416,6 +526,7 @@ msgstr "تعديل"
 msgid "Edit Note"
 msgstr "تعديل ملاحظة"
 
+#: app/components/organization-invitations.tsx:386
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
@@ -435,6 +546,10 @@ msgstr "تفعيل المصادقة الثنائية"
 #: app/components/settings/cards/security-card.tsx:126
 msgid "Enable Two-Factor Authentication"
 msgstr "تفعيل المصادقة الثنائية"
+
+#: app/components/organization-invitations.tsx:385
+msgid "Enter email address"
+msgstr "أدخل عنوان البريد الإلكتروني"
 
 #: app/routes/_auth+/login.tsx:641
 #: app/routes/_auth+/login.tsx:762
@@ -467,6 +582,11 @@ msgstr "أدخل اسم المستخدم"
 msgid "Enter your username or email"
 msgstr "أدخل اسم المستخدم أو البريد الإلكتروني"
 
+#: app/components/data-table.tsx:236
+#: app/components/data-table.tsx:266
+msgid "Error"
+msgstr "خطأ"
+
 #: app/routes/_auth+/login.tsx:426
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMessage}"
@@ -475,11 +595,15 @@ msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMess
 msgid "Failed to create passkey. Please try again."
 msgstr "فشل إنشاء مفتاح المرور. يرجى المحاولة مرة أخرى."
 
+#: app/components/data-table.tsx:379
+msgid "Favorite"
+msgstr "المفضلة"
+
 #: app/components/favorite-notes.tsx:63
 msgid "Favorites"
 msgstr "المفضلة"
 
-#: app/components/feature-updates.tsx:178
+#: app/components/feature-updates.tsx:180
 msgid "Feature Preview"
 msgstr "معاينة الميزة"
 
@@ -526,6 +650,11 @@ msgstr "ابدأ"
 #: app/components/app-sidebar.tsx:291
 msgid "Give feedback"
 msgstr "إرسال ملاحظات"
+
+#: app/components/data-table.tsx:187
+#: app/components/data-table.tsx:822
+msgid "Header"
+msgstr "العنوان"
 
 #: app/routes/settings+/profile.connections.tsx:131
 msgid "Here are your current connections:"
@@ -583,6 +712,10 @@ msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 msgid "Invalid Verification Type"
 msgstr "نوع التحقق غير صالح"
 
+#: app/components/organization-invitations.tsx:228
+msgid "Invite by email"
+msgstr "الدعوة عبر البريد الإلكتروني"
+
 #: app/components/team-switcher.tsx:156
 msgid "Invite members"
 msgstr "دعوة أعضاء"
@@ -592,6 +725,7 @@ msgid "Invite new members"
 msgstr "دعوة أعضاء جدد"
 
 #. placeholder {0}: invitation.inviter.name || invitation.inviter.email
+#: app/components/organization-invitations.tsx:295
 #: app/routes/_app+/organizations.tsx:274
 msgid "Invited by {0}"
 msgstr "مدعو من قبل {0}"
@@ -621,13 +755,23 @@ msgstr "كانبان"
 msgid "Last used"
 msgstr "آخر استخدام"
 
-#: app/components/feature-updates.tsx:197
+#: app/components/feature-updates.tsx:199
 msgid "Learn more"
 msgstr "اعرف المزيد"
 
 #: app/components/nav-user.tsx:70
 msgid "Light mode"
 msgstr "الوضع الفاتح"
+
+#: app/components/data-table.tsx:255
+#: app/components/data-table.tsx:271
+#: app/components/data-table.tsx:880
+msgid "Limit"
+msgstr "الحد الأقصى"
+
+#: app/components/ui/notification-bell.tsx:469
+msgid "Load More"
+msgstr "تحميل المزيد"
 
 #: app/components/command-menu.tsx:105
 msgid "Loading notes..."
@@ -653,6 +797,10 @@ msgstr "تسجيل الخروج"
 msgid "m@example.com"
 msgstr "م@مثال.com"
 
+#: app/components/data-table.tsx:376
+msgid "Make a copy"
+msgstr "عمل نسخة"
+
 #: app/routes/settings+/profile.index.tsx:183
 msgid "Manage connections"
 msgstr "إدارة الاتصالات"
@@ -669,6 +817,10 @@ msgstr "إدارة مفاتيح المرور"
 #: app/routes/_app+/profile.tsx:91
 msgid "Manage your account settings and set e-mail preferences."
 msgstr "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
+
+#: app/components/settings/cards/connections-card.tsx:40
+msgid "Manage your connected accounts here."
+msgstr "إدارة حساباتك المتصلة هنا."
 
 #: app/routes/_app+/notifications.tsx:27
 msgid "Manage your notification preferences for different channels and workflows."
@@ -689,6 +841,18 @@ msgstr "إدارة كلمة المرور وإعدادات المصادقة ال�
 #: app/routes/_app+/security.tsx:235
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr "إدارة كلمة المرور والمصادقة الثنائية والحسابات المتصلة وإعدادات الأمان المتقدمة."
+
+#: app/components/ui/notification-bell.tsx:429
+msgid "Mark all as read"
+msgstr "تحديد الكل كمقروء"
+
+#: app/components/ui/notification-bell.tsx:192
+msgid "Mark as read"
+msgstr "تحديد كمقروء"
+
+#: app/components/ui/notification-bell.tsx:190
+msgid "Mark as unread"
+msgstr "تحديد كغير مقروء"
 
 #: app/components/app-sidebar.tsx:227
 msgid "MCP Server"
@@ -778,6 +942,10 @@ msgstr "لا توجد منظمة بالمعرف \"{0}\""
 msgid "No passkeys registered yet"
 msgstr "لا توجد مفاتيح مرور مسجلة بعد"
 
+#: app/components/data-table.tsx:629
+msgid "No results."
+msgstr "لا توجد نتائج."
+
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
 msgstr "لا يوجد مستخدم بهذا الاسم أو البريد الإلكتروني"
@@ -812,6 +980,10 @@ msgstr "الملاحظات التي أنشأتها منظمتك خلال الـ 
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr "تساعدك الملاحظات على تسجيل الأفكار ومحاضر الاجتماعات أو أي شيء مهم لمنظمتك. ابدأ بإنشاء ملاحظتك الأولى."
 
+#: app/components/ui/notification-bell.tsx:249
+msgid "Nothing here yet!"
+msgstr "لا شيء هنا بعد!"
+
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
 msgstr "إعدادات الإشعارات"
@@ -827,6 +999,11 @@ msgstr "من {totalUsers} شخص"
 #: app/components/favorite-notes.tsx:99
 msgid "Open"
 msgstr "فتح"
+
+#: app/components/data-table.tsx:367
+#: app/components/ui/notification-bell.tsx:422
+msgid "Open menu"
+msgstr "فتح القائمة"
 
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
@@ -872,6 +1049,7 @@ msgstr "تم تغيير كلمة المرور"
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
 
+#: app/components/organization-invitations.tsx:276
 #: app/routes/_app+/organizations.tsx:231
 msgid "Pending Invitations"
 msgstr "الدعوات المعلقة"
@@ -948,6 +1126,10 @@ msgstr "الرد على التعليق"
 msgid "Requesting your authorization"
 msgstr "جاري طلب التفويض"
 
+#: app/components/organization-invitations.tsx:204
+msgid "Reset"
+msgstr "إعادة تعيين"
+
 #: app/routes/_auth+/reset-password.tsx:180
 msgid "Reset password"
 msgstr "إعادة تعيين كلمة المرور"
@@ -955,6 +1137,11 @@ msgstr "إعادة تعيين كلمة المرور"
 #: app/routes/_auth+/reset-password.tsx:121
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
+
+#: app/components/data-table.tsx:283
+#: app/components/data-table.tsx:887
+msgid "Reviewers"
+msgstr "المراجعون"
 
 #: app/components/organization-members.tsx:102
 msgid "Save"
@@ -964,6 +1151,12 @@ msgstr "حفظ"
 #: app/routes/settings+/profile.index.tsx:321
 msgid "Save changes"
 msgstr "حفظ التغييرات"
+
+#. placeholder {0}: row.original.header
+#: app/components/data-table.tsx:234
+#: app/components/data-table.tsx:264
+msgid "Saving {0}"
+msgstr "حفظ {0}"
 
 #: app/components/search-bar.tsx:39
 #: app/components/search-bar.tsx:46
@@ -984,6 +1177,10 @@ msgstr "البحث في الملاحظات..."
 msgid "Search..."
 msgstr "البحث..."
 
+#: app/components/data-table.tsx:195
+msgid "Section Type"
+msgstr "نوع القسم"
+
 #: app/components/app-sidebar.tsx:121
 msgid "Security"
 msgstr "الأمان"
@@ -997,9 +1194,25 @@ msgstr "مفتاح الأمان"
 msgid "Security Settings"
 msgstr "إعدادات الأمان"
 
+#: app/components/data-table.tsx:861
+msgid "Select a status"
+msgstr "اختر حالة"
+
+#: app/components/data-table.tsx:169
+msgid "Select all"
+msgstr "تحديد الكل"
+
+#: app/components/data-table.tsx:178
+msgid "Select row"
+msgstr "تحديد صف"
+
 #: app/routes/settings+/profile.change-email.tsx:172
 msgid "Send Confirmation"
 msgstr "إرسال التأكيد"
+
+#: app/components/organization-invitations.tsx:264
+msgid "Send Invitations"
+msgstr "إرسال الدعوات"
 
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
@@ -1015,6 +1228,10 @@ msgstr "الإعدادات"
 #: app/routes/_auth+/waitlist.tsx:169
 msgid "Share with others"
 msgstr "شارك مع الآخرين"
+
+#: app/components/data-table.tsx:758
+msgid "Showing total visitors for the last 6 months"
+msgstr "عرض إجمالي الزوار لآخر 6 أشهر"
 
 #: app/routes/_auth+/signup.tsx:285
 msgid "Sign in"
@@ -1049,10 +1266,16 @@ msgstr "تسجيل الدخول باسم"
 msgid "Start the conversation by adding the first comment."
 msgstr "ابدأ المحادثة بإضافة التعليق الأول."
 
+#: app/components/data-table.tsx:206
+#: app/components/data-table.tsx:857
+msgid "Status"
+msgstr "الحالة"
+
 #: app/components/impersonation-banner.tsx:54
 msgid "Stop Impersonation"
 msgstr "إيقاف انتحال الشخصية"
 
+#: app/components/data-table.tsx:960
 #: app/routes/_app+/$orgSlug_+/index.tsx:296
 msgid "Submit"
 msgstr "إرسال"
@@ -1064,6 +1287,12 @@ msgstr "المسؤول الأعلى"
 #: app/components/nav-user.tsx:72
 msgid "System theme"
 msgstr "نظام السمة"
+
+#: app/components/data-table.tsx:225
+#: app/components/data-table.tsx:241
+#: app/components/data-table.tsx:874
+msgid "Target"
+msgstr "الهدف"
 
 #: app/components/leadership-card.tsx:71
 msgid "Team member"
@@ -1121,6 +1350,10 @@ msgstr "هذا البريد الإلكتروني قيد الاستخدام با�
 msgid "This is your only session"
 msgstr "هذه هي جلستك الوحيدة"
 
+#: app/components/ui/notification-bell.tsx:375
+msgid "Toggle notifications"
+msgstr "تبديل الإشعارات"
+
 #: app/components/leadership-card.tsx:58
 msgid "Top Contributors"
 msgstr "أفضل المساهمين"
@@ -1132,6 +1365,15 @@ msgstr "يتجه للأعلى بنسبة {trendPercentage}٪ في هذه الف�
 #: app/components/settings/cards/security-card.tsx:124
 msgid "Two-Factor Authentication"
 msgstr "المصادقة الثنائية"
+
+#: app/components/data-table.tsx:829
+msgid "Type"
+msgstr "النوع"
+
+#: app/components/ui/notification-bell.tsx:327
+#: app/components/ui/notification-bell.tsx:412
+msgid "Unread Notifications"
+msgstr "الإشعارات غير المقروءة"
 
 #: app/components/favorite-notes.tsx:133
 msgid "Unstar"
@@ -1240,6 +1482,10 @@ msgstr "مرحباً بك في لوحة تحكم المنظمة. هنا يمكن
 msgid "Welcome!"
 msgstr "مرحباً!"
 
+#: app/components/ui/notification-bell.tsx:252
+msgid "When you get notifications, they'll show up here."
+msgstr "عند وصول الإشعارات، ستظهر هنا."
+
 #: app/components/note/comment-item.tsx:228
 msgid "Write a reply..."
 msgstr "اكتب رداً..."
@@ -1322,6 +1568,10 @@ msgstr "تم حذف اتصالك."
 #: app/routes/settings+/profile.password.tsx:136
 msgid "Your password has been changed."
 msgstr "تم تغيير كلمة المرور الخاصة بك."
+
+#: app/components/organization-invitations.tsx:148
+msgid "Your personal invite link"
+msgstr "رابط الدعوة الشخصي"
 
 #: app/routes/_auth+/waitlist.tsx:144
 msgid "Your points"
