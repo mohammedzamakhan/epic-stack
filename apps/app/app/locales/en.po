@@ -13,6 +13,22 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: step.actionConfig?.completedLabel || 'Completed'
+#: app/components/onboarding-checklist.tsx:201
+msgid "{0}"
+msgstr ""
+
+#. placeholder {0}: progress.completedCount
+#. placeholder {1}: progress.totalSteps
+#: app/components/onboarding-checklist.tsx:134
+msgid "{0} of {1} completed"
+msgstr ""
+
+#. placeholder {0}: Math.round(progressPercentage)
+#: app/components/onboarding-checklist.tsx:111
+msgid "{0}% complete"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:728
 msgid "← Back to SSO login"
 msgstr ""
@@ -21,8 +37,32 @@ msgstr ""
 msgid "A user already exists with this email"
 msgstr ""
 
+#: app/routes/_app+/organizations.tsx:297
+msgid "Accept"
+msgstr ""
+
+#: app/components/command-menu.tsx:153
+msgid "Account settings"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:276
 msgid "Account Suspended"
+msgstr ""
+
+#: app/components/command-menu.tsx:108
+msgid "Actions"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:280
+msgid "Add members"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:219
+msgid "Add organization"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:376
+msgid "Adjust your search query to show more."
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:276
@@ -33,12 +73,26 @@ msgstr ""
 msgid "Back to login"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:258
+#: app/components/command-menu.tsx:163
+msgid "Billing"
+msgstr ""
+
+#. placeholder {0}: note.createdByName
+#: app/components/command-menu.tsx:141
+msgid "by {0}"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:58
 msgid "Check your email"
+msgstr ""
+
+#: app/components/onboarding-checklist.tsx:145
+msgid "complete"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:215
@@ -73,8 +127,25 @@ msgstr ""
 msgid "Create an account"
 msgstr ""
 
+#: app/components/command-menu.tsx:115
+msgid "Create new note"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:109
+#: app/components/app-sidebar.tsx:215
+msgid "Dashboard"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:312
+msgid "Decline"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
+msgstr ""
+
+#: app/components/onboarding-checklist.tsx:116
+msgid "Done!"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:743
@@ -120,12 +191,43 @@ msgstr ""
 msgid "Forgot your password?"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:239
+msgid "General"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:388
 msgid "Generating Authentication Options"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:272
+msgid "Get chrome extension"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:142
+#: app/components/app-sidebar.tsx:285
+msgid "Get help"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:83
+msgid "Get in touch"
+msgstr ""
+
+#: app/components/onboarding-checklist.tsx:94
+#: app/components/onboarding-checklist.tsx:131
+msgid "Get Started"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:147
+#: app/components/app-sidebar.tsx:291
+msgid "Give feedback"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:249
+msgid "Integrations"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:210
@@ -136,13 +238,30 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
+#: app/components/command-menu.tsx:124
+msgid "Invite new members"
+msgstr ""
+
+#. placeholder {0}: invitation.inviter.name || invitation.inviter.email
+#: app/routes/_app+/organizations.tsx:274
+msgid "Invited by {0}"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:199
+msgid "Jump into an existing organization, accept pending invitations, or add a new one."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:467
 #: app/routes/_auth+/login.tsx:478
 msgid "Last used"
+msgstr ""
+
+#: app/components/command-menu.tsx:105
+msgid "Loading notes..."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:288
@@ -157,8 +276,24 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:227
+msgid "MCP Server"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:244
+msgid "Members"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
+msgstr ""
+
+#: app/components/command-menu.tsx:105
+msgid "No notes found."
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:372
+msgid "No organization found"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:131
@@ -169,6 +304,15 @@ msgstr ""
 msgid "No worries, we'll send you reset instructions."
 msgstr ""
 
+#: app/components/app-sidebar.tsx:221
+#: app/components/command-menu.tsx:130
+msgid "Notes"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:127
+msgid "Notifications"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
 msgstr ""
@@ -177,12 +321,21 @@ msgstr ""
 msgid "Or continue with email or username"
 msgstr ""
 
+#: app/components/app-sidebar.tsx:133
+#: app/routes/_app+/organizations.tsx:198
+msgid "Organizations"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:764
 msgid "Password"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:73
 msgid "Password is too common"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:231
+msgid "Pending Invitations"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:94
@@ -195,6 +348,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:74
 msgid "Please enter your email or username"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:115
+msgid "Profile"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:578
@@ -221,8 +378,27 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
+#: app/components/command-menu.tsx:99
+#: app/components/site-header.tsx:39
+msgid "Search notes..."
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:210
+msgid "Search..."
+msgstr ""
+
+#: app/components/app-sidebar.tsx:121
+msgid "Security"
+msgstr ""
+
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:233
+#: app/components/command-menu.tsx:149
+#: app/components/command-menu.tsx:173
+msgid "Settings"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:285
@@ -250,8 +426,17 @@ msgstr ""
 msgid "Signing in as"
 msgstr ""
 
+#. placeholder {0}: trialStatus.daysRemaining
+#: app/components/app-sidebar.tsx:58
+msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
+msgstr ""
+
+#: app/components/app-sidebar.tsx:75
+msgid "Upgrade"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:591
@@ -292,6 +477,14 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:234
+msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
+msgstr ""
+
+#: app/routes/_app+/organizations.tsx:378
+msgid "You haven't joined any organizations yet."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:422

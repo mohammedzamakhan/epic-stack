@@ -1,5 +1,6 @@
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
+import { Trans } from '@lingui/macro'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
 import { ShineBorder } from './magic-ui/shine-border'
@@ -89,7 +90,9 @@ export function OnboardingChecklist({
 								size={16}
 								className="text-primary"
 							/>
-							<span className="text-sm font-semibold">Get Started</span>
+							<span className="text-sm font-semibold">
+								<Trans>Get Started</Trans>
+							</span>
 						</div>
 						<div className="flex items-center gap-1">
 							<span className="bg-muted rounded border px-1.5 py-0.5 text-xs font-medium">
@@ -105,12 +108,12 @@ export function OnboardingChecklist({
 						/>
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-medium">
-								{Math.round(progressPercentage)}% complete
+								<Trans>{Math.round(progressPercentage)}% complete</Trans>
 							</span>
 							{progressPercentage === 100 && (
 								<div className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
 									<Icon name="check" className="h-3 w-3" />
-									Done!
+									<Trans>Done!</Trans>
 								</div>
 							)}
 						</div>
@@ -124,9 +127,13 @@ export function OnboardingChecklist({
 		<Card className={className}>
 			<CardHeader className="grid grid-cols-[1fr_auto] items-start">
 				<CardHeaderContent>
-					<h3 className="text-lg font-semibold">Get Started</h3>
+					<h3 className="text-lg font-semibold">
+						<Trans>Get Started</Trans>
+					</h3>
 					<p className="text-muted-foreground text-sm">
-						{progress.completedCount} of {progress.totalSteps} completed
+						<Trans>
+							{progress.completedCount} of {progress.totalSteps} completed
+						</Trans>
 					</p>
 				</CardHeaderContent>
 				<CardAction className="flex items-center gap-3">
@@ -134,7 +141,9 @@ export function OnboardingChecklist({
 						<div className="text-sm font-medium">
 							{Math.round(progressPercentage)}%
 						</div>
-						<div className="text-muted-foreground text-xs">complete</div>
+						<div className="text-muted-foreground text-xs">
+							<Trans>complete</Trans>
+						</div>
 					</div>
 					<Button
 						variant="ghost"
@@ -189,7 +198,9 @@ export function OnboardingChecklist({
 							<div className="flex-shrink-0">
 								{step.isCompleted ? (
 									<span className="text-muted-foreground text-sm font-medium">
-										{step.actionConfig?.completedLabel || 'Completed'}
+										<Trans>
+											{step.actionConfig?.completedLabel || 'Completed'}
+										</Trans>
 									</span>
 								) : (
 									step.actionConfig && (

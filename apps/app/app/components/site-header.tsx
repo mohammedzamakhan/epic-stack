@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import { Trans } from '@lingui/macro'
 import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
 import { Button, Separator, SidebarTrigger, Icon, Kbd } from '@repo/ui'
@@ -36,7 +36,7 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 						onClick={() => setCommandOpen(true)}
 					>
 						<Icon name="search" className="h-4 w-4" />
-						Search notes...
+						<Trans>Search notes...</Trans>
 						<Kbd className="absolute top-[0.3rem] right-[0.3rem]">
 							<span className="text-xs">⌘</span>K
 						</Kbd>

@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouteLoaderData, useFetcher, Link } from 'react-router'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -33,6 +35,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 	const [hasTrackedUsage, setHasTrackedUsage] = useState(false)
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const fetcher = useFetcher()
+	const { _ } = useLingui()
 
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
@@ -93,23 +96,23 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 			className="rounded-lg border shadow-md md:min-w-[650px]"
 		>
 			<CommandInput
-				placeholder="Search notes..."
+				placeholder={_(t`Search notes...`)}
 				value={query}
 				onValueChange={setQuery}
 			/>
 			<CommandList className="md:min-h-[400px]">
 				<CommandEmpty>
-					{loading ? 'Loading notes...' : 'No notes found.'}
+					{loading ? <Trans>Loading notes...</Trans> : <Trans>No notes found.</Trans>}
 				</CommandEmpty>
 
-				<CommandGroup heading="Actions">
+				<CommandGroup heading={_(t`Actions`)}>
 					<CommandItem asChild>
 						<Link
 							to={`/${orgSlug}/notes/new`}
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="plus" />
-							Create new note
+							<Trans>Create new note</Trans>
 						</Link>
 					</CommandItem>
 					<CommandItem asChild>
@@ -118,13 +121,13 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="user-plus" />
-							Invite new members
+							<Trans>Invite new members</Trans>
 						</Link>
 					</CommandItem>
 				</CommandGroup>
 
 				{notes.length > 0 && (
-					<CommandGroup heading="Notes">
+					<CommandGroup heading={_(t`Notes`)}>
 						{notes.map((note) => (
 							<CommandItem key={note.id} asChild>
 								<Link
@@ -135,7 +138,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 									<div className="flex flex-col items-start">
 										<span className="font-medium">{note.title}</span>
 										<span className="text-muted-foreground text-xs">
-											by {note.createdByName}
+											<Trans>by {note.createdByName}</Trans>
 										</span>
 									</div>
 								</Link>
@@ -143,11 +146,11 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 						))}
 					</CommandGroup>
 				)}
-				<CommandGroup heading="Settings">
+				<CommandGroup heading={_(t`Settings`)}>
 					<CommandItem asChild>
 						<Link to="/profile" onClick={() => onOpenChange(false)}>
 							<Icon name="user" />
-							<span>Account settings</span>
+							<span><Trans>Account settings</Trans></span>
 							<CommandShortcut>⌘P</CommandShortcut>
 						</Link>
 					</CommandItem>
@@ -157,7 +160,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="credit-card" />
-							<span>Billing</span>
+							<span><Trans>Billing</Trans></span>
 							<CommandShortcut>⌘B</CommandShortcut>
 						</Link>
 					</CommandItem>
@@ -167,7 +170,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 							onClick={() => onOpenChange(false)}
 						>
 							<Icon name="settings" />
-							<span>Settings</span>
+							<span><Trans>Settings</Trans></span>
 							<CommandShortcut>⌘S</CommandShortcut>
 						</Link>
 					</CommandItem>

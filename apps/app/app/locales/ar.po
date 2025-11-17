@@ -13,6 +13,22 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: step.actionConfig?.completedLabel || 'Completed'
+#: app/components/onboarding-checklist.tsx:201
+msgid "{0}"
+msgstr "{0}"
+
+#. placeholder {0}: progress.completedCount
+#. placeholder {1}: progress.totalSteps
+#: app/components/onboarding-checklist.tsx:134
+msgid "{0} of {1} completed"
+msgstr "{0} من {1} مكتمل"
+
+#. placeholder {0}: Math.round(progressPercentage)
+#: app/components/onboarding-checklist.tsx:111
+msgid "{0}% complete"
+msgstr "{0}٪ مكتمل"
+
 #: app/routes/_auth+/login.tsx:728
 msgid "← Back to SSO login"
 msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
@@ -21,9 +37,33 @@ msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
 msgid "A user already exists with this email"
 msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
 
+#: app/routes/_app+/organizations.tsx:297
+msgid "Accept"
+msgstr "قبول"
+
+#: app/components/command-menu.tsx:153
+msgid "Account settings"
+msgstr "إعدادات الحساب"
+
 #: app/routes/_auth+/login.tsx:276
 msgid "Account Suspended"
 msgstr "الحساب معلق"
+
+#: app/components/command-menu.tsx:108
+msgid "Actions"
+msgstr "الإجراءات"
+
+#: app/components/app-sidebar.tsx:280
+msgid "Add members"
+msgstr "إضافة أعضاء"
+
+#: app/routes/_app+/organizations.tsx:219
+msgid "Add organization"
+msgstr "إضافة منظمة"
+
+#: app/routes/_app+/organizations.tsx:376
+msgid "Adjust your search query to show more."
+msgstr "اضبط استعلام البحث لعرض المزيد."
 
 #: app/routes/_auth+/signup.tsx:276
 msgid "Already have an account?"
@@ -33,6 +73,16 @@ msgstr "هل لديك حساب بالفعل؟"
 msgid "Back to login"
 msgstr "العودة لتسجيل الدخول"
 
+#: app/components/app-sidebar.tsx:258
+#: app/components/command-menu.tsx:163
+msgid "Billing"
+msgstr "الفواتير"
+
+#. placeholder {0}: note.createdByName
+#: app/components/command-menu.tsx:141
+msgid "by {0}"
+msgstr "بواسطة {0}"
+
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
 msgstr "تحقق من تطبيق المصادقة الثنائية"
@@ -40,6 +90,10 @@ msgstr "تحقق من تطبيق المصادقة الثنائية"
 #: app/routes/_auth+/verify.tsx:58
 msgid "Check your email"
 msgstr "تحقق من بريدك الإلكتروني"
+
+#: app/components/onboarding-checklist.tsx:145
+msgid "complete"
+msgstr "مكتمل"
 
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
@@ -73,9 +127,26 @@ msgstr "إنشاء حساب"
 msgid "Create an account"
 msgstr "إنشاء حساب"
 
+#: app/components/command-menu.tsx:115
+msgid "Create new note"
+msgstr "إنشاء ملاحظة جديدة"
+
+#: app/components/app-sidebar.tsx:109
+#: app/components/app-sidebar.tsx:215
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+#: app/routes/_app+/organizations.tsx:312
+msgid "Decline"
+msgstr "رفض"
+
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
+
+#: app/components/onboarding-checklist.tsx:116
+msgid "Done!"
+msgstr "تم!"
 
 #: app/routes/_auth+/login.tsx:743
 #: app/routes/_auth+/signup.tsx:247
@@ -120,13 +191,44 @@ msgstr "نسيت كلمة المرور"
 msgid "Forgot your password?"
 msgstr "هل نسيت كلمة المرور؟"
 
+#: app/components/app-sidebar.tsx:239
+msgid "General"
+msgstr "عام"
+
 #: app/routes/_auth+/login.tsx:388
 msgid "Generating Authentication Options"
 msgstr "جاري إنشاء خيارات المصادقة"
 
+#: app/components/app-sidebar.tsx:272
+msgid "Get chrome extension"
+msgstr "احصل على إضافة كروم"
+
+#: app/components/app-sidebar.tsx:142
+#: app/components/app-sidebar.tsx:285
+msgid "Get help"
+msgstr "احصل على المساعدة"
+
+#: app/components/app-sidebar.tsx:83
+msgid "Get in touch"
+msgstr "تواصل معنا"
+
+#: app/components/onboarding-checklist.tsx:94
+#: app/components/onboarding-checklist.tsx:131
+msgid "Get Started"
+msgstr "ابدأ"
+
+#: app/components/app-sidebar.tsx:147
+#: app/components/app-sidebar.tsx:291
+msgid "Give feedback"
+msgstr "إرسال ملاحظات"
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
 msgstr "مرحباً"
+
+#: app/components/app-sidebar.tsx:249
+msgid "Integrations"
+msgstr "التكاملات"
 
 #: app/routes/_auth+/login.tsx:210
 msgid "Invalid username or password"
@@ -136,14 +238,31 @@ msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 msgid "Invalid Verification Type"
 msgstr "نوع التحقق غير صالح"
 
+#: app/components/command-menu.tsx:124
+msgid "Invite new members"
+msgstr "دعوة أعضاء جدد"
+
+#. placeholder {0}: invitation.inviter.name || invitation.inviter.email
+#: app/routes/_app+/organizations.tsx:274
+msgid "Invited by {0}"
+msgstr "مدعو من قبل {0}"
+
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
 msgstr "الانضمام إلى المنظمة"
+
+#: app/routes/_app+/organizations.tsx:199
+msgid "Jump into an existing organization, accept pending invitations, or add a new one."
+msgstr "انتقل إلى منظمة موجودة، أو اقبل الدعوات المعلقة، أو أضف منظمة جديدة."
 
 #: app/routes/_auth+/login.tsx:467
 #: app/routes/_auth+/login.tsx:478
 msgid "Last used"
 msgstr "آخر استخدام"
+
+#: app/components/command-menu.tsx:105
+msgid "Loading notes..."
+msgstr "جاري تحميل الملاحظات..."
 
 #: app/routes/_auth+/login.tsx:288
 msgid "Login Error"
@@ -157,9 +276,25 @@ msgstr "تسجيل الدخول بمفتاح المرور"
 msgid "m@example.com"
 msgstr "م@مثال.com"
 
+#: app/components/app-sidebar.tsx:227
+msgid "MCP Server"
+msgstr "خادم MCP"
+
+#: app/components/app-sidebar.tsx:244
+msgid "Members"
+msgstr "الأعضاء"
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
+
+#: app/components/command-menu.tsx:105
+msgid "No notes found."
+msgstr "لم يتم العثور على ملاحظات."
+
+#: app/routes/_app+/organizations.tsx:372
+msgid "No organization found"
+msgstr "لم يتم العثور على منظمة"
 
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
@@ -169,6 +304,15 @@ msgstr "لا يوجد مستخدم بهذا الاسم أو البريد الإ�
 msgid "No worries, we'll send you reset instructions."
 msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين."
 
+#: app/components/app-sidebar.tsx:221
+#: app/components/command-menu.tsx:130
+msgid "Notes"
+msgstr "الملاحظات"
+
+#: app/components/app-sidebar.tsx:127
+msgid "Notifications"
+msgstr "الإشعارات"
+
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
 msgstr "أو تابع باستخدام"
@@ -177,6 +321,11 @@ msgstr "أو تابع باستخدام"
 msgid "Or continue with email or username"
 msgstr "أو تابع باستخدام البريد الإلكتروني أو اسم المستخدم"
 
+#: app/components/app-sidebar.tsx:133
+#: app/routes/_app+/organizations.tsx:198
+msgid "Organizations"
+msgstr "المنظمات"
+
 #: app/routes/_auth+/login.tsx:764
 msgid "Password"
 msgstr "كلمة المرور"
@@ -184,6 +333,10 @@ msgstr "كلمة المرور"
 #: app/routes/_auth+/reset-password.tsx:73
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
+
+#: app/routes/_app+/organizations.tsx:231
+msgid "Pending Invitations"
+msgstr "الدعوات المعلقة"
 
 #: app/routes/_auth+/verify.tsx:94
 msgid "Please check your verification link."
@@ -196,6 +349,10 @@ msgstr "يرجى إدخال رمز المصادقة الثنائية للتحق�
 #: app/routes/_auth+/login.tsx:74
 msgid "Please enter your email or username"
 msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
+
+#: app/components/app-sidebar.tsx:115
+msgid "Profile"
+msgstr "الملف الشخصي"
 
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
@@ -221,9 +378,28 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
+#: app/components/command-menu.tsx:99
+#: app/components/site-header.tsx:39
+msgid "Search notes..."
+msgstr "البحث في الملاحظات..."
+
+#: app/routes/_app+/organizations.tsx:210
+msgid "Search..."
+msgstr "البحث..."
+
+#: app/components/app-sidebar.tsx:121
+msgid "Security"
+msgstr "الأمان"
+
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
 msgstr "إرسال تعليمات إعادة التعيين"
+
+#: app/components/app-sidebar.tsx:233
+#: app/components/command-menu.tsx:149
+#: app/components/command-menu.tsx:173
+msgid "Settings"
+msgstr "الإعدادات"
 
 #: app/routes/_auth+/signup.tsx:285
 msgid "Sign in"
@@ -250,9 +426,18 @@ msgstr "أنشئ حساباً باستخدام حساب التواصل الاج�
 msgid "Signing in as"
 msgstr "تسجيل الدخول باسم"
 
+#. placeholder {0}: trialStatus.daysRemaining
+#: app/components/app-sidebar.tsx:58
+msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
+msgstr "باقي <0>{0} أيام</0> في فترة التجربة. تواصل معنا إذا كان لديك أي أسئلة أو ملاحظات."
+
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
 msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+#: app/components/app-sidebar.tsx:75
+msgid "Upgrade"
+msgstr "ترقية"
 
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
@@ -293,6 +478,14 @@ msgstr "لقد أرسلنا لك رمزاً للتحقق من عنوان بري�
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr "مرحباً بعودتك"
+
+#: app/routes/_app+/organizations.tsx:234
+msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
+msgstr "تمت دعوتك للانضمام إلى المنظمات التالية. اختر قبول أو رفض كل دعوة."
+
+#: app/routes/_app+/organizations.tsx:378
+msgid "You haven't joined any organizations yet."
+msgstr "لم تنضم إلى أي منظمات بعد."
 
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."

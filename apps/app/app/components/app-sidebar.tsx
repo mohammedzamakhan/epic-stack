@@ -7,7 +7,7 @@ import {
 	CardHeader,
 } from '@repo/ui'
 import React, { useEffect, useState } from 'react'
-
+import { Trans } from '@lingui/macro'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { FoldersIcon } from '#app/components/icons/folders-icon.tsx'
 import { HomeIcon } from '#app/components/icons/home-icon.tsx'
@@ -55,11 +55,13 @@ function UpgradeAccountCard({
 		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 border p-2 group-data-[collapsible=icon]:hidden">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
-					There are{' '}
-					<span className="font-bold text-red-400">
-						{trialStatus.daysRemaining} days
-					</span>{' '}
-					left in your trial. Get in touch with questions or feedback.
+					<Trans>
+						There are{' '}
+						<span className="font-bold text-red-400">
+							{trialStatus.daysRemaining} days
+						</span>{' '}
+						left in your trial. Get in touch with questions or feedback.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="-mt-4 flex flex-col gap-1 border-0 bg-transparent p-2 pb-0 shadow-none ring-0">
@@ -69,14 +71,16 @@ function UpgradeAccountCard({
 					className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/70 w-full"
 					asChild
 				>
-					<Link to={`/${orgSlug}/settings/billing`}>Upgrade</Link>
+					<Link to={`/${orgSlug}/settings/billing`}>
+						<Trans>Upgrade</Trans>
+					</Link>
 				</Button>
 				<Button
 					variant="link"
 					size="sm"
 					className="text-sidebar-foreground hover:text-sidebar-foreground/80 w-full"
 				>
-					Get in touch
+					<Trans>Get in touch</Trans>
 				</Button>
 			</CardContent>
 		</Card>
@@ -102,31 +106,31 @@ function AccountSidebar({
 
 	const navMain = [
 		{
-			title: 'Dashboard',
+			title: <Trans>Dashboard</Trans>,
 			url: orgSlug ? `/${orgSlug}` : '/organizations',
 			isActive: false,
 			icon: ArrowLeftIcon,
 		},
 		{
-			title: 'Profile',
+			title: <Trans>Profile</Trans>,
 			url: '/profile',
 			isActive: isProfileRoute,
 			icon: UserIcon,
 		},
 		{
-			title: 'Security',
+			title: <Trans>Security</Trans>,
 			url: '/security',
 			isActive: isSecurityRoute,
 			icon: LockOpenIcon,
 		},
 		{
-			title: 'Notifications',
+			title: <Trans>Notifications</Trans>,
 			url: '/notifications',
 			isActive: isNotificationsRoute,
 			icon: BellIcon,
 		},
 		{
-			title: 'Organizations',
+			title: <Trans>Organizations</Trans>,
 			url: '/organizations',
 			isActive: isOrganizationsRoute,
 			icon: BuildingIcon,
@@ -135,12 +139,12 @@ function AccountSidebar({
 
 	const navSecondary = [
 		{
-			title: 'Get help',
+			title: <Trans>Get help</Trans>,
 			url: '#',
 			icon: CircleHelpIcon,
 		},
 		{
-			title: 'Give feedback',
+			title: <Trans>Give feedback</Trans>,
 			icon: MessageSquareMoreIcon,
 			onClick: onFeedbackClick,
 		},
@@ -208,41 +212,41 @@ function OrganizationSidebar({
 	}, [extensionId])
 	const navMain = [
 		{
-			title: 'Dashboard',
+			title: <Trans>Dashboard</Trans>,
 			url: `/${orgSlug}`,
 			isActive: location.pathname === `/${orgSlug}`,
 			icon: HomeIcon,
 		},
 		{
-			title: 'Notes',
+			title: <Trans>Notes</Trans>,
 			url: `/${orgSlug}/notes`,
 			isActive: location.pathname.includes(`/${orgSlug}/notes`),
 			icon: FoldersIcon,
 		},
 		{
-			title: 'MCP Server',
+			title: <Trans>MCP Server</Trans>,
 			url: `/${orgSlug}/mcp`,
 			isActive: location.pathname.includes(`/${orgSlug}/mcp`),
 			icon: McpIcon,
 		},
 		{
-			title: 'Settings',
+			title: <Trans>Settings</Trans>,
 			url: `/${orgSlug}/settings`,
 			isActive: location.pathname.includes(`/${orgSlug}/settings`),
 			icon: SettingsGearIcon,
 			items: [
 				{
-					title: 'General',
+					title: <Trans>General</Trans>,
 					url: `/${orgSlug}/settings`,
 					isActive: location.pathname === `/${orgSlug}/settings`,
 				},
 				{
-					title: 'Members',
+					title: <Trans>Members</Trans>,
 					url: `/${orgSlug}/settings/members`,
 					isActive: location.pathname === `/${orgSlug}/settings/members`,
 				},
 				{
-					title: 'Integrations',
+					title: <Trans>Integrations</Trans>,
 					url: `/${orgSlug}/settings/integrations`,
 					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
 				},
@@ -251,7 +255,7 @@ function OrganizationSidebar({
 				rootData?.launchStatus !== 'CLOSED_BETA'
 					? [
 							{
-								title: 'Billing',
+								title: <Trans>Billing</Trans>,
 								url: `/${orgSlug}/settings/billing`,
 								isActive: location.pathname === `/${orgSlug}/settings/billing`,
 							},
@@ -265,7 +269,7 @@ function OrganizationSidebar({
 		...(!isExtensionInstalled
 			? [
 					{
-						title: 'Get chrome extension',
+						title: <Trans>Get chrome extension</Trans>,
 						url: `https://chrome.google.com/webstore/detail/${extensionId}`,
 						icon: ExternalLinkIcon,
 						target: '_blank',
@@ -273,18 +277,18 @@ function OrganizationSidebar({
 				]
 			: []),
 		{
-			title: 'Add members',
+			title: <Trans>Add members</Trans>,
 			url: `/${orgSlug}/settings/members`,
 			icon: UserRoundPlusIcon,
 		},
 		{
-			title: 'Get help',
+			title: <Trans>Get help</Trans>,
 			url: 'http://docs.epic-stack.me:2999',
 			icon: CircleHelpIcon,
 			target: '_blank',
 		},
 		{
-			title: 'Give feedback',
+			title: <Trans>Give feedback</Trans>,
 			icon: MessageSquareMoreIcon,
 			onClick: onFeedbackClick,
 		},

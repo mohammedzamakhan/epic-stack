@@ -11,6 +11,8 @@ import {
 	Icon,
 } from '@repo/ui'
 import { useState } from 'react'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
@@ -174,6 +176,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function OrganizationsPage() {
 	const { organizations, pendingInvitations } = useLoaderData<typeof loader>()
 	const [searchQuery, setSearchQuery] = useState('')
+	const { _ } = useLingui()
 
 	const filteredOrganizations = organizations.filter(
 		(org: UserOrganizationWithRole) =>
@@ -192,8 +195,8 @@ export default function OrganizationsPage() {
 			<div className="py-8 md:container md:max-w-2xl">
 				<div className="mb-8">
 					<PageTitle
-						title="Organizations"
-						description="Jump into an existing organization, accept pending invitations, or add a new one."
+						title={_(t`Organizations`)}
+						description={_(t`Jump into an existing organization, accept pending invitations, or add a new one.`)}
 					/>
 
 					<div className="mt-4 flex items-center gap-3">
@@ -204,7 +207,7 @@ export default function OrganizationsPage() {
 							/>
 							<Input
 								type="text"
-								placeholder="Search..."
+								placeholder={_(t`Search...`)}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="bg-background pl-10"
@@ -213,7 +216,7 @@ export default function OrganizationsPage() {
 						<Button asChild>
 							<Link to="/organizations/create">
 								<span className="mr-1">+</span>
-								Add organization
+								<Trans>Add organization</Trans>
 							</Link>
 						</Button>
 					</div>
@@ -225,11 +228,13 @@ export default function OrganizationsPage() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Icon name="mail" className="h-5 w-5" />
-								Pending Invitations
+								<Trans>Pending Invitations</Trans>
 							</CardTitle>
 							<p className="text-muted-foreground text-sm">
-								You have been invited to join the following organizations.
-								Choose to accept or decline each invitation.
+								<Trans>
+									You have been invited to join the following organizations.
+									Choose to accept or decline each invitation.
+								</Trans>
 							</p>
 						</CardHeader>
 						<CardContent className="space-y-3">
@@ -266,9 +271,11 @@ export default function OrganizationsPage() {
 												</Badge>
 												{invitation.inviter && (
 													<span>
-														Invited by{' '}
-														{invitation.inviter.name ||
-															invitation.inviter.email}
+														<Trans>
+															Invited by{' '}
+															{invitation.inviter.name ||
+																invitation.inviter.email}
+														</Trans>
 													</span>
 												)}
 											</div>
@@ -287,7 +294,7 @@ export default function OrganizationsPage() {
 												value={invitation.id}
 											/>
 											<Button type="submit" size="sm">
-												Accept
+												<Trans>Accept</Trans>
 											</Button>
 										</Form>
 										<Form method="POST">
@@ -302,7 +309,7 @@ export default function OrganizationsPage() {
 												value={invitation.id}
 											/>
 											<Button type="submit" variant="outline" size="sm">
-												Decline
+												<Trans>Decline</Trans>
 											</Button>
 										</Form>
 									</div>
@@ -362,12 +369,14 @@ export default function OrganizationsPage() {
 									/>
 								</div>
 								<div className="mb-2 text-lg font-medium">
-									No organization found
+									<Trans>No organization found</Trans>
 								</div>
 								<p className="text-muted-foreground text-sm">
-									{searchQuery
-										? 'Adjust your search query to show more.'
-										: "You haven't joined any organizations yet."}
+									{searchQuery ? (
+										<Trans>Adjust your search query to show more.</Trans>
+									) : (
+										<Trans>You haven't joined any organizations yet.</Trans>
+									)}
 								</p>
 							</div>
 						</div>
