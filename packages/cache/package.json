@@ -1,0 +1,33 @@
+{
+  "name": "@repo/cache",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@epic-web/cachified": "^5.4.2",
+    "@epic-web/remember": "^1.1.0",
+    "lru-cache": "^11.1.0",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@vitest/coverage-v8": "^4.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.4"
+  }
+}
