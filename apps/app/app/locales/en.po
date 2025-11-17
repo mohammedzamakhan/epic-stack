@@ -115,6 +115,10 @@ msgstr ""
 msgid "Accept"
 msgstr ""
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:254
+msgid "Access Key ID"
+msgstr ""
+
 #: app/components/nav-user.tsx:129
 msgid "Account"
 msgstr ""
@@ -282,6 +286,10 @@ msgstr ""
 msgid "Billing & Subscription"
 msgstr ""
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:241
+msgid "Bucket Name"
+msgstr ""
+
 #. placeholder {0}: note.createdByName
 #: app/components/command-menu.tsx:141
 msgid "by {0}"
@@ -295,7 +303,13 @@ msgstr ""
 msgid "By creating an account, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr ""
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:62
+#: app/components/settings/cards/organization/danger-zone-card.tsx:82
+msgid "By deleting your organization you and your team will lose access and all data will be lost. This is a permanent action and cannot be undone."
+msgstr ""
+
 #: app/components/note/comment-input.tsx:164
+#: app/components/settings/cards/organization/danger-zone-card.tsx:126
 #: app/components/settings/password-form.tsx:193
 #: app/components/settings/two-factor-form.tsx:65
 #: app/components/settings/two-factor-form.tsx:194
@@ -400,6 +414,7 @@ msgstr ""
 msgid "Configuration examples for popular MCP clients"
 msgstr ""
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:139
 #: app/components/settings/two-factor-form.tsx:202
 msgid "Confirm"
 msgstr ""
@@ -578,6 +593,7 @@ msgid "Daily Notes Created"
 msgstr ""
 
 #: app/components/settings/cards/danger-card.tsx:23
+#: app/components/settings/cards/organization/danger-zone-card.tsx:46
 msgid "Danger"
 msgstr ""
 
@@ -622,6 +638,15 @@ msgstr ""
 msgid "Delete all your data"
 msgstr ""
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:59
+#: app/components/settings/cards/organization/danger-zone-card.tsx:73
+msgid "Delete organization"
+msgstr ""
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:79
+msgid "Delete organization?"
+msgstr ""
+
 #: app/routes/settings+/profile.connections.tsx:119
 msgid "Deleted"
 msgstr ""
@@ -632,6 +657,10 @@ msgstr ""
 
 #: app/components/settings/cards/danger-card.tsx:26
 msgid "Destructive settings that cannot be undone."
+msgstr ""
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:49
+msgid "Destructive settings that cannot be undone. All your data will be permanently removed from our servers."
 msgstr ""
 
 #: app/components/settings/passkey-manager.tsx:119
@@ -714,6 +743,10 @@ msgstr ""
 #: app/components/settings/cards/security-card.tsx:148
 #: app/routes/settings+/profile.index.tsx:164
 msgid "Enable 2FA"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:171
+msgid "Enable Custom S3 Storage"
 msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:126
@@ -891,12 +924,20 @@ msgstr ""
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr ""
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:116
+msgid "I'll not be able to access the organization and its data anymore"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:463
 msgid "I've Copied the Key"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:154
 msgid "If you change your email, you'll need to verify the new address"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:193
+msgid "Important Security Note"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:447
@@ -986,6 +1027,10 @@ msgstr ""
 
 #: app/components/feature-updates.tsx:199
 msgid "Learn more"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:279
+msgid "Leave empty to keep existing secret key, or enter a new one to update."
 msgstr ""
 
 #: app/components/nav-user.tsx:70
@@ -1156,6 +1201,10 @@ msgstr ""
 #: app/routes/settings+/profile.password_.create.tsx:125
 #: app/routes/settings+/profile.password.tsx:184
 msgid "New Password"
+msgstr ""
+
+#: app/components/organization-invitations.tsx:160
+msgid "No active invite link"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:164
@@ -1398,6 +1447,10 @@ msgstr ""
 msgid "Recommended for"
 msgstr ""
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:228
+msgid "Region"
+msgstr ""
+
 #: app/components/settings/cards/security-card.tsx:181
 msgid "Register a passkey to log in without a password"
 msgstr ""
@@ -1469,7 +1522,16 @@ msgstr ""
 msgid "Reviewers"
 msgstr ""
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:217
+msgid "S3 Endpoint URL"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:152
+msgid "S3 Storage Configuration"
+msgstr ""
+
 #: app/components/organization-members.tsx:102
+#: app/components/settings/cards/organization/s3-storage-card.tsx:305
 #: app/components/settings/cards/organization/verified-domain-card.tsx:118
 msgid "Save"
 msgstr ""
@@ -1515,6 +1577,10 @@ msgstr ""
 
 #: app/routes/_app+/organizations.tsx:210
 msgid "Search..."
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:265
+msgid "Secret Access Key"
 msgstr ""
 
 #: app/components/data-table.tsx:195
@@ -1763,6 +1829,11 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
+#. placeholder {0}: organization.name
+#: app/components/settings/cards/organization/danger-zone-card.tsx:93
+msgid "Type the organization name \"{0}\" to confirm."
+msgstr ""
+
 #: app/components/settings/cards/organization/billing-card.tsx:258
 msgid "Unable to load pricing information"
 msgstr ""
@@ -1807,6 +1878,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:174
+msgid "Use your own S3-compatible storage instead of the default storage"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:105
@@ -2026,4 +2101,8 @@ msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:182
 msgid "Your referral link"
+msgstr ""
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:196
+msgid "Your S3 credentials will be encrypted and stored securely. However, we recommend using IAM credentials with minimal required permissions (read/write access to the specific bucket only)."
 msgstr ""

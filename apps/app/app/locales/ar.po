@@ -115,6 +115,10 @@ msgstr "يوجد مستخدم بالفعل بهذا اسم المستخدم"
 msgid "Accept"
 msgstr "قبول"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:254
+msgid "Access Key ID"
+msgstr "معرف مفتاح الوصول"
+
 #: app/components/nav-user.tsx:129
 msgid "Account"
 msgstr "الحساب"
@@ -282,6 +286,10 @@ msgstr "الفواتير"
 msgid "Billing & Subscription"
 msgstr "الفوترة والاشتراك"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:241
+msgid "Bucket Name"
+msgstr "اسم الحاوية"
+
 #. placeholder {0}: note.createdByName
 #: app/components/command-menu.tsx:141
 msgid "by {0}"
@@ -295,7 +303,13 @@ msgstr "بالمتابعة، فإنك توافق على <0>شروط الخدمة
 msgid "By creating an account, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr "بإنشاء حساب، فإنك توافق على <0>شروط الخدمة</0> و<1>سياسة الخصوصية</1>."
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:62
+#: app/components/settings/cards/organization/danger-zone-card.tsx:82
+msgid "By deleting your organization you and your team will lose access and all data will be lost. This is a permanent action and cannot be undone."
+msgstr "بحذف مؤسستك، ستفقد أنت وفريقك الوصول وسيتم فقدان جميع البيانات. هذا إجراء دائم ولا يمكن التراجع عنه."
+
 #: app/components/note/comment-input.tsx:164
+#: app/components/settings/cards/organization/danger-zone-card.tsx:126
 #: app/components/settings/password-form.tsx:193
 #: app/components/settings/two-factor-form.tsx:65
 #: app/components/settings/two-factor-form.tsx:194
@@ -400,6 +414,7 @@ msgstr "أكمل التسجيل للانضمام إلى المنظمة"
 msgid "Configuration examples for popular MCP clients"
 msgstr "أمثلة على التكوين لعملاء MCP الشائعين"
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:139
 #: app/components/settings/two-factor-form.tsx:202
 msgid "Confirm"
 msgstr "تأكيد"
@@ -578,6 +593,7 @@ msgid "Daily Notes Created"
 msgstr "الملاحظات اليومية المنشأة"
 
 #: app/components/settings/cards/danger-card.tsx:23
+#: app/components/settings/cards/organization/danger-zone-card.tsx:46
 msgid "Danger"
 msgstr "خطر"
 
@@ -622,6 +638,15 @@ msgstr "حذف الحساب"
 msgid "Delete all your data"
 msgstr "حذف جميع بياناتك"
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:59
+#: app/components/settings/cards/organization/danger-zone-card.tsx:73
+msgid "Delete organization"
+msgstr "حذف المؤسسة"
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:79
+msgid "Delete organization?"
+msgstr "حذف المؤسسة؟"
+
 #: app/routes/settings+/profile.connections.tsx:119
 msgid "Deleted"
 msgstr "تم الحذف"
@@ -633,6 +658,10 @@ msgstr "سيؤدي حذف المستخدم إلى حذف جميع بيانات �
 #: app/components/settings/cards/danger-card.tsx:26
 msgid "Destructive settings that cannot be undone."
 msgstr "إعدادات مدمرة لا يمكن التراجع عنها."
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:49
+msgid "Destructive settings that cannot be undone. All your data will be permanently removed from our servers."
+msgstr "إعدادات مدمرة لا يمكن التراجع عنها. سيتم إزالة جميع بياناتك بشكل دائم من خوادمنا."
 
 #: app/components/settings/passkey-manager.tsx:119
 #: app/routes/settings+/profile.passkeys.tsx:170
@@ -715,6 +744,10 @@ msgstr "البريد الإلكتروني / اسم المستخدم"
 #: app/routes/settings+/profile.index.tsx:164
 msgid "Enable 2FA"
 msgstr "تفعيل المصادقة الثنائية"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:171
+msgid "Enable Custom S3 Storage"
+msgstr "تفعيل تخزين S3 مخصص"
 
 #: app/components/settings/cards/security-card.tsx:126
 msgid "Enable Two-Factor Authentication"
@@ -891,6 +924,10 @@ msgstr "مرحباً {0}، يرجى إكمال ملفك الشخصي{1}."
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr "أوافق على شروط الخدمة وسياسة الخصوصية"
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:116
+msgid "I'll not be able to access the organization and its data anymore"
+msgstr "لن أتمكن من الوصول إلى المؤسسة وبياناتها بعد الآن"
+
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:463
 msgid "I've Copied the Key"
 msgstr "لقد نسخت المفتاح"
@@ -898,6 +935,10 @@ msgstr "لقد نسخت المفتاح"
 #: app/components/settings/cards/profile-card.tsx:154
 msgid "If you change your email, you'll need to verify the new address"
 msgstr "إذا قمت بتغيير بريدك الإلكتروني، ستحتاج إلى التحقق من العنوان الجديد"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:193
+msgid "Important Security Note"
+msgstr "ملاحظة أمنية مهمة"
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:447
 msgid "Important:"
@@ -987,6 +1028,10 @@ msgstr "آخر استخدام"
 #: app/components/feature-updates.tsx:199
 msgid "Learn more"
 msgstr "اعرف المزيد"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:279
+msgid "Leave empty to keep existing secret key, or enter a new one to update."
+msgstr "اتركه فارغاً للاحتفاظ بالمفتاح السري الحالي، أو أدخل واحداً جديداً للتحديث."
 
 #: app/components/nav-user.tsx:70
 msgid "Light mode"
@@ -1157,6 +1202,10 @@ msgstr "ملاحظة جديدة"
 #: app/routes/settings+/profile.password.tsx:184
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
+
+#: app/components/organization-invitations.tsx:160
+msgid "No active invite link"
+msgstr "لا يوجد رابط دعوة نشط"
 
 #: app/components/settings/cards/organization/billing-card.tsx:164
 msgid "No active subscription"
@@ -1398,6 +1447,10 @@ msgstr "قراءة الوثائق"
 msgid "Recommended for"
 msgstr "موصى به لـ"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:228
+msgid "Region"
+msgstr "المنطقة"
+
 #: app/components/settings/cards/security-card.tsx:181
 msgid "Register a passkey to log in without a password"
 msgstr "سجّل مفتاح مرور لتسجيل الدخول بدون كلمة مرور"
@@ -1469,7 +1522,16 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Reviewers"
 msgstr "المراجعون"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:217
+msgid "S3 Endpoint URL"
+msgstr "رابط نقطة نهاية S3"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:152
+msgid "S3 Storage Configuration"
+msgstr "تكوين تخزين S3"
+
 #: app/components/organization-members.tsx:102
+#: app/components/settings/cards/organization/s3-storage-card.tsx:305
 #: app/components/settings/cards/organization/verified-domain-card.tsx:118
 msgid "Save"
 msgstr "حفظ"
@@ -1516,6 +1578,10 @@ msgstr "البحث في الملاحظات..."
 #: app/routes/_app+/organizations.tsx:210
 msgid "Search..."
 msgstr "البحث..."
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:265
+msgid "Secret Access Key"
+msgstr "مفتاح الوصول السري"
 
 #: app/components/data-table.tsx:195
 msgid "Section Type"
@@ -1763,6 +1829,11 @@ msgstr "المصادقة الثنائية مفعّلة حالياً. تعطيل�
 msgid "Type"
 msgstr "النوع"
 
+#. placeholder {0}: organization.name
+#: app/components/settings/cards/organization/danger-zone-card.tsx:93
+msgid "Type the organization name \"{0}\" to confirm."
+msgstr "اكتب اسم المؤسسة \"{0}\" للتأكيد."
+
 #: app/components/settings/cards/organization/billing-card.tsx:258
 msgid "Unable to load pricing information"
 msgstr "تعذر تحميل معلومات الأسعار"
@@ -1808,6 +1879,10 @@ msgstr "استخدم أي تطبيق مصادقة على جهازك المحمو
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
 msgstr "استخدم كلمة المرور بدلاً من ذلك"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:174
+msgid "Use your own S3-compatible storage instead of the default storage"
+msgstr "استخدم تخزين S3 المتوافق الخاص بك بدلاً من التخزين الافتراضي"
 
 #: app/components/settings/cards/profile-card.tsx:105
 #: app/routes/_auth+/login.tsx:756
@@ -2027,3 +2102,7 @@ msgstr "ترتيبك"
 #: app/routes/_auth+/waitlist.tsx:182
 msgid "Your referral link"
 msgstr "رابط الإحالة الخاص بك"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:196
+msgid "Your S3 credentials will be encrypted and stored securely. However, we recommend using IAM credentials with minimal required permissions (read/write access to the specific bucket only)."
+msgstr "سيتم تشفير بيانات اعتماد S3 الخاصة بك وتخزينها بشكل آمن. ومع ذلك، نوصي باستخدام بيانات اعتماد IAM بأقل الأذونات المطلوبة (الوصول للقراءة/الكتابة إلى الحاوية المحددة فقط)."

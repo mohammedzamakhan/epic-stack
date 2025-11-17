@@ -157,7 +157,7 @@ export function OrganizationInvitations({
 				<CardContent className="space-y-4">
 					<div className="flex gap-2">
 						<Input
-							value={inviteUrl || 'No active invite link'}
+							value={inviteUrl || _(msg`No active invite link`)}
 							readOnly
 							onClick={inviteUrl ? copyInviteLink : undefined}
 							className={`flex-1 ${inviteUrl ? 'cursor-pointer' : 'cursor-not-allowed'}`}
