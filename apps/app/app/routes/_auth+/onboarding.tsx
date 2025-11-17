@@ -51,18 +51,6 @@ export const onboardingEmailSessionKey = 'onboardingEmail'
 export const onboardingInviteTokenSessionKey = 'onboardingInviteToken'
 export const onboardingReferralCodeSessionKey = 'referralCode'
 
-const SignupFormSchema = z
-	.object({
-		username: UsernameSchema,
-		name: NameSchema,
-		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
-			required_error: t`You must agree to the terms of service and privacy policy`,
-		}),
-		remember: z.boolean().optional(),
-		redirectTo: z.string().optional(),
-	})
-	.and(PasswordAndConfirmPasswordSchema)
-
 async function requireOnboardingEmail(request: Request) {
 	await requireAnonymous(request)
 	const verifySession = await verifySessionStorage.getSession(
@@ -98,6 +86,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	const SignupFormSchema = z
+	.object({
+		username: UsernameSchema,
+		name: NameSchema,
+		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+			required_error: t`You must agree to the terms of service and privacy policy`,
+		}),
+		remember: z.boolean().optional(),
+		redirectTo: z.string().optional(),
+	})
+	.and(PasswordAndConfirmPasswordSchema)
 	const email = await requireOnboardingEmail(request)
 	const inviteToken = await getOnboardingInviteToken(request)
 	const formData = await request.formData()
@@ -341,6 +340,17 @@ export default function OnboardingRoute({
 	loaderData,
 	actionData,
 }: Route.ComponentProps) {
+	const SignupFormSchema = z
+	.object({
+		username: UsernameSchema,
+		name: NameSchema,
+		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+			required_error: t`You must agree to the terms of service and privacy policy`,
+		}),
+		remember: z.boolean().optional(),
+		redirectTo: z.string().optional(),
+	})
+	.and(PasswordAndConfirmPasswordSchema)
 	const isPending = useIsPending()
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')

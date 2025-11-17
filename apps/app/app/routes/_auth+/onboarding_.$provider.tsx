@@ -54,17 +54,6 @@ import {
 export const providerIdKey = 'providerId'
 export const prefilledProfileKey = 'prefilledProfile'
 
-const SignupFormSchema = z.object({
-	imageUrl: z.string().optional(),
-	username: UsernameSchema,
-	name: NameSchema,
-	agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
-		required_error: t`You must agree to the terms of service and privacy policy`,
-	}),
-	remember: z.boolean().optional(),
-	redirectTo: z.string().optional(),
-})
-
 async function requireData({
 	request,
 	params,
@@ -111,6 +100,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
+	const SignupFormSchema = z.object({
+		imageUrl: z.string().optional(),
+		username: UsernameSchema,
+		name: NameSchema,
+		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+			required_error: t`You must agree to the terms of service and privacy policy`,
+		}),
+		remember: z.boolean().optional(),
+		redirectTo: z.string().optional(),
+	})
 	const { email, providerId, providerName } = await requireData({
 		request,
 		params,
@@ -189,6 +188,17 @@ export default function OnboardingProviderRoute({
 	const isPending = useIsPending()
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')
+
+	const SignupFormSchema = z.object({
+		imageUrl: z.string().optional(),
+		username: UsernameSchema,
+		name: NameSchema,
+		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+			required_error: t`You must agree to the terms of service and privacy policy`,
+		}),
+		remember: z.boolean().optional(),
+		redirectTo: z.string().optional(),
+	})
 
 	const [form, fields] = useForm({
 		id: 'onboarding-provider-form',
