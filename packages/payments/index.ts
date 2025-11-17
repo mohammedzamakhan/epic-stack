@@ -53,3 +53,11 @@ export {
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
 } from './src/trial-config'
+
+// Route handlers
+export {
+	handleStripeWebhook,
+	handleStripeCheckout,
+	type StripeWebhookDependencies,
+	type StripeCheckoutDependencies,
+} from './src/route-handlers/index.ts'

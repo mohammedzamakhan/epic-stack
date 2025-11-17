@@ -99,3 +99,15 @@ export type {
 	NoteIntegrationConnection,
 	OrganizationNote,
 } from '@prisma/client'
+
+// Route handlers
+export {
+	handleOAuthCallback,
+	handleJiraSearchUsers,
+	handleJiraCurrentUser,
+	handleUpdateIntegrationConfig,
+	type OAuthCallbackDependencies,
+	type JiraSearchUsersDependencies,
+	type JiraCurrentUserDependencies,
+	type UpdateConfigDependencies,
+} from './route-handlers/index.ts'
