@@ -15,6 +15,7 @@ import {
 } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { z } from 'zod'
+import { Trans, t } from '@lingui/macro'
 import {
 	CheckboxField,
 	ErrorList,
@@ -58,7 +59,7 @@ const SignupFormSchema = z.object({
 	username: UsernameSchema,
 	name: NameSchema,
 	agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
-		required_error: 'You must agree to the terms of service and privacy policy',
+		required_error: t`You must agree to the terms of service and privacy policy`,
 	}),
 	remember: z.boolean().optional(),
 	redirectTo: z.string().optional(),
@@ -129,7 +130,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['username'],
 					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this username',
+					message: t`A user already exists with this username`,
 				})
 				return
 			}
@@ -172,7 +173,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 	return redirectWithToast(
 		'/organizations',
-		{ title: 'Welcome', description: 'Thanks for signing up!' },
+		{ title: t`Welcome`, description: t`Thanks for signing up!` },
 		{ headers },
 	)
 }
@@ -213,9 +214,13 @@ export default function OnboardingProviderRoute({
 				<div className="flex flex-col gap-6">
 					<Card className="bg-muted/80 border-0 shadow-2xl">
 						<CardHeader className="text-center">
-							<CardTitle className="text-xl">Complete your profile</CardTitle>
+							<CardTitle className="text-xl">
+								<Trans>Complete your profile</Trans>
+							</CardTitle>
 							<CardDescription>
-								Hi {loaderData.email}, just a few more details to get started.
+								<Trans>
+									Hi {loaderData.email}, just a few more details to get started.
+								</Trans>
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -225,11 +230,11 @@ export default function OnboardingProviderRoute({
 										<div className="flex flex-col items-center justify-center gap-4">
 											<img
 												src={fields.imageUrl.initialValue}
-												alt="Profile"
+												alt={t`Profile`}
 												className="size-24 rounded-full"
 											/>
 											<p className="text-muted-foreground text-sm">
-												You can change your photo later
+												<Trans>You can change your photo later</Trans>
 											</p>
 											<input
 												{...getInputProps(fields.imageUrl, { type: 'hidden' })}
@@ -243,13 +248,13 @@ export default function OnboardingProviderRoute({
 										}
 									>
 										<FieldLabel htmlFor={fields.username.id}>
-											Username
+											<Trans>Username</Trans>
 										</FieldLabel>
 										<Input
 											{...getInputProps(fields.username, { type: 'text' })}
 											autoComplete="username"
 											className="lowercase"
-											placeholder="Enter your username"
+											placeholder={t`Enter your username`}
 											required
 											aria-invalid={
 												fields.username.errors?.length ? true : undefined
@@ -265,11 +270,13 @@ export default function OnboardingProviderRoute({
 									<Field
 										data-invalid={fields.name.errors?.length ? true : undefined}
 									>
-										<FieldLabel htmlFor={fields.name.id}>Full Name</FieldLabel>
+										<FieldLabel htmlFor={fields.name.id}>
+											<Trans>Full Name</Trans>
+										</FieldLabel>
 										<Input
 											{...getInputProps(fields.name, { type: 'text' })}
 											autoComplete="name"
-											placeholder="Enter your full name"
+											placeholder={t`Enter your full name`}
 											required
 											aria-invalid={
 												fields.name.errors?.length ? true : undefined
@@ -298,7 +305,9 @@ export default function OnboardingProviderRoute({
 												}
 												className="font-normal"
 											>
-												I agree to the Terms of Service and Privacy Policy
+												<Trans>
+													I agree to the Terms of Service and Privacy Policy
+												</Trans>
 											</FieldLabel>
 										</Field>
 										<FieldError
@@ -322,7 +331,7 @@ export default function OnboardingProviderRoute({
 												htmlFor={fields.remember.id}
 												className="font-normal"
 											>
-												Remember me
+												<Trans>Remember me</Trans>
 											</FieldLabel>
 										</Field>
 									</FieldGroup>
@@ -339,15 +348,17 @@ export default function OnboardingProviderRoute({
 										type="submit"
 										disabled={isPending}
 									>
-										Create account
+										<Trans>Create account</Trans>
 									</StatusButton>
 								</FieldGroup>
 							</Form>
 						</CardContent>
 					</Card>
 					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
-						By creating an account, you agree to our{' '}
-						<a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+						<Trans>
+							By creating an account, you agree to our{' '}
+							<a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+						</Trans>
 					</div>
 				</div>
 			</div>

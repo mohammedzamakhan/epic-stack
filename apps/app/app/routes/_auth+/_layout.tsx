@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router'
+import { Trans } from '@lingui/macro'
 
 export default function AuthLayout() {
 	return (
@@ -15,8 +16,10 @@ export default function AuthLayout() {
 				<div className="flex flex-col gap-6">
 					<Outlet />
 					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
-						By continuing, you agree to our <a href="#">Terms of Service</a> and{' '}
-						<a href="#">Privacy Policy</a>.
+						<Trans>
+							By continuing, you agree to our <a href="#">Terms of Service</a>{' '}
+							and <a href="#">Privacy Policy</a>.
+						</Trans>
 					</div>
 				</div>
 			</div>

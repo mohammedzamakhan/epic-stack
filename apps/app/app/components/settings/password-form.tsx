@@ -1,6 +1,7 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
+import { Trans, t } from '@lingui/macro'
 import { z } from 'zod'
 import {
 	ErrorList,
@@ -34,7 +35,7 @@ export const ChangePasswordSchema = z
 			ctx.addIssue({
 				path: ['confirmNewPassword'],
 				code: z.ZodIssueCode.custom,
-				message: 'The passwords must match',
+				message: t`The passwords must match`,
 			})
 		}
 	})
@@ -83,7 +84,7 @@ export function PasswordForm({
 						}
 					>
 						<FieldLabel htmlFor={fields.currentPassword.id}>
-							Current Password
+							<Trans>Current Password</Trans>
 						</FieldLabel>
 						<Input
 							{...getInputProps(fields.currentPassword, { type: 'password' })}
@@ -110,7 +111,11 @@ export function PasswordForm({
 					<FieldLabel
 						htmlFor={(hasPassword ? fields.newPassword : fields.password).id}
 					>
-						{hasPassword ? 'New Password' : 'Password'}
+						{hasPassword ? (
+							<Trans>New Password</Trans>
+						) : (
+							<Trans>Password</Trans>
+						)}
 					</FieldLabel>
 					<Input
 						{...getInputProps(
@@ -148,7 +153,11 @@ export function PasswordForm({
 								.id
 						}
 					>
-						{hasPassword ? 'Confirm New Password' : 'Confirm Password'}
+						{hasPassword ? (
+							<Trans>Confirm New Password</Trans>
+						) : (
+							<Trans>Confirm Password</Trans>
+						)}
 					</FieldLabel>
 					<Input
 						{...getInputProps(
@@ -181,7 +190,7 @@ export function PasswordForm({
 						variant="secondary"
 						onClick={() => setIsOpen(false)}
 					>
-						Cancel
+						<Trans>Cancel</Trans>
 					</Button>
 					<StatusButton
 						type="submit"
@@ -189,7 +198,11 @@ export function PasswordForm({
 							fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 						}
 					>
-						{hasPassword ? 'Change Password' : 'Create Password'}
+						{hasPassword ? (
+							<Trans>Change Password</Trans>
+						) : (
+							<Trans>Create Password</Trans>
+						)}
 					</StatusButton>
 				</div>
 			</FieldGroup>

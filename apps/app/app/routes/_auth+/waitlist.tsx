@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { getPageTitle } from '@repo/config/brand'
 import { redirect } from 'react-router'
+import { Trans, t } from '@lingui/macro'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
@@ -122,31 +123,35 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 					<Icon name="check" className="h-8 w-8 text-green-600" />
 				</div>
 				<CardTitle className="justify-center text-2xl font-bold">
-					You're on the Waitlist!
+					<Trans>You're on the Waitlist!</Trans>
 				</CardTitle>
 				<CardDescription className="text-base">
-					We'll notify you by email as soon as the waitlist opens.
+					<Trans>We'll notify you by email as soon as the waitlist opens.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{/* Points and Rank Display */}
 				<div>
 					<p className="mb-1 text-center font-medium">
-						Want to go to the top of the waitlist?
+						<Trans>Want to go to the top of the waitlist?</Trans>
 					</p>
 					<p className="text-muted-foreground mb-4 text-center text-sm">
-						Here's how to do it:
+						<Trans>Here's how to do it:</Trans>
 					</p>
 					<div className="grid grid-cols-2 gap-4">
 						<div className="text-center">
-							<p className="text-muted-foreground mb-1 text-xs">Your points</p>
+							<p className="text-muted-foreground mb-1 text-xs">
+								<Trans>Your points</Trans>
+							</p>
 							<p className="text-3xl font-bold">{waitlistEntry.points}</p>
 						</div>
 						<div className="text-center">
-							<p className="text-muted-foreground mb-1 text-xs">Your rank</p>
+							<p className="text-muted-foreground mb-1 text-xs">
+								<Trans>Your rank</Trans>
+							</p>
 							<p className="text-3xl font-bold">#{rank}</p>
 							<p className="text-muted-foreground text-xs">
-								of {totalUsers} people
+								<Trans>of {totalUsers} people</Trans>
 							</p>
 						</div>
 					</div>
@@ -160,9 +165,11 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 						</div>
 						<div className="min-w-0 flex-1">
 							<div className="my-2 flex items-baseline justify-between gap-2">
-								<p className="text-sm font-medium">Share with others</p>
+								<p className="text-sm font-medium">
+									<Trans>Share with others</Trans>
+								</p>
 								<span className="text-xs font-semibold text-green-600">
-									+5 points/referral
+									<Trans>+5 points/referral</Trans>
 								</span>
 							</div>
 							<Field>
@@ -172,7 +179,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 											type="text"
 											value={referralUrl}
 											readOnly
-											aria-label="Your referral link"
+											aria-label={t`Your referral link`}
 										/>
 										<InputGroupAddon align="inline-end">
 											<InputGroupButton
@@ -181,7 +188,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 												size="xs"
 											>
 												<Icon name={copied ? 'check' : 'copy'} />
-												{copied ? 'Copied!' : 'Copy'}
+												{copied ? <Trans>Copied!</Trans> : <Trans>Copy</Trans>}
 											</InputGroupButton>
 										</InputGroupAddon>
 									</InputGroup>
@@ -189,9 +196,11 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 							</Field>
 							{waitlistEntry.referralCount > 0 && (
 								<p className="mt-2 text-xs text-green-600">
-									{waitlistEntry.referralCount}{' '}
-									{waitlistEntry.referralCount === 1 ? 'person' : 'people'}{' '}
-									joined using your link! Thanks for referring.
+									<Trans>
+										{waitlistEntry.referralCount}{' '}
+										{waitlistEntry.referralCount === 1 ? 'person' : 'people'}{' '}
+										joined using your link! Thanks for referring.
+									</Trans>
 								</p>
 							)}
 						</div>
@@ -204,14 +213,16 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 						</div>
 						<div className="flex-1">
 							<div className="my-2 flex items-baseline justify-between gap-2">
-								<p className="text-sm font-medium">Join our Discord</p>
+								<p className="text-sm font-medium">
+									<Trans>Join our Discord</Trans>
+								</p>
 								<span className="text-xs font-semibold text-green-600">
-									+2 points
+									<Trans>+2 points</Trans>
 								</span>
 							</div>
 							{waitlistEntry.hasJoinedDiscord ? (
 								<p className="text-xs font-medium text-green-600">
-									✓ Discord points claimed
+									<Trans>✓ Discord points claimed</Trans>
 								</p>
 							) : (
 								<div className="flex flex-col gap-2">
@@ -222,7 +233,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 											rel="noopener noreferrer"
 											className="rounded-md bg-[#5865F2] px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#4752C4]"
 										>
-											Join Discord server
+											<Trans>Join Discord server</Trans>
 										</a>
 									)}
 									{hasDiscordOAuth ? (
@@ -231,17 +242,21 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 												href="/auth/discord/verify"
 												className="rounded-md border border-[#5865F2] px-4 py-2 text-center text-sm font-medium text-[#5865F2] transition-colors hover:bg-[#5865F2]/10"
 											>
-												Verify Discord membership
+												<Trans>Verify Discord membership</Trans>
 											</a>
 											<p className="text-muted-foreground text-xs">
-												Click "Verify Discord membership" after joining to claim
-												your points automatically.
+												<Trans>
+													Click "Verify Discord membership" after joining to
+													claim your points automatically.
+												</Trans>
 											</p>
 										</>
 									) : (
 										<p className="text-muted-foreground text-xs">
-											Note: Discord verification is currently manual. Contact
-											support after joining to claim your points.
+											<Trans>
+												Note: Discord verification is currently manual. Contact
+												support after joining to claim your points.
+											</Trans>
 										</p>
 									)}
 								</div>
@@ -253,9 +268,11 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 			{/* Email Notification Info */}
 			<CardFooter>
 				<p className="text-muted-foreground text-sm">
-					We'll send you an email at{' '}
-					<span className="font-semibold">{user.email}</span> when we're ready
-					to welcome you.
+					<Trans>
+						We'll send you an email at{' '}
+						<span className="font-semibold">{user.email}</span> when we're ready
+						to welcome you.
+					</Trans>
 				</p>
 			</CardFooter>
 		</Card>

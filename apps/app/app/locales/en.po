@@ -18,6 +18,12 @@ msgstr ""
 msgid "{0}"
 msgstr ""
 
+#. placeholder {0}: waitlistEntry.referralCount
+#. placeholder {1}: waitlistEntry.referralCount === 1 ? 'person' : 'people'
+#: app/routes/_auth+/waitlist.tsx:199
+msgid "{0} {1} joined using your link! Thanks for referring."
+msgstr ""
+
 #. placeholder {0}: progress.completedCount
 #. placeholder {1}: progress.totalSteps
 #: app/components/onboarding-checklist.tsx:134
@@ -37,6 +43,18 @@ msgstr ""
 msgid "← Back to SSO login"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:220
+msgid "+2 points"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:172
+msgid "+5 points/referral"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:225
+msgid "✓ Discord points claimed"
+msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:160
 msgid "2FA is enabled"
 msgstr ""
@@ -45,6 +63,8 @@ msgstr ""
 msgid "A user already exists with this email"
 msgstr ""
 
+#: app/routes/_auth+/onboarding_.$provider.tsx:133
+#: app/routes/_auth+/onboarding.tsx:116
 #: app/routes/settings+/profile.index.tsx:224
 msgid "A user already exists with this username"
 msgstr ""
@@ -110,6 +130,15 @@ msgstr ""
 msgid "by {0}"
 msgstr ""
 
+#: app/routes/_auth+/_layout.tsx:19
+msgid "By continuing, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:358
+msgid "By creating an account, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
+msgstr ""
+
+#: app/components/settings/password-form.tsx:193
 #: app/routes/settings+/profile.password_.create.tsx:161
 #: app/routes/settings+/profile.password.tsx:222
 msgid "Cancel"
@@ -134,6 +163,7 @@ msgstr ""
 msgid "Change email from {0}"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:202
 #: app/routes/settings+/profile.index.tsx:173
 #: app/routes/settings+/profile.password.tsx:229
 msgid "Change Password"
@@ -152,25 +182,41 @@ msgstr ""
 msgid "Check your email"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:248
+msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
+msgstr ""
+
 #: app/components/onboarding-checklist.tsx:145
 msgid "complete"
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:218
+#: app/routes/_auth+/onboarding.tsx:365
+msgid "Complete your profile"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:157
 #: app/routes/settings+/profile.password_.create.tsx:143
 #: app/routes/settings+/profile.password.tsx:202
 msgid "Confirm New Password"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:159
+#: app/routes/_auth+/onboarding.tsx:439
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:159
 msgid "Confirm your new password"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:446
+msgid "Confirm your password"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:35
@@ -189,11 +235,25 @@ msgstr ""
 msgid "Continue with your password"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:191
+msgid "Copied!"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:191
+msgid "Copy"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:424
+msgid "Create a password"
+msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:175
 msgid "Create a Password"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:354
+#: app/routes/_auth+/onboarding_.$provider.tsx:351
+#: app/routes/_auth+/onboarding.tsx:514
 msgid "Create account"
 msgstr ""
 
@@ -218,10 +278,12 @@ msgstr ""
 msgid "Create Note"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:204
 #: app/routes/settings+/profile.password_.create.tsx:168
 msgid "Create Password"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:87
 #: app/routes/settings+/profile.password.tsx:166
 msgid "Current Password"
 msgstr ""
@@ -309,6 +371,11 @@ msgstr ""
 msgid "Enter your email or username"
 msgstr ""
 
+#: app/routes/_auth+/onboarding_.$provider.tsx:279
+#: app/routes/_auth+/onboarding.tsx:406
+msgid "Enter your full name"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:137
 msgid "Enter your new password"
 msgstr ""
@@ -319,6 +386,11 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:788
 msgid "Enter your password"
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:257
+#: app/routes/_auth+/onboarding.tsx:390
+msgid "Enter your username"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:216
@@ -343,6 +415,11 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:781
 msgid "Forgot your password?"
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:274
+#: app/routes/_auth+/onboarding.tsx:401
+msgid "Full Name"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:239
@@ -380,8 +457,28 @@ msgstr ""
 msgid "Here are your current connections:"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:139
+msgid "Here's how to do it:"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
+msgstr ""
+
+#. placeholder {0}: loaderData.email
+#: app/routes/_auth+/onboarding_.$provider.tsx:221
+msgid "Hi {0}, just a few more details to get started."
+msgstr ""
+
+#. placeholder {0}: loaderData.email
+#. placeholder {1}: inviteToken ? ' to join the organization' : ''
+#: app/routes/_auth+/onboarding.tsx:371
+msgid "Hi {0}, please complete your profile{1}."
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:308
+#: app/routes/_auth+/onboarding.tsx:475
+msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:154
@@ -425,8 +522,16 @@ msgstr ""
 msgid "Invited by {0}"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:236
+msgid "Join Discord server"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:217
+msgid "Join our Discord"
 msgstr ""
 
 #: app/routes/_app+/organizations.tsx:199
@@ -519,6 +624,7 @@ msgstr ""
 msgid "New Note"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:115
 #: app/routes/_auth+/reset-password.tsx:132
 #: app/routes/settings+/profile.password_.create.tsx:125
 #: app/routes/settings+/profile.password.tsx:184
@@ -572,6 +678,10 @@ msgstr ""
 msgid "note"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:256
+msgid "Note: Discord verification is currently manual. Contact support after joining to claim your points."
+msgstr ""
+
 #: app/components/leadership-card.tsx:105
 msgid "notes"
 msgstr ""
@@ -598,6 +708,10 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:154
+msgid "of {totalUsers} people"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
 msgstr ""
@@ -621,7 +735,9 @@ msgstr ""
 msgid "Passkeys"
 msgstr ""
 
+#: app/components/settings/password-form.tsx:117
 #: app/routes/_auth+/login.tsx:776
+#: app/routes/_auth+/onboarding.tsx:419
 #: app/routes/settings+/profile.password_.create.tsx:36
 #: app/routes/settings+/profile.password.tsx:39
 msgid "Password"
@@ -631,6 +747,7 @@ msgstr ""
 msgid "Password Changed"
 msgstr ""
 
+#: app/routes/_auth+/onboarding.tsx:125
 #: app/routes/_auth+/reset-password.tsx:73
 #: app/routes/settings+/profile.password_.create.tsx:72
 #: app/routes/settings+/profile.password.tsx:99
@@ -656,6 +773,7 @@ msgstr ""
 
 #: app/components/app-sidebar.tsx:115
 #: app/components/user-dropdown.tsx:51
+#: app/routes/_auth+/onboarding_.$provider.tsx:233
 msgid "Profile"
 msgstr ""
 
@@ -682,6 +800,8 @@ msgid "Registered {0} ago"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:807
+#: app/routes/_auth+/onboarding_.$provider.tsx:334
+#: app/routes/_auth+/onboarding.tsx:500
 msgid "Remember me"
 msgstr ""
 
@@ -746,6 +866,10 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:169
+msgid "Share with others"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:285
 msgid "Sign in"
 msgstr ""
@@ -787,6 +911,29 @@ msgstr ""
 msgid "Team members who have created the most notes"
 msgstr ""
 
+#: app/routes/_auth+/onboarding_.$provider.tsx:176
+#: app/routes/_auth+/onboarding.tsx:331
+msgid "Thanks for signing up!"
+msgstr ""
+
+#. placeholder {0}: invitation.organization.name
+#: app/routes/_auth+/onboarding.tsx:179
+msgid "Thanks for signing up! {inviterName} has invited you to join {0}. Review the invitation below."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:321
+msgid "Thanks for signing up! We'll notify you when we're ready."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:209
+msgid "Thanks for signing up! You have pending organization invitations."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:281
+msgid "Thanks for signing up! You've been automatically added to {orgNames} based on your email domain."
+msgstr ""
+
+#: app/components/settings/password-form.tsx:38
 #: app/routes/settings+/profile.password.tsx:56
 msgid "The passwords must match"
 msgstr ""
@@ -830,6 +977,8 @@ msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:105
 #: app/routes/_auth+/login.tsx:756
+#: app/routes/_auth+/onboarding_.$provider.tsx:251
+#: app/routes/_auth+/onboarding.tsx:385
 #: app/routes/settings+/profile.index.tsx:281
 msgid "Username"
 msgstr ""
@@ -851,21 +1000,48 @@ msgstr ""
 msgid "Verify"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:245
+msgid "Verify Discord membership"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:396
 msgid "Verifying your passkey"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:136
+msgid "Want to go to the top of the waitlist?"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:553
 msgid "We found your organization:"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:129
+msgid "We'll notify you by email as soon as the waitlist opens."
+msgstr ""
+
+#. placeholder {0}: user.email
+#: app/routes/_auth+/waitlist.tsx:271
+msgid "We'll send you an email at <0>{0}</0> when we're ready to welcome you."
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:59
 msgid "We've sent you a code to verify your email address."
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:176
+#: app/routes/_auth+/onboarding.tsx:320
+#: app/routes/_auth+/onboarding.tsx:331
+msgid "Welcome"
 msgstr ""
 
 #. placeholder {0}: user?.name || 'User'
 #: app/routes/_app+/$orgSlug_+/index.tsx:290
 msgid "Welcome {0}!"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:367
+msgid "Welcome aboard!"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:260
@@ -874,6 +1050,16 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/index.tsx:291
 msgid "Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:178
+#: app/routes/_auth+/onboarding.tsx:208
+#: app/routes/_auth+/onboarding.tsx:280
+msgid "Welcome!"
+msgstr ""
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:237
+msgid "You can change your photo later"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:273
@@ -901,12 +1087,21 @@ msgstr ""
 msgid "You haven't joined any organizations yet."
 msgstr ""
 
+#: app/routes/_auth+/onboarding_.$provider.tsx:62
+#: app/routes/_auth+/onboarding.tsx:59
+msgid "You must agree to the terms of service and privacy policy"
+msgstr ""
+
 #: app/routes/settings+/profile.change-email.tsx:141
 msgid "You will receive an email at the new email address to confirm."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:126
+msgid "You're on the Waitlist!"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:279
@@ -919,4 +1114,16 @@ msgstr ""
 
 #: app/routes/settings+/profile.password.tsx:136
 msgid "Your password has been changed."
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:144
+msgid "Your points"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:150
+msgid "Your rank"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:182
+msgid "Your referral link"
 msgstr ""
