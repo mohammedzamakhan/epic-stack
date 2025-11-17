@@ -1,7 +1,7 @@
 import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { SignupEmail } from '@repo/email'
@@ -107,7 +107,7 @@ export async function action(args: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['email'],
 					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this email', // TODO: translate via t macro
+					message: t`A user already exists with this email`,
 				})
 				return
 			}
@@ -249,7 +249,7 @@ export default function SignupRoute({
 									{...getInputProps(fields.email, { type: 'email' })}
 									autoFocus
 									autoComplete="email"
-									placeholder="m@example.com" // TODO: translate placeholder
+									placeholder={t`m@example.com`}
 									required
 									aria-invalid={fields.email.errors?.length ? true : undefined}
 								/>

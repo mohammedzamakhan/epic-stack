@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
 import { data, redirect, Form } from 'react-router'
@@ -70,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['password'],
 					code: 'custom',
-					message: 'Password is too common', // TODO: translate via t macro
+					message: t`Password is too common`,
 				})
 			}
 		}),
@@ -134,7 +134,7 @@ export default function ResetPasswordPage({
 								{...getInputProps(fields.password, { type: 'password' })}
 								autoComplete="new-password"
 								autoFocus
-								placeholder="Enter your new password" // TODO: translate placeholder
+								placeholder={t`Enter your new password`}
 								required
 								aria-invalid={fields.password.errors?.length ? true : undefined}
 							/>
@@ -156,7 +156,7 @@ export default function ResetPasswordPage({
 									type: 'password',
 								})}
 								autoComplete="new-password"
-								placeholder="Confirm your new password" // TODO: translate placeholder
+								placeholder={t`Confirm your new password`}
 								required
 								aria-invalid={
 									fields.confirmPassword.errors?.length ? true : undefined

@@ -1,7 +1,7 @@
 import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { ForgotPasswordEmail } from '@repo/email'
@@ -128,7 +128,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['usernameOrEmail'],
 					code: z.ZodIssueCode.custom,
-					message: 'No user exists with this username or email', // TODO: translate via t macro
+					message: t`No user exists with this username or email`,
 				})
 				return
 			}
@@ -213,7 +213,7 @@ export default function ForgotPasswordRoute() {
 							<Input
 								{...getInputProps(fields.usernameOrEmail, { type: 'text' })}
 								autoFocus
-								placeholder="Enter your username or email" // TODO: translate placeholder
+								placeholder={t`Enter your username or email`}
 								required
 								aria-invalid={
 									fields.usernameOrEmail.errors?.length ? true : undefined

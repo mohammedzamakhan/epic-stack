@@ -17,6 +17,10 @@ msgstr ""
 msgid "← Back to SSO login"
 msgstr ""
 
+#: app/routes/_auth+/signup.tsx:110
+msgid "A user already exists with this email"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:276
 msgid "Account Suspended"
 msgstr ""
@@ -29,12 +33,24 @@ msgstr ""
 msgid "Back to login"
 msgstr ""
 
+#: app/routes/_auth+/verify.tsx:70
+msgid "Check your 2FA app"
+msgstr ""
+
+#: app/routes/_auth+/verify.tsx:58
+msgid "Check your email"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
+msgstr ""
+
+#: app/routes/_auth+/reset-password.tsx:159
+msgid "Confirm your new password"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:657
@@ -71,8 +87,29 @@ msgstr ""
 msgid "Email or Username"
 msgstr ""
 
+#: app/routes/_auth+/login.tsx:636
+#: app/routes/_auth+/login.tsx:750
+msgid "Enter your email or username"
+msgstr ""
+
+#: app/routes/_auth+/reset-password.tsx:137
+msgid "Enter your new password"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Enter your new password below."
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:776
+msgid "Enter your password"
+msgstr ""
+
+#: app/routes/_auth+/forgot-password.tsx:216
+msgid "Enter your username or email"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:426
+msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:196
@@ -83,8 +120,20 @@ msgstr ""
 msgid "Forgot your password?"
 msgstr ""
 
+#: app/routes/_auth+/login.tsx:388
+msgid "Generating Authentication Options"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:210
+msgid "Invalid username or password"
+msgstr ""
+
+#: app/routes/_auth+/verify.tsx:93
+msgid "Invalid Verification Type"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:211
@@ -100,8 +149,20 @@ msgstr ""
 msgid "Login Error"
 msgstr ""
 
+#: app/routes/_auth+/login.tsx:382
+msgid "Login with a passkey"
+msgstr ""
+
+#: app/routes/_auth+/signup.tsx:252
+msgid "m@example.com"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
+msgstr ""
+
+#: app/routes/_auth+/forgot-password.tsx:131
+msgid "No user exists with this username or email"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:198
@@ -120,6 +181,22 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
+#: app/routes/_auth+/reset-password.tsx:73
+msgid "Password is too common"
+msgstr ""
+
+#: app/routes/_auth+/verify.tsx:94
+msgid "Please check your verification link."
+msgstr ""
+
+#: app/routes/_auth+/verify.tsx:71
+msgid "Please enter your 2FA code to verify your identity."
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:74
+msgid "Please enter your email or username"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
 msgstr ""
@@ -130,6 +207,10 @@ msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:242
 msgid "Remember your password?"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:394
+msgid "Requesting your authorization"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:180
@@ -185,6 +266,10 @@ msgstr ""
 msgid "Username or Email"
 msgstr ""
 
+#: app/routes/_auth+/login.tsx:67
+msgid "Username or email is required"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:111
 msgid "Verification Code"
 msgstr ""
@@ -193,12 +278,24 @@ msgstr ""
 msgid "Verify"
 msgstr ""
 
+#: app/routes/_auth+/login.tsx:396
+msgid "Verifying your passkey"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:553
 msgid "We found your organization:"
 msgstr ""
 
+#: app/routes/_auth+/verify.tsx:59
+msgid "We've sent you a code to verify your email address."
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:422
+msgid "You're logged in! Navigating..."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:279

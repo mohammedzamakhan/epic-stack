@@ -17,6 +17,10 @@ msgstr ""
 msgid "← Back to SSO login"
 msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
 
+#: app/routes/_auth+/signup.tsx:110
+msgid "A user already exists with this email"
+msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
+
 #: app/routes/_auth+/login.tsx:276
 msgid "Account Suspended"
 msgstr "الحساب معلق"
@@ -29,6 +33,14 @@ msgstr "هل لديك حساب بالفعل؟"
 msgid "Back to login"
 msgstr "العودة لتسجيل الدخول"
 
+#: app/routes/_auth+/verify.tsx:70
+msgid "Check your 2FA app"
+msgstr "تحقق من تطبيق المصادقة الثنائية"
+
+#: app/routes/_auth+/verify.tsx:58
+msgid "Check your email"
+msgstr "تحقق من بريدك الإلكتروني"
+
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
@@ -36,6 +48,10 @@ msgstr "أكمل التسجيل للانضمام إلى المنظمة"
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr "تأكيد كلمة المرور"
+
+#: app/routes/_auth+/reset-password.tsx:159
+msgid "Confirm your new password"
+msgstr "أكد كلمة المرور الجديدة"
 
 #: app/routes/_auth+/login.tsx:657
 msgid "Continue"
@@ -71,9 +87,30 @@ msgstr "البريد الإلكتروني"
 msgid "Email or Username"
 msgstr "البريد الإلكتروني / اسم المستخدم"
 
+#: app/routes/_auth+/login.tsx:636
+#: app/routes/_auth+/login.tsx:750
+msgid "Enter your email or username"
+msgstr "أدخل بريدك الإلكتروني أو اسم المستخدم"
+
+#: app/routes/_auth+/reset-password.tsx:137
+msgid "Enter your new password"
+msgstr "أدخل كلمة المرور الجديدة"
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Enter your new password below."
 msgstr "أدخل كلمة المرور الجديدة أدناه."
+
+#: app/routes/_auth+/login.tsx:776
+msgid "Enter your password"
+msgstr "أدخل كلمة المرور"
+
+#: app/routes/_auth+/forgot-password.tsx:216
+msgid "Enter your username or email"
+msgstr "أدخل اسم المستخدم أو البريد الإلكتروني"
+
+#: app/routes/_auth+/login.tsx:426
+msgid "Failed to authenticate with passkey: {errorMessage}"
+msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMessage}"
 
 #: app/routes/_auth+/forgot-password.tsx:196
 msgid "Forgot Password"
@@ -83,9 +120,21 @@ msgstr "نسيت كلمة المرور"
 msgid "Forgot your password?"
 msgstr "هل نسيت كلمة المرور؟"
 
+#: app/routes/_auth+/login.tsx:388
+msgid "Generating Authentication Options"
+msgstr "جاري إنشاء خيارات المصادقة"
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
 msgstr "مرحباً"
+
+#: app/routes/_auth+/login.tsx:210
+msgid "Invalid username or password"
+msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
+
+#: app/routes/_auth+/verify.tsx:93
+msgid "Invalid Verification Type"
+msgstr "نوع التحقق غير صالح"
 
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
@@ -100,9 +149,21 @@ msgstr "آخر استخدام"
 msgid "Login Error"
 msgstr "خطأ في تسجيل الدخول"
 
+#: app/routes/_auth+/login.tsx:382
+msgid "Login with a passkey"
+msgstr "تسجيل الدخول بمفتاح المرور"
+
+#: app/routes/_auth+/signup.tsx:252
+msgid "m@example.com"
+msgstr "م@مثال.com"
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
+
+#: app/routes/_auth+/forgot-password.tsx:131
+msgid "No user exists with this username or email"
+msgstr "لا يوجد مستخدم بهذا الاسم أو البريد الإلكتروني"
 
 #: app/routes/_auth+/forgot-password.tsx:198
 msgid "No worries, we'll send you reset instructions."
@@ -120,6 +181,22 @@ msgstr "أو تابع باستخدام البريد الإلكتروني أو ا
 msgid "Password"
 msgstr "كلمة المرور"
 
+#: app/routes/_auth+/reset-password.tsx:73
+msgid "Password is too common"
+msgstr "كلمة المرور شائعة جداً"
+
+#: app/routes/_auth+/verify.tsx:94
+msgid "Please check your verification link."
+msgstr "يرجى التحقق من رابط التحقق."
+
+#: app/routes/_auth+/verify.tsx:71
+msgid "Please enter your 2FA code to verify your identity."
+msgstr "يرجى إدخال رمز المصادقة الثنائية للتحقق من هويتك."
+
+#: app/routes/_auth+/login.tsx:74
+msgid "Please enter your email or username"
+msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
+
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
 msgstr "موصى به لـ"
@@ -131,6 +208,10 @@ msgstr "تذكرني"
 #: app/routes/_auth+/forgot-password.tsx:242
 msgid "Remember your password?"
 msgstr "هل تتذكر كلمة المرور الخاصة بك؟"
+
+#: app/routes/_auth+/login.tsx:394
+msgid "Requesting your authorization"
+msgstr "جاري طلب التفويض"
 
 #: app/routes/_auth+/reset-password.tsx:180
 msgid "Reset password"
@@ -185,6 +266,10 @@ msgstr "اسم المستخدم"
 msgid "Username or Email"
 msgstr "اسم المستخدم أو البريد الإلكتروني"
 
+#: app/routes/_auth+/login.tsx:67
+msgid "Username or email is required"
+msgstr "اسم المستخدم أو البريد الإلكتروني مطلوب"
+
 #: app/routes/_auth+/verify.tsx:111
 msgid "Verification Code"
 msgstr "رمز التحقق"
@@ -193,13 +278,25 @@ msgstr "رمز التحقق"
 msgid "Verify"
 msgstr "تحقق"
 
+#: app/routes/_auth+/login.tsx:396
+msgid "Verifying your passkey"
+msgstr "جاري التحقق من مفتاح المرور"
+
 #: app/routes/_auth+/login.tsx:553
 msgid "We found your organization:"
 msgstr "وجدنا منظمتك:"
 
+#: app/routes/_auth+/verify.tsx:59
+msgid "We've sent you a code to verify your email address."
+msgstr "لقد أرسلنا لك رمزاً للتحقق من عنوان بريدك الإلكتروني."
+
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr "مرحباً بعودتك"
+
+#: app/routes/_auth+/login.tsx:422
+msgid "You're logged in! Navigating..."
+msgstr "تم تسجيل الدخول! جاري التوجيه..."
 
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."

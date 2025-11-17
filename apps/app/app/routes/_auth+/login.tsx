@@ -1,7 +1,7 @@
 import { detectBot, slidingWindow } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
 import { startAuthentication } from '@simplewebauthn/browser'
@@ -64,14 +64,14 @@ export const handle: SEOHandle = {
 }
 
 const LoginFormSchema = z.object({
-	username: z.string().min(1, 'Username or email is required'), // TODO: translate via t macro
+	username: z.string().min(1, t`Username or email is required`),
 	password: PasswordSchema,
 	redirectTo: z.string().optional(),
 	remember: z.boolean().optional(),
 })
 
 const EmailCheckSchema = z.object({
-	username: z.string().min(1, 'Please enter your email or username'), // TODO: translate via t macro
+	username: z.string().min(1, t`Please enter your email or username`),
 	redirectTo: z.string().optional(),
 })
 
@@ -207,7 +207,7 @@ export async function action({ request }: Route.ActionArgs) {
 				if (!session) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
-						message: 'Invalid username or password', // TODO: translate via t macro
+						message: t`Invalid username or password`,
 					})
 					return z.NEVER
 				}
@@ -379,21 +379,21 @@ function PasskeyLogin({
 	const [isPending] = useTransition()
 	const [error, setError] = useState<string | null>(null)
 	const [passkeyMessage, setPasskeyMessage] = useOptimistic<string | null>(
-		'Login with a passkey', // TODO: translate via t macro for dynamic messages
+		t`Login with a passkey`,
 	)
 	const navigate = useNavigate()
 
 	async function handlePasskeyLogin() {
 		try {
-			setPasskeyMessage('Generating Authentication Options') // TODO: translate
+			setPasskeyMessage(t`Generating Authentication Options`)
 			// Get authentication options from the server
 			const optionsResponse = await fetch('/webauthn/authentication')
 			const json = await optionsResponse.json()
 			const { options } = AuthenticationOptionsSchema.parse(json)
 
-			setPasskeyMessage('Requesting your authorization') // TODO: translate
+			setPasskeyMessage(t`Requesting your authorization`)
 			const authResponse = await startAuthentication({ optionsJSON: options })
-			setPasskeyMessage('Verifying your passkey') // TODO: translate
+			setPasskeyMessage(t`Verifying your passkey`)
 
 			// Verify the authentication with the server
 			const verificationResponse = await fetch('/webauthn/authentication', {
@@ -419,11 +419,11 @@ function PasskeyLogin({
 			// Save the successful login method
 			saveLastLoginMethod('passkey')
 
-			setPasskeyMessage("You're logged in! Navigating...") // TODO: translate
+			setPasskeyMessage(t`You're logged in! Navigating...`)
 			await navigate(location ?? '/')
 		} catch (e) {
 			const errorMessage = getErrorMessage(e)
-			setError(`Failed to authenticate with passkey: ${errorMessage}`) // TODO: translate
+			setError(t`Failed to authenticate with passkey: ${errorMessage}`)
 		}
 	}
 
@@ -633,7 +633,7 @@ function UsernameInputStep({
 						{...getInputProps(usernameFields.username, { type: 'text' })}
 						autoFocus
 						autoComplete="username"
-						placeholder="Enter your email or username" // TODO: translate placeholder
+						placeholder={t`Enter your email or username`}
 						aria-invalid={
 							usernameFields.username.errors?.length ? true : undefined
 						}
@@ -747,7 +747,7 @@ function PasswordLoginStep({
 						<Input
 							{...getInputProps(fields.username, { type: 'text' })}
 							autoComplete="username"
-							placeholder={username ? username : 'Enter your email or username'} // TODO: translate placeholder
+							placeholder={username ? username : t`Enter your email or username`}
 							readOnly={!!username}
 							className={username ? 'bg-muted' : ''}
 							aria-invalid={fields.username.errors?.length ? true : undefined}
@@ -773,7 +773,7 @@ function PasswordLoginStep({
 							{...getInputProps(fields.password, { type: 'password' })}
 							autoFocus={!!username}
 							autoComplete="current-password"
-							placeholder="Enter your password" // TODO: translate placeholder
+							placeholder={t`Enter your password`}
 							aria-invalid={fields.password.errors?.length ? true : undefined}
 						/>
 						<FieldError
