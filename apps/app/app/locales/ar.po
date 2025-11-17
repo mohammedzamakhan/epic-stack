@@ -171,6 +171,10 @@ msgstr "لوحة التحكم"
 msgid "Decline"
 msgstr "رفض"
 
+#: app/components/feature-updates.tsx:206
+msgid "Dismiss"
+msgstr "تجاهل"
+
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
@@ -223,6 +227,10 @@ msgstr "أدخل اسم المستخدم أو البريد الإلكتروني"
 #: app/routes/_auth+/login.tsx:426
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMessage}"
+
+#: app/components/feature-updates.tsx:178
+msgid "Feature Preview"
+msgstr "معاينة الميزة"
 
 #: app/routes/_auth+/forgot-password.tsx:196
 msgid "Forgot Password"
@@ -312,6 +320,10 @@ msgstr "كانبان"
 #: app/routes/_auth+/login.tsx:478
 msgid "Last used"
 msgstr "آخر استخدام"
+
+#: app/components/feature-updates.tsx:197
+msgid "Learn more"
+msgstr "اعرف المزيد"
 
 #: app/components/command-menu.tsx:105
 msgid "Loading notes..."

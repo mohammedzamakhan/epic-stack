@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Play } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { Trans } from '@lingui/macro'
 import { cn } from '#app/utils/misc.tsx'
 
 interface FeatureUpdate {
@@ -174,7 +175,7 @@ export function FeatureUpdates({
 										)}
 										<div className="bg-sidebar/20 flex h-full w-full items-center justify-center">
 											<span className="text-sidebar-foreground/50 text-xs font-medium">
-												Feature Preview
+												<Trans>Feature Preview</Trans>
 											</span>
 										</div>
 									</motion.div>
@@ -193,7 +194,7 @@ export function FeatureUpdates({
 											whileHover={{ scale: 1.05 }}
 											whileTap={{ scale: 0.95 }}
 										>
-											Learn more
+											<Trans>Learn more</Trans>
 										</motion.button>
 									)}
 									<motion.button
@@ -202,7 +203,7 @@ export function FeatureUpdates({
 										whileHover={{ scale: 1.05 }}
 										whileTap={{ scale: 0.95 }}
 									>
-										Dismiss
+										<Trans>Dismiss</Trans>
 									</motion.button>
 								</motion.div>
 							</div>
