@@ -55,6 +55,10 @@ msgstr "منذ {0} ساعة"
 msgid "{0}m ago"
 msgstr "منذ {0} دقيقة"
 
+#: app/components/settings/cards/notification-preferences-card.tsx:37
+msgid "{channel}"
+msgstr "{channel}"
+
 #: app/components/ui/notification-bell.tsx:55
 msgid "{diffInSeconds}s ago"
 msgstr "منذ {diffInSeconds} ثانية"
@@ -62,6 +66,10 @@ msgstr "منذ {diffInSeconds} ثانية"
 #: app/components/impersonation-banner.tsx:37
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
 msgstr "{duration, plural, one {منذ # دقيقة} other {منذ # دقيقة}}"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:383
+msgid "{enabledCount} of {totalCount} notifications enabled"
+msgstr "{enabledCount} من {totalCount} إشعار مفعّل"
 
 #: app/components/settings/account-management.tsx:66
 msgid "{otherSessionsCount, plural, one {Sign out of other session} other {Sign out of other sessions}}"
@@ -74,6 +82,10 @@ msgstr "{otherSessionsCount, plural, one {لديك # جلسة نشطة أخرى}
 #: app/components/notes-chart.tsx:119
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr "{totalNotes} ملاحظة إجمالاً • {avgNotesPerDay} متوسط يومي"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:47
+msgid "{workflowName}"
+msgstr "{workflowName}"
 
 #: app/routes/_auth+/login.tsx:740
 msgid "← Back to SSO login"
@@ -308,6 +320,7 @@ msgstr "بإنشاء حساب، فإنك توافق على <0>شروط الخد�
 msgid "By deleting your organization you and your team will lose access and all data will be lost. This is a permanent action and cannot be undone."
 msgstr "بحذف مؤسستك، ستفقد أنت وفريقك الوصول وسيتم فقدان جميع البيانات. هذا إجراء دائم ولا يمكن التراجع عنه."
 
+#: app/components/core/feedback-modal.tsx:109
 #: app/components/note/comment-input.tsx:164
 #: app/components/settings/cards/organization/danger-zone-card.tsx:126
 #: app/components/settings/password-form.tsx:193
@@ -355,6 +368,14 @@ msgstr "تغيير صورة الملف الشخصي"
 #: app/components/settings/cards/security-card.tsx:82
 msgid "Change your password to something new"
 msgstr "غيّر كلمة المرور الخاصة بك إلى شيء جديد"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:359
+msgid "Channel Overview"
+msgstr "نظرة عامة على القنوات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:35
+msgid "Chat"
+msgstr "المحادثة"
 
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
@@ -571,6 +592,10 @@ msgstr "تم الإنشاء {0}"
 msgid "Creating..."
 msgstr "جاري الإنشاء..."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:317
+msgid "Critical"
+msgstr "حرجة"
+
 #: app/components/settings/password-form.tsx:87
 #: app/routes/settings+/profile.password.tsx:166
 msgid "Current Password"
@@ -729,6 +754,7 @@ msgid "Edit Note"
 msgstr "تعديل ملاحظة"
 
 #: app/components/organization-invitations.tsx:386
+#: app/components/settings/cards/notification-preferences-card.tsx:31
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
@@ -826,6 +852,11 @@ msgstr "فشل إنشاء مفتاح المرور. يرجى المحاولة م�
 msgid "Failed to load AI Assistant"
 msgstr "فشل تحميل مساعد الذكاء الاصطناعي"
 
+#. placeholder {0}: error.message
+#: app/components/settings/cards/notification-preferences-card.tsx:168
+msgid "Failed to load notification preferences: {0}"
+msgstr "فشل تحميل تفضيلات الإشعارات: {0}"
+
 #: app/components/data-table.tsx:379
 msgid "Favorite"
 msgstr "المفضلة"
@@ -884,8 +915,13 @@ msgstr "ابدأ"
 
 #: app/components/app-sidebar.tsx:147
 #: app/components/app-sidebar.tsx:291
+#: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr "إرسال ملاحظات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:264
+msgid "Global Preferences"
+msgstr "التفضيلات العامة"
 
 #: app/components/data-table.tsx:187
 #: app/components/data-table.tsx:822
@@ -943,6 +979,10 @@ msgstr "ملاحظة أمنية مهمة"
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:447
 msgid "Important:"
 msgstr "مهم:"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:33
+msgid "In-App"
+msgstr "داخل التطبيق"
 
 #: app/components/settings/cards/organization/billing-card.tsx:427
 msgid "Includes {includesSeats} user seats"
@@ -1055,6 +1095,10 @@ msgstr "جاري تحميل مساعد الذكاء الاصطناعي..."
 msgid "Loading notes..."
 msgstr "جاري تحميل الملاحظات..."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:141
+msgid "Loading preferences..."
+msgstr "جاري تحميل التفضيلات..."
+
 #: app/components/nav-user.tsx:222
 msgid "Log out"
 msgstr "تسجيل الخروج"
@@ -1107,6 +1151,16 @@ msgstr "إدارة حساباتك المتصلة هنا."
 #: app/routes/_app+/notifications.tsx:27
 msgid "Manage your notification preferences for different channels and workflows."
 msgstr "إدارة تفضيلات الإشعارات للقنوات وسير العمل المختلفة."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:130
+#: app/components/settings/cards/notification-preferences-card.tsx:158
+#: app/components/settings/cards/notification-preferences-card.tsx:196
+msgid "Manage your notification settings for different channels and workflows."
+msgstr "إدارة إعدادات الإشعارات للقنوات ومسارات العمل المختلفة."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:245
+msgid "Manage your notification settings for different channels and workflows. Critical notifications cannot be disabled."
+msgstr "إدارة إعدادات الإشعارات للقنوات ومسارات العمل المختلفة. لا يمكن تعطيل الإشعارات الحرجة."
 
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:18
 msgid "Manage your organization settings and preferences."
@@ -1188,6 +1242,14 @@ msgstr "الاسم"
 msgid "Need an integration but don't see it here?"
 msgstr "هل تحتاج إلى تكامل ولكن لا تراه هنا؟"
 
+#: app/components/core/feedback-modal.tsx:31
+msgid "Negative feedback"
+msgstr "ملاحظات سلبية"
+
+#: app/components/core/feedback-modal.tsx:32
+msgid "Neutral feedback"
+msgstr "ملاحظات محايدة"
+
 #: app/routes/settings+/profile.change-email.tsx:156
 msgid "New Email"
 msgstr "البريد الإلكتروني الجديد"
@@ -1245,6 +1307,10 @@ msgstr "لم يتم العثور على ملاحظات."
 msgid "No notes match your search for \"{0}\". Try a different search term or create a new note."
 msgstr "لا توجد ملاحظات تطابق بحثك عن \"{0}\". جرب مصطلح بحث مختلف أو أنشئ ملاحظة جديدة."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:212
+msgid "No notification preferences are configured yet."
+msgstr "لم يتم تكوين تفضيلات الإشعارات بعد."
+
 #: app/routes/_app+/organizations.tsx:372
 msgid "No organization found"
 msgstr "لم يتم العثور على منظمة"
@@ -1258,6 +1324,10 @@ msgstr "لا توجد منظمة بالمعرف \"{0}\""
 #: app/routes/settings+/profile.passkeys.tsx:203
 msgid "No passkeys registered yet"
 msgstr "لا توجد مفاتيح مرور مسجلة بعد"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:209
+msgid "No preferences found"
+msgstr "لم يتم العثور على تفضيلات"
 
 #: app/components/data-table.tsx:629
 msgid "No results."
@@ -1301,6 +1371,18 @@ msgstr "تساعدك الملاحظات على تسجيل الأفكار ومح�
 msgid "Nothing here yet!"
 msgstr "لا شيء هنا بعد!"
 
+#: app/components/settings/cards/notification-preferences-card.tsx:127
+#: app/components/settings/cards/notification-preferences-card.tsx:155
+#: app/components/settings/cards/notification-preferences-card.tsx:193
+#: app/components/settings/cards/notification-preferences-card.tsx:242
+#: app/components/settings/cards/notification-preferences-card.tsx:429
+msgid "Notification Preferences"
+msgstr "تفضيلات الإشعارات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:432
+msgid "Notification preferences are not available at this time."
+msgstr "تفضيلات الإشعارات غير متاحة في هذا الوقت."
+
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
 msgstr "إعدادات الإشعارات"
@@ -1308,6 +1390,14 @@ msgstr "إعدادات الإشعارات"
 #: app/components/app-sidebar.tsx:127
 msgid "Notifications"
 msgstr "الإشعارات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:45
+msgid "Notifications when someone comments on your notes"
+msgstr "إشعارات عندما يعلق شخص ما على ملاحظاتك"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:44
+msgid "Notifications when you are mentioned in a comment"
+msgstr "إشعارات عندما يتم ذكرك في تعليق"
 
 #: app/routes/_auth+/waitlist.tsx:154
 msgid "of {totalUsers} people"
@@ -1395,6 +1485,10 @@ msgstr "يرجى التحقق من تكوين Stripe أو المحاولة مر�
 msgid "Please check your verification link."
 msgstr "يرجى التحقق من رابط التحقق."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:442
+msgid "Please ensure you have an active organization to manage notification preferences."
+msgstr "يرجى التأكد من أن لديك منظمة نشطة لإدارة تفضيلات الإشعارات."
+
 #: app/routes/_auth+/verify.tsx:71
 msgid "Please enter your 2FA code to verify your identity."
 msgstr "يرجى إدخال رمز المصادقة الثنائية للتحقق من هويتك."
@@ -1403,6 +1497,10 @@ msgstr "يرجى إدخال رمز المصادقة الثنائية للتحق�
 #: app/routes/_auth+/login.tsx:608
 msgid "Please enter your email or username"
 msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
+
+#: app/components/core/feedback-modal.tsx:33
+msgid "Positive feedback"
+msgstr "ملاحظات إيجابية"
 
 #: app/components/settings/cards/organization/billing-card.tsx:394
 msgid "Price not configured"
@@ -1426,6 +1524,10 @@ msgstr "الملف الشخصي"
 #: app/routes/_app+/profile.tsx:90
 msgid "Profile Settings"
 msgstr "إعدادات الملف الشخصي"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:34
+msgid "Push"
+msgstr "الإشعارات الفورية"
 
 #: app/components/settings/two-factor-form.tsx:115
 msgid "QR code"
@@ -1516,6 +1618,14 @@ msgstr "إعادة تعيين كلمة المرور"
 #: app/routes/_auth+/reset-password.tsx:121
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retry"
+msgstr "إعادة المحاولة"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retrying..."
+msgstr "جاري إعادة المحاولة..."
 
 #: app/components/data-table.tsx:283
 #: app/components/data-table.tsx:887
@@ -1685,6 +1795,10 @@ msgstr "تسجيل دخول موحد، اتفاقية مستوى خدمة مخص
 msgid "Slug"
 msgstr "الرابط الثابت"
 
+#: app/components/settings/cards/notification-preferences-card.tsx:32
+msgid "SMS"
+msgstr "الرسائل النصية"
+
 #: app/components/note/comments-section.tsx:201
 msgid "Start the conversation by adding the first comment."
 msgstr "ابدأ المحادثة بإضافة التعليق الأول."
@@ -1698,6 +1812,7 @@ msgstr "الحالة"
 msgid "Stop Impersonation"
 msgstr "إيقاف انتحال الشخصية"
 
+#: app/components/core/feedback-modal.tsx:112
 #: app/components/data-table.tsx:960
 #: app/routes/_app+/$orgSlug_+/index.tsx:296
 msgid "Submit"
@@ -1736,6 +1851,10 @@ msgstr "أعضاء الفريق الذين أنشأوا أكبر عدد من ا�
 #: app/components/settings/cards/organization/team-size-card.tsx:62
 msgid "Team Size"
 msgstr "حجم الفريق"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:43
+msgid "Testing notifications"
+msgstr "إشعارات الاختبار"
 
 #: app/routes/_auth+/onboarding_.$provider.tsx:175
 #: app/routes/_auth+/onboarding.tsx:330
@@ -1938,6 +2057,10 @@ msgstr "وجدنا منظمتك:"
 msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content. <0>Read our Cookie Policy</0>."
 msgstr "نستخدم ملفات تعريف الارتباط لتحسين تجربتك وتحليل حركة المرور على الموقع وتقديم محتوى مخصص. <0>اقرأ سياسة ملفات تعريف الارتباط</0>."
 
+#: app/components/core/feedback-modal.tsx:72
+msgid "We'd love to hear what went well or how we can improve the product experience."
+msgstr "نود أن نسمع ما سار على ما يرام أو كيف يمكننا تحسين تجربة المنتج."
+
 #: app/routes/_auth+/waitlist.tsx:129
 msgid "We'll notify you by email as soon as the waitlist opens."
 msgstr "سنبلغك بالبريد الإلكتروني بمجرد فتح قائمة الانتظار."
@@ -2078,6 +2201,10 @@ msgstr "تم إنشاء مفتاح API بنجاح. انسخه الآن - لن ت
 #: app/routes/settings+/profile.connections.tsx:120
 msgid "Your connection has been deleted."
 msgstr "تم حذف اتصالك."
+
+#: app/components/core/feedback-modal.tsx:80
+msgid "Your feedback"
+msgstr "ملاحظاتك"
 
 #: app/components/settings/cards/organization/billing-card.tsx:129
 msgid "Your organization's current plan and billing status"

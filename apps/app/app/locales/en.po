@@ -55,12 +55,20 @@ msgstr ""
 msgid "{0}m ago"
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:37
+msgid "{channel}"
+msgstr ""
+
 #: app/components/ui/notification-bell.tsx:55
 msgid "{diffInSeconds}s ago"
 msgstr ""
 
 #: app/components/impersonation-banner.tsx:37
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:383
+msgid "{enabledCount} of {totalCount} notifications enabled"
 msgstr ""
 
 #: app/components/settings/account-management.tsx:66
@@ -73,6 +81,10 @@ msgstr ""
 
 #: app/components/notes-chart.tsx:119
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:47
+msgid "{workflowName}"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:740
@@ -308,6 +320,7 @@ msgstr ""
 msgid "By deleting your organization you and your team will lose access and all data will be lost. This is a permanent action and cannot be undone."
 msgstr ""
 
+#: app/components/core/feedback-modal.tsx:109
 #: app/components/note/comment-input.tsx:164
 #: app/components/settings/cards/organization/danger-zone-card.tsx:126
 #: app/components/settings/password-form.tsx:193
@@ -354,6 +367,14 @@ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:82
 msgid "Change your password to something new"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:359
+msgid "Channel Overview"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:35
+msgid "Chat"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:70
@@ -571,6 +592,10 @@ msgstr ""
 msgid "Creating..."
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:317
+msgid "Critical"
+msgstr ""
+
 #: app/components/settings/password-form.tsx:87
 #: app/routes/settings+/profile.password.tsx:166
 msgid "Current Password"
@@ -729,6 +754,7 @@ msgid "Edit Note"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:386
+#: app/components/settings/cards/notification-preferences-card.tsx:31
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
@@ -826,6 +852,11 @@ msgstr ""
 msgid "Failed to load AI Assistant"
 msgstr ""
 
+#. placeholder {0}: error.message
+#: app/components/settings/cards/notification-preferences-card.tsx:168
+msgid "Failed to load notification preferences: {0}"
+msgstr ""
+
 #: app/components/data-table.tsx:379
 msgid "Favorite"
 msgstr ""
@@ -884,7 +915,12 @@ msgstr ""
 
 #: app/components/app-sidebar.tsx:147
 #: app/components/app-sidebar.tsx:291
+#: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:264
+msgid "Global Preferences"
 msgstr ""
 
 #: app/components/data-table.tsx:187
@@ -942,6 +978,10 @@ msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:447
 msgid "Important:"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:33
+msgid "In-App"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:427
@@ -1055,6 +1095,10 @@ msgstr ""
 msgid "Loading notes..."
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:141
+msgid "Loading preferences..."
+msgstr ""
+
 #: app/components/nav-user.tsx:222
 msgid "Log out"
 msgstr ""
@@ -1106,6 +1150,16 @@ msgstr ""
 
 #: app/routes/_app+/notifications.tsx:27
 msgid "Manage your notification preferences for different channels and workflows."
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:130
+#: app/components/settings/cards/notification-preferences-card.tsx:158
+#: app/components/settings/cards/notification-preferences-card.tsx:196
+msgid "Manage your notification settings for different channels and workflows."
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:245
+msgid "Manage your notification settings for different channels and workflows. Critical notifications cannot be disabled."
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:18
@@ -1188,6 +1242,14 @@ msgstr ""
 msgid "Need an integration but don't see it here?"
 msgstr ""
 
+#: app/components/core/feedback-modal.tsx:31
+msgid "Negative feedback"
+msgstr ""
+
+#: app/components/core/feedback-modal.tsx:32
+msgid "Neutral feedback"
+msgstr ""
+
 #: app/routes/settings+/profile.change-email.tsx:156
 msgid "New Email"
 msgstr ""
@@ -1245,6 +1307,10 @@ msgstr ""
 msgid "No notes match your search for \"{0}\". Try a different search term or create a new note."
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:212
+msgid "No notification preferences are configured yet."
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:372
 msgid "No organization found"
 msgstr ""
@@ -1257,6 +1323,10 @@ msgstr ""
 #: app/components/settings/passkey-manager.tsx:153
 #: app/routes/settings+/profile.passkeys.tsx:203
 msgid "No passkeys registered yet"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:209
+msgid "No preferences found"
 msgstr ""
 
 #: app/components/data-table.tsx:629
@@ -1301,12 +1371,32 @@ msgstr ""
 msgid "Nothing here yet!"
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:127
+#: app/components/settings/cards/notification-preferences-card.tsx:155
+#: app/components/settings/cards/notification-preferences-card.tsx:193
+#: app/components/settings/cards/notification-preferences-card.tsx:242
+#: app/components/settings/cards/notification-preferences-card.tsx:429
+msgid "Notification Preferences"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:432
+msgid "Notification preferences are not available at this time."
+msgstr ""
+
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:127
 msgid "Notifications"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:45
+msgid "Notifications when someone comments on your notes"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:44
+msgid "Notifications when you are mentioned in a comment"
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:154
@@ -1395,6 +1485,10 @@ msgstr ""
 msgid "Please check your verification link."
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:442
+msgid "Please ensure you have an active organization to manage notification preferences."
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:71
 msgid "Please enter your 2FA code to verify your identity."
 msgstr ""
@@ -1402,6 +1496,10 @@ msgstr ""
 #: app/routes/_auth+/login.tsx:130
 #: app/routes/_auth+/login.tsx:608
 msgid "Please enter your email or username"
+msgstr ""
+
+#: app/components/core/feedback-modal.tsx:33
+msgid "Positive feedback"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:394
@@ -1425,6 +1523,10 @@ msgstr ""
 #: app/components/settings/cards/profile-card.tsx:74
 #: app/routes/_app+/profile.tsx:90
 msgid "Profile Settings"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:34
+msgid "Push"
 msgstr ""
 
 #: app/components/settings/two-factor-form.tsx:115
@@ -1515,6 +1617,14 @@ msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:121
 msgid "Reset Password"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retry"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retrying..."
 msgstr ""
 
 #: app/components/data-table.tsx:283
@@ -1685,6 +1795,10 @@ msgstr ""
 msgid "Slug"
 msgstr ""
 
+#: app/components/settings/cards/notification-preferences-card.tsx:32
+msgid "SMS"
+msgstr ""
+
 #: app/components/note/comments-section.tsx:201
 msgid "Start the conversation by adding the first comment."
 msgstr ""
@@ -1698,6 +1812,7 @@ msgstr ""
 msgid "Stop Impersonation"
 msgstr ""
 
+#: app/components/core/feedback-modal.tsx:112
 #: app/components/data-table.tsx:960
 #: app/routes/_app+/$orgSlug_+/index.tsx:296
 msgid "Submit"
@@ -1735,6 +1850,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/team-size-card.tsx:62
 msgid "Team Size"
+msgstr ""
+
+#: app/components/settings/cards/notification-preferences-card.tsx:43
+msgid "Testing notifications"
 msgstr ""
 
 #: app/routes/_auth+/onboarding_.$provider.tsx:175
@@ -1938,6 +2057,10 @@ msgstr ""
 msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content. <0>Read our Cookie Policy</0>."
 msgstr ""
 
+#: app/components/core/feedback-modal.tsx:72
+msgid "We'd love to hear what went well or how we can improve the product experience."
+msgstr ""
+
 #: app/routes/_auth+/waitlist.tsx:129
 msgid "We'll notify you by email as soon as the waitlist opens."
 msgstr ""
@@ -2077,6 +2200,10 @@ msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:120
 msgid "Your connection has been deleted."
+msgstr ""
+
+#: app/components/core/feedback-modal.tsx:80
+msgid "Your feedback"
 msgstr ""
 
 #: app/components/settings/cards/organization/billing-card.tsx:129
