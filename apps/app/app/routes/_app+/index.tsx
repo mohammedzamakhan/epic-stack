@@ -1,4 +1,6 @@
 import { LoaderFunctionArgs, redirect } from 'react-router'
+import { t } from '@lingui/macro'
+import { i18n } from '@lingui/core'
 import { getUserId } from '#app/utils/auth.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
@@ -28,8 +30,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	// If no organization found, redirect to create one
 	return redirectWithToast('/organizations/create', {
-		title: 'Create an organization',
-		description: 'Organizations are used to group your projects.',
+		title: i18n._(t`Create an organization`),
+		description: i18n._(t`Organizations are used to group your projects.`),
 		type: 'message',
 	})
 }

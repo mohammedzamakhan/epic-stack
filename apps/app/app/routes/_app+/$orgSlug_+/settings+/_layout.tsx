@@ -1,9 +1,12 @@
 import { Outlet, useLocation, useRouteLoaderData } from 'react-router'
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { PageTitle } from '@repo/ui'
 
 export default function SettingsLayout() {
+	const { _ } = useLingui()
 	useRouteLoaderData<typeof rootLoader>('root')
 	useLocation()
 
@@ -11,8 +14,8 @@ export default function SettingsLayout() {
 		<div className="py-8 md:p-8">
 			<div className="mb-8">
 				<PageTitle
-					title="Settings"
-					description="Manage your organization settings and preferences."
+					title={_(t`Settings`)}
+					description={_(t`Manage your organization settings and preferences.`)}
 				/>
 			</div>
 

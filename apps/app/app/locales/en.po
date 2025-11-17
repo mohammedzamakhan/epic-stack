@@ -144,6 +144,10 @@ msgstr ""
 msgid "Create an account"
 msgstr ""
 
+#: app/routes/_app+/index.tsx:33
+msgid "Create an organization"
+msgstr ""
+
 #: app/components/command-menu.tsx:115
 msgid "Create new note"
 msgstr ""
@@ -353,6 +357,10 @@ msgstr ""
 msgid "Manage your notification preferences for different channels and workflows."
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:18
+msgid "Manage your organization settings and preferences."
+msgstr ""
+
 #: app/routes/_app+/security.tsx:235
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr ""
@@ -468,6 +476,10 @@ msgstr ""
 msgid "Organizations"
 msgstr ""
 
+#: app/routes/_app+/index.tsx:34
+msgid "Organizations are used to group your projects."
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:764
 msgid "Password"
 msgstr ""
@@ -562,6 +574,7 @@ msgstr ""
 #: app/components/app-sidebar.tsx:233
 #: app/components/command-menu.tsx:149
 #: app/components/command-menu.tsx:173
+#: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:17
 msgid "Settings"
 msgstr ""
 

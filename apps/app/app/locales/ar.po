@@ -144,6 +144,10 @@ msgstr "إنشاء حساب"
 msgid "Create an account"
 msgstr "إنشاء حساب"
 
+#: app/routes/_app+/index.tsx:33
+msgid "Create an organization"
+msgstr "إنشاء منظمة"
+
 #: app/components/command-menu.tsx:115
 msgid "Create new note"
 msgstr "إنشاء ملاحظة جديدة"
@@ -353,6 +357,10 @@ msgstr "إدارة إعدادات حسابك وتفضيلات البريد ال�
 msgid "Manage your notification preferences for different channels and workflows."
 msgstr "إدارة تفضيلات الإشعارات للقنوات وسير العمل المختلفة."
 
+#: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:18
+msgid "Manage your organization settings and preferences."
+msgstr "إدارة إعدادات وتفضيلات منظمتك."
+
 #: app/routes/_app+/security.tsx:235
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr "إدارة كلمة المرور والمصادقة الثنائية والحسابات المتصلة وإعدادات الأمان المتقدمة."
@@ -468,6 +476,10 @@ msgstr "أو تابع باستخدام البريد الإلكتروني أو ا
 msgid "Organizations"
 msgstr "المنظمات"
 
+#: app/routes/_app+/index.tsx:34
+msgid "Organizations are used to group your projects."
+msgstr "تُستخدم المنظمات لتجميع مشاريعك."
+
 #: app/routes/_auth+/login.tsx:764
 msgid "Password"
 msgstr "كلمة المرور"
@@ -562,6 +574,7 @@ msgstr "إرسال تعليمات إعادة التعيين"
 #: app/components/app-sidebar.tsx:233
 #: app/components/command-menu.tsx:149
 #: app/components/command-menu.tsx:173
+#: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:17
 msgid "Settings"
 msgstr "الإعدادات"
 
