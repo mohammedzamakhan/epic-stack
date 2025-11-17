@@ -19,3 +19,5 @@ export type { EmailChangeEmailProps } from './src/templates/email-change.tsx'
 export type { EmailChangeNoticeEmailProps } from './src/templates/email-change-notice.tsx'
 export type { TrialEndingEmailProps } from './src/templates/trial-ending.tsx'
 export type { NewDeviceSigninEmailProps } from './src/templates/new-device-signin.tsx'
+
+export { sendEmail } from './src/send-email'
