@@ -19,3 +19,6 @@ export type { EmailChangeEmailProps } from './templates/email-change'
 export type { EmailChangeNoticeEmailProps } from './templates/email-change-notice'
 export type { TrialEndingEmailProps } from './templates/trial-ending'
 export type { NewDeviceSigninEmailProps } from './templates/new-device-signin'
+
+// Export sendEmail function
+export { sendEmail } from './send-email'

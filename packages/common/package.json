@@ -41,6 +41,11 @@
       "types": "./src/litefs.server.ts",
       "import": "./src/litefs.server.ts",
       "default": "./src/litefs.server.ts"
+    },
+    "./user-permissions": {
+      "types": "./src/user-permissions.ts",
+      "import": "./src/user-permissions.ts",
+      "default": "./src/user-permissions.ts"
     }
   },
   "scripts": {
