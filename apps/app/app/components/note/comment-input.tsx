@@ -3,6 +3,8 @@ import Mention from '@tiptap/extension-mention'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, { useEffect, useState } from 'react'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '#app/utils/misc.tsx'
 
 import { CommentImagePreview } from './comment-image-preview'
@@ -39,6 +41,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 	placeholder = 'Add a comment...',
 	disabled = false,
 }) => {
+	const { _ } = useLingui()
 	const [initialValue] = useState(value)
 	const [content, setContent] = useState(value)
 	const [selectedImages, setSelectedImages] = useState<File[]>([])
@@ -119,7 +122,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 				<EditorContent
 					editor={editor}
 					className="min-h-[60px] focus:outline-none"
-					placeholder={placeholder}
+					placeholder={_(msg`Add a comment...`)}
 				/>
 				{selectedImages.length > 0 && (
 					<div className="mt-3">
@@ -142,9 +145,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
 						disabled={disabled}
 					/>
 					<div className="text-muted-foreground ml-2 text-xs">
-						{reply
-							? 'Replying to comment'
-							: 'Use @ to mention someone • Cmd+Enter to submit'}
+						{reply ? (
+							<Trans>Replying to comment</Trans>
+						) : (
+							<Trans>Use @ to mention someone • Cmd+Enter to submit</Trans>
+						)}
 					</div>
 				</div>
 				<div className="flex gap-2">
@@ -156,7 +161,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 							size="sm"
 							disabled={disabled}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 					)}
 					<Button
@@ -166,7 +171,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 						}
 						onClick={handleSubmit}
 					>
-						{reply ? 'Reply' : 'Comment'}
+						{reply ? <Trans>Reply</Trans> : <Trans>Comment</Trans>}
 					</Button>
 				</div>
 			</CardFooter>

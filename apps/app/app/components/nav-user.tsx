@@ -1,6 +1,8 @@
 import { useRef } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui'
 import { Link, Form, useFetcher } from 'react-router'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 import {
 	DropdownMenu,
@@ -62,10 +64,12 @@ export function NavUser({
 	const optimisticMode = useOptimisticThemeMode()
 	const mode = optimisticMode ?? userPreference ?? 'system'
 
+	const { _ } = useLingui()
+
 	const themeOptions = [
-		{ value: 'light', icon: 'sun', label: 'Light mode' },
-		{ value: 'dark', icon: 'moon', label: 'Dark mode' },
-		{ value: 'system', icon: 'laptop', label: 'System theme' },
+		{ value: 'light', icon: 'sun', label: _(msg`Light mode`) },
+		{ value: 'dark', icon: 'moon', label: _(msg`Dark mode`) },
+		{ value: 'system', icon: 'laptop', label: _(msg`System theme`) },
 	] as const
 
 	const handleMenuItemMouseEnter = (iconKey: string) => {
@@ -122,7 +126,7 @@ export function NavUser({
 										ref={(ref: any) => (iconRefs.current['account'] = ref)}
 										size={16}
 									/>
-									Account
+									<Trans>Account</Trans>
 								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem
@@ -138,7 +142,7 @@ export function NavUser({
 										}
 										size={16}
 									/>
-									Organizations
+									<Trans>Organizations</Trans>
 								</Link>
 							</DropdownMenuItem>
 							{isAdmin && (
@@ -153,7 +157,7 @@ export function NavUser({
 											ref={(ref: any) => (iconRefs.current['admin'] = ref)}
 											size={16}
 										/>
-										Super Admin
+										<Trans>Super Admin</Trans>
 									</Link>
 								</DropdownMenuItem>
 							)}
@@ -169,7 +173,7 @@ export function NavUser({
 									size={16}
 									ref={(ref: any) => (iconRefs.current['theme'] = ref)}
 								/>
-								Theme
+								<Trans>Theme</Trans>
 							</DropdownMenuSubTrigger>
 							<DropdownMenuSubContent>
 								{themeOptions.map((option) => (
@@ -215,7 +219,7 @@ export function NavUser({
 									size={16}
 								/>
 								<button type="submit" className="w-full ltr:text-left rtl:text-right">
-									Log out
+									<Trans>Log out</Trans>
 								</button>
 							</Form>
 						</DropdownMenuItem>

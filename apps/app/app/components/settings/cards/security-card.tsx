@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans, Plural } from '@lingui/macro'
 
 import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 import { PasswordForm } from '#app/components/settings/password-form.tsx'
@@ -57,9 +58,11 @@ export function SecurityCard({
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<CardTitle>Security Settings</CardTitle>
+				<CardTitle>
+					<Trans>Security Settings</Trans>
+				</CardTitle>
 				<CardDescription>
-					Manage your password and two-factor authentication settings.
+					<Trans>Manage your password and two-factor authentication settings.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -68,12 +71,18 @@ export function SecurityCard({
 					<div className="flex items-center justify-between">
 						<div>
 							<h3 className="font-semibold">
-								{hasPassword ? 'Change Password' : 'Create Password'}
+								{hasPassword ? (
+									<Trans>Change Password</Trans>
+								) : (
+									<Trans>Create Password</Trans>
+								)}
 							</h3>
 							<p className="text-muted-foreground text-sm">
-								{hasPassword
-									? 'Change your password to something new'
-									: 'Create a password to secure your account'}
+								{hasPassword ? (
+									<Trans>Change your password to something new</Trans>
+								) : (
+									<Trans>Create a password to secure your account</Trans>
+								)}
 							</p>
 						</div>
 						<Dialog
@@ -82,13 +91,21 @@ export function SecurityCard({
 						>
 							<DialogTrigger asChild>
 								<Button variant="outline">
-									{hasPassword ? 'Change Password' : 'Create Password'}
+									{hasPassword ? (
+										<Trans>Change Password</Trans>
+									) : (
+										<Trans>Create Password</Trans>
+									)}
 								</Button>
 							</DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>
-										{hasPassword ? 'Change Password' : 'Create Password'}
+										{hasPassword ? (
+											<Trans>Change Password</Trans>
+										) : (
+											<Trans>Create Password</Trans>
+										)}
 									</DialogTitle>
 								</DialogHeader>
 								<PasswordForm
@@ -103,14 +120,18 @@ export function SecurityCard({
 					<div className="flex items-center justify-between">
 						<div>
 							<h3 className="font-semibold">
-								{isTwoFactorEnabled
-									? 'Two-Factor Authentication'
-									: 'Enable Two-Factor Authentication'}
+								{isTwoFactorEnabled ? (
+									<Trans>Two-Factor Authentication</Trans>
+								) : (
+									<Trans>Enable Two-Factor Authentication</Trans>
+								)}
 							</h3>
 							<p className="text-muted-foreground text-sm">
-								{isTwoFactorEnabled
-									? 'Your account is secured with two-factor authentication'
-									: 'Add an extra layer of security to your account'}
+								{isTwoFactorEnabled ? (
+									<Trans>Your account is secured with two-factor authentication</Trans>
+								) : (
+									<Trans>Add an extra layer of security to your account</Trans>
+								)}
 							</p>
 						</div>
 						<Dialog
@@ -121,7 +142,11 @@ export function SecurityCard({
 								<Button
 									variant={isTwoFactorEnabled ? 'destructive' : 'outline'}
 								>
-									{isTwoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+									{isTwoFactorEnabled ? (
+										<Trans>Disable 2FA</Trans>
+									) : (
+										<Trans>Enable 2FA</Trans>
+									)}
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl">
@@ -138,11 +163,23 @@ export function SecurityCard({
 					{/* Passkeys Section */}
 					<div className="flex items-center justify-between">
 						<div>
-							<h3 className="font-semibold">Passkeys</h3>
+							<h3 className="font-semibold">
+								<Trans>Passkeys</Trans>
+							</h3>
 							<p className="text-muted-foreground text-sm">
-								{passkeys?.length > 0
-									? `You're signed in on ${user._count.sessions} device${user._count.sessions === 1 ? '' : 's'} as ${user.email}`
-									: 'Register a passkey to log in without a password'}
+								{passkeys?.length > 0 ? (
+									<Trans>
+										You're signed in on{' '}
+										<Plural
+											value={user._count.sessions}
+											one="# device"
+											other="# devices"
+										/>{' '}
+										as {user.email}
+									</Trans>
+								) : (
+									<Trans>Register a passkey to log in without a password</Trans>
+								)}
 							</p>
 						</div>
 						<Dialog
@@ -150,11 +187,15 @@ export function SecurityCard({
 							onOpenChange={setIsPasskeyModalOpen}
 						>
 							<DialogTrigger asChild>
-								<Button variant="outline">Manage Passkeys</Button>
+								<Button variant="outline">
+									<Trans>Manage Passkeys</Trans>
+								</Button>
 							</DialogTrigger>
 							<DialogContent className="max-w-3xl">
 								<DialogHeader>
-									<DialogTitle>Manage Passkeys</DialogTitle>
+									<DialogTitle>
+										<Trans>Manage Passkeys</Trans>
+									</DialogTitle>
 								</DialogHeader>
 								<PasskeyManager data={{ passkeys }} />
 							</DialogContent>

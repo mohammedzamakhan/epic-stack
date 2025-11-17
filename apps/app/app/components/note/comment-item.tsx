@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 
 import CommentInput, { type MentionUser } from './comment-input'
@@ -47,6 +49,7 @@ export function CommentItem({
 	onDelete,
 	organizationId,
 }: CommentItemProps) {
+	const { _ } = useLingui()
 	const [showReplyForm, setShowReplyForm] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 
@@ -60,7 +63,7 @@ export function CommentItem({
 	const handleDelete = async () => {
 		if (
 			onDelete &&
-			window.confirm('Are you sure you want to delete this comment?')
+			window.confirm(_(msg`Are you sure you want to delete this comment?`))
 		) {
 			setIsDeleting(true)
 			onDelete(comment.id)
@@ -198,7 +201,7 @@ export function CommentItem({
 							style={{ marginLeft: `${depth * 2 + 2}rem` }}
 						>
 							<Icon name="paper-plane" className="mr-1 h-3 w-3" />
-							Reply
+							<Trans>Reply</Trans>
 						</Button>
 						<div
 							className="border-border dark:border-muted absolute h-px rounded-bl-lg border-b"
@@ -222,7 +225,7 @@ export function CommentItem({
 						value=""
 						reply
 						onCancel={() => setShowReplyForm(false)}
-						placeholder="Write a reply..."
+						placeholder={_(msg`Write a reply...`)}
 					/>
 				</div>
 			)}

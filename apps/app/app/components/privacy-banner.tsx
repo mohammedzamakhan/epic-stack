@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { Button } from '@repo/ui'
+import { Trans } from '@lingui/macro'
 
 export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 	const fetcher = useFetcher()
@@ -17,17 +18,19 @@ export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 						<div className="p-5">
 							<div>
 								<p className="m-0 p-0 text-sm leading-6 tracking-normal text-gray-800">
-									We use cookies to enhance your experience, analyze site
-									traffic and deliver personalized content.{' '}
-									<a
-										href="/legal/cookie-policy/"
-										target="_blank"
-										rel="noreferrer"
-										className="text-blue-700 no-underline"
-									>
-										Read our Cookie Policy
-									</a>
-									.
+									<Trans>
+										We use cookies to enhance your experience, analyze site
+										traffic and deliver personalized content.{' '}
+										<a
+											href="/legal/cookie-policy/"
+											target="_blank"
+											rel="noreferrer"
+											className="text-blue-700 no-underline"
+										>
+											Read our Cookie Policy
+										</a>
+										.
+									</Trans>
 								</p>
 							</div>
 							<div className="mt-4 flex flex-row gap-2.5">
@@ -42,7 +45,7 @@ export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 										)
 									}}
 								>
-									Reject
+									<Trans>Reject</Trans>
 								</Button>
 								<Button
 									type="button"
@@ -54,7 +57,7 @@ export function CookieConsentBanner({ consent }: { consent: boolean | null }) {
 										)
 									}}
 								>
-									Accept
+									<Trans>Accept</Trans>
 								</Button>
 							</div>
 						</div>

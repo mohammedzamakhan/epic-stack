@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Form, Link } from 'react-router'
+import { Trans } from '@lingui/macro'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -59,7 +60,7 @@ export default function FavoriteNotes({
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
 			<SidebarGroupLabel className="flex items-center gap-2">
 				<Icon name="star" className="h-4 w-4" />
-				Favorites
+				<Trans>Favorites</Trans>
 			</SidebarGroupLabel>
 			<SidebarMenu>
 				{favoriteNotes.map((favorite) => (
@@ -81,7 +82,9 @@ export default function FavoriteNotes({
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuAction showOnHover className="rounded-sm">
 									<Icon name="more-horizontal" />
-									<span className="sr-only">More</span>
+									<span className="sr-only">
+										<Trans>More</Trans>
+									</span>
 								</SidebarMenuAction>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
@@ -92,13 +95,17 @@ export default function FavoriteNotes({
 								<DropdownMenuItem asChild className="gap-2">
 									<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
 										<Icon name="folder" />
-										<span>Open</span>
+										<span>
+											<Trans>Open</Trans>
+										</span>
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuItem asChild className="gap-2">
 									<Link to={`/${orgSlug}/notes/${favorite.note.id}/edit`}>
 										<Icon name="pencil" />
-										<span>Edit</span>
+										<span>
+											<Trans>Edit</Trans>
+										</span>
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
@@ -122,7 +129,9 @@ export default function FavoriteNotes({
 											className="text-destructive flex w-full items-center gap-2"
 										>
 											<Icon name="star-off" />
-											<span>Unstar</span>
+											<span>
+												<Trans>Unstar</Trans>
+											</span>
 										</button>
 									</Form>
 								</DropdownMenuItem>
