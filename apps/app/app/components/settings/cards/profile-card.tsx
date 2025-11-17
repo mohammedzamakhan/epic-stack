@@ -2,7 +2,8 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
-
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { z } from 'zod'
 import {
 	ErrorList,
@@ -52,6 +53,7 @@ interface ProfileCardProps {
 export function ProfileCard({ user }: ProfileCardProps) {
 	const fetcher = useFetcher()
 	const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+	const { _ } = useLingui()
 
 	const [form, fields] = useForm({
 		id: 'edit-profile',
@@ -69,9 +71,9 @@ export function ProfileCard({ user }: ProfileCardProps) {
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<CardTitle>Profile Settings</CardTitle>
+				<CardTitle><Trans>Profile Settings</Trans></CardTitle>
 				<CardDescription>
-					Update your photo and personal details here.
+					<Trans>Update your photo and personal details here.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6 pb-0">
@@ -85,7 +87,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 								<Field
 									data-invalid={fields.name.errors?.length ? true : undefined}
 								>
-									<FieldLabel htmlFor={fields.name.id}>Name</FieldLabel>
+									<FieldLabel htmlFor={fields.name.id}><Trans>Name</Trans></FieldLabel>
 									<Input
 										{...getInputProps(fields.name, { type: 'text' })}
 										aria-invalid={fields.name.errors?.length ? true : undefined}
@@ -100,7 +102,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 										fields.username.errors?.length ? true : undefined
 									}
 								>
-									<FieldLabel htmlFor={fields.username.id}>Username</FieldLabel>
+									<FieldLabel htmlFor={fields.username.id}><Trans>Username</Trans></FieldLabel>
 									<Input
 										{...getInputProps(fields.username, { type: 'text' })}
 										aria-invalid={
@@ -117,7 +119,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 										htmlFor="email"
 										className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 									>
-										Email
+										<Trans>Email</Trans>
 									</label>
 									<div className="relative">
 										<Input
@@ -137,20 +139,22 @@ export function ProfileCard({ user }: ProfileCardProps) {
 													size="sm"
 													className="absolute top-1/2 right-1 -translate-y-1/2"
 												>
-													Change
+													<Trans>Change</Trans>
 												</Button>
 											</DialogTrigger>
 											<DialogContent>
 												<DialogHeader>
-													<DialogTitle>Change Email</DialogTitle>
+													<DialogTitle><Trans>Change Email</Trans></DialogTitle>
 												</DialogHeader>
 												<EmailChangeForm setIsOpen={setIsEmailModalOpen} />
 											</DialogContent>
 										</Dialog>
 									</div>
 									<p className="text-muted-foreground mt-1 text-sm">
-										If you change your email, you'll need to verify the new
-										address
+										<Trans>
+											If you change your email, you'll need to verify the new
+											address
+										</Trans>
 									</p>
 								</div>
 
@@ -171,7 +175,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 						fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 					}
 				>
-					Save changes
+					<Trans>Save changes</Trans>
 				</StatusButton>
 			</CardFooter>
 		</Card>

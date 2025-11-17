@@ -3,6 +3,8 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import * as QRCode from 'qrcode'
 import { AnnotatedLayout, AnnotatedSection, Divider, PageTitle } from '@repo/ui'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
@@ -223,13 +225,14 @@ async function deletePasskeyAction({ formData, userId }: SecurityActionArgs) {
 
 export default function SecuritySettings() {
 	const data = useLoaderData<typeof loader>()
+	const { _ } = useLingui()
 
 	return (
 		<div className="my-8 flex flex-1 flex-col gap-4 md:m-8">
 			<AnnotatedLayout>
 				<PageTitle
-					title="Security Settings"
-					description="Manage your password, two-factor authentication, connected accounts, and advanced security settings."
+					title={_(t`Security Settings`)}
+					description={_(t`Manage your password, two-factor authentication, connected accounts, and advanced security settings.`)}
 				/>
 
 				<AnnotatedSection>

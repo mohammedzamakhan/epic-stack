@@ -83,6 +83,14 @@ msgstr ""
 msgid "by {0}"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:142
+msgid "Change"
+msgstr ""
+
+#: app/components/settings/cards/profile-card.tsx:147
+msgid "Change Email"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
 msgstr ""
@@ -148,6 +156,7 @@ msgstr ""
 msgid "Done!"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:743
 #: app/routes/_auth+/signup.tsx:247
 msgid "Email"
@@ -226,6 +235,10 @@ msgstr ""
 msgid "Hi"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:154
+msgid "If you change your email, you'll need to verify the new address"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:249
 msgid "Integrations"
 msgstr ""
@@ -276,12 +289,28 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
+#: app/routes/_app+/profile.tsx:91
+msgid "Manage your account settings and set e-mail preferences."
+msgstr ""
+
+#: app/routes/_app+/notifications.tsx:27
+msgid "Manage your notification preferences for different channels and workflows."
+msgstr ""
+
+#: app/routes/_app+/security.tsx:235
+msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
+msgstr ""
+
 #: app/components/app-sidebar.tsx:227
 msgid "MCP Server"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:244
 msgid "Members"
+msgstr ""
+
+#: app/components/settings/cards/profile-card.tsx:90
+msgid "Name"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:132
@@ -307,6 +336,10 @@ msgstr ""
 #: app/components/app-sidebar.tsx:221
 #: app/components/command-menu.tsx:130
 msgid "Notes"
+msgstr ""
+
+#: app/routes/_app+/notifications.tsx:26
+msgid "Notification Settings"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:127
@@ -354,6 +387,11 @@ msgstr ""
 msgid "Profile"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:74
+#: app/routes/_app+/profile.tsx:90
+msgid "Profile Settings"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
 msgstr ""
@@ -378,6 +416,10 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:178
+msgid "Save changes"
+msgstr ""
+
 #: app/components/command-menu.tsx:99
 #: app/components/site-header.tsx:39
 msgid "Search notes..."
@@ -389,6 +431,10 @@ msgstr ""
 
 #: app/components/app-sidebar.tsx:121
 msgid "Security"
+msgstr ""
+
+#: app/routes/_app+/security.tsx:234
+msgid "Security Settings"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:236
@@ -435,6 +481,10 @@ msgstr ""
 msgid "There was an issue with your login attempt. Please try again."
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:76
+msgid "Update your photo and personal details here."
+msgstr ""
+
 #: app/components/app-sidebar.tsx:75
 msgid "Upgrade"
 msgstr ""
@@ -443,6 +493,7 @@ msgstr ""
 msgid "Use password instead"
 msgstr ""
 
+#: app/components/settings/cards/profile-card.tsx:105
 #: app/routes/_auth+/login.tsx:744
 msgid "Username"
 msgstr ""

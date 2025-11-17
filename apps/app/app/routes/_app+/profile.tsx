@@ -2,6 +2,8 @@ import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { AnnotatedLayout, AnnotatedSection, PageTitle } from '@repo/ui'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -79,13 +81,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function ProfileSettings() {
 	const data = useLoaderData<typeof loader>()
+	const { _ } = useLingui()
 
 	return (
 		<div className="my-8 flex flex-1 flex-col gap-4 md:m-8">
 			<AnnotatedLayout>
 				<PageTitle
-					title="Profile Settings"
-					description="Manage your account settings and set e-mail preferences."
+					title={_(t`Profile Settings`)}
+					description={_(t`Manage your account settings and set e-mail preferences.`)}
 				/>
 				<AnnotatedSection>
 					<ProfileCard user={data.user} />

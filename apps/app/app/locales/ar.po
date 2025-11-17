@@ -83,6 +83,14 @@ msgstr "الفواتير"
 msgid "by {0}"
 msgstr "بواسطة {0}"
 
+#: app/components/settings/cards/profile-card.tsx:142
+msgid "Change"
+msgstr "تغيير"
+
+#: app/components/settings/cards/profile-card.tsx:147
+msgid "Change Email"
+msgstr "تغيير البريد الإلكتروني"
+
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
 msgstr "تحقق من تطبيق المصادقة الثنائية"
@@ -148,6 +156,7 @@ msgstr "ليس لديك حساب؟"
 msgid "Done!"
 msgstr "تم!"
 
+#: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:743
 #: app/routes/_auth+/signup.tsx:247
 msgid "Email"
@@ -226,6 +235,10 @@ msgstr "إرسال ملاحظات"
 msgid "Hi"
 msgstr "مرحباً"
 
+#: app/components/settings/cards/profile-card.tsx:154
+msgid "If you change your email, you'll need to verify the new address"
+msgstr "إذا قمت بتغيير بريدك الإلكتروني، ستحتاج إلى التحقق من العنوان الجديد"
+
 #: app/components/app-sidebar.tsx:249
 msgid "Integrations"
 msgstr "التكاملات"
@@ -276,6 +289,18 @@ msgstr "تسجيل الدخول بمفتاح المرور"
 msgid "m@example.com"
 msgstr "م@مثال.com"
 
+#: app/routes/_app+/profile.tsx:91
+msgid "Manage your account settings and set e-mail preferences."
+msgstr "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
+
+#: app/routes/_app+/notifications.tsx:27
+msgid "Manage your notification preferences for different channels and workflows."
+msgstr "إدارة تفضيلات الإشعارات للقنوات وسير العمل المختلفة."
+
+#: app/routes/_app+/security.tsx:235
+msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
+msgstr "إدارة كلمة المرور والمصادقة الثنائية والحسابات المتصلة وإعدادات الأمان المتقدمة."
+
 #: app/components/app-sidebar.tsx:227
 msgid "MCP Server"
 msgstr "خادم MCP"
@@ -283,6 +308,10 @@ msgstr "خادم MCP"
 #: app/components/app-sidebar.tsx:244
 msgid "Members"
 msgstr "الأعضاء"
+
+#: app/components/settings/cards/profile-card.tsx:90
+msgid "Name"
+msgstr "الاسم"
 
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
@@ -308,6 +337,10 @@ msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين
 #: app/components/command-menu.tsx:130
 msgid "Notes"
 msgstr "الملاحظات"
+
+#: app/routes/_app+/notifications.tsx:26
+msgid "Notification Settings"
+msgstr "إعدادات الإشعارات"
 
 #: app/components/app-sidebar.tsx:127
 msgid "Notifications"
@@ -354,6 +387,11 @@ msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المس
 msgid "Profile"
 msgstr "الملف الشخصي"
 
+#: app/components/settings/cards/profile-card.tsx:74
+#: app/routes/_app+/profile.tsx:90
+msgid "Profile Settings"
+msgstr "إعدادات الملف الشخصي"
+
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
 msgstr "موصى به لـ"
@@ -378,6 +416,10 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
+#: app/components/settings/cards/profile-card.tsx:178
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
 #: app/components/command-menu.tsx:99
 #: app/components/site-header.tsx:39
 msgid "Search notes..."
@@ -390,6 +432,10 @@ msgstr "البحث..."
 #: app/components/app-sidebar.tsx:121
 msgid "Security"
 msgstr "الأمان"
+
+#: app/routes/_app+/security.tsx:234
+msgid "Security Settings"
+msgstr "إعدادات الأمان"
 
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
@@ -435,6 +481,10 @@ msgstr "باقي <0>{0} أيام</0> في فترة التجربة. تواصل م
 msgid "There was an issue with your login attempt. Please try again."
 msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
 
+#: app/components/settings/cards/profile-card.tsx:76
+msgid "Update your photo and personal details here."
+msgstr "قم بتحديث صورتك وبياناتك الشخصية هنا."
+
 #: app/components/app-sidebar.tsx:75
 msgid "Upgrade"
 msgstr "ترقية"
@@ -443,6 +493,7 @@ msgstr "ترقية"
 msgid "Use password instead"
 msgstr "استخدم كلمة المرور بدلاً من ذلك"
 
+#: app/components/settings/cards/profile-card.tsx:105
 #: app/routes/_auth+/login.tsx:744
 msgid "Username"
 msgstr "اسم المستخدم"
