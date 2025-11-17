@@ -1,7 +1,6 @@
 import crypto from 'node:crypto'
 import { PassThrough } from 'node:stream'
-import { i18n } from '@lingui/core'
-import { I18nProvider } from '@lingui/react'
+import { i18n, I18nProvider } from '@repo/i18n'
 import { contentSecurity } from '@nichtsam/helmet/content'
 import { createReadableStreamFromReadable } from '@react-router/node'
 import { isbot } from 'isbot'

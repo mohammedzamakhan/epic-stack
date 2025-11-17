@@ -1,6 +1,4 @@
-import { i18n } from '@lingui/core'
-import { detect, fromHtmlTag } from '@lingui/detect-locale'
-import { I18nProvider } from '@lingui/react'
+import { i18n, I18nProvider, detect, fromHtmlTag } from '@repo/i18n'
 import { startTransition } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 import { HydratedRouter } from 'react-router/dom'
