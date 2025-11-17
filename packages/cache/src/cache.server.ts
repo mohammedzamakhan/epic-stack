@@ -17,7 +17,7 @@ import { LRUCache } from 'lru-cache'
 import { z } from 'zod'
 import { cachifiedTimingReporter, type Timings } from '@repo/common'
 
-const CACHE_DATABASE_PATH = process.env.CACHE_DATABASE_PATH
+const CACHE_DATABASE_PATH = process.env.CACHE_DATABASE_PATH ?? './cache.db'
 
 const cacheDb = remember('cacheDb', createDatabase)
 
