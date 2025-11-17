@@ -52,3 +52,37 @@ function getHeaders(requestOrHeaders: Request | Headers): Headers {
 
 	return requestOrHeaders
 }
+
+/**
+ * List of RTL (Right-to-Left) language codes.
+ * These languages are written from right to left.
+ */
+const RTL_LOCALES = new Set([
+	'ar', // Arabic
+	'he', // Hebrew
+	'fa', // Persian/Farsi
+	'ur', // Urdu
+	'yi', // Yiddish
+])
+
+/**
+ * Determines if a locale uses RTL (Right-to-Left) text direction.
+ * Supports locale codes with or without region (e.g., 'ar' or 'ar-SA').
+ *
+ * @param locale - The locale code to check
+ * @returns 'rtl' if the locale is right-to-left, 'ltr' otherwise
+ *
+ * @example
+ * getDirection('ar') // returns 'rtl'
+ * getDirection('ar-SA') // returns 'rtl'
+ * getDirection('en') // returns 'ltr'
+ * getDirection('en-US') // returns 'ltr'
+ */
+export function getDirection(locale: string | null | undefined): 'rtl' | 'ltr' {
+	if (!locale) return 'ltr'
+
+	// Extract the base language code (e.g., 'ar' from 'ar-SA')
+	const baseLocale = locale.toLowerCase().split(/[-_]/)[0]
+
+	return RTL_LOCALES.has(baseLocale) ? 'rtl' : 'ltr'
+}

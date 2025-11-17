@@ -1,5 +1,6 @@
 import { NovuProvider } from '@novu/react/hooks'
 import { brand, getErrorTitle } from '@repo/config/brand'
+import { getDirection } from '@repo/i18n'
 import { EpicToaster, TooltipProvider } from '@repo/ui'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
@@ -227,9 +228,14 @@ function Document({
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
 	const { locale } = useLoaderData<typeof loader>()
+	const direction = getDirection(locale)
 
 	return (
-		<html lang={locale ?? 'en'} className={`${theme} h-full overflow-x-hidden`}>
+		<html
+			lang={locale ?? 'en'}
+			dir={direction}
+			className={`${theme} h-full overflow-x-hidden`}
+		>
 			<head>
 				<ClientHintCheck nonce={nonce} />
 				<Meta />

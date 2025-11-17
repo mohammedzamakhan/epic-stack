@@ -7,6 +7,9 @@ export { detect, fromUrl, fromNavigator, fromHtmlTag } from '@lingui/detect-loca
 export { createCatalogLoader, loadCatalog } from './src/lingui'
 export type { CatalogLoader } from './src/lingui'
 
+// Client utilities
+export { getDirection } from './src/utils'
+
 // Type exports (client-safe)
 export type {
 	RemixLinguiOptions,
