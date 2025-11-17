@@ -1,4 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans } from '@lingui/macro'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { SheetHeader, SheetTitle } from '@repo/ui'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -82,7 +83,9 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle>Edit Note</SheetTitle>
+				<SheetTitle>
+					<Trans>Edit Note</Trans>
+				</SheetTitle>
 			</SheetHeader>
 
 			<section
@@ -105,7 +108,9 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				404: ({ params }) => (
-					<p>No note with the id "{params.noteId}" exists</p>
+					<p>
+						<Trans>No note with the id "{params.noteId}" exists</Trans>
+					</p>
 				),
 			}}
 		/>

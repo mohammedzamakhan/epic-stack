@@ -57,6 +57,7 @@ msgstr "الإجراءات"
 msgid "Add members"
 msgstr "إضافة أعضاء"
 
+#: app/components/team-switcher.tsx:167
 #: app/routes/_app+/organizations.tsx:219
 msgid "Add organization"
 msgstr "إضافة منظمة"
@@ -82,6 +83,10 @@ msgstr "الفواتير"
 #: app/components/command-menu.tsx:141
 msgid "by {0}"
 msgstr "بواسطة {0}"
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:294
+msgid "Cards"
+msgstr "بطاقات"
 
 #: app/components/settings/cards/profile-card.tsx:142
 msgid "Change"
@@ -139,6 +144,15 @@ msgstr "إنشاء حساب"
 msgid "Create new note"
 msgstr "إنشاء ملاحظة جديدة"
 
+#: app/routes/_app+/$orgSlug_+/notes.new.tsx:32
+msgid "Create New Note"
+msgstr "إنشاء ملاحظة جديدة"
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:371
+#: app/routes/_app+/$orgSlug_+/notes.tsx:383
+msgid "Create Note"
+msgstr "إنشاء ملاحظة"
+
 #: app/components/app-sidebar.tsx:109
 #: app/components/app-sidebar.tsx:215
 msgid "Dashboard"
@@ -155,6 +169,10 @@ msgstr "ليس لديك حساب؟"
 #: app/components/onboarding-checklist.tsx:116
 msgid "Done!"
 msgstr "تم!"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
+msgid "Edit Note"
+msgstr "تعديل ملاحظة"
 
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:743
@@ -251,6 +269,10 @@ msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 msgid "Invalid Verification Type"
 msgstr "نوع التحقق غير صالح"
 
+#: app/components/team-switcher.tsx:156
+msgid "Invite members"
+msgstr "دعوة أعضاء"
+
 #: app/components/command-menu.tsx:124
 msgid "Invite new members"
 msgstr "دعوة أعضاء جدد"
@@ -267,6 +289,10 @@ msgstr "الانضمام إلى المنظمة"
 #: app/routes/_app+/organizations.tsx:199
 msgid "Jump into an existing organization, accept pending invitations, or add a new one."
 msgstr "انتقل إلى منظمة موجودة، أو اقبل الدعوات المعلقة، أو أضف منظمة جديدة."
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:308
+msgid "Kanban"
+msgstr "كانبان"
 
 #: app/routes/_auth+/login.tsx:467
 #: app/routes/_auth+/login.tsx:478
@@ -305,6 +331,14 @@ msgstr "إدارة كلمة المرور والمصادقة الثنائية و�
 msgid "MCP Server"
 msgstr "خادم MCP"
 
+#: app/components/team-switcher.tsx:92
+msgid "member"
+msgstr "عضو"
+
+#: app/components/team-switcher.tsx:94
+msgid "members"
+msgstr "أعضاء"
+
 #: app/components/app-sidebar.tsx:244
 msgid "Members"
 msgstr "الأعضاء"
@@ -313,17 +347,40 @@ msgstr "الأعضاء"
 msgid "Name"
 msgstr "الاسم"
 
+#: app/routes/_app+/$orgSlug_+/notes.tsx:318
+msgid "New Note"
+msgstr "ملاحظة جديدة"
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
+
+#. placeholder {0}: params.noteId
+#: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:112
+msgid "No note with the id \"{0}\" exists"
+msgstr "لا توجد ملاحظة بالمعرف \"{0}\""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:365
+msgid "No notes found"
+msgstr "لم يتم العثور على ملاحظات"
 
 #: app/components/command-menu.tsx:105
 msgid "No notes found."
 msgstr "لم يتم العثور على ملاحظات."
 
+#. placeholder {0}: loaderData.searchQuery
+#: app/routes/_app+/$orgSlug_+/notes.tsx:367
+msgid "No notes match your search for \"{0}\". Try a different search term or create a new note."
+msgstr "لا توجد ملاحظات تطابق بحثك عن \"{0}\". جرب مصطلح بحث مختلف أو أنشئ ملاحظة جديدة."
+
 #: app/routes/_app+/organizations.tsx:372
 msgid "No organization found"
 msgstr "لم يتم العثور على منظمة"
+
+#. placeholder {0}: params.orgSlug
+#: app/routes/_app+/$orgSlug_+/notes.tsx:414
+msgid "No organization with the slug \"{0}\" exists"
+msgstr "لا توجد منظمة بالمعرف \"{0}\""
 
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
@@ -335,8 +392,13 @@ msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين
 
 #: app/components/app-sidebar.tsx:221
 #: app/components/command-menu.tsx:130
+#: app/routes/_app+/$orgSlug_+/notes.tsx:272
 msgid "Notes"
 msgstr "الملاحظات"
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:379
+msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
+msgstr "تساعدك الملاحظات على تسجيل الأفكار ومحاضر الاجتماعات أو أي شيء مهم لمنظمتك. ابدأ بإنشاء ملاحظتك الأولى."
 
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
@@ -355,6 +417,7 @@ msgid "Or continue with email or username"
 msgstr "أو تابع باستخدام البريد الإلكتروني أو اسم المستخدم"
 
 #: app/components/app-sidebar.tsx:133
+#: app/components/team-switcher.tsx:117
 #: app/routes/_app+/organizations.tsx:198
 msgid "Organizations"
 msgstr "المنظمات"
@@ -420,6 +483,10 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Save changes"
 msgstr "حفظ التغييرات"
 
+#: app/routes/_app+/$orgSlug_+/notes.tsx:333
+msgid "Search notes by title or content..."
+msgstr "البحث في الملاحظات بالعنوان أو المحتوى..."
+
 #: app/components/command-menu.tsx:99
 #: app/components/site-header.tsx:39
 msgid "Search notes..."
@@ -471,6 +538,10 @@ msgstr "أنشئ حساباً باستخدام حساب التواصل الاج�
 #: app/routes/_auth+/login.tsx:711
 msgid "Signing in as"
 msgstr "تسجيل الدخول باسم"
+
+#: app/routes/_app+/$orgSlug_+/index.tsx:296
+msgid "Submit"
+msgstr "إرسال"
 
 #. placeholder {0}: trialStatus.daysRemaining
 #: app/components/app-sidebar.tsx:58
@@ -526,13 +597,30 @@ msgstr "وجدنا منظمتك:"
 msgid "We've sent you a code to verify your email address."
 msgstr "لقد أرسلنا لك رمزاً للتحقق من عنوان بريدك الإلكتروني."
 
+#. placeholder {0}: user?.name || 'User'
+#: app/routes/_app+/$orgSlug_+/index.tsx:290
+msgid "Welcome {0}!"
+msgstr "مرحباً {0}!"
+
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr "مرحباً بعودتك"
 
+#: app/routes/_app+/$orgSlug_+/index.tsx:291
+msgid "Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
+msgstr "مرحباً بك في لوحة تحكم المنظمة. هنا يمكنك إدارة إعدادات منظمتك وعرض التحليلات."
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:273
+msgid "You can create notes for your organization here."
+msgstr "يمكنك إنشاء ملاحظات لمنظمتك هنا."
+
 #: app/routes/_app+/organizations.tsx:234
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
 msgstr "تمت دعوتك للانضمام إلى المنظمات التالية. اختر قبول أو رفض كل دعوة."
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:377
+msgid "You haven't created any notes yet!"
+msgstr "لم تقم بإنشاء أي ملاحظات بعد!"
 
 #: app/routes/_app+/organizations.tsx:378
 msgid "You haven't joined any organizations yet."

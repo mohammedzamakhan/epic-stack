@@ -11,6 +11,8 @@ import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
 } from 'react-router'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
@@ -224,6 +226,7 @@ export default function NotesRoute({
 		searchQuery: string
 	}
 }) {
+	const { _ } = useLingui()
 	const location = useLocation()
 	const [hasOutlet, setHasOutlet] = useState(false)
 	const navigate = useNavigate()
@@ -266,8 +269,8 @@ export default function NotesRoute({
 		<div className="flex h-full flex-col py-8 md:p-8">
 			<div className="flex items-center justify-between pb-4">
 				<PageTitle
-					title={`Notes`}
-					description="You can create notes for your organization here."
+					title={_(t`Notes`)}
+					description={_(t`You can create notes for your organization here.`)}
 				/>
 				<div className="flex items-center gap-4">
 					<Tabs
@@ -287,7 +290,9 @@ export default function NotesRoute({
 										</span>
 									</TooltipTrigger>
 									<Portal>
-										<TooltipContent>Cards</TooltipContent>
+										<TooltipContent>
+											<Trans>Cards</Trans>
+										</TooltipContent>
 									</Portal>
 								</Tooltip>
 							</TabsTrigger>
@@ -299,7 +304,9 @@ export default function NotesRoute({
 										</span>
 									</TooltipTrigger>
 									<Portal>
-										<TooltipContent>Kanban</TooltipContent>
+										<TooltipContent>
+											<Trans>Kanban</Trans>
+										</TooltipContent>
 									</Portal>
 								</Tooltip>
 							</TabsTrigger>
@@ -307,7 +314,9 @@ export default function NotesRoute({
 					</Tabs>
 					<Button variant="default" asChild>
 						<Link to="new">
-							<Icon name="plus">New Note</Icon>
+							<Icon name="plus">
+								<Trans>New Note</Trans>
+							</Icon>
 						</Link>
 					</Button>
 				</div>
@@ -321,7 +330,7 @@ export default function NotesRoute({
 						role="searchbox"
 						name="search"
 						aria-label="Search notes"
-						placeholder="Search notes by title or content..."
+						placeholder={_(t`Search notes by title or content...`)}
 						value={searchValue}
 						onChange={(e) => {
 							setSearchValue(e.target.value)
@@ -353,23 +362,25 @@ export default function NotesRoute({
 					)
 				) : loaderData.searchQuery ? (
 					<EmptyState
-						title="No notes found"
-						description={`No notes match your search for "${loaderData.searchQuery}". Try a different search term or create a new note.`}
+						title={_(t`No notes found`)}
+						description={_(
+							t`No notes match your search for "${loaderData.searchQuery}". Try a different search term or create a new note.`,
+						)}
 						icons={['search', 'file-text']}
 						action={{
-							label: 'Create Note',
+							label: _(t`Create Note`),
 							href: `/${loaderData.organization.slug}/notes/new`,
 						}}
 					/>
 				) : (
 					<EmptyState
-						title="You haven't created any notes yet!"
-						description="Notes help you capture thoughts, meeting minutes, or anything
-						important for your organization. Get started by creating your
-						first note."
+						title={_(t`You haven't created any notes yet!`)}
+						description={_(
+							t`Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note.`,
+						)}
 						icons={['file-text', 'link-2', 'image']}
 						action={{
-							label: 'Create Note',
+							label: _(t`Create Note`),
 							href: `/${loaderData.organization.slug}/notes/new`,
 						}}
 					/>
@@ -399,7 +410,9 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				404: ({ params }) => (
-					<p>No organization with the slug "{params.orgSlug}" exists</p>
+					<p>
+						<Trans>No organization with the slug "{params.orgSlug}" exists</Trans>
+					</p>
 				),
 			}}
 		/>

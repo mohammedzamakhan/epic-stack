@@ -16,6 +16,8 @@ import {
 } from 'react-router'
 import { useEffect } from 'react'
 import confetti from 'canvas-confetti'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { PageTitle } from '@repo/ui'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
 import { NotesChart } from '#app/components/notes-chart.tsx'
@@ -212,6 +214,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function OrganizationDashboard() {
+	const { _ } = useLingui()
 	const { chartData, daysToShow, onboardingProgress, leaders } =
 		useLoaderData() as {
 			organization: { name: string }
@@ -284,12 +287,14 @@ export default function OrganizationDashboard() {
 	return (
 		<div className="py-8 md:p-8">
 			<PageTitle
-				title={`Welcome ${user?.name || 'User'}!`}
-				description="Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
+				title={_(t`Welcome ${user?.name || 'User'}!`)}
+				description={_(t`Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics.`)}
 			/>
 
 			<Form method="post">
-				<button type="submit">Submit</button>
+				<button type="submit">
+					<Trans>Submit</Trans>
+				</button>
 			</Form>
 
 			<div className="flex flex-wrap gap-8 md:flex-nowrap">

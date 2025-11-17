@@ -57,6 +57,7 @@ msgstr ""
 msgid "Add members"
 msgstr ""
 
+#: app/components/team-switcher.tsx:167
 #: app/routes/_app+/organizations.tsx:219
 msgid "Add organization"
 msgstr ""
@@ -81,6 +82,10 @@ msgstr ""
 #. placeholder {0}: note.createdByName
 #: app/components/command-menu.tsx:141
 msgid "by {0}"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:294
+msgid "Cards"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:142
@@ -139,6 +144,15 @@ msgstr ""
 msgid "Create new note"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/notes.new.tsx:32
+msgid "Create New Note"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:371
+#: app/routes/_app+/$orgSlug_+/notes.tsx:383
+msgid "Create Note"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:109
 #: app/components/app-sidebar.tsx:215
 msgid "Dashboard"
@@ -154,6 +168,10 @@ msgstr ""
 
 #: app/components/onboarding-checklist.tsx:116
 msgid "Done!"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
+msgid "Edit Note"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:122
@@ -251,6 +269,10 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
+#: app/components/team-switcher.tsx:156
+msgid "Invite members"
+msgstr ""
+
 #: app/components/command-menu.tsx:124
 msgid "Invite new members"
 msgstr ""
@@ -266,6 +288,10 @@ msgstr ""
 
 #: app/routes/_app+/organizations.tsx:199
 msgid "Jump into an existing organization, accept pending invitations, or add a new one."
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:308
+msgid "Kanban"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:467
@@ -305,6 +331,14 @@ msgstr ""
 msgid "MCP Server"
 msgstr ""
 
+#: app/components/team-switcher.tsx:92
+msgid "member"
+msgstr ""
+
+#: app/components/team-switcher.tsx:94
+msgid "members"
+msgstr ""
+
 #: app/components/app-sidebar.tsx:244
 msgid "Members"
 msgstr ""
@@ -313,16 +347,39 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/notes.tsx:318
+msgid "New Note"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:132
 msgid "New Password"
+msgstr ""
+
+#. placeholder {0}: params.noteId
+#: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:112
+msgid "No note with the id \"{0}\" exists"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:365
+msgid "No notes found"
 msgstr ""
 
 #: app/components/command-menu.tsx:105
 msgid "No notes found."
 msgstr ""
 
+#. placeholder {0}: loaderData.searchQuery
+#: app/routes/_app+/$orgSlug_+/notes.tsx:367
+msgid "No notes match your search for \"{0}\". Try a different search term or create a new note."
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:372
 msgid "No organization found"
+msgstr ""
+
+#. placeholder {0}: params.orgSlug
+#: app/routes/_app+/$orgSlug_+/notes.tsx:414
+msgid "No organization with the slug \"{0}\" exists"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:131
@@ -335,7 +392,12 @@ msgstr ""
 
 #: app/components/app-sidebar.tsx:221
 #: app/components/command-menu.tsx:130
+#: app/routes/_app+/$orgSlug_+/notes.tsx:272
 msgid "Notes"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:379
+msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr ""
 
 #: app/routes/_app+/notifications.tsx:26
@@ -355,6 +417,7 @@ msgid "Or continue with email or username"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:133
+#: app/components/team-switcher.tsx:117
 #: app/routes/_app+/organizations.tsx:198
 msgid "Organizations"
 msgstr ""
@@ -420,6 +483,10 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/notes.tsx:333
+msgid "Search notes by title or content..."
+msgstr ""
+
 #: app/components/command-menu.tsx:99
 #: app/components/site-header.tsx:39
 msgid "Search notes..."
@@ -470,6 +537,10 @@ msgstr ""
 #: app/routes/_auth+/login.tsx:550
 #: app/routes/_auth+/login.tsx:711
 msgid "Signing in as"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/index.tsx:296
+msgid "Submit"
 msgstr ""
 
 #. placeholder {0}: trialStatus.daysRemaining
@@ -526,12 +597,29 @@ msgstr ""
 msgid "We've sent you a code to verify your email address."
 msgstr ""
 
+#. placeholder {0}: user?.name || 'User'
+#: app/routes/_app+/$orgSlug_+/index.tsx:290
+msgid "Welcome {0}!"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr ""
 
+#: app/routes/_app+/$orgSlug_+/index.tsx:291
+msgid "Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:273
+msgid "You can create notes for your organization here."
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:234
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:377
+msgid "You haven't created any notes yet!"
 msgstr ""
 
 #: app/routes/_app+/organizations.tsx:378

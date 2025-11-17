@@ -1,6 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { prisma } from '@repo/prisma'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
+import { Trans } from '@lingui/macro'
 import { SheetHeader, SheetTitle } from '@repo/ui'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
@@ -27,7 +28,9 @@ export default function NewNote() {
 	return (
 		<>
 			<SheetHeader className="border-b">
-				<SheetTitle>Create New Note</SheetTitle>
+				<SheetTitle>
+					<Trans>Create New Note</Trans>
+				</SheetTitle>
 			</SheetHeader>
 
 			<section
