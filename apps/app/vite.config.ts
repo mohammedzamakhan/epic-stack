@@ -81,7 +81,12 @@ export default defineConfig((config) => ({
 		cssMinify: MODE === 'production',
 
 		rollupOptions: {
-			external: [/node:.*/, 'fsevents'],
+			external: [
+				/node:.*/,
+				'fsevents',
+				'@sentry/profiling-node',
+				'@sentry-internal/node-cpu-profiler',
+			],
 			output: {
 				// Optimize chunk splitting for better caching and parallel loading
 				manualChunks: (id) => {
@@ -124,6 +129,7 @@ export default defineConfig((config) => ({
 	},
 	optimizeDeps: {
 		include: ['@repo/ai', '@repo/email', '@repo/integrations'],
+		exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
 	},
 	...(MODE !== 'test' && {
 		ssr: {

@@ -54,7 +54,12 @@ export default defineConfig((config) => ({
 		cssMinify: MODE === 'production',
 
 		rollupOptions: {
-			external: [/node:.*/, 'fsevents'],
+			external: [
+				/node:.*/,
+				'fsevents',
+				'@sentry/profiling-node',
+				'@sentry-internal/node-cpu-profiler',
+			],
 		},
 
 		assetsInlineLimit: (source: string) => {
@@ -67,6 +72,7 @@ export default defineConfig((config) => ({
 	},
 	optimizeDeps: {
 		include: ['@repo/email', '@repo/integrations'],
+		exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
 	},
 	...(MODE !== 'test' && {
 		ssr: {
