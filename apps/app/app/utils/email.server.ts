@@ -1,7 +1,7 @@
 import { render } from '@react-email/components'
 import { type ReactElement } from 'react'
 import { z } from 'zod'
-import { logger } from './logger.server.ts'
+import { logger } from '@repo/observability'
 
 const resendErrorSchema = z.union([
 	z.object({

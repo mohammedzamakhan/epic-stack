@@ -1,5 +1,5 @@
 import { prisma } from './db.server.ts'
-import { logger, sentryLogger } from './logger.server.ts'
+import { logger, sentryLogger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
 
 // SSO-specific audit event types

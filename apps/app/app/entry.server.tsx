@@ -16,7 +16,7 @@ import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
 import { getEnv, init } from './utils/env.server.ts'
 import { getInstanceInfo } from './utils/litefs.server.ts'
-import { sentryLogger, sanitizeUrl } from './utils/logger.server.ts'
+import { sentryLogger, sanitizeUrl } from '@repo/observability'
 import { NonceProvider } from './utils/nonce-provider.ts'
 import { makeTimings } from './utils/timing.server.ts'
 

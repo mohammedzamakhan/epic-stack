@@ -11,7 +11,7 @@ import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
 import morgan from 'morgan'
 import { type ServerBuild } from 'react-router'
-import { logger, sentryLogger } from '../app/utils/logger.server.js'
+import { logger, sentryLogger } from '@repo/observability'
 
 const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'

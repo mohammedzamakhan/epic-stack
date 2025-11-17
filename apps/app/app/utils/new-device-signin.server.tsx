@@ -4,7 +4,7 @@ import { prisma } from './db.server.ts'
 import { sendEmail } from './email.server.ts'
 import { parseUserAgent, getUserAgent } from './user-agent.server.ts'
 import { getClientIp, trackIpRequest } from './ip-tracking.server.ts'
-import { logger } from './logger.server.ts'
+import { logger } from '@repo/observability'
 
 interface CheckNewDeviceParams {
 	userId: string
