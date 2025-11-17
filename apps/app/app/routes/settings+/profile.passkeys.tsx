@@ -1,5 +1,8 @@
 import { startRegistration } from '@simplewebauthn/browser'
 import { formatDistanceToNow } from 'date-fns'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { i18n } from '@lingui/core'
 import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
@@ -10,7 +13,11 @@ import { type Route } from './+types/profile.passkeys.ts'
 import { Button, Icon } from '@repo/ui'
 
 export const handle = {
-	breadcrumb: <Icon name="passkey">Passkeys</Icon>,
+	breadcrumb: (
+		<Icon name="passkey">
+			<Trans>Passkeys</Trans>
+		</Icon>
+	),
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -36,7 +43,7 @@ export async function action({ request }: Route.ActionArgs) {
 		const passkeyId = formData.get('passkeyId')
 		if (typeof passkeyId !== 'string') {
 			return Response.json(
-				{ status: 'error', error: 'Invalid passkey ID' },
+				{ status: 'error', error: i18n._(t`Invalid passkey ID`) },
 				{ status: 400 },
 			)
 		}
@@ -51,7 +58,7 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 
 	return Response.json(
-		{ status: 'error', error: 'Invalid intent' },
+		{ status: 'error', error: i18n._(t`Invalid intent`) },
 		{ status: 400 },
 	)
 }
@@ -92,6 +99,7 @@ const RegistrationOptionsSchema = z.object({
 }) satisfies z.ZodType<{ options: PublicKeyCredentialCreationOptionsJSON }>
 
 export default function Passkeys({ loaderData }: Route.ComponentProps) {
+	const { _ } = useLingui()
 	const revalidator = useRevalidator()
 	const [error, setError] = useState<string | null>(null)
 
@@ -118,21 +126,25 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 
 			void revalidator.revalidate()
 		} catch (err) {
-			setError('Failed to create passkey. Please try again.')
+			setError(_(t`Failed to create passkey. Please try again.`))
 		}
 	}
 
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="flex justify-between gap-4">
-				<h1 className="text-h1">Passkeys</h1>
+				<h1 className="text-h1">
+					<Trans>Passkeys</Trans>
+				</h1>
 				<form action={handlePasskeyRegistration}>
 					<Button
 						type="submit"
 						variant="secondary"
 						className="flex items-center gap-2"
 					>
-						<Icon name="plus">Register new passkey</Icon>
+						<Icon name="plus">
+							<Trans>Register new passkey</Trans>
+						</Icon>
 					</Button>
 				</form>
 			</div>
@@ -154,14 +166,18 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 								<div className="flex items-center gap-2">
 									<Icon name="lock" />
 									<span className="font-semibold">
-										{passkey.deviceType === 'platform'
-											? 'Device'
-											: 'Security Key'}
+										{passkey.deviceType === 'platform' ? (
+											<Trans>Device</Trans>
+										) : (
+											<Trans>Security Key</Trans>
+										)}
 									</span>
 								</div>
 								<div className="text-muted-foreground text-sm">
-									Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
-									ago
+									<Trans>
+										Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
+										ago
+									</Trans>
 								</div>
 							</div>
 							<Form method="POST">
@@ -174,7 +190,9 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 									size="sm"
 									className="flex items-center gap-2"
 								>
-									<Icon name="trash-2">Delete</Icon>
+									<Icon name="trash-2">
+										<Trans>Delete</Trans>
+									</Icon>
 								</Button>
 							</Form>
 						</li>
@@ -182,7 +200,7 @@ export default function Passkeys({ loaderData }: Route.ComponentProps) {
 				</ul>
 			) : (
 				<div className="text-muted-foreground text-center">
-					No passkeys registered yet
+					<Trans>No passkeys registered yet</Trans>
 				</div>
 			)}
 		</div>

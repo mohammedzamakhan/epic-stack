@@ -1,6 +1,8 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Trans, t } from '@lingui/macro'
+import { i18n } from '@lingui/core'
 import { data, redirect, Form, Link } from 'react-router'
 import {
 	ErrorList,
@@ -29,7 +31,11 @@ import { type Route } from './+types/profile.password_.create.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="more-horizontal">Password</Icon>,
+	breadcrumb: (
+		<Icon name="more-horizontal">
+			<Trans>Password</Trans>
+		</Icon>
+	),
 	getSitemapEntries: () => null,
 }
 
@@ -63,7 +69,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['password'],
 					code: 'custom',
-					message: 'Password is too common',
+					message: i18n._(t`Password is too common`),
 				})
 			}
 		}),
@@ -115,7 +121,9 @@ export default function CreatePasswordRoute({
 		<Form method="POST" {...getFormProps(form)} className="mx-auto max-w-md">
 			<FieldGroup>
 				<Field data-invalid={fields.password.errors?.length ? true : undefined}>
-					<FieldLabel htmlFor={fields.password.id}>New Password</FieldLabel>
+					<FieldLabel htmlFor={fields.password.id}>
+						<Trans>New Password</Trans>
+					</FieldLabel>
 					<Input
 						{...getInputProps(fields.password, { type: 'password' })}
 						autoComplete="new-password"
@@ -132,7 +140,7 @@ export default function CreatePasswordRoute({
 					}
 				>
 					<FieldLabel htmlFor={fields.confirmPassword.id}>
-						Confirm New Password
+						<Trans>Confirm New Password</Trans>
 					</FieldLabel>
 					<Input
 						{...getInputProps(fields.confirmPassword, { type: 'password' })}
@@ -149,13 +157,15 @@ export default function CreatePasswordRoute({
 				<ErrorList id={form.errorId} errors={form.errors} />
 				<div className="grid w-full grid-cols-2 gap-6">
 					<Button variant="secondary" asChild>
-						<Link to="..">Cancel</Link>
+						<Link to="..">
+							<Trans>Cancel</Trans>
+						</Link>
 					</Button>
 					<StatusButton
 						type="submit"
 						status={isPending ? 'pending' : (form.status ?? 'idle')}
 					>
-						Create Password
+						<Trans>Create Password</Trans>
 					</StatusButton>
 				</div>
 			</FieldGroup>

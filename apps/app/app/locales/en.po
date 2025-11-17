@@ -33,12 +33,20 @@ msgstr ""
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:728
+#: app/routes/_auth+/login.tsx:740
 msgid "← Back to SSO login"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:160
+msgid "2FA is enabled"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:224
+msgid "A user already exists with this username"
 msgstr ""
 
 #: app/routes/_app+/organizations.tsx:297
@@ -70,8 +78,22 @@ msgstr ""
 msgid "Adjust your search query to show more."
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:396
+msgid "All of your data has been deleted"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:276
 msgid "Already have an account?"
+msgstr ""
+
+#. placeholder {0}: loaderData.user.email
+#: app/routes/settings+/profile.change-email.tsx:144
+msgid "An email notice will also be sent to your old address {0}."
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:375
+#: app/routes/settings+/profile.index.tsx:418
+msgid "Are you sure?"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:244
@@ -88,6 +110,11 @@ msgstr ""
 msgid "by {0}"
 msgstr ""
 
+#: app/routes/settings+/profile.password_.create.tsx:161
+#: app/routes/settings+/profile.password.tsx:222
+msgid "Cancel"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/notes.tsx:294
 msgid "Cards"
 msgstr ""
@@ -97,7 +124,24 @@ msgid "Change"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:147
+#: app/routes/settings+/profile.change-email.tsx:41
+#: app/routes/settings+/profile.change-email.tsx:138
 msgid "Change Email"
+msgstr ""
+
+#. placeholder {0}: loaderData.user.email
+#: app/routes/settings+/profile.index.tsx:152
+msgid "Change email from {0}"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:173
+#: app/routes/settings+/profile.password.tsx:229
+msgid "Change Password"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:137
+#: app/routes/settings+/profile.index.tsx:138
+msgid "Change profile photo"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:70
@@ -116,6 +160,11 @@ msgstr ""
 msgid "Complete your signup to join the organization"
 msgstr ""
 
+#: app/routes/settings+/profile.password_.create.tsx:143
+#: app/routes/settings+/profile.password.tsx:202
+msgid "Confirm New Password"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr ""
@@ -124,7 +173,11 @@ msgstr ""
 msgid "Confirm your new password"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:657
+#: app/routes/settings+/profile.connections.tsx:35
+msgid "Connections"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:662
 msgid "Continue"
 msgstr ""
 
@@ -134,6 +187,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:267
 msgid "Continue with your password"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:175
+msgid "Create a Password"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:354
@@ -161,6 +218,14 @@ msgstr ""
 msgid "Create Note"
 msgstr ""
 
+#: app/routes/settings+/profile.password_.create.tsx:168
+msgid "Create Password"
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:166
+msgid "Current Password"
+msgstr ""
+
 #: app/components/notes-chart.tsx:58
 msgid "Daily Notes Created"
 msgstr ""
@@ -171,8 +236,32 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:395
+msgid "Data Deleted"
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:312
 msgid "Decline"
+msgstr ""
+
+#: app/routes/settings+/profile.passkeys.tsx:194
+msgid "Delete"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:420
+msgid "Delete all your data"
+msgstr ""
+
+#: app/routes/settings+/profile.connections.tsx:119
+msgid "Deleted"
+msgstr ""
+
+#: app/routes/settings+/profile.passkeys.tsx:170
+msgid "Device"
+msgstr ""
+
+#: app/routes/settings+/profile.connections.tsx:208
+msgid "Disconnect this account"
 msgstr ""
 
 #: app/components/feature-updates.tsx:206
@@ -192,23 +281,31 @@ msgstr ""
 msgid "Down by {0}% this period"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:201
+msgid "Download your data"
+msgstr ""
+
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
 msgid "Edit Note"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:122
-#: app/routes/_auth+/login.tsx:743
+#: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
 msgid "Email"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:630
-#: app/routes/_auth+/login.tsx:745
+#: app/routes/_auth+/login.tsx:635
+#: app/routes/_auth+/login.tsx:757
 msgid "Email or Username"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:636
-#: app/routes/_auth+/login.tsx:750
+#: app/routes/settings+/profile.index.tsx:164
+msgid "Enable 2FA"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:641
+#: app/routes/_auth+/login.tsx:762
 msgid "Enter your email or username"
 msgstr ""
 
@@ -220,7 +317,7 @@ msgstr ""
 msgid "Enter your new password below."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:776
+#: app/routes/_auth+/login.tsx:788
 msgid "Enter your password"
 msgstr ""
 
@@ -232,6 +329,10 @@ msgstr ""
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr ""
 
+#: app/routes/settings+/profile.passkeys.tsx:129
+msgid "Failed to create passkey. Please try again."
+msgstr ""
+
 #: app/components/feature-updates.tsx:178
 msgid "Feature Preview"
 msgstr ""
@@ -240,7 +341,7 @@ msgstr ""
 msgid "Forgot Password"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:769
+#: app/routes/_auth+/login.tsx:781
 msgid "Forgot your password?"
 msgstr ""
 
@@ -275,6 +376,10 @@ msgstr ""
 msgid "Give feedback"
 msgstr ""
 
+#: app/routes/settings+/profile.connections.tsx:131
+msgid "Here are your current connections:"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
 msgstr ""
@@ -283,8 +388,20 @@ msgstr ""
 msgid "If you change your email, you'll need to verify the new address"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:91
+msgid "Incorrect password."
+msgstr ""
+
 #: app/components/app-sidebar.tsx:249
 msgid "Integrations"
+msgstr ""
+
+#: app/routes/settings+/profile.passkeys.tsx:61
+msgid "Invalid intent"
+msgstr ""
+
+#: app/routes/settings+/profile.passkeys.tsx:46
+msgid "Invalid passkey ID"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:210
@@ -349,6 +466,14 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:183
+msgid "Manage connections"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:190
+msgid "Manage passkeys"
+msgstr ""
+
 #: app/routes/_app+/profile.tsx:91
 msgid "Manage your account settings and set e-mail preferences."
 msgstr ""
@@ -382,7 +507,12 @@ msgid "Members"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:90
+#: app/routes/settings+/profile.index.tsx:297
 msgid "Name"
+msgstr ""
+
+#: app/routes/settings+/profile.change-email.tsx:156
+msgid "New Email"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:318
@@ -390,6 +520,8 @@ msgid "New Note"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:132
+#: app/routes/settings+/profile.password_.create.tsx:125
+#: app/routes/settings+/profile.password.tsx:184
 msgid "New Password"
 msgstr ""
 
@@ -422,6 +554,10 @@ msgstr ""
 #. placeholder {0}: params.orgSlug
 #: app/routes/_app+/$orgSlug_+/notes.tsx:414
 msgid "No organization with the slug \"{0}\" exists"
+msgstr ""
+
+#: app/routes/settings+/profile.passkeys.tsx:203
+msgid "No passkeys registered yet"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:131
@@ -480,11 +616,24 @@ msgstr ""
 msgid "Organizations are used to group your projects."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:764
+#: app/routes/settings+/profile.passkeys.tsx:18
+#: app/routes/settings+/profile.passkeys.tsx:137
+msgid "Passkeys"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:776
+#: app/routes/settings+/profile.password_.create.tsx:36
+#: app/routes/settings+/profile.password.tsx:39
 msgid "Password"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:135
+msgid "Password Changed"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:73
+#: app/routes/settings+/profile.password_.create.tsx:72
+#: app/routes/settings+/profile.password.tsx:99
 msgid "Password is too common"
 msgstr ""
 
@@ -500,7 +649,8 @@ msgstr ""
 msgid "Please enter your 2FA code to verify your identity."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:74
+#: app/routes/_auth+/login.tsx:130
+#: app/routes/_auth+/login.tsx:608
 msgid "Please enter your email or username"
 msgstr ""
 
@@ -522,7 +672,16 @@ msgstr ""
 msgid "Recommended for"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:795
+#: app/routes/settings+/profile.passkeys.tsx:146
+msgid "Register new passkey"
+msgstr ""
+
+#. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
+#: app/routes/settings+/profile.passkeys.tsx:177
+msgid "Registered {0} ago"
+msgstr ""
+
+#: app/routes/_auth+/login.tsx:807
 msgid "Remember me"
 msgstr ""
 
@@ -543,6 +702,7 @@ msgid "Reset Password"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:178
+#: app/routes/settings+/profile.index.tsx:321
 msgid "Save changes"
 msgstr ""
 
@@ -551,7 +711,7 @@ msgid "Search notes by title or content..."
 msgstr ""
 
 #: app/components/command-menu.tsx:99
-#: app/components/site-header.tsx:39
+#: app/components/site-header.tsx:38
 msgid "Search notes..."
 msgstr ""
 
@@ -563,8 +723,16 @@ msgstr ""
 msgid "Security"
 msgstr ""
 
+#: app/routes/settings+/profile.passkeys.tsx:172
+msgid "Security Key"
+msgstr ""
+
 #: app/routes/_app+/security.tsx:234
 msgid "Security Settings"
+msgstr ""
+
+#: app/routes/settings+/profile.change-email.tsx:172
+msgid "Send Confirmation"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:236
@@ -582,12 +750,16 @@ msgstr ""
 msgid "Sign in"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:808
+#: app/routes/_auth+/login.tsx:820
 msgid "Sign In"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:268
 msgid "Sign in to your account"
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:377
+msgid "Sign out of {otherSessionsCount} other sessions"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:269
@@ -599,7 +771,7 @@ msgid "Sign up with your social account or email"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:550
-#: app/routes/_auth+/login.tsx:711
+#: app/routes/_auth+/login.tsx:723
 msgid "Signing in as"
 msgstr ""
 
@@ -615,6 +787,10 @@ msgstr ""
 msgid "Team members who have created the most notes"
 msgstr ""
 
+#: app/routes/settings+/profile.password.tsx:56
+msgid "The passwords must match"
+msgstr ""
+
 #. placeholder {0}: trialStatus.daysRemaining
 #: app/components/app-sidebar.tsx:58
 msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
@@ -622,6 +798,14 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
+msgstr ""
+
+#: app/routes/settings+/profile.change-email.tsx:79
+msgid "This email is already in use."
+msgstr ""
+
+#: app/routes/settings+/profile.index.tsx:384
+msgid "This is your only session"
 msgstr ""
 
 #: app/components/leadership-card.tsx:58
@@ -645,7 +829,8 @@ msgid "Use password instead"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:105
-#: app/routes/_auth+/login.tsx:744
+#: app/routes/_auth+/login.tsx:756
+#: app/routes/settings+/profile.index.tsx:281
 msgid "Username"
 msgstr ""
 
@@ -653,7 +838,8 @@ msgstr ""
 msgid "Username or Email"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:67
+#: app/routes/_auth+/login.tsx:123
+#: app/routes/_auth+/login.tsx:685
 msgid "Username or email is required"
 msgstr ""
 
@@ -694,6 +880,15 @@ msgstr ""
 msgid "You can create notes for your organization here."
 msgstr ""
 
+#: app/routes/settings+/profile.connections.tsx:107
+#: app/routes/settings+/profile.connections.tsx:220
+msgid "You cannot delete your last connection unless you have a password."
+msgstr ""
+
+#: app/routes/settings+/profile.connections.tsx:146
+msgid "You don't have any connections yet."
+msgstr ""
+
 #: app/routes/_app+/organizations.tsx:234
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
 msgstr ""
@@ -706,10 +901,22 @@ msgstr ""
 msgid "You haven't joined any organizations yet."
 msgstr ""
 
+#: app/routes/settings+/profile.change-email.tsx:141
+msgid "You will receive an email at the new email address to confirm."
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
+msgstr ""
+
+#: app/routes/settings+/profile.connections.tsx:120
+msgid "Your connection has been deleted."
+msgstr ""
+
+#: app/routes/settings+/profile.password.tsx:136
+msgid "Your password has been changed."
 msgstr ""

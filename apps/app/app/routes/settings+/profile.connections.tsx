@@ -1,5 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Trans, t } from '@lingui/macro'
+import { i18n } from '@lingui/core'
 import { useState } from 'react'
 import { data, useFetcher } from 'react-router'
 
@@ -28,7 +30,11 @@ import { type Route } from './+types/profile.connections.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="link-2">Connections</Icon>,
+	breadcrumb: (
+		<Icon name="link-2">
+			<Trans>Connections</Trans>
+		</Icon>
+	),
 	getSitemapEntries: () => null,
 }
 
@@ -97,7 +103,9 @@ export async function action({ request }: Route.ActionArgs) {
 	)
 	invariantResponse(
 		await userCanDeleteConnections(userId),
-		'You cannot delete your last connection unless you have a password.',
+		i18n._(
+			t`You cannot delete your last connection unless you have a password.`,
+		),
 	)
 	const connectionId = formData.get('connectionId')
 	invariantResponse(typeof connectionId === 'string', 'Invalid connectionId')
@@ -108,8 +116,8 @@ export async function action({ request }: Route.ActionArgs) {
 		},
 	})
 	const toastHeaders = await createToastHeaders({
-		title: 'Deleted',
-		description: 'Your connection has been deleted.',
+		title: i18n._(t`Deleted`),
+		description: i18n._(t`Your connection has been deleted.`),
 	})
 	return data({ status: 'success' } as const, { headers: toastHeaders })
 }
@@ -119,7 +127,9 @@ export default function Connections({ loaderData }: Route.ComponentProps) {
 		<div className="mx-auto max-w-md">
 			{loaderData.connections.length ? (
 				<div className="flex flex-col gap-2">
-					<p>Here are your current connections:</p>
+					<p>
+						<Trans>Here are your current connections:</Trans>
+					</p>
 					<ul className="flex flex-col gap-4">
 						{loaderData.connections.map((c) => (
 							<li key={c.id}>
@@ -132,7 +142,9 @@ export default function Connections({ loaderData }: Route.ComponentProps) {
 					</ul>
 				</div>
 			) : (
-				<p>You don't have any connections yet.</p>
+				<p>
+					<Trans>You don't have any connections yet.</Trans>
+				</p>
 			)}
 			<div className="border-border mt-5 flex flex-col gap-5 border-t-2 border-b-2 py-3">
 				{providerNames.map((providerName) => (
@@ -192,7 +204,9 @@ function Connection({
 									<Icon name="x" />
 								</StatusButton>
 							</TooltipTrigger>
-							<TooltipContent>Disconnect this account</TooltipContent>
+							<TooltipContent>
+								<Trans>Disconnect this account</Trans>
+							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
 				</deleteFetcher.Form>
@@ -203,7 +217,9 @@ function Connection({
 							<Icon name="help-circle"></Icon>
 						</TooltipTrigger>
 						<TooltipContent>
-							You cannot delete your last connection unless you have a password.
+							<Trans>
+								You cannot delete your last connection unless you have a password.
+							</Trans>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>

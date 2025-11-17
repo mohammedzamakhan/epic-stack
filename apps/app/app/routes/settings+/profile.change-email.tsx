@@ -1,6 +1,8 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Trans, t } from '@lingui/macro'
+import { i18n } from '@lingui/core'
 import { brand } from '@repo/config/brand'
 import { EmailChangeEmail } from '@repo/email'
 import { data, redirect, Form } from 'react-router'
@@ -34,7 +36,11 @@ export const BreadcrumbHandle = z.object({ breadcrumb: z.any() })
 export type BreadcrumbHandle = z.infer<typeof BreadcrumbHandle>
 
 export const handle: BreadcrumbHandle & SEOHandle = {
-	breadcrumb: <Icon name="mail">Change Email</Icon>,
+	breadcrumb: (
+		<Icon name="mail">
+			<Trans>Change Email</Trans>
+		</Icon>
+	),
 	getSitemapEntries: () => null,
 }
 
@@ -70,7 +76,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['email'],
 					code: z.ZodIssueCode.custom,
-					message: 'This email is already in use.',
+					message: i18n._(t`This email is already in use.`),
 				})
 			}
 		}),
@@ -128,11 +134,17 @@ export default function ChangeEmailIndex({
 	const isPending = useIsPending()
 	return (
 		<div>
-			<h1 className="text-h1">Change Email</h1>
-			<p>You will receive an email at the new email address to confirm.</p>
+			<h1 className="text-h1">
+				<Trans>Change Email</Trans>
+			</h1>
 			<p>
-				An email notice will also be sent to your old address{' '}
-				{loaderData.user.email}.
+				<Trans>You will receive an email at the new email address to confirm.</Trans>
+			</p>
+			<p>
+				<Trans>
+					An email notice will also be sent to your old address{' '}
+					{loaderData.user.email}.
+				</Trans>
 			</p>
 			<div className="mx-auto mt-5 max-w-sm">
 				<Form method="POST" {...getFormProps(form)}>
@@ -140,7 +152,9 @@ export default function ChangeEmailIndex({
 						<Field
 							data-invalid={fields.email.errors?.length ? true : undefined}
 						>
-							<FieldLabel htmlFor={fields.email.id}>New Email</FieldLabel>
+							<FieldLabel htmlFor={fields.email.id}>
+								<Trans>New Email</Trans>
+							</FieldLabel>
 							<Input
 								{...getInputProps(fields.email, { type: 'email' })}
 								autoComplete="email"
@@ -155,7 +169,7 @@ export default function ChangeEmailIndex({
 							<StatusButton
 								status={isPending ? 'pending' : (form.status ?? 'idle')}
 							>
-								Send Confirmation
+								<Trans>Send Confirmation</Trans>
 							</StatusButton>
 						</div>
 					</FieldGroup>

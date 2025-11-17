@@ -33,13 +33,21 @@ msgstr "{0}٪ مكتمل"
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr "{totalNotes} ملاحظة إجمالاً • {avgNotesPerDay} متوسط يومي"
 
-#: app/routes/_auth+/login.tsx:728
+#: app/routes/_auth+/login.tsx:740
 msgid "← Back to SSO login"
 msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
+
+#: app/routes/settings+/profile.index.tsx:160
+msgid "2FA is enabled"
+msgstr "المصادقة الثنائية مفعّلة"
 
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
 msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
+
+#: app/routes/settings+/profile.index.tsx:224
+msgid "A user already exists with this username"
+msgstr "يوجد مستخدم بالفعل بهذا اسم المستخدم"
 
 #: app/routes/_app+/organizations.tsx:297
 msgid "Accept"
@@ -70,9 +78,23 @@ msgstr "إضافة منظمة"
 msgid "Adjust your search query to show more."
 msgstr "اضبط استعلام البحث لعرض المزيد."
 
+#: app/routes/settings+/profile.index.tsx:396
+msgid "All of your data has been deleted"
+msgstr "تم حذف جميع بياناتك"
+
 #: app/routes/_auth+/signup.tsx:276
 msgid "Already have an account?"
 msgstr "هل لديك حساب بالفعل؟"
+
+#. placeholder {0}: loaderData.user.email
+#: app/routes/settings+/profile.change-email.tsx:144
+msgid "An email notice will also be sent to your old address {0}."
+msgstr "سيتم أيضًا إرسال إشعار بالبريد الإلكتروني إلى عنوانك القديم {0}."
+
+#: app/routes/settings+/profile.index.tsx:375
+#: app/routes/settings+/profile.index.tsx:418
+msgid "Are you sure?"
+msgstr "هل أنت متأكد؟"
 
 #: app/routes/_auth+/forgot-password.tsx:244
 msgid "Back to login"
@@ -88,6 +110,11 @@ msgstr "الفواتير"
 msgid "by {0}"
 msgstr "بواسطة {0}"
 
+#: app/routes/settings+/profile.password_.create.tsx:161
+#: app/routes/settings+/profile.password.tsx:222
+msgid "Cancel"
+msgstr "إلغاء"
+
 #: app/routes/_app+/$orgSlug_+/notes.tsx:294
 msgid "Cards"
 msgstr "بطاقات"
@@ -97,8 +124,25 @@ msgid "Change"
 msgstr "تغيير"
 
 #: app/components/settings/cards/profile-card.tsx:147
+#: app/routes/settings+/profile.change-email.tsx:41
+#: app/routes/settings+/profile.change-email.tsx:138
 msgid "Change Email"
 msgstr "تغيير البريد الإلكتروني"
+
+#. placeholder {0}: loaderData.user.email
+#: app/routes/settings+/profile.index.tsx:152
+msgid "Change email from {0}"
+msgstr "تغيير البريد الإلكتروني من {0}"
+
+#: app/routes/settings+/profile.index.tsx:173
+#: app/routes/settings+/profile.password.tsx:229
+msgid "Change Password"
+msgstr "تغيير كلمة المرور"
+
+#: app/routes/settings+/profile.index.tsx:137
+#: app/routes/settings+/profile.index.tsx:138
+msgid "Change profile photo"
+msgstr "تغيير صورة الملف الشخصي"
 
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
@@ -116,6 +160,11 @@ msgstr "مكتمل"
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
 
+#: app/routes/settings+/profile.password_.create.tsx:143
+#: app/routes/settings+/profile.password.tsx:202
+msgid "Confirm New Password"
+msgstr "تأكيد كلمة المرور الجديدة"
+
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr "تأكيد كلمة المرور"
@@ -124,7 +173,11 @@ msgstr "تأكيد كلمة المرور"
 msgid "Confirm your new password"
 msgstr "أكد كلمة المرور الجديدة"
 
-#: app/routes/_auth+/login.tsx:657
+#: app/routes/settings+/profile.connections.tsx:35
+msgid "Connections"
+msgstr "الاتصالات"
+
+#: app/routes/_auth+/login.tsx:662
 msgid "Continue"
 msgstr "متابعة"
 
@@ -135,6 +188,10 @@ msgstr "المتابعة باستخدام"
 #: app/routes/_auth+/login.tsx:267
 msgid "Continue with your password"
 msgstr "تابع باستخدام كلمة المرور الخاصة بك"
+
+#: app/routes/settings+/profile.index.tsx:175
+msgid "Create a Password"
+msgstr "إنشاء كلمة مرور"
 
 #: app/routes/_auth+/login.tsx:354
 msgid "Create account"
@@ -161,6 +218,14 @@ msgstr "إنشاء ملاحظة جديدة"
 msgid "Create Note"
 msgstr "إنشاء ملاحظة"
 
+#: app/routes/settings+/profile.password_.create.tsx:168
+msgid "Create Password"
+msgstr "إنشاء كلمة المرور"
+
+#: app/routes/settings+/profile.password.tsx:166
+msgid "Current Password"
+msgstr "كلمة المرور الحالية"
+
 #: app/components/notes-chart.tsx:58
 msgid "Daily Notes Created"
 msgstr "الملاحظات اليومية المنشأة"
@@ -171,9 +236,33 @@ msgstr "الملاحظات اليومية المنشأة"
 msgid "Dashboard"
 msgstr "لوحة التحكم"
 
+#: app/routes/settings+/profile.index.tsx:395
+msgid "Data Deleted"
+msgstr "تم حذف البيانات"
+
 #: app/routes/_app+/organizations.tsx:312
 msgid "Decline"
 msgstr "رفض"
+
+#: app/routes/settings+/profile.passkeys.tsx:194
+msgid "Delete"
+msgstr "حذف"
+
+#: app/routes/settings+/profile.index.tsx:420
+msgid "Delete all your data"
+msgstr "حذف جميع بياناتك"
+
+#: app/routes/settings+/profile.connections.tsx:119
+msgid "Deleted"
+msgstr "تم الحذف"
+
+#: app/routes/settings+/profile.passkeys.tsx:170
+msgid "Device"
+msgstr "جهاز"
+
+#: app/routes/settings+/profile.connections.tsx:208
+msgid "Disconnect this account"
+msgstr "قطع الاتصال بهذا الحساب"
 
 #: app/components/feature-updates.tsx:206
 msgid "Dismiss"
@@ -192,23 +281,31 @@ msgstr "تم!"
 msgid "Down by {0}% this period"
 msgstr "انخفض بنسبة {0}٪ في هذه الفترة"
 
+#: app/routes/settings+/profile.index.tsx:201
+msgid "Download your data"
+msgstr "تنزيل بياناتك"
+
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
 msgid "Edit Note"
 msgstr "تعديل ملاحظة"
 
 #: app/components/settings/cards/profile-card.tsx:122
-#: app/routes/_auth+/login.tsx:743
+#: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
-#: app/routes/_auth+/login.tsx:630
-#: app/routes/_auth+/login.tsx:745
+#: app/routes/_auth+/login.tsx:635
+#: app/routes/_auth+/login.tsx:757
 msgid "Email or Username"
 msgstr "البريد الإلكتروني / اسم المستخدم"
 
-#: app/routes/_auth+/login.tsx:636
-#: app/routes/_auth+/login.tsx:750
+#: app/routes/settings+/profile.index.tsx:164
+msgid "Enable 2FA"
+msgstr "تفعيل المصادقة الثنائية"
+
+#: app/routes/_auth+/login.tsx:641
+#: app/routes/_auth+/login.tsx:762
 msgid "Enter your email or username"
 msgstr "أدخل بريدك الإلكتروني أو اسم المستخدم"
 
@@ -220,7 +317,7 @@ msgstr "أدخل كلمة المرور الجديدة"
 msgid "Enter your new password below."
 msgstr "أدخل كلمة المرور الجديدة أدناه."
 
-#: app/routes/_auth+/login.tsx:776
+#: app/routes/_auth+/login.tsx:788
 msgid "Enter your password"
 msgstr "أدخل كلمة المرور"
 
@@ -232,6 +329,10 @@ msgstr "أدخل اسم المستخدم أو البريد الإلكتروني"
 msgid "Failed to authenticate with passkey: {errorMessage}"
 msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMessage}"
 
+#: app/routes/settings+/profile.passkeys.tsx:129
+msgid "Failed to create passkey. Please try again."
+msgstr "فشل إنشاء مفتاح المرور. يرجى المحاولة مرة أخرى."
+
 #: app/components/feature-updates.tsx:178
 msgid "Feature Preview"
 msgstr "معاينة الميزة"
@@ -240,7 +341,7 @@ msgstr "معاينة الميزة"
 msgid "Forgot Password"
 msgstr "نسيت كلمة المرور"
 
-#: app/routes/_auth+/login.tsx:769
+#: app/routes/_auth+/login.tsx:781
 msgid "Forgot your password?"
 msgstr "هل نسيت كلمة المرور؟"
 
@@ -275,6 +376,10 @@ msgstr "ابدأ"
 msgid "Give feedback"
 msgstr "إرسال ملاحظات"
 
+#: app/routes/settings+/profile.connections.tsx:131
+msgid "Here are your current connections:"
+msgstr "إليك اتصالاتك الحالية:"
+
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
 msgstr "مرحباً"
@@ -283,9 +388,21 @@ msgstr "مرحباً"
 msgid "If you change your email, you'll need to verify the new address"
 msgstr "إذا قمت بتغيير بريدك الإلكتروني، ستحتاج إلى التحقق من العنوان الجديد"
 
+#: app/routes/settings+/profile.password.tsx:91
+msgid "Incorrect password."
+msgstr "كلمة المرور غير صحيحة."
+
 #: app/components/app-sidebar.tsx:249
 msgid "Integrations"
 msgstr "التكاملات"
+
+#: app/routes/settings+/profile.passkeys.tsx:61
+msgid "Invalid intent"
+msgstr "نية غير صالحة"
+
+#: app/routes/settings+/profile.passkeys.tsx:46
+msgid "Invalid passkey ID"
+msgstr "معرف مفتاح المرور غير صالح"
 
 #: app/routes/_auth+/login.tsx:210
 msgid "Invalid username or password"
@@ -349,6 +466,14 @@ msgstr "تسجيل الخروج"
 msgid "m@example.com"
 msgstr "م@مثال.com"
 
+#: app/routes/settings+/profile.index.tsx:183
+msgid "Manage connections"
+msgstr "إدارة الاتصالات"
+
+#: app/routes/settings+/profile.index.tsx:190
+msgid "Manage passkeys"
+msgstr "إدارة مفاتيح المرور"
+
 #: app/routes/_app+/profile.tsx:91
 msgid "Manage your account settings and set e-mail preferences."
 msgstr "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
@@ -382,14 +507,21 @@ msgid "Members"
 msgstr "الأعضاء"
 
 #: app/components/settings/cards/profile-card.tsx:90
+#: app/routes/settings+/profile.index.tsx:297
 msgid "Name"
 msgstr "الاسم"
+
+#: app/routes/settings+/profile.change-email.tsx:156
+msgid "New Email"
+msgstr "البريد الإلكتروني الجديد"
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:318
 msgid "New Note"
 msgstr "ملاحظة جديدة"
 
 #: app/routes/_auth+/reset-password.tsx:132
+#: app/routes/settings+/profile.password_.create.tsx:125
+#: app/routes/settings+/profile.password.tsx:184
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
 
@@ -423,6 +555,10 @@ msgstr "لم يتم العثور على منظمة"
 #: app/routes/_app+/$orgSlug_+/notes.tsx:414
 msgid "No organization with the slug \"{0}\" exists"
 msgstr "لا توجد منظمة بالمعرف \"{0}\""
+
+#: app/routes/settings+/profile.passkeys.tsx:203
+msgid "No passkeys registered yet"
+msgstr "لا توجد مفاتيح مرور مسجلة بعد"
 
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
@@ -480,11 +616,24 @@ msgstr "المنظمات"
 msgid "Organizations are used to group your projects."
 msgstr "تُستخدم المنظمات لتجميع مشاريعك."
 
-#: app/routes/_auth+/login.tsx:764
+#: app/routes/settings+/profile.passkeys.tsx:18
+#: app/routes/settings+/profile.passkeys.tsx:137
+msgid "Passkeys"
+msgstr "مفاتيح المرور"
+
+#: app/routes/_auth+/login.tsx:776
+#: app/routes/settings+/profile.password_.create.tsx:36
+#: app/routes/settings+/profile.password.tsx:39
 msgid "Password"
 msgstr "كلمة المرور"
 
+#: app/routes/settings+/profile.password.tsx:135
+msgid "Password Changed"
+msgstr "تم تغيير كلمة المرور"
+
 #: app/routes/_auth+/reset-password.tsx:73
+#: app/routes/settings+/profile.password_.create.tsx:72
+#: app/routes/settings+/profile.password.tsx:99
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
 
@@ -500,7 +649,8 @@ msgstr "يرجى التحقق من رابط التحقق."
 msgid "Please enter your 2FA code to verify your identity."
 msgstr "يرجى إدخال رمز المصادقة الثنائية للتحقق من هويتك."
 
-#: app/routes/_auth+/login.tsx:74
+#: app/routes/_auth+/login.tsx:130
+#: app/routes/_auth+/login.tsx:608
 msgid "Please enter your email or username"
 msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
 
@@ -522,7 +672,16 @@ msgstr "الترتيب"
 msgid "Recommended for"
 msgstr "موصى به لـ"
 
-#: app/routes/_auth+/login.tsx:795
+#: app/routes/settings+/profile.passkeys.tsx:146
+msgid "Register new passkey"
+msgstr "تسجيل مفتاح مرور جديد"
+
+#. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
+#: app/routes/settings+/profile.passkeys.tsx:177
+msgid "Registered {0} ago"
+msgstr "تم التسجيل منذ {0}"
+
+#: app/routes/_auth+/login.tsx:807
 msgid "Remember me"
 msgstr "تذكرني"
 
@@ -543,6 +702,7 @@ msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
 #: app/components/settings/cards/profile-card.tsx:178
+#: app/routes/settings+/profile.index.tsx:321
 msgid "Save changes"
 msgstr "حفظ التغييرات"
 
@@ -551,7 +711,7 @@ msgid "Search notes by title or content..."
 msgstr "البحث في الملاحظات بالعنوان أو المحتوى..."
 
 #: app/components/command-menu.tsx:99
-#: app/components/site-header.tsx:39
+#: app/components/site-header.tsx:38
 msgid "Search notes..."
 msgstr "البحث في الملاحظات..."
 
@@ -563,9 +723,17 @@ msgstr "البحث..."
 msgid "Security"
 msgstr "الأمان"
 
+#: app/routes/settings+/profile.passkeys.tsx:172
+msgid "Security Key"
+msgstr "مفتاح الأمان"
+
 #: app/routes/_app+/security.tsx:234
 msgid "Security Settings"
 msgstr "إعدادات الأمان"
+
+#: app/routes/settings+/profile.change-email.tsx:172
+msgid "Send Confirmation"
+msgstr "إرسال التأكيد"
 
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
@@ -582,13 +750,17 @@ msgstr "الإعدادات"
 msgid "Sign in"
 msgstr "تسجيل الدخول"
 
-#: app/routes/_auth+/login.tsx:808
+#: app/routes/_auth+/login.tsx:820
 msgid "Sign In"
 msgstr "تسجيل الدخول"
 
 #: app/routes/_auth+/login.tsx:268
 msgid "Sign in to your account"
 msgstr "تسجيل الدخول إلى حسابك"
+
+#: app/routes/settings+/profile.index.tsx:377
+msgid "Sign out of {otherSessionsCount} other sessions"
+msgstr "تسجيل الخروج من {otherSessionsCount} جلسات أخرى"
 
 #: app/routes/_auth+/signup.tsx:269
 msgid "Sign up"
@@ -599,7 +771,7 @@ msgid "Sign up with your social account or email"
 msgstr "أنشئ حساباً باستخدام حساب التواصل الاجتماعي أو البريد الإلكتروني"
 
 #: app/routes/_auth+/login.tsx:550
-#: app/routes/_auth+/login.tsx:711
+#: app/routes/_auth+/login.tsx:723
 msgid "Signing in as"
 msgstr "تسجيل الدخول باسم"
 
@@ -615,6 +787,10 @@ msgstr "عضو الفريق"
 msgid "Team members who have created the most notes"
 msgstr "أعضاء الفريق الذين أنشأوا أكبر عدد من الملاحظات"
 
+#: app/routes/settings+/profile.password.tsx:56
+msgid "The passwords must match"
+msgstr "يجب أن تتطابق كلمات المرور"
+
 #. placeholder {0}: trialStatus.daysRemaining
 #: app/components/app-sidebar.tsx:58
 msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
@@ -623,6 +799,14 @@ msgstr "باقي <0>{0} أيام</0> في فترة التجربة. تواصل م
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
 msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+#: app/routes/settings+/profile.change-email.tsx:79
+msgid "This email is already in use."
+msgstr "هذا البريد الإلكتروني قيد الاستخدام بالفعل."
+
+#: app/routes/settings+/profile.index.tsx:384
+msgid "This is your only session"
+msgstr "هذه هي جلستك الوحيدة"
 
 #: app/components/leadership-card.tsx:58
 msgid "Top Contributors"
@@ -645,7 +829,8 @@ msgid "Use password instead"
 msgstr "استخدم كلمة المرور بدلاً من ذلك"
 
 #: app/components/settings/cards/profile-card.tsx:105
-#: app/routes/_auth+/login.tsx:744
+#: app/routes/_auth+/login.tsx:756
+#: app/routes/settings+/profile.index.tsx:281
 msgid "Username"
 msgstr "اسم المستخدم"
 
@@ -653,7 +838,8 @@ msgstr "اسم المستخدم"
 msgid "Username or Email"
 msgstr "اسم المستخدم أو البريد الإلكتروني"
 
-#: app/routes/_auth+/login.tsx:67
+#: app/routes/_auth+/login.tsx:123
+#: app/routes/_auth+/login.tsx:685
 msgid "Username or email is required"
 msgstr "اسم المستخدم أو البريد الإلكتروني مطلوب"
 
@@ -694,6 +880,15 @@ msgstr "مرحباً بك في لوحة تحكم المنظمة. هنا يمكن
 msgid "You can create notes for your organization here."
 msgstr "يمكنك إنشاء ملاحظات لمنظمتك هنا."
 
+#: app/routes/settings+/profile.connections.tsx:107
+#: app/routes/settings+/profile.connections.tsx:220
+msgid "You cannot delete your last connection unless you have a password."
+msgstr "لا يمكنك حذف اتصالك الأخير إلا إذا كان لديك كلمة مرور."
+
+#: app/routes/settings+/profile.connections.tsx:146
+msgid "You don't have any connections yet."
+msgstr "ليس لديك أي اتصالات بعد."
+
 #: app/routes/_app+/organizations.tsx:234
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
 msgstr "تمت دعوتك للانضمام إلى المنظمات التالية. اختر قبول أو رفض كل دعوة."
@@ -706,6 +901,10 @@ msgstr "لم تقم بإنشاء أي ملاحظات بعد!"
 msgid "You haven't joined any organizations yet."
 msgstr "لم تنضم إلى أي منظمات بعد."
 
+#: app/routes/settings+/profile.change-email.tsx:141
+msgid "You will receive an email at the new email address to confirm."
+msgstr "ستتلقى بريدًا إلكترونيًا على العنوان الجديد للتأكيد."
+
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."
 msgstr "تم تسجيل الدخول! جاري التوجيه..."
@@ -713,3 +912,11 @@ msgstr "تم تسجيل الدخول! جاري التوجيه..."
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr "تم تعليق حسابك. يرجى الاتصال بالدعم إذا كنت تعتقد أن هذا خطأ."
+
+#: app/routes/settings+/profile.connections.tsx:120
+msgid "Your connection has been deleted."
+msgstr "تم حذف اتصالك."
+
+#: app/routes/settings+/profile.password.tsx:136
+msgid "Your password has been changed."
+msgstr "تم تغيير كلمة المرور الخاصة بك."
