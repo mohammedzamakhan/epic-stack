@@ -13,6 +13,7 @@ import {
 	CardBody,
 } from '@repo/ui'
 import { useFetcher, Form } from 'react-router'
+import { Trans } from '@lingui/macro'
 
 import { CircleHelpIcon } from '#app/components/icons/circle-help.tsx'
 import { JiraIntegrationSettings } from './jira-integration-settings'
@@ -63,7 +64,9 @@ export function IntegrationsCard({
 	return (
 		<div className="space-y-6">
 			<header className="space-y-1">
-				<h2 className="text-2xl font-semibold tracking-tight">Integrations</h2>
+				<h2 className="text-2xl font-semibold tracking-tight">
+					<Trans>Integrations</Trans>
+				</h2>
 			</header>
 
 			<div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -84,14 +87,14 @@ export function IntegrationsCard({
 				</div>
 				<div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-2">
 					<div className="text-pretty">
-						Need an integration but don't see it here?
+						<Trans>Need an integration but don't see it here?</Trans>
 					</div>
 					<div className="flex items-center justify-start gap-3">
 						<a
 							href="mailto:support@yourcompany.com?subject=Integration%20request"
 							className="font-medium"
 						>
-							Request integration
+							<Trans>Request integration</Trans>
 						</a>
 					</div>
 				</div>
@@ -177,7 +180,7 @@ function IntegrationCard({
 										status={isProcessing ? 'pending' : 'idle'}
 										className="w-full"
 									>
-										Disconnect
+										<Trans>Disconnect</Trans>
 									</StatusButton>
 								</>
 							) : (
@@ -199,7 +202,7 @@ function IntegrationCard({
 										status={isProcessing ? 'pending' : 'idle'}
 										className="w-full"
 									>
-										Connect
+										<Trans>Connect</Trans>
 									</StatusButton>
 								</>
 							)}
@@ -215,7 +218,9 @@ function IntegrationCard({
 					rel="noreferrer"
 					className="flex w-full items-center justify-between text-xs text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
 				>
-					<span className="flex items-center gap-1.5">Read documentation</span>
+					<span className="flex items-center gap-1.5">
+						<Trans>Read documentation</Trans>
+					</span>
 					<Icon name="chevron-right" className="h-3.5 w-3.5" />
 				</a>
 			</CardFooter>

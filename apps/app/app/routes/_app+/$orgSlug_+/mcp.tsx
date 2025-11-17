@@ -36,6 +36,7 @@ import {
 	FieldGroup,
 	FieldDescription,
 } from '@repo/ui'
+import { Trans } from '@lingui/macro'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -260,18 +261,22 @@ function CreateApiKeyModal({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Icon name="key" className="h-5 w-5" />
-						Create API Key
+						<Trans>Create API Key</Trans>
 					</DialogTitle>
 					<DialogDescription>
-						Create a new API key to connect your AI assistants to{' '}
-						{organization.name} data.
+						<Trans>
+							Create a new API key to connect your AI assistants to{' '}
+							{organization.name} data.
+						</Trans>
 					</DialogDescription>
 				</DialogHeader>
 
 				<Form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
 						<FieldGroup>
-							<FieldLabel htmlFor="api-key-name">Key Name</FieldLabel>
+							<FieldLabel htmlFor="api-key-name">
+								<Trans>Key Name</Trans>
+							</FieldLabel>
 							<Input
 								id="api-key-name"
 								placeholder="e.g., Claude Desktop, Kiro IDE"
@@ -297,7 +302,7 @@ function CreateApiKeyModal({
 								disabled={isSubmitting}
 							/>
 							<FieldLabel htmlFor="has-expiration" className="text-sm">
-								Set expiration date (optional)
+								<Trans>Set expiration date (optional)</Trans>
 							</FieldLabel>
 						</div>
 
@@ -308,7 +313,7 @@ function CreateApiKeyModal({
 									className="flex items-center gap-2"
 								>
 									<Icon name="calendar" className="h-4 w-4" />
-									Expiration Date
+									<Trans>Expiration Date</Trans>
 								</FieldLabel>
 								<Input
 									id="expiration-date"
@@ -319,8 +324,10 @@ function CreateApiKeyModal({
 									disabled={isSubmitting}
 								/>
 								<FieldDescription>
-									The API key will expire on this date. Leave unchecked for no
-									expiration.
+									<Trans>
+										The API key will expire on this date. Leave unchecked for no
+										expiration.
+									</Trans>
 								</FieldDescription>
 							</FieldGroup>
 						)}
@@ -333,7 +340,7 @@ function CreateApiKeyModal({
 							onClick={handleClose}
 							disabled={isSubmitting}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 						<Button
 							type="submit"
@@ -343,12 +350,12 @@ function CreateApiKeyModal({
 							{isSubmitting ? (
 								<>
 									<div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-									Creating...
+									<Trans>Creating...</Trans>
 								</>
 							) : (
 								<>
 									<Icon name="key" className="h-4 w-4" />
-									Create API Key
+									<Trans>Create API Key</Trans>
 								</>
 							)}
 						</Button>
@@ -385,25 +392,31 @@ function NewApiKeyModal({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Icon name="check-circle" className="h-5 w-5 text-green-600" />
-						API Key Created
+						<Trans>API Key Created</Trans>
 					</DialogTitle>
 					<DialogDescription>
-						Your API key has been created successfully. Copy it now - you won't
-						be able to see it again.
+						<Trans>
+							Your API key has been created successfully. Copy it now - you won't
+							be able to see it again.
+						</Trans>
 					</DialogDescription>
 				</DialogHeader>
 
 				{apiKey && (
 					<div className="space-y-6">
 						<div className="space-y-2">
-							<Label className="text-sm font-medium">Key Name</Label>
+							<Label className="text-sm font-medium">
+								<Trans>Key Name</Trans>
+							</Label>
 							<div className="bg-muted rounded-md p-3 font-medium">
 								{apiKey.name}
 							</div>
 						</div>
 
 						<div className="space-y-2">
-							<Label className="text-sm font-medium">API Key</Label>
+							<Label className="text-sm font-medium">
+								<Trans>API Key</Trans>
+							</Label>
 							<div className="relative">
 								<div className="bg-muted rounded-md border p-3 font-mono text-sm break-all">
 									{apiKey.key}
@@ -418,7 +431,7 @@ function NewApiKeyModal({
 										name={copied ? 'check' : 'copy'}
 										className="mr-1 h-4 w-4"
 									/>
-									{copied ? 'Copied!' : 'Copy'}
+									{copied ? <Trans>Copied!</Trans> : <Trans>Copy</Trans>}
 								</Button>
 							</div>
 						</div>
@@ -430,10 +443,14 @@ function NewApiKeyModal({
 									className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600"
 								/>
 								<div className="text-sm text-yellow-800">
-									<div className="mb-1 font-semibold">Important:</div>
+									<div className="mb-1 font-semibold">
+										<Trans>Important:</Trans>
+									</div>
 									<div>
-										This is the only time you'll see this API key. Make sure to
-										copy it and store it securely.
+										<Trans>
+											This is the only time you'll see this API key. Make sure to
+											copy it and store it securely.
+										</Trans>
 									</div>
 								</div>
 							</div>
@@ -443,7 +460,7 @@ function NewApiKeyModal({
 
 				<DialogFooter className="mt-6">
 					<Button onClick={onClose} className="w-full" size="lg">
-						I've Copied the Key
+						<Trans>I've Copied the Key</Trans>
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -469,16 +486,16 @@ function ApiKeysCard({
 				<CardHeaderContent>
 					<CardTitle className="flex items-center gap-2">
 						<Icon name="key" className="h-5 w-5" />
-						API Keys
+						<Trans>API Keys</Trans>
 					</CardTitle>
 					<CardDescription>
-						Create and manage API keys to authenticate your MCP clients
+						<Trans>Create and manage API keys to authenticate your MCP clients</Trans>
 					</CardDescription>
 				</CardHeaderContent>
 				<CardAction>
 					<Button onClick={onCreateClick} className="gap-2">
 						<Icon name="plus" className="h-4 w-4" />
-						Create API Key
+						<Trans>Create API Key</Trans>
 					</Button>
 				</CardAction>
 			</CardHeader>
@@ -499,11 +516,15 @@ function ApiKeysCard({
 								<div>
 									<div className="font-medium">{apiKey.name}</div>
 									<div className="text-muted-foreground text-sm">
-										Created {new Date(apiKey.createdAt).toLocaleDateString()}
+										<Trans>
+											Created {new Date(apiKey.createdAt).toLocaleDateString()}
+										</Trans>
 										{apiKey.expiresAt && (
 											<span className="ml-2">
-												• Expires{' '}
-												{new Date(apiKey.expiresAt).toLocaleDateString()}
+												• <Trans>
+													Expires{' '}
+													{new Date(apiKey.expiresAt).toLocaleDateString()}
+												</Trans>
 											</span>
 										)}
 									</div>
@@ -526,8 +547,8 @@ function ApiKeysCard({
 					))}
 					{apiKeys.length === 0 && (
 						<EmptyState
-							title="No API keys created yet"
-							description="Create your first API key to get started"
+							title={<Trans>No API keys created yet</Trans>}
+							description={<Trans>Create your first API key to get started</Trans>}
 							icons={['key']}
 							className="-m-1 w-[calc(100%+12px)]"
 						/>
@@ -582,10 +603,10 @@ function SetupInstructionsCard({
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Icon name="settings" className="h-5 w-5" />
-					Client Configuration
+					<Trans>Client Configuration</Trans>
 				</CardTitle>
 				<CardDescription>
-					Configuration examples for popular MCP clients
+					<Trans>Configuration examples for popular MCP clients</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
@@ -593,14 +614,14 @@ function SetupInstructionsCard({
 				<div>
 					<h3 className="mb-2 flex items-center gap-2 font-semibold">
 						<Icon name="bot" className="h-4 w-4" />
-						Claude Desktop
+						<Trans>Claude Desktop</Trans>
 					</h3>
 					<p className="text-muted-foreground mb-3 text-sm">
-						Add this configuration to your Claude Desktop settings:
+						<Trans>Add this configuration to your Claude Desktop settings:</Trans>
 					</p>
 					<CodeBlock code={claudeConfig} />
 					<p className="text-muted-foreground mt-2 text-xs">
-						Replace YOUR_API_KEY_HERE with one of your API keys above
+						<Trans>Replace YOUR_API_KEY_HERE with one of your API keys above</Trans>
 					</p>
 				</div>
 
@@ -608,10 +629,10 @@ function SetupInstructionsCard({
 				<div>
 					<h3 className="mb-2 flex items-center gap-2 font-semibold">
 						<Icon name="bot" className="h-4 w-4" />
-						Kiro IDE
+						<Trans>Kiro IDE</Trans>
 					</h3>
 					<p className="text-muted-foreground mb-3 text-sm">
-						Add this to your .kiro/settings/mcp.json file:
+						<Trans>Add this to your .kiro/settings/mcp.json file:</Trans>
 					</p>
 					<CodeBlock code={kiroConfig} />
 				</div>
@@ -646,10 +667,10 @@ function AvailableToolsCard({
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Icon name="pocket-knife" className="h-5 w-5" />
-					Available Tools
+					<Trans>Available Tools</Trans>
 				</CardTitle>
 				<CardDescription>
-					Tools available through your MCP server connection
+					<Trans>Tools available through your MCP server connection</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -708,8 +729,13 @@ export default function McpPage() {
 		<div className="py-8 md:p-8">
 			<div className="mb-8">
 				<PageTitle
-					title="MCP Server"
-					description={`Connect your AI assistants to ${organization.name} data using the Model Context Protocol`}
+					title={<Trans>MCP Server</Trans>}
+					description={
+						<Trans>
+							Connect your AI assistants to {organization.name} data using the
+							Model Context Protocol
+						</Trans>
+					}
 				/>
 			</div>
 
