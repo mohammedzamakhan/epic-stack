@@ -13,12 +13,32 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: app/routes/_auth+/onboarding.tsx:369
+msgid " to join the organization"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:728
 msgid "← Back to SSO login"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:210
+msgid "+2 points"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:166
+msgid "+5 points/referral"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:215
+msgid "✓ Discord points claimed"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:117
+msgid "A user already exists with this username"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:276
@@ -41,16 +61,29 @@ msgstr ""
 msgid "Check your email"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:238
+msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:365
+msgid "Complete your profile"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr ""
 
+#: app/routes/_auth+/onboarding.tsx:428
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr ""
 
 #: app/routes/_auth+/reset-password.tsx:159
 msgid "Confirm your new password"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:435
+msgid "Confirm your password"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:657
@@ -65,7 +98,20 @@ msgstr ""
 msgid "Continue with your password"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:185
+msgid "Copied!"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:185
+msgid "Copy"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:413
+msgid "Create a password"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:354
+#: app/routes/_auth+/onboarding.tsx:501
 msgid "Create account"
 msgstr ""
 
@@ -92,6 +138,10 @@ msgstr ""
 msgid "Enter your email or username"
 msgstr ""
 
+#: app/routes/_auth+/onboarding.tsx:397
+msgid "Enter your full name"
+msgstr ""
+
 #: app/routes/_auth+/reset-password.tsx:137
 msgid "Enter your new password"
 msgstr ""
@@ -102,6 +152,10 @@ msgstr ""
 
 #: app/routes/_auth+/login.tsx:776
 msgid "Enter your password"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:383
+msgid "Enter your username"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:216
@@ -120,12 +174,25 @@ msgstr ""
 msgid "Forgot your password?"
 msgstr ""
 
+#: app/routes/_auth+/onboarding.tsx:393
+msgid "Full Name"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:388
 msgid "Generating Authentication Options"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:139
+msgid "Here's how to do it:"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:368
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:464
+msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:210
@@ -136,8 +203,20 @@ msgstr ""
 msgid "Invalid Verification Type"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:226
+msgid "Join Discord server"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:208
+msgid "Join our Discord"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:195
+msgid "joined using your link! Thanks for referring."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:467
@@ -169,6 +248,14 @@ msgstr ""
 msgid "No worries, we'll send you reset instructions."
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:243
+msgid "Note: Discord verification is currently manual. Contact support after joining to claim your points."
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:150
+msgid "of"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
 msgstr ""
@@ -178,15 +265,30 @@ msgid "Or continue with email or username"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:764
+#: app/routes/_auth+/onboarding.tsx:409
 msgid "Password"
 msgstr ""
 
+#: app/routes/_auth+/onboarding.tsx:126
 #: app/routes/_auth+/reset-password.tsx:73
 msgid "Password is too common"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:150
+#: app/routes/_auth+/waitlist.tsx:194
+msgid "people"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:194
+msgid "person"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:94
 msgid "Please check your verification link."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:368
+msgid "please complete your profile"
 msgstr ""
 
 #: app/routes/_auth+/verify.tsx:71
@@ -202,6 +304,7 @@ msgid "Recommended for"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:795
+#: app/routes/_auth+/onboarding.tsx:487
 msgid "Remember me"
 msgstr ""
 
@@ -223,6 +326,10 @@ msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:164
+msgid "Share with others"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:285
@@ -259,6 +366,7 @@ msgid "Use password instead"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:744
+#: app/routes/_auth+/onboarding.tsx:379
 msgid "Username"
 msgstr ""
 
@@ -278,26 +386,70 @@ msgstr ""
 msgid "Verify"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:235
+msgid "Verify Discord membership"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:396
 msgid "Verifying your passkey"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:136
+msgid "Want to go to the top of the waitlist?"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:553
 msgid "We found your organization:"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:129
+msgid "We'll notify you by email as soon as the waitlist opens."
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:255
+msgid "We'll send you an email at"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:59
 msgid "We've sent you a code to verify your email address."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:365
+msgid "Welcome aboard!"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:256
+msgid "when we're ready to welcome you."
+msgstr ""
+
+#: app/routes/_auth+/onboarding.tsx:60
+msgid "You must agree to the terms of service and privacy policy"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."
 msgstr ""
 
+#: app/routes/_auth+/waitlist.tsx:126
+msgid "You're on the Waitlist!"
+msgstr ""
+
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:143
+msgid "Your points"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:147
+msgid "Your rank"
+msgstr ""
+
+#: app/routes/_auth+/waitlist.tsx:176
+msgid "Your referral link"
 msgstr ""

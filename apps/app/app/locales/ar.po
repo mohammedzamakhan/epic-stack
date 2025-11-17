@@ -13,13 +13,33 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: app/routes/_auth+/onboarding.tsx:369
+msgid " to join the organization"
+msgstr " للانضمام إلى المنظمة"
+
 #: app/routes/_auth+/login.tsx:728
 msgid "← Back to SSO login"
 msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
 
+#: app/routes/_auth+/waitlist.tsx:210
+msgid "+2 points"
+msgstr "+٢ نقاط"
+
+#: app/routes/_auth+/waitlist.tsx:166
+msgid "+5 points/referral"
+msgstr "+٥ نقاط/إحالة"
+
+#: app/routes/_auth+/waitlist.tsx:215
+msgid "✓ Discord points claimed"
+msgstr "✓ تم المطالبة بنقاط Discord"
+
 #: app/routes/_auth+/signup.tsx:110
 msgid "A user already exists with this email"
 msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
+
+#: app/routes/_auth+/onboarding.tsx:117
+msgid "A user already exists with this username"
+msgstr "يوجد مستخدم بالفعل بهذا الاسم"
 
 #: app/routes/_auth+/login.tsx:276
 msgid "Account Suspended"
@@ -41,10 +61,19 @@ msgstr "تحقق من تطبيق المصادقة الثنائية"
 msgid "Check your email"
 msgstr "تحقق من بريدك الإلكتروني"
 
+#: app/routes/_auth+/waitlist.tsx:238
+msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
+msgstr "انقر على \"التحقق من عضوية Discord\" بعد الانضمام للمطالبة بنقاطك تلقائياً."
+
+#: app/routes/_auth+/onboarding.tsx:365
+msgid "Complete your profile"
+msgstr "أكمل ملفك الشخصي"
+
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
 
+#: app/routes/_auth+/onboarding.tsx:428
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr "تأكيد كلمة المرور"
@@ -52,6 +81,10 @@ msgstr "تأكيد كلمة المرور"
 #: app/routes/_auth+/reset-password.tsx:159
 msgid "Confirm your new password"
 msgstr "أكد كلمة المرور الجديدة"
+
+#: app/routes/_auth+/onboarding.tsx:435
+msgid "Confirm your password"
+msgstr "أكد كلمة المرور"
 
 #: app/routes/_auth+/login.tsx:657
 msgid "Continue"
@@ -65,7 +98,20 @@ msgstr "المتابعة باستخدام"
 msgid "Continue with your password"
 msgstr "تابع باستخدام كلمة المرور الخاصة بك"
 
+#: app/routes/_auth+/waitlist.tsx:185
+msgid "Copied!"
+msgstr "تم النسخ!"
+
+#: app/routes/_auth+/waitlist.tsx:185
+msgid "Copy"
+msgstr "نسخ"
+
+#: app/routes/_auth+/onboarding.tsx:413
+msgid "Create a password"
+msgstr "أنشئ كلمة مرور"
+
 #: app/routes/_auth+/login.tsx:354
+#: app/routes/_auth+/onboarding.tsx:501
 msgid "Create account"
 msgstr "إنشاء حساب"
 
@@ -92,6 +138,10 @@ msgstr "البريد الإلكتروني / اسم المستخدم"
 msgid "Enter your email or username"
 msgstr "أدخل بريدك الإلكتروني أو اسم المستخدم"
 
+#: app/routes/_auth+/onboarding.tsx:397
+msgid "Enter your full name"
+msgstr "أدخل اسمك الكامل"
+
 #: app/routes/_auth+/reset-password.tsx:137
 msgid "Enter your new password"
 msgstr "أدخل كلمة المرور الجديدة"
@@ -103,6 +153,10 @@ msgstr "أدخل كلمة المرور الجديدة أدناه."
 #: app/routes/_auth+/login.tsx:776
 msgid "Enter your password"
 msgstr "أدخل كلمة المرور"
+
+#: app/routes/_auth+/onboarding.tsx:383
+msgid "Enter your username"
+msgstr "أدخل اسم المستخدم"
 
 #: app/routes/_auth+/forgot-password.tsx:216
 msgid "Enter your username or email"
@@ -120,13 +174,26 @@ msgstr "نسيت كلمة المرور"
 msgid "Forgot your password?"
 msgstr "هل نسيت كلمة المرور؟"
 
+#: app/routes/_auth+/onboarding.tsx:393
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
 #: app/routes/_auth+/login.tsx:388
 msgid "Generating Authentication Options"
 msgstr "جاري إنشاء خيارات المصادقة"
 
+#: app/routes/_auth+/waitlist.tsx:139
+msgid "Here's how to do it:"
+msgstr "إليك كيفية القيام بذلك:"
+
+#: app/routes/_auth+/onboarding.tsx:368
 #: app/routes/_auth+/reset-password.tsx:123
 msgid "Hi"
 msgstr "مرحباً"
+
+#: app/routes/_auth+/onboarding.tsx:464
+msgid "I agree to the Terms of Service and Privacy Policy"
+msgstr "أوافق على شروط الخدمة وسياسة الخصوصية"
 
 #: app/routes/_auth+/login.tsx:210
 msgid "Invalid username or password"
@@ -136,9 +203,21 @@ msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 msgid "Invalid Verification Type"
 msgstr "نوع التحقق غير صالح"
 
+#: app/routes/_auth+/waitlist.tsx:226
+msgid "Join Discord server"
+msgstr "انضم إلى خادم Discord"
+
 #: app/routes/_auth+/signup.tsx:211
 msgid "Join organization"
 msgstr "الانضمام إلى المنظمة"
+
+#: app/routes/_auth+/waitlist.tsx:208
+msgid "Join our Discord"
+msgstr "انضم إلى Discord الخاص بنا"
+
+#: app/routes/_auth+/waitlist.tsx:195
+msgid "joined using your link! Thanks for referring."
+msgstr "انضموا باستخدام رابطك! شكراً على الإحالة."
 
 #: app/routes/_auth+/login.tsx:467
 #: app/routes/_auth+/login.tsx:478
@@ -169,6 +248,14 @@ msgstr "لا يوجد مستخدم بهذا الاسم أو البريد الإ�
 msgid "No worries, we'll send you reset instructions."
 msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين."
 
+#: app/routes/_auth+/waitlist.tsx:243
+msgid "Note: Discord verification is currently manual. Contact support after joining to claim your points."
+msgstr "ملاحظة: التحقق من Discord يدوي حالياً. اتصل بالدعم بعد الانضمام للمطالبة بنقاطك."
+
+#: app/routes/_auth+/waitlist.tsx:150
+msgid "of"
+msgstr "من"
+
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
 msgstr "أو تابع باستخدام"
@@ -178,16 +265,31 @@ msgid "Or continue with email or username"
 msgstr "أو تابع باستخدام البريد الإلكتروني أو اسم المستخدم"
 
 #: app/routes/_auth+/login.tsx:764
+#: app/routes/_auth+/onboarding.tsx:409
 msgid "Password"
 msgstr "كلمة المرور"
 
+#: app/routes/_auth+/onboarding.tsx:126
 #: app/routes/_auth+/reset-password.tsx:73
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
 
+#: app/routes/_auth+/waitlist.tsx:150
+#: app/routes/_auth+/waitlist.tsx:194
+msgid "people"
+msgstr "أشخاص"
+
+#: app/routes/_auth+/waitlist.tsx:194
+msgid "person"
+msgstr "شخص"
+
 #: app/routes/_auth+/verify.tsx:94
 msgid "Please check your verification link."
 msgstr "يرجى التحقق من رابط التحقق."
+
+#: app/routes/_auth+/onboarding.tsx:368
+msgid "please complete your profile"
+msgstr "يرجى إكمال ملفك الشخصي"
 
 #: app/routes/_auth+/verify.tsx:71
 msgid "Please enter your 2FA code to verify your identity."
@@ -202,6 +304,7 @@ msgid "Recommended for"
 msgstr "موصى به لـ"
 
 #: app/routes/_auth+/login.tsx:795
+#: app/routes/_auth+/onboarding.tsx:487
 msgid "Remember me"
 msgstr "تذكرني"
 
@@ -224,6 +327,10 @@ msgstr "إعادة تعيين كلمة المرور"
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
 msgstr "إرسال تعليمات إعادة التعيين"
+
+#: app/routes/_auth+/waitlist.tsx:164
+msgid "Share with others"
+msgstr "شارك مع الآخرين"
 
 #: app/routes/_auth+/signup.tsx:285
 msgid "Sign in"
@@ -259,6 +366,7 @@ msgid "Use password instead"
 msgstr "استخدم كلمة المرور بدلاً من ذلك"
 
 #: app/routes/_auth+/login.tsx:744
+#: app/routes/_auth+/onboarding.tsx:379
 msgid "Username"
 msgstr "اسم المستخدم"
 
@@ -278,26 +386,70 @@ msgstr "رمز التحقق"
 msgid "Verify"
 msgstr "تحقق"
 
+#: app/routes/_auth+/waitlist.tsx:235
+msgid "Verify Discord membership"
+msgstr "التحقق من عضوية Discord"
+
 #: app/routes/_auth+/login.tsx:396
 msgid "Verifying your passkey"
 msgstr "جاري التحقق من مفتاح المرور"
+
+#: app/routes/_auth+/waitlist.tsx:136
+msgid "Want to go to the top of the waitlist?"
+msgstr "هل تريد الوصول إلى أعلى قائمة الانتظار؟"
 
 #: app/routes/_auth+/login.tsx:553
 msgid "We found your organization:"
 msgstr "وجدنا منظمتك:"
 
+#: app/routes/_auth+/waitlist.tsx:129
+msgid "We'll notify you by email as soon as the waitlist opens."
+msgstr "سنخطرك عبر البريد الإلكتروني بمجرد فتح قائمة الانتظار."
+
+#: app/routes/_auth+/waitlist.tsx:255
+msgid "We'll send you an email at"
+msgstr "سنرسل لك بريداً إلكترونياً على"
+
 #: app/routes/_auth+/verify.tsx:59
 msgid "We've sent you a code to verify your email address."
 msgstr "لقد أرسلنا لك رمزاً للتحقق من عنوان بريدك الإلكتروني."
+
+#: app/routes/_auth+/onboarding.tsx:365
+msgid "Welcome aboard!"
+msgstr "مرحباً بك!"
 
 #: app/routes/_auth+/login.tsx:260
 msgid "Welcome back"
 msgstr "مرحباً بعودتك"
 
+#: app/routes/_auth+/waitlist.tsx:256
+msgid "when we're ready to welcome you."
+msgstr "عندما نكون مستعدين للترحيب بك."
+
+#: app/routes/_auth+/onboarding.tsx:60
+msgid "You must agree to the terms of service and privacy policy"
+msgstr "يجب أن توافق على شروط الخدمة وسياسة الخصوصية"
+
 #: app/routes/_auth+/login.tsx:422
 msgid "You're logged in! Navigating..."
 msgstr "تم تسجيل الدخول! جاري التوجيه..."
 
+#: app/routes/_auth+/waitlist.tsx:126
+msgid "You're on the Waitlist!"
+msgstr "أنت في قائمة الانتظار!"
+
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr "تم تعليق حسابك. يرجى الاتصال بالدعم إذا كنت تعتقد أن هذا خطأ."
+
+#: app/routes/_auth+/waitlist.tsx:143
+msgid "Your points"
+msgstr "نقاطك"
+
+#: app/routes/_auth+/waitlist.tsx:147
+msgid "Your rank"
+msgstr "ترتيبك"
+
+#: app/routes/_auth+/waitlist.tsx:176
+msgid "Your referral link"
+msgstr "رابط الإحالة الخاص بك"
