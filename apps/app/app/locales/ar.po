@@ -13,6 +13,194 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: app/routes/_auth+/login.tsx:631
+#: app/routes/_auth+/login.tsx:728
+msgid "← Back to SSO login"
+msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
+
+#: app/routes/_auth+/login.tsx:276
+msgid "Account Suspended"
+msgstr "الحساب معلق"
+
+#: app/routes/_auth+/signup.tsx:276
+msgid "Already have an account?"
+msgstr "هل لديك حساب بالفعل؟"
+
+#: app/routes/_auth+/forgot-password.tsx:244
+msgid "Back to login"
+msgstr "العودة لتسجيل الدخول"
+
+#: app/routes/_auth+/signup.tsx:215
+msgid "Complete your signup to join the organization"
+msgstr "أكمل التسجيل للانضمام إلى المنظمة"
+
+#: app/routes/_auth+/reset-password.tsx:152
+msgid "Confirm Password"
+msgstr "تأكيد كلمة المرور"
+
+#: app/routes/_auth+/login.tsx:657
+msgid "Continue"
+msgstr "متابعة"
+
+#: app/routes/_auth+/login.tsx:575
+msgid "Continue with"
+msgstr "المتابعة باستخدام"
+
+#: app/routes/_auth+/login.tsx:267
+msgid "Continue with your password"
+msgstr "تابع باستخدام كلمة المرور الخاصة بك"
+
+#: app/routes/_auth+/login.tsx:354
+msgid "Create account"
+msgstr "إنشاء حساب"
+
+#: app/routes/_auth+/signup.tsx:211
+msgid "Create an account"
+msgstr "إنشاء حساب"
+
+#: app/routes/_auth+/login.tsx:345
+msgid "Don't have an account?"
+msgstr "ليس لديك حساب؟"
+
+#: app/routes/_auth+/login.tsx:743
+#: app/routes/_auth+/signup.tsx:247
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: app/routes/_auth+/login.tsx:630
+#: app/routes/_auth+/login.tsx:745
 msgid "Email or Username"
 msgstr "البريد الإلكتروني / اسم المستخدم"
+
+#: app/routes/_auth+/reset-password.tsx:123
+msgid "Enter your new password below."
+msgstr "أدخل كلمة المرور الجديدة أدناه."
+
+#: app/routes/_auth+/forgot-password.tsx:196
+msgid "Forgot Password"
+msgstr "نسيت كلمة المرور"
+
+#: app/routes/_auth+/login.tsx:769
+msgid "Forgot your password?"
+msgstr "هل نسيت كلمة المرور؟"
+
+#: app/routes/_auth+/reset-password.tsx:123
+msgid "Hi"
+msgstr "مرحباً"
+
+#: app/routes/_auth+/signup.tsx:211
+msgid "Join organization"
+msgstr "الانضمام إلى المنظمة"
+
+#: app/routes/_auth+/login.tsx:467
+#: app/routes/_auth+/login.tsx:478
+msgid "Last used"
+msgstr "آخر استخدام"
+
+#: app/routes/_auth+/login.tsx:288
+msgid "Login Error"
+msgstr "خطأ في تسجيل الدخول"
+
+#: app/routes/_auth+/reset-password.tsx:132
+msgid "New Password"
+msgstr "كلمة المرور الجديدة"
+
+#: app/routes/_auth+/forgot-password.tsx:198
+msgid "No worries, we'll send you reset instructions."
+msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين."
+
+#: app/routes/_auth+/signup.tsx:236
+msgid "Or continue with"
+msgstr "أو تابع باستخدام"
+
+#: app/routes/_auth+/login.tsx:303
+msgid "Or continue with email or username"
+msgstr "أو تابع باستخدام البريد الإلكتروني أو اسم المستخدم"
+
+#: app/routes/_auth+/login.tsx:764
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: app/routes/_auth+/login.tsx:578
+msgid "Recommended for"
+msgstr "موصى به لـ"
+
+#: app/routes/_auth+/login.tsx:795
+msgid "Remember me"
+msgstr "تذكرني"
+
+#: app/routes/_auth+/forgot-password.tsx:242
+msgid "Remember your password?"
+msgstr "هل تتذكر كلمة المرور الخاصة بك؟"
+
+#: app/routes/_auth+/reset-password.tsx:180
+msgid "Reset password"
+msgstr "إعادة تعيين كلمة المرور"
+
+#: app/routes/_auth+/reset-password.tsx:121
+msgid "Reset Password"
+msgstr "إعادة تعيين كلمة المرور"
+
+#: app/routes/_auth+/forgot-password.tsx:236
+msgid "Send reset instructions"
+msgstr "إرسال تعليمات إعادة التعيين"
+
+#: app/routes/_auth+/signup.tsx:285
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+#: app/routes/_auth+/login.tsx:808
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+#: app/routes/_auth+/login.tsx:268
+msgid "Sign in to your account"
+msgstr "تسجيل الدخول إلى حسابك"
+
+#: app/routes/_auth+/signup.tsx:269
+msgid "Sign up"
+msgstr "إنشاء حساب"
+
+#: app/routes/_auth+/signup.tsx:216
+msgid "Sign up with your social account or email"
+msgstr "أنشئ حساباً باستخدام حساب التواصل الاجتماعي أو البريد الإلكتروني"
+
+#: app/routes/_auth+/login.tsx:550
+#: app/routes/_auth+/login.tsx:711
+msgid "Signing in as"
+msgstr "تسجيل الدخول باسم"
+
+#: app/routes/_auth+/login.tsx:291
+msgid "There was an issue with your login attempt. Please try again."
+msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+#: app/routes/_auth+/login.tsx:591
+msgid "Use password instead"
+msgstr "استخدم كلمة المرور بدلاً من ذلك"
+
+#: app/routes/_auth+/login.tsx:744
+msgid "Username"
+msgstr "اسم المستخدم"
+
+#: app/routes/_auth+/forgot-password.tsx:211
+msgid "Username or Email"
+msgstr "اسم المستخدم أو البريد الإلكتروني"
+
+#: app/routes/_auth+/verify.tsx:111
+msgid "Verification Code"
+msgstr "رمز التحقق"
+
+#: app/routes/_auth+/verify.tsx:142
+msgid "Verify"
+msgstr "تحقق"
+
+#: app/routes/_auth+/login.tsx:553
+msgid "We found your organization:"
+msgstr "وجدنا منظمتك:"
+
+#: app/routes/_auth+/login.tsx:260
+msgid "Welcome back"
+msgstr "مرحباً بعودتك"
+
+#: app/routes/_auth+/login.tsx:279
+msgid "Your account has been suspended. Please contact support if you believe this is an error."
+msgstr "تم تعليق حسابك. يرجى الاتصال بالدعم إذا كنت تعتقد أن هذا خطأ."

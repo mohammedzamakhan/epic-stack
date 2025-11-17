@@ -1,6 +1,7 @@
 import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { ForgotPasswordEmail } from '@repo/email'
@@ -127,7 +128,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['usernameOrEmail'],
 					code: z.ZodIssueCode.custom,
-					message: 'No user exists with this username or email',
+					message: 'No user exists with this username or email', // TODO: translate via t macro
 				})
 				return
 			}
@@ -192,9 +193,9 @@ export default function ForgotPasswordRoute() {
 	return (
 		<Card className="bg-muted/80 border-0 shadow-2xl">
 			<CardHeader>
-				<CardTitle className="text-xl">Forgot Password</CardTitle>
+				<CardTitle className="text-xl"><Trans>Forgot Password</Trans></CardTitle>
 				<CardDescription>
-					No worries, we'll send you reset instructions.
+					<Trans>No worries, we'll send you reset instructions.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -207,12 +208,12 @@ export default function ForgotPasswordRoute() {
 							}
 						>
 							<FieldLabel htmlFor={fields.usernameOrEmail.id}>
-								Username or Email
+								<Trans>Username or Email</Trans>
 							</FieldLabel>
 							<Input
 								{...getInputProps(fields.usernameOrEmail, { type: 'text' })}
 								autoFocus
-								placeholder="Enter your username or email"
+								placeholder="Enter your username or email" // TODO: translate placeholder
 								required
 								aria-invalid={
 									fields.usernameOrEmail.errors?.length ? true : undefined
@@ -232,15 +233,15 @@ export default function ForgotPasswordRoute() {
 							status={form.status ?? 'idle'}
 							type="submit"
 						>
-							Send reset instructions
+							<Trans>Send reset instructions</Trans>
 						</StatusButton>
 					</FieldGroup>
 				</Form>
 			</CardContent>
 			<CardFooter className="block rounded-lg p-4 text-center text-sm">
-				Remember your password?{' '}
+				<Trans>Remember your password?</Trans>{' '}
 				<Link to="/login" className="font-medium underline underline-offset-4">
-					Back to login
+					<Trans>Back to login</Trans>
 				</Link>
 			</CardFooter>
 		</Card>

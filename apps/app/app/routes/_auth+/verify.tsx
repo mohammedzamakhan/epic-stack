@@ -1,5 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
@@ -54,8 +55,8 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 	const type = parseWithZoddType.success ? parseWithZoddType.data : null
 
 	const checkEmail = {
-		title: 'Check your email',
-		description: "We've sent you a code to verify your email address.",
+		title: 'Check your email', // TODO: translate these strings
+		description: "We've sent you a code to verify your email address.", // TODO: translate
 	}
 
 	const headings: Record<
@@ -66,8 +67,8 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 		'reset-password': checkEmail,
 		'change-email': checkEmail,
 		'2fa': {
-			title: 'Check your 2FA app',
-			description: 'Please enter your 2FA code to verify your identity.',
+			title: 'Check your 2FA app', // TODO: translate
+			description: 'Please enter your 2FA code to verify your identity.', // TODO: translate
 		},
 	}
 
@@ -89,8 +90,8 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 	const currentHeading = type
 		? headings[type]
 		: {
-				title: 'Invalid Verification Type',
-				description: 'Please check your verification link.',
+				title: 'Invalid Verification Type', // TODO: translate
+				description: 'Please check your verification link.', // TODO: translate
 			}
 
 	return (
@@ -107,7 +108,7 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 							<OTPField
 								labelProps={{
 									htmlFor: fields[codeQueryParam].id,
-									children: 'Verification Code',
+									children: <Trans>Verification Code</Trans>,
 								}}
 								inputProps={{
 									...getInputProps(fields[codeQueryParam], { type: 'text' }),
@@ -138,7 +139,7 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 							type="submit"
 							disabled={isPending}
 						>
-							Verify
+							<Trans>Verify</Trans>
 						</StatusButton>
 					</div>
 				</Form>

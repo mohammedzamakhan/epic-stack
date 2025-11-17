@@ -1,5 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
 import { data, redirect, Form } from 'react-router'
@@ -69,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['password'],
 					code: 'custom',
-					message: 'Password is too common',
+					message: 'Password is too common', // TODO: translate via t macro
 				})
 			}
 		}),
@@ -117,9 +118,9 @@ export default function ResetPasswordPage({
 	return (
 		<Card className="bg-muted/80 border-0 shadow-2xl">
 			<CardHeader>
-				<CardTitle className="text-xl">Reset Password</CardTitle>
+				<CardTitle className="text-xl"><Trans>Reset Password</Trans></CardTitle>
 				<CardDescription>
-					Hi, {loaderData.resetPasswordUsername}. Enter your new password below.
+					<Trans>Hi</Trans>, {loaderData.resetPasswordUsername}. <Trans>Enter your new password below.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -128,12 +129,12 @@ export default function ResetPasswordPage({
 						<Field
 							data-invalid={fields.password.errors?.length ? true : undefined}
 						>
-							<FieldLabel htmlFor={fields.password.id}>New Password</FieldLabel>
+							<FieldLabel htmlFor={fields.password.id}><Trans>New Password</Trans></FieldLabel>
 							<Input
 								{...getInputProps(fields.password, { type: 'password' })}
 								autoComplete="new-password"
 								autoFocus
-								placeholder="Enter your new password"
+								placeholder="Enter your new password" // TODO: translate placeholder
 								required
 								aria-invalid={fields.password.errors?.length ? true : undefined}
 							/>
@@ -148,14 +149,14 @@ export default function ResetPasswordPage({
 							}
 						>
 							<FieldLabel htmlFor={fields.confirmPassword.id}>
-								Confirm Password
+								<Trans>Confirm Password</Trans>
 							</FieldLabel>
 							<Input
 								{...getInputProps(fields.confirmPassword, {
 									type: 'password',
 								})}
 								autoComplete="new-password"
-								placeholder="Confirm your new password"
+								placeholder="Confirm your new password" // TODO: translate placeholder
 								required
 								aria-invalid={
 									fields.confirmPassword.errors?.length ? true : undefined
@@ -176,7 +177,7 @@ export default function ResetPasswordPage({
 							type="submit"
 							disabled={isPending}
 						>
-							Reset password
+							<Trans>Reset password</Trans>
 						</StatusButton>
 					</FieldGroup>
 				</Form>

@@ -64,14 +64,14 @@ export const handle: SEOHandle = {
 }
 
 const LoginFormSchema = z.object({
-	username: z.string().min(1, 'Username or email is required'),
+	username: z.string().min(1, 'Username or email is required'), // TODO: translate via t macro
 	password: PasswordSchema,
 	redirectTo: z.string().optional(),
 	remember: z.boolean().optional(),
 })
 
 const EmailCheckSchema = z.object({
-	username: z.string().min(1, 'Please enter your email or username'),
+	username: z.string().min(1, 'Please enter your email or username'), // TODO: translate via t macro
 	redirectTo: z.string().optional(),
 })
 
@@ -207,7 +207,7 @@ export async function action({ request }: Route.ActionArgs) {
 				if (!session) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
-						message: 'Invalid username or password',
+						message: 'Invalid username or password', // TODO: translate via t macro
 					})
 					return z.NEVER
 				}
@@ -257,15 +257,15 @@ export default function LoginPage({
 	return (
 		<Card className="bg-muted/80 border-0 shadow-2xl">
 			<CardHeader>
-				<CardTitle className="text-xl">Welcome back</CardTitle>
+				<CardTitle className="text-xl"><Trans>Welcome back</Trans></CardTitle>
 				<CardDescription>
 					{ssoAvailable && discoveredOrganization && !usePassword
 						? `Sign in to ${discoveredOrganization.name}`
 						: (discoveredUsername && ssoAvailable === false) ||
 							  usePassword ||
 							  organization
-							? 'Continue with your password'
-							: 'Sign in to your account'}
+							? <Trans>Continue with your password</Trans>
+							: <Trans>Sign in to your account</Trans>}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -273,11 +273,10 @@ export default function LoginPage({
 					<div className="border-destructive bg-destructive/10 mb-4 rounded-lg border p-4">
 						<div className="text-destructive flex items-center gap-2">
 							<Icon name="lock" className="h-5 w-5" />
-							<h3 className="font-semibold">Account Suspended</h3>
+							<h3 className="font-semibold"><Trans>Account Suspended</Trans></h3>
 						</div>
 						<p className="text-destructive/80 mt-2 text-sm">
-							Your account has been suspended. Please contact support if you
-							believe this is an error.
+							<Trans>Your account has been suspended. Please contact support if you believe this is an error.</Trans>
 						</p>
 					</div>
 				)}
@@ -286,10 +285,10 @@ export default function LoginPage({
 					<div className="mb-4 rounded-lg border border-orange-500 bg-orange-50 p-4">
 						<div className="flex items-center gap-2 text-orange-700">
 							<Icon name="alert-triangle" className="h-5 w-5" />
-							<h3 className="font-semibold">Login Error</h3>
+							<h3 className="font-semibold"><Trans>Login Error</Trans></h3>
 						</div>
 						<p className="mt-2 text-sm text-orange-600">
-							There was an issue with your login attempt. Please try again.
+							<Trans>There was an issue with your login attempt. Please try again.</Trans>
 						</p>
 					</div>
 				)}
@@ -301,7 +300,7 @@ export default function LoginPage({
 					{/* Divider */}
 					<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
 						<span className="bg-card text-muted-foreground relative z-10 px-2">
-							Or continue with email or username
+							<Trans>Or continue with email or username</Trans>
 						</span>
 					</div>
 
@@ -343,7 +342,7 @@ export default function LoginPage({
 				</div>
 			</CardContent>
 			<CardFooter className="block rounded-lg p-4 text-center text-sm">
-				Don&apos;t have an account?{' '}
+				<Trans>Don't have an account?</Trans>{' '}
 				<Link
 					to={
 						redirectTo
@@ -352,7 +351,7 @@ export default function LoginPage({
 					}
 					className="font-medium underline underline-offset-4"
 				>
-					Create account
+					<Trans>Create account</Trans>
 				</Link>
 			</CardFooter>
 		</Card>
@@ -380,21 +379,21 @@ function PasskeyLogin({
 	const [isPending] = useTransition()
 	const [error, setError] = useState<string | null>(null)
 	const [passkeyMessage, setPasskeyMessage] = useOptimistic<string | null>(
-		'Login with a passkey',
+		'Login with a passkey', // TODO: translate via t macro for dynamic messages
 	)
 	const navigate = useNavigate()
 
 	async function handlePasskeyLogin() {
 		try {
-			setPasskeyMessage('Generating Authentication Options')
+			setPasskeyMessage('Generating Authentication Options') // TODO: translate
 			// Get authentication options from the server
 			const optionsResponse = await fetch('/webauthn/authentication')
 			const json = await optionsResponse.json()
 			const { options } = AuthenticationOptionsSchema.parse(json)
 
-			setPasskeyMessage('Requesting your authorization')
+			setPasskeyMessage('Requesting your authorization') // TODO: translate
 			const authResponse = await startAuthentication({ optionsJSON: options })
-			setPasskeyMessage('Verifying your passkey')
+			setPasskeyMessage('Verifying your passkey') // TODO: translate
 
 			// Verify the authentication with the server
 			const verificationResponse = await fetch('/webauthn/authentication', {
@@ -420,11 +419,11 @@ function PasskeyLogin({
 			// Save the successful login method
 			saveLastLoginMethod('passkey')
 
-			setPasskeyMessage("You're logged in! Navigating...")
+			setPasskeyMessage("You're logged in! Navigating...") // TODO: translate
 			await navigate(location ?? '/')
 		} catch (e) {
 			const errorMessage = getErrorMessage(e)
-			setError(`Failed to authenticate with passkey: ${errorMessage}`)
+			setError(`Failed to authenticate with passkey: ${errorMessage}`) // TODO: translate
 		}
 	}
 
@@ -465,7 +464,7 @@ function SocialLoginButtons({ redirectTo }: { redirectTo: string | null }) {
 					/>
 					{lastLoginMethod === providerName && (
 						<div className="bg-primary text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-xs font-medium">
-							Last used
+							<Trans>Last used</Trans>
 						</div>
 					)}
 				</div>
@@ -476,7 +475,7 @@ function SocialLoginButtons({ redirectTo }: { redirectTo: string | null }) {
 				<PasskeyLogin redirectTo={redirectTo} remember={false} />
 				{lastLoginMethod === 'passkey' && (
 					<div className="bg-primary text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-xs font-medium">
-						Last used
+						<Trans>Last used</Trans>
 					</div>
 				)}
 			</div>
@@ -548,10 +547,10 @@ function SSOLoginStep({
 		<div className="space-y-4">
 			<div className="space-y-2 text-center">
 				<div className="text-muted-foreground text-sm">
-					Signing in as <span className="font-medium">{username}</span>
+					<Trans>Signing in as</Trans> <span className="font-medium">{username}</span>
 				</div>
 				<div className="text-muted-foreground text-xs">
-					We found your organization: {organization.name}
+					<Trans>We found your organization:</Trans> {organization.name}
 				</div>
 			</div>
 
@@ -573,10 +572,10 @@ function SSOLoginStep({
 						/>
 						<div className="flex flex-col items-start">
 							<span className="font-medium">
-								Continue with {getProviderDisplayName(ssoConfig.providerName)}
+								<Trans>Continue with</Trans> {getProviderDisplayName(ssoConfig.providerName)}
 							</span>
 							<span className="text-xs opacity-90">
-								Recommended for {organization.name}
+								<Trans>Recommended for</Trans> {organization.name}
 							</span>
 						</div>
 					</span>
@@ -589,7 +588,7 @@ function SSOLoginStep({
 					onClick={handleUsePassword}
 					className="text-muted-foreground hover:text-foreground text-sm underline underline-offset-4"
 				>
-					Use password instead
+					<Trans>Use password instead</Trans>
 				</button>
 			</div>
 		</div>
@@ -634,7 +633,7 @@ function UsernameInputStep({
 						{...getInputProps(usernameFields.username, { type: 'text' })}
 						autoFocus
 						autoComplete="username"
-						placeholder="Enter your email or username"
+						placeholder="Enter your email or username" // TODO: translate placeholder
 						aria-invalid={
 							usernameFields.username.errors?.length ? true : undefined
 						}
@@ -655,7 +654,7 @@ function UsernameInputStep({
 					type="submit"
 					disabled={isPending}
 				>
-					Continue
+					<Trans>Continue</Trans>
 				</StatusButton>
 			</FieldGroup>
 		</Form>
@@ -709,7 +708,7 @@ function PasswordLoginStep({
 			{username && (
 				<div className="space-y-2 text-center">
 					<div className="text-muted-foreground text-sm">
-						Signing in as <span className="font-medium">{username}</span>
+						<Trans>Signing in as</Trans> <span className="font-medium">{username}</span>
 					</div>
 					{organization && (
 						<div className="text-muted-foreground text-xs">
@@ -726,7 +725,7 @@ function PasswordLoginStep({
 						onClick={handleBackToSSO}
 						className="text-muted-foreground hover:text-foreground text-sm underline underline-offset-4"
 					>
-						← Back to SSO login
+						<Trans>← Back to SSO login</Trans>
 					</button>
 				</div>
 			)}
@@ -741,14 +740,14 @@ function PasswordLoginStep({
 						<FieldLabel htmlFor={fields.username.id}>
 							{username
 								? username.includes('@')
-									? 'Email'
-									: 'Username'
-								: 'Email or Username'}
+									? <Trans>Email</Trans>
+									: <Trans>Username</Trans>
+								: <Trans>Email or Username</Trans>}
 						</FieldLabel>
 						<Input
 							{...getInputProps(fields.username, { type: 'text' })}
 							autoComplete="username"
-							placeholder={username ? username : 'Enter your email or username'}
+							placeholder={username ? username : 'Enter your email or username'} // TODO: translate placeholder
 							readOnly={!!username}
 							className={username ? 'bg-muted' : ''}
 							aria-invalid={fields.username.errors?.length ? true : undefined}
@@ -762,19 +761,19 @@ function PasswordLoginStep({
 						data-invalid={fields.password.errors?.length ? true : undefined}
 					>
 						<div className="flex items-center">
-							<FieldLabel htmlFor={fields.password.id}>Password</FieldLabel>
+							<FieldLabel htmlFor={fields.password.id}><Trans>Password</Trans></FieldLabel>
 							<Link
 								to="/forgot-password"
 								className="ml-auto text-sm underline-offset-4 hover:underline"
 							>
-								Forgot your password?
+								<Trans>Forgot your password?</Trans>
 							</Link>
 						</div>
 						<Input
 							{...getInputProps(fields.password, { type: 'password' })}
 							autoFocus={!!username}
 							autoComplete="current-password"
-							placeholder="Enter your password"
+							placeholder="Enter your password" // TODO: translate placeholder
 							aria-invalid={fields.password.errors?.length ? true : undefined}
 						/>
 						<FieldError
@@ -793,7 +792,7 @@ function PasswordLoginStep({
 							id={fields.remember.id}
 						/>
 						<FieldLabel htmlFor={fields.remember.id} className="font-normal">
-							Remember me
+							<Trans>Remember me</Trans>
 						</FieldLabel>
 					</Field>
 
@@ -806,7 +805,7 @@ function PasswordLoginStep({
 						type="submit"
 						disabled={isPending}
 					>
-						Sign In
+						<Trans>Sign In</Trans>
 					</StatusButton>
 				</FieldGroup>
 			</Form>

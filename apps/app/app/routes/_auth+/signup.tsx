@@ -1,6 +1,7 @@
 import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { SignupEmail } from '@repo/email'
@@ -106,7 +107,7 @@ export async function action(args: Route.ActionArgs) {
 				ctx.addIssue({
 					path: ['email'],
 					code: z.ZodIssueCode.custom,
-					message: 'A user already exists with this email',
+					message: 'A user already exists with this email', // TODO: translate via t macro
 				})
 				return
 			}
@@ -207,12 +208,12 @@ export default function SignupRoute({
 		<Card className="bg-muted/80 border-0 shadow-2xl">
 			<CardHeader>
 				<CardTitle className="text-xl">
-					{inviteToken ? 'Join organization' : 'Create an account'}
+					{inviteToken ? <Trans>Join organization</Trans> : <Trans>Create an account</Trans>}
 				</CardTitle>
 				<CardDescription>
 					{inviteToken
-						? 'Complete your signup to join the organization'
-						: 'Sign up with your social account or email'}
+						? <Trans>Complete your signup to join the organization</Trans>
+						: <Trans>Sign up with your social account or email</Trans>}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -232,7 +233,7 @@ export default function SignupRoute({
 					{/* Divider */}
 					<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
 						<span className="bg-card text-muted-foreground relative z-10 px-2">
-							Or continue with
+							<Trans>Or continue with</Trans>
 						</span>
 					</div>
 
@@ -243,12 +244,12 @@ export default function SignupRoute({
 							<Field
 								data-invalid={fields.email.errors?.length ? true : undefined}
 							>
-								<FieldLabel htmlFor={fields.email.id}>Email</FieldLabel>
+								<FieldLabel htmlFor={fields.email.id}><Trans>Email</Trans></FieldLabel>
 								<Input
 									{...getInputProps(fields.email, { type: 'email' })}
 									autoFocus
 									autoComplete="email"
-									placeholder="m@example.com"
+									placeholder="m@example.com" // TODO: translate placeholder
 									required
 									aria-invalid={fields.email.errors?.length ? true : undefined}
 								/>
@@ -265,14 +266,14 @@ export default function SignupRoute({
 								type="submit"
 								disabled={isPending}
 							>
-								Sign up
+								<Trans>Sign up</Trans>
 							</StatusButton>
 						</FieldGroup>
 					</Form>
 				</div>
 			</CardContent>
 			<CardFooter className="block rounded-lg p-4 text-center text-sm">
-				Already have an account?{' '}
+				<Trans>Already have an account?</Trans>{' '}
 				<Link
 					to={
 						redirectTo
@@ -281,7 +282,7 @@ export default function SignupRoute({
 					}
 					className="font-medium underline underline-offset-4"
 				>
-					Sign in
+					<Trans>Sign in</Trans>
 				</Link>
 			</CardFooter>
 		</Card>
