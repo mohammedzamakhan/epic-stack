@@ -1,5 +1,7 @@
 import { TrendingUp } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	Card,
 	CardContent,
@@ -31,6 +33,7 @@ interface NotesChartProps {
 }
 
 export function NotesChart({ data, daysShown }: NotesChartProps) {
+	const { _ } = useLingui()
 	const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)
 	const avgNotesPerDay = Math.round((totalNotes / data.length) * 10) / 10
 
@@ -51,9 +54,13 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Daily Notes Created</CardTitle>
+				<CardTitle>
+					<Trans>Daily Notes Created</Trans>
+				</CardTitle>
 				<CardDescription>
-					Notes created by your organization over the last {daysShown} days
+					<Trans>
+						Notes created by your organization over the last {daysShown} days
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -98,18 +105,20 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 						<div className="flex items-center gap-2 leading-none font-medium">
 							{trendPercentage >= 0 ? (
 								<>
-									Trending up by {trendPercentage}% this period{' '}
+									<Trans>Trending up by {trendPercentage}% this period</Trans>{' '}
 									<TrendingUp className="h-4 w-4" />
 								</>
 							) : (
 								<>
-									Down by {Math.abs(trendPercentage)}% this period{' '}
+									<Trans>Down by {Math.abs(trendPercentage)}% this period</Trans>{' '}
 									<TrendingUp className="h-4 w-4 rotate-180" />
 								</>
 							)}
 						</div>
 						<div className="text-muted-foreground flex items-center gap-2 leading-none">
-							{totalNotes} total notes • {avgNotesPerDay} avg per day
+							<Trans>
+								{totalNotes} total notes • {avgNotesPerDay} avg per day
+							</Trans>
 						</div>
 					</div>
 				</div>

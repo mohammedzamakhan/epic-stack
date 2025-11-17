@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { cn, getUserImgSrc } from '#app/utils/misc.tsx'
 import {
 	Avatar,
@@ -53,20 +54,26 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 	return (
 		<Card className={cn('w-full', className)}>
 			<CardHeader>
-				<CardTitle>Top Contributors</CardTitle>
+				<CardTitle>
+					<Trans>Top Contributors</Trans>
+				</CardTitle>
 				<CardDescription>
-					Team members who have created the most notes
+					<Trans>Team members who have created the most notes</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="h-full">
 				<div className="space-y-1">
 					<div className="text-muted-foreground grid grid-cols-2 gap-4 border-b pb-2 text-sm font-medium">
-						<div>Rank</div>
-						<div>Team member</div>
+						<div>
+							<Trans>Rank</Trans>
+						</div>
+						<div>
+							<Trans>Team member</Trans>
+						</div>
 					</div>
 					{leaders.length === 0 ? (
 						<div className="text-muted-foreground py-8 text-center">
-							No notes created yet
+							<Trans>No notes created yet</Trans>
 						</div>
 					) : (
 						leaders.map((leader, index) => (
@@ -93,8 +100,12 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 									<div className="flex-1">
 										<div className="text-sm font-medium">{leader.name}</div>
 										<div className="text-muted-foreground text-xs">
-											{leader.notesCount} note
-											{leader.notesCount !== 1 ? 's' : ''}
+											{leader.notesCount}{' '}
+											{leader.notesCount !== 1 ? (
+												<Trans>notes</Trans>
+											) : (
+												<Trans>note</Trans>
+											)}
 										</div>
 									</div>
 								</div>

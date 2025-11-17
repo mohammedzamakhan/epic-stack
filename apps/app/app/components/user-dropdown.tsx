@@ -1,6 +1,7 @@
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
 import { Link, Form } from 'react-router'
+import { Trans } from '@lingui/macro'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { useCurrentOrganization } from '#app/utils/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
@@ -47,14 +48,14 @@ export function UserDropdown() {
 					<DropdownMenuItem asChild>
 						<Link prefetch="intent" to={`/profile`}>
 							<Icon className="text-body-md" name="user">
-								Profile
+								<Trans>Profile</Trans>
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link prefetch="intent" to={`/${organization.slug}`}>
 							<Icon className="text-body-md" name="clock">
-								Dashboard
+								<Trans>Dashboard</Trans>
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
@@ -62,7 +63,7 @@ export function UserDropdown() {
 						<DropdownMenuItem asChild>
 							<button type="submit" className="w-full">
 								<Icon className="text-body-md" name="log-out">
-									Logout
+									<Trans>Logout</Trans>
 								</Icon>
 							</button>
 						</DropdownMenuItem>

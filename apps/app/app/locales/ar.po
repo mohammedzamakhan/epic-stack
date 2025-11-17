@@ -29,6 +29,10 @@ msgstr "{0} من {1} مكتمل"
 msgid "{0}% complete"
 msgstr "{0}٪ مكتمل"
 
+#: app/components/notes-chart.tsx:119
+msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
+msgstr "{totalNotes} ملاحظة إجمالاً • {avgNotesPerDay} متوسط يومي"
+
 #: app/routes/_auth+/login.tsx:728
 msgid "← Back to SSO login"
 msgstr "→ العودة إلى تسجيل الدخول بـ SSO"
@@ -153,8 +157,13 @@ msgstr "إنشاء ملاحظة جديدة"
 msgid "Create Note"
 msgstr "إنشاء ملاحظة"
 
+#: app/components/notes-chart.tsx:58
+msgid "Daily Notes Created"
+msgstr "الملاحظات اليومية المنشأة"
+
 #: app/components/app-sidebar.tsx:109
 #: app/components/app-sidebar.tsx:215
+#: app/components/user-dropdown.tsx:58
 msgid "Dashboard"
 msgstr "لوحة التحكم"
 
@@ -169,6 +178,11 @@ msgstr "ليس لديك حساب؟"
 #: app/components/onboarding-checklist.tsx:116
 msgid "Done!"
 msgstr "تم!"
+
+#. placeholder {0}: Math.abs(trendPercentage)
+#: app/components/notes-chart.tsx:113
+msgid "Down by {0}% this period"
+msgstr "انخفض بنسبة {0}٪ في هذه الفترة"
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
 msgid "Edit Note"
@@ -311,6 +325,10 @@ msgstr "خطأ في تسجيل الدخول"
 msgid "Login with a passkey"
 msgstr "تسجيل الدخول بمفتاح المرور"
 
+#: app/components/user-dropdown.tsx:66
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
 #: app/routes/_auth+/signup.tsx:252
 msgid "m@example.com"
 msgstr "م@مثال.com"
@@ -360,6 +378,10 @@ msgstr "كلمة المرور الجديدة"
 msgid "No note with the id \"{0}\" exists"
 msgstr "لا توجد ملاحظة بالمعرف \"{0}\""
 
+#: app/components/leadership-card.tsx:76
+msgid "No notes created yet"
+msgstr "لم يتم إنشاء ملاحظات بعد"
+
 #: app/routes/_app+/$orgSlug_+/notes.tsx:365
 msgid "No notes found"
 msgstr "لم يتم العثور على ملاحظات"
@@ -390,11 +412,23 @@ msgstr "لا يوجد مستخدم بهذا الاسم أو البريد الإ�
 msgid "No worries, we'll send you reset instructions."
 msgstr "لا تقلق، سنرسل لك تعليمات إعادة التعيين."
 
+#: app/components/leadership-card.tsx:107
+msgid "note"
+msgstr "ملاحظة"
+
+#: app/components/leadership-card.tsx:105
+msgid "notes"
+msgstr "ملاحظات"
+
 #: app/components/app-sidebar.tsx:221
 #: app/components/command-menu.tsx:130
 #: app/routes/_app+/$orgSlug_+/notes.tsx:272
 msgid "Notes"
 msgstr "الملاحظات"
+
+#: app/components/notes-chart.tsx:61
+msgid "Notes created by your organization over the last {daysShown} days"
+msgstr "الملاحظات التي أنشأتها منظمتك خلال الـ {daysShown} يومًا الماضية"
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:379
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
@@ -447,6 +481,7 @@ msgid "Please enter your email or username"
 msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
 
 #: app/components/app-sidebar.tsx:115
+#: app/components/user-dropdown.tsx:51
 msgid "Profile"
 msgstr "الملف الشخصي"
 
@@ -454,6 +489,10 @@ msgstr "الملف الشخصي"
 #: app/routes/_app+/profile.tsx:90
 msgid "Profile Settings"
 msgstr "إعدادات الملف الشخصي"
+
+#: app/components/leadership-card.tsx:68
+msgid "Rank"
+msgstr "الترتيب"
 
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
@@ -543,6 +582,14 @@ msgstr "تسجيل الدخول باسم"
 msgid "Submit"
 msgstr "إرسال"
 
+#: app/components/leadership-card.tsx:71
+msgid "Team member"
+msgstr "عضو الفريق"
+
+#: app/components/leadership-card.tsx:61
+msgid "Team members who have created the most notes"
+msgstr "أعضاء الفريق الذين أنشأوا أكبر عدد من الملاحظات"
+
 #. placeholder {0}: trialStatus.daysRemaining
 #: app/components/app-sidebar.tsx:58
 msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
@@ -551,6 +598,14 @@ msgstr "باقي <0>{0} أيام</0> في فترة التجربة. تواصل م
 #: app/routes/_auth+/login.tsx:291
 msgid "There was an issue with your login attempt. Please try again."
 msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+#: app/components/leadership-card.tsx:58
+msgid "Top Contributors"
+msgstr "أفضل المساهمين"
+
+#: app/components/notes-chart.tsx:108
+msgid "Trending up by {trendPercentage}% this period"
+msgstr "يتجه للأعلى بنسبة {trendPercentage}٪ في هذه الفترة"
 
 #: app/components/settings/cards/profile-card.tsx:76
 msgid "Update your photo and personal details here."
