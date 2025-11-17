@@ -5,6 +5,8 @@
 @source './../../../../packages/ui/**/*.{js,jsx,ts,tsx}';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant rtl ([dir="rtl"] &);
+@custom-variant ltr ([dir="ltr"] &);
 
 :root {
 	--radius: 0.65rem;
@@ -123,6 +125,151 @@
 
 	body {
 		@apply bg-background text-foreground;
+	}
+	
+	/* RTL Support */
+	:dir(rtl) .ltr\:text-left {
+		text-align: right !important;
+	}
+	
+	:dir(rtl) .ltr\:text-right {
+		text-align: left !important;
+	}
+	
+	:dir(rtl) .ltr\:pl-2 {
+		padding-left: 0 !important;
+		padding-right: 0.5rem !important;
+	}
+	
+	:dir(rtl) .ltr\:pr-2 {
+		padding-right: 0 !important;
+		padding-left: 0.5rem !important;
+	}
+	
+	:dir(rtl) .ltr\:pl-8 {
+		padding-left: 0 !important;
+		padding-right: 2rem !important;
+	}
+	
+	:dir(rtl) .ltr\:pr-8 {
+		padding-right: 0 !important;
+		padding-left: 2rem !important;
+	}
+	
+	:dir(rtl) .ltr\:left-2 {
+		left: auto !important;
+		right: 0.5rem !important;
+	}
+	
+	:dir(rtl) .ltr\:right-2 {
+		right: auto !important;
+		left: 0.5rem !important;
+	}
+	
+	:dir(rtl) .ltr\:ml-auto {
+		margin-left: 0 !important;
+		margin-right: auto !important;
+	}
+	
+	:dir(rtl) .ltr\:mr-auto {
+		margin-right: 0 !important;
+		margin-left: auto !important;
+	}
+	
+	/* RTL text alignment utilities */
+	:dir(rtl) .rtl\:text-right {
+		text-align: right !important;
+	}
+	
+	:dir(rtl) .rtl\:text-left {
+		text-align: left !important;
+	}
+	
+	:dir(rtl) .rtl\:pl-2 {
+		padding-left: 0.5rem !important;
+	}
+	
+	:dir(rtl) .rtl\:pr-2 {
+		padding-right: 0.5rem !important;
+	}
+	
+	:dir(rtl) .rtl\:pl-8 {
+		padding-left: 2rem !important;
+	}
+	
+	:dir(rtl) .rtl\:pr-8 {
+		padding-right: 2rem !important;
+	}
+	
+	:dir(rtl) .rtl\:left-2 {
+		left: 0.5rem !important;
+	}
+	
+	:dir(rtl) .rtl\:right-2 {
+		right: 0.5rem !important;
+	}
+	
+	:dir(rtl) .rtl\:mr-auto {
+		margin-right: auto !important;
+	}
+	
+	:dir(rtl) .rtl\:rotate-180 {
+		transform: rotate(180deg) !important;
+	}
+	
+	/* Flex direction for RTL */
+	:dir(rtl) .rtl\:flex-row-reverse {
+		flex-direction: row-reverse !important;
+	}
+	
+	/* Dropdown menu items in RTL should have reversed flex direction */
+	:dir(rtl) [data-slot="dropdown-menu-item"] {
+		flex-direction: row-reverse !important;
+		text-align: right !important;
+	}
+	
+	:dir(rtl) [data-slot="dropdown-menu-item"] > a,
+	:dir(rtl) [data-slot="dropdown-menu-item"] > form {
+		flex-direction: row-reverse !important;
+		width: 100%;
+	}
+	
+	:dir(rtl) [data-slot="dropdown-menu-checkbox-item"],
+	:dir(rtl) [data-slot="dropdown-menu-radio-item"] {
+		flex-direction: row-reverse !important;
+		text-align: right !important;
+	}
+	
+	:dir(rtl) [data-slot="dropdown-menu-sub-trigger"] {
+		flex-direction: row-reverse !important;
+		text-align: right !important;
+	}
+	
+	:dir(rtl) [data-slot="dropdown-menu-sub-trigger"] > span:last-child {
+		transform: rotate(180deg) !important;
+	}
+	
+	:dir(rtl) [data-slot="dropdown-menu-label"] {
+		text-align: right !important;
+	}
+	
+	/* Select items in RTL */
+	:dir(rtl) [data-slot="select-item"] {
+		flex-direction: row-reverse !important;
+		text-align: right !important;
+	}
+	
+	:dir(rtl) [data-slot="select-trigger"] {
+		flex-direction: row-reverse !important;
+	}
+	
+	/* Switch component RTL support */
+	:dir(rtl) [data-slot="switch-thumb"][data-state="checked"] {
+		transform: translateX(calc(-100% + 2px)) !important;
+	}
+	
+	:dir(rtl) [data-slot="switch-thumb"][data-state="unchecked"] {
+		transform: translateX(-100%) !important;
 	}
 }
 

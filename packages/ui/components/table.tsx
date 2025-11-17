@@ -57,7 +57,7 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
 	return (
 		<th
 			className={cn(
-				'text-foreground overflow-hidden px-4 pt-3 pb-2 text-left text-sm font-medium',
+				'text-foreground overflow-hidden px-4 pt-3 pb-2 text-sm font-medium ltr:text-left rtl:text-right',
 				className,
 			)}
 			{...props}
@@ -69,7 +69,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
 	return (
 		<td
 			className={cn(
-				'text-foreground overflow-hidden border-0 px-4 py-2 text-left text-sm',
+				'text-foreground overflow-hidden border-0 px-4 py-2 text-sm ltr:text-left rtl:text-right',
 				className,
 			)}
 			{...props}

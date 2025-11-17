@@ -92,14 +92,15 @@ const DropdownMenuSubTrigger = ({
 			data-inset={inset}
 			className={cn(
 				'focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none',
-				inset && 'pl-8',
+				'ltr:text-left rtl:text-right',
+				inset && 'ltr:pl-8 rtl:pr-8',
 				className,
 			)}
 			{...props}
 		>
 			{children}
-			<span className="ml-auto">
-				<Icon name="chevron-right" className="size-4 items-center" />
+			<span className="ltr:ml-auto rtl:mr-auto">
+				<Icon name="chevron-right" className="size-4 items-center rtl:rotate-180" />
 			</span>
 		</DropdownMenuPrimitive.SubTrigger>
 	)
@@ -132,7 +133,8 @@ const DropdownMenuItem = ({
 		data-inset={inset}
 		className={cn(
 			'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm px-2 py-1.5 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
-			inset && 'pl-8',
+			'ltr:text-left rtl:text-right',
+			inset && 'ltr:pl-8 rtl:pr-8',
 			className,
 			props.variant === 'destructive' && 'text-destructive',
 		)}
@@ -150,13 +152,15 @@ const DropdownMenuCheckboxItem = ({
 		<DropdownMenuPrimitive.CheckboxItem
 			data-slot="dropdown-menu-checkbox-item"
 			className={cn(
-				'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+				'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm py-1.5 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+				'ltr:pr-2 ltr:pl-8 ltr:text-left',
+				'rtl:pl-2 rtl:pr-8 rtl:text-right',
 				className,
 			)}
 			checked={checked}
 			{...props}
 		>
-			<span className="absolute left-2 flex size-3.5 items-center justify-center">
+			<span className="absolute flex size-3.5 items-center justify-center ltr:left-2 rtl:right-2">
 				<DropdownMenuPrimitive.ItemIndicator>
 					<span className="size-4">
 						<Icon name="check" className="h-4 w-4" />
@@ -176,12 +180,14 @@ const DropdownMenuRadioItem = ({
 	<DropdownMenuPrimitive.RadioItem
 		data-slot="dropdown-menu-radio-item"
 		className={cn(
-			'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+			'focus:bg-accent focus:text-accent-foreground relative flex items-center rounded-sm py-1.5 text-sm outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
+			'ltr:pr-2 ltr:pl-8 ltr:text-left',
+			'rtl:pl-2 rtl:pr-8 rtl:text-right',
 			className,
 		)}
 		{...props}
 	>
-		<span className="absolute left-2 flex size-3.5 items-center justify-center">
+		<span className="absolute flex size-3.5 items-center justify-center ltr:left-2 rtl:right-2">
 			<DropdownMenuPrimitive.ItemIndicator>
 				<span className="size-2">⚪</span>
 			</DropdownMenuPrimitive.ItemIndicator>
@@ -202,7 +208,8 @@ const DropdownMenuLabel = ({
 		data-inset={inset}
 		className={cn(
 			'px-2 py-1.5 text-sm font-semibold',
-			inset && 'pl-8',
+			'ltr:text-left rtl:text-right',
+			inset && 'ltr:pl-8 rtl:pr-8',
 			className,
 		)}
 		{...props}
@@ -226,7 +233,7 @@ const DropdownMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
 		<span
-			className={cn('ml-auto text-xs tracking-widest opacity-60', className)}
+			className={cn('text-xs tracking-widest opacity-60 ltr:ml-auto rtl:mr-auto', className)}
 			{...props}
 		/>
 	)

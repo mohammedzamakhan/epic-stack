@@ -32,12 +32,12 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 				<div className="flex flex-1 gap-4 px-2 pr-6 md:flex-none">
 					<Button
 						variant="outline"
-						className="bg-muted/50 text-muted-foreground relative h-8 w-[calc(100%-1rem)] flex-1 justify-start rounded-[0.5rem] text-sm font-normal shadow-none sm:pr-12 md:w-40 lg:w-64"
+						className="bg-muted/50 text-muted-foreground relative h-8 w-[calc(100%-1rem)] flex-1 rounded-[0.5rem] text-sm font-normal shadow-none justify-start ltr:text-left rtl:text-right ltr:sm:pr-12 rtl:sm:pl-12 flex-row-reverse md:w-40 lg:w-64"
 						onClick={() => setCommandOpen(true)}
 					>
+						<span className="flex-1"><Trans>Search notes...</Trans></span>
 						<Icon name="search" className="h-4 w-4" />
-						<Trans>Search notes...</Trans>
-						<Kbd className="absolute top-[0.3rem] right-[0.3rem]">
+						<Kbd className="absolute top-[0.3rem] ltr:right-[0.3rem] rtl:left-[0.3rem]">
 							<span className="text-xs">⌘</span>K
 						</Kbd>
 					</Button>

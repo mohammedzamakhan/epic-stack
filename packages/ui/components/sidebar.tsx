@@ -2,6 +2,8 @@ import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
 import { PanelLeftIcon } from 'lucide-react'
+import { getDirection } from '@repo/i18n'
+import { useRouteLoaderData } from 'react-router'
 
 import { Button } from './button'
 import { Input } from './input'
@@ -157,6 +159,11 @@ function Sidebar({
 	collapsible?: 'offcanvas' | 'icon' | 'none'
 }) {
 	const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+	
+	const { locale } = useRouteLoaderData('root') as { locale: string }
+	const isRTL = getDirection(locale) === 'rtl'
+
+	const effectiveSide = isRTL ? (side === 'left' ? 'right' : 'left') : side
 
 	if (collapsible === 'none') {
 		return (
@@ -186,7 +193,7 @@ function Sidebar({
 							'--sidebar-width': SIDEBAR_WIDTH_MOBILE,
 						} as React.CSSProperties
 					}
-					side={side}
+					side={effectiveSide}
 				>
 					<SheetHeader className="sr-only">
 						<SheetTitle>Sidebar</SheetTitle>
@@ -204,7 +211,7 @@ function Sidebar({
 			data-state={state}
 			data-collapsible={state === 'collapsed' ? collapsible : ''}
 			data-variant={variant}
-			data-side={side}
+			data-side={effectiveSide}
 			data-slot="sidebar"
 		>
 			{/* This is what handles the sidebar gap on desktop */}
@@ -223,7 +230,7 @@ function Sidebar({
 				data-slot="sidebar-container"
 				className={cn(
 					'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
-					side === 'left'
+					effectiveSide === 'left'
 						? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
 						: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
 					// Adjust the padding for floating and inset variants.
@@ -284,7 +291,8 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
 			onClick={toggleSidebar}
 			title="Toggle Sidebar"
 			className={cn(
-				'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
+				'hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex',
+				'group-data-[side=left]:-right-4 group-data-[side=right]:left-0',
 				'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
 				'[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
 				'hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',
@@ -467,7 +475,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 const sidebarMenuButtonVariants = cva(
-	'peer/menu-button ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+	'peer/menu-button ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-sm outline-hidden transition-[width,height,padding] focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium ltr:text-left rtl:text-right ltr:group-has-data-[sidebar=menu-action]/menu-item:pr-8 rtl:group-has-data-[sidebar=menu-action]/menu-item:pl-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
 	{
 		variants: {
 			variant: {

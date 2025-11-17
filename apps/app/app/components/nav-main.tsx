@@ -90,7 +90,7 @@ export function NavMain({
 											</div>
 											<Icon
 												name={isOpen ? 'chevron-down' : 'chevron-right'}
-												className="h-4 w-4"
+												className="h-4 w-4 rtl:rotate-180"
 											/>
 										</SidebarMenuButton>
 										{isOpen && (

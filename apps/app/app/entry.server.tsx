@@ -47,6 +47,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 
 	const nonce = crypto.randomBytes(16).toString('hex')
 	const locale = await linguiServer.getLocale(request)
+	console.log("load catalog")
 	await loadCatalog(locale)
 
 	if (request.url.includes('/novu') || request.url.includes('builder.my')) {

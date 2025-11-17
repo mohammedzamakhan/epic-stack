@@ -63,18 +63,6 @@ export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
 }
 
-const LoginFormSchema = z.object({
-	username: z.string().min(1, t`Username or email is required`),
-	password: PasswordSchema,
-	redirectTo: z.string().optional(),
-	remember: z.boolean().optional(),
-})
-
-const EmailCheckSchema = z.object({
-	username: z.string().min(1, t`Please enter your email or username`),
-	redirectTo: z.string().optional(),
-})
-
 const AuthenticationOptionsSchema = z.object({
 	options: z.object({ challenge: z.string() }),
 }) satisfies z.ZodType<{ options: PublicKeyCredentialRequestOptionsJSON }>
@@ -130,6 +118,18 @@ export async function action({ request }: Route.ActionArgs) {
 	await checkHoneypot(formData)
 
 	const intent = formData.get('intent')
+
+	const LoginFormSchema = z.object({
+		username: z.string().min(1, t`Username or email is required`),
+		password: PasswordSchema,
+		redirectTo: z.string().optional(),
+		remember: z.boolean().optional(),
+	})
+
+	const EmailCheckSchema = z.object({
+		username: z.string().min(1, t`Please enter your email or username`),
+		redirectTo: z.string().optional(),
+	})
 
 	// Arcjet security protection for login (skip in test environment)
 	if (process.env.ARCJET_KEY && process.env.NODE_ENV !== 'test') {
@@ -604,6 +604,11 @@ function UsernameInputStep({
 }) {
 	const isPending = useIsPending()
 
+	const EmailCheckSchema = z.object({
+		username: z.string().min(1, t`Please enter your email or username`),
+		redirectTo: z.string().optional(),
+	})
+
 	const [usernameForm, usernameFields] = useForm({
 		id: 'username-check-form',
 		constraint: getZodConstraint(EmailCheckSchema),
@@ -676,6 +681,13 @@ function PasswordLoginStep({
 	actionData: any
 	showBackToSSO?: boolean
 }) {
+	const LoginFormSchema = z.object({
+		username: z.string().min(1, t`Username or email is required`),
+		password: PasswordSchema,
+		redirectTo: z.string().optional(),
+		remember: z.boolean().optional(),
+	})
+
 	const isPending = useIsPending()
 	const navigate = useNavigate()
 

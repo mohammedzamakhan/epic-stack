@@ -95,7 +95,7 @@ export function NavUser({
 								<AvatarImage src={user.avatar} alt={user.name} />
 								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
 							</Avatar>
-							<div className="grid flex-1 text-left text-sm leading-tight">
+							<div className="grid flex-1 text-sm leading-tight ltr:text-left rtl:text-right">
 								<span className="truncate font-medium">{user.name}</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user.email}
@@ -214,7 +214,7 @@ export function NavUser({
 									ref={(ref: any) => (iconRefs.current['logout'] = ref)}
 									size={16}
 								/>
-								<button type="submit" className="w-full text-left">
+								<button type="submit" className="w-full ltr:text-left rtl:text-right">
 									Log out
 								</button>
 							</Form>

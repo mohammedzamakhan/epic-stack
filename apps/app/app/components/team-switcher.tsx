@@ -79,7 +79,7 @@ export function TeamSwitcher() {
 								</div>
 
 								{/* Enhanced Text Content */}
-								<div className="min-w-0 flex-1 text-left">
+								<div className="min-w-0 flex-1 ltr:text-left rtl:text-right">
 									<div className="flex items-center gap-2">
 										<span className="text-sidebar-foreground truncate text-sm font-semibold">
 											{activeTeam.name}
