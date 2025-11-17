@@ -46,6 +46,11 @@
       "types": "./src/user-permissions.ts",
       "import": "./src/user-permissions.ts",
       "default": "./src/user-permissions.ts"
+    },
+    "./feature-flags": {
+      "types": "./src/feature-flags.server.ts",
+      "import": "./src/feature-flags.server.ts",
+      "default": "./src/feature-flags.server.ts"
     }
   },
   "scripts": {
@@ -58,6 +63,7 @@
   "dependencies": {
     "@epic-web/cachified": "^5.4.2",
     "@paralleldrive/cuid2": "^2.2.2",
+    "@repo/prisma": "*",
     "@tusbar/cache-control": "^1.0.0",
     "clsx": "^2.1.1",
     "cookie": "^1.0.2",
