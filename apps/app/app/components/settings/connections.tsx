@@ -1,4 +1,5 @@
 import { useFetcher } from 'react-router'
+import { Trans } from '@lingui/macro'
 import { disconnectProviderActionIntent } from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { Icon, IconName, StatusButton } from '@repo/ui'
@@ -36,8 +37,10 @@ export function Connections({ data }: ConnectionsProps) {
 									{connection.providerName}
 								</div>
 								<span className="text-muted-foreground text-xs">
-									Connected on{' '}
-									{new Date(connection.createdAt).toLocaleDateString()}
+									<Trans>
+										Connected on{' '}
+										{new Date(connection.createdAt).toLocaleDateString()}
+									</Trans>
 								</span>
 							</div>
 						</div>
@@ -74,7 +77,7 @@ export function DisconnectProvider({
 				status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				size="sm"
 			>
-				{dc.doubleCheck ? 'Are you sure?' : 'Disconnect'}
+				{dc.doubleCheck ? <Trans>Are you sure?</Trans> : <Trans>Disconnect</Trans>}
 			</StatusButton>
 		</fetcher.Form>
 	)

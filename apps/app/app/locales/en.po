@@ -58,6 +58,14 @@ msgstr ""
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
 msgstr ""
 
+#: app/components/settings/account-management.tsx:66
+msgid "{otherSessionsCount, plural, one {Sign out of other session} other {Sign out of other sessions}}"
+msgstr ""
+
+#: app/components/settings/account-management.tsx:42
+msgid "{otherSessionsCount, plural, one {You have # other active session} other {You have # other active sessions}}"
+msgstr ""
+
 #: app/components/notes-chart.tsx:119
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr ""
@@ -159,6 +167,10 @@ msgstr ""
 msgid "Admin Impersonation Active"
 msgstr ""
 
+#: app/components/settings/cards/advanced-settings-card.tsx:30
+msgid "Advanced Settings"
+msgstr ""
+
 #: app/components/data-table.tsx:348
 msgid "All assigned"
 msgstr ""
@@ -189,9 +201,16 @@ msgstr ""
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
+#: app/components/settings/account-management.tsx:64
+#: app/components/settings/account-management.tsx:96
+#: app/components/settings/connections.tsx:80
 #: app/routes/settings+/profile.index.tsx:375
 #: app/routes/settings+/profile.index.tsx:418
 msgid "Are you sure?"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:174
+msgid "Authentication Code"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:244
@@ -218,6 +237,8 @@ msgstr ""
 
 #: app/components/note/comment-input.tsx:164
 #: app/components/settings/password-form.tsx:193
+#: app/components/settings/two-factor-form.tsx:65
+#: app/components/settings/two-factor-form.tsx:194
 #: app/routes/settings+/profile.password_.create.tsx:161
 #: app/routes/settings+/profile.password.tsx:222
 msgid "Cancel"
@@ -288,6 +309,14 @@ msgstr ""
 msgid "complete"
 msgstr ""
 
+#: app/components/settings/two-factor-form.tsx:87
+msgid "Complete the following steps."
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:84
+msgid "Complete two-factor authentication setup"
+msgstr ""
+
 #: app/routes/_auth+/onboarding_.$provider.tsx:228
 #: app/routes/_auth+/onboarding.tsx:375
 msgid "Complete your profile"
@@ -295,6 +324,10 @@ msgstr ""
 
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:202
+msgid "Confirm"
 msgstr ""
 
 #: app/components/settings/password-form.tsx:157
@@ -319,6 +352,11 @@ msgstr ""
 
 #: app/components/settings/cards/connections-card.tsx:37
 msgid "Connected Accounts"
+msgstr ""
+
+#. placeholder {0}: new Date(connection.createdAt).toLocaleDateString()
+#: app/components/settings/connections.tsx:40
+msgid "Connected on {0}"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:35
@@ -445,10 +483,12 @@ msgid "Decline"
 msgstr ""
 
 #: app/components/data-table.tsx:383
+#: app/components/settings/passkey-manager.tsx:144
 #: app/routes/settings+/profile.passkeys.tsx:194
 msgid "Delete"
 msgstr ""
 
+#: app/components/settings/account-management.tsx:98
 #: app/components/settings/cards/danger-card.tsx:33
 msgid "Delete account"
 msgstr ""
@@ -469,6 +509,7 @@ msgstr ""
 msgid "Destructive settings that cannot be undone."
 msgstr ""
 
+#: app/components/settings/passkey-manager.tsx:119
 #: app/routes/settings+/profile.passkeys.tsx:170
 msgid "Device"
 msgstr ""
@@ -478,7 +519,12 @@ msgid "Disable"
 msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:146
+#: app/components/settings/two-factor-form.tsx:72
 msgid "Disable 2FA"
+msgstr ""
+
+#: app/components/settings/connections.tsx:80
+msgid "Disconnect"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:208
@@ -509,6 +555,7 @@ msgstr ""
 msgid "Down by {0}% this period"
 msgstr ""
 
+#: app/components/settings/cards/advanced-settings-card.tsx:46
 #: app/routes/settings+/profile.index.tsx:201
 msgid "Download your data"
 msgstr ""
@@ -547,8 +594,16 @@ msgstr ""
 msgid "Enable Two-Factor Authentication"
 msgstr ""
 
+#: app/components/settings/two-factor-form.tsx:153
+msgid "Enter 6-digit OTP token"
+msgstr ""
+
 #: app/components/organization-invitations.tsx:385
 msgid "Enter email address"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:156
+msgid "Enter the 6-digit one time password (OTP) token that your authentication app provides you."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:641
@@ -842,6 +897,10 @@ msgstr ""
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr ""
 
+#: app/components/settings/cards/advanced-settings-card.tsx:33
+msgid "Manage your sessions and download your data."
+msgstr ""
+
 #: app/components/ui/notification-bell.tsx:429
 msgid "Mark all as read"
 msgstr ""
@@ -938,6 +997,7 @@ msgstr ""
 msgid "No organization with the slug \"{0}\" exists"
 msgstr ""
 
+#: app/components/settings/passkey-manager.tsx:153
 #: app/routes/settings+/profile.passkeys.tsx:203
 msgid "No passkeys registered yet"
 msgstr ""
@@ -1078,6 +1138,10 @@ msgstr ""
 msgid "Profile Settings"
 msgstr ""
 
+#: app/components/settings/two-factor-form.tsx:115
+msgid "QR code"
+msgstr ""
+
 #: app/components/leadership-card.tsx:68
 msgid "Rank"
 msgstr ""
@@ -1090,11 +1154,13 @@ msgstr ""
 msgid "Register a passkey to log in without a password"
 msgstr ""
 
+#: app/components/settings/passkey-manager.tsx:97
 #: app/routes/settings+/profile.passkeys.tsx:146
 msgid "Register new passkey"
 msgstr ""
 
 #. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
+#: app/components/settings/passkey-manager.tsx:126
 #: app/routes/settings+/profile.passkeys.tsx:177
 msgid "Registered {0} ago"
 msgstr ""
@@ -1158,6 +1224,10 @@ msgstr ""
 msgid "Saving {0}"
 msgstr ""
 
+#: app/components/settings/two-factor-form.tsx:101
+msgid "Scan QR Code or Enter Setup Key"
+msgstr ""
+
 #: app/components/search-bar.tsx:39
 #: app/components/search-bar.tsx:46
 #: app/components/search-bar.tsx:59
@@ -1185,6 +1255,7 @@ msgstr ""
 msgid "Security"
 msgstr ""
 
+#: app/components/settings/passkey-manager.tsx:121
 #: app/routes/settings+/profile.passkeys.tsx:172
 msgid "Security Key"
 msgstr ""
@@ -1223,6 +1294,10 @@ msgstr ""
 #: app/components/command-menu.tsx:173
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:17
 msgid "Settings"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:118
+msgid "Setup key"
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:169
@@ -1346,6 +1421,10 @@ msgstr ""
 msgid "This email is already in use."
 msgstr ""
 
+#: app/components/settings/account-management.tsx:31
+msgid "This is your only active session"
+msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:384
 msgid "This is your only session"
 msgstr ""
@@ -1364,6 +1443,10 @@ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:124
 msgid "Two-Factor Authentication"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:54
+msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure."
 msgstr ""
 
 #: app/components/data-table.tsx:829
@@ -1389,6 +1472,10 @@ msgstr ""
 
 #: app/components/note/comment-input.tsx:151
 msgid "Use @ to mention someone • Cmd+Enter to submit"
+msgstr ""
+
+#: app/components/settings/two-factor-form.tsx:104
+msgid "Use any authenticator app on your mobile device to scan the QR code, or enter the Setup Key manually."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:591

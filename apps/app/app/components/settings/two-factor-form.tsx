@@ -2,6 +2,7 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
 import {
@@ -50,8 +51,10 @@ export function TwoFactorForm({
 			<fetcher.Form method="POST">
 				<input type="hidden" name="intent" value={disable2FAActionIntent} />
 				<p className="mb-4 text-sm">
-					Two-factor authentication is currently enabled. Disabling it will make
-					your account less secure.
+					<Trans>
+						Two-factor authentication is currently enabled. Disabling it will
+						make your account less secure.
+					</Trans>
 				</p>
 				<div className="flex justify-end gap-2">
 					<Button
@@ -59,14 +62,14 @@ export function TwoFactorForm({
 						variant="secondary"
 						onClick={() => setIsOpen(false)}
 					>
-						Cancel
+						<Trans>Cancel</Trans>
 					</Button>
 					<StatusButton
 						type="submit"
 						variant="destructive"
 						status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 					>
-						Disable 2FA
+						<Trans>Disable 2FA</Trans>
 					</StatusButton>
 				</div>
 			</fetcher.Form>
@@ -78,10 +81,10 @@ export function TwoFactorForm({
 			{/* Header */}
 			<div className="space-y-2">
 				<h2 className="text-xl font-semibold">
-					Complete two-factor authentication setup
+					<Trans>Complete two-factor authentication setup</Trans>
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					Complete the following steps.
+					<Trans>Complete the following steps.</Trans>
 				</p>
 			</div>
 
@@ -94,18 +97,26 @@ export function TwoFactorForm({
 				</div>
 				<div className="flex-1 space-y-3">
 					<div>
-						<h3 className="font-medium">Scan QR Code or Enter Setup Key</h3>
+						<h3 className="font-medium">
+							<Trans>Scan QR Code or Enter Setup Key</Trans>
+						</h3>
 						<p className="text-muted-foreground text-sm">
-							Use any authenticator app on your mobile device to scan the QR
-							code, or enter the Setup Key manually.
+							<Trans>
+								Use any authenticator app on your mobile device to scan the QR
+								code, or enter the Setup Key manually.
+							</Trans>
 						</p>
 					</div>
 
 					{qrCode && (
 						<Tabs defaultValue="qr-code" className="w-full">
 							<TabsList className="grid w-full grid-cols-2">
-								<TabsTrigger value="qr-code">QR code</TabsTrigger>
-								<TabsTrigger value="setup-key">Setup key</TabsTrigger>
+								<TabsTrigger value="qr-code">
+									<Trans>QR code</Trans>
+								</TabsTrigger>
+								<TabsTrigger value="setup-key">
+									<Trans>Setup key</Trans>
+								</TabsTrigger>
 							</TabsList>
 							<TabsContent value="qr-code" className="mt-4">
 								<div className="flex justify-center">
@@ -138,10 +149,14 @@ export function TwoFactorForm({
 				</div>
 				<div className="flex-1 space-y-3">
 					<div>
-						<h3 className="font-medium">Enter 6-digit OTP token</h3>
+						<h3 className="font-medium">
+							<Trans>Enter 6-digit OTP token</Trans>
+						</h3>
 						<p className="text-muted-foreground text-sm">
-							Enter the 6-digit one time password (OTP) token that your
-							authentication app provides you.
+							<Trans>
+								Enter the 6-digit one time password (OTP) token that your
+								authentication app provides you.
+							</Trans>
 						</p>
 					</div>
 
@@ -156,7 +171,7 @@ export function TwoFactorForm({
 							<OTPField
 								labelProps={{
 									htmlFor: fields.code.id,
-									children: 'Authentication Code',
+									children: <Trans>Authentication Code</Trans>,
 									className: 'sr-only',
 								}}
 								inputProps={{
@@ -176,7 +191,7 @@ export function TwoFactorForm({
 								variant="outline"
 								onClick={() => setIsOpen(false)}
 							>
-								Cancel
+								<Trans>Cancel</Trans>
 							</Button>
 							<StatusButton
 								type="submit"
@@ -184,7 +199,7 @@ export function TwoFactorForm({
 									fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 								}
 							>
-								Confirm
+								<Trans>Confirm</Trans>
 							</StatusButton>
 						</div>
 					</fetcher.Form>

@@ -58,6 +58,14 @@ msgstr "منذ {diffInSeconds} ثانية"
 msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
 msgstr "{duration, plural, one {منذ # دقيقة} other {منذ # دقيقة}}"
 
+#: app/components/settings/account-management.tsx:66
+msgid "{otherSessionsCount, plural, one {Sign out of other session} other {Sign out of other sessions}}"
+msgstr "{otherSessionsCount, plural, one {تسجيل الخروج من جلسة أخرى} other {تسجيل الخروج من جلسات أخرى}}"
+
+#: app/components/settings/account-management.tsx:42
+msgid "{otherSessionsCount, plural, one {You have # other active session} other {You have # other active sessions}}"
+msgstr "{otherSessionsCount, plural, one {لديك # جلسة نشطة أخرى} other {لديك # جلسات نشطة أخرى}}"
+
 #: app/components/notes-chart.tsx:119
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr "{totalNotes} ملاحظة إجمالاً • {avgNotesPerDay} متوسط يومي"
@@ -159,6 +167,10 @@ msgstr "مسؤول"
 msgid "Admin Impersonation Active"
 msgstr "انتحال شخصية المسؤول نشط"
 
+#: app/components/settings/cards/advanced-settings-card.tsx:30
+msgid "Advanced Settings"
+msgstr "الإعدادات المتقدمة"
+
 #: app/components/data-table.tsx:348
 msgid "All assigned"
 msgstr "جميعهم معينون"
@@ -189,10 +201,17 @@ msgstr "يمكن لأي شخص لديه هذا الرابط الانضمام إ�
 msgid "Are you sure you want to delete this comment?"
 msgstr "هل أنت متأكد أنك تريد حذف هذا التعليق؟"
 
+#: app/components/settings/account-management.tsx:64
+#: app/components/settings/account-management.tsx:96
+#: app/components/settings/connections.tsx:80
 #: app/routes/settings+/profile.index.tsx:375
 #: app/routes/settings+/profile.index.tsx:418
 msgid "Are you sure?"
 msgstr "هل أنت متأكد؟"
+
+#: app/components/settings/two-factor-form.tsx:174
+msgid "Authentication Code"
+msgstr "رمز المصادقة"
 
 #: app/routes/_auth+/forgot-password.tsx:244
 msgid "Back to login"
@@ -218,6 +237,8 @@ msgstr "بإنشاء حساب، فإنك توافق على <0>شروط الخد�
 
 #: app/components/note/comment-input.tsx:164
 #: app/components/settings/password-form.tsx:193
+#: app/components/settings/two-factor-form.tsx:65
+#: app/components/settings/two-factor-form.tsx:194
 #: app/routes/settings+/profile.password_.create.tsx:161
 #: app/routes/settings+/profile.password.tsx:222
 msgid "Cancel"
@@ -288,6 +309,14 @@ msgstr "التعليقات"
 msgid "complete"
 msgstr "مكتمل"
 
+#: app/components/settings/two-factor-form.tsx:87
+msgid "Complete the following steps."
+msgstr "أكمل الخطوات التالية."
+
+#: app/components/settings/two-factor-form.tsx:84
+msgid "Complete two-factor authentication setup"
+msgstr "إكمال إعداد المصادقة الثنائية"
+
 #: app/routes/_auth+/onboarding_.$provider.tsx:228
 #: app/routes/_auth+/onboarding.tsx:375
 msgid "Complete your profile"
@@ -296,6 +325,10 @@ msgstr "أكمل ملفك الشخصي"
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
+
+#: app/components/settings/two-factor-form.tsx:202
+msgid "Confirm"
+msgstr "تأكيد"
 
 #: app/components/settings/password-form.tsx:157
 #: app/routes/settings+/profile.password_.create.tsx:143
@@ -320,6 +353,11 @@ msgstr "أكد كلمة المرور"
 #: app/components/settings/cards/connections-card.tsx:37
 msgid "Connected Accounts"
 msgstr "الحسابات المتصلة"
+
+#. placeholder {0}: new Date(connection.createdAt).toLocaleDateString()
+#: app/components/settings/connections.tsx:40
+msgid "Connected on {0}"
+msgstr "متصل في {0}"
 
 #: app/routes/settings+/profile.connections.tsx:35
 msgid "Connections"
@@ -445,10 +483,12 @@ msgid "Decline"
 msgstr "رفض"
 
 #: app/components/data-table.tsx:383
+#: app/components/settings/passkey-manager.tsx:144
 #: app/routes/settings+/profile.passkeys.tsx:194
 msgid "Delete"
 msgstr "حذف"
 
+#: app/components/settings/account-management.tsx:98
 #: app/components/settings/cards/danger-card.tsx:33
 msgid "Delete account"
 msgstr "حذف الحساب"
@@ -469,6 +509,7 @@ msgstr "سيؤدي حذف المستخدم إلى حذف جميع بيانات �
 msgid "Destructive settings that cannot be undone."
 msgstr "إعدادات مدمرة لا يمكن التراجع عنها."
 
+#: app/components/settings/passkey-manager.tsx:119
 #: app/routes/settings+/profile.passkeys.tsx:170
 msgid "Device"
 msgstr "جهاز"
@@ -478,8 +519,13 @@ msgid "Disable"
 msgstr "تعطيل"
 
 #: app/components/settings/cards/security-card.tsx:146
+#: app/components/settings/two-factor-form.tsx:72
 msgid "Disable 2FA"
 msgstr "تعطيل المصادقة الثنائية"
+
+#: app/components/settings/connections.tsx:80
+msgid "Disconnect"
+msgstr "قطع الاتصال"
 
 #: app/routes/settings+/profile.connections.tsx:208
 msgid "Disconnect this account"
@@ -509,6 +555,7 @@ msgstr "تم!"
 msgid "Down by {0}% this period"
 msgstr "انخفض بنسبة {0}٪ في هذه الفترة"
 
+#: app/components/settings/cards/advanced-settings-card.tsx:46
 #: app/routes/settings+/profile.index.tsx:201
 msgid "Download your data"
 msgstr "تنزيل بياناتك"
@@ -547,9 +594,17 @@ msgstr "تفعيل المصادقة الثنائية"
 msgid "Enable Two-Factor Authentication"
 msgstr "تفعيل المصادقة الثنائية"
 
+#: app/components/settings/two-factor-form.tsx:153
+msgid "Enter 6-digit OTP token"
+msgstr "أدخل رمز OTP المكون من 6 أرقام"
+
 #: app/components/organization-invitations.tsx:385
 msgid "Enter email address"
 msgstr "أدخل عنوان البريد الإلكتروني"
+
+#: app/components/settings/two-factor-form.tsx:156
+msgid "Enter the 6-digit one time password (OTP) token that your authentication app provides you."
+msgstr "أدخل رمز كلمة المرور لمرة واحدة (OTP) المكون من 6 أرقام الذي يوفره لك تطبيق المصادقة."
 
 #: app/routes/_auth+/login.tsx:641
 #: app/routes/_auth+/login.tsx:762
@@ -842,6 +897,10 @@ msgstr "إدارة كلمة المرور وإعدادات المصادقة ال�
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr "إدارة كلمة المرور والمصادقة الثنائية والحسابات المتصلة وإعدادات الأمان المتقدمة."
 
+#: app/components/settings/cards/advanced-settings-card.tsx:33
+msgid "Manage your sessions and download your data."
+msgstr "إدارة جلساتك وتنزيل بياناتك."
+
 #: app/components/ui/notification-bell.tsx:429
 msgid "Mark all as read"
 msgstr "تحديد الكل كمقروء"
@@ -938,6 +997,7 @@ msgstr "لم يتم العثور على منظمة"
 msgid "No organization with the slug \"{0}\" exists"
 msgstr "لا توجد منظمة بالمعرف \"{0}\""
 
+#: app/components/settings/passkey-manager.tsx:153
 #: app/routes/settings+/profile.passkeys.tsx:203
 msgid "No passkeys registered yet"
 msgstr "لا توجد مفاتيح مرور مسجلة بعد"
@@ -1078,6 +1138,10 @@ msgstr "الملف الشخصي"
 msgid "Profile Settings"
 msgstr "إعدادات الملف الشخصي"
 
+#: app/components/settings/two-factor-form.tsx:115
+msgid "QR code"
+msgstr "رمز QR"
+
 #: app/components/leadership-card.tsx:68
 msgid "Rank"
 msgstr "الترتيب"
@@ -1090,11 +1154,13 @@ msgstr "موصى به لـ"
 msgid "Register a passkey to log in without a password"
 msgstr "سجّل مفتاح مرور لتسجيل الدخول بدون كلمة مرور"
 
+#: app/components/settings/passkey-manager.tsx:97
 #: app/routes/settings+/profile.passkeys.tsx:146
 msgid "Register new passkey"
 msgstr "تسجيل مفتاح مرور جديد"
 
 #. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
+#: app/components/settings/passkey-manager.tsx:126
 #: app/routes/settings+/profile.passkeys.tsx:177
 msgid "Registered {0} ago"
 msgstr "تم التسجيل منذ {0}"
@@ -1158,6 +1224,10 @@ msgstr "حفظ التغييرات"
 msgid "Saving {0}"
 msgstr "حفظ {0}"
 
+#: app/components/settings/two-factor-form.tsx:101
+msgid "Scan QR Code or Enter Setup Key"
+msgstr "مسح رمز QR أو إدخال مفتاح الإعداد"
+
 #: app/components/search-bar.tsx:39
 #: app/components/search-bar.tsx:46
 #: app/components/search-bar.tsx:59
@@ -1185,6 +1255,7 @@ msgstr "نوع القسم"
 msgid "Security"
 msgstr "الأمان"
 
+#: app/components/settings/passkey-manager.tsx:121
 #: app/routes/settings+/profile.passkeys.tsx:172
 msgid "Security Key"
 msgstr "مفتاح الأمان"
@@ -1224,6 +1295,10 @@ msgstr "إرسال تعليمات إعادة التعيين"
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:17
 msgid "Settings"
 msgstr "الإعدادات"
+
+#: app/components/settings/two-factor-form.tsx:118
+msgid "Setup key"
+msgstr "مفتاح الإعداد"
 
 #: app/routes/_auth+/waitlist.tsx:169
 msgid "Share with others"
@@ -1346,6 +1421,10 @@ msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى 
 msgid "This email is already in use."
 msgstr "هذا البريد الإلكتروني قيد الاستخدام بالفعل."
 
+#: app/components/settings/account-management.tsx:31
+msgid "This is your only active session"
+msgstr "هذه هي جلستك النشطة الوحيدة"
+
 #: app/routes/settings+/profile.index.tsx:384
 msgid "This is your only session"
 msgstr "هذه هي جلستك الوحيدة"
@@ -1365,6 +1444,10 @@ msgstr "يتجه للأعلى بنسبة {trendPercentage}٪ في هذه الف�
 #: app/components/settings/cards/security-card.tsx:124
 msgid "Two-Factor Authentication"
 msgstr "المصادقة الثنائية"
+
+#: app/components/settings/two-factor-form.tsx:54
+msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure."
+msgstr "المصادقة الثنائية مفعّلة حالياً. تعطيلها سيجعل حسابك أقل أماناً."
 
 #: app/components/data-table.tsx:829
 msgid "Type"
@@ -1390,6 +1473,10 @@ msgstr "ترقية"
 #: app/components/note/comment-input.tsx:151
 msgid "Use @ to mention someone • Cmd+Enter to submit"
 msgstr "استخدم @ للإشارة إلى شخص • Cmd+Enter للإرسال"
+
+#: app/components/settings/two-factor-form.tsx:104
+msgid "Use any authenticator app on your mobile device to scan the QR code, or enter the Setup Key manually."
+msgstr "استخدم أي تطبيق مصادقة على جهازك المحمول لمسح رمز QR، أو أدخل مفتاح الإعداد يدوياً."
 
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
