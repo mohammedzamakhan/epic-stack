@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@repo/config": "*",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.15.3",
     "typescript": "^5.8.3"
   }
 }

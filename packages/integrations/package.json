@@ -32,7 +32,7 @@
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.1",
     "msw": "^2.0.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.8.3",
     "vitest": "^4.0.4"
   }
 }

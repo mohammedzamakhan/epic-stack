@@ -18,14 +18,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@epic-web/cachified": "^5.4.2",
+    "@epic-web/cachified": "^5.5.2",
     "@epic-web/remember": "^1.1.0",
     "lru-cache": "^11.1.0",
     "zod": "^3.25.76"
   },
   "peerDependencies": {},
   "devDependencies": {
-    "@types/node": "^24.10.0",
+    "@types/node": "^22.15.3",
     "@vitest/coverage-v8": "^4.0.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.4"
