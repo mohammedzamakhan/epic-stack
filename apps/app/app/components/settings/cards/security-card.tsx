@@ -197,7 +197,10 @@ export function SecurityCard({
 										<Trans>Manage Passkeys</Trans>
 									</DialogTitle>
 								</DialogHeader>
-								<PasskeyManager data={{ passkeys }} />
+								<PasskeyManager
+									data={{ passkeys }}
+									deleteIntent={deletePasskeyActionIntent}
+								/>
 							</DialogContent>
 						</Dialog>
 					</div>

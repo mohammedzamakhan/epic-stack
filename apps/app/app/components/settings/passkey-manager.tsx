@@ -5,11 +5,10 @@ import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
 import { Trans } from '@lingui/macro'
 
-import { deletePasskeyActionIntent } from '#app/routes/_app+/security.tsx'
 import { Button, Icon } from '@repo/ui'
 
-// Registration options schema for passkeys
-const RegistrationOptionsSchema = z.object({
+// Registration options schema for passkeys (exported for reuse)
+export const RegistrationOptionsSchema = z.object({
 	options: z.object({
 		rp: z.object({
 			id: z.string(),
@@ -52,7 +51,13 @@ interface PasskeyData {
 	}>
 }
 
-export function PasskeyManager({ data }: { data: PasskeyData }) {
+export function PasskeyManager({
+	data,
+	deleteIntent = 'delete',
+}: {
+	data: PasskeyData
+	deleteIntent?: string
+}) {
 	const [error, setError] = useState<string | null>(null)
 	const revalidator = useRevalidator()
 
@@ -134,7 +139,7 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 								<Button
 									type="submit"
 									name="intent"
-									value={deletePasskeyActionIntent}
+									value={deleteIntent}
 									variant="destructive"
 									size="sm"
 									className="flex items-center gap-2"

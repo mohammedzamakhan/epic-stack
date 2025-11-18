@@ -1,16 +1,11 @@
-import { startRegistration } from '@simplewebauthn/browser'
-import { formatDistanceToNow } from 'date-fns'
 import { Trans, t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { i18n } from '@lingui/core'
-import { useState } from 'react'
-import { Form, useRevalidator } from 'react-router'
-import { z } from 'zod'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { type Route } from './+types/profile.passkeys.ts'
-import { Button, Icon } from '@repo/ui'
+import { Icon } from '@repo/ui'
+import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 
 export const handle = {
 	breadcrumb: (
@@ -63,146 +58,13 @@ export async function action({ request }: Route.ActionArgs) {
 	)
 }
 
-const RegistrationOptionsSchema = z.object({
-	options: z.object({
-		rp: z.object({
-			id: z.string(),
-			name: z.string(),
-		}),
-		user: z.object({
-			id: z.string(),
-			name: z.string(),
-			displayName: z.string(),
-		}),
-		challenge: z.string(),
-		pubKeyCredParams: z.array(
-			z.object({
-				type: z.literal('public-key'),
-				alg: z.number(),
-			}),
-		),
-		authenticatorSelection: z
-			.object({
-				authenticatorAttachment: z
-					.enum(['platform', 'cross-platform'])
-					.optional(),
-				residentKey: z
-					.enum(['required', 'preferred', 'discouraged'])
-					.optional(),
-				userVerification: z
-					.enum(['required', 'preferred', 'discouraged'])
-					.optional(),
-				requireResidentKey: z.boolean().optional(),
-			})
-			.optional(),
-	}),
-}) satisfies z.ZodType<{ options: PublicKeyCredentialCreationOptionsJSON }>
-
 export default function Passkeys({ loaderData }: Route.ComponentProps) {
-	const { _ } = useLingui()
-	const revalidator = useRevalidator()
-	const [error, setError] = useState<string | null>(null)
-
-	async function handlePasskeyRegistration() {
-		try {
-			setError(null)
-			const resp = await fetch('/webauthn/registration')
-			const jsonResult = await resp.json()
-			const parsedResult = RegistrationOptionsSchema.parse(jsonResult)
-
-			const regResult = await startRegistration({
-				optionsJSON: parsedResult.options,
-			})
-
-			const verificationResp = await fetch('/webauthn/registration', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(regResult),
-			})
-
-			if (!verificationResp.ok) {
-				throw new Error('Failed to verify registration')
-			}
-
-			void revalidator.revalidate()
-		} catch (err) {
-			setError(_(t`Failed to create passkey. Please try again.`))
-		}
-	}
-
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="flex justify-between gap-4">
-				<h1 className="text-h1">
-					<Trans>Passkeys</Trans>
-				</h1>
-				<form action={handlePasskeyRegistration}>
-					<Button
-						type="submit"
-						variant="secondary"
-						className="flex items-center gap-2"
-					>
-						<Icon name="plus">
-							<Trans>Register new passkey</Trans>
-						</Icon>
-					</Button>
-				</form>
-			</div>
-
-			{error ? (
-				<div className="bg-destructive/15 text-destructive rounded-lg p-4">
-					{error}
-				</div>
-			) : null}
-
-			{loaderData.passkeys.length ? (
-				<ul className="flex flex-col gap-4" title="passkeys">
-					{loaderData.passkeys.map((passkey) => (
-						<li
-							key={passkey.id}
-							className="border-muted-foreground flex items-center justify-between gap-4 rounded-lg border p-4"
-						>
-							<div className="flex flex-col gap-2">
-								<div className="flex items-center gap-2">
-									<Icon name="lock" />
-									<span className="font-semibold">
-										{passkey.deviceType === 'platform' ? (
-											<Trans>Device</Trans>
-										) : (
-											<Trans>Security Key</Trans>
-										)}
-									</span>
-								</div>
-								<div className="text-muted-foreground text-sm">
-									<Trans>
-										Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
-										ago
-									</Trans>
-								</div>
-							</div>
-							<Form method="POST">
-								<input type="hidden" name="passkeyId" value={passkey.id} />
-								<Button
-									type="submit"
-									name="intent"
-									value="delete"
-									variant="destructive"
-									size="sm"
-									className="flex items-center gap-2"
-								>
-									<Icon name="trash-2">
-										<Trans>Delete</Trans>
-									</Icon>
-								</Button>
-							</Form>
-						</li>
-					))}
-				</ul>
-			) : (
-				<div className="text-muted-foreground text-center">
-					<Trans>No passkeys registered yet</Trans>
-				</div>
-			)}
+			<h1 className="text-h1">
+				<Trans>Passkeys</Trans>
+			</h1>
+			<PasskeyManager data={{ passkeys: loaderData.passkeys }} />
 		</div>
 	)
 }
