@@ -1,5 +1,5 @@
 import DOMPurify from 'isomorphic-dompurify'
-import { getClientIp } from './client-ip.server.ts'
+import { getClientIp } from './ip-tracking.server.ts'
 import { isSuspiciousActivityBlocked } from './sso-rate-limit.server.ts'
 import {
 	createSSOError,

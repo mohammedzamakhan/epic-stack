@@ -9,7 +9,7 @@ import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
-import { getOrganizationForSSO } from './$organizationId.sso.tsx'
+import { getOrganizationForSSO } from './sso.tsx'
 
 const SSOUserActionSchema = z.object({
 	intent: z.enum(['change_role', 'toggle_status']),
