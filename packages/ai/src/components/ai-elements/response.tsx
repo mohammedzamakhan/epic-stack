@@ -5,7 +5,7 @@ import ReactMarkdown, { type Options } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 import { CodeBlock, CodeBlockCopyButton } from './code-block'
 import 'katex/dist/katex.min.css'
 import hardenReactMarkdown from 'harden-react-markdown'
@@ -296,9 +296,13 @@ export const Response = memo(
 					components={components}
 					rehypePlugins={[rehypeKatex]}
 					remarkPlugins={[remarkGfm, remarkMath]}
-					{...(allowedImagePrefixes ? { allowedImagePrefixes: allowedImagePrefixes ?? ['*'] } : {} as any)}
-					{...(allowedLinkPrefixes ? { allowedLinkPrefixes: allowedLinkPrefixes ?? ['*'] } : {} as any)}
-					{...(defaultOrigin ? { defaultOrigin } : {} as any)}
+					{...(allowedImagePrefixes
+						? { allowedImagePrefixes: allowedImagePrefixes ?? ['*'] }
+						: ({} as any))}
+					{...(allowedLinkPrefixes
+						? { allowedLinkPrefixes: allowedLinkPrefixes ?? ['*'] }
+						: ({} as any))}
+					{...(defaultOrigin ? { defaultOrigin } : ({} as any))}
 					{...options}
 				>
 					{parsedChildren}

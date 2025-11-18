@@ -16,7 +16,7 @@ export interface UploadOptions {
  */
 function sanitizeAndExtractExtension(filename: string): string {
 	// Remove path separators to prevent path traversal
-	const basename = filename.replace(/^.*[\\\/]/, '')
+	const basename = filename.replace(/^.*[\\/]/, '')
 	// Remove null bytes
 	const cleaned = basename.replace(/\0/g, '')
 

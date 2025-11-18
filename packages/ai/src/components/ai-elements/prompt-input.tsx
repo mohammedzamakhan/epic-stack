@@ -1,15 +1,16 @@
 'use client'
 
+import { Textarea } from '@repo/ui/textarea'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import {
-	Button,
-	Icon,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	Textarea,
-} from '@repo/ui'
+} from '@repo/ui/select'
+
 import {
 	type ComponentProps,
 	type HTMLAttributes,
@@ -17,7 +18,7 @@ import {
 	Children,
 } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error'
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>

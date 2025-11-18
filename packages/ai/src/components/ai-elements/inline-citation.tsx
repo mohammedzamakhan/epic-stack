@@ -1,23 +1,22 @@
 'use client'
 
+import { Badge } from '@repo/ui/badge'
 import {
-	Badge,
 	HoverCard,
 	HoverCardTrigger,
 	HoverCardContent,
-	Icon,
-} from '@repo/ui'
-import * as React from 'react'
-import { type ComponentProps } from 'react'
-
+} from '@repo/ui/hover-card'
+import { Icon } from '@repo/ui/icon'
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
 	useCarousel as useCarouselApi,
-} from '@repo/ui'
+} from '@repo/ui/carousel'
+import * as React from 'react'
+import { type ComponentProps } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export type InlineCitationProps = ComponentProps<'span'>
 

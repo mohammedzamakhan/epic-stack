@@ -16,7 +16,7 @@ Epic Stack monorepo.
 The card components can be imported from the UI package:
 
 ```tsx
-import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui'
+import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/card'
 
 function MyComponent() {
 	return (

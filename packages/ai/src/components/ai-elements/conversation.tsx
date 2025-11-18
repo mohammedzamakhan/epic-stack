@@ -1,10 +1,11 @@
 'use client'
 
-import { Button, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
 

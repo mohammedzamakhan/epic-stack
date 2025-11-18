@@ -1,7 +1,7 @@
 'use client'
 
 import { useChat, type Message as AIMessage } from 'ai/react'
-import { Icon } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
 import {
 	Conversation,

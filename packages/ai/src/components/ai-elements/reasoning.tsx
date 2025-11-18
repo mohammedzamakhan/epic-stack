@@ -5,8 +5,8 @@ import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
-	Icon,
-} from '@repo/ui'
+} from '@repo/ui/collapsible'
+import { Icon } from '@repo/ui/icon'
 import {
 	type ComponentProps,
 	createContext,
@@ -16,7 +16,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 import { Response } from './response'
 
 type ReasoningContextValue = {

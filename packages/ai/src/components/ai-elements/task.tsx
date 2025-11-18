@@ -4,11 +4,11 @@ import {
 	Collapsible,
 	CollapsibleTrigger,
 	CollapsibleContent,
-	Icon,
-} from '@repo/ui'
+} from '@repo/ui/collapsible'
+import { Icon } from '@repo/ui/icon'
 import { type ComponentProps } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export type TaskItemFileProps = ComponentProps<'div'>
 

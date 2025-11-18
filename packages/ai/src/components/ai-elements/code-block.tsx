@@ -1,6 +1,7 @@
 'use client'
 
-import { Button, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import {
 	type ComponentProps,
 	type HTMLAttributes,
@@ -15,7 +16,7 @@ import {
 	oneLight,
 } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 type CodeBlockContextType = {
 	code: string

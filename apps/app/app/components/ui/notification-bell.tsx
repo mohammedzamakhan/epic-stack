@@ -13,8 +13,18 @@ import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader } from '@repo/ui/card'
 import { Popover, PopoverTrigger, PopoverContent } from '@repo/ui/popover'
 import { ScrollArea } from '@repo/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@repo/ui/tooltip'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { useNavigate, useLocation } from 'react-router'
 
@@ -266,9 +276,6 @@ function NotificationBellComponent() {
 	const [isOpen, setIsOpen] = useState(false)
 	const location = useLocation()
 
-	if (!novu) return null
-	if (!notifications) return null
-
 	const unreadCount = notifications?.filter((n) => !n.isRead).length || 0
 
 	useEffect(() => {
@@ -308,6 +315,10 @@ function NotificationBellComponent() {
 	}
 
 	const { _ } = useLingui()
+
+	if (!novu) return null
+	if (!notifications) return null
+
 	const filterTitles = {
 		all: _(msg`All Notifications`),
 		unread: _(msg`Unread Notifications`),

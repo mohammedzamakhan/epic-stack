@@ -1,5 +1,5 @@
 import { type Experimental_GeneratedImage } from 'ai'
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export type ImageProps = Experimental_GeneratedImage & {
 	className?: string

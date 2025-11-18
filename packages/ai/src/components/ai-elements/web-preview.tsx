@@ -1,17 +1,19 @@
 'use client'
 
 import {
-	Button,
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
-	Icon,
-	Input,
+} from '@repo/ui/collapsible'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from '@repo/ui'
+} from '@repo/ui/tooltip'
+import { Button } from '@repo/ui/button'
 import {
 	type ComponentProps,
 	type ReactNode,
@@ -20,7 +22,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export type WebPreviewContextValue = {
 	url: string

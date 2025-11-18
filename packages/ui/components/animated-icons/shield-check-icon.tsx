@@ -8,7 +8,7 @@ import {
 	useImperativeHandle,
 	useRef,
 } from 'react'
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 export interface ShieldCheckIconHandle {
 	startAnimation: () => void

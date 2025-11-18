@@ -1,7 +1,8 @@
 'use client'
 
 import { type UIMessage } from 'ai'
-import { Button, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import {
 	type ComponentProps,
 	type HTMLAttributes,
@@ -12,7 +13,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '@repo/ui'
+import { cn } from '@repo/ui/cn'
 
 type BranchContextType = {
 	currentBranch: number
