@@ -46,13 +46,20 @@ export function CommentsSection({
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const revalidator = useRevalidator()
 
-	const handleAddComment = async (content: string, images?: File[]) => {
-		setIsSubmitting(true)
-
+	// Shared helper to submit comments and replies
+	const submitComment = async (
+		content: string,
+		images: File[] | undefined,
+		parentId?: string,
+	) => {
 		const formData = new FormData()
 		formData.append('intent', 'add-comment')
 		formData.append('noteId', noteId)
 		formData.append('content', content)
+
+		if (parentId) {
+			formData.append('parentId', parentId)
+		}
 
 		// Add images to form data
 		if (images && images.length > 0) {
@@ -69,14 +76,23 @@ export function CommentsSection({
 			})
 
 			if (response.ok) {
-				// Revalidate the data to show the new comment
+				// Revalidate the data to show the new comment/reply
 				void revalidator.revalidate()
 			} else {
 				const errorText = await response.text()
-				console.error('Comment failed:', errorText)
+				const action = parentId ? 'Reply' : 'Comment'
+				console.error(`${action} failed:`, errorText)
 			}
 		} catch (error) {
-			console.error('Error adding comment:', error)
+			const action = parentId ? 'adding reply' : 'adding comment'
+			console.error(`Error ${action}:`, error)
+		}
+	}
+
+	const handleAddComment = async (content: string, images?: File[]) => {
+		setIsSubmitting(true)
+		try {
+			await submitComment(content, images)
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -87,36 +103,7 @@ export function CommentsSection({
 		content: string,
 		images?: File[],
 	) => {
-		const formData = new FormData()
-		formData.append('intent', 'add-comment')
-		formData.append('noteId', noteId)
-		formData.append('content', content)
-		formData.append('parentId', parentId)
-
-		// Add images to form data
-		if (images && images.length > 0) {
-			images.forEach((image, index) => {
-				formData.append(`image-${index}`, image)
-			})
-			formData.append('imageCount', images.length.toString())
-		}
-
-		try {
-			const response = await fetch(window.location.pathname, {
-				method: 'POST',
-				body: formData,
-			})
-
-			if (response.ok) {
-				// Revalidate the data to show the new reply
-				void revalidator.revalidate()
-			} else {
-				const errorText = await response.text()
-				console.error('Reply failed:', errorText)
-			}
-		} catch (error) {
-			console.error('Error adding reply:', error)
-		}
+		await submitComment(content, images, parentId)
 	}
 
 	const handleDelete = async (commentId: string) => {
