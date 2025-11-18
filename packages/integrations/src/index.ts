@@ -110,4 +110,4 @@ export {
 	type JiraSearchUsersDependencies,
 	type JiraCurrentUserDependencies,
 	type UpdateConfigDependencies,
-} from './route-handlers/index.ts'
+} from './route-handlers'

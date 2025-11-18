@@ -1,14 +1,22 @@
 # AGENTS.md
 
-This file provides AI coding agents with essential context for working on the Epic Stack monorepo.
+This file provides AI coding agents with essential context for working on the
+Epic Stack monorepo.
 
 ## Project Overview
 
-**Epic Stack** is a production-ready, full-stack SaaS template built as an Nx-based monorepo with npm workspaces. It includes multiple apps (main app, marketing site, admin dashboard, mobile app, CMS, background jobs, email templates, notifications) and shared packages (UI, auth, AI, payments, storage, security, i18n, etc.).
+**Epic Stack** is a production-ready, full-stack SaaS template built as an
+Nx-based monorepo with npm workspaces. It includes multiple apps (main app,
+marketing site, admin dashboard, mobile app, CMS, background jobs, email
+templates, notifications) and shared packages (UI, auth, AI, payments, storage,
+security, i18n, etc.).
 
-**Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing), deployed on Fly.io with LiteFS for distributed SQLite.
+**Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind
+CSS 4, TypeScript, Expo (mobile), Astro (marketing), deployed on Fly.io with
+LiteFS for distributed SQLite.
 
 **Monorepo Structure**:
+
 - `/apps/*` - Applications (app, web, admin, mobile, cms, etc.)
 - `/packages/*` - Shared packages (ui, auth, prisma, config, ai, payments, etc.)
 - `/docs/*` - Comprehensive documentation (84 markdown files)
@@ -20,7 +28,7 @@ This file provides AI coding agents with essential context for working on the Ep
 git clone <your-fork>
 cd epic-stack
 cp .env.example .env
-npm install && npm run setup -s
+PUPPETEER_SKIP_DOWNLOAD=true npm install && npm run setup -s
 
 # Install Playwright browsers for E2E tests
 npm run test:e2e:install
@@ -78,28 +86,33 @@ npm run validate       # lint + typecheck + test + e2e
 ## Code Style & Conventions
 
 **TypeScript**:
+
 - Strict mode enabled
 - Path aliases: `#app/*` (app code), `#tests/*` (tests), `@repo/*` (packages)
 - Use Zod for all validation schemas
 - React Router v7 conventions (loaders/actions)
 
 **Imports**:
+
 - ESM modules throughout (`"type": "module"`)
 - Consistent import ordering (enforced by ESLint)
 - Prefer named exports over default exports
 
 **Components**:
+
 - PascalCase for component files and names
 - Use Radix UI primitives from `@repo/ui` package
 - Tailwind CSS with class-variance-authority for variants
 - Use `cn()` utility for className merging
 
 **Forms & Validation**:
+
 - conform-to for form management
 - Zod schemas for validation (client + server)
 - Type-safe with TypeScript inference
 
 **Naming**:
+
 - Components: `PascalCase`
 - Files: `kebab-case.tsx` (except components)
 - Functions/variables: `camelCase`
@@ -109,12 +122,14 @@ npm run validate       # lint + typecheck + test + e2e
 ## Testing Guidelines
 
 **Unit Tests**:
+
 - Place tests alongside source files (`*.test.ts`, `*.test.tsx`)
 - Use Vitest + Testing Library
 - Mock external services with MSW (Mock Service Worker)
 - Fixtures in `/tests/fixtures` with auto-cleanup
 
 **E2E Tests**:
+
 - Located in `/tests/e2e`
 - Use authenticated fixtures for logged-in scenarios
 - Clean up test data automatically
@@ -126,13 +141,16 @@ npm run validate       # lint + typecheck + test + e2e
 ## Security Considerations
 
 **Critical Requirements**:
+
 - ALWAYS sanitize user-generated HTML with DOMPurify before rendering
-- ALWAYS validate environment variables on app startup (`SESSION_SECRET`, encryption keys)
+- ALWAYS validate environment variables on app startup (`SESSION_SECRET`,
+  encryption keys)
 - NEVER reduce bcrypt cost factor below 12
 - ALWAYS escape user input in activity logs and system messages
 - ALWAYS use Zod validation for all user inputs
 
 **Security Features in Place**:
+
 - AES-256-GCM encryption for sensitive data (SSO, integrations)
 - PBKDF2-SHA512 key derivation (100k iterations)
 - Bcrypt cost factor 12 for passwords
@@ -144,6 +162,7 @@ npm run validate       # lint + typecheck + test + e2e
 - Comprehensive audit logging
 
 **Environment Variables**:
+
 - `SESSION_SECRET` - Required, validated on startup
 - `ENCRYPTION_KEY` - 32 characters for general encryption
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
@@ -153,11 +172,13 @@ npm run validate       # lint + typecheck + test + e2e
 ## PR & Commit Guidelines
 
 **Pre-commit Checks**:
+
 - Husky runs `lint-staged` on commit
 - Must pass: Prettier, ESLint, Oxlint, TypeCheck on staged files
 - Fix issues before committing
 
 **Before Submitting PR**:
+
 ```bash
 npm run validate  # Must pass: lint + typecheck + test + e2e
 ```
@@ -165,11 +186,13 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 **Branch Naming**: Use `pr/your-feature-name` format
 
 **Commit Messages**:
+
 - Clear, descriptive messages
 - Reference issue numbers where applicable
 - Format: `feat(scope): description` or `fix(scope): description`
 
 **PR Requirements**:
+
 - All CI checks must pass (lint, typecheck, unit tests, E2E tests)
 - No merge to `main` or `dev` without passing tests
 - Code review required
@@ -177,6 +200,7 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 ## Database Operations
 
 **Prisma Workflow**:
+
 ```bash
 # After schema changes in packages/prisma/schema.prisma
 cd packages/prisma
@@ -188,6 +212,7 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 ```
 
 **LiteFS Notes**:
+
 - SQLite replication across Fly.io regions
 - Database at `/litefs/data/sqlite.db` in production
 - Local: `./packages/prisma/data.db`
@@ -200,6 +225,7 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
 **CI/CD Pipeline** (GitHub Actions):
+
 1. Lint with Oxlint
 2. Build + TypeCheck
 3. Unit tests (Vitest)
@@ -208,6 +234,7 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 6. Deploy to Fly.io
 
 **Zero-Downtime Deployments**:
+
 - Multiple instances run simultaneously
 - LiteFS handles database replication
 - Health checks: `/resources/healthcheck`, `/litefs/health`
@@ -215,6 +242,7 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 ## Internationalization
 
 **LinguiJS** for translations:
+
 ```bash
 npm run lingui:extract  # Extract translatable strings
 ```
@@ -225,12 +253,14 @@ npm run lingui:extract  # Extract translatable strings
 ## Monorepo Navigation
 
 **Package Structure**:
+
 ```bash
 pnpm dlx turbo run <command> --filter=<package_name>  # Run command in package
 npm install --prefix packages/<name>                   # Install deps in package
 ```
 
 **Key Packages**:
+
 - `@repo/ui` - Shared components (Radix UI + Tailwind)
 - `@repo/auth` - Authentication & RBAC
 - `@repo/prisma` - Database schema & client

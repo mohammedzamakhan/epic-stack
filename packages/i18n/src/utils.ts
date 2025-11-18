@@ -82,7 +82,7 @@ export function getDirection(locale: string | null | undefined): 'rtl' | 'ltr' {
 	if (!locale) return 'ltr'
 
 	// Extract the base language code (e.g., 'ar' from 'ar-SA')
-	const baseLocale = locale.toLowerCase().split(/[-_]/)[0]
+	const baseLocale = locale.toLowerCase().split(/[-_]/)[0] as string
 
 	return RTL_LOCALES.has(baseLocale) ? 'rtl' : 'ltr'
 }

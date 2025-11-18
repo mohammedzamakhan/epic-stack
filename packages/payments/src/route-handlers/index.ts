@@ -1,8 +1,8 @@
 export {
 	handleStripeWebhook,
 	type StripeWebhookDependencies,
-} from './stripe-webhook.ts'
+} from './stripe-webhook'
 export {
 	handleStripeCheckout,
 	type StripeCheckoutDependencies,
-} from './stripe-checkout.ts'
+} from './stripe-checkout'
