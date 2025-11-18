@@ -33,6 +33,7 @@ import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
 import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
+	const userId = await requireUserId(request)
 	const organization = await requireUserOrganization(request, params.orgSlug, {
 		id: true,
 		name: true,
