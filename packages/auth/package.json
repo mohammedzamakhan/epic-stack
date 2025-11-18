@@ -16,6 +16,9 @@
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .nx dist node_modules",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -26,6 +29,8 @@
   "devDependencies": {
     "@repo/config": "*",
     "@types/node": "^22.15.3",
-    "typescript": "^5.8.3"
+    "@vitest/coverage-v8": "^2.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^2.0.0"
   }
 }
