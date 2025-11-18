@@ -3,16 +3,15 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Trans, t } from '@lingui/macro'
 import { i18n } from '@lingui/core'
-import { data, redirect, Form, Link } from 'react-router'
+import { data, redirect, Form } from 'react-router'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
+import { FormActions } from '#app/components/form-actions.tsx'
 
 import {
-	Button,
 	Icon,
-	StatusButton,
 	Field,
 	FieldLabel,
 	FieldError,
@@ -25,7 +24,6 @@ import {
 	requireUserId,
 } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { type Route } from './+types/profile.password_.create.ts'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
@@ -105,8 +103,6 @@ export async function action({ request }: Route.ActionArgs) {
 export default function CreatePasswordRoute({
 	actionData,
 }: Route.ComponentProps) {
-	const isPending = useIsPending()
-
 	const [form, fields] = useForm({
 		id: 'password-create-form',
 		constraint: getZodConstraint(CreatePasswordForm),
@@ -155,19 +151,10 @@ export default function CreatePasswordRoute({
 				</Field>
 
 				<ErrorList id={form.errorId} errors={form.errors} />
-				<div className="grid w-full grid-cols-2 gap-6">
-					<Button variant="secondary" asChild>
-						<Link to="..">
-							<Trans>Cancel</Trans>
-						</Link>
-					</Button>
-					<StatusButton
-						type="submit"
-						status={isPending ? 'pending' : (form.status ?? 'idle')}
-					>
-						<Trans>Create Password</Trans>
-					</StatusButton>
-				</div>
+				<FormActions
+					submitText={<Trans>Create Password</Trans>}
+					formStatus={form.status}
+				/>
 			</FieldGroup>
 		</Form>
 	)
