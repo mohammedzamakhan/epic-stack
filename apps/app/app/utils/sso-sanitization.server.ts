@@ -1,4 +1,11 @@
 import DOMPurify from 'isomorphic-dompurify'
+import { getClientIp } from './client-ip.server.ts'
+import { isSuspiciousActivityBlocked } from './sso-rate-limit.server.ts'
+import {
+	createSSOError,
+	SSOErrorType,
+	handleSSOError,
+} from './sso-error-handling.server.ts'
 
 /**
  * Sanitize HTML content to prevent XSS attacks
@@ -351,4 +358,44 @@ export function sanitizeOIDCUserInfo(userInfo: any): any {
 	}
 
 	return sanitized
+}
+
+/**
+ * Validates and sanitizes organization slug for SSO authentication requests.
+ * Checks for suspicious activity and throws appropriate errors.
+ * Reduces duplication between SSO callback and login routes.
+ *
+ * @param request - The incoming request
+ * @param rawOrganizationSlug - The raw organization slug from params
+ * @returns The sanitized organization slug
+ * @throws Response with appropriate error status and message
+ */
+export async function validateSSOOrganization(
+	request: Request,
+	rawOrganizationSlug: string | undefined,
+): Promise<string> {
+	const clientIP = getClientIp(request)
+
+	// Sanitize and validate organization slug
+	if (!rawOrganizationSlug) {
+		throw new Response('Organization slug is required', { status: 400 })
+	}
+
+	const organizationSlug = sanitizeOrganizationSlug(rawOrganizationSlug)
+	if (!organizationSlug) {
+		throw new Response('Invalid organization slug format', { status: 400 })
+	}
+
+	// Check for suspicious activity
+	const activityKey = `${organizationSlug}:${clientIP}`
+	if (isSuspiciousActivityBlocked(activityKey, 'failed_auth')) {
+		const error = createSSOError(
+			SSOErrorType.SUSPICIOUS_ACTIVITY,
+			'Too many failed authentication attempts',
+			`Activity key: ${activityKey}`,
+		)
+		throw await handleSSOError(error)
+	}
+
+	return organizationSlug
 }

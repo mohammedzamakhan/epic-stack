@@ -15,8 +15,8 @@ import {
 } from '#app/utils/toast.server.ts'
 import { SSOCallbackSchema } from '@repo/validation'
 import {
-	sanitizeOrganizationSlug,
 	sanitizeOIDCUserInfo,
+	validateSSOOrganization,
 } from '#app/utils/sso-sanitization.server.ts'
 import {
 	trackSuspiciousActivity,
@@ -49,27 +49,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	const clientIP = getClientIp(request)
 
 	try {
-		// Sanitize and validate organization slug
-		const rawOrganizationSlug = params.organizationSlug
-		if (!rawOrganizationSlug) {
-			throw new Response('Organization slug is required', { status: 400 })
-		}
-
-		const organizationSlug = sanitizeOrganizationSlug(rawOrganizationSlug)
-		if (!organizationSlug) {
-			throw new Response('Invalid organization slug format', { status: 400 })
-		}
-
-		// Check for suspicious activity
-		const activityKey = `${organizationSlug}:${clientIP}`
-		if (isSuspiciousActivityBlocked(activityKey, 'failed_auth')) {
-			const error = createSSOError(
-				SSOErrorType.SUSPICIOUS_ACTIVITY,
-				'Too many failed authentication attempts',
-				`Activity key: ${activityKey}`,
-			)
-			throw await handleSSOError(error)
-		}
+		// Validate and sanitize organization slug (includes suspicious activity check)
+		const organizationSlug = await validateSSOOrganization(
+			request,
+			params.organizationSlug,
+		)
 
 		// Validate callback parameters
 		const url = new URL(request.url)

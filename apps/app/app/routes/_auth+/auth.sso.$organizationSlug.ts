@@ -6,8 +6,8 @@ import { getReferrerRoute } from '#app/utils/misc.tsx'
 import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
 import { SSOAuthRequestSchema } from '@repo/validation'
 import {
-	sanitizeOrganizationSlug,
 	sanitizeRedirectUrl,
+	validateSSOOrganization,
 } from '#app/utils/sso-sanitization.server.ts'
 import {
 	trackSuspiciousActivity,
@@ -67,27 +67,11 @@ export async function action({ request, params }: Route.ActionArgs) {
 	const clientIP = getClientIp(request)
 
 	try {
-		// Sanitize and validate organization slug
-		const rawOrganizationSlug = params.organizationSlug
-		if (!rawOrganizationSlug) {
-			throw new Response('Organization slug is required', { status: 400 })
-		}
-
-		const organizationSlug = sanitizeOrganizationSlug(rawOrganizationSlug)
-		if (!organizationSlug) {
-			throw new Response('Invalid organization slug format', { status: 400 })
-		}
-
-		// Check for suspicious activity
-		const activityKey = `${organizationSlug}:${clientIP}`
-		if (isSuspiciousActivityBlocked(activityKey, 'failed_auth')) {
-			const error = createSSOError(
-				SSOErrorType.SUSPICIOUS_ACTIVITY,
-				'Too many failed authentication attempts',
-				`Activity key: ${activityKey}`,
-			)
-			throw await handleSSOError(error)
-		}
+		// Validate and sanitize organization slug (includes suspicious activity check)
+		const organizationSlug = await validateSSOOrganization(
+			request,
+			params.organizationSlug,
+		)
 
 		// Get and validate form data
 		const formData = await request.formData()
