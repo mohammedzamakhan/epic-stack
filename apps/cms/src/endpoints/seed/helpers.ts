@@ -44,7 +44,7 @@ export function createParagraph(
 }
 
 /**
- * Creates a heading block
+ * Creates a heading block with simple text
  */
 export function createHeading(
 	text: string,
@@ -53,6 +53,24 @@ export function createHeading(
 	return {
 		type: 'heading',
 		children: [createTextNode(text)],
+		direction: 'ltr' as const,
+		format: '',
+		indent: 0,
+		tag,
+		version: 1,
+	}
+}
+
+/**
+ * Creates a heading block with complex content (multiple text nodes with different formatting)
+ */
+export function createHeadingWithContent(
+	children: Array<ReturnType<typeof createTextNode>>,
+	tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h2',
+) {
+	return {
+		type: 'heading',
+		children,
 		direction: 'ltr' as const,
 		format: '',
 		indent: 0,
@@ -99,16 +117,19 @@ export function createMediaBlock(mediaId: string) {
 }
 
 /**
- * Creates an info/warning/error banner block
+ * Creates an info/warning/error banner block with simple text content
  */
 export function createBanner(
 	content: string,
 	style: 'info' | 'warning' | 'error' = 'info',
+	blockName = '',
 ) {
 	return {
 		type: 'block',
 		fields: {
-			bannerContent: {
+			blockName,
+			blockType: 'banner',
+			content: {
 				root: {
 					type: 'root',
 					children: [createParagraph(content)],
@@ -119,6 +140,96 @@ export function createBanner(
 				},
 			},
 			style,
+		},
+		format: '',
+		version: 2,
+	}
+}
+
+/**
+ * Creates a banner block with complex content (multiple text nodes/links)
+ */
+export function createBannerWithContent(
+	children: Array<ReturnType<typeof createTextNode | typeof createLink>>,
+	style: 'info' | 'warning' | 'error' = 'info',
+	blockName = '',
+) {
+	return {
+		type: 'block',
+		fields: {
+			blockName,
+			blockType: 'banner',
+			content: {
+				root: {
+					type: 'root',
+					children: [
+						{
+							type: 'paragraph',
+							children,
+							direction: 'ltr' as const,
+							format: '',
+							indent: 0,
+							textFormat: 0,
+							version: 1,
+						},
+					],
+					direction: 'ltr' as const,
+					format: '',
+					indent: 0,
+					version: 1,
+				},
+			},
+			style,
+		},
+		format: '',
+		version: 2,
+	}
+}
+
+/**
+ * Creates the standard disclaimer banner used across all post seed files
+ */
+export function createDisclaimerBanner() {
+	return createBannerWithContent(
+		[
+			createTextNode('Disclaimer:', { format: 1 }), // format: 1 = bold
+			createTextNode(
+				' This content is fabricated and for demonstration purposes only. To edit this post, ',
+			),
+			createLink('navigate to the admin dashboard', '/admin'),
+			createTextNode('.'),
+		],
+		'info',
+		'Disclaimer',
+	)
+}
+
+/**
+ * Creates the standard "dynamic components" banner used across post seed files
+ */
+export function createDynamicComponentsBanner() {
+	return createBanner(
+		"This content above is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
+		'info',
+		'Dynamic Components',
+	)
+}
+
+/**
+ * Creates a code block
+ */
+export function createCodeBlock(
+	code: string,
+	language: string,
+	blockName = '',
+) {
+	return {
+		type: 'block',
+		fields: {
+			blockName,
+			blockType: 'code',
+			code,
+			language,
 		},
 		format: '',
 		version: 2,
