@@ -6,7 +6,7 @@ import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { Badge } from '@repo/ui/badge'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+import { auditService, AuditAction, AuditService } from '#app/utils/audit.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -53,9 +53,9 @@ export async function loader({
 		select: { createdAt: true },
 	})
 
-	const compliancePresets = auditService.constructor.getCompliancePresets()
+	const compliancePresets = AuditService.getCompliancePresets()
 
-	return Response.json({
+	return {
 		organization,
 		retentionPolicy,
 		statistics: {
@@ -65,7 +65,7 @@ export async function loader({
 			oldestDate: oldestLog?.createdAt,
 		},
 		compliancePresets,
-	})
+	}
 }
 
 export async function action({
@@ -98,7 +98,7 @@ export async function action({
 		// Log the policy update
 		await auditService.logAdminOperation(
 			AuditAction.ADMIN_CONFIG_CHANGED,
-			adminUser.id,
+			adminUser,
 			`Updated audit log retention policy for organization`,
 			{
 				retentionDays,
@@ -122,7 +122,7 @@ export async function action({
 
 	if (intent === 'apply-preset') {
 		const presetType = formData.get('presetType') as string
-		const presets = auditService.constructor.getCompliancePresets() as any
+		const presets = AuditService.getCompliancePresets()
 
 		const preset = presets[presetType]
 		if (!preset) {
@@ -137,7 +137,7 @@ export async function action({
 
 		await auditService.logAdminOperation(
 			AuditAction.ADMIN_CONFIG_CHANGED,
-			adminUser.id,
+			adminUser,
 			`Applied ${presetType} compliance preset to retention policy`,
 			{
 				preset: presetType,
@@ -161,7 +161,7 @@ export async function action({
 
 		await auditService.logAdminOperation(
 			AuditAction.ADMIN_CONFIG_CHANGED,
-			adminUser.id,
+			adminUser,
 			`Manually triggered log archival`,
 			{
 				archived: result.archived,
@@ -220,7 +220,7 @@ export default function AuditRetentionPage() {
 						<CardTitle className="text-sm font-medium">
 							Archived Logs
 						</CardTitle>
-						<Icon name="archive" className="text-muted-foreground h-4 w-4" />
+						<Icon name="folder" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
@@ -439,7 +439,7 @@ export default function AuditRetentionPage() {
 								</p>
 							</div>
 							<Button type="submit" variant="outline" disabled={isSubmitting}>
-								<Icon name="archive" className="mr-2 h-4 w-4" />
+								<Icon name="folder" className="mr-2 h-4 w-4" />
 								Run Archival
 							</Button>
 						</div>

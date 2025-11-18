@@ -16,5 +16,5 @@ export async function requireUserWithOrganizationPermission(
 	permission: OrganizationPermissionString,
 ): Promise<string> {
 	const userId = await getUserId(request)
-	return _requireUserWithOrganizationPermission(userId, organizationId, permission)
+	return _requireUserWithOrganizationPermission(userId ?? undefined, organizationId, permission)
 }

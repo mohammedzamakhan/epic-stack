@@ -443,14 +443,15 @@ export class AuditService {
         // CSV rows
         const rows = logs.map((log) => {
             const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+            const metadataTyped = metadata as Record<string, any>
             return [
                 log.createdAt.toISOString(),
                 log.action,
                 log.user?.email || log.userId || 'System',
                 log.organization?.name || log.organizationId || 'N/A',
                 `"${this.escapeCsvValue(log.details)}"`,
-                metadata.ipAddress || 'N/A',
-                metadata.userAgent ? `"${this.escapeCsvValue(metadata.userAgent)}"` : 'N/A',
+                metadataTyped.ipAddress || 'N/A',
+                metadataTyped.userAgent ? `"${this.escapeCsvValue(metadataTyped.userAgent)}"` : 'N/A',
             ]
         })
 
