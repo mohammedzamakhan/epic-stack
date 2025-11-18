@@ -1,7 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import {
-	Badge,
 	Button,
 	Card,
 	CardContent,
@@ -24,7 +23,6 @@ import {
 	SelectValue,
 	Table,
 	TableBody,
-	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -40,6 +38,7 @@ import {
 } from 'react-router'
 import { z } from 'zod'
 
+import { RolesTableRows } from '#app/components/roles/roles-table-rows.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
