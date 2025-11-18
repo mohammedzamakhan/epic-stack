@@ -74,77 +74,52 @@ export async function getUserOrganizations(
 	return userOrganizations as UserOrganizationWithRole[]
 }
 
+/**
+ * Shared select structure for user organization queries
+ */
+const userOrganizationSelect = {
+	organization: {
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+			image: {
+				select: {
+					id: true,
+					altText: true,
+					objectKey: true,
+				},
+			},
+			_count: {
+				select: {
+					users: {
+						where: { active: true },
+					},
+				},
+			},
+		},
+	},
+	organizationRole: {
+		select: {
+			id: true,
+			name: true,
+			level: true,
+		},
+	},
+	isDefault: true,
+} as const
+
 export async function getUserDefaultOrganization(userId: User['id']) {
 	const defaultOrg = await prisma.userOrganization.findFirst({
 		where: { userId, isDefault: true, active: true },
-		select: {
-			organization: {
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					image: {
-						select: {
-							id: true,
-							altText: true,
-							objectKey: true,
-						},
-					},
-					_count: {
-						select: {
-							users: {
-								where: { active: true },
-							},
-						},
-					},
-				},
-			},
-			organizationRole: {
-				select: {
-					id: true,
-					name: true,
-					level: true,
-				},
-			},
-			isDefault: true,
-		},
+		select: userOrganizationSelect,
 	})
 
 	if (!defaultOrg) {
 		// If no default organization is set, get the first active organization
 		const firstOrg = await prisma.userOrganization.findFirst({
 			where: { userId, active: true },
-			select: {
-				organization: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-						image: {
-							select: {
-								id: true,
-								altText: true,
-								objectKey: true,
-							},
-						},
-						_count: {
-							select: {
-								users: {
-									where: { active: true },
-								},
-							},
-						},
-					},
-				},
-				organizationRole: {
-					select: {
-						id: true,
-						name: true,
-						level: true,
-					},
-				},
-				isDefault: true,
-			},
+			select: userOrganizationSelect,
 			orderBy: { createdAt: 'asc' },
 		})
 
