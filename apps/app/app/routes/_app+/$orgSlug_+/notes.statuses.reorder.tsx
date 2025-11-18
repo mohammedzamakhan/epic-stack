@@ -1,20 +1,10 @@
 import { type ActionFunction } from 'react-router'
 import { calculateReorderPosition } from '@repo/common'
 import { prisma } from '#app/utils/db.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { validateOrgAccess } from '#app/utils/organization-loader.server.ts'
 
 export const action: ActionFunction = async ({ request, params }) => {
-	const orgSlug = params.orgSlug
-	if (!orgSlug) return new Response('Missing orgSlug', { status: 400 })
-
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug },
-	})
-	if (!organization)
-		return new Response('Organization not found', { status: 404 })
-
-	await userHasOrgAccess(request, organization.id)
+	const organization = await validateOrgAccess(request, params.orgSlug)
 
 	const formData = await request.formData()
 	const statusId = formData.get('statusId')?.toString()
