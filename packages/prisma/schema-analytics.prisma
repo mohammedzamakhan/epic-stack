@@ -1,0 +1,346 @@
+// Analytics Database Schema (PostgreSQL)
+// This is a read-only database optimized for reporting and analytics
+// Data is synced from the primary SQLite database via background jobs
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/analytics"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("ANALYTICS_DATABASE_URL")
+}
+
+// ============================================================================
+// AGGREGATED METRICS TABLES
+// These tables store pre-calculated metrics for fast querying
+// ============================================================================
+
+model OrganizationMetrics {
+  id             String   @id
+  organizationId String   @unique
+
+  // Basic info (denormalized for easier querying)
+  organizationName String
+  organizationSlug String
+  planName         String?
+  active           Boolean
+  createdAt        DateTime
+
+  // User metrics
+  totalUsers       Int      @default(0)
+  activeUsers30d   Int      @default(0) // Active in last 30 days
+  activeUsers7d    Int      @default(0) // Active in last 7 days
+  newUsersThisMonth Int     @default(0)
+
+  // Content metrics
+  totalNotes       Int      @default(0)
+  notesCreatedThisMonth Int @default(0)
+  totalComments    Int      @default(0)
+
+  // Engagement metrics
+  avgNotesPerUser  Float    @default(0)
+  avgLoginsPerDay  Float    @default(0)
+  lastActivityAt   DateTime?
+
+  // Storage metrics
+  storageUsedBytes BigInt   @default(0)
+  totalImages      Int      @default(0)
+  totalVideos      Int      @default(0)
+
+  // Billing metrics (if applicable)
+  mrr              Decimal? @db.Decimal(10, 2) // Monthly Recurring Revenue
+  subscriptionStatus String?
+
+  // Metadata
+  lastSyncedAt     DateTime @default(now())
+  calculatedAt     DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([planName])
+  @@index([active])
+  @@index([lastSyncedAt])
+}
+
+model UserMetrics {
+  id          String   @id
+  userId      String   @unique
+
+  // Basic info (denormalized)
+  email       String
+  username    String
+  name        String?
+  createdAt   DateTime
+
+  // Activity metrics
+  totalLogins      Int      @default(0)
+  lastLoginAt      DateTime?
+  loginCount7d     Int      @default(0)
+  loginCount30d    Int      @default(0)
+
+  // Content metrics
+  notesCreated     Int      @default(0)
+  commentsCreated  Int      @default(0)
+
+  // Engagement score (calculated)
+  engagementScore  Float    @default(0) // 0-100 score based on activity
+
+  // Organization membership
+  organizationCount Int     @default(0)
+  primaryOrgId     String?
+
+  // Metadata
+  lastSyncedAt     DateTime @default(now())
+  calculatedAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([lastLoginAt])
+  @@index([engagementScore])
+  @@index([lastSyncedAt])
+}
+
+model DailyMetrics {
+  id             String   @id
+  date           DateTime @db.Date
+  organizationId String?  // null for system-wide metrics
+
+  // Daily counts
+  newUsers       Int      @default(0)
+  activeUsers    Int      @default(0)
+  notesCreated   Int      @default(0)
+  commentsCreated Int     @default(0)
+  apiCalls       Int      @default(0)
+
+  // Session metrics
+  totalSessions  Int      @default(0)
+  avgSessionDuration Float @default(0) // in minutes
+
+  // Performance metrics
+  avgResponseTime Float   @default(0) // in ms
+  errorCount     Int      @default(0)
+
+  createdAt      DateTime @default(now())
+
+  @@unique([date, organizationId])
+  @@index([date])
+  @@index([organizationId, date])
+}
+
+model MonthlyMetrics {
+  id             String   @id
+  month          DateTime @db.Date // First day of month
+  organizationId String?  // null for system-wide metrics
+
+  // Monthly aggregates
+  newUsers       Int      @default(0)
+  churned Users  Int      @default(0)
+  activeUsers    Int      @default(0)
+  notesCreated   Int      @default(0)
+
+  // Revenue metrics
+  mrr            Decimal? @db.Decimal(10, 2)
+  newMrr         Decimal? @db.Decimal(10, 2)
+  expandedMrr    Decimal? @db.Decimal(10, 2)
+  contractedMrr  Decimal? @db.Decimal(10, 2)
+  churnedMrr     Decimal? @db.Decimal(10, 2)
+
+  // Storage
+  storageUsedBytes BigInt @default(0)
+
+  createdAt      DateTime @default(now())
+
+  @@unique([month, organizationId])
+  @@index([month])
+  @@index([organizationId, month])
+}
+
+// ============================================================================
+// ARCHIVED DATA TABLES
+// Historical data moved from SQLite for long-term storage
+// ============================================================================
+
+model ArchivedAuditLog {
+  id             String    @id
+  organizationId String?
+  userId         String?
+
+  // Action details
+  action         String
+  details        String
+  metadata       Json?
+
+  // Request context
+  ipAddress      String?
+  userAgent      String?
+
+  // Resource tracking
+  resourceType   String?
+  resourceId     String?
+  targetUserId   String?
+
+  // Compliance
+  severity       String
+  retainUntil    DateTime?
+
+  // Original timestamp from SQLite
+  createdAt      DateTime
+
+  // Archive metadata
+  archivedAt     DateTime  @default(now())
+  archivedReason String    @default("retention_policy")
+  s3Key          String?   // If also stored in S3
+
+  @@index([organizationId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action])
+  @@index([createdAt])
+  @@index([archivedAt])
+  @@index([resourceType, resourceId])
+}
+
+model ArchivedSession {
+  id             String   @id
+  userId         String
+
+  expirationDate DateTime
+  createdAt      DateTime
+  endedAt        DateTime // When session actually ended
+
+  // Session metadata
+  userAgent      String?
+  ipAddress      String?
+  duration       Int?     // Duration in seconds
+
+  archivedAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([archivedAt])
+}
+
+model ArchivedIntegrationLog {
+  id             String   @id
+  integrationId  String
+  organizationId String
+
+  action         String
+  status         String
+  requestData    Json?
+  responseData   Json?
+  errorMessage   String?
+
+  createdAt      DateTime
+  archivedAt     DateTime @default(now())
+  s3Key          String?
+
+  @@index([integrationId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([createdAt])
+  @@index([archivedAt])
+}
+
+// ============================================================================
+// MATERIALIZED VIEWS FOR COMPLEX QUERIES
+// These are refreshed periodically for performance
+// ============================================================================
+
+// Top organizations by activity
+model TopOrganizations {
+  id             String   @id
+  organizationId String   @unique
+  organizationName String
+  planName       String?
+
+  activityScore  Float    // Calculated score
+  userCount      Int
+  noteCount      Int
+
+  calculatedAt   DateTime @default(now())
+
+  @@index([activityScore])
+}
+
+// User growth trends
+model UserGrowthTrend {
+  id             String   @id
+  date           DateTime @db.Date
+
+  newUsers       Int
+  totalUsers     Int
+  activeUsers    Int
+  churnedUsers   Int
+
+  growthRate     Float    // Percentage
+
+  calculatedAt   DateTime @default(now())
+
+  @@unique([date])
+  @@index([date])
+}
+
+// Revenue metrics aggregation
+model RevenueMetrics {
+  id             String   @id
+  month          DateTime @db.Date
+
+  totalMrr       Decimal  @db.Decimal(10, 2)
+  newMrr         Decimal  @db.Decimal(10, 2)
+  expansionMrr   Decimal  @db.Decimal(10, 2)
+  contractionMrr Decimal  @db.Decimal(10, 2)
+  churnMrr       Decimal  @db.Decimal(10, 2)
+
+  customerCount  Int
+  avgRevenuePerUser Decimal @db.Decimal(10, 2)
+
+  calculatedAt   DateTime @default(now())
+
+  @@unique([month])
+  @@index([month])
+}
+
+// ============================================================================
+// SYNC METADATA TRACKING
+// Track what has been synced from SQLite to PostgreSQL
+// ============================================================================
+
+model SyncJob {
+  id          String   @id @default(cuid())
+  jobType     String   // "metrics", "archive", "full_sync"
+  tableName   String   // Which table/metric was synced
+
+  status      String   // "pending", "running", "completed", "failed"
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  recordsProcessed Int   @default(0)
+  recordsFailed    Int   @default(0)
+
+  lastSyncedId     String? // Last record ID synced (for incremental)
+  lastSyncedAt     DateTime? // Last timestamp synced
+
+  errorMessage     String?
+  metadata         Json?   // Additional context
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([jobType, status])
+  @@index([tableName, status])
+  @@index([createdAt])
+}
+
+// Track the last successful sync for each table
+model SyncCursor {
+  id            String   @id
+  tableName     String   @unique
+
+  lastRecordId  String?  // Last synced record ID
+  lastTimestamp DateTime? // Last synced timestamp
+  lastSyncedAt  DateTime @default(now())
+
+  recordCount   Int      @default(0)
+
+  @@index([tableName])
+}

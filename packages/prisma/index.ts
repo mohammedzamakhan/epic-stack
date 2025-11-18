@@ -5,6 +5,12 @@ import { remember } from '@epic-web/remember'
 // Export types
 export * from '@prisma/client'
 
+// Export analytics database client and types
+export { analyticsDb, isAnalyticsDbHealthy, getAnalyticsDbInfo } from './src/analytics-client.js'
+
+// Export analytics query utilities
+export * from './src/analytics-queries.js'
+
 // Changed import due to issue: https://github.com/remix-run/react-router/pull/12644
 export const prisma = remember('prisma', () => {
 	// NOTE: if you change anything in this function you'll need to restart

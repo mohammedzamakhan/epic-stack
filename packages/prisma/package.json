@@ -11,7 +11,11 @@
     "db:seed": "tsx seed.ts",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "setup": "npm run db:migrate:deploy && npm run db:generate"
+    "analytics:generate": "prisma generate --schema=schema-analytics.prisma",
+    "analytics:push": "prisma db push --schema=schema-analytics.prisma --skip-generate",
+    "analytics:migrate:dev": "prisma migrate dev --schema=schema-analytics.prisma",
+    "analytics:migrate:deploy": "prisma migrate deploy --schema=schema-analytics.prisma",
+    "setup": "npm run db:migrate:deploy && npm run db:generate && npm run analytics:migrate:deploy && npm run analytics:generate"
   },
   "dependencies": {
     "@epic-web/remember": "^1.1.0",
