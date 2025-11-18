@@ -16,5 +16,8 @@ export async function requireUserWithOrganizationPermission(
 	permission: OrganizationPermissionString,
 ): Promise<string> {
 	const userId = await getUserId(request)
+	if (!userId) {
+		throw new Response('Unauthorized', { status: 401 })
+	}
 	return _requireUserWithOrganizationPermission(userId, organizationId, permission)
 }

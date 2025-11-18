@@ -349,7 +349,9 @@ export function NotesKanbanBoard({
 
 		const formData = new FormData()
 		formData.append('intent', 'reorder-note')
-		formData.append('noteId', activeParsed.noteId)
+		if (activeParsed?.noteId) {
+			formData.append('noteId', activeParsed.noteId)
+		}
 		formData.append('position', String(destination.position))
 		if (destination.columnId !== UNCATEGORISED)
 			formData.append('statusId', destination.columnId)

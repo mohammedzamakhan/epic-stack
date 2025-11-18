@@ -161,7 +161,7 @@ export default function EnhancedAuditLogsPage() {
 							Security Events
 						</CardTitle>
 						<Icon
-							name="shield-alert"
+							name="shield"
 							className="text-muted-foreground h-4 w-4"
 						/>
 					</CardHeader>
@@ -176,7 +176,7 @@ export default function EnhancedAuditLogsPage() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Top Action</CardTitle>
-						<Icon name="bar-chart" className="text-muted-foreground h-4 w-4" />
+						<Icon name="chevron-up" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm font-medium">
@@ -193,7 +193,7 @@ export default function EnhancedAuditLogsPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<Icon name="filter" className="h-5 w-5" />
+						<Icon name="search" className="h-5 w-5" />
 						Filters
 					</CardTitle>
 				</CardHeader>
@@ -266,7 +266,7 @@ export default function EnhancedAuditLogsPage() {
 					{logs.length > 0 ? (
 						<div className="space-y-3">
 							{logs.map((log) => {
-								const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+								const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as {severity: string, ipAddress: string}
 								return (
 									<div
 										key={log.id}
@@ -297,13 +297,13 @@ export default function EnhancedAuditLogsPage() {
 												)}
 												{metadata.ipAddress && (
 													<span>
-														<Icon name="map-pin" className="mr-1 inline h-3 w-3" />
+														<Icon name="chevron-up" className="mr-1 inline h-3 w-3" />
 														{metadata.ipAddress}
 													</span>
 												)}
 												{log.resourceType && (
 													<span>
-														<Icon name="box" className="mr-1 inline h-3 w-3" />
+														<Icon name="x" className="mr-1 inline h-3 w-3" />
 														{log.resourceType}:{' '}
 														{log.resourceId?.substring(0, 8)}
 													</span>

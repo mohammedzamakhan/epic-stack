@@ -8,7 +8,7 @@ export interface OAuthCallbackDependencies {
 	redirectWithToast: (
 		url: string,
 		options: { title: string; description: string; type: string },
-	) => Response
+	) => Response | Promise<Response>
 	prisma: PrismaClient
 }
 

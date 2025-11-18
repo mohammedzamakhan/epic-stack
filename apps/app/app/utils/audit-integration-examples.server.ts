@@ -319,7 +319,6 @@ export async function exampleAPIKeyCreated(
 			organizationId,
 		},
 		request,
-		'info',
 	)
 }
 

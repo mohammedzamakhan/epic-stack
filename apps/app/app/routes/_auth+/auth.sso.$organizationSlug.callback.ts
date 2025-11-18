@@ -54,6 +54,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			request,
 			params.organizationSlug,
 		)
+		const activityKey = `${organizationSlug}:${clientIP}`
 
 		// Validate callback parameters
 		const url = new URL(request.url)
@@ -268,9 +269,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		})
 	} catch (error: unknown) {
 		// Track failed authentication attempts
-		const organizationSlug = sanitizeOrganizationSlug(
-			params.organizationSlug || '',
-		)
+		const organizationSlug = params.organizationSlug || ''
 		if (organizationSlug) {
 			const activityKey = `${organizationSlug}:${clientIP}`
 			trackSuspiciousActivity(activityKey, 'failed_auth')

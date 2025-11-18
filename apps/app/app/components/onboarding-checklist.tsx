@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { Trans } from '@lingui/macro'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
-import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
+import { ListTodoIcon } from './icons/list-todo'
 import { ShineBorder } from './magic-ui/shine-border'
 
 import { Button } from '@repo/ui/button'
@@ -26,7 +26,7 @@ export function OnboardingChecklist({
 	className = '',
 }: OnboardingChecklistProps) {
 	const fetcher = useFetcher()
-	const listTodoIconRef = useRef<ListTodoIconHandle>(null)
+	const listTodoIconRef = useRef<any>(null)
 
 	// Don't show if completed and not visible
 	if (progress.isCompleted && !progress.isVisible) {

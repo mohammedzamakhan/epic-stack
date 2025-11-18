@@ -83,6 +83,7 @@ const SettingsSchema = z.object({
 })
 
 export async function action({ request, params }: ActionFunctionArgs) {
+	const userId = await requireUserId(request)
 	const [organization, user] = await Promise.all([
 		requireUserOrganization(request, params.orgSlug, {
 			id: true,
@@ -104,12 +105,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 		}),
 		// Get user email for domain validation
-		requireUserId(request).then((userId) =>
-			prisma.user.findUnique({
-				where: { id: userId },
-				select: { email: true },
-			}),
-		),
+		prisma.user.findUnique({
+			where: { id: userId },
+			select: { email: true },
+		}),
 	])
 
 	if (!organization || !user) {

@@ -358,6 +358,7 @@ function InviteFieldset({
 		description: string
 	}>
 }) {
+	const { _ } = useLingui()
 	const inviteFields = meta.getFieldset()
 	const role = useInputControl(inviteFields.role)
 	const { key, ...emailProps } = getInputProps(inviteFields.email, {
@@ -370,8 +371,8 @@ function InviteFieldset({
 				<InputGroup className="w-full">
 					<InputGroupInput
 						{...emailProps}
-						placeholder={(msg`Enter email address`)}
-						aria-label={(msg`Email`)}
+						placeholder={_(msg`Enter email address`)}
+						aria-label={_(msg`Email`)}
 						aria-invalid={
 							inviteFields.email.errors?.length ? 'true' : undefined
 						}

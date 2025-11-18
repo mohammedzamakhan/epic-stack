@@ -256,7 +256,7 @@ export async function createAuthenticatedSessionResponse(
 	const { handleNewDeviceSignin } = await import(
 		'#app/utils/new-device-signin.server.tsx'
 	)
-	const { getClientIp } = await import('#app/utils/misc.tsx')
+	const { getClientIp } = await import('#app/utils/ip-tracking.server.ts')
 
 	// Get user data for the response
 	const user = await prisma.user.findUnique({

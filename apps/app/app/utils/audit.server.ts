@@ -442,7 +442,7 @@ export class AuditService {
 
 		// CSV rows
 		const rows = logs.map((log) => {
-			const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+			const metadata: any = log.metadata ? JSON.parse(log.metadata) : {}
 			return [
 				log.createdAt.toISOString(),
 				log.action,
@@ -474,17 +474,17 @@ export class AuditService {
 			action: log.action,
 			user: log.user
 				? {
-						id: log.user.id,
-						email: log.user.email,
-						name: log.user.name,
-					}
+					id: log.user.id,
+					email: log.user.email,
+					name: log.user.name,
+				}
 				: null,
 			organization: log.organization
 				? {
-						id: log.organization.id,
-						name: log.organization.name,
-						slug: log.organization.slug,
-					}
+					id: log.organization.id,
+					name: log.organization.name,
+					slug: log.organization.slug,
+				}
 				: null,
 			details: log.details,
 			metadata: log.metadata ? JSON.parse(log.metadata) : null,

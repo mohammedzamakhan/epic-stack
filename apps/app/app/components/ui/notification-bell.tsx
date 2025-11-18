@@ -279,6 +279,8 @@ function NotificationBellComponent() {
 	const unreadCount = notifications?.filter((n) => !n.isRead).length || 0
 
 	useEffect(() => {
+		if (!novu || !refetch) return
+
 		const listener = () => {
 			void refetch()
 		}
@@ -293,16 +295,19 @@ function NotificationBellComponent() {
 	}, [novu, refetch])
 
 	useEffect(() => {
-		setTimeout(() => void refetch(), 200)
-	}, [location.pathname])
+		if (refetch) {
+			setTimeout(() => void refetch(), 200)
+		}
+	}, [location.pathname, refetch])
 
 	const handleLoadMore = () => {
-		if (hasMore) {
+		if (hasMore && fetchMore) {
 			void fetchMore()
 		}
 	}
 
 	const handleReadAll = async () => {
+		if (!readAll) return
 		try {
 			await readAll()
 		} catch (error) {

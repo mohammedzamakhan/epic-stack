@@ -19,7 +19,7 @@ import { PageTitle } from '@repo/ui/page-title'
 import { Textarea } from '@repo/ui/textarea'
 import { Icon } from '@repo/ui/icon'
 import { FieldLabel, FieldGroup, FieldDescription } from '@repo/ui/field'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -519,8 +519,8 @@ function ApiKeysCard({
 					))}
 					{apiKeys.length === 0 && (
 						<EmptyState
-							title={<Trans>No API keys created yet</Trans>}
-							description={<Trans>Create your first API key to get started</Trans>}
+							title={t`No API keys created yet`}
+							description={t`Create your first API key to get started`}
 							icons={['key']}
 							className="-m-1 w-[calc(100%+12px)]"
 						/>
@@ -701,13 +701,9 @@ export default function McpPage() {
 		<div className="py-8 md:p-8">
 			<div className="mb-8">
 				<PageTitle
-					title={<Trans>MCP Server</Trans>}
-					description={
-						<Trans>
-							Connect your AI assistants to {organization.name} data using the
-							Model Context Protocol
-						</Trans>
-					}
+					title={t`MCP Server`}
+					description={t`Connect your AI assistants to {organization.name} data using the
+							Model Context Protocol`}
 				/>
 			</div>
 

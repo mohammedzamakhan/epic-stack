@@ -5,6 +5,7 @@ import {
 	type OrganizationPermissionString,
 } from '@repo/auth'
 import { getUserId } from './auth.server.ts'
+import { invariant } from '@epic-web/invariant'
 
 /**
  * Require user to have organization permission - throws 403 if not
@@ -16,5 +17,6 @@ export async function requireUserWithOrganizationPermission(
 	permission: OrganizationPermissionString,
 ): Promise<string> {
 	const userId = await getUserId(request)
+	invariant(userId, 'User must be logged in to access this resource')
 	return _requireUserWithOrganizationPermission(userId, organizationId, permission)
 }

@@ -2,7 +2,8 @@ import { motion } from 'motion/react'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import React, { useEffect, useState } from 'react'
-import { Trans } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { FoldersIcon } from '#app/components/icons/folders-icon.tsx'
 import { HomeIcon } from '#app/components/icons/home-icon.tsx'
@@ -94,6 +95,7 @@ function AccountSidebar({
 	orgSlug: string | undefined
 	onFeedbackClick: () => void
 }) {
+	const { _ } = useLingui()
 	const isProfileRoute = location.pathname === '/profile'
 	const isSecurityRoute = location.pathname === '/security'
 	const isNotificationsRoute = location.pathname === '/notifications'
@@ -101,31 +103,31 @@ function AccountSidebar({
 
 	const navMain = [
 		{
-			title: <Trans>Dashboard</Trans>,
+			title: _(msg`Dashboard`),
 			url: orgSlug ? `/${orgSlug}` : '/organizations',
 			isActive: false,
 			icon: ArrowLeftIcon,
 		},
 		{
-			title: <Trans>Profile</Trans>,
+			title: _(msg`Profile`),
 			url: '/profile',
 			isActive: isProfileRoute,
 			icon: UserIcon,
 		},
 		{
-			title: <Trans>Security</Trans>,
+			title: _(msg`Security`),
 			url: '/security',
 			isActive: isSecurityRoute,
 			icon: LockOpenIcon,
 		},
 		{
-			title: <Trans>Notifications</Trans>,
+			title: _(msg`Notifications`),
 			url: '/notifications',
 			isActive: isNotificationsRoute,
 			icon: BellIcon,
 		},
 		{
-			title: <Trans>Organizations</Trans>,
+			title: _(msg`Organizations`),
 			url: '/organizations',
 			isActive: isOrganizationsRoute,
 			icon: BuildingIcon,
@@ -134,12 +136,12 @@ function AccountSidebar({
 
 	const navSecondary = [
 		{
-			title: <Trans>Get help</Trans>,
+			title: _(msg`Get help`),
 			url: '#',
 			icon: CircleHelpIcon,
 		},
 		{
-			title: <Trans>Give feedback</Trans>,
+			title: _(msg`Give feedback`),
 			icon: MessageSquareMoreIcon,
 			onClick: onFeedbackClick,
 		},
@@ -186,6 +188,7 @@ function OrganizationSidebar({
 	onFeedbackClick: () => void
 	extensionId?: string
 }) {
+	const { _ } = useLingui()
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
 
 	useEffect(() => {
@@ -207,41 +210,41 @@ function OrganizationSidebar({
 	}, [extensionId])
 	const navMain = [
 		{
-			title: <Trans>Dashboard</Trans>,
+			title: _(msg`Dashboard`),
 			url: `/${orgSlug}`,
 			isActive: location.pathname === `/${orgSlug}`,
 			icon: HomeIcon,
 		},
 		{
-			title: <Trans>Notes</Trans>,
+			title: _(msg`Notes`),
 			url: `/${orgSlug}/notes`,
 			isActive: location.pathname.includes(`/${orgSlug}/notes`),
 			icon: FoldersIcon,
 		},
 		{
-			title: <Trans>MCP Server</Trans>,
+			title: _(msg`MCP Server`),
 			url: `/${orgSlug}/mcp`,
 			isActive: location.pathname.includes(`/${orgSlug}/mcp`),
 			icon: McpIcon,
 		},
 		{
-			title: <Trans>Settings</Trans>,
+			title: _(msg`Settings`),
 			url: `/${orgSlug}/settings`,
 			isActive: location.pathname.includes(`/${orgSlug}/settings`),
 			icon: SettingsGearIcon,
 			items: [
 				{
-					title: <Trans>General</Trans>,
+					title: _(msg`General`),
 					url: `/${orgSlug}/settings`,
 					isActive: location.pathname === `/${orgSlug}/settings`,
 				},
 				{
-					title: <Trans>Members</Trans>,
+					title: _(msg`Members`),
 					url: `/${orgSlug}/settings/members`,
 					isActive: location.pathname === `/${orgSlug}/settings/members`,
 				},
 				{
-					title: <Trans>Integrations</Trans>,
+					title: _(msg`Integrations`),
 					url: `/${orgSlug}/settings/integrations`,
 					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
 				},
@@ -250,7 +253,7 @@ function OrganizationSidebar({
 				rootData?.launchStatus !== 'CLOSED_BETA'
 					? [
 							{
-								title: <Trans>Billing</Trans>,
+								title: _(msg`Billing`),
 								url: `/${orgSlug}/settings/billing`,
 								isActive: location.pathname === `/${orgSlug}/settings/billing`,
 							},
@@ -264,7 +267,7 @@ function OrganizationSidebar({
 		...(!isExtensionInstalled
 			? [
 					{
-						title: <Trans>Get chrome extension</Trans>,
+						title: _(msg`Get chrome extension`),
 						url: `https://chrome.google.com/webstore/detail/${extensionId}`,
 						icon: ExternalLinkIcon,
 						target: '_blank',
@@ -272,18 +275,18 @@ function OrganizationSidebar({
 				]
 			: []),
 		{
-			title: <Trans>Add members</Trans>,
+			title: _(msg`Add members`),
 			url: `/${orgSlug}/settings/members`,
 			icon: UserRoundPlusIcon,
 		},
 		{
-			title: <Trans>Get help</Trans>,
+			title: _(msg`Get help`),
 			url: 'http://docs.epic-stack.me:2999',
 			icon: CircleHelpIcon,
 			target: '_blank',
 		},
 		{
-			title: <Trans>Give feedback</Trans>,
+			title: _(msg`Give feedback`),
 			icon: MessageSquareMoreIcon,
 			onClick: onFeedbackClick,
 		},

@@ -43,13 +43,13 @@ export async function getUserOrganizations(
 					level: true,
 					permissions: includePermissions
 						? {
-								where: { context: 'organization' },
-								select: {
-									action: true,
-									entity: true,
-									access: true,
-								},
-							}
+							where: { context: 'organization' },
+							select: {
+								action: true,
+								entity: true,
+								access: true,
+							},
+						}
 						: false,
 				},
 			},
@@ -208,13 +208,13 @@ export async function createOrganization({
 				},
 				...(imageObjectKey
 					? {
-							image: {
-								create: {
-									altText: `${name} logo`,
-									objectKey: imageObjectKey,
-								},
+						image: {
+							create: {
+								altText: `${name} logo`,
+								objectKey: imageObjectKey,
 							},
-						}
+						},
+					}
 					: {}),
 			},
 			select: {
@@ -445,10 +445,10 @@ export async function getOrganizationWithAccess<
 	select?: T,
 ): Promise<{
 	[K in keyof T]: T[K] extends true
-		? K extends 'id' | 'name' | 'slug'
-			? string
-			: any
-		: any
+	? K extends 'id' | 'name' | 'slug'
+	? string
+	: any
+	: any
 }> {
 	const organization = await prisma.organization.findFirst({
 		where: {
@@ -459,7 +459,7 @@ export async function getOrganizationWithAccess<
 				},
 			},
 		},
-		select: select || ({ id: true, name: true, slug: true } as T),
+		select: select || ({ id: true, name: true, slug: true } as any),
 	})
 
 	if (!organization) {

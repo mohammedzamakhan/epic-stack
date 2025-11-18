@@ -34,7 +34,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 		})
 
 		// Calculate the new fractional position using shared utility
-		const newPosition = calculateReorderPosition(allStatuses, targetIndex)
+		const newPosition = calculateReorderPosition(
+			allStatuses.map(s => ({ position: s.position ?? 0 })),
+			targetIndex
+		)
 
 		// Update the status with new position
 		await tx.organizationNoteStatus.update({

@@ -442,7 +442,7 @@ export class AuditService {
 
         // CSV rows
         const rows = logs.map((log) => {
-            const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+            const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as { ipAddress: string, userAgent: string }
             return [
                 log.createdAt.toISOString(),
                 log.action,

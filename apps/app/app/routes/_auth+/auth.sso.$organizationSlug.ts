@@ -72,6 +72,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 			request,
 			params.organizationSlug,
 		)
+		const activityKey = `${organizationSlug}:${clientIP}`
 
 		// Get and validate form data
 		const formData = await request.formData()
@@ -134,9 +135,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 		return response
 	} catch (error: unknown) {
 		// Track failed authentication attempts
-		const organizationSlug = sanitizeOrganizationSlug(
-			params.organizationSlug || '',
-		)
+		const organizationSlug = params.organizationSlug || ''
 		if (organizationSlug) {
 			const activityKey = `${organizationSlug}:${clientIP}`
 			trackSuspiciousActivity(activityKey, 'failed_auth')

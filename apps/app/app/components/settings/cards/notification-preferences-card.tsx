@@ -66,6 +66,7 @@ function ChannelSwitchList({
 	onUpdate,
 	disabled,
 }: ChannelSwitchListProps) {
+	const { _ } = useLingui()
 	return (
 		<div className="grid gap-1 pl-4">
 			{Object.entries(preference.channels).map(([channel, enabled]) => (
@@ -76,7 +77,7 @@ function ChannelSwitchList({
 							className="text-muted-foreground h-4 w-4"
 						/>
 						<span className="text-sm font-medium">
-							{channelLabels[channel] || channel}
+							{getChannelLabel(channel, _)}
 						</span>
 					</div>
 					<Switch
