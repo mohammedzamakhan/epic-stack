@@ -1,13 +1,12 @@
 import { data } from 'react-router'
 import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
-import { createTokenPair } from '#app/utils/jwt.server.ts'
+import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	normalizeEmail,
 	normalizeUsername,
 } from '#app/utils/providers/provider.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -73,62 +72,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				)
 			}
 
-			const user = await prisma.user.findUnique({
-				select: {
-					id: true,
-					email: true,
-					username: true,
-					name: true,
-					image: { select: { id: true } },
-					createdAt: true,
-					updatedAt: true,
-				},
-				where: { id: existingConnection.userId },
-			})
-
-			if (!user) {
-				return data(
-					{
-						success: false,
-						error: 'user_not_found',
-						message: 'User not found',
-					},
-					{ status: 400 },
-				)
-			}
-
-			// Create JWT tokens for mobile authentication
-			const userAgent = request.headers.get('user-agent') ?? undefined
-			const ip = getClientIp(request)
-
-			const tokens = await createTokenPair(
-				{
-					id: user.id,
-					email: user.email,
-					username: user.username,
-				},
-				{ userAgent, ip },
+			// Use shared helper to create authenticated session response
+			const response = await createAuthenticatedSessionResponse(
+				existingConnection.userId,
+				request,
 			)
 
-			return data({
-				success: true,
-				data: {
-					user: {
-						id: user.id,
-						email: user.email,
-						username: user.username,
-						name: user.name,
-						image: user.image?.id,
-						createdAt: user.createdAt.toISOString(),
-						updatedAt: user.updatedAt.toISOString(),
-					},
-					// Return JWT tokens instead of session
-					accessToken: tokens.accessToken,
-					refreshToken: tokens.refreshToken,
-					expiresIn: tokens.expiresIn,
-					expiresAt: tokens.expiresAt.toISOString(),
-				},
-			})
+			if (!response.success) {
+				return data(response, { status: 400 })
+			}
+
+			return data(response)
 		}
 
 		// Check if user exists with same email
@@ -160,62 +114,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				},
 			})
 
-			const user = await prisma.user.findUnique({
-				select: {
-					id: true,
-					email: true,
-					username: true,
-					name: true,
-					image: { select: { id: true } },
-					createdAt: true,
-					updatedAt: true,
-				},
-				where: { id: existingUser.id },
-			})
-
-			if (!user) {
-				return data(
-					{
-						success: false,
-						error: 'user_not_found',
-						message: 'User not found',
-					},
-					{ status: 400 },
-				)
-			}
-
-			// Create JWT tokens for mobile authentication
-			const userAgent = request.headers.get('user-agent') ?? undefined
-			const ip = getClientIp(request)
-
-			const tokens = await createTokenPair(
-				{
-					id: user.id,
-					email: user.email,
-					username: user.username,
-				},
-				{ userAgent, ip },
+			// Use shared helper to create authenticated session response
+			const response = await createAuthenticatedSessionResponse(
+				existingUser.id,
+				request,
 			)
 
-			return data({
-				success: true,
-				data: {
-					user: {
-						id: user.id,
-						email: user.email,
-						username: user.username,
-						name: user.name,
-						image: user.image?.id,
-						createdAt: user.createdAt.toISOString(),
-						updatedAt: user.updatedAt.toISOString(),
-					},
-					// Return JWT tokens instead of session
-					accessToken: tokens.accessToken,
-					refreshToken: tokens.refreshToken,
-					expiresIn: tokens.expiresIn,
-					expiresAt: tokens.expiresAt.toISOString(),
-				},
-			})
+			if (!response.success) {
+				return data(response, { status: 400 })
+			}
+
+			return data(response)
 		}
 
 		// Create new user with provider connection
@@ -245,62 +154,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			imageUrl: profile.imageUrl,
 		})
 
-		const user = await prisma.user.findUnique({
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				name: true,
-				image: { select: { id: true } },
-				createdAt: true,
-				updatedAt: true,
-			},
-			where: { id: session.id },
-		})
-
-		if (!user) {
-			return data(
-				{
-					success: false,
-					error: 'user_creation_failed',
-					message: 'Failed to create user',
-				},
-				{ status: 500 },
-			)
-		}
-
-		// Create JWT tokens for mobile authentication
-		const userAgent = request.headers.get('user-agent') ?? undefined
-		const ip = getClientIp(request)
-
-		const tokens = await createTokenPair(
-			{
-				id: user.id,
-				email: user.email,
-				username: user.username,
-			},
-			{ userAgent, ip },
+		// Use shared helper to create authenticated session response
+		const response = await createAuthenticatedSessionResponse(
+			session.id,
+			request,
 		)
 
-		return data({
-			success: true,
-			data: {
-				user: {
-					id: user.id,
-					email: user.email,
-					username: user.username,
-					name: user.name,
-					image: user.image?.id,
-					createdAt: user.createdAt.toISOString(),
-					updatedAt: user.updatedAt.toISOString(),
-				},
-				// Return JWT tokens instead of session
-				accessToken: tokens.accessToken,
-				refreshToken: tokens.refreshToken,
-				expiresIn: tokens.expiresIn,
-				expiresAt: tokens.expiresAt.toISOString(),
-			},
-		})
+		if (!response.success) {
+			return data(response, { status: 500 })
+		}
+
+		return data(response)
 	} catch (error) {
 		console.error('OAuth callback error:', error)
 		return data(
