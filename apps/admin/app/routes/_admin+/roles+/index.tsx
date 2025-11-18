@@ -351,38 +351,13 @@ export default function AdminRolesPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{organizationRoles.map((role) => (
-								<TableRow key={role.id}>
-									<TableCell className="font-medium">
-										<Link to={`/roles/${role.id}`} className="hover:underline">
-											{role.name}
-										</Link>
-									</TableCell>
-									<TableCell>
-										<Badge variant="secondary">{role.level}</Badge>
-									</TableCell>
-									<TableCell>{role._count.users}</TableCell>
-									<TableCell>{role.permissions.length}</TableCell>
-									<TableCell className="text-muted-foreground">
-										{role.description || 'No description'}
-									</TableCell>
-									<TableCell className="text-right">
-										<Button asChild variant="ghost" size="sm">
-											<Link to={`/roles/${role.id}`}>Edit</Link>
-										</Button>
-									</TableCell>
-								</TableRow>
-							))}
-							{organizationRoles.length === 0 && (
-								<TableRow>
-									<TableCell
-										colSpan={6}
-										className="text-muted-foreground text-center"
-									>
-										No organization roles found
-									</TableCell>
-								</TableRow>
-							)}
+							<RolesTableRows
+								roles={organizationRoles}
+								baseUrl="/roles"
+								emptyMessage="No organization roles found"
+								emptyColSpan={6}
+								showLevel
+							/>
 						</TableBody>
 					</Table>
 				</CardContent>
@@ -408,38 +383,12 @@ export default function AdminRolesPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{systemRoles.map((role) => (
-								<TableRow key={role.id}>
-									<TableCell className="font-medium">
-										<Link
-											to={`/roles/system/${role.id}`}
-											className="hover:underline"
-										>
-											{role.name}
-										</Link>
-									</TableCell>
-									<TableCell>{role._count.users}</TableCell>
-									<TableCell>{role.permissions.length}</TableCell>
-									<TableCell className="text-muted-foreground">
-										{role.description || 'No description'}
-									</TableCell>
-									<TableCell className="text-right">
-										<Button asChild variant="ghost" size="sm">
-											<Link to={`/roles/system/${role.id}`}>Edit</Link>
-										</Button>
-									</TableCell>
-								</TableRow>
-							))}
-							{systemRoles.length === 0 && (
-								<TableRow>
-									<TableCell
-										colSpan={5}
-										className="text-muted-foreground text-center"
-									>
-										No system roles found
-									</TableCell>
-								</TableRow>
-							)}
+							<RolesTableRows
+								roles={systemRoles}
+								baseUrl="/roles/system"
+								emptyMessage="No system roles found"
+								emptyColSpan={5}
+							/>
 						</TableBody>
 					</Table>
 				</CardContent>
