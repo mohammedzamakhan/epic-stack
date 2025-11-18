@@ -353,13 +353,13 @@ export class NoteEventHandler {
 
 			const totalEvents = logs.length
 			const successfulEvents = logs.filter(
-				(log) => log.status === 'success',
+				(log: any) => log.status === 'success',
 			).length
-			const failedEvents = logs.filter((log) => log.status === 'error').length
+			const failedEvents = logs.filter((log: any) => log.status === 'error').length
 
 			// Count unique connections notified
 			const uniqueConnections = new Set()
-			logs.forEach((log) => {
+			logs.forEach((log: any) => {
 				if (log.requestData) {
 					try {
 						const data = JSON.parse(log.requestData) as {

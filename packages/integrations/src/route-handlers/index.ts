@@ -1,16 +1,16 @@
 export {
 	handleOAuthCallback,
 	type OAuthCallbackDependencies,
-} from './oauth-callback.ts'
+} from './oauth-callback'
 export {
 	handleJiraSearchUsers,
 	type JiraSearchUsersDependencies,
-} from './jira-search-users.ts'
+} from './jira-search-users'
 export {
 	handleJiraCurrentUser,
 	type JiraCurrentUserDependencies,
-} from './jira-current-user.ts'
+} from './jira-current-user'
 export {
 	handleUpdateIntegrationConfig,
 	type UpdateConfigDependencies,
-} from './update-config.ts'
+} from './update-config'

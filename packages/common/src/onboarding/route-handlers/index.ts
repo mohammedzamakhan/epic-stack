@@ -1,12 +1,12 @@
 export {
 	handleOnboardingProgress,
 	type OnboardingProgressDependencies,
-} from './progress.ts'
+} from './progress'
 export {
 	handleOnboardingHide,
 	type OnboardingHideDependencies,
-} from './hide.ts'
+} from './hide'
 export {
 	handleOnboardingCompleteStep,
 	type OnboardingCompleteStepDependencies,
-} from './complete-step.ts'
+} from './complete-step'

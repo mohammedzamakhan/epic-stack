@@ -92,7 +92,7 @@ export async function handleChat(
 		wordCount: note.content ? note.content.split(/\s+/).length : 0,
 		hasComments: note.comments && note.comments.length > 0,
 		commentCount: note.comments?.length || 0,
-		comments: note.comments.map((comment) => ({
+		comments: note.comments.map((comment: any) => ({
 			content: comment.content,
 			userName: comment.user.name,
 		})),

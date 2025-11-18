@@ -1,4 +1,4 @@
 export {
 	getFractionalPosition,
 	calculateReorderPosition,
-} from './fractional-position.ts'
+} from './fractional-position'

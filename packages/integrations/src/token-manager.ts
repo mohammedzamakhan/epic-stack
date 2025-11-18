@@ -3,7 +3,7 @@
  * of OAuth tokens for third-party integrations
  */
 
-import { type Integration } from '@prisma/client'
+import { type Integration } from './prisma-types'
 import { prisma } from '@repo/prisma'
 import {
 	integrationEncryption,

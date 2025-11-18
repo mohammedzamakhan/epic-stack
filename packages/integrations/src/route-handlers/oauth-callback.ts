@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import type { PrismaClient } from '@prisma/client'
-import { integrationManager, OAuthStateManager } from '../index.ts'
+import { integrationManager, OAuthStateManager } from '../index'
 import { type LoaderFunctionArgs } from 'react-router'
 
 export interface OAuthCallbackDependencies {

@@ -9,7 +9,7 @@ import {
 	type Integration,
 	type NoteIntegrationConnection,
 	type OrganizationNote,
-} from '@prisma/client'
+} from './prisma-types'
 import { integrationManager } from './integration-manager'
 import { type IntegrationProvider } from './provider'
 import { TokenRefreshManager } from './oauth-manager'

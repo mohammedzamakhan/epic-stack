@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import { integrationManager, JiraProvider } from '../index.ts'
+import { integrationManager, JiraProvider } from '../index'
 import { type LoaderFunctionArgs } from 'react-router'
 
 export interface JiraSearchUsersDependencies {

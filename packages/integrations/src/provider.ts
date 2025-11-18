@@ -5,7 +5,7 @@
 import {
 	type Integration,
 	type NoteIntegrationConnection,
-} from '@prisma/client'
+} from './prisma-types'
 import {
 	type TokenData,
 	type Channel,

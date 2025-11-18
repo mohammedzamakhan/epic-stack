@@ -15,7 +15,7 @@ import {
 	type NoteIntegrationConnection,
 	type OrganizationNote,
 	type Organization,
-} from '@prisma/client'
+} from './prisma-types'
 import { prisma } from '@repo/prisma'
 import { type IntegrationProvider, providerRegistry } from './provider'
 import {
@@ -860,7 +860,7 @@ export class IntegrationManager {
 			status,
 			lastSync: integration.lastSyncAt || undefined,
 			connectionCount: integration.connections?.length || 0,
-			recentErrors: recentErrors.map((log) => ({
+			recentErrors: recentErrors.map((log: any) => ({
 				action: log.action,
 				status: log.status as 'success' | 'error' | 'pending',
 				requestData: log.requestData
