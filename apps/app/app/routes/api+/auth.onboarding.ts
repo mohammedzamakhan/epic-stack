@@ -3,7 +3,7 @@ import { data } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
 import { checkIsCommonPassword, signup } from '#app/utils/auth.server.ts'
-import { createTokenPair } from '#app/utils/jwt.server.ts'
+import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import {
@@ -11,7 +11,6 @@ import {
 	PasswordAndConfirmPasswordSchema,
 	UsernameSchema,
 } from '@repo/validation'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
 import { type Route } from './+types/auth.onboarding.ts'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
@@ -159,63 +158,17 @@ export async function action({ request }: Route.ActionArgs) {
 			request,
 		})
 
-		// Get user data for the response
-		const user = await prisma.user.findUnique({
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				name: true,
-				image: { select: { id: true } },
-				createdAt: true,
-				updatedAt: true,
-			},
-			where: { id: session.userId },
-		})
-
-		if (!user) {
-			return data(
-				{
-					success: false,
-					error: 'user_not_found',
-					message: 'User not found after creation',
-				},
-				{ status: 400 },
-			)
-		}
-
-		// Create JWT tokens for mobile authentication
-		const userAgent = request.headers.get('user-agent') ?? undefined
-		const ip = getClientIp(request)
-
-		const tokens = await createTokenPair(
-			{
-				id: user.id,
-				email: user.email,
-				username: user.username,
-			},
-			{ userAgent, ip },
+		// Use shared helper to create authenticated session response
+		const response = await createAuthenticatedSessionResponse(
+			session.userId,
+			request,
 		)
 
-		return data({
-			success: true,
-			data: {
-				user: {
-					id: user.id,
-					email: user.email,
-					username: user.username,
-					name: user.name,
-					image: user.image?.id,
-					createdAt: user.createdAt.toISOString(),
-					updatedAt: user.updatedAt.toISOString(),
-				},
-				// Return JWT tokens instead of session
-				accessToken: tokens.accessToken,
-				refreshToken: tokens.refreshToken,
-				expiresIn: tokens.expiresIn,
-				expiresAt: tokens.expiresAt.toISOString(),
-			},
-		})
+		if (!response.success) {
+			return data(response, { status: 400 })
+		}
+
+		return data(response)
 	} catch (error) {
 		console.error('Onboarding action error:', error)
 		return data(
