@@ -1,15 +1,16 @@
 'use client'
 
 import type { Variants } from 'motion/react'
-import { motion, useAnimation } from 'motion/react'
+import { motion } from 'motion/react'
 import type { HTMLAttributes } from 'react'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
+import { forwardRef } from 'react'
 import { cn } from '#app/utils/misc.tsx'
+import {
+	type IconAnimationHandle,
+	useIconAnimation,
+} from './use-icon-animation.tsx'
 
-export interface BellIconHandle {
-	startAnimation: () => void
-	stopAnimation: () => void
-}
+export interface BellIconHandle extends IconAnimationHandle {}
 
 interface BellIconProps extends HTMLAttributes<HTMLDivElement> {
 	size?: number
@@ -22,37 +23,9 @@ const svgVariants: Variants = {
 
 const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
 	({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-		const controls = useAnimation()
-		const isControlledRef = useRef(false)
-
-		useImperativeHandle(ref, () => {
-			isControlledRef.current = true
-			return {
-				startAnimation: () => void controls.start('animate'),
-				stopAnimation: () => void controls.start('normal'),
-			}
-		})
-
-		const handleMouseEnter = useCallback(
-			(e: React.MouseEvent<HTMLDivElement>) => {
-				if (!isControlledRef.current) {
-					void controls.start('animate')
-				} else {
-					onMouseEnter?.(e)
-				}
-			},
-			[controls, onMouseEnter],
-		)
-
-		const handleMouseLeave = useCallback(
-			(e: React.MouseEvent<HTMLDivElement>) => {
-				if (!isControlledRef.current) {
-					void controls.start('normal')
-				} else {
-					onMouseLeave?.(e)
-				}
-			},
-			[controls, onMouseLeave],
+		const { controls, handleMouseEnter, handleMouseLeave } = useIconAnimation(
+			ref,
+			{ onMouseEnter, onMouseLeave },
 		)
 
 		return (
