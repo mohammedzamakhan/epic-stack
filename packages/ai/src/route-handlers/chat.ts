@@ -43,9 +43,7 @@ export async function handleChat(
 	const url = new URL(request.url)
 	const noteId = url.searchParams.get('noteId')
 
-	if (!noteId) {
-		invariant(noteId, 'Note ID is required')
-	}
+	invariant(noteId, 'Note ID is required')
 
 	const note = await deps.prisma.organizationNote.findUnique({
 		where: { id: noteId },

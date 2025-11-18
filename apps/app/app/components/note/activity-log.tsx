@@ -49,9 +49,15 @@ function formatActivityMessage(log: {
 	const targetUserName = log.targetUser
 		? escapeHtml(log.targetUser.name || log.targetUser.username)
 		: null
-	const metadata = log.metadata
-		? (JSON.parse(log.metadata) as Record<string, any>)
-		: {}
+	let metadata: Record<string, any> = {}
+	if (log.metadata) {
+		try {
+			metadata = JSON.parse(log.metadata) as Record<string, any>
+		} catch (error) {
+			console.error('Failed to parse activity log metadata:', error)
+			// Continue with empty metadata to prevent UI crash
+		}
+	}
 
 	switch (log.action) {
 		case 'viewed':

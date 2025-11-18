@@ -99,10 +99,24 @@ export async function getOnboardingProgress(
 				description: step.description,
 				icon: step.icon || undefined,
 				actionConfig: step.actionConfig
-					? (JSON.parse(step.actionConfig) as OnboardingStepAction)
+					? (() => {
+					try {
+						return JSON.parse(step.actionConfig) as OnboardingStepAction
+					} catch (error) {
+						console.error('Failed to parse onboarding step actionConfig:', error)
+						return undefined
+					}
+				})()
 					: undefined,
 				detectConfig: step.detectConfig
-					? (JSON.parse(step.detectConfig) as OnboardingStepDetectConfig)
+					? (() => {
+					try {
+						return JSON.parse(step.detectConfig) as OnboardingStepDetectConfig
+					} catch (error) {
+						console.error('Failed to parse onboarding step detectConfig:', error)
+						return undefined
+					}
+				})()
 					: undefined,
 				sortOrder: step.sortOrder,
 				isCompleted: false,
@@ -114,18 +128,34 @@ export async function getOnboardingProgress(
 	// Transform steps with progress data
 	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map((step) => {
 		const userProgress = step.userProgress[0]
+
+		let actionConfig: OnboardingStepAction | undefined
+		let detectConfig: OnboardingStepDetectConfig | undefined
+
+		if (step.actionConfig) {
+			try {
+				actionConfig = JSON.parse(step.actionConfig) as OnboardingStepAction
+			} catch (error) {
+				console.error('Failed to parse onboarding step actionConfig:', error)
+			}
+		}
+
+		if (step.detectConfig) {
+			try {
+				detectConfig = JSON.parse(step.detectConfig) as OnboardingStepDetectConfig
+			} catch (error) {
+				console.error('Failed to parse onboarding step detectConfig:', error)
+			}
+		}
+
 		return {
 			id: step.id,
 			key: step.key,
 			title: step.title,
 			description: step.description,
 			icon: step.icon || undefined,
-			actionConfig: step.actionConfig
-				? (JSON.parse(step.actionConfig) as OnboardingStepAction)
-				: undefined,
-			detectConfig: step.detectConfig
-				? (JSON.parse(step.detectConfig) as OnboardingStepDetectConfig)
-				: undefined,
+			actionConfig,
+			detectConfig,
 			sortOrder: step.sortOrder,
 			isCompleted: userProgress?.isCompleted || false,
 			completedAt: userProgress?.completedAt || undefined,

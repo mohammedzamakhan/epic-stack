@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { integrationManager, JiraProvider } from '../index.ts'
 import { type ActionFunctionArgs } from 'react-router'
+import { z } from 'zod'
 
 export interface UpdateConfigDependencies {
 	requireUserId: (request: Request) => Promise<string>
@@ -25,6 +26,14 @@ export async function handleUpdateIntegrationConfig(
 ) {
 	const userId = await deps.requireUserId(request)
 	const defaultOrg = await deps.getUserDefaultOrganization(userId)
+
+	if (!defaultOrg) {
+		return Response.json(
+			{ error: 'User organization not found' },
+			{ status: 400 },
+		)
+	}
+
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
@@ -46,11 +55,39 @@ export async function handleUpdateIntegrationConfig(
 		return Response.json({ error: 'Config is required' }, { status: 400 })
 	}
 
-	let config: any
+	// Parse and validate config JSON
+	let parsedConfig: any
 	try {
-		config = JSON.parse(configString)
+		parsedConfig = JSON.parse(configString)
 	} catch {
 		return Response.json({ error: 'Invalid config JSON' }, { status: 400 })
+	}
+
+	// Define schema for Jira bot user config
+	const jiraBotUserConfigSchema = z.object({
+		useBotUser: z.boolean().optional(),
+		botUser: z
+			.object({
+				accountId: z.string().min(1, 'Bot user account ID is required'),
+			})
+			.optional(),
+	})
+
+	// Validate config structure for Jira integrations
+	let config: any
+	if ('useBotUser' in parsedConfig) {
+		const validation = jiraBotUserConfigSchema.safeParse(parsedConfig)
+		if (!validation.success) {
+			return Response.json(
+				{
+					error: `Invalid config structure: ${validation.error.errors.map((e) => e.message).join(', ')}`,
+				},
+				{ status: 400 },
+			)
+		}
+		config = validation.data
+	} else {
+		config = parsedConfig
 	}
 
 	try {
@@ -58,7 +95,7 @@ export async function handleUpdateIntegrationConfig(
 		const integration = await deps.prisma.integration.findUnique({
 			where: {
 				id: integrationId,
-				organizationId: defaultOrg?.organization.id,
+				organizationId: defaultOrg.organization.id,
 			},
 		})
 

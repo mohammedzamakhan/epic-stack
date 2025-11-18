@@ -442,7 +442,14 @@ export class AuditService {
 
 		// CSV rows
 		const rows = logs.map((log) => {
-			const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+			let metadata: any = {}
+		if (log.metadata) {
+			try {
+				metadata = JSON.parse(log.metadata)
+			} catch (error) {
+				console.error('Failed to parse audit log metadata:', error)
+			}
+		}
 			return [
 				log.createdAt.toISOString(),
 				log.action,
@@ -487,7 +494,15 @@ export class AuditService {
 					}
 				: null,
 			details: log.details,
-			metadata: log.metadata ? JSON.parse(log.metadata) : null,
+			metadata: (() => {
+			if (!log.metadata) return null
+			try {
+				return JSON.parse(log.metadata)
+			} catch (error) {
+				console.error('Failed to parse audit log metadata:', error)
+				return null
+			}
+		})(),
 		}))
 
 		return JSON.stringify(exportData, null, 2)
