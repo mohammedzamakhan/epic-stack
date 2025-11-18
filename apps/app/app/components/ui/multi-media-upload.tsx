@@ -8,6 +8,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import { Button, Icon, FieldLabel } from '@repo/ui'
 import { type MediaFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 import { cn, getNoteImgSrc } from '#app/utils/misc.tsx'
+import { useDragAndDrop } from './use-drag-and-drop.tsx'
 
 interface MultiMediaUploadProps {
 	label?: string
@@ -42,7 +43,6 @@ export function MultiMediaUpload({
 	existingVideos = [],
 	organizationId,
 }: MultiMediaUploadProps) {
-	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const [form] = useForm({ id: formId })
 	const mediaList = meta.getFieldList()
@@ -117,41 +117,13 @@ export function MultiMediaUpload({
 		[form, metaName, meta],
 	)
 
-	const handleDragOver = useCallback(
-		(e: React.DragEvent) => {
-			e.preventDefault()
-			if (!disabled) {
-				setIsDragging(true)
-			}
-		},
-		[disabled],
-	)
-
-	const handleDragLeave = useCallback((e: React.DragEvent) => {
-		e.preventDefault()
-		setIsDragging(false)
-	}, [])
-
-	const handleDrop = useCallback(
-		(e: React.DragEvent) => {
-			e.preventDefault()
-			setIsDragging(false)
-
-			if (disabled) return
-
-			const files = Array.from(e.dataTransfer.files).filter(
-				(file) =>
-					file.type.startsWith('image/') || file.type.startsWith('video/'),
-			)
-
-			if (files.length > 0) {
-				for (const file of files) {
-					handleFileUpload(file)
-				}
-			}
-		},
-		[disabled, handleFileUpload],
-	)
+	const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
+		useDragAndDrop({
+			disabled,
+			onFileUpload: handleFileUpload,
+			acceptFilter: (file) =>
+				file.type.startsWith('image/') || file.type.startsWith('video/'),
+		})
 
 	const handleClick = () => {
 		if (!disabled && fileInputRef.current) {

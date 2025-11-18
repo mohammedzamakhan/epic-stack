@@ -8,6 +8,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import { Button, Icon, FieldLabel } from '@repo/ui'
 import { type ImageFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 import { cn, getNoteImgSrc } from '#app/utils/misc.tsx'
+import { useDragAndDrop } from './use-drag-and-drop.tsx'
 
 interface MultiImageUploadProps {
 	label?: string
@@ -34,7 +35,6 @@ export function MultiImageUpload({
 	existingImages = [],
 	organizationId,
 }: MultiImageUploadProps) {
-	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const [form] = useForm({ id: formId })
 	const imageList = meta.getFieldList()
@@ -91,39 +91,12 @@ export function MultiImageUpload({
 		[form, metaName, meta],
 	)
 
-	const handleDragOver = useCallback(
-		(e: React.DragEvent) => {
-			e.preventDefault()
-			if (!disabled) {
-				setIsDragging(true)
-			}
-		},
-		[disabled],
-	)
-
-	const handleDragLeave = useCallback((e: React.DragEvent) => {
-		e.preventDefault()
-		setIsDragging(false)
-	}, [])
-	const handleDrop = useCallback(
-		(e: React.DragEvent) => {
-			e.preventDefault()
-			setIsDragging(false)
-
-			if (disabled) return
-
-			const files = Array.from(e.dataTransfer.files).filter((file) =>
-				file.type.startsWith('image/'),
-			)
-
-			if (files.length > 0) {
-				for (const file of files) {
-					handleFileUpload(file)
-				}
-			}
-		},
-		[disabled, handleFileUpload],
-	)
+	const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
+		useDragAndDrop({
+			disabled,
+			onFileUpload: handleFileUpload,
+			acceptFilter: (file) => file.type.startsWith('image/'),
+		})
 
 	const handleClick = () => {
 		if (!disabled && fileInputRef.current) {
