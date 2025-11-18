@@ -11,7 +11,7 @@ import {
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
 	Icon,
-} from '.'
+} from '../index.js'
 
 export function NavMain({
 	items,
