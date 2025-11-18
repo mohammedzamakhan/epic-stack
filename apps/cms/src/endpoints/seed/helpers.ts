@@ -324,3 +324,22 @@ export function createImageCaption(
 		},
 	}
 }
+
+/**
+ * Creates a simple card with heading and paragraph text
+ * Used in home page content columns
+ */
+export function createContentCard(
+	heading: string,
+	paragraphText: string,
+	size: 'oneThird' | 'twoThirds' | 'full' = 'oneThird',
+) {
+	return {
+		enableLink: false,
+		richText: createRootDocument([
+			createHeading(heading, 'h3'),
+			createParagraph(paragraphText),
+		]),
+		size,
+	}
+}
