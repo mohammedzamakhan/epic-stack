@@ -10,6 +10,7 @@ import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { logNoteActivity } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { markStepCompleted } from '#app/utils/onboarding.ts'
 import {
@@ -182,6 +183,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		actionType,
 	} = submission.value
 
+	// SECURITY: Sanitize note content to prevent XSS attacks
+	const sanitizedContent = sanitizeNoteContent(content)
+
 	// Process tags - convert comma-separated string to JSON array
 	const processedTags = tags
 		? JSON.stringify(
@@ -237,7 +241,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		create: {
 			id: noteId,
 			title,
-			content,
+			content: sanitizedContent,
 			priority: processedPriority,
 			tags: processedTags,
 			organization: { connect: { id: organization.id } },
@@ -248,11 +252,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			actionType === 'inline-edit'
 				? {
 						title,
-						content,
+						content: sanitizedContent,
 					}
 				: {
 						title,
-						content,
+						content: sanitizedContent,
 						priority: processedPriority,
 						tags: processedTags,
 						uploads: {

@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from 'date-fns'
+import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
@@ -74,6 +75,33 @@ export function CommentItem({
 	const canDelete = comment.user.id === currentUserId
 	const maxDepth = 3 // Limit nesting depth
 
+	// SECURITY: Defense-in-depth - sanitize comment content on client side
+	// Comments are already sanitized server-side, but this protects against
+	// any legacy data that might not have been sanitized
+	const sanitizedContent = useMemo(() => {
+		return DOMPurify.sanitize(comment.content, {
+			ALLOWED_TAGS: [
+				'p',
+				'br',
+				'strong',
+				'b',
+				'em',
+				'i',
+				'u',
+				'a',
+				'span',
+				'ul',
+				'ol',
+				'li',
+				'code',
+				'pre',
+			],
+			ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'data-mention-id'],
+			ALLOW_DATA_ATTR: false,
+			ALLOW_UNKNOWN_PROTOCOLS: false,
+		})
+	}, [comment.content])
+
 	return (
 		<div className="relative">
 			{/* Vertical line extending down from this comment if it has replies */}
@@ -142,7 +170,7 @@ export function CommentItem({
 
 						<div
 							className="text-foreground prose prose-sm prose-p:my-1 mb-2 max-w-none text-sm leading-relaxed tracking-wider"
-							dangerouslySetInnerHTML={{ __html: comment.content }}
+							dangerouslySetInnerHTML={{ __html: sanitizedContent }}
 						/>
 
 						{/* Comment Images */}
