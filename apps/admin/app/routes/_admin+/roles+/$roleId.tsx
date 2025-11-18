@@ -3,7 +3,7 @@ import { invariant } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
 import { Input } from '@repo/ui/input'
@@ -133,14 +133,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 		name,
 		description,
 		permissionId,
-		action,
-		entity,
-		access,
+		action: _action,
+		entity: _entity,
+		access: _access,
 		featureName,
 		featureKey,
 		featureDescription,
-		permissionName,
-		permissionKey,
+		permissionName: _permissionName,
+		permissionKey: _permissionKey,
 		permissionDescription,
 		permissionAction,
 		permissionAccess,
@@ -351,7 +351,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				return { result: submission.reply(), success: true, createdPermission }
 			}
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error updating role:', error)
 		return {
 			result: submission.reply({ formErrors: ['Failed to update role'] }),
@@ -364,7 +364,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function AdminRoleDetailPage() {
 	const { role, roleType, allPermissions } = useLoaderData<typeof loader>()
-	const [searchParams] = useSearchParams()
+	const [_searchParams] = useSearchParams()
 	const [selectedTab, setSelectedTab] = useState('feature')
 
 	// Group permissions by entity for better organization
@@ -549,8 +549,8 @@ function PermissionGroup({
 	entity,
 	permissions,
 	rolePermissionIds,
-	roleId,
-	availableEntities,
+	_roleId,
+	_availableEntities,
 }: {
 	entity: string
 	permissions: Array<{
@@ -560,8 +560,8 @@ function PermissionGroup({
 		description: string
 	}>
 	rolePermissionIds: Set<string>
-	roleId: string
-	availableEntities: string[]
+	_roleId: string
+	_availableEntities: string[]
 }) {
 	const [isOpen, setIsOpen] = useState(true)
 
@@ -697,10 +697,10 @@ function CreateFeatureDialog() {
 
 function CreatePermissionDialog({
 	selectedEntity,
-	availableEntities,
+	_availableEntities,
 }: {
 	selectedEntity: string
-	availableEntities: string[]
+	_availableEntities: string[]
 }) {
 	return (
 		<Dialog>

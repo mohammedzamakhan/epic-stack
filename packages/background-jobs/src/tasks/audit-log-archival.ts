@@ -16,7 +16,7 @@ export const auditLogArchival = schedules.task({
 	id: 'audit-log-archival',
 	// Declarative cron schedule - syncs on deploy
 	cron: '0 2 * * *', // Daily at 2 AM UTC
-	run: async (payload) => {
+	run: async (_payload) => {
 		logger.info('Starting audit log archival job')
 
 		try {
@@ -117,7 +117,7 @@ export const auditLogArchival = schedules.task({
 				deleted: totalDeleted,
 				timestamp: new Date().toISOString(),
 			}
-		} catch (error) {
+		} catch {
 			logger.error('Audit log archival failed', { error })
 
 			// Re-throw to mark the job as failed in Trigger.dev

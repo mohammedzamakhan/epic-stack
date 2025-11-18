@@ -37,7 +37,7 @@ if (!process.env.PRISMA_QUERY_ENGINE_LIBRARY) {
 				break
 			}
 		}
-	} catch (error) {
+	} catch {
 		// Fallback - let Prisma handle it
 	}
 }
@@ -293,7 +293,7 @@ export const imageProcessingTask = task({
 					width: metadata?.width,
 					height: metadata?.height,
 				})
-			} catch (error) {
+			} catch {
 				const errorMessage =
 					error instanceof Error ? error.message : String(error)
 				logger.error('Jimp failed, using fallback', {
@@ -337,7 +337,7 @@ export const imageProcessingTask = task({
 					.quality(80)
 					.getBufferAsync(jimp.MIME_JPEG)
 				logger.info('Thumbnail generated successfully')
-			} catch (error) {
+			} catch {
 				const errorMessage =
 					error instanceof Error ? error.message : String(error)
 				logger.error('Jimp thumbnail creation failed, using original image', {
@@ -403,7 +403,7 @@ export const imageProcessingTask = task({
 			})
 
 			return result
-		} catch (error) {
+		} catch {
 			logger.error('Image processing failed', {
 				error: error instanceof Error ? error.message : 'Unknown error',
 				imageId,
@@ -426,7 +426,7 @@ export const imageProcessingTask = task({
 			// Clean up temporary files on error
 			try {
 				await fs.unlink(thumbnailPath)
-			} catch (cleanupError) {
+			} catch {
 				// Ignore cleanup errors
 			}
 			try {
@@ -434,7 +434,7 @@ export const imageProcessingTask = task({
 				await fs.unlink(`${tempImagePath}.png`)
 				await fs.unlink(`${tempImagePath}.gif`)
 				await fs.unlink(`${tempImagePath}.webp`)
-			} catch (cleanupError) {
+			} catch {
 				// Ignore cleanup errors
 			}
 

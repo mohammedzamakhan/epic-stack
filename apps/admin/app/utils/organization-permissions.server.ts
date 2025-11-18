@@ -17,6 +17,5 @@ export async function requireUserWithOrganizationPermission(
 	permission: OrganizationPermissionString,
 ): Promise<string> {
 	const userId = await getUserId(request)
-	invariant(userId, 'User must be logged in to access this resource')
-	return _requireUserWithOrganizationPermission(userId, organizationId, permission)
+	return _requireUserWithOrganizationPermission(userId ?? undefined, organizationId, permission)
 }

@@ -250,7 +250,7 @@ export class SSOConfigurationService {
 					revocationUrl: endpoints.revocationUrl,
 				},
 			}
-		} catch (error) {
+		} catch {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error occurred'
 			return {

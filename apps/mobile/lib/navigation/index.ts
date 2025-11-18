@@ -87,7 +87,7 @@ export const handleDeepLink = (url: string): void => {
 
 		// Default fallback - let AuthGuard handle it
 		console.log('Deep link will be handled by AuthGuard')
-	} catch (error) {
+	} catch {
 		console.warn('Failed to parse deep link URL:', url, error)
 		// Fallback to sign in on invalid URLs
 		navigateToSignIn()

@@ -52,7 +52,7 @@ export function verifyAccessToken(token: string): JWTPayload | null {
 			audience: 'mobile-app',
 		}) as JWTPayload
 		return decoded
-	} catch (error) {
+	} catch {
 		return null
 	}
 }

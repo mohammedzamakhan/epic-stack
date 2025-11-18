@@ -64,24 +64,25 @@ interface GitLabUser {
 	state: 'active' | 'blocked'
 }
 
-interface GitLabIssue {
-	id: number
-	iid: number
-	title: string
-	description?: string
-	state: 'opened' | 'closed'
-	web_url: string
-	author: GitLabUser
-	assignees: GitLabUser[]
-	labels: string[]
-	milestone?: {
-		id: number
-		title: string
-	}
-	project_id: number
-	created_at: string
-	updated_at: string
-}
+// Unused interface - kept for future extensibility
+// interface GitLabIssue {
+// 	id: number
+// 	iid: number
+// 	title: string
+// 	description?: string
+// 	state: 'opened' | 'closed'
+// 	web_url: string
+// 	author: GitLabUser
+// 	assignees: GitLabUser[]
+// 	labels: string[]
+// 	milestone?: {
+// 		id: number
+// 		title: string
+// 	}
+// 	project_id: number
+// 	created_at: string
+// 	updated_at: string
+// }
 
 interface GitLabCreateIssueResponse {
 	id: number
@@ -275,7 +276,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`GitLab OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -333,7 +334,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 				expiresAt,
 				scope: tokenData.scope,
 			}
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`GitLab token refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -431,7 +432,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 					return !!project
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('GitLab connection validation failed:', error)
 			return false
 		}
@@ -509,7 +510,7 @@ export class GitLabProvider extends BaseIntegrationProvider {
 			const { decryptToken } = await import('../../encryption')
 			const accessToken = await decryptToken(integration.accessToken)
 			return await apiCall(accessToken)
-		} catch (error) {
+		} catch {
 			// If token is expired, try to refresh it
 			if (error instanceof Error && error.message.includes('401')) {
 				if (!integration.refreshToken) {

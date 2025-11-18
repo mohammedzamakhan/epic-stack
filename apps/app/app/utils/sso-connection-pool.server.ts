@@ -57,7 +57,7 @@ export class SSOConnectionPool {
 			pool.lastUsed = Date.now()
 
 			return response
-		} catch (error) {
+		} catch {
 			pool.errorCount++
 			throw error
 		} finally {

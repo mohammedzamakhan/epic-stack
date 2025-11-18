@@ -187,7 +187,7 @@ export class PolarProvider implements PaymentProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('PolarProvider: Error in getPlansAndPrices:', error)
 
 			// Return fallback data to prevent the app from hanging
@@ -244,7 +244,7 @@ export class PolarProvider implements PaymentProvider {
 		}
 	}
 
-	async retrieveSubscription(subscriptionId: string): Promise<Subscription> {
+	async retrieveSubscription(_subscriptionId: string): Promise<Subscription> {
 		// Polar SDK doesn't have a direct get subscription by ID method
 		// We need to list subscriptions and find the one we want
 		throw new Error(
@@ -317,7 +317,7 @@ export class PolarProvider implements PaymentProvider {
 	}
 
 	async updateSubscription(
-		options: SubscriptionUpdateOptions,
+		_options: SubscriptionUpdateOptions,
 	): Promise<Subscription> {
 		// Polar SDK doesn't expose subscription update methods
 		throw new Error(
@@ -325,7 +325,7 @@ export class PolarProvider implements PaymentProvider {
 		)
 	}
 
-	async cancelSubscription(subscriptionId: string): Promise<Subscription> {
+	async cancelSubscription(_subscriptionId: string): Promise<Subscription> {
 		// Polar SDK doesn't expose subscription cancel methods
 		throw new Error(
 			'Polar SDK does not support canceling subscriptions through the standard API. Use the Polar client directly for subscription management.',
@@ -333,7 +333,7 @@ export class PolarProvider implements PaymentProvider {
 	}
 
 	async createCustomerPortalSession(
-		options: CustomerPortalOptions,
+		_options: CustomerPortalOptions,
 	): Promise<CustomerPortalSession> {
 		// Polar doesn't have a direct customer portal API like Stripe
 		// Return a placeholder or throw an error
@@ -395,8 +395,8 @@ export class PolarProvider implements PaymentProvider {
 
 	async constructWebhookEvent(
 		payload: string | Buffer,
-		signature: string,
-		secret: string,
+		_signature: string,
+		_secret: string,
 	): Promise<WebhookEvent> {
 		// Polar SDK doesn't export webhook validation utilities in the same way as Stripe
 		// For now, we'll parse the payload as JSON and return it

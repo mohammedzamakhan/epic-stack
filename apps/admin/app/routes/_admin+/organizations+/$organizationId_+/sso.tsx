@@ -398,7 +398,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					{ status: 400 },
 				)
 		}
-	} catch (error) {
+	} catch {
 		console.error('SSO configuration error:', error)
 		return Response.json(
 			{

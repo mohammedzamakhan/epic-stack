@@ -9,7 +9,6 @@ import {
 	createStripeProvider,
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
-	type StripeProvider,
 } from '@repo/payments'
 import { data, redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -185,7 +184,7 @@ export async function createCheckoutSession(
 					success: true,
 				})
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error checking existing subscription:', error)
 			// Continue with checkout if we can't retrieve subscription
 		}
@@ -282,7 +281,7 @@ export async function handleSubscriptionChange(subscription: {
 				console.log(
 					`Cancelled old subscription: ${organization.stripeSubscriptionId}`,
 				)
-			} catch (error) {
+			} catch {
 				console.error('Error cancelling old subscription:', error)
 			}
 		}
@@ -554,7 +553,7 @@ export async function cleanupDuplicateSubscriptions(
 		})
 
 		console.log(`Kept subscription: ${keepSubscription.id}`)
-	} catch (error) {
+	} catch {
 		console.error('Error cleaning up duplicate subscriptions:', error)
 	}
 }

@@ -122,10 +122,10 @@ export class SSOAuthService {
 
 		// Use the strategy's authenticate method which returns a Response for redirects
 		try {
-			const result = await strategy.authenticate(request)
+			await strategy.authenticate(request)
 			// If we get here, it means authentication failed or there's an issue
 			throw new Error('Unexpected authentication result')
-		} catch (error) {
+		} catch {
 			if (error instanceof Response) {
 				return error
 			}
@@ -407,7 +407,7 @@ export class SSOAuthService {
 	private async handleUserInfo(
 		tokens: any,
 		config: SSOConfiguration,
-		request: Request,
+		_request: Request,
 	): Promise<ProviderUser & { tokens?: TokenSet }> {
 		// Get user info from the identity provider
 		const userInfo = await this.fetchUserInfo(tokens.accessToken, config)
@@ -609,7 +609,7 @@ export class SSOAuthService {
 					client_secret: clientSecret,
 				}),
 			})
-		} catch (error) {
+		} catch {
 			// Token revocation is best-effort, don't throw on failure
 			console.warn('Token revocation failed:', error)
 		}

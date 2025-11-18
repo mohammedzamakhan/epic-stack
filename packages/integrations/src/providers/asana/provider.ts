@@ -228,7 +228,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 					workspaces,
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error exchanging OAuth code for Asana token:', error)
 			throw new Error(
 				`Failed to exchange OAuth code: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -284,7 +284,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				refreshToken: tokenData.refresh_token || refreshToken,
 				expiresAt,
 			}
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -339,7 +339,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 							})
 						}
 					}
-				} catch (error) {
+				} catch {
 					console.warn(
 						`Failed to fetch projects for workspace ${workspace.name}:`,
 						error,
@@ -349,7 +349,7 @@ export class AsanaProvider extends BaseIntegrationProvider {
 			}
 
 			return channels.sort((a, b) => a.name.localeCompare(b.name))
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`Failed to fetch Asana projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -446,8 +446,8 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				throw new Error(errorMessage)
 			}
 
-			const result = (await response.json()) as AsanaCreateTaskResponse
-		} catch (error) {
+			const _result = (await response.json()) as AsanaCreateTaskResponse
+		} catch {
 			throw new Error(
 				`Failed to create Asana task: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -496,9 +496,9 @@ export class AsanaProvider extends BaseIntegrationProvider {
 				return false
 			}
 
-			const project = await response.json()
+			const _project = await response.json()
 			return true
-		} catch (error) {
+		} catch {
 			return false
 		}
 	}

@@ -1,4 +1,4 @@
-import { redirect, data } from 'react-router'
+import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -138,7 +138,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			title: 'Discord Verified!',
 			description: 'You have earned 2 points for joining our Discord server!',
 		})
-	} catch (error) {
+	} catch {
 		console.error('Discord verification error:', error)
 		return redirectWithToast('/waitlist', {
 			type: 'error',

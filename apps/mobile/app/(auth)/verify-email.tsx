@@ -57,7 +57,7 @@ export default function VerifyEmailScreen() {
 					},
 				],
 			)
-		} catch (_error) {
+		} catch {
 			setVerificationError(
 				_error instanceof Error ? _error.message : 'Email verification failed',
 			)

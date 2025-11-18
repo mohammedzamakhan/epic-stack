@@ -171,7 +171,7 @@ export async function action({ request }: Route.ActionArgs) {
 				throw new Error(`Unknown action type: ${actionType}`)
 			}
 		}
-	} catch (error) {
+	} catch {
 		console.error('Cache action error:', error)
 		return redirectWithToast(url.pathname + url.search, {
 			type: 'error',

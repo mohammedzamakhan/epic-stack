@@ -32,7 +32,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 		const testResult = await ssoConfigurationService.testConnection(ssoConfig)
 
 		return Response.json(testResult)
-	} catch (error) {
+	} catch {
 		console.error('SSO connection test error:', error)
 		return Response.json(
 			{
@@ -61,7 +61,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			enabled: ssoConfig?.isEnabled || false,
 			lastTested: ssoConfig?.lastTested || null,
 		})
-	} catch (error) {
+	} catch {
 		console.error('SSO status check error:', error)
 		return Response.json(
 			{

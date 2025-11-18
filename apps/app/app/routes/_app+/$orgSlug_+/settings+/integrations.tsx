@@ -68,7 +68,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 
 			return Response.redirect(authUrl)
-		} catch (error) {
+		} catch {
 			return redirectWithToast(`/${organization.slug}/settings/integrations`, {
 				title: 'Integration failed',
 				description: `Failed to initiate OAuth: ${error instanceof Error ? error.message : 'Unknown error'}`,

@@ -169,7 +169,7 @@ app.use(async (req, res, next) => {
 				code: 'IP_BLACKLISTED',
 			})
 		}
-	} catch (error) {
+	} catch {
 		// If there's an error checking blacklist, log it but don't block the request
 		logger.error({ err: error }, 'Error checking IP blacklist')
 	}
@@ -189,7 +189,7 @@ app.use(async (req, res, next) => {
 					referer: req.get('referer'),
 					statusCode: res.statusCode,
 				})
-			} catch (error) {
+			} catch {
 				// Silently fail to not break the app
 				logger.error({ err: error }, 'IP tracking error')
 			}
@@ -205,7 +205,7 @@ setInterval(
 		try {
 			const ipTracking = await import('../app/utils/ip-tracking.server.js')
 			ipTracking.cleanupRequestCounts()
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Error cleaning up request counts')
 		}
 	},
@@ -281,7 +281,7 @@ async function getBuild() {
 				await import('../build/server/index.js')
 
 		return { build: build as unknown as ServerBuild, error: null }
-	} catch (error) {
+	} catch {
 		// Catch error and return null to make express happy and avoid an unrecoverable crash
 		sentryLogger.error({ err: error }, 'Error creating build')
 		return { error: error, build: null as unknown as ServerBuild }

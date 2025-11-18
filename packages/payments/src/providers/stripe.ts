@@ -139,7 +139,7 @@ export class StripeProvider implements PaymentProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('StripeProvider: Error in getPlansAndPrices:', error)
 
 			// Return fallback data to prevent the app from hanging
@@ -425,7 +425,7 @@ export class StripeProvider implements PaymentProvider {
 				periodStart: invoice.period_start,
 				periodEnd: invoice.period_end,
 			}))
-		} catch (error) {
+		} catch {
 			console.error('StripeProvider: Error fetching invoices:', error)
 			return []
 		}

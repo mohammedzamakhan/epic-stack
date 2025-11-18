@@ -19,7 +19,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		if (defaultOrg?.organization?.slug) {
 			return redirect(`/${defaultOrg.organization.slug}`)
 		}
-	} catch (error) {
+	} catch {
 		// Error getting default organization
 	}
 

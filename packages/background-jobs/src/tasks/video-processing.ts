@@ -38,7 +38,7 @@ if (!process.env.PRISMA_QUERY_ENGINE_LIBRARY) {
 				break
 			}
 		}
-	} catch (error) {
+	} catch {
 		// Fallback - let Prisma handle it
 	}
 }
@@ -416,7 +416,7 @@ export const videoProcessingTask = task({
 			})
 
 			return result
-		} catch (error) {
+		} catch {
 			logger.error('Video processing failed', {
 				error: error instanceof Error ? error.message : 'Unknown error',
 				videoId,
@@ -439,17 +439,17 @@ export const videoProcessingTask = task({
 			// Clean up temporary files on error
 			try {
 				await fs.unlink(thumbnailPath)
-			} catch (cleanupError) {
+			} catch {
 				// Ignore cleanup errors
 			}
 			try {
 				await fs.unlink(palettePath)
-			} catch (cleanupError) {
+			} catch {
 				// Ignore cleanup errors
 			}
 			try {
 				await fs.unlink(tempVideoPath)
-			} catch (cleanupError) {
+			} catch {
 				// Ignore cleanup errors
 			}
 

@@ -189,7 +189,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 // Mock function for passkey registration - in a real app, you'd use your passkey API
-async function registerPasskeyAction({}: SecurityActionArgs) {
+async function registerPasskeyAction(_args: SecurityActionArgs) {
 	return { status: 'success' }
 }
 

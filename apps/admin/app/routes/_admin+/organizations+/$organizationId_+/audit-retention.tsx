@@ -122,7 +122,7 @@ export async function action({
 
 	if (intent === 'apply-preset') {
 		const presetType = formData.get('presetType') as string
-		const presets = AuditService.getCompliancePresets() as any
+		const presets = AuditService.getCompliancePresets()
 
 		const preset = presets[presetType]
 		if (!preset) {
@@ -220,7 +220,7 @@ export default function AuditRetentionPage() {
 						<CardTitle className="text-sm font-medium">
 							Archived Logs
 						</CardTitle>
-						<Icon name="activity-log" className="text-muted-foreground h-4 w-4" />
+						<Icon name="folder" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
@@ -439,7 +439,7 @@ export default function AuditRetentionPage() {
 								</p>
 							</div>
 							<Button type="submit" variant="outline" disabled={isSubmitting}>
-								<Icon name="activity-log" className="mr-2 h-4 w-4" />
+								<Icon name="folder" className="mr-2 h-4 w-4" />
 								Run Archival
 							</Button>
 						</div>

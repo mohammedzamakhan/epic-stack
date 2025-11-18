@@ -84,7 +84,7 @@ export async function createOrganizationInvitation({
 				invitedEmail: email,
 				role: invitation.organizationRole.name,
 			})
-		} catch (error) {
+		} catch {
 			// Don't fail the invitation if onboarding tracking fails
 			console.error('Failed to track member invitation onboarding step:', error)
 		}

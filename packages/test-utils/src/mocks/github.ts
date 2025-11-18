@@ -76,7 +76,7 @@ async function getGitHubUsers() {
             return json as Array<GitHubUser>
         }
         return []
-    } catch (error) {
+    } catch {
         console.error(error)
         return []
     }

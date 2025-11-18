@@ -66,7 +66,7 @@ export class MessageHandler {
 			} else {
 				return await browser.runtime.sendMessage(message)
 			}
-		} catch (error) {
+		} catch {
 			logger.warn('Message sending failed:', error)
 			return null
 		}
@@ -80,7 +80,7 @@ export class MessageHandler {
 			listeners.forEach((callback) => {
 				try {
 					callback(message)
-				} catch (error) {
+				} catch {
 					logger.error('Message handler error:', error)
 				}
 			})
@@ -92,7 +92,7 @@ export const getAuthStatus = async (): Promise<AuthStatus | null> => {
 	try {
 		const result = await browser.storage.local.get([AUTH_STATUS_KEY])
 		return (result[AUTH_STATUS_KEY] as AuthStatus) || null
-	} catch (error) {
+	} catch {
 		console.error('Error getting auth status:', error)
 		return null
 	}
@@ -115,7 +115,7 @@ export const setAuthStatus = async (authStatus: AuthStatus): Promise<void> => {
 				void MessageHandler.sendMessage(message, tab.id)
 			}
 		})
-	} catch (error) {
+	} catch {
 		console.error('Error setting auth status:', error)
 	}
 }
@@ -127,7 +127,7 @@ export const checkAuthCookie = async (): Promise<boolean> => {
 			name: 'en_session',
 		})
 		return cookies.length > 0 && !!cookies[0].value
-	} catch (error) {
+	} catch {
 		console.error('Error checking auth cookie:', error)
 		return false
 	}

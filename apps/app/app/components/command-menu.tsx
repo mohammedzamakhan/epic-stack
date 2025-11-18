@@ -60,7 +60,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 					const data = (await response.json()) as { notes: Note[] }
 					setNotes(data.notes)
 				}
-			} catch (error) {
+			} catch {
 				console.error('Failed to search notes:', error)
 				setNotes([])
 			} finally {

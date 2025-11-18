@@ -83,7 +83,7 @@ export function CommentsSection({
 				const action = parentId ? 'Reply' : 'Comment'
 				console.error(`${action} failed:`, errorText)
 			}
-		} catch (error) {
+		} catch {
 			const action = parentId ? 'adding reply' : 'adding comment'
 			console.error(`Error ${action}:`, error)
 		}
@@ -124,7 +124,7 @@ export function CommentsSection({
 				const errorText = await response.text()
 				console.error('Delete failed:', errorText)
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error deleting comment:', error)
 		}
 	}

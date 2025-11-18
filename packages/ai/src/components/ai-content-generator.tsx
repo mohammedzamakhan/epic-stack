@@ -28,7 +28,7 @@ export function AIContentGenerator({
 				{ title, intent: 'generate-content' },
 				{ method: 'POST', action: '/api/ai/generate-content' },
 			)
-		} catch (error) {
+		} catch {
 			console.error('Failed to generate content:', error)
 			setIsGenerating(false)
 		}

@@ -25,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
 				'Content-Type': 'text/html',
 			},
 		})
-	} catch (error) {
+	} catch {
 		console.error('Preview error:', error)
 		return new Response(
 			JSON.stringify({ error: 'Failed to process preview' }),

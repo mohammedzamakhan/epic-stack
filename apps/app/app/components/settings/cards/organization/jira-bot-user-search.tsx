@@ -54,7 +54,7 @@ export function JiraBotUserSearch({
 
 			const userData = (await response.json()) as JiraUser
 			setCurrentUser(userData)
-		} catch (error) {
+		} catch {
 			console.error('Error fetching current user:', error)
 			toast.error('Failed to fetch current user information')
 		}
@@ -83,7 +83,7 @@ export function JiraBotUserSearch({
 
 			const usersData = (await response.json()) as JiraUser[]
 			setUsers(usersData)
-		} catch (error) {
+		} catch {
 			console.error('Error searching users:', error)
 			toast.error('Failed to search for users')
 		} finally {

@@ -81,7 +81,7 @@ export async function handleUpdateIntegrationConfig(
 						integration,
 						config.botUser.accountId,
 					)
-				} catch (error) {
+				} catch {
 					console.error('Error validating bot user:', error)
 					return Response.json(
 						{
@@ -104,7 +104,7 @@ export async function handleUpdateIntegrationConfig(
 		})
 
 		return Response.json({ success: true, integration: updatedIntegration })
-	} catch (error) {
+	} catch {
 		console.error('Error updating integration config:', error)
 		return Response.json(
 			{

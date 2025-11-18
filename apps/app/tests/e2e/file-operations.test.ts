@@ -1,6 +1,5 @@
 import {
 	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead
 import { expect, test } from '#tests/playwright-utils.ts'
@@ -220,7 +219,7 @@ test.describe('File Operations', () => {
 				// Verify error message for file too large
 				await expect(page.getByText(/file too large/i)).toBeVisible() // Fixed .first() syntax - using conditional logic instead
 				// expect(page.getByText(/maximum file size/i)).toBeVisible())
-			} catch (error) {
+			} catch {
 				// File might not exist in fixtures, skip this test
 				console.log(
 					'Large test file not found, skipping file size validation test',

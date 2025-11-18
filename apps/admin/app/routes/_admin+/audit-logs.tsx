@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+import { auditService } from '#app/utils/audit.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { useState } from 'react'
 
@@ -176,7 +176,7 @@ export default function EnhancedAuditLogsPage() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Top Action</CardTitle>
-						<Icon name="chevron-up" className="text-muted-foreground h-4 w-4" />
+						<Icon name="trending-up" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm font-medium">
@@ -266,7 +266,8 @@ export default function EnhancedAuditLogsPage() {
 					{logs.length > 0 ? (
 						<div className="space-y-3">
 							{logs.map((log) => {
-								const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as {severity: string, ipAddress: string}
+								const metadata = log.metadata ? JSON.parse(log.metadata) : {}
+								const metadataTyped = metadata as Record<string, any>
 								return (
 									<div
 										key={log.id}
@@ -274,8 +275,8 @@ export default function EnhancedAuditLogsPage() {
 									>
 										<div className="flex-1 space-y-2">
 											<div className="flex items-center gap-2">
-												<Badge variant={getSeverityBadgeVariant(metadata.severity || 'info')}>
-													{metadata.severity || 'info'}
+												<Badge variant={getSeverityBadgeVariant(metadataTyped.severity || 'info')}>
+													{metadataTyped.severity || 'info'}
 												</Badge>
 												<span className="font-mono text-sm text-muted-foreground">
 													{log.action}
@@ -295,15 +296,15 @@ export default function EnhancedAuditLogsPage() {
 														{log.organization.name}
 													</span>
 												)}
-												{metadata.ipAddress && (
+												{metadataTyped.ipAddress && (
 													<span>
-														<Icon name="chevron-up" className="mr-1 inline h-3 w-3" />
-														{metadata.ipAddress}
+														<Icon name="external-link" className="mr-1 inline h-3 w-3" />
+														{metadataTyped.ipAddress}
 													</span>
 												)}
 												{log.resourceType && (
 													<span>
-														<Icon name="x" className="mr-1 inline h-3 w-3" />
+														<Icon name="folder" className="mr-1 inline h-3 w-3" />
 														{log.resourceType}:{' '}
 														{log.resourceId?.substring(0, 8)}
 													</span>

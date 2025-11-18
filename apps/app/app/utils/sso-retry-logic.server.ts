@@ -59,7 +59,7 @@ export class SSORetryManager {
 					attempts: attempt,
 					totalDuration: Date.now() - startTime,
 				}
-			} catch (error) {
+			} catch {
 				lastError = error instanceof Error ? error : new Error(String(error))
 
 				// Check if error is retryable
@@ -306,7 +306,7 @@ export class SSORetryManager {
 				}
 
 				return result
-			} catch (error) {
+			} catch {
 				failures++
 				lastFailureTime = now
 

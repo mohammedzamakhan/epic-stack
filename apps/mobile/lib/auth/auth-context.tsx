@@ -145,7 +145,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				// Throw error so calling components know login failed
 				throw new Error(errorMessage)
 			}
-		} catch (error) {
+		} catch {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Login failed'
 			console.log('❌ Auth Context: Login error:', errorMessage)
@@ -178,7 +178,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 					},
 				})
 			}
-		} catch (error) {
+		} catch {
 			dispatch({
 				type: 'AUTH_ERROR',
 				payload: {
@@ -260,7 +260,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 						payload: { error: 'OAuth authorization code is required' },
 					})
 				}
-			} catch (error) {
+			} catch {
 				dispatch({
 					type: 'AUTH_ERROR',
 					payload: {
@@ -291,7 +291,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 			// Update state
 			dispatch({ type: 'LOGOUT' })
-		} catch (error) {
+		} catch {
 			console.error('Logout error:', error)
 			// Even if API call fails, clear local tokens
 			await tokenManager.clearTokens()
@@ -354,7 +354,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				// Refresh failed, logout user
 				await logout()
 			}
-		} catch (error) {
+		} catch {
 			console.error('Token refresh error:', error)
 			dispatch({
 				type: 'REFRESH_ERROR',
@@ -398,7 +398,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 						},
 					})
 				}
-			} catch (error) {
+			} catch {
 				dispatch({
 					type: 'AUTH_ERROR',
 					payload: {
@@ -471,7 +471,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 						},
 					})
 				}
-			} catch (error) {
+			} catch {
 				dispatch({
 					type: 'AUTH_ERROR',
 					payload: {

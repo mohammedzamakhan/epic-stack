@@ -128,7 +128,7 @@ export async function action(args: Route.ActionArgs) {
 						})
 						return
 					}
-				} catch (error) {
+				} catch {
 					// If Arcjet fails, log error but continue with signup process
 					console.error('Arcjet protection failed:', error)
 				}

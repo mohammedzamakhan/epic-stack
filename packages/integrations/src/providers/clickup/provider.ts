@@ -140,75 +140,6 @@ interface ClickUpList {
 	permission_level: string
 }
 
-interface ClickUpTask {
-	id: string
-	custom_id?: string
-	name: string
-	text_content?: string
-	description?: string
-	status: {
-		id: string
-		status: string
-		color: string
-		orderindex: number
-		type: string
-	}
-	orderindex: string
-	date_created: string
-	date_updated: string
-	date_closed?: string
-	date_done?: string
-	archived: boolean
-	creator: ClickUpUser
-	assignees: ClickUpUser[]
-	watchers: ClickUpUser[]
-	checklists: any[]
-	tags: Array<{
-		name: string
-		tag_fg: string
-		tag_bg: string
-		creator: number
-	}>
-	parent?: string
-	priority?: {
-		id: string
-		priority: string
-		color: string
-		orderindex: string
-	}
-	due_date?: string
-	start_date?: string
-	points?: number
-	time_estimate?: number
-	time_spent?: number
-	custom_fields: any[]
-	dependencies: any[]
-	linked_tasks: any[]
-	team_id: string
-	url: string
-	permission_level: string
-	list: {
-		id: string
-		name: string
-		access: boolean
-	}
-	project: {
-		id: string
-		name: string
-		hidden: boolean
-		access: boolean
-	}
-	folder: {
-		id: string
-		name: string
-		hidden: boolean
-		access: boolean
-	}
-	space: {
-		id: string
-	}
-}
-
 interface ClickUpCreateTaskResponse {
 	id: string
 	custom_id?: string
@@ -293,7 +224,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		}
 
 		// Validate OAuth state
-		const stateData = this.parseOAuthState(state)
+		this.parseOAuthState(state)
 
 		try {
 			const tokenResponse = await fetch(this.tokenUrl, {
@@ -345,7 +276,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('ClickUp OAuth callback error:', error)
 			throw new Error(
 				`Failed to exchange ClickUp authorization code: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -357,7 +288,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 	 * Refresh ClickUp access token
 	 * Note: ClickUp doesn't currently support refresh tokens, so this will throw an error
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// ClickUp doesn't currently support refresh tokens
 		// Users will need to re-authenticate when tokens expire
 		throw new Error(
@@ -417,7 +348,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 								},
 							})
 						}
-					} catch (error) {
+					} catch {
 						console.warn(`Failed to get lists for space ${space.name}:`, error)
 						// Continue with other spaces even if one fails
 					}
@@ -438,12 +369,6 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 		return this.makeAuthenticatedApiCall(
 			connection.integration,
 			async (accessToken) => {
-				const connectionConfig = connection.config
-					? typeof connection.config === 'string'
-						? JSON.parse(connection.config)
-						: connection.config
-					: {}
-
 				// Parse channel ID to determine if it's a space or list
 				const channelId = connection.externalId
 				let listId: string
@@ -500,7 +425,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 					return true
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('ClickUp connection validation failed:', error)
 			return false
 		}
@@ -562,7 +487,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			const { decryptToken } = await import('../../encryption')
 			const accessToken = await decryptToken(integration.accessToken)
 			return await apiCall(accessToken)
-		} catch (error) {
+		} catch {
 			// ClickUp doesn't support refresh tokens, so we can't automatically refresh
 			// The user will need to re-authenticate
 			if (error instanceof Error && error.message.includes('401')) {

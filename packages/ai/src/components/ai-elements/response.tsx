@@ -1,6 +1,6 @@
 'use client'
 
-import { type ComponentProps, type HTMLAttributes, memo } from 'react'
+import { type HTMLAttributes, memo } from 'react'
 import ReactMarkdown, { type Options } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
@@ -102,9 +102,9 @@ function parseIncompleteMarkdown(text: string): string {
 	const inlineCodeMatch = result.match(inlineCodePattern)
 	if (inlineCodeMatch) {
 		// Check if we're dealing with a code block (triple backticks)
-		const hasCodeBlockStart = result.includes('```')
+		const _hasCodeBlockStart = result.includes('```')
 		const codeBlockPattern = /```[\s\S]*?```/g
-		const completeCodeBlocks = (result.match(codeBlockPattern) || []).length
+		const _completeCodeBlocks = (result.match(codeBlockPattern) || []).length
 		const allTripleBackticks = (result.match(/```/g) || []).length
 
 		// If we have an odd number of ``` sequences, we're inside an incomplete code block
@@ -166,27 +166,27 @@ export type ResponseProps = HTMLAttributes<HTMLDivElement> & {
 }
 
 const components: Options['components'] = {
-	ol: ({ node, children, className, ...props }) => (
+	ol: ({ _node, children, className, ...props }) => (
 		<ol className={cn('ml-4 list-outside list-decimal', className)} {...props}>
 			{children}
 		</ol>
 	),
-	li: ({ node, children, className, ...props }) => (
+	li: ({ _node, children, className, ...props }) => (
 		<li className={cn('py-1', className)} {...props}>
 			{children}
 		</li>
 	),
-	ul: ({ node, children, className, ...props }) => (
+	ul: ({ _node, children, className, ...props }) => (
 		<ul className={cn('ml-4 list-outside list-decimal', className)} {...props}>
 			{children}
 		</ul>
 	),
-	strong: ({ node, children, className, ...props }) => (
+	strong: ({ _node, children, className, ...props }) => (
 		<span className={cn('font-semibold', className)} {...props}>
 			{children}
 		</span>
 	),
-	a: ({ node, children, className, ...props }) => (
+	a: ({ _node, children, className, ...props }) => (
 		<a
 			className={cn('text-primary font-medium underline', className)}
 			rel="noreferrer"
@@ -196,7 +196,7 @@ const components: Options['components'] = {
 			{children}
 		</a>
 	),
-	h1: ({ node, children, className, ...props }) => (
+	h1: ({ _node, children, className, ...props }) => (
 		<h1
 			className={cn('mt-6 mb-2 text-3xl font-semibold', className)}
 			{...props}
@@ -204,7 +204,7 @@ const components: Options['components'] = {
 			{children}
 		</h1>
 	),
-	h2: ({ node, children, className, ...props }) => (
+	h2: ({ _node, children, className, ...props }) => (
 		<h2
 			className={cn('mt-6 mb-2 text-2xl font-semibold', className)}
 			{...props}
@@ -212,17 +212,17 @@ const components: Options['components'] = {
 			{children}
 		</h2>
 	),
-	h3: ({ node, children, className, ...props }) => (
+	h3: ({ _node, children, className, ...props }) => (
 		<h3 className={cn('mt-6 mb-2 text-xl font-semibold', className)} {...props}>
 			{children}
 		</h3>
 	),
-	h4: ({ node, children, className, ...props }) => (
+	h4: ({ _node, children, className, ...props }) => (
 		<h4 className={cn('mt-6 mb-2 text-lg font-semibold', className)} {...props}>
 			{children}
 		</h4>
 	),
-	h5: ({ node, children, className, ...props }) => (
+	h5: ({ _node, children, className, ...props }) => (
 		<h5
 			className={cn('mt-6 mb-2 text-base font-semibold', className)}
 			{...props}
@@ -230,7 +230,7 @@ const components: Options['components'] = {
 			{children}
 		</h5>
 	),
-	h6: ({ node, children, className, ...props }) => (
+	h6: ({ _node, children, className, ...props }) => (
 		<h6 className={cn('mt-6 mb-2 text-sm font-semibold', className)} {...props}>
 			{children}
 		</h6>

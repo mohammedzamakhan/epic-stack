@@ -80,7 +80,7 @@ async function seedOrganizations() {
 					})
 				}
 			}
-		} catch (error) {
+		} catch {
 			console.error(`Error creating organization: ${error}`)
 		}
 	}

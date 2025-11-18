@@ -125,7 +125,7 @@ export async function action({ request }: Route.ActionArgs) {
 				'Set-Cookie': await passkeyCookie.serialize('', { maxAge: 0 }),
 			},
 		})
-	} catch (error) {
+	} catch {
 		if (error instanceof Response) throw error
 
 		return Response.json(

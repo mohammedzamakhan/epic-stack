@@ -112,7 +112,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 			{ headers: response.headers },
 		)
-	} catch (error) {
+	} catch {
 		if (error instanceof Response) throw error
 
 		return Response.json(

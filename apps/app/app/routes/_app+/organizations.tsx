@@ -132,7 +132,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				// Update seat quantity for billing
 				try {
 					await updateSeatQuantity(invitation.organizationId)
-				} catch (error) {
+				} catch {
 					// Failed to update seat quantity
 				}
 			}
@@ -143,7 +143,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			return Response.json(
 				{ error: 'Failed to accept invitation' },
 				{ status: 500 },
@@ -157,7 +157,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				where: { id: invitationId },
 			})
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			return Response.json(
 				{ error: 'Failed to decline invitation' },
 				{ status: 500 },

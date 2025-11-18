@@ -39,7 +39,7 @@ export async function handleOnboardingProgress(
 		const progress = await deps.getOnboardingProgress(userId, organizationId)
 
 		return Response.json({ progress })
-	} catch (error) {
+	} catch {
 		console.error('Error fetching onboarding progress:', error)
 		return Response.json(
 			{ error: 'Failed to fetch onboarding progress' },

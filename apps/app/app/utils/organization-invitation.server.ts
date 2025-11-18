@@ -85,7 +85,7 @@ export async function createOrganizationInvitation({
 				invitedEmail: email,
 				role: invitation.organizationRole.name,
 			})
-		} catch (error) {
+		} catch {
 			// Don't fail the invitation if onboarding tracking fails
 			console.error('Failed to track member invitation onboarding step:', error)
 		}
@@ -228,7 +228,7 @@ export async function acceptInvitationByEmail(email: string, userId: string) {
 			// Update seat quantity for billing
 			try {
 				await updateSeatQuantity(invitation.organizationId)
-			} catch (error) {
+			} catch {
 				console.error(
 					'Failed to update seat quantity after adding user:',
 					error,
@@ -306,7 +306,7 @@ export async function validateAndAcceptInvitation(
 	// Update seat quantity for billing
 	try {
 		await updateSeatQuantity(invitation.organizationId)
-	} catch (error) {
+	} catch {
 		console.error('Failed to update seat quantity after adding user:', error)
 	}
 
@@ -545,7 +545,7 @@ export async function validateAndAcceptInviteLink(
 	// Update seat quantity for billing
 	try {
 		await updateSeatQuantity(inviteLink.organizationId)
-	} catch (error) {
+	} catch {
 		console.error('Failed to update seat quantity after adding user:', error)
 	}
 

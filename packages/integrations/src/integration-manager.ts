@@ -564,7 +564,7 @@ export class IntegrationManager {
 			)
 
 			return channels
-		} catch (error) {
+		} catch {
 			// Log error
 			await this.logIntegrationActivity(
 				integrationId,
@@ -667,7 +667,7 @@ export class IntegrationManager {
 					changeType: message.changeType,
 				},
 			)
-		} catch (error) {
+		} catch {
 			// Log error but don't throw to allow other connections to succeed
 			await this.logIntegrationActivity(
 				connection.integrationId,
@@ -738,7 +738,7 @@ export class IntegrationManager {
 			)
 
 			return updatedIntegration
-		} catch (error) {
+		} catch {
 			// Log error
 			await this.logIntegrationActivity(
 				integrationId,
@@ -794,7 +794,7 @@ export class IntegrationManager {
 					invalid++
 					errors.push(`Connection ${connection.id} is invalid`)
 				}
-			} catch (error) {
+			} catch {
 				invalid++
 				const errorMsg =
 					error instanceof Error ? error.message : 'Unknown error'

@@ -183,25 +183,6 @@ function sanitizeSensitiveData(text: string): string {
 }
 
 /**
- * Safely stringify objects, handling circular references
- */
-function safeStringify(obj: any): string {
-	try {
-		return JSON.stringify(obj, (key, value) => {
-			if (typeof value === 'object' && value !== null) {
-				// Simple circular reference detection
-				if (value.self === value) {
-					return '[Circular Reference]'
-				}
-			}
-			return value
-		})
-	} catch (error) {
-		return '[Unable to stringify object]'
-	}
-}
-
-/**
  * Create an SSO error with consistent structure
  */
 export function createSSOError(
@@ -218,7 +199,7 @@ export function createSSOError(
 	let sanitizedDetails: string | undefined
 	try {
 		sanitizedDetails = details ? sanitizeSensitiveData(details) : undefined
-	} catch (error) {
+	} catch {
 		sanitizedDetails =
 			'[Error processing details: circular reference or invalid data]'
 	}

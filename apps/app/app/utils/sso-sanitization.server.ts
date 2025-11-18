@@ -46,7 +46,7 @@ export function sanitizeUrl(input: string): string {
 
 		// Return normalized URL
 		return url.toString()
-	} catch (error) {
+	} catch {
 		throw new Error(
 			`Invalid URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		)
@@ -147,7 +147,7 @@ export function sanitizeJsonInput(input: string): string | null {
 		return Object.keys(limitedMappings).length > 0
 			? JSON.stringify(limitedMappings)
 			: null
-	} catch (error) {
+	} catch {
 		throw new Error(
 			`Invalid JSON: ${error instanceof Error ? error.message : 'Parse error'}`,
 		)

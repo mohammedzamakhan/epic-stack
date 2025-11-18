@@ -54,7 +54,7 @@ async function handleSSOLogout(
 			// Revoke tokens at the identity provider
 			try {
 				await ssoAuthService.revokeTokens(ssoSession.id)
-			} catch (error) {
+			} catch {
 				// Token revocation is best-effort, continue with logout even if it fails
 				console.warn('Failed to revoke SSO tokens:', error)
 			}

@@ -312,7 +312,7 @@ export async function expectToThrow(
 	try {
 		await fn()
 		throw new Error('Expected function to throw, but it did not')
-	} catch (error) {
+	} catch {
 		if (expectedMessage) {
 			if (typeof expectedMessage === 'string') {
 				if ((error as Error).message !== expectedMessage) {

@@ -100,7 +100,7 @@ export class SSOAuditLogger {
 			if (logEntry.severity === 'critical') {
 				await this.handleCriticalEvent(logEntry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to log SSO audit event')
 		}
 	}
@@ -199,8 +199,8 @@ export class SSOAuditLogger {
 	 * Get SSO audit logs for an organization
 	 */
 	async getOrganizationLogs(
-		organizationId: string,
-		options: {
+		_organizationId: string,
+		_options: {
 			eventTypes?: SSOAuditEventType[]
 			startDate?: Date
 			endDate?: Date
@@ -217,8 +217,8 @@ export class SSOAuditLogger {
 	 * Get SSO metrics for monitoring dashboard
 	 */
 	async getSSOMetrics(
-		organizationId?: string,
-		timeRange: { start: Date; end: Date } = {
+		_organizationId?: string,
+		_timeRange: { start: Date; end: Date } = {
 			start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
 			end: new Date(),
 		},
@@ -279,7 +279,7 @@ export class SSOAuditLogger {
 					activeConfigurations: 0, // Would count from database
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'unhealthy',
 				issues: [
@@ -385,8 +385,11 @@ export class SSOAuditLogger {
 		if (!message) return message
 
 		// Remove control characters and ANSI escape sequences
+		// eslint-disable-next-line no-control-regex
 		return message
+			// eslint-disable-next-line no-control-regex
 			.replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+			// eslint-disable-next-line no-control-regex
 			.replace(/\x1b\[[0-9;]*m/g, '') // Remove ANSI escape sequences
 			.substring(0, 2000) // Limit message length
 	}
@@ -429,7 +432,7 @@ export class SSOAuditLogger {
 	/**
 	 * Store audit log in database
 	 */
-	private async storeInDatabase(entry: SSOAuditLogEntry): Promise<void> {
+	private async storeInDatabase(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// This would store in AuditLog table when available
 			// For now, we'll use a simple log table or file storage
@@ -447,7 +450,7 @@ export class SSOAuditLogger {
 			//     createdAt: entry.timestamp,
 			//   },
 			// })
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to store audit log in database')
 		}
 	}
@@ -455,7 +458,7 @@ export class SSOAuditLogger {
 	/**
 	 * Send audit logs to external monitoring systems
 	 */
-	private async sendToMonitoring(entry: SSOAuditLogEntry): Promise<void> {
+	private async sendToMonitoring(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// Send to monitoring services like DataDog, New Relic, etc.
 			// This would be configured based on environment variables
@@ -471,7 +474,7 @@ export class SSOAuditLogger {
 			if (process.env.SENTRY_DSN) {
 				// await sendToSentry(entry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to send audit log to monitoring')
 		}
 	}
@@ -479,7 +482,7 @@ export class SSOAuditLogger {
 	/**
 	 * Handle critical events that require immediate attention
 	 */
-	private async handleCriticalEvent(entry: SSOAuditLogEntry): Promise<void> {
+	private async handleCriticalEvent(_entry: SSOAuditLogEntry): Promise<void> {
 		try {
 			// Send immediate alerts for critical events
 			// This is already logged via logToConsole with sentryLogger.fatal
@@ -492,7 +495,7 @@ export class SSOAuditLogger {
 			if (process.env.PAGERDUTY_INTEGRATION_KEY) {
 				// await sendPagerDutyAlert(entry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to handle critical SSO event')
 		}
 	}
@@ -526,7 +529,7 @@ export class SSOAuditLogger {
 			// Check for disabled configurations
 			// Check for configurations with invalid settings
 			// This would query the SSO configurations and validate them
-		} catch (error) {
+		} catch {
 			issues.push(
 				`Configuration health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)

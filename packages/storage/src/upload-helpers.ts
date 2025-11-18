@@ -17,7 +17,8 @@ export interface UploadOptions {
 function sanitizeAndExtractExtension(filename: string): string {
 	// Remove path separators to prevent path traversal
 	const basename = filename.replace(/^.*[\\/]/, '')
-	// Remove null bytes
+	// Remove null bytes (security: prevent null byte injection)
+	// eslint-disable-next-line no-control-regex
 	const cleaned = basename.replace(/\0/g, '')
 
 	// Validate filename contains only safe characters

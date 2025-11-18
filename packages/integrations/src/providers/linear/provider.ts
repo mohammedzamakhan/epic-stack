@@ -152,9 +152,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 		const redirectUri = stateData.redirectUri as string | undefined
 		const tokenResponse = await this.exchangeCodeForToken(code, redirectUri)
 
-		// Get user information and create provider config
-		const userInfo = await this.getCurrentUser(tokenResponse.access_token)
-
 		// Note: Integration storage is handled by the calling code
 		// This method only returns the token data
 
@@ -170,7 +167,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	/**
 	 * Refresh expired access token
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// Linear doesn't currently support refresh tokens
 		// Access tokens are long-lived (typically 1 year)
 		throw new Error(
@@ -190,7 +187,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			const { decryptToken } = await import('../../encryption')
 			const accessToken = await decryptToken(integration.accessToken!)
 			return await apiCall(accessToken)
-		} catch (error) {
+		} catch {
 			// Check if it's an authentication error
 			if (
 				error instanceof Error &&
@@ -263,7 +260,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 
 			return channels.sort((a, b) => a.name.localeCompare(b.name))
-		} catch (error) {
+		} catch {
 			console.error('Error fetching Linear channels:', error)
 			throw new Error(
 				`Failed to fetch Linear channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -282,7 +279,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 			throw new Error('No access token found for integration')
 		}
 
-		const config = JSON.parse(connection.config || '{}')
 		const channelId = connection.externalId // Use externalId from database schema
 
 		// Determine if this is a team or project connection
@@ -366,7 +362,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 				)
 				return !!project
 			}
-		} catch (error) {
+		} catch {
 			console.error('Linear connection validation failed:', error)
 			return false
 		}

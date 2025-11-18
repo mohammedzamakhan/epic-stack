@@ -206,7 +206,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 			payload: {},
 		})
-	} catch (err) {
+	} catch {
 		// Error triggering workflow
 	}
 

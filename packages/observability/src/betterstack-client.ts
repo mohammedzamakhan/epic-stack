@@ -74,7 +74,7 @@ export async function getUptimeStatus(
 		statusCache.set(cacheKey, { status: statusInfo, timestamp: Date.now() })
 
 		return statusInfo
-	} catch (error) {
+	} catch {
 		console.error('Error fetching uptime status:', error)
 		// Return a degraded status on error
 		return {

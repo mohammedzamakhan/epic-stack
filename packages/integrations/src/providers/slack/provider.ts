@@ -129,10 +129,9 @@ export class SlackProvider extends BaseIntegrationProvider {
 		const { code, state } = params
 
 		// Parse and validate the OAuth state using the standardized format
-		let stateData
 		try {
-			stateData = this.parseOAuthState(state)
-		} catch (error) {
+			this.parseOAuthState(state)
+		} catch {
 			throw new Error(
 				`Invalid OAuth state: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -192,7 +191,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 					botUserId: data.bot_user_id,
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error exchanging OAuth code for Slack token:', error)
 			throw new Error(
 				`Failed to exchange OAuth code: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -204,7 +203,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 	 * Refresh Slack access token
 	 * Note: Slack doesn't use refresh tokens in the same way as other providers
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// Slack doesn't typically use refresh tokens for bot tokens
 		// Bot tokens are long-lived and don't expire
 		throw new Error('Slack bot tokens do not require refresh')
@@ -348,7 +347,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 				)
 				.sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
 			return channels
-		} catch (error) {
+		} catch {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
 			console.error('Error fetching Slack channels:', errorMessage)
@@ -506,7 +505,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 			if (!data.ok) {
 				throw new Error(`Slack API error: ${data.error || 'Unknown error'}`)
 			}
-		} catch (error) {
+		} catch {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
 

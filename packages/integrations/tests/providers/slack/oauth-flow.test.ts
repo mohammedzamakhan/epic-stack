@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { SlackProvider } from '../../../src/providers/slack/provider'
 
 describe('SlackProvider - OAuth Flow', () => {

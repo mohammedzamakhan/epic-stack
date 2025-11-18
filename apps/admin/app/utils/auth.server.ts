@@ -374,10 +374,10 @@ export async function checkIsCommonPassword(password: string) {
 
 		const data = await response.text()
 		return data.split(/\r?\n/).some((line) => {
-			const [hashSuffix, ignoredPrevalenceCount] = line.split(':')
+			const [hashSuffix, _ignoredPrevalenceCount] = line.split(':')
 			return hashSuffix === suffix
 		})
-	} catch (error) {
+	} catch {
 		if (error instanceof DOMException && error.name === 'TimeoutError') {
 			console.warn('Password check timed out')
 			return false

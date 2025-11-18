@@ -151,7 +151,7 @@ export async function sendNewDeviceSigninEmail({
 			{ email: user.email, device: deviceInfo.deviceName },
 			'New device sign-in email sent',
 		)
-	} catch (error) {
+	} catch {
 		logger.error(
 			{ error },
 			'Failed to send new device sign-in email',
@@ -208,7 +208,7 @@ export async function handleNewDeviceSignin({
 				'New device sign-in detected',
 			)
 		}
-	} catch (error) {
+	} catch {
 		// Log error but don't throw - we don't want to block login
 		logger.error(
 			{ error },

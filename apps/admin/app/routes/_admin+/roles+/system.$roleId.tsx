@@ -149,7 +149,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				return Response.redirect('/roles')
 			}
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error updating system role:', error)
 		return {
 			result: submission.reply({ formErrors: ['Failed to update role'] }),
@@ -354,7 +354,7 @@ function SystemPermissionGroup({
 	entity,
 	permissions,
 	rolePermissionIds,
-	roleId,
+	roleId: _roleId,
 	disabled = false,
 }: {
 	entity: string

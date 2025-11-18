@@ -2,7 +2,7 @@
  * Tests for AsanaProvider utility methods
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { AsanaProvider } from '../../../src/providers/asana/provider'
 import { OAuthStateManager } from '../../../src/oauth-manager'
 

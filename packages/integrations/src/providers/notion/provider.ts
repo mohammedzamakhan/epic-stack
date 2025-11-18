@@ -43,17 +43,6 @@ interface NotionOAuthResponse {
 	error_description?: string
 }
 
-interface NotionUser {
-	object: string
-	id: string
-	name: string
-	avatar_url?: string
-	type: string
-	person?: {
-		email: string
-	}
-}
-
 interface NotionDatabase {
 	object: string
 	id: string
@@ -295,7 +284,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 	 * Refresh expired access token
 	 * Note: Notion doesn't provide refresh tokens, so this will always throw
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		throw new Error(
 			'Notion does not support token refresh. Users must re-authenticate.',
 		)
@@ -358,7 +347,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 					lastEditedTime: database.last_edited_time,
 				},
 			}))
-		} catch (error) {
+		} catch {
 			console.error('Error fetching Notion databases:', error)
 			throw error
 		}
@@ -452,7 +441,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 
 			const createdPage = (await response.json()) as NotionCreatePageResponse
 			console.log(`Successfully created Notion page: ${createdPage.url}`)
-		} catch (error) {
+		} catch {
 			console.error('Error creating Notion page:', error)
 			throw error
 		}
@@ -507,7 +496,7 @@ export class NotionProvider extends BaseIntegrationProvider {
 			)
 
 			return response.ok
-		} catch (error) {
+		} catch {
 			console.error('Error validating Notion connection:', error)
 			return false
 		}

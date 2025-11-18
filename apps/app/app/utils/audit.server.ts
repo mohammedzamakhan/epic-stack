@@ -216,7 +216,7 @@ export class AuditService {
 				userAgent,
 				sanitizedMetadata,
 			})
-		} catch (error) {
+		} catch {
 			// Never fail the primary operation due to audit logging errors
 			// But ensure we log the failure
 			logger.error(
@@ -611,7 +611,9 @@ export class AuditService {
 
 		// Remove control characters and limit length
 		return message
+			// eslint-disable-next-line no-control-regex
 			.replace(/[\x00-\x1F\x7F]/g, '')
+			// eslint-disable-next-line no-control-regex
 			.replace(/\x1b\[[0-9;]*m/g, '')
 			.substring(0, 2000)
 	}
@@ -665,7 +667,7 @@ export class AuditService {
 			const date = new Date()
 			date.setDate(date.getDate() + retentionDays)
 			return date
-		} catch (error) {
+		} catch {
 			// Fall back to default 1 year retention
 			const date = new Date()
 			date.setFullYear(date.getFullYear() + 1)

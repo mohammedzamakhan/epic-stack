@@ -60,4 +60,4 @@ export {
 	handleStripeCheckout,
 	type StripeWebhookDependencies,
 	type StripeCheckoutDependencies,
-} from './src/route-handlers/index'
+} from './src/route-handlers'

@@ -32,7 +32,7 @@ export async function handleOnboardingHide(
 		await deps.hideOnboarding(userId, organizationId)
 
 		return Response.json({ success: true })
-	} catch (error) {
+	} catch {
 		console.error('Error hiding onboarding:', error)
 		return Response.json(
 			{ error: 'Failed to hide onboarding' },

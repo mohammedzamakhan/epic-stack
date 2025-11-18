@@ -2,7 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { brand } from '@repo/config/brand'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import {
 	getAuthStatus,
 	MessageHandler,
@@ -29,7 +29,7 @@ function ContentApp({ onClose }: { onClose: () => void }) {
 				if (mounted && authStatus) {
 					setIsLoggedIn(authStatus.isLoggedIn)
 				}
-			} catch (error) {
+			} catch {
 				console.error('Error getting auth status in content script:', error)
 			} finally {
 				if (mounted) {
@@ -198,7 +198,7 @@ function createShadowWidget() {
 			hostElement.style.opacity = '1'
 			hostElement.style.transform = 'translateY(0)'
 		}, 100)
-	} catch (error) {
+	} catch {
 		console.error('Failed to create shadow DOM manually:', error)
 	}
 }
@@ -262,7 +262,7 @@ function initializeWidget() {
 				widget.style.transform = 'translateY(0)'
 			}, 100)
 		}
-	} catch (error) {
+	} catch {
 		console.error('Failed to initialize widget:', error)
 		createShadowWidget()
 	}
@@ -302,7 +302,7 @@ browser.runtime.onMessage.addListener((message: unknown) => {
 		// Pass message to MessageHandler
 		MessageHandler.handleMessage(extensionMessage)
 		return Promise.resolve()
-	} catch (error) {
+	} catch {
 		console.error('Error handling message in content script:', error)
 		return Promise.resolve()
 	}

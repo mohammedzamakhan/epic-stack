@@ -68,28 +68,6 @@ interface GitHubUser {
 	bio?: string
 }
 
-interface GitHubIssue {
-	id: number
-	number: number
-	title: string
-	body?: string
-	state: 'open' | 'closed'
-	html_url: string
-	user: GitHubUser
-	assignees: GitHubUser[]
-	labels: GitHubLabel[]
-	milestone?: {
-		id: number
-		number: number
-		title: string
-		description?: string
-		state: 'open' | 'closed'
-	}
-	created_at: string
-	updated_at: string
-	repository_url: string
-}
-
 interface GitHubCreateIssueResponse {
 	id: number
 	number: number
@@ -339,7 +317,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 					return repository !== null && repository.permissions.push === true
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('GitHub connection validation failed:', error)
 			return false
 		}

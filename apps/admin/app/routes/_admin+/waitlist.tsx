@@ -158,7 +158,7 @@ export async function action({ request }: Route.ActionArgs) {
 		}
 
 		return Response.json({ error: 'Invalid intent' }, { status: 400 })
-	} catch (error) {
+	} catch {
 		console.error('Waitlist action error:', error)
 		return Response.json(
 			{ error: 'Failed to process request' },

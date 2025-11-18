@@ -314,7 +314,7 @@ async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
 }
 
 function SignOutOfSessions({
-	loaderData: loaderData,
+	loaderData,
 }: {
 	loaderData: Route.ComponentProps['loaderData']
 }) {

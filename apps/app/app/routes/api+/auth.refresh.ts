@@ -98,7 +98,7 @@ export async function action({ request }: Route.ActionArgs) {
 				expiresAt: rotated.expiresAt.toISOString(),
 			},
 		})
-	} catch (error) {
+	} catch {
 		console.error('Refresh token error:', error)
 		return data(
 			{

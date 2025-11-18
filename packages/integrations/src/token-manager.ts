@@ -59,7 +59,7 @@ export class TokenManager {
 			})
 
 			return { success: true }
-		} catch (error) {
+		} catch {
 			console.error('Failed to store token data:', error)
 			return {
 				success: false,
@@ -99,7 +99,7 @@ export class TokenManager {
 
 			// Decrypt and return token data
 			return await integrationEncryption.decryptTokenData(encryptedData)
-		} catch (error) {
+		} catch {
 			console.error('Failed to retrieve token data:', error)
 			return null
 		}
@@ -140,7 +140,7 @@ export class TokenManager {
 
 			// Token refresh failed or no refresh token available
 			return null
-		} catch (error) {
+		} catch {
 			console.error('Failed to get valid access token:', error)
 			return null
 		}
@@ -186,7 +186,7 @@ export class TokenManager {
 				success: true,
 				tokenData: newTokenData,
 			}
-		} catch (error) {
+		} catch {
 			// Log failed refresh
 			await this.logTokenOperation(
 				integration.id,
@@ -219,7 +219,7 @@ export class TokenManager {
 			}
 
 			return integrationEncryption.validateToken(tokenData)
-		} catch (error) {
+		} catch {
 			console.error('Failed to validate token:', error)
 			return null
 		}
@@ -259,7 +259,7 @@ export class TokenManager {
 			}
 
 			return needingRefresh
-		} catch (error) {
+		} catch {
 			console.error('Failed to check tokens needing refresh:', error)
 			return []
 		}
@@ -280,7 +280,7 @@ export class TokenManager {
 			if (tokenData && provider?.revokeToken) {
 				try {
 					await provider.revokeToken(tokenData.accessToken)
-				} catch (error) {
+				} catch {
 					console.warn('Failed to revoke token with provider:', error)
 					// Continue with local cleanup even if provider revocation fails
 				}
@@ -301,7 +301,7 @@ export class TokenManager {
 			await this.logTokenOperation(integrationId, 'token_revoke', 'success')
 
 			return true
-		} catch (error) {
+		} catch {
 			console.error('Failed to revoke token:', error)
 			await this.logTokenOperation(
 				integrationId,
@@ -333,7 +333,7 @@ export class TokenManager {
 					responseData: null,
 				},
 			})
-		} catch (error) {
+		} catch {
 			console.error('Failed to log token operation:', error)
 		}
 	}

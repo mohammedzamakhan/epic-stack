@@ -77,7 +77,7 @@ export async function handleChat(
 				completedVia: 'ai_chat_usage',
 				noteId,
 			})
-		} catch (error) {
+		} catch {
 			// Don't fail the AI request if onboarding tracking fails
 			console.error('Failed to track AI chat onboarding step:', error)
 		}

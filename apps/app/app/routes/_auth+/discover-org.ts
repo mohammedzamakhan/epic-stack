@@ -74,7 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			ssoConfig: safeSSOConfig,
 			ssoAvailable: true,
 		})
-	} catch (error) {
+	} catch {
 		console.error('Error discovering organization:', error)
 
 		return Response.json(

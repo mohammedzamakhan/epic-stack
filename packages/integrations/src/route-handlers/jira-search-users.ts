@@ -65,7 +65,7 @@ export async function handleJiraSearchUsers(
 		const users = await jiraProvider.searchUsers(integration, query)
 
 		return Response.json(users)
-	} catch (error) {
+	} catch {
 		console.error('Error searching Jira users:', error)
 		return Response.json(
 			{

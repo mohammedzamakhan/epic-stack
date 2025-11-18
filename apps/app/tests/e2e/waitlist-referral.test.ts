@@ -14,7 +14,7 @@ const test = base.extend<{
 		password: string
 	}
 }>({
-	getOnboardingData: async ({}, use) => {
+	getOnboardingData: async (_deps, use) => {
 		const userData = createUser()
 		await use(() => {
 			const onboardingData = {
@@ -454,14 +454,14 @@ test.describe('Waitlist Referral System', () => {
 	})
 })
 
-// Helper function for tests that need insertNewUser
-async function insertNewUser() {
-	const userData = createUser()
-	return await prisma.user.create({
-		data: {
-			...userData,
-			roles: { connect: { name: 'user' } },
-		},
-		select: { id: true, email: true, username: true, name: true },
-	})
-}
+// Helper function for tests that need insertNewUser (currently unused but kept for future tests)
+// async function insertNewUser() {
+// 	const userData = createUser()
+// 	return await prisma.user.create({
+// 		data: {
+// 			...userData,
+// 			roles: { connect: { name: 'user' } },
+// 		},
+// 		select: { id: true, email: true, username: true, name: true },
+// 	})
+// }

@@ -7,7 +7,6 @@ import { z } from 'zod'
 import {
 	ErrorList,
 	OTPField,
-	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'

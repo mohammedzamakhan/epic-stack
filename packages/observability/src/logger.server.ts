@@ -256,7 +256,7 @@ const createLogger = (): PinoLogger => {
 					},
 				},
 			})
-		} catch (error) {
+		} catch {
 			console.warn('pino-pretty not available, falling back to JSON logs:', error)
 			return pino(baseConfig)
 		}

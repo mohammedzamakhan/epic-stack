@@ -18,8 +18,7 @@ import {
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
-import { Trans, msg } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
+import { Trans } from '@lingui/macro'
 import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
@@ -33,7 +32,6 @@ import {
 } from '#app/utils/organization-invitation.server.ts'
 import {
 	createOrganization,
-	type OrganizationRoleName,
 } from '#app/utils/organizations.server.ts'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import {
@@ -105,13 +103,13 @@ const Step1Schema = z.object({
 // Using default roles for organization creation since we don't have a loader
 const DEFAULT_AVAILABLE_ROLES = ['admin', 'member', 'viewer', 'guest'] as const
 
-// Create role descriptions map
-const ROLE_DESCRIPTIONS: Record<string, string> = {
-	admin: 'Full access to organization settings and member management.',
-	member: 'Standard organization member with basic permissions.',
-	viewer: 'Read-only access to organization content.',
-	guest: 'Limited access for temporary collaborators.',
-}
+// Create role descriptions map (currently unused but kept for future use)
+// const ROLE_DESCRIPTIONS: Record<string, string> = {
+// 	admin: 'Full access to organization settings and member management.',
+// 	member: 'Standard organization member with basic permissions.',
+// 	viewer: 'Read-only access to organization content.',
+// 	guest: 'Limited access for temporary collaborators.',
+// }
 
 const InviteSchema = z.object({
 	invites: z
@@ -159,7 +157,7 @@ export async function loader({ request }: { request: Request }) {
 	if (shouldShowPricing) {
 		try {
 			plansAndPrices = await getPlansAndPrices()
-		} catch (error) {
+		} catch {
 			console.error('Failed to fetch plans and prices:', error)
 		}
 	}
@@ -224,7 +222,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			return redirect(
 				`/organizations/create?step=${nextStep}&orgId=${organization.id}`,
 			)
-		} catch (error) {
+		} catch {
 			console.error('Failed to create organization', error)
 			return submission.reply({
 				formErrors: ['Failed to create organization'],
@@ -275,7 +273,7 @@ export async function action({ request }: ActionFunctionArgs) {
 						})
 					}),
 				)
-			} catch (error) {
+			} catch {
 				console.error('Error sending invitations:', error)
 				return Response.json(
 					{
@@ -328,7 +326,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				from: 'checkout',
 				isCreationFlow: true,
 			})
-		} catch (error) {
+		} catch {
 			console.error('Failed to create checkout session', error)
 			return submission.reply({
 				formErrors: ['Failed to create subscription'],
@@ -371,7 +369,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return redirect(`/${organization?.slug}?celebrate=true`)
-		} catch (error) {
+		} catch {
 			console.error('Failed to complete setup', error)
 			return submission.reply({
 				formErrors: ['Failed to complete setup'],
@@ -753,7 +751,7 @@ function SubscriptionStep({
 	plansAndPrices: Awaited<ReturnType<typeof getPlansAndPrices>>
 	actionData: any
 }) {
-	const [form, fields] = useForm({
+	const [form, _fields] = useForm({
 		id: 'create-organization-subscription',
 		constraint: getZodConstraint(SubscriptionSchema),
 		lastResult: actionData,

@@ -232,7 +232,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			// The SSO auth service handles user provisioning and organization membership
 			// It will create the user if auto-provisioning is enabled, or throw an error if not
 			user = await ssoAuthService.provisionUser(userInfo, ssoConfig)
-		} catch (error) {
+		} catch {
 			console.error('User provisioning failed:', error)
 			trackSuspiciousActivity(activityKey, 'failed_auth')
 
@@ -337,7 +337,7 @@ async function makeSession(
 				tokens,
 			)
 		}
-	} catch (error) {
+	} catch {
 		console.warn('Failed to create SSO session tracking:', error)
 		// Don't fail the login if SSO session creation fails
 	}

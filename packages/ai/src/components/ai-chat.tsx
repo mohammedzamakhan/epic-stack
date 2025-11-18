@@ -63,7 +63,7 @@ const getSmartSuggestions = (messages: AIMessage[], hasContent: boolean) => {
 				]
 	}
 
-	const lastMessage = messages[messages.length - 1]
+	const _lastMessage = messages[messages.length - 1]
 	const conversationContext = messages
 		.slice(-3)
 		.map((m) => m.content.toLowerCase())

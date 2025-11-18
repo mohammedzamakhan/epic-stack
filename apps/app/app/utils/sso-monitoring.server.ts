@@ -75,7 +75,7 @@ export class SSOMonitoringService {
 		this.healthCheckInterval = setInterval(async () => {
 			try {
 				await this.performHealthCheck()
-			} catch (error) {
+			} catch {
 				console.error('Health check failed:', error)
 			}
 		}, healthCheckIntervalMs)
@@ -84,7 +84,7 @@ export class SSOMonitoringService {
 		this.metricsCollectionInterval = setInterval(async () => {
 			try {
 				await this.collectMetrics()
-			} catch (error) {
+			} catch {
 				console.error('Metrics collection failed:', error)
 			}
 		}, 60 * 1000) // Collect metrics every minute
@@ -225,7 +225,7 @@ export class SSOMonitoringService {
 			// Test database connectivity
 			await ssoConfigurationService.listConfigurations()
 			return 'healthy'
-		} catch (error) {
+		} catch {
 			console.error('Database health check failed:', error)
 			return 'unhealthy'
 		}
@@ -284,7 +284,7 @@ export class SSOMonitoringService {
 			}
 
 			return { status, issues }
-		} catch (error) {
+		} catch {
 			return {
 				status: 'unhealthy',
 				issues: [
@@ -334,7 +334,7 @@ export class SSOMonitoringService {
 							message: `Identity provider test failed for ${config.providerName}: ${testResult.error}`,
 						})
 					}
-				} catch (error) {
+				} catch {
 					failedTests++
 					issues.push({
 						severity: 'error',
@@ -352,7 +352,7 @@ export class SSOMonitoringService {
 			}
 
 			return { status, issues }
-		} catch (error) {
+		} catch {
 			return {
 				status: 'unhealthy',
 				issues: [
@@ -376,7 +376,7 @@ export class SSOMonitoringService {
 			// This would query audit logs for recent auth failures
 			// For now, assume healthy
 			return 'healthy'
-		} catch (error) {
+		} catch {
 			return 'unhealthy'
 		}
 	}
@@ -396,7 +396,7 @@ export class SSOMonitoringService {
 				averageResponseTime: 0, // Would calculate from performance logs
 				errorRate: 0, // Would calculate from error logs
 			}
-		} catch (error) {
+		} catch {
 			return {
 				totalConfigurations: 0,
 				activeConfigurations: 0,
@@ -423,7 +423,7 @@ export class SSOMonitoringService {
 				timestamp: new Date().toISOString(),
 				...metrics,
 			})
-		} catch (error) {
+		} catch {
 			console.error('Failed to collect SSO metrics:', error)
 		}
 	}
@@ -432,8 +432,8 @@ export class SSOMonitoringService {
 	 * Get performance metrics for a time range
 	 */
 	async getPerformanceMetrics(
-		startDate: Date,
-		endDate: Date,
+		_startDate: Date,
+		_endDate: Date,
 	): Promise<SSOPerformanceMetrics> {
 		// This would analyze audit logs and calculate performance metrics
 		// For now, return default values

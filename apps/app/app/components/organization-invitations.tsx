@@ -112,7 +112,7 @@ export function OrganizationInvitations({
 				await navigator.clipboard.writeText(inviteUrl)
 				setLinkCopied(true)
 				setTimeout(() => setLinkCopied(false), 2000)
-			} catch (error) {
+			} catch {
 				console.error('Failed to copy link:', error)
 				// Fallback for browsers that don't support clipboard API
 				const textArea = document.createElement('textarea')

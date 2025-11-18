@@ -37,7 +37,7 @@ export const triggerHaptic = async (
 			default:
 				await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 		}
-	} catch (error) {
+	} catch {
 		// Haptic feedback is not critical, so we just log the error
 		console.warn('Haptic feedback failed:', error)
 	}

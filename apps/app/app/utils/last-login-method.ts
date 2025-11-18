@@ -15,7 +15,7 @@ export function saveLastLoginMethod(method: LoginMethod): void {
 	if (typeof window !== 'undefined') {
 		try {
 			localStorage.setItem(LAST_LOGIN_METHOD_KEY, method)
-		} catch (error) {
+		} catch {
 			// Silently fail if localStorage is not available
 			console.warn('Failed to save last login method:', error)
 		}
@@ -32,7 +32,7 @@ export function getLastLoginMethod(): LoginMethod | null {
 			if (method && isValidLoginMethod(method)) {
 				return method as LoginMethod
 			}
-		} catch (error) {
+		} catch {
 			// Silently fail if localStorage is not available
 			console.warn('Failed to get last login method:', error)
 		}
@@ -47,7 +47,7 @@ export function clearLastLoginMethod(): void {
 	if (typeof window !== 'undefined') {
 		try {
 			localStorage.removeItem(LAST_LOGIN_METHOD_KEY)
-		} catch (error) {
+		} catch {
 			// Silently fail if localStorage is not available
 			console.warn('Failed to clear last login method:', error)
 		}

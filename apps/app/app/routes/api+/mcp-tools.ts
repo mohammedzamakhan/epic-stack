@@ -2,15 +2,6 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getSignedGetRequestInfo } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/mcp-tools.ts'
 
-// Define Note type based on Prisma query result
-type NoteData = {
-	id: string
-	title: string
-	content: string
-	createdAt: Date
-	isPublic: boolean
-}
-
 async function validateApiKey(apiKey: string) {
 	const apiKeyRecord = await prisma.apiKey.findUnique({
 		where: { key: apiKey },
@@ -278,7 +269,7 @@ export async function action({ request }: Route.ActionArgs) {
 			status: 400,
 			headers: { 'Content-Type': 'application/json' },
 		})
-	} catch (error) {
+	} catch {
 		console.error('API error:', error)
 		return new Response(JSON.stringify({ error: 'Internal server error' }), {
 			status: 500,
