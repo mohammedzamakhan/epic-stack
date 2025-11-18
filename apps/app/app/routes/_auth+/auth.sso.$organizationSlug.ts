@@ -51,7 +51,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 			// Process the SSO callback
 			return await ssoAuthService.handleCallback(organization.id, request)
-		} catch (error) {
+		} catch {
 			console.error('SSO callback error:', error)
 			// Redirect to login with error
 			return redirect('/login?error=sso_callback_failed')

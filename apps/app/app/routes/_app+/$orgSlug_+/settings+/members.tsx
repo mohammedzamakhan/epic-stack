@@ -173,7 +173,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 
 			return Response.json({ result: submission.reply({ resetForm: true }) })
-		} catch (error) {
+		} catch {
 			console.error('Error sending invitations:', error)
 			return Response.json(
 				{
@@ -199,7 +199,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		try {
 			await deleteOrganizationInvitation(invitationId)
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			console.error('Error removing invitation:', error)
 			return Response.json(
 				{ error: 'Failed to remove invitation' },
@@ -241,7 +241,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			// Update seat quantity for billing
 			try {
 				await updateSeatQuantity(organization.id)
-			} catch (error) {
+			} catch {
 				console.error(
 					'Failed to update seat quantity after removing user:',
 					error,
@@ -249,7 +249,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			console.error('Error removing member:', error)
 			return Response.json(
 				{ error: 'Failed to remove member' },
@@ -355,7 +355,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				},
 			})
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			console.error('Error updating member role:', error)
 			return Response.json(
 				{ error: 'Failed to update member role' },
@@ -372,7 +372,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				createdById: userId,
 			})
 			return Response.json({ success: true, inviteLink })
-		} catch (error) {
+		} catch {
 			console.error('Error creating invite link:', error)
 			return Response.json(
 				{ error: 'Failed to create invite link' },
@@ -389,7 +389,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				createdById: userId,
 			})
 			return Response.json({ success: true, inviteLink })
-		} catch (error) {
+		} catch {
 			console.error('Error resetting invite link:', error)
 			return Response.json(
 				{ error: 'Failed to reset invite link' },
@@ -402,7 +402,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		try {
 			await deactivateOrganizationInviteLink(organization.id, userId)
 			return Response.json({ success: true })
-		} catch (error) {
+		} catch {
 			console.error('Error deactivating invite link:', error)
 			return Response.json(
 				{ error: 'Failed to deactivate invite link' },

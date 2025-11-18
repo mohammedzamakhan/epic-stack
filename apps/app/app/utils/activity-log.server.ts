@@ -47,7 +47,7 @@ export async function logNoteActivity(options: ActivityLogOptions) {
 				commentId,
 			},
 		})
-	} catch (error) {
+	} catch {
 		// Log the error but don't throw - activity logging shouldn't break the main functionality
 		logger.error(
 			{ err: error, noteId, userId, action },

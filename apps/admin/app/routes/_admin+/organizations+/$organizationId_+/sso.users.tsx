@@ -310,7 +310,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					{ status: 400 },
 				)
 		}
-	} catch (error) {
+	} catch {
 		console.error('SSO user management error:', error)
 		return Response.json(
 			{

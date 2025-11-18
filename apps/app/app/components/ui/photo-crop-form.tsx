@@ -128,7 +128,7 @@ export function PhotoCropForm({
 
 				setCroppedFile(croppedFile)
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error applying crop:', error)
 		}
 	}

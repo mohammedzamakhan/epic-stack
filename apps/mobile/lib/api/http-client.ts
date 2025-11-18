@@ -77,7 +77,7 @@ export class HttpClient {
 					status: response.status,
 					...data,
 				}
-			} catch (error) {
+			} catch {
 				lastError = error as Error
 
 				// Don't retry on certain errors

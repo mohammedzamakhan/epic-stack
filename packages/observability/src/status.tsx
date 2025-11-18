@@ -45,7 +45,7 @@ export function Status({
 			}
 			const data = await response.json()
 			setStatus(data)
-		} catch (error) {
+		} catch {
 			console.error('Error fetching status:', error)
 			setStatus({
 				status: 'degraded',

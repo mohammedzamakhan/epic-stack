@@ -183,7 +183,7 @@ export class IntegrationEncryptionService {
 				organizationId: stateData.organizationId,
 				providerName: stateData.providerName,
 			}
-		} catch (error) {
+		} catch {
 			throw new Error('Invalid or expired OAuth state')
 		}
 	}

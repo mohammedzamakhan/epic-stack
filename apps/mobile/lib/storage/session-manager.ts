@@ -85,7 +85,7 @@ export class TokenManager {
 	async storeTokens(tokens: TokenData): Promise<void> {
 		try {
 			await this.storage.storeTokens(tokens)
-		} catch (_error) {
+		} catch {
 			throw new Error(
 				`Failed to store tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
 			)
@@ -99,7 +99,7 @@ export class TokenManager {
 	async storeUser(user: any): Promise<void> {
 		try {
 			await this.storage.storeUser(user)
-		} catch (_error) {
+		} catch {
 			throw new Error(
 				`Failed to store user: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
 			)
@@ -177,7 +177,7 @@ export class TokenManager {
 			await this.storeTokens(newTokens)
 
 			return newTokens
-		} catch (_error) {
+		} catch {
 			// If refresh fails, clear all token data
 			await this.clearTokens()
 			throw _error
@@ -190,7 +190,7 @@ export class TokenManager {
 	async clearTokens(): Promise<void> {
 		try {
 			await this.storage.clearAll()
-		} catch (_error) {
+		} catch {
 			throw new Error(
 				`Failed to clear tokens: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
 			)

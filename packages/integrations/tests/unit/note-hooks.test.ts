@@ -44,7 +44,7 @@ const setImmediateImpl = (
 	const asyncCallback = async () => {
 		try {
 			await callback(...args)
-		} catch (error) {
+		} catch {
 			// Errors are logged in the implementation
 		}
 	}

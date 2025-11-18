@@ -142,7 +142,7 @@ export class JWTAuthApi {
 				data: response?.data, // Use the response data directly
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -170,7 +170,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -198,7 +198,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -233,7 +233,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -269,7 +269,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -321,7 +321,7 @@ export class JWTAuthApi {
 				message: response.message || 'OAuth callback failed',
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			if (error instanceof Error) {
 				return {
 					success: false,
@@ -366,7 +366,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -398,7 +398,7 @@ export class JWTAuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			// Clear the access token even on error
 			this.httpClient.clearAccessToken()
 			return this.handleError(error as Error)
@@ -432,7 +432,7 @@ export class JWTAuthApi {
 				},
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return {
 				success: false,
 				error: 'network_error',

@@ -39,7 +39,7 @@ describe('SlackProvider - Token Refresh', () => {
 
 			try {
 				await provider.refreshToken('test-token')
-			} catch (error) {
+			} catch {
 				const endTime = Date.now()
 				const duration = endTime - startTime
 

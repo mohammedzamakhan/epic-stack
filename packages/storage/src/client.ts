@@ -247,7 +247,7 @@ export async function testS3Connection(
 				message: `Failed to upload test file: ${response.status} ${response.statusText}`,
 			}
 		}
-	} catch (error) {
+	} catch {
 		return {
 			success: false,
 			message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,

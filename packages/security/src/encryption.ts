@@ -92,7 +92,7 @@ export function decrypt(encryptedData: string, masterKey: string): string {
 		decrypted += decipher.final('utf8')
 
 		return decrypted
-	} catch (error) {
+	} catch {
 		throw new Error(
 			`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		)

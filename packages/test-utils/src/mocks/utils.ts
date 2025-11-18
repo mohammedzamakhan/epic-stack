@@ -44,7 +44,7 @@ export async function readEmail(recipient: string) {
     try {
         const email = await readFixture('email', recipient)
         return EmailSchema.parse(email)
-    } catch (error) {
+    } catch {
         console.error(`Error reading email`, error)
         return null
     }

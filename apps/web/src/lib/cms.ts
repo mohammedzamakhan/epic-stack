@@ -68,7 +68,7 @@ class CMSClient {
 				`/pages?where[slug][equals]=${slug}&limit=1`,
 			)
 			return response.docs[0] || null
-		} catch (error) {
+		} catch {
 			console.error('Error fetching page:', error)
 			return null
 		}
@@ -80,7 +80,7 @@ class CMSClient {
 				`/pages?where[slug][equals]=home&limit=1`,
 			)
 			return response.docs[0] || null
-		} catch (error) {
+		} catch {
 			console.error('Error fetching home page:', error)
 			return null
 		}
@@ -91,7 +91,7 @@ class CMSClient {
 			const response =
 				await this.fetch<PaginatedResponse<Page>>('/pages?limit=100')
 			return response.docs
-		} catch (error) {
+		} catch {
 			console.error('Error fetching pages:', error)
 			return []
 		}
@@ -103,7 +103,7 @@ class CMSClient {
 				`/posts?page=${page}&limit=${limit}&sort=-publishedAt`,
 			)
 			return response
-		} catch (error) {
+		} catch {
 			console.error('Error fetching posts:', error)
 			return {
 				docs: [],
@@ -123,7 +123,7 @@ class CMSClient {
 				`/posts?where[slug][equals]=${slug}&limit=1`,
 			)
 			return response.docs[0] || null
-		} catch (error) {
+		} catch {
 			console.error('Error fetching post:', error)
 			return null
 		}

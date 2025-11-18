@@ -27,7 +27,7 @@ export async function action({ request }: Route.ActionArgs) {
 		// Check honeypot
 		try {
 			await checkHoneypot(formData)
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					success: false,
@@ -62,7 +62,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 			// If it returns data, pass it through
 			return result
-		} catch (error) {
+		} catch {
 			// If validateRequest throws an error (like a redirect with toast),
 			// handle it appropriately for the API
 			if (error instanceof Response) {
@@ -80,7 +80,7 @@ export async function action({ request }: Route.ActionArgs) {
 			}
 			throw error
 		}
-	} catch (error) {
+	} catch {
 		console.error('Verify action error:', error)
 		return data(
 			{

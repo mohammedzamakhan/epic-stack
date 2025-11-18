@@ -276,7 +276,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('ClickUp OAuth callback error:', error)
 			throw new Error(
 				`Failed to exchange ClickUp authorization code: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -348,7 +348,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 								},
 							})
 						}
-					} catch (error) {
+					} catch {
 						console.warn(`Failed to get lists for space ${space.name}:`, error)
 						// Continue with other spaces even if one fails
 					}
@@ -425,7 +425,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 					return true
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('ClickUp connection validation failed:', error)
 			return false
 		}
@@ -487,7 +487,7 @@ export class ClickUpProvider extends BaseIntegrationProvider {
 			const { decryptToken } = await import('../../encryption')
 			const accessToken = await decryptToken(integration.accessToken)
 			return await apiCall(accessToken)
-		} catch (error) {
+		} catch {
 			// ClickUp doesn't support refresh tokens, so we can't automatically refresh
 			// The user will need to re-authenticate
 			if (error instanceof Error && error.message.includes('401')) {

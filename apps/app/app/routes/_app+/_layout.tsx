@@ -24,7 +24,7 @@ export async function loader({ request }: { request: Request }) {
 			// Auto-detect completed steps first
 			try {
 				await autoDetectCompletedSteps(userId, defaultOrg.organization.id)
-			} catch (autoDetectError) {
+			} catch {
 				// Continue without auto-detection if there's an error
 			}
 
@@ -34,7 +34,7 @@ export async function loader({ request }: { request: Request }) {
 					userId,
 					defaultOrg.organization.id,
 				)
-			} catch (onboardingError) {
+			} catch {
 				// Continue without onboarding progress if there's an error
 				onboardingProgress = null
 			}
@@ -42,11 +42,11 @@ export async function loader({ request }: { request: Request }) {
 			// Get trial status using environment variables
 			try {
 				trialStatus = await getTrialStatus(userId, defaultOrg.organization.slug)
-			} catch (trialError) {
+			} catch {
 				// Continue without trial status if there's an error
 			}
 		}
-	} catch (error) {
+	} catch {
 		// Don't throw, just continue without onboarding progress
 	}
 

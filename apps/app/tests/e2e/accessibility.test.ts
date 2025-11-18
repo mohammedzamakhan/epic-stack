@@ -299,7 +299,7 @@ test.describe('Accessibility', () => {
 
 						expect(hasFocusIndicator).toBeTruthy()
 					}
-				} catch (_error) {
+				} catch {
 					// Skip elements that can't be focused
 					continue
 				}

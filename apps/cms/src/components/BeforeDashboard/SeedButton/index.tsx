@@ -54,7 +54,7 @@ export const SeedButton: React.FC = () => {
                 .catch((error) => {
                   reject(error)
                 })
-            } catch (error) {
+            } catch {
               reject(error)
             }
           }),

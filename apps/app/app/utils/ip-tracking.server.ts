@@ -104,7 +104,7 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 		if (ipRecord.isBlacklisted) {
 			console.log(`Blacklisted IP ${data.ip} attempted to access ${data.path}`)
 		}
-	} catch (error) {
+	} catch {
 		// Don't let IP tracking errors break the application
 		console.error('Error tracking IP request:', error)
 	}
@@ -178,7 +178,7 @@ async function getIpGeolocation(ip: string): Promise<GeolocationData | null> {
 		*/
 
 		return null
-	} catch (error) {
+	} catch {
 		console.error('Error getting IP geolocation:', error)
 		return null
 	}

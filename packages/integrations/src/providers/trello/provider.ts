@@ -253,7 +253,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			})
 
 			return `${this.authBaseUrl}/authorize?${authParams.toString()}`
-		} catch (error) {
+		} catch {
 			console.error('Trello auth URL generation failed:', error)
 			throw new Error(
 				`Failed to generate Trello auth URL: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -335,7 +335,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				refreshToken: accessTokenSecret, // Store token secret as refresh token
 				// Trello tokens don't expire, so no expiresAt date
 			}
-		} catch (error) {
+		} catch {
 			console.error('Trello OAuth callback failed:', error)
 			throw new Error(
 				`Trello OAuth callback failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -434,7 +434,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			}
 
 			return channels
-		} catch (error) {
+		} catch {
 			console.error('Failed to get Trello channels:', error)
 			throw new Error(
 				`Failed to get Trello channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -545,7 +545,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 				}
 				throw new Error(errorMessage)
 			}
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`Failed to post message to Trello: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)
@@ -579,7 +579,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 			)
 
 			return response.ok
-		} catch (error) {
+		} catch {
 			console.error('Trello connection validation failed:', error)
 			return false
 		}

@@ -54,7 +54,7 @@ export async function handleStripeWebhook(
 			signature,
 			deps.webhookSecret,
 		)
-	} catch (error) {
+	} catch {
 		console.error('Webhook signature verification failed:', error)
 		return new Response('Invalid signature', { status: 400 })
 	}
@@ -142,7 +142,7 @@ export async function handleStripeWebhook(
 		}
 
 		return new Response('Webhook processed successfully', { status: 200 })
-	} catch (error) {
+	} catch {
 		console.error(`Error processing webhook ${event.type}:`, error)
 		return new Response('Webhook processing failed', { status: 500 })
 	}

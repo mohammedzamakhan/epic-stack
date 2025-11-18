@@ -101,7 +101,7 @@ export default function SignUpScreen() {
 
 			// Reset form on success
 			reset()
-		} catch (error) {
+		} catch {
 			// Trigger error haptic feedback
 			await triggerErrorHaptic()
 			console.error('Signup submission error:', error)

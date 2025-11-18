@@ -164,7 +164,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 					},
 				)
 			}
-		} catch (error) {
+		} catch {
 			console.error('Failed to load user organizations', error)
 		}
 	}

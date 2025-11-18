@@ -123,7 +123,7 @@ export async function handleOAuthCallback(
 			// OAuth 2.0 flow (all other providers) - validate state first
 			try {
 				stateData = OAuthStateManager.validateState(state!)
-			} catch (error) {
+			} catch {
 				throw new Error(`Invalid OAuth state: ${error}`)
 			}
 
@@ -149,7 +149,7 @@ export async function handleOAuthCallback(
 			description: `Successfully connected to ${providerName}`,
 			type: 'success',
 		})
-	} catch (error) {
+	} catch {
 		console.error('OAuth callback error:', error)
 
 		const errorMessage =

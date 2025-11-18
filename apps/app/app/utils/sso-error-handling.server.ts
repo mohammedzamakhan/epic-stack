@@ -199,7 +199,7 @@ export function createSSOError(
 	let sanitizedDetails: string | undefined
 	try {
 		sanitizedDetails = details ? sanitizeSensitiveData(details) : undefined
-	} catch (_error) {
+	} catch {
 		sanitizedDetails =
 			'[Error processing details: circular reference or invalid data]'
 	}

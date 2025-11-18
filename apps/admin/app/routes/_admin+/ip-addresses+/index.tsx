@@ -123,7 +123,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				message: `IP ${ip} has been removed from blacklist`,
 			}
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error processing IP action:', error)
 		throw new Response('Failed to process request', { status: 500 })
 	}

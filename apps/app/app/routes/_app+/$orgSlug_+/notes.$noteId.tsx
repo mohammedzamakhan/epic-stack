@@ -526,7 +526,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -595,7 +595,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -636,7 +636,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				await integrationManager.getAvailableChannels(integrationId)
 
 			return data({ channels })
-		} catch (error) {
+		} catch {
 			// For demo purposes, return empty channels array instead of error
 			// This allows the UI to show "No channels available" instead of crashing
 			return data({
@@ -697,7 +697,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -783,7 +783,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -841,7 +841,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -1013,7 +1013,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -1217,7 +1217,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -1285,7 +1285,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {
@@ -1380,7 +1380,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			return data({ result: { status: 'success' } })
-		} catch (error) {
+		} catch {
 			return data(
 				{
 					result: {

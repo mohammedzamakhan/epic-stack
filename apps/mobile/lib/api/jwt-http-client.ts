@@ -159,7 +159,7 @@ export class JWTHttpClient extends HttpClient {
 
 			// Store the new tokens
 			await this.tokenManager.storeTokens(newTokens)
-		} catch (error) {
+		} catch {
 			// Clear tokens on refresh failure
 			await this.tokenManager.clearTokens()
 			throw error

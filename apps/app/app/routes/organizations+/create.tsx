@@ -157,7 +157,7 @@ export async function loader({ request }: { request: Request }) {
 	if (shouldShowPricing) {
 		try {
 			plansAndPrices = await getPlansAndPrices()
-		} catch (error) {
+		} catch {
 			console.error('Failed to fetch plans and prices:', error)
 		}
 	}
@@ -222,7 +222,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			return redirect(
 				`/organizations/create?step=${nextStep}&orgId=${organization.id}`,
 			)
-		} catch (error) {
+		} catch {
 			console.error('Failed to create organization', error)
 			return submission.reply({
 				formErrors: ['Failed to create organization'],
@@ -273,7 +273,7 @@ export async function action({ request }: ActionFunctionArgs) {
 						})
 					}),
 				)
-			} catch (error) {
+			} catch {
 				console.error('Error sending invitations:', error)
 				return Response.json(
 					{
@@ -326,7 +326,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				from: 'checkout',
 				isCreationFlow: true,
 			})
-		} catch (error) {
+		} catch {
 			console.error('Failed to create checkout session', error)
 			return submission.reply({
 				formErrors: ['Failed to create subscription'],
@@ -369,7 +369,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			})
 
 			return redirect(`/${organization?.slug}?celebrate=true`)
-		} catch (error) {
+		} catch {
 			console.error('Failed to complete setup', error)
 			return submission.reply({
 				formErrors: ['Failed to complete setup'],

@@ -317,7 +317,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 					return repository !== null && repository.permissions.push === true
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('GitHub connection validation failed:', error)
 			return false
 		}

@@ -122,7 +122,7 @@ export class SSOHealthChecker {
 					sessions: sessionCount,
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'fail',
 				message: `Database check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -191,7 +191,7 @@ export class SSOHealthChecker {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'fail',
 				message: `Cache check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -243,7 +243,7 @@ export class SSOHealthChecker {
 					pools: poolStats,
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'fail',
 				message: `Connection pool check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -308,7 +308,7 @@ export class SSOHealthChecker {
 					warnings: configsWithWarnings,
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'fail',
 				message: `Configuration check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -355,7 +355,7 @@ export class SSOHealthChecker {
 								? connectivityResult.errors.join(', ')
 								: undefined,
 						}
-					} catch (error) {
+					} catch {
 						return {
 							config: config.id,
 							status: 'fail',
@@ -405,7 +405,7 @@ export class SSOHealthChecker {
 					results,
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'fail',
 				message: `Identity provider check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -567,7 +567,7 @@ export class SSOHealthChecker {
 				issues,
 				lastValidated: new Date().toISOString(),
 			}
-		} catch (error) {
+		} catch {
 			return {
 				configurationId,
 				organizationId: 'unknown',
@@ -690,7 +690,7 @@ export class SSOHealthChecker {
 						'Check identity provider configuration and network connectivity',
 				})
 			}
-		} catch (error) {
+		} catch {
 			issues.push({
 				type: 'error',
 				code: 'CONNECTION_ERROR',

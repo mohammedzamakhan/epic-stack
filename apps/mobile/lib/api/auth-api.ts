@@ -88,7 +88,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -117,7 +117,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -146,7 +146,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -177,7 +177,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -213,7 +213,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -272,7 +272,7 @@ export class AuthApi {
 				message: response.message || 'OAuth callback failed',
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			// Handle network errors and other exceptions
 			if (error instanceof Error) {
 				return {
@@ -314,7 +314,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -358,7 +358,7 @@ export class AuthApi {
 				data: response.data,
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return this.handleError(error as Error)
 		}
 	}
@@ -390,7 +390,7 @@ export class AuthApi {
 				},
 				status: response.status,
 			}
-		} catch (error) {
+		} catch {
 			return {
 				success: false,
 				error: 'network_error',

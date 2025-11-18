@@ -115,7 +115,7 @@ export function useOAuthCallback() {
 						error: result.errorDescription || 'OAuth callback failed',
 					}
 				}
-			} catch (error) {
+			} catch {
 				return {
 					success: false,
 					error:

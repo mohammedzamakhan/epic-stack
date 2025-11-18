@@ -146,7 +146,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 						organizations: orgs,
 						currentOrganization: defaultOrg || orgs[0],
 					}
-				} catch (error) {
+				} catch {
 					console.error('Failed to load user organizations', error)
 					return undefined
 				}

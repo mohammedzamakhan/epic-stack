@@ -187,7 +187,7 @@ export class PolarProvider implements PaymentProvider {
 					},
 				},
 			}
-		} catch (error) {
+		} catch {
 			console.error('PolarProvider: Error in getPlansAndPrices:', error)
 
 			// Return fallback data to prevent the app from hanging

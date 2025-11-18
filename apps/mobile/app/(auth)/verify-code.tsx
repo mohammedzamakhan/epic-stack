@@ -97,7 +97,7 @@ export default function VerifyCodeScreen() {
 					...(redirectTo && { redirectTo }),
 				},
 			})
-		} catch (error) {
+		} catch {
 			// Trigger error haptic feedback
 			await triggerErrorHaptic()
 			console.error('Verification error:', error)

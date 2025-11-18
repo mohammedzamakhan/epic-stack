@@ -138,7 +138,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			title: 'Discord Verified!',
 			description: 'You have earned 2 points for joining our Discord server!',
 		})
-	} catch (error) {
+	} catch {
 		console.error('Discord verification error:', error)
 		return redirectWithToast('/waitlist', {
 			type: 'error',

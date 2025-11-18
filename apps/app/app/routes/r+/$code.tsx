@@ -93,7 +93,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			title: 'Referral applied!',
 			description: `You were referred by ${referrerName}. Welcome to the waitlist!`,
 		})
-	} catch (error) {
+	} catch {
 		console.error('Error processing referral link:', error)
 		return redirectWithToast('/signup', {
 			title: 'Error',

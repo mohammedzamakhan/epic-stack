@@ -187,7 +187,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			const { decryptToken } = await import('../../encryption')
 			const accessToken = await decryptToken(integration.accessToken!)
 			return await apiCall(accessToken)
-		} catch (error) {
+		} catch {
 			// Check if it's an authentication error
 			if (
 				error instanceof Error &&
@@ -260,7 +260,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			}
 
 			return channels.sort((a, b) => a.name.localeCompare(b.name))
-		} catch (error) {
+		} catch {
 			console.error('Error fetching Linear channels:', error)
 			throw new Error(
 				`Failed to fetch Linear channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -362,7 +362,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 				)
 				return !!project
 			}
-		} catch (error) {
+		} catch {
 			console.error('Linear connection validation failed:', error)
 			return false
 		}

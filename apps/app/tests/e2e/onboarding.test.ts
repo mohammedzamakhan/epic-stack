@@ -347,7 +347,7 @@ test('login as existing user', async ({ page, insertNewUser, navigate }) => {
 	try {
 		// Wait for either successful redirect to home page or stay on login page
 		await page.waitForURL('/organizations/create')
-	} catch (error) {
+	} catch {
 		// If we didn't redirect to home, we're probably still on login page
 		console.log('Login did not redirect to home page. Current URL:', page.url())
 

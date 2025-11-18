@@ -94,7 +94,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 			try {
 				// Implement read functionality here
 				await notification.read()
-			} catch (error) {
+			} catch {
 				console.error('Error marking notification as read:', error)
 			}
 		}
@@ -109,7 +109,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 			} else {
 				await notification.read()
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error toggling read status:', error)
 		}
 	}
@@ -305,7 +305,7 @@ function NotificationBellComponent() {
 	const handleReadAll = async () => {
 		try {
 			await readAll()
-		} catch (error) {
+		} catch {
 			console.error('Error marking all notifications as read:', error)
 		}
 	}

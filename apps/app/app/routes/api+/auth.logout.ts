@@ -21,7 +21,7 @@ export async function action({ request }: Route.ActionArgs) {
 			success: true,
 			data: { message: 'Logged out successfully' },
 		})
-	} catch (error) {
+	} catch {
 		console.error('Logout error:', error)
 		return data(
 			{

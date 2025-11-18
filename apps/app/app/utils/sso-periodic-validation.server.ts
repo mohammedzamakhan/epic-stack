@@ -148,7 +148,7 @@ export class SSOPeriodicValidator {
 					errorCount,
 				},
 			)
-		} catch (error) {
+		} catch {
 			console.error('Periodic SSO validation failed:', error)
 
 			// Log validation system failure
@@ -166,7 +166,7 @@ export class SSOPeriodicValidator {
 	private async validateSingleConfiguration(config: any): Promise<any> {
 		try {
 			return await ssoHealthChecker.validateConfiguration(config.id)
-		} catch (error) {
+		} catch {
 			console.error(`Failed to validate configuration ${config.id}:`, error)
 			throw error
 		}
@@ -252,7 +252,7 @@ export class SSOPeriodicValidator {
 			try {
 				await ssoConfigurationService.toggleConfiguration(config.id, false, 'system')
 				console.log(`Auto-disabled SSO configuration ${config.id} due to critical errors`)
-			} catch (error) {
+			} catch {
 				console.error(`Failed to auto-disable configuration ${config.id}:`, error)
 			}
 			*/

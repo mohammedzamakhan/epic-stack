@@ -99,7 +99,7 @@ export class NoteEventHandler {
 			}
 
 			return await this.processNoteEvent(event)
-		} catch (error) {
+		} catch {
 			console.error('Error handling note creation:', error)
 			return {
 				success: false,
@@ -166,7 +166,7 @@ export class NoteEventHandler {
 			}
 
 			return await this.processNoteEvent(event)
-		} catch (error) {
+		} catch {
 			console.error('Error handling note update:', error)
 			return {
 				success: false,
@@ -201,7 +201,7 @@ export class NoteEventHandler {
 			}
 
 			return await this.processNoteEvent(event)
-		} catch (error) {
+		} catch {
 			console.error('Error handling note deletion:', error)
 			return {
 				success: false,
@@ -271,7 +271,7 @@ export class NoteEventHandler {
 				connectionsNotified: connections.length,
 				errors: [],
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error processing note event:', error)
 			return {
 				success: false,
@@ -295,7 +295,7 @@ export class NoteEventHandler {
 			try {
 				const result = await this.processNoteEvent(event)
 				results.push(result)
-			} catch (error) {
+			} catch {
 				results.push({
 					success: false,
 					connectionsNotified: 0,
@@ -381,7 +381,7 @@ export class NoteEventHandler {
 				failedEvents,
 				connectionsNotified: uniqueConnections.size,
 			}
-		} catch (error) {
+		} catch {
 			console.error('Error getting event stats:', error)
 			return {
 				totalEvents: 0,

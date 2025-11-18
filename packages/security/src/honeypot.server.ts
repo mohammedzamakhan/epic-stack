@@ -8,7 +8,7 @@ export const honeypot = new Honeypot({
 export async function checkHoneypot(formData: FormData) {
 	try {
 		await honeypot.check(formData)
-	} catch (error) {
+	} catch {
 		if (error instanceof SpamError) {
 			throw new Response('Form not submitted properly', { status: 400 })
 		}

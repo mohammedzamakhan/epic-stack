@@ -35,7 +35,7 @@ export async function handleGenerateContent(
 		const text = await deps.generateNoteContent(title)
 
 		return data({ success: true, content: text })
-	} catch (error) {
+	} catch {
 		console.error('AI generation error:', error)
 		return data(
 			{ error: 'Failed to generate content. Please try again.' },

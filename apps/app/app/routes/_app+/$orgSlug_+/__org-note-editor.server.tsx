@@ -308,7 +308,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					userId,
 				})
 			}
-		} catch (error) {
+		} catch {
 			console.error('Failed to trigger video processing:', error)
 			// Don't fail the note creation if video processing fails
 		}
@@ -342,7 +342,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					userId,
 				})
 			}
-		} catch (error) {
+		} catch {
 			console.error('Failed to trigger image processing:', error)
 			// Don't fail the note creation if image processing fails
 		}
@@ -364,7 +364,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				noteId: updatedNote.id,
 				noteTitle: title,
 			})
-		} catch (error) {
+		} catch {
 			// Don't fail the note creation if onboarding tracking fails
 			console.error('Failed to track note creation onboarding step:', error)
 		}

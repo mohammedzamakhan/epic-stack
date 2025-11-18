@@ -82,7 +82,7 @@ test('handles organization not found', async () => {
 			context: {},
 		})
 		expect.fail('Should have thrown an error')
-	} catch (error) {
+	} catch {
 		expect(error).toBeInstanceOf(Response)
 		expect((error as Response).status).toBe(404)
 	}
@@ -98,7 +98,7 @@ test('handles missing organization slug', async () => {
 			context: {},
 		})
 		expect.fail('Should have thrown an error')
-	} catch (error) {
+	} catch {
 		expect(error).toBeInstanceOf(Response)
 		expect((error as Response).status).toBe(400)
 	}
@@ -115,7 +115,7 @@ test('handles SSO not configured for organization', async () => {
 	try {
 		await action({ request, params: PARAMS, context: {} })
 		expect.fail('Should have thrown an error')
-	} catch (error) {
+	} catch {
 		expect(error).toBeInstanceOf(Response)
 		expect((error as Response).status).toBe(400)
 	}
@@ -137,7 +137,7 @@ test('handles SSO authentication service error', async () => {
 	try {
 		await action({ request, params: PARAMS, context: {} })
 		expect.fail('Should have thrown an error')
-	} catch (error) {
+	} catch {
 		expect(error).toBeInstanceOf(Error)
 		expect((error as Error).message).toBe('Identity provider unavailable')
 	}

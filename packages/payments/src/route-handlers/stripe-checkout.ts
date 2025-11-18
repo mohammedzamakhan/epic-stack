@@ -112,7 +112,7 @@ export async function handleStripeCheckout(
 
 		// Regular checkout flow - go to dashboard
 		return redirect(`/${tenant.slug}/dashboard`)
-	} catch (error) {
+	} catch {
 		console.error('Error handling successful checkout:', error)
 		return redirect('/error')
 	}

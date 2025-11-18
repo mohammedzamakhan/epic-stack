@@ -28,7 +28,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				'Content-Type': 'application/json',
 			},
 		})
-	} catch (error) {
+	} catch {
 		// If user doesn't have permission, return 403
 		if (error instanceof Response && error.status === 403) {
 			return Response.json(
@@ -80,7 +80,7 @@ export async function action({ request }: LoaderFunctionArgs) {
 				'Content-Type': 'application/json',
 			},
 		})
-	} catch (error) {
+	} catch {
 		if (error instanceof Response && error.status === 403) {
 			return Response.json(
 				{

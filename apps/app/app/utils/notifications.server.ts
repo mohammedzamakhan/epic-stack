@@ -125,7 +125,7 @@ export async function notifyCommentMentions({
 		}
 
 		console.log(`Sent mention notifications to ${filteredUserIds.length} users`)
-	} catch (error) {
+	} catch {
 		console.error('Error sending mention notifications:', error)
 	}
 }
@@ -182,7 +182,7 @@ export async function notifyNoteOwner({
 		})
 
 		console.log(`Sent note comment notification to note owner: ${noteOwnerId}`)
-	} catch (error) {
+	} catch {
 		console.error('Error sending note owner notification:', error)
 	}
 }

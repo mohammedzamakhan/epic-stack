@@ -351,7 +351,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				return { result: submission.reply(), success: true, createdPermission }
 			}
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error updating role:', error)
 		return {
 			result: submission.reply({ formErrors: ['Failed to update role'] }),

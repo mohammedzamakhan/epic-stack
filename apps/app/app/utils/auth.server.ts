@@ -475,7 +475,7 @@ export async function checkIsCommonPassword(password: string) {
 			const [hashSuffix, _prevalenceCount] = line.split(':')
 			return hashSuffix === suffix
 		})
-	} catch (error) {
+	} catch {
 		if (error instanceof DOMException && error.name === 'TimeoutError') {
 			console.warn('Password check timed out')
 			return false

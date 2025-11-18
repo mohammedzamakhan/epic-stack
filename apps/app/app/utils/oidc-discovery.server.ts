@@ -180,7 +180,7 @@ export async function discoverOIDCEndpoints(
 			endpoints,
 			discoveryDocument: discoveryDoc,
 		}
-	} catch (error) {
+	} catch {
 		if (error instanceof Error) {
 			if (error.name === 'AbortError') {
 				return {
@@ -415,7 +415,7 @@ export async function testEndpointConnectivity(
 				`Authorization endpoint returned unexpected status: ${authResponse.status}`,
 			)
 		}
-	} catch (error) {
+	} catch {
 		results.errors.push(
 			`Authorization endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		)
@@ -435,7 +435,7 @@ export async function testEndpointConnectivity(
 				`Token endpoint returned unexpected status: ${tokenResponse.status}`,
 			)
 		}
-	} catch (error) {
+	} catch {
 		results.errors.push(
 			`Token endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		)
@@ -457,7 +457,7 @@ export async function testEndpointConnectivity(
 					`UserInfo endpoint returned unexpected status: ${userinfoResponse.status}`,
 				)
 			}
-		} catch (error) {
+		} catch {
 			results.userinfoEndpoint = false
 			results.errors.push(
 				`UserInfo endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -483,7 +483,7 @@ export async function testEndpointConnectivity(
 					`Revocation endpoint returned unexpected status: ${revocationResponse.status}`,
 				)
 			}
-		} catch (error) {
+		} catch {
 			results.revocationEndpoint = false
 			results.errors.push(
 				`Revocation endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,

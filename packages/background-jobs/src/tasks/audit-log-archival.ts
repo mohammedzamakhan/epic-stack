@@ -117,7 +117,7 @@ export const auditLogArchival = schedules.task({
 				deleted: totalDeleted,
 				timestamp: new Date().toISOString(),
 			}
-		} catch (error) {
+		} catch {
 			logger.error('Audit log archival failed', { error })
 
 			// Re-throw to mark the job as failed in Trigger.dev

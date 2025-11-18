@@ -216,7 +216,7 @@ export class AuditService {
                 userAgent,
                 sanitizedMetadata,
             })
-        } catch (error) {
+        } catch {
             // Never fail the primary operation due to audit logging errors
             // But ensure we log the failure
             logger.error(
@@ -667,7 +667,7 @@ export class AuditService {
             const date = new Date()
             date.setDate(date.getDate() + retentionDays)
             return date
-        } catch (_error) {
+        } catch {
             // Fall back to default 1 year retention
             const date = new Date()
             date.setFullYear(date.getFullYear() + 1)

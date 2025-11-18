@@ -100,7 +100,7 @@ export class SSOAuditLogger {
 			if (logEntry.severity === 'critical') {
 				await this.handleCriticalEvent(logEntry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to log SSO audit event')
 		}
 	}
@@ -279,7 +279,7 @@ export class SSOAuditLogger {
 					activeConfigurations: 0, // Would count from database
 				},
 			}
-		} catch (error) {
+		} catch {
 			return {
 				status: 'unhealthy',
 				issues: [
@@ -450,7 +450,7 @@ export class SSOAuditLogger {
 			//     createdAt: entry.timestamp,
 			//   },
 			// })
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to store audit log in database')
 		}
 	}
@@ -474,7 +474,7 @@ export class SSOAuditLogger {
 			if (process.env.SENTRY_DSN) {
 				// await sendToSentry(entry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to send audit log to monitoring')
 		}
 	}
@@ -495,7 +495,7 @@ export class SSOAuditLogger {
 			if (process.env.PAGERDUTY_INTEGRATION_KEY) {
 				// await sendPagerDutyAlert(entry)
 			}
-		} catch (error) {
+		} catch {
 			logger.error({ err: error }, 'Failed to handle critical SSO event')
 		}
 	}
@@ -529,7 +529,7 @@ export class SSOAuditLogger {
 			// Check for disabled configurations
 			// Check for configurations with invalid settings
 			// This would query the SSO configurations and validate them
-		} catch (error) {
+		} catch {
 			issues.push(
 				`Configuration health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			)

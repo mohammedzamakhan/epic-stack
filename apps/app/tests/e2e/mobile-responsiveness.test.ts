@@ -219,7 +219,7 @@ test.describe('Mobile Responsiveness', () => {
 						try {
 							await button.click({ timeout: 2000 })
 							await page.waitForTimeout(100) // Brief wait after interaction
-						} catch (_error) {
+						} catch {
 							// Button moved or became unavailable, that's okay
 							console.log(`Button ${i} could not be clicked, skipping`)
 						}

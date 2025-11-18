@@ -148,7 +148,7 @@ function NotificationPreferencesCardComponent() {
 				},
 			})
 			await handleRefetch()
-		} catch (error) {
+		} catch {
 			console.error('Failed to update preference:', error)
 		} finally {
 			setUpdatingPreferences((prev) => {

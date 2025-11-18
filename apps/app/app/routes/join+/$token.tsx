@@ -58,7 +58,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			title: 'Organization Invitation',
 			description: `${inviterName} has invited you to join ${inviteLink.organization.name}. Review the invitation below.`,
 		})
-	} catch (error) {
+	} catch {
 		// Check if it's an authentication error (redirect response)
 		if (
 			error instanceof Response &&

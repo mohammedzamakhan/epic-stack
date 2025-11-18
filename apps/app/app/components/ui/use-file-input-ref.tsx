@@ -12,7 +12,7 @@ export function createFileInputRef(file?: File) {
 				const dataTransfer = new DataTransfer()
 				dataTransfer.items.add(file)
 				input.files = dataTransfer.files
-			} catch (error) {
+			} catch {
 				console.log('Error setting file on input:', error)
 			}
 		}

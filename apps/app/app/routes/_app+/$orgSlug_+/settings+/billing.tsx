@@ -65,7 +65,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				organization.stripeSubscriptionId,
 			)
 			currentPriceId = subscription.items.data[0]?.price.id || null
-		} catch (error) {
+		} catch {
 			console.error('Error fetching current subscription:', error)
 		}
 	}

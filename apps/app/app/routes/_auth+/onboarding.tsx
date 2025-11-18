@@ -170,7 +170,7 @@ export async function action({ request }: Route.ActionArgs) {
 				},
 				{ headers },
 			)
-		} catch (error) {
+		} catch {
 			console.error('Error processing invite link during signup:', error)
 			// If invite link processing fails, continue with normal flow
 		}
@@ -202,7 +202,7 @@ export async function action({ request }: Route.ActionArgs) {
 				)
 			}
 		}
-	} catch (error) {
+	} catch {
 		// Don't fail the signup if invitation processing fails
 		console.error(
 			'Error processing organization invitations during signup:',
@@ -251,7 +251,7 @@ export async function action({ request }: Route.ActionArgs) {
 				for (const org of organizationsWithMatchingDomain) {
 					try {
 						await updateSeatQuantity(org.id)
-					} catch (error) {
+					} catch {
 						console.error(
 							`Failed to update seat quantity for organization ${org.id} after domain-based auto-join:`,
 							error,
@@ -274,7 +274,7 @@ export async function action({ request }: Route.ActionArgs) {
 				)
 			}
 		}
-	} catch (error) {
+	} catch {
 		// Don't fail the signup if domain-based organization joining fails
 		console.error(
 			'Error processing domain-based organization joining during signup:',
@@ -292,7 +292,7 @@ export async function action({ request }: Route.ActionArgs) {
 			// Ensure waitlist entry exists before linking referral
 			await getOrCreateWaitlistEntry(session.userId)
 			await linkReferral(session.userId, referralCode)
-		} catch (error) {
+		} catch {
 			// Don't fail the signup if referral linking fails
 			console.error('Error linking referral code during signup:', error)
 		}

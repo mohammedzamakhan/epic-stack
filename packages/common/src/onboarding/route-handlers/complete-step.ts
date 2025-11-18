@@ -41,7 +41,7 @@ export async function handleOnboardingCompleteStep(
 		})
 
 		return Response.json({ success: true })
-	} catch (error) {
+	} catch {
 		console.error('Error completing onboarding step:', error)
 		return Response.json({ error: 'Failed to complete step' }, { status: 500 })
 	}

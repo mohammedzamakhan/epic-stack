@@ -23,7 +23,7 @@ const updateAuthStatus = async (): Promise<void> => {
 
 		await setAuthStatus(authStatus)
 		console.log('Auth status updated:', authStatus)
-	} catch (error) {
+	} catch {
 		console.error('Error updating auth status:', error)
 	}
 }
@@ -45,7 +45,7 @@ const injectContentScript = async (tabId: number): Promise<void> => {
 				files: [contentScript],
 			})
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error injecting content script:', error)
 	}
 }
@@ -89,7 +89,7 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
 			default:
 				MessageHandler.handleMessage(extensionMessage)
 		}
-	} catch (error) {
+	} catch {
 		console.error('Error handling message:', error)
 	}
 })
@@ -111,7 +111,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 			if (result[domain]) {
 				await injectContentScript(tabId)
 			}
-		} catch (error) {
+		} catch {
 			// Ignore URL parsing errors and tab access errors
 			if (
 				error instanceof Error &&
@@ -136,7 +136,7 @@ const initialize = async (): Promise<void> => {
 		authCheckInterval = setInterval(updateAuthStatus, AUTH_CHECK_INTERVAL)
 
 		console.log('Background script initialized')
-	} catch (error) {
+	} catch {
 		console.error('Error initializing background script:', error)
 	}
 }
