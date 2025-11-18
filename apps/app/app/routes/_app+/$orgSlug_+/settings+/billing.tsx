@@ -123,31 +123,32 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const intent = formData.get('intent')
 	const priceId = formData.get('priceId') as string | null
 
+	// Fetch full organization data with billing fields for payment actions
+	const organizationWithBilling = await prisma.organization.findUnique({
+		where: { id: organization.id },
+		select: {
+			id: true,
+			createdAt: true,
+			updatedAt: true,
+			name: true,
+			slug: true,
+			description: true,
+			active: true,
+			size: true,
+			stripeCustomerId: true,
+			stripeSubscriptionId: true,
+			stripeProductId: true,
+			planName: true,
+			subscriptionStatus: true,
+			verifiedDomain: true,
+		},
+	})
+
+	if (!organizationWithBilling) {
+		return Response.json({ error: 'Organization not found' }, { status: 404 })
+	}
+
 	if (intent === 'upgrade') {
-		const organizationWithBilling = await prisma.organization.findUnique({
-			where: { id: organization.id },
-			select: {
-				id: true,
-				createdAt: true,
-				updatedAt: true,
-				name: true,
-				slug: true,
-				description: true,
-				active: true,
-				size: true,
-				stripeCustomerId: true,
-				stripeSubscriptionId: true,
-				stripeProductId: true,
-				planName: true,
-				subscriptionStatus: true,
-				verifiedDomain: true,
-			},
-		})
-
-		if (!organizationWithBilling) {
-			return Response.json({ error: 'Organization not found' }, { status: 404 })
-		}
-
 		return checkoutAction(
 			request,
 			organizationWithBilling,
@@ -156,30 +157,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'customer-portal') {
-		const organizationWithBilling = await prisma.organization.findUnique({
-			where: { id: organization.id },
-			select: {
-				id: true,
-				createdAt: true,
-				updatedAt: true,
-				name: true,
-				slug: true,
-				description: true,
-				active: true,
-				size: true,
-				stripeCustomerId: true,
-				stripeSubscriptionId: true,
-				stripeProductId: true,
-				planName: true,
-				subscriptionStatus: true,
-				verifiedDomain: true,
-			},
-		})
-
-		if (!organizationWithBilling) {
-			return Response.json({ error: 'Organization not found' }, { status: 404 })
-		}
-
 		return customerPortalAction(request, organizationWithBilling)
 	}
 
