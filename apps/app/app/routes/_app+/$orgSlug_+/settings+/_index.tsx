@@ -82,19 +82,8 @@ const SettingsSchema = z.object({
 })
 
 export async function action({ request, params }: ActionFunctionArgs) {
-	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
-			},
-		},
-		select: {
+	const [organization, user] = await Promise.all([
+		requireUserOrganization(request, params.orgSlug, {
 			id: true,
 			name: true,
 			slug: true,
@@ -112,14 +101,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					region: true,
 				},
 			},
-		},
-	})
-
-	// Get user email for domain validation
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { email: true },
-	})
+		}),
+		// Get user email for domain validation
+		requireUserId(request).then((userId) =>
+			prisma.user.findUnique({
+				where: { id: userId },
+				select: { email: true },
+			}),
+		),
+	])
 
 	if (!organization || !user) {
 		throw new Response('Not Found', { status: 404 })

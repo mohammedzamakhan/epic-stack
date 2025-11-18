@@ -451,3 +451,45 @@ export async function userHasOrgAccess(
 
 	return true
 }
+
+/**
+ * Get organization by slug and verify user has access to it.
+ * Combines getOrganizationBySlug with user access verification.
+ * Throws 404 if organization not found, 403 if user doesn't have access.
+ *
+ * @param orgSlug - The organization slug
+ * @param userId - The user ID to check access for
+ * @param select - Optional custom select fields (defaults to id, name, slug)
+ * @returns The organization with specified fields
+ */
+export async function getOrganizationWithAccess<
+	T extends Record<string, any> = { id: true; name: true; slug: true },
+>(
+	orgSlug: string,
+	userId: string,
+	select?: T,
+): Promise<{
+	[K in keyof T]: T[K] extends true
+		? K extends 'id' | 'name' | 'slug'
+			? string
+			: any
+		: any
+}> {
+	const organization = await prisma.organization.findFirst({
+		where: {
+			slug: orgSlug,
+			users: {
+				some: {
+					userId,
+				},
+			},
+		},
+		select: select || ({ id: true, name: true, slug: true } as T),
+	})
+
+	if (!organization) {
+		throw new Response('Not Found', { status: 404 })
+	}
+
+	return organization as any
+}

@@ -93,6 +93,43 @@ const collisionStrategy = (args: any) => {
 	return pointer.length > 0 ? pointer : rectIntersection(args)
 }
 
+/**
+ * Helper function to determine the destination column and position for a note drag operation.
+ * Reduces code duplication between handleDragOver and handleDragEnd.
+ */
+function calculateNoteDestination(
+	over: { id: unknown },
+	activeParsed: ReturnType<typeof parseDragId>,
+	grouped: Record<string, Note[]>,
+): { columnId: string; position: number } | null {
+	const overParsed = parseDragId(over.id)
+	const destColId = overParsed?.columnId ?? String(over.id)
+	const overNoteId =
+		overParsed?.noteId && overParsed.noteId !== '__placeholder'
+			? overParsed.noteId
+			: null
+
+	if (!destColId || !activeParsed?.noteId) return null
+
+	const list = grouped[destColId] ?? []
+	let destIndex = list.length
+
+	if (overNoteId) {
+		const overIndex = list.findIndex((n) => n.id === overNoteId)
+		if (overIndex >= 0) destIndex = overIndex
+
+		// If moving within same column and after itself, adjust index
+		if (
+			activeParsed.columnId === destColId &&
+			overIndex > list.findIndex((n) => n.id === activeParsed.noteId)
+		) {
+			destIndex--
+		}
+	}
+
+	return { columnId: destColId, position: destIndex }
+}
+
 export function NotesKanbanBoard({
 	notes,
 	statuses,
@@ -256,37 +293,18 @@ export function NotesKanbanBoard({
 		// Handle note drag over (existing logic)
 		if (!activeNote) return
 
-		const overParsed = parseDragId(over.id)
-		const destColId = overParsed?.columnId ?? String(over.id)
-		const overNoteId =
-			overParsed?.noteId && overParsed.noteId !== '__placeholder'
-				? overParsed.noteId
-				: null
-
-		if (!destColId || !activeParsed?.noteId) return
-
-		const list = grouped[destColId] ?? []
-		let destIndex = list.length
-
-		if (overNoteId) {
-			const overIndex = list.findIndex((n) => n.id === overNoteId)
-			if (overIndex >= 0) destIndex = overIndex
-
-			// If moving within same column and after itself, adjust index
-			if (
-				activeParsed.columnId === destColId &&
-				overIndex > list.findIndex((n) => n.id === activeParsed.noteId)
-			) {
-				destIndex--
-			}
-		}
+		const destination = calculateNoteDestination(over, activeParsed, grouped)
+		if (!destination) return
 
 		// Only update if destination changed
 		if (
-			dragDestination?.columnId !== destColId ||
-			dragDestination?.position !== destIndex
+			dragDestination?.columnId !== destination.columnId ||
+			dragDestination?.position !== destination.position
 		) {
-			setDragDestination({ columnId: destColId, position: destIndex })
+			setDragDestination({
+				columnId: destination.columnId,
+				position: destination.position,
+			})
 		}
 	}
 
@@ -322,34 +340,15 @@ export function NotesKanbanBoard({
 		}
 
 		// Handle note reordering (existing logic)
-		const overParsed = parseDragId(over.id)
-		const destColId = overParsed?.columnId ?? String(over.id)
-		const overNoteId =
-			overParsed?.noteId && overParsed.noteId !== '__placeholder'
-				? overParsed.noteId
-				: null
-		if (!destColId || !activeParsed?.noteId) return
-		const list = grouped[destColId] ?? []
-		let destIndex = list.length
-
-		if (overNoteId) {
-			const overIndex = list.findIndex((n) => n.id === overNoteId)
-			if (overIndex >= 0) destIndex = overIndex
-
-			// If moving within same column and after itself, adjust index
-			if (
-				activeParsed.columnId === destColId &&
-				overIndex > list.findIndex((n) => n.id === activeParsed.noteId)
-			) {
-				destIndex--
-			}
-		}
+		const destination = calculateNoteDestination(over, activeParsed, grouped)
+		if (!destination) return
 
 		const formData = new FormData()
 		formData.append('intent', 'reorder-note')
 		formData.append('noteId', activeParsed.noteId)
-		formData.append('position', String(destIndex))
-		if (destColId !== UNCATEGORISED) formData.append('statusId', destColId)
+		formData.append('position', String(destination.position))
+		if (destination.columnId !== UNCATEGORISED)
+			formData.append('statusId', destination.columnId)
 		void reorderFetcher.submit(formData, {
 			method: 'post',
 			action: `/${orgSlug}/notes/reorder`,

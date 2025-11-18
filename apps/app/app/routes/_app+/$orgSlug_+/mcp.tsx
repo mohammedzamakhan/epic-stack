@@ -53,45 +53,11 @@ type ApiKeyData = {
 	expiresAt: Date | null
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
-	const { orgSlug } = params
-	invariantResponse(orgSlug, 'Organization slug is required')
-
-	const organization = await prisma.organization.findFirst({
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
-		where: { slug: orgSlug },
-	})
-
-	invariantResponse(organization, 'Organization not found', { status: 404 })
-
-	// Check if the user has access to this organization
-	const userId = await requireUserId(request)
-	await userHasOrgAccess(request, organization.id)
-
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { id: true, name: true, username: true },
-	})
-	invariantResponse(user, 'User not found')
-
-	// Get existing API keys for this user and organization
-	const apiKeys = await prisma.apiKey.findMany({
-		where: {
-			userId: user.id,
-			organizationId: organization.id,
-		},
-		orderBy: { createdAt: 'desc' },
-	})
-
-	return { user, organization, apiKeys, orgSlug }
-}
-
-export async function action({ request, params }: ActionFunctionArgs) {
-	const { orgSlug } = params
+/**
+ * Helper function to validate organization access and get user data.
+ * Reduces code duplication between loader and action functions.
+ */
+async function getOrgAndUser(request: Request, orgSlug: string) {
 	invariantResponse(orgSlug, 'Organization slug is required')
 
 	const organization = await prisma.organization.findFirst({
@@ -110,6 +76,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		select: { id: true, name: true, username: true },
 	})
 	invariantResponse(user, 'User not found')
+
+	return { organization, user }
+}
+
+export async function loader({ request, params }: LoaderFunctionArgs) {
+	const { orgSlug } = params
+	const { organization, user } = await getOrgAndUser(request, orgSlug!)
+
+	// Get existing API keys for this user and organization
+	const apiKeys = await prisma.apiKey.findMany({
+		where: {
+			userId: user.id,
+			organizationId: organization.id,
+		},
+		orderBy: { createdAt: 'desc' },
+	})
+
+	return { user, organization, apiKeys, orgSlug }
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+	const { orgSlug } = params
+	const { organization, user } = await getOrgAndUser(request, orgSlug!)
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')

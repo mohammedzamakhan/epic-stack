@@ -79,30 +79,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			stripeSubscriptionId: true,
-			subscriptionStatus: true,
-		},
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
+		name: true,
+		slug: true,
+		stripeSubscriptionId: true,
+		subscriptionStatus: true,
 	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
 
 	// Block access to billing actions for PUBLIC_BETA and CLOSED_BETA
 	// EXCEPT for organizations with existing active subscriptions (grandfathered)

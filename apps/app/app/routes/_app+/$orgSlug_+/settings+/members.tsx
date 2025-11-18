@@ -123,24 +123,11 @@ const InviteSchema = z.object({
 })
 
 export async function action({ request, params }: ActionFunctionArgs) {
-	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
-			},
-		},
-		select: { id: true, name: true, slug: true },
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
+		name: true,
+		slug: true,
 	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
