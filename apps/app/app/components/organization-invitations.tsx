@@ -382,8 +382,8 @@ function InviteFieldset({
 				<InputGroup className="w-full">
 					<InputGroupInput
 						{...emailProps}
-						placeholder={_(msg`Enter email address`)}
-						aria-label={_(msg`Email`)}
+						placeholder={(msg`Enter email address`)}
+						aria-label={(msg`Email`)}
 						aria-invalid={
 							inviteFields.email.errors?.length ? 'true' : undefined
 						}
