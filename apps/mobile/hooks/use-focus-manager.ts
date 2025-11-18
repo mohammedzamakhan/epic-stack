@@ -14,7 +14,7 @@ export interface UseFocusManagerReturn {
  * Hook for managing focus between multiple input fields
  */
 export const useFocusManager = (inputCount: number): UseFocusManagerReturn => {
-	const refs = useRef<(TextInput | null)[]>(new Array(inputCount).fill(null))
+	const refs = useRef<(TextInput | null)[]>(Array.from({ length: inputCount }, () => null))
 
 	const setRef = useCallback(
 		(index: number) => (ref: TextInput | null) => {

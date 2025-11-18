@@ -4,12 +4,6 @@ import * as React from 'react'
 import { cn } from '../utils/cn'
 import { Icon } from './icon'
 
-// Icon dependency injection interface
-interface SheetIconProps {
-	name: string
-	className?: string
-}
-
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
 	return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }

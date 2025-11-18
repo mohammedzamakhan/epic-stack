@@ -3,12 +3,11 @@ import { Trans } from '@lingui/macro'
 import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { CommandMenu } from './command-menu'
 import { Button } from '@repo/ui/button'
-import { Separator } from '@repo/ui/separator'
 import { SidebarTrigger } from '@repo/ui/sidebar'
 import { Icon } from '@repo/ui/icon'
 import { Kbd } from '@repo/ui/kbd'
 import NotificationBell from './ui/notification-bell'
-import { Form, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 
 export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 	const [commandOpen, setCommandOpen] = useState(false)

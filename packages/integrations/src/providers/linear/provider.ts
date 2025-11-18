@@ -152,9 +152,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 		const redirectUri = stateData.redirectUri as string | undefined
 		const tokenResponse = await this.exchangeCodeForToken(code, redirectUri)
 
-		// Get user information and create provider config
-		const userInfo = await this.getCurrentUser(tokenResponse.access_token)
-
 		// Note: Integration storage is handled by the calling code
 		// This method only returns the token data
 
@@ -170,7 +167,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 	/**
 	 * Refresh expired access token
 	 */
-	async refreshToken(refreshToken: string): Promise<TokenData> {
+	async refreshToken(_refreshToken: string): Promise<TokenData> {
 		// Linear doesn't currently support refresh tokens
 		// Access tokens are long-lived (typically 1 year)
 		throw new Error(
@@ -282,7 +279,6 @@ export class LinearProvider extends BaseIntegrationProvider {
 			throw new Error('No access token found for integration')
 		}
 
-		const config = JSON.parse(connection.config || '{}')
 		const channelId = connection.externalId // Use externalId from database schema
 
 		// Determine if this is a team or project connection

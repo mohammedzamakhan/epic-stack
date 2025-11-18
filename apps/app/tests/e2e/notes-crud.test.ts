@@ -1,10 +1,4 @@
-import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
-import {
-	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
-} from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+import { createTestOrganization } from '#tests/test-utils.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Notes CRUD Operations', () => {

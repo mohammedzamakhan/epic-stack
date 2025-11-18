@@ -29,13 +29,6 @@ const requestTokenStorage = new Map<
 /**
  * Trello API response interfaces
  */
-interface TrelloOAuthResponse {
-	oauth_token?: string
-	oauth_token_secret?: string
-	oauth_verifier?: string
-	error?: string
-}
-
 interface TrelloUser {
 	id: string
 	username: string
@@ -62,15 +55,6 @@ interface TrelloList {
 	name: string
 	closed: boolean
 	pos: number
-	idBoard: string
-}
-
-interface TrelloCard {
-	id: string
-	name: string
-	desc: string
-	url: string
-	idList: string
 	idBoard: string
 }
 
@@ -207,7 +191,7 @@ export class TrelloProvider extends BaseIntegrationProvider {
 	async getAuthUrl(
 		organizationId: string,
 		redirectUri: string,
-		additionalParams?: Record<string, any>,
+		_additionalParams?: Record<string, any>,
 	): Promise<string> {
 		try {
 			// Step 1: Get request token
@@ -544,19 +528,16 @@ export class TrelloProvider extends BaseIntegrationProvider {
 
 			if (!response.ok) {
 				let errorMessage = `Failed to create card (${response.status} ${response.statusText})`
-				let errorDetails = ''
 				try {
 					// Try to parse as JSON first
 					const errorData = (await response.json()) as TrelloApiError
 					errorMessage = `Failed to create card: ${errorData.message || errorData.error || 'Unknown error'}`
-					errorDetails = JSON.stringify(errorData, null, 2)
 				} catch {
 					// If JSON parsing fails, try to get plain text error
 					try {
 						const errorText = await response.text()
 						if (errorText) {
 							errorMessage = `Failed to create card: ${errorText}`
-							errorDetails = errorText
 						}
 					} catch {
 						// If both fail, use the status text

@@ -4,11 +4,11 @@ import * as React from 'react'
 import { cn } from '../utils/cn'
 import { Icon } from './icon'
 
-// Icon dependency injection interface
-interface SelectIconProps {
-	name: string
-	className?: string
-}
+// Icon dependency injection interface (unused but kept for future extensibility)
+// interface SelectIconProps {
+// 	name: string
+// 	className?: string
+// }
 
 function Select({
 	...props

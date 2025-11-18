@@ -2,7 +2,6 @@ import {
 	Html,
 	Container,
 	Text,
-	Link,
 	Head,
 	Body,
 	Button,

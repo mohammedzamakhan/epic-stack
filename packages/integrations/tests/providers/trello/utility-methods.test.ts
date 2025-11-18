@@ -2,7 +2,7 @@
  * Tests for TrelloProvider utility methods
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { TrelloProvider } from '../../../src/providers/trello/provider'
 
 describe('TrelloProvider - Utility Methods', () => {

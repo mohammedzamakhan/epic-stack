@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { JiraProvider } from '../../../src/providers/jira/provider'
 
 describe('JiraProvider - OAuth Flow', () => {

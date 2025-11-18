@@ -210,7 +210,7 @@ export function validateSSOConfigurationUpdate(
 // Security validation helpers
 export function sanitizeSSOConfigInput(input: any): any {
 	// Remove any potentially dangerous fields
-	const { __proto__, constructor, prototype, ...sanitized } = input || {}
+	const { __proto__, constructor: _constructor, prototype: _prototype, ...sanitized } = input || {}
 
 	// Sanitize string fields
 	if (sanitized.providerName && typeof sanitized.providerName === 'string') {

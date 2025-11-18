@@ -7,7 +7,7 @@ import { type LoaderFunctionArgs } from 'react-router'
  * This endpoint is used by BetterStack and other uptime monitoring services
  * to check if the application is running.
  */
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request: _request }: LoaderFunctionArgs) {
 	return Response.json(
 		{
 			status: 'ok',

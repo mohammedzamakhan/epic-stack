@@ -2,7 +2,7 @@ import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request: _request }: LoaderFunctionArgs) {
 	const flags = await prisma.configFlag.findMany()
 	return { flags }
 }

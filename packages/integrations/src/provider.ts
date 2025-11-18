@@ -189,8 +189,8 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 	 * @returns Promise resolving to response
 	 */
 	protected async makeAuthenticatedRequest(
-		integration: Integration,
-		endpoint: string,
+		_integration: Integration,
+		_endpoint: string,
 		_options: RequestInit = {},
 	): Promise<Response> {
 		// This will be implemented with token decryption in a later task

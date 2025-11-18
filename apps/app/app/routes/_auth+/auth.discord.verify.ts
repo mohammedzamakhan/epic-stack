@@ -1,4 +1,4 @@
-import { redirect, data } from 'react-router'
+import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'

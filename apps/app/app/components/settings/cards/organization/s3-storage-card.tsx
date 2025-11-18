@@ -90,7 +90,7 @@ function Switch({
 	name,
 	formId,
 	value,
-	defaultChecked,
+	_defaultChecked,
 	...props
 }: SwitchProps) {
 	const switchRef = useRef<React.ElementRef<typeof ShadcnSwitch>>(null)

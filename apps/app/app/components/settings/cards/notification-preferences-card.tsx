@@ -100,7 +100,6 @@ function NotificationPreferencesCardComponent() {
 		new Set(),
 	)
 	const [isRefetching, setIsRefetching] = useState(false)
-	const [hasMounted, setHasMounted] = useState(false)
 
 	const handleRefetch = useCallback(async () => {
 		setIsRefetching(true)

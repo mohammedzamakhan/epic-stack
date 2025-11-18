@@ -6,8 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
 	tokenManager,
 	TokenManager,
-	type TokenRefreshResult,
-	type TokenStorageResult,
 } from '../../src/token-manager'
 import { integrationEncryption } from '../../src/encryption'
 import { prisma } from '@repo/prisma'

@@ -1,7 +1,7 @@
 import { SetCookie } from '@mjackson/headers'
 import { createId as cuid } from '@paralleldrive/cuid2'
 import { redirect } from 'react-router'
-import { GoogleStrategy, type GoogleProfile } from '@coji/remix-auth-google'
+import { GoogleStrategy } from '@coji/remix-auth-google'
 import type { OAuth2Tokens } from 'arctic'
 import { z } from 'zod'
 import { cache, cachified } from '@repo/cache'

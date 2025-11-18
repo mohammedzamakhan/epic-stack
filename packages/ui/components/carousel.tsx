@@ -80,10 +80,18 @@ function Carousel({
 			const isRTL = document.documentElement.dir === 'rtl'
 			if (event.key === 'ArrowLeft') {
 				event.preventDefault()
-				isRTL ? scrollNext() : scrollPrev()
+				if (isRTL) {
+					scrollNext()
+				} else {
+					scrollPrev()
+				}
 			} else if (event.key === 'ArrowRight') {
 				event.preventDefault()
-				isRTL ? scrollPrev() : scrollNext()
+				if (isRTL) {
+					scrollPrev()
+				} else {
+					scrollNext()
+				}
 			}
 		},
 		[scrollPrev, scrollNext],

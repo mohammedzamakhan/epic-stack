@@ -12,7 +12,7 @@ type LowImpactHeroType =
       richText?: Page['hero']['richText']
     })
 
-export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText }) => {
+export const LowImpactHero: React.FC<LowImpactHeroType> = ({ _children, _richText }) => {
   return (
     <div className="container mt-16">
       <div className="max-w-[48rem]"></div>

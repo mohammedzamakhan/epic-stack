@@ -9,7 +9,6 @@ import {
 	createStripeProvider,
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
-	type StripeProvider,
 } from '@repo/payments'
 import { data, redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'

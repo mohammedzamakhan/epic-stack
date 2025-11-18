@@ -1,5 +1,4 @@
-import { useEffect } from 'react'
-import { Form, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 import { Button } from '@repo/ui/button'
 
 export function CookieConsentBanner({ consent }: { consent: boolean | null }) {

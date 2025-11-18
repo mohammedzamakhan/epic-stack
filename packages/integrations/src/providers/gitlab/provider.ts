@@ -64,24 +64,25 @@ interface GitLabUser {
 	state: 'active' | 'blocked'
 }
 
-interface GitLabIssue {
-	id: number
-	iid: number
-	title: string
-	description?: string
-	state: 'opened' | 'closed'
-	web_url: string
-	author: GitLabUser
-	assignees: GitLabUser[]
-	labels: string[]
-	milestone?: {
-		id: number
-		title: string
-	}
-	project_id: number
-	created_at: string
-	updated_at: string
-}
+// Unused interface - kept for future extensibility
+// interface GitLabIssue {
+// 	id: number
+// 	iid: number
+// 	title: string
+// 	description?: string
+// 	state: 'opened' | 'closed'
+// 	web_url: string
+// 	author: GitLabUser
+// 	assignees: GitLabUser[]
+// 	labels: string[]
+// 	milestone?: {
+// 		id: number
+// 		title: string
+// 	}
+// 	project_id: number
+// 	created_at: string
+// 	updated_at: string
+// }
 
 interface GitLabCreateIssueResponse {
 	id: number

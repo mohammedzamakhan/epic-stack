@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SSOUserManagement } from './sso-user-management.tsx'
@@ -79,7 +79,7 @@ vi.mock('@repo/ui', () => ({
 
 // Mock date-fns
 vi.mock('date-fns', () => ({
-	formatDistanceToNow: (date: Date) => '2 hours ago',
+	formatDistanceToNow: (_date: Date) => '2 hours ago',
 }))
 
 describe('SSOUserManagement', () => {

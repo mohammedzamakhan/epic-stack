@@ -57,7 +57,6 @@ export class SSOHealthChecker {
 	 * Perform complete system health check
 	 */
 	async checkSystemHealth(): Promise<SSOHealthStatus> {
-		const startTime = Date.now()
 		const timestamp = new Date().toISOString()
 
 		// Run all health checks in parallel
@@ -523,7 +522,6 @@ export class SSOHealthChecker {
 	async validateConfiguration(
 		configurationId: string,
 	): Promise<ConfigurationValidationResult> {
-		const startTime = Date.now()
 		const issues: ValidationIssue[] = []
 
 		try {

@@ -3,7 +3,6 @@ import { Link, useFetcher } from 'react-router'
 import { Trans } from '@lingui/macro'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
-import { ShineBorder } from './magic-ui/shine-border'
 
 import { Button } from '@repo/ui/button'
 import { Card, CardHeader, CardHeaderContent, CardAction, CardContent } from '@repo/ui/card'

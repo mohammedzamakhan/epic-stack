@@ -64,7 +64,7 @@ interface SSOUserManagementProps {
 	onUserStatusChange?: (userId: string, active: boolean) => void
 }
 
-const getRoleBadge = (role: string, level: number) => {
+const getRoleBadge = (role: string, _level: number) => {
 	switch (role.toLowerCase()) {
 		case 'owner':
 			return <Badge variant="default">Owner</Badge>
@@ -99,7 +99,7 @@ const getActionIcon = (action: string) => {
 }
 
 export function SSOUserManagement({
-	organizationId,
+	organizationId: _organizationId,
 	ssoUsers,
 	auditLogs,
 	availableRoles,

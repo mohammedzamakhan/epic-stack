@@ -16,7 +16,7 @@ export const auditLogArchival = schedules.task({
 	id: 'audit-log-archival',
 	// Declarative cron schedule - syncs on deploy
 	cron: '0 2 * * *', // Daily at 2 AM UTC
-	run: async (payload) => {
+	run: async (_payload) => {
 		logger.info('Starting audit log archival job')
 
 		try {

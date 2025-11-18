@@ -1,10 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
-import {
-	createTestOrganization,
-	createTestOrganizationWithMultipleUsers,
-} from '#tests/test-utils.ts'
+import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Organization Management', () => {
 	test('Users can create a new organization', async ({
