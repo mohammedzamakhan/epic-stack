@@ -9,6 +9,7 @@ import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
+import { getOrganizationForSSO } from './$organizationId.sso.tsx'
 
 const SSOUserActionSchema = z.object({
 	intent: z.enum(['change_role', 'toggle_status']),
@@ -23,18 +24,7 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	invariant(params.organizationId, 'Organization ID is required')
 
 	// Get organization
-	const organization = await prisma.organization.findUnique({
-		where: { id: params.organizationId },
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
-	})
-
-	if (!organization) {
-		throw new Response('Organization not found', { status: 404 })
-	}
+	const organization = await getOrganizationForSSO(params.organizationId)
 
 	// Get SSO configuration
 	const ssoConfig = await ssoConfigurationService.getConfiguration(

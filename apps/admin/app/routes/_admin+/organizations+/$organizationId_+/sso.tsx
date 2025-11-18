@@ -44,14 +44,14 @@ const SSOConfigurationActionSchema = z.object({
 	revocationUrl: z.string().url().optional(),
 })
 
-export async function loader({ request, params }: Route['LoaderArgs']) {
-	await requireUserWithRole(request, 'admin')
-
-	invariant(params.organizationId, 'Organization ID is required')
-
-	// Get organization
+/**
+ * Helper function to get organization by ID for SSO routes.
+ * Reduces code duplication between sso.tsx and sso.users.tsx.
+ * Exported for use in sso.users.tsx
+ */
+export async function getOrganizationForSSO(organizationId: string) {
 	const organization = await prisma.organization.findUnique({
-		where: { id: params.organizationId },
+		where: { id: organizationId },
 		select: {
 			id: true,
 			name: true,
@@ -62,6 +62,17 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	if (!organization) {
 		throw new Response('Organization not found', { status: 404 })
 	}
+
+	return organization
+}
+
+export async function loader({ request, params }: Route['LoaderArgs']) {
+	await requireUserWithRole(request, 'admin')
+
+	invariant(params.organizationId, 'Organization ID is required')
+
+	// Get organization
+	const organization = await getOrganizationForSSO(params.organizationId)
 
 	// Get SSO configuration if it exists
 	const ssoConfig = await ssoConfigurationService.getConfiguration(
