@@ -4,3 +4,13 @@ export * from './src/timing.js'
 export * from './src/notes-view-cookie.js'
 export * from './src/nonce-provider.js'
 export * from './src/user-permissions.js'
+
+// Onboarding route handlers
+export {
+	handleOnboardingProgress,
+	handleOnboardingHide,
+	handleOnboardingCompleteStep,
+	type OnboardingProgressDependencies,
+	type OnboardingHideDependencies,
+	type OnboardingCompleteStepDependencies,
+} from './src/onboarding/route-handlers/index.js'

@@ -53,10 +53,10 @@ export async function handleJiraCurrentUser(
 		// Get Jira provider
 		const jiraProvider = integrationManager.getProvider('jira') as JiraProvider
 
-		// Get current user
-		const currentUser = await jiraProvider.getCurrentUser(integration)
+		// Get current user details
+		const userDetails = await jiraProvider.getCurrentUserDetails(integration)
 
-		return Response.json(currentUser)
+		return Response.json(userDetails)
 	} catch (error) {
 		console.error('Error getting current Jira user:', error)
 		return Response.json(
