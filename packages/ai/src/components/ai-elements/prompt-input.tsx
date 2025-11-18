@@ -1,8 +1,8 @@
 'use client'
 
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from 'lucide-react'
 import {
 	Button,
+	Icon,
 	Select,
 	SelectContent,
 	SelectItem,
@@ -147,14 +147,14 @@ export const PromptInputSubmit = ({
 	children,
 	...props
 }: PromptInputSubmitProps) => {
-	let Icon = <SendIcon className="size-4" />
+	let iconElement = <Icon name="send" className="size-4" />
 
 	if (status === 'submitted') {
-		Icon = <Loader2Icon className="size-4 animate-spin" />
+		iconElement = <Icon name="loader" className="size-4 animate-spin" />
 	} else if (status === 'streaming') {
-		Icon = <SquareIcon className="size-4" />
+		iconElement = <Icon name="ban" className="size-4" />
 	} else if (status === 'error') {
-		Icon = <XIcon className="size-4" />
+		iconElement = <Icon name="x" className="size-4" />
 	}
 
 	return (
@@ -165,7 +165,7 @@ export const PromptInputSubmit = ({
 			variant={variant}
 			{...props}
 		>
-			{children ?? Icon}
+			{children ?? iconElement}
 		</Button>
 	)
 }

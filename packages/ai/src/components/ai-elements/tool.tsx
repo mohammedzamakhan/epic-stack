@@ -5,15 +5,8 @@ import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
+	Icon,
 } from '@repo/ui'
-import {
-	CheckCircleIcon,
-	ChevronDownIcon,
-	CircleIcon,
-	ClockIcon,
-	WrenchIcon,
-	XCircleIcon,
-} from 'lucide-react'
 import { type ComponentProps, type ReactNode } from 'react'
 
 import { cn } from '@repo/ui'
@@ -54,10 +47,14 @@ const getStatusBadge = (status: ToolUIPart['state']) => {
 	}
 
 	const icons: Record<ToolUIPart['state'], ReactNode> = {
-		'input-streaming': <CircleIcon className="size-4" />,
-		'input-available': <ClockIcon className="size-4 animate-pulse" />,
-		'output-available': <CheckCircleIcon className="size-4 text-green-600" />,
-		'output-error': <XCircleIcon className="size-4 text-red-600" />,
+		'input-streaming': <Icon name="ellipsis" className="size-4" />,
+		'input-available': <Icon name="clock" className="size-4 animate-pulse" />,
+		'output-available': (
+			<Icon name="check-circle" className="size-4 text-green-600" />
+		),
+		'output-error': (
+			<Icon name="octagon-alert" className="size-4 text-red-600" />
+		),
 	}
 
 	return (
@@ -82,11 +79,14 @@ export const ToolHeader = ({
 		{...props}
 	>
 		<div className="flex items-center gap-2">
-			<WrenchIcon className="text-muted-foreground size-4" />
+			<Icon name="gear" className="text-muted-foreground size-4" />
 			<span className="text-sm font-medium">{type}</span>
 			{getStatusBadge(state)}
 		</div>
-		<ChevronDownIcon className="text-muted-foreground size-4 transition-transform group-data-[state=open]:rotate-180" />
+		<Icon
+			name="chevron-down"
+			className="text-muted-foreground size-4 transition-transform group-data-[state=open]:rotate-180"
+		/>
 	</CollapsibleTrigger>
 )
 

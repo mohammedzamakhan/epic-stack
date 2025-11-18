@@ -1,8 +1,7 @@
 'use client'
 
 import { type UIMessage } from 'ai'
-import { Button } from '@repo/ui'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { Button, Icon } from '@repo/ui'
 import {
 	type ComponentProps,
 	type HTMLAttributes,
@@ -168,7 +167,7 @@ export const BranchPrevious = ({
 			variant="ghost"
 			{...props}
 		>
-			{children ?? <ChevronLeftIcon size={14} />}
+			{children ?? <Icon name="chevron-left" className="size-3.5" />}
 		</Button>
 	)
 }
@@ -198,7 +197,7 @@ export const BranchNext = ({
 			variant="ghost"
 			{...props}
 		>
-			{children ?? <ChevronRightIcon size={14} />}
+			{children ?? <Icon name="chevron-right" className="size-3.5" />}
 		</Button>
 	)
 }

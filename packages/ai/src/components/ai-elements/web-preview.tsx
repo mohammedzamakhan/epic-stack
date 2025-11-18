@@ -1,11 +1,11 @@
 'use client'
 
-import { ChevronDownIcon } from 'lucide-react'
 import {
 	Button,
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
+	Icon,
 	Input,
 	Tooltip,
 	TooltipContent,
@@ -213,7 +213,8 @@ export const WebPreviewConsole = ({
 					className="hover:bg-muted/50 flex w-full items-center justify-between p-4 text-left font-medium"
 				>
 					Console
-					<ChevronDownIcon
+					<Icon
+						name="chevron-down"
 						className={cn(
 							'h-4 w-4 transition-transform duration-200',
 							consoleOpen && 'rotate-180',

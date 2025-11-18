@@ -1,7 +1,11 @@
 'use client'
 
-import { BookIcon, ChevronDownIcon } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@repo/ui'
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+	Icon,
+} from '@repo/ui'
 import { type ComponentProps } from 'react'
 
 import { cn } from '@repo/ui'
@@ -29,7 +33,7 @@ export const SourcesTrigger = ({
 		{children ?? (
 			<>
 				<p className="font-medium">Used {count} sources</p>
-				<ChevronDownIcon className="h-4 w-4" />
+				<Icon name="chevron-down" className="h-4 w-4" />
 			</>
 		)}
 	</CollapsibleTrigger>
@@ -63,7 +67,7 @@ export const Source = ({ href, title, children, ...props }: SourceProps) => (
 	>
 		{children ?? (
 			<>
-				<BookIcon className="h-4 w-4" />
+				<Icon name="file-text" className="h-4 w-4" />
 				<span className="block font-medium">{title}</span>
 			</>
 		)}

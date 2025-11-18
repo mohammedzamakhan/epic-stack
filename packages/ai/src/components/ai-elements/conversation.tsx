@@ -1,7 +1,6 @@
 'use client'
 
-import { ArrowDownIcon } from 'lucide-react'
-import { Button } from '@repo/ui'
+import { Button, Icon } from '@repo/ui'
 import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
@@ -55,7 +54,7 @@ export const ConversationScrollButton = ({
 				variant="outline"
 				{...props}
 			>
-				<ArrowDownIcon className="size-4" />
+				<Icon name="chevron-down" className="size-4" />
 			</Button>
 		)
 	)

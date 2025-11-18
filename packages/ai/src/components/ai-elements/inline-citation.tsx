@@ -1,7 +1,12 @@
 'use client'
 
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
-import { Badge, HoverCard, HoverCardTrigger, HoverCardContent } from '@repo/ui'
+import {
+	Badge,
+	HoverCard,
+	HoverCardTrigger,
+	HoverCardContent,
+	Icon,
+} from '@repo/ui'
 import * as React from 'react'
 import { type ComponentProps } from 'react'
 
@@ -178,7 +183,7 @@ export const InlineCitationCarouselPrev = ({
 			aria-label="Previous"
 			{...props}
 		>
-			<ArrowLeftIcon className="text-muted-foreground size-4" />
+			<Icon name="arrow-left" className="text-muted-foreground size-4" />
 		</button>
 	)
 }
@@ -205,7 +210,7 @@ export const InlineCitationCarouselNext = ({
 			aria-label="Next"
 			{...props}
 		>
-			<ArrowRightIcon className="text-muted-foreground size-4" />
+			<Icon name="arrow-right" className="text-muted-foreground size-4" />
 		</button>
 	)
 }

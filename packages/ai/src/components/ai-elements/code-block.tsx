@@ -1,7 +1,6 @@
 'use client'
 
-import { CheckIcon, CopyIcon } from 'lucide-react'
-import { Button } from '@repo/ui'
+import { Button, Icon } from '@repo/ui'
 import {
 	type ComponentProps,
 	type HTMLAttributes,
@@ -139,7 +138,7 @@ export const CodeBlockCopyButton = ({
 		}
 	}
 
-	const Icon = isCopied ? CheckIcon : CopyIcon
+	const iconName = isCopied ? 'check' : 'copy'
 
 	return (
 		<Button
@@ -149,7 +148,7 @@ export const CodeBlockCopyButton = ({
 			variant="ghost"
 			{...props}
 		>
-			{children ?? <Icon size={14} />}
+			{children ?? <Icon name={iconName} className="size-3.5" />}
 		</Button>
 	)
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useChat, type Message as AIMessage } from 'ai/react'
-import { SparklesIcon } from 'lucide-react'
+import { Icon } from '@repo/ui'
 import { useState, useEffect } from 'react'
 import {
 	Conversation,
@@ -148,7 +148,7 @@ export function AIChat({ noteId }: AIChatProps) {
 					{messages.length === 0 ? (
 						<div className="mt-10 flex h-full flex-col items-center justify-center space-y-4 text-center">
 							<div className="text-muted-foreground flex items-center gap-2">
-								<SparklesIcon className="h-5 w-5" />
+								<Icon name="sparkles" className="h-5 w-5" />
 								<p>AI Assistant ready to help with this note</p>
 							</div>
 							<div className="text-muted-foreground max-w-md text-sm">
@@ -196,7 +196,7 @@ export function AIChat({ noteId }: AIChatProps) {
 				{showSuggestions && suggestions.length > 0 && (
 					<div className="p-4 pb-2">
 						<div className="mb-2 flex items-center gap-2">
-							<SparklesIcon className="text-muted-foreground h-4 w-4" />
+							<Icon name="sparkles" className="text-muted-foreground h-4 w-4" />
 							<span className="text-muted-foreground text-sm font-medium">
 								Suggested questions
 							</span>
