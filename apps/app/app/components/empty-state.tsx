@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 
 import { cn } from '#app/utils/misc.tsx'
 import { Button } from '@repo/ui/button'
-import { Icon }, type { IconName } from '@repo/ui/icon'
+import { Icon, type IconName } from '@repo/ui/icon'
 
 interface EmptyStateProps {
 	title: string

@@ -4,11 +4,17 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Badge } from '@repo/ui/badge'
 import { Switch } from '@repo/ui/switch'
 import { Separator } from '@repo/ui/separator'
-import { Icon }, type { IconName } from '@repo/ui/icon'
+import { Icon, type IconName } from '@repo/ui/icon'
 
 const channelIcons: Record<string, IconName> = {
 	email: 'mail',
@@ -31,7 +37,10 @@ function getChannelLabel(channel: string, _: (msg: any) => string): string {
 }
 
 // Workflow labels function that uses lingui
-function getWorkflowLabel(workflowName: string, _: (msg: any) => string): string {
+function getWorkflowLabel(
+	workflowName: string,
+	_: (msg: any) => string,
+): string {
 	const labels: Record<string, any> = {
 		'test-workflow': msg`Testing notifications`,
 		'comment-mention-workflow': msg`Notifications when you are mentioned in a comment`,
@@ -60,10 +69,7 @@ function ChannelSwitchList({
 	return (
 		<div className="grid gap-1 pl-4">
 			{Object.entries(preference.channels).map(([channel, enabled]) => (
-				<div
-					key={channel}
-					className="flex items-center justify-between py-2"
-				>
+				<div key={channel} className="flex items-center justify-between py-2">
 					<div className="flex items-center gap-3">
 						<Icon
 							name={getChannelIcon(channel)}
@@ -75,7 +81,9 @@ function ChannelSwitchList({
 					</div>
 					<Switch
 						checked={enabled}
-						onCheckedChange={(checked) => onUpdate(preference, channel, checked)}
+						onCheckedChange={(checked) =>
+							onUpdate(preference, channel, checked)
+						}
 						disabled={disabled || isUpdating}
 					/>
 				</div>
@@ -198,7 +206,9 @@ function NotificationPreferencesCardComponent() {
 					<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
 						<Icon name="octagon-alert" className="h-4 w-4 text-red-600" />
 						<p className="text-sm text-red-800">
-							<Trans>Failed to load notification preferences: {error.message}</Trans>
+							<Trans>
+								Failed to load notification preferences: {error.message}
+							</Trans>
 						</p>
 					</div>
 					<Button
@@ -420,7 +430,9 @@ class NotificationPreferencesErrorBoundary extends React.Component<
 							<Trans>Notification Preferences</Trans>
 						</CardTitle>
 						<CardDescription>
-							<Trans>Notification preferences are not available at this time.</Trans>
+							<Trans>
+								Notification preferences are not available at this time.
+							</Trans>
 						</CardDescription>
 					</CardHeader>
 					<CardContent>

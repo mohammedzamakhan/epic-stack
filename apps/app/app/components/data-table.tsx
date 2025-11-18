@@ -15,17 +15,52 @@ import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@repo/ui/drawer'
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from '@repo/ui/drawer'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import { Separator } from '@repo/ui/separator'
 import { TableCell, TableRow } from '@repo/ui/table'
-import { ChartContainer, ChartTooltip, ChartTooltipContent }, type { ChartConfig } from '@repo/ui/chart'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+	type ChartConfig,
+} from '@repo/ui/chart'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { cn } from '@repo/ui/cn'
-import { Card, CardTitle, CardDescription, CardHeader, CardContent, CardHeaderContent, CardAction } from '@repo/ui/card'
+import {
+	Card,
+	CardTitle,
+	CardDescription,
+	CardHeader,
+	CardContent,
+	CardHeaderContent,
+	CardAction,
+} from '@repo/ui/card'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
 	arrayMove,
@@ -485,7 +520,9 @@ export function DataTable({
 						<Trans>Data Table</Trans>
 					</CardTitle>
 					<CardDescription>
-						<Trans>Data Table is a table that displays data in a grid format.</Trans>
+						<Trans>
+							Data Table is a table that displays data in a grid format.
+						</Trans>
 					</CardDescription>
 				</CardHeaderContent>
 				<CardAction className="flex items-center gap-2 pt-2 md:pt-0">
@@ -829,7 +866,9 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								</Label>
 								<Select defaultValue={item.status}>
 									<SelectTrigger id="status" className="w-full">
-										<SelectValue placeholder={useLingui()._(msg`Select a status`)} />
+										<SelectValue
+											placeholder={useLingui()._(msg`Select a status`)}
+										/>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Done">Done</SelectItem>

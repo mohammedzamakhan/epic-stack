@@ -1,0 +1,35 @@
+{
+    "name": "@repo/test-utils",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./mocks": "./src/mocks/index.ts",
+        "./mocks/github": "./src/mocks/github.ts",
+        "./mocks/tigris": "./src/mocks/tigris.ts",
+        "./mocks/utils": "./src/mocks/utils.ts",
+        "./mocks/resend": "./src/mocks/resend.ts",
+        "./mocks/stripe": "./src/mocks/stripe.ts",
+        "./mocks/pwned-passwords": "./src/mocks/pwned-passwords.ts",
+        "./setup/custom-matchers": "./src/setup/custom-matchers.ts",
+        "./playwright-utils": "./src/playwright-utils.ts",
+        "./db-utils": "./src/db-utils.ts"
+    },
+    "dependencies": {
+        "@epic-web/invariant": "^1.0.0",
+        "@faker-js/faker": "^9.3.0",
+        "@prisma/client": "^6.18.0",
+        "@repo/prisma": "*",
+        "@repo/validation": "*",
+        "bcryptjs": "^2.4.3",
+        "close-with-grace": "^2.1.0",
+        "enforce-unique": "^1.3.0",
+        "fs-extra": "^11.2.0",
+        "mime-types": "^2.1.35",
+        "msw": "^2.6.8",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4"
+    }
+}

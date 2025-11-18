@@ -2,8 +2,20 @@ import { TrendingUp } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
-import { ChartContainer, ChartTooltip, ChartTooltipContent }, type { ChartConfig } from '@repo/ui/chart'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+	type ChartConfig,
+} from '@repo/ui/chart'
 
 const chartConfig = {
 	notes: {
@@ -100,7 +112,9 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 								</>
 							) : (
 								<>
-									<Trans>Down by {Math.abs(trendPercentage)}% this period</Trans>{' '}
+									<Trans>
+										Down by {Math.abs(trendPercentage)}% this period
+									</Trans>{' '}
 									<TrendingUp className="h-4 w-4 rotate-180" />
 								</>
 							)}
