@@ -13,6 +13,7 @@ import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
+import { userSecuritySelect } from '#app/utils/user-security.server.ts'
 import {
 	deleteDataAction,
 	signOutOfSessionsAction,
@@ -48,24 +49,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			getFreshValue: () =>
 				prisma.user.findUniqueOrThrow({
 					where: { id: userId },
-					select: {
-						id: true,
-						name: true,
-						username: true,
-						email: true,
-						image: {
-							select: { objectKey: true },
-						},
-						_count: {
-							select: {
-								sessions: {
-									where: {
-										expirationDate: { gt: new Date() },
-									},
-								},
-							},
-						},
-					},
+					select: userSecuritySelect,
 				}),
 		}),
 		prisma.verification.findUnique({
