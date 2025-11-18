@@ -1,1 +1,1 @@
-export { GlobeIcon } from '@repo/ui/components/icons/globe-icon'
+export { GlobeIcon } from '@repo/ui'

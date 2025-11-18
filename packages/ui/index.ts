@@ -244,6 +244,25 @@ export {
 // Icon system
 export { Icon, type IconName, type IconSize } from './components/icon'
 
+// Animated icons
+export { ArrowLeftIcon } from './components/icons/arrow-left-icon'
+export { BuildingIcon } from './components/icons/building-icon'
+export { CircleHelpIcon } from './components/icons/circle-help'
+export { FileTextIcon } from './components/icons/file-text-icon'
+export { FoldersIcon } from './components/icons/folders-icon'
+export { GlobeIcon } from './components/icons/globe-icon'
+export { HomeIcon } from './components/icons/home-icon'
+export { ListTodoIcon } from './components/icons/list-todo'
+export { LockOpenIcon } from './components/icons/lock-open-icon'
+export { LogoutIcon } from './components/icons/logout-icon'
+export { McpIcon } from './components/icons/mcp-icon'
+export { MessageSquareMoreIcon } from './components/icons/message-square-more'
+export { SettingsGearIcon } from './components/icons/settings-gear-icon'
+export { ShieldCheckIcon } from './components/icons/shield-check-icon'
+export { SunMoonIcon } from './components/icons/sun-moon-icon'
+export { UserIcon } from './components/icons/user-icon'
+export { UserRoundPlusIcon } from './components/icons/user-round-plus'
+
 export { Divider } from './components/divider'
 
 // Field components

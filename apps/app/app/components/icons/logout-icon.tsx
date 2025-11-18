@@ -1,1 +1,1 @@
-export { LogoutIcon } from '@repo/ui/components/icons/logout-icon'
+export { LogoutIcon } from '@repo/ui'
