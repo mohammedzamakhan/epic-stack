@@ -42,6 +42,46 @@ function getChannelIcon(channel: string): IconName {
 	return channelIcons[channel] ?? 'bell'
 }
 
+interface ChannelSwitchListProps {
+	preference: Preference
+	isUpdating: boolean
+	onUpdate: (preference: Preference, channel: string, enabled: boolean) => void
+	disabled: boolean
+}
+
+function ChannelSwitchList({
+	preference,
+	isUpdating,
+	onUpdate,
+	disabled,
+}: ChannelSwitchListProps) {
+	return (
+		<div className="grid gap-1 pl-4">
+			{Object.entries(preference.channels).map(([channel, enabled]) => (
+				<div
+					key={channel}
+					className="flex items-center justify-between py-2"
+				>
+					<div className="flex items-center gap-3">
+						<Icon
+							name={getChannelIcon(channel)}
+							className="text-muted-foreground h-4 w-4"
+						/>
+						<span className="text-sm font-medium">
+							{channelLabels[channel] || channel}
+						</span>
+					</div>
+					<Switch
+						checked={enabled}
+						onCheckedChange={(checked) => onUpdate(preference, channel, checked)}
+						disabled={disabled || isUpdating}
+					/>
+				</div>
+			))}
+		</div>
+	)
+}
+
 function NotificationPreferencesCardComponent() {
 	const { preferences, isLoading, error, refetch } = usePreferences()
 	const novu = useNovu()
@@ -234,33 +274,12 @@ function NotificationPreferencesCardComponent() {
 									<Icon name="settings" className="h-5 w-5" />
 									<h3 className="text-lg font-medium">Global Preferences</h3>
 								</div>
-								<div className="grid gap-1 pl-4">
-									{Object.entries(preference.channels).map(
-										([channel, enabled]) => (
-											<div
-												key={channel}
-												className="flex items-center justify-between py-2"
-											>
-												<div className="flex items-center gap-3">
-													<Icon
-														name={getChannelIcon(channel)}
-														className="text-muted-foreground h-4 w-4"
-													/>
-													<span className="text-sm font-medium">
-														{channelLabels[channel] || channel}
-													</span>
-												</div>
-												<Switch
-													checked={enabled}
-													onCheckedChange={(checked) =>
-														updatePreference(preference, channel, checked)
-													}
-													disabled={isUpdating}
-												/>
-											</div>
-										),
-									)}
-								</div>
+								<ChannelSwitchList
+									preference={preference}
+									isUpdating={isUpdating}
+									onUpdate={updatePreference}
+									disabled={false}
+								/>
 								<Separator />
 							</div>
 						)
@@ -288,33 +307,12 @@ function NotificationPreferencesCardComponent() {
 										</Badge>
 									)}
 								</div>
-								<div className="grid gap-1 pl-4">
-									{Object.entries(preference.channels).map(
-										([channel, enabled]) => (
-											<div
-												key={channel}
-												className="flex items-center justify-between py-2"
-											>
-												<div className="flex items-center gap-3">
-													<Icon
-														name={getChannelIcon(channel)}
-														className="text-muted-foreground h-4 w-4"
-													/>
-													<span className="text-sm font-medium">
-														{channelLabels[channel] || channel}
-													</span>
-												</div>
-												<Switch
-													checked={enabled}
-													onCheckedChange={(checked) =>
-														updatePreference(preference, channel, checked)
-													}
-													disabled={preference.workflow?.critical || isUpdating}
-												/>
-											</div>
-										),
-									)}
-								</div>
+								<ChannelSwitchList
+									preference={preference}
+									isUpdating={isUpdating}
+									onUpdate={updatePreference}
+									disabled={preference.workflow?.critical || false}
+								/>
 								{preference !== preferences[preferences.length - 1] && (
 									<Separator />
 								)}
