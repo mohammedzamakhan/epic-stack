@@ -233,3 +233,88 @@ export function optionalAuth(request: Request): JWTPayload | null {
 		return null
 	}
 }
+
+/**
+ * Helper function to create an authenticated session response with tokens.
+ * Encapsulates the common pattern used across auth routes:
+ * 1. Fetch user data
+ * 2. Create JWT token pair
+ * 3. Handle new device signin notification
+ *
+ * Reduces code duplication between auth.login, auth.onboarding, and auth.$provider.callback routes.
+ *
+ * @param userId - The authenticated user's ID
+ * @param request - The incoming request (for user-agent, IP, etc.)
+ * @returns Promise containing user data and tokens, ready for JSON response
+ */
+export async function createAuthenticatedSessionResponse(
+	userId: string,
+	request: Request,
+) {
+	// Import here to avoid circular dependencies
+	const { prisma } = await import('#app/utils/db.server.ts')
+	const { handleNewDeviceSignin } = await import(
+		'#app/utils/new-device-signin.server.tsx'
+	)
+	const { getClientIp } = await import('#app/utils/misc.tsx')
+
+	// Get user data for the response
+	const user = await prisma.user.findUnique({
+		select: {
+			id: true,
+			email: true,
+			username: true,
+			name: true,
+			image: { select: { id: true } },
+			createdAt: true,
+			updatedAt: true,
+		},
+		where: { id: userId },
+	})
+
+	if (!user) {
+		return {
+			success: false as const,
+			error: 'user_not_found' as const,
+			message: 'User not found',
+		}
+	}
+
+	// Create JWT tokens for mobile authentication
+	const userAgent = request.headers.get('user-agent') ?? undefined
+	const ip = getClientIp(request)
+
+	const tokens = await createTokenPair(
+		{
+			id: user.id,
+			email: user.email,
+			username: user.username,
+		},
+		{ userAgent, ip },
+	)
+
+	// Check for new device and send notification email (don't await)
+	void handleNewDeviceSignin({
+		userId: user.id,
+		request,
+	})
+
+	return {
+		success: true as const,
+		data: {
+			user: {
+				id: user.id,
+				email: user.email,
+				username: user.username,
+				name: user.name,
+				image: user.image?.id,
+				createdAt: user.createdAt.toISOString(),
+				updatedAt: user.updatedAt.toISOString(),
+			},
+			accessToken: tokens.accessToken,
+			refreshToken: tokens.refreshToken,
+			expiresIn: tokens.expiresIn,
+			expiresAt: tokens.expiresAt.toISOString(),
+		},
+	}
+}

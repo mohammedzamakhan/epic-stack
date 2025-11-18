@@ -51,6 +51,37 @@ interface ToolRequest {
 	args: Record<string, any>
 }
 
+/**
+ * Helper function to validate API key from query params.
+ * Returns error response if validation fails, or auth data if successful.
+ * Reduces code duplication between loader and action.
+ */
+async function validateApiKeyFromRequest(request: Request) {
+	const url = new URL(request.url)
+	const apiKey = url.searchParams.get('apiKey')
+
+	if (!apiKey) {
+		return {
+			error: new Response(JSON.stringify({ error: 'API key required' }), {
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			}),
+		}
+	}
+
+	const authData = await validateApiKey(apiKey)
+	if (!authData) {
+		return {
+			error: new Response(JSON.stringify({ error: 'Invalid API key' }), {
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			}),
+		}
+	}
+
+	return { authData }
+}
+
 // Tool definitions that will be returned to MCP clients
 const TOOL_DEFINITIONS: ToolDefinition[] = [
 	{
@@ -87,23 +118,8 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
 ]
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const url = new URL(request.url)
-	const apiKey = url.searchParams.get('apiKey')
-
-	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
-
-	const authData = await validateApiKey(apiKey)
-	if (!authData) {
-		return new Response(JSON.stringify({ error: 'Invalid API key' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
+	const validation = await validateApiKeyFromRequest(request)
+	if (validation.error) return validation.error
 
 	// Return available tools
 	return new Response(JSON.stringify({ tools: TOOL_DEFINITIONS }), {
@@ -112,23 +128,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	const url = new URL(request.url)
-	const apiKey = url.searchParams.get('apiKey')
-
-	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'API key required' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
-
-	const authData = await validateApiKey(apiKey)
-	if (!authData) {
-		return new Response(JSON.stringify({ error: 'Invalid API key' }), {
-			status: 401,
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
+	const validation = await validateApiKeyFromRequest(request)
+	if (validation.error) return validation.error
+	const authData = validation.authData!
 
 	try {
 		const body = (await request.json()) as ToolRequest
