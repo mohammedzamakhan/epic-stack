@@ -1,7 +1,7 @@
 import { type Notification } from '@novu/js'
 import { useNotifications, useNovu } from '@novu/react/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, memo } from 'react'
 import Markdown from 'react-markdown'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
@@ -78,7 +78,12 @@ function formatRelativeTime(
 	return date.toLocaleDateString()
 }
 
-function NotificationItem({ notification }: { notification: Notification }) {
+// PERFORMANCE: Memoize NotificationItem to prevent unnecessary re-renders
+const NotificationItem = memo(function NotificationItem({
+	notification,
+}: {
+	notification: Notification
+}) {
 	const { _ } = useLingui()
 	const [isHovered, setIsHovered] = useState(false)
 	const navigate = useNavigate()
@@ -203,7 +208,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 			</div>
 		</div>
 	)
-}
+})
 
 function EmptyState() {
 	const cardVariants = [

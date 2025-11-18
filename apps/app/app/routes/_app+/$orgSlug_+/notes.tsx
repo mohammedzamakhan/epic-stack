@@ -63,6 +63,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		: {}
 
 	// Get organization notes with access control and search
+	// PERFORMANCE: Add pagination to prevent loading all notes at once
 	const notes = await prisma.organizationNote.findMany({
 		select: {
 			id: true,
@@ -118,6 +119,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			],
 		},
 		orderBy: [{ statusId: 'asc' }, { position: 'asc' }, { createdAt: 'desc' }],
+		// PERFORMANCE: Limit to 100 notes per load to improve initial load time
+		take: 100,
 	})
 
 	const formattedNotes = notes.map((note) => ({

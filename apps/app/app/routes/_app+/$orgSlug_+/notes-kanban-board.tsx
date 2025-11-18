@@ -22,7 +22,7 @@ import {
 	useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import React, { useState } from 'react'
+import React, { useState, memo, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useFetcher, useFetchers } from 'react-router'
 
@@ -196,52 +196,63 @@ export function NotesKanbanBoard({
 		}
 	}
 
-	// Build columns
-	const columns: Column[] = [
-		...statuses
-			.filter((s) => !pendingDeletes.has(s.id))
-			.map((s) => ({
-				id: s.id,
-				name: renameMap[s.id] ?? s.name,
-				color: s.color,
-			})),
-		...pendingCreatesStatus,
-	]
-	if (notes.some((n) => !n.statusId))
-		columns.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+	// PERFORMANCE: Memoize expensive column building
+	const columns: Column[] = useMemo(() => {
+		const cols = [
+			...statuses
+				.filter((s) => !pendingDeletes.has(s.id))
+				.map((s) => ({
+					id: s.id,
+					name: renameMap[s.id] ?? s.name,
+					color: s.color,
+				})),
+			...pendingCreatesStatus,
+		]
+		if (notes.some((n) => !n.statusId))
+			cols.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+		return cols
+	}, [statuses, pendingDeletes, renameMap, pendingCreatesStatus, notes])
 
-	// Build notes
-	const noteMap = new Map<string, Note>()
-	notes.forEach((n) => noteMap.set(n.id, { ...n }))
-	pendingNotes.forEach((p) => {
-		const n = noteMap.get(p.id)
-		if (n) {
-			n.statusId = p.statusId
-			n.position = p.position
-		}
-	})
-	pendingNoteCreates.forEach((n) => noteMap.set(n.id, n))
-
-	// Group by statusId
-	const grouped: Record<string, Note[]> = {}
-	columns.forEach((c) => (grouped[c.id] = []))
-	noteMap.forEach((n) => {
-		const bucket =
-			grouped[n.statusId ?? UNCATEGORISED] ??
-			(grouped[n.statusId ?? UNCATEGORISED] = [])
-		bucket.push(n)
-	})
-	Object.values(grouped).forEach((arr) =>
-		arr.sort((a, b) => {
-			const posA = a.position ?? Number.POSITIVE_INFINITY
-			const posB = b.position ?? Number.POSITIVE_INFINITY
-			if (posA === posB) {
-				// Fallback to creation date if positions are equal
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+	// PERFORMANCE: Memoize expensive note map building
+	const noteMap = useMemo(() => {
+		const map = new Map<string, Note>()
+		notes.forEach((n) => map.set(n.id, { ...n }))
+		pendingNotes.forEach((p) => {
+			const n = map.get(p.id)
+			if (n) {
+				n.statusId = p.statusId
+				n.position = p.position
 			}
-			return posA - posB
-		}),
-	)
+		})
+		pendingNoteCreates.forEach((n) => map.set(n.id, n))
+		return map
+	}, [notes, pendingNotes, pendingNoteCreates])
+
+	// PERFORMANCE: Memoize expensive grouping and sorting
+	const grouped: Record<string, Note[]> = useMemo(() => {
+		const groups: Record<string, Note[]> = {}
+		columns.forEach((c) => (groups[c.id] = []))
+		noteMap.forEach((n) => {
+			const bucket =
+				groups[n.statusId ?? UNCATEGORISED] ??
+				(groups[n.statusId ?? UNCATEGORISED] = [])
+			bucket.push(n)
+		})
+		Object.values(groups).forEach((arr) =>
+			arr.sort((a, b) => {
+				const posA = a.position ?? Number.POSITIVE_INFINITY
+				const posB = b.position ?? Number.POSITIVE_INFINITY
+				if (posA === posB) {
+					// Fallback to creation date if positions are equal
+					return (
+						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+					)
+				}
+				return posA - posB
+			}),
+		)
+		return groups
+	}, [columns, noteMap])
 
 	// --- DnD-kit setup ---
 	const sensors = useSensors(
@@ -479,7 +490,8 @@ export function NotesKanbanBoard({
 /*  Sortable Column Wrapper                                                   */
 /* -------------------------------------------------------------------------- */
 
-function SortableKanbanColumn({
+// PERFORMANCE: Memoize to prevent unnecessary re-renders during drag operations
+const SortableKanbanColumn = memo(function SortableKanbanColumn({
 	column,
 	notes,
 	orgSlug,
@@ -532,13 +544,14 @@ function SortableKanbanColumn({
 			/>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
 /*  Column                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function KanbanColumn({
+// PERFORMANCE: Memoize to prevent unnecessary re-renders
+const KanbanColumn = memo(function KanbanColumn({
 	column,
 	notes,
 	orgSlug,
@@ -704,13 +717,14 @@ function KanbanColumn({
 			</SortableContext>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
 /*  Note Card wrapper                                                         */
 /* -------------------------------------------------------------------------- */
 
-function SortableNote({
+// PERFORMANCE: Memoize to prevent unnecessary re-renders
+const SortableNote = memo(function SortableNote({
 	note,
 	dragId,
 	organizationId,
@@ -760,10 +774,10 @@ function SortableNote({
 			/>
 		</div>
 	)
-}
+})
 
 /* -------------------------------------------------------------------------- */
-/*  “+ column” button – stateless (details element manages open/close)    */
+/*  "+ column" button – stateless (details element manages open/close)    */
 /* -------------------------------------------------------------------------- */
 
 function EditColumnForm({

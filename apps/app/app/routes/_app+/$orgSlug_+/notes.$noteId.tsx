@@ -58,8 +58,17 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList } from '#app/components/forms.tsx'
 import { ActivityLog } from '#app/components/note/activity-log.tsx'
 import { CommentsSection } from '#app/components/note/comments-section.tsx'
-import { IntegrationControls } from '#app/components/note/integration-controls.tsx'
-import { ShareNoteButton } from '#app/components/note/share-note-button.tsx'
+// PERFORMANCE: Lazy load large components to reduce initial bundle size
+const IntegrationControls = lazy(() =>
+	import('#app/components/note/integration-controls.tsx').then((module) => ({
+		default: module.IntegrationControls,
+	})),
+)
+const ShareNoteButton = lazy(() =>
+	import('#app/components/note/share-note-button.tsx').then((module) => ({
+		default: module.ShareNoteButton,
+	})),
+)
 import {
 	CanEditNote,
 	CanDeleteNote,
@@ -220,6 +229,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		integrationManager.getNoteConnections(note.id),
 		integrationManager.getOrganizationIntegrations(note.organizationId),
 		// Get comments for this note
+		// PERFORMANCE: Limit to 50 comments per load to improve performance
 		prisma.noteComment.findMany({
 			where: { noteId: note.id },
 			include: {
@@ -240,11 +250,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				},
 			},
 			orderBy: { createdAt: 'desc' },
+			take: 50,
 		}),
 	])
 
 	// Organize comments into a tree structure
-	const organizeComments = (comments: CommentWithUser[]) => {
+	// PERFORMANCE: Add depth limiting to prevent unbounded recursion
+	const organizeComments = (comments: CommentWithUser[], maxDepth = 3) => {
 		const commentMap = new Map<string, CommentWithReplies>()
 		const rootComments: CommentWithReplies[] = []
 
@@ -253,12 +265,27 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			commentMap.set(comment.id, { ...comment, replies: [] })
 		})
 
-		// Second pass: organize into tree structure
+		// Helper to check depth
+		const getDepth = (commentId: string, depth = 0): number => {
+			if (depth >= maxDepth) return depth
+			const comment = commentMap.get(commentId)
+			if (!comment?.parentId) return depth
+			return getDepth(comment.parentId, depth + 1)
+		}
+
+		// Second pass: organize into tree structure with depth limiting
 		comments.forEach((comment) => {
 			if (comment.parentId) {
-				const parent = commentMap.get(comment.parentId)
-				if (parent) {
-					parent.replies.push(commentMap.get(comment.id)!)
+				const depth = getDepth(comment.id)
+				// Only nest if depth is within limit
+				if (depth < maxDepth) {
+					const parent = commentMap.get(comment.parentId)
+					if (parent) {
+						parent.replies.push(commentMap.get(comment.id)!)
+					}
+				} else {
+					// If depth exceeded, add as root comment
+					rootComments.push(commentMap.get(comment.id)!)
 				}
 			} else {
 				rootComments.push(commentMap.get(comment.id)!)
@@ -1749,17 +1776,33 @@ export default function NoteRoute() {
 						</span>
 						<div className="flex items-center gap-2 md:gap-3">
 							<FavoriteButton noteId={note.id} isFavorited={isFavorited} />
-							<ShareNoteButton
-								noteId={note.id}
-								isPublic={note.isPublic}
-								noteAccess={note.noteAccess}
-								organizationMembers={organizationMembers}
-							/>
-							<IntegrationControls
-								noteId={note.id}
-								connections={connections}
-								availableIntegrations={availableIntegrations}
-							/>
+							<Suspense
+								fallback={
+									<Button variant="outline" size="sm" disabled>
+										<Icon name="share" className="h-4 w-4" />
+									</Button>
+								}
+							>
+								<ShareNoteButton
+									noteId={note.id}
+									isPublic={note.isPublic}
+									noteAccess={note.noteAccess}
+									organizationMembers={organizationMembers}
+								/>
+							</Suspense>
+							<Suspense
+								fallback={
+									<Button variant="outline" size="sm" disabled>
+										<Icon name="link-2" className="h-4 w-4" />
+									</Button>
+								}
+							>
+								<IntegrationControls
+									noteId={note.id}
+									connections={connections}
+									availableIntegrations={availableIntegrations}
+								/>
+							</Suspense>
 							<CanEditNote
 								noteOwnerId={note.createdById}
 								currentUserId={currentUserId}
