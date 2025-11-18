@@ -1,23 +1,10 @@
 import { formatDistanceToNow } from 'date-fns'
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-	Icon,
-} from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import { Icon } from '@repo/ui/icon'
 
 export interface AdminOrganizationDetail {
 	id: string

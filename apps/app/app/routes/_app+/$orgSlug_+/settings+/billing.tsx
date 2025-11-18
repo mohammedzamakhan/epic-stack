@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import { AnnotatedLayout, AnnotatedSection } from '@repo/ui'
+import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,

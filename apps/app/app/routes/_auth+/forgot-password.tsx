@@ -20,20 +20,10 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Input,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'

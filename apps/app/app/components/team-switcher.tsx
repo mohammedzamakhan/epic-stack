@@ -1,23 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Trans } from '@lingui/macro'
 import { Link, useSubmit } from 'react-router'
 
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuShortcut,
-	DropdownMenuTrigger,
-	Icon,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-} from '@repo/ui'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@repo/ui/sidebar'
 import { useUserOrganizations } from '#app/utils/organizations.ts'
 
 export function TeamSwitcher() {

@@ -1,1 +1,1 @@
-export { MessageSquareMoreIcon } from '@repo/ui'
+export { MessageSquareMoreIcon } from '@repo/ui/message-square-more'

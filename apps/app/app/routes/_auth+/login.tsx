@@ -22,22 +22,12 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Input,
-	StatusButton,
-	Icon,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Checkbox,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Icon } from '@repo/ui/icon'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Checkbox } from '@repo/ui/checkbox'
 import {
 	saveLastLoginMethod,
 	useLastLoginMethod,

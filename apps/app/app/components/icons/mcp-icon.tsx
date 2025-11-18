@@ -1,1 +1,1 @@
-export { McpIcon } from '@repo/ui'
+export { McpIcon } from '@repo/ui/mcp-icon'

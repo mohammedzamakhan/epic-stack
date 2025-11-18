@@ -13,20 +13,10 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Input,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { requireAnonymous } from '#app/utils/auth.server.ts'
 import {

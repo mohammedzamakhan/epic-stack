@@ -31,21 +31,12 @@ import {
 } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/onboarding.ts'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Input,
-	StatusButton,
-	Icon,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Checkbox,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Icon } from '@repo/ui/icon'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Checkbox } from '@repo/ui/checkbox'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
 export const onboardingInviteTokenSessionKey = 'onboardingInviteToken'

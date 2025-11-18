@@ -3,7 +3,7 @@ import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { PageTitle } from '@repo/ui'
+import { PageTitle } from '@repo/ui/page-title'
 
 export default function SettingsLayout() {
 	const { _ } = useLingui()

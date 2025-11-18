@@ -13,26 +13,12 @@ import { EmailChangeForm } from '#app/components/settings/email-form.tsx'
 
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { ProfilePhoto } from './profile-photo'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Input,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
 
 export const ProfileFormSchema = z.object({
 	name: NameSchema.nullable().default(null),

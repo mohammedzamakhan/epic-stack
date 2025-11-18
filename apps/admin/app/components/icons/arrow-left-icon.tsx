@@ -1,1 +1,1 @@
-export { ArrowLeftIcon } from '@repo/ui'
+export { ArrowLeftIcon } from '@repo/ui/arrow-left-icon'

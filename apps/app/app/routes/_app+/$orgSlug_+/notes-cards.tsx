@@ -4,24 +4,17 @@ import { Img } from 'openimg/react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 
-import { Icon } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
 
 import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 import { type loader } from './notes'
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Button,
-	Card,
-	CardContent,
-	Input,
-	PrioritySignal,
-	Textarea,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { PrioritySignal } from '@repo/ui/priority-signal'
+import { Textarea } from '@repo/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 
 type LoaderNote = {
 	id: string

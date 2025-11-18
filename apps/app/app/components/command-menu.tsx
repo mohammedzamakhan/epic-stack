@@ -2,16 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouteLoaderData, useFetcher, Link } from 'react-router'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import {
-	CommandDialog,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-	CommandShortcut,
-	Icon,
-} from '@repo/ui'
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from '@repo/ui/command'
+import { Icon } from '@repo/ui/icon'
 import { type loader as rootLoader } from '#app/root.tsx'
 
 interface Note {

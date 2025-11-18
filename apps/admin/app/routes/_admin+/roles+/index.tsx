@@ -1,33 +1,13 @@
 import { parseWithZod } from '@conform-to/zod'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	Input,
-	Label,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Table,
-	TableBody,
-	TableHead,
-	TableHeader,
-	TableRow,
-	Textarea,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import { Textarea } from '@repo/ui/textarea'
 import { useState } from 'react'
 import {
 	Form,

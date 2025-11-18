@@ -9,26 +9,14 @@ import {
 } from '@conform-to/react'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import {
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	Icon,
-	Input,
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-	Separator,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@repo/ui/input-group'
+import { Separator } from '@repo/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useState } from 'react'
 import { Form } from 'react-router'

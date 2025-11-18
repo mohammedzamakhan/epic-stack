@@ -1,11 +1,6 @@
 import { motion } from 'motion/react'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import React, { useEffect, useState } from 'react'
 import { Trans } from '@lingui/macro'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
@@ -20,7 +15,7 @@ import { NavUser } from '#app/components/nav-user.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 import { TeamSwitcher } from '#app/components/team-switcher.tsx'
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@repo/ui'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@repo/ui/sidebar'
 import { type loader as rootLoader } from '#app/root.tsx'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import FeedbackModal from './core/feedback-modal'

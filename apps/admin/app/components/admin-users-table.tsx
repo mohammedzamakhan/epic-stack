@@ -10,31 +10,15 @@ import {
 	useReactTable,
 	type VisibilityState,
 } from '@tanstack/react-table'
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Badge,
-	Button,
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-	Icon,
-	Input,
-	Label,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 

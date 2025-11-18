@@ -19,19 +19,10 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/reset-password.ts'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Input,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

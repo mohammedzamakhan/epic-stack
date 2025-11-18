@@ -1,20 +1,12 @@
 import { useInputControl } from '@conform-to/react'
 import { REGEXP_ONLY_DIGITS_AND_CHARS, type OTPInputProps } from 'input-otp'
 import React, { useId } from 'react'
-import {
-	Checkbox,
-	type CheckboxProps,
-	InputOTP,
-	InputOTPGroup,
-	InputOTPSeparator,
-	InputOTPSlot,
-	Input,
-	Textarea,
-	Field as UIField,
-	FieldLabel,
-	FieldError,
-	cn,
-} from '@repo/ui'
+import { Checkbox }, type { CheckboxProps } from '@repo/ui/checkbox'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@repo/ui/input-otp'
+import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
+import { FieldLabel, FieldError } from '@repo/ui/field'
+import { cn } from '@repo/ui/cn'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 

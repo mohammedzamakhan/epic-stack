@@ -3,19 +3,12 @@ import { usePreferences, useNovu } from '@novu/react'
 import React, { useState, useEffect, useCallback } from 'react'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Badge,
-	Switch,
-	Separator,
-	Icon,
-	type IconName,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Badge } from '@repo/ui/badge'
+import { Switch } from '@repo/ui/switch'
+import { Separator } from '@repo/ui/separator'
+import { Icon }, type { IconName } from '@repo/ui/icon'
 
 const channelIcons: Record<string, IconName> = {
 	email: 'mail',

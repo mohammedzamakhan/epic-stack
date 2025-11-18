@@ -1,22 +1,11 @@
 import { useState } from 'react'
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Separator,
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-	Icon,
-} from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Separator } from '@repo/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
+import { Icon } from '@repo/ui/icon'
 import { useNavigate, useSubmit } from 'react-router'
 
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'

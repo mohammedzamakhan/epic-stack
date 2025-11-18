@@ -5,7 +5,8 @@ import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
 import { Trans } from '@lingui/macro'
 
-import { Button, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 
 // Registration options schema for passkeys (exported for reuse)
 export const RegistrationOptionsSchema = z.object({

@@ -1,1 +1,1 @@
-export { NavMain } from '@repo/ui'
+export { NavMain } from '@repo/ui/nav-main'

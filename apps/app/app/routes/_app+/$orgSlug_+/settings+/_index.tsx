@@ -1,5 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
-import { AnnotatedLayout, AnnotatedSection, Divider } from '@repo/ui'
+import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
+import { Divider } from '@repo/ui/divider'
 import { invariant } from '@epic-web/invariant'
 import { parseFormData } from '@mjackson/form-data-parser'
 import {

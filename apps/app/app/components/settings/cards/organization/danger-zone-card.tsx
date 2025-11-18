@@ -1,23 +1,11 @@
 import { useState } from 'react'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Checkbox,
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	Icon,
-	Input,
-	Label,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Checkbox } from '@repo/ui/checkbox'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
 import { Form } from 'react-router'
 import { Trans } from '@lingui/macro'
 

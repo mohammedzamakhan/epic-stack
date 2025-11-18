@@ -1,6 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { Link } from 'react-router'
-import { Button, StatusButton } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { StatusButton } from '@repo/ui/status-button'
 import { useIsPending } from '#app/utils/misc.tsx'
 
 interface FormActionsProps {

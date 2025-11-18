@@ -4,17 +4,10 @@ import {
 	useForm,
 	useInputControl,
 } from '@conform-to/react'
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Label,
-	Switch as ShadcnSwitch,
-	Icon,
-	StatusButton,
-} from '@repo/ui'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Label } from '@repo/ui/label'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useRef } from 'react'
 import { useFetcher } from 'react-router'

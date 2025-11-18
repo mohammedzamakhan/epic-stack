@@ -1,14 +1,8 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { brand } from '@repo/config/brand'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import {
 	getAuthStatus,
 	MessageHandler,

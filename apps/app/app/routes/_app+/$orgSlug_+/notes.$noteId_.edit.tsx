@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { SheetHeader, SheetTitle } from '@repo/ui'
+import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'

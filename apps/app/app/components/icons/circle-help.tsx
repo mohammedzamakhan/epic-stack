@@ -1,1 +1,1 @@
-export { CircleHelpIcon } from '@repo/ui'
+export { CircleHelpIcon } from '@repo/ui/circle-help'

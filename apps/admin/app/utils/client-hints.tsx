@@ -1,5 +1,5 @@
 // Core client hints utilities from UI package
-export { getHints, ClientHintCheck } from '@repo/ui'
+export { getHints, ClientHintCheck } from '@repo/ui/client-hints'
 
 // App-specific hooks that depend on request-info
 import { useOptionalRequestInfo, useRequestInfo } from './request-info.ts'

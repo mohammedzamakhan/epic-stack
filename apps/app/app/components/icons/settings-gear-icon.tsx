@@ -1,1 +1,1 @@
-export { SettingsGearIcon } from '@repo/ui'
+export { SettingsGearIcon } from '@repo/ui/settings-gear-icon'

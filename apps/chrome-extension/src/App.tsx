@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import browser from 'webextension-polyfill'
 import { brand } from '@repo/config/brand'
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import {
 	AUTH_STATUS_KEY,
 	APP_URL,

@@ -5,17 +5,11 @@ import { noteHooks, integrationManager } from '@repo/integrations'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useRef, useEffect, useState, lazy, Suspense, Component } from 'react'
-import {
-	Button,
-	Tabs,
-	TabsList,
-	TabsTrigger,
-	TabsContent,
-	SheetHeader,
-	SheetTitle,
-	Icon,
-	StatusButton,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
+import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import {
 	Form,
 	Link,

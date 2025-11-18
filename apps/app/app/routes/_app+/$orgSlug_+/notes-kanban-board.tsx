@@ -1,4 +1,8 @@
-import { Button, ColorPicker, Input, StatusButton, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { ColorPicker } from '@repo/ui/color-picker'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { Icon } from '@repo/ui/icon'
 import {
 	DndContext,
 	KeyboardSensor,

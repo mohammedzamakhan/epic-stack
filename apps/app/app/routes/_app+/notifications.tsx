@@ -1,5 +1,6 @@
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { AnnotatedLayout, AnnotatedSection, PageTitle } from '@repo/ui'
+import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
+import { PageTitle } from '@repo/ui/page-title'
 import { type LoaderFunctionArgs } from 'react-router'
 import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'

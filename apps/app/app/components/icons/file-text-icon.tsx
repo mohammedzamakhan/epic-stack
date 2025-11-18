@@ -1,1 +1,1 @@
-export { FileTextIcon } from '@repo/ui'
+export { FileTextIcon } from '@repo/ui/file-text-icon'

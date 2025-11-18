@@ -22,15 +22,10 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { EmailSchema } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/profile.change-email.ts'
-import {
-	Icon,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Input,
-} from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
 
 export const BreadcrumbHandle = z.object({ breadcrumb: z.any() })
 export type BreadcrumbHandle = z.infer<typeof BreadcrumbHandle>

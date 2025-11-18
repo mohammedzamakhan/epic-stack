@@ -7,7 +7,8 @@ import { generateTOTP } from '#app/utils/totp.server.ts'
 import { type Route } from './+types/profile.two-factor.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import { twoFAVerifyVerificationType } from './profile.two-factor.verify.tsx'
-import { Icon, StatusButton } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

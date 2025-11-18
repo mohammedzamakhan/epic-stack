@@ -11,14 +11,9 @@ import {
 } from '#app/components/forms.tsx'
 import { FormActions } from '#app/components/form-actions.tsx'
 
-import {
-	Icon,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Input,
-} from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
 import {
 	checkIsCommonPassword,
 	getPasswordHash,

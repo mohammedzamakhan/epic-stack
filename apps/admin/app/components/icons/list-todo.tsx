@@ -1,1 +1,1 @@
-export { ListTodoIcon } from '@repo/ui'
+export { ListTodoIcon } from '@repo/ui/list-todo'

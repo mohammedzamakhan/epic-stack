@@ -1,14 +1,7 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	FieldGroup,
-	StatusButton,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { FieldGroup } from '@repo/ui/field'
+import { StatusButton } from '@repo/ui/status-button'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'

@@ -1,17 +1,9 @@
 import { useState } from 'react'
-import {
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	Icon,
-	StatusButton,
-	CardFooter,
-	CardBody,
-} from '@repo/ui'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter, CardBody } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import { useFetcher, Form } from 'react-router'
 import { Trans } from '@lingui/macro'
 

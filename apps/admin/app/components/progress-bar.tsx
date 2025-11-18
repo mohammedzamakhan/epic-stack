@@ -1,4 +1,4 @@
-import { Icon } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'

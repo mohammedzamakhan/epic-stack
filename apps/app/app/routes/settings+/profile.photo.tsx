@@ -10,7 +10,9 @@ import { ErrorList } from '#app/components/forms.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { Button, Icon, StatusButton } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import {
 	getUserImgSrc,
 	useDoubleCheck,

@@ -1,18 +1,8 @@
 import { prisma } from '@repo/prisma'
-import {
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@repo/ui'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
 
 import { getUsersByIpAddress } from '#app/utils/ip-tracking.server.ts'

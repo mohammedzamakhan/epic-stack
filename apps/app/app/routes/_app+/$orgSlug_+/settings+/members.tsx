@@ -1,5 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
-import { AnnotatedLayout, AnnotatedSection } from '@repo/ui'
+import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { invariant } from '@epic-web/invariant'
 import {
 	type ActionFunctionArgs,

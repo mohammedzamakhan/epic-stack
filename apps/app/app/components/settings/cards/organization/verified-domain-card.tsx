@@ -1,15 +1,8 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	FieldGroup,
-	Switch,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { FieldGroup } from '@repo/ui/field'
+import { Switch } from '@repo/ui/switch'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'

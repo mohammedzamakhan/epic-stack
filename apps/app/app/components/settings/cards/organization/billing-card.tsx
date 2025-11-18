@@ -4,16 +4,10 @@ import { useState, useEffect } from 'react'
 import { Trans, Plural } from '@lingui/macro'
 
 import { type getPlansAndPrices } from '#app/utils/payments.server.ts'
-import {
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Icon,
-} from '@repo/ui'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 
 const PLANS = {
 	Base: {

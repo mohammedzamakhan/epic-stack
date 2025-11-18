@@ -4,7 +4,7 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import CommentInput, { type MentionUser } from './comment-input'
 import { CommentItem } from './comment-item'
-import { Icon } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
 
 interface CommentUser {
 	id: string

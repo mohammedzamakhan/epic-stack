@@ -5,7 +5,9 @@ import {
 	type FieldMetadata,
 } from '@conform-to/react'
 import React, { useState, useRef, useCallback } from 'react'
-import { Button, Icon, FieldLabel } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { FieldLabel } from '@repo/ui/field'
 import { type ImageFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 import { cn, getNoteImgSrc } from '#app/utils/misc.tsx'
 import { useDragAndDrop } from './use-drag-and-drop.tsx'

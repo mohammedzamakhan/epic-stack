@@ -3,7 +3,10 @@ import { Form, useSearchParams, useSubmit } from 'react-router'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
-import { Input, FieldLabel, Icon, StatusButton } from '@repo/ui'
+import { Input } from '@repo/ui/input'
+import { FieldLabel } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 
 export function SearchBar({
 	status,

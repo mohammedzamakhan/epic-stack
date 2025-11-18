@@ -5,14 +5,9 @@ import { z } from 'zod'
 import { Trans } from '@lingui/macro'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
-import {
-	Button,
-	StatusButton,
-	Tabs,
-	TabsList,
-	TabsTrigger,
-	TabsContent,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { StatusButton } from '@repo/ui/status-button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
 import { enable2FAActionIntent } from '#app/routes/_app+/security.tsx'
 import { disable2FAActionIntent } from './cards/security-card'
 

@@ -8,15 +8,10 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import {
-	Button,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Input,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
 import { setPasswordActionIntent } from '#app/routes/_app+/security.tsx'
 import {
 	PasswordSchema,

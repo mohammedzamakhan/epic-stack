@@ -2,18 +2,8 @@ import { TrendingUp } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-	type ChartConfig,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent }, type { ChartConfig } from '@repo/ui/chart'
 
 const chartConfig = {
 	notes: {

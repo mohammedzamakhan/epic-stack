@@ -21,16 +21,11 @@ import { getUserSecurityData } from '#app/utils/user-security.server.ts'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { type Route } from './+types/profile.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
-import {
-	Button,
-	Icon,
-	StatusButton,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Input,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
 import { i18n } from '@lingui/core'
 
 export const handle: SEOHandle = {

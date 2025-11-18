@@ -1,1 +1,1 @@
-export { BuildingIcon } from '@repo/ui'
+export { BuildingIcon } from '@repo/ui/building-icon'

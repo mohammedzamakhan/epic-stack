@@ -1,1 +1,1 @@
-export { HomeIcon } from '@repo/ui'
+export { HomeIcon } from '@repo/ui/home-icon'

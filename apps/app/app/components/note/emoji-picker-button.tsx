@@ -2,7 +2,8 @@ import { computePosition, flip, shift, offset } from '@floating-ui/dom'
 import { EmojiPicker } from 'frimousse'
 import React, { useState, useRef, useEffect } from 'react'
 
-import { Button, Icon } from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 
 interface EmojiPickerButtonProps {
 	onEmojiSelect: (emoji: string) => void

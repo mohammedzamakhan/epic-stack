@@ -2,18 +2,12 @@
 // import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Form, useActionData, useLoaderData } from 'react-router'
 import { z } from 'zod'
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Icon,
-	Input,
-	Label,
-	Textarea,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
+import { Textarea } from '@repo/ui/textarea'
 // import { Field, ErrorList, CheckboxField } from './forms.tsx'
 
 const SSOConfigurationSchema = z.object({

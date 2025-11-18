@@ -1,29 +1,10 @@
-import {
-	Button,
-	Input,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Card,
-	CardHeader,
-	CardContent,
-	CardTitle,
-	Table,
-	TableHeader,
-	TableRow,
-	TableHead,
-	TableBody,
-	TableCell,
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	Switch,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Input } from '@repo/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import { Card, CardHeader, CardContent, CardTitle } from '@repo/ui/card'
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@repo/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { Switch } from '@repo/ui/switch'
 import { useState } from 'react'
 import { useFetcher, useLoaderData } from 'react-router'
 import { type loader } from '#app/routes/_admin+/feature-flags.tsx'

@@ -1,23 +1,8 @@
 import * as React from 'react'
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	ToggleGroup,
-	ToggleGroupItem,
-	type ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { ToggleGroup, ToggleGroupItem } from '@repo/ui/toggle-group'
+import { ChartContainer, ChartTooltip, ChartTooltipContent }, type { ChartConfig } from '@repo/ui/chart'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 import { useIsMobile } from '#app/hooks/use-mobile.ts'

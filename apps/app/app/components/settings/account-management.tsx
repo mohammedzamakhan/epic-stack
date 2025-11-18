@@ -5,7 +5,8 @@ import {
 	signOutOfSessionsActionIntent,
 } from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
-import { Icon, StatusButton } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 
 interface SignOutOfSessionsProps {
 	data: {

@@ -7,7 +7,7 @@
 
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-import { NotFoundPage } from '@repo/ui'
+import { NotFoundPage } from '@repo/ui/not-found-page'
 
 export function loader() {
 	throw new Response('Not found', { status: 404 })

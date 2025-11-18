@@ -17,7 +17,8 @@ import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { getTOTPAuthUri } from '#app/utils/totp.server.ts'
 import { type Route } from './+types/profile.two-factor.verify.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
-import { Icon, StatusButton } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import { BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {

@@ -7,29 +7,15 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
-import {
-	Avatar,
-	AvatarImage,
-	AvatarFallback,
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	Popover,
-	PopoverTrigger,
-	PopoverContent,
-	ScrollArea,
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-	Icon,
-} from '@repo/ui'
+import { Avatar, AvatarImage, AvatarFallback } from '@repo/ui/avatar'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader } from '@repo/ui/card'
+import { Popover, PopoverTrigger, PopoverContent } from '@repo/ui/popover'
+import { ScrollArea } from '@repo/ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
 import { useNavigate, useLocation } from 'react-router'
 
 interface Action {

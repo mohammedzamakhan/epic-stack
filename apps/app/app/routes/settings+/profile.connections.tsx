@@ -7,14 +7,9 @@ import { data, useFetcher } from 'react-router'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { resolveConnectionData } from '#app/utils/connections.server.ts'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-	Icon,
-	StatusButton,
-} from '@repo/ui'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import {
 	ProviderConnectionForm,
 	type ProviderName,

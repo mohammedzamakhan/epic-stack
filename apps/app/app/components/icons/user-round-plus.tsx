@@ -1,1 +1,1 @@
-export { UserRoundPlusIcon } from '@repo/ui'
+export { UserRoundPlusIcon } from '@repo/ui/user-round-plus'

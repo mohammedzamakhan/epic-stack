@@ -6,15 +6,9 @@ import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { useCurrentOrganization } from '#app/utils/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 
-import {
-	Button,
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuPortal,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	Icon,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
 
 export function UserDropdown() {
 	const user = useUser()

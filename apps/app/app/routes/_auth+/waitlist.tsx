@@ -10,21 +10,10 @@ import {
 	calculateUserRank,
 } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/waitlist.ts'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-	Icon,
-	Field,
-	FieldContent,
-	InputGroup,
-	InputGroupInput,
-	InputGroupAddon,
-	InputGroupButton,
-} from '@repo/ui'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Field, FieldContent } from '@repo/ui/field'
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@repo/ui/input-group'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)

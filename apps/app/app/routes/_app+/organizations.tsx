@@ -1,15 +1,10 @@
 import { Img } from 'openimg/react'
-import {
-	Badge,
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-	Input,
-	PageTitle,
-	Icon,
-} from '@repo/ui'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { PageTitle } from '@repo/ui/page-title'
+import { Icon } from '@repo/ui/icon'
 import { useState } from 'react'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'

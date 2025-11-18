@@ -5,16 +5,10 @@ import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import { ListTodoIcon, type ListTodoIconHandle } from './icons/list-todo'
 import { ShineBorder } from './magic-ui/shine-border'
 
-import {
-	Button,
-	Card,
-	CardHeader,
-	CardHeaderContent,
-	CardAction,
-	CardContent,
-	Progress,
-	Icon,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Card, CardHeader, CardHeaderContent, CardAction, CardContent } from '@repo/ui/card'
+import { Progress } from '@repo/ui/progress'
+import { Icon } from '@repo/ui/icon'
 
 interface OnboardingChecklistProps {
 	progress: OnboardingProgressData

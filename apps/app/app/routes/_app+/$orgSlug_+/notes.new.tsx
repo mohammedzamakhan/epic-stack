@@ -2,7 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { prisma } from '@repo/prisma'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { Trans } from '@lingui/macro'
-import { SheetHeader, SheetTitle } from '@repo/ui'
+import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 

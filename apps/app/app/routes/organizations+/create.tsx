@@ -22,13 +22,7 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -48,22 +42,13 @@ import {
 	createCheckoutSession,
 } from '#app/utils/payments.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
-import {
-	Button,
-	Input,
-	Textarea,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Icon,
-	Field,
-	FieldLabel,
-	FieldError,
-	FieldGroup,
-	Badge,
-} from '@repo/ui'
+import { Button } from '@repo/ui/button'
+import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Badge } from '@repo/ui/badge'
 
 // Photo upload schema
 const MAX_SIZE = 1024 * 1024 * 5 // 5MB

@@ -2,7 +2,8 @@ import { useFetcher } from 'react-router'
 import { Trans } from '@lingui/macro'
 import { disconnectProviderActionIntent } from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
-import { Icon, IconName, StatusButton } from '@repo/ui'
+import { Icon, IconName } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 
 interface Connection {
 	id: string
