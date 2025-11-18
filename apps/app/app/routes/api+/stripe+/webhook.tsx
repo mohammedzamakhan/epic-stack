@@ -6,6 +6,24 @@ import {
 	handleTrialEnd,
 } from '#app/utils/payments.server.ts'
 
+/**
+ * Helper function to process subscription events and extract the relevant data
+ * for handleSubscriptionChange. Reduces code duplication across multiple event types.
+ */
+function processSubscriptionEvent(subscription: Stripe.Subscription) {
+	return handleSubscriptionChange({
+		id: subscription.id,
+		status: subscription.status,
+		customer: subscription.customer as string,
+		items: subscription.items.data.map((item) => ({
+			price: {
+				id: item.price.id,
+				product: item.price.product as string,
+			},
+		})),
+	})
+}
+
 export async function action({ request }: ActionFunctionArgs) {
 	if (request.method !== 'POST') {
 		return new Response('Method not allowed', { status: 405 })
@@ -38,17 +56,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			case 'customer.subscription.updated':
 			case 'customer.subscription.deleted': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange({
-					id: subscription.id,
-					status: subscription.status,
-					customer: subscription.customer as string,
-					items: subscription.items.data.map((item) => ({
-						price: {
-							id: item.price.id,
-							product: item.price.product as string,
-						},
-					})),
-				})
+				await processSubscriptionEvent(subscription)
 				break
 			}
 
@@ -79,33 +87,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			case 'customer.subscription.paused': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange({
-					id: subscription.id,
-					status: subscription.status,
-					customer: subscription.customer as string,
-					items: subscription.items.data.map((item) => ({
-						price: {
-							id: item.price.id,
-							product: item.price.product as string,
-						},
-					})),
-				})
+				await processSubscriptionEvent(subscription)
 				break
 			}
 
 			case 'customer.subscription.resumed': {
 				const subscription = event.data.object as Stripe.Subscription
-				await handleSubscriptionChange({
-					id: subscription.id,
-					status: subscription.status,
-					customer: subscription.customer as string,
-					items: subscription.items.data.map((item) => ({
-						price: {
-							id: item.price.id,
-							product: item.price.product as string,
-						},
-					})),
-				})
+				await processSubscriptionEvent(subscription)
 				break
 			}
 
