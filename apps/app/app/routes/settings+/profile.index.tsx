@@ -17,6 +17,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { getUserImgSrc, useDoubleCheck } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { getUserSecurityData } from '#app/utils/user-security.server.ts'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { type Route } from './+types/profile.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
@@ -43,37 +44,10 @@ export const ProfileFormSchema = z.object({
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			email: true,
-			image: {
-				select: { objectKey: true },
-			},
-			_count: {
-				select: {
-					sessions: {
-						where: {
-							expirationDate: { gt: new Date() },
-						},
-					},
-				},
-			},
-		},
-	})
-
-	const twoFactorVerification = await prisma.verification.findUnique({
-		select: { id: true },
-		where: { target_type: { type: twoFAVerificationType, target: userId } },
-	})
-
-	const password = await prisma.password.findUnique({
-		select: { userId: true },
-		where: { userId },
-	})
+	const { user, password, twoFactorVerification } = await getUserSecurityData(
+		userId,
+		twoFAVerificationType,
+	)
 
 	return {
 		user,
