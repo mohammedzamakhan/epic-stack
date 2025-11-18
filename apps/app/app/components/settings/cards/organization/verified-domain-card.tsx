@@ -15,6 +15,7 @@ import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
 export const VerifiedDomainSchema = z.object({
@@ -65,13 +66,15 @@ export default function VerifiedDomainCard({
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-lg font-medium">
 						<Switch checked={isChecked} onCheckedChange={handleSwitchChange} />
-						Verified domain
+						<Trans>Verified domain</Trans>
 					</CardTitle>
 				</div>
 				<CardDescription className="text-muted-foreground text-sm">
-					When someone signs up using an email that matches your verified
-					domain, they will be automatically added to your organization as a
-					member.
+					<Trans>
+						When someone signs up using an email that matches your verified
+						domain, they will be automatically added to your organization as a
+						member.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<div
@@ -87,7 +90,7 @@ export default function VerifiedDomainCard({
 					<CardContent>
 						<FieldGroup>
 							<Field
-								labelProps={{ children: 'Verified domain' }}
+								labelProps={{ children: <Trans>Verified domain</Trans> }}
 								inputProps={{
 									...getInputProps(fields.verifiedDomain, { type: 'text' }),
 									placeholder: 'example.com',
@@ -102,14 +105,18 @@ export default function VerifiedDomainCard({
 						<div className="text-primary flex items-center text-xs">
 							<InfoIcon className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0" />
 							<p className="text-muted-foreground">
-								Verified domain must match your current email address domain for
-								security.{' '}
-								<a href="#" className="underline">
-									Learn more
-								</a>
+								<Trans>
+									Verified domain must match your current email address domain for
+									security.{' '}
+									<a href="#" className="underline">
+										Learn more
+									</a>
+								</Trans>
 							</p>
 						</div>
-						<Button type="submit">Save</Button>
+						<Button type="submit">
+							<Trans>Save</Trans>
+						</Button>
 					</CardFooter>
 				</Form>
 			</div>

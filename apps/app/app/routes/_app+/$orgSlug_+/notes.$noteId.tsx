@@ -24,6 +24,7 @@ import {
 	type LoaderFunctionArgs,
 } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 
 // Simple error boundary for lazy-loaded components
 class LazyLoadErrorBoundary extends Component<
@@ -1547,16 +1548,20 @@ export default function NoteRoute() {
 		<>
 			<SheetHeader className="border-b">
 				<SheetTitle className="text-left">
-					{note.title || 'Untitled Note'}
+					{note.title || <Trans>Untitled Note</Trans>}
 				</SheetTitle>
 				<div className="text-muted-foreground flex items-center gap-2 text-sm">
 					<Icon name="clock" className="h-3.5 w-3.5" />
-					<span>Updated {timeAgo} ago</span>
+					<span>
+						<Trans>Updated {timeAgo} ago</Trans>
+					</span>
 					{!note.isPublic && (
 						<>
 							<span>•</span>
 							<Icon name="lock" className="h-3.5 w-3.5" />
-							<span>Private</span>
+							<span>
+								<Trans>Private</Trans>
+							</span>
 						</>
 					)}
 				</div>
@@ -1576,11 +1581,15 @@ export default function NoteRoute() {
 					<TabsList className="w-full rounded-none">
 						<TabsTrigger value="overview" className="flex-1 gap-2">
 							<Icon name="file-text" className="h-4 w-4" />
-							<span className="hidden sm:inline">Overview</span>
+							<span className="hidden sm:inline">
+								<Trans>Overview</Trans>
+							</span>
 						</TabsTrigger>
 						<TabsTrigger value="comments" className="flex-1 gap-2">
 							<Icon name="message-square" className="h-4 w-4" />
-							<span className="hidden sm:inline">Comments</span>
+							<span className="hidden sm:inline">
+								<Trans>Comments</Trans>
+							</span>
 							{comments.length > 0 && (
 								<span className="bg-muted-foreground/20 rounded-full px-1.5 py-0.5 text-xs">
 									{comments.length}
@@ -1589,11 +1598,15 @@ export default function NoteRoute() {
 						</TabsTrigger>
 						<TabsTrigger value="activity" className="flex-1 gap-2">
 							<Icon name="logs" className="h-4 w-4" />
-							<span className="hidden sm:inline">Activity</span>
+							<span className="hidden sm:inline">
+								<Trans>Activity</Trans>
+							</span>
 						</TabsTrigger>
 						<TabsTrigger value="ai-assistant" className="flex-1 gap-2">
 							<Icon name="sparkles" className="h-4 w-4" />
-							<span className="hidden sm:inline">AI Assistant</span>
+							<span className="hidden sm:inline">
+								<Trans>AI Assistant</Trans>
+							</span>
 						</TabsTrigger>
 					</TabsList>
 
@@ -1700,13 +1713,13 @@ export default function NoteRoute() {
 								<div className="flex h-full items-center justify-center p-4">
 									<div className="text-center">
 										<div className="text-muted-foreground mb-2">
-											Failed to load AI Assistant
+											<Trans>Failed to load AI Assistant</Trans>
 										</div>
 										<button
 											onClick={() => window.location.reload()}
 											className="text-primary text-sm hover:underline"
 										>
-											Reload page
+											<Trans>Reload page</Trans>
 										</button>
 									</div>
 								</div>
@@ -1716,7 +1729,7 @@ export default function NoteRoute() {
 								fallback={
 									<div className="flex h-full items-center justify-center">
 										<div className="text-muted-foreground">
-											Loading AI Assistant...
+											<Trans>Loading AI Assistant...</Trans>
 										</div>
 									</div>
 								}

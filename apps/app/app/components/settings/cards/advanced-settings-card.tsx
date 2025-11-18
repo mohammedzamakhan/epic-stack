@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { Trans } from '@lingui/macro'
 import {
 	Card,
 	CardContent,
@@ -25,9 +26,11 @@ export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
 	return (
 		<Card className="w-full">
 			<CardHeader>
-				<CardTitle>Advanced Settings</CardTitle>
+				<CardTitle>
+					<Trans>Advanced Settings</Trans>
+				</CardTitle>
 				<CardDescription>
-					Manage your sessions and download your data.
+					<Trans>Manage your sessions and download your data.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -40,7 +43,7 @@ export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
 							to="/resources/download-user-data"
 							className="hover:underline"
 						>
-							Download your data
+							<Trans>Download your data</Trans>
 						</Link>
 					</div>
 					<SignOutOfSessions data={{ user }} />

@@ -1,6 +1,7 @@
 import { type Organization } from '@prisma/client'
 import { Form, Link } from 'react-router'
 import { useState, useEffect } from 'react'
+import { Trans, Plural } from '@lingui/macro'
 
 import { type getPlansAndPrices } from '#app/utils/payments.server.ts'
 import {
@@ -90,21 +91,25 @@ export function BillingCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Billing & Subscription</CardTitle>
+					<CardTitle>
+						<Trans>Billing & Subscription</Trans>
+					</CardTitle>
 					<CardDescription>
-						Manage your organization's subscription
+						<Trans>Manage your organization's subscription</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="py-8 text-center">
 						<div className="mb-4">
 							<Badge variant="secondary" className="text-sm">
-								Beta Access
+								<Trans>Beta Access</Trans>
 							</Badge>
 						</div>
 						<p className="text-muted-foreground">
-							You are covered during our beta phase. No billing required at this
-							time.
+							<Trans>
+								You are covered during our beta phase. No billing required at this
+								time.
+							</Trans>
 						</p>
 					</div>
 				</CardContent>
@@ -117,9 +122,11 @@ export function BillingCard({
 			{/* Current Subscription Status */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Current Subscription</CardTitle>
+					<CardTitle>
+						<Trans>Current Subscription</Trans>
+					</CardTitle>
 					<CardDescription>
-						Your organization's current plan and billing status
+						<Trans>Your organization's current plan and billing status</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -149,17 +156,20 @@ export function BillingCard({
 							</div>
 							<p className="text-muted-foreground text-sm">
 								{organization.subscriptionStatus === 'active'
-									? 'Billed monthly'
+									? <Trans>Billed monthly</Trans>
 									: organization.subscriptionStatus === 'trialing'
-										? 'Trial period active'
+										? <Trans>Trial period active</Trans>
 										: organization.stripeCustomerId
-											? 'Subscription inactive'
-											: 'No active subscription'}
+											? <Trans>Subscription inactive</Trans>
+											: <Trans>No active subscription</Trans>}
 							</p>
 							{organization._count?.users && (
 								<p className="text-muted-foreground mt-1 text-sm">
-									{organization._count.users} active member
-									{organization._count.users !== 1 ? 's' : ''}
+									<Plural
+										value={organization._count.users}
+										one="# active member"
+										other="# active members"
+									/>
 								</p>
 							)}
 						</div>
@@ -168,13 +178,13 @@ export function BillingCard({
 								<Form method="post">
 									<input type="hidden" name="intent" value="customer-portal" />
 									<Button type="submit" variant="outline">
-										Manage Subscription
+										<Trans>Manage Subscription</Trans>
 									</Button>
 								</Form>
 							) : (
 								<Button asChild>
 									<Link to={`/pricing?orgSlug=${organization.slug}`}>
-										Subscribe
+										<Trans>Subscribe</Trans>
 									</Link>
 								</Button>
 							)}
@@ -195,7 +205,7 @@ export function BillingCard({
 									: 'text-muted-foreground hover:text-foreground'
 							}`}
 						>
-							Monthly
+							<Trans>Monthly</Trans>
 						</button>
 						<button
 							onClick={() => setBillingInterval('yearly')}
@@ -205,9 +215,9 @@ export function BillingCard({
 									: 'text-muted-foreground hover:text-foreground'
 							}`}
 						>
-							Yearly
+							<Trans>Yearly</Trans>
 							<Badge variant="secondary" className="ml-2 text-xs">
-								Save 20%
+								<Trans>Save 20%</Trans>
 							</Badge>
 						</button>
 					</div>
@@ -244,9 +254,13 @@ export function BillingCard({
 				<Card>
 					<CardContent className="p-6">
 						<div className="text-muted-foreground text-center">
-							<p>Unable to load pricing information</p>
+							<p>
+								<Trans>Unable to load pricing information</Trans>
+							</p>
 							<p className="text-sm">
-								Please check your Stripe configuration or try again later
+								<Trans>
+									Please check your Stripe configuration or try again later
+								</Trans>
 							</p>
 						</div>
 					</CardContent>
@@ -258,16 +272,22 @@ export function BillingCard({
 				<CardContent>
 					<div className="flex items-center justify-between">
 						<div>
-							<h3 className="mb-2 font-semibold">Enterprise Plan</h3>
+							<h3 className="mb-2 font-semibold">
+								<Trans>Enterprise Plan</Trans>
+							</h3>
 							<p className="text-muted-foreground text-sm">
-								Single sign-on, custom SLA, private support channel, and more.{' '}
-								<Link to="/contact" className="text-primary hover:underline">
-									Learn more
-								</Link>
+								<Trans>
+									Single sign-on, custom SLA, private support channel, and more.{' '}
+									<Link to="/contact" className="text-primary hover:underline">
+										Learn more
+									</Link>
+								</Trans>
 							</p>
 						</div>
 						<Button variant="outline" asChild>
-							<Link to="/contact?subject=Enterprise">Schedule a call</Link>
+							<Link to="/contact?subject=Enterprise">
+								<Trans>Schedule a call</Trans>
+							</Link>
 						</Button>
 					</div>
 				</CardContent>
@@ -278,10 +298,12 @@ export function BillingCard({
 				<CardContent>
 					<div className="flex items-center justify-between">
 						<div className="text-muted-foreground text-sm">
-							Questions about billing?
+							<Trans>Questions about billing?</Trans>
 						</div>
 						<Button variant="link" className="text-sm" asChild>
-							<Link to="/support">Get in touch</Link>
+							<Link to="/support">
+								<Trans>Get in touch</Trans>
+							</Link>
 						</Button>
 					</div>
 				</CardContent>
@@ -325,8 +347,12 @@ function PricingPlan({
 			<Card>
 				<CardContent className="p-6">
 					<div className="text-muted-foreground text-center">
-						<p>Pricing not available</p>
-						<p className="text-sm">Please check your Stripe configuration</p>
+						<p>
+							<Trans>Pricing not available</Trans>
+						</p>
+						<p className="text-sm">
+							<Trans>Please check your Stripe configuration</Trans>
+						</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -364,8 +390,12 @@ function PricingPlan({
 			<Card>
 				<CardContent className="p-6">
 					<div className="text-muted-foreground text-center">
-						<p>Price not configured</p>
-						<p className="text-sm">Contact support for pricing</p>
+						<p>
+							<Trans>Price not configured</Trans>
+						</p>
+						<p className="text-sm">
+							<Trans>Contact support for pricing</Trans>
+						</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -380,30 +410,36 @@ function PricingPlan({
 					<CardTitle className="text-2xl font-bold">
 						${displayPrice.toFixed(2)}
 					</CardTitle>
-					<span className="text-muted-foreground text-sm">per month</span>
+					<span className="text-muted-foreground text-sm">
+						<Trans>per month</Trans>
+					</span>
 				</div>
 				{billingInterval === 'yearly' && (
 					<div className="text-muted-foreground text-sm">
-						${basePrice.toFixed(2)} billed annually
+						<Trans>${basePrice.toFixed(2)} billed annually</Trans>
 					</div>
 				)}
 				<CardDescription>{title}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<ul className="text-muted-foreground mb-4 space-y-2 text-sm">
-					<li>Includes {includesSeats} user seats</li>
+					<li>
+						<Trans>Includes {includesSeats} user seats</Trans>
+					</li>
 					{additionalUserPrice > 0 && (
 						<li>
-							Additional users: $
-							{billingInterval === 'yearly'
-								? (additionalUserPrice / 12).toFixed(2)
-								: additionalUserPrice.toFixed(2)}
-							/user/month
-							{billingInterval === 'yearly' && (
-								<span className="block text-xs opacity-75">
-									(${additionalUserPrice.toFixed(2)} billed annually per user)
-								</span>
-							)}
+							<Trans>
+								Additional users: $
+								{billingInterval === 'yearly'
+									? (additionalUserPrice / 12).toFixed(2)
+									: additionalUserPrice.toFixed(2)}
+								/user/month
+								{billingInterval === 'yearly' && (
+									<span className="block text-xs opacity-75">
+										(${additionalUserPrice.toFixed(2)} billed annually per user)
+									</span>
+								)}
+							</Trans>
 						</li>
 					)}
 				</ul>
@@ -419,10 +455,10 @@ function PricingPlan({
 					>
 						{currentPlan ? (
 							<>
-								<Icon name="check" className="h-4 w-4" /> Current Plan
+								<Icon name="check" className="h-4 w-4" /> <Trans>Current Plan</Trans>
 							</>
 						) : (
-							'Upgrade'
+							<Trans>Upgrade</Trans>
 						)}
 					</Button>
 				</Form>

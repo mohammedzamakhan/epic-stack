@@ -19,6 +19,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 import { Field, ErrorList } from '#app/components/forms.tsx'
 
 export const S3StorageSchema = z
@@ -148,7 +149,7 @@ export function S3StorageCard({
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Icon name="database" className="h-5 w-5" />
-					S3 Storage Configuration
+					<Trans>S3 Storage Configuration</Trans>
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">
@@ -167,11 +168,13 @@ export function S3StorageCard({
 										name={fields.s3Enabled.name}
 										defaultChecked={organization.s3Config?.isEnabled}
 									/>
-									Enable Custom S3 Storage
+									<Trans>Enable Custom S3 Storage</Trans>
 								</Label>
 								<p className="text-muted-foreground text-sm">
-									Use your own S3-compatible storage instead of the default
-									storage
+									<Trans>
+										Use your own S3-compatible storage instead of the default
+										storage
+									</Trans>
 								</p>
 							</div>
 						</div>
@@ -187,13 +190,15 @@ export function S3StorageCard({
 										/>
 										<div className="text-sm">
 											<p className="font-medium text-yellow-800">
-												Important Security Note
+												<Trans>Important Security Note</Trans>
 											</p>
 											<p className="mt-1 text-yellow-700">
-												Your S3 credentials will be encrypted and stored
-												securely. However, we recommend using IAM credentials
-												with minimal required permissions (read/write access to
-												the specific bucket only).
+												<Trans>
+													Your S3 credentials will be encrypted and stored
+													securely. However, we recommend using IAM credentials
+													with minimal required permissions (read/write access to
+													the specific bucket only).
+												</Trans>
 											</p>
 										</div>
 									</div>
@@ -209,7 +214,7 @@ export function S3StorageCard({
 									<Field
 										labelProps={{
 											htmlFor: fields.s3Endpoint.id,
-											children: 'S3 Endpoint URL',
+											children: <Trans>S3 Endpoint URL</Trans>,
 										}}
 										inputProps={{
 											...getInputProps(fields.s3Endpoint, { type: 'url' }),
@@ -220,7 +225,7 @@ export function S3StorageCard({
 									<Field
 										labelProps={{
 											htmlFor: fields.s3Region.id,
-											children: 'Region',
+											children: <Trans>Region</Trans>,
 										}}
 										inputProps={{
 											...getInputProps(fields.s3Region, { type: 'text' }),
@@ -233,7 +238,7 @@ export function S3StorageCard({
 								<Field
 									labelProps={{
 										htmlFor: fields.s3BucketName.id,
-										children: 'Bucket Name',
+										children: <Trans>Bucket Name</Trans>,
 									}}
 									inputProps={{
 										...getInputProps(fields.s3BucketName, { type: 'text' }),
@@ -246,7 +251,7 @@ export function S3StorageCard({
 									<Field
 										labelProps={{
 											htmlFor: fields.s3AccessKeyId.id,
-											children: 'Access Key ID',
+											children: <Trans>Access Key ID</Trans>,
 										}}
 										inputProps={{
 											...getInputProps(fields.s3AccessKeyId, { type: 'text' }),
@@ -257,7 +262,7 @@ export function S3StorageCard({
 									<Field
 										labelProps={{
 											htmlFor: fields.s3SecretAccessKey.id,
-											children: 'Secret Access Key',
+											children: <Trans>Secret Access Key</Trans>,
 										}}
 										inputProps={{
 											...getInputProps(fields.s3SecretAccessKey, {
@@ -271,8 +276,10 @@ export function S3StorageCard({
 									/>
 									{organization.s3Config?.secretAccessKey && (
 										<p className="text-muted-foreground mt-1 text-sm">
-											Leave empty to keep existing secret key, or enter a new
-											one to update.
+											<Trans>
+												Leave empty to keep existing secret key, or enter a new
+												one to update.
+											</Trans>
 										</p>
 									)}
 								</div>
@@ -295,7 +302,7 @@ export function S3StorageCard({
 						fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 					}
 				>
-					Save
+					<Trans>Save</Trans>
 				</StatusButton>
 				{fields.s3Endpoint.value &&
 					fields.s3BucketName.value &&

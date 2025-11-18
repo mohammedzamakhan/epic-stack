@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans } from '@lingui/macro'
 import {
 	Avatar,
 	AvatarFallback,
@@ -89,12 +90,16 @@ function OrganizationMemberRoleEditor({
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value="admin">Admin</SelectItem>
-					<SelectItem value="member">Member</SelectItem>
+					<SelectItem value="admin">
+						<Trans>Admin</Trans>
+					</SelectItem>
+					<SelectItem value="member">
+						<Trans>Member</Trans>
+					</SelectItem>
 				</SelectContent>
 			</Select>
 			<Button type="submit" variant="outline" size="sm">
-				Save
+				<Trans>Save</Trans>
 			</Button>
 		</Form>
 	)
@@ -111,7 +116,9 @@ export function OrganizationMembers({
 		return (
 			<Card>
 				<CardContent>
-					<p className="text-muted-foreground text-sm">No members found.</p>
+					<p className="text-muted-foreground text-sm">
+						<Trans>No members found.</Trans>
+					</p>
 				</CardContent>
 			</Card>
 		)
@@ -120,8 +127,12 @@ export function OrganizationMembers({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Members</CardTitle>
-				<CardDescription>Manage your organization's members.</CardDescription>
+				<CardTitle>
+					<Trans>Members</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>Manage your organization's members.</Trans>
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-3">
@@ -151,7 +162,7 @@ export function OrganizationMembers({
 											</span>
 											{member.userId === currentUserId && (
 												<Badge variant="outline" className="text-xs">
-													You
+													<Trans>You</Trans>
 												</Badge>
 											)}
 										</div>

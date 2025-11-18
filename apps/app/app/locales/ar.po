@@ -13,6 +13,11 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: organization._count.users
+#: app/components/settings/cards/organization/billing-card.tsx:168
+msgid "{0, plural, one {# active member} other {# active members}}"
+msgstr "{0, plural, one {# عضو نشط} other {# أعضاء نشطون}}"
+
 #. placeholder {0}: step.actionConfig?.completedLabel || 'Completed'
 #: app/components/onboarding-checklist.tsx:201
 msgid "{0}"
@@ -35,9 +40,56 @@ msgstr "{0} من {1} مكتمل"
 msgid "{0}% complete"
 msgstr "{0}٪ مكتمل"
 
+#. placeholder {0}: Math.floor(diffInSeconds / 86400)
+#: app/components/ui/notification-bell.tsx:72
+msgid "{0}d ago"
+msgstr "منذ {0} يوم"
+
+#. placeholder {0}: Math.floor(diffInSeconds / 3600)
+#: app/components/ui/notification-bell.tsx:65
+msgid "{0}h ago"
+msgstr "منذ {0} ساعة"
+
+#. placeholder {0}: Math.floor(diffInSeconds / 60)
+#: app/components/ui/notification-bell.tsx:58
+msgid "{0}m ago"
+msgstr "منذ {0} دقيقة"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:37
+msgid "{channel}"
+msgstr "{channel}"
+
+#: app/components/ui/notification-bell.tsx:55
+msgid "{diffInSeconds}s ago"
+msgstr "منذ {diffInSeconds} ثانية"
+
+#: app/components/impersonation-banner.tsx:37
+msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
+msgstr "{duration, plural, one {منذ # دقيقة} other {منذ # دقيقة}}"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:383
+msgid "{enabledCount} of {totalCount} notifications enabled"
+msgstr "{enabledCount} من {totalCount} إشعار مفعّل"
+
+#: app/components/settings/account-management.tsx:66
+msgid "{otherSessionsCount, plural, one {Sign out of other session} other {Sign out of other sessions}}"
+msgstr "{otherSessionsCount, plural, one {تسجيل الخروج من جلسة أخرى} other {تسجيل الخروج من جلسات أخرى}}"
+
+#: app/components/settings/account-management.tsx:42
+msgid "{otherSessionsCount, plural, one {You have # other active session} other {You have # other active sessions}}"
+msgstr "{otherSessionsCount, plural, one {لديك # جلسة نشطة أخرى} other {لديك # جلسات نشطة أخرى}}"
+
 #: app/components/notes-chart.tsx:119
 msgid "{totalNotes} total notes • {avgNotesPerDay} avg per day"
 msgstr "{totalNotes} ملاحظة إجمالاً • {avgNotesPerDay} متوسط يومي"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:47
+msgid "{workflowName}"
+msgstr "{workflowName}"
+
+#: app/routes/organizations+/create.tsx:630
+msgid "*.png, *.jpeg files up to 5 MB"
+msgstr "ملفات *.png و *.jpeg حتى 5 ميجابايت"
 
 #: app/routes/_auth+/login.tsx:740
 msgid "← Back to SSO login"
@@ -55,6 +107,12 @@ msgstr "+٥ نقاط/إحالة"
 msgid "✓ Discord points claimed"
 msgstr "✓ تم المطالبة بنقاط Discord"
 
+#. placeholder {0}: basePrice.toFixed(2)
+#: app/components/settings/cards/organization/billing-card.tsx:419
+#: app/routes/organizations+/create.tsx:1314
+msgid "${0} billed annually"
+msgstr "${0} يُفوتر سنوياً"
+
 #: app/routes/settings+/profile.index.tsx:160
 msgid "2FA is enabled"
 msgstr "المصادقة الثنائية مفعّلة"
@@ -63,15 +121,24 @@ msgstr "المصادقة الثنائية مفعّلة"
 msgid "A user already exists with this email"
 msgstr "يوجد مستخدم بالفعل بهذا البريد الإلكتروني"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:133
-#: app/routes/_auth+/onboarding.tsx:116
+#: app/routes/_auth+/onboarding_.$provider.tsx:132
+#: app/routes/_auth+/onboarding.tsx:115
 #: app/routes/settings+/profile.index.tsx:224
 msgid "A user already exists with this username"
 msgstr "يوجد مستخدم بالفعل بهذا اسم المستخدم"
 
+#: app/components/privacy-banner.tsx:60
 #: app/routes/_app+/organizations.tsx:297
 msgid "Accept"
 msgstr "قبول"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:254
+msgid "Access Key ID"
+msgstr "معرف مفتاح الوصول"
+
+#: app/components/nav-user.tsx:129
+msgid "Account"
+msgstr "الحساب"
 
 #: app/components/command-menu.tsx:153
 msgid "Account settings"
@@ -85,18 +152,98 @@ msgstr "الحساب معلق"
 msgid "Actions"
 msgstr "الإجراءات"
 
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1602
+msgid "Activity"
+msgstr "النشاط"
+
+#: app/components/note/comment-input.tsx:125
+#: app/components/note/comments-section.tsx:170
+msgid "Add a comment..."
+msgstr "أضف تعليقاً..."
+
+#: app/components/settings/cards/security-card.tsx:133
+msgid "Add an extra layer of security to your account"
+msgstr "أضف طبقة إضافية من الأمان لحسابك"
+
+#: app/components/organization-invitations.tsx:257
+#: app/routes/organizations+/create.tsx:1100
+msgid "Add another invitation"
+msgstr "إضافة دعوة أخرى"
+
 #: app/components/app-sidebar.tsx:280
 msgid "Add members"
 msgstr "إضافة أعضاء"
+
+#: app/components/settings/cards/connections-card.tsx:47
+msgid "Add more connections"
+msgstr "إضافة المزيد من الاتصالات"
 
 #: app/components/team-switcher.tsx:167
 #: app/routes/_app+/organizations.tsx:219
 msgid "Add organization"
 msgstr "إضافة منظمة"
 
+#: app/components/data-table.tsx:321
+msgid "Add reviewer"
+msgstr "إضافة مراجع"
+
+#: app/components/data-table.tsx:562
+msgid "Add Section"
+msgstr "إضافة قسم"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:620
+msgid "Add this configuration to your Claude Desktop settings:"
+msgstr "أضف هذا التكوين إلى إعدادات Claude Desktop:"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:635
+msgid "Add this to your .kiro/settings/mcp.json file:"
+msgstr "أضف هذا إلى ملف .kiro/settings/mcp.json:"
+
+#: app/routes/organizations+/create.tsx:904
+msgid "Add your team members to get started. You can always invite more people later."
+msgstr "أضف أعضاء فريقك للبدء. يمكنك دائمًا دعوة المزيد من الأشخاص لاحقًا."
+
+#. placeholder {0}: billingInterval === 'yearly' ? (additionalUserPrice / 12).toFixed(2) : additionalUserPrice.toFixed(2)
+#. placeholder {0}: billingInterval === 'yearly' ? (additionalUserPrice / 12).toFixed(2) : additionalUserPrice.toFixed(2)
+#. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
+#. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
+#: app/components/settings/cards/organization/billing-card.tsx:431
+#: app/routes/organizations+/create.tsx:1325
+msgid "Additional users: ${0}/user/month{1}"
+msgstr "مستخدمون إضافيون: ${0}/مستخدم/شهر{1}"
+
 #: app/routes/_app+/organizations.tsx:376
 msgid "Adjust your search query to show more."
 msgstr "اضبط استعلام البحث لعرض المزيد."
+
+#: app/components/organization-members.tsx:94
+msgid "Admin"
+msgstr "مسؤول"
+
+#: app/components/impersonation-banner.tsx:27
+msgid "Admin Impersonation Active"
+msgstr "انتحال شخصية المسؤول نشط"
+
+#: app/components/settings/cards/advanced-settings-card.tsx:30
+msgid "Advanced Settings"
+msgstr "الإعدادات المتقدمة"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1608
+msgid "AI Assistant"
+msgstr "مساعد الذكاء الاصطناعي"
+
+#: app/components/data-table.tsx:348
+msgid "All assigned"
+msgstr "جميعهم معينون"
+
+#: app/routes/organizations+/create.tsx:1340
+msgid "All core features included"
+msgstr "جميع الميزات الأساسية مضمنة"
+
+#: app/components/ui/notification-bell.tsx:326
+#: app/components/ui/notification-bell.tsx:407
+msgid "All Notifications"
+msgstr "جميع الإشعارات"
 
 #: app/routes/settings+/profile.index.tsx:396
 msgid "All of your data has been deleted"
@@ -111,19 +258,70 @@ msgstr "هل لديك حساب بالفعل؟"
 msgid "An email notice will also be sent to your old address {0}."
 msgstr "سيتم أيضًا إرسال إشعار بالبريد الإلكتروني إلى عنوانك القديم {0}."
 
+#: app/routes/organizations+/create.tsx:554
+msgid "An organization is a workspace where teams collect, organize, and work together."
+msgstr "المنظمة هي مساحة عمل حيث تجمع الفرق وتنظم وتعمل معًا."
+
+#: app/components/organization-invitations.tsx:151
+msgid "Anyone with this link can join your organization and will know you invited them. By default, they will have the Member role."
+msgstr "يمكن لأي شخص لديه هذا الرابط الانضمام إلى منظمتك وسيعرف أنك دعوته. افتراضياً، سيكون لديهم دور عضو."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:418
+msgid "API Key"
+msgstr "مفتاح API"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:395
+msgid "API Key Created"
+msgstr "تم إنشاء مفتاح API"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:489
+msgid "API Keys"
+msgstr "مفاتيح API"
+
+#: app/components/note/comment-item.tsx:66
+msgid "Are you sure you want to delete this comment?"
+msgstr "هل أنت متأكد أنك تريد حذف هذا التعليق؟"
+
+#: app/components/settings/account-management.tsx:64
+#: app/components/settings/account-management.tsx:96
+#: app/components/settings/connections.tsx:80
 #: app/routes/settings+/profile.index.tsx:375
 #: app/routes/settings+/profile.index.tsx:418
 msgid "Are you sure?"
 msgstr "هل أنت متأكد؟"
 
+#: app/components/settings/two-factor-form.tsx:174
+msgid "Authentication Code"
+msgstr "رمز المصادقة"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:670
+msgid "Available Tools"
+msgstr "الأدوات المتاحة"
+
 #: app/routes/_auth+/forgot-password.tsx:244
 msgid "Back to login"
 msgstr "العودة لتسجيل الدخول"
+
+#: app/components/settings/cards/organization/billing-card.tsx:105
+msgid "Beta Access"
+msgstr "الوصول التجريبي"
+
+#: app/components/settings/cards/organization/billing-card.tsx:159
+msgid "Billed monthly"
+msgstr "الفوترة الشهرية"
 
 #: app/components/app-sidebar.tsx:258
 #: app/components/command-menu.tsx:163
 msgid "Billing"
 msgstr "الفواتير"
+
+#: app/components/settings/cards/organization/billing-card.tsx:95
+msgid "Billing & Subscription"
+msgstr "الفوترة والاشتراك"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:241
+msgid "Bucket Name"
+msgstr "اسم الحاوية"
 
 #. placeholder {0}: note.createdByName
 #: app/components/command-menu.tsx:141
@@ -134,11 +332,24 @@ msgstr "بواسطة {0}"
 msgid "By continuing, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr "بالمتابعة، فإنك توافق على <0>شروط الخدمة</0> و<1>سياسة الخصوصية</1>."
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:358
+#: app/routes/_auth+/onboarding_.$provider.tsx:368
 msgid "By creating an account, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr "بإنشاء حساب، فإنك توافق على <0>شروط الخدمة</0> و<1>سياسة الخصوصية</1>."
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:62
+#: app/components/settings/cards/organization/danger-zone-card.tsx:82
+msgid "By deleting your organization you and your team will lose access and all data will be lost. This is a permanent action and cannot be undone."
+msgstr "بحذف مؤسستك، ستفقد أنت وفريقك الوصول وسيتم فقدان جميع البيانات. هذا إجراء دائم ولا يمكن التراجع عنه."
+
+#: app/components/core/feedback-modal.tsx:109
+#: app/components/note/comment-input.tsx:164
+#: app/components/settings/cards/organization/danger-zone-card.tsx:126
 #: app/components/settings/password-form.tsx:193
+#: app/components/settings/two-factor-form.tsx:65
+#: app/components/settings/two-factor-form.tsx:194
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:343
+#: app/routes/organizations+/create.tsx:748
+#: app/routes/organizations+/create.tsx:883
 #: app/routes/settings+/profile.password_.create.tsx:161
 #: app/routes/settings+/profile.password.tsx:222
 msgid "Cancel"
@@ -163,6 +374,9 @@ msgstr "تغيير البريد الإلكتروني"
 msgid "Change email from {0}"
 msgstr "تغيير البريد الإلكتروني من {0}"
 
+#: app/components/settings/cards/security-card.tsx:75
+#: app/components/settings/cards/security-card.tsx:95
+#: app/components/settings/cards/security-card.tsx:105
 #: app/components/settings/password-form.tsx:202
 #: app/routes/settings+/profile.index.tsx:173
 #: app/routes/settings+/profile.password.tsx:229
@@ -174,6 +388,18 @@ msgstr "تغيير كلمة المرور"
 msgid "Change profile photo"
 msgstr "تغيير صورة الملف الشخصي"
 
+#: app/components/settings/cards/security-card.tsx:82
+msgid "Change your password to something new"
+msgstr "غيّر كلمة المرور الخاصة بك إلى شيء جديد"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:359
+msgid "Channel Overview"
+msgstr "نظرة عامة على القنوات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:35
+msgid "Chat"
+msgstr "المحادثة"
+
 #: app/routes/_auth+/verify.tsx:70
 msgid "Check your 2FA app"
 msgstr "تحقق من تطبيق المصادقة الثنائية"
@@ -182,22 +408,68 @@ msgstr "تحقق من تطبيق المصادقة الثنائية"
 msgid "Check your email"
 msgstr "تحقق من بريدك الإلكتروني"
 
+#: app/routes/organizations+/create.tsx:800
+msgid "Choose your plan"
+msgstr "اختر خطتك"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:617
+msgid "Claude Desktop"
+msgstr "Claude Desktop"
+
 #: app/routes/_auth+/waitlist.tsx:248
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr "انقر على \"تحقق من عضوية Discord\" بعد الانضمام للمطالبة بنقاطك تلقائياً."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:606
+msgid "Client Configuration"
+msgstr "تكوين العميل"
+
+#: app/components/data-table.tsx:530
+msgid "Columns"
+msgstr "الأعمدة"
+
+#: app/components/note/comment-input.tsx:174
+msgid "Comment"
+msgstr "تعليق"
+
+#: app/components/note/comments-section.tsx:154
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1591
+msgid "Comments"
+msgstr "التعليقات"
 
 #: app/components/onboarding-checklist.tsx:145
 msgid "complete"
 msgstr "مكتمل"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:218
-#: app/routes/_auth+/onboarding.tsx:365
+#: app/routes/organizations+/create.tsx:1030
+msgid "Complete Setup"
+msgstr "إكمال الإعداد"
+
+#: app/components/settings/two-factor-form.tsx:87
+msgid "Complete the following steps."
+msgstr "أكمل الخطوات التالية."
+
+#: app/components/settings/two-factor-form.tsx:84
+msgid "Complete two-factor authentication setup"
+msgstr "إكمال إعداد المصادقة الثنائية"
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:228
+#: app/routes/_auth+/onboarding.tsx:375
 msgid "Complete your profile"
 msgstr "أكمل ملفك الشخصي"
 
 #: app/routes/_auth+/signup.tsx:215
 msgid "Complete your signup to join the organization"
 msgstr "أكمل التسجيل للانضمام إلى المنظمة"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:609
+msgid "Configuration examples for popular MCP clients"
+msgstr "أمثلة على التكوين لعملاء MCP الشائعين"
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:139
+#: app/components/settings/two-factor-form.tsx:202
+msgid "Confirm"
+msgstr "تأكيد"
 
 #: app/components/settings/password-form.tsx:157
 #: app/routes/settings+/profile.password_.create.tsx:143
@@ -206,7 +478,7 @@ msgid "Confirm New Password"
 msgstr "تأكيد كلمة المرور الجديدة"
 
 #: app/components/settings/password-form.tsx:159
-#: app/routes/_auth+/onboarding.tsx:439
+#: app/routes/_auth+/onboarding.tsx:449
 #: app/routes/_auth+/reset-password.tsx:152
 msgid "Confirm Password"
 msgstr "تأكيد كلمة المرور"
@@ -215,17 +487,48 @@ msgstr "تأكيد كلمة المرور"
 msgid "Confirm your new password"
 msgstr "أكد كلمة المرور الجديدة"
 
-#: app/routes/_auth+/onboarding.tsx:446
+#: app/routes/_auth+/onboarding.tsx:456
 msgid "Confirm your password"
 msgstr "أكد كلمة المرور"
+
+#: app/components/settings/cards/organization/integrations-card.tsx:205
+msgid "Connect"
+msgstr "اتصال"
+
+#. placeholder {0}: organization.name
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:734
+msgid "Connect your AI assistants to {0} data using the Model Context Protocol"
+msgstr "ربط مساعدي الذكاء الاصطناعي ببيانات {0} باستخدام بروتوكول سياق النموذج"
+
+#: app/components/settings/cards/connections-card.tsx:37
+msgid "Connected Accounts"
+msgstr "الحسابات المتصلة"
+
+#. placeholder {0}: new Date(connection.createdAt).toLocaleDateString()
+#: app/components/settings/connections.tsx:40
+msgid "Connected on {0}"
+msgstr "متصل في {0}"
 
 #: app/routes/settings+/profile.connections.tsx:35
 msgid "Connections"
 msgstr "الاتصالات"
 
+#: app/routes/organizations+/create.tsx:1286
+msgid "Contact support"
+msgstr "اتصل بالدعم"
+
+#: app/components/settings/cards/organization/billing-card.tsx:397
+msgid "Contact support for pricing"
+msgstr "اتصل بالدعم للحصول على الأسعار"
+
 #: app/routes/_auth+/login.tsx:662
+#: app/routes/organizations+/create.tsx:752
 msgid "Continue"
 msgstr "متابعة"
+
+#: app/routes/organizations+/create.tsx:887
+msgid "Continue to Payment"
+msgstr "المتابعة إلى الدفع"
 
 #: app/routes/_auth+/login.tsx:575
 msgid "Continue with"
@@ -235,15 +538,31 @@ msgstr "المتابعة باستخدام"
 msgid "Continue with your password"
 msgstr "تابع باستخدام كلمة المرور الخاصة بك"
 
+#: app/components/organization-invitations.tsx:174
+msgid "Copied"
+msgstr "تم النسخ"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:434
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copied!"
 msgstr "تم النسخ!"
 
+#: app/components/organization-invitations.tsx:179
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:434
 #: app/routes/_auth+/waitlist.tsx:191
 msgid "Copy"
 msgstr "نسخ"
 
-#: app/routes/_auth+/onboarding.tsx:424
+#. placeholder {0}: organization.name
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:267
+msgid "Create a new API key to connect your AI assistants to {0} data."
+msgstr "إنشاء مفتاح API جديد لربط مساعدي الذكاء الاصطناعي ببيانات {0}."
+
+#: app/routes/organizations+/create.tsx:549
+msgid "Create a new organization"
+msgstr "إنشاء منظمة جديدة"
+
+#: app/routes/_auth+/onboarding.tsx:434
 msgid "Create a password"
 msgstr "إنشاء كلمة مرور"
 
@@ -251,9 +570,13 @@ msgstr "إنشاء كلمة مرور"
 msgid "Create a Password"
 msgstr "إنشاء كلمة مرور"
 
+#: app/components/settings/cards/security-card.tsx:84
+msgid "Create a password to secure your account"
+msgstr "أنشئ كلمة مرور لحماية حسابك"
+
 #: app/routes/_auth+/login.tsx:354
-#: app/routes/_auth+/onboarding_.$provider.tsx:351
-#: app/routes/_auth+/onboarding.tsx:514
+#: app/routes/_auth+/onboarding_.$provider.tsx:361
+#: app/routes/_auth+/onboarding.tsx:524
 msgid "Create account"
 msgstr "إنشاء حساب"
 
@@ -264,6 +587,20 @@ msgstr "إنشاء حساب"
 #: app/routes/_app+/index.tsx:33
 msgid "Create an organization"
 msgstr "إنشاء منظمة"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:492
+msgid "Create and manage API keys to authenticate your MCP clients"
+msgstr "إنشاء وإدارة مفاتيح API لمصادقة عملاء MCP"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:264
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:358
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:498
+msgid "Create API Key"
+msgstr "إنشاء مفتاح API"
+
+#: app/components/organization-invitations.tsx:191
+msgid "Create Link"
+msgstr "إنشاء رابط"
 
 #: app/components/command-menu.tsx:115
 msgid "Create new note"
@@ -278,19 +615,60 @@ msgstr "إنشاء ملاحظة جديدة"
 msgid "Create Note"
 msgstr "إنشاء ملاحظة"
 
+#: app/components/settings/cards/security-card.tsx:77
+#: app/components/settings/cards/security-card.tsx:97
+#: app/components/settings/cards/security-card.tsx:107
 #: app/components/settings/password-form.tsx:204
 #: app/routes/settings+/profile.password_.create.tsx:168
 msgid "Create Password"
 msgstr "إنشاء كلمة المرور"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:551
+msgid "Create your first API key to get started"
+msgstr "أنشئ مفتاح API الأول للبدء"
+
+#. placeholder {0}: new Date(apiKey.createdAt).toLocaleDateString()
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:519
+msgid "Created {0}"
+msgstr "تم الإنشاء {0}"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:353
+msgid "Creating..."
+msgstr "جاري الإنشاء..."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:317
+msgid "Critical"
+msgstr "حرجة"
 
 #: app/components/settings/password-form.tsx:87
 #: app/routes/settings+/profile.password.tsx:166
 msgid "Current Password"
 msgstr "كلمة المرور الحالية"
 
+#: app/components/settings/cards/organization/billing-card.tsx:458
+msgid "Current Plan"
+msgstr "الخطة الحالية"
+
+#: app/components/settings/cards/organization/billing-card.tsx:126
+msgid "Current Subscription"
+msgstr "الاشتراك الحالي"
+
+#: app/components/data-table.tsx:527
+msgid "Customize Columns"
+msgstr "تخصيص الأعمدة"
+
 #: app/components/notes-chart.tsx:58
 msgid "Daily Notes Created"
 msgstr "الملاحظات اليومية المنشأة"
+
+#: app/components/settings/cards/danger-card.tsx:23
+#: app/components/settings/cards/organization/danger-zone-card.tsx:46
+msgid "Danger"
+msgstr "خطر"
+
+#: app/components/nav-user.tsx:71
+msgid "Dark mode"
+msgstr "الوضع الداكن"
 
 #: app/components/app-sidebar.tsx:109
 #: app/components/app-sidebar.tsx:215
@@ -302,37 +680,99 @@ msgstr "لوحة التحكم"
 msgid "Data Deleted"
 msgstr "تم حذف البيانات"
 
+#: app/components/data-table.tsx:514
+msgid "Data Table"
+msgstr "جدول البيانات"
+
+#: app/components/data-table.tsx:517
+msgid "Data Table is a table that displays data in a grid format."
+msgstr "جدول البيانات هو جدول يعرض البيانات بتنسيق شبكة."
+
 #: app/routes/_app+/organizations.tsx:312
 msgid "Decline"
 msgstr "رفض"
 
+#: app/components/data-table.tsx:383
+#: app/components/settings/passkey-manager.tsx:144
 #: app/routes/settings+/profile.passkeys.tsx:194
 msgid "Delete"
 msgstr "حذف"
+
+#: app/components/settings/account-management.tsx:98
+#: app/components/settings/cards/danger-card.tsx:33
+msgid "Delete account"
+msgstr "حذف الحساب"
 
 #: app/routes/settings+/profile.index.tsx:420
 msgid "Delete all your data"
 msgstr "حذف جميع بياناتك"
 
+#: app/components/settings/cards/organization/danger-zone-card.tsx:59
+#: app/components/settings/cards/organization/danger-zone-card.tsx:73
+msgid "Delete organization"
+msgstr "حذف المؤسسة"
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:79
+msgid "Delete organization?"
+msgstr "حذف المؤسسة؟"
+
 #: app/routes/settings+/profile.connections.tsx:119
 msgid "Deleted"
 msgstr "تم الحذف"
 
+#: app/components/settings/cards/danger-card.tsx:36
+msgid "Deleting your user will permanently delete all user data. You should download any data that you wish to retain."
+msgstr "سيؤدي حذف المستخدم إلى حذف جميع بيانات المستخدم بشكل دائم. يجب عليك تنزيل أي بيانات تريد الاحتفاظ بها."
+
+#: app/routes/organizations+/create.tsx:727
+msgid "Description"
+msgstr "الوصف"
+
+#: app/components/settings/cards/danger-card.tsx:26
+msgid "Destructive settings that cannot be undone."
+msgstr "إعدادات مدمرة لا يمكن التراجع عنها."
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:49
+msgid "Destructive settings that cannot be undone. All your data will be permanently removed from our servers."
+msgstr "إعدادات مدمرة لا يمكن التراجع عنها. سيتم إزالة جميع بياناتك بشكل دائم من خوادمنا."
+
+#: app/components/settings/passkey-manager.tsx:119
 #: app/routes/settings+/profile.passkeys.tsx:170
 msgid "Device"
 msgstr "جهاز"
+
+#: app/components/organization-invitations.tsx:215
+msgid "Disable"
+msgstr "تعطيل"
+
+#: app/components/settings/cards/security-card.tsx:146
+#: app/components/settings/two-factor-form.tsx:72
+msgid "Disable 2FA"
+msgstr "تعطيل المصادقة الثنائية"
+
+#: app/components/settings/cards/organization/integrations-card.tsx:183
+#: app/components/settings/connections.tsx:80
+msgid "Disconnect"
+msgstr "قطع الاتصال"
 
 #: app/routes/settings+/profile.connections.tsx:208
 msgid "Disconnect this account"
 msgstr "قطع الاتصال بهذا الحساب"
 
-#: app/components/feature-updates.tsx:206
+#: app/components/feature-updates.tsx:134
+#: app/components/feature-updates.tsx:208
 msgid "Dismiss"
 msgstr "تجاهل"
 
 #: app/routes/_auth+/login.tsx:345
 msgid "Don't have an account?"
 msgstr "ليس لديك حساب؟"
+
+#: app/components/data-table.tsx:235
+#: app/components/data-table.tsx:265
+#: app/components/data-table.tsx:964
+msgid "Done"
+msgstr "تم"
 
 #: app/components/onboarding-checklist.tsx:116
 msgid "Done!"
@@ -343,14 +783,26 @@ msgstr "تم!"
 msgid "Down by {0}% this period"
 msgstr "انخفض بنسبة {0}٪ في هذه الفترة"
 
+#: app/components/settings/cards/advanced-settings-card.tsx:46
 #: app/routes/settings+/profile.index.tsx:201
 msgid "Download your data"
 msgstr "تنزيل بياناتك"
+
+#: app/components/data-table.tsx:147
+msgid "Drag to reorder"
+msgstr "اسحب لإعادة الترتيب"
+
+#: app/components/data-table.tsx:373
+#: app/components/favorite-notes.tsx:107
+msgid "Edit"
+msgstr "تعديل"
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
 msgid "Edit Note"
 msgstr "تعديل ملاحظة"
 
+#: app/components/organization-invitations.tsx:386
+#: app/components/settings/cards/notification-preferences-card.tsx:31
 #: app/components/settings/cards/profile-card.tsx:122
 #: app/routes/_auth+/login.tsx:755
 #: app/routes/_auth+/signup.tsx:247
@@ -362,17 +814,38 @@ msgstr "البريد الإلكتروني"
 msgid "Email or Username"
 msgstr "البريد الإلكتروني / اسم المستخدم"
 
+#: app/components/settings/cards/security-card.tsx:148
 #: app/routes/settings+/profile.index.tsx:164
 msgid "Enable 2FA"
 msgstr "تفعيل المصادقة الثنائية"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:171
+msgid "Enable Custom S3 Storage"
+msgstr "تفعيل تخزين S3 مخصص"
+
+#: app/components/settings/cards/security-card.tsx:126
+msgid "Enable Two-Factor Authentication"
+msgstr "تفعيل المصادقة الثنائية"
+
+#: app/components/settings/two-factor-form.tsx:153
+msgid "Enter 6-digit OTP token"
+msgstr "أدخل رمز OTP المكون من 6 أرقام"
+
+#: app/components/organization-invitations.tsx:385
+msgid "Enter email address"
+msgstr "أدخل عنوان البريد الإلكتروني"
+
+#: app/components/settings/two-factor-form.tsx:156
+msgid "Enter the 6-digit one time password (OTP) token that your authentication app provides you."
+msgstr "أدخل رمز كلمة المرور لمرة واحدة (OTP) المكون من 6 أرقام الذي يوفره لك تطبيق المصادقة."
 
 #: app/routes/_auth+/login.tsx:641
 #: app/routes/_auth+/login.tsx:762
 msgid "Enter your email or username"
 msgstr "أدخل بريدك الإلكتروني أو اسم المستخدم"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:279
-#: app/routes/_auth+/onboarding.tsx:406
+#: app/routes/_auth+/onboarding_.$provider.tsx:289
+#: app/routes/_auth+/onboarding.tsx:416
 msgid "Enter your full name"
 msgstr "أدخل اسمك الكامل"
 
@@ -388,14 +861,32 @@ msgstr "أدخل كلمة المرور الجديدة أدناه."
 msgid "Enter your password"
 msgstr "أدخل كلمة المرور"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:257
-#: app/routes/_auth+/onboarding.tsx:390
+#: app/routes/_auth+/onboarding_.$provider.tsx:267
+#: app/routes/_auth+/onboarding.tsx:400
 msgid "Enter your username"
 msgstr "أدخل اسم المستخدم"
 
 #: app/routes/_auth+/forgot-password.tsx:216
 msgid "Enter your username or email"
 msgstr "أدخل اسم المستخدم أو البريد الإلكتروني"
+
+#: app/components/settings/cards/organization/billing-card.tsx:276
+msgid "Enterprise Plan"
+msgstr "الخطة المؤسسية"
+
+#: app/components/data-table.tsx:236
+#: app/components/data-table.tsx:266
+msgid "Error"
+msgstr "خطأ"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:316
+msgid "Expiration Date"
+msgstr "تاريخ انتهاء الصلاحية"
+
+#. placeholder {0}: new Date(apiKey.expiresAt).toLocaleDateString()
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:524
+msgid "Expires {0}"
+msgstr "تنتهي صلاحيته {0}"
 
 #: app/routes/_auth+/login.tsx:426
 msgid "Failed to authenticate with passkey: {errorMessage}"
@@ -405,7 +896,24 @@ msgstr "فشل التحقق باستخدام مفتاح المرور: {errorMess
 msgid "Failed to create passkey. Please try again."
 msgstr "فشل إنشاء مفتاح المرور. يرجى المحاولة مرة أخرى."
 
-#: app/components/feature-updates.tsx:178
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1716
+msgid "Failed to load AI Assistant"
+msgstr "فشل تحميل مساعد الذكاء الاصطناعي"
+
+#. placeholder {0}: error.message
+#: app/components/settings/cards/notification-preferences-card.tsx:168
+msgid "Failed to load notification preferences: {0}"
+msgstr "فشل تحميل تفضيلات الإشعارات: {0}"
+
+#: app/components/data-table.tsx:379
+msgid "Favorite"
+msgstr "المفضلة"
+
+#: app/components/favorite-notes.tsx:63
+msgid "Favorites"
+msgstr "المفضلة"
+
+#: app/components/feature-updates.tsx:180
 msgid "Feature Preview"
 msgstr "معاينة الميزة"
 
@@ -417,14 +925,18 @@ msgstr "نسيت كلمة المرور"
 msgid "Forgot your password?"
 msgstr "هل نسيت كلمة المرور؟"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:274
-#: app/routes/_auth+/onboarding.tsx:401
+#: app/routes/_auth+/onboarding_.$provider.tsx:284
+#: app/routes/_auth+/onboarding.tsx:411
 msgid "Full Name"
 msgstr "الاسم الكامل"
 
 #: app/components/app-sidebar.tsx:239
 msgid "General"
 msgstr "عام"
+
+#: app/components/settings/cards/organization/general-settings-card.tsx:58
+msgid "General Settings"
+msgstr "الإعدادات العامة"
 
 #: app/routes/_auth+/login.tsx:388
 msgid "Generating Authentication Options"
@@ -440,6 +952,7 @@ msgid "Get help"
 msgstr "احصل على المساعدة"
 
 #: app/components/app-sidebar.tsx:83
+#: app/components/settings/cards/organization/billing-card.tsx:305
 msgid "Get in touch"
 msgstr "تواصل معنا"
 
@@ -450,8 +963,22 @@ msgstr "ابدأ"
 
 #: app/components/app-sidebar.tsx:147
 #: app/components/app-sidebar.tsx:291
+#: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr "إرسال ملاحظات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:264
+msgid "Global Preferences"
+msgstr "التفضيلات العامة"
+
+#: app/components/data-table.tsx:187
+#: app/components/data-table.tsx:822
+msgid "Header"
+msgstr "العنوان"
+
+#: app/components/settings/cards/organization/team-size-card.tsx:65
+msgid "Help us understand your organization size to provide better recommendations."
+msgstr "ساعدنا في فهم حجم مؤسستك لتقديم توصيات أفضل."
 
 #: app/routes/settings+/profile.connections.tsx:131
 msgid "Here are your current connections:"
@@ -466,30 +993,59 @@ msgid "Hi"
 msgstr "مرحباً"
 
 #. placeholder {0}: loaderData.email
-#: app/routes/_auth+/onboarding_.$provider.tsx:221
+#: app/routes/_auth+/onboarding_.$provider.tsx:231
 msgid "Hi {0}, just a few more details to get started."
 msgstr "مرحباً {0}، بعض التفاصيل فقط للبدء."
 
 #. placeholder {0}: loaderData.email
 #. placeholder {1}: inviteToken ? ' to join the organization' : ''
-#: app/routes/_auth+/onboarding.tsx:371
+#: app/routes/_auth+/onboarding.tsx:381
 msgid "Hi {0}, please complete your profile{1}."
 msgstr "مرحباً {0}، يرجى إكمال ملفك الشخصي{1}."
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:308
-#: app/routes/_auth+/onboarding.tsx:475
+#: app/routes/_auth+/onboarding_.$provider.tsx:318
+#: app/routes/_auth+/onboarding.tsx:485
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr "أوافق على شروط الخدمة وسياسة الخصوصية"
+
+#: app/components/settings/cards/organization/danger-zone-card.tsx:116
+msgid "I'll not be able to access the organization and its data anymore"
+msgstr "لن أتمكن من الوصول إلى المؤسسة وبياناتها بعد الآن"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:463
+msgid "I've Copied the Key"
+msgstr "لقد نسخت المفتاح"
 
 #: app/components/settings/cards/profile-card.tsx:154
 msgid "If you change your email, you'll need to verify the new address"
 msgstr "إذا قمت بتغيير بريدك الإلكتروني، ستحتاج إلى التحقق من العنوان الجديد"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:193
+msgid "Important Security Note"
+msgstr "ملاحظة أمنية مهمة"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:447
+msgid "Important:"
+msgstr "مهم:"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:33
+msgid "In-App"
+msgstr "داخل التطبيق"
+
+#: app/components/settings/cards/organization/billing-card.tsx:427
+msgid "Includes {includesSeats} user seats"
+msgstr "يتضمن {includesSeats} مقعد مستخدم"
+
+#: app/routes/organizations+/create.tsx:1321
+msgid "Includes {seats} user seats"
+msgstr "يتضمن {seats} مقعد مستخدم"
 
 #: app/routes/settings+/profile.password.tsx:91
 msgid "Incorrect password."
 msgstr "كلمة المرور غير صحيحة."
 
 #: app/components/app-sidebar.tsx:249
+#: app/components/settings/cards/organization/integrations-card.tsx:68
 msgid "Integrations"
 msgstr "التكاملات"
 
@@ -509,6 +1065,10 @@ msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 msgid "Invalid Verification Type"
 msgstr "نوع التحقق غير صالح"
 
+#: app/components/organization-invitations.tsx:228
+msgid "Invite by email"
+msgstr "الدعوة عبر البريد الإلكتروني"
+
 #: app/components/team-switcher.tsx:156
 msgid "Invite members"
 msgstr "دعوة أعضاء"
@@ -517,7 +1077,12 @@ msgstr "دعوة أعضاء"
 msgid "Invite new members"
 msgstr "دعوة أعضاء جدد"
 
+#: app/routes/organizations+/create.tsx:901
+msgid "Invite team members"
+msgstr "دعوة أعضاء الفريق"
+
 #. placeholder {0}: invitation.inviter.name || invitation.inviter.email
+#: app/components/organization-invitations.tsx:295
 #: app/routes/_app+/organizations.tsx:274
 msgid "Invited by {0}"
 msgstr "مدعو من قبل {0}"
@@ -542,18 +1107,57 @@ msgstr "انتقل إلى منظمة موجودة، أو اقبل الدعوات
 msgid "Kanban"
 msgstr "كانبان"
 
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:278
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:409
+msgid "Key Name"
+msgstr "اسم المفتاح"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:632
+msgid "Kiro IDE"
+msgstr "Kiro IDE"
+
 #: app/routes/_auth+/login.tsx:467
 #: app/routes/_auth+/login.tsx:478
 msgid "Last used"
 msgstr "آخر استخدام"
 
-#: app/components/feature-updates.tsx:197
+#: app/components/feature-updates.tsx:199
 msgid "Learn more"
 msgstr "اعرف المزيد"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:279
+msgid "Leave empty to keep existing secret key, or enter a new one to update."
+msgstr "اتركه فارغاً للاحتفاظ بالمفتاح السري الحالي، أو أدخل واحداً جديداً للتحديث."
+
+#: app/components/nav-user.tsx:70
+msgid "Light mode"
+msgstr "الوضع الفاتح"
+
+#: app/components/data-table.tsx:255
+#: app/components/data-table.tsx:271
+#: app/components/data-table.tsx:880
+msgid "Limit"
+msgstr "الحد الأقصى"
+
+#: app/components/ui/notification-bell.tsx:469
+msgid "Load More"
+msgstr "تحميل المزيد"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1732
+msgid "Loading AI Assistant..."
+msgstr "جاري تحميل مساعد الذكاء الاصطناعي..."
 
 #: app/components/command-menu.tsx:105
 msgid "Loading notes..."
 msgstr "جاري تحميل الملاحظات..."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:141
+msgid "Loading preferences..."
+msgstr "جاري تحميل التفضيلات..."
+
+#: app/components/nav-user.tsx:222
+msgid "Log out"
+msgstr "تسجيل الخروج"
 
 #: app/routes/_auth+/login.tsx:288
 msgid "Login Error"
@@ -563,6 +1167,10 @@ msgstr "خطأ في تسجيل الدخول"
 msgid "Login with a passkey"
 msgstr "تسجيل الدخول بمفتاح المرور"
 
+#: app/routes/organizations+/create.tsx:577
+msgid "Logo"
+msgstr "الشعار"
+
 #: app/components/user-dropdown.tsx:66
 msgid "Logout"
 msgstr "تسجيل الخروج"
@@ -570,6 +1178,10 @@ msgstr "تسجيل الخروج"
 #: app/routes/_auth+/signup.tsx:252
 msgid "m@example.com"
 msgstr "م@مثال.com"
+
+#: app/components/data-table.tsx:376
+msgid "Make a copy"
+msgstr "عمل نسخة"
 
 #: app/routes/settings+/profile.index.tsx:183
 msgid "Manage connections"
@@ -579,23 +1191,79 @@ msgstr "إدارة الاتصالات"
 msgid "Manage passkeys"
 msgstr "إدارة مفاتيح المرور"
 
+#: app/components/settings/cards/security-card.tsx:191
+#: app/components/settings/cards/security-card.tsx:197
+msgid "Manage Passkeys"
+msgstr "إدارة مفاتيح المرور"
+
+#: app/components/settings/cards/organization/billing-card.tsx:181
+msgid "Manage Subscription"
+msgstr "إدارة الاشتراك"
+
 #: app/routes/_app+/profile.tsx:91
 msgid "Manage your account settings and set e-mail preferences."
 msgstr "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
+
+#: app/components/settings/cards/connections-card.tsx:40
+msgid "Manage your connected accounts here."
+msgstr "إدارة حساباتك المتصلة هنا."
 
 #: app/routes/_app+/notifications.tsx:27
 msgid "Manage your notification preferences for different channels and workflows."
 msgstr "إدارة تفضيلات الإشعارات للقنوات وسير العمل المختلفة."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:130
+#: app/components/settings/cards/notification-preferences-card.tsx:158
+#: app/components/settings/cards/notification-preferences-card.tsx:196
+msgid "Manage your notification settings for different channels and workflows."
+msgstr "إدارة إعدادات الإشعارات للقنوات ومسارات العمل المختلفة."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:245
+msgid "Manage your notification settings for different channels and workflows. Critical notifications cannot be disabled."
+msgstr "إدارة إعدادات الإشعارات للقنوات ومسارات العمل المختلفة. لا يمكن تعطيل الإشعارات الحرجة."
+
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:18
 msgid "Manage your organization settings and preferences."
 msgstr "إدارة إعدادات وتفضيلات منظمتك."
+
+#: app/components/organization-members.tsx:134
+msgid "Manage your organization's members."
+msgstr "إدارة أعضاء منظمتك."
+
+#: app/components/settings/cards/organization/general-settings-card.tsx:61
+msgid "Manage your organization's name, slug, and profile image."
+msgstr "إدارة اسم مؤسستك والرابط الثابت وصورة الملف الشخصي."
+
+#: app/components/settings/cards/organization/billing-card.tsx:98
+msgid "Manage your organization's subscription"
+msgstr "إدارة اشتراك مؤسستك"
+
+#: app/components/settings/cards/security-card.tsx:65
+msgid "Manage your password and two-factor authentication settings."
+msgstr "إدارة كلمة المرور وإعدادات المصادقة الثنائية."
 
 #: app/routes/_app+/security.tsx:235
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr "إدارة كلمة المرور والمصادقة الثنائية والحسابات المتصلة وإعدادات الأمان المتقدمة."
 
+#: app/components/settings/cards/advanced-settings-card.tsx:33
+msgid "Manage your sessions and download your data."
+msgstr "إدارة جلساتك وتنزيل بياناتك."
+
+#: app/components/ui/notification-bell.tsx:429
+msgid "Mark all as read"
+msgstr "تحديد الكل كمقروء"
+
+#: app/components/ui/notification-bell.tsx:192
+msgid "Mark as read"
+msgstr "تحديد كمقروء"
+
+#: app/components/ui/notification-bell.tsx:190
+msgid "Mark as unread"
+msgstr "تحديد كغير مقروء"
+
 #: app/components/app-sidebar.tsx:227
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:732
 msgid "MCP Server"
 msgstr "خادم MCP"
 
@@ -603,18 +1271,46 @@ msgstr "خادم MCP"
 msgid "member"
 msgstr "عضو"
 
+#: app/components/organization-members.tsx:97
+msgid "Member"
+msgstr "عضو"
+
 #: app/components/team-switcher.tsx:94
 msgid "members"
 msgstr "أعضاء"
 
 #: app/components/app-sidebar.tsx:244
+#: app/components/organization-members.tsx:131
 msgid "Members"
 msgstr "الأعضاء"
 
+#: app/components/settings/cards/organization/billing-card.tsx:208
+#: app/routes/organizations+/create.tsx:831
+msgid "Monthly"
+msgstr "شهري"
+
+#: app/components/favorite-notes.tsx:86
+msgid "More"
+msgstr "المزيد"
+
+#: app/components/settings/cards/organization/general-settings-card.tsx:78
 #: app/components/settings/cards/profile-card.tsx:90
+#: app/routes/organizations+/create.tsx:644
 #: app/routes/settings+/profile.index.tsx:297
 msgid "Name"
 msgstr "الاسم"
+
+#: app/components/settings/cards/organization/integrations-card.tsx:90
+msgid "Need an integration but don't see it here?"
+msgstr "هل تحتاج إلى تكامل ولكن لا تراه هنا؟"
+
+#: app/components/core/feedback-modal.tsx:31
+msgid "Negative feedback"
+msgstr "ملاحظات سلبية"
+
+#: app/components/core/feedback-modal.tsx:32
+msgid "Neutral feedback"
+msgstr "ملاحظات محايدة"
 
 #: app/routes/settings+/profile.change-email.tsx:156
 msgid "New Email"
@@ -630,6 +1326,26 @@ msgstr "ملاحظة جديدة"
 #: app/routes/settings+/profile.password.tsx:184
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
+
+#: app/components/organization-invitations.tsx:160
+msgid "No active invite link"
+msgstr "لا يوجد رابط دعوة نشط"
+
+#: app/components/settings/cards/organization/billing-card.tsx:164
+msgid "No active subscription"
+msgstr "لا يوجد اشتراك نشط"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:550
+msgid "No API keys created yet"
+msgstr "لم يتم إنشاء مفاتيح API بعد"
+
+#: app/components/note/comments-section.tsx:198
+msgid "No comments yet"
+msgstr "لا توجد تعليقات بعد"
+
+#: app/components/organization-members.tsx:120
+msgid "No members found."
+msgstr "لم يتم العثور على أعضاء."
 
 #. placeholder {0}: params.noteId
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:112
@@ -653,6 +1369,10 @@ msgstr "لم يتم العثور على ملاحظات."
 msgid "No notes match your search for \"{0}\". Try a different search term or create a new note."
 msgstr "لا توجد ملاحظات تطابق بحثك عن \"{0}\". جرب مصطلح بحث مختلف أو أنشئ ملاحظة جديدة."
 
+#: app/components/settings/cards/notification-preferences-card.tsx:212
+msgid "No notification preferences are configured yet."
+msgstr "لم يتم تكوين تفضيلات الإشعارات بعد."
+
 #: app/routes/_app+/organizations.tsx:372
 msgid "No organization found"
 msgstr "لم يتم العثور على منظمة"
@@ -662,9 +1382,18 @@ msgstr "لم يتم العثور على منظمة"
 msgid "No organization with the slug \"{0}\" exists"
 msgstr "لا توجد منظمة بالمعرف \"{0}\""
 
+#: app/components/settings/passkey-manager.tsx:153
 #: app/routes/settings+/profile.passkeys.tsx:203
 msgid "No passkeys registered yet"
 msgstr "لا توجد مفاتيح مرور مسجلة بعد"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:209
+msgid "No preferences found"
+msgstr "لم يتم العثور على تفضيلات"
+
+#: app/components/data-table.tsx:629
+msgid "No results."
+msgstr "لا توجد نتائج."
 
 #: app/routes/_auth+/forgot-password.tsx:131
 msgid "No user exists with this username or email"
@@ -700,6 +1429,22 @@ msgstr "الملاحظات التي أنشأتها منظمتك خلال الـ 
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr "تساعدك الملاحظات على تسجيل الأفكار ومحاضر الاجتماعات أو أي شيء مهم لمنظمتك. ابدأ بإنشاء ملاحظتك الأولى."
 
+#: app/components/ui/notification-bell.tsx:249
+msgid "Nothing here yet!"
+msgstr "لا شيء هنا بعد!"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:127
+#: app/components/settings/cards/notification-preferences-card.tsx:155
+#: app/components/settings/cards/notification-preferences-card.tsx:193
+#: app/components/settings/cards/notification-preferences-card.tsx:242
+#: app/components/settings/cards/notification-preferences-card.tsx:429
+msgid "Notification Preferences"
+msgstr "تفضيلات الإشعارات"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:432
+msgid "Notification preferences are not available at this time."
+msgstr "تفضيلات الإشعارات غير متاحة في هذا الوقت."
+
 #: app/routes/_app+/notifications.tsx:26
 msgid "Notification Settings"
 msgstr "إعدادات الإشعارات"
@@ -708,9 +1453,26 @@ msgstr "إعدادات الإشعارات"
 msgid "Notifications"
 msgstr "الإشعارات"
 
+#: app/components/settings/cards/notification-preferences-card.tsx:45
+msgid "Notifications when someone comments on your notes"
+msgstr "إشعارات عندما يعلق شخص ما على ملاحظاتك"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:44
+msgid "Notifications when you are mentioned in a comment"
+msgstr "إشعارات عندما يتم ذكرك في تعليق"
+
 #: app/routes/_auth+/waitlist.tsx:154
 msgid "of {totalUsers} people"
 msgstr "من {totalUsers} شخص"
+
+#: app/components/favorite-notes.tsx:99
+msgid "Open"
+msgstr "فتح"
+
+#: app/components/data-table.tsx:367
+#: app/components/ui/notification-bell.tsx:422
+msgid "Open menu"
+msgstr "فتح القائمة"
 
 #: app/routes/_auth+/signup.tsx:236
 msgid "Or continue with"
@@ -720,7 +1482,16 @@ msgstr "أو تابع باستخدام"
 msgid "Or continue with email or username"
 msgstr "أو تابع باستخدام البريد الإلكتروني أو اسم المستخدم"
 
+#: app/routes/organizations+/create.tsx:970
+msgid "Organization size"
+msgstr "حجم المنظمة"
+
+#: app/components/settings/cards/organization/team-size-card.tsx:77
+msgid "Organization Size"
+msgstr "حجم المؤسسة"
+
 #: app/components/app-sidebar.tsx:133
+#: app/components/nav-user.tsx:145
 #: app/components/team-switcher.tsx:117
 #: app/routes/_app+/organizations.tsx:198
 msgid "Organizations"
@@ -730,6 +1501,11 @@ msgstr "المنظمات"
 msgid "Organizations are used to group your projects."
 msgstr "تُستخدم المنظمات لتجميع مشاريعك."
 
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1585
+msgid "Overview"
+msgstr "نظرة عامة"
+
+#: app/components/settings/cards/security-card.tsx:167
 #: app/routes/settings+/profile.passkeys.tsx:18
 #: app/routes/settings+/profile.passkeys.tsx:137
 msgid "Passkeys"
@@ -737,7 +1513,7 @@ msgstr "مفاتيح المرور"
 
 #: app/components/settings/password-form.tsx:117
 #: app/routes/_auth+/login.tsx:776
-#: app/routes/_auth+/onboarding.tsx:419
+#: app/routes/_auth+/onboarding.tsx:429
 #: app/routes/settings+/profile.password_.create.tsx:36
 #: app/routes/settings+/profile.password.tsx:39
 msgid "Password"
@@ -747,20 +1523,46 @@ msgstr "كلمة المرور"
 msgid "Password Changed"
 msgstr "تم تغيير كلمة المرور"
 
-#: app/routes/_auth+/onboarding.tsx:125
+#: app/routes/_auth+/onboarding.tsx:124
 #: app/routes/_auth+/reset-password.tsx:73
 #: app/routes/settings+/profile.password_.create.tsx:72
 #: app/routes/settings+/profile.password.tsx:99
 msgid "Password is too common"
 msgstr "كلمة المرور شائعة جداً"
 
+#: app/components/organization-invitations.tsx:276
 #: app/routes/_app+/organizations.tsx:231
 msgid "Pending Invitations"
 msgstr "الدعوات المعلقة"
 
+#: app/components/settings/cards/organization/billing-card.tsx:414
+#: app/routes/organizations+/create.tsx:1309
+msgid "per month"
+msgstr "شهرياً"
+
+#: app/routes/organizations+/create.tsx:1246
+msgid "Plan not available"
+msgstr "الخطة غير متاحة"
+
+#: app/routes/organizations+/create.tsx:1249
+msgid "Please check configuration"
+msgstr "يرجى التحقق من التكوين"
+
+#: app/components/settings/cards/organization/billing-card.tsx:354
+msgid "Please check your Stripe configuration"
+msgstr "يرجى التحقق من تكوين Stripe"
+
+#: app/components/settings/cards/organization/billing-card.tsx:261
+msgid "Please check your Stripe configuration or try again later"
+msgstr "يرجى التحقق من تكوين Stripe أو المحاولة مرة أخرى لاحقاً"
+
 #: app/routes/_auth+/verify.tsx:94
 msgid "Please check your verification link."
 msgstr "يرجى التحقق من رابط التحقق."
+
+#: app/components/settings/cards/notification-preferences-card.tsx:442
+msgid "Please ensure you have an active organization to manage notification preferences."
+msgstr "يرجى التأكد من أن لديك منظمة نشطة لإدارة تفضيلات الإشعارات."
 
 #: app/routes/_auth+/verify.tsx:71
 msgid "Please enter your 2FA code to verify your identity."
@@ -771,9 +1573,30 @@ msgstr "يرجى إدخال رمز المصادقة الثنائية للتحق�
 msgid "Please enter your email or username"
 msgstr "يرجى إدخال بريدك الإلكتروني أو اسم المستخدم"
 
+#: app/components/core/feedback-modal.tsx:33
+msgid "Positive feedback"
+msgstr "ملاحظات إيجابية"
+
+#: app/components/settings/cards/organization/billing-card.tsx:394
+#: app/routes/organizations+/create.tsx:1283
+msgid "Price not configured"
+msgstr "السعر غير مكوّن"
+
+#: app/components/settings/cards/organization/billing-card.tsx:351
+msgid "Pricing not available"
+msgstr "الأسعار غير متاحة"
+
+#: app/routes/organizations+/create.tsx:1344
+msgid "Priority support"
+msgstr "دعم الأولوية"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1563
+msgid "Private"
+msgstr "خاص"
+
 #: app/components/app-sidebar.tsx:115
 #: app/components/user-dropdown.tsx:51
-#: app/routes/_auth+/onboarding_.$provider.tsx:233
+#: app/routes/_auth+/onboarding_.$provider.tsx:243
 msgid "Profile"
 msgstr "الملف الشخصي"
 
@@ -782,26 +1605,60 @@ msgstr "الملف الشخصي"
 msgid "Profile Settings"
 msgstr "إعدادات الملف الشخصي"
 
+#: app/components/settings/cards/notification-preferences-card.tsx:34
+msgid "Push"
+msgstr "الإشعارات الفورية"
+
+#: app/components/settings/two-factor-form.tsx:115
+msgid "QR code"
+msgstr "رمز QR"
+
+#: app/components/settings/cards/organization/billing-card.tsx:301
+msgid "Questions about billing?"
+msgstr "أسئلة حول الفوترة؟"
+
 #: app/components/leadership-card.tsx:68
 msgid "Rank"
 msgstr "الترتيب"
+
+#: app/components/settings/cards/organization/integrations-card.tsx:222
+msgid "Read documentation"
+msgstr "قراءة الوثائق"
 
 #: app/routes/_auth+/login.tsx:578
 msgid "Recommended for"
 msgstr "موصى به لـ"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:228
+msgid "Region"
+msgstr "المنطقة"
+
+#: app/components/settings/cards/security-card.tsx:181
+msgid "Register a passkey to log in without a password"
+msgstr "سجّل مفتاح مرور لتسجيل الدخول بدون كلمة مرور"
+
+#: app/components/settings/passkey-manager.tsx:97
 #: app/routes/settings+/profile.passkeys.tsx:146
 msgid "Register new passkey"
 msgstr "تسجيل مفتاح مرور جديد"
 
 #. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
+#: app/components/settings/passkey-manager.tsx:126
 #: app/routes/settings+/profile.passkeys.tsx:177
 msgid "Registered {0} ago"
 msgstr "تم التسجيل منذ {0}"
 
+#: app/components/privacy-banner.tsx:48
+msgid "Reject"
+msgstr "رفض"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1722
+msgid "Reload page"
+msgstr "إعادة تحميل الصفحة"
+
 #: app/routes/_auth+/login.tsx:807
-#: app/routes/_auth+/onboarding_.$provider.tsx:334
-#: app/routes/_auth+/onboarding.tsx:500
+#: app/routes/_auth+/onboarding_.$provider.tsx:344
+#: app/routes/_auth+/onboarding.tsx:510
 msgid "Remember me"
 msgstr "تذكرني"
 
@@ -809,9 +1666,30 @@ msgstr "تذكرني"
 msgid "Remember your password?"
 msgstr "هل تتذكر كلمة المرور الخاصة بك؟"
 
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:624
+msgid "Replace YOUR_API_KEY_HERE with one of your API keys above"
+msgstr "استبدل YOUR_API_KEY_HERE بأحد مفاتيح API أعلاه"
+
+#: app/components/note/comment-input.tsx:174
+#: app/components/note/comment-item.tsx:204
+msgid "Reply"
+msgstr "رد"
+
+#: app/components/note/comment-input.tsx:149
+msgid "Replying to comment"
+msgstr "الرد على التعليق"
+
+#: app/components/settings/cards/organization/integrations-card.tsx:97
+msgid "Request integration"
+msgstr "طلب تكامل"
+
 #: app/routes/_auth+/login.tsx:394
 msgid "Requesting your authorization"
 msgstr "جاري طلب التفويض"
+
+#: app/components/organization-invitations.tsx:204
+msgid "Reset"
+msgstr "إعادة تعيين"
 
 #: app/routes/_auth+/reset-password.tsx:180
 msgid "Reset password"
@@ -821,10 +1699,67 @@ msgstr "إعادة تعيين كلمة المرور"
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
+#: app/routes/organizations+/create.tsx:711
+msgid "Reset to auto-generated"
+msgstr "إعادة تعيين إلى التلقائي"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retry"
+msgstr "إعادة المحاولة"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:181
+msgid "Retrying..."
+msgstr "جاري إعادة المحاولة..."
+
+#: app/components/data-table.tsx:283
+#: app/components/data-table.tsx:887
+msgid "Reviewers"
+msgstr "المراجعون"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:217
+msgid "S3 Endpoint URL"
+msgstr "رابط نقطة نهاية S3"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:152
+msgid "S3 Storage Configuration"
+msgstr "تكوين تخزين S3"
+
+#: app/components/organization-members.tsx:102
+#: app/components/settings/cards/organization/s3-storage-card.tsx:305
+#: app/components/settings/cards/organization/verified-domain-card.tsx:118
+msgid "Save"
+msgstr "حفظ"
+
+#: app/components/settings/cards/organization/billing-card.tsx:220
+#: app/routes/organizations+/create.tsx:847
+msgid "Save 20%"
+msgstr "وفّر 20٪"
+
+#: app/components/settings/cards/organization/general-settings-card.tsx:104
 #: app/components/settings/cards/profile-card.tsx:178
 #: app/routes/settings+/profile.index.tsx:321
 msgid "Save changes"
 msgstr "حفظ التغييرات"
+
+#. placeholder {0}: row.original.header
+#: app/components/data-table.tsx:234
+#: app/components/data-table.tsx:264
+msgid "Saving {0}"
+msgstr "حفظ {0}"
+
+#: app/components/settings/two-factor-form.tsx:101
+msgid "Scan QR Code or Enter Setup Key"
+msgstr "مسح رمز QR أو إدخال مفتاح الإعداد"
+
+#: app/components/settings/cards/organization/billing-card.tsx:289
+msgid "Schedule a call"
+msgstr "حدد موعد مكالمة"
+
+#: app/components/search-bar.tsx:39
+#: app/components/search-bar.tsx:46
+#: app/components/search-bar.tsx:59
+msgid "Search"
+msgstr "بحث"
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:333
 msgid "Search notes by title or content..."
@@ -839,25 +1774,60 @@ msgstr "البحث في الملاحظات..."
 msgid "Search..."
 msgstr "البحث..."
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:265
+msgid "Secret Access Key"
+msgstr "مفتاح الوصول السري"
+
+#: app/components/data-table.tsx:195
+msgid "Section Type"
+msgstr "نوع القسم"
+
 #: app/components/app-sidebar.tsx:121
 msgid "Security"
 msgstr "الأمان"
 
+#: app/components/settings/passkey-manager.tsx:121
 #: app/routes/settings+/profile.passkeys.tsx:172
 msgid "Security Key"
 msgstr "مفتاح الأمان"
 
+#: app/components/settings/cards/security-card.tsx:62
 #: app/routes/_app+/security.tsx:234
 msgid "Security Settings"
 msgstr "إعدادات الأمان"
+
+#: app/components/data-table.tsx:861
+msgid "Select a status"
+msgstr "اختر حالة"
+
+#: app/routes/organizations+/create.tsx:803
+msgid "Select a subscription plan to get started with your organization. Your trial will begin after payment setup."
+msgstr "اختر خطة اشتراك للبدء مع منظمتك. ستبدأ تجربتك بعد إعداد الدفع."
+
+#: app/components/data-table.tsx:169
+msgid "Select all"
+msgstr "تحديد الكل"
+
+#: app/components/data-table.tsx:178
+msgid "Select row"
+msgstr "تحديد صف"
 
 #: app/routes/settings+/profile.change-email.tsx:172
 msgid "Send Confirmation"
 msgstr "إرسال التأكيد"
 
+#: app/components/organization-invitations.tsx:264
+#: app/routes/organizations+/create.tsx:1107
+msgid "Send Invitations"
+msgstr "إرسال الدعوات"
+
 #: app/routes/_auth+/forgot-password.tsx:236
 msgid "Send reset instructions"
 msgstr "إرسال تعليمات إعادة التعيين"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:305
+msgid "Set expiration date (optional)"
+msgstr "تعيين تاريخ انتهاء الصلاحية (اختياري)"
 
 #: app/components/app-sidebar.tsx:233
 #: app/components/command-menu.tsx:149
@@ -866,9 +1836,17 @@ msgstr "إرسال تعليمات إعادة التعيين"
 msgid "Settings"
 msgstr "الإعدادات"
 
+#: app/components/settings/two-factor-form.tsx:118
+msgid "Setup key"
+msgstr "مفتاح الإعداد"
+
 #: app/routes/_auth+/waitlist.tsx:169
 msgid "Share with others"
 msgstr "شارك مع الآخرين"
+
+#: app/components/data-table.tsx:758
+msgid "Showing total visitors for the last 6 months"
+msgstr "عرض إجمالي الزوار لآخر 6 أشهر"
 
 #: app/routes/_auth+/signup.tsx:285
 msgid "Sign in"
@@ -899,9 +1877,68 @@ msgstr "أنشئ حساباً باستخدام حساب التواصل الاج�
 msgid "Signing in as"
 msgstr "تسجيل الدخول باسم"
 
+#: app/components/settings/cards/organization/billing-card.tsx:279
+msgid "Single sign-on, custom SLA, private support channel, and more. <0>Learn more</0>"
+msgstr "تسجيل دخول موحد، اتفاقية مستوى خدمة مخصصة، قناة دعم خاصة، والمزيد. <0>اعرف المزيد</0>"
+
+#: app/routes/organizations+/create.tsx:924
+msgid "Skip for now"
+msgstr "تخطي الآن"
+
+#: app/components/settings/cards/organization/general-settings-card.tsx:83
+#: app/routes/organizations+/create.tsx:665
+msgid "Slug"
+msgstr "الرابط الثابت"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:32
+msgid "SMS"
+msgstr "الرسائل النصية"
+
+#: app/components/note/comments-section.tsx:201
+msgid "Start the conversation by adding the first comment."
+msgstr "ابدأ المحادثة بإضافة التعليق الأول."
+
+#: app/components/data-table.tsx:206
+#: app/components/data-table.tsx:857
+msgid "Status"
+msgstr "الحالة"
+
+#. placeholder {0}: steps.length
+#: app/routes/organizations+/create.tsx:469
+msgid "Step {currentStep} of {0}"
+msgstr "الخطوة {currentStep} من {0}"
+
+#: app/components/impersonation-banner.tsx:54
+msgid "Stop Impersonation"
+msgstr "إيقاف انتحال الشخصية"
+
+#: app/components/core/feedback-modal.tsx:112
+#: app/components/data-table.tsx:960
 #: app/routes/_app+/$orgSlug_+/index.tsx:296
 msgid "Submit"
 msgstr "إرسال"
+
+#: app/components/settings/cards/organization/billing-card.tsx:187
+msgid "Subscribe"
+msgstr "اشتراك"
+
+#: app/components/settings/cards/organization/billing-card.tsx:163
+msgid "Subscription inactive"
+msgstr "الاشتراك غير نشط"
+
+#: app/components/nav-user.tsx:160
+msgid "Super Admin"
+msgstr "المسؤول الأعلى"
+
+#: app/components/nav-user.tsx:72
+msgid "System theme"
+msgstr "نظام السمة"
+
+#: app/components/data-table.tsx:225
+#: app/components/data-table.tsx:241
+#: app/components/data-table.tsx:874
+msgid "Target"
+msgstr "الهدف"
 
 #: app/components/leadership-card.tsx:71
 msgid "Team member"
@@ -911,32 +1948,52 @@ msgstr "عضو الفريق"
 msgid "Team members who have created the most notes"
 msgstr "أعضاء الفريق الذين أنشأوا أكبر عدد من الملاحظات"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:176
-#: app/routes/_auth+/onboarding.tsx:331
+#: app/components/settings/cards/organization/team-size-card.tsx:62
+msgid "Team Size"
+msgstr "حجم الفريق"
+
+#: app/routes/organizations+/create.tsx:948
+msgid "Tell us more about your organization"
+msgstr "أخبرنا المزيد عن منظمتك"
+
+#: app/components/settings/cards/notification-preferences-card.tsx:43
+msgid "Testing notifications"
+msgstr "إشعارات الاختبار"
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:175
+#: app/routes/_auth+/onboarding.tsx:330
 msgid "Thanks for signing up!"
 msgstr "شكراً لتسجيلك!"
 
 #. placeholder {0}: invitation.organization.name
-#: app/routes/_auth+/onboarding.tsx:179
+#: app/routes/_auth+/onboarding.tsx:178
 msgid "Thanks for signing up! {inviterName} has invited you to join {0}. Review the invitation below."
 msgstr "شكراً لتسجيلك! دعاك {inviterName} للانضمام إلى {0}. راجع الدعوة أدناه."
 
-#: app/routes/_auth+/onboarding.tsx:321
+#: app/routes/_auth+/onboarding.tsx:320
 msgid "Thanks for signing up! We'll notify you when we're ready."
 msgstr "شكراً لتسجيلك! سنبلغك عندما نكون جاهزين."
 
-#: app/routes/_auth+/onboarding.tsx:209
+#: app/routes/_auth+/onboarding.tsx:208
 msgid "Thanks for signing up! You have pending organization invitations."
 msgstr "شكراً لتسجيلك! لديك دعوات منظمة معلقة."
 
-#: app/routes/_auth+/onboarding.tsx:281
+#: app/routes/_auth+/onboarding.tsx:280
 msgid "Thanks for signing up! You've been automatically added to {orgNames} based on your email domain."
 msgstr "شكراً لتسجيلك! تمت إضافتك تلقائياً إلى {orgNames} بناءً على نطاق بريدك الإلكتروني."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:327
+msgid "The API key will expire on this date. Leave unchecked for no expiration."
+msgstr "سينتهي صلاحية مفتاح API في هذا التاريخ. اترك بدون تحديد لعدم انتهاء الصلاحية."
 
 #: app/components/settings/password-form.tsx:38
 #: app/routes/settings+/profile.password.tsx:56
 msgid "The passwords must match"
 msgstr "يجب أن تتطابق كلمات المرور"
+
+#: app/components/nav-user.tsx:176
+msgid "Theme"
+msgstr "السمة"
 
 #. placeholder {0}: trialStatus.daysRemaining
 #: app/components/app-sidebar.tsx:58
@@ -951,9 +2008,29 @@ msgstr "حدثت مشكلة في محاولة تسجيل الدخول. يرجى 
 msgid "This email is already in use."
 msgstr "هذا البريد الإلكتروني قيد الاستخدام بالفعل."
 
+#: app/routes/organizations+/create.tsx:951
+msgid "This helps us customize your experience and provide better insights."
+msgstr "يساعدنا هذا في تخصيص تجربتك وتقديم رؤى أفضل."
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:450
+msgid "This is the only time you'll see this API key. Make sure to copy it and store it securely."
+msgstr "هذه هي المرة الوحيدة التي سترى فيها مفتاح API. تأكد من نسخه وتخزينه بشكل آمن."
+
+#: app/components/settings/account-management.tsx:31
+msgid "This is your only active session"
+msgstr "هذه هي جلستك النشطة الوحيدة"
+
 #: app/routes/settings+/profile.index.tsx:384
 msgid "This is your only session"
 msgstr "هذه هي جلستك الوحيدة"
+
+#: app/components/ui/notification-bell.tsx:375
+msgid "Toggle notifications"
+msgstr "تبديل الإشعارات"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:673
+msgid "Tools available through your MCP server connection"
+msgstr "الأدوات المتاحة من خلال اتصال خادم MCP"
 
 #: app/components/leadership-card.tsx:58
 msgid "Top Contributors"
@@ -963,22 +2040,85 @@ msgstr "أفضل المساهمين"
 msgid "Trending up by {trendPercentage}% this period"
 msgstr "يتجه للأعلى بنسبة {trendPercentage}٪ في هذه الفترة"
 
+#: app/components/settings/cards/organization/billing-card.tsx:161
+msgid "Trial period active"
+msgstr "فترة تجريبية نشطة"
+
+#: app/components/settings/cards/security-card.tsx:124
+msgid "Two-Factor Authentication"
+msgstr "المصادقة الثنائية"
+
+#: app/components/settings/two-factor-form.tsx:54
+msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure."
+msgstr "المصادقة الثنائية مفعّلة حالياً. تعطيلها سيجعل حسابك أقل أماناً."
+
+#: app/components/data-table.tsx:829
+msgid "Type"
+msgstr "النوع"
+
+#. placeholder {0}: organization.name
+#: app/components/settings/cards/organization/danger-zone-card.tsx:93
+msgid "Type the organization name \"{0}\" to confirm."
+msgstr "اكتب اسم المؤسسة \"{0}\" للتأكيد."
+
+#: app/components/settings/cards/organization/billing-card.tsx:258
+msgid "Unable to load pricing information"
+msgstr "تعذر تحميل معلومات الأسعار"
+
+#: app/components/ui/notification-bell.tsx:327
+#: app/components/ui/notification-bell.tsx:412
+msgid "Unread Notifications"
+msgstr "الإشعارات غير المقروءة"
+
+#: app/components/favorite-notes.tsx:133
+msgid "Unstar"
+msgstr "إلغاء التفضيل"
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1551
+msgid "Untitled Note"
+msgstr "ملاحظة بدون عنوان"
+
+#: app/components/settings/cards/organization/team-size-card.tsx:102
+msgid "Update"
+msgstr "تحديث"
+
 #: app/components/settings/cards/profile-card.tsx:76
 msgid "Update your photo and personal details here."
 msgstr "قم بتحديث صورتك وبياناتك الشخصية هنا."
 
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1556
+msgid "Updated {timeAgo} ago"
+msgstr "تم التحديث منذ {timeAgo}"
+
 #: app/components/app-sidebar.tsx:75
+#: app/components/settings/cards/organization/billing-card.tsx:461
 msgid "Upgrade"
 msgstr "ترقية"
+
+#: app/routes/organizations+/create.tsx:626
+msgid "Upload your logo"
+msgstr "تحميل شعارك"
+
+#: app/components/note/comment-input.tsx:151
+msgid "Use @ to mention someone • Cmd+Enter to submit"
+msgstr "استخدم @ للإشارة إلى شخص • Cmd+Enter للإرسال"
+
+#: app/components/settings/two-factor-form.tsx:104
+msgid "Use any authenticator app on your mobile device to scan the QR code, or enter the Setup Key manually."
+msgstr "استخدم أي تطبيق مصادقة على جهازك المحمول لمسح رمز QR، أو أدخل مفتاح الإعداد يدوياً."
 
 #: app/routes/_auth+/login.tsx:591
 msgid "Use password instead"
 msgstr "استخدم كلمة المرور بدلاً من ذلك"
 
+#: app/components/settings/cards/organization/s3-storage-card.tsx:174
+msgid "Use your own S3-compatible storage instead of the default storage"
+msgstr "استخدم تخزين S3 المتوافق الخاص بك بدلاً من التخزين الافتراضي"
+
 #: app/components/settings/cards/profile-card.tsx:105
 #: app/routes/_auth+/login.tsx:756
-#: app/routes/_auth+/onboarding_.$provider.tsx:251
-#: app/routes/_auth+/onboarding.tsx:385
+#: app/routes/_auth+/onboarding_.$provider.tsx:261
+#: app/routes/_auth+/onboarding.tsx:395
 #: app/routes/settings+/profile.index.tsx:281
 msgid "Username"
 msgstr "اسم المستخدم"
@@ -995,6 +2135,15 @@ msgstr "اسم المستخدم أو البريد الإلكتروني مطلو�
 #: app/routes/_auth+/verify.tsx:111
 msgid "Verification Code"
 msgstr "رمز التحقق"
+
+#: app/components/settings/cards/organization/verified-domain-card.tsx:69
+#: app/components/settings/cards/organization/verified-domain-card.tsx:93
+msgid "Verified domain"
+msgstr "النطاق المُتحقق منه"
+
+#: app/components/settings/cards/organization/verified-domain-card.tsx:108
+msgid "Verified domain must match your current email address domain for security. <0>Learn more</0>"
+msgstr "يجب أن يطابق النطاق المُتحقق منه نطاق عنوان بريدك الإلكتروني الحالي للأمان. <0>اعرف المزيد</0>"
 
 #: app/routes/_auth+/verify.tsx:142
 msgid "Verify"
@@ -1016,6 +2165,14 @@ msgstr "تريد الذهاب إلى أعلى قائمة الانتظار?"
 msgid "We found your organization:"
 msgstr "وجدنا منظمتك:"
 
+#: app/components/privacy-banner.tsx:21
+msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content. <0>Read our Cookie Policy</0>."
+msgstr "نستخدم ملفات تعريف الارتباط لتحسين تجربتك وتحليل حركة المرور على الموقع وتقديم محتوى مخصص. <0>اقرأ سياسة ملفات تعريف الارتباط</0>."
+
+#: app/components/core/feedback-modal.tsx:72
+msgid "We'd love to hear what went well or how we can improve the product experience."
+msgstr "نود أن نسمع ما سار على ما يرام أو كيف يمكننا تحسين تجربة المنتج."
+
 #: app/routes/_auth+/waitlist.tsx:129
 msgid "We'll notify you by email as soon as the waitlist opens."
 msgstr "سنبلغك بالبريد الإلكتروني بمجرد فتح قائمة الانتظار."
@@ -1029,9 +2186,9 @@ msgstr "سنرسل لك بريداً إلكترونياً على <0>{0}</0> عن
 msgid "We've sent you a code to verify your email address."
 msgstr "لقد أرسلنا لك رمزاً للتحقق من عنوان بريدك الإلكتروني."
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:176
-#: app/routes/_auth+/onboarding.tsx:320
-#: app/routes/_auth+/onboarding.tsx:331
+#: app/routes/_auth+/onboarding_.$provider.tsx:175
+#: app/routes/_auth+/onboarding.tsx:319
+#: app/routes/_auth+/onboarding.tsx:330
 msgid "Welcome"
 msgstr "مرحباً"
 
@@ -1040,7 +2197,7 @@ msgstr "مرحباً"
 msgid "Welcome {0}!"
 msgstr "مرحباً {0}!"
 
-#: app/routes/_auth+/onboarding.tsx:367
+#: app/routes/_auth+/onboarding.tsx:377
 msgid "Welcome aboard!"
 msgstr "مرحباً بك على متن الطائرة!"
 
@@ -1052,13 +2209,43 @@ msgstr "مرحباً بعودتك"
 msgid "Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics."
 msgstr "مرحباً بك في لوحة تحكم المنظمة. هنا يمكنك إدارة إعدادات منظمتك وعرض التحليلات."
 
-#: app/routes/_auth+/onboarding.tsx:178
-#: app/routes/_auth+/onboarding.tsx:208
-#: app/routes/_auth+/onboarding.tsx:280
+#: app/routes/_auth+/onboarding.tsx:177
+#: app/routes/_auth+/onboarding.tsx:207
+#: app/routes/_auth+/onboarding.tsx:279
 msgid "Welcome!"
 msgstr "مرحباً!"
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:237
+#: app/components/settings/cards/organization/verified-domain-card.tsx:73
+msgid "When someone signs up using an email that matches your verified domain, they will be automatically added to your organization as a member."
+msgstr "عندما يقوم شخص ما بالتسجيل باستخدام بريد إلكتروني يطابق نطاقك المُتحقق منه، سيتم إضافته تلقائياً إلى مؤسستك كعضو."
+
+#: app/components/ui/notification-bell.tsx:252
+msgid "When you get notifications, they'll show up here."
+msgstr "عند وصول الإشعارات، ستظهر هنا."
+
+#: app/components/note/comment-item.tsx:228
+msgid "Write a reply..."
+msgstr "اكتب رداً..."
+
+#: app/components/settings/cards/organization/billing-card.tsx:218
+#: app/routes/organizations+/create.tsx:845
+msgid "Yearly"
+msgstr "سنوي"
+
+#: app/components/organization-members.tsx:165
+msgid "You"
+msgstr "أنت"
+
+#: app/components/settings/cards/organization/billing-card.tsx:109
+msgid "You are covered during our beta phase. No billing required at this time."
+msgstr "أنت مشمول خلال مرحلتنا التجريبية. لا توجد فوترة مطلوبة في الوقت الحالي."
+
+#. placeholder {0}: impersonationInfo.targetName
+#: app/components/impersonation-banner.tsx:30
+msgid "You are impersonating <0>{0}</0>"
+msgstr "أنت تنتحل شخصية <0>{0}</0>"
+
+#: app/routes/_auth+/onboarding_.$provider.tsx:247
 msgid "You can change your photo later"
 msgstr "يمكنك تغيير صورتك لاحقاً"
 
@@ -1087,8 +2274,10 @@ msgstr "لم تقم بإنشاء أي ملاحظات بعد!"
 msgid "You haven't joined any organizations yet."
 msgstr "لم تنضم إلى أي منظمات بعد."
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:62
-#: app/routes/_auth+/onboarding.tsx:59
+#: app/routes/_auth+/onboarding_.$provider.tsx:108
+#: app/routes/_auth+/onboarding_.$provider.tsx:197
+#: app/routes/_auth+/onboarding.tsx:94
+#: app/routes/_auth+/onboarding.tsx:348
 msgid "You must agree to the terms of service and privacy policy"
 msgstr "يجب أن توافق على شروط الخدمة وسياسة الخصوصية"
 
@@ -1104,17 +2293,47 @@ msgstr "تم تسجيل الدخول! جاري التوجيه..."
 msgid "You're on the Waitlist!"
 msgstr "أنت في قائمة الانتظار!"
 
+#. placeholder {0}: user._count.sessions
+#. placeholder {1}: user.email
+#: app/components/settings/cards/security-card.tsx:171
+msgid "You're signed in on {0, plural, one {# device} other {# devices}} as {1}"
+msgstr "أنت مسجل الدخول على {0, plural, one {# جهاز} other {# أجهزة}} كـ {1}"
+
 #: app/routes/_auth+/login.tsx:279
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr "تم تعليق حسابك. يرجى الاتصال بالدعم إذا كنت تعتقد أن هذا خطأ."
+
+#: app/components/settings/cards/security-card.tsx:131
+msgid "Your account is secured with two-factor authentication"
+msgstr "حسابك محمي بالمصادقة الثنائية"
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:398
+msgid "Your API key has been created successfully. Copy it now - you won't be able to see it again."
+msgstr "تم إنشاء مفتاح API بنجاح. انسخه الآن - لن تتمكن من رؤيته مرة أخرى."
 
 #: app/routes/settings+/profile.connections.tsx:120
 msgid "Your connection has been deleted."
 msgstr "تم حذف اتصالك."
 
+#: app/routes/organizations+/create.tsx:1000
+msgid "Your department"
+msgstr "قسمك"
+
+#: app/components/core/feedback-modal.tsx:80
+msgid "Your feedback"
+msgstr "ملاحظاتك"
+
+#: app/components/settings/cards/organization/billing-card.tsx:129
+msgid "Your organization's current plan and billing status"
+msgstr "الخطة الحالية لمؤسستك وحالة الفوترة"
+
 #: app/routes/settings+/profile.password.tsx:136
 msgid "Your password has been changed."
 msgstr "تم تغيير كلمة المرور الخاصة بك."
+
+#: app/components/organization-invitations.tsx:148
+msgid "Your personal invite link"
+msgstr "رابط الدعوة الشخصي"
 
 #: app/routes/_auth+/waitlist.tsx:144
 msgid "Your points"
@@ -1127,3 +2346,7 @@ msgstr "ترتيبك"
 #: app/routes/_auth+/waitlist.tsx:182
 msgid "Your referral link"
 msgstr "رابط الإحالة الخاص بك"
+
+#: app/components/settings/cards/organization/s3-storage-card.tsx:196
+msgid "Your S3 credentials will be encrypted and stored securely. However, we recommend using IAM credentials with minimal required permissions (read/write access to the specific bucket only)."
+msgstr "سيتم تشفير بيانات اعتماد S3 الخاصة بك وتخزينها بشكل آمن. ومع ذلك، نوصي باستخدام بيانات اعتماد IAM بأقل الأذونات المطلوبة (الوصول للقراءة/الكتابة إلى الحاوية المحددة فقط)."

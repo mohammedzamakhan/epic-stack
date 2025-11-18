@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useRevalidator } from 'react-router'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import CommentInput, { type MentionUser } from './comment-input'
 import { CommentItem } from './comment-item'
 import { Icon } from '@repo/ui'
@@ -39,6 +41,7 @@ export function CommentsSection({
 	users,
 	organizationId,
 }: CommentsSectionProps) {
+	const { _ } = useLingui()
 	const [newComment] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const revalidator = useRevalidator()
@@ -147,7 +150,9 @@ export function CommentsSection({
 			{/* Section Header */}
 			<div className="mb-2 flex items-center gap-2">
 				<Icon name="message-square" className="text-muted-foreground h-5 w-5" />
-				<h2 className="text-lg font-semibold">Comments</h2>
+				<h2 className="text-lg font-semibold">
+					<Trans>Comments</Trans>
+				</h2>
 				{comments.length > 0 && (
 					<span className="text-muted-foreground bg-muted rounded-full px-2 py-0.5 text-sm">
 						{comments.length}
@@ -162,7 +167,7 @@ export function CommentsSection({
 					onSubmit={handleAddComment}
 					value={newComment}
 					disabled={isSubmitting}
-					placeholder="Add a comment..."
+					placeholder={_(msg`Add a comment...`)}
 				/>
 			</div>
 
@@ -190,10 +195,10 @@ export function CommentsSection({
 							/>
 						</div>
 						<h3 className="text-foreground mb-1 text-sm font-medium">
-							No comments yet
+							<Trans>No comments yet</Trans>
 						</h3>
 						<p className="text-muted-foreground text-sm">
-							Start the conversation by adding the first comment.
+							<Trans>Start the conversation by adding the first comment.</Trans>
 						</p>
 					</div>
 				)}

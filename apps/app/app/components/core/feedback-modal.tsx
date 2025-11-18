@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 import {
 	Button,
@@ -21,13 +23,14 @@ export default function FeedbackModal({
 	isOpen,
 	onOpenChange,
 }: FeedbackModalProps) {
+	const { _ } = useLingui()
 	const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
 	const [feedback, setFeedback] = useState('')
 
 	const icons = [
-		{ id: 'negative', icon: 'frown', label: 'Negative feedback' },
-		{ id: 'neutral', icon: 'meh', label: 'Neutral feedback' },
-		{ id: 'positive', icon: 'smile', label: 'Positive feedback' },
+		{ id: 'negative', icon: 'frown', label: _(msg`Negative feedback`) },
+		{ id: 'neutral', icon: 'meh', label: _(msg`Neutral feedback`) },
+		{ id: 'positive', icon: 'smile', label: _(msg`Positive feedback`) },
 	]
 
 	const fetcher = useFetcher()
@@ -63,16 +66,18 @@ export default function FeedbackModal({
 			<DialogContent className="sm:max-w-[500px]">
 				<DialogHeader>
 					<DialogTitle className="text-xl font-semibold">
-						Give feedback
+						<Trans>Give feedback</Trans>
 					</DialogTitle>
 					<DialogDescription>
-						We'd love to hear what went well or how we can improve the product
-						experience.
+						<Trans>
+							We'd love to hear what went well or how we can improve the product
+							experience.
+						</Trans>
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-6">
 					<Textarea
-						placeholder="Your feedback"
+						placeholder={_(msg`Your feedback`)}
 						value={feedback}
 						onChange={(e) => setFeedback(e.target.value)}
 						className="min-h-[120px] resize-none"
@@ -101,9 +106,11 @@ export default function FeedbackModal({
 						</div>
 						<div className="flex gap-3">
 							<Button variant="ghost" onClick={handleCancel}>
-								Cancel
+								<Trans>Cancel</Trans>
 							</Button>
-							<Button onClick={handleSubmit}>Submit</Button>
+							<Button onClick={handleSubmit}>
+								<Trans>Submit</Trans>
+							</Button>
 						</div>
 					</div>
 				</div>

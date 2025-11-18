@@ -19,6 +19,7 @@ import {
 	Label,
 } from '@repo/ui'
 import { Form } from 'react-router'
+import { Trans } from '@lingui/macro'
 
 export default function DangerZoneCard({
 	organization,
@@ -41,47 +42,57 @@ export default function DangerZoneCard({
 	return (
 		<Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30">
 			<CardHeader>
-				<CardTitle className="text-destructive">Danger</CardTitle>
+				<CardTitle className="text-destructive">
+					<Trans>Danger</Trans>
+				</CardTitle>
 				<CardDescription>
-					Destructive settings that cannot be undone. All your data will be
-					permanently removed from our servers.
+					<Trans>
+						Destructive settings that cannot be undone. All your data will be
+						permanently removed from our servers.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex justify-between">
 					<div>
 						<h3 className="text-foreground mb-2 font-medium">
-							Delete organization
+							<Trans>Delete organization</Trans>
 						</h3>
 						<p className="text-muted-foreground text-sm">
-							By deleting your organization you and your team will lose access
-							and all data will be lost. This is a permanent action and cannot
-							be undone.
+							<Trans>
+								By deleting your organization you and your team will lose access
+								and all data will be lost. This is a permanent action and cannot
+								be undone.
+							</Trans>
 						</p>
 					</div>
 					<Dialog open={isOpen} onOpenChange={setIsOpen}>
 						<DialogTrigger asChild>
 							<Button variant="destructive">
 								<Icon name="trash-2" />
-								Delete organization
+								<Trans>Delete organization</Trans>
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="sm:max-w-md">
 							<DialogHeader>
 								<DialogTitle className="text-destructive">
-									Delete organization?
+									<Trans>Delete organization?</Trans>
 								</DialogTitle>
 								<DialogDescription>
-									By deleting your organization you and your team will lose
-									access and all data will be lost. This is a permanent action
-									and cannot be undone.
+									<Trans>
+										By deleting your organization you and your team will lose
+										access and all data will be lost. This is a permanent action
+										and cannot be undone.
+									</Trans>
 								</DialogDescription>
 							</DialogHeader>
 
 							<div className="space-y-4">
 								<div className="space-y-2">
 									<Label htmlFor="confirmation">
-										Type the organization name "{organization.name}" to confirm.
+										<Trans>
+											Type the organization name "{organization.name}" to confirm.
+										</Trans>
 									</Label>
 									<Input
 										id="confirmation"
@@ -102,15 +113,17 @@ export default function DangerZoneCard({
 										className="mt-1"
 									/>
 									<Label htmlFor="understand" className="text-sm">
-										I'll not be able to access the organization and its data
-										anymore
+										<Trans>
+											I'll not be able to access the organization and its data
+											anymore
+										</Trans>
 									</Label>
 								</div>
 							</div>
 
 							<DialogFooter className="gap-2">
 								<Button variant="outline" onClick={() => setIsOpen(false)}>
-									Cancel
+									<Trans>Cancel</Trans>
 								</Button>
 								<Form method="POST" onSubmit={handleSubmit}>
 									<input
@@ -123,7 +136,7 @@ export default function DangerZoneCard({
 										variant="destructive"
 										disabled={!isDeleteEnabled}
 									>
-										Confirm
+										<Trans>Confirm</Trans>
 									</Button>
 								</Form>
 							</DialogFooter>

@@ -7,6 +7,8 @@ import {
 	type FieldMetadata,
 	FormProvider,
 } from '@conform-to/react'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	Badge,
 	Button,
@@ -87,6 +89,7 @@ export function OrganizationInvitations({
 	actionData?: any
 	availableRoles?: OrganizationRoleName[]
 }) {
+	const { _ } = useLingui()
 	// Create dynamic schema and roles based on available roles
 	const InviteSchema = createInviteSchema(availableRoles)
 	const roles = availableRoles.map((role) => ({
@@ -141,16 +144,20 @@ export function OrganizationInvitations({
 			{/* Invite Link Section */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-lg">Your personal invite link</CardTitle>
+					<CardTitle className="text-lg">
+						<Trans>Your personal invite link</Trans>
+					</CardTitle>
 					<p className="text-muted-foreground text-sm">
-						Anyone with this link can join your organization and will know you
-						invited them. By default, they will have the Member role.
+						<Trans>
+							Anyone with this link can join your organization and will know you
+							invited them. By default, they will have the Member role.
+						</Trans>
 					</p>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="flex gap-2">
 						<Input
-							value={inviteUrl || 'No active invite link'}
+							value={inviteUrl || _(msg`No active invite link`)}
 							readOnly
 							onClick={inviteUrl ? copyInviteLink : undefined}
 							className={`flex-1 ${inviteUrl ? 'cursor-pointer' : 'cursor-not-allowed'}`}
@@ -164,12 +171,12 @@ export function OrganizationInvitations({
 								{linkCopied ? (
 									<>
 										<Icon name="check" className="h-4 w-4" />
-										Copied
+										<Trans>Copied</Trans>
 									</>
 								) : (
 									<>
 										<Icon name="copy" className="h-4 w-4" />
-										Copy
+										<Trans>Copy</Trans>
 									</>
 								)}
 							</Button>
@@ -181,7 +188,7 @@ export function OrganizationInvitations({
 								<input type="hidden" name="intent" value="create-invite-link" />
 								<Button type="submit" variant="outline">
 									<Icon name="plus" className="h-4 w-4" />
-									Create Link
+									<Trans>Create Link</Trans>
 								</Button>
 							</Form>
 						) : (
@@ -194,7 +201,7 @@ export function OrganizationInvitations({
 									/>
 									<Button type="submit" variant="outline">
 										<Icon name="undo-2" className="h-4 w-4" />
-										Reset
+										<Trans>Reset</Trans>
 									</Button>
 								</Form>
 								<Form method="POST">
@@ -205,7 +212,7 @@ export function OrganizationInvitations({
 									/>
 									<Button type="submit" variant="outline">
 										<Icon name="x" className="h-4 w-4" />
-										Disable
+										<Trans>Disable</Trans>
 									</Button>
 								</Form>
 							</>
@@ -217,7 +224,9 @@ export function OrganizationInvitations({
 			{/* Email Invitations Section */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-lg">Invite by email</CardTitle>
+					<CardTitle className="text-lg">
+						<Trans>Invite by email</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-6">
 					{/* Invitation Form */}
@@ -245,14 +254,14 @@ export function OrganizationInvitations({
 									})}
 								>
 									<Icon name="plus" className="h-4 w-4" />
-									Add another invitation
+									<Trans>Add another invitation</Trans>
 								</Button>
 							</div>
 
 							<div className="mt-6 space-y-2">
 								<ErrorList id={form.errorId} errors={form.errors} />
 								<Button type="submit" className="w-full">
-									Send Invitations
+									<Trans>Send Invitations</Trans>
 								</Button>
 							</div>
 						</Form>
@@ -264,7 +273,7 @@ export function OrganizationInvitations({
 							<Separator />
 							<div>
 								<h4 className="mb-3 text-sm font-medium">
-									Pending Invitations
+									<Trans>Pending Invitations</Trans>
 								</h4>
 								<div className="space-y-2">
 									{pendingInvitations.map((invitation) => (
@@ -283,9 +292,11 @@ export function OrganizationInvitations({
 												</div>
 												{invitation.inviter && (
 													<p className="text-muted-foreground mt-1 text-xs">
-														Invited by{' '}
-														{invitation.inviter.name ||
-															invitation.inviter.email}
+														<Trans>
+															Invited by{' '}
+															{invitation.inviter.name ||
+																invitation.inviter.email}
+														</Trans>
 													</p>
 												)}
 											</div>
@@ -371,8 +382,8 @@ function InviteFieldset({
 				<InputGroup className="w-full">
 					<InputGroupInput
 						{...emailProps}
-						placeholder="Enter email address"
-						aria-label="Email"
+						placeholder={(msg`Enter email address`)}
+						aria-label={(msg`Email`)}
 						aria-invalid={
 							inviteFields.email.errors?.length ? 'true' : undefined
 						}

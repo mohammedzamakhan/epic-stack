@@ -12,6 +12,7 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 import { Field, ErrorList } from '#app/components/forms.tsx'
 
 import { OrganizationPhoto } from './organization-photo-card'
@@ -53,9 +54,11 @@ export function GeneralSettingsCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>General Settings</CardTitle>
+				<CardTitle>
+					<Trans>General Settings</Trans>
+				</CardTitle>
 				<CardDescription>
-					Manage your organization's name, slug, and profile image.
+					<Trans>Manage your organization's name, slug, and profile image.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
@@ -72,12 +75,12 @@ export function GeneralSettingsCard({
 							/>
 							<FieldGroup>
 								<Field
-									labelProps={{ htmlFor: fields.name.id, children: 'Name' }}
+									labelProps={{ htmlFor: fields.name.id, children: <Trans>Name</Trans> }}
 									inputProps={getInputProps(fields.name, { type: 'text' })}
 									errors={fields.name.errors}
 								/>
 								<Field
-									labelProps={{ htmlFor: fields.slug.id, children: 'Slug' }}
+									labelProps={{ htmlFor: fields.slug.id, children: <Trans>Slug</Trans> }}
 									inputProps={getInputProps(fields.slug, { type: 'text' })}
 									errors={fields.slug.errors}
 								/>
@@ -98,7 +101,7 @@ export function GeneralSettingsCard({
 						fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 					}
 				>
-					Save changes
+					<Trans>Save changes</Trans>
 				</StatusButton>
 			</CardFooter>
 		</Card>

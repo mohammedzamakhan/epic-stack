@@ -18,6 +18,8 @@ import {
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 import {
@@ -464,7 +466,9 @@ export default function CreateOrganizationPage() {
 					))}
 				</div>
 				<p className="text-muted-foreground text-sm">
-					Step {currentStep} of {steps.length}
+					<Trans>
+						Step {currentStep} of {steps.length}
+					</Trans>
 				</p>
 			</div>
 
@@ -541,12 +545,16 @@ function Step1({ actionData }: { actionData: any }) {
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					<h2>Create a new organization</h2>
+					<h2>
+						<Trans>Create a new organization</Trans>
+					</h2>
 				</CardTitle>
 
 				<CardDescription>
-					An organization is a workspace where teams collect, organize, and work
-					together.
+					<Trans>
+						An organization is a workspace where teams collect, organize, and
+						work together.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 
@@ -565,7 +573,9 @@ function Step1({ actionData }: { actionData: any }) {
 							<Field
 								data-invalid={fields.logoFile.errors?.length ? true : undefined}
 							>
-								<FieldLabel htmlFor={fields.logoFile.id}>Logo</FieldLabel>
+								<FieldLabel htmlFor={fields.logoFile.id}>
+									<Trans>Logo</Trans>
+								</FieldLabel>
 								<div className="mt-2">
 									<div className="flex items-center">
 										<div className="bg-muted border-input relative flex size-16 items-center justify-center overflow-hidden rounded-md border">
@@ -613,11 +623,11 @@ function Step1({ actionData }: { actionData: any }) {
 													htmlFor={fields.logoFile.id}
 													className="cursor-pointer"
 												>
-													Upload your logo
+													<Trans>Upload your logo</Trans>
 												</label>
 											</Button>
 											<p className="mt-1 text-xs text-gray-500">
-												*.png, *.jpeg files up to 5 MB
+												<Trans>*.png, *.jpeg files up to 5 MB</Trans>
 											</p>
 										</div>
 									</div>
@@ -631,7 +641,8 @@ function Step1({ actionData }: { actionData: any }) {
 								data-invalid={fields.name.errors?.length ? true : undefined}
 							>
 								<FieldLabel htmlFor={fields.name.id}>
-									Name<span className="text-red-500">*</span>
+									<Trans>Name</Trans>
+									<span className="text-red-500">*</span>
 								</FieldLabel>
 								<Input
 									id={fields.name.id}
@@ -651,7 +662,8 @@ function Step1({ actionData }: { actionData: any }) {
 								data-invalid={fields.slug.errors?.length ? true : undefined}
 							>
 								<FieldLabel htmlFor={fields.slug.id}>
-									Slug<span className="text-red-500">*</span>
+									<Trans>Slug</Trans>
+									<span className="text-red-500">*</span>
 								</FieldLabel>
 								<div className="flex items-center">
 									<div className="pr-1 text-sm text-gray-500">/app/</div>
@@ -696,7 +708,7 @@ function Step1({ actionData }: { actionData: any }) {
 												}}
 												className="text-xs text-blue-600 underline hover:text-blue-800"
 											>
-												Reset to auto-generated
+												<Trans>Reset to auto-generated</Trans>
 											</button>
 										)}
 									</div>
@@ -712,7 +724,7 @@ function Step1({ actionData }: { actionData: any }) {
 								}
 							>
 								<FieldLabel htmlFor={fields.description.id}>
-									Description
+									<Trans>Description</Trans>
 								</FieldLabel>
 								<Textarea
 									{...getInputProps(fields.description, { type: 'text' })}
@@ -732,9 +744,13 @@ function Step1({ actionData }: { actionData: any }) {
 
 						<div className="flex justify-end gap-4 pt-4">
 							<Button variant="outline" asChild>
-								<Link to="/organizations">Cancel</Link>
+								<Link to="/organizations">
+									<Trans>Cancel</Trans>
+								</Link>
 							</Button>
-							<Button type="submit">Continue</Button>
+							<Button type="submit">
+								<Trans>Continue</Trans>
+							</Button>
 						</div>
 					</form>
 				</FormProvider>
@@ -780,10 +796,14 @@ function SubscriptionStep({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Choose your plan</CardTitle>
+				<CardTitle>
+					<Trans>Choose your plan</Trans>
+				</CardTitle>
 				<CardDescription>
-					Select a subscription plan to get started with your organization. Your
-					trial will begin after payment setup.
+					<Trans>
+						Select a subscription plan to get started with your organization.
+						Your trial will begin after payment setup.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 
@@ -808,7 +828,7 @@ function SubscriptionStep({
 										: 'text-muted-foreground hover:text-foreground'
 								}`}
 							>
-								Monthly
+								<Trans>Monthly</Trans>
 							</button>
 							<button
 								type="button"
@@ -822,9 +842,9 @@ function SubscriptionStep({
 										: 'text-muted-foreground hover:text-foreground'
 								}`}
 							>
-								Yearly
+								<Trans>Yearly</Trans>
 								<Badge variant="secondary" className="ml-2 text-xs">
-									Save 20%
+									<Trans>Save 20%</Trans>
 								</Badge>
 							</button>
 						</div>
@@ -859,10 +879,12 @@ function SubscriptionStep({
 
 					<div className="flex justify-between pt-4">
 						<Button variant="outline" asChild>
-							<Link to="/organizations">Cancel</Link>
+							<Link to="/organizations">
+								<Trans>Cancel</Trans>
+							</Link>
 						</Button>
 						<Button type="submit" disabled={!selectedPriceId}>
-							Continue to Payment
+							<Trans>Continue to Payment</Trans>
 						</Button>
 					</div>
 				</form>
@@ -875,10 +897,14 @@ function Step3({ orgId, actionData }: { orgId: string; actionData: any }) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Invite team members</CardTitle>
+				<CardTitle>
+					<Trans>Invite team members</Trans>
+				</CardTitle>
 				<CardDescription>
-					Add your team members to get started. You can always invite more
-					people later.
+					<Trans>
+						Add your team members to get started. You can always invite more
+						people later.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 
@@ -895,7 +921,7 @@ function Step3({ orgId, actionData }: { orgId: string; actionData: any }) {
 							<input type="hidden" name="intent" value="send-invitations" />
 							<input type="hidden" name="orgId" value={orgId} />
 							<Button type="submit" variant="outline">
-								Skip for now
+								<Trans>Skip for now</Trans>
 							</Button>
 						</form>
 					</div>
@@ -918,9 +944,14 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Tell us more about your organization</CardTitle>
+				<CardTitle>
+					<Trans>Tell us more about your organization</Trans>
+				</CardTitle>
 				<CardDescription>
-					This helps us customize your experience and provide better insights.
+					<Trans>
+						This helps us customize your experience and provide better
+						insights.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 
@@ -936,7 +967,7 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 							}
 						>
 							<FieldLabel htmlFor={fields.organizationSize.id}>
-								Organization size
+								<Trans>Organization size</Trans>
 							</FieldLabel>
 							<Select
 								name={fields.organizationSize.name}
@@ -966,7 +997,7 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 							}
 						>
 							<FieldLabel htmlFor={fields.userDepartment.id}>
-								Your department
+								<Trans>Your department</Trans>
 							</FieldLabel>
 							<Select
 								name={fields.userDepartment.name}
@@ -995,7 +1026,9 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 
 					<div className="flex justify-between pt-4">
 						<div></div>
-						<Button type="submit">Complete Setup</Button>
+						<Button type="submit">
+							<Trans>Complete Setup</Trans>
+						</Button>
 					</div>
 				</form>
 			</CardContent>
@@ -1064,14 +1097,14 @@ function CreateOrganizationInvitations({
 									d="M12 6v6m0 0v6m0-6h6m-6 0H6"
 								/>
 							</svg>
-							Add another invitation
+							<Trans>Add another invitation</Trans>
 						</Button>
 					</div>
 
 					<div className="mt-6 space-y-2">
 						<ErrorList id={form.errorId} errors={form.errors} />
 						<Button type="submit" className="w-full">
-							Send Invitations
+							<Trans>Send Invitations</Trans>
 						</Button>
 					</div>
 				</form>
@@ -1209,8 +1242,12 @@ function PlanCard({
 		return (
 			<div className="border-border rounded-lg border-2 p-4 opacity-50">
 				<div className="text-muted-foreground text-center">
-					<p>Plan not available</p>
-					<p className="text-sm">Please check configuration</p>
+					<p>
+						<Trans>Plan not available</Trans>
+					</p>
+					<p className="text-sm">
+						<Trans>Please check configuration</Trans>
+					</p>
 				</div>
 			</div>
 		)
@@ -1242,8 +1279,12 @@ function PlanCard({
 		return (
 			<div className="border-border rounded-lg border-2 p-4 opacity-50">
 				<div className="text-muted-foreground text-center">
-					<p>Price not configured</p>
-					<p className="text-sm">Contact support</p>
+					<p>
+						<Trans>Price not configured</Trans>
+					</p>
+					<p className="text-sm">
+						<Trans>Contact support</Trans>
+					</p>
 				</div>
 			</div>
 		)
@@ -1264,33 +1305,45 @@ function PlanCard({
 			<div className="mb-4">
 				<div className="flex items-baseline gap-2">
 					<span className="text-2xl font-bold">${displayPrice.toFixed(2)}</span>
-					<span className="text-muted-foreground text-sm">per month</span>
+					<span className="text-muted-foreground text-sm">
+						<Trans>per month</Trans>
+					</span>
 				</div>
 				{billingInterval === 'yearly' && (
 					<div className="text-muted-foreground text-sm">
-						${basePrice.toFixed(2)} billed annually
+						<Trans>${basePrice.toFixed(2)} billed annually</Trans>
 					</div>
 				)}
 				<h3 className="text-lg font-semibold">{title}</h3>
 			</div>
 			<ul className="text-muted-foreground space-y-2 text-sm">
-				<li>Includes {seats} user seats</li>
+				<li>
+					<Trans>Includes {seats} user seats</Trans>
+				</li>
 				{additionalUserPrice > 0 && (
 					<li>
-						Additional users: $
-						{billingInterval === 'yearly'
-							? (additionalUserPrice / 12).toFixed(2)
-							: additionalUserPrice.toFixed(2)}
-						/user/month
-						{billingInterval === 'yearly' && (
-							<span className="block text-xs opacity-75">
-								(${additionalUserPrice.toFixed(2)} billed annually per user)
-							</span>
-						)}
+						<Trans>
+							Additional users: $
+							{billingInterval === 'yearly'
+								? (additionalUserPrice / 12).toFixed(2)
+								: additionalUserPrice.toFixed(2)}
+							/user/month
+							{billingInterval === 'yearly' && (
+								<span className="block text-xs opacity-75">
+									(${additionalUserPrice.toFixed(2)} billed annually per user)
+								</span>
+							)}
+						</Trans>
 					</li>
 				)}
-				<li>All core features included</li>
-				{isPremium && <li>Priority support</li>}
+				<li>
+					<Trans>All core features included</Trans>
+				</li>
+				{isPremium && (
+					<li>
+						<Trans>Priority support</Trans>
+					</li>
+				)}
 			</ul>
 		</div>
 	)

@@ -3,6 +3,8 @@ import { useNotifications, useNovu } from '@novu/react/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
 import {
@@ -41,20 +43,43 @@ interface Redirect {
 	target?: '_self' | '_blank' | '_parent' | '_top' | '_unfencedTop'
 }
 
-function formatRelativeTime(timestamp: string): string {
+function formatRelativeTime(
+	timestamp: string,
+	_: (message: { id: string; message: string }) => string,
+): string {
 	const date = new Date(timestamp)
 	const now = new Date()
 	const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-	if (diffInSeconds < 60) return `${diffInSeconds}s ago`
-	if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-	if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-	if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+	if (diffInSeconds < 60)
+		return _(msg`${diffInSeconds}s ago` as { id: string; message: string })
+	if (diffInSeconds < 3600)
+		return _(
+			msg`${Math.floor(diffInSeconds / 60)}m ago` as {
+				id: string
+				message: string
+			},
+		)
+	if (diffInSeconds < 86400)
+		return _(
+			msg`${Math.floor(diffInSeconds / 3600)}h ago` as {
+				id: string
+				message: string
+			},
+		)
+	if (diffInSeconds < 604800)
+		return _(
+			msg`${Math.floor(diffInSeconds / 86400)}d ago` as {
+				id: string
+				message: string
+			},
+		)
 
 	return date.toLocaleDateString()
 }
 
 function NotificationItem({ notification }: { notification: Notification }) {
+	const { _ } = useLingui()
 	const [isHovered, setIsHovered] = useState(false)
 	const navigate = useNavigate()
 
@@ -141,7 +166,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 							<div className="flex shrink-0 items-center space-x-2">
 								{!isHovered ? (
 									<p className="text-muted-foreground text-xs whitespace-nowrap">
-										{formatRelativeTime(notification.createdAt)}
+										{formatRelativeTime(notification.createdAt, _)}
 									</p>
 								) : (
 									<TooltipProvider>
@@ -161,9 +186,11 @@ function NotificationItem({ notification }: { notification: Notification }) {
 											</TooltipTrigger>
 											<TooltipContent>
 												<p>
-													{notification.isRead
-														? 'Mark as unread'
-														: 'Mark as read'}
+													{notification.isRead ? (
+														<Trans>Mark as unread</Trans>
+													) : (
+														<Trans>Mark as read</Trans>
+													)}
 												</p>
 											</TooltipContent>
 										</Tooltip>
@@ -219,10 +246,10 @@ function EmptyState() {
 			</div>
 			<div className="mt-8 text-center">
 				<h3 className="text-foreground text-lg font-medium">
-					Nothing here yet!
+					<Trans>Nothing here yet!</Trans>
 				</h3>
 				<p className="text-muted-foreground mt-1 text-sm">
-					When you get notifications, they'll show up here.
+					<Trans>When you get notifications, they'll show up here.</Trans>
 				</p>
 			</div>
 		</div>
@@ -294,9 +321,10 @@ function NotificationBellComponent() {
 		setFilter(value)
 	}
 
+	const { _ } = useLingui()
 	const filterTitles = {
-		all: 'All Notifications',
-		unread: 'Unread Notifications',
+		all: _(msg`All Notifications`),
+		unread: _(msg`Unread Notifications`),
 	}
 
 	const containerVariants = {
@@ -343,7 +371,9 @@ function NotificationBellComponent() {
 							</motion.div>
 						)}
 					</AnimatePresence>
-					<span className="sr-only">Toggle notifications</span>
+					<span className="sr-only">
+						<Trans>Toggle notifications</Trans>
+					</span>
 				</motion.button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[400px] rounded-2xl p-0" align="end">
@@ -374,12 +404,12 @@ function NotificationBellComponent() {
 											<DropdownMenuItem
 												onClick={() => handleFilterChange('all')}
 											>
-												All Notifications
+												<Trans>All Notifications</Trans>
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onClick={() => handleFilterChange('unread')}
 											>
-												Unread Notifications
+												<Trans>Unread Notifications</Trans>
 											</DropdownMenuItem>
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -388,13 +418,15 @@ function NotificationBellComponent() {
 									<DropdownMenuTrigger asChild>
 										<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
 											<Icon name="ellipsis" className="h-4 w-4" />
-											<span className="sr-only">Open menu</span>
+											<span className="sr-only">
+												<Trans>Open menu</Trans>
+											</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
 										<DropdownMenuItem onClick={handleReadAll}>
 											<Icon name="check-circled" className="mr-2 h-4 w-4" />
-											Mark all as read
+											<Trans>Mark all as read</Trans>
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
@@ -434,7 +466,7 @@ function NotificationBellComponent() {
 													className="mt-4 w-full"
 													onClick={handleLoadMore}
 												>
-													Load More{' '}
+													<Trans>Load More</Trans>{' '}
 													<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 												</Button>
 											)}

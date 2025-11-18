@@ -19,6 +19,7 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Form } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 export const TeamSizeSchema = z.object({
@@ -57,10 +58,14 @@ export default function TeamSizeCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Team Size</CardTitle>
+				<CardTitle>
+					<Trans>Team Size</Trans>
+				</CardTitle>
 				<CardDescription>
-					Help us understand your organization size to provide better
-					recommendations.
+					<Trans>
+						Help us understand your organization size to provide better
+						recommendations.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<Form method="POST" {...getFormProps(form)}>
@@ -68,7 +73,9 @@ export default function TeamSizeCard({
 				<input {...getInputProps(fields.organizationId, { type: 'hidden' })} />
 				<CardContent>
 					<Field data-invalid={fields.size.errors?.length ? true : undefined}>
-						<FieldLabel htmlFor={fields.size.id}>Organization Size</FieldLabel>
+						<FieldLabel htmlFor={fields.size.id}>
+							<Trans>Organization Size</Trans>
+						</FieldLabel>
 						<Select
 							name={fields.size.name}
 							defaultValue={organization.size || ''}
@@ -92,7 +99,7 @@ export default function TeamSizeCard({
 				</CardContent>
 				<CardFooter className="justify-end">
 					<Button size="sm" type="submit">
-						Update
+						<Trans>Update</Trans>
 					</Button>
 				</CardFooter>
 			</Form>

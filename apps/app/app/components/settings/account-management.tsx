@@ -1,4 +1,5 @@
 import { useFetcher } from 'react-router'
+import { Trans, Plural } from '@lingui/macro'
 import {
 	deleteDataActionIntent,
 	signOutOfSessionsActionIntent,
@@ -26,7 +27,9 @@ export function SignOutOfSessions({ data }: SignOutOfSessionsProps) {
 		return (
 			<div className="flex items-center">
 				<Icon name="user" className="mr-2" />
-				<span>This is your only active session</span>
+				<span>
+					<Trans>This is your only active session</Trans>
+				</span>
 			</div>
 		)
 	}
@@ -36,8 +39,11 @@ export function SignOutOfSessions({ data }: SignOutOfSessionsProps) {
 			<div className="flex items-center">
 				<Icon name="user" className="mr-2" />
 				<span>
-					You have {otherSessionsCount} other active{' '}
-					{otherSessionsCount === 1 ? 'session' : 'sessions'}
+					<Plural
+						value={otherSessionsCount}
+						one="You have # other active session"
+						other="You have # other active sessions"
+					/>
 				</span>
 			</div>
 			<fetcher.Form method="POST">
@@ -54,9 +60,15 @@ export function SignOutOfSessions({ data }: SignOutOfSessionsProps) {
 							: (fetcher.data?.status ?? 'idle')
 					}
 				>
-					{dc.doubleCheck
-						? 'Are you sure?'
-						: `Sign out of other ${otherSessionsCount === 1 ? 'session' : 'sessions'}`}
+					{dc.doubleCheck ? (
+						<Trans>Are you sure?</Trans>
+					) : (
+						<Plural
+							value={otherSessionsCount}
+							one="Sign out of other session"
+							other="Sign out of other sessions"
+						/>
+					)}
 				</StatusButton>
 			</fetcher.Form>
 		</div>
@@ -80,7 +92,11 @@ export function DeleteData() {
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				>
 					<Icon name="trash-2" />
-					{dc.doubleCheck ? 'Are you sure?' : 'Delete account'}
+					{dc.doubleCheck ? (
+						<Trans>Are you sure?</Trans>
+					) : (
+						<Trans>Delete account</Trans>
+					)}
 				</StatusButton>
 			</fetcher.Form>
 		</div>

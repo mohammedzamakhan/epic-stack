@@ -3,6 +3,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
+import { Trans } from '@lingui/macro'
 
 import { deletePasskeyActionIntent } from '#app/routes/_app+/security.tsx'
 import { Button, Icon } from '@repo/ui'
@@ -92,7 +93,8 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 					className="flex items-center gap-2"
 					onClick={handlePasskeyRegistration}
 				>
-					<Icon name="plus">Register new passkey</Icon>
+					<Icon name="plus" />
+					<Trans>Register new passkey</Trans>
 				</Button>
 			</div>
 
@@ -113,14 +115,18 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 								<div className="flex items-center gap-2">
 									<Icon name="lock" />
 									<span className="font-semibold">
-										{passkey.deviceType === 'platform'
-											? 'Device'
-											: 'Security Key'}
+										{passkey.deviceType === 'platform' ? (
+											<Trans>Device</Trans>
+										) : (
+											<Trans>Security Key</Trans>
+										)}
 									</span>
 								</div>
 								<div className="text-muted-foreground text-sm">
-									Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
-									ago
+									<Trans>
+										Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
+										ago
+									</Trans>
 								</div>
 							</div>
 							<Form method="POST">
@@ -134,7 +140,9 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 									className="flex items-center gap-2"
 								>
 									<Icon name="trash-2" />
-									<span>Delete</span>
+									<span>
+										<Trans>Delete</Trans>
+									</span>
 								</Button>
 							</Form>
 						</li>
@@ -142,7 +150,7 @@ export function PasskeyManager({ data }: { data: PasskeyData }) {
 				</ul>
 			) : (
 				<div className="text-muted-foreground text-center">
-					No passkeys registered yet
+					<Trans>No passkeys registered yet</Trans>
 				</div>
 			)}
 		</div>
