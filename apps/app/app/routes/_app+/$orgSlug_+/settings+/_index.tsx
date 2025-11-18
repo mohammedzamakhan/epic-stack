@@ -41,51 +41,37 @@ import {
 	testS3Connection,
 } from '#app/utils/storage.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
 
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
+		name: true,
+		slug: true,
+		size: true,
+		verifiedDomain: true,
+		stripeSubscriptionId: true,
+		s3Config: {
+			select: {
+				id: true,
+				isEnabled: true,
+				endpoint: true,
+				bucketName: true,
+				accessKeyId: true,
+				secretAccessKey: true,
+				region: true,
 			},
 		},
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			size: true,
-			verifiedDomain: true,
-			stripeSubscriptionId: true,
-			s3Config: {
-				select: {
-					id: true,
-					isEnabled: true,
-					endpoint: true,
-					bucketName: true,
-					accessKeyId: true,
-					secretAccessKey: true,
-					region: true,
-				},
-			},
-			image: {
-				select: {
-					id: true,
-					objectKey: true,
-					altText: true,
-				},
+		image: {
+			select: {
+				id: true,
+				objectKey: true,
+				altText: true,
 			},
 		},
 	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
 
 	return { organization }
 }

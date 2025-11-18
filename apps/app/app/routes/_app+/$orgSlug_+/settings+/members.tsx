@@ -30,30 +30,14 @@ import {
 } from '#app/utils/organization-permissions.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
+		name: true,
+		slug: true,
 	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
 
 	// Check if user has permission to view members
 	await requireUserWithOrganizationPermission(

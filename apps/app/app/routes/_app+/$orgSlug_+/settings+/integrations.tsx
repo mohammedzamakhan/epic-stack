@@ -15,30 +15,14 @@ import {
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-	const userId = await requireUserId(request)
-	invariant(params.orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: params.orgSlug,
-			users: {
-				some: {
-					userId,
-				},
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
+		name: true,
+		slug: true,
 	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
 
 	const [integrations, availableProviders] = await Promise.all([
 		integrationManager.getOrganizationIntegrations(organization.id),
