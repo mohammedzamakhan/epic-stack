@@ -168,6 +168,9 @@ export {
 	BreadcrumbEllipsis,
 } from './components/breadcrumb'
 
+export { NavMain } from './components/nav-main'
+export { NotFoundPage } from './components/not-found-page'
+
 export {
 	DropdownMenu,
 	DropdownMenuTrigger,
