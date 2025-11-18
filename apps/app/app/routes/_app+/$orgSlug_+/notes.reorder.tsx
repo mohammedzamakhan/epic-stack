@@ -1,22 +1,7 @@
 import { type ActionFunction } from 'react-router'
+import { calculateReorderPosition } from '@repo/common'
 import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
-
-// Helper function to calculate fractional position
-function getFractionalPosition(
-	prevPosition: number | null,
-	nextPosition: number | null,
-): number {
-	if (prevPosition === null && nextPosition === null) {
-		return 1.0 // First item
-	} else if (prevPosition === null) {
-		return nextPosition! - 1.0 // Insert at beginning
-	} else if (nextPosition === null) {
-		return prevPosition + 1.0 // Insert at end
-	} else {
-		return (prevPosition + nextPosition) / 2.0 // Insert between
-	}
-}
 
 export const action: ActionFunction = async ({ request, params }) => {
 	const orgSlug = params.orgSlug
@@ -68,29 +53,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 			orderBy: { position: 'asc' },
 		})
 
-		// Calculate the new fractional position
-		let newPosition: number
-
-		if (notesInDestColumn.length === 0) {
-			// Empty column, use position 1.0
-			newPosition = 1.0
-		} else if (targetIndex <= 0) {
-			// Insert at beginning
-			const firstNote = notesInDestColumn[0]
-			newPosition = getFractionalPosition(null, firstNote?.position ?? null)
-		} else if (targetIndex >= notesInDestColumn.length) {
-			// Insert at end
-			const lastNote = notesInDestColumn[notesInDestColumn.length - 1]
-			newPosition = getFractionalPosition(lastNote?.position ?? null, null)
-		} else {
-			// Insert between two notes
-			const prevNote = notesInDestColumn[targetIndex - 1]
-			const nextNote = notesInDestColumn[targetIndex]
-			newPosition = getFractionalPosition(
-				prevNote?.position ?? null,
-				nextNote?.position ?? null,
-			)
-		}
+		// Calculate the new fractional position using shared utility
+		const newPosition = calculateReorderPosition(notesInDestColumn, targetIndex)
 
 		// Update the note with new position and status
 		await tx.organizationNote.update({
