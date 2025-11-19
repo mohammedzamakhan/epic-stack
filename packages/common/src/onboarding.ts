@@ -1,4 +1,4 @@
-import { prisma } from './db.server'
+import { prisma } from '@repo/prisma'
 
 export interface OnboardingStepAction {
 	type: 'navigate' | 'modal' | 'external'
@@ -92,7 +92,7 @@ export async function getOnboardingProgress(
 			completedCount: 0,
 			isCompleted: false, // Don't mark as completed so onboarding shows
 			isVisible: true, // Make it visible so onboarding shows
-			steps: steps.map((step) => ({
+			steps: steps.map((step: any) => ({
 				id: step.id,
 				key: step.key,
 				title: step.title,
@@ -112,7 +112,7 @@ export async function getOnboardingProgress(
 	}
 
 	// Transform steps with progress data
-	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map((step) => {
+	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map((step: any) => {
 		const userProgress = step.userProgress[0]
 		return {
 			id: step.id,

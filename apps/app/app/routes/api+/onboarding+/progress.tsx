@@ -4,7 +4,7 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
-} from '#app/utils/onboarding.ts'
+} from '@repo/common'
 
 export async function loader(args: LoaderFunctionArgs) {
 	return handleOnboardingProgress(args, {

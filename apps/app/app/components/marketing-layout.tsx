@@ -2,7 +2,7 @@ import { SidebarInset, SidebarProvider } from '@repo/ui/sidebar'
 import { type ReactNode } from 'react'
 import { AppSidebar } from '#app/components/app-sidebar.tsx'
 import { SiteHeader } from '#app/components/site-header.tsx'
-import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
+import { type OnboardingProgressData } from '@repo/common'
 import { EpicProgress } from './progress-bar'
 
 type MarketingLayoutProps = {

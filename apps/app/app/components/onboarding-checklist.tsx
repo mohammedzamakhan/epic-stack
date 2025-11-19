@@ -5,7 +5,7 @@ import { Icon } from '@repo/ui/icon'
 import { Progress } from '@repo/ui/progress'
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
+import { type OnboardingProgressData } from '@repo/common'
 import { ListTodoIcon } from './icons/list-todo'
 
 

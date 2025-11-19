@@ -18,7 +18,7 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 import { TeamSwitcher } from '#app/components/team-switcher.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
+import { type OnboardingProgressData } from '@repo/common'
 import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'

@@ -11,6 +11,9 @@ export {
 	calculateReorderPosition,
 } from './src/reorder/index.js'
 
+// Onboarding utilities
+export * from './src/onboarding.js'
+
 // Onboarding route handlers
 export {
 	handleOnboardingProgress,

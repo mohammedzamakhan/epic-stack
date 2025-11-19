@@ -25,7 +25,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
-} from '#app/utils/onboarding.ts'
+} from '@repo/common'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 

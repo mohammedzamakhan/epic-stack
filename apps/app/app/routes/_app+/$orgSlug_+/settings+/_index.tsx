@@ -31,7 +31,7 @@ import VerifiedDomainCard, {
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { markStepCompleted } from '#app/utils/onboarding.ts'
+import { markStepCompleted } from '@repo/common'
 import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {
 	updateSeatQuantity,

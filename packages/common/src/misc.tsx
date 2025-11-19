@@ -285,7 +285,8 @@ export async function downloadFile(url: string, retries: number = 0) {
 		}
 		const contentType = response.headers.get('content-type') ?? 'image/jpg'
 		const arrayBuffer = await response.arrayBuffer()
-		const file = new File([arrayBuffer], 'downloaded-file', {
+		const blob = new Blob([arrayBuffer], { type: contentType })
+		const file = new File([blob], 'downloaded-file', {
 			type: contentType,
 		})
 		return file
