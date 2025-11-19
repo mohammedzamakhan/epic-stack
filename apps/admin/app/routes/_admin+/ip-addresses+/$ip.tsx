@@ -1,8 +1,15 @@
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@repo/ui/table'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
 
 import { getUsersByIpAddress } from '@repo/common/ip-tracking'

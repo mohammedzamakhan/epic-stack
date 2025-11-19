@@ -1,6 +1,6 @@
 import { redirect } from 'react-router'
 import { getUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { linkReferral } from '#app/utils/waitlist.server.ts'

@@ -10,16 +10,3 @@ export {
 	getFractionalPosition,
 	calculateReorderPosition,
 } from './src/reorder/index.js'
-
-// Onboarding utilities
-export * from './src/onboarding.js'
-
-// Onboarding route handlers
-export {
-	handleOnboardingProgress,
-	handleOnboardingHide,
-	handleOnboardingCompleteStep,
-	type OnboardingProgressDependencies,
-	type OnboardingHideDependencies,
-	type OnboardingCompleteStepDependencies,
-} from './src/onboarding/route-handlers/index.js'

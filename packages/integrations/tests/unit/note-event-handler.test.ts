@@ -9,10 +9,10 @@ import {
 	type NoteChangeEvent,
 } from '../../src/note-event-handler'
 import { integrationManager } from '../../src/integration-manager'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Mock dependencies
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		organizationNote: {
 			findUnique: vi.fn(),

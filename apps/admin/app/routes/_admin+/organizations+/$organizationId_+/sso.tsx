@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { SSOConfigurationForm } from '#app/components/sso-configuration-form.tsx'
 import { SSOConfigurationOverview } from '#app/components/sso-configuration-overview.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -45,28 +45,6 @@ const SSOConfigurationActionSchema = z.object({
 })
 
 /**
- * Helper function to get organization by ID for SSO routes.
- * Reduces code duplication between sso.tsx and sso.users.tsx.
- * Exported for use in sso.users.tsx
- */
-export async function getOrganizationForSSO(organizationId: string) {
-	const organization = await prisma.organization.findUnique({
-		where: { id: organizationId },
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
-	})
-
-	if (!organization) {
-		throw new Response('Organization not found', { status: 404 })
-	}
-
-	return organization
-}
-
-/**
  * Helper to build SSO configuration object from form data.
  * Eliminates duplication between create and update operations.
  */
@@ -91,6 +69,23 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	await requireUserWithRole(request, 'admin')
 
 	invariant(params.organizationId, 'Organization ID is required')
+
+	async function getOrganizationForSSO(organizationId: string) {
+		const organization = await prisma.organization.findUnique({
+			where: { id: organizationId },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+			},
+		})
+
+		if (!organization) {
+			throw new Response('Organization not found', { status: 404 })
+		}
+
+		return organization
+	}
 
 	// Get organization
 	const organization = await getOrganizationForSSO(params.organizationId)

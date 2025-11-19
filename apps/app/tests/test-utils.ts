@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 
 export async function createTestOrganization(
 	userId: string,

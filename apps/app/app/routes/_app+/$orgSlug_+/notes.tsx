@@ -23,9 +23,8 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import {
 	getNotesViewMode,
 	setNotesViewMode,
@@ -406,7 +405,9 @@ export function ErrorBoundary() {
 			statusHandlers={{
 				404: ({ params }) => (
 					<p>
-						<Trans>No organization with the slug "{params.orgSlug}" exists</Trans>
+						<Trans>
+							No organization with the slug "{params.orgSlug}" exists
+						</Trans>
 					</p>
 				),
 			}}

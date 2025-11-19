@@ -6,7 +6,11 @@ import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
 import { PageTitle } from '@repo/ui/page-title'
 import * as QRCode from 'qrcode'
-import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData  } from 'react-router'
+import {
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	useLoaderData,
+} from 'react-router'
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
@@ -14,7 +18,7 @@ import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { userSecuritySelect } from '#app/utils/user-security.server.ts'
 import {
 	deleteDataAction,
@@ -84,12 +88,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	// Extract results with error handling
 	const user =
-		results[0].status === 'fulfilled' ? results[0].value : (() => { throw results[0].reason })()
+		results[0].status === 'fulfilled'
+			? results[0].value
+			: (() => {
+					throw results[0].reason
+				})()
 	const twoFactorVerification =
 		results[1].status === 'fulfilled' ? results[1].value : null
 	const password = results[2].status === 'fulfilled' ? results[2].value : null
-	const connections =
-		results[3].status === 'fulfilled' ? results[3].value : []
+	const connections = results[3].status === 'fulfilled' ? results[3].value : []
 	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
 
 	// Generate TOTP QR code if 2FA is not enabled
@@ -217,7 +224,9 @@ export default function SecuritySettings() {
 			<AnnotatedLayout>
 				<PageTitle
 					title={_(t`Security Settings`)}
-					description={_(t`Manage your password, two-factor authentication, connected accounts, and advanced security settings.`)}
+					description={_(
+						t`Manage your password, two-factor authentication, connected accounts, and advanced security settings.`,
+					)}
 				/>
 
 				<AnnotatedSection>

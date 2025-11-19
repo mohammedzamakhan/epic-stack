@@ -19,7 +19,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
     "@epic-web/invariant": "^1.0.0",
-    "@repo/prisma": "*",
+    "@repo/database": "*",
     "@trigger.dev/build": "^3.0.0",
     "@trigger.dev/sdk": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",

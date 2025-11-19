@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { test } from '#tests/playwright-utils.ts'
 
 test.describe('Admin Impersonation', () => {
@@ -74,10 +74,9 @@ test.describe('Admin Impersonation', () => {
 		await page.click('[type="submit"]')
 
 		// Try to access impersonation route directly
-		const response = await navigate(
-			'/users/:userId/impersonate',
-			{ userId: targetUser.id },
-		)
+		const response = await navigate('/users/:userId/impersonate', {
+			userId: targetUser.id,
+		})
 
 		// Should get 403 or be redirected
 		expect(response?.status()).toBe(403)

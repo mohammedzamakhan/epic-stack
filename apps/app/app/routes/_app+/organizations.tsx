@@ -13,11 +13,12 @@ import {
 	type ActionFunctionArgs,
 	Link,
 	useLoaderData,
-	Form, redirect 
+	Form,
+	redirect,
 } from 'react-router'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,

@@ -16,7 +16,7 @@ import {
 	type OrganizationNote,
 	type Organization,
 } from './prisma-types'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { type IntegrationProvider, providerRegistry } from './provider'
 import {
 	type TokenData,

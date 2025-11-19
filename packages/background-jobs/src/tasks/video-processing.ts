@@ -43,7 +43,7 @@ if (!process.env.PRISMA_QUERY_ENGINE_LIBRARY) {
 	}
 }
 
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Import MSW setup for development mode
 import '../mocks/index'

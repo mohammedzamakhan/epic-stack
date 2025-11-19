@@ -1,12 +1,8 @@
-import { initClientMonitoring } from '@repo/observability'
+import { initClientMonitoring } from '@repo/observability/client'
 
 export function init() {
 	initClientMonitoring({
-		dsn: ENV.SENTRY_DSN,
+		dsn: ENV.SENTRY_DSN as string,
 		environment: ENV.MODE,
-		// Admin app uses 100% sample rate for traces
-		tracesSampleRate: 1.0,
-		// Admin uses 0.1 for session replays
-		replaysSessionSampleRate: 0.1,
 	})
 }

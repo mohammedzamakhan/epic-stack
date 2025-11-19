@@ -1,4 +1,4 @@
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 export async function setupRoles() {
 	console.log('Setting up roles...')

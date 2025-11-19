@@ -11,7 +11,7 @@ export const mockPrisma = {
 	},
 }
 
-// Mock the @repo/prisma module
-vi.mock('@repo/prisma', () => ({
+// Mock the @repo/database module
+vi.mock('@repo/database', () => ({
 	prisma: mockPrisma,
 }))

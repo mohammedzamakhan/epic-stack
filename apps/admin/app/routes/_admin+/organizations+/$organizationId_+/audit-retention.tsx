@@ -23,7 +23,7 @@ import {
 	AuditAction,
 	AuditService,
 } from '#app/utils/audit.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 

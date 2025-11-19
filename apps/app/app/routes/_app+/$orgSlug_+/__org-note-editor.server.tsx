@@ -11,8 +11,8 @@ import { z } from 'zod'
 import { logNoteActivity } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
-import { markStepCompleted } from '@repo/common'
+import { prisma } from '@repo/database'
+import { markStepCompleted } from '@repo/common/onboarding'
 import {
 	uploadNoteImage,
 	uploadNoteVideo,

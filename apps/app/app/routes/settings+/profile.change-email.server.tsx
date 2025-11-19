@@ -5,7 +5,7 @@ import {
 	requireRecentVerification,
 	type VerifyFunctionArgs,
 } from '#app/routes/_auth+/verify.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'

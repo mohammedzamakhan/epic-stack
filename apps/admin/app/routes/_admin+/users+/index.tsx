@@ -1,7 +1,7 @@
 import { type User, type Organization, type UserImage } from '@prisma/client'
 import { useLoaderData } from 'react-router'
 import { AdminUsersTable } from '#app/components/admin-users-table.tsx'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 

@@ -1,10 +1,20 @@
 {
   "type": "module",
-  "name": "@repo/prisma",
+  "name": "@repo/database",
   "version": "0.0.0",
   "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "types": "./db.server.ts",
+      "import": "./db.server.ts",
+      "default": "./db.server.ts"
+    },
+    "./types": {
+      "types": "./types.ts",
+      "import": "./types.ts",
+      "default": "./types.ts"
+    }
+  },
   "scripts": {
     "db:generate": "prisma generate --sql",
     "db:push": "prisma db push --skip-generate",

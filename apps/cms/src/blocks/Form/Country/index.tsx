@@ -7,21 +7,21 @@ import { BaseSelectField } from '../BaseSelectField'
 import { countryOptions } from './options'
 
 export const Country: React.FC<
-	CountryField & {
-		control: Control
-		errors: Partial<FieldErrorsImpl>
-	}
+  CountryField & {
+    control: Control
+    errors: Partial<FieldErrorsImpl>
+  }
 > = ({ name, control, errors, label, required, width }) => {
-	return (
-		<BaseSelectField
-			name={name}
-			control={control}
-			errors={errors}
-			label={label}
-			options={countryOptions}
-			required={required}
-			width={width}
-			defaultValue=""
-		/>
-	)
+  return (
+    <BaseSelectField
+      name={name}
+      control={control}
+      errors={errors}
+      label={label as string}
+      options={countryOptions}
+      required={required}
+      width={String(width)}
+      defaultValue=""
+    />
+  )
 }

@@ -3,7 +3,7 @@
  */
 
 // Mock Prisma first
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		integration: {
 			create: vi.fn(),
@@ -59,7 +59,7 @@ describe('Error Scenarios Integration Tests', () => {
 
 	describe('API Error Recovery', () => {
 		it('should handle channel retrieval errors with fallback', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -124,7 +124,7 @@ describe('Error Scenarios Integration Tests', () => {
 		})
 
 		it('should handle database connection errors', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock database error for integration lookup
 			vi.mocked(prisma.integration.findUnique).mockRejectedValue(
@@ -137,7 +137,7 @@ describe('Error Scenarios Integration Tests', () => {
 		})
 
 		it('should handle logging failures gracefully', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -184,7 +184,7 @@ describe('Error Scenarios Integration Tests', () => {
 		})
 
 		it('should handle provider method failures with fallback', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -251,7 +251,7 @@ describe('Error Scenarios Integration Tests', () => {
 
 	describe('Validation Error Recovery', () => {
 		it('should handle integration validation failures', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -294,7 +294,7 @@ describe('Error Scenarios Integration Tests', () => {
 		})
 
 		it('should handle missing integration errors', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration not found
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue(null)

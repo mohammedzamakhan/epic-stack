@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'

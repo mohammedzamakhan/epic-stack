@@ -126,11 +126,14 @@ npm run validate       # lint + typecheck + test + e2e
 When encountering many ESLint warnings, follow this systematic approach:
 
 1. **Run ESLint with auto-fix first**:
+
    ```bash
    cd apps/<app-name>
    npx eslint . --ext .js,.jsx,.ts,.tsx --fix
    ```
-   This typically fixes 80-90% of warnings automatically (import order, formatting, etc.)
+
+   This typically fixes 80-90% of warnings automatically (import order,
+   formatting, etc.)
 
 2. **Identify remaining warnings by category**:
    - Import order issues
@@ -152,22 +155,23 @@ Epic Stack enforces specific import ordering:
 
 ```typescript
 // ✅ Correct order
-import { useState } from 'react'                    // 1. External dependencies
-import { useNavigate } from 'react-router'           // 2. External dependencies
-import { Button } from '@repo/ui/button'             // 3. Monorepo packages (@repo/*)
-import { prisma } from '@repo/prisma'                // 4. Monorepo packages
-import { requireUserId } from '#app/utils/auth.server.ts'  // 5. App imports (#app/*)
+import { useState } from 'react' // 1. External dependencies
+import { useNavigate } from 'react-router' // 2. External dependencies
+import { Button } from '@repo/ui/button' // 3. Monorepo packages (@repo/*)
+import { prisma } from '@repo/database' // 4. Monorepo packages
+import { requireUserId } from '#app/utils/auth.server.ts' // 5. App imports (#app/*)
 import { EmptyState } from '#app/components/empty-state.tsx' // 6. App imports
-import { type Route } from './+types/route-name'     // 7. Relative imports
-import { NoteEditor } from './note-editor'           // 8. Relative imports
+import { type Route } from './+types/route-name' // 7. Relative imports
+import { NoteEditor } from './note-editor' // 8. Relative imports
 
 // ❌ Wrong order - causes warnings
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { Button } from '@repo/ui/button'
-import { useState } from 'react'  // External should come first
+import { useState } from 'react' // External should come first
 ```
 
 **Key rules**:
+
 - External packages first (react, react-router, third-party libs)
 - Monorepo packages second (`@repo/*`)
 - App-specific imports third (`#app/*`, `#tests/*`)
@@ -192,7 +196,8 @@ const [_searchParams] = useSearchParams()
 const { data, _ } = response
 ```
 
-**ESLint config**: Variables must match `/^ignored/u` pattern to be allowed as unused.
+**ESLint config**: Variables must match `/^ignored/u` pattern to be allowed as
+unused.
 
 **3. React Hooks Exhaustive Dependencies (`react-hooks/exhaustive-deps`)**:
 
@@ -201,32 +206,32 @@ When useEffect/useCallback/useMemo have missing dependencies:
 ```typescript
 // ❌ Wrong - missing dependencies
 const handleChange = (key: string, value: string) => {
-  const newParams = new URLSearchParams(searchParams)
-  newParams.set(key, value)
-  setSearchParams(newParams)
+	const newParams = new URLSearchParams(searchParams)
+	newParams.set(key, value)
+	setSearchParams(newParams)
 }
 
 useEffect(() => {
-  if (searchValue !== data.filters.search) {
-    handleChange('search', searchValue)
-  }
-}, [searchValue])  // ⚠️ Missing: data.filters.search, handleChange
+	if (searchValue !== data.filters.search) {
+		handleChange('search', searchValue)
+	}
+}, [searchValue]) // ⚠️ Missing: data.filters.search, handleChange
 
 // ✅ Correct - wrap in useCallback and add all dependencies
 const handleChange = useCallback(
-  (key: string, value: string) => {
-    const newParams = new URLSearchParams(searchParams)
-    newParams.set(key, value)
-    setSearchParams(newParams)
-  },
-  [searchParams, setSearchParams],
+	(key: string, value: string) => {
+		const newParams = new URLSearchParams(searchParams)
+		newParams.set(key, value)
+		setSearchParams(newParams)
+	},
+	[searchParams, setSearchParams],
 )
 
 useEffect(() => {
-  if (searchValue !== data.filters.search) {
-    handleChange('search', searchValue)
-  }
-}, [searchValue, data.filters.search, handleChange])  // ✅ All deps included
+	if (searchValue !== data.filters.search) {
+		handleChange('search', searchValue)
+	}
+}, [searchValue, data.filters.search, handleChange]) // ✅ All deps included
 ```
 
 **4. Type Import Specifiers (`import/consistent-type-specifier-style`)**:
@@ -236,12 +241,12 @@ Prefer inline type specifiers over top-level type-only imports:
 ```typescript
 // ✅ Correct - inline type specifier
 import { type LoaderFunctionArgs } from 'react-router'
-import { type User, prisma } from '@repo/prisma'
+import { type User, prisma } from '@repo/database'
 
 // ❌ Wrong - top-level type-only import
 import type { LoaderFunctionArgs } from 'react-router'
-import type { User } from '@repo/prisma'
-import { prisma } from '@repo/prisma'
+import type { User } from '@repo/database'
+import { prisma } from '@repo/database'
 ```
 
 **5. Duplicate Imports (`import/no-duplicates`)**:
@@ -264,7 +269,8 @@ import { useActionData } from 'react-router'
 - Large changesets may timeout during pre-commit checks
 - If pre-commit fails due to timeout (not errors):
   1. Verify changes pass individually: `npm run lint`, `npm run typecheck`
-  2. Use `git commit --no-verify` only if you've verified the changes are correct
+  2. Use `git commit --no-verify` only if you've verified the changes are
+     correct
   3. Note this in commit message for transparency
 
 **Workflow for Clean Commits**:
@@ -370,8 +376,8 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 **Prisma Workflow**:
 
 ```bash
-# After schema changes in packages/prisma/schema.prisma
-cd packages/prisma
+# After schema changes in packages/database/schema.prisma
+cd packages/database
 npx prisma migrate dev --name your_migration_name
 npx prisma generate  # Regenerate Prisma Client
 
@@ -383,7 +389,7 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 
 - SQLite replication across Fly.io regions
 - Database at `/litefs/data/sqlite.db` in production
-- Local: `./packages/prisma/data.db`
+- Local: `./packages/database/data.db`
 - Use "widen then narrow" migration strategy for zero-downtime
 
 ## Deployment
@@ -431,7 +437,7 @@ npm install --prefix packages/<name>                   # Install deps in package
 
 - `@repo/ui` - Shared components (Radix UI + Tailwind)
 - `@repo/auth` - Authentication & RBAC
-- `@repo/prisma` - Database schema & client
+- `@repo/database` - Database schema & client
 - `@repo/config` - Shared configs (ESLint, TypeScript, Prettier)
 - `@repo/ai` - AI/ML integrations (Vercel AI SDK, Google AI)
 - `@repo/security` - Security utilities (encryption, rate limiting)

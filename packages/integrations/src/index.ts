@@ -95,7 +95,7 @@ export * from './providers'
 
 // Re-export commonly used types for convenience
 // Note: These types are currently typed as 'any' because Prisma client generation failed
-// They can still be imported directly from '@prisma/client' or '@repo/prisma'
+// They can still be imported directly from '@prisma/client' or '@repo/database'
 export type Integration = any
 export type NoteIntegrationConnection = any
 export type OrganizationNote = any

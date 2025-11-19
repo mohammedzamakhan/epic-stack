@@ -173,7 +173,7 @@ if what you need to seed is a lot of data), so here's an easy way to help out:
    ```
 1. Create a "dump" of the seed database using the `sqlite3` command line tool.
    ```sh nonumber
-   sqlite3 ./prisma/seed.local.db .dump > seed.local.sql
+   sqlite3 ./database/seed.local.db .dump > seed.local.sql
    ```
 1. Copy the relevant bits from the `seed.local.sql` file into your
    `migration.sql` file. The `seed.local.sql` will include create table/index

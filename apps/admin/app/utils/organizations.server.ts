@@ -1,5 +1,5 @@
 import { type User } from '@prisma/client'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { getUserId } from './auth.server.ts'
 

@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { ErrorList } from '#app/components/forms.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import {
 	getUserImgSrc,
 	useDoubleCheck,

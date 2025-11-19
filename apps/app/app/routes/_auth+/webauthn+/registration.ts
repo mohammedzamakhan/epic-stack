@@ -3,7 +3,7 @@ import {
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getDomainUrl, getErrorMessage } from '#app/utils/misc.tsx'
 import { type Route } from './+types/registration.ts'
 import {

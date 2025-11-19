@@ -12,10 +12,10 @@ import {
 	NoteOperationWrapper,
 } from '../../src/note-hooks'
 import { noteEventHandler } from '../../src/note-event-handler'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Mock dependencies
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		organizationNote: {
 			findUnique: vi.fn(),

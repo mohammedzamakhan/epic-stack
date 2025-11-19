@@ -7,7 +7,13 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
@@ -32,7 +38,7 @@ import {
 	requireAnonymous,
 } from '#app/utils/auth.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -356,7 +362,8 @@ export default function OnboardingProviderRoute({
 					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
 						<Trans>
 							By creating an account, you agree to our{' '}
-							<a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+							<a href="#">Terms of Service</a> and{' '}
+							<a href="#">Privacy Policy</a>.
 						</Trans>
 					</div>
 				</div>

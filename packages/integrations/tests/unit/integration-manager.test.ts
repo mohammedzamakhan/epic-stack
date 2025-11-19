@@ -6,10 +6,10 @@ import {
 	createTestIntegration,
 	createTestChannels,
 } from '../utils/test-helpers'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Mock Prisma
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		integration: {
 			create: vi.fn(),

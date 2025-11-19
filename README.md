@@ -57,7 +57,7 @@ directories: `apps` and `packages`.
 The `packages` directory contains reusable packages that are shared across the
 different applications.
 
-- **`@repo/prisma`**: Contains the database schema, Prisma client, and
+- **`@repo/database`**: Contains the database schema, Prisma client, and
   migrations.
 - **`@repo/ui`**: Contains the UI components that are shared across the
   applications.

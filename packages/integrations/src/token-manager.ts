@@ -4,7 +4,7 @@
  */
 
 import { type Integration } from './prisma-types'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import {
 	integrationEncryption,
 	type EncryptedTokenData,

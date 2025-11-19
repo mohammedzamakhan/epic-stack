@@ -1,6 +1,6 @@
 import { calculateReorderPosition } from '@repo/common'
 import { type ActionFunction } from 'react-router'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { validateOrgAccess } from '#app/utils/organization-loader.server.ts'
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -35,8 +35,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 		// Calculate the new fractional position using shared utility
 		const newPosition = calculateReorderPosition(
-			allStatuses.map(s => ({ position: s.position ?? 0 })),
-			targetIndex
+			allStatuses.map((s) => ({ position: s.position ?? 0 })),
+			targetIndex,
 		)
 
 		// Update the status with new position

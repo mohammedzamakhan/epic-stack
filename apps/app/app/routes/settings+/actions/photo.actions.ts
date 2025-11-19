@@ -1,6 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { z } from 'zod'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { uploadProfileImage } from '#app/utils/storage.server.ts'
 
 // Photo upload schema

@@ -1,5 +1,5 @@
 import { type User } from '@prisma/client'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { auditService, AuditAction } from './audit.server.ts'
 import { getUserId } from './auth.server.ts'
@@ -43,13 +43,13 @@ export async function getUserOrganizations(
 					level: true,
 					permissions: includePermissions
 						? {
-							where: { context: 'organization' },
-							select: {
-								action: true,
-								entity: true,
-								access: true,
-							},
-						}
+								where: { context: 'organization' },
+								select: {
+									action: true,
+									entity: true,
+									access: true,
+								},
+							}
 						: false,
 				},
 			},
@@ -208,13 +208,13 @@ export async function createOrganization({
 				},
 				...(imageObjectKey
 					? {
-						image: {
-							create: {
-								altText: `${name} logo`,
-								objectKey: imageObjectKey,
+							image: {
+								create: {
+									altText: `${name} logo`,
+									objectKey: imageObjectKey,
+								},
 							},
-						},
-					}
+						}
 					: {}),
 			},
 			select: {
@@ -445,10 +445,10 @@ export async function getOrganizationWithAccess<
 	select?: T,
 ): Promise<{
 	[K in keyof T]: T[K] extends true
-	? K extends 'id' | 'name' | 'slug'
-	? string
-	: any
-	: any
+		? K extends 'id' | 'name' | 'slug'
+			? string
+			: any
+		: any
 }> {
 	const organization = await prisma.organization.findFirst({
 		where: {

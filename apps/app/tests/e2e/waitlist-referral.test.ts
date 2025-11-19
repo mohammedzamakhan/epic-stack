@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
 
 // Override LAUNCH_STATUS for these tests to force CLOSED_BETA mode
@@ -274,10 +274,7 @@ test.describe('Waitlist Referral System', () => {
 		const { linkReferral } = await import('#app/utils/waitlist.server.ts')
 
 		// Link the referral
-		const result = await linkReferral(
-			referee.id,
-			`${referrer.username}-9991`,
-		)
+		const result = await linkReferral(referee.id, `${referrer.username}-9991`)
 		expect(result.success).toBe(true)
 
 		// Verify both the link and points were updated
@@ -435,7 +432,10 @@ test.describe('Waitlist Referral System', () => {
 		expect(entry?.grantedAccessAt).toBeNull()
 	})
 
-	test('referral code validation rejects invalid formats', async ({ page, navigate }) => {
+	test('referral code validation rejects invalid formats', async ({
+		page,
+		navigate,
+	}) => {
 		// Try various invalid formats - all should redirect to signup
 		const invalidCodes = [
 			'test', // Too short

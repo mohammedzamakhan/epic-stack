@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 async function seedOrganizations() {
 	console.log('🏢 Seeding organizations...')

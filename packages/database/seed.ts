@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { MOCK_CODE_GITHUB } from '#app/utils/providers/constants'
 import {
 	createPassword,

@@ -21,7 +21,7 @@
   "dependencies": {
     "@mjackson/form-data-parser": "^0.7.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@repo/prisma": "*",
+    "@repo/database": "*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

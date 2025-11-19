@@ -2,7 +2,10 @@
 
 **Comprehensive Guide for AI Assistants Working on Epic Stack**
 
-This document provides detailed guidance for AI assistants (like Claude) to effectively understand, navigate, and contribute to the Epic Stack monorepo. It covers architecture, patterns, conventions, and workflows specific to this codebase.
+This document provides detailed guidance for AI assistants (like Claude) to
+effectively understand, navigate, and contribute to the Epic Stack monorepo. It
+covers architecture, patterns, conventions, and workflows specific to this
+codebase.
 
 ---
 
@@ -30,9 +33,9 @@ This document provides detailed guidance for AI assistants (like Claude) to effe
 ### Essential Context
 
 **Project**: Epic Stack - Production-ready full-stack SaaS template
-**Architecture**: Nx monorepo with npm workspaces
-**Primary Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind CSS 4
-**Deployment**: Fly.io with Docker + LiteFS (distributed SQLite)
+**Architecture**: Nx monorepo with npm workspaces **Primary Stack**: React 19 +
+React Router 7, Node.js 22, SQLite + Prisma, Tailwind CSS 4 **Deployment**:
+Fly.io with Docker + LiteFS (distributed SQLite)
 
 ### Initial Setup Commands
 
@@ -129,24 +132,24 @@ epic-stack/
 
 ### Key Technologies
 
-| Category | Technologies |
-|----------|-------------|
-| **Frontend** | React 19, React Router 7, Tailwind CSS 4, Radix UI |
-| **Backend** | Node.js 22, Express |
-| **Database** | SQLite + Prisma, LiteFS (replication) |
-| **Mobile** | Expo (React Native) |
-| **Marketing** | Astro |
-| **Styling** | Tailwind CSS 4, class-variance-authority |
-| **Forms** | conform-to, Zod validation |
-| **Auth** | Custom auth + OAuth providers, TOTP 2FA |
-| **Payments** | Stripe |
-| **Email** | Resend + React Email |
-| **Notifications** | Novu |
-| **Background Jobs** | Trigger.dev |
-| **AI/ML** | Vercel AI SDK, Google AI |
-| **Testing** | Vitest, Playwright, Testing Library |
-| **Build** | Vite, Nx |
-| **Deployment** | Fly.io, Docker, LiteFS |
+| Category            | Technologies                                       |
+| ------------------- | -------------------------------------------------- |
+| **Frontend**        | React 19, React Router 7, Tailwind CSS 4, Radix UI |
+| **Backend**         | Node.js 22, Express                                |
+| **Database**        | SQLite + Prisma, LiteFS (replication)              |
+| **Mobile**          | Expo (React Native)                                |
+| **Marketing**       | Astro                                              |
+| **Styling**         | Tailwind CSS 4, class-variance-authority           |
+| **Forms**           | conform-to, Zod validation                         |
+| **Auth**            | Custom auth + OAuth providers, TOTP 2FA            |
+| **Payments**        | Stripe                                             |
+| **Email**           | Resend + React Email                               |
+| **Notifications**   | Novu                                               |
+| **Background Jobs** | Trigger.dev                                        |
+| **AI/ML**           | Vercel AI SDK, Google AI                           |
+| **Testing**         | Vitest, Playwright, Testing Library                |
+| **Build**           | Vite, Nx                                           |
+| **Deployment**      | Fly.io, Docker, LiteFS                             |
 
 ---
 
@@ -164,47 +167,50 @@ import { createUser } from '#tests/fixtures/user.ts'
 
 // Package aliases (available everywhere)
 import { Button } from '@repo/ui/button'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { EmailSchema } from '@repo/validation'
 import { encryptData } from '@repo/security'
 ```
 
 **Configuration** (`apps/app/tsconfig.json`):
+
 ```json
 {
-  "compilerOptions": {
-    "paths": {
-      "#app/*": ["./app/*"],
-      "#tests/*": ["./tests/*"],
-      "@repo/ui": ["../../packages/ui"],
-      "@repo/prisma": ["../../packages/prisma"]
-    }
-  }
+	"compilerOptions": {
+		"paths": {
+			"#app/*": ["./app/*"],
+			"#tests/*": ["./tests/*"],
+			"@repo/ui": ["../../packages/ui"],
+			"@repo/database": ["../../packages/database"]
+		}
+	}
 }
 ```
 
 ### Server vs Client Code
 
-**Critical Pattern**: Files ending in `.server.ts` or `.server.tsx` are server-only and excluded from client bundles.
+**Critical Pattern**: Files ending in `.server.ts` or `.server.tsx` are
+server-only and excluded from client bundles.
 
 ```typescript
 // ✅ Server-only file
 // app/utils/auth.server.ts
 export async function requireUserId(request: Request) {
-  // This code NEVER runs in browser
-  const session = await getSession(request)
-  return session.userId
+	// This code NEVER runs in browser
+	const session = await getSession(request)
+	return session.userId
 }
 
 // ✅ Client-safe file
 // app/utils/misc.tsx
 export function cn(...classes: ClassValue[]) {
-  // This code runs on both server and client
-  return clsx(classes)
+	// This code runs on both server and client
+	return clsx(classes)
 }
 ```
 
-**Naming Rule**: If a file accesses server-only APIs (database, filesystem, env vars), it MUST have `.server.ts` suffix.
+**Naming Rule**: If a file accesses server-only APIs (database, filesystem, env
+vars), it MUST have `.server.ts` suffix.
 
 ### Package Organization
 
@@ -279,21 +285,23 @@ npm run test:e2e:run      # E2E headless (CI mode)
 
 ```json
 {
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write"],
-    "*.{js,jsx,ts,tsx}": ["oxlint --fix"],
-    "*.{ts,tsx}": ["npm run typecheck"]
-  }
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write"],
+		"*.{js,jsx,ts,tsx}": ["oxlint --fix"],
+		"*.{ts,tsx}": ["npm run typecheck"]
+	}
 }
 ```
 
 **What happens**:
+
 1. Format staged files with Prettier
 2. Lint with Oxlint
 3. Type-check TypeScript files
 4. Commit fails if any errors
 
 **Before PR**: Always run full validation:
+
 ```bash
 npm run lint:all && npm run typecheck && npm run test && npm run test:e2e:run
 ```
@@ -302,10 +310,10 @@ npm run lint:all && npm run typecheck && npm run test && npm run test:e2e:run
 
 ```bash
 # 1. Edit schema
-vim packages/prisma/schema.prisma
+vim packages/database/schema.prisma
 
 # 2. Create migration (production-ready)
-cd packages/prisma
+cd packages/database
 npx prisma migrate dev --name add_user_preferences
 
 # 3. Regenerate Prisma Client
@@ -316,6 +324,7 @@ npx prisma migrate deploy
 ```
 
 **Key Commands**:
+
 - `prisma migrate dev` - Create migration + apply (dev)
 - `prisma migrate deploy` - Apply migrations (production)
 - `prisma db push` - Quick schema sync (dev only, skips migrations)
@@ -341,7 +350,8 @@ export default function SettingsProfile({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-2. **Route becomes available** at `/settings/profile` (auto-discovered by React Router)
+2. **Route becomes available** at `/settings/profile` (auto-discovered by React
+   Router)
 
 ### Adding New Components
 
@@ -396,15 +406,15 @@ npm init -y
 
 ```json
 {
-  "name": "@repo/my-package",
-  "version": "0.0.0",
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  }
+	"name": "@repo/my-package",
+	"version": "0.0.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	}
 }
 ```
 
@@ -412,7 +422,7 @@ npm init -y
 
 ```json
 {
-  "workspaces": ["apps/*", "packages/*"]
+	"workspaces": ["apps/*", "packages/*"]
 }
 ```
 
@@ -449,6 +459,7 @@ routes/
 ```
 
 **URL Mapping**:
+
 - `index.tsx` → `/`
 - `about.tsx` → `/about`
 - `blog.index.tsx` → `/blog`
@@ -485,6 +496,7 @@ export default function AppLayout() {
 ```
 
 **File naming**:
+
 - `_app+/` - Folder (+ means contains routes)
 - `_layout.tsx` - Layout component (underscore = pathless)
 
@@ -587,6 +599,7 @@ export function Alert({ children, className, variant, icon }: AlertProps) {
 ```
 
 **Key Patterns**:
+
 1. Use `class-variance-authority` for variants
 2. Use `cn()` utility for className merging
 3. Export props interface for type safety
@@ -604,11 +617,13 @@ import { Icon } from '@repo/ui/icon'
 ```
 
 **Icons are**:
+
 - Type-safe (TypeScript autocomplete)
 - Auto-generated from SVG files in `packages/ui/components/icons/`
 - Rendered as sprite sheet (performance)
 
 **Adding new icons**:
+
 1. Add SVG file to `packages/ui/components/icons/`
 2. Run `node packages/ui/generate-icons.js`
 3. Use with `<Icon name="my-new-icon" />`
@@ -655,6 +670,7 @@ export default function LoginForm() {
 ```
 
 **Form Pattern**:
+
 1. Define Zod schema for validation
 2. Use conform-to for form state
 3. Connect to server action via `method="post"`
@@ -692,6 +708,7 @@ export {
 ```
 
 **Usage**:
+
 ```typescript
 import {
   DropdownMenu,
@@ -720,7 +737,7 @@ import {
 import { type Route } from './+types/notes.$noteId'
 import { data } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { invariantResponse } from '@epic-web/invariant'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -765,6 +782,7 @@ export default function NoteView({ loaderData }: Route.ComponentProps) {
 ```
 
 **Key Points**:
+
 - Loaders run on server before rendering
 - Use `data()` helper for type-safe responses
 - Use `invariantResponse()` for assertions that throw responses
@@ -837,6 +855,7 @@ export default function NewNote({ actionData }: Route.ComponentProps) {
 ```
 
 **Action Flow**:
+
 1. User submits form
 2. Server action runs
 3. Validates data with Zod
@@ -879,29 +898,30 @@ import { cachified } from '@epic-web/cachified'
 import { cache } from '#app/utils/cache.server.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const userId = await requireUserId(request)
+	const userId = await requireUserId(request)
 
-  const user = await cachified({
-    key: `user:${userId}`,
-    cache,
-    ttl: 1000 * 60 * 5,  // 5 minutes
-    getFreshValue: async () => {
-      return prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      })
-    },
-  })
+	const user = await cachified({
+		key: `user:${userId}`,
+		cache,
+		ttl: 1000 * 60 * 5, // 5 minutes
+		getFreshValue: async () => {
+			return prisma.user.findUnique({
+				where: { id: userId },
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				},
+			})
+		},
+	})
 
-  return { user }
+	return { user }
 }
 ```
 
 **Cache TTL Guidelines**:
+
 - User data (security-sensitive): 1-5 minutes
 - Public content: 15-60 minutes
 - Static data: 24 hours
@@ -913,36 +933,38 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 ### Prisma Client Setup
 
 ```typescript
-// packages/prisma/index.ts
+// packages/database/index.ts
 import { PrismaClient } from '@prisma/client'
 import { remember } from '@epic-web/remember'
 
 export const prisma = remember('prisma', () => {
-  const client = new PrismaClient({
-    log: process.env.NODE_ENV === 'development'
-      ? [{ level: 'query', emit: 'event' }]
-      : [],
-  })
+	const client = new PrismaClient({
+		log:
+			process.env.NODE_ENV === 'development'
+				? [{ level: 'query', emit: 'event' }]
+				: [],
+	})
 
-  // Log slow queries
-  if (process.env.NODE_ENV === 'development') {
-    client.$on('query', (e: any) => {
-      if (e.duration > 20) {
-        console.info(`[Prisma] Slow query (${e.duration}ms): ${e.query}`)
-      }
-    })
-  }
+	// Log slow queries
+	if (process.env.NODE_ENV === 'development') {
+		client.$on('query', (e: any) => {
+			if (e.duration > 20) {
+				console.info(`[Prisma] Slow query (${e.duration}ms): ${e.query}`)
+			}
+		})
+	}
 
-  return client
+	return client
 })
 
 export * from '@prisma/client'
 ```
 
 **Re-export in app**:
+
 ```typescript
 // app/utils/db.server.ts
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 export { prisma }
 ```
 
@@ -953,25 +975,25 @@ export { prisma }
 ```typescript
 // ✅ Good: Only fetch needed fields
 const user = await prisma.user.findUnique({
-  where: { id: userId },
-  select: {
-    id: true,
-    name: true,
-    email: true,
-    roles: {
-      select: {
-        name: true,
-        permissions: {
-          select: { entity: true, action: true }
-        }
-      }
-    }
-  }
+	where: { id: userId },
+	select: {
+		id: true,
+		name: true,
+		email: true,
+		roles: {
+			select: {
+				name: true,
+				permissions: {
+					select: { entity: true, action: true },
+				},
+			},
+		},
+	},
 })
 
 // ❌ Bad: Fetches all fields (slow, insecure)
 const user = await prisma.user.findUnique({
-  where: { id: userId }
+	where: { id: userId },
 })
 ```
 
@@ -979,19 +1001,19 @@ const user = await prisma.user.findUnique({
 
 ```typescript
 const notes = await prisma.note.findMany({
-  where: {
-    ownerId: userId,
-    title: { contains: searchTerm },
-    createdAt: { gte: new Date('2024-01-01') },
-  },
-  orderBy: { createdAt: 'desc' },
-  take: 20,
-  skip: page * 20,
-  select: {
-    id: true,
-    title: true,
-    createdAt: true,
-  },
+	where: {
+		ownerId: userId,
+		title: { contains: searchTerm },
+		createdAt: { gte: new Date('2024-01-01') },
+	},
+	orderBy: { createdAt: 'desc' },
+	take: 20,
+	skip: page * 20,
+	select: {
+		id: true,
+		title: true,
+		createdAt: true,
+	},
 })
 ```
 
@@ -999,19 +1021,19 @@ const notes = await prisma.note.findMany({
 
 ```typescript
 const result = await prisma.$transaction(async (tx) => {
-  // All operations must succeed or all fail
-  const user = await tx.user.create({
-    data: { email, name }
-  })
+	// All operations must succeed or all fail
+	const user = await tx.user.create({
+		data: { email, name },
+	})
 
-  await tx.organization.create({
-    data: {
-      name: `${name}'s Org`,
-      members: { connect: { id: user.id } }
-    }
-  })
+	await tx.organization.create({
+		data: {
+			name: `${name}'s Org`,
+			members: { connect: { id: user.id } },
+		},
+	})
 
-  return user
+	return user
 })
 ```
 
@@ -1019,9 +1041,9 @@ const result = await prisma.$transaction(async (tx) => {
 
 ```typescript
 const user = await prisma.user.upsert({
-  where: { email },
-  update: { name, lastLoginAt: new Date() },
-  create: { email, name, lastLoginAt: new Date() },
+	where: { email },
+	update: { name, lastLoginAt: new Date() },
+	create: { email, name, lastLoginAt: new Date() },
 })
 ```
 
@@ -1061,6 +1083,7 @@ model Note {
 ```
 
 **Guidelines**:
+
 - Use `cuid()` for IDs (random, URL-safe)
 - Always add `createdAt` and `updatedAt`
 - Add indexes for foreign keys and frequently queried fields
@@ -1071,7 +1094,7 @@ model Note {
 
 ```bash
 # Development workflow
-cd packages/prisma
+cd packages/database
 
 # 1. Edit schema.prisma
 
@@ -1086,6 +1109,7 @@ npx prisma migrate deploy
 ```
 
 **Zero-downtime migrations** (widen-then-narrow strategy):
+
 1. **Widen**: Add new nullable field
 2. **Deploy**: App works with old & new schema
 3. **Backfill**: Populate new field
@@ -1101,48 +1125,48 @@ npx prisma migrate deploy
 // app/utils/auth.server.ts
 import { Authenticator } from 'remix-auth'
 import { sessionStorage } from './session.server.ts'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 export const authenticator = new Authenticator<ProviderUser>(sessionStorage)
 
 // Get user ID (returns null if not authenticated)
 export async function getUserId(request: Request) {
-  const authSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
-  )
-  const sessionId = authSession.get(sessionKey)
+	const authSession = await sessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	const sessionId = authSession.get(sessionKey)
 
-  if (!sessionId) return null
+	if (!sessionId) return null
 
-  const session = await prisma.session.findUnique({
-    where: { id: sessionId },
-    select: { userId: true, expirationDate: true }
-  })
+	const session = await prisma.session.findUnique({
+		where: { id: sessionId },
+		select: { userId: true, expirationDate: true },
+	})
 
-  if (!session || session.expirationDate < new Date()) {
-    return null
-  }
+	if (!session || session.expirationDate < new Date()) {
+		return null
+	}
 
-  return session.userId
+	return session.userId
 }
 
 // Require authentication (throws 401 if not authenticated)
 export async function requireUserId(request: Request) {
-  const userId = await getUserId(request)
-  invariantResponse(userId, 'Must be authenticated', { status: 401 })
-  return userId
+	const userId = await getUserId(request)
+	invariantResponse(userId, 'Must be authenticated', { status: 401 })
+	return userId
 }
 
 // Logout
 export async function logout({ request, redirectTo = '/' }) {
-  const authSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
-  )
-  return redirect(redirectTo, {
-    headers: {
-      'Set-Cookie': await sessionStorage.destroySession(authSession)
-    }
-  })
+	const authSession = await sessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	return redirect(redirectTo, {
+		headers: {
+			'Set-Cookie': await sessionStorage.destroySession(authSession),
+		},
+	})
 }
 ```
 
@@ -1151,25 +1175,25 @@ export async function logout({ request, redirectTo = '/' }) {
 ```typescript
 // Protected route
 export async function loader({ request }: Route.LoaderArgs) {
-  const userId = await requireUserId(request)  // Throws if not authenticated
+	const userId = await requireUserId(request) // Throws if not authenticated
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId }
-  })
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+	})
 
-  return { user }
+	return { user }
 }
 
 // Optional authentication
 export async function loader({ request }: Route.LoaderArgs) {
-  const userId = await getUserId(request)  // Returns null if not authenticated
+	const userId = await getUserId(request) // Returns null if not authenticated
 
-  if (!userId) {
-    return { isAuthenticated: false }
-  }
+	if (!userId) {
+		return { isAuthenticated: false }
+	}
 
-  const user = await prisma.user.findUnique({ where: { id: userId } })
-  return { isAuthenticated: true, user }
+	const user = await prisma.user.findUnique({ where: { id: userId } })
+	return { isAuthenticated: true, user }
 }
 ```
 
@@ -1179,68 +1203,66 @@ export async function loader({ request }: Route.LoaderArgs) {
 // app/utils/permissions.server.ts
 import { requireUserId } from './auth.server.ts'
 
-export async function requireUserWithRole(
-  request: Request,
-  role: string
-) {
-  const userId = await requireUserId(request)
+export async function requireUserWithRole(request: Request, role: string) {
+	const userId = await requireUserId(request)
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      roles: { select: { name: true } }
-    }
-  })
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: {
+			id: true,
+			roles: { select: { name: true } },
+		},
+	})
 
-  invariantResponse(user, 'User not found', { status: 404 })
+	invariantResponse(user, 'User not found', { status: 404 })
 
-  const hasRole = user.roles.some(r => r.name === role)
-  invariantResponse(hasRole, 'Not authorized', { status: 403 })
+	const hasRole = user.roles.some((r) => r.name === role)
+	invariantResponse(hasRole, 'Not authorized', { status: 403 })
 
-  return user
+	return user
 }
 
 export async function requirePermission(
-  request: Request,
-  permission: { entity: string; action: string }
+	request: Request,
+	permission: { entity: string; action: string },
 ) {
-  const userId = await requireUserId(request)
+	const userId = await requireUserId(request)
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      roles: {
-        select: {
-          permissions: {
-            select: { entity: true, action: true }
-          }
-        }
-      }
-    }
-  })
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: {
+			id: true,
+			roles: {
+				select: {
+					permissions: {
+						select: { entity: true, action: true },
+					},
+				},
+			},
+		},
+	})
 
-  invariantResponse(user, 'User not found', { status: 404 })
+	invariantResponse(user, 'User not found', { status: 404 })
 
-  const hasPermission = user.roles.some(role =>
-    role.permissions.some(p =>
-      p.entity === permission.entity && p.action === permission.action
-    )
-  )
+	const hasPermission = user.roles.some((role) =>
+		role.permissions.some(
+			(p) => p.entity === permission.entity && p.action === permission.action,
+		),
+	)
 
-  invariantResponse(hasPermission, 'Not authorized', { status: 403 })
+	invariantResponse(hasPermission, 'Not authorized', { status: 403 })
 
-  return user
+	return user
 }
 ```
 
 **Usage in routes**:
+
 ```typescript
 export async function loader({ request }: Route.LoaderArgs) {
-  await requirePermission(request, { entity: 'note', action: 'delete' })
+	await requirePermission(request, { entity: 'note', action: 'delete' })
 
-  // User has permission, continue...
+	// User has permission, continue...
 }
 ```
 
@@ -1251,20 +1273,20 @@ export async function loader({ request }: Route.LoaderArgs) {
 import { GitHubStrategy } from 'remix-auth-github'
 
 export const githubStrategy = new GitHubStrategy(
-  {
-    clientID: process.env.GITHUB_CLIENT_ID!,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    callbackURL: `${process.env.APP_URL}/auth/github/callback`,
-  },
-  async ({ profile }) => {
-    // Return user data to be stored in session
-    return {
-      id: profile.id,
-      email: profile.emails[0].value,
-      name: profile.displayName,
-      avatarUrl: profile.photos[0].value,
-    }
-  }
+	{
+		clientID: process.env.GITHUB_CLIENT_ID!,
+		clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+		callbackURL: `${process.env.APP_URL}/auth/github/callback`,
+	},
+	async ({ profile }) => {
+		// Return user data to be stored in session
+		return {
+			id: profile.id,
+			email: profile.emails[0].value,
+			name: profile.displayName,
+			avatarUrl: profile.photos[0].value,
+		}
+	},
 )
 ```
 
@@ -1280,32 +1302,32 @@ import { describe, it, expect } from 'vitest'
 import { cn, getErrorMessage } from './misc'
 
 describe('cn utility', () => {
-  it('merges class names', () => {
-    expect(cn('foo', 'bar')).toBe('foo bar')
-  })
+	it('merges class names', () => {
+		expect(cn('foo', 'bar')).toBe('foo bar')
+	})
 
-  it('handles conditional classes', () => {
-    expect(cn('foo', false && 'bar', 'baz')).toBe('foo baz')
-  })
+	it('handles conditional classes', () => {
+		expect(cn('foo', false && 'bar', 'baz')).toBe('foo baz')
+	})
 
-  it('handles Tailwind conflicts', () => {
-    expect(cn('px-2 py-1', 'px-4')).toBe('py-1 px-4')
-  })
+	it('handles Tailwind conflicts', () => {
+		expect(cn('px-2 py-1', 'px-4')).toBe('py-1 px-4')
+	})
 })
 
 describe('getErrorMessage', () => {
-  it('extracts message from Error object', () => {
-    const error = new Error('Something went wrong')
-    expect(getErrorMessage(error)).toBe('Something went wrong')
-  })
+	it('extracts message from Error object', () => {
+		const error = new Error('Something went wrong')
+		expect(getErrorMessage(error)).toBe('Something went wrong')
+	})
 
-  it('handles string errors', () => {
-    expect(getErrorMessage('Error string')).toBe('Error string')
-  })
+	it('handles string errors', () => {
+		expect(getErrorMessage('Error string')).toBe('Error string')
+	})
 
-  it('returns unknown for non-standard errors', () => {
-    expect(getErrorMessage({ foo: 'bar' })).toBe('Unknown Error')
-  })
+	it('returns unknown for non-standard errors', () => {
+		expect(getErrorMessage({ foo: 'bar' })).toBe('Unknown Error')
+	})
 })
 ```
 
@@ -1354,48 +1376,48 @@ import { createUser } from '#tests/fixtures/user'
 import { createNote } from '#tests/fixtures/note'
 
 test('user can create a note', async ({ page }) => {
-  const user = await createUser()
+	const user = await createUser()
 
-  // Login
-  await page.goto('/login')
-  await page.fill('input[name="email"]', user.email)
-  await page.fill('input[name="password"]', 'password123')
-  await page.click('button[type="submit"]')
+	// Login
+	await page.goto('/login')
+	await page.fill('input[name="email"]', user.email)
+	await page.fill('input[name="password"]', 'password123')
+	await page.click('button[type="submit"]')
 
-  // Navigate to new note
-  await page.click('a[href="/notes/new"]')
+	// Navigate to new note
+	await page.click('a[href="/notes/new"]')
 
-  // Fill form
-  await page.fill('input[name="title"]', 'My Test Note')
-  await page.fill('textarea[name="content"]', 'Note content here')
-  await page.click('button[type="submit"]')
+	// Fill form
+	await page.fill('input[name="title"]', 'My Test Note')
+	await page.fill('textarea[name="content"]', 'Note content here')
+	await page.click('button[type="submit"]')
 
-  // Verify redirect and content
-  await expect(page).toHaveURL(/\/notes\/[a-z0-9]+/)
-  await expect(page.locator('h1')).toHaveText('My Test Note')
-  await expect(page.locator('p')).toHaveText('Note content here')
+	// Verify redirect and content
+	await expect(page).toHaveURL(/\/notes\/[a-z0-9]+/)
+	await expect(page.locator('h1')).toHaveText('My Test Note')
+	await expect(page.locator('p')).toHaveText('Note content here')
 })
 
 test('user can edit their own note', async ({ page }) => {
-  const user = await createUser()
-  const note = await createNote({ ownerId: user.id })
+	const user = await createUser()
+	const note = await createNote({ ownerId: user.id })
 
-  // Login (could use authenticated fixture instead)
-  await page.goto('/login')
-  // ... login flow ...
+	// Login (could use authenticated fixture instead)
+	await page.goto('/login')
+	// ... login flow ...
 
-  // Navigate to note
-  await page.goto(`/notes/${note.id}`)
+	// Navigate to note
+	await page.goto(`/notes/${note.id}`)
 
-  // Click edit
-  await page.click('a[href*="/edit"]')
+	// Click edit
+	await page.click('a[href*="/edit"]')
 
-  // Update content
-  await page.fill('input[name="title"]', 'Updated Title')
-  await page.click('button[type="submit"]')
+	// Update content
+	await page.fill('input[name="title"]', 'Updated Title')
+	await page.click('button[type="submit"]')
 
-  // Verify update
-  await expect(page.locator('h1')).toHaveText('Updated Title')
+	// Verify update
+	await expect(page.locator('h1')).toHaveText('Updated Title')
 })
 ```
 
@@ -1403,56 +1425,57 @@ test('user can edit their own note', async ({ page }) => {
 
 ```typescript
 // tests/fixtures/user.ts
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 
 const cleanupCallbacks: Array<() => Promise<void>> = []
 
 export function registerCleanup(callback: () => Promise<void>) {
-  cleanupCallbacks.push(callback)
+	cleanupCallbacks.push(callback)
 }
 
 export async function cleanup() {
-  for (const callback of cleanupCallbacks) {
-    await callback()
-  }
-  cleanupCallbacks.length = 0
+	for (const callback of cleanupCallbacks) {
+		await callback()
+	}
+	cleanupCallbacks.length = 0
 }
 
 export async function createUser(data: Partial<User> = {}) {
-  const user = await prisma.user.create({
-    data: {
-      email: data.email ?? faker.internet.email(),
-      name: data.name ?? faker.person.fullName(),
-      password: data.password
-        ? await bcrypt.hash(data.password, 12)
-        : await bcrypt.hash('password123', 12),
-      ...data,
-    },
-  })
+	const user = await prisma.user.create({
+		data: {
+			email: data.email ?? faker.internet.email(),
+			name: data.name ?? faker.person.fullName(),
+			password: data.password
+				? await bcrypt.hash(data.password, 12)
+				: await bcrypt.hash('password123', 12),
+			...data,
+		},
+	})
 
-  // Auto-cleanup after test
-  registerCleanup(async () => {
-    await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
-  })
+	// Auto-cleanup after test
+	registerCleanup(async () => {
+		await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
+	})
 
-  return user
+	return user
 }
 ```
 
 **Usage**:
+
 ```typescript
 import { afterEach } from 'vitest'
 import { cleanup, createUser } from '#tests/fixtures/user'
 
 afterEach(async () => {
-  await cleanup()
+	await cleanup()
 })
 
 test('something', async () => {
-  const user = await createUser()  // Auto-deleted after test
-  // ...
+	const user = await createUser() // Auto-deleted after test
+	// ...
 })
 ```
 
@@ -1463,26 +1486,27 @@ test('something', async () => {
 import { http, HttpResponse } from 'msw'
 
 export const githubHandlers = [
-  http.get('https://api.github.com/user', () => {
-    return HttpResponse.json({
-      id: 123456,
-      login: 'testuser',
-      email: 'test@example.com',
-      name: 'Test User',
-      avatar_url: 'https://example.com/avatar.jpg',
-    })
-  }),
+	http.get('https://api.github.com/user', () => {
+		return HttpResponse.json({
+			id: 123456,
+			login: 'testuser',
+			email: 'test@example.com',
+			name: 'Test User',
+			avatar_url: 'https://example.com/avatar.jpg',
+		})
+	}),
 
-  http.get('https://api.github.com/user/repos', () => {
-    return HttpResponse.json([
-      { id: 1, name: 'repo1', full_name: 'testuser/repo1' },
-      { id: 2, name: 'repo2', full_name: 'testuser/repo2' },
-    ])
-  }),
+	http.get('https://api.github.com/user/repos', () => {
+		return HttpResponse.json([
+			{ id: 1, name: 'repo1', full_name: 'testuser/repo1' },
+			{ id: 2, name: 'repo2', full_name: 'testuser/repo2' },
+		])
+	}),
 ]
 ```
 
 **Setup**:
+
 ```typescript
 // tests/setup/setup-test-env.ts
 import { setupServer } from 'msw/node'
@@ -1504,7 +1528,7 @@ afterAll(() => server.close())
 1. **Create database schema** (if needed):
 
 ```prisma
-// packages/prisma/schema.prisma
+// packages/database/schema.prisma
 model Feature {
   id        String   @id @default(cuid())
   name      String
@@ -1518,7 +1542,7 @@ model Feature {
 ```
 
 ```bash
-cd packages/prisma
+cd packages/database
 npx prisma migrate dev --name add_feature_model
 ```
 
@@ -1568,13 +1592,13 @@ export default function Features({ loaderData }: Route.ComponentProps) {
 import { test, expect } from '@playwright/test'
 
 test('displays features list', async ({ page }) => {
-  await createFeature({ name: 'Feature 1' })
-  await createFeature({ name: 'Feature 2' })
+	await createFeature({ name: 'Feature 1' })
+	await createFeature({ name: 'Feature 2' })
 
-  await page.goto('/features')
+	await page.goto('/features')
 
-  await expect(page.locator('text=Feature 1')).toBeVisible()
-  await expect(page.locator('text=Feature 2')).toBeVisible()
+	await expect(page.locator('text=Feature 1')).toBeVisible()
+	await expect(page.locator('text=Feature 2')).toBeVisible()
 })
 ```
 
@@ -1665,6 +1689,7 @@ export const sendWelcomeEmailJob = client.defineJob({
 ```
 
 **Trigger from app**:
+
 ```typescript
 // After user creation
 await sendWelcomeEmailJob.trigger({ userId: user.id })
@@ -1678,38 +1703,39 @@ import { type Route } from './+types/features'
 import { json } from 'react-router'
 
 export async function loader({ request }: Route.LoaderArgs) {
-  // Validate API key
-  const apiKey = request.headers.get('x-api-key')
-  invariantResponse(apiKey === process.env.API_KEY, 'Invalid API key', {
-    status: 401,
-  })
+	// Validate API key
+	const apiKey = request.headers.get('x-api-key')
+	invariantResponse(apiKey === process.env.API_KEY, 'Invalid API key', {
+		status: 401,
+	})
 
-  const features = await prisma.feature.findMany()
+	const features = await prisma.feature.findMany()
 
-  return json({ features })
+	return json({ features })
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const apiKey = request.headers.get('x-api-key')
-  invariantResponse(apiKey === process.env.API_KEY, 'Invalid API key', {
-    status: 401,
-  })
+	const apiKey = request.headers.get('x-api-key')
+	invariantResponse(apiKey === process.env.API_KEY, 'Invalid API key', {
+		status: 401,
+	})
 
-  if (request.method === 'POST') {
-    const body = await request.json()
+	if (request.method === 'POST') {
+		const body = await request.json()
 
-    const feature = await prisma.feature.create({
-      data: body,
-    })
+		const feature = await prisma.feature.create({
+			data: body,
+		})
 
-    return json({ feature }, { status: 201 })
-  }
+		return json({ feature }, { status: 201 })
+	}
 
-  throw new Response('Method not allowed', { status: 405 })
+	throw new Response('Method not allowed', { status: 405 })
 }
 ```
 
 **Usage**:
+
 ```bash
 curl http://localhost:3001/api/features \
   -H "x-api-key: your-api-key"
@@ -1721,53 +1747,54 @@ curl http://localhost:3001/api/features \
 // Using Server-Sent Events (SSE)
 // apps/app/app/routes/api+/events.ts
 export async function loader({ request }: Route.LoaderArgs) {
-  const userId = await requireUserId(request)
+	const userId = await requireUserId(request)
 
-  const stream = new ReadableStream({
-    start(controller) {
-      // Send initial event
-      controller.enqueue(`data: ${JSON.stringify({ type: 'connected' })}\n\n`)
+	const stream = new ReadableStream({
+		start(controller) {
+			// Send initial event
+			controller.enqueue(`data: ${JSON.stringify({ type: 'connected' })}\n\n`)
 
-      // Setup interval for updates
-      const interval = setInterval(async () => {
-        const updates = await getUpdatesForUser(userId)
+			// Setup interval for updates
+			const interval = setInterval(async () => {
+				const updates = await getUpdatesForUser(userId)
 
-        if (updates.length > 0) {
-          controller.enqueue(
-            `data: ${JSON.stringify({ type: 'updates', data: updates })}\n\n`
-          )
-        }
-      }, 5000)
+				if (updates.length > 0) {
+					controller.enqueue(
+						`data: ${JSON.stringify({ type: 'updates', data: updates })}\n\n`,
+					)
+				}
+			}, 5000)
 
-      // Cleanup on close
-      request.signal.addEventListener('abort', () => {
-        clearInterval(interval)
-        controller.close()
-      })
-    },
-  })
+			// Cleanup on close
+			request.signal.addEventListener('abort', () => {
+				clearInterval(interval)
+				controller.close()
+			})
+		},
+	})
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  })
+	return new Response(stream, {
+		headers: {
+			'Content-Type': 'text/event-stream',
+			'Cache-Control': 'no-cache',
+			Connection: 'keep-alive',
+		},
+	})
 }
 ```
 
 **Client**:
+
 ```typescript
 useEffect(() => {
-  const eventSource = new EventSource('/api/events')
+	const eventSource = new EventSource('/api/events')
 
-  eventSource.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    console.log('Received update:', data)
-  }
+	eventSource.onmessage = (event) => {
+		const data = JSON.parse(event.data)
+		console.log('Received update:', data)
+	}
 
-  return () => eventSource.close()
+	return () => eventSource.close()
 }, [])
 ```
 
@@ -1785,10 +1812,10 @@ const EmailSchema = z.string().email()
 const PasswordSchema = z.string().min(8).max(72)
 
 const submission = await parseWithZod(formData, {
-  schema: z.object({
-    email: EmailSchema,
-    password: PasswordSchema,
-  }),
+	schema: z.object({
+		email: EmailSchema,
+		password: PasswordSchema,
+	}),
 })
 
 // ❌ Bad - No validation
@@ -1818,13 +1845,13 @@ return <div dangerouslySetInnerHTML={{ __html: userInput }} />
 ```typescript
 // ✅ Safe - Prisma parameterizes queries
 const user = await prisma.user.findUnique({
-  where: { email: userEmail }  // Automatically escaped
+	where: { email: userEmail }, // Automatically escaped
 })
 
 // ⚠️ Raw SQL - Only use with extreme caution
 const users = await prisma.$queryRaw`
   SELECT * FROM User WHERE email = ${userEmail}
-`  // Parameterized (safe), but avoid if possible
+` // Parameterized (safe), but avoid if possible
 ```
 
 ### Password Security
@@ -1850,9 +1877,9 @@ import { encrypt, decrypt } from '@repo/security'
 // Encrypt sensitive data
 const encrypted = encrypt(sensitiveData)
 await prisma.integration.create({
-  data: {
-    apiKey: encrypted,
-  }
+	data: {
+		apiKey: encrypted,
+	},
 })
 
 // Decrypt when needed
@@ -1867,14 +1894,14 @@ import { invariantResponse } from '@epic-web/invariant'
 
 // Validate critical env vars on startup
 const ENV = {
-  SESSION_SECRET: process.env.SESSION_SECRET,
-  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+	SESSION_SECRET: process.env.SESSION_SECRET,
+	ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
 }
 
 invariantResponse(ENV.SESSION_SECRET, 'SESSION_SECRET is required')
 invariantResponse(
-  ENV.ENCRYPTION_KEY?.length === 32,
-  'ENCRYPTION_KEY must be 32 characters'
+	ENV.ENCRYPTION_KEY?.length === 32,
+	'ENCRYPTION_KEY must be 32 characters',
 )
 
 export { ENV }
@@ -1889,15 +1916,15 @@ export { ENV }
 import { ratelimit } from '#app/utils/rate-limit.server.ts'
 
 export async function action({ request }: Route.ActionArgs) {
-  const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
+	const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
 
-  const { success } = await ratelimit.limit(ip)
+	const { success } = await ratelimit.limit(ip)
 
-  if (!success) {
-    throw new Response('Too many requests', { status: 429 })
-  }
+	if (!success) {
+		throw new Response('Too many requests', { status: 429 })
+	}
 
-  // Continue with action...
+	// Continue with action...
 }
 ```
 
@@ -1929,13 +1956,15 @@ export async function action({ request }: Route.ActionArgs) {
 ```typescript
 // Log security-sensitive operations
 await prisma.auditLog.create({
-  data: {
-    userId,
-    action: 'user.password.changed',
-    ipAddress: request.headers.get('x-forwarded-for'),
-    userAgent: request.headers.get('user-agent'),
-    metadata: { /* additional context */ },
-  },
+	data: {
+		userId,
+		action: 'user.password.changed',
+		ipAddress: request.headers.get('x-forwarded-for'),
+		userAgent: request.headers.get('user-agent'),
+		metadata: {
+			/* additional context */
+		},
+	},
 })
 ```
 
@@ -1945,13 +1974,13 @@ await prisma.auditLog.create({
 
 ### File Naming
 
-| Type | Convention | Examples |
-|------|-----------|----------|
-| Components | PascalCase.tsx | `EmptyState.tsx`, `UserProfile.tsx` |
-| Routes | kebab-case.tsx | `settings.profile.tsx`, `notes.$noteId.tsx` |
-| Utilities | kebab-case.ts | `auth.server.ts`, `misc.tsx` |
-| Tests | *.test.ts(x) | `auth.server.test.ts`, `button.test.tsx` |
-| Server-only | *.server.ts | `db.server.ts`, `email.server.ts` |
+| Type        | Convention     | Examples                                    |
+| ----------- | -------------- | ------------------------------------------- |
+| Components  | PascalCase.tsx | `EmptyState.tsx`, `UserProfile.tsx`         |
+| Routes      | kebab-case.tsx | `settings.profile.tsx`, `notes.$noteId.tsx` |
+| Utilities   | kebab-case.ts  | `auth.server.ts`, `misc.tsx`                |
+| Tests       | \*.test.ts(x)  | `auth.server.test.ts`, `button.test.tsx`    |
+| Server-only | \*.server.ts   | `db.server.ts`, `email.server.ts`           |
 
 ### Import Ordering
 
@@ -1963,7 +1992,7 @@ import { z } from 'zod'
 
 // 2. Monorepo packages
 import { Button } from '@repo/ui/button'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // 3. App imports (absolute with #app)
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -2010,21 +2039,21 @@ const user = await prisma.user.findUnique({ where: { id } })
 
 // ✅ Explicit return types for exported functions
 export async function getUser(id: string): Promise<User | null> {
-  return prisma.user.findUnique({ where: { id } })
+	return prisma.user.findUnique({ where: { id } })
 }
 
 // ✅ Use const assertions for literal types
 const ALLOWED_ROLES = ['admin', 'user', 'guest'] as const
-type Role = typeof ALLOWED_ROLES[number]  // 'admin' | 'user' | 'guest'
+type Role = (typeof ALLOWED_ROLES)[number] // 'admin' | 'user' | 'guest'
 
 // ✅ Use generics for reusable code
 function createResponse<T>(data: T) {
-  return { data, timestamp: Date.now() }
+	return { data, timestamp: Date.now() }
 }
 
 // ✅ Avoid 'any', use 'unknown' instead
 function parseJson(str: string): unknown {
-  return JSON.parse(str)
+	return JSON.parse(str)
 }
 ```
 
@@ -2124,7 +2153,7 @@ PORT=3002 npm run dev:app
 #### Database out of sync
 
 ```bash
-cd packages/prisma
+cd packages/database
 
 # Reset database (destructive)
 npx prisma migrate reset
@@ -2146,7 +2175,7 @@ npx nx reset
 npm run build
 
 # Regenerate Prisma client
-cd packages/prisma && npx prisma generate
+cd packages/database && npx prisma generate
 ```
 
 #### Tests failing
@@ -2179,30 +2208,30 @@ npm run test:e2e
 
 ```typescript
 // Enable Prisma query logging
-// packages/prisma/index.ts
+// packages/database/index.ts
 const client = new PrismaClient({
-  log: [
-    { level: 'query', emit: 'event' },
-    { level: 'error', emit: 'stdout' },
-    { level: 'warn', emit: 'stdout' },
-  ],
+	log: [
+		{ level: 'query', emit: 'event' },
+		{ level: 'error', emit: 'stdout' },
+		{ level: 'warn', emit: 'stdout' },
+	],
 })
 
 client.$on('query', (e) => {
-  console.log('Query:', e.query)
-  console.log('Duration:', e.duration + 'ms')
+	console.log('Query:', e.query)
+	console.log('Duration:', e.duration + 'ms')
 })
 ```
 
 ```typescript
 // Debug route loader/action
 export async function loader({ request, params }: Route.LoaderArgs) {
-  console.log('Loader called:', { params, url: request.url })
+	console.log('Loader called:', { params, url: request.url })
 
-  const userId = await getUserId(request)
-  console.log('User ID:', userId)
+	const userId = await getUserId(request)
+	console.log('User ID:', userId)
 
-  // ...
+	// ...
 }
 ```
 
@@ -2214,7 +2243,7 @@ npm run build
 npx vite-bundle-visualizer
 
 # Profile database queries
-# Enable slow query logging in packages/prisma/index.ts
+# Enable slow query logging in packages/database/index.ts
 
 # Check Nx cache
 npx nx show projects --with-target=build
@@ -2295,7 +2324,7 @@ import { Icon } from '@repo/ui/icon'
 import { cn } from '@repo/ui'
 
 // Database
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Auth
 import { requireUserId, getUserId } from '#app/utils/auth.server.ts'
@@ -2352,6 +2381,5 @@ export default function Route({ loaderData, actionData }: Route.ComponentProps) 
 
 ---
 
-**Last Updated**: 2025-11-18
-**For**: AI Assistants (Claude, etc.)
-**Companion File**: AGENTS.md
+**Last Updated**: 2025-11-18 **For**: AI Assistants (Claude, etc.) **Companion
+File**: AGENTS.md

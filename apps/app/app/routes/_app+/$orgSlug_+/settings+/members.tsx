@@ -12,7 +12,7 @@ import { InvitationsCard } from '#app/components/settings/cards/organization/inv
 import { MembersCard } from '#app/components/settings/cards/organization/members-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,

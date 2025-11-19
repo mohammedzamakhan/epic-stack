@@ -1,5 +1,5 @@
 import { getFeatureFlag as _getFeatureFlag } from '@repo/common/feature-flags'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 
 export async function getFeatureFlag(
 	key: string,

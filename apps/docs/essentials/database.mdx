@@ -45,7 +45,7 @@ In production, Epic Stack is configured with connection pooling for better perfo
 Data access is provided through a centralized Prisma client:
 
 ```typescript
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Query example
 const user = await prisma.user.findUnique({

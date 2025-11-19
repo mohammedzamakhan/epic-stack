@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document summarizes the code duplication refactoring effort completed to reduce duplicate code across the epic-stack monorepo, specifically between the `apps/admin` and `apps/app` applications.
+This document summarizes the code duplication refactoring effort completed to
+reduce duplicate code across the epic-stack monorepo, specifically between the
+`apps/admin` and `apps/app` applications.
 
 ## Methodology
 
@@ -21,38 +23,45 @@ This document summarizes the code duplication refactoring effort completed to re
 **Location**: `packages/payments/src/route-handlers/`
 
 **Files Created**:
+
 - `stripe-webhook.ts` - Shared webhook handler for Stripe subscription events
 - `stripe-checkout.ts` - Shared checkout success handler
 - `index.ts` - Exports for route handlers
 
 **Files Updated**:
-- `apps/admin/app/routes/api+/stripe+/webhook.tsx` - Now 10 lines (was 122 lines)
+
+- `apps/admin/app/routes/api+/stripe+/webhook.tsx` - Now 10 lines (was 122
+  lines)
 - `apps/app/app/routes/api+/stripe+/webhook.tsx` - Now 10 lines (was 122 lines)
-- `apps/admin/app/routes/api+/stripe+/checkout.tsx` - Now 11 lines (was 100+ lines)
-- `apps/app/app/routes/api+/stripe+/checkout.tsx` - Now 11 lines (was 100+ lines)
+- `apps/admin/app/routes/api+/stripe+/checkout.tsx` - Now 11 lines (was 100+
+  lines)
+- `apps/app/app/routes/api+/stripe+/checkout.tsx` - Now 11 lines (was 100+
+  lines)
 - `packages/payments/index.ts` - Added exports for route handlers
 
 **Pattern**:
+
 ```typescript
 // Before: 122 lines of duplicated code in each app
 export async function action({ request }: ActionFunctionArgs) {
-  // ... 120 lines of webhook handling logic ...
+	// ... 120 lines of webhook handling logic ...
 }
 
 // After: 10 lines per app, logic in shared package
 import { handleStripeWebhook } from '@repo/payments'
 
 export async function action(args: ActionFunctionArgs) {
-  return handleStripeWebhook(args, {
-    stripe,
-    handleSubscriptionChange,
-    handleTrialEnd,
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
-  })
+	return handleStripeWebhook(args, {
+		stripe,
+		handleSubscriptionChange,
+		handleTrialEnd,
+		webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+	})
 }
 ```
 
 **Benefits**:
+
 - Single source of truth for Stripe webhook handling
 - Easier to maintain and test
 - Consistent behavior across admin and app
@@ -65,37 +74,44 @@ export async function action(args: ActionFunctionArgs) {
 **Location**: `packages/integrations/src/route-handlers/`
 
 **Files Created**:
-- `oauth-callback.ts` - Shared OAuth callback handler (supports OAuth 1.0a and 2.0)
+
+- `oauth-callback.ts` - Shared OAuth callback handler (supports OAuth 1.0a and
+  2.0)
 - `jira-search-users.ts` - Shared Jira user search handler
 - `jira-current-user.ts` - Shared Jira current user handler
 - `update-config.ts` - Shared integration config update handler
 - `index.ts` - Exports for route handlers
 
 **Files Updated**:
-- `apps/admin/app/routes/api+/integrations+/oauth.callback.tsx` - Now 13 lines (was 145 lines)
-- `apps/app/app/routes/api+/integrations+/oauth.callback.tsx` - Now 13 lines (was 145 lines)
+
+- `apps/admin/app/routes/api+/integrations+/oauth.callback.tsx` - Now 13 lines
+  (was 145 lines)
+- `apps/app/app/routes/api+/integrations+/oauth.callback.tsx` - Now 13 lines
+  (was 145 lines)
 - `packages/integrations/src/index.ts` - Added exports for route handlers
 
 **Pattern**:
+
 ```typescript
 // Before: 145 lines of duplicated OAuth logic
 export async function loader({ request }: LoaderFunctionArgs) {
-  // ... 143 lines of OAuth 1.0a and 2.0 handling ...
+	// ... 143 lines of OAuth 1.0a and 2.0 handling ...
 }
 
 // After: 13 lines per app, logic in shared package
 import { handleOAuthCallback } from '@repo/integrations'
 
 export async function loader(args: LoaderFunctionArgs) {
-  return handleOAuthCallback(args, {
-    requireUserId,
-    redirectWithToast,
-    prisma,
-  })
+	return handleOAuthCallback(args, {
+		requireUserId,
+		redirectWithToast,
+		prisma,
+	})
 }
 ```
 
 **Benefits**:
+
 - Unified OAuth flow handling for all providers
 - Supports both OAuth 1.0a (Trello) and 2.0 (all other providers)
 - Consistent error handling and user feedback
@@ -108,31 +124,32 @@ All shared route handlers follow a consistent dependency injection pattern:
 ```typescript
 // 1. Define dependencies interface
 export interface HandlerDependencies {
-  requireUserId: (request: Request) => Promise<string>
-  prisma: PrismaClient
-  // ... other dependencies
+	requireUserId: (request: Request) => Promise<string>
+	prisma: PrismaClient
+	// ... other dependencies
 }
 
 // 2. Create handler accepting dependencies
 export async function handleRoute(
-  args: LoaderFunctionArgs,
-  deps: HandlerDependencies
+	args: LoaderFunctionArgs,
+	deps: HandlerDependencies,
 ) {
-  // ... handler logic using deps ...
+	// ... handler logic using deps ...
 }
 
 // 3. Apps inject their specific implementations
 export async function loader(args: LoaderFunctionArgs) {
-  return handleRoute(args, {
-    requireUserId: requireUserId,  // from app's auth.server.ts
-    prisma: prisma,                // from app's db.server.ts
-  })
+	return handleRoute(args, {
+		requireUserId: requireUserId, // from app's auth.server.ts
+		prisma: prisma, // from app's db.server.ts
+	})
 }
 ```
 
 ## Remaining Duplications (Ready for Next Phase)
 
-The following handlers have been **created and are ready to use**, but the app routes haven't been updated yet:
+The following handlers have been **created and are ready to use**, but the app
+routes haven't been updated yet:
 
 ### Ready to Deploy:
 
@@ -170,16 +187,19 @@ The following handlers have been **created and are ready to use**, but the app r
 ## Metrics
 
 ### Before Refactoring:
+
 - Stripe handlers: 206 lines duplicated (103 lines × 2 apps)
 - OAuth callback: 144 lines duplicated (72 lines × 2 apps)
 - **Total eliminated so far: ~350 lines**
 
 ### After Refactoring:
+
 - Stripe handlers: 21 lines total (10-11 lines per app)
 - OAuth callback: 26 lines total (13 lines per app)
 - **Reduction: 94% for refactored handlers**
 
 ### Potential Total Impact:
+
 - API routes alone: ~770+ lines of duplication identified
 - After completing all API route refactorings: **~95% reduction expected**
 
@@ -188,18 +208,19 @@ The following handlers have been **created and are ready to use**, but the app r
 ### For Jira and Integration Config (Handlers Already Created):
 
 1. Update the route files to follow this pattern:
+
    ```typescript
    import { handleJiraSearchUsers } from '@repo/integrations'
    import { requireUserId } from '#app/utils/auth.server.ts'
    import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
-   import { prisma } from '@repo/prisma'
+   import { prisma } from '@repo/database'
 
    export async function loader(args: LoaderFunctionArgs) {
-     return handleJiraSearchUsers(args, {
-       requireUserId,
-       getUserDefaultOrganization,
-       prisma,
-     })
+   	return handleJiraSearchUsers(args, {
+   		requireUserId,
+   		getUserDefaultOrganization,
+   		prisma,
+   	})
    }
    ```
 
@@ -220,11 +241,13 @@ To verify the refactoring:
    - OAuth integration connections
 
 2. Run type checking:
+
    ```bash
    npm run typecheck
    ```
 
 3. Run tests:
+
    ```bash
    npm run test
    ```
@@ -236,15 +259,20 @@ To verify the refactoring:
 
 ## Key Learnings
 
-1. **Dependency Injection is Powerful**: By accepting dependencies as parameters, shared handlers remain framework-agnostic and testable
+1. **Dependency Injection is Powerful**: By accepting dependencies as
+   parameters, shared handlers remain framework-agnostic and testable
 
-2. **Small Route Files**: Route files should be thin wrappers that compose functionality from packages
+2. **Small Route Files**: Route files should be thin wrappers that compose
+   functionality from packages
 
-3. **Type Safety**: TypeScript interfaces for dependencies ensure type safety across app boundaries
+3. **Type Safety**: TypeScript interfaces for dependencies ensure type safety
+   across app boundaries
 
-4. **Incremental Refactoring**: Breaking changes into phases (Stripe → OAuth → Jira → etc.) makes the work manageable
+4. **Incremental Refactoring**: Breaking changes into phases (Stripe → OAuth →
+   Jira → etc.) makes the work manageable
 
-5. **Documentation**: Clear patterns make it easy for team members to continue the refactoring
+5. **Documentation**: Clear patterns make it easy for team members to continue
+   the refactoring
 
 ## Next Steps
 
@@ -267,6 +295,7 @@ To verify the refactoring:
 ## Files Modified
 
 ### New Files:
+
 - `packages/payments/src/route-handlers/stripe-webhook.ts`
 - `packages/payments/src/route-handlers/stripe-checkout.ts`
 - `packages/payments/src/route-handlers/index.ts`
@@ -279,6 +308,7 @@ To verify the refactoring:
 - `REFACTORING_COMPLETE_SUMMARY.md`
 
 ### Modified Files:
+
 - `packages/payments/index.ts`
 - `packages/integrations/src/index.ts`
 - `apps/admin/app/routes/api+/stripe+/webhook.tsx`
@@ -290,6 +320,6 @@ To verify the refactoring:
 
 ---
 
-**Refactoring completed by**: Claude (AI Assistant)
-**Date**: 2025-11-17
-**Status**: Phase 1 Complete ✅ | Phase 2 Ready to Deploy 🚀 | Phase 3 Planned 📋
+**Refactoring completed by**: Claude (AI Assistant) **Date**: 2025-11-17
+**Status**: Phase 1 Complete ✅ | Phase 2 Ready to Deploy 🚀 | Phase 3 Planned
+📋

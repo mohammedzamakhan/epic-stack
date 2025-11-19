@@ -1,4 +1,4 @@
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 export interface OnboardingStepAction {
 	type: 'navigate' | 'modal' | 'external'
@@ -112,25 +112,27 @@ export async function getOnboardingProgress(
 	}
 
 	// Transform steps with progress data
-	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map((step: any) => {
-		const userProgress = step.userProgress[0]
-		return {
-			id: step.id,
-			key: step.key,
-			title: step.title,
-			description: step.description,
-			icon: step.icon || undefined,
-			actionConfig: step.actionConfig
-				? (JSON.parse(step.actionConfig) as OnboardingStepAction)
-				: undefined,
-			detectConfig: step.detectConfig
-				? (JSON.parse(step.detectConfig) as OnboardingStepDetectConfig)
-				: undefined,
-			sortOrder: step.sortOrder,
-			isCompleted: userProgress?.isCompleted || false,
-			completedAt: userProgress?.completedAt || undefined,
-		}
-	})
+	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map(
+		(step: any) => {
+			const userProgress = step.userProgress[0]
+			return {
+				id: step.id,
+				key: step.key,
+				title: step.title,
+				description: step.description,
+				icon: step.icon || undefined,
+				actionConfig: step.actionConfig
+					? (JSON.parse(step.actionConfig) as OnboardingStepAction)
+					: undefined,
+				detectConfig: step.detectConfig
+					? (JSON.parse(step.detectConfig) as OnboardingStepDetectConfig)
+					: undefined,
+				sortOrder: step.sortOrder,
+				isCompleted: userProgress?.isCompleted || false,
+				completedAt: userProgress?.completedAt || undefined,
+			}
+		},
+	)
 
 	const completedCount = stepsWithProgress.filter(
 		(step) => step.isCompleted,
@@ -428,3 +430,12 @@ function evaluateDetectionCondition(
 			return false
 	}
 }
+
+export {
+	handleOnboardingProgress,
+	handleOnboardingHide,
+	handleOnboardingCompleteStep,
+	type OnboardingProgressDependencies,
+	type OnboardingHideDependencies,
+	type OnboardingCompleteStepDependencies,
+} from './onboarding/route-handlers'

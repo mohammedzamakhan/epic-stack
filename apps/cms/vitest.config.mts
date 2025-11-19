@@ -9,4 +9,7 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
   },
+  optimizeDeps: {
+    exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+  },
 })

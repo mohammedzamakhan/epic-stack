@@ -3,7 +3,7 @@ import { Trans } from '@lingui/macro'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 

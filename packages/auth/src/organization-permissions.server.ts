@@ -1,5 +1,5 @@
 // No longer need data import
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 export type OrganizationPermissionString = `${string}:${string}:${string}`
 

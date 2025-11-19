@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 
 test.skip('Users can create notes', async ({ page, login, navigate }) => {

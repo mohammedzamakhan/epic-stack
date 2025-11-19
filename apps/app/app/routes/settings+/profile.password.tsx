@@ -21,7 +21,7 @@ import {
 	requireUserId,
 	verifyUserPassword,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/profile.password.ts'
 import { type BreadcrumbHandle } from './profile.change-email.tsx'

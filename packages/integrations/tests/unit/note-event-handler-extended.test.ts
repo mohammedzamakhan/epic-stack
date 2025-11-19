@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NoteEventHandler } from '../../src/note-event-handler'
 import { integrationManager } from '../../src/integration-manager'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 // Mock integration manager
 vi.mock('../../src/integration-manager', () => ({
@@ -17,7 +17,7 @@ vi.mock('../../src/integration-manager', () => ({
 }))
 
 // Mock prisma
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		organizationNote: {
 			findUnique: vi.fn(),

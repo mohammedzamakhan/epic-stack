@@ -20,7 +20,7 @@ import {
 	useNavigation,
 	useSearchParams,
 } from 'react-router'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import {

@@ -2,9 +2,24 @@ import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Button } from '@repo/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardHeaderContent, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardHeaderContent,
+	CardTitle,
+} from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@repo/ui/dialog'
 import { FieldLabel, FieldGroup, FieldDescription } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
@@ -22,7 +37,7 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { cn } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 
@@ -367,8 +382,8 @@ function NewApiKeyModal({
 					</DialogTitle>
 					<DialogDescription>
 						<Trans>
-							Your API key has been created successfully. Copy it now - you won't
-							be able to see it again.
+							Your API key has been created successfully. Copy it now - you
+							won't be able to see it again.
 						</Trans>
 					</DialogDescription>
 				</DialogHeader>
@@ -419,8 +434,8 @@ function NewApiKeyModal({
 									</div>
 									<div>
 										<Trans>
-											This is the only time you'll see this API key. Make sure to
-											copy it and store it securely.
+											This is the only time you'll see this API key. Make sure
+											to copy it and store it securely.
 										</Trans>
 									</div>
 								</div>
@@ -448,7 +463,9 @@ function ApiKeysCard({
 }: {
 	organization: { name: string }
 	apiKeys: ApiKeyData[]
-	actionData: { success?: boolean; message?: string; newApiKey?: ApiKeyData } | undefined
+	actionData:
+		| { success?: boolean; message?: string; newApiKey?: ApiKeyData }
+		| undefined
 	onCreateClick: () => void
 }) {
 	return (
@@ -460,7 +477,9 @@ function ApiKeysCard({
 						<Trans>API Keys</Trans>
 					</CardTitle>
 					<CardDescription>
-						<Trans>Create and manage API keys to authenticate your MCP clients</Trans>
+						<Trans>
+							Create and manage API keys to authenticate your MCP clients
+						</Trans>
 					</CardDescription>
 				</CardHeaderContent>
 				<CardAction>
@@ -492,7 +511,8 @@ function ApiKeysCard({
 										</Trans>
 										{apiKey.expiresAt && (
 											<span className="ml-2">
-												• <Trans>
+												•{' '}
+												<Trans>
 													Expires{' '}
 													{new Date(apiKey.expiresAt).toLocaleDateString()}
 												</Trans>
@@ -588,11 +608,15 @@ function SetupInstructionsCard({
 						<Trans>Claude Desktop</Trans>
 					</h3>
 					<p className="text-muted-foreground mb-3 text-sm">
-						<Trans>Add this configuration to your Claude Desktop settings:</Trans>
+						<Trans>
+							Add this configuration to your Claude Desktop settings:
+						</Trans>
 					</p>
 					<CodeBlock code={claudeConfig} />
 					<p className="text-muted-foreground mt-2 text-xs">
-						<Trans>Replace YOUR_API_KEY_HERE with one of your API keys above</Trans>
+						<Trans>
+							Replace YOUR_API_KEY_HERE with one of your API keys above
+						</Trans>
 					</p>
 				</div>
 

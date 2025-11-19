@@ -1,6 +1,6 @@
 import { logger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 
 /**
  * Comprehensive audit action types for the entire application

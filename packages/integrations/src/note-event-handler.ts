@@ -8,7 +8,7 @@
  * - Manage event queuing and processing
  */
 
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { integrationManager } from './integration-manager'
 
 /**

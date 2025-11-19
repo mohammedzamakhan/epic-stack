@@ -4,12 +4,11 @@ import { useLoaderData } from 'react-router'
 import { z } from 'zod'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
-import { getOrganizationForSSO } from './sso.tsx'
 
 const SSOUserActionSchema = z.object({
 	intent: z.enum(['change_role', 'toggle_status']),
@@ -20,6 +19,23 @@ const SSOUserActionSchema = z.object({
 
 export async function loader({ request, params }: Route['LoaderArgs']) {
 	await requireUserWithRole(request, 'admin')
+
+	async function getOrganizationForSSO(organizationId: string) {
+		const organization = await prisma.organization.findUnique({
+			where: { id: organizationId },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+			},
+		})
+
+		if (!organization) {
+			throw new Response('Organization not found', { status: 404 })
+		}
+
+		return organization
+	}
 
 	invariant(params.organizationId, 'Organization ID is required')
 

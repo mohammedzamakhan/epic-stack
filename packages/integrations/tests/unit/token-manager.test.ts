@@ -3,17 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-	tokenManager,
-	TokenManager,
-} from '../../src/token-manager'
+import { tokenManager, TokenManager } from '../../src/token-manager'
 import { integrationEncryption } from '../../src/encryption'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import type { Integration } from '@prisma/client'
 import type { IntegrationProvider, TokenData } from '../../src/types'
 
 // Mock dependencies
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		integration: {
 			update: vi.fn(),

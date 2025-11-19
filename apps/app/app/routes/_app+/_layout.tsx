@@ -5,7 +5,7 @@ import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 	type OnboardingProgressData,
-} from '@repo/common'
+} from '@repo/common/onboarding'
 import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
 import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'

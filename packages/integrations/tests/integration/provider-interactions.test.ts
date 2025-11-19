@@ -3,7 +3,7 @@
  */
 
 // Mock Prisma first
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		integration: {
 			create: vi.fn(),
@@ -70,7 +70,7 @@ describe('Provider Interactions Integration Tests', () => {
 
 	describe('Channel Retrieval', () => {
 		it('should retrieve Slack channels successfully', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -122,7 +122,7 @@ describe('Provider Interactions Integration Tests', () => {
 		})
 
 		it('should retrieve Jira projects as channels', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -179,7 +179,7 @@ describe('Provider Interactions Integration Tests', () => {
 		})
 
 		it('should handle inactive integrations', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock inactive integration
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -205,7 +205,7 @@ describe('Provider Interactions Integration Tests', () => {
 
 	describe('Message Posting', () => {
 		it('should post message to Slack channel', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock note and user data
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue({
@@ -309,7 +309,7 @@ describe('Provider Interactions Integration Tests', () => {
 		})
 
 		it('should handle notes with no connections', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock empty connections
 			vi.mocked(prisma.noteIntegrationConnection.findMany).mockResolvedValue([])
@@ -330,7 +330,7 @@ describe('Provider Interactions Integration Tests', () => {
 
 	describe('Connection Management', () => {
 		it('should create note-to-channel connections', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
@@ -425,7 +425,7 @@ describe('Provider Interactions Integration Tests', () => {
 		})
 
 		it('should validate channel exists before creating connection', async () => {
-			const { prisma } = await import('@repo/prisma')
+			const { prisma } = await import('@repo/database')
 
 			// Mock integration lookup
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue({

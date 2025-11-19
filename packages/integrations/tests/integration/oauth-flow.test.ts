@@ -3,7 +3,7 @@
  */
 
 // Mock Prisma first
-vi.mock('@repo/prisma', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		integration: {
 			create: vi.fn(),
@@ -69,7 +69,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		integrationManager.registerProvider(new JiraProvider())
 
 		// Setup mock responses
-		const { prisma } = await import('@repo/prisma')
+		const { prisma } = await import('@repo/database')
 
 		vi.mocked(prisma.integration.create).mockResolvedValue({
 			id: 'integration-123',
@@ -145,7 +145,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		expect(integration.isActive).toBe(true)
 
 		// Verify database calls
-		const { prisma } = await import('@repo/prisma')
+		const { prisma } = await import('@repo/database')
 		expect(prisma.integration.create).toHaveBeenCalled()
 		expect(prisma.integrationLog.create).toHaveBeenCalled()
 	})

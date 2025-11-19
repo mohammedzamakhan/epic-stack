@@ -1,7 +1,7 @@
 import { data, redirect } from 'react-router'
 import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
 

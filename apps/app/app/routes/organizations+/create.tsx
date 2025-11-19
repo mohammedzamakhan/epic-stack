@@ -44,9 +44,8 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,

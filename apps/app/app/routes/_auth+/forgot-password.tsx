@@ -26,7 +26,7 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/forgot-password.ts'

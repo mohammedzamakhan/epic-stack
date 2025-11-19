@@ -6,11 +6,16 @@ import { brand } from '@repo/config/brand'
 import { generateSeoMeta } from '@repo/seo'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
-import { type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction, useLoaderData  } from 'react-router'
+import {
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+	useLoaderData,
+} from 'react-router'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { changeEmailAction } from '../settings+/actions/email.actions'
 import { photoAction } from '../settings+/actions/photo.actions'
 import { profileUpdateAction } from '../settings+/actions/profile.actions'
@@ -102,7 +107,9 @@ export default function ProfileSettings() {
 			<AnnotatedLayout>
 				<PageTitle
 					title={_(t`Profile Settings`)}
-					description={_(t`Manage your account settings and set e-mail preferences.`)}
+					description={_(
+						t`Manage your account settings and set e-mail preferences.`,
+					)}
 				/>
 				<AnnotatedSection>
 					<ProfileCard user={data.user} />

@@ -10,7 +10,7 @@
  */
 
 import { schedules, logger } from '@trigger.dev/sdk/v3'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 
 export const auditLogArchival = schedules.task({
 	id: 'audit-log-archival',

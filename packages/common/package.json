@@ -56,6 +56,11 @@
       "types": "./src/ip-tracking.server.ts",
       "import": "./src/ip-tracking.server.ts",
       "default": "./src/ip-tracking.server.ts"
+    },
+    "./onboarding": {
+      "types": "./src/onboarding.ts",
+      "import": "./src/onboarding.ts",
+      "default": "./src/onboarding.ts"
     }
   },
   "scripts": {
@@ -68,7 +73,7 @@
   "dependencies": {
     "@epic-web/cachified": "^5.5.2",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@repo/prisma": "*",
+    "@repo/database": "*",
     "@tusbar/cache-control": "^1.0.0",
     "clsx": "^2.1.1",
     "cookie": "^1.0.2",

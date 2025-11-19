@@ -1,4 +1,4 @@
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getSignedGetRequestInfo } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/mcp-tools.ts'
 

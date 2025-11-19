@@ -28,7 +28,7 @@ import {
 } from 'react-router'
 
 import { getUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { blacklistIp, unblacklistIp } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 

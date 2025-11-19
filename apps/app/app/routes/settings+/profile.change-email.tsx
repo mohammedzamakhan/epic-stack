@@ -21,7 +21,7 @@ import {
 	requireRecentVerification,
 } from '#app/routes/_auth+/verify.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
@@ -133,7 +133,9 @@ export default function ChangeEmailIndex({
 				<Trans>Change Email</Trans>
 			</h1>
 			<p>
-				<Trans>You will receive an email at the new email address to confirm.</Trans>
+				<Trans>
+					You will receive an email at the new email address to confirm.
+				</Trans>
 			</p>
 			<p>
 				<Trans>

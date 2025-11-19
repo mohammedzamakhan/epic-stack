@@ -2,7 +2,13 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { t, Trans } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
@@ -26,7 +32,7 @@ import {
 	sessionKey,
 	signup,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
@@ -76,16 +82,16 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
 	const SignupFormSchema = z
-	.object({
-		username: UsernameSchema,
-		name: NameSchema,
-		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
-			required_error: t`You must agree to the terms of service and privacy policy`,
-		}),
-		remember: z.boolean().optional(),
-		redirectTo: z.string().optional(),
-	})
-	.and(PasswordAndConfirmPasswordSchema)
+		.object({
+			username: UsernameSchema,
+			name: NameSchema,
+			agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+				required_error: t`You must agree to the terms of service and privacy policy`,
+			}),
+			remember: z.boolean().optional(),
+			redirectTo: z.string().optional(),
+		})
+		.and(PasswordAndConfirmPasswordSchema)
 	const email = await requireOnboardingEmail(request)
 	const inviteToken = await getOnboardingInviteToken(request)
 	const formData = await request.formData()
@@ -330,16 +336,16 @@ export default function OnboardingRoute({
 	actionData,
 }: Route.ComponentProps) {
 	const SignupFormSchema = z
-	.object({
-		username: UsernameSchema,
-		name: NameSchema,
-		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
-			required_error: t`You must agree to the terms of service and privacy policy`,
-		}),
-		remember: z.boolean().optional(),
-		redirectTo: z.string().optional(),
-	})
-	.and(PasswordAndConfirmPasswordSchema)
+		.object({
+			username: UsernameSchema,
+			name: NameSchema,
+			agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
+				required_error: t`You must agree to the terms of service and privacy policy`,
+			}),
+			remember: z.boolean().optional(),
+			redirectTo: z.string().optional(),
+		})
+		.and(PasswordAndConfirmPasswordSchema)
 	const isPending = useIsPending()
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')
@@ -485,9 +491,12 @@ export default function OnboardingRoute({
 							<Field orientation="horizontal">
 								<Checkbox
 									{...(() => {
-										const { type: _type, ...props } = getInputProps(fields.remember, {
-											type: 'checkbox',
-										})
+										const { type: _type, ...props } = getInputProps(
+											fields.remember,
+											{
+												type: 'checkbox',
+											},
+										)
 										return props
 									})()}
 									id={fields.remember.id}

@@ -4,7 +4,12 @@ import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@repo/ui/tooltip'
 import { useState } from 'react'
 import { data, useFetcher } from 'react-router'
 
@@ -17,7 +22,7 @@ import {
 	providerIcons,
 	providerNames,
 } from '#app/utils/connections.tsx'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { pipeHeaders } from '#app/utils/headers.server.ts'
 import { makeTimings } from '#app/utils/timing.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
@@ -213,7 +218,8 @@ function Connection({
 						</TooltipTrigger>
 						<TooltipContent>
 							<Trans>
-								You cannot delete your last connection unless you have a password.
+								You cannot delete your last connection unless you have a
+								password.
 							</Trans>
 						</TooltipContent>
 					</Tooltip>

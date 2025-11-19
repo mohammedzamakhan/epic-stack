@@ -1,4 +1,4 @@
-import { prisma } from './index'
+import { prisma } from './db.server'
 
 // Default onboarding steps to seed the database
 export const DEFAULT_ONBOARDING_STEPS = [

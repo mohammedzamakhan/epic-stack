@@ -7,7 +7,7 @@ import type { Page } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 
-export const HighImpactHero: React.FC<Page['hero']> = ({ links, media, _richText }) => {
+export const HighImpactHero: React.FC<Page['hero']> = ({ links, media }) => {
   const { setHeaderTheme } = useHeaderTheme()
 
   useEffect(() => {

@@ -27,7 +27,7 @@ export const seoConfig = createSeoConfig({
 		width: 1200,
 		height: 630,
 	},
-	twitterHandle: brand.twitter,
+	twitterHandle: brand.twitterHandle,
 	locale: 'en_US',
 	keywords: [
 		'saas',

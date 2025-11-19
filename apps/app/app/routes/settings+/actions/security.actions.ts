@@ -8,7 +8,7 @@ import {
 	getPasswordHash,
 	checkIsCommonPassword,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { twoFAVerificationType } from '../profile.two-factor'
 import { twoFAVerifyVerificationType } from '../profile.two-factor.verify'
 

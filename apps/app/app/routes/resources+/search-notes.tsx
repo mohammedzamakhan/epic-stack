@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {

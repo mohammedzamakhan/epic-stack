@@ -5,7 +5,7 @@ import {
 	type AdminUserDetail,
 	type RecentActivity,
 } from '#app/components/admin-user-detail.tsx'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 

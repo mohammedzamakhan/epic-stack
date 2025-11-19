@@ -1,8 +1,8 @@
 import { invariant } from '@epic-web/invariant'
-import  { type Prisma } from '@prisma/client'
+import { type Prisma } from '@prisma/client'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 
 /**
@@ -14,7 +14,9 @@ import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
  * @param select - Prisma select object for which organization fields to return
  * @returns The organization with selected fields
  */
-export async function requireUserOrganization<T extends Prisma.OrganizationSelect>(
+export async function requireUserOrganization<
+	T extends Prisma.OrganizationSelect,
+>(
 	request: Request,
 	orgSlug: string | undefined,
 	select: T,

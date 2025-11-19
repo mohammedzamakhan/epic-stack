@@ -1,4 +1,4 @@
-import { type PrismaClient } from '@repo/prisma'
+import { type PrismaClient } from '@repo/database/types'
 
 async function getFlag(
 	prisma: PrismaClient,

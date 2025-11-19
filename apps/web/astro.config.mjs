@@ -26,6 +26,9 @@ export default defineConfig({
 		server: {
 			allowedHosts: ['epic-stack.me', 'localhost'],
 		},
+		optimizeDeps: {
+			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+		}
 	},
 
 	adapter: cloudflare(),

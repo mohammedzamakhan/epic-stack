@@ -2,7 +2,7 @@ import { parseWithZod } from '@conform-to/zod'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { z } from 'zod'
 
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 
 export const ProfileFormSchema = z.object({
 	name: NameSchema.nullable().default(null),

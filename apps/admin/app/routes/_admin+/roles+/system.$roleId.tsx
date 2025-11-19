@@ -32,7 +32,7 @@ import { useState } from 'react'
 import { Form, Link, useLoaderData } from 'react-router'
 import { z } from 'zod'
 
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/system.$roleId.ts'
 

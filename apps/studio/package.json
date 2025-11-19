@@ -2,7 +2,7 @@
   "name": "studio",
   "version": "0.0.0",
   "scripts": {
-    "dev": "prisma studio --schema ../../packages/prisma/schema.prisma --port 3003 --browser none",
+    "dev": "prisma studio --schema ../../packages/database/schema.prisma --port 3003 --browser none",
     "clean": "git clean -xdf .cache .nx dist node_modules"
   },
   "devDependencies": {

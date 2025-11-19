@@ -1,7 +1,6 @@
 ---
 import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from '~/components/GridDesign.astro'
-import { Status } from '@repo/observability'
 import '../styles/tailwind.css'
 
 // Get the current URL and transform it for the app subdomain
@@ -524,7 +523,6 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 								<p class="text-sm text-muted-foreground">
 									{getCopyright()}
 								</p>
-								<Status client:load statusEndpoint="/api/status" />
 							</div>
 							<div class="flex items-center space-x-4">
 								<span

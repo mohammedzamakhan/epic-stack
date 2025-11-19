@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead
-import { initializeOnboardingSteps } from '../../../../packages/prisma/setup-onboarding.ts'
+import { initializeOnboardingSteps } from '../../../../packages/database/setup-onboarding.ts'
 
 // Ensure onboarding steps are seeded before tests
 async function ensureOnboardingStepsExist() {

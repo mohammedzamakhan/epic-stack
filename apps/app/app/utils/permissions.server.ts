@@ -1,6 +1,6 @@
 import { data } from 'react-router'
 import { requireUserId } from './auth.server.ts'
-import { prisma } from './db.server.ts'
+import { prisma } from '@repo/database'
 import { type PermissionString, parsePermissionString } from './user.ts'
 
 export async function requireUserWithPermission(

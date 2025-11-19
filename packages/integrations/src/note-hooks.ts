@@ -5,7 +5,7 @@
  * and trigger integration notifications without requiring manual intervention.
  */
 
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { noteEventHandler } from './note-event-handler'
 
 /**

@@ -19,7 +19,7 @@ import {
 	getPasswordHash,
 	requireUserId,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { type Route } from './+types/profile.password_.create.ts'
 import { type BreadcrumbHandle } from './profile.change-email.tsx'
 

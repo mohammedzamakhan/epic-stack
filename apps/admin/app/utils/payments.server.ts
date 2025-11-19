@@ -12,7 +12,7 @@ import {
 } from '@repo/payments'
 import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 
 if (!process.env.STRIPE_SECRET_KEY) {

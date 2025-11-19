@@ -1,18 +1,24 @@
 # @repo/storage
 
-A reusable storage package for S3-compatible storage solutions (Tigris, AWS S3, etc.).
+A reusable storage package for S3-compatible storage solutions (Tigris, AWS S3,
+etc.).
 
 ## Features
 
-- **S3-Compatible**: Works with Tigris, AWS S3, and other S3-compatible storage solutions
-- **AWS Signature V4**: Implements AWS Signature Version 4 signing for secure requests
-- **Organization-Specific Storage**: Supports multi-tenant storage configurations
+- **S3-Compatible**: Works with Tigris, AWS S3, and other S3-compatible storage
+  solutions
+- **AWS Signature V4**: Implements AWS Signature Version 4 signing for secure
+  requests
+- **Organization-Specific Storage**: Supports multi-tenant storage
+  configurations
 - **Type-Safe**: Written in TypeScript with full type definitions
-- **Upload Helpers**: Pre-built helpers for common upload scenarios (profile images, organization logos, etc.)
+- **Upload Helpers**: Pre-built helpers for common upload scenarios (profile
+  images, organization logos, etc.)
 
 ## Installation
 
-This package is part of the monorepo and is automatically available to other packages.
+This package is part of the monorepo and is automatically available to other
+packages.
 
 ```bash
 npm install @repo/storage
@@ -49,7 +55,7 @@ console.log(result.success ? 'Connected!' : result.message)
 
 ```typescript
 import { createStorageClient } from '@repo/storage'
-import { prisma } from '@repo/prisma'
+import { prisma } from '@repo/database'
 import { decrypt, getSSOMasterKey } from './encryption'
 
 const storageClient = createStorageClient({
@@ -125,7 +131,8 @@ interface StorageConfig {
 ### Client Methods
 
 - `upload(file, key, organizationId?, options?)` - Upload a file
-- `getSignedGetUrl(key, organizationId?, options?)` - Get a signed URL for downloading
+- `getSignedGetUrl(key, organizationId?, options?)` - Get a signed URL for
+  downloading
 - `testConnection(organizationId?, options?)` - Test the storage connection
 - `getConfig(organizationId?, options?)` - Get storage configuration
 

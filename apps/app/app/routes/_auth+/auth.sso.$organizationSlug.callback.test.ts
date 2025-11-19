@@ -2,7 +2,7 @@ import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
@@ -248,7 +248,7 @@ test('handles SSO disabled for organization', async () => {
 })
 
 test('handles OAuth callback failure', async () => {
-	consoleError.mockImplementation(() => { })
+	consoleError.mockImplementation(() => {})
 
 	vi.mocked(ssoAuthService.handleCallback).mockRejectedValue(
 		new Error('OAuth callback failed'),
@@ -274,7 +274,7 @@ test('handles OAuth callback failure', async () => {
 })
 
 test('handles user provisioning failure', async () => {
-	consoleError.mockImplementation(() => { })
+	consoleError.mockImplementation(() => {})
 
 	const mockProviderUser = {
 		id: faker.string.uuid(),

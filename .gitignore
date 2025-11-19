@@ -8,8 +8,8 @@ node_modules
 .astro/
 .next/
 
-/prisma/data.db
-/prisma/data.db-journal
+/database/data.db
+/database/data.db-journal
 /tests/prisma
 
 /test-results/

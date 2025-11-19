@@ -1,13 +1,25 @@
 import { Trans, t } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Field, FieldContent } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
-import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@repo/ui/input-group'
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupAddon,
+	InputGroupButton,
+} from '@repo/ui/input-group'
 import * as React from 'react'
 import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/database'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,
@@ -115,7 +127,9 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 					<Trans>You're on the Waitlist!</Trans>
 				</CardTitle>
 				<CardDescription className="text-base">
-					<Trans>We'll notify you by email as soon as the waitlist opens.</Trans>
+					<Trans>
+						We'll notify you by email as soon as the waitlist opens.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">

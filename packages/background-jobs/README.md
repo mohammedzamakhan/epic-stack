@@ -120,5 +120,5 @@ files.
 
 ### Database Connection
 
-The package uses `@repo/prisma` directly for database access and handles
+The package uses `@repo/database` directly for database access and handles
 thumbnail uploads internally using the same storage system as your app.
