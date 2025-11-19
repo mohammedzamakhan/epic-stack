@@ -119,6 +119,174 @@ npm run validate       # lint + typecheck + test + e2e
 - Constants: `SCREAMING_SNAKE_CASE`
 - Types/Interfaces: `PascalCase`
 
+## ESLint Best Practices
+
+**Fixing ESLint Warnings in Bulk**:
+
+When encountering many ESLint warnings, follow this systematic approach:
+
+1. **Run ESLint with auto-fix first**:
+   ```bash
+   cd apps/<app-name>
+   npx eslint . --ext .js,.jsx,.ts,.tsx --fix
+   ```
+   This typically fixes 80-90% of warnings automatically (import order, formatting, etc.)
+
+2. **Identify remaining warnings by category**:
+   - Import order issues
+   - Unused variables
+   - React hooks dependencies
+   - Type imports
+
+3. **Fix manually in priority order**:
+   - Security-related warnings (first priority)
+   - Unused variables (quick wins)
+   - Import order (remaining after auto-fix)
+   - React hooks exhaustive-deps (requires code understanding)
+
+**Common ESLint Warning Patterns**:
+
+**1. Import Order (`import/order`)**:
+
+Epic Stack enforces specific import ordering:
+
+```typescript
+// ✅ Correct order
+import { useState } from 'react'                    // 1. External dependencies
+import { useNavigate } from 'react-router'           // 2. External dependencies
+import { Button } from '@repo/ui/button'             // 3. Monorepo packages (@repo/*)
+import { prisma } from '@repo/prisma'                // 4. Monorepo packages
+import { requireUserId } from '#app/utils/auth.server.ts'  // 5. App imports (#app/*)
+import { EmptyState } from '#app/components/empty-state.tsx' // 6. App imports
+import { type Route } from './+types/route-name'     // 7. Relative imports
+import { NoteEditor } from './note-editor'           // 8. Relative imports
+
+// ❌ Wrong order - causes warnings
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { Button } from '@repo/ui/button'
+import { useState } from 'react'  // External should come first
+```
+
+**Key rules**:
+- External packages first (react, react-router, third-party libs)
+- Monorepo packages second (`@repo/*`)
+- App-specific imports third (`#app/*`, `#tests/*`)
+- Relative imports last (`./`, `../`)
+- Within each group, alphabetical order by module path
+
+**2. Unused Variables (`@typescript-eslint/no-unused-vars`)**:
+
+The project convention requires unused variables to have an `ignored` prefix:
+
+```typescript
+// ✅ Correct - prefix with 'ignored'
+const { data, ignoredMetadata } = response
+const [ignoredSearchParams] = useSearchParams()
+const ignoredActionData = useActionData()
+
+// ❌ Wrong - underscore prefix not allowed
+const { data, _metadata } = response
+const [_searchParams] = useSearchParams()
+
+// ❌ Wrong - generic underscore not allowed
+const { data, _ } = response
+```
+
+**ESLint config**: Variables must match `/^ignored/u` pattern to be allowed as unused.
+
+**3. React Hooks Exhaustive Dependencies (`react-hooks/exhaustive-deps`)**:
+
+When useEffect/useCallback/useMemo have missing dependencies:
+
+```typescript
+// ❌ Wrong - missing dependencies
+const handleChange = (key: string, value: string) => {
+  const newParams = new URLSearchParams(searchParams)
+  newParams.set(key, value)
+  setSearchParams(newParams)
+}
+
+useEffect(() => {
+  if (searchValue !== data.filters.search) {
+    handleChange('search', searchValue)
+  }
+}, [searchValue])  // ⚠️ Missing: data.filters.search, handleChange
+
+// ✅ Correct - wrap in useCallback and add all dependencies
+const handleChange = useCallback(
+  (key: string, value: string) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set(key, value)
+    setSearchParams(newParams)
+  },
+  [searchParams, setSearchParams],
+)
+
+useEffect(() => {
+  if (searchValue !== data.filters.search) {
+    handleChange('search', searchValue)
+  }
+}, [searchValue, data.filters.search, handleChange])  // ✅ All deps included
+```
+
+**4. Type Import Specifiers (`import/consistent-type-specifier-style`)**:
+
+Prefer inline type specifiers over top-level type-only imports:
+
+```typescript
+// ✅ Correct - inline type specifier
+import { type LoaderFunctionArgs } from 'react-router'
+import { type User, prisma } from '@repo/prisma'
+
+// ❌ Wrong - top-level type-only import
+import type { LoaderFunctionArgs } from 'react-router'
+import type { User } from '@repo/prisma'
+import { prisma } from '@repo/prisma'
+```
+
+**5. Duplicate Imports (`import/no-duplicates`)**:
+
+Combine multiple imports from the same module:
+
+```typescript
+// ✅ Correct - single import
+import { useLoaderData, Form, useActionData } from 'react-router'
+
+// ❌ Wrong - duplicate imports
+import { useLoaderData } from 'react-router'
+import { Form } from 'react-router'
+import { useActionData } from 'react-router'
+```
+
+**Pre-commit Hook Considerations**:
+
+- Pre-commit hooks run ESLint, Prettier, and TypeCheck via Husky + lint-staged
+- Large changesets may timeout during pre-commit checks
+- If pre-commit fails due to timeout (not errors):
+  1. Verify changes pass individually: `npm run lint`, `npm run typecheck`
+  2. Use `git commit --no-verify` only if you've verified the changes are correct
+  3. Note this in commit message for transparency
+
+**Workflow for Clean Commits**:
+
+```bash
+# 1. Auto-fix what you can
+npx eslint . --ext .js,.jsx,.ts,.tsx --fix
+
+# 2. Run full linting suite
+npm run lint:all
+
+# 3. Type check
+npm run typecheck
+
+# 4. If all pass, commit
+git add -A
+git commit -m "fix: resolve ESLint warnings"
+
+# 5. If pre-commit times out but checks passed above
+git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
+```
+
 ## Testing Guidelines
 
 **Unit Tests**:
