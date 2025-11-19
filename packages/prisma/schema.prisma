@@ -23,6 +23,10 @@ model User {
   bannedById             String?
   bannedBy               User?                      @relation("UserBans", fields: [bannedById], references: [id])
   bannedUsers            User[]                     @relation("UserBans")
+  // Failed login tracking for SOC2 compliance
+  failedLoginAttempts    Int                        @default(0)
+  lastFailedLoginAt      DateTime?
+  accountLockedUntil     DateTime?
   connections            Connection[]
   notes                  Note[]
   noteAccess             NoteAccess[]
@@ -101,6 +105,7 @@ model Session {
   expirationDate DateTime
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+  lastActivityAt DateTime    @default(now()) // For inactivity timeout (SOC2)
   userId         String
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   ssoSession     SSOSession?

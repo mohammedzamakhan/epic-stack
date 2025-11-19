@@ -22,11 +22,19 @@ const schema = z.object({
 	SLACK_CLIENT_ID: z.string().optional(),
 	SLACK_CLIENT_SECRET: z.string().optional(),
 
-	// Integration encryption key (required for token security)
-	INTEGRATION_ENCRYPTION_KEY: z.string().optional(),
+	// Integration encryption key (required for token security - SOC2 compliance)
+	INTEGRATION_ENCRYPTION_KEY: z.string().min(64, {
+		message: 'INTEGRATION_ENCRYPTION_KEY must be at least 64 characters (32 bytes hex)',
+	}).optional().refine(
+		(val) => process.env.NODE_ENV !== 'production' || val !== undefined,
+		{ message: 'INTEGRATION_ENCRYPTION_KEY is required in production for SOC2 compliance' }
+	),
 
 	// OAuth state secret (required for OAuth flow security)
-	INTEGRATIONS_OAUTH_STATE_SECRET: z.string().optional(),
+	INTEGRATIONS_OAUTH_STATE_SECRET: z.string().optional().refine(
+		(val) => process.env.NODE_ENV !== 'production' || val !== undefined,
+		{ message: 'INTEGRATIONS_OAUTH_STATE_SECRET is required in production' }
+	),
 
 	ALLOW_INDEXING: z.enum(['true', 'false']).optional(),
 

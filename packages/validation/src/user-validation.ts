@@ -15,11 +15,24 @@ export const UsernameSchema = z
 
 export const PasswordSchema = z
 	.string({ required_error: 'Password is required' })
-	.min(6, { message: 'Password is too short' })
+	.min(12, { message: 'Password must be at least 12 characters' })
 	// NOTE: bcrypt has a limit of 72 bytes (which should be plenty long)
 	// https://github.com/epicweb-dev/epic-stack/issues/918
 	.refine((val) => new TextEncoder().encode(val).length <= 72, {
 		message: 'Password is too long',
+	})
+	// Password complexity requirements for SOC2 compliance
+	.refine((val) => /[a-z]/.test(val), {
+		message: 'Password must contain at least one lowercase letter',
+	})
+	.refine((val) => /[A-Z]/.test(val), {
+		message: 'Password must contain at least one uppercase letter',
+	})
+	.refine((val) => /[0-9]/.test(val), {
+		message: 'Password must contain at least one number',
+	})
+	.refine((val) => /[^a-zA-Z0-9]/.test(val), {
+		message: 'Password must contain at least one special character',
 	})
 
 export const NameSchema = z

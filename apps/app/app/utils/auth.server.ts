@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { redirect } from 'react-router'
 import { Authenticator } from 'remix-auth'
 import { safeRedirect } from 'remix-utils/safe-redirect'
+import { AuditAction, AuditService } from './audit.server.ts'
 import { providers } from './connections.server.ts'
 import { prisma } from './db.server.ts'
 import { combineHeaders, downloadFile } from './misc.tsx'
@@ -13,7 +14,11 @@ import { ssoAuthService } from './sso-auth.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
 import { getUtmParams } from './utm.server.ts'
 
-export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30
+// Initialize audit service
+const auditService = new AuditService()
+
+export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30 // 30 days
+export const SESSION_INACTIVITY_TIMEOUT = 1000 * 60 * 30 // 30 minutes (SOC2 compliant)
 export const getSessionExpirationDate = () =>
 	new Date(Date.now() + SESSION_EXPIRATION_TIME)
 
@@ -90,6 +95,7 @@ export async function getUserId(request: Request) {
 	const session = await prisma.session.findUnique({
 		select: {
 			userId: true,
+			lastActivityAt: true,
 			user: {
 				select: {
 					isBanned: true,
@@ -106,6 +112,38 @@ export async function getUserId(request: Request) {
 			},
 		})
 	}
+
+	// Check session inactivity timeout (SOC2 compliance)
+	const now = new Date()
+	const lastActivity = session.lastActivityAt
+	const timeSinceActivity = now.getTime() - lastActivity.getTime()
+
+	if (timeSinceActivity > SESSION_INACTIVITY_TIMEOUT) {
+		// Session has been inactive too long - delete and redirect to login
+		await prisma.session.delete({ where: { id: sessionId } })
+		await auditService.log({
+			action: AuditAction.SESSION_EXPIRED,
+			userId: session.userId,
+			details: 'Session expired due to inactivity',
+			metadata: {
+				sessionId,
+				inactiveFor: Math.floor(timeSinceActivity / 1000 / 60) + ' minutes'
+			},
+			request,
+			severity: 'info',
+		})
+		throw redirect('/login?reason=inactivity', {
+			headers: {
+				'set-cookie': await authSessionStorage.destroySession(authSession),
+			},
+		})
+	}
+
+	// Update lastActivityAt to track ongoing activity
+	await prisma.session.update({
+		where: { id: sessionId },
+		data: { lastActivityAt: now },
+	})
 
 	// Check if user is banned
 	if (session.user.isBanned) {
@@ -200,13 +238,70 @@ export async function canUserLogin(userId: string): Promise<boolean> {
 export async function login({
 	username,
 	password,
+	request,
 }: {
 	username: string
 	password: string
+	request?: Request
 }) {
-	// Try to find user by username first, then by email if it looks like an email
-	let user = null
+	// Configuration for failed login tracking (SOC2 compliance)
+	const MAX_FAILED_ATTEMPTS = 5
+	const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
+	// Try to find user by username or email
+	let userWithLockInfo = null
+	const isEmail = username.includes('@')
+
+	// First, check if account exists and is locked (before password verification)
+	userWithLockInfo = await prisma.user.findFirst({
+		where: isEmail ? { email: username } : { username },
+		select: {
+			id: true,
+			email: true,
+			username: true,
+			failedLoginAttempts: true,
+			lastFailedLoginAt: true,
+			accountLockedUntil: true,
+		},
+	})
+
+	// If user exists, check if account is locked
+	if (userWithLockInfo) {
+		const now = new Date()
+		if (
+			userWithLockInfo.accountLockedUntil &&
+			userWithLockInfo.accountLockedUntil > now
+		) {
+			// Account is still locked - log and reject
+			await auditService.log({
+				action: AuditAction.USER_LOGIN_FAILED,
+				userId: userWithLockInfo.id,
+				details: `Login attempt failed: Account locked until ${userWithLockInfo.accountLockedUntil.toISOString()}`,
+				metadata: { username, reason: 'account_locked' },
+				request,
+				severity: 'warning',
+			})
+			return null
+		}
+
+		// If lock has expired, reset failed attempts
+		if (
+			userWithLockInfo.accountLockedUntil &&
+			userWithLockInfo.accountLockedUntil <= now
+		) {
+			await prisma.user.update({
+				where: { id: userWithLockInfo.id },
+				data: {
+					failedLoginAttempts: 0,
+					accountLockedUntil: null,
+					lastFailedLoginAt: null,
+				},
+			})
+		}
+	}
+
+	// Now try to verify password
+	let user = null
 	if (username.includes('@')) {
 		// Looks like an email, try email first
 		user = await verifyUserPassword({ email: username }, password)
@@ -223,10 +318,75 @@ export async function login({
 		}
 	}
 
-	if (!user) return null
+	// Handle failed login attempt
+	if (!user) {
+		if (userWithLockInfo) {
+			const newFailedAttempts = (userWithLockInfo.failedLoginAttempts || 0) + 1
+			const shouldLock = newFailedAttempts >= MAX_FAILED_ATTEMPTS
 
+			await prisma.user.update({
+				where: { id: userWithLockInfo.id },
+				data: {
+					failedLoginAttempts: newFailedAttempts,
+					lastFailedLoginAt: new Date(),
+					...(shouldLock && {
+						accountLockedUntil: new Date(Date.now() + LOCKOUT_DURATION_MS),
+					}),
+				},
+			})
+
+			// Log failed login attempt with appropriate severity
+			await auditService.log({
+				action: AuditAction.USER_LOGIN_FAILED,
+				userId: userWithLockInfo.id,
+				details: shouldLock
+					? `Login failed: Account locked after ${MAX_FAILED_ATTEMPTS} failed attempts`
+					: `Login failed: Invalid password (attempt ${newFailedAttempts}/${MAX_FAILED_ATTEMPTS})`,
+				metadata: {
+					username,
+					failedAttempts: newFailedAttempts,
+					accountLocked: shouldLock,
+					reason: 'invalid_credentials',
+				},
+				request,
+				severity: shouldLock ? 'error' : 'warning',
+			})
+		} else {
+			// User doesn't exist - log without user ID to prevent enumeration
+			await auditService.log({
+				action: AuditAction.USER_LOGIN_FAILED,
+				details: `Login attempt failed: User not found`,
+				metadata: { username, reason: 'user_not_found' },
+				request,
+				severity: 'info',
+			})
+		}
+		return null
+	}
+
+	// Check if user can login (banned, etc.)
 	const canLogin = await canUserLogin(user.id)
-	if (!canLogin) return null
+	if (!canLogin) {
+		await auditService.log({
+			action: AuditAction.USER_LOGIN_FAILED,
+			userId: user.id,
+			details: 'Login failed: User is banned or suspended',
+			metadata: { username, reason: 'user_banned' },
+			request,
+			severity: 'warning',
+		})
+		return null
+	}
+
+	// Successful login - reset failed attempts and create session
+	await prisma.user.update({
+		where: { id: user.id },
+		data: {
+			failedLoginAttempts: 0,
+			lastFailedLoginAt: null,
+			accountLockedUntil: null,
+		},
+	})
 
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
@@ -235,6 +395,17 @@ export async function login({
 			userId: user.id,
 		},
 	})
+
+	// Log successful login
+	await auditService.log({
+		action: AuditAction.USER_LOGIN,
+		userId: user.id,
+		details: 'User logged in successfully',
+		metadata: { username, loginMethod: 'password' },
+		request,
+		severity: 'info',
+	})
+
 	return session
 }
 
@@ -404,9 +575,28 @@ export async function logout(
 		request.headers.get('cookie'),
 	)
 	const sessionId = authSession.get(sessionKey)
-	// if this fails, we still need to delete the session from the user's browser
-	// and it doesn't do any harm staying in the db anyway.
+
+	// Get userId before deleting session for audit logging
+	let userId: string | undefined
 	if (sessionId) {
+		const session = await prisma.session.findUnique({
+			where: { id: sessionId },
+			select: { userId: true },
+		})
+		userId = session?.userId
+
+		// Log logout event for SOC2 compliance
+		if (userId) {
+			await auditService.log({
+				action: AuditAction.USER_LOGOUT,
+				userId,
+				details: 'User logged out',
+				metadata: { sessionId },
+				request,
+				severity: 'info',
+			})
+		}
+
 		// the .catch is important because that's what triggers the query.
 		// learn more about PrismaPromise: https://www.prisma.io/docs/orm/reference/prisma-client-reference#prismapromise-behavior
 		void prisma.session.deleteMany({ where: { id: sessionId } }).catch(() => {})
