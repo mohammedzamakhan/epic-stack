@@ -1630,6 +1630,7 @@ export default function NoteRoute() {
 													className="size-32 rounded-lg object-cover"
 													width={512}
 													height={512}
+														loading="lazy"
 												/>
 											</a>
 										</li>
@@ -1653,6 +1654,7 @@ export default function NoteRoute() {
 													className="size-32 rounded-lg object-cover"
 													width={512}
 													height={512}
+														loading="lazy"
 												/>
 												<div className="absolute inset-0 flex items-center justify-center">
 													<div className="rounded-full bg-black/50 p-2">

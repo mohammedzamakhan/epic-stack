@@ -138,13 +138,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const userOrganizationsPromise = user
 		? (async () => {
 				try {
-					const { getUserOrganizations, getUserDefaultOrganization } =
+					const { getUserOrganizations } =
 						await import('./utils/organizations.server')
 					const orgs = await getUserOrganizations(user.id, true)
-					const defaultOrg = await getUserDefaultOrganization(user.id)
+					// Find default org from the array instead of making a second query (N+1 fix)
+					const defaultOrg = orgs.find(org => org.isDefault) || orgs[0]
 					return {
 						organizations: orgs,
-						currentOrganization: defaultOrg || orgs[0],
+						currentOrganization: defaultOrg,
 					}
 				} catch (error) {
 					console.error('Failed to load user organizations', error)

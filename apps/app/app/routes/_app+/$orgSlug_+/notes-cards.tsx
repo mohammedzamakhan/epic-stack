@@ -231,6 +231,7 @@ export const NoteCard = ({
 										className="absolute inset-0 h-full w-full rounded-xl object-cover transition-all duration-300"
 										width={200}
 										height={200}
+										loading="lazy"
 									/>
 
 									{/* Video play overlay */}

@@ -119,8 +119,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 					contentSecurity(responseHeaders, {
 						crossOriginEmbedderPolicy: false,
 						contentSecurityPolicy: {
-							// NOTE: Remove reportOnly when you're ready to enforce this CSP
-							reportOnly: true,
+						// CSP is now enforced (not report-only) for security
 							directives: {
 								fetch: {
 									'connect-src': [

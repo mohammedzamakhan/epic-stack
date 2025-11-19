@@ -250,6 +250,7 @@ export default function OrganizationsPage() {
 													className="h-full w-full object-cover"
 													width={40}
 													height={40}
+											loading="lazy"
 												/>
 											) : (
 												<span>
@@ -332,6 +333,7 @@ export default function OrganizationsPage() {
 												className="h-full w-full object-cover"
 												width={40}
 												height={40}
+										loading="lazy"
 											/>
 										) : (
 											<span>

@@ -65,12 +65,12 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 				return (
 					<div className="flex justify-end gap-2">
 						<Button variant="ghost" size="icon" asChild>
-							<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
+							<Link to={`${note.id}`} onClick={(e) =aria-label="View note"> e.stopPropagation()}>
 								<Icon name="search" className="size-4" />
 							</Link>
 						</Button>
 						<Button variant="ghost" size="icon" asChild>
-							<Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
+							<Link to={`${note.id}/edit`} onClick={(e) =aria-label="Edit note"> e.stopPropagation()}>
 								<Icon name="pencil" className="size-4" />
 							</Link>
 						</Button>
