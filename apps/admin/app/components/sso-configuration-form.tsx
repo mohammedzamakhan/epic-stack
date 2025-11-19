@@ -1,16 +1,16 @@
 // import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 // import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Form, useActionData } from 'react-router'
-import { z } from 'zod'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import { Textarea } from '@repo/ui/textarea'
+import { Form, useActionData } from 'react-router'
+import { z } from 'zod'
 // import { Field, ErrorList, CheckboxField } from './forms.tsx'
 
-const SSOConfigurationSchema = z.object({
+const ignoredSSOConfigurationSchema = z.object({
 	providerName: z.string().min(1, 'Provider name is required'),
 	issuerUrl: z.string().url('Must be a valid URL'),
 	clientId: z.string().min(1, 'Client ID is required'),
@@ -38,7 +38,9 @@ const SSOConfigurationSchema = z.object({
 	revocationUrl: z.string().url().optional(),
 })
 
-export type SSOConfigurationFormData = z.infer<typeof SSOConfigurationSchema>
+export type SSOConfigurationFormData = z.infer<
+	typeof ignoredSSOConfigurationSchema
+>
 
 interface SSOConfigurationFormProps {
 	organizationId: string
@@ -80,7 +82,7 @@ export function SSOConfigurationForm({
 	isSubmitting = false,
 	testConnectionResult,
 }: SSOConfigurationFormProps) {
-	const _actionData = useActionData<{
+	const ignoredActionData = useActionData<{
 		result?: any
 		errors?: any
 	}>()

@@ -1,6 +1,6 @@
 import { type User } from '@prisma/client'
-import { data } from 'react-router'
 import { prisma } from '@repo/prisma'
+import { data } from 'react-router'
 import { getUserId } from './auth.server.ts'
 
 export type OrganizationWithImage = {

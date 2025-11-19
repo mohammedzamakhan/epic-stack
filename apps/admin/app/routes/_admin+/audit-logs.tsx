@@ -1,13 +1,13 @@
-import { useLoaderData, useSearchParams } from 'react-router'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import { useState } from 'react'
+import { useLoaderData, useSearchParams } from 'react-router'
 import { auditService } from '#app/utils/audit.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
-import { useState } from 'react'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')

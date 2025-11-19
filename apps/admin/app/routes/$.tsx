@@ -5,9 +5,9 @@
 // ensure the user gets the right status code and we can display a nicer error
 // message for them than the Remix and/or browser default.
 
+import { NotFoundPage } from '@repo/ui/not-found-page'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-import { NotFoundPage } from '@repo/ui/not-found-page'
 
 export function loader() {
 	throw new Response('Not found', { status: 404 })

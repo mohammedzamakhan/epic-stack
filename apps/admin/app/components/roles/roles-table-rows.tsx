@@ -1,7 +1,7 @@
-import { Link } from 'react-router'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { TableCell, TableRow } from '@repo/ui/table'
+import { Link } from 'react-router'
 
 interface Role {
 	id: string

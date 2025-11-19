@@ -1,6 +1,6 @@
-import { SSOConfiguration } from '@repo/prisma'
-import { prisma } from './db.server.ts'
+import { type SSOConfiguration } from '@repo/prisma'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
+import { prisma } from './db.server.ts'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,

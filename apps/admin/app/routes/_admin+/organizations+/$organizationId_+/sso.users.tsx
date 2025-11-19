@@ -1,12 +1,12 @@
-import { invariant } from '@epic-web/invariant'
 import { parseWithZod } from '@conform-to/zod'
+import { invariant } from '@epic-web/invariant'
 import { useLoaderData } from 'react-router'
 import { z } from 'zod'
+import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
+import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
-import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
 import { getOrganizationForSSO } from './sso.tsx'
@@ -327,7 +327,7 @@ export default function AdminOrganizationSSOUsersPage() {
 	const data = useLoaderData<typeof loader>()
 	const {
 		organization: org,
-		ssoConfig: _ssoConfig,
+		ssoConfig: ignoredSsoConfig,
 		ssoUsers,
 		availableRoles,
 		auditLogs,

@@ -2,9 +2,22 @@ import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Badge } from '@repo/ui/badge'
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from '@repo/ui/breadcrumb'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@repo/ui/collapsible'
 import {
 	Dialog,
 	DialogContent,
@@ -24,28 +37,13 @@ import {
 } from '@repo/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { Textarea } from '@repo/ui/textarea'
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from '@repo/ui/collapsible'
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from '@repo/ui/breadcrumb'
 import { useState } from 'react'
-import { Form, Link, useSearchParams } from 'react-router'
+import { Form, Link, useSearchParams, useLoaderData , redirect  } from 'react-router'
 import { z } from 'zod'
 
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/$roleId.ts'
-import { useLoaderData } from 'react-router'
-import { redirect } from 'react-router'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -157,14 +155,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 		name,
 		description,
 		permissionId,
-		action: _action,
-		entity: _entity,
-		access: _access,
+		action: ignoredAction,
+		entity: ignoredEntity,
+		access: ignoredAccess,
 		featureName,
 		featureKey,
 		featureDescription,
-		permissionName: _permissionName,
-		permissionKey: _permissionKey,
+		permissionName: ignoredPermissionName,
+		permissionKey: ignoredPermissionKey,
 		permissionDescription,
 		permissionAction,
 		permissionAccess,
@@ -388,7 +386,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function AdminRoleDetailPage() {
 	const { role, roleType, allPermissions } = useLoaderData<typeof loader>()
-	const [_searchParams] = useSearchParams()
+	const [ignoredSearchParams] = useSearchParams()
 	const [selectedTab, setSelectedTab] = useState('feature')
 
 	// Group permissions by entity for better organization

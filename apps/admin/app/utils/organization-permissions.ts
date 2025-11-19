@@ -1,5 +1,6 @@
-import { type UserOrganizationWithRole } from './organizations.server'
 import { ORG_PERMISSIONS } from './organization-permissions.server'
+import { useUserOrganizations } from './organizations'
+import { type UserOrganizationWithRole } from './organizations.server'
 
 export type OrganizationPermissionString = `${string}:${string}:${string}`
 
@@ -100,6 +101,3 @@ export function useUserHasAllOrganizationPermissions(
 
 // Re-export constants for convenience
 export { ORG_PERMISSIONS }
-
-// Import the hook we need (this would be imported from the organizations utils)
-import { useUserOrganizations } from './organizations'

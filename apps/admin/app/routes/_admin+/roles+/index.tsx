@@ -13,7 +13,7 @@ import {
 	Form,
 	redirect,
 	useActionData,
-	useNavigation,
+	useNavigation, useLoaderData 
 } from 'react-router'
 import { z } from 'zod'
 
@@ -21,7 +21,6 @@ import { RolesTableRows } from '#app/components/roles/roles-table-rows.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
-import { useLoaderData } from 'react-router'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

@@ -1,17 +1,17 @@
-import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 import { Separator } from '@repo/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { Icon } from '@repo/ui/icon'
+import { useState } from 'react'
 import { useNavigate, useSubmit } from 'react-router'
 
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
 
-import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { type getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
+import { getUserImgSrc } from '#app/utils/misc.tsx'
 
 export interface AdminUserDetail {
 	id: string

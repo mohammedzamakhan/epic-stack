@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router'
+import  { type LoaderFunctionArgs, type ActionFunctionArgs } from 'react-router'
 
 export interface Route {
 	LoaderArgs: LoaderFunctionArgs

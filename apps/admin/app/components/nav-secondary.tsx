@@ -1,8 +1,8 @@
+import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@repo/ui/sidebar'
 import * as React from 'react'
 import { useRef } from 'react'
 
 import { Link } from 'react-router'
-import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@repo/ui/sidebar'
 
 type NavItem = {
 	title: string

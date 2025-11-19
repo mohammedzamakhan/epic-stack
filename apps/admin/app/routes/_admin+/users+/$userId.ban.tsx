@@ -1,9 +1,9 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { type ActionFunctionArgs } from 'react-router'
+import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 
 export async function action({ request, params }: ActionFunctionArgs) {
 	const adminUserId = await requireUserWithRole(request, 'admin')

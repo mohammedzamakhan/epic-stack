@@ -1,16 +1,8 @@
-import {
-	useLoaderData,
-	Form,
-	useNavigation,
-	useSearchParams,
-} from 'react-router'
 import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
-import { prisma } from '#app/utils/db.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
-import { type Route } from './+types/waitlist.ts'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import {
 	Table,
@@ -20,14 +12,22 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
-import { Icon } from '@repo/ui/icon'
+import { Img } from 'openimg/react'
+import { useCallback, useEffect, useState } from 'react'
+import {
+	useLoaderData,
+	Form,
+	useNavigation,
+	useSearchParams,
+} from 'react-router'
+import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
+import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import {
 	grantEarlyAccess,
 	revokeEarlyAccess,
 } from '#app/utils/waitlist.server.ts'
-import { Img } from 'openimg/react'
-import { useEffect, useState } from 'react'
+import { type Route } from './+types/waitlist.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireUserWithRole(request, 'admin')
@@ -205,6 +205,20 @@ export default function AdminWaitlistPage() {
 
 	const isProcessing = navigation.state === 'submitting'
 
+	const handleFilterChange = useCallback(
+		(key: string, value: string) => {
+			const newParams = new URLSearchParams(searchParams)
+			if (value) {
+				newParams.set(key, value)
+			} else {
+				newParams.delete(key)
+			}
+			newParams.set('page', '1') // Reset to first page when filtering
+			setSearchParams(newParams)
+		},
+		[searchParams, setSearchParams],
+	)
+
 	// Debounce search input
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -213,18 +227,7 @@ export default function AdminWaitlistPage() {
 			}
 		}, 300)
 		return () => clearTimeout(timer)
-	}, [searchValue])
-
-	const handleFilterChange = (key: string, value: string) => {
-		const newParams = new URLSearchParams(searchParams)
-		if (value) {
-			newParams.set(key, value)
-		} else {
-			newParams.delete(key)
-		}
-		newParams.set('page', '1') // Reset to first page when filtering
-		setSearchParams(newParams)
-	}
+	}, [searchValue, data.filters.search, handleFilterChange])
 
 	const handlePageChange = (newPage: number) => {
 		const newParams = new URLSearchParams(searchParams)

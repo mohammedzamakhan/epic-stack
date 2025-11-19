@@ -1,10 +1,3 @@
-import {
-	useLoaderData,
-	Form,
-	type LoaderFunctionArgs,
-	type ActionFunctionArgs,
-	Link,
-} from 'react-router'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -26,6 +19,13 @@ import {
 	TableRow,
 } from '@repo/ui/table'
 import { Textarea } from '@repo/ui/textarea'
+import {
+	useLoaderData,
+	Form,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
+	Link,
+} from 'react-router'
 
 import { getUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
