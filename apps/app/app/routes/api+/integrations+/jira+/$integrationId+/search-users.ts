@@ -1,5 +1,5 @@
 import { handleJiraSearchUsers } from '@repo/integrations'
-import { prisma } from '@repo/prisma'
+import { prisma } from '#app/utils/db.server.ts'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'

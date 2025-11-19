@@ -1,6 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
-import { prisma } from '@repo/prisma'
+import { prisma } from '#app/utils/db.server.ts'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
