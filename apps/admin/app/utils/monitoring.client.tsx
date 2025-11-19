@@ -1,35 +1,12 @@
-import * as Sentry from '@sentry/react-router'
+import { initClientMonitoring } from '@repo/observability'
 
 export function init() {
-	Sentry.init({
+	initClientMonitoring({
 		dsn: ENV.SENTRY_DSN,
 		environment: ENV.MODE,
-		beforeSend(event) {
-			if (event.request?.url) {
-				const url = new URL(event.request.url)
-				if (
-					url.protocol === 'chrome-extension:' ||
-					url.protocol === 'moz-extension:'
-				) {
-					// This error is from a browser extension, ignore it
-					return null
-				}
-			}
-			return event
-		},
-		integrations: [
-			Sentry.replayIntegration(),
-			Sentry.browserProfilingIntegration(),
-		],
-
-		// Set tracesSampleRate to 1.0 to capture 100%
-		// of transactions for performance monitoring.
-		// We recommend adjusting this value in production
+		// Admin app uses 100% sample rate for traces
 		tracesSampleRate: 1.0,
-
-		// Capture Replay for 10% of all sessions,
-		// plus for 100% of sessions with an error
+		// Admin uses 0.1 for session replays
 		replaysSessionSampleRate: 0.1,
-		replaysOnErrorSampleRate: 1.0,
 	})
 }
