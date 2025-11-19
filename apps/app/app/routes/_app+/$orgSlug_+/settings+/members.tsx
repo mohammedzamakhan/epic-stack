@@ -259,11 +259,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	// --- update-member-role intent ---
 	if (intent === 'update-member-role') {
-		const memberUserId = formData.get('userId') as string
-		const newRole = formData.get('role') as string
+		const memberUserId = formData.get('userId')
+		const newRole = formData.get('role')
 
 		if (!memberUserId || typeof memberUserId !== 'string') {
 			return Response.json({ error: 'Missing userId' }, { status: 400 })
+		}
+		if (!newRole || typeof newRole !== 'string') {
+			return Response.json({ error: 'Missing role' }, { status: 400 })
 		}
 		if (!['admin', 'member'].includes(newRole)) {
 			return Response.json({ error: 'Invalid role' }, { status: 400 })
@@ -283,11 +286,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				},
 			},
 		})
-		if (
-			!requester ||
-			requester.organizationRole.name !== 'admin' ||
-			!requester.active
-		) {
+		if (!requester) {
+			return Response.json(
+				{ error: 'Requester not found in organization' },
+				{ status: 403 },
+			)
+		}
+		if (requester.organizationRole.name !== 'admin' || !requester.active) {
 			return Response.json(
 				{ error: 'Only admins can change member roles' },
 				{ status: 403 },

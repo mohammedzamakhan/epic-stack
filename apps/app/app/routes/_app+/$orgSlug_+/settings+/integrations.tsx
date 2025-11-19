@@ -55,7 +55,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		try {
 			const url = new URL(request.url)
-			const protocol = url.protocol === 'https:' ? 'https:' : 'https:'
+			const protocol = url.protocol === 'https:' ? 'https:' : 'http:'
 			const redirectUri = `${protocol}//${url.host}/api/integrations/oauth/callback?provider=${providerName}`
 
 			const { authUrl } = await integrationManager.initiateOAuth(

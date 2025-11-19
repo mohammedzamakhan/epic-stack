@@ -13,6 +13,9 @@ export const action: ActionFunction = async ({ request, params }) => {
 	if (!noteId || !positionStr)
 		return new Response('Missing fields', { status: 400 })
 	const targetIndex = Number(positionStr)
+	if (!Number.isInteger(targetIndex) || targetIndex < 0) {
+		return new Response('Invalid position', { status: 400 })
+	}
 
 	// Validate statusId (if provided)
 	if (statusId) {

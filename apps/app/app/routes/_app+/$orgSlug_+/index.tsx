@@ -181,7 +181,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		select: { id: true },
 	})
 
-	const user = await prisma.user.findFirst({
+	const user = await prisma.user.findUnique({
 		where: { id: userId },
 		select: { id: true, email: true },
 	})
