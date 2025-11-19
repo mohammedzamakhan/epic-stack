@@ -1,7 +1,7 @@
-import { parseWithZod } from '@conform-to/zod'
 import { z } from 'zod'
 import { prisma } from '#app/utils/db.server.ts'
 import { uploadProfileImage } from '#app/utils/storage.server.ts'
+import { validateAndReturnError } from './_action-helpers.server.ts'
 
 // Photo upload schema
 export const DeleteImageSchema = z.object({
@@ -33,8 +33,9 @@ type PhotoActionArgs = {
 }
 
 export async function photoAction({ formData, userId }: PhotoActionArgs) {
-	const submission = await parseWithZod(formData, {
-		schema: PhotoFormSchema.transform(async (data) => {
+	const result = await validateAndReturnError(
+		formData,
+		PhotoFormSchema.transform(async (data) => {
 			if (data.intent === 'delete-photo') return { intent: 'delete-photo' }
 			if (data.photoFile.size <= 0) return z.NEVER
 			return {
@@ -42,17 +43,13 @@ export async function photoAction({ formData, userId }: PhotoActionArgs) {
 				image: { objectKey: await uploadProfileImage(userId, data.photoFile) },
 			}
 		}),
-		async: true,
-	})
+	)
 
-	if (submission.status !== 'success') {
-		return Response.json(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
+	if (!result.success) {
+		return result.response
 	}
 
-	const { image, intent } = submission.value as {
+	const { image, intent } = result.value as {
 		intent: string
 		image?: { objectKey: string }
 	}

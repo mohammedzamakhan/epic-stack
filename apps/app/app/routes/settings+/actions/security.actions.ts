@@ -1,4 +1,3 @@
-import { parseWithZod } from '@conform-to/zod'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { z } from 'zod'
 
@@ -11,6 +10,10 @@ import {
 import { prisma } from '#app/utils/db.server.ts'
 import { twoFAVerificationType } from '../profile.two-factor'
 import { twoFAVerifyVerificationType } from '../profile.two-factor.verify'
+import {
+	createSuccessResponse,
+	validateAndReturnError,
+} from './_action-helpers.server.ts'
 
 export const ChangePasswordSchema = z
 	.object({
@@ -37,9 +40,9 @@ export async function changePasswordAction({
 	userId,
 	formData,
 }: SecurityActionArgs) {
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: ChangePasswordSchema.superRefine(
+	const result = await validateAndReturnError(
+		formData,
+		ChangePasswordSchema.superRefine(
 			async ({ currentPassword, newPassword }, ctx) => {
 				if (currentPassword && newPassword) {
 					const user = await verifyUserPassword({ id: userId }, currentPassword)
@@ -61,20 +64,16 @@ export async function changePasswordAction({
 				}
 			},
 		),
-	})
+		{
+			hideFields: ['currentPassword', 'newPassword', 'confirmNewPassword'],
+		},
+	)
 
-	if (submission.status !== 'success') {
-		return Response.json(
-			{
-				result: submission.reply({
-					hideFields: ['currentPassword', 'newPassword', 'confirmNewPassword'],
-				}),
-			},
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
+	if (!result.success) {
+		return result.response
 	}
 
-	const { newPassword } = submission.value
+	const { newPassword } = result.value
 
 	await prisma.user.update({
 		select: { username: true },
@@ -88,19 +87,16 @@ export async function changePasswordAction({
 		},
 	})
 
-	return Response.json({
-		status: 'success',
-		result: submission.reply(),
-	})
+	return createSuccessResponse(result.submission)
 }
 
 export async function setPasswordAction({
 	userId,
 	formData,
 }: SecurityActionArgs) {
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: PasswordAndConfirmPasswordSchema.superRefine(
+	const result = await validateAndReturnError(
+		formData,
+		PasswordAndConfirmPasswordSchema.superRefine(
 			async ({ password }, ctx) => {
 				const isCommonPassword = await checkIsCommonPassword(password)
 				if (isCommonPassword) {
@@ -112,20 +108,16 @@ export async function setPasswordAction({
 				}
 			},
 		),
-	})
+		{
+			hideFields: ['password', 'confirmPassword'],
+		},
+	)
 
-	if (submission.status !== 'success') {
-		return Response.json(
-			{
-				result: submission.reply({
-					hideFields: ['password', 'confirmPassword'],
-				}),
-			},
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
+	if (!result.success) {
+		return result.response
 	}
 
-	const { password } = submission.value
+	const { password } = result.value
 
 	await prisma.user.update({
 		select: { username: true },
@@ -139,18 +131,16 @@ export async function setPasswordAction({
 		},
 	})
 
-	return Response.json({
-		status: 'success',
-		result: submission.reply(),
-	})
+	return createSuccessResponse(result.submission)
 }
 
 export async function enable2FAAction({
 	formData,
 	userId,
 }: SecurityActionArgs) {
-	const submission = await parseWithZod(formData, {
-		schema: Enable2FASchema.superRefine(async (data, ctx) => {
+	const result = await validateAndReturnError(
+		formData,
+		Enable2FASchema.superRefine(async (data, ctx) => {
 			const codeIsValid = await isCodeValid({
 				code: data.code,
 				type: twoFAVerifyVerificationType,
@@ -165,14 +155,10 @@ export async function enable2FAAction({
 				return z.NEVER
 			}
 		}),
-		async: true,
-	})
+	)
 
-	if (submission.status !== 'success') {
-		return Response.json(
-			{ result: submission.reply(), status: 'error' },
-			{ status: 400 },
-		)
+	if (!result.success) {
+		return result.response
 	}
 
 	await prisma.verification.update({

@@ -1,8 +1,11 @@
-import { parseWithZod } from '@conform-to/zod'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { z } from 'zod'
 
 import { prisma } from '#app/utils/db.server.ts'
+import {
+	createSuccessResponse,
+	validateAndReturnError,
+} from './_action-helpers.server.ts'
 
 export const ProfileFormSchema = z.object({
 	name: NameSchema.nullable().default(null),
@@ -18,9 +21,9 @@ export async function profileUpdateAction({
 	userId,
 	formData,
 }: ProfileActionArgs) {
-	const submission = await parseWithZod(formData, {
-		async: true,
-		schema: ProfileFormSchema.superRefine(async ({ username }, ctx) => {
+	const result = await validateAndReturnError(
+		formData,
+		ProfileFormSchema.superRefine(async ({ username }, ctx) => {
 			const existingUsername = await prisma.user.findUnique({
 				where: { username },
 				select: { id: true },
@@ -33,15 +36,13 @@ export async function profileUpdateAction({
 				})
 			}
 		}),
-	})
-	if (submission.status !== 'success') {
-		return Response.json(
-			{ result: submission.reply() },
-			{ status: submission.status === 'error' ? 400 : 200 },
-		)
+	)
+
+	if (!result.success) {
+		return result.response
 	}
 
-	const { username, name } = submission.value
+	const { username, name } = result.value
 
 	await prisma.user.update({
 		select: { username: true },
@@ -52,7 +53,5 @@ export async function profileUpdateAction({
 		},
 	})
 
-	return Response.json({
-		result: submission.reply(),
-	})
+	return createSuccessResponse(result.submission)
 }

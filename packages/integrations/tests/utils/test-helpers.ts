@@ -331,3 +331,197 @@ export async function expectToThrow(
 		return error as Error
 	}
 }
+
+/**
+ * Extract URL search parameters from a URL string
+ */
+export function extractUrlParams(url: string): URLSearchParams {
+	const urlObj = new URL(url)
+	return new URLSearchParams(urlObj.search)
+}
+
+/**
+ * Shared OAuth flow test assertions
+ */
+export const oauthTestHelpers = {
+	/**
+	 * Assert that an OAuth URL contains required parameters
+	 */
+	assertOAuthUrlStructure(
+		authUrl: string,
+		expectedParams: {
+			baseUrl: string
+			clientId?: string
+			scope?: string
+			responseType?: string
+			redirectUri?: string
+			additionalParams?: Record<string, string>
+		},
+	) {
+		// Check base URL
+		if (!authUrl.includes(expectedParams.baseUrl)) {
+			throw new Error(
+				`Expected URL to contain ${expectedParams.baseUrl}, got ${authUrl}`,
+			)
+		}
+
+		const urlParams = extractUrlParams(authUrl)
+
+		// Check client_id if provided
+		if (expectedParams.clientId !== undefined) {
+			const clientId = urlParams.get('client_id')
+			if (!clientId?.includes(expectedParams.clientId)) {
+				throw new Error(
+					`Expected client_id to contain ${expectedParams.clientId}, got ${clientId}`,
+				)
+			}
+		}
+
+		// Check scope if provided
+		if (expectedParams.scope !== undefined) {
+			const scope = urlParams.get('scope')
+			if (scope !== expectedParams.scope) {
+				throw new Error(
+					`Expected scope to be ${expectedParams.scope}, got ${scope}`,
+				)
+			}
+		}
+
+		// Check response_type if provided
+		if (expectedParams.responseType !== undefined) {
+			const responseType = urlParams.get('response_type')
+			if (responseType !== expectedParams.responseType) {
+				throw new Error(
+					`Expected response_type to be ${expectedParams.responseType}, got ${responseType}`,
+				)
+			}
+		}
+
+		// Check redirect_uri if provided
+		if (expectedParams.redirectUri !== undefined) {
+			const redirectUri = urlParams.get('redirect_uri')
+			if (redirectUri !== expectedParams.redirectUri) {
+				throw new Error(
+					`Expected redirect_uri to be ${expectedParams.redirectUri}, got ${redirectUri}`,
+				)
+			}
+		}
+
+		// Check state parameter exists
+		const state = urlParams.get('state')
+		if (!state) {
+			throw new Error('Expected state parameter to be present')
+		}
+
+		// Check additional params
+		if (expectedParams.additionalParams) {
+			Object.entries(expectedParams.additionalParams).forEach(([key, value]) => {
+				const actualValue = urlParams.get(key)
+				if (actualValue !== value) {
+					throw new Error(
+						`Expected ${key} to be ${value}, got ${actualValue}`,
+					)
+				}
+			})
+		}
+
+		return { urlParams, state }
+	},
+
+	/**
+	 * Assert that state parameter contains expected data
+	 */
+	assertStateStructure(
+		state: string,
+		expectedData: {
+			organizationId: string
+			providerName: string
+			redirectUri?: string
+			additionalData?: Record<string, unknown>
+		},
+	) {
+		// Decode state (handle both base64 and signed formats)
+		let decodedState: any
+
+		try {
+			// Try parsing as OAuthStateManager format (base64 encoded JSON)
+			const statePayload = state.split('.')[0] // Remove signature if present
+			decodedState = JSON.parse(Buffer.from(statePayload, 'base64').toString())
+		} catch {
+			// If that fails, try parsing as direct JSON
+			try {
+				decodedState = JSON.parse(state)
+			} catch {
+				throw new Error(`Could not decode state: ${state}`)
+			}
+		}
+
+		// Verify organization ID
+		if (decodedState.organizationId !== expectedData.organizationId) {
+			throw new Error(
+				`Expected organizationId to be ${expectedData.organizationId}, got ${decodedState.organizationId}`,
+			)
+		}
+
+		// Verify provider name
+		if (decodedState.providerName !== expectedData.providerName) {
+			throw new Error(
+				`Expected providerName to be ${expectedData.providerName}, got ${decodedState.providerName}`,
+			)
+		}
+
+		// Verify redirect URI if provided
+		if (
+			expectedData.redirectUri &&
+			decodedState.redirectUri !== expectedData.redirectUri
+		) {
+			throw new Error(
+				`Expected redirectUri to be ${expectedData.redirectUri}, got ${decodedState.redirectUri}`,
+			)
+		}
+
+		// Verify timestamp exists and is a number
+		if (typeof decodedState.timestamp !== 'number') {
+			throw new Error(
+				`Expected timestamp to be a number, got ${typeof decodedState.timestamp}`,
+			)
+		}
+
+		// Verify nonce exists and is a string
+		if (typeof decodedState.nonce !== 'string') {
+			throw new Error(
+				`Expected nonce to be a string, got ${typeof decodedState.nonce}`,
+			)
+		}
+
+		// Verify additional data if provided
+		if (expectedData.additionalData) {
+			Object.entries(expectedData.additionalData).forEach(([key, value]) => {
+				if (decodedState[key] !== value) {
+					throw new Error(
+						`Expected ${key} to be ${value}, got ${decodedState[key]}`,
+					)
+				}
+			})
+		}
+
+		return decodedState
+	},
+
+	/**
+	 * Assert that two OAuth URLs have different state parameters
+	 */
+	assertUniqueStates(url1: string, url2: string) {
+		const params1 = extractUrlParams(url1)
+		const params2 = extractUrlParams(url2)
+
+		const state1 = params1.get('state')
+		const state2 = params2.get('state')
+
+		if (state1 === state2) {
+			throw new Error('Expected states to be unique, but they are identical')
+		}
+
+		return { state1, state2 }
+	},
+}
