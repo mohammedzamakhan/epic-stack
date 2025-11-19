@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
 
-import { getUsersByIpAddress } from '#app/utils/ip-tracking.server.ts'
+import { getUsersByIpAddress } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {

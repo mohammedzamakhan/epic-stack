@@ -51,6 +51,11 @@
       "types": "./src/feature-flags.server.ts",
       "import": "./src/feature-flags.server.ts",
       "default": "./src/feature-flags.server.ts"
+    },
+    "./ip-tracking": {
+      "types": "./src/ip-tracking.server.ts",
+      "import": "./src/ip-tracking.server.ts",
+      "default": "./src/ip-tracking.server.ts"
     }
   },
   "scripts": {

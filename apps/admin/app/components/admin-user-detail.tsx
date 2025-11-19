@@ -10,7 +10,7 @@ import { useNavigate, useSubmit } from 'react-router'
 
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
 
-import { type getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
+import { type getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
 
 export interface AdminUserDetail {

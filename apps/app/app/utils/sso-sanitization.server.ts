@@ -1,5 +1,5 @@
 import DOMPurify from 'isomorphic-dompurify'
-import { getClientIp } from './ip-tracking.server.ts'
+import { getClientIp } from '@repo/common/ip-tracking'
 import {
 	createSSOError,
 	SSOErrorType,

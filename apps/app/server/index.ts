@@ -157,7 +157,7 @@ app.use(
 app.use(async (req, res, next) => {
 	try {
 		// Check if IP is blacklisted first
-		const ipTracking = await import('../app/utils/ip-tracking.server.js')
+		const ipTracking = await import('@repo/common/ip-tracking')
 		const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
 
 		const isBlacklisted = await ipTracking.isIpBlacklisted(ip)
@@ -178,7 +178,7 @@ app.use(async (req, res, next) => {
 		// Track the request asynchronously
 		setImmediate(async () => {
 			try {
-				const ipTracking = await import('../app/utils/ip-tracking.server.js')
+				const ipTracking = await import('@repo/common/ip-tracking')
 				const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
 				await ipTracking.trackIpRequest({
 					ip,
@@ -202,7 +202,7 @@ app.use(async (req, res, next) => {
 setInterval(
 	async () => {
 		try {
-			const ipTracking = await import('../app/utils/ip-tracking.server.js')
+			const ipTracking = await import('@repo/common/ip-tracking')
 			ipTracking.cleanupRequestCounts()
 		} catch (error) {
 			logger.error({ err: error }, 'Error cleaning up request counts')

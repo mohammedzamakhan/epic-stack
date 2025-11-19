@@ -6,7 +6,7 @@ import {
 	type RecentActivity,
 } from '#app/components/admin-user-detail.tsx'
 import { prisma } from '#app/utils/db.server.ts'
-import { getIpAddressesByUser } from '#app/utils/ip-tracking.server.ts'
+import { getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({

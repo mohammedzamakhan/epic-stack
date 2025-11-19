@@ -1,7 +1,7 @@
 import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '#app/utils/auth.server.ts'
-import { getClientIp } from '#app/utils/ip-tracking.server.ts'
+import { getClientIp } from '@repo/common/ip-tracking'
 import { getReferrerRoute } from '#app/utils/misc.tsx'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
 import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
