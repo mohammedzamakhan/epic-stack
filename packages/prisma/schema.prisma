@@ -21,6 +21,18 @@ model User {
   banExpiresAt           DateTime?
   bannedAt               DateTime?
   bannedById             String?
+
+  // GDPR Consent Management
+  privacyConsent         Boolean                    @default(true) // Essential services consent
+  marketingConsent       Boolean                    @default(false) // Marketing communications
+  analyticsConsent       Boolean                    @default(false) // Analytics tracking
+  dataProcessingConsent  Boolean                    @default(false) // Data processing for improvements
+  consentUpdatedAt       DateTime?                  // Last consent update timestamp
+
+  // Data Retention
+  accountDeletedAt       DateTime?                  // Soft delete timestamp
+  dataRetentionDate      DateTime?                  // When data should be permanently deleted
+
   bannedBy               User?                      @relation("UserBans", fields: [bannedById], references: [id])
   bannedUsers            User[]                     @relation("UserBans")
   connections            Connection[]
@@ -52,6 +64,7 @@ model User {
   auditLogs              AuditLog[]                 @relation("AuditLogUser")
   waitlistEntry          WaitlistEntry?
   grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
+  dataBreachNotifications DataBreachNotification[]  @relation("AffectedUsers")
 }
 
 model Note {
@@ -848,4 +861,86 @@ model WaitlistEntry {
   @@index([points, createdAt])
   @@index([hasEarlyAccess])
   @@index([grantedAccessBy])
+}
+
+// GDPR Data Breach Notification
+model DataBreachNotification {
+  id                   String    @id @default(cuid())
+  breachDate           DateTime  // When the breach occurred
+  detectedDate         DateTime  // When the breach was detected
+  severity             String    // "low", "medium", "high", "critical"
+  breachType           String    // "unauthorized_access", "data_leak", "ransomware", etc.
+  affectedDataTypes    String    // JSON array: ["email", "password", "personal_info"]
+  description          String    // Detailed description of the breach
+  mitigationSteps      String    // Steps taken to mitigate
+
+  // Notification tracking
+  supervisoryAuthorityNotified Boolean  @default(false) // GDPR requires notification to DPA
+  supervisoryNotifiedAt        DateTime?
+  usersNotified                Boolean  @default(false)
+  usersNotifiedAt              DateTime?
+
+  // Affected users
+  affectedUsers        User[]    @relation("AffectedUsers")
+  affectedUserCount    Int       @default(0)
+
+  // Status tracking
+  status               String    @default("investigating") // "investigating", "contained", "resolved"
+  resolvedAt           DateTime?
+
+  // Compliance
+  reportedById         String?   // Admin who reported
+  within72Hours        Boolean   @default(true) // GDPR requires 72h notification
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([breachDate])
+  @@index([severity])
+  @@index([status])
+  @@index([supervisoryAuthorityNotified])
+}
+
+// Data Retention Policy Configuration
+model DataRetentionPolicy {
+  id                      String    @id @default(cuid())
+  entityType              String    @unique // "user", "session", "audit_log", "note", etc.
+  retentionPeriodDays     Int       // How many days to retain
+  autoDeleteEnabled       Boolean   @default(true)
+  gracePeriodDays         Int       @default(30) // Grace period before permanent deletion
+  legalHoldExemption      Boolean   @default(false) // Exempt from auto-deletion for legal reasons
+  description             String?
+  lastProcessedAt         DateTime? // Last time cleanup ran
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([entityType])
+  @@index([autoDeleteEnabled])
+}
+
+// Cookie Consent Tracking (Enhanced from basic cookie)
+model CookieConsent {
+  id                String    @id @default(cuid())
+  userId            String?   // If user is logged in
+  sessionId         String?   // Anonymous session tracking
+
+  // Consent types
+  essential         Boolean   @default(true)  // Always true (required)
+  analytics         Boolean   @default(false)
+  marketing         Boolean   @default(false)
+  preferences       Boolean   @default(false)
+
+  // Metadata
+  consentGivenAt    DateTime  @default(now())
+  consentUpdatedAt  DateTime  @updatedAt
+  ipAddress         String?
+  userAgent         String?
+  consentMethod     String    @default("banner") // "banner", "settings", "api"
+
+  // GDPR proof of consent
+  consentVersion    String    @default("1.0") // Version of privacy policy/terms
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([consentGivenAt])
 }
