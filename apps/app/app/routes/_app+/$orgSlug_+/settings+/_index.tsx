@@ -30,7 +30,7 @@ import VerifiedDomainCard, {
 } from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { markStepCompleted } from '#app/utils/onboarding.ts'
 import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {

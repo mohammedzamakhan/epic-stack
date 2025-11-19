@@ -5,7 +5,7 @@ import {
 	SSOConfigurationUpdateSchema,
 	type SSOConfigurationInput,
 } from '@repo/validation'
-import { prisma } from './db.server.ts'
+import { prisma } from '@repo/prisma'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { test } from '#tests/playwright-utils.ts'
 
 test.describe('Admin Impersonation', () => {

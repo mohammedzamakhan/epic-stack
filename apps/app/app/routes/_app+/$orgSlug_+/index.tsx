@@ -21,7 +21,7 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,

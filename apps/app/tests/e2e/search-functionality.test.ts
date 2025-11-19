@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization, createTestOrganizationWithMultipleUsers } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead

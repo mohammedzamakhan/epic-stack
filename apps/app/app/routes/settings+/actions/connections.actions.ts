@@ -1,5 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 
 type ConnectionsActionArgs = {
 	formData: FormData

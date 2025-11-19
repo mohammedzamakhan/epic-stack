@@ -25,7 +25,7 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import {
 	getNotesViewMode,
 	setNotesViewMode,

@@ -1,4 +1,4 @@
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 
 export type ActivityAction =
 	| 'viewed'

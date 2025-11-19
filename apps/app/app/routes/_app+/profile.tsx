@@ -8,7 +8,7 @@ import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData  } from
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { changeEmailAction } from '../settings+/actions/email.actions'
 import { photoAction } from '../settings+/actions/photo.actions'
 import { profileUpdateAction } from '../settings+/actions/profile.actions'

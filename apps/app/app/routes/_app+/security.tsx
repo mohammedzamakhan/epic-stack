@@ -14,7 +14,7 @@ import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { userSecuritySelect } from '#app/utils/user-security.server.ts'
 import {
 	deleteDataAction,

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo
 import { Icon } from '@repo/ui/icon'
 import { useLoaderData } from 'react-router'
 
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {

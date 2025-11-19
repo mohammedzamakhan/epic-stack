@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
 
 // Override LAUNCH_STATUS for these tests to force CLOSED_BETA mode

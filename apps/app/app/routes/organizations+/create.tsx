@@ -46,7 +46,7 @@ import {
 
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,

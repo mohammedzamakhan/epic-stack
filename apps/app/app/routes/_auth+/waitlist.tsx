@@ -7,7 +7,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '
 import * as React from 'react'
 import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,

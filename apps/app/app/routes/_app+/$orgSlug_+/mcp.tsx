@@ -22,7 +22,7 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { cn } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 

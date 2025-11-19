@@ -21,7 +21,7 @@ import {
 	requireRecentVerification,
 } from '#app/routes/_auth+/verify.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'

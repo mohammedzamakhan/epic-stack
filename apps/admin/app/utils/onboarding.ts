@@ -1,4 +1,4 @@
-import { prisma } from './db.server'
+import { prisma } from '@repo/prisma'
 
 export interface OnboardingStepAction {
 	type: 'navigate' | 'modal' | 'external'

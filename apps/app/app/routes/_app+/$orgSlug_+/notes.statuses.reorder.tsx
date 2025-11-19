@@ -1,6 +1,6 @@
 import { calculateReorderPosition } from '@repo/common'
 import { type ActionFunction } from 'react-router'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { validateOrgAccess } from '#app/utils/organization-loader.server.ts'
 
 export const action: ActionFunction = async ({ request, params }) => {

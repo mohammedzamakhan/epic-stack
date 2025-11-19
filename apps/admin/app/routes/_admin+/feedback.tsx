@@ -2,7 +2,7 @@ import { type Feedback, type Organization, type User } from '@repo/prisma'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
 import { useLoaderData } from 'react-router'
 
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {

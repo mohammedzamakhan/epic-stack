@@ -1,5 +1,5 @@
 import { randomInt } from 'node:crypto'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { getLaunchStatus } from './env.server.ts'
 
 const REFERRAL_POINTS = 5

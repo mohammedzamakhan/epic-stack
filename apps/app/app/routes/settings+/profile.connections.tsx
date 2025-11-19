@@ -17,7 +17,7 @@ import {
 	providerIcons,
 	providerNames,
 } from '#app/utils/connections.tsx'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { pipeHeaders } from '#app/utils/headers.server.ts'
 import { makeTimings } from '#app/utils/timing.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'

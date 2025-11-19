@@ -65,7 +65,7 @@ import {
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import {
 	notifyCommentMentions,

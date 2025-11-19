@@ -1,7 +1,7 @@
 import { handleOAuthCallback } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
+import { prisma } from '@repo/prisma'
 import { redirectWithToast as _redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader(args: LoaderFunctionArgs) {
