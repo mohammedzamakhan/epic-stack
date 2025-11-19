@@ -5,6 +5,10 @@
 
 import { ssoCache } from './sso-cache.server.ts'
 import { ssoConnectionPool } from './sso-connection-pool.server.ts'
+import {
+	validateOIDCIssuerUrl,
+	validateEndpointUrl,
+} from './url-validation.server.ts'
 
 export interface OIDCDiscoveryDocument {
 	issuer: string
@@ -49,33 +53,35 @@ export interface EndpointValidationResult {
 export async function discoverOIDCEndpoints(
 	issuerUrl: string,
 ): Promise<DiscoveryResult> {
-	console.log('=== OIDC DISCOVERY START (Main App) ===')
-	console.log('Starting OIDC discovery for:', issuerUrl)
-	console.log('NODE_ENV:', process.env.NODE_ENV)
+	// Log only in development mode to avoid information disclosure
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Starting OIDC discovery')
+	}
 
 	try {
-		// Normalize issuer URL (remove trailing slash)
-		const normalizedIssuer = issuerUrl.replace(/\/$/, '')
-		console.log('Normalized issuer URL:', normalizedIssuer)
+		// SECURITY: Validate issuer URL against SSRF attacks
+		const urlValidation = validateOIDCIssuerUrl(issuerUrl)
+		if (!urlValidation.valid) {
+			return {
+				success: false,
+				error: `Invalid issuer URL: ${urlValidation.error}`,
+			}
+		}
+
+		const normalizedIssuer = urlValidation.normalizedUrl!
 
 		// Check cache first
-		console.log('Checking cache for endpoints...')
 		const cachedEndpoints = ssoCache.getEndpoints(normalizedIssuer)
 		if (cachedEndpoints) {
-			console.log('Using cached endpoints:', cachedEndpoints)
 			return {
 				success: true,
 				endpoints: cachedEndpoints,
 			}
 		}
-		console.log('No cached endpoints found, proceeding with discovery...')
 
 		// IMMEDIATE FALLBACK FOR DEVELOPMENT
 		if (process.env.NODE_ENV === 'development') {
-			console.log('=== DEVELOPMENT MODE DETECTED - USING FALLBACK ===')
-
 			if (normalizedIssuer.includes('okta.com')) {
-				console.log('Using fallback Okta OIDC configuration for development')
 				const fallbackEndpoints: EndpointConfiguration = {
 					authorizationUrl: `${normalizedIssuer}/v1/authorize`,
 					tokenUrl: `${normalizedIssuer}/v1/token`,
@@ -83,8 +89,6 @@ export async function discoverOIDCEndpoints(
 					revocationUrl: `${normalizedIssuer}/v1/revoke`,
 					jwksUrl: `${normalizedIssuer}/v1/keys`,
 				}
-
-				console.log('Fallback endpoints:', fallbackEndpoints)
 
 				return {
 					success: true,
@@ -101,7 +105,6 @@ export async function discoverOIDCEndpoints(
 			}
 
 			if (normalizedIssuer === 'https://accounts.google.com') {
-				console.log('Using fallback Google OIDC configuration for development')
 				const fallbackEndpoints: EndpointConfiguration = {
 					authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
 					tokenUrl: 'https://oauth2.googleapis.com/token',
@@ -125,10 +128,15 @@ export async function discoverOIDCEndpoints(
 			}
 		}
 
-		// Continue with network discovery if no fallback was used
-		// (normalizedIssuer is already declared above in the fallback section)
-
+		// SECURITY: Validate discovery URL before making request
 		const discoveryUrl = `${normalizedIssuer}/.well-known/openid-configuration`
+		const discoveryUrlValidation = validateEndpointUrl(discoveryUrl)
+		if (!discoveryUrlValidation.valid) {
+			return {
+				success: false,
+				error: `Invalid discovery URL: ${discoveryUrlValidation.error}`,
+			}
+		}
 
 		const response = await ssoConnectionPool.request(discoveryUrl, {
 			method: 'GET',
@@ -202,6 +210,7 @@ export async function discoverOIDCEndpoints(
 
 /**
  * Validate OIDC discovery document according to specification
+ * SECURITY: Also validates URLs against SSRF attacks
  */
 export function validateDiscoveryDocument(
 	doc: any,
@@ -219,31 +228,51 @@ export function validateDiscoveryDocument(
 		)
 	}
 
+	// SECURITY: Validate authorization_endpoint against SSRF
 	if (!doc.authorization_endpoint) {
 		errors.push('Missing required field: authorization_endpoint')
-	} else if (!isValidUrl(doc.authorization_endpoint)) {
-		errors.push('Invalid authorization_endpoint URL')
+	} else {
+		const validation = validateEndpointUrl(doc.authorization_endpoint)
+		if (!validation.valid) {
+			errors.push(
+				`Invalid authorization_endpoint URL: ${validation.error}`,
+			)
+		}
 	}
 
+	// SECURITY: Validate token_endpoint against SSRF
 	if (!doc.token_endpoint) {
 		errors.push('Missing required field: token_endpoint')
-	} else if (!isValidUrl(doc.token_endpoint)) {
-		errors.push('Invalid token_endpoint URL')
+	} else {
+		const validation = validateEndpointUrl(doc.token_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid token_endpoint URL: ${validation.error}`)
+		}
 	}
 
+	// SECURITY: Validate jwks_uri against SSRF
 	if (!doc.jwks_uri) {
 		warnings.push('Missing jwks_uri (recommended for token validation)')
-	} else if (!isValidUrl(doc.jwks_uri)) {
-		errors.push('Invalid jwks_uri URL')
+	} else {
+		const validation = validateEndpointUrl(doc.jwks_uri)
+		if (!validation.valid) {
+			errors.push(`Invalid jwks_uri URL: ${validation.error}`)
+		}
 	}
 
-	// Optional but commonly used fields
-	if (doc.userinfo_endpoint && !isValidUrl(doc.userinfo_endpoint)) {
-		errors.push('Invalid userinfo_endpoint URL')
+	// SECURITY: Validate optional endpoints against SSRF
+	if (doc.userinfo_endpoint) {
+		const validation = validateEndpointUrl(doc.userinfo_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid userinfo_endpoint URL: ${validation.error}`)
+		}
 	}
 
-	if (doc.revocation_endpoint && !isValidUrl(doc.revocation_endpoint)) {
-		errors.push('Invalid revocation_endpoint URL')
+	if (doc.revocation_endpoint) {
+		const validation = validateEndpointUrl(doc.revocation_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid revocation_endpoint URL: ${validation.error}`)
+		}
 	}
 
 	// Validate supported features
@@ -277,6 +306,7 @@ export function validateDiscoveryDocument(
 
 /**
  * Validate manually configured endpoints
+ * SECURITY: Also validates URLs against SSRF attacks
  */
 export function validateManualEndpoints(
 	endpoints: Partial<EndpointConfiguration>,
@@ -284,30 +314,45 @@ export function validateManualEndpoints(
 	const errors: string[] = []
 	const warnings: string[] = []
 
-	// Required endpoints
+	// SECURITY: Validate required endpoints against SSRF
 	if (!endpoints.authorizationUrl) {
 		errors.push('Authorization URL is required')
-	} else if (!isValidUrl(endpoints.authorizationUrl)) {
-		errors.push('Invalid authorization URL')
+	} else {
+		const validation = validateEndpointUrl(endpoints.authorizationUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid authorization URL: ${validation.error}`)
+		}
 	}
 
 	if (!endpoints.tokenUrl) {
 		errors.push('Token URL is required')
-	} else if (!isValidUrl(endpoints.tokenUrl)) {
-		errors.push('Invalid token URL')
+	} else {
+		const validation = validateEndpointUrl(endpoints.tokenUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid token URL: ${validation.error}`)
+		}
 	}
 
-	// Optional endpoints
-	if (endpoints.userinfoUrl && !isValidUrl(endpoints.userinfoUrl)) {
-		errors.push('Invalid userinfo URL')
+	// SECURITY: Validate optional endpoints against SSRF
+	if (endpoints.userinfoUrl) {
+		const validation = validateEndpointUrl(endpoints.userinfoUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid userinfo URL: ${validation.error}`)
+		}
 	}
 
-	if (endpoints.revocationUrl && !isValidUrl(endpoints.revocationUrl)) {
-		errors.push('Invalid revocation URL')
+	if (endpoints.revocationUrl) {
+		const validation = validateEndpointUrl(endpoints.revocationUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid revocation URL: ${validation.error}`)
+		}
 	}
 
-	if (endpoints.jwksUrl && !isValidUrl(endpoints.jwksUrl)) {
-		errors.push('Invalid JWKS URL')
+	if (endpoints.jwksUrl) {
+		const validation = validateEndpointUrl(endpoints.jwksUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid JWKS URL: ${validation.error}`)
+		}
 	}
 
 	// Warnings for missing optional but recommended endpoints
@@ -519,17 +564,6 @@ export function normalizeIssuerUrl(input: string): string {
 	}
 }
 
-/**
- * Simple URL validation
- */
-function isValidUrl(urlString: string): boolean {
-	try {
-		const url = new URL(urlString)
-		return url.protocol === 'http:' || url.protocol === 'https:'
-	} catch {
-		return false
-	}
-}
 
 /**
  * Get well-known OIDC discovery URL for an issuer
