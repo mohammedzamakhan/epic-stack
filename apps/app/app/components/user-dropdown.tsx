@@ -1,14 +1,14 @@
+import { Trans } from '@lingui/macro'
+import { Button } from '@repo/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
 import { Link, Form } from 'react-router'
-import { Trans } from '@lingui/macro'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { useCurrentOrganization } from '#app/utils/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 
-import { Button } from '@repo/ui/button'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@repo/ui/dropdown-menu'
-import { Icon } from '@repo/ui/icon'
 
 export function UserDropdown() {
 	const user = useUser()

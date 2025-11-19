@@ -1,8 +1,8 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Play } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Trans, msg } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { cn } from '#app/utils/misc.tsx'
 
 interface FeatureUpdate {

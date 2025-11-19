@@ -1,7 +1,3 @@
-import { Button } from '@repo/ui/button'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError } from '@repo/ui/field'
-import { Input } from '@repo/ui/input'
 import {
 	FormProvider,
 	getFormProps,
@@ -9,6 +5,11 @@ import {
 	useForm,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { AIContentGenerator } from '@repo/ai'
+import { Button } from '@repo/ui/button'
+import { Field, FieldLabel, FieldError } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
 import { useEffect, useState, useRef, lazy, Suspense, Component } from 'react'
 import { useFetcher, useParams } from 'react-router'
 import { z } from 'zod'
@@ -17,7 +18,6 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import { AIContentGenerator } from '@repo/ai'
 import {
 	ContentEditor,
 	type ContentEditorRef,

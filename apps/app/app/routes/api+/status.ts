@@ -1,5 +1,5 @@
-import { type LoaderFunctionArgs } from 'react-router'
 import { getUptimeStatus } from '@repo/observability'
+import { type LoaderFunctionArgs } from 'react-router'
 
 /**
  * Status endpoint that returns uptime monitoring information

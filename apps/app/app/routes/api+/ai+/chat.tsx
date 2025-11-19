@@ -1,10 +1,10 @@
-import { brand } from '@repo/config/brand'
-import { prisma } from '@repo/prisma'
 import {
 	handleChat,
 	createChatStream,
 	buildNoteChatSystemPrompt,
 } from '@repo/ai'
+import { brand } from '@repo/config/brand'
+import { prisma } from '@repo/prisma'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { markStepCompleted } from '#app/utils/onboarding.ts'

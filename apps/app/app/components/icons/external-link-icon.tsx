@@ -1,10 +1,8 @@
 'use client'
 
+import  { type Variants, motion  } from 'motion/react'
+import  { type HTMLAttributes, forwardRef  } from 'react'
 import { cn } from '#app/utils/misc.tsx'
-import type { Variants } from 'motion/react'
-import { motion } from 'motion/react'
-import type { HTMLAttributes } from 'react'
-import { forwardRef } from 'react'
 import {
 	type IconAnimationHandle,
 	useIconAnimation,

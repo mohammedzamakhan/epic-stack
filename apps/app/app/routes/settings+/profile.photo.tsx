@@ -3,6 +3,9 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import { useState } from 'react'
 import { data, redirect, Form, useNavigation } from 'react-router'
 import { z } from 'zod'
@@ -10,9 +13,6 @@ import { ErrorList } from '#app/components/forms.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { Button } from '@repo/ui/button'
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
 import {
 	getUserImgSrc,
 	useDoubleCheck,
@@ -20,7 +20,7 @@ import {
 } from '#app/utils/misc.tsx'
 import { uploadProfileImage } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/profile.photo.ts'
-import { BreadcrumbHandle } from './profile.change-email.tsx'
+import { type BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="user">Photo</Icon>,

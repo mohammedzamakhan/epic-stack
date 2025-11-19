@@ -1,8 +1,8 @@
 import { data } from 'react-router'
 import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
-import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
+import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import {
 	normalizeEmail,
 	normalizeUsername,

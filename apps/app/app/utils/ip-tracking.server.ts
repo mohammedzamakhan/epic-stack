@@ -1,5 +1,5 @@
-import { prisma } from './db.server'
 import { getClientIp } from '@repo/security'
+import { prisma } from './db.server'
 
 export interface IpTrackingData {
 	ip: string

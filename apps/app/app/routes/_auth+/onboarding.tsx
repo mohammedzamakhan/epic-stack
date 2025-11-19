@@ -1,9 +1,19 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { t, Trans } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Checkbox } from '@repo/ui/checkbox'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import {
+	NameSchema,
+	PasswordAndConfirmPasswordSchema,
+	UsernameSchema,
+} from '@repo/validation'
 import { data, redirect, Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { t, Trans } from '@lingui/macro'
 import { z } from 'zod'
 import {
 	ErrorList,
@@ -23,18 +33,8 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import {
-	NameSchema,
-	PasswordAndConfirmPasswordSchema,
-	UsernameSchema,
-} from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/onboarding.ts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
-import { Input } from '@repo/ui/input'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Checkbox } from '@repo/ui/checkbox'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
 export const onboardingInviteTokenSessionKey = 'onboardingInviteToken'

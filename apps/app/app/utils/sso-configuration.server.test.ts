@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { faker } from '@faker-js/faker'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 
 // Mock the entire service module with proper class for Vitest v4

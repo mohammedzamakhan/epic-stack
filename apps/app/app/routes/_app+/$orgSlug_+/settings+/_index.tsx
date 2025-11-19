@@ -1,7 +1,8 @@
 import { parseWithZod } from '@conform-to/zod'
+import { parseFormData } from '@mjackson/form-data-parser'
+import { encrypt, getSSOMasterKey } from '@repo/security'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
-import { parseFormData } from '@mjackson/form-data-parser'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -30,8 +31,8 @@ import VerifiedDomainCard, {
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { encrypt, getSSOMasterKey } from '@repo/security'
 import { markStepCompleted } from '#app/utils/onboarding.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {
 	updateSeatQuantity,
 	deleteSubscription,
@@ -41,7 +42,6 @@ import {
 	testS3Connection,
 } from '#app/utils/storage.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)

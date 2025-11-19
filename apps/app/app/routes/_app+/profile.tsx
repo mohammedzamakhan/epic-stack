@@ -1,10 +1,10 @@
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
-import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
+import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData  } from 'react-router'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -12,7 +12,6 @@ import { prisma } from '#app/utils/db.server.ts'
 import { changeEmailAction } from '../settings+/actions/email.actions'
 import { photoAction } from '../settings+/actions/photo.actions'
 import { profileUpdateAction } from '../settings+/actions/profile.actions'
-import { useLoaderData } from 'react-router'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

@@ -1,5 +1,5 @@
-import { formatDistanceToNow } from 'date-fns'
 import { Icon } from '@repo/ui/icon'
+import { formatDistanceToNow } from 'date-fns'
 
 /**
  * Escape HTML special characters to prevent XSS

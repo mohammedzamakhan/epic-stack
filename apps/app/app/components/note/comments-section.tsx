@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { useRevalidator } from 'react-router'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { Icon } from '@repo/ui/icon'
+import { useState } from 'react'
+import { useRevalidator } from 'react-router'
 import CommentInput, { type MentionUser } from './comment-input'
 import { CommentItem } from './comment-item'
-import { Icon } from '@repo/ui/icon'
 
 interface CommentUser {
 	id: string

@@ -1,9 +1,9 @@
-import { Form } from 'react-router'
-import { z } from 'zod'
-import { useIsPending } from './misc.tsx'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
+import { Form } from 'react-router'
+import { z } from 'zod'
 import { saveLastLoginMethod, type LoginMethod } from './last-login-method.ts'
+import { useIsPending } from './misc.tsx'
 
 export const GITHUB_PROVIDER_NAME = 'github'
 export const GOOGLE_PROVIDER_NAME = 'google'

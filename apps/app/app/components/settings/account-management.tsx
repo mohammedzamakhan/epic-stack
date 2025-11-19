@@ -1,12 +1,12 @@
-import { useFetcher } from 'react-router'
 import { Trans, Plural } from '@lingui/macro'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
+import { useFetcher } from 'react-router'
 import {
 	deleteDataActionIntent,
 	signOutOfSessionsActionIntent,
 } from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
 
 interface SignOutOfSessionsProps {
 	data: {

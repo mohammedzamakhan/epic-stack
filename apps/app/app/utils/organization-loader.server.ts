@@ -1,8 +1,8 @@
 import { invariant } from '@epic-web/invariant'
-import type { Prisma } from '@prisma/client'
+import  { type Prisma } from '@prisma/client'
 
-import { prisma } from '#app/utils/db.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 
 /**

@@ -1,14 +1,14 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
 import { Switch } from '@repo/ui/switch'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { z } from 'zod'
-import { Trans } from '@lingui/macro'
 import { ErrorList, Field } from '#app/components/forms.tsx'
 
 export const VerifiedDomainSchema = z.object({

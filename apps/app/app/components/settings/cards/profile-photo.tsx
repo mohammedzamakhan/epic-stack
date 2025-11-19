@@ -1,5 +1,5 @@
-import { ProfilePhotoForm } from '#app/components/settings/profile-photo-form.tsx'
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
+import { ProfilePhotoForm } from '#app/components/settings/profile-photo-form.tsx'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
 
 export const uploadPhotoActionIntent = 'upload-photo'

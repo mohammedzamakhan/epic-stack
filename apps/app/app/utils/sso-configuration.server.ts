@@ -1,26 +1,26 @@
-import { SSOConfiguration } from '@repo/prisma'
-import { prisma } from './db.server.ts'
+import { type SSOConfiguration } from '@repo/prisma'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
+import {
+	SSOConfigurationSchema,
+	SSOConfigurationUpdateSchema,
+	type SSOConfigurationInput,
+} from '@repo/validation'
+import { prisma } from './db.server.ts'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,
 	type DiscoveryResult as OIDCDiscoveryResult,
 	type EndpointConfiguration,
 } from './oidc-discovery.server.ts'
-import { ssoCache } from './sso-cache.server.ts'
-import {
-	SSOConfigurationSchema,
-	SSOConfigurationUpdateSchema,
-	type SSOConfigurationInput,
-} from '@repo/validation'
-import { sanitizeSSOConfigInput } from './sso-sanitization.server.ts'
-import { trackSuspiciousActivity } from './sso-rate-limit.server.ts'
 import {
 	auditSSOConfigCreated,
 	auditSSOConfigUpdated,
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from './sso-audit-logging.server.ts'
+import { ssoCache } from './sso-cache.server.ts'
+import { trackSuspiciousActivity } from './sso-rate-limit.server.ts'
+import { sanitizeSSOConfigInput } from './sso-sanitization.server.ts'
 
 export interface ConnectionTestResult {
 	success: boolean

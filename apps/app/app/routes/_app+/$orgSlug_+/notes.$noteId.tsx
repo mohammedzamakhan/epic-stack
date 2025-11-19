@@ -1,24 +1,24 @@
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans } from '@lingui/macro'
 import { noteHooks, integrationManager } from '@repo/integrations'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
+import { StatusButton } from '@repo/ui/status-button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useRef, useEffect, useState, lazy, Suspense, Component } from 'react'
-import { Button } from '@repo/ui/button'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
-import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
 import {
 	Form,
 	Link,
 	useLoaderData,
 	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
+	type LoaderFunctionArgs, data 
 } from 'react-router'
 import { z } from 'zod'
-import { Trans } from '@lingui/macro'
 
 // Simple error boundary for lazy-loaded components
 class LazyLoadErrorBoundary extends Component<
@@ -66,19 +66,18 @@ import {
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
+import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import {
 	notifyCommentMentions,
 	notifyNoteOwner,
 } from '#app/utils/notifications.server.ts'
-import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization-permissions.server.ts'
+import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { data } from 'react-router'
 
 // Define comment types based on Prisma query structure
 type CommentWithUser = {

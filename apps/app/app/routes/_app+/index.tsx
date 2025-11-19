@@ -1,6 +1,6 @@
-import { LoaderFunctionArgs, redirect } from 'react-router'
-import { t } from '@lingui/macro'
 import { i18n } from '@lingui/core'
+import { t } from '@lingui/macro'
+import { type LoaderFunctionArgs, redirect } from 'react-router'
 import { getUserId } from '#app/utils/auth.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'

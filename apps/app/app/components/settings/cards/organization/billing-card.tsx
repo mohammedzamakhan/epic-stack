@@ -1,13 +1,13 @@
-import { type Organization } from '@prisma/client'
-import { Form, Link } from 'react-router'
-import { useState, useEffect } from 'react'
 import { Trans, Plural } from '@lingui/macro'
+import { type Organization } from '@prisma/client'
 
-import { type getPlansAndPrices } from '#app/utils/payments.server.ts'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import { useState, useEffect } from 'react'
+import { Form, Link } from 'react-router'
+import { type getPlansAndPrices } from '#app/utils/payments.server.ts'
 
 const PLANS = {
 	Base: {

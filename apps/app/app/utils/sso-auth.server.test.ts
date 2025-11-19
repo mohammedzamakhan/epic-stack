@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { faker } from '@faker-js/faker'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { server } from '#tests/mocks/index.ts'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 

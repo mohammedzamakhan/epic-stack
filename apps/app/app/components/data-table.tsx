@@ -1,5 +1,3 @@
-import { Trans, msg } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import {
 	closestCenter,
 	DndContext,
@@ -11,10 +9,36 @@ import {
 	type DragEndEvent,
 	type UniqueIdentifier,
 } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import {
+	arrayMove,
+	SortableContext,
+	useSortable,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
+import {
+	Card,
+	CardTitle,
+	CardDescription,
+	CardHeader,
+	CardContent,
+	CardHeaderContent,
+	CardAction,
+} from '@repo/ui/card'
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+	type ChartConfig,
+} from '@repo/ui/chart'
 import { Checkbox } from '@repo/ui/checkbox'
+import { cn } from '@repo/ui/cn'
 import {
 	Drawer,
 	DrawerClose,
@@ -25,22 +49,6 @@ import {
 	DrawerTitle,
 	DrawerTrigger,
 } from '@repo/ui/drawer'
-import { Input } from '@repo/ui/input'
-import { Label } from '@repo/ui/label'
-import { Separator } from '@repo/ui/separator'
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-	type ChartConfig,
-} from '@repo/ui/chart'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui/select'
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -50,24 +58,16 @@ import {
 	DropdownMenuTrigger,
 } from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
-import { cn } from '@repo/ui/cn'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
 import {
-	Card,
-	CardTitle,
-	CardDescription,
-	CardHeader,
-	CardContent,
-	CardHeaderContent,
-	CardAction,
-} from '@repo/ui/card'
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
-import {
-	arrayMove,
-	SortableContext,
-	useSortable,
-	verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
+import { Separator } from '@repo/ui/separator'
 import {
 	type ColumnDef,
 	type ColumnFiltersState,

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
 	Card,
 	CardAction,
@@ -7,7 +6,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
-import { ToggleGroup, ToggleGroupItem } from '@repo/ui/toggle-group'
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -21,6 +19,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui/select'
+import { ToggleGroup, ToggleGroupItem } from '@repo/ui/toggle-group'
+import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 import { useIsMobile } from '#app/hooks/use-mobile.ts'

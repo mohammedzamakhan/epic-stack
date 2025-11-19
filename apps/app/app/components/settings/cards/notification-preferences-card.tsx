@@ -1,8 +1,7 @@
-import type { Preference } from '@novu/react'
-import { usePreferences, useNovu } from '@novu/react'
-import React, { useState, useEffect, useCallback } from 'react'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { usePreferences, useNovu, type Preference  } from '@novu/react'
+import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -11,10 +10,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
-import { Badge } from '@repo/ui/badge'
-import { Switch } from '@repo/ui/switch'
-import { Separator } from '@repo/ui/separator'
 import { Icon, type IconName } from '@repo/ui/icon'
+import { Separator } from '@repo/ui/separator'
+import { Switch } from '@repo/ui/switch'
+import React, { useState, useEffect, useCallback } from 'react'
 
 const channelIcons: Record<string, IconName> = {
 	email: 'mail',
@@ -116,7 +115,7 @@ function NotificationPreferencesCardComponent() {
 	// Force refetch when component mounts to ensure fresh data
 	useEffect(() => {
 		void handleRefetch()
-	}, [])
+	}, [handleRefetch])
 
 	// Listen for preference updates from Novu
 	useEffect(() => {

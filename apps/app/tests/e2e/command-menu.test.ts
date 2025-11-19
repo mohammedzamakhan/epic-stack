@@ -1,5 +1,5 @@
-import { createTestOrganization } from '#tests/test-utils.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
+import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Command Menu', () => {
 	test('Command menu opens with Cmd+K shortcut', async ({ page, login, navigate }) => {

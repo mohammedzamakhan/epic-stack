@@ -1,5 +1,5 @@
-import { expect, test } from '#tests/playwright-utils.ts'
 import { prisma } from '#app/utils/db.server.ts'
+import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Accessibility', () => {
@@ -303,7 +303,7 @@ test.describe('Accessibility', () => {
 
 						expect(hasFocusIndicator).toBeTruthy()
 					}
-				} catch (error) {
+				} catch {
 					// Skip elements that can't be focused
 					continue
 				}

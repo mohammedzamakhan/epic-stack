@@ -1,24 +1,24 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { useState } from 'react'
-import { useFetcher } from 'react-router'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { NameSchema, UsernameSchema } from '@repo/validation'
+import { useState } from 'react'
+import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 import { EmailChangeForm } from '#app/components/settings/email-form.tsx'
-
-import { NameSchema, UsernameSchema } from '@repo/validation'
 import { ProfilePhoto } from './profile-photo'
-import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Input } from '@repo/ui/input'
 
 export const ProfileFormSchema = z.object({
 	name: NameSchema.nullable().default(null),
@@ -39,7 +39,7 @@ interface ProfileCardProps {
 export function ProfileCard({ user }: ProfileCardProps) {
 	const fetcher = useFetcher()
 	const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
-	const { _ } = useLingui()
+	const { _: ignored_ } = useLingui()
 
 	const [form, fields] = useForm({
 		id: 'edit-profile',

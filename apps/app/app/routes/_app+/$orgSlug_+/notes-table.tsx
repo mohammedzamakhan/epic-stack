@@ -1,3 +1,6 @@
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
 import {
 	flexRender,
 	getCoreRowModel,
@@ -10,9 +13,6 @@ import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
 
-import { Button } from '@repo/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
-import { Icon } from '@repo/ui/icon'
 
 export type Note = {
 	id: string

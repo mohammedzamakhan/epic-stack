@@ -1,11 +1,11 @@
-import { Trans, t } from '@lingui/macro'
 import { i18n } from '@lingui/core'
+import { Trans, t } from '@lingui/macro'
 
+import { Icon } from '@repo/ui/icon'
+import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { type Route } from './+types/profile.passkeys.ts'
-import { Icon } from '@repo/ui/icon'
-import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 
 export const handle = {
 	breadcrumb: (

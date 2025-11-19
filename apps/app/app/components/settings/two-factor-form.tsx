@@ -1,13 +1,13 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { useFetcher } from 'react-router'
-import { z } from 'zod'
 import { Trans } from '@lingui/macro'
-import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
 import { Button } from '@repo/ui/button'
 import { StatusButton } from '@repo/ui/status-button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
+import { useFetcher } from 'react-router'
+import { z } from 'zod'
+import { ErrorList, OTPField } from '#app/components/forms.tsx'
 import { enable2FAActionIntent } from '#app/routes/_app+/security.tsx'
 import { disable2FAActionIntent } from './cards/security-card'
 

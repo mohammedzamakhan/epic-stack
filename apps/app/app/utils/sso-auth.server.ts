@@ -1,15 +1,15 @@
 import { type User, type SSOConfiguration, type SSOSession } from '@repo/prisma'
 
+import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
 import { prisma } from './db.server.ts'
-import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
-import { ssoConfigurationService } from './sso-configuration.server.ts'
-import { type ProviderUser } from './providers/provider.ts'
 import {
 	discoverOIDCEndpoints,
 	type EndpointConfiguration,
 } from './oidc-discovery.server.ts'
+import { type ProviderUser } from './providers/provider.ts'
 import { ssoCache } from './sso-cache.server.ts'
+import { ssoConfigurationService } from './sso-configuration.server.ts'
 import { ssoConnectionPool } from './sso-connection-pool.server.ts'
 import { ssoRetryManager } from './sso-retry-logic.server.ts'
 

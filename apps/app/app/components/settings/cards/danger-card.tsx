@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Trans } from '@lingui/macro'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { DeleteData } from '#app/components/settings/account-management.tsx'
 
 interface DangerCardProps {

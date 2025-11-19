@@ -7,6 +7,27 @@ import {
 } from '@conform-to/react'
 
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
+import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
+import { Textarea } from '@repo/ui/textarea'
 import slugify from '@sindresorhus/slugify'
 import { useState, useEffect } from 'react'
 import {
@@ -18,19 +39,11 @@ import {
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
-import { Trans } from '@lingui/macro'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui/select'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -40,26 +53,13 @@ import {
 	sendOrganizationInvitationEmail,
 } from '#app/utils/organization-invitation.server.ts'
 import { createOrganization } from '#app/utils/organizations.server.ts'
-import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import {
 	getTrialConfig,
 	getPlansAndPrices,
 	createCheckoutSession,
 } from '#app/utils/payments.server.ts'
+import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
-import { Button } from '@repo/ui/button'
-import { Input } from '@repo/ui/input'
-import { Textarea } from '@repo/ui/textarea'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
-import { Icon } from '@repo/ui/icon'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Badge } from '@repo/ui/badge'
 
 // Photo upload schema
 const MAX_SIZE = 1024 * 1024 * 5 // 5MB
@@ -764,7 +764,7 @@ function SubscriptionStep({
 	plansAndPrices: Awaited<ReturnType<typeof getPlansAndPrices>>
 	actionData: any
 }) {
-	const [form, _fields] = useForm({
+	const [form, ignored_fields] = useForm({
 		id: 'create-organization-subscription',
 		constraint: getZodConstraint(SubscriptionSchema),
 		lastResult: actionData,

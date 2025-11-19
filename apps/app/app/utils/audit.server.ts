@@ -1,6 +1,6 @@
-import { prisma } from '#app/utils/db.server.ts'
 import { logger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
+import { prisma } from '#app/utils/db.server.ts'
 
 /**
  * Comprehensive audit action types for the entire application
@@ -612,9 +612,9 @@ export class AuditService {
 		// Remove control characters and limit length
 		return (
 			message
-				// eslint-disable-next-line no-control-regex
+				 
 				.replace(/[\x00-\x1F\x7F]/g, '')
-				// eslint-disable-next-line no-control-regex
+				 
 				.replace(/\x1b\[[0-9;]*m/g, '')
 				.substring(0, 2000)
 		)

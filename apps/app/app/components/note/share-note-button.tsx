@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react'
-import { useFetcher } from 'react-router'
 
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import { Separator } from '@repo/ui/separator'
-import { Switch } from '@repo/ui/switch'
 import { StatusButton } from '@repo/ui/status-button'
-import { Icon } from '@repo/ui/icon'
+import { Switch } from '@repo/ui/switch'
+import { useState, useEffect } from 'react'
+import { useFetcher } from 'react-router'
 
 type ShareNoteButtonProps = {
 	noteId: string

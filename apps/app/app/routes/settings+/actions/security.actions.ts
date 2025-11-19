@@ -1,4 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
+import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { z } from 'zod'
 
 import { isCodeValid } from '#app/routes/_auth+/verify.server.ts'
@@ -8,7 +9,6 @@ import {
 	checkIsCommonPassword,
 } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { twoFAVerificationType } from '../profile.two-factor'
 import { twoFAVerifyVerificationType } from '../profile.two-factor.verify'
 

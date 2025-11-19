@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { Trans } from '@lingui/macro'
 import { Card, CardContent, CardFooter } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
+import { useState } from 'react'
 import { useFetcher, Form } from 'react-router'
-import { Trans } from '@lingui/macro'
 
 import { JiraIntegrationSettings } from './jira-integration-settings'
 
@@ -110,7 +110,7 @@ function IntegrationCard({
 	integration,
 	fetcher,
 }: IntegrationCardProps) {
-	const [showSettings, _setShowSettings] = useState(false)
+	const [showSettings, ignored_setShowSettings] = useState(false)
 	const isConnected = !!integration
 	const isJira = provider.name === 'jira'
 

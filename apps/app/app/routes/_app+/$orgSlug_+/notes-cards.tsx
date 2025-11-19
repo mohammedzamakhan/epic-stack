@@ -1,20 +1,20 @@
 import { Portal } from '@radix-ui/react-portal'
-import { formatDistanceToNow } from 'date-fns'
-import { Img } from 'openimg/react'
-import { useState, useRef, useEffect } from 'react'
-import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 
-import { Icon } from '@repo/ui/icon'
 
-import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
-import { type loader } from './notes'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { PrioritySignal } from '@repo/ui/priority-signal'
 import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
+import { formatDistanceToNow } from 'date-fns'
+import { Img } from 'openimg/react'
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
+import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
+import { type loader } from './notes'
 
 type LoaderNote = {
 	id: string

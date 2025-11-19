@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import {
@@ -10,6 +9,7 @@ import {
 } from '@repo/ui/card'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 // Jira user interface

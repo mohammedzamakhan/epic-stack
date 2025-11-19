@@ -1,12 +1,12 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { Field, FieldLabel, FieldError } from '@repo/ui/field'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
 import { Form } from 'react-router'
 import { z } from 'zod'
-import { Trans } from '@lingui/macro'
 import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
 
 export const TeamSizeSchema = z.object({

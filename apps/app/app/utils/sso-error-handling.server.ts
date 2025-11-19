@@ -1,5 +1,5 @@
-import { redirectWithToast } from './toast.server.ts'
 import { destroyRedirectToHeader } from './redirect-cookie.server.ts'
+import { redirectWithToast } from './toast.server.ts'
 
 // SSO-specific error types
 export enum SSOErrorType {

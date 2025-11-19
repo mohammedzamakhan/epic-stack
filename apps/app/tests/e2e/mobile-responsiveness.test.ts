@@ -1,7 +1,7 @@
-import { createTestOrganization } from '#tests/test-utils.ts'
 import { prisma } from '#app/utils/db.server.ts'
 // Removed prisma import - using test utilities instead
 import { expect, test } from '#tests/playwright-utils.ts'
+import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Mobile Responsiveness', () => {
 	test('Dashboard is responsive on mobile devices', async ({
@@ -229,7 +229,7 @@ test.describe('Mobile Responsiveness', () => {
 						try {
 							await button.click({ timeout: 2000 })
 							await page.waitForTimeout(100) // Brief wait after interaction
-						} catch (error) {
+						} catch {
 							// Button moved or became unavailable, that's okay
 							console.log(`Button ${i} could not be clicked, skipping`)
 						}

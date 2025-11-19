@@ -1,6 +1,6 @@
 import { type LoaderFunctionArgs } from 'react-router'
-import { ssoHealthChecker } from '../../utils/sso-health-check.server.ts'
 import { requireUserWithRole } from '../../utils/permissions.server.ts'
+import { ssoHealthChecker } from '../../utils/sso-health-check.server.ts'
 
 /**
  * SSO system health check endpoint

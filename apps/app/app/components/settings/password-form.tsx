@@ -1,22 +1,22 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { useFetcher } from 'react-router'
 import { Trans, t } from '@lingui/macro'
+
+import { Button } from '@repo/ui/button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import {
+	PasswordSchema,
+	PasswordAndConfirmPasswordSchema,
+} from '@repo/validation'
+import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-
-import { Button } from '@repo/ui/button'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Input } from '@repo/ui/input'
 import { setPasswordActionIntent } from '#app/routes/_app+/security.tsx'
-import {
-	PasswordSchema,
-	PasswordAndConfirmPasswordSchema,
-} from '@repo/validation'
 import { changePasswordActionIntent } from './cards/security-card'
 
 export const ChangePasswordSchema = z

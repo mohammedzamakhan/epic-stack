@@ -5,10 +5,10 @@ import { twoFAVerificationType } from '#app/routes/settings+/profile.two-factor.
 import { getUserId, sessionKey } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { combineResponseInits } from '#app/utils/misc.tsx'
+import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
-import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.tsx'
 import { getRedirectToUrl, type VerifyFunctionArgs } from './verify.server.ts'
 
 const verifiedTimeKey = 'verified-time'

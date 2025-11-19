@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { faker } from '@faker-js/faker'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { loader } from './discover-org.ts'
 
 interface DiscoverOrgResponse {

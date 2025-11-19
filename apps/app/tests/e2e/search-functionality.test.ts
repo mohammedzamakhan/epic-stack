@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
+import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization, createTestOrganizationWithMultipleUsers } from '#tests/test-utils.ts'
 // Removed prisma import - using test utilities instead
-import { expect, test } from '#tests/playwright-utils.ts'
 
 test.describe('Search Functionality', () => {
 	test('Users can search for notes by title', async ({ page, login, navigate }) => {

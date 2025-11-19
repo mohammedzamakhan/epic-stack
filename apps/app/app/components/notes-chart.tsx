@@ -1,5 +1,3 @@
-import { TrendingUp } from 'lucide-react'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -16,6 +14,8 @@ import {
 	ChartTooltipContent,
 	type ChartConfig,
 } from '@repo/ui/chart'
+import { TrendingUp } from 'lucide-react'
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 const chartConfig = {
 	notes: {
@@ -35,7 +35,7 @@ interface NotesChartProps {
 }
 
 export function NotesChart({ data, daysShown }: NotesChartProps) {
-	const { _ } = useLingui()
+	const { _: ignored_ } = useLingui()
 	const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)
 	const avgNotesPerDay = Math.round((totalNotes / data.length) * 10) / 10
 

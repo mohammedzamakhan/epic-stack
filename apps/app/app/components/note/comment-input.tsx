@@ -1,10 +1,12 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { Button } from '@repo/ui/button'
+import { Card, CardContent, CardFooter } from '@repo/ui/card'
 import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import Mention from '@tiptap/extension-mention'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, { useEffect, useState } from 'react'
-import { Trans, msg } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { cn } from '#app/utils/misc.tsx'
 
 import { CommentImagePreview } from './comment-image-preview'
@@ -12,8 +14,6 @@ import { CommentImageUpload } from './comment-image-upload'
 import { EmojiPickerButton } from './emoji-picker-button'
 import { default as getEmojiSuggestion } from './emoji-suggestions'
 import getSuggestions from './suggestions'
-import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardFooter } from '@repo/ui/card'
 
 export interface MentionUser {
 	id: string

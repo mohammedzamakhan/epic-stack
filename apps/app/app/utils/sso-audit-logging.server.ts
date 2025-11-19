@@ -1,6 +1,6 @@
-import { prisma } from './db.server.ts'
 import { logger, sentryLogger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
+import { prisma } from './db.server.ts'
 
 // SSO-specific audit event types
 export enum SSOAuditEventType {
@@ -385,12 +385,12 @@ export class SSOAuditLogger {
 		if (!message) return message
 
 		// Remove control characters and ANSI escape sequences
-		// eslint-disable-next-line no-control-regex
+		 
 		return (
 			message
-				// eslint-disable-next-line no-control-regex
+				 
 				.replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
-				// eslint-disable-next-line no-control-regex
+				 
 				.replace(/\x1b\[[0-9;]*m/g, '') // Remove ANSI escape sequences
 				.substring(0, 2000)
 		) // Limit message length

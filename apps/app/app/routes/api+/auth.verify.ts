@@ -1,7 +1,7 @@
 import { data } from 'react-router'
 import { z } from 'zod'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { validateRequest } from '#app/routes/_auth+/verify.server.ts'
+import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/auth.verify.ts'
 
 const codeQueryParam = 'code'

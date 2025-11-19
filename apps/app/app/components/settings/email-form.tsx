@@ -1,5 +1,10 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Button } from '@repo/ui/button'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { EmailSchema } from '@repo/validation'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import {
@@ -8,11 +13,6 @@ import {
 } from '#app/components/forms.tsx'
 
 import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
-import { EmailSchema } from '@repo/validation'
-import { Button } from '@repo/ui/button'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Input } from '@repo/ui/input'
 
 export const ChangeEmailSchema = z.object({
 	email: EmailSchema,

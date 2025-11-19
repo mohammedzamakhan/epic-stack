@@ -1,11 +1,11 @@
-import { useRouteLoaderData } from 'react-router'
-import { type loader as rootLoader } from '#app/root.tsx'
 import {
 	parsePermissionString,
 	userHasPermission as _userHasPermission,
 	userHasRole as _userHasRole,
 	type PermissionString,
 } from '@repo/common/user-permissions'
+import { useRouteLoaderData } from 'react-router'
+import { type loader as rootLoader } from '#app/root.tsx'
 
 function isUser(
 	user: any,

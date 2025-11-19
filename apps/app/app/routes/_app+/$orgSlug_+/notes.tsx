@@ -1,5 +1,14 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Portal } from '@radix-ui/react-portal'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { PageTitle } from '@repo/ui/page-title'
+import { Sheet, SheetContent } from '@repo/ui/sheet'
+import { Tabs, TabsList, TabsTrigger } from '@repo/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import { useEffect, useState } from 'react'
 import {
 	Outlet,
@@ -11,14 +20,9 @@ import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
 } from 'react-router'
-import { Trans, t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-import { Sheet, SheetContent } from '@repo/ui/sheet'
-import { Icon } from '@repo/ui/icon'
-import { Input } from '@repo/ui/input'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
@@ -28,6 +32,7 @@ import {
 } from '#app/utils/notes-view-cookie.server.ts'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { NotesCards } from './notes-cards.tsx'
+import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
@@ -168,12 +173,6 @@ export async function action({ request }: ActionFunctionArgs) {
 		},
 	})
 }
-
-import { NotesKanbanBoard } from './notes-kanban-board.tsx'
-import { Button } from '@repo/ui/button'
-import { PageTitle } from '@repo/ui/page-title'
-import { Tabs, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 
 export default function NotesRoute({
 	loaderData,

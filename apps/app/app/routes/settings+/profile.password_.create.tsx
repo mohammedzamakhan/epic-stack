@@ -1,27 +1,27 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { Trans, t } from '@lingui/macro'
 import { i18n } from '@lingui/core'
+import { Trans, t } from '@lingui/macro'
+import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { data, redirect, Form } from 'react-router'
+import { FormActions } from '#app/components/form-actions.tsx'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import { FormActions } from '#app/components/form-actions.tsx'
 
-import { Icon } from '@repo/ui/icon'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Input } from '@repo/ui/input'
 import {
 	checkIsCommonPassword,
 	getPasswordHash,
 	requireUserId,
 } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { type Route } from './+types/profile.password_.create.ts'
-import { BreadcrumbHandle } from './profile.change-email.tsx'
+import { type BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: (

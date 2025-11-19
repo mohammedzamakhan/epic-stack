@@ -1,5 +1,5 @@
-import { prisma } from '#app/utils/db.server.ts'
 import { logger } from '@repo/observability'
+import { prisma } from '#app/utils/db.server.ts'
 
 export type ActivityAction =
 	| 'viewed'

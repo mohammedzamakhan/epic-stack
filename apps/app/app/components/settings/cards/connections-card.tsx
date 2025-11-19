@@ -1,10 +1,10 @@
 import { Trans } from '@lingui/macro'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Connections } from '#app/components/settings/connections.tsx'
 import {
 	ProviderConnectionForm,
 	providerNames,
 } from '#app/utils/connections.tsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 
 export const disconnectProviderActionIntent = 'disconnect-provider'
 

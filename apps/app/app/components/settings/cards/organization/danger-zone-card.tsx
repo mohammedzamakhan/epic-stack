@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
@@ -6,8 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
+import { useState } from 'react'
 import { Form } from 'react-router'
-import { Trans } from '@lingui/macro'
 
 export default function DangerZoneCard({
 	organization,

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '#app/utils/db.server.ts'
-import { createTestOrganization } from '#tests/test-utils.ts'
 import { expect, test } from '#tests/playwright-utils.ts'
+import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Notifications', () => {
 	test('Users can access notification settings', async ({
@@ -285,7 +285,7 @@ test.describe('Notifications', () => {
 			.first()
 
 		if (await emailToggle.isVisible()) {
-			const _initialState = await emailToggle.isChecked()
+			const ignored_initialState = await emailToggle.isChecked()
 
 			// Toggle the setting
 			await emailToggle.click()

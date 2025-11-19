@@ -1,12 +1,12 @@
+import { Trans } from '@lingui/macro'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import { startRegistration } from '@simplewebauthn/browser'
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
-import { Trans } from '@lingui/macro'
 
-import { Button } from '@repo/ui/button'
-import { Icon } from '@repo/ui/icon'
 
 // Registration options schema for passkeys (exported for reuse)
 export const RegistrationOptionsSchema = z.object({

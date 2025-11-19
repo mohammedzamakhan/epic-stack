@@ -5,14 +5,6 @@ import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { ForgotPasswordEmail } from '@repo/email'
-import { data, redirect, Link, Form, useActionData } from 'react-router'
-import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import {
-	ErrorList,
-	convertErrorsToFieldFormat,
-} from '#app/components/forms.tsx'
 import {
 	Card,
 	CardContent,
@@ -21,14 +13,22 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { EmailSchema, UsernameSchema } from '@repo/validation'
+import { data, redirect, Link, Form, useActionData } from 'react-router'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import {
+	ErrorList,
+	convertErrorsToFieldFormat,
+} from '#app/components/forms.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { EmailSchema, UsernameSchema } from '@repo/validation'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.ts'
 

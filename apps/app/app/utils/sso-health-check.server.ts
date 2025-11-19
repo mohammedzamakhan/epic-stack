@@ -1,11 +1,11 @@
 import { prisma } from './db.server.ts'
-import { ssoConfigurationService } from './sso-configuration.server.ts'
-import { ssoCache } from './sso-cache.server.ts'
-import { ssoConnectionPool } from './sso-connection-pool.server.ts'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,
 } from './oidc-discovery.server.ts'
+import { ssoCache } from './sso-cache.server.ts'
+import { ssoConfigurationService } from './sso-configuration.server.ts'
+import { ssoConnectionPool } from './sso-connection-pool.server.ts'
 
 export interface SSOHealthStatus {
 	overall: 'healthy' | 'degraded' | 'unhealthy'

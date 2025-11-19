@@ -3,7 +3,7 @@
  * Hide/show elements based on user's organization permissions
  */
 
-import type { ReactNode } from 'react'
+import  { type ReactNode } from 'react'
 import {
 	useHasPermission,
 	useHasAllPermissions,

@@ -1,4 +1,6 @@
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
 import { redirect, Link, useFetcher } from 'react-router'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -7,8 +9,6 @@ import { generateTOTP } from '#app/utils/totp.server.ts'
 import { type Route } from './+types/profile.two-factor.index.ts'
 import { twoFAVerificationType } from './profile.two-factor.tsx'
 import { twoFAVerifyVerificationType } from './profile.two-factor.verify.tsx'
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

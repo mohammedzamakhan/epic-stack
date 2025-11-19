@@ -19,7 +19,7 @@ async function setupWebAuthn(page: any) {
 }
 
 test.skip('Users can register and use passkeys', async ({ page, login, navigate }) => {
-	const _user = await login()
+	const ignored_user = await login()
 
 	const { client, authenticatorId } = await setupWebAuthn(page)
 

@@ -1,13 +1,13 @@
+import { Trans } from '@lingui/macro'
+import { Button } from '@repo/ui/button'
+import { Card, CardHeader, CardHeaderContent, CardAction, CardContent } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Progress } from '@repo/ui/progress'
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { Trans } from '@lingui/macro'
 import { type OnboardingProgressData } from '#app/utils/onboarding.ts'
 import { ListTodoIcon } from './icons/list-todo'
 
-import { Button } from '@repo/ui/button'
-import { Card, CardHeader, CardHeaderContent, CardAction, CardContent } from '@repo/ui/card'
-import { Progress } from '@repo/ui/progress'
-import { Icon } from '@repo/ui/icon'
 
 interface OnboardingChecklistProps {
 	progress: OnboardingProgressData

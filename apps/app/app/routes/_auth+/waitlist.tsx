@@ -1,7 +1,11 @@
-import * as React from 'react'
-import { getPageTitle } from '@repo/config/brand'
-import { redirect } from 'react-router'
 import { Trans, t } from '@lingui/macro'
+import { getPageTitle } from '@repo/config/brand'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import { Field, FieldContent } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@repo/ui/input-group'
+import * as React from 'react'
+import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
@@ -10,10 +14,6 @@ import {
 	calculateUserRank,
 } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/waitlist.ts'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
-import { Icon } from '@repo/ui/icon'
-import { Field, FieldContent } from '@repo/ui/field'
-import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@repo/ui/input-group'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)

@@ -1,30 +1,29 @@
-import { Img } from 'openimg/react'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { PageTitle } from '@repo/ui/page-title'
-import { Icon } from '@repo/ui/icon'
+import { Img } from 'openimg/react'
 import { useState } from 'react'
-import { Trans, t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
 	Link,
 	useLoaderData,
-	Form,
+	Form, redirect 
 } from 'react-router'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
 } from '#app/utils/organizations.server.ts'
+import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
-import { redirect } from 'react-router'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

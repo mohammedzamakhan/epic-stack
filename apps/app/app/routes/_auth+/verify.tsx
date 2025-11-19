@@ -2,6 +2,8 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { StatusButton } from '@repo/ui/status-button'
 import { Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
@@ -12,8 +14,6 @@ import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { type Route } from './+types/verify.ts'
 import { validateRequest } from './verify.server.ts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
-import { StatusButton } from '@repo/ui/status-button'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

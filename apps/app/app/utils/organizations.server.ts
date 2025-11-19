@@ -1,8 +1,8 @@
 import { type User } from '@prisma/client'
-import { data } from 'react-router'
 import { prisma } from '@repo/prisma'
-import { getUserId } from './auth.server.ts'
+import { data } from 'react-router'
 import { auditService, AuditAction } from './audit.server.ts'
+import { getUserId } from './auth.server.ts'
 
 export type OrganizationWithImage = {
 	id: string

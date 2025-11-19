@@ -1,7 +1,7 @@
-import { Link } from 'react-router'
 import { Trans } from '@lingui/macro'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import { Link } from 'react-router'
 import { SignOutOfSessions } from '#app/components/settings/account-management.tsx'
 
 export const signOutOfSessionsActionIntent = 'sign-out-of-sessions'

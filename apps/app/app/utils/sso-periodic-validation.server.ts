@@ -1,9 +1,9 @@
-import { ssoConfigurationService } from './sso-configuration.server.ts'
-import { ssoHealthChecker } from './sso-health-check.server.ts'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from './sso-audit-logging.server.ts'
+import { ssoConfigurationService } from './sso-configuration.server.ts'
+import { ssoHealthChecker } from './sso-health-check.server.ts'
 
 /**
  * Periodic validation service for SSO configurations

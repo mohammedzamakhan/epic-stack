@@ -1,5 +1,5 @@
-import { OrganizationPhotoForm } from '#app/components/settings/organization-photo-form.tsx'
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
+import { OrganizationPhotoForm } from '#app/components/settings/organization-photo-form.tsx'
 
 export const uploadOrgPhotoActionIntent = 'upload-org-photo'
 export const deleteOrgPhotoActionIntent = 'delete-org-photo'

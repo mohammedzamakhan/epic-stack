@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import { prisma } from '#app/utils/db.server.ts'
 
 if (!process.env.JWT_SECRET) {

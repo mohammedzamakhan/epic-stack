@@ -1,8 +1,8 @@
-import { ssoConfigurationService } from './sso-configuration.server.ts'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from './sso-audit-logging.server.ts'
+import { ssoConfigurationService } from './sso-configuration.server.ts'
 
 export interface SSOHealthStatus {
 	overall: 'healthy' | 'degraded' | 'unhealthy'

@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/macro'
-import { cn, getUserImgSrc } from '#app/utils/misc.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { cn, getUserImgSrc } from '#app/utils/misc.tsx'
 
 interface LeadershipUser {
 	id: string

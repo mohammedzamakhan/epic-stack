@@ -3,6 +3,11 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { data, redirect, Form } from 'react-router'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import {
@@ -16,13 +21,8 @@ import {
 	resetUserPassword,
 } from '#app/utils/auth.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
-import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/reset-password.ts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
-import { Input } from '@repo/ui/input'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

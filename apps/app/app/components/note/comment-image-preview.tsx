@@ -1,8 +1,8 @@
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
 import { cn } from '#app/utils/misc.tsx'
 
-import { Button } from '@repo/ui/button'
-import { Icon } from '@repo/ui/icon'
 
 interface CommentImagePreviewProps {
 	files: File[]

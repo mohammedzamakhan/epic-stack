@@ -11,13 +11,13 @@ import { InvoicesCard } from '#app/components/settings/cards/organization/invoic
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {
 	checkoutAction,
 	customerPortalAction,
 	getPlansAndPrices,
 	getOrganizationInvoices,
 } from '#app/utils/payments.server.ts'
-import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)

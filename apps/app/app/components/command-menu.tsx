@@ -1,5 +1,3 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useRouteLoaderData, useFetcher, Link } from 'react-router'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -12,6 +10,8 @@ import {
 	CommandShortcut,
 } from '@repo/ui/command'
 import { Icon } from '@repo/ui/icon'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouteLoaderData, useFetcher, Link } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
 
 interface Note {

@@ -1,6 +1,11 @@
 import { invariant } from '@epic-web/invariant'
-import { Novu } from '@novu/api'
 
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { Novu } from '@novu/api'
+import { PageTitle } from '@repo/ui/page-title'
+import confetti from 'canvas-confetti'
+import { useEffect } from 'react'
 import {
 	type ActionFunctionArgs,
 	Form,
@@ -10,11 +15,6 @@ import {
 	useSearchParams,
 	useNavigate,
 } from 'react-router'
-import { useEffect } from 'react'
-import confetti from 'canvas-confetti'
-import { Trans, t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
-import { PageTitle } from '@repo/ui/page-title'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
 import { NotesChart } from '#app/components/notes-chart.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'

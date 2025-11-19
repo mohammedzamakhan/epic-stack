@@ -6,7 +6,10 @@ export default [
 	// add custom config objects here:
 	{
 		files: ['**/tests/**/*.ts'],
-		rules: { 'react-hooks/rules-of-hooks': 'off' },
+		rules: {
+			'react-hooks/rules-of-hooks': 'off',
+			'playwright/no-raw-locators': 'off',
+		},
 	},
 	{
 		ignores: ['.react-router/*'],

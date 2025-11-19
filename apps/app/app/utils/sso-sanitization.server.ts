@@ -1,11 +1,11 @@
 import DOMPurify from 'isomorphic-dompurify'
 import { getClientIp } from './ip-tracking.server.ts'
-import { isSuspiciousActivityBlocked } from './sso-rate-limit.server.ts'
 import {
 	createSSOError,
 	SSOErrorType,
 	handleSSOError,
 } from './sso-error-handling.server.ts'
+import { isSuspiciousActivityBlocked } from './sso-rate-limit.server.ts'
 
 /**
  * Sanitize HTML content to prevent XSS attacks

@@ -1,9 +1,9 @@
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
 import { type LoaderFunctionArgs } from 'react-router'
-import { t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'

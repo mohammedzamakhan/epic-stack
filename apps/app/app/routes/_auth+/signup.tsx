@@ -5,14 +5,6 @@ import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { SignupEmail } from '@repo/email'
-import { data, redirect, Form, useSearchParams, Link } from 'react-router'
-import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import {
-	ErrorList,
-	convertErrorsToFieldFormat,
-} from '#app/components/forms.tsx'
 import {
 	Card,
 	CardContent,
@@ -21,9 +13,18 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { EmailSchema } from '@repo/validation'
+import { data, redirect, Form, useSearchParams, Link } from 'react-router'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import {
+	ErrorList,
+	convertErrorsToFieldFormat,
+} from '#app/components/forms.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { requireAnonymous } from '#app/utils/auth.server.ts'
 import {
@@ -34,7 +35,6 @@ import { prisma } from '#app/utils/db.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
-import { EmailSchema } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/signup.ts'
 import { onboardingInviteTokenSessionKey } from './onboarding'

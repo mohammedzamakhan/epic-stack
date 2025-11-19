@@ -1,16 +1,19 @@
-import { type Notification } from '@novu/js'
-import { useNotifications, useNovu } from '@novu/react/hooks'
-import { motion, AnimatePresence } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
-import Markdown from 'react-markdown'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { BellIcon } from '#app/components/icons/bell-icon.tsx'
+import { type Notification } from '@novu/js'
+import { useNotifications, useNovu } from '@novu/react/hooks'
 
 import { Avatar, AvatarImage, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader } from '@repo/ui/card'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
+import { Icon } from '@repo/ui/icon'
 import { Popover, PopoverTrigger, PopoverContent } from '@repo/ui/popover'
 import { ScrollArea } from '@repo/ui/scroll-area'
 import {
@@ -19,14 +22,11 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@repo/ui/tooltip'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@repo/ui/dropdown-menu'
-import { Icon } from '@repo/ui/icon'
+import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useState } from 'react'
+import Markdown from 'react-markdown'
 import { useNavigate, useLocation } from 'react-router'
+import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
 interface Action {
 	label: string

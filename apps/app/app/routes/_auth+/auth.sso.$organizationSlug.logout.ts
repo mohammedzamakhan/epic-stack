@@ -1,10 +1,10 @@
+import { safeRedirect } from 'remix-utils/safe-redirect'
 import { logout, sessionKey } from '#app/utils/auth.server.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
+import { authSessionStorage } from '#app/utils/session.server.ts'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
-import { safeRedirect } from 'remix-utils/safe-redirect'
 import { type Route } from './+types/auth.sso.$organizationSlug.logout.ts'
 
 /**

@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import { Trans } from '@lingui/macro'
-import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
-import { CommandMenu } from './command-menu'
 import { Button } from '@repo/ui/button'
-import { SidebarTrigger } from '@repo/ui/sidebar'
 import { Icon } from '@repo/ui/icon'
 import { Kbd } from '@repo/ui/kbd'
-import NotificationBell from './ui/notification-bell'
+import { SidebarTrigger } from '@repo/ui/sidebar'
+import { useState } from 'react'
 import { useFetcher } from 'react-router'
+import { useGlobalHotkeys } from '#app/hooks/use-hotkeys.ts'
+import { CommandMenu } from './command-menu'
+import NotificationBell from './ui/notification-bell'
 
 export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 	const [commandOpen, setCommandOpen] = useState(false)

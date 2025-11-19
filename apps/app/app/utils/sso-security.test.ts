@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import {
-	sanitizeSSOConfigInput,
-	sanitizeOIDCUserInfo,
-	sanitizeOrganizationSlug,
-	sanitizeRedirectUrl,
-} from './sso-sanitization.server.ts'
+import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	SSOConfigurationSchema,
 	SSOAuthRequestSchema,
 	SSOCallbackSchema,
 	OIDCUserInfoSchema,
 } from '@repo/validation'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
 	trackSuspiciousActivity,
 	isSuspiciousActivityBlocked,
 } from './sso-rate-limit.server.ts'
-import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
+import {
+	sanitizeSSOConfigInput,
+	sanitizeOIDCUserInfo,
+	sanitizeOrganizationSlug,
+	sanitizeRedirectUrl,
+} from './sso-sanitization.server.ts'
 
 // Mock the encryption functions
 vi.mock('./encryption.server.ts', () => ({

@@ -1,8 +1,8 @@
-import { Link } from 'react-router'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import { Link } from 'react-router'
 
 type Invoice = {
 	id?: string

@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router'
 import { Trans } from '@lingui/macro'
+import { Outlet } from 'react-router'
 
 export default function AuthLayout() {
 	return (

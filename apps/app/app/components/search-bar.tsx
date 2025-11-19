@@ -1,12 +1,12 @@
-import { useId } from 'react'
-import { Form, useSearchParams, useSubmit } from 'react-router'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
-import { Input } from '@repo/ui/input'
 import { FieldLabel } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
+import { useId } from 'react'
+import { Form, useSearchParams, useSubmit } from 'react-router'
+import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
 
 export function SearchBar({
 	status,

@@ -1,8 +1,7 @@
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { server } from '#tests/mocks/index.ts'
 import { consoleWarn } from '#tests/setup/setup-test-env.ts'
-import { ssoCache } from './sso-cache.server.ts'
 import {
 	discoverOIDCEndpoints,
 	validateDiscoveryDocument,
@@ -12,6 +11,7 @@ import {
 	type OIDCDiscoveryDocument,
 	type EndpointConfiguration,
 } from './oidc-discovery.server.ts'
+import { ssoCache } from './sso-cache.server.ts'
 
 describe('OIDC Discovery', () => {
 	beforeEach(() => {

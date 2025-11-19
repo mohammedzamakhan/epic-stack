@@ -254,7 +254,7 @@ describe('SSO Error Handling Security Tests', () => {
 						'Circular reference error',
 						circularString,
 					)
-				} catch (error) {
+				} catch {
 					// If JSON.stringify fails, createSSOError should still work
 					error = createSSOError(
 						SSOErrorType.UNKNOWN_ERROR,

@@ -5,7 +5,14 @@ import {
 	type SubmissionResult,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans, t } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import { Checkbox } from '@repo/ui/checkbox'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { NameSchema, UsernameSchema } from '@repo/validation'
 import {
 	redirect,
 	data,
@@ -14,7 +21,6 @@ import {
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
-import { Trans, t } from '@lingui/macro'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
@@ -30,15 +36,9 @@ import { prisma } from '#app/utils/db.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { NameSchema, UsernameSchema } from '@repo/validation'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/onboarding_.$provider.ts'
 import { onboardingEmailSessionKey } from './onboarding'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
-import { Input } from '@repo/ui/input'
-import { StatusButton } from '@repo/ui/status-button'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Checkbox } from '@repo/ui/checkbox'
 
 export const providerIdKey = 'providerId'
 export const prefilledProfileKey = 'prefilledProfile'

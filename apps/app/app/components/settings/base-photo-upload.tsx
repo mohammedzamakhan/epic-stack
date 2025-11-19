@@ -1,9 +1,9 @@
-import { Img } from 'openimg/react'
-import { useState, useRef, type ReactNode } from 'react'
 
 import { Button } from '@repo/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
+import { Img } from 'openimg/react'
+import { useState, useRef, type ReactNode } from 'react'
 
 interface BasePhotoUploadProps {
 	imgSrc: string

@@ -7,6 +7,7 @@ import {
 	type FieldMetadata,
 	FormProvider,
 } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
@@ -20,7 +21,6 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from '@repo/ui/input-group'
-import { Separator } from '@repo/ui/separator'
 import {
 	Select,
 	SelectContent,
@@ -28,7 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui/select'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Separator } from '@repo/ui/separator'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'

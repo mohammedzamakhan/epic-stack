@@ -4,6 +4,20 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
+import { Checkbox } from '@repo/ui/checkbox'
+import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
+import { StatusButton } from '@repo/ui/status-button'
+import { PasswordSchema } from '@repo/validation'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { type PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server'
 import { useOptimistic, useState, useTransition } from 'react'
@@ -22,23 +36,6 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
-import { Input } from '@repo/ui/input'
-import { StatusButton } from '@repo/ui/status-button'
-import { Icon } from '@repo/ui/icon'
-import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
-import { Checkbox } from '@repo/ui/checkbox'
-import {
-	saveLastLoginMethod,
-	useLastLoginMethod,
-} from '#app/utils/last-login-method.ts'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { login, requireAnonymous } from '#app/utils/auth.server.ts'
 import {
@@ -46,15 +43,18 @@ import {
 	providerNames,
 } from '#app/utils/connections.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import {
+	saveLastLoginMethod,
+	useLastLoginMethod,
+} from '#app/utils/last-login-method.ts'
 import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
-import { PasswordSchema } from '@repo/validation'
-import { type Route } from './+types/login.ts'
-import { handleNewSession } from './login.server.ts'
 import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
 } from '#app/utils/organizations.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { type Route } from './+types/login.ts'
+import { handleNewSession } from './login.server.ts'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

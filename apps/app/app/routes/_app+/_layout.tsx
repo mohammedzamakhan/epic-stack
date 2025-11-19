@@ -7,8 +7,8 @@ import {
 	type OnboardingProgressData,
 } from '#app/utils/onboarding.ts'
 import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'
-import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
+import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
 
 export async function loader({ request }: { request: Request }) {
 	const isCollapsed = await getSidebarState(request)

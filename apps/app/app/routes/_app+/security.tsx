@@ -1,12 +1,12 @@
 import { generateTOTP, getTOTPAuthUri } from '@epic-web/totp'
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import * as QRCode from 'qrcode'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
 import { PageTitle } from '@repo/ui/page-title'
-import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { t } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
+import * as QRCode from 'qrcode'
+import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData  } from 'react-router'
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
@@ -29,7 +29,6 @@ import {
 } from '../settings+/actions/security.actions'
 import { twoFAVerificationType } from '../settings+/profile.two-factor'
 import { twoFAVerifyVerificationType } from '../settings+/profile.two-factor.verify'
-import { useLoaderData } from 'react-router'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

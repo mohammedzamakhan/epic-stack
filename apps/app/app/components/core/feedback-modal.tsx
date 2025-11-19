@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { useFetcher } from 'react-router'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 
 import { Button } from '@repo/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@repo/ui/dialog'
-import { Textarea } from '@repo/ui/textarea'
 import { Icon } from '@repo/ui/icon'
+import { Textarea } from '@repo/ui/textarea'
+import { useState } from 'react'
+import { useFetcher } from 'react-router'
 
 type FeedbackModalProps = {
 	isOpen: boolean

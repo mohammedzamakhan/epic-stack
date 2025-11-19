@@ -1,15 +1,15 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import { Button } from '@repo/ui/button'
+import { Icon } from '@repo/ui/icon'
 import { formatDistanceToNow } from 'date-fns'
 import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useMemo, useState } from 'react'
-import { Trans, msg } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 
 import CommentInput, { type MentionUser } from './comment-input'
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
-import { Button } from '@repo/ui/button'
-import { Icon } from '@repo/ui/icon'
 
 interface CommentUser {
 	id: string

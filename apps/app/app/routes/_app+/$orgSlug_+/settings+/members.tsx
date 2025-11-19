@@ -22,14 +22,14 @@ import {
 	getOrganizationInviteLink,
 	deactivateOrganizationInviteLink,
 } from '#app/utils/organization-invitation.server.ts'
+import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization-permissions.server.ts'
-import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { type OrganizationRoleName } from '#app/utils/organizations.server.ts'
-import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
+import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)

@@ -1,15 +1,15 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { Trans, t } from '@lingui/macro'
 import { i18n } from '@lingui/core'
+import { Trans, t } from '@lingui/macro'
+import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
 import { useState } from 'react'
 import { data, useFetcher } from 'react-router'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { resolveConnectionData } from '#app/utils/connections.server.ts'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@repo/ui/tooltip'
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
 import {
 	ProviderConnectionForm,
 	type ProviderName,
@@ -22,7 +22,7 @@ import { pipeHeaders } from '#app/utils/headers.server.ts'
 import { makeTimings } from '#app/utils/timing.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/profile.connections.ts'
-import { BreadcrumbHandle } from './profile.change-email.tsx'
+import { type BreadcrumbHandle } from './profile.change-email.tsx'
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: (
