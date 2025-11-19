@@ -7,6 +7,7 @@
     "eslint-preset.js",
     "brand.ts",
     "manifest.ts",
+    "tsconfig.base-package.json",
     "dist"
   ],
   "scripts": {

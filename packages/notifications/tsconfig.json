@@ -1,13 +1,7 @@
 {
-	"extends": ["@epic-web/config/typescript"],
+	"extends": "../config/tsconfig.base-package.json",
 	"compilerOptions": {
-		"outDir": "./dist",
 		"rootDir": "./src",
-		"declaration": true,
-		"declarationMap": true,
-		"sourceMap": true,
-		"module": "ESNext",
-		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": false,
 		"noEmit": false
 	},
