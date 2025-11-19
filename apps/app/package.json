@@ -109,6 +109,7 @@
     "@repo/observability": "*",
     "@repo/payments": "*",
     "@repo/prisma": "*",
+    "@repo/seo": "*",
     "@repo/storage": "*",
     "@repo/ui": "*",
     "@sentry/profiling-node": "9.15.0",

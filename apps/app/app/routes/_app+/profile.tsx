@@ -2,9 +2,11 @@ import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { brand } from '@repo/config/brand'
+import { generateSeoMeta } from '@repo/seo'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
-import { type ActionFunctionArgs, type LoaderFunctionArgs, useLoaderData  } from 'react-router'
+import { type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction, useLoaderData  } from 'react-router'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -15,6 +17,18 @@ import { profileUpdateAction } from '../settings+/actions/profile.actions'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
+}
+
+export const meta: MetaFunction = () => {
+	// Protected routes should not be indexed by search engines
+	return generateSeoMeta({
+		title: `Profile Settings | ${brand.name}`,
+		description: 'Manage your account settings and set e-mail preferences.',
+		robots: {
+			index: false,
+			follow: false,
+		},
+	})
 }
 
 // Photo upload schema

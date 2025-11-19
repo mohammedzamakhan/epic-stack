@@ -1,6 +1,7 @@
 import { NovuProvider } from '@novu/react/hooks'
 import { brand, getErrorTitle } from '@repo/config/brand'
 import { getDirection } from '@repo/i18n'
+import { generateSeoMeta, generateOrganizationSchema, structuredDataScriptTag } from '@repo/seo'
 import { EpicToaster } from '@repo/ui/sonner'
 import { TooltipProvider } from '@repo/ui/tooltip'
 import { OpenImgContextProvider } from 'openimg/react'
@@ -37,6 +38,7 @@ import { honeypot } from './utils/honeypot.server.ts'
 import { getImpersonationInfo } from './utils/impersonation.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
+import { seoConfig } from './utils/seo.server.ts'
 import { getSidebarState } from './utils/sidebar-cookie.server.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
@@ -73,10 +75,59 @@ export const links: Route.LinksFunction = () => {
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data, location }) => {
+	// If there's an error, return minimal meta tags
+	if (!data) {
+		return [
+			{ title: getErrorTitle() },
+			{ name: 'robots', content: 'noindex, nofollow' },
+		]
+	}
+
+	// Get domain URL from request info
+	const url = data.requestInfo
+		? `${data.requestInfo.origin}${location.pathname}`
+		: seoConfig.getSiteUrl()
+
+	// Generate comprehensive SEO meta tags with Open Graph and Twitter Cards
+	const seoMeta = generateSeoMeta({
+		title: brand.name,
+		description: brand.description,
+		url,
+		siteName: brand.name,
+		image: seoConfig.getDefaults().image,
+		twitter: {
+			card: 'summary_large_image',
+			site: brand.twitterHandle,
+		},
+		keywords: [
+			'saas',
+			'full-stack',
+			'react',
+			'typescript',
+			'notes',
+			'organization',
+			'productivity',
+		],
+		robots: {
+			index: data.ENV?.ALLOW_INDEXING !== 'false',
+			follow: data.ENV?.ALLOW_INDEXING !== 'false',
+			maxImagePreview: 'large',
+		},
+	})
+
+	// Generate Organization structured data for better SEO
+	const organizationSchema = generateOrganizationSchema({
+		name: brand.companyName,
+		url: brand.url,
+		description: brand.description,
+		email: brand.supportEmail,
+		sameAs: brand.twitterHandle ? [`https://twitter.com/${brand.twitterHandle.replace('@', '')}`] : [],
+	})
+
 	return [
-		{ title: data ? brand.name : getErrorTitle() },
-		{ name: 'description', content: brand.products.app.description },
+		...seoMeta,
+		structuredDataScriptTag(organizationSchema),
 	]
 }
 

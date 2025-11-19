@@ -1,0 +1,21 @@
+{
+  "name": "@repo/seo",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./meta": "./src/meta.ts",
+    "./structured-data": "./src/structured-data.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nasa-gcn/remix-seo": "^2.0.1"
+  },
+  "devDependencies": {
+    "@repo/config": "*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.2"
+  }
+}
