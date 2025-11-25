@@ -33,6 +33,9 @@
     "db:migrate:dev": "cd packages/database && npm run db:migrate:dev",
     "docs:dev": "cd apps/docs && npx mint dev",
     "docs:build": "cd apps/docs && npx mint build",
+    "knip": "knip",
+    "knip:fix": "knip --fix",
+    "knip:production": "knip --production",
     "prepare": "husky"
   },
   "devDependencies": {
