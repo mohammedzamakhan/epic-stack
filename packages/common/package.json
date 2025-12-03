@@ -12,6 +12,11 @@
       "import": "./index.ts",
       "default": "./index.ts"
     },
+    "./url": {
+      "types": "./src/url.client.ts",
+      "import": "./src/url.client.ts",
+      "default": "./src/url.client.ts"
+    },
     "./cookie-consent": {
       "types": "./src/cookie-consent.server.ts",
       "import": "./src/cookie-consent.server.ts",

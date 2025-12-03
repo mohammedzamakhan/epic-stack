@@ -1,0 +1,160 @@
+---
+title: "Notion Integration"
+description: "Connect your notes to Notion databases for knowledge management and collaboration"
+---
+
+# Notion Integration
+
+Connect your Epic Stack workspace to Notion to manage knowledge and collaborate across both platforms.
+
+## Overview
+
+The Notion integration allows you to:
+
+- Link notes to Notion pages
+- Create pages from notes
+- Sync content and updates
+- Manage databases
+- Organize knowledge across platforms
+
+## Setup Instructions
+
+### 1. Create a Notion Integration
+
+1. Go to [Notion Integrations](https://www.notion.so/my-integrations)
+2. Click **Create new integration**
+3. Fill in the integration details:
+   - **Name**: Epic Stack
+   - **Logo**: (optional)
+   - **Description**: Integration for note management
+4. Under **Capabilities**, enable:
+   - **Read content**
+   - **Update content**
+   - **Insert content**
+5. Set your **Redirect URI**: `https://your-domain.com/api/integrations/oauth/callback`
+6. Copy your **OAuth Client ID** and **OAuth Client Secret**
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+NOTION_CLIENT_ID=your_notion_client_id
+NOTION_CLIENT_SECRET=your_notion_client_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your Notion Account
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **Notion** and click **Connect**
+4. You'll be redirected to Notion's authorization page
+5. Log in with your Notion account
+6. Click **Authorize** to grant permissions
+
+### 4. Select Databases
+
+After connecting, select which Notion databases you want to work with:
+
+- Choose default databases for page creation
+- Configure property mappings for your databases
+- Set up database-specific workflows
+
+## Using the Integration
+
+### Linking Notes to Pages
+
+1. Open a note in Epic Stack
+2. Click the **Link to Notion** option
+3. Search for or select a Notion page
+4. The note will be linked to the page
+
+### Creating Pages from Notes
+
+1. Create a note in Epic Stack
+2. Click **Create Notion Page**
+3. Select the database
+4. Configure page details (title, content, properties, etc.)
+5. Click **Create**
+6. The page will be created in Notion and linked to your note
+
+### Syncing Content
+
+Connected pages automatically sync:
+
+- Content changes in Notion appear in Epic Stack
+- Property updates are reflected
+- Comments and updates are synchronized
+
+## Advanced Features
+
+### Custom Properties
+
+Map Epic Stack fields to Notion properties:
+
+- Configure property mappings in integration settings
+- Sync property values automatically
+- Support for various property types
+
+### Workflow Automation
+
+Set up automated workflows:
+
+- Auto-create pages when notes reach certain status
+- Update page properties based on note changes
+- Trigger notifications on page updates
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or shows permission errors
+
+**Solution**:
+- Ensure you have admin access to the Notion workspace
+- Check that your Notion account has API access enabled
+- Verify your Notion workspace is active
+- Try disconnecting and reconnecting
+
+### Pages Not Appearing
+
+**Problem**: Expected Notion pages don't show up in Epic Stack
+
+**Solution**:
+- Verify you have permission to view the pages in Notion
+- Check that the database is selected in integration settings
+- Refresh the integration connection
+- Ensure the page type is supported
+
+### Sync Failures
+
+**Problem**: Changes aren't syncing between platforms
+
+**Solution**:
+- Check your internet connection
+- Verify the integration is still connected
+- Review Notion API rate limits
+- Reconnect the integration
+
+## Security & Privacy
+
+- All communication with Notion is encrypted
+- Your Notion tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from Notion's app management
+
+## Disconnecting
+
+To disconnect Notion:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **Notion** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your Notion account settings.
+
+## Support
+
+For issues or questions about the Notion integration, please [contact support](mailto:support@yourcompany.com?subject=Notion%20Integration%20Help).

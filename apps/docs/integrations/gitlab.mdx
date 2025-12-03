@@ -1,0 +1,160 @@
+---
+title: "GitLab Integration"
+description: "Connect your notes to GitLab projects for issue tracking and project management"
+---
+
+# GitLab Integration
+
+Connect your Epic Stack workspace to GitLab to manage issues and projects across both platforms.
+
+## Overview
+
+The GitLab integration allows you to:
+
+- Link notes to GitLab issues
+- Create issues from notes
+- Sync issue status and updates
+- Manage projects and groups
+- Track work in real-time
+
+## Setup Instructions
+
+### 1. Create a GitLab OAuth Application
+
+1. Go to [GitLab Settings - Applications](https://gitlab.com/-/user_settings/applications) (or your self-hosted instance)
+2. Click **Add new application**
+3. Fill in the application details:
+   - **Name**: Epic Stack
+   - **Redirect URI**: `https://your-domain.com/api/integrations/oauth/callback`
+   - **Scopes**: Select the following:
+     - `api` - Full API access
+     - `read_user` - Read user profile information
+     - `read_repository` - Read repository information
+     - `write_repository` - Write access for issue creation
+4. Click **Save application**
+5. Copy your **Application ID** and **Secret**
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+GITLAB_CLIENT_ID=your_gitlab_client_id
+GITLAB_CLIENT_SECRET=your_gitlab_client_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your GitLab Account
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **GitLab** and click **Connect**
+4. You'll be redirected to GitLab's authorization page
+5. Log in with your GitLab account
+6. Click **Authorize** to grant permissions
+
+### 4. Select Projects
+
+After connecting, select which GitLab projects you want to work with:
+
+- Choose default projects for issue creation
+- Configure default issue labels
+- Set up project-specific workflows
+
+## Using the Integration
+
+### Linking Notes to Issues
+
+1. Open a note in Epic Stack
+2. Click the **Link to GitLab** option
+3. Search for or select a GitLab issue
+4. The note will be linked to the issue
+
+### Creating Issues from Notes
+
+1. Create a note in Epic Stack
+2. Click **Create GitLab Issue**
+3. Select the project
+4. Configure issue details (title, description, assignee, labels, etc.)
+5. Click **Create**
+6. The issue will be created in GitLab and linked to your note
+
+### Syncing Issue Status
+
+Connected issues automatically sync:
+
+- Status changes in GitLab appear in Epic Stack
+- Comments and updates are reflected
+- Assignee changes are synchronized
+
+## Advanced Features
+
+### Custom Fields
+
+Map Epic Stack fields to GitLab custom fields:
+
+- Configure field mappings in integration settings
+- Sync custom field values automatically
+- Support for various field types
+
+### Workflow Automation
+
+Set up automated workflows:
+
+- Auto-create issues when notes reach certain status
+- Update issue status based on note changes
+- Trigger notifications on issue updates
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or shows permission errors
+
+**Solution**:
+- Ensure you have admin access to the GitLab instance
+- Check that your GitLab account has API access enabled
+- Verify your GitLab instance URL is correct
+- Try disconnecting and reconnecting
+
+### Issues Not Appearing
+
+**Problem**: Expected GitLab issues don't show up in Epic Stack
+
+**Solution**:
+- Verify you have permission to view the issues in GitLab
+- Check that the project is selected in integration settings
+- Refresh the integration connection
+- Ensure the issue type is supported
+
+### Sync Failures
+
+**Problem**: Changes aren't syncing between platforms
+
+**Solution**:
+- Check your internet connection
+- Verify the integration is still connected
+- Review GitLab API rate limits
+- Reconnect the integration
+
+## Security & Privacy
+
+- All communication with GitLab is encrypted
+- Your GitLab tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from GitLab's app management
+
+## Disconnecting
+
+To disconnect GitLab:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **GitLab** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your GitLab account settings.
+
+## Support
+
+For issues or questions about the GitLab integration, please [contact support](mailto:support@yourcompany.com?subject=GitLab%20Integration%20Help).

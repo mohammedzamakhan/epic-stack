@@ -33,6 +33,29 @@
 				]
 			},
 			{
+				"tab": "Integrations",
+				"groups": [
+					{
+						"group": "Overview",
+						"pages": ["integrations/index"]
+					},
+					{
+						"group": "Available Integrations",
+						"pages": [
+							"integrations/slack",
+							"integrations/jira",
+							"integrations/linear",
+							"integrations/gitlab",
+							"integrations/clickup",
+							"integrations/notion",
+							"integrations/asana",
+							"integrations/trello",
+							"integrations/github"
+						]
+					}
+				]
+			},
+			{
 				"tab": "API Reference",
 				"groups": [
 					{

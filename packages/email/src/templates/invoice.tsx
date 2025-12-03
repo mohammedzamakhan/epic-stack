@@ -110,7 +110,7 @@ const InvoiceEmail = (props: InvoiceEmailProps) => {
 							</Row>
 
 							{/* Items */}
-							{props.items.map((item, index) => (
+							{props.items?.map((item, index) => (
 								<Row key={index} className="mb-[12px]">
 									<Column className="w-1/2">
 										<Text className="mb-[2px] text-[16px] font-medium text-[#020304]">

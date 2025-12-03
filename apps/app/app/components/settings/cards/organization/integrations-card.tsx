@@ -1,4 +1,5 @@
 import { Trans } from '@lingui/macro'
+import { getCrossAppUrl } from '@repo/common/url'
 import { Card, CardContent, CardFooter } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
@@ -202,7 +203,7 @@ function IntegrationCard({
 
 			<CardFooter className="px-4 py-1 pt-2">
 				<a
-					href={`/integrations/${provider.name}`}
+					href={getCrossAppUrl('docs', `/integrations/${provider.name}`)}
 					target="_blank"
 					rel="noreferrer"
 					className="flex w-full items-center justify-between text-xs text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"

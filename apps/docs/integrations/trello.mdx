@@ -1,0 +1,151 @@
+---
+title: "Trello Integration"
+description: "Connect your notes to Trello boards for task management and project organization"
+---
+
+# Trello Integration
+
+Connect your Epic Stack workspace to Trello to manage boards and cards seamlessly.
+
+## Overview
+
+The Trello integration allows you to:
+
+- Link notes to Trello cards
+- Create cards from notes
+- Sync card status and updates
+- Manage boards and lists
+- Track work across platforms
+
+## Setup Instructions
+
+### 1. Get Your Trello API Credentials
+
+1. Go to [Trello App Key](https://trello.com/app-key)
+2. You'll see your **API Key** and **API Secret**
+3. Copy both values for your environment variables
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+TRELLO_API_KEY=your_trello_api_key
+TRELLO_API_SECRET=your_trello_api_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your Trello Account
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **Trello** and click **Connect**
+4. You'll be redirected to Trello's authorization page
+5. Log in with your Trello account
+6. Grant the requested permissions (read, write, account access)
+
+### 4. Select Boards and Lists
+
+After connecting, select which Trello boards and lists you want to work with:
+
+- Choose default boards for card creation
+- Select target lists for note conversion
+- Configure default labels and members for created cards
+
+## Using the Integration
+
+### Linking Notes to Cards
+
+1. Open a note in Epic Stack
+2. Click the **Link to Trello** option
+3. Search for or select a Trello card
+4. The note will be linked to the card
+
+### Creating Cards from Notes
+
+1. Create a note in Epic Stack
+2. Click **Create Trello Card**
+3. Select the board and list
+4. Configure card details (title, description, assignee, due date, labels, etc.)
+5. Click **Create**
+6. The card will be created in Trello and linked to your note
+
+### Syncing Card Status
+
+Connected cards automatically sync:
+
+- Status changes in Trello appear in Epic Stack
+- Comments and updates are reflected
+- Assignee changes are synchronized
+
+## Advanced Features
+
+### Custom Fields
+
+Map Epic Stack fields to Trello custom fields:
+
+- Configure field mappings in integration settings
+- Sync custom field values automatically
+- Support for various field types
+
+### Workflow Automation
+
+Set up automated workflows:
+
+- Auto-create cards when notes reach certain status
+- Update card status based on note changes
+- Trigger notifications on card updates
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or shows permission errors
+
+**Solution**:
+- Ensure you have admin access to the Trello workspace
+- Check that your Trello account has API access enabled
+- Verify your Trello workspace is active
+- Try disconnecting and reconnecting
+
+### Cards Not Appearing
+
+**Problem**: Expected Trello cards don't show up in Epic Stack
+
+**Solution**:
+- Verify you have permission to view the cards in Trello
+- Check that the board is selected in integration settings
+- Refresh the integration connection
+- Ensure the card type is supported
+
+### Sync Failures
+
+**Problem**: Changes aren't syncing between platforms
+
+**Solution**:
+- Check your internet connection
+- Verify the integration is still connected
+- Review Trello API rate limits
+- Reconnect the integration
+
+## Security & Privacy
+
+- All communication with Trello is encrypted
+- Your Trello tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from Trello's app management
+
+## Disconnecting
+
+To disconnect Trello:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **Trello** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your Trello account settings.
+
+## Support
+
+For issues or questions about the Trello integration, please [contact support](mailto:support@yourcompany.com?subject=Trello%20Integration%20Help).

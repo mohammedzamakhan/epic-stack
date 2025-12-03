@@ -19,6 +19,7 @@ node_modules
 /packages/**/fixtures/uploaded/
 /packages/**/fixtures/openimg/
 /coverage
+/apps/email/out/
 
 /packages/database/cache.db
 

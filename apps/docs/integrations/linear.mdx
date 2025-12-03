@@ -1,0 +1,157 @@
+---
+title: "Linear Integration"
+description: "Connect your notes to Linear teams and projects for issue tracking"
+---
+
+# Linear Integration
+
+Connect your Epic Stack workspace to Linear to manage issues and projects seamlessly.
+
+## Overview
+
+The Linear integration allows you to:
+
+- Link notes to Linear issues
+- Create issues from notes
+- Sync issue status and updates
+- Manage teams and projects
+- Track work across platforms
+
+## Setup Instructions
+
+### 1. Create a Linear OAuth Application
+
+1. Go to [Linear Settings - API](https://linear.app/settings/api)
+2. Click **Create new** under OAuth applications
+3. Fill in the application details:
+   - **Application name**: Epic Stack
+   - **Redirect URL**: `https://your-domain.com/api/integrations/oauth/callback`
+4. Select the required scopes:
+   - `read` - Read access to Linear data
+   - `write` - Write access to create issues
+5. Copy your **Client ID** and **Client Secret**
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+LINEAR_CLIENT_ID=your_linear_client_id
+LINEAR_CLIENT_SECRET=your_linear_client_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your Linear Account
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **Linear** and click **Connect**
+4. You'll be redirected to Linear's authorization page
+5. Log in with your Linear account
+6. Click **Authorize** to grant permissions
+
+### 4. Select Teams or Projects
+
+After connecting, select which Linear teams or projects you want to work with:
+
+- Choose default teams for issue creation
+- Optionally select specific projects
+- Configure issue creation preferences
+
+## Using the Integration
+
+### Linking Notes to Issues
+
+1. Open a note in Epic Stack
+2. Click the **Link to Linear** option
+3. Search for or select a Linear issue
+4. The note will be linked to the issue
+
+### Creating Issues from Notes
+
+1. Create a note in Epic Stack
+2. Click **Create Linear Issue**
+3. Select the team and project
+4. Configure issue details (title, description, assignee, priority, etc.)
+5. Click **Create**
+6. The issue will be created in Linear and linked to your note
+
+### Syncing Issue Status
+
+Connected issues automatically sync:
+
+- Status changes in Linear appear in Epic Stack
+- Comments and updates are reflected
+- Assignee changes are synchronized
+
+## Advanced Features
+
+### Custom Fields
+
+Map Epic Stack fields to Linear custom fields:
+
+- Configure field mappings in integration settings
+- Sync custom field values automatically
+- Support for various field types
+
+### Workflow Automation
+
+Set up automated workflows:
+
+- Auto-create issues when notes reach certain status
+- Update issue status based on note changes
+- Trigger notifications on issue updates
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or shows permission errors
+
+**Solution**:
+- Ensure you have admin access to the Linear workspace
+- Check that your Linear account has API access enabled
+- Verify your Linear workspace is active
+- Try disconnecting and reconnecting
+
+### Issues Not Appearing
+
+**Problem**: Expected Linear issues don't show up in Epic Stack
+
+**Solution**:
+- Verify you have permission to view the issues in Linear
+- Check that the team is selected in integration settings
+- Refresh the integration connection
+- Ensure the issue type is supported
+
+### Sync Failures
+
+**Problem**: Changes aren't syncing between platforms
+
+**Solution**:
+- Check your internet connection
+- Verify the integration is still connected
+- Review Linear API rate limits
+- Reconnect the integration
+
+## Security & Privacy
+
+- All communication with Linear is encrypted
+- Your Linear tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from Linear's app management
+
+## Disconnecting
+
+To disconnect Linear:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **Linear** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your Linear account settings.
+
+## Support
+
+For issues or questions about the Linear integration, please [contact support](mailto:support@yourcompany.com?subject=Linear%20Integration%20Help).

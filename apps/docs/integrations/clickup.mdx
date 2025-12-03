@@ -1,0 +1,155 @@
+---
+title: "ClickUp Integration"
+description: "Connect your notes to ClickUp spaces and lists for task management"
+---
+
+# ClickUp Integration
+
+Connect your Epic Stack workspace to ClickUp to manage tasks and projects seamlessly.
+
+## Overview
+
+The ClickUp integration allows you to:
+
+- Link notes to ClickUp tasks
+- Create tasks from notes
+- Sync task status and updates
+- Manage spaces and lists
+- Track work across platforms
+
+## Setup Instructions
+
+### 1. Create a ClickUp OAuth Application
+
+1. Go to [ClickUp App Directory](https://app.clickup.com/apps)
+2. Click **Build an App** or manage existing apps
+3. Create a new OAuth app with the following settings:
+   - **App Name**: Epic Stack
+   - **Description**: Integration for note management
+   - **Redirect URL**: `https://your-domain.com/api/integrations/oauth/callback`
+4. Copy your **Client ID** and **Client Secret**
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+CLICKUP_CLIENT_ID=your_clickup_client_id
+CLICKUP_CLIENT_SECRET=your_clickup_client_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your ClickUp Account
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **ClickUp** and click **Connect**
+4. You'll be redirected to ClickUp's authorization page
+5. Log in with your ClickUp account
+6. Click **Authorize** to grant permissions
+
+### 4. Select Spaces and Lists
+
+After connecting, select which ClickUp spaces and lists you want to work with:
+
+- Choose default spaces for task creation
+- Select target lists for note conversion
+- Configure task creation preferences (priority, assignees, tags)
+
+## Using the Integration
+
+### Linking Notes to Tasks
+
+1. Open a note in Epic Stack
+2. Click the **Link to ClickUp** option
+3. Search for or select a ClickUp task
+4. The note will be linked to the task
+
+### Creating Tasks from Notes
+
+1. Create a note in Epic Stack
+2. Click **Create ClickUp Task**
+3. Select the space and list
+4. Configure task details (name, description, assignee, priority, due date, etc.)
+5. Click **Create**
+6. The task will be created in ClickUp and linked to your note
+
+### Syncing Task Status
+
+Connected tasks automatically sync:
+
+- Status changes in ClickUp appear in Epic Stack
+- Comments and updates are reflected
+- Assignee changes are synchronized
+
+## Advanced Features
+
+### Custom Fields
+
+Map Epic Stack fields to ClickUp custom fields:
+
+- Configure field mappings in integration settings
+- Sync custom field values automatically
+- Support for various field types
+
+### Workflow Automation
+
+Set up automated workflows:
+
+- Auto-create tasks when notes reach certain status
+- Update task status based on note changes
+- Trigger notifications on task updates
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or shows permission errors
+
+**Solution**:
+- Ensure you have admin access to the ClickUp workspace
+- Check that your ClickUp account has API access enabled
+- Verify your ClickUp workspace is active
+- Try disconnecting and reconnecting
+
+### Tasks Not Appearing
+
+**Problem**: Expected ClickUp tasks don't show up in Epic Stack
+
+**Solution**:
+- Verify you have permission to view the tasks in ClickUp
+- Check that the space is selected in integration settings
+- Refresh the integration connection
+- Ensure the task type is supported
+
+### Sync Failures
+
+**Problem**: Changes aren't syncing between platforms
+
+**Solution**:
+- Check your internet connection
+- Verify the integration is still connected
+- Review ClickUp API rate limits
+- Reconnect the integration
+
+## Security & Privacy
+
+- All communication with ClickUp is encrypted
+- Your ClickUp tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from ClickUp's app management
+
+## Disconnecting
+
+To disconnect ClickUp:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **ClickUp** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your ClickUp account settings.
+
+## Support
+
+For issues or questions about the ClickUp integration, please [contact support](mailto:support@yourcompany.com?subject=ClickUp%20Integration%20Help).

@@ -1,0 +1,131 @@
+---
+title: "Slack Integration"
+description: "Connect your notes to Slack channels for team collaboration"
+---
+
+# Slack Integration
+
+Connect your Epic Stack workspace to Slack to share notes and updates directly with your team channels.
+
+## Overview
+
+The Slack integration allows you to:
+
+- Share notes to Slack channels
+- Post updates and notifications to your team
+- Collaborate seamlessly between Epic Stack and Slack
+- Keep your team informed in real-time
+
+## Setup Instructions
+
+### 1. Create a Slack App
+
+1. Go to [Slack API Dashboard](https://api.slack.com/apps)
+2. Click **Create New App** and select **From scratch**
+3. Name your app (e.g., "Epic Stack") and select your workspace
+4. Go to **OAuth & Permissions** in the left sidebar
+5. Under **Scopes**, add the following bot token scopes:
+   - `channels:read` - Read channel information
+   - `chat:write` - Post messages to channels
+   - `channels:history` - Read channel history
+   - `groups:read` - Read private channel information
+6. Under **Redirect URLs**, add your callback URL: `https://your-domain.com/api/integrations/oauth/callback`
+7. Copy your **Client ID** and **Client Secret** to your environment variables
+
+### 2. Set Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+SLACK_CLIENT_ID=your_slack_client_id
+SLACK_CLIENT_SECRET=your_slack_client_secret
+INTEGRATION_ENCRYPTION_KEY=64_character_hex_string
+```
+
+### 3. Connect Your Slack Workspace
+
+1. Go to your organization settings
+2. Navigate to the **Integrations** tab
+3. Find **Slack** and click **Connect**
+4. You'll be redirected to Slack's authorization page
+5. Select the workspace you want to connect
+6. Click **Allow** to grant permissions
+
+### 4. Select Channels
+
+After connecting, you can select which channels to share notes to:
+
+- Available channels will be displayed
+- Select your preferred channels for note sharing
+- Configure notification preferences
+
+## Using the Integration
+
+### Sharing Notes to Slack
+
+1. Create or edit a note in Epic Stack
+2. Look for the Slack sharing option
+3. Select the channel(s) to share to
+4. Click **Share to Slack**
+5. The note will be posted as a formatted message
+
+### Receiving Notifications
+
+Configure which events trigger Slack notifications:
+
+- New notes created
+- Notes updated
+- Comments added
+- Mentions in notes
+- Task assignments
+
+## Troubleshooting
+
+### Connection Issues
+
+**Problem**: Authorization fails or redirects to an error page
+
+**Solution**:
+- Ensure you have admin access to the Slack workspace
+- Check that your Slack workspace allows third-party app installations
+- Try disconnecting and reconnecting the integration
+
+### Missing Channels
+
+**Problem**: Expected channels don't appear in the channel list
+
+**Solution**:
+- Verify the Slack app has access to the channels
+- Check channel permissions and visibility settings
+- Reconnect the integration to refresh the channel list
+
+### Messages Not Posting
+
+**Problem**: Notes aren't appearing in Slack channels
+
+**Solution**:
+- Verify the Slack app has posting permissions in the channel
+- Check that the channel is public or the app is a member
+- Review Slack workspace app settings and permissions
+
+## Security & Privacy
+
+- All communication with Slack is encrypted
+- Your Slack tokens are securely stored and encrypted
+- Epic Stack only accesses the permissions you explicitly grant
+- You can revoke access at any time from Slack's app management
+
+## Disconnecting
+
+To disconnect Slack:
+
+1. Go to organization settings
+2. Navigate to **Integrations**
+3. Find **Slack** and click **Disconnect**
+4. Confirm the disconnection
+
+You can also revoke access from your Slack workspace settings.
+
+## Support
+
+For issues or questions about the Slack integration, please [contact support](mailto:support@yourcompany.com?subject=Slack%20Integration%20Help).
