@@ -1,5 +1,5 @@
-import { logger } from '@repo/observability'
 import { prisma } from '@repo/database'
+import { logger } from '@repo/observability'
 
 export type ActivityAction =
 	| 'viewed'

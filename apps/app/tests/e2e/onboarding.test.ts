@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
-import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
 import { prisma } from '@repo/database'
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
 import {
 	normalizeEmail,
 	normalizeUsername,

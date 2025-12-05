@@ -1,9 +1,9 @@
+import { getClientIp, trackIpRequest } from '@repo/common/ip-tracking'
+import { prisma } from '@repo/database'
 import { NewDeviceSigninEmail } from '@repo/email'
 import { logger } from '@repo/observability'
 import React from 'react'
-import { prisma } from '@repo/database'
 import { sendEmail } from './email.server.ts'
-import { getClientIp, trackIpRequest } from '@repo/common/ip-tracking'
 import { parseUserAgent, getUserAgent } from './user-agent.server.ts'
 
 interface CheckNewDeviceParams {

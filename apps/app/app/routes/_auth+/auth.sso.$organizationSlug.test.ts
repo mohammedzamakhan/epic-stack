@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
 import { BASE_URL } from '#tests/utils.ts'
 import { action } from './auth.sso.$organizationSlug.ts'

@@ -1,7 +1,7 @@
+import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
-import { prisma } from '@repo/database'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import {
 	normalizeEmail,

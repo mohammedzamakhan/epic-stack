@@ -1,11 +1,11 @@
 import { invariant } from '@epic-web/invariant'
+import { prisma } from '@repo/database'
 import { EmailChangeNoticeEmail } from '@repo/email'
 import { data } from 'react-router'
 import {
 	requireRecentVerification,
 	type VerifyFunctionArgs,
 } from '#app/routes/_auth+/verify.server.ts'
-import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'

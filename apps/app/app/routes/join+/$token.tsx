@@ -1,7 +1,7 @@
+import { prisma } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import { onboardingInviteTokenSessionKey } from '#app/routes/_auth+/onboarding.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import {
 	validateInviteLink,
 	createInvitationFromLink,

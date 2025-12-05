@@ -1,4 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
+import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
@@ -12,7 +13,6 @@ import { InvitationsCard } from '#app/components/settings/cards/organization/inv
 import { MembersCard } from '#app/components/settings/cards/organization/members-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,

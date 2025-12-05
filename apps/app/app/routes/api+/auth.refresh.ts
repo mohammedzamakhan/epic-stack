@@ -1,7 +1,7 @@
+import { getClientIp } from '@repo/common/ip-tracking'
+import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { z } from 'zod'
-import { prisma } from '@repo/database'
-import { getClientIp } from '@repo/common/ip-tracking'
 import { rotateRefreshToken, createAccessToken } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.refresh.ts'
 

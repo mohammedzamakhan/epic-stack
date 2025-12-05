@@ -1,8 +1,8 @@
 import { parseWithZod } from '@conform-to/zod'
+import { prisma } from '@repo/database'
 import { z } from 'zod'
 
 import { prepareVerification } from '#app/routes/_auth+/verify.server.ts'
-import { prisma } from '@repo/database'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { newEmailAddressSessionKey } from '../profile.change-email'
 

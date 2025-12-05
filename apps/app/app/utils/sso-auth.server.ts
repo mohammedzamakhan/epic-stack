@@ -1,3 +1,4 @@
+import { prisma } from '@repo/database'
 import {
 	type User,
 	type SSOConfiguration,
@@ -6,7 +7,6 @@ import {
 
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
-import { prisma } from '@repo/database'
 import {
 	discoverOIDCEndpoints,
 	type EndpointConfiguration,

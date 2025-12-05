@@ -3,11 +3,11 @@ import {
 	createChatStream,
 	buildNoteChatSystemPrompt,
 } from '@repo/ai'
+import { markStepCompleted } from '@repo/common/onboarding'
 import { brand } from '@repo/config/brand'
 import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { markStepCompleted } from '@repo/common/onboarding'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30

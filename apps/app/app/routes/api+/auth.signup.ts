@@ -1,9 +1,9 @@
 import { parseWithZod } from '@conform-to/zod'
+import { prisma } from '@repo/database'
 import { EmailSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { prepareVerification } from '#app/routes/_auth+/verify.server.ts'
-import { prisma } from '@repo/database'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/auth.signup.ts'
 

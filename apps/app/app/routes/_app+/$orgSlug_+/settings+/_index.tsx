@@ -1,5 +1,7 @@
 import { parseWithZod } from '@conform-to/zod'
 import { parseFormData } from '@mjackson/form-data-parser'
+import { markStepCompleted } from '@repo/common/onboarding'
+import { prisma } from '@repo/database'
 import { encrypt, getSSOMasterKey } from '@repo/security'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
@@ -30,8 +32,6 @@ import VerifiedDomainCard, {
 } from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
-import { markStepCompleted } from '@repo/common/onboarding'
 import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
 import {
 	updateSeatQuantity,

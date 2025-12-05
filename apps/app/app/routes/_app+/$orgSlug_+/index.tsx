@@ -3,6 +3,11 @@ import { invariant } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Novu } from '@novu/api'
+import {
+	getOnboardingProgress,
+	autoDetectCompletedSteps,
+} from '@repo/common/onboarding'
+import { prisma } from '@repo/database'
 import { PageTitle } from '@repo/ui/page-title'
 import confetti from 'canvas-confetti'
 import { useEffect } from 'react'
@@ -21,11 +26,6 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
-import {
-	getOnboardingProgress,
-	autoDetectCompletedSteps,
-} from '@repo/common/onboarding'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 

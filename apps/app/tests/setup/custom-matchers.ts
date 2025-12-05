@@ -1,7 +1,7 @@
+import { prisma } from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import { expect } from 'vitest'
 import { sessionKey } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import {
 	type ToastInput,

@@ -1,6 +1,6 @@
+import { prisma } from '@repo/database'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { logout, sessionKey } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { ssoAuthService } from '#app/utils/sso-auth.server.ts'

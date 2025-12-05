@@ -1,11 +1,11 @@
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import { useFetcher } from 'react-router'
 
 import { requireRecentVerification } from '#app/routes/_auth+/verify.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/profile.two-factor.disable.ts'

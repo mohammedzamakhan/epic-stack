@@ -1,3 +1,4 @@
+import { prisma } from '@repo/database'
 import { redirect } from 'react-router'
 import {
 	authenticator,
@@ -5,7 +6,6 @@ import {
 	getUserId,
 } from '#app/utils/auth.server.ts'
 import { ProviderNameSchema, providerLabels } from '#app/utils/connections.tsx'
-import { prisma } from '@repo/database'
 import { ensurePrimary } from '#app/utils/litefs.server.ts'
 import { combineHeaders } from '#app/utils/misc.tsx'
 import {

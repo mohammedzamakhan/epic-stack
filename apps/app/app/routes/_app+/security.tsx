@@ -2,6 +2,7 @@ import { generateTOTP, getTOTPAuthUri } from '@epic-web/totp'
 import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
 import { PageTitle } from '@repo/ui/page-title'
@@ -18,7 +19,6 @@ import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
-import { prisma } from '@repo/database'
 import { userSecuritySelect } from '#app/utils/user-security.server.ts'
 import {
 	deleteDataAction,

@@ -2,6 +2,7 @@ import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
+import { prisma } from '@repo/database'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -66,7 +67,6 @@ import {
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import { prisma } from '@repo/database'
 import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import {
 	notifyCommentMentions,

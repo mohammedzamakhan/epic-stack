@@ -4,6 +4,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
+import { prisma } from '@repo/database'
 import { ForgotPasswordEmail } from '@repo/email'
 import {
 	Card,
@@ -26,7 +27,6 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
-import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/forgot-password.ts'

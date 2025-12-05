@@ -30,7 +30,7 @@
     "db:generate": "cd packages/database && npm run db:generate",
     "db:push": "cd packages/database && npm run db:push",
     "db:migrate:deploy": "cd packages/database && npm run db:migrate:deploy",
-    "db:seed": "cd packages/database && npm run db:seed",
+    "db:seed": "nx run @repo/database:db:seed",
     "db:migrate:dev": "cd packages/database && npm run db:migrate:dev",
     "docs:dev": "cd apps/docs && npx mint dev",
     "docs:build": "cd apps/docs && npx mint build",

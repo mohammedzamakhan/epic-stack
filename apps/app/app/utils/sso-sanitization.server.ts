@@ -1,5 +1,5 @@
-import DOMPurify from 'isomorphic-dompurify'
 import { getClientIp } from '@repo/common/ip-tracking'
+import DOMPurify from 'isomorphic-dompurify'
 import {
 	createSSOError,
 	SSOErrorType,

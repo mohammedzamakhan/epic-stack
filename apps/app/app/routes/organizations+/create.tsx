@@ -8,6 +8,7 @@ import {
 
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans } from '@lingui/macro'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -45,7 +46,6 @@ import {
 } from '#app/components/forms.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,

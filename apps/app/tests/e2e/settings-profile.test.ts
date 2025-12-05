@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
-import { verifyUserPassword } from '#app/utils/auth.server.ts'
 import { prisma } from '@repo/database'
+import { verifyUserPassword } from '#app/utils/auth.server.ts'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, createUser, waitFor } from '#tests/playwright-utils.ts'
 

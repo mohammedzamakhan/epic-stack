@@ -1,5 +1,5 @@
-import { handleUpdateIntegrationConfig } from '@repo/integrations'
 import { prisma } from '@repo/database'
+import { handleUpdateIntegrationConfig } from '@repo/integrations'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { getUserDefaultOrganization } from '#app/utils/organizations.server.ts'

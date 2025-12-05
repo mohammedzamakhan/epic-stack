@@ -1,4 +1,5 @@
 import { Trans } from '@lingui/macro'
+import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -11,7 +12,6 @@ import { Icon } from '@repo/ui/icon'
 import { Progress } from '@repo/ui/progress'
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { ListTodoIcon } from './icons/list-todo'
 
 interface OnboardingChecklistProps {

@@ -4,6 +4,7 @@
  */
 
 import { type Organization } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { TrialEndingEmail } from '@repo/email'
 import {
 	createStripeProvider,
@@ -12,7 +13,6 @@ import {
 } from '@repo/payments'
 import { data, redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
 
 if (!process.env.STRIPE_SECRET_KEY) {

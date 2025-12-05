@@ -52,6 +52,7 @@ model User {
   auditLogs              AuditLog[]                 @relation("AuditLogUser")
   waitlistEntry          WaitlistEntry?
   grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
+  mcpAuthorizations      MCPAuthorization[]
 }
 
 model Note {
@@ -233,6 +234,7 @@ model Organization {
   Feedback               Feedback[]
   apiKeys                ApiKey[]
   configFlags            ConfigFlag[]
+  mcpAuthorizations      MCPAuthorization[]
 }
 
 model OrganizationRole {
@@ -848,4 +850,99 @@ model WaitlistEntry {
   @@index([points, createdAt])
   @@index([hasEarlyAccess])
   @@index([grantedAccessBy])
+}
+
+// MCP Authorization - represents an authorized MCP client
+model MCPAuthorization {
+  id             String            @id @default(cuid())
+  userId         String
+  organizationId String
+  clientName     String            // e.g., "Claude Desktop", "Kiro IDE"
+  clientId       String            @unique // Generated client identifier
+  
+  // Status
+  isActive       Boolean           @default(true)
+  lastUsedAt     DateTime?
+  
+  // Timestamps
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  
+  // Relations
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  accessTokens   MCPAccessToken[]
+  refreshTokens  MCPRefreshToken[]
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([clientId])
+  @@index([userId, organizationId])
+}
+
+// MCP Access Token - short-lived token for API access
+model MCPAccessToken {
+  id              String           @id @default(cuid())
+  authorizationId String
+  tokenHash       String           @unique // SHA-256 hash of the token
+  
+  // Expiration
+  expiresAt       DateTime
+  
+  // Metadata
+  ipAddress       String?
+  userAgent       String?
+  
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  
+  // Relations
+  authorization   MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
+  
+  @@index([authorizationId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
+// MCP Refresh Token - long-lived token for obtaining new access tokens
+model MCPRefreshToken {
+  id              String           @id @default(cuid())
+  authorizationId String
+  tokenHash       String           @unique // SHA-256 hash of the token
+  
+  // Status
+  revoked         Boolean          @default(false)
+  revokedAt       DateTime?
+  
+  // Expiration
+  expiresAt       DateTime
+  
+  // Metadata
+  ipAddress       String?
+  userAgent       String?
+  
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // Relations
+  authorization   MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
+  
+  @@index([authorizationId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@index([revoked])
+}
+
+// Rate Limit Entry - tracks rate limit attempts for sliding window algorithm
+model RateLimitEntry {
+  id        String   @id @default(cuid())
+  keyId     String   // Composite key: "type:value"
+  keyType   String   // 'user', 'ip', or 'token'
+  keyValue  String   // The actual value (userId, IP address, or token hash)
+  createdAt DateTime @default(now())
+  
+  @@index([keyId])
+  @@index([keyId, createdAt])
+  @@index([createdAt]) // For cleanup queries
 }

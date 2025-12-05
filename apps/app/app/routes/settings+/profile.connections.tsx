@@ -2,6 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { i18n } from '@lingui/core'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import {
@@ -22,7 +23,6 @@ import {
 	providerIcons,
 	providerNames,
 } from '#app/utils/connections.tsx'
-import { prisma } from '@repo/database'
 import { pipeHeaders } from '#app/utils/headers.server.ts'
 import { makeTimings } from '#app/utils/timing.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'

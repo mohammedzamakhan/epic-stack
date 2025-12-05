@@ -1,0 +1,11 @@
+{
+	"name": "@repo/database",
+	"targets": {
+		"db:seed": {
+			"executor": "nx:run-script",
+			"options": {
+				"script": "db:seed"
+			}
+		}
+	}
+}

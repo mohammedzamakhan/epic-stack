@@ -1,7 +1,7 @@
 import crypto from 'crypto'
+import { prisma } from '@repo/database'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { prisma } from '@repo/database'
 
 if (!process.env.JWT_SECRET) {
 	throw new Error(

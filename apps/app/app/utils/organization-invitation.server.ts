@@ -1,8 +1,8 @@
 import { webcrypto as crypto } from 'node:crypto'
-import { OrganizationInviteEmail } from '@repo/email'
-import { prisma } from '@repo/database'
-import { sendEmail } from '#app/utils/email.server.ts'
 import { markStepCompleted } from '@repo/common/onboarding'
+import { prisma } from '@repo/database'
+import { OrganizationInviteEmail } from '@repo/email'
+import { sendEmail } from '#app/utils/email.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { type OrganizationRoleName } from './organizations.server'
 

@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test'
 import { type User as UserModel } from '@prisma/client'
+import { prisma } from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import {
 	getPasswordHash,
@@ -7,7 +8,6 @@ import {
 	sessionKey,
 } from '#app/utils/auth.server.ts'
 import { cookieConsentCookie } from '#app/utils/cookie-consent.server.ts'
-import { prisma } from '@repo/database'
 import { MOCK_CODE_GITHUB_HEADER } from '#app/utils/providers/constants.ts'
 import { normalizeEmail } from '#app/utils/providers/provider.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'

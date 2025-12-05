@@ -1,6 +1,6 @@
+import { prisma } from '@repo/database'
 import { logger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
-import { prisma } from '@repo/database'
 
 /**
  * Comprehensive audit action types for the entire application
@@ -122,6 +122,16 @@ export enum AuditAction {
 	SSO_LOGIN_FAILED = 'sso_login_failed',
 	SSO_USER_PROVISIONED = 'sso_user_provisioned',
 	SSO_USER_ROLE_CHANGED = 'sso_user_role_changed',
+
+	// MCP (Model Context Protocol) OAuth
+	MCP_AUTHORIZATION_REQUESTED = 'mcp_authorization_requested',
+	MCP_AUTHORIZATION_APPROVED = 'mcp_authorization_approved',
+	MCP_AUTHORIZATION_DENIED = 'mcp_authorization_denied',
+	MCP_AUTHORIZATION_REVOKED = 'mcp_authorization_revoked',
+	MCP_TOKEN_ISSUED = 'mcp_token_issued',
+	MCP_TOKEN_REFRESHED = 'mcp_token_refreshed',
+	MCP_TOOL_INVOKED = 'mcp_tool_invoked',
+	MCP_RATE_LIMIT_EXCEEDED = 'mcp_rate_limit_exceeded',
 
 	// System Events
 	SYSTEM_BACKUP_STARTED = 'system_backup_started',

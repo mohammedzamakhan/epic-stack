@@ -1,9 +1,9 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
+import { prisma } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 

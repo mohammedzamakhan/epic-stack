@@ -1,5 +1,6 @@
 import { Trans, t } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
+import { prisma } from '@repo/database'
 import {
 	Card,
 	CardContent,
@@ -19,7 +20,6 @@ import {
 import * as React from 'react'
 import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,

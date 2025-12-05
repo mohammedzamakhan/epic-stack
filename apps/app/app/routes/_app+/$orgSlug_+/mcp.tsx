@@ -1,5 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
+import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Button } from '@repo/ui/button'
 import {
@@ -37,7 +38,7 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
+import { revokeAuthorization } from '#app/utils/mcp-oauth.server.ts'
 import { cn } from '#app/utils/misc.tsx'
 import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
 
@@ -48,6 +49,15 @@ type ApiKeyData = {
 	name: string
 	createdAt: Date
 	expiresAt: Date | null
+}
+
+// Define MCPAuthorization type
+type MCPAuthorizationData = {
+	id: string
+	clientName: string
+	createdAt: Date
+	lastUsedAt: Date | null
+	organizationName: string
 }
 
 /**
@@ -90,7 +100,42 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		orderBy: { createdAt: 'desc' },
 	})
 
-	return { user, organization, apiKeys, orgSlug }
+	// Get MCP authorizations for this user and organization
+	const mcpAuthorizations = await prisma.mCPAuthorization.findMany({
+		where: {
+			userId: user.id,
+			organizationId: organization.id,
+		},
+		select: {
+			id: true,
+			clientName: true,
+			createdAt: true,
+			lastUsedAt: true,
+			organization: {
+				select: {
+					name: true,
+				},
+			},
+		},
+		orderBy: { createdAt: 'desc' },
+	})
+
+	// Map to include organization name at top level
+	const mcpAuthorizationsWithOrgName = mcpAuthorizations.map((auth) => ({
+		id: auth.id,
+		clientName: auth.clientName,
+		createdAt: auth.createdAt,
+		lastUsedAt: auth.lastUsedAt,
+		organizationName: auth.organization.name,
+	}))
+
+	return {
+		user,
+		organization,
+		apiKeys,
+		mcpAuthorizations: mcpAuthorizationsWithOrgName,
+		orgSlug,
+	}
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -142,6 +187,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		})
 
 		return { success: true, message: 'API key deleted successfully' }
+	}
+
+	if (intent === 'revoke-mcp') {
+		const authorizationId = formData.get('authorizationId')
+		invariantResponse(
+			typeof authorizationId === 'string',
+			'Authorization ID is required',
+		)
+
+		// Verify the authorization belongs to this user and organization
+		const authorization = await prisma.mCPAuthorization.findFirst({
+			where: {
+				id: authorizationId,
+				userId: user.id,
+				organizationId: organization.id,
+			},
+		})
+
+		invariantResponse(authorization, 'Authorization not found', { status: 404 })
+
+		// Revoke the authorization
+		await revokeAuthorization(authorizationId)
+
+		return { success: true, message: 'Authorization revoked successfully' }
 	}
 
 	return { success: false, message: 'Invalid action' }
@@ -553,7 +622,7 @@ function ApiKeysCard({
 // Setup Instructions Card Component
 function SetupInstructionsCard({
 	organization,
-	serverUrl: _serverUrl,
+	serverUrl,
 }: {
 	organization: { name: string }
 	serverUrl: string
@@ -563,9 +632,11 @@ function SetupInstructionsCard({
 			mcpServers: {
 				[`epic-notes-${organization.name.toLowerCase().replace(/\s+/g, '-')}`]:
 					{
-						command: 'npx',
-						args: ['epic-notes-mcp', `YOUR_API_KEY_HERE`],
-						env: {},
+						url: `${serverUrl}/sse`,
+						env: {
+							AUTHORIZATION_URL: `${serverUrl}/authorize`,
+							TOKEN_URL: `${serverUrl}/token`,
+						},
 					},
 			},
 		},
@@ -578,10 +649,13 @@ function SetupInstructionsCard({
 			mcpServers: {
 				[`epic-notes-${organization.name.toLowerCase().replace(/\s+/g, '-')}`]:
 					{
-						command: 'npx',
-						args: ['epic-notes-mcp', `YOUR_API_KEY_HERE`],
+						url: `${serverUrl}/sse`,
 						disabled: false,
 						autoApprove: ['find_user', 'get_user_notes'],
+						env: {
+							AUTHORIZATION_URL: `${serverUrl}/authorize`,
+							TOKEN_URL: `${serverUrl}/token`,
+						},
 					},
 			},
 		},
@@ -594,13 +668,40 @@ function SetupInstructionsCard({
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Icon name="settings" className="h-5 w-5" />
-					<Trans>Client Configuration</Trans>
+					<Trans>OAuth Setup Instructions</Trans>
 				</CardTitle>
 				<CardDescription>
-					<Trans>Configuration examples for popular MCP clients</Trans>
+					<Trans>Configure your MCP client to use OAuth authentication</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
+				{/* Setup Steps */}
+				<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+					<div className="text-sm text-blue-900">
+						<div className="mb-2 font-semibold">
+							<Trans>OAuth Setup Flow:</Trans>
+						</div>
+						<ol className="list-inside list-decimal space-y-1">
+							<li>
+								<Trans>Configure your MCP client with the URLs below</Trans>
+							</li>
+							<li>
+								<Trans>
+									When you connect, you'll be redirected to authorize
+								</Trans>
+							</li>
+							<li>
+								<Trans>Select this organization and approve access</Trans>
+							</li>
+							<li>
+								<Trans>
+									Your client will receive OAuth tokens automatically
+								</Trans>
+							</li>
+						</ol>
+					</div>
+				</div>
+
 				{/* Claude Desktop */}
 				<div>
 					<h3 className="mb-2 flex items-center gap-2 font-semibold">
@@ -609,13 +710,14 @@ function SetupInstructionsCard({
 					</h3>
 					<p className="text-muted-foreground mb-3 text-sm">
 						<Trans>
-							Add this configuration to your Claude Desktop settings:
+							Add this configuration to your Claude Desktop settings file:
 						</Trans>
 					</p>
 					<CodeBlock code={claudeConfig} />
 					<p className="text-muted-foreground mt-2 text-xs">
 						<Trans>
-							Replace YOUR_API_KEY_HERE with one of your API keys above
+							Location: ~/.claude_desktop_config.json (macOS/Linux) or
+							%APPDATA%\Claude\claude_desktop_config.json (Windows)
 						</Trans>
 					</p>
 				</div>
@@ -630,9 +732,194 @@ function SetupInstructionsCard({
 						<Trans>Add this to your .kiro/settings/mcp.json file:</Trans>
 					</p>
 					<CodeBlock code={kiroConfig} />
+					<p className="text-muted-foreground mt-2 text-xs">
+						<Trans>
+							The autoApprove setting allows automatic approval of these tools
+							without prompting
+						</Trans>
+					</p>
+				</div>
+
+				{/* Info Box */}
+				<div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+					<div className="text-sm text-amber-900">
+						<div className="mb-1 font-semibold">
+							<Trans>Note:</Trans>
+						</div>
+						<Trans>
+							OAuth tokens are short-lived (1 hour) and automatically refreshed.
+							No API keys needed!
+						</Trans>
+					</div>
 				</div>
 			</CardContent>
 		</Card>
+	)
+}
+
+// MCP Authorizations Card Component
+function AuthorizedClientsCard({
+	authorizations,
+	onRevokeClick,
+}: {
+	authorizations: MCPAuthorizationData[]
+	onRevokeClick: (authorizationId: string, clientName: string) => void
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="flex items-center gap-2">
+					<Icon name="shield-check" className="h-5 w-5" />
+					<Trans>Authorized Clients</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>MCP clients authorized to access your organization data</Trans>
+				</CardDescription>
+			</CardHeader>
+			<CardContent
+				className={cn(
+					authorizations.length === 0 && 'border-0 p-0 shadow-none ring-0',
+					'space-y-4',
+				)}
+			>
+				<div className="space-y-3">
+					{authorizations.map((auth) => (
+						<div
+							key={auth.id}
+							className="flex items-center justify-between rounded-lg border p-4"
+						>
+							<div className="flex-1">
+								<div className="font-medium">{auth.clientName}</div>
+								<div className="text-muted-foreground text-sm">
+									<div>
+										<Trans>Organization: {auth.organizationName}</Trans>
+									</div>
+									<div className="mt-1">
+										<Trans>
+											Authorized {new Date(auth.createdAt).toLocaleDateString()}
+										</Trans>
+										{auth.lastUsedAt && (
+											<span className="ml-2">
+												•{' '}
+												<Trans>
+													Last used{' '}
+													{new Date(auth.lastUsedAt).toLocaleDateString()}
+												</Trans>
+											</span>
+										)}
+										{!auth.lastUsedAt && (
+											<span className="ml-2">
+												• <Trans>Never used</Trans>
+											</span>
+										)}
+									</div>
+								</div>
+							</div>
+							<Button
+								variant="destructive"
+								size="sm"
+								onClick={() => onRevokeClick(auth.id, auth.clientName)}
+								className="gap-2"
+							>
+								<Icon name="trash-2" className="h-4 w-4" />
+								<Trans>Revoke</Trans>
+							</Button>
+						</div>
+					))}
+					{authorizations.length === 0 && (
+						<EmptyState
+							title={t`No authorized clients`}
+							description={t`Authorize an MCP client to get started`}
+							icons={['shield-check']}
+							className="-m-1 w-[calc(100%+12px)]"
+						/>
+					)}
+				</div>
+			</CardContent>
+		</Card>
+	)
+}
+
+// Revocation Confirmation Dialog
+function RevokeConfirmationDialog({
+	isOpen,
+	onClose,
+	onConfirm,
+	clientName,
+	isSubmitting,
+}: {
+	isOpen: boolean
+	onClose: () => void
+	onConfirm: () => void
+	clientName: string
+	isSubmitting: boolean
+}) {
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle className="flex items-center gap-2">
+						<Icon name="alert-triangle" className="h-5 w-5 text-red-600" />
+						<Trans>Revoke Authorization</Trans>
+					</DialogTitle>
+					<DialogDescription>
+						<Trans>
+							Are you sure you want to revoke access for {clientName}? This
+							action cannot be undone.
+						</Trans>
+					</DialogDescription>
+				</DialogHeader>
+
+				<div className="rounded-lg border border-red-200 bg-red-50 p-4">
+					<div className="text-sm text-red-800">
+						<div className="mb-1 font-semibold">
+							<Trans>This will:</Trans>
+						</div>
+						<ul className="list-inside list-disc space-y-1">
+							<li>
+								<Trans>Immediately invalidate all tokens for this client</Trans>
+							</li>
+							<li>
+								<Trans>Disconnect any active MCP connections</Trans>
+							</li>
+							<li>
+								<Trans>Require re-authorization to reconnect</Trans>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<DialogFooter className="gap-2">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onClose}
+						disabled={isSubmitting}
+					>
+						<Trans>Cancel</Trans>
+					</Button>
+					<Button
+						type="button"
+						variant="destructive"
+						onClick={onConfirm}
+						disabled={isSubmitting}
+						className="gap-2"
+					>
+						{isSubmitting ? (
+							<>
+								<div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+								<Trans>Revoking...</Trans>
+							</>
+						) : (
+							<>
+								<Icon name="trash-2" className="h-4 w-4" />
+								<Trans>Revoke Access</Trans>
+							</>
+						)}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	)
 }
 
@@ -698,14 +985,20 @@ function AvailableToolsCard({
 }
 
 export default function McpPage() {
-	const { organization, apiKeys } = useLoaderData<typeof loader>()
+	const { organization, apiKeys, mcpAuthorizations } =
+		useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const submit = useSubmit()
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 	const [isNewKeyModalOpen, setIsNewKeyModalOpen] = useState(false)
 	const [newApiKey, setNewApiKey] = useState<{
 		key: string
 		name: string
 	} | null>(null)
+	const [isRevokeDialogOpen, setIsRevokeDialogOpen] = useState(false)
+	const [selectedAuthId, setSelectedAuthId] = useState<string | null>(null)
+	const [selectedClientName, setSelectedClientName] = useState<string>('')
+	const [isRevoking, setIsRevoking] = useState(false)
 
 	const serverUrl =
 		typeof window !== 'undefined'
@@ -720,17 +1013,43 @@ export default function McpPage() {
 		}
 	}, [actionData])
 
+	const handleRevokeClick = (authId: string, clientName: string) => {
+		setSelectedAuthId(authId)
+		setSelectedClientName(clientName)
+		setIsRevokeDialogOpen(true)
+	}
+
+	const handleConfirmRevoke = () => {
+		if (!selectedAuthId) return
+
+		setIsRevoking(true)
+		const formData = new FormData()
+		formData.append('intent', 'revoke-mcp')
+		formData.append('authorizationId', selectedAuthId)
+
+		void submit(formData, { method: 'POST' })
+		setIsRevokeDialogOpen(false)
+		setIsRevoking(false)
+	}
+
 	return (
 		<div className="py-8 md:p-8">
 			<div className="mb-8">
 				<PageTitle
 					title={t`MCP Server`}
-					description={t`Connect your AI assistants to {organization.name} data using the
+					description={t`Connect your AI assistants to ${organization.name} data using the
 							Model Context Protocol`}
 				/>
 			</div>
 
 			<AnnotatedLayout>
+				<AnnotatedSection>
+					<AuthorizedClientsCard
+						authorizations={mcpAuthorizations}
+						onRevokeClick={handleRevokeClick}
+					/>
+				</AnnotatedSection>
+
 				<AnnotatedSection>
 					<ApiKeysCard
 						organization={organization}
@@ -766,6 +1085,14 @@ export default function McpPage() {
 					setNewApiKey(null)
 				}}
 				apiKey={newApiKey}
+			/>
+
+			<RevokeConfirmationDialog
+				isOpen={isRevokeDialogOpen}
+				onClose={() => setIsRevokeDialogOpen(false)}
+				onConfirm={handleConfirmRevoke}
+				clientName={selectedClientName}
+				isSubmitting={isRevoking}
 			/>
 		</div>
 	)

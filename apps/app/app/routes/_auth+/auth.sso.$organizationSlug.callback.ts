@@ -1,7 +1,7 @@
+import { getClientIp } from '@repo/common/ip-tracking'
 import { SSOCallbackSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getUserId, loginWithSSO } from '#app/utils/auth.server.ts'
-import { getClientIp } from '@repo/common/ip-tracking'
 import { ensurePrimary } from '#app/utils/litefs.server.ts'
 import { combineHeaders } from '#app/utils/misc.tsx'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'

@@ -3,6 +3,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { i18n } from '@lingui/core'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
@@ -21,7 +22,6 @@ import {
 	requireUserId,
 	verifyUserPassword,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/profile.password.ts'
 import { type BreadcrumbHandle } from './profile.change-email.tsx'

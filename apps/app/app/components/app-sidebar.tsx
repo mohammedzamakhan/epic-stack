@@ -1,5 +1,6 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import {
@@ -23,7 +24,6 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 import { TeamSwitcher } from '#app/components/team-switcher.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { type OnboardingProgressData } from '@repo/common/onboarding'
 import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'

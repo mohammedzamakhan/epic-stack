@@ -1,4 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
+import { prisma } from '@repo/database'
 import {
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
@@ -7,7 +8,6 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { checkIsCommonPassword, signup } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'

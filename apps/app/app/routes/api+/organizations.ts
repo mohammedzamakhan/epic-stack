@@ -1,5 +1,5 @@
-import { data } from 'react-router'
 import { prisma } from '@repo/database'
+import { data } from 'react-router'
 import { requireAuth } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/organizations.ts'
 

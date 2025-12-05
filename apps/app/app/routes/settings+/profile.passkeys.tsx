@@ -1,10 +1,10 @@
 import { i18n } from '@lingui/core'
 import { Trans, t } from '@lingui/macro'
 
+import { prisma } from '@repo/database'
 import { Icon } from '@repo/ui/icon'
 import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { type Route } from './+types/profile.passkeys.ts'
 
 export const handle = {

@@ -1,3 +1,4 @@
+import { prisma } from '@repo/database'
 import { type SSOConfiguration } from '@repo/database/types'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
@@ -5,7 +6,6 @@ import {
 	SSOConfigurationUpdateSchema,
 	type SSOConfigurationInput,
 } from '@repo/validation'
-import { prisma } from '@repo/database'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,

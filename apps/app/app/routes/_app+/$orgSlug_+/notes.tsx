@@ -2,6 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Portal } from '@radix-ui/react-portal'
+import { prisma } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
@@ -24,7 +25,6 @@ import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import {
 	getNotesViewMode,
 	setNotesViewMode,

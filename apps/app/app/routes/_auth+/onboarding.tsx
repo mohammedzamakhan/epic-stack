@@ -2,6 +2,7 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { t, Trans } from '@lingui/macro'
 import { getPageTitle } from '@repo/config/brand'
+import { prisma } from '@repo/database'
 import {
 	Card,
 	CardContent,
@@ -32,7 +33,6 @@ import {
 	sessionKey,
 	signup,
 } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'

@@ -1,6 +1,6 @@
+import { prisma } from '@repo/database'
 import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 
 const FeedbackSchema = z.object({
 	message: z.string().min(1).max(5000, 'Feedback message is too long'),

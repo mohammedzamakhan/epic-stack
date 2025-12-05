@@ -139,6 +139,16 @@ export enum AuditAction {
 	GDPR_ACCESS_REQUEST = 'gdpr_access_request',
 	AUDIT_LOG_EXPORTED = 'audit_log_exported',
 	AUDIT_LOG_VIEWED = 'audit_log_viewed',
+
+	// MCP OAuth
+	MCP_AUTHORIZATION_REQUESTED = 'mcp_authorization_requested',
+	MCP_AUTHORIZATION_APPROVED = 'mcp_authorization_approved',
+	MCP_AUTHORIZATION_DENIED = 'mcp_authorization_denied',
+	MCP_TOKEN_ISSUED = 'mcp_token_issued',
+	MCP_TOKEN_REFRESHED = 'mcp_token_refreshed',
+	MCP_AUTHORIZATION_REVOKED = 'mcp_authorization_revoked',
+	MCP_TOOL_INVOKED = 'mcp_tool_invoked',
+	MCP_RATE_LIMIT_EXCEEDED = 'mcp_rate_limit_exceeded',
 }
 
 export interface AuditLogInput {
