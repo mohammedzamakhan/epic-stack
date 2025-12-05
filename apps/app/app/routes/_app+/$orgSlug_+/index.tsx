@@ -26,6 +26,7 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { setUserDefaultOrganization } from '#app/utils/organizations.server.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 
@@ -47,6 +48,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		// Handle case where organization is not found or user is not a member
 		throw new Response('Not Found', { status: 404 })
 	}
+
+	// Set this organization as the user's default organization
+	// This ensures that when a user visits an organization's dashboard, it becomes their default
+	await setUserDefaultOrganization(userId, organization.id)
 
 	// Calculate appropriate date range - show since org creation or last 30 days, whichever is shorter
 	const now = new Date()
