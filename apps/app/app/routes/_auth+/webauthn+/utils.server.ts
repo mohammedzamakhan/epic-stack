@@ -11,7 +11,7 @@ export const passkeyCookie = createCookie('webauthn-challenge', {
 	sameSite: 'lax',
 	httpOnly: true,
 	maxAge: 60 * 60 * 2,
-	secure: process.env.NODE_ENV === 'production',
+	secure: true,
 	secrets: [process.env.SESSION_SECRET],
 })
 

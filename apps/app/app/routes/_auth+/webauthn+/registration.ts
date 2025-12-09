@@ -14,44 +14,50 @@ import {
 } from './utils.server.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const userId = await requireUserId(request)
-	const passkeys = await prisma.passkey.findMany({
-		where: { userId },
-		select: { id: true },
-	})
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: { email: true, name: true, username: true },
-	})
+	try {
+		const userId = await requireUserId(request)
+		const passkeys = await prisma.passkey.findMany({
+			where: { userId },
+			select: { id: true },
+		})
+		const user = await prisma.user.findUniqueOrThrow({
+			where: { id: userId },
+			select: { email: true, name: true, username: true },
+		})
 
-	const config = getWebAuthnConfig(request)
-	const options = await generateRegistrationOptions({
-		rpName: config.rpName,
-		rpID: config.rpID,
-		userName: user.username,
-		userID: new TextEncoder().encode(userId),
-		userDisplayName: user.name ?? user.email,
-		attestationType: 'none',
-		excludeCredentials: passkeys,
-		authenticatorSelection: {
-			residentKey: 'preferred',
-			userVerification: 'preferred',
-		},
-	})
+		const config = getWebAuthnConfig(request)
 
-	return Response.json(
-		{ options },
-		{
-			headers: {
-				'Set-Cookie': await passkeyCookie.serialize(
-					PasskeyCookieSchema.parse({
-						challenge: options.challenge,
-						userId: options.user.id,
-					}),
-				),
+		const options = await generateRegistrationOptions({
+			rpName: config.rpName,
+			rpID: config.rpID,
+			userName: user.username,
+			userID: new TextEncoder().encode(userId),
+			userDisplayName: user.name ?? user.email,
+			attestationType: 'none',
+			excludeCredentials: passkeys,
+			authenticatorSelection: {
+				residentKey: 'preferred',
+				userVerification: 'preferred',
 			},
-		},
-	)
+		})
+
+		return Response.json(
+			{ options },
+			{
+				headers: {
+					'Set-Cookie': await passkeyCookie.serialize(
+						PasskeyCookieSchema.parse({
+							challenge: options.challenge,
+							userId: options.user.id,
+						}),
+					),
+				},
+			},
+		)
+	} catch (error) {
+		console.error('WebAuthn registration loader error:', error)
+		return Response.json({ error: getErrorMessage(error) }, { status: 500 })
+	}
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -61,25 +67,32 @@ export async function action({ request }: Route.ActionArgs) {
 		const body = await request.json()
 		const result = RegistrationResponseSchema.safeParse(body)
 		if (!result.success) {
+			console.error('Invalid registration response:', result.error)
 			throw new Error('Invalid registration response')
 		}
 
 		const data = result.data
 
-		// Get challenge from cookie
 		const passkeyCookieData = await passkeyCookie.parse(
 			request.headers.get('Cookie'),
 		)
 		const parsedPasskeyCookieData =
 			PasskeyCookieSchema.safeParse(passkeyCookieData)
 		if (!parsedPasskeyCookieData.success) {
+			console.error(
+				'Cookie parse error:',
+				passkeyCookieData,
+				parsedPasskeyCookieData.error,
+			)
 			throw new Error('No challenge found')
 		}
 		const { challenge, userId: webauthnUserId } = parsedPasskeyCookieData.data
 
-		const domain = new URL(getDomainUrl(request)).hostname
+		const domainUrl = getDomainUrl(request)
+
+		const domain = new URL(domainUrl).hostname
 		const rpID = domain
-		const origin = getDomainUrl(request)
+		const origin = domainUrl
 
 		const verification = await verifyRegistrationResponse({
 			response: data,
@@ -91,6 +104,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 		const { verified, registrationInfo } = verification
 		if (!verified || !registrationInfo) {
+			console.error('Verification failed:', verification)
 			throw new Error('Registration verification failed')
 		}
 		const { credential, credentialDeviceType, credentialBackedUp, aaguid } =
@@ -105,7 +119,6 @@ export async function action({ request }: Route.ActionArgs) {
 			throw new Error('This passkey has already been registered')
 		}
 
-		// Create new passkey in database
 		await prisma.passkey.create({
 			data: {
 				id: credential.id,
@@ -126,6 +139,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 	} catch (error) {
+		console.error('Passkey registration error:', error)
 		if (error instanceof Response) throw error
 
 		return Response.json(

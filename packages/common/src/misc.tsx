@@ -70,8 +70,12 @@ export function getDomainUrl(request: Request) {
 		request.headers.get('X-Forwarded-Host') ??
 		request.headers.get('host') ??
 		new URL(request.url).host
-	const protocol = request.headers.get('X-Forwarded-Proto') ?? 'http'
-	return `${protocol}://${host}`
+	const protocol =
+		(request.headers.get('X-Forwarded-Proto') ?? 'http')
+			.split(',')[0]
+			?.trim() ?? 'http'
+	const hostValue = host.split(',')[0]?.trim() ?? host
+	return `${protocol}://${hostValue}`
 }
 
 export function getReferrerRoute(request: Request) {

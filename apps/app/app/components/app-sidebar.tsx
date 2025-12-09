@@ -1,6 +1,7 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
+import { getCrossAppUrl } from '@repo/common/url'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import {
@@ -195,22 +196,33 @@ function OrganizationSidebar({
 }) {
 	const { _ } = useLingui()
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
+	const [helpUrl, setHelpUrl] = useState('https://docs.epic-stack.me:2999')
 
 	useEffect(() => {
+		setHelpUrl(getCrossAppUrl('docs', '', 'https://docs.epic-stack.me:2999'))
+	}, [])
+
+	useEffect(() => {
+		if (!extensionId) return
+
 		// Type assertion for Chrome extension API
 		const chromeWindow = window as any
-		if (chromeWindow?.chrome?.runtime) {
-			chromeWindow.chrome.runtime.sendMessage(
-				extensionId,
-				{ type: 'PING' },
-				() => {
-					if (chromeWindow.chrome.runtime.lastError) {
-						setIsExtensionInstalled(false)
-					} else {
-						setIsExtensionInstalled(true)
-					}
-				},
-			)
+		if (chromeWindow?.chrome?.runtime?.sendMessage) {
+			try {
+				chromeWindow.chrome.runtime.sendMessage(
+					extensionId,
+					{ type: 'PING' },
+					() => {
+						if (chromeWindow.chrome?.runtime?.lastError) {
+							setIsExtensionInstalled(false)
+						} else {
+							setIsExtensionInstalled(true)
+						}
+					},
+				)
+			} catch {
+				setIsExtensionInstalled(false)
+			}
 		}
 	}, [extensionId])
 	const navMain = [
@@ -269,7 +281,9 @@ function OrganizationSidebar({
 	]
 
 	const navSecondary = [
-		...(!isExtensionInstalled
+		...(!isExtensionInstalled &&
+		extensionId &&
+		extensionId !== 'your-extension-id'
 			? [
 					{
 						title: _(msg`Get chrome extension`),
@@ -286,7 +300,7 @@ function OrganizationSidebar({
 		},
 		{
 			title: _(msg`Get help`),
-			url: 'http://docs.epic-stack.me:2999',
+			url: helpUrl,
 			icon: CircleHelpIcon,
 			target: '_blank',
 		},

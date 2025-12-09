@@ -24,6 +24,10 @@ export function getCrossAppUrl(
 	path: string = '',
 	fallbackUrl?: string,
 ): string {
+	if (typeof window === 'undefined') {
+		return fallbackUrl ?? `http://${targetSubdomain}.epic-stack.me:2999${path}`
+	}
+
 	const currentHost = window.location.host
 	const hostParts = currentHost.split(':')
 	const hostWithoutPort = hostParts[0] ?? currentHost

@@ -7,7 +7,6 @@ import { useState } from 'react'
 import { Form, useRevalidator } from 'react-router'
 import { z } from 'zod'
 
-
 // Registration options schema for passkeys (exported for reuse)
 export const RegistrationOptionsSchema = z.object({
 	options: z.object({
@@ -65,7 +64,16 @@ export function PasskeyManager({
 	async function handlePasskeyRegistration() {
 		try {
 			setError(null)
-			const resp = await fetch('/webauthn/registration')
+			const resp = await fetch('/webauthn/registration', {
+				credentials: 'include',
+			})
+
+			if (!resp.ok) {
+				const text = await resp.text()
+				console.error('GET /webauthn/registration failed:', resp.status, text)
+				throw new Error(`Server error: ${text}`)
+			}
+
 			const jsonResult = await resp.json()
 			const parsedResult = RegistrationOptionsSchema.parse(jsonResult)
 
@@ -76,17 +84,39 @@ export function PasskeyManager({
 			const verificationResp = await fetch('/webauthn/registration', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
 				body: JSON.stringify(regResult),
 			})
 
 			if (!verificationResp.ok) {
-				throw new Error('Failed to verify registration')
+				const text = await verificationResp.text()
+				console.error(
+					'POST /webauthn/registration failed:',
+					verificationResp.status,
+					text,
+				)
+				let errorMsg = 'Failed to verify registration'
+				try {
+					const errorData = JSON.parse(text) as { error?: string }
+					errorMsg = errorData.error || errorMsg
+				} catch {
+					errorMsg = text || errorMsg
+				}
+				throw new Error(errorMsg)
 			}
 
 			void revalidator.revalidate()
 		} catch (err) {
 			console.error('Failed to create passkey:', err)
-			setError('Failed to create passkey. Please try again.')
+			if (err instanceof Error && err.name === 'NotAllowedError') {
+				setError('Passkey registration was cancelled.')
+			} else if (err instanceof Error && err.name === 'AbortError') {
+				setError('Passkey registration was cancelled.')
+			} else if (err instanceof Error) {
+				setError(err.message || 'Failed to create passkey. Please try again.')
+			} else {
+				setError('Failed to create passkey. Please try again.')
+			}
 		}
 	}
 
@@ -130,8 +160,8 @@ export function PasskeyManager({
 								</div>
 								<div className="text-muted-foreground text-sm">
 									<Trans>
-										Registered {formatDistanceToNow(new Date(passkey.createdAt))}{' '}
-										ago
+										Registered{' '}
+										{formatDistanceToNow(new Date(passkey.createdAt))} ago
 									</Trans>
 								</div>
 							</div>

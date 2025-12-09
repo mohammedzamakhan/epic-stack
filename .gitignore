@@ -65,3 +65,5 @@ packages/**/*.d.ts.map
 .github/instructions/nx.instructions.md
 static
 graph.html
+
+/other/ssl

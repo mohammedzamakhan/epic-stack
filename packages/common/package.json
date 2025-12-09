@@ -13,9 +13,9 @@
       "default": "./index.ts"
     },
     "./url": {
-      "types": "./src/url.client.ts",
-      "import": "./src/url.client.ts",
-      "default": "./src/url.client.ts"
+      "types": "./src/url.ts",
+      "import": "./src/url.ts",
+      "default": "./src/url.ts"
     },
     "./cookie-consent": {
       "types": "./src/cookie-consent.server.ts",

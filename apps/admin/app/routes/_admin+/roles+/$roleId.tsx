@@ -1,6 +1,7 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Breadcrumb,
@@ -41,7 +42,6 @@ import { useState } from 'react'
 import { Form, Link, useLoaderData, redirect } from 'react-router'
 import { z } from 'zod'
 
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/$roleId.ts'
 
@@ -607,11 +607,7 @@ function PermissionGroup({
 								<Form
 									method="post"
 									key={permission.id}
-									onChange={(e) => {
-										// Auto-submit when checkbox changes
-										const form = e.currentTarget
-										setTimeout(() => form.requestSubmit(), 0)
-									}}
+									id={`form-${permission.id}`}
 								>
 									<input
 										type="hidden"
@@ -627,12 +623,25 @@ function PermissionGroup({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center space-x-2">
 											<Checkbox
-												id={permission.id}
+												id={`org_perm_${permission.action}_${entity}_${permission.access}`}
 												name="permission"
 												checked={isChecked}
-												onChange={() => {}} // Handled by form onChange
+												onCheckedChange={() => {
+													const form = document.getElementById(
+														`form-${permission.id}`,
+													) as HTMLFormElement
+													form?.requestSubmit()
+												}}
 											/>
-											<Label htmlFor={permission.id} className="font-medium">
+											<input
+												type="hidden"
+												name="checked"
+												value={isChecked ? 'on' : ''}
+											/>
+											<Label
+												htmlFor={`org_perm_${permission.action}_${entity}_${permission.access}`}
+												className="font-medium"
+											>
 												{permission.action}
 											</Label>
 										</div>

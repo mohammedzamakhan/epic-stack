@@ -1,14 +1,14 @@
+import { prisma } from '@repo/database'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { FeatureFlags } from '#app/components/admin/feature-flags.tsx'
-import { prisma } from '@repo/database'
 
 export async function loader({ request: _request }: LoaderFunctionArgs) {
 	const flags = await prisma.configFlag.findMany()
 	return { flags }
 }
 
-const schema = z
+const createUpdateSchema = z
 	.object({
 		key: z.string(),
 		value: z.string(),
@@ -43,11 +43,30 @@ const schema = z
 		},
 	)
 
+const deleteSchema = z.object({
+	id: z.string().min(1, 'ID is required for delete'),
+})
+
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()
-	const { _action, ...values } = Object.fromEntries(formData)
+	const _action = formData.get('_action')
 
-	const result = schema.safeParse(values)
+	if (_action === 'delete') {
+		const result = deleteSchema.safeParse({ id: formData.get('id') })
+		if (!result.success) {
+			return Response.json(
+				{ errors: result.error.flatten().fieldErrors },
+				{ status: 400 },
+			)
+		}
+		await prisma.configFlag.delete({
+			where: { id: result.data.id },
+		})
+		return Response.json({ ok: true })
+	}
+
+	const values = Object.fromEntries(formData)
+	const result = createUpdateSchema.safeParse(values)
 	if (!result.success) {
 		return Response.json(
 			{ errors: result.error.flatten().fieldErrors },
@@ -70,50 +89,62 @@ export async function action({ request }: ActionFunctionArgs) {
 			value = result.data.value as string
 	}
 
-	if (_action === 'create') {
-		await prisma.configFlag.create({
-			data: {
-				key: values.key as string,
-				value: value,
-				level: values.level as any,
-				organizationId: values.organizationId as string | undefined,
-				userId: values.userId as string | undefined,
-			},
-		})
-	}
+	try {
+		if (_action === 'create') {
+			const existing = await prisma.configFlag.findFirst({
+				where: {
+					key: result.data.key,
+					level: result.data.level,
+					organizationId: result.data.organizationId ?? null,
+					userId: result.data.userId ?? null,
+				},
+			})
+			if (existing) {
+				return Response.json(
+					{ error: 'A flag with this key already exists at this level' },
+					{ status: 400 },
+				)
+			}
+			await prisma.configFlag.create({
+				data: {
+					key: result.data.key,
+					value: value,
+					level: result.data.level,
+					organizationId: result.data.organizationId || undefined,
+					userId: result.data.userId || undefined,
+				},
+			})
+		}
 
-	if (_action === 'update') {
-		if (!result.data.id) {
+		if (_action === 'update') {
+			if (!result.data.id) {
+				return Response.json(
+					{ errors: { id: ['ID is required for update'] } },
+					{ status: 400 },
+				)
+			}
+			await prisma.configFlag.update({
+				where: { id: result.data.id },
+				data: {
+					key: result.data.key,
+					value: value,
+					level: result.data.level,
+					organizationId: result.data.organizationId,
+					userId: result.data.userId,
+				},
+			})
+		}
+
+		return Response.json({ ok: true })
+	} catch (error: any) {
+		if (error?.code === 'P2002') {
 			return Response.json(
-				{ errors: { id: ['ID is required for update'] } },
+				{ error: 'A flag with this key already exists at this level' },
 				{ status: 400 },
 			)
 		}
-		await prisma.configFlag.update({
-			where: { id: result.data.id },
-			data: {
-				key: result.data.key,
-				value: value,
-				level: result.data.level,
-				organizationId: result.data.organizationId,
-				userId: result.data.userId,
-			},
-		})
+		throw error
 	}
-
-	if (_action === 'delete') {
-		if (!result.data.id) {
-			return Response.json(
-				{ errors: { id: ['ID is required for delete'] } },
-				{ status: 400 },
-			)
-		}
-		await prisma.configFlag.delete({
-			where: { id: result.data.id },
-		})
-	}
-
-	return Response.json({ ok: true })
 }
 
 export default function FeatureFlagsAdmin() {
