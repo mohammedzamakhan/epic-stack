@@ -76,7 +76,7 @@ export function OnboardingChecklist({
 	if (variant === 'sidebar') {
 		return (
 			<div
-				className={`group bg-background relative overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 group-data-[collapsible=icon]:hidden ${className}`}
+				className={`group bg-background relative mx-2 mt-2 overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 group-data-[collapsible=icon]:hidden ${className}`}
 				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
 				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
 			>
@@ -154,12 +154,12 @@ export function OnboardingChecklist({
 				</CardAction>
 			</CardHeader>
 
-			<CardContent className="space-y-6 p-2 py-0">
+			<CardContent className="space-y-6 p-0">
 				<div>
 					{progress.steps.map((step, index) => (
 						<div
 							key={step.id}
-							className={`group hover:bg-muted/50 flex items-center gap-4 rounded-lg p-2 transition-colors ${
+							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 transition-colors ${
 								index > 0 ? 'border-border border-t border-dashed' : ''
 							}`}
 						>

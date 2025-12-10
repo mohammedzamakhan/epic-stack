@@ -54,7 +54,7 @@ function UpgradeAccountCard({
 		return null
 
 	return (
-		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mb-4 gap-1 border p-2 group-data-[collapsible=icon]:hidden">
+		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mx-2 mb-4 gap-1 border p-2 group-data-[collapsible=icon]:hidden">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
 					<Trans>
@@ -313,9 +313,9 @@ function OrganizationSidebar({
 
 	return (
 		<>
-			<SidebarHeader className="px-0">
+			<SidebarHeader className="px-2 pt-2 pb-0">
 				<Link to="/">
-					<Logo className="text-md m-1 mx-4" />
+					<Logo className="text-md m-1 mx-2" />
 				</Link>
 				<TeamSwitcher />
 			</SidebarHeader>

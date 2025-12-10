@@ -1,21 +1,20 @@
+import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
-import * as React from 'react'
 import { cn } from '../utils/cn'
 
 const buttonVariants = cva(
-	"focus-visible:ring-ring aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-1 focus-visible:outline-none active:scale-97 disabled:pointer-events-none disabled:opacity-50 data-[theme=light]:text-shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+	"focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 	{
 		variants: {
 			variant: {
-				default:
-					'bg-primary text-primary-foreground hover:bg-primary/90 border-[0.5px] border-white/25 shadow-sm ring-1 shadow-black/10 ring-[color-mix(in_oklab,var(--foreground)_15%,var(--primary))] [--ring-color:color-mix(in_oklab,var(--foreground)_15%,var(--primary))]',
+				default: 'bg-primary text-primary-foreground hover:bg-primary/90',
 				destructive:
-					'bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 border-[0.5px] border-white/15 text-white shadow-sm shadow-red-900/10',
+					'bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
 				outline:
-					'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border-input border shadow-sm shadow-black/5',
+					'bg-background hover:bg-accent hover:text-muted-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
 				secondary:
-					'bg-secondary text-secondary-foreground hover:bg-secondary/80 border-[0.5px] border-white/20 shadow-sm shadow-black/8',
+					'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 				ghost:
 					'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
 				link: 'text-primary underline-offset-4 hover:underline',
@@ -25,6 +24,8 @@ const buttonVariants = cva(
 				sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
 				lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
 				icon: 'size-9',
+				'icon-sm': 'size-8',
+				'icon-lg': 'size-10',
 			},
 		},
 		defaultVariants: {

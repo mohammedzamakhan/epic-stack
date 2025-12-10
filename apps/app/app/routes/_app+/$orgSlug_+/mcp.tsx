@@ -491,13 +491,13 @@ function NewApiKeyModal({
 							</div>
 						</div>
 
-						<div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+						<div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
 							<div className="flex items-start gap-3">
 								<Icon
 									name="alert-triangle"
-									className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600"
+									className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400"
 								/>
-								<div className="text-sm text-yellow-800">
+								<div className="text-sm text-yellow-800 dark:text-yellow-200">
 									<div className="mb-1 font-semibold">
 										<Trans>Important:</Trans>
 									</div>
@@ -633,10 +633,6 @@ function SetupInstructionsCard({
 				[`epic-notes-${organization.name.toLowerCase().replace(/\s+/g, '-')}`]:
 					{
 						url: `${serverUrl}/sse`,
-						env: {
-							AUTHORIZATION_URL: `${serverUrl}/authorize`,
-							TOKEN_URL: `${serverUrl}/token`,
-						},
 					},
 			},
 		},
@@ -652,10 +648,6 @@ function SetupInstructionsCard({
 						url: `${serverUrl}/sse`,
 						disabled: false,
 						autoApprove: ['find_user', 'get_user_notes'],
-						env: {
-							AUTHORIZATION_URL: `${serverUrl}/authorize`,
-							TOKEN_URL: `${serverUrl}/token`,
-						},
 					},
 			},
 		},
@@ -676,8 +668,8 @@ function SetupInstructionsCard({
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{/* Setup Steps */}
-				<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-					<div className="text-sm text-blue-900">
+				<div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+					<div className="text-sm text-blue-800 dark:text-blue-200">
 						<div className="mb-2 font-semibold">
 							<Trans>OAuth Setup Flow:</Trans>
 						</div>
@@ -741,8 +733,8 @@ function SetupInstructionsCard({
 				</div>
 
 				{/* Info Box */}
-				<div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-					<div className="text-sm text-amber-900">
+				<div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+					<div className="text-sm text-amber-800 dark:text-amber-200">
 						<div className="mb-1 font-semibold">
 							<Trans>Note:</Trans>
 						</div>
@@ -870,8 +862,8 @@ function RevokeConfirmationDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="rounded-lg border border-red-200 bg-red-50 p-4">
-					<div className="text-sm text-red-800">
+				<div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+					<div className="text-sm text-red-800 dark:text-red-200">
 						<div className="mb-1 font-semibold">
 							<Trans>This will:</Trans>
 						</div>
@@ -1047,15 +1039,6 @@ export default function McpPage() {
 					<AuthorizedClientsCard
 						authorizations={mcpAuthorizations}
 						onRevokeClick={handleRevokeClick}
-					/>
-				</AnnotatedSection>
-
-				<AnnotatedSection>
-					<ApiKeysCard
-						organization={organization}
-						apiKeys={apiKeys}
-						actionData={actionData}
-						onCreateClick={() => setIsCreateModalOpen(true)}
 					/>
 				</AnnotatedSection>
 

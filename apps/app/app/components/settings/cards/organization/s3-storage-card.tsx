@@ -182,17 +182,17 @@ export function S3StorageCard({
 						{(fields.s3Enabled.value === 'on' ||
 							organization.s3Config?.isEnabled) && (
 							<div className="space-y-4 border-t pt-4">
-								<div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-									<div className="flex items-start gap-2">
+								<div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+									<div className="flex gap-3">
 										<Icon
 											name="alert-triangle"
-											className="mt-0.5 h-5 w-5 text-yellow-600"
+											className="h-5 w-5 shrink-0 self-start text-yellow-800 dark:text-yellow-200"
 										/>
 										<div className="text-sm">
-											<p className="font-medium text-yellow-800">
+											<p className="font-medium text-yellow-800 dark:text-yellow-200">
 												<Trans>Important Security Note</Trans>
 											</p>
-											<p className="mt-1 text-yellow-700">
+											<p className="mt-1 text-yellow-700 dark:text-yellow-400">
 												<Trans>
 													Your S3 credentials will be encrypted and stored
 													securely. However, we recommend using IAM credentials
