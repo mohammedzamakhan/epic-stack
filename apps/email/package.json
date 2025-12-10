@@ -8,16 +8,20 @@
     "clean": "git clean -xdf .cache .nx dist node_modules"
   },
   "dependencies": {
+    "@playwright/test": "1.57.0",
     "@react-email/components": "0.0.41",
     "@repo/email": "*",
+    "@sentry/react-router": "10.29.0",
+    "ai": "5.0.108",
+    "litefs-js": "2.0.2",
     "react": "^19.1.1",
     "react-email": "4.3.2"
   },
   "devDependencies": {
-    "@react-email/preview-server": "4.3.2",
+    "@react-email/preview-server": "^5.0.7",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
-    "next": "15.5.2",
+    "next": "^15.5.7",
     "typescript": "^5.8.3"
   }
 }

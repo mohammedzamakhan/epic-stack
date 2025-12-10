@@ -52,12 +52,18 @@ vi.mock('stripe', () => {
 		},
 	}
 
-	const mockStripeConstructor = vi.fn(() => mockStripe) as any
-	// Add createFetchHttpClient as a static method on the constructor
-	mockStripeConstructor.createFetchHttpClient = vi.fn(() => ({}))
+	class MockStripeConstructor {
+		constructor() {
+			return mockStripe
+		}
+
+		static createFetchHttpClient() {
+			return {}
+		}
+	}
 
 	return {
-		default: mockStripeConstructor,
+		default: MockStripeConstructor,
 	}
 })
 

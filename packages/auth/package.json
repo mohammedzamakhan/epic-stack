@@ -23,8 +23,13 @@
   },
   "dependencies": {
     "@epic-web/totp": "^4.0.1",
+    "@playwright/test": "1.57.0",
+    "@react-email/preview-server": "5.0.7",
     "@repo/cache": "*",
     "@repo/database": "*",
+    "@sentry/react-router": "10.29.0",
+    "ai": "5.0.108",
+    "litefs-js": "2.0.2",
     "react-router": "^7.8.1"
   },
   "devDependencies": {
@@ -32,6 +37,6 @@
     "@types/node": "^22.15.3",
     "@vitest/coverage-v8": "^2.0.0",
     "typescript": "^5.8.3",
-    "vitest": "^2.0.0"
+    "vitest": "^4.0.15"
   }
 }

@@ -61,7 +61,7 @@ export const links: Route.LinksFunction = () => {
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
 	return [
 		{ title: data ? brand.name : getErrorTitle() },
 		{ name: 'description', content: brand.products.admin.description },

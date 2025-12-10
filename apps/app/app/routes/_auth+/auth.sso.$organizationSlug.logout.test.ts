@@ -123,7 +123,12 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -160,6 +165,7 @@ test('handles logout when organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
 		thrownResponse = response as Response
@@ -188,7 +194,12 @@ test('handles logout when SSO not configured', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -219,7 +230,12 @@ test('handles logout when SSO disabled', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -245,7 +261,12 @@ test('handles logout when no session exists', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -286,7 +307,12 @@ test('handles logout when no SSO session exists', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -350,7 +376,12 @@ test('continues logout even if token revocation fails', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -391,7 +422,12 @@ test('handles custom redirect URL from query params', async () => {
 	// The loader should throw the logout response
 	let thrownResponse: Response | undefined
 	try {
-		await loader({ request, params: PARAMS, context: {} })
+		await loader({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug/logout',
+		})
 	} catch (response) {
 		thrownResponse = response as Response
 	}

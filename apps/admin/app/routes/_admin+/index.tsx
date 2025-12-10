@@ -233,19 +233,21 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-3">
-							{metrics.subscriptionStats.map((stat) => (
-								<div
-									key={stat.subscriptionStatus || 'none'}
-									className="text-center"
-								>
-									<div className="text-2xl font-bold">
-										{stat._count.subscriptionStatus}
+							{metrics.subscriptionStats.map(
+								(stat: (typeof metrics.subscriptionStats)[number]) => (
+									<div
+										key={stat.subscriptionStatus || 'none'}
+										className="text-center"
+									>
+										<div className="text-2xl font-bold">
+											{stat._count.subscriptionStatus}
+										</div>
+										<p className="text-muted-foreground text-sm capitalize">
+											{stat.subscriptionStatus || 'No Subscription'}
+										</p>
 									</div>
-									<p className="text-muted-foreground text-sm capitalize">
-										{stat.subscriptionStatus || 'No Subscription'}
-									</p>
-								</div>
-							))}
+								),
+							)}
 						</div>
 					</CardContent>
 				</Card>

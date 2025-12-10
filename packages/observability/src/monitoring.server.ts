@@ -1,5 +1,4 @@
 import { PrismaInstrumentation } from '@prisma/instrumentation'
-import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import * as Sentry from '@sentry/react-router'
 
 export function init() {
@@ -21,7 +20,6 @@ export function init() {
 				prismaInstrumentation: new PrismaInstrumentation(),
 			}),
 			Sentry.httpIntegration(),
-			nodeProfilingIntegration(),
 		],
 		tracesSampler(samplingContext) {
 			// ignore healthcheck transactions by other services (consul, etc.)

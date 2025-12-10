@@ -114,11 +114,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 		},
 		subscriptionStatuses: subscriptionStatuses
 			.map((s) => s.subscriptionStatus)
-			.filter(Boolean)
+			.filter((s): s is string => s !== null)
 			.sort(),
 		planNames: planNames
 			.map((p) => p.planName)
-			.filter(Boolean)
+			.filter((p): p is string => p !== null)
 			.sort(),
 		filters: {
 			search: searchQuery,

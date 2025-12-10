@@ -110,7 +110,12 @@ test('successful SSO authentication creates session for existing user', async ()
 	vi.mocked(ssoAuthService.createSSOSession).mockResolvedValue({} as any)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} })
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	})
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -166,7 +171,12 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 	vi.mocked(ssoAuthService.createSSOSession).mockResolvedValue({} as any)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} })
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	})
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -196,6 +206,7 @@ test('handles organization not found', async () => {
 		request,
 		params: { organizationSlug: 'non-existent-org' },
 		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -212,9 +223,12 @@ test('handles SSO not configured for organization', async () => {
 	vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(null)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} }).catch(
-		(e) => e,
-	)
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -233,9 +247,12 @@ test('handles SSO disabled for organization', async () => {
 	})
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} }).catch(
-		(e) => e,
-	)
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -255,9 +272,12 @@ test('handles OAuth callback failure', async () => {
 	)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} }).catch(
-		(e) => e,
-	)
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -289,9 +309,12 @@ test('handles user provisioning failure', async () => {
 	)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} }).catch(
-		(e) => e,
-	)
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -320,7 +343,12 @@ test('handles user already logged in', async () => {
 	})
 
 	const request = await setupRequest({ sessionId: session.id })
-	const response = await loader({ request, params: PARAMS, context: {} })
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	})
 
 	expect(response).toHaveRedirect('/settings/profile')
 	await expect(response).toSendToast(
@@ -352,7 +380,12 @@ test('handles banned user login attempt', async () => {
 	vi.mocked(ssoAuthService.provisionUser).mockResolvedValue(bannedUser)
 
 	const request = await setupRequest()
-	const response = await loader({ request, params: PARAMS, context: {} })
+	const response = await loader({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug/callback',
+	})
 
 	expect(response).toHaveRedirect('/login?banned=true')
 })

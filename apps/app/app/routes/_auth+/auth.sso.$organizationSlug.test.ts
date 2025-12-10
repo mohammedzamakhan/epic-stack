@@ -57,7 +57,12 @@ test('successful SSO initiation redirects to identity provider', async () => {
 	vi.mocked(ssoAuthService.initiateAuth).mockResolvedValue(mockRedirectResponse)
 
 	const request = await setupRequest()
-	const response = await action({ request, params: PARAMS, context: {} })
+	const response = await action({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug',
+	})
 
 	expect(response.status).toBe(302)
 	expect(response.headers.get('Location')).toContain(
@@ -79,6 +84,7 @@ test('handles organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -95,6 +101,7 @@ test('handles missing organization slug', async () => {
 			request,
 			params: { organizationSlug: '' },
 			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -112,7 +119,12 @@ test('handles SSO not configured for organization', async () => {
 	const request = await setupRequest()
 
 	try {
-		await action({ request, params: PARAMS, context: {} })
+		await action({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug',
+		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -134,7 +146,12 @@ test('handles SSO authentication service error', async () => {
 	const request = await setupRequest()
 
 	try {
-		await action({ request, params: PARAMS, context: {} })
+		await action({
+			request,
+			params: PARAMS,
+			context: {},
+			unstable_pattern: '/auth/sso/:organizationSlug',
+		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Error)
@@ -159,7 +176,12 @@ test('preserves redirect URL in cookie', async () => {
 
 	const redirectTo = '/dashboard'
 	const request = await setupRequest({ redirectTo })
-	const response = await action({ request, params: PARAMS, context: {} })
+	const response = await action({
+		request,
+		params: PARAMS,
+		context: {},
+		unstable_pattern: '/auth/sso/:organizationSlug',
+	})
 
 	// Check that redirect cookie was set
 	const setCookieHeader = response.headers.get('set-cookie')

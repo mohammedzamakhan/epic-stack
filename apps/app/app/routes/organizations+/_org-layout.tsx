@@ -1,4 +1,5 @@
 import { Outlet, useRouteLoaderData } from 'react-router'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Logo } from '#app/components/icons/logo.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
@@ -16,7 +17,22 @@ export default function OrganizationLayout() {
 			<header className="border-b p-2 shadow-xs">
 				<div className="container flex items-center justify-between p-2">
 					<Logo />
-					<div>{rootData?.user?.name}</div>
+					<div className="flex items-center gap-2">
+						<Avatar className="h-8 w-8">
+							<AvatarImage
+								src={
+									rootData?.user?.image
+										? `/resources/images?objectKey=${rootData.user.image.objectKey}`
+										: undefined
+								}
+								alt={rootData?.user?.name || 'User avatar'}
+							/>
+							<AvatarFallback className="rounded-lg">
+								{rootData?.user?.name?.charAt(0).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+						<span>{rootData?.user?.name}</span>
+					</div>
 				</div>
 			</header>
 			<div className="bg-muted/10 flex-1">

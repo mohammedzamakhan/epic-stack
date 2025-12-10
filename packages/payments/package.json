@@ -18,7 +18,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@playwright/test": "1.57.0",
     "@polar-sh/sdk": "^0.8.0",
+    "@react-email/preview-server": "5.0.7",
+    "@sentry/react-router": "10.29.0",
+    "ai": "5.0.108",
+    "litefs-js": "2.0.2",
     "stripe": "^18.5.0"
   },
   "devDependencies": {
@@ -26,6 +31,6 @@
     "@types/node": "^22.15.3",
     "@vitest/coverage-v8": "^2.0.0",
     "typescript": "^5.8.3",
-    "vitest": "^2.0.0"
+    "vitest": "^4.0.15"
   }
 }

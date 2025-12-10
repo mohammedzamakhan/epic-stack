@@ -131,14 +131,16 @@ export default function Connections({ loaderData }: Route.ComponentProps) {
 						<Trans>Here are your current connections:</Trans>
 					</p>
 					<ul className="flex flex-col gap-4">
-						{loaderData.connections.map((c) => (
-							<li key={c.id}>
-								<Connection
-									connection={c}
-									canDelete={loaderData.canDeleteConnections}
-								/>
-							</li>
-						))}
+						{loaderData.connections.map(
+							(c: (typeof loaderData.connections)[number]) => (
+								<li key={c.id}>
+									<Connection
+										connection={c}
+										canDelete={loaderData.canDeleteConnections}
+									/>
+								</li>
+							),
+						)}
 					</ul>
 				</div>
 			) : (
@@ -168,7 +170,7 @@ function Connection({
 }) {
 	const deleteFetcher = useFetcher<typeof action>()
 	const [infoOpen, setInfoOpen] = useState(false)
-	const icon = providerIcons[connection.providerName]
+	const icon = providerIcons[connection.providerName as ProviderName]
 	return (
 		<div className="flex justify-between gap-2">
 			<span className={`inline-flex items-center gap-1.5`}>
