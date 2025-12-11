@@ -1,6 +1,10 @@
-
 import { Button } from '@repo/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
 import { useState, useRef, type ReactNode } from 'react'
@@ -15,6 +19,7 @@ interface BasePhotoUploadProps {
 		selectedFile: File | null
 	}) => ReactNode
 	size?: 'small' | 'normal'
+	showAvatarChars?: boolean
 }
 
 export function BasePhotoUpload({
@@ -24,6 +29,7 @@ export function BasePhotoUpload({
 	imgClassName = 'ring-muted hover:ring-primary/50 h-full w-full rounded-full object-cover ring-2 ring-offset-2',
 	renderForm,
 	size = 'normal',
+	showAvatarChars = false,
 }: BasePhotoUploadProps) {
 	const [showPhotoForm, setShowPhotoForm] = useState(false)
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -54,15 +60,26 @@ export function BasePhotoUpload({
 					className="sr-only"
 					onChange={handleFileSelect}
 				/>
-				<div onClick={handlePhotoClick} className="cursor-pointer">
-					<Img
-						src={imgSrc}
-						alt={alt}
-						className={imgClassName}
-						width={832}
-						height={832}
-						isAboveFold
-					/>
+				<div
+					onClick={handlePhotoClick}
+					className="h-full w-full cursor-pointer"
+				>
+					{!imgSrc && showAvatarChars ? (
+						<div className={imgClassName}>
+							<span className="text-background items-center justify-center">
+								{alt.slice(0, 2).toUpperCase()}
+							</span>
+						</div>
+					) : (
+						<Img
+							src={imgSrc}
+							alt={alt}
+							className={imgClassName}
+							width={832}
+							height={832}
+							isAboveFold
+						/>
+					)}
 					<Button
 						variant="outline"
 						className={`absolute ${buttonPosition} flex ${size === 'small' ? 'size-8' : 'size-10'} dark:bg-background dark:hover:bg-muted hover:ring-primary/50 items-center justify-center rounded-full p-0 ring-2 ring-transparent ring-offset-2`}

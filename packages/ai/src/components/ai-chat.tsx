@@ -1,6 +1,7 @@
 'use client'
 
-import { useChat, type Message as AIMessage } from 'ai/react'
+import { useChat, type UIMessage } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
 import {
@@ -29,22 +30,40 @@ interface AIChatProps {
 
 // Message Content Component
 function MessageContentRenderer({
-	content,
+	parts,
 	isUser,
 }: {
-	content: string
+	parts: UIMessage['parts']
 	isUser: boolean
 }) {
 	if (isUser) {
-		return <div className="whitespace-pre-wrap">{content}</div>
+		return (
+			<div className="whitespace-pre-wrap">
+				{parts.map((part, index) => {
+					if (part.type === 'text') {
+						return <span key={index}>{part.text}</span>
+					}
+					return null
+				})}
+			</div>
+		)
 	}
 
 	// Use the Response component for AI messages with markdown support
-	return <Response>{content}</Response>
+	return (
+		<div>
+			{parts.map((part, index) => {
+				if (part.type === 'text') {
+					return <Response key={index}>{part.text}</Response>
+				}
+				return null
+			})}
+		</div>
+	)
 }
 
 // Smart suggestions based on context and conversation state
-const getSmartSuggestions = (messages: AIMessage[], hasContent: boolean) => {
+const getSmartSuggestions = (messages: UIMessage[], hasContent: boolean) => {
 	if (messages.length === 0) {
 		// Initial suggestions when no conversation has started
 		return hasContent
@@ -63,11 +82,14 @@ const getSmartSuggestions = (messages: AIMessage[], hasContent: boolean) => {
 				]
 	}
 
-	const _lastMessage = messages[messages.length - 1]
 	const conversationContext = messages
 		.slice(-3)
-		.map((m) => m.content.toLowerCase())
+		.map((m) => {
+			const textParts = m.parts.filter((p) => p.type === 'text')
+			return textParts.map((p) => (p.type === 'text' ? p.text : '')).join(' ')
+		})
 		.join(' ')
+		.toLowerCase()
 
 	// Context-aware follow-up suggestions
 	if (
@@ -116,10 +138,12 @@ const getSmartSuggestions = (messages: AIMessage[], hasContent: boolean) => {
 }
 
 export function AIChat({ noteId }: AIChatProps) {
-	const { messages, input, handleInputChange, handleSubmit, isLoading } =
-		useChat({
+	const [input, setInput] = useState('')
+	const { messages, sendMessage, status } = useChat({
+		transport: new DefaultChatTransport({
 			api: `/api/ai/chat?noteId=${noteId}`,
-		})
+		}),
+	})
 
 	const [suggestions, setSuggestions] = useState<string[]>([])
 	const [showSuggestions, setShowSuggestions] = useState(true)
@@ -132,14 +156,20 @@ export function AIChat({ noteId }: AIChatProps) {
 	}, [messages, input])
 
 	const handleSuggestionClick = (suggestion: string) => {
-		handleInputChange({ target: { value: suggestion } } as any)
+		setInput(suggestion)
 		setShowSuggestions(false)
 	}
 
 	const handleFormSubmit = (e: React.FormEvent) => {
-		handleSubmit(e)
-		setShowSuggestions(false)
+		e.preventDefault()
+		if (input.trim()) {
+			sendMessage({ text: input })
+			setInput('')
+			setShowSuggestions(false)
+		}
 	}
+
+	const isLoading = status === 'streaming'
 
 	return (
 		<div className="flex h-full flex-col">
@@ -161,7 +191,7 @@ export function AIChat({ noteId }: AIChatProps) {
 							<Message key={message.id} from={message.role}>
 								<MessageContent>
 									<MessageContentRenderer
-										content={message.content}
+										parts={message.parts}
 										isUser={message.role === 'user'}
 									/>
 								</MessageContent>
@@ -222,7 +252,7 @@ export function AIChat({ noteId }: AIChatProps) {
 						<PromptInputTextarea
 							value={input}
 							onChange={(e) => {
-								handleInputChange(e)
+								setInput(e.target.value)
 								setShowSuggestions(e.target.value.trim().length === 0)
 							}}
 							placeholder="Ask about this note..."

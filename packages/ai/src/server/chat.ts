@@ -1,8 +1,8 @@
 import { google } from '@ai-sdk/google'
-import { streamText, type Message } from 'ai'
+import { streamText, type CoreMessage } from 'ai'
 
 export type ChatStreamOptions = {
-	messages: Message[]
+	messages: CoreMessage[]
 	systemPrompt: string
 	modelName?: string
 	maxDuration?: number
@@ -14,8 +14,11 @@ export type ChatStreamOptions = {
  * @returns A streamable response that can be converted to a DataStreamResponse
  */
 export function createChatStream(options: ChatStreamOptions) {
-	const { messages, systemPrompt, modelName = 'models/gemini-2.5-flash' } =
-		options
+	const {
+		messages,
+		systemPrompt,
+		modelName = 'models/gemini-2.5-flash',
+	} = options
 
 	const result = streamText({
 		model: google(modelName),

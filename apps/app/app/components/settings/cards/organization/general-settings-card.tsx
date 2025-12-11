@@ -1,7 +1,14 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans } from '@lingui/macro'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
 import { StatusButton } from '@repo/ui/status-button'
 import { useFetcher } from 'react-router'
@@ -51,12 +58,14 @@ export function GeneralSettingsCard({
 					<Trans>General Settings</Trans>
 				</CardTitle>
 				<CardDescription>
-					<Trans>Manage your organization's name, slug, and profile image.</Trans>
+					<Trans>
+						Manage your organization's name, slug, and profile image.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
 				<div className="mb-6 flex flex-col gap-6 md:flex-row">
-					<div className="w-32 flex-shrink-0">
+					<div className="h-32 w-32 flex-shrink-0">
 						<OrganizationPhoto organization={organization} size="small" />
 					</div>
 					<div className="flex-grow">
@@ -68,12 +77,18 @@ export function GeneralSettingsCard({
 							/>
 							<FieldGroup>
 								<Field
-									labelProps={{ htmlFor: fields.name.id, children: <Trans>Name</Trans> }}
+									labelProps={{
+										htmlFor: fields.name.id,
+										children: <Trans>Name</Trans>,
+									}}
 									inputProps={getInputProps(fields.name, { type: 'text' })}
 									errors={fields.name.errors}
 								/>
 								<Field
-									labelProps={{ htmlFor: fields.slug.id, children: <Trans>Slug</Trans> }}
+									labelProps={{
+										htmlFor: fields.slug.id,
+										children: <Trans>Slug</Trans>,
+									}}
 									inputProps={getInputProps(fields.slug, { type: 'text' })}
 									errors={fields.slug.errors}
 								/>

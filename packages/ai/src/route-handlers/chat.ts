@@ -1,13 +1,13 @@
 import { invariant } from '@epic-web/invariant'
 import type { PrismaClient } from '@prisma/client'
-import type { Message } from 'ai'
+import type { CoreMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
 
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
 	prisma: PrismaClient
 	createChatStream: (params: {
-		messages: Message[]
+		messages: CoreMessage[]
 		systemPrompt: string
 	}) => any
 	buildNoteChatSystemPrompt: (basePrompt: string, noteContext: any) => string
@@ -80,7 +80,7 @@ export async function handleChat(
 		}
 	}
 
-	const { messages } = (await request.json()) as { messages: Message[] }
+	const { messages } = (await request.json()) as { messages: CoreMessage[] }
 
 	// Build note context
 	const noteContext = {

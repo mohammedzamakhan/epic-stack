@@ -1,5 +1,6 @@
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
 import { OrganizationPhotoForm } from '#app/components/settings/organization-photo-form.tsx'
+import { cn } from '@repo/ui'
 
 export const uploadOrgPhotoActionIntent = 'upload-org-photo'
 export const deleteOrgPhotoActionIntent = 'delete-org-photo'
@@ -23,17 +24,25 @@ export function OrganizationPhoto({
 	function getOrgImgSrc(objectKey?: string | null) {
 		return objectKey
 			? `/resources/images?objectKey=${encodeURIComponent(objectKey)}`
-			: '/img/user.png'
+			: ''
 	}
 
 	return (
 		<BasePhotoUpload
 			imgSrc={getOrgImgSrc(organization.image?.objectKey)}
 			alt={organization.name}
+			showAvatarChars={true}
 			dialogTitle="Update Organization Logo"
-			imgClassName="bg-secondary h-full w-full rounded-md object-contain"
+			imgClassName={cn(
+				'bg-primary h-full w-full rounded-md object-contain',
+				!organization.image?.objectKey &&
+					'flex items-center justify-center p-4 text-6xl font-semibold',
+			)}
 			renderForm={({ setIsOpen, selectedFile }) => (
-				<OrganizationPhotoForm setIsOpen={setIsOpen} selectedFile={selectedFile} />
+				<OrganizationPhotoForm
+					setIsOpen={setIsOpen}
+					selectedFile={selectedFile}
+				/>
 			)}
 			size={size}
 		/>

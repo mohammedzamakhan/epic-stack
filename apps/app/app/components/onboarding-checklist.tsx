@@ -159,7 +159,7 @@ export function OnboardingChecklist({
 					{progress.steps.map((step, index) => (
 						<div
 							key={step.id}
-							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 transition-colors ${
+							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 px-4 transition-colors ${
 								index > 0 ? 'border-border border-t border-dashed' : ''
 							}`}
 						>

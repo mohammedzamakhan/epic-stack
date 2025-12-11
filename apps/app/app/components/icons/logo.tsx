@@ -9,12 +9,7 @@ export function Logo({
 	size?: number
 }) {
 	return (
-		<div
-			className={cn(
-				'flex items-center gap-2 group-data-[collapsible=icon]:m-4',
-				className,
-			)}
-		>
+		<div className={cn('flex items-center gap-2', className)}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				height="18"

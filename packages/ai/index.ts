@@ -1,3 +1,6 @@
+// Re-export types from ai package
+export type { CoreMessage } from 'ai'
+
 // Server utilities
 export * from './src/server/index.js'
 

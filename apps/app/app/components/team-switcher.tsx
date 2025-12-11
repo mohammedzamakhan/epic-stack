@@ -17,6 +17,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from '@repo/ui/sidebar'
 import * as React from 'react'
 import { Link, useSubmit } from 'react-router'
@@ -24,6 +25,7 @@ import { useUserOrganizations } from '#app/utils/organizations.ts'
 
 export function TeamSwitcher() {
 	const submit = useSubmit()
+	const { isMobile, toggleSidebar } = useSidebar()
 
 	const userOrganizations = useUserOrganizations() || {
 		organizations: [],
@@ -55,7 +57,7 @@ export function TeamSwitcher() {
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="group bg-background relative h-14 rounded-xl border px-3 py-2 transition-all duration-200"
+							className="group bg-background relative h-14 border px-3 py-2 transition-all duration-200"
 						>
 							<div className="relative flex w-full items-center gap-3">
 								{/* Enhanced Avatar Container */}
@@ -121,35 +123,41 @@ export function TeamSwitcher() {
 						{organizations.map((userOrg, index) => (
 							<DropdownMenuItem
 								key={userOrg.organization.id}
-								onClick={() =>
+								onClick={() => {
 									handleOrganizationSelect(userOrg.organization.id)
-								}
-								className="gap-2 p-2"
+									if (isMobile) toggleSidebar()
+								}}
+								className="group/item gap-2 p-2"
 							>
-								<div className="flex size-6 items-center justify-center rounded border">
-									<Avatar className="size-6 rounded">
-										{userOrg.organization.image?.objectKey ? (
-											<AvatarImage
-												src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}
-												alt={
-													userOrg.organization.image?.altText ||
-													`${userOrg.organization.name} logo`
-												}
-												className="grayscale-0"
-											/>
-										) : null}
-										<AvatarFallback>
-											{userOrg.organization.name
-												.slice(0, 2)
-												.toLocaleUpperCase()}
-										</AvatarFallback>
-									</Avatar>
+								<div className="relative">
+									<div className="from-sidebar-primary/20 to-sidebar-primary/40 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 absolute inset-0 rounded bg-gradient-to-br transition-colors" />
+									<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 group-hover/item:text-sidebar-primary group-hover/item:ring-sidebar-primary relative flex size-6 items-center justify-center rounded bg-gradient-to-br ring-1 transition-colors">
+										<Avatar className="size-6 rounded">
+											{userOrg.organization.image?.objectKey ? (
+												<AvatarImage
+													src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}
+													alt={
+														userOrg.organization.image?.altText ||
+														`${userOrg.organization.name} logo`
+													}
+													className="object-cover"
+												/>
+											) : null}
+											<AvatarFallback className="text-sidebar-primary-foreground group-hover/item:text-sidebar-primary bg-transparent text-xs font-semibold transition-colors">
+												{userOrg.organization.name.slice(0, 2).toUpperCase()}
+											</AvatarFallback>
+										</Avatar>
+									</div>
 								</div>
 								{userOrg.organization.name}
 								<DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
 							</DropdownMenuItem>
 						))}
-						<DropdownMenuItem asChild className="gap-2 p-2">
+						<DropdownMenuItem
+							asChild
+							className="gap-2 p-2"
+							onClick={() => isMobile && toggleSidebar()}
+						>
 							<Link to={`/${activeTeam.slug}/settings/members`}>
 								<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
 									<Icon name="user-plus" className="size-4" />

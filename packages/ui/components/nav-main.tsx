@@ -11,6 +11,11 @@ import {
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
 	Icon,
+	useSidebar,
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
 } from '../index.js'
 
 export function NavMain({
@@ -30,6 +35,7 @@ export function NavMain({
 }) {
 	const [openItems, setOpenItems] = useState<Set<string>>(new Set())
 	const iconRefs = useRef<{ [key: string]: any }>({})
+	const { state } = useSidebar()
 
 	const toggleItem = (title: string) => {
 		setOpenItems((prev) => {
@@ -64,52 +70,93 @@ export function NavMain({
 					{items.map((item) => {
 						const hasSubItems = item.items && item.items.length > 0
 						const isOpen = openItems.has(item.title)
+						const isSidebarCollapsed = state === 'collapsed'
 
 						return (
 							<SidebarMenuItem key={item.title}>
 								{hasSubItems ? (
-									<>
-										<SidebarMenuButton
-											onClick={() => toggleItem(item.title)}
-											tooltip={item.title}
-											isActive={item.isActive}
-											className="w-full justify-between"
-											onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
-											onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
-										>
-											<div className="flex items-center gap-2">
-												{item.icon && (
-													<item.icon
-														ref={(ref: any) =>
-															(iconRefs.current[item.title] = ref)
-														}
-														size={16}
-													/>
-												)}
-												<span>{item.title}</span>
-											</div>
-											<Icon
-												name={isOpen ? 'chevron-down' : 'chevron-right'}
-												className="h-4 w-4 rtl:rotate-180"
-											/>
-										</SidebarMenuButton>
-										{isOpen && (
-											<SidebarMenuSub>
+									isSidebarCollapsed ? (
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<SidebarMenuButton
+													tooltip={item.title}
+													isActive={item.isActive}
+													onMouseEnter={() =>
+														handleMenuItemMouseEnter(item.title)
+													}
+													onMouseLeave={() =>
+														handleMenuItemMouseLeave(item.title)
+													}
+												>
+													<div className="flex items-center gap-2">
+														{item.icon && (
+															<item.icon
+																ref={(ref: any) =>
+																	(iconRefs.current[item.title] = ref)
+																}
+																size={16}
+															/>
+														)}
+														<span>{item.title}</span>
+													</div>
+												</SidebarMenuButton>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent side="right" align="start">
 												{item.items?.map((subItem) => (
-													<SidebarMenuSubItem key={subItem.title}>
-														<SidebarMenuSubButton
-															asChild
-															isActive={subItem.isActive}
-														>
-															<Link to={subItem.url}>
-																<span>{subItem.title}</span>
-															</Link>
-														</SidebarMenuSubButton>
-													</SidebarMenuSubItem>
+													<DropdownMenuItem key={subItem.title} asChild>
+														<Link to={subItem.url}>{subItem.title}</Link>
+													</DropdownMenuItem>
 												))}
-											</SidebarMenuSub>
-										)}
-									</>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									) : (
+										<>
+											<SidebarMenuButton
+												onClick={() => toggleItem(item.title)}
+												tooltip={item.title}
+												isActive={item.isActive}
+												className="w-full justify-between"
+												onMouseEnter={() =>
+													handleMenuItemMouseEnter(item.title)
+												}
+												onMouseLeave={() =>
+													handleMenuItemMouseLeave(item.title)
+												}
+											>
+												<div className="flex items-center gap-2">
+													{item.icon && (
+														<item.icon
+															ref={(ref: any) =>
+																(iconRefs.current[item.title] = ref)
+															}
+															size={16}
+														/>
+													)}
+													<span>{item.title}</span>
+												</div>
+												<Icon
+													name={isOpen ? 'chevron-down' : 'chevron-right'}
+													className="h-4 w-4 rtl:rotate-180"
+												/>
+											</SidebarMenuButton>
+											{isOpen && (
+												<SidebarMenuSub>
+													{item.items?.map((subItem) => (
+														<SidebarMenuSubItem key={subItem.title}>
+															<SidebarMenuSubButton
+																asChild
+																isActive={subItem.isActive}
+															>
+																<Link to={subItem.url}>
+																	<span>{subItem.title}</span>
+																</Link>
+															</SidebarMenuSubButton>
+														</SidebarMenuSubItem>
+													))}
+												</SidebarMenuSub>
+											)}
+										</>
+									)
 								) : (
 									<SidebarMenuButton
 										asChild

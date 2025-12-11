@@ -2,9 +2,24 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@repo/ui/sidebar'
+import {
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	useSidebar,
+} from '@repo/ui/sidebar'
 import { useRef } from 'react'
 import { Link, Form, useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
@@ -27,7 +42,7 @@ export function NavUser({
 	}
 	userPreference?: 'light' | 'dark' | 'system' | null
 }) {
-	const { isMobile } = useSidebar()
+	const { isMobile, toggleSidebar } = useSidebar()
 	const iconRefs = useRef<{ [key: string]: any }>({})
 	const themeFetcher = useFetcher()
 	const requestInfo = useOptionalRequestInfo()
@@ -103,6 +118,7 @@ export function NavUser({
 					>
 						<DropdownMenuGroup>
 							<DropdownMenuItem
+								onClick={() => isMobile && toggleSidebar()}
 								asChild
 								className="gap-2"
 								onMouseEnter={() => handleMenuItemMouseEnter('account')}
@@ -117,6 +133,7 @@ export function NavUser({
 								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem
+								onClick={() => isMobile && toggleSidebar()}
 								asChild
 								className="gap-2"
 								onMouseEnter={() => handleMenuItemMouseEnter('organizations')}
@@ -205,7 +222,10 @@ export function NavUser({
 									ref={(ref: any) => (iconRefs.current['logout'] = ref)}
 									size={16}
 								/>
-								<button type="submit" className="w-full ltr:text-left rtl:text-right">
+								<button
+									type="submit"
+									className="w-full ltr:text-left rtl:text-right"
+								>
 									<Trans>Log out</Trans>
 								</button>
 							</Form>
