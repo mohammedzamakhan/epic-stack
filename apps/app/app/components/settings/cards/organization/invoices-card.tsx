@@ -1,8 +1,16 @@
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Link } from 'react-router'
+
+import { EmptyState } from '#app/components/empty-state.tsx'
 
 type Invoice = {
 	id?: string
@@ -62,18 +70,13 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 					View and download your billing invoices
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="p-0">
 				{invoices.length === 0 ? (
-					<div className="py-8 text-center">
-						<Icon
-							name="file-text"
-							className="text-muted-foreground mx-auto h-12 w-12"
-						/>
-						<p className="text-muted-foreground mt-4">
-							No invoices found. Invoices will appear here once you have an
-							active subscription.
-						</p>
-					</div>
+					<EmptyState
+						title="No invoices found"
+						description="Invoices will appear here once you have an active subscription."
+						icons={['file-text']}
+					/>
 				) : (
 					<div className="space-y-4">
 						{invoices.map((invoice) => (

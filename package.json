@@ -9,8 +9,10 @@
   "scripts": {
     "build": "node packages/ui/generate-icons.js && nx run-many -t build",
     "dev": "npm-run-all --parallel dev:proxy dev:all",
+    "dev:http": "npm-run-all --parallel dev:proxy:http dev:all",
     "dev:all": "nx run-many -t dev -p app web cms admin studio docs --parallel=20",
     "dev:proxy": "node dev-proxy.js",
+    "dev:proxy:http": "PROXY_PROTOCOL=http node dev-proxy.js",
     "dev:web": "nx run-many -t dev -p web cms",
     "dev:app": "nx run app:dev",
     "dev:mobile": "nx run mobile:dev",

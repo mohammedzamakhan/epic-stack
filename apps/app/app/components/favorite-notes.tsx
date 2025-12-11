@@ -1,7 +1,21 @@
 import { Trans } from '@lingui/macro'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@repo/ui/sidebar'
+import {
+	SidebarGroup,
+	SidebarGroupLabel,
+	SidebarMenu,
+	SidebarMenuAction,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	useSidebar,
+} from '@repo/ui/sidebar'
 import { useRef } from 'react'
 import { Form, Link } from 'react-router'
 
@@ -97,7 +111,7 @@ export default function FavoriteNotes({
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem asChild>
+								<DropdownMenuItem variant="destructive" asChild>
 									<Form
 										method="post"
 										action={`/${orgSlug}/notes/${favorite.note.id}`}

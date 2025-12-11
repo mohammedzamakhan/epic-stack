@@ -13,6 +13,12 @@ import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import {
@@ -21,13 +27,6 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from '@repo/ui/input-group'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@repo/ui/select'
 import { Separator } from '@repo/ui/separator'
 import { useState } from 'react'
 import { Form } from 'react-router'
@@ -393,45 +392,39 @@ function InviteFieldset({
 						className="gap-0 rounded-r-lg py-1 pr-1.5"
 						align="inline-end"
 					>
-						<Select
-							name={inviteFields.role.name}
-							value={role.value}
-							onValueChange={(value) => {
-								role.change(value)
-							}}
-							onOpenChange={(open) => {
-								if (!open) {
-									role.blur()
-								}
-							}}
-						>
-							<SelectTrigger className="border-r-none h-auto rounded-r-md border-1 border-l bg-transparent shadow-none focus:ring-0">
-								<SelectValue>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<InputGroupButton variant="ghost">
 									{roles.find((r) => r.value === role.value)?.label}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent>
+									<Icon name="chevron-down" />
+								</InputGroupButton>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent side="top" align="end">
 								{roles.map((roleOption) => (
-									<SelectItem key={roleOption.value} value={roleOption.value}>
+									<DropdownMenuItem
+										key={roleOption.value}
+										onClick={() => role.change(roleOption.value)}
+										className="group"
+									>
 										<div className="flex flex-col">
 											<span className="font-medium">{roleOption.label}</span>
-											<span className="text-muted-foreground text-xs">
+											<span className="text-muted-foreground group-data-[highlighted]:text-accent-foreground text-xs">
 												{roleOption.description}
 											</span>
 										</div>
-									</SelectItem>
+									</DropdownMenuItem>
 								))}
-							</SelectContent>
-						</Select>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						{index > 0 && (
 							<InputGroupButton
 								variant="ghost"
 								size="icon-sm"
-								{...form.remove.getButtonProps({
-									name: fields.invites.name,
-									index,
-								})}
+								type="button"
+								onClick={() =>
+									form.remove({ name: fields.invites.name, index })
+								}
 							>
 								<Icon name="trash-2" className="h-4 w-4" />
 							</InputGroupButton>
