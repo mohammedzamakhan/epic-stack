@@ -50,6 +50,17 @@ export function NavUser({
 	// Check if user has admin role
 	const isAdmin = user.roles?.some((role) => role.name === 'admin') ?? false
 
+	const getInitials = (name: string) => {
+		const parts = name
+			.trim()
+			.split(/\s+/)
+			.filter((part) => part.length > 0)
+		if (parts.length >= 2) {
+			return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase()
+		}
+		return name.slice(0, 2).toUpperCase()
+	}
+
 	// Generate admin URL by replacing app. with admin.
 	const getAdminUrl = () => {
 		if (typeof window === 'undefined') return ''
@@ -95,11 +106,11 @@ export function NavUser({
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
 						>
 							<UserAvatar
 								user={{
-									name: user.name,
+									name: getInitials(user.name),
 									email: user.email,
 									image: user.avatar,
 								}}

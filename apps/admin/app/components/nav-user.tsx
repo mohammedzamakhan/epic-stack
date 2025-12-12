@@ -41,6 +41,17 @@ export function NavUser({
 	const themeFetcher = useFetcher()
 	const requestInfo = useOptionalRequestInfo()
 
+	const getInitials = (name: string) => {
+		const parts = name
+			.trim()
+			.split(/\s+/)
+			.filter((part) => part.length > 0)
+		if (parts.length >= 2) {
+			return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase()
+		}
+		return name.slice(0, 2).toUpperCase()
+	}
+
 	// Theme switching logic
 	const optimisticMode = useOptimisticThemeMode()
 	const mode = optimisticMode ?? userPreference ?? 'system'
@@ -72,11 +83,11 @@ export function NavUser({
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
 						>
 							<Avatar className="h-8 w-8">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+								<AvatarFallback>{getInitials(user.name)}</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">{user.name}</span>

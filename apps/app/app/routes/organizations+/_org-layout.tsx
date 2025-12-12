@@ -18,7 +18,7 @@ export default function OrganizationLayout() {
 				<div className="container flex items-center justify-between p-2">
 					<Logo />
 					<div className="flex items-center gap-2">
-						<Avatar className="h-8 w-8">
+						<Avatar className="h-8 w-8 rounded-full">
 							<AvatarImage
 								src={
 									rootData?.user?.image
@@ -27,7 +27,7 @@ export default function OrganizationLayout() {
 								}
 								alt={rootData?.user?.name || 'User avatar'}
 							/>
-							<AvatarFallback className="rounded-lg">
+							<AvatarFallback className="rounded-full">
 								{rootData?.user?.name?.charAt(0).toUpperCase()}
 							</AvatarFallback>
 						</Avatar>

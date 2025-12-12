@@ -205,45 +205,15 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 
 					<div class="flex flex-col space-y-6 p-6 mt-8">
 						<div class="space-y-4">
-							<div>
-								<button
-									id="mobile-operation-types-trigger"
-									class="w-full flex justify-between items-center text-lg py-2"
-								>
-									<span>Operation Types</span>
-									<svg
-										class="h-4 w-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M19 9l-7 7-7-7"></path>
-									</svg>
-								</button>
-								<div
-									id="mobile-operation-types-content"
-									class="ml-4 mt-2 space-y-2 hidden"
-								>
-									<a href="/operations/brokerages" class="block py-2 text-base">
-										Freight Brokerages
-									</a>
-									<a href="/operations/forwarders" class="block py-2 text-base">
-										Freight Forwarders
-									</a>
-									<a href="/operations/carriers" class="block py-2 text-base">
-										Carriers
-									</a>
-									<a href="/operations/shippers" class="block py-2 text-base">
-										Shippers
-									</a>
-								</div>
-							</div>
-							<a href="/product" class="block text-lg py-2"> Product </a>
-							<a href="/company" class="block text-lg py-2"> Company </a>
+							<a href="/blog" class="block text-lg py-2"> Blog </a>
+							<a href="/pricing" class="block text-lg py-2"> Pricing </a>
+							<a
+								href={docsUrl}
+								target="_blank"
+								class="block text-lg py-2"
+							>
+								Docs
+							</a>
 						</div>
 
 						<div class="space-y-3 pt-6 border-t border-border/50">
