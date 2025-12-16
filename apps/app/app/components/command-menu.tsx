@@ -8,10 +8,11 @@ import {
 	CommandItem,
 	CommandList,
 	CommandShortcut,
+	Command,
 } from '@repo/ui/command'
 import { Icon } from '@repo/ui/icon'
 import { useEffect, useState, useCallback } from 'react'
-import { useRouteLoaderData, useFetcher, Link } from 'react-router'
+import { useRouteLoaderData, useFetcher, Link, useNavigate } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
 
 interface Note {
@@ -36,6 +37,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const fetcher = useFetcher()
 	const { _ } = useLingui()
+	const navigate = useNavigate()
 
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
@@ -95,48 +97,51 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 			onOpenChange={onOpenChange}
 			className="rounded-lg border shadow-md md:min-w-[650px]"
 		>
-			<CommandInput
-				placeholder={_(t`Search notes...`)}
-				value={query}
-				onValueChange={setQuery}
-			/>
-			<CommandList className="md:min-h-[400px]">
-				<CommandEmpty>
-					{loading ? (
-						<Trans>Loading notes...</Trans>
-					) : (
-						<Trans>No notes found.</Trans>
-					)}
-				</CommandEmpty>
+			<Command>
+				<CommandInput
+					placeholder={_(t`Search notes...`)}
+					value={query}
+					onValueChange={setQuery}
+				/>
+				<CommandList className="md:min-h-[400px]">
+					<CommandEmpty>
+						{loading ? (
+							<Trans>Loading notes...</Trans>
+						) : (
+							<Trans>No notes found.</Trans>
+						)}
+					</CommandEmpty>
 
-				<CommandGroup heading={_(t`Actions`)}>
-					<CommandItem asChild>
-						<Link
-							to={`/${orgSlug}/notes/new`}
-							onClick={() => onOpenChange(false)}
+					<CommandGroup heading={_(t`Actions`)}>
+						<CommandItem
+							onSelect={() => {
+								void navigate(`/${orgSlug}/notes/new`)
+								onOpenChange(false)
+							}}
 						>
 							<Icon name="plus" />
 							<Trans>Create new note</Trans>
-						</Link>
-					</CommandItem>
-					<CommandItem asChild>
-						<Link
-							to={`/${orgSlug}/settings/members`}
-							onClick={() => onOpenChange(false)}
+						</CommandItem>
+						<CommandItem
+							onSelect={() => {
+								void navigate(`/${orgSlug}/settings/members`)
+								onOpenChange(false)
+							}}
 						>
 							<Icon name="user-plus" />
 							<Trans>Invite new members</Trans>
-						</Link>
-					</CommandItem>
-				</CommandGroup>
+						</CommandItem>
+					</CommandGroup>
 
-				{notes.length > 0 && (
-					<CommandGroup heading={_(t`Notes`)}>
-						{notes.map((note) => (
-							<CommandItem key={note.id} asChild>
-								<Link
-									to={`/${orgSlug}/notes/${note.id}`}
-									onClick={() => onOpenChange(false)}
+					{notes.length > 0 && (
+						<CommandGroup heading={_(t`Notes`)}>
+							{notes.map((note) => (
+								<CommandItem
+									key={note.id}
+									onSelect={() => {
+										void navigate(`/${orgSlug}/notes/${note.id}`)
+										onOpenChange(false)
+									}}
 								>
 									<Icon name="file-text" />
 									<div className="flex flex-col items-start">
@@ -145,47 +150,50 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 											<Trans>by {note.createdByName}</Trans>
 										</span>
 									</div>
-								</Link>
-							</CommandItem>
-						))}
-					</CommandGroup>
-				)}
-				<CommandGroup heading={_(t`Settings`)}>
-					<CommandItem asChild>
-						<Link to="/profile" onClick={() => onOpenChange(false)}>
+								</CommandItem>
+							))}
+						</CommandGroup>
+					)}
+					<CommandGroup heading={_(t`Settings`)}>
+						<CommandItem
+							onSelect={() => {
+								void navigate('/profile')
+								onOpenChange(false)
+							}}
+						>
 							<Icon name="user" />
 							<span>
 								<Trans>Account settings</Trans>
 							</span>
 							<CommandShortcut>⌘P</CommandShortcut>
-						</Link>
-					</CommandItem>
-					<CommandItem asChild>
-						<Link
-							to={`/${orgSlug}/settings/billing`}
-							onClick={() => onOpenChange(false)}
+						</CommandItem>
+						<CommandItem
+							onSelect={() => {
+								void navigate(`/${orgSlug}/settings/billing`)
+								onOpenChange(false)
+							}}
 						>
 							<Icon name="credit-card" />
 							<span>
 								<Trans>Billing</Trans>
 							</span>
 							<CommandShortcut>⌘B</CommandShortcut>
-						</Link>
-					</CommandItem>
-					<CommandItem asChild>
-						<Link
-							to={`/${orgSlug}/settings`}
-							onClick={() => onOpenChange(false)}
+						</CommandItem>
+						<CommandItem
+							onSelect={() => {
+								void navigate(`/${orgSlug}/settings`)
+								onOpenChange(false)
+							}}
 						>
 							<Icon name="settings" />
 							<span>
 								<Trans>Settings</Trans>
 							</span>
 							<CommandShortcut>⌘S</CommandShortcut>
-						</Link>
-					</CommandItem>
-				</CommandGroup>
-			</CommandList>
+						</CommandItem>
+					</CommandGroup>
+				</CommandList>
+			</Command>
 		</CommandDialog>
 	)
 }

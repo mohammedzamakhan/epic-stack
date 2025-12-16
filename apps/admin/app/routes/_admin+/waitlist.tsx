@@ -248,11 +248,11 @@ export default function AdminWaitlistPage() {
 
 			{data.launchStatus !== 'CLOSED_BETA' && (
 				<Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
-					<CardContent className="pt-6">
+					<CardContent>
 						<div className="flex items-start gap-2">
 							<Icon
 								name="help-circle"
-								className="mt-0.5 h-5 w-5 text-yellow-600 dark:text-yellow-400"
+								className="h-5 w-5 text-yellow-600 dark:text-yellow-400"
 							/>
 							<div className="text-sm text-yellow-800 dark:text-yellow-200">
 								Launch status is currently <strong>{data.launchStatus}</strong>.

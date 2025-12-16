@@ -252,7 +252,7 @@ export default function LoginPage({
 	const usernameFromParams = searchParams.get('username')
 
 	return (
-		<Card className="bg-muted/80 border-0 shadow-2xl">
+		<Card>
 			<CardHeader>
 				<CardTitle className="text-xl">
 					<Trans>Welcome back</Trans>

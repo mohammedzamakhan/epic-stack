@@ -1,12 +1,30 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@repo/ui/dropdown-menu'
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@repo/ui/table'
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -353,11 +371,11 @@ export function AdminOrganizationsTable({
 					</div>
 					<Select
 						value={subscriptionStatusFilter || 'all'}
-						onValueChange={handleSubscriptionStatusFilter}
+						onValueChange={(value) =>
+							handleSubscriptionStatusFilter(value as string)
+						}
 					>
-						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Filter by status" />
-						</SelectTrigger>
+						<SelectTrigger className="w-48">Filter by status</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All statuses</SelectItem>
 							{subscriptionStatuses.map((status) => (
@@ -367,10 +385,11 @@ export function AdminOrganizationsTable({
 							))}
 						</SelectContent>
 					</Select>
-					<Select value={planFilter || 'all'} onValueChange={handlePlanFilter}>
-						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Filter by plan" />
-						</SelectTrigger>
+					<Select
+						value={planFilter || 'all'}
+						onValueChange={(value) => handlePlanFilter(value as string)}
+					>
+						<SelectTrigger className="w-48">Filter by plan</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All plans</SelectItem>
 							{planNames.map((plan) => (
@@ -394,7 +413,7 @@ export function AdminOrganizationsTable({
 				</div>
 				<div className="flex items-center gap-2">
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
+						<DropdownMenuTrigger>
 							<Button variant="outline" size="sm">
 								Columns
 								<Icon name="chevron-down" className="ml-2 h-4 w-4" />
@@ -501,7 +520,7 @@ export function AdminOrganizationsTable({
 					</Label>
 					<Select
 						value={pagination.pageSize.toString()}
-						onValueChange={handlePageSizeChange}
+						onValueChange={(value) => handlePageSizeChange(value as string)}
 					>
 						<SelectTrigger className="w-20" id="rows-per-page">
 							<SelectValue />

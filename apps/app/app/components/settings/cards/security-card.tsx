@@ -1,7 +1,19 @@
 import { Trans, Plural } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@repo/ui/dialog'
 import { useState } from 'react'
 
 import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
@@ -52,7 +64,9 @@ export function SecurityCard({
 					<Trans>Security Settings</Trans>
 				</CardTitle>
 				<CardDescription>
-					<Trans>Manage your password and two-factor authentication settings.</Trans>
+					<Trans>
+						Manage your password and two-factor authentication settings.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -79,7 +93,7 @@ export function SecurityCard({
 							open={isPasswordModalOpen}
 							onOpenChange={setIsPasswordModalOpen}
 						>
-							<DialogTrigger asChild>
+							<DialogTrigger>
 								<Button variant="outline">
 									{hasPassword ? (
 										<Trans>Change Password</Trans>
@@ -118,7 +132,9 @@ export function SecurityCard({
 							</h3>
 							<p className="text-muted-foreground text-sm">
 								{isTwoFactorEnabled ? (
-									<Trans>Your account is secured with two-factor authentication</Trans>
+									<Trans>
+										Your account is secured with two-factor authentication
+									</Trans>
 								) : (
 									<Trans>Add an extra layer of security to your account</Trans>
 								)}
@@ -128,7 +144,7 @@ export function SecurityCard({
 							open={isTwoFactorModalOpen}
 							onOpenChange={setIsTwoFactorModalOpen}
 						>
-							<DialogTrigger asChild>
+							<DialogTrigger>
 								<Button
 									variant={isTwoFactorEnabled ? 'destructive' : 'outline'}
 								>
@@ -176,7 +192,7 @@ export function SecurityCard({
 							open={isPasskeyModalOpen}
 							onOpenChange={setIsPasskeyModalOpen}
 						>
-							<DialogTrigger asChild>
+							<DialogTrigger>
 								<Button variant="outline">
 									<Trans>Manage Passkeys</Trans>
 								</Button>

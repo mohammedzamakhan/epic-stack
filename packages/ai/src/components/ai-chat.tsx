@@ -3,7 +3,7 @@
 import { useChat, type UIMessage } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { Icon } from '@repo/ui/icon'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
 	Conversation,
 	ConversationContent,

@@ -3,5 +3,6 @@
 	"compilerOptions": {
 		"baseUrl": "."
 	},
-	"include": ["."]
+	"include": ["."],
+	"exclude": ["**/*.stories.tsx", "**/*.stories.ts"]
 }

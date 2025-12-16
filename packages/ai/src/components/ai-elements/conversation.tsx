@@ -34,6 +34,7 @@ export type ConversationScrollButtonProps = ComponentProps<typeof Button>
 
 export const ConversationScrollButton = ({
 	className,
+	nativeButton: ignoredNativeButton,
 	...props
 }: ConversationScrollButtonProps) => {
 	const { isAtBottom, scrollToBottom } = useStickToBottomContext()
@@ -49,6 +50,7 @@ export const ConversationScrollButton = ({
 					'absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full',
 					className,
 				)}
+				nativeButton
 				onClick={handleScrollToBottom}
 				size="icon"
 				type="button"

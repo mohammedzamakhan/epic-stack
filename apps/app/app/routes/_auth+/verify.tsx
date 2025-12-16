@@ -2,7 +2,13 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { StatusButton } from '@repo/ui/status-button'
 import { Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
@@ -89,7 +95,7 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 			}
 
 	return (
-		<Card className="bg-muted/80 border-0 shadow-2xl">
+		<Card>
 			<CardHeader>
 				<CardTitle className="text-xl">{currentHeading.title}</CardTitle>
 				<CardDescription>{currentHeading.description}</CardDescription>

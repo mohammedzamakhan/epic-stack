@@ -47,7 +47,6 @@ import { CacheConfirmationDialog } from '#app/components/admin-cache-confirmatio
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { useToast } from '#app/components/toaster.tsx'
 
-
 import {
 	cache,
 	lruCache,
@@ -331,10 +330,11 @@ export default function CacheAdminRoute() {
 							className="pl-9"
 						/>
 					</div>
-					<Select value={cacheType} onValueChange={handleTypeFilter}>
-						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Filter by cache type" />
-						</SelectTrigger>
+					<Select
+						value={cacheType}
+						onValueChange={(value) => handleTypeFilter(value as string)}
+					>
+						<SelectTrigger className="w-48">Filter by cache type</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All caches</SelectItem>
 							<SelectItem value="sqlite">SQLite only</SelectItem>
@@ -345,7 +345,7 @@ export default function CacheAdminRoute() {
 						value={limit}
 						onValueChange={(value) => {
 							const newSearchParams = new URLSearchParams(searchParams)
-							newSearchParams.set('limit', value)
+							newSearchParams.set('limit', value as string)
 							setSearchParams(newSearchParams)
 						}}
 					>
@@ -783,7 +783,7 @@ function CacheBulkActions({
 	return (
 		<>
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
+				<DropdownMenuTrigger>
 					<Button variant="outline" size="sm" disabled={isDeleting}>
 						Bulk Actions ({selectedKeys.size})
 						<Icon name="chevron-down" className="ml-2 h-4 w-4" />

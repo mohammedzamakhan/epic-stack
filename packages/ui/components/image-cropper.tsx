@@ -7,15 +7,15 @@ import ReactCrop, {
 } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-import { Button } from './button'
+import { Icon } from './icon'
+import { Button } from './ui/button'
 import {
 	Dialog,
 	DialogClose,
 	DialogContent,
 	DialogFooter,
 	DialogTrigger,
-} from './dialog'
-import { Icon } from './icon'
+} from './ui/dialog'
 
 function ImageCropperProvider({ children }: { children: React.ReactNode }) {
 	return <>{children}</>
@@ -26,7 +26,7 @@ interface ImageCropperProps {
 	setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 	selectedFile: File | null
 	onCropComplete: (croppedImageBlob: Blob) => void
-	children: React.ReactNode
+	children: React.ReactElement
 	aspect?: number
 	className?: string
 }
@@ -129,9 +129,7 @@ export function ImageCropper({
 	return (
 		<ImageCropperProvider>
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogTrigger asChild className={className}>
-					{children}
-				</DialogTrigger>
+				<DialogTrigger render={children} className={className}></DialogTrigger>
 				<DialogContent className="max-w-2xl gap-0 p-0">
 					<div className="size-full p-6">
 						{imagePreviewUrl && (
@@ -174,18 +172,20 @@ function ImageCropperFooter({
 }) {
 	return (
 		<DialogFooter className="justify-center p-6 pt-0">
-			<DialogClose asChild>
-				<Button
-					size="sm"
-					type="button"
-					className="w-fit"
-					variant="outline"
-					onClick={onCancel}
-				>
-					<Icon name="trash-2" className="mr-1.5 size-4" />
-					Cancel
-				</Button>
-			</DialogClose>
+			<DialogClose
+				render={
+					<Button
+						size="sm"
+						type="button"
+						className="w-fit"
+						variant="outline"
+						onClick={onCancel}
+					>
+						<Icon name="trash-2" className="mr-1.5 size-4" />
+						Cancel
+					</Button>
+				}
+			></DialogClose>
 			<Button
 				type="button"
 				size="sm"

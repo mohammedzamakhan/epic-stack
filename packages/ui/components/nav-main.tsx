@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 
+import { Icon } from './icon'
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
+} from './ui/dropdown-menu'
 import {
 	SidebarGroup,
 	SidebarGroupContent,
@@ -10,13 +17,8 @@ import {
 	SidebarMenuSub,
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
-	Icon,
 	useSidebar,
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-} from '../index.js'
+} from './ui/sidebar'
 
 export function NavMain({
 	items,
@@ -93,35 +95,40 @@ export function NavMain({
 								{hasSubItems ? (
 									isSidebarCollapsed ? (
 										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<SidebarMenuButton
-													tooltip={item.title}
-													isActive={item.isActive}
-													onMouseEnter={() =>
-														handleMenuItemMouseEnter(item.title)
-													}
-													onMouseLeave={() =>
-														handleMenuItemMouseLeave(item.title)
-													}
-												>
-													<div className="flex items-center gap-2">
-														{item.icon && (
-															<item.icon
-																ref={(ref: any) =>
-																	(iconRefs.current[item.title] = ref)
-																}
-																size={16}
-															/>
-														)}
-														<span>{item.title}</span>
-													</div>
-												</SidebarMenuButton>
-											</DropdownMenuTrigger>
+											<DropdownMenuTrigger
+												render={
+													<SidebarMenuButton
+														tooltip={item.title}
+														isActive={item.isActive}
+														onMouseEnter={() =>
+															handleMenuItemMouseEnter(item.title)
+														}
+														onMouseLeave={() =>
+															handleMenuItemMouseLeave(item.title)
+														}
+													>
+														<div className="flex items-center gap-2">
+															{item.icon && (
+																<item.icon
+																	ref={(ref: any) =>
+																		(iconRefs.current[item.title] = ref)
+																	}
+																	size={16}
+																/>
+															)}
+															<span>{item.title}</span>
+														</div>
+													</SidebarMenuButton>
+												}
+											></DropdownMenuTrigger>
 											<DropdownMenuContent side="right" align="start">
 												{item.items?.map((subItem) => (
-													<DropdownMenuItem key={subItem.title} asChild>
-														<Link to={subItem.url}>{subItem.title}</Link>
-													</DropdownMenuItem>
+													<DropdownMenuItem
+														key={subItem.title}
+														render={
+															<Link to={subItem.url}>{subItem.title}</Link>
+														}
+													></DropdownMenuItem>
 												))}
 											</DropdownMenuContent>
 										</DropdownMenu>
@@ -160,13 +167,13 @@ export function NavMain({
 													{item.items?.map((subItem) => (
 														<SidebarMenuSubItem key={subItem.title}>
 															<SidebarMenuSubButton
-																asChild
+																render={
+																	<Link to={subItem.url}>
+																		<span>{subItem.title}</span>
+																	</Link>
+																}
 																isActive={subItem.isActive}
-															>
-																<Link to={subItem.url}>
-																	<span>{subItem.title}</span>
-																</Link>
-															</SidebarMenuSubButton>
+															></SidebarMenuSubButton>
 														</SidebarMenuSubItem>
 													))}
 												</SidebarMenuSub>
@@ -175,24 +182,24 @@ export function NavMain({
 									)
 								) : (
 									<SidebarMenuButton
-										asChild
-										tooltip={item.title}
+										render={
+											<Link to={item.url} className="flex items-center gap-2">
+												{item.icon && (
+													<item.icon
+														ref={(ref: any) =>
+															(iconRefs.current[item.title] = ref)
+														}
+														size={16}
+													/>
+												)}
+												<span>{item.title}</span>
+											</Link>
+										}
+										// tooltip={item.title}
 										isActive={item.isActive}
 										onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
 										onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
-									>
-										<Link to={item.url} className="flex items-center gap-2">
-											{item.icon && (
-												<item.icon
-													ref={(ref: any) =>
-														(iconRefs.current[item.title] = ref)
-													}
-													size={16}
-												/>
-											)}
-											<span>{item.title}</span>
-										</Link>
-									</SidebarMenuButton>
+									></SidebarMenuButton>
 								)}
 							</SidebarMenuItem>
 						)

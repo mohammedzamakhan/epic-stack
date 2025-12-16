@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
-import { Button } from './button'
 import { Icon } from './icon'
+import { Button } from './ui/button'
 
 export function NotFoundPage() {
 	return (

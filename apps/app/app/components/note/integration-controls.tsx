@@ -1,8 +1,21 @@
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { StatusButton } from '@repo/ui/status-button'
 import { useState } from 'react'
 import * as React from 'react'
@@ -71,7 +84,7 @@ export function IntegrationControls({
 
 			{/* Manage Connections Dialog */}
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger asChild>
+				<DialogTrigger>
 					<Button
 						variant="outline"
 						size="sm"
@@ -270,11 +283,9 @@ function AddConnectionForm({
 				<label className="text-sm font-medium">Service</label>
 				<Select
 					value={selectedIntegration}
-					onValueChange={handleIntegrationChange}
+					onValueChange={(value) => handleIntegrationChange(value as string)}
 				>
-					<SelectTrigger>
-						<SelectValue placeholder="Select a service" />
-					</SelectTrigger>
+					<SelectTrigger>Select a service</SelectTrigger>
 					<SelectContent>
 						{integrations.map((integration) => (
 							<SelectItem key={integration.id} value={integration.id}>
@@ -301,19 +312,15 @@ function AddConnectionForm({
 					</p>
 					<Select
 						value={selectedChannel}
-						onValueChange={setSelectedChannel}
+						onValueChange={(value) => setSelectedChannel(value as string)}
 						disabled={isLoadingChannels}
 					>
 						<SelectTrigger>
-							<SelectValue
-								placeholder={
-									isLoadingChannels
-										? 'Loading channels...'
-										: availableChannels.length === 0
-											? 'No channels available'
-											: 'Select a channel'
-								}
-							/>
+							{isLoadingChannels
+								? 'Loading channels...'
+								: availableChannels.length === 0
+									? 'No channels available'
+									: 'Select a channel'}
 						</SelectTrigger>
 						<SelectContent>
 							{isLoadingChannels ? (

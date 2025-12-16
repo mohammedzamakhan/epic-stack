@@ -445,7 +445,7 @@ export default function CreateOrganizationPage() {
 				]
 
 	return (
-		<div className="container max-w-xl px-4 py-8">
+		<div className="container mx-auto max-w-xl px-4 py-8">
 			{/* Progress indicator */}
 			<div className="mb-8 text-center">
 				<div className="mb-2 flex items-center justify-center gap-2">
@@ -613,7 +613,7 @@ function Step1({ actionData }: { actionData: any }) {
 													fields.logoFile.errors?.length ? true : undefined
 												}
 											/>
-											<Button type="button" variant="outline" size="sm" asChild>
+											<Button type="button" variant="outline" size="sm">
 												<label
 													htmlFor={fields.logoFile.id}
 													className="cursor-pointer"
@@ -738,7 +738,7 @@ function Step1({ actionData }: { actionData: any }) {
 						<ErrorList errors={form.errors} id={form.errorId} />
 
 						<div className="flex justify-end gap-4 pt-4">
-							<Button variant="outline" asChild>
+							<Button variant="outline">
 								<Link to="/organizations">
 									<Trans>Cancel</Trans>
 								</Link>
@@ -873,7 +873,7 @@ function SubscriptionStep({
 					<ErrorList errors={form.errors} id={form.errorId} />
 
 					<div className="flex justify-between pt-4">
-						<Button variant="outline" asChild>
+						<Button variant="outline">
 							<Link to="/organizations">
 								<Trans>Cancel</Trans>
 							</Link>
@@ -968,7 +968,7 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 								defaultValue={fields.organizationSize.initialValue}
 							>
 								<SelectTrigger className="mt-1">
-									<SelectValue placeholder="Select organization size" />
+									Select organization size
 								</SelectTrigger>
 								<SelectContent>
 									{organizationSizes.map((size) => (
@@ -998,7 +998,7 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 								defaultValue={fields.userDepartment.initialValue}
 							>
 								<SelectTrigger className="mt-1">
-									<SelectValue placeholder="Select your department" />
+									Select your department
 								</SelectTrigger>
 								<SelectContent>
 									{departments.map((dept) => (
@@ -1154,7 +1154,7 @@ function CreateInviteFieldset({
 									: role.value || 'member'
 							}
 							onValueChange={(value) => {
-								role.change(value)
+								role.change(value as string)
 							}}
 							onOpenChange={(open) => {
 								if (!open) {

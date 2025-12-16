@@ -143,7 +143,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 												value={user.email}
 											/>
 											<InputGroupAddon align="inline-end">
-												<DialogTrigger asChild>
+												<DialogTrigger>
 													<InputGroupButton variant="outline">
 														<Trans>Change</Trans>
 													</InputGroupButton>

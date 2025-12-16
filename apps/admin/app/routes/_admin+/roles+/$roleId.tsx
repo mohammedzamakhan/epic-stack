@@ -408,13 +408,13 @@ export default function AdminRoleDetailPage() {
 			<Breadcrumb>
 				<BreadcrumbList>
 					<BreadcrumbItem>
-						<BreadcrumbLink asChild>
+						<BreadcrumbLink>
 							<Link to="/admin">Admin</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
 					<BreadcrumbItem>
-						<BreadcrumbLink asChild>
+						<BreadcrumbLink>
 							<Link to="/roles">Roles</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
@@ -667,7 +667,7 @@ function PermissionGroup({
 function CreateFeatureDialog() {
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
+			<DialogTrigger>
 				<Button size="sm" variant="outline">
 					+ New feature
 				</Button>
@@ -734,7 +734,7 @@ function CreatePermissionDialog({
 }) {
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
+			<DialogTrigger>
 				<Button size="sm" variant="outline" className="mt-3">
 					+ Add permission
 				</Button>
@@ -780,9 +780,7 @@ function CreatePermissionDialog({
 						<div className="space-y-2">
 							<Label htmlFor="permissionAccess">Access Level</Label>
 							<Select name="permissionAccess" required>
-								<SelectTrigger>
-									<SelectValue placeholder="Select access level" />
-								</SelectTrigger>
+								<SelectTrigger>Select access level</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="own">
 										own - User's own resources

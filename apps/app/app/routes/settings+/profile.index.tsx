@@ -96,7 +96,6 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 						isAboveFold
 					/>
 					<Button
-						asChild
 						variant="outline"
 						className="absolute top-3 -right-3 flex size-10 items-center justify-center rounded-full p-0"
 					>

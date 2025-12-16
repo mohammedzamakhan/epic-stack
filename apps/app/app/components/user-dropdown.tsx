@@ -1,6 +1,12 @@
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from '@repo/ui/dropdown-menu'
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuPortal,
+	DropdownMenuContent,
+	DropdownMenuItem,
+} from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
@@ -9,15 +15,14 @@ import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { useCurrentOrganization } from '#app/utils/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 
-
 export function UserDropdown() {
 	const user = useUser()
 	const { organization } = useCurrentOrganization()
 	const formRef = useRef<HTMLFormElement>(null)
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button asChild variant="secondary">
+			<DropdownMenuTrigger>
+				<Button variant="secondary">
 					<Link
 						to={`/users/${user.username}`}
 						// this is for progressive enhancement
@@ -39,14 +44,14 @@ export function UserDropdown() {
 			</DropdownMenuTrigger>
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="end">
-					<DropdownMenuItem asChild>
+					<DropdownMenuItem>
 						<Link prefetch="intent" to={`/profile`}>
 							<Icon className="text-body-md" name="user">
 								<Trans>Profile</Trans>
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
+					<DropdownMenuItem>
 						<Link prefetch="intent" to={`/${organization.slug}`}>
 							<Icon className="text-body-md" name="clock">
 								<Trans>Dashboard</Trans>
@@ -54,7 +59,7 @@ export function UserDropdown() {
 						</Link>
 					</DropdownMenuItem>
 					<Form action="/logout" method="POST" ref={formRef}>
-						<DropdownMenuItem asChild>
+						<DropdownMenuItem>
 							<button type="submit" className="w-full">
 								<Icon className="text-body-md" name="log-out">
 									<Trans>Logout</Trans>

@@ -260,7 +260,6 @@ export default function AuthorizePage() {
 	const [selectedOrgId, setSelectedOrgId] = useState<string>(
 		organizations[0]?.id || '',
 	)
-	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	// Handle client-side redirect for custom protocols (cursor://, etc.)
 	useEffect(() => {
@@ -318,9 +317,12 @@ export default function AuthorizePage() {
 							<Label htmlFor="organization-select">
 								<Trans>Select Organization</Trans>
 							</Label>
-							<Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+							<Select
+								value={selectedOrgId}
+								onValueChange={(value) => setSelectedOrgId(value as string)}
+							>
 								<SelectTrigger id="organization-select">
-									<SelectValue placeholder="Select an organization" />
+									Select an organization
 								</SelectTrigger>
 								<SelectContent>
 									{organizations.map((org) => (

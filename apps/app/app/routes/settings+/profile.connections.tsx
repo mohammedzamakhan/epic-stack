@@ -191,7 +191,7 @@ function Connection({
 					<input name="connectionId" value={connection.id} type="hidden" />
 					<TooltipProvider>
 						<Tooltip>
-							<TooltipTrigger asChild>
+							<TooltipTrigger>
 								<StatusButton
 									name="intent"
 									value="delete-connection"

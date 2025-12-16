@@ -2,7 +2,14 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
 import { Switch } from '@repo/ui/switch'
 import { InfoIcon } from 'lucide-react'
@@ -54,15 +61,17 @@ export default function VerifiedDomainCard({
 	}
 
 	return (
-		<Card className="w-full gap-0">
+		<Card>
 			<CardHeader>
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-lg font-medium">
+					<CardTitle className="flex gap-2">
 						<Switch checked={isChecked} onCheckedChange={handleSwitchChange} />
-						<Trans>Verified domain</Trans>
+						<span>
+							<Trans>Verified domain</Trans>
+						</span>
 					</CardTitle>
 				</div>
-				<CardDescription className="text-muted-foreground text-sm">
+				<CardDescription>
 					<Trans>
 						When someone signs up using an email that matches your verified
 						domain, they will be automatically added to your organization as a
@@ -71,8 +80,8 @@ export default function VerifiedDomainCard({
 				</CardDescription>
 			</CardHeader>
 			<div
-				className={`-mt-2 overflow-hidden transition-all duration-300 ${
-					isChecked ? 'max-h-50' : 'max-h-0'
+				className={`overflow-hidden transition-all duration-300 ${
+					isChecked ? 'max-h-60' : 'max-h-0'
 				}`}
 			>
 				<Form method="POST" {...getFormProps(form)}>
@@ -80,7 +89,7 @@ export default function VerifiedDomainCard({
 					<input
 						{...getInputProps(fields.organizationId, { type: 'hidden' })}
 					/>
-					<CardContent>
+					<CardContent className="pb-4">
 						<FieldGroup>
 							<Field
 								labelProps={{ children: <Trans>Verified domain</Trans> }}
@@ -99,8 +108,8 @@ export default function VerifiedDomainCard({
 							<InfoIcon className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0" />
 							<p className="text-muted-foreground">
 								<Trans>
-									Verified domain must match your current email address domain for
-									security.{' '}
+									Verified domain must match your current email address domain
+									for security.{' '}
 									<a href="#" className="underline">
 										Learn more
 									</a>

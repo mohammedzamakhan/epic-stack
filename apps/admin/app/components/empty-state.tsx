@@ -78,12 +78,11 @@ export function EmptyState({
 					{description}
 				</p>
 				{action && (
-					<Button
-						asChild
-						className={cn('mt-4', 'shadow-sm active:shadow-none')}
-					>
-						<Link to={action.href}>{action.label}</Link>
-					</Button>
+					<Link to={action.href}>
+						<Button className={cn('mt-4', 'shadow-sm active:shadow-none')}>
+							{action.label}
+						</Button>
+					</Link>
 				)}
 			</div>
 		</div>

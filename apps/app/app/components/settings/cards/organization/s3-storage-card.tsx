@@ -93,7 +93,6 @@ function Switch({
 	defaultChecked: _defaultChecked,
 	...props
 }: SwitchProps) {
-	const switchRef = useRef<React.ElementRef<typeof ShadcnSwitch>>(null)
 	const control = useInputControl({
 		formId,
 		key: props.id,
@@ -106,7 +105,6 @@ function Switch({
 			{/* <input name={name} id={props.id} hidden /> */}
 			<ShadcnSwitch
 				{...props}
-				ref={switchRef}
 				name={name}
 				checked={control.value === 'on' ? true : false}
 				onCheckedChange={(checked) => control.change(checked ? 'on' : 'off')}

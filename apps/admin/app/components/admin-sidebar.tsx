@@ -1,17 +1,24 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@repo/ui/sidebar'
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarHeader,
+} from '@repo/ui/sidebar'
+import { ClockIcon } from '@repo/ui/clock-icon'
+import { FlaskIcon } from '@repo/ui/flask-icon'
+import { UserIcon } from '@repo/ui/user-icon'
+import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
+import { HomeIcon } from '@repo/ui/home-icon'
+import { BuildingIcon } from '@repo/ui/building-icon'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
+import { GlobeIcon } from '@repo/ui/globe-icon'
+import { ShieldCheckIcon } from '@repo/ui/shield-check-icon'
 import * as React from 'react'
 import { Link, useLocation, useRouteLoaderData } from 'react-router'
-import { BuildingIcon } from '#app/components/icons/building-icon.tsx'
-import { HomeIcon } from '#app/components/icons/home-icon.tsx'
-import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon.tsx'
-import { UserIcon } from '#app/components/icons/user-icon.tsx'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { GlobeIcon } from './icons/globe-icon'
 import { Logo } from './icons/logo'
-import { MessageSquareMoreIcon } from './icons/message-square-more'
-import { ShieldCheckIcon } from './icons/shield-check-icon'
 
 export function AdminSidebar({
 	...props
@@ -37,7 +44,7 @@ export function AdminSidebar({
 			title: 'Waitlist',
 			url: '/waitlist',
 			isActive: location.pathname.startsWith('/waitlist'),
-			icon: UserIcon,
+			icon: ClockIcon,
 		},
 		{
 			title: 'Organizations',
@@ -79,7 +86,7 @@ export function AdminSidebar({
 			title: 'Feature Flags',
 			url: '/feature-flags',
 			isActive: location.pathname.startsWith('/feature-flags'),
-			icon: SettingsGearIcon,
+			icon: FlaskIcon,
 		},
 	]
 
@@ -101,7 +108,7 @@ export function AdminSidebar({
 			}
 
 	return (
-		<Sidebar collapsible="offcanvas" {...props}>
+		<Sidebar {...props}>
 			<SidebarHeader className="p-2">
 				<Link to="/">
 					<Logo className="mb-0" />

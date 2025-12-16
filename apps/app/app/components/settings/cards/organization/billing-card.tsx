@@ -189,7 +189,7 @@ export function BillingCard({
 									</Button>
 								</Form>
 							) : (
-								<Button asChild>
+								<Button>
 									<Link to={`/pricing?orgSlug=${organization.slug}`}>
 										<Trans>Subscribe</Trans>
 									</Link>
@@ -292,7 +292,7 @@ export function BillingCard({
 							</ItemDescription>
 						</ItemContent>
 						<ItemActions>
-							<Button variant="outline" asChild>
+							<Button variant="outline">
 								<Link to="/contact?subject=Enterprise">
 									<Trans>Schedule a call</Trans>
 								</Link>
@@ -312,7 +312,7 @@ export function BillingCard({
 							</ItemTitle>
 						</ItemContent>
 						<ItemActions>
-							<Button variant="link" className="text-sm" asChild>
+							<Button variant="link" className="text-sm">
 								<Link to="/support">
 									<Trans>Get in touch</Trans>
 								</Link>

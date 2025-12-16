@@ -84,7 +84,7 @@ function FeatureFlagDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+			<DialogTrigger>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{flag ? 'Edit Flag' : 'Add Flag'}</DialogTitle>
@@ -117,10 +117,12 @@ function FeatureFlagDialog({
 							defaultValue={flag?.key}
 							disabled={!!flag}
 						/>
-						<Select name="type" defaultValue={type} onValueChange={setType}>
-							<SelectTrigger>
-								<SelectValue placeholder="Type" />
-							</SelectTrigger>
+						<Select
+							name="type"
+							defaultValue={type}
+							onValueChange={(value) => setType(value as string)}
+						>
+							<SelectTrigger>Type</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="string">String</SelectItem>
 								<SelectItem value="number">Number</SelectItem>
@@ -209,7 +211,7 @@ function OverrideDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+			<DialogTrigger>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>

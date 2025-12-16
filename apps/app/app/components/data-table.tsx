@@ -28,7 +28,6 @@ import {
 	CardDescription,
 	CardHeader,
 	CardContent,
-	CardHeaderContent,
 	CardAction,
 } from '@repo/ui/card'
 import {
@@ -166,10 +165,8 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 		header: ({ table }) => (
 			<div className="flex items-center justify-center">
 				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && 'indeterminate')
-					}
+					checked={table.getIsAllPageRowsSelected()}
+					indeterminate={table.getIsSomePageRowsSelected()}
 					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
 					aria-label="Select all"
 				/>
@@ -315,7 +312,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					{/* Plus button to add new reviewer */}
 					{availableReviewers.length > 0 && (
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
+							<DropdownMenuTrigger>
 								<Button
 									variant="ghost"
 									size="icon"
@@ -361,7 +358,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 		id: 'actions',
 		cell: () => (
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
+				<DropdownMenuTrigger>
 					<Button
 						variant="ghost"
 						className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
@@ -489,20 +486,19 @@ export function DataTable({
 	return (
 		<Card>
 			<CardHeader className="items-start md:grid md:grid-cols-[1fr_auto]">
-				<CardHeaderContent>
-					<CardTitle>
-						<Trans>Data Table</Trans>
-					</CardTitle>
-					<CardDescription>
-						<Trans>
-							Data Table is a table that displays data in a grid format.
-						</Trans>
-					</CardDescription>
-				</CardHeaderContent>
+				<CardTitle>
+					<Trans>Data Table</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>
+						Data Table is a table that displays data in a grid format.
+					</Trans>
+				</CardDescription>
+
 				<CardAction className="flex items-center gap-2 pt-2 md:pt-0">
 					<div className="flex items-center gap-2">
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
+							<DropdownMenuTrigger>
 								<Button variant="outline" size="sm">
 									<Icon name="activity" />
 									<span className="hidden lg:inline">
@@ -728,7 +724,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 
 	return (
 		<Drawer direction={isMobile ? 'bottom' : 'right'}>
-			<DrawerTrigger asChild>
+			<DrawerTrigger>
 				<Button variant="link" className="text-foreground w-fit px-0 text-left">
 					{item.header}
 				</Button>
@@ -812,7 +808,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								</Label>
 								<Select defaultValue={item.type}>
 									<SelectTrigger id="type" className="w-full">
-										<SelectValue placeholder="Select a type" />
+										Select a type
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Table of Contents">
@@ -840,9 +836,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								</Label>
 								<Select defaultValue={item.status}>
 									<SelectTrigger id="status" className="w-full">
-										<SelectValue
-											placeholder={useLingui()._(msg`Select a status`)}
-										/>
+										{useLingui()._(msg`Select a status`)}
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="Done">Done</SelectItem>
@@ -901,7 +895,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 
 								{/* Add reviewer button */}
 								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
+									<DropdownMenuTrigger>
 										<Button
 											type="button"
 											variant="outline"
@@ -943,7 +937,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 					<Button>
 						<Trans>Submit</Trans>
 					</Button>
-					<DrawerClose asChild>
+					<DrawerClose>
 						<Button variant="outline">
 							<Trans>Done</Trans>
 						</Button>

@@ -167,7 +167,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 								) : (
 									<TooltipProvider>
 										<Tooltip>
-											<TooltipTrigger asChild>
+											<TooltipTrigger>
 												<Button
 													variant="ghost"
 													size="sm"
@@ -343,7 +343,7 @@ function NotificationBellComponent() {
 
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<PopoverTrigger asChild>
+			<PopoverTrigger>
 				<motion.button
 					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
 					whileHover={{ scale: 1.05 }}
@@ -379,12 +379,12 @@ function NotificationBellComponent() {
 					exit="hidden"
 					variants={containerVariants}
 				>
-					<Card className="border-0 shadow-none">
+					<Card className="border-0 py-0 shadow-none">
 						<CardHeader className="p-2">
 							<div className="flex justify-between">
 								<div className="mt-1 flex-1">
 									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
+										<DropdownMenuTrigger>
 											<Button
 												variant="ghost"
 												className="h-auto p-0 focus:outline-none"
@@ -411,7 +411,7 @@ function NotificationBellComponent() {
 									</DropdownMenu>
 								</div>
 								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
+									<DropdownMenuTrigger>
 										<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
 											<Icon name="ellipsis" className="h-4 w-4" />
 											<span className="sr-only">

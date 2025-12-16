@@ -78,10 +78,7 @@ export function EmptyState({
 					{description}
 				</p>
 				{action && (
-					<Button
-						asChild
-						className={cn('mt-4', 'shadow-sm active:shadow-none')}
-					>
+					<Button className={cn('mt-4', 'shadow-sm active:shadow-none')}>
 						<Link to={action.href}>{action.label}</Link>
 					</Button>
 				)}

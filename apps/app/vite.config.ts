@@ -128,8 +128,13 @@ export default defineConfig((config) => ({
 		sourcemap: true,
 	},
 	optimizeDeps: {
-		include: ['@repo/ai', '@repo/email', '@repo/integrations'],
-		exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+		include: ['@repo/email', '@repo/integrations'],
+		exclude: [
+			'@sentry/profiling-node',
+			'@sentry-internal/node-cpu-profiler',
+			'@repo/ai',
+			'@repo/ui',
+		],
 	},
 	...(MODE !== 'test' && {
 		ssr: {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Button } from './button'
-import { Popover, PopoverContent, PopoverTrigger } from './popover'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
 const PRESET_COLORS = [
 	'#ef4444', // red
@@ -42,18 +42,20 @@ export function ColorPicker({
 
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<PopoverTrigger asChild>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					disabled={disabled}
-					className="h-8 w-8 border-2 p-0"
-					style={{ backgroundColor: value }}
-				>
-					<span className="sr-only">Pick a color</span>
-				</Button>
-			</PopoverTrigger>
+			<PopoverTrigger
+				render={
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						disabled={disabled}
+						className="h-8 w-8 border-2 p-0"
+						style={{ backgroundColor: value }}
+					>
+						<span className="sr-only">Pick a color</span>
+					</Button>
+				}
+			></PopoverTrigger>
 			<PopoverContent className="w-auto p-3" align="start">
 				<div className="space-y-3">
 					<div className="grid grid-cols-5 gap-1">

@@ -20,7 +20,7 @@
   "dependencies": {
     "@playwright/test": "1.57.0",
     "@polar-sh/sdk": "^0.8.0",
-    "@react-email/preview-server": "5.0.7",
+    "@react-email/preview-server": "^5.0.8",
     "@sentry/react-router": "10.29.0",
     "ai": "5.0.108",
     "litefs-js": "2.0.2",

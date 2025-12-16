@@ -1,9 +1,22 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@repo/ui/table'
 import { formatDistanceToNow } from 'date-fns'
 
 export interface AdminOrganizationDetail {
@@ -296,13 +309,13 @@ export function AdminOrganizationDetail({
 					</CardHeader>
 					<CardContent>
 						<div className="flex gap-2">
-							<Button asChild variant="outline" size="sm">
+							<Button variant="outline" size="sm">
 								<a href={`/organizations/${organization.id}/sso`}>
 									<Icon name="settings" className="mr-2 h-4 w-4" />
 									Configure SSO
 								</a>
 							</Button>
-							<Button asChild variant="outline" size="sm">
+							<Button variant="outline" size="sm">
 								<a href={`/organizations/${organization.id}/sso/users`}>
 									<Icon name="users" className="mr-2 h-4 w-4" />
 									SSO Users

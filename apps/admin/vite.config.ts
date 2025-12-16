@@ -71,7 +71,7 @@ export default defineConfig((config) => ({
 		sourcemap: true,
 	},
 	optimizeDeps: {
-		include: ['@repo/email', '@repo/integrations'],
+		include: ['@repo/email', '@repo/integrations', '@repo/ai', '@repo/ui'],
 		exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
 	},
 	...(MODE !== 'test' && {

@@ -10,15 +10,17 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 } from '@repo/ui/sidebar'
+import { UserIcon } from '@repo/ui/user-icon'
+import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
+import { HomeIcon } from '@repo/ui/home-icon'
+import { BuildingIcon } from '@repo/ui/building-icon'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import { motion } from 'motion/react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 import { FoldersIcon } from '#app/components/icons/folders-icon.tsx'
-import { HomeIcon } from '#app/components/icons/home-icon.tsx'
 import { LockOpenIcon } from '#app/components/icons/lock-open-icon.tsx'
-import { SettingsGearIcon } from '#app/components/icons/settings-gear-icon.tsx'
-import { UserIcon } from '#app/components/icons/user-icon.tsx'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
@@ -29,12 +31,10 @@ import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'
 import { ArrowLeftIcon } from './icons/arrow-left-icon'
-import { BuildingIcon } from './icons/building-icon'
 import { CircleHelpIcon } from './icons/circle-help'
 import { ExternalLinkIcon } from './icons/external-link-icon'
 import { Logo } from './icons/logo'
 import { McpIcon } from './icons/mcp-icon'
-import { MessageSquareMoreIcon } from './icons/message-square-more'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { NavSecondary } from './nav-secondary'
 
@@ -71,7 +71,6 @@ function UpgradeAccountCard({
 					variant="secondary"
 					size="sm"
 					className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/70 w-full"
-					asChild
 				>
 					<Link to={`/${orgSlug}/settings/billing`}>
 						<Trans>Upgrade</Trans>

@@ -1,13 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { Button } from '@repo/ui/button'
-import {
-	Card,
-	CardHeader,
-	CardHeaderContent,
-	CardAction,
-	CardContent,
-} from '@repo/ui/card'
+import { Card, CardHeader, CardAction, CardContent } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Progress } from '@repo/ui/progress'
 import React, { useRef } from 'react'
@@ -100,10 +94,7 @@ export function OnboardingChecklist({
 					</div>
 
 					<div className="space-y-2">
-						<Progress
-							value={progressPercentage}
-							className="border-muted-foreground h-2 border"
-						/>
+						<Progress value={progressPercentage} />
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-medium">
 								<Trans>{Math.round(progressPercentage)}% complete</Trans>
@@ -124,16 +115,15 @@ export function OnboardingChecklist({
 	return (
 		<Card className={className}>
 			<CardHeader className="grid grid-cols-[1fr_auto] items-start">
-				<CardHeaderContent>
-					<h3 className="text-lg font-semibold">
-						<Trans>Get Started</Trans>
-					</h3>
-					<p className="text-muted-foreground text-sm">
-						<Trans>
-							{progress.completedCount} of {progress.totalSteps} completed
-						</Trans>
-					</p>
-				</CardHeaderContent>
+				<h3 className="text-lg font-semibold">
+					<Trans>Get Started</Trans>
+				</h3>
+				<p className="text-muted-foreground text-sm">
+					<Trans>
+						{progress.completedCount} of {progress.totalSteps} completed
+					</Trans>
+				</p>
+
 				<CardAction className="flex items-center gap-3">
 					<div className="text-right">
 						<div className="text-sm font-medium">

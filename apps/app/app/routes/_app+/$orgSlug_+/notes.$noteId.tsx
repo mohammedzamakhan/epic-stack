@@ -1768,7 +1768,6 @@ export default function NoteRoute() {
 								currentUserId={currentUserId}
 							>
 								<Button
-									asChild
 									variant="outline"
 									size="sm"
 									className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"

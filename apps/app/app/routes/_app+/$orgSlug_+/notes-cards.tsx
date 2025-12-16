@@ -1,6 +1,3 @@
-import { Portal } from '@radix-ui/react-portal'
-
-
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent } from '@repo/ui/card'
@@ -204,7 +201,7 @@ export const NoteCard = ({
 	return (
 		<div className="group h-full">
 			<Card
-				className="group-hover:bg-muted/30 relative h-full cursor-pointer overflow-hidden border-none shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)] transition-all dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]"
+				className="group-hover:bg-muted/30 relative h-full cursor-pointer overflow-hidden border-none py-0 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)] transition-all dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]"
 				onClick={handleCardClick}
 			>
 				{/* Background gradient overlay */}
@@ -261,8 +258,8 @@ export const NoteCard = ({
 							<div className="absolute -top-[1px] -right-[1px] z-10 flex transition-all duration-300">
 								{setEditingNote && (
 									<div className="pointer-events-auto">
-										<Tooltip delayDuration={0}>
-											<TooltipTrigger asChild>
+										<Tooltip>
+											<TooltipTrigger>
 												<button
 													className="bg-background text-background-foreground flex items-center gap-1.5 rounded-bl-md border-b border-l border-black/10 px-2 py-1.5"
 													onClick={handleStartEdit}
@@ -270,21 +267,15 @@ export const NoteCard = ({
 													<Icon name="pencil" className="h-3.5 w-3.5" />
 												</button>
 											</TooltipTrigger>
-											<Portal>
-												<TooltipContent>
-													<p>Quick edit</p>
-												</TooltipContent>
-											</Portal>
+											<TooltipContent>
+												<p>Quick edit</p>
+											</TooltipContent>
 										</Tooltip>
 									</div>
 								)}
 								<div className="pointer-events-auto">
-									<Tooltip
-										delayDuration={0}
-										open={tooltipOpen}
-										onOpenChange={setTooltipOpen}
-									>
-										<TooltipTrigger asChild>
+									<Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+										<TooltipTrigger>
 											<button
 												className="bg-background text-background-foreground flex items-center gap-1.5 rounded-tr-[16px] border-b border-l border-black/10 px-2 py-1.5"
 												onClick={handleCopyLink}
@@ -296,11 +287,9 @@ export const NoteCard = ({
 												)}
 											</button>
 										</TooltipTrigger>
-										<Portal>
-											<TooltipContent>
-												<p>{copied ? 'Link copied!' : 'Copy link'}</p>
-											</TooltipContent>
-										</Portal>
+										<TooltipContent>
+											<p>{copied ? 'Link copied!' : 'Copy link'}</p>
+										</TooltipContent>
 									</Tooltip>
 								</div>
 							</div>
@@ -385,7 +374,7 @@ export const NoteCard = ({
 								{/* Priority indicator */}
 								{note.priority && (
 									<Tooltip>
-										<TooltipTrigger asChild>
+										<TooltipTrigger>
 											<Button
 												size="sm"
 												variant="secondary"
@@ -433,11 +422,9 @@ export const NoteCard = ({
 												})()}
 											</Button>
 										</TooltipTrigger>
-										<Portal>
-											<TooltipContent>
-												<p className="capitalize">{note.priority} priority</p>
-											</TooltipContent>
-										</Portal>
+										<TooltipContent>
+											<p className="capitalize">{note.priority} priority</p>
+										</TooltipContent>
 									</Tooltip>
 								)}
 								<h3 className="flex-1 text-lg leading-tight font-semibold">

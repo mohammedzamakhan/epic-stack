@@ -2,7 +2,13 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 
 import { Button } from '@repo/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
 import { Textarea } from '@repo/ui/textarea'
 import { useState } from 'react'
@@ -59,7 +65,7 @@ export default function FeedbackModal({
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[500px]">
 				<DialogHeader>
-					<DialogTitle className="text-xl font-semibold">
+					<DialogTitle>
 						<Trans>Give feedback</Trans>
 					</DialogTitle>
 					<DialogDescription>

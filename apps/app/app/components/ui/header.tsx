@@ -72,7 +72,7 @@ export const HeroHeader = () => {
 								<ul className="flex gap-1">
 									{menuItems.map((item, index) => (
 										<li key={index}>
-											<Button asChild variant="ghost" size="sm">
+											<Button variant="ghost" size="sm">
 												<Link to={item.href} className="text-base">
 													<span>{item.name}</span>
 												</Link>
@@ -102,7 +102,6 @@ export const HeroHeader = () => {
 								{!user ? (
 									<>
 										<Button
-											asChild
 											variant="ghost"
 											size="sm"
 											className={cn(isScrolled && 'lg:hidden')}
@@ -111,17 +110,12 @@ export const HeroHeader = () => {
 												<span>Login</span>
 											</Link>
 										</Button>
-										<Button
-											asChild
-											size="sm"
-											className={cn(isScrolled && 'lg:hidden')}
-										>
+										<Button size="sm" className={cn(isScrolled && 'lg:hidden')}>
 											<Link to="/signup">
 												<span>Sign Up</span>
 											</Link>
 										</Button>
 										<Button
-											asChild
 											size="sm"
 											className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}
 										>
@@ -142,7 +136,7 @@ export const HeroHeader = () => {
 												<span>Log out</span>
 											</Button>
 										</Form>
-										<Button asChild size="sm">
+										<Button size="sm">
 											<Link
 												to={
 													currentOrganization

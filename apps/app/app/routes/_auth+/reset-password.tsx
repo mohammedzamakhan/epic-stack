@@ -3,7 +3,13 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { getPageTitle } from '@repo/config/brand'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
@@ -107,11 +113,14 @@ export default function ResetPasswordPage({
 	})
 
 	return (
-		<Card className="bg-muted/80 border-0 shadow-2xl">
+		<Card>
 			<CardHeader>
-				<CardTitle className="text-xl"><Trans>Reset Password</Trans></CardTitle>
+				<CardTitle className="text-xl">
+					<Trans>Reset Password</Trans>
+				</CardTitle>
 				<CardDescription>
-					<Trans>Hi</Trans>, {loaderData.resetPasswordUsername}. <Trans>Enter your new password below.</Trans>
+					<Trans>Hi</Trans>, {loaderData.resetPasswordUsername}.{' '}
+					<Trans>Enter your new password below.</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -120,7 +129,9 @@ export default function ResetPasswordPage({
 						<Field
 							data-invalid={fields.password.errors?.length ? true : undefined}
 						>
-							<FieldLabel htmlFor={fields.password.id}><Trans>New Password</Trans></FieldLabel>
+							<FieldLabel htmlFor={fields.password.id}>
+								<Trans>New Password</Trans>
+							</FieldLabel>
 							<Input
 								{...getInputProps(fields.password, { type: 'password' })}
 								autoComplete="new-password"

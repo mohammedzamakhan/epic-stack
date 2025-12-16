@@ -214,7 +214,7 @@ function CreateRoleDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
+			<DialogTrigger>
 				<Button>+ New Role</Button>
 			</DialogTrigger>
 			<DialogContent className="max-w-md">
@@ -241,9 +241,7 @@ function CreateRoleDialog() {
 					<div className="space-y-2">
 						<Label htmlFor="type">Role Type</Label>
 						<Select name="type" defaultValue="organization" required>
-							<SelectTrigger>
-								<SelectValue placeholder="Select role type" />
-							</SelectTrigger>
+							<SelectTrigger>Select role type</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="organization">Organization Role</SelectItem>
 								<SelectItem value="system">System Role</SelectItem>

@@ -298,7 +298,7 @@ export default function AdminIpAddressesPage() {
 											</Form>
 										) : (
 											<Dialog>
-												<DialogTrigger asChild>
+												<DialogTrigger>
 													<Button variant="destructive" size="sm">
 														Blacklist
 													</Button>

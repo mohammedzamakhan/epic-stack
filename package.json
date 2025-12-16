@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "node packages/ui/generate-icons.js && nx run-many -t build",
-    "dev": "npm run dev:services && npm-run-all --parallel dev:proxy dev:all",
+    "dev": "npm run dev:services && NODE_TLS_REJECT_UNAUTHORIZED=0 npm-run-all --parallel dev:proxy dev:all",
     "dev:http": "npm-run-all --parallel dev:proxy:http dev:all",
     "dev:all": "nx run-many -t dev -p app web cms admin studio docs --parallel=20",
     "dev:services": "node scripts/docker-services.mjs start",

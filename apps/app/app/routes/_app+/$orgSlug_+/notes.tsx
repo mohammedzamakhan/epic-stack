@@ -1,7 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { Portal } from '@radix-ui/react-portal'
 import { prisma } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -278,35 +277,31 @@ export default function NotesRoute({
 						<TabsList>
 							<TabsTrigger value="cards" aria-label="Cards view">
 								<Tooltip>
-									<TooltipTrigger asChild>
+									<TooltipTrigger>
 										<span>
 											<Icon name="blocks" />
 										</span>
 									</TooltipTrigger>
-									<Portal>
-										<TooltipContent>
-											<Trans>Cards</Trans>
-										</TooltipContent>
-									</Portal>
+									<TooltipContent>
+										<Trans>Cards</Trans>
+									</TooltipContent>
 								</Tooltip>
 							</TabsTrigger>
 							<TabsTrigger value="kanban" aria-label="Kanban board">
 								<Tooltip>
-									<TooltipTrigger asChild>
+									<TooltipTrigger>
 										<span>
 											<Icon name="menu" />
 										</span>
 									</TooltipTrigger>
-									<Portal>
-										<TooltipContent>
-											<Trans>Kanban</Trans>
-										</TooltipContent>
-									</Portal>
+									<TooltipContent>
+										<Trans>Kanban</Trans>
+									</TooltipContent>
 								</Tooltip>
 							</TabsTrigger>
 						</TabsList>
 					</Tabs>
-					<Button variant="default" asChild>
+					<Button variant="default">
 						<Link to="new">
 							<Icon name="plus">
 								<Trans>New Note</Trans>
@@ -391,7 +386,7 @@ export default function NotesRoute({
 					}
 				}}
 			>
-				<SheetContent className="flex w-[40vw] flex-col gap-0 sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+				<SheetContent className="flex w-[40vw] flex-col gap-0 data-[side=right]:w-full sm:max-w-xl data-[side=right]:sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
 					<Outlet />
 				</SheetContent>
 			</Sheet>

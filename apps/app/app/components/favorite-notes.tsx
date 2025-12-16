@@ -68,20 +68,22 @@ export default function FavoriteNotes({
 				{favoriteNotes.map((favorite) => (
 					<SidebarMenuItem key={favorite.note.id}>
 						<SidebarMenuButton
-							asChild
 							onMouseEnter={() => handleMenuItemMouseEnter(favorite.note.id)}
 							onMouseLeave={() => handleMenuItemMouseLeave(favorite.note.id)}
-						>
-							<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
-								<FileTextIcon
-									ref={(ref: any) => (iconRefs.current[favorite.note.id] = ref)}
-									size={16}
-								/>
-								<span>{favorite.note.title}</span>
-							</Link>
-						</SidebarMenuButton>
+							render={
+								<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
+									<FileTextIcon
+										ref={(ref: any) =>
+											(iconRefs.current[favorite.note.id] = ref)
+										}
+										size={16}
+									/>
+									<span>{favorite.note.title}</span>
+								</Link>
+							}
+						></SidebarMenuButton>
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
+							<DropdownMenuTrigger>
 								<SidebarMenuAction showOnHover className="rounded-sm">
 									<Icon name="more-horizontal" />
 									<span className="sr-only">
@@ -94,7 +96,7 @@ export default function FavoriteNotes({
 								side={isMobile ? 'bottom' : 'right'}
 								align={isMobile ? 'end' : 'start'}
 							>
-								<DropdownMenuItem asChild className="gap-2">
+								<DropdownMenuItem className="gap-2">
 									<Link to={`/${orgSlug}/notes/${favorite.note.id}`}>
 										<Icon name="folder" />
 										<span>
@@ -102,7 +104,7 @@ export default function FavoriteNotes({
 										</span>
 									</Link>
 								</DropdownMenuItem>
-								<DropdownMenuItem asChild className="gap-2">
+								<DropdownMenuItem className="gap-2">
 									<Link to={`/${orgSlug}/notes/${favorite.note.id}/edit`}>
 										<Icon name="pencil" />
 										<span>
@@ -111,7 +113,7 @@ export default function FavoriteNotes({
 									</Link>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem variant="destructive" asChild>
+								<DropdownMenuItem variant="destructive">
 									<Form
 										method="post"
 										action={`/${orgSlug}/notes/${favorite.note.id}`}

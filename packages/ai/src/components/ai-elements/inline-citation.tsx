@@ -13,7 +13,7 @@ import {
 	CarouselItem,
 	useCarousel as useCarouselApi,
 } from '@repo/ui/carousel'
-import * as React from 'react'
+import React from 'react'
 import { type ComponentProps } from 'react'
 
 import { cn } from '@repo/ui/cn'
@@ -45,7 +45,7 @@ export const InlineCitationText = ({
 export type InlineCitationCardProps = ComponentProps<typeof HoverCard>
 
 export const InlineCitationCard = (props: InlineCitationCardProps) => (
-	<HoverCard openDelay={0} closeDelay={0} {...props} />
+	<HoverCard {...props} />
 )
 
 export type InlineCitationCardTriggerProps = ComponentProps<'button'> & {
@@ -57,22 +57,24 @@ export const InlineCitationCardTrigger = ({
 	className,
 	...props
 }: InlineCitationCardTriggerProps) => (
-	<HoverCardTrigger asChild>
-		<Badge
-			variant="secondary"
-			className={cn('ml-1 rounded-full', className)}
-			{...props}
-		>
-			{sources.length && sources[0] ? (
-				<>
-					{new URL(sources[0]).hostname}{' '}
-					{sources.length > 1 && `+${sources.length - 1}`}
-				</>
-			) : (
-				'unknown'
-			)}
-		</Badge>
-	</HoverCardTrigger>
+	<HoverCardTrigger
+		render={
+			<Badge
+				variant="secondary"
+				className={cn('ml-1 rounded-full', className)}
+				{...props}
+			>
+				{sources.length && sources[0] ? (
+					<>
+						{new URL(sources[0]).hostname}{' '}
+						{sources.length > 1 && `+${sources.length - 1}`}
+					</>
+				) : (
+					'unknown'
+				)}
+			</Badge>
+		}
+	></HoverCardTrigger>
 )
 
 export type InlineCitationCardBodyProps = ComponentProps<'div'>

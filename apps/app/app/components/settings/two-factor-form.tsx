@@ -75,7 +75,7 @@ export function TwoFactorForm({
 		<div className="space-y-6">
 			{/* Header */}
 			<div className="space-y-2">
-				<h2 className="text-xl font-semibold">
+				<h2>
 					<Trans>Complete two-factor authentication setup</Trans>
 				</h2>
 				<p className="text-muted-foreground text-sm">

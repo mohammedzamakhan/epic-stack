@@ -92,7 +92,7 @@ function OrganizationMemberRoleEditor({
 				name="role"
 				defaultValue={member.organizationRole.name}
 				value={role}
-				onValueChange={setRole}
+				onValueChange={(value) => setRole(value as string)}
 			>
 				<SelectTrigger size="sm" className="w-28">
 					<SelectValue />

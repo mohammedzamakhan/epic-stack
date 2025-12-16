@@ -192,8 +192,8 @@ describe('SSOUserManagement', () => {
 		render(<SSOUserManagement {...defaultProps} />)
 
 		// Check for role badges
-		expect(screen.getByText('member')).toBeInTheDocument() // John's role
-		expect(screen.getByText('admin')).toBeInTheDocument() // Jane's role
+		expect(screen.getByText('Member')).toBeInTheDocument() // John's role
+		expect(screen.getByText('Admin')).toBeInTheDocument() // Jane's role
 		expect(screen.getByText('Default')).toBeInTheDocument() // Jane is default
 		expect(screen.getByText('Active')).toBeInTheDocument() // John is active
 		expect(screen.getByText('Inactive')).toBeInTheDocument() // Jane is inactive

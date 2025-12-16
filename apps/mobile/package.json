@@ -18,7 +18,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@payloadcms/plugin-search": "3.68.2",
     "@playwright/test": "1.57.0",
-    "@react-email/preview-server": "5.0.7",
+    "@react-email/preview-server": "^5.0.8",
     "@repo/config": "*",
     "@repo/types": "*",
     "@repo/validation": "*",

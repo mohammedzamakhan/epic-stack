@@ -1,5 +1,5 @@
 import { useInputControl } from '@conform-to/react'
-import { Checkbox, type CheckboxProps } from '@repo/ui/checkbox'
+import { Checkbox } from '@repo/ui/checkbox'
 import { Input } from '@repo/ui/input'
 import {
 	InputOTP,
@@ -145,10 +145,11 @@ export function CheckboxField({
 	className,
 }: {
 	labelProps: React.ComponentProps<'label'>
-	buttonProps: CheckboxProps & {
+	buttonProps: React.ComponentProps<typeof Checkbox> & {
 		name: string
 		form: string
 		value?: string
+		onCheckedChange: (value: boolean) => void
 	}
 	errors?: ListOfErrors
 	className?: string
@@ -186,7 +187,6 @@ export function CheckboxField({
 						input.blur()
 						buttonProps.onBlur?.(event)
 					}}
-					type="button"
 				/>
 				<label
 					htmlFor={id}

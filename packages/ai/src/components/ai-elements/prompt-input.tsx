@@ -11,7 +11,7 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 
-import {
+import React, {
 	type ComponentProps,
 	type HTMLAttributes,
 	type KeyboardEventHandler,
@@ -115,6 +115,7 @@ export const PromptInputButton = ({
 	variant = 'ghost',
 	className,
 	size,
+	nativeButton: ignoredNativeButton,
 	...props
 }: PromptInputButtonProps) => {
 	const newSize =
@@ -128,6 +129,7 @@ export const PromptInputButton = ({
 				newSize === 'default' && 'px-3',
 				className,
 			)}
+			nativeButton
 			size={newSize}
 			type="button"
 			variant={variant}
@@ -146,6 +148,7 @@ export const PromptInputSubmit = ({
 	size = 'icon',
 	status,
 	children,
+	nativeButton: ignoredNativeButton,
 	...props
 }: PromptInputSubmitProps) => {
 	let iconElement = <Icon name="send" className="size-4" />
@@ -161,6 +164,7 @@ export const PromptInputSubmit = ({
 	return (
 		<Button
 			className={cn('gap-1.5 rounded-lg', className)}
+			nativeButton
 			size={size}
 			type="submit"
 			variant={variant}

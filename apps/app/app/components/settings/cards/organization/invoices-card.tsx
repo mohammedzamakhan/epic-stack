@@ -124,7 +124,7 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 									</div>
 									<div className="flex gap-2">
 										{invoice.hostedInvoiceUrl && (
-											<Button variant="outline" size="sm" asChild>
+											<Button variant="outline" size="sm">
 												<Link
 													to={invoice.hostedInvoiceUrl}
 													target="_blank"
@@ -136,7 +136,7 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 											</Button>
 										)}
 										{invoice.invoicePdf && (
-											<Button variant="outline" size="sm" asChild>
+											<Button variant="outline" size="sm">
 												<Link
 													to={invoice.invoicePdf}
 													target="_blank"

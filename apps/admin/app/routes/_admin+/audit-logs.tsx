@@ -1,9 +1,21 @@
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { useState } from 'react'
 import { useLoaderData, useSearchParams } from 'react-router'
 import { auditService } from '#app/utils/audit.server.ts'
@@ -71,7 +83,8 @@ export default function EnhancedAuditLogsPage() {
 		try {
 			const params = new URLSearchParams()
 			params.set('format', format)
-			if (filters.organizationId) params.set('organizationId', filters.organizationId)
+			if (filters.organizationId)
+				params.set('organizationId', filters.organizationId)
 			if (filters.userId) params.set('userId', filters.userId)
 			if (filters.startDate) params.set('startDate', filters.startDate)
 			if (filters.endDate) params.set('endDate', filters.endDate)
@@ -160,10 +173,7 @@ export default function EnhancedAuditLogsPage() {
 						<CardTitle className="text-sm font-medium">
 							Security Events
 						</CardTitle>
-						<Icon
-							name="shield"
-							className="text-muted-foreground h-4 w-4"
-						/>
+						<Icon name="shield" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
@@ -176,7 +186,10 @@ export default function EnhancedAuditLogsPage() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Top Action</CardTitle>
-						<Icon name="trending-up" className="text-muted-foreground h-4 w-4" />
+						<Icon
+							name="trending-up"
+							className="text-muted-foreground h-4 w-4"
+						/>
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm font-medium">
@@ -229,12 +242,13 @@ export default function EnhancedAuditLogsPage() {
 							<Select
 								value={filters.severity || 'all'}
 								onValueChange={(value) =>
-									updateFilter('severity', value === 'all' ? '' : value)
+									updateFilter(
+										'severity',
+										value === 'all' ? '' : (value as string),
+									)
 								}
 							>
-								<SelectTrigger>
-									<SelectValue placeholder="All severities" />
-								</SelectTrigger>
+								<SelectTrigger>All severities</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="all">All</SelectItem>
 									<SelectItem value="info">Info</SelectItem>
@@ -275,15 +289,19 @@ export default function EnhancedAuditLogsPage() {
 									>
 										<div className="flex-1 space-y-2">
 											<div className="flex items-center gap-2">
-												<Badge variant={getSeverityBadgeVariant(metadataTyped.severity || 'info')}>
+												<Badge
+													variant={getSeverityBadgeVariant(
+														metadataTyped.severity || 'info',
+													)}
+												>
 													{metadataTyped.severity || 'info'}
 												</Badge>
-												<span className="font-mono text-sm text-muted-foreground">
+												<span className="text-muted-foreground font-mono text-sm">
 													{log.action}
 												</span>
 											</div>
 											<p className="font-medium">{log.details}</p>
-											<div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+											<div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
 												{log.user && (
 													<span>
 														<Icon name="user" className="mr-1 inline h-3 w-3" />
@@ -292,26 +310,35 @@ export default function EnhancedAuditLogsPage() {
 												)}
 												{log.organization && (
 													<span>
-														<Icon name="building" className="mr-1 inline h-3 w-3" />
+														<Icon
+															name="building"
+															className="mr-1 inline h-3 w-3"
+														/>
 														{log.organization.name}
 													</span>
 												)}
 												{metadataTyped.ipAddress && (
 													<span>
-														<Icon name="external-link" className="mr-1 inline h-3 w-3" />
+														<Icon
+															name="external-link"
+															className="mr-1 inline h-3 w-3"
+														/>
 														{metadataTyped.ipAddress}
 													</span>
 												)}
 												{log.resourceType && (
 													<span>
-														<Icon name="folder" className="mr-1 inline h-3 w-3" />
+														<Icon
+															name="folder"
+															className="mr-1 inline h-3 w-3"
+														/>
 														{log.resourceType}:{' '}
 														{log.resourceId?.substring(0, 8)}
 													</span>
 												)}
 											</div>
 										</div>
-										<div className="flex flex-col items-end gap-1 text-sm text-muted-foreground">
+										<div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
 											<Icon name="clock" className="h-4 w-4" />
 											<span>{new Date(log.createdAt).toLocaleString()}</span>
 										</div>

@@ -2,12 +2,28 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Field, FieldLabel, FieldError } from '@repo/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { Form } from 'react-router'
 import { z } from 'zod'
-import { ErrorList, convertErrorsToFieldFormat } from '#app/components/forms.tsx'
+import {
+	ErrorList,
+	convertErrorsToFieldFormat,
+} from '#app/components/forms.tsx'
 
 export const TeamSizeSchema = z.object({
 	size: z.string().min(1, 'Team size is required'),
@@ -43,19 +59,19 @@ export default function TeamSizeCard({
 	})
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>
-					<Trans>Team Size</Trans>
-				</CardTitle>
-				<CardDescription>
-					<Trans>
-						Help us understand your organization size to provide better
-						recommendations.
-					</Trans>
-				</CardDescription>
-			</CardHeader>
-			<Form method="POST" {...getFormProps(form)}>
+		<Form method="POST" {...getFormProps(form)}>
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						<Trans>Team Size</Trans>
+					</CardTitle>
+					<CardDescription>
+						<Trans>
+							Help us understand your organization size to provide better
+							recommendations.
+						</Trans>
+					</CardDescription>
+				</CardHeader>
 				<input type="hidden" name="intent" value="update-team-size" />
 				<input {...getInputProps(fields.organizationId, { type: 'hidden' })} />
 				<CardContent>
@@ -67,9 +83,7 @@ export default function TeamSizeCard({
 							name={fields.size.name}
 							defaultValue={organization.size || ''}
 						>
-							<SelectTrigger>
-								<SelectValue placeholder="Select team size" />
-							</SelectTrigger>
+							<SelectTrigger>Select team size</SelectTrigger>
 							<SelectContent>
 								{teamSizeOptions.map((option) => (
 									<SelectItem key={option.value} value={option.value}>
@@ -89,7 +103,7 @@ export default function TeamSizeCard({
 						<Trans>Update</Trans>
 					</Button>
 				</CardFooter>
-			</Form>
-		</Card>
+			</Card>
+		</Form>
 	)
 }

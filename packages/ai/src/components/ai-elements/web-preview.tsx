@@ -14,7 +14,7 @@ import {
 	TooltipTrigger,
 } from '@repo/ui/tooltip'
 import { Button } from '@repo/ui/button'
-import {
+import React, {
 	type ComponentProps,
 	type ReactNode,
 	createContext,
@@ -111,18 +111,20 @@ export const WebPreviewNavigationButton = ({
 }: WebPreviewNavigationButtonProps) => (
 	<TooltipProvider>
 		<Tooltip>
-			<TooltipTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="hover:text-foreground h-8 w-8 p-0"
-					onClick={onClick}
-					disabled={disabled}
-					{...props}
-				>
-					{children}
-				</Button>
-			</TooltipTrigger>
+			<TooltipTrigger
+				render={
+					<Button
+						variant="ghost"
+						size="sm"
+						className="hover:text-foreground h-8 w-8 p-0"
+						onClick={onClick}
+						disabled={disabled}
+						{...props}
+					>
+						{children}
+					</Button>
+				}
+			></TooltipTrigger>
 			<TooltipContent>
 				<p>{tooltip}</p>
 			</TooltipContent>
@@ -209,21 +211,23 @@ export const WebPreviewConsole = ({
 			className={cn('bg-muted/50 border-t font-mono text-sm', className)}
 			{...props}
 		>
-			<CollapsibleTrigger asChild>
-				<Button
-					variant="ghost"
-					className="hover:bg-muted/50 flex w-full items-center justify-between p-4 text-left font-medium"
-				>
-					Console
-					<Icon
-						name="chevron-down"
-						className={cn(
-							'h-4 w-4 transition-transform duration-200',
-							consoleOpen && 'rotate-180',
-						)}
-					/>
-				</Button>
-			</CollapsibleTrigger>
+			<CollapsibleTrigger
+				render={
+					<Button
+						variant="ghost"
+						className="hover:bg-muted/50 flex w-full items-center justify-between p-4 text-left font-medium"
+					>
+						Console
+						<Icon
+							name="chevron-down"
+							className={cn(
+								'h-4 w-4 transition-transform duration-200',
+								consoleOpen && 'rotate-180',
+							)}
+						/>
+					</Button>
+				}
+			></CollapsibleTrigger>
 			<CollapsibleContent
 				className={cn(
 					'px-4 pb-4',

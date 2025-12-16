@@ -1,4 +1,10 @@
-import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@repo/ui/sidebar'
+import {
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from '@repo/ui/sidebar'
 import * as React from 'react'
 import { useRef } from 'react'
 
@@ -38,7 +44,6 @@ export function NavSecondary({
 					{items.map((item) => (
 						<SidebarMenuItem key={item.title}>
 							<SidebarMenuButton
-								asChild={!!item.url}
 								onClick={item.onClick}
 								onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
 								onMouseLeave={() => handleMenuItemMouseLeave(item.title)}

@@ -80,7 +80,7 @@ export function NavUser({
 		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger>
 						<SidebarMenuButton
 							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
@@ -149,7 +149,6 @@ export function NavUser({
 						</DropdownMenuSub>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
-							asChild
 							className="gap-2"
 							onMouseEnter={() => handleMenuItemMouseEnter('logout')}
 							onMouseLeave={() => handleMenuItemMouseLeave('logout')}

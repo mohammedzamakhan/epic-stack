@@ -1,6 +1,13 @@
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/table'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@repo/ui/table'
 import {
 	flexRender,
 	getCoreRowModel,
@@ -12,7 +19,6 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-
 
 export type Note = {
 	id: string
@@ -64,12 +70,12 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 				const note = row.original
 				return (
 					<div className="flex justify-end gap-2">
-						<Button variant="ghost" size="icon" asChild>
+						<Button variant="ghost" size="icon">
 							<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
 								<Icon name="search" className="size-4" />
 							</Link>
 						</Button>
-						<Button variant="ghost" size="icon" asChild>
+						<Button variant="ghost" size="icon">
 							<Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
 								<Icon name="pencil" className="size-4" />
 							</Link>

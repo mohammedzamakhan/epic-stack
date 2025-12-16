@@ -363,7 +363,7 @@ export default function OnboardingRoute({
 	})
 
 	return (
-		<Card className="bg-muted/80 border-0 shadow-2xl">
+		<Card>
 			<CardHeader>
 				<CardTitle className="text-xl">
 					{inviteToken ? (

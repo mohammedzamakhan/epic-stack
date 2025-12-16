@@ -72,7 +72,7 @@ export default function AdminIpDetailPage() {
 						Detailed information for IP {ipAddress.ip}
 					</p>
 				</div>
-				<Button asChild variant="outline">
+				<Button variant="outline">
 					<Link to="/ip-addresses">← Back to IP Addresses</Link>
 				</Button>
 			</div>
@@ -262,7 +262,7 @@ export default function AdminIpDetailPage() {
 											</Badge>
 										</TableCell>
 										<TableCell>
-											<Button asChild variant="outline" size="sm">
+											<Button variant="outline" size="sm">
 												<Link to={`/users/${connection.user.id}`}>
 													View User
 												</Link>

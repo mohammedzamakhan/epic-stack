@@ -4,7 +4,6 @@ import { Icon } from '@repo/ui/icon'
 import { EmojiPicker } from 'frimousse'
 import React, { useState, useRef, useEffect } from 'react'
 
-
 interface EmojiPickerButtonProps {
 	onEmojiSelect: (emoji: string) => void
 	disabled?: boolean
@@ -100,17 +99,19 @@ export const EmojiPickerButton: React.FC<EmojiPickerButtonProps> = ({
 	return (
 		<>
 			<Button
-				ref={buttonRef}
 				type="button"
 				variant="ghost"
 				size="sm"
 				disabled={disabled}
 				className="hover:bg-accent h-8 w-8 p-0"
 				onClick={handleButtonClick}
-			>
-				<Icon name="smile" className="h-4 w-4" />
-				<span className="sr-only">Add emoji</span>
-			</Button>
+				render={
+					<button ref={buttonRef}>
+						<Icon name="smile" className="h-4 w-4" />
+						<span className="sr-only">Add emoji</span>
+					</button>
+				}
+			></Button>
 
 			{isOpen && (
 				<div

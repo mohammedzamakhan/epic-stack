@@ -53,7 +53,7 @@ export function RolesTableRows({
 						{role.description || 'No description'}
 					</TableCell>
 					<TableCell className="text-right">
-						<Button asChild variant="ghost" size="sm">
+						<Button variant="ghost" size="sm">
 							<Link to={`${baseUrl}/${role.id}`}>Edit</Link>
 						</Button>
 					</TableCell>

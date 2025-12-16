@@ -9,7 +9,6 @@ import {
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardHeaderContent,
 	CardTitle,
 } from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
@@ -552,17 +551,15 @@ function ApiKeysCard({
 	return (
 		<Card>
 			<CardHeader className="grid grid-cols-[1fr_auto] items-start">
-				<CardHeaderContent>
-					<CardTitle className="flex items-center gap-2">
-						<Icon name="key" className="h-5 w-5" />
-						<Trans>API Keys</Trans>
-					</CardTitle>
-					<CardDescription>
-						<Trans>
-							Create and manage API keys to authenticate your MCP clients
-						</Trans>
-					</CardDescription>
-				</CardHeaderContent>
+				<CardTitle className="flex items-center gap-2">
+					<Icon name="key" className="h-5 w-5" />
+					<Trans>API Keys</Trans>
+				</CardTitle>
+				<CardDescription>
+					<Trans>
+						Create and manage API keys to authenticate your MCP clients
+					</Trans>
+				</CardDescription>
 				<CardAction>
 					<Button onClick={onCreateClick} className="gap-2">
 						<Icon name="plus" className="h-4 w-4" />

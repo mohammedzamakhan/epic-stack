@@ -1,6 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { getCrossAppUrl } from '@repo/common/url'
-import { Card, CardContent, CardFooter } from '@repo/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import { useState } from 'react'
@@ -115,7 +115,6 @@ function IntegrationCard({
 	const isConnected = !!integration
 	const isJira = provider.name === 'jira'
 
-	// Check if we're currently processing this integration
 	const isProcessing =
 		fetcher.state !== 'idle' &&
 		(fetcher.formData?.get('integrationId') === integration?.id ||
@@ -123,31 +122,25 @@ function IntegrationCard({
 
 	return (
 		<Card className="flex h-full flex-col">
-			<CardContent className="flex flex-1 flex-col p-4">
-				{/* Header with icon, title and domain */}
-				<header className="mb-3 flex w-full items-center gap-3">
-					<div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md after:absolute after:inset-0 after:h-full after:w-full after:rounded-[inherit] after:ring-1 after:ring-black/8 after:ring-inset dark:after:ring-white/8">
-						<Icon name={provider.icon as any} className="h-6 w-6" />
-					</div>
-					<div className="flex min-w-0 flex-1 flex-col">
-						<h2 className="truncate text-sm font-medium">
-							{provider.displayName}
-						</h2>
-						<span className="text-muted-foreground text-xs">
-							{provider.name === 'jira' && 'atlassian.com'}
-							{!['jira'].includes(provider.name) && `${provider.name}.com`}
-						</span>
-					</div>
-				</header>
-
-				{/* Description - takes up flexible space */}
-				<div className="min-h-[3rem] flex-1">
-					<p className="text-muted-foreground text-sm leading-5">
-						{provider.description}
-					</p>
+			<CardHeader className="mb-3 flex w-full items-center gap-3">
+				<div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md after:absolute after:inset-0 after:h-full after:w-full after:rounded-[inherit] after:ring-1 after:ring-black/8 after:ring-inset dark:after:ring-white/8">
+					<Icon name={provider.icon as any} className="h-6 w-6" />
 				</div>
+				<div className="flex min-w-0 flex-1 flex-col">
+					<h2 className="truncate text-sm font-medium">
+						{provider.displayName}
+					</h2>
+					<span className="text-muted-foreground text-xs">
+						{provider.name === 'jira' && 'atlassian.com'}
+						{!['jira'].includes(provider.name) && `${provider.name}.com`}
+					</span>
+				</div>
+			</CardHeader>
 
-				{/* Button - fixed at bottom */}
+			<CardContent className="min-h-[3rem] flex-1">
+				<p className="text-muted-foreground text-sm leading-5">
+					{provider.description}
+				</p>
 				<div className="pt-2">
 					{provider.name !== 'google-analytics' && (
 						<Form method="POST">
@@ -201,7 +194,7 @@ function IntegrationCard({
 				</div>
 			</CardContent>
 
-			<CardFooter className="px-4 py-1 pt-2">
+			<CardFooter className="py-1">
 				<a
 					href={getCrossAppUrl('docs', `/integrations/${provider.name}`)}
 					target="_blank"
@@ -211,11 +204,10 @@ function IntegrationCard({
 					<span className="flex items-center gap-1.5">
 						<Trans>Read documentation</Trans>
 					</span>
-					<Icon name="chevron-right" className="h-3.5 w-3.5" />
+					<Icon name="chevron-right" />
 				</a>
 			</CardFooter>
 
-			{/* Show Jira settings if this is a connected Jira integration and settings are expanded */}
 			{isJira && isConnected && showSettings && (
 				<div className="border-t px-4 py-4">
 					<JiraIntegrationSettings integration={integration} />

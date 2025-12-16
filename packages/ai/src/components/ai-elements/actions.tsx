@@ -31,6 +31,7 @@ export const Action = ({
 	className,
 	variant = 'ghost',
 	size = 'sm',
+	nativeButton: ignoredNativeButton,
 	...props
 }: ActionProps) => {
 	const button = (
@@ -39,6 +40,7 @@ export const Action = ({
 				'text-muted-foreground hover:text-foreground size-9 p-1.5',
 				className,
 			)}
+			nativeButton
 			size={size}
 			type="button"
 			variant={variant}
@@ -53,7 +55,7 @@ export const Action = ({
 		return (
 			<TooltipProvider>
 				<Tooltip>
-					<TooltipTrigger asChild>{button}</TooltipTrigger>
+					<TooltipTrigger>{button}</TooltipTrigger>
 					<TooltipContent>
 						<p>{tooltip}</p>
 					</TooltipContent>

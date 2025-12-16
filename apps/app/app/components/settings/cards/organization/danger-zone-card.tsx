@@ -1,8 +1,22 @@
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Checkbox } from '@repo/ui/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
@@ -55,7 +69,7 @@ export default function DangerZoneCard({
 						</p>
 					</div>
 					<Dialog open={isOpen} onOpenChange={setIsOpen}>
-						<DialogTrigger asChild>
+						<DialogTrigger>
 							<Button variant="destructive">
 								<Icon name="trash-2" />
 								<Trans>Delete organization</Trans>
@@ -79,7 +93,8 @@ export default function DangerZoneCard({
 								<div className="space-y-2">
 									<Label htmlFor="confirmation">
 										<Trans>
-											Type the organization name "{organization.name}" to confirm.
+											Type the organization name "{organization.name}" to
+											confirm.
 										</Trans>
 									</Label>
 									<Input

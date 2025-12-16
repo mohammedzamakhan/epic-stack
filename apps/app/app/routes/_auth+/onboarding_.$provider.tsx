@@ -217,7 +217,7 @@ export default function OnboardingProviderRoute({
 		>
 			<div className="w-full max-w-md">
 				<div className="flex flex-col gap-6">
-					<Card className="bg-muted/80 border-0 shadow-2xl">
+					<Card>
 						<CardHeader className="text-center">
 							<CardTitle className="text-xl">
 								<Trans>Complete your profile</Trans>

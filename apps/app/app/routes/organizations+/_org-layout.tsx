@@ -27,7 +27,7 @@ export default function OrganizationLayout() {
 								}
 								alt={rootData?.user?.name || 'User avatar'}
 							/>
-							<AvatarFallback className="rounded-full">
+							<AvatarFallback>
 								{rootData?.user?.name?.charAt(0).toUpperCase()}
 							</AvatarFallback>
 						</Avatar>

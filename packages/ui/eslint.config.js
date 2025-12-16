@@ -5,7 +5,7 @@ export default [
 	...defaultConfig,
 	{
 		files: ['**/*.ts', '**/*.tsx'],
-		ignores: ['.storybook/**'],
+		ignores: ['.storybook/**', '**/*.stories.tsx', '**/*.stories.ts'],
 		rules: {
 			'react-hooks/rules-of-hooks': 'error',
 			'react-hooks/exhaustive-deps': 'warn',

@@ -202,13 +202,13 @@ export default function AdminSystemRoleDetailPage() {
 			<Breadcrumb>
 				<BreadcrumbList>
 					<BreadcrumbItem>
-						<BreadcrumbLink asChild>
+						<BreadcrumbLink>
 							<Link to="/admin">Admin</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
 					<BreadcrumbItem>
-						<BreadcrumbLink asChild>
+						<BreadcrumbLink>
 							<Link to="/roles">Roles</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
@@ -436,7 +436,6 @@ function SystemPermissionGroup({
 												name="permission"
 												checked={isChecked}
 												disabled={disabled}
-												onChange={() => {}} // Handled by form onChange
 											/>
 											<Label
 												htmlFor={permission.id}

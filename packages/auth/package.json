@@ -24,7 +24,7 @@
   "dependencies": {
     "@epic-web/totp": "^4.0.1",
     "@playwright/test": "1.57.0",
-    "@react-email/preview-server": "5.0.7",
+    "@react-email/preview-server": "^5.0.8",
     "@repo/cache": "*",
     "@repo/database": "*",
     "@sentry/react-router": "10.29.0",

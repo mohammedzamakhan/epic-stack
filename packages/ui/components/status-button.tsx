@@ -1,14 +1,18 @@
+import { type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { useSpinDelay } from 'spin-delay'
 import { cn } from '../utils/cn'
-import { Button, type ButtonVariant } from './button'
 import { Icon } from './icon'
+import { Button, type buttonVariants } from './ui/button'
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from './tooltip'
+} from './ui/tooltip'
+
+type ButtonVariant = VariantProps<typeof buttonVariants>
 
 interface StatusButtonProps
 	extends React.ComponentProps<'button'>,
@@ -118,15 +122,17 @@ export const StatusButton = ({
 	return message ? (
 		<TooltipProvider>
 			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						className={getButtonClassName()}
-						disabled={internalStatus === 'pending'}
-						{...props}
-					>
-						{buttonContent}
-					</Button>
-				</TooltipTrigger>
+				<TooltipTrigger
+					render={
+						<Button
+							className={getButtonClassName()}
+							disabled={internalStatus === 'pending'}
+							{...props}
+						>
+							{buttonContent}
+						</Button>
+					}
+				></TooltipTrigger>
 				<TooltipContent>{message}</TooltipContent>
 			</Tooltip>
 		</TooltipProvider>

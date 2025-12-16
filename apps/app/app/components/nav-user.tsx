@@ -24,11 +24,11 @@ import { useRef } from 'react'
 import { Link, Form, useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
-import { BuildingIcon } from './icons/building-icon'
+import { BuildingIcon } from '@repo/ui/building-icon'
 import { LogoutIcon } from './icons/logout-icon'
-import { SettingsGearIcon } from './icons/settings-gear-icon'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import { SunMoonIcon } from './icons/sun-moon-icon'
-import { UserIcon } from './icons/user-icon'
+import { UserIcon } from '@repo/ui/user-icon'
 
 export function NavUser({
 	user,
@@ -103,44 +103,44 @@ export function NavUser({
 		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<SidebarMenuButton
-							size="lg"
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
-						>
-							<UserAvatar
-								user={{
-									name: getInitials(user.name),
-									email: user.email,
-									image: user.avatar,
-								}}
-								className="h-8 w-8"
-								fallbackClassName="rounded-lg"
-								alt={user.name}
-							/>
-							<div className="grid flex-1 text-sm leading-tight ltr:text-left rtl:text-right">
-								<span className="truncate font-medium">{user.name}</span>
-								<span className="text-muted-foreground truncate text-xs">
-									{user.email}
-								</span>
-							</div>
-							<Icon name="ellipsis-vertical" className="ml-auto size-4" />
-						</SidebarMenuButton>
-					</DropdownMenuTrigger>
+					<DropdownMenuTrigger
+						render={
+							<SidebarMenuButton
+								size="lg"
+								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+							>
+								<UserAvatar
+									user={{
+										name: getInitials(user.name),
+										email: user.email,
+										image: user.avatar,
+									}}
+									className="h-8 w-8"
+									fallbackClassName="rounded-lg"
+									alt={user.name}
+								/>
+								<div className="grid flex-1 text-sm leading-tight ltr:text-left rtl:text-right">
+									<span className="truncate font-medium">{user.name}</span>
+									<span className="text-muted-foreground truncate text-xs">
+										{user.email}
+									</span>
+								</div>
+								<Icon name="ellipsis-vertical" className="ml-auto size-4" />
+							</SidebarMenuButton>
+						}
+					></DropdownMenuTrigger>
 					<DropdownMenuContent
 						className="w-(--radix-dropdown-menu-trigger-width) min-w-40 rounded-lg"
 						side={isMobile ? 'bottom' : 'top'}
 						align="start"
 						sideOffset={4}
 					>
-						<DropdownMenuGroup>
-							<DropdownMenuItem
-								onClick={() => isMobile && toggleSidebar()}
-								asChild
-								className="gap-2"
-								onMouseEnter={() => handleMenuItemMouseEnter('account')}
-								onMouseLeave={() => handleMenuItemMouseLeave('account')}
-							>
+						<DropdownMenuItem
+							onClick={() => isMobile && toggleSidebar()}
+							className="gap-2"
+							onMouseEnter={() => handleMenuItemMouseEnter('account')}
+							onMouseLeave={() => handleMenuItemMouseLeave('account')}
+							render={
 								<Link to="/profile">
 									<UserIcon
 										ref={(ref: any) => (iconRefs.current['account'] = ref)}
@@ -148,14 +148,14 @@ export function NavUser({
 									/>
 									<Trans>Account</Trans>
 								</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => isMobile && toggleSidebar()}
-								asChild
-								className="gap-2"
-								onMouseEnter={() => handleMenuItemMouseEnter('organizations')}
-								onMouseLeave={() => handleMenuItemMouseLeave('organizations')}
-							>
+							}
+						></DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => isMobile && toggleSidebar()}
+							className="gap-2"
+							onMouseEnter={() => handleMenuItemMouseEnter('organizations')}
+							onMouseLeave={() => handleMenuItemMouseLeave('organizations')}
+							render={
 								<Link to="/organizations">
 									<BuildingIcon
 										ref={(ref: any) =>
@@ -165,14 +165,14 @@ export function NavUser({
 									/>
 									<Trans>Organizations</Trans>
 								</Link>
-							</DropdownMenuItem>
-							{isAdmin && (
-								<DropdownMenuItem
-									asChild
-									className="gap-2"
-									onMouseEnter={() => handleMenuItemMouseEnter('admin')}
-									onMouseLeave={() => handleMenuItemMouseLeave('admin')}
-								>
+							}
+						></DropdownMenuItem>
+						{isAdmin && (
+							<DropdownMenuItem
+								className="gap-2"
+								onMouseEnter={() => handleMenuItemMouseEnter('admin')}
+								onMouseLeave={() => handleMenuItemMouseLeave('admin')}
+								render={
 									<Link to={getAdminUrl()} target="_blank">
 										<SettingsGearIcon
 											ref={(ref: any) => (iconRefs.current['admin'] = ref)}
@@ -180,9 +180,9 @@ export function NavUser({
 										/>
 										<Trans>Super Admin</Trans>
 									</Link>
-								</DropdownMenuItem>
-							)}
-						</DropdownMenuGroup>
+								}
+							></DropdownMenuItem>
+						)}
 						<DropdownMenuSeparator />
 						<DropdownMenuSub>
 							<DropdownMenuSubTrigger
@@ -201,7 +201,7 @@ export function NavUser({
 									<DropdownMenuItem
 										key={option.value}
 										className="gap-2"
-										onSelect={(e) => {
+										onClick={(e) => {
 											e.preventDefault()
 											const formData = new FormData()
 											formData.append('theme', option.value)
@@ -228,25 +228,25 @@ export function NavUser({
 							</DropdownMenuSubContent>
 						</DropdownMenuSub>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							asChild
-							className="gap-2"
-							onMouseEnter={() => handleMenuItemMouseEnter('logout')}
-							onMouseLeave={() => handleMenuItemMouseLeave('logout')}
-						>
-							<Form action="/logout" method="POST">
-								<LogoutIcon
-									ref={(ref: any) => (iconRefs.current['logout'] = ref)}
-									size={16}
-								/>
-								<button
-									type="submit"
-									className="w-full ltr:text-left rtl:text-right"
-								>
-									<Trans>Log out</Trans>
-								</button>
-							</Form>
-						</DropdownMenuItem>
+						<Form action="/logout" method="POST">
+							<DropdownMenuItem
+								className="gap-2"
+								onMouseEnter={() => handleMenuItemMouseEnter('logout')}
+								onMouseLeave={() => handleMenuItemMouseLeave('logout')}
+								render={
+									<button
+										type="submit"
+										className="w-full ltr:text-left rtl:text-right"
+									>
+										<LogoutIcon
+											ref={(ref: any) => (iconRefs.current['logout'] = ref)}
+											size={16}
+										/>
+										<Trans>Log out</Trans>
+									</button>
+								}
+							></DropdownMenuItem>
+						</Form>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>

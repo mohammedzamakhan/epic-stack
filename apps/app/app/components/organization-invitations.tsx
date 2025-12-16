@@ -398,7 +398,7 @@ function InviteFieldset({
 						align="inline-end"
 					>
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
+							<DropdownMenuTrigger>
 								<InputGroupButton variant="ghost">
 									{roles.find((r) => r.value === role.value)?.label}
 									<Icon name="chevron-down" />

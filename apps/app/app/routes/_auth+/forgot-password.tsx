@@ -181,7 +181,7 @@ export default function ForgotPasswordRoute() {
 	})
 
 	return (
-		<Card className="bg-muted/80 border-0 shadow-2xl">
+		<Card>
 			<CardHeader>
 				<CardTitle className="text-xl">
 					<Trans>Forgot Password</Trans>

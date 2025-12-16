@@ -3,7 +3,7 @@
 import { type UIMessage } from 'ai'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
-import {
+import React, {
 	type ComponentProps,
 	type HTMLAttributes,
 	type ReactElement,
@@ -148,6 +148,7 @@ export type BranchPreviousProps = ComponentProps<typeof Button>
 export const BranchPrevious = ({
 	className,
 	children,
+	nativeButton: ignoredNativeButton,
 	...props
 }: BranchPreviousProps) => {
 	const { goToPrevious, totalBranches } = useBranch()
@@ -162,6 +163,7 @@ export const BranchPrevious = ({
 				className,
 			)}
 			disabled={totalBranches <= 1}
+			nativeButton
 			onClick={goToPrevious}
 			size="icon"
 			type="button"
@@ -178,6 +180,7 @@ export type BranchNextProps = ComponentProps<typeof Button>
 export const BranchNext = ({
 	className,
 	children,
+	nativeButton: ignoredNativeButton,
 	...props
 }: BranchNextProps) => {
 	const { goToNext, totalBranches } = useBranch()
@@ -192,6 +195,7 @@ export const BranchNext = ({
 				className,
 			)}
 			disabled={totalBranches <= 1}
+			nativeButton
 			onClick={goToNext}
 			size="icon"
 			type="button"

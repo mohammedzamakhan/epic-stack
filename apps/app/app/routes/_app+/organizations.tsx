@@ -187,7 +187,7 @@ export default function OrganizationsPage() {
 
 	return (
 		<div className="flex flex-1 flex-col gap-4 py-4 pt-0">
-			<div className="py-8 md:container md:max-w-2xl">
+			<div className="mx-auto py-8 md:container md:max-w-2xl">
 				<div className="mb-8">
 					<PageTitle
 						title={_(t`Organizations`)}
@@ -210,11 +210,9 @@ export default function OrganizationsPage() {
 								className="bg-background pl-10"
 							/>
 						</div>
-						<Button asChild>
-							<Link to="/organizations/create">
-								<span className="mr-1">+</span>
-								<Trans>Add organization</Trans>
-							</Link>
+						<Button render={<Link to="/organizations/create" />}>
+							<span className="mr-1">+</span>
+							<Trans>Add organization</Trans>
 						</Button>
 					</div>
 				</div>
