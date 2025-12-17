@@ -31,6 +31,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const headers = new Headers()
 	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+	headers.set(
+		'Content-Security-Policy',
+		"sandbox; default-src 'none'; script-src 'none'; object-src 'none'",
+	)
 
 	const objectKey = searchParams.get('objectKey')
 	const organizationId = searchParams.get('organizationId')
