@@ -175,7 +175,7 @@ export interface PaymentProvider {
  * Payment provider configuration
  */
 export interface PaymentProviderConfig {
-	provider: 'stripe' | 'polar' | 'lemon-squeezy'
+	provider: 'stripe' | 'polar' | 'lemon-squeezy' | 'creem'
 	apiKey: string
 	webhookSecret?: string
 	apiVersion?: string

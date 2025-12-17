@@ -3,9 +3,10 @@
  * Creates the appropriate payment provider based on configuration
  */
 
+import { CreemProvider } from './providers/creem'
 import { PolarProvider } from './providers/polar'
 import { StripeProvider } from './providers/stripe'
-import  { type PaymentProvider, type PaymentProviderConfig } from './types'
+import { type PaymentProvider, type PaymentProviderConfig } from './types'
 
 /**
  * Create a payment provider instance
@@ -32,6 +33,10 @@ export function createPaymentProvider(
 			return new PolarProvider({
 				apiKey: config.apiKey,
 				organizationId: config.organizationId,
+			})
+		case 'creem':
+			return new CreemProvider({
+				apiKey: config.apiKey,
 			})
 		case 'lemon-squeezy':
 			throw new Error(
