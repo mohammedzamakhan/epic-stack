@@ -218,13 +218,29 @@ export async function loader({ request }: Route.LoaderArgs) {
 		: undefined
 
 	const favoriteNotes = user
-		? await prisma.organizationNoteFavorite.findMany({
-				where: {
-					userId: user.id,
-				},
-				include: {
-					note: true,
-				},
+		? await cachified({
+				key: `user-favorite-notes:${user.id}`,
+				cache,
+				ttl: 1000 * 60 * 60 * 24, // 24 hours (invalidated on update)
+				getFreshValue: () =>
+					prisma.organizationNoteFavorite.findMany({
+						where: {
+							userId: user.id,
+						},
+						select: {
+							note: {
+								select: {
+									id: true,
+									title: true,
+									organization: {
+										select: {
+											slug: true,
+										},
+									},
+								},
+							},
+						},
+					}),
 			})
 		: undefined
 

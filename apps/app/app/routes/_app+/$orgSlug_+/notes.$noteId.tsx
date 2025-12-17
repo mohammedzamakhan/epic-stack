@@ -66,6 +66,7 @@ import {
 	getNoteActivityLogs,
 } from '#app/utils/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { cache } from '#app/utils/cache.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '#app/utils/misc.tsx'
 import {
@@ -603,6 +604,8 @@ export async function action({ request }: ActionFunctionArgs) {
 					},
 				})
 			}
+
+			await cache.delete(`user-favorite-notes:${userId}`)
 
 			return data({ result: { status: 'success' } })
 		} catch {
