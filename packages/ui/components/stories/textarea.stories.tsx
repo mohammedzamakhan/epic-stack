@@ -7,9 +7,7 @@ import { Textarea } from '../ui/textarea'
 const meta = {
 	title: 'Components/Textarea',
 	component: Textarea,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		disabled: {

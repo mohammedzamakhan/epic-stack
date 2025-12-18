@@ -8,6 +8,8 @@ import { Input } from '@repo/ui/input'
 import { PageTitle } from '@repo/ui/page-title'
 import { Sheet, SheetContent } from '@repo/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@repo/ui/tabs'
+import { useDirection } from '@base-ui/react/direction-provider'
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import { useEffect, useState } from 'react'
 import {
@@ -226,6 +228,7 @@ export default function NotesRoute({
 	const fetcher = useFetcher()
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [searchValue, setSearchValue] = useState(loaderData.searchQuery)
+	const direction = useDirection()
 
 	const viewMode = loaderData.viewMode
 
@@ -277,11 +280,13 @@ export default function NotesRoute({
 						<TabsList>
 							<TabsTrigger value="cards" aria-label="Cards view">
 								<Tooltip>
-									<TooltipTrigger>
-										<span>
-											<Icon name="blocks" />
-										</span>
-									</TooltipTrigger>
+									<TooltipTrigger
+										render={
+											<span>
+												<Icon name="blocks" />
+											</span>
+										}
+									></TooltipTrigger>
 									<TooltipContent>
 										<Trans>Cards</Trans>
 									</TooltipContent>
@@ -289,11 +294,13 @@ export default function NotesRoute({
 							</TabsTrigger>
 							<TabsTrigger value="kanban" aria-label="Kanban board">
 								<Tooltip>
-									<TooltipTrigger>
-										<span>
-											<Icon name="menu" />
-										</span>
-									</TooltipTrigger>
+									<TooltipTrigger
+										render={
+											<span>
+												<Icon name="menu" />
+											</span>
+										}
+									></TooltipTrigger>
 									<TooltipContent>
 										<Trans>Kanban</Trans>
 									</TooltipContent>
@@ -386,7 +393,10 @@ export default function NotesRoute({
 					}
 				}}
 			>
-				<SheetContent className="flex w-[40vw] flex-col gap-0 data-[side=right]:w-full sm:max-w-xl data-[side=right]:sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+				<SheetContent
+					side={direction === 'rtl' ? 'left' : 'right'}
+					className="flex w-[40vw] flex-col gap-0 data-[side=right]:w-full sm:max-w-xl data-[side=right]:sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
+				>
 					<Outlet />
 				</SheetContent>
 			</Sheet>

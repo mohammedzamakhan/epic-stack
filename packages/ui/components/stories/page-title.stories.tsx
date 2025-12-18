@@ -4,9 +4,7 @@ import { PageTitle } from '../page-title'
 const meta = {
 	title: 'Components/PageTitle',
 	component: PageTitle,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof PageTitle>
 

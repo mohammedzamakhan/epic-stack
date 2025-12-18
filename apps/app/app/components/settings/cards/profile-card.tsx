@@ -139,15 +139,20 @@ export function ProfileCard({ user }: ProfileCardProps) {
 											<InputGroupInput
 												id="email"
 												type="text"
-												disabled
+												// disabled
 												value={user.email}
 											/>
 											<InputGroupAddon align="inline-end">
-												<DialogTrigger>
-													<InputGroupButton variant="outline">
-														<Trans>Change</Trans>
-													</InputGroupButton>
-												</DialogTrigger>
+												<DialogTrigger
+													render={
+														<InputGroupButton
+															disabled={false}
+															variant="destructive"
+														>
+															<Trans>Change</Trans>
+														</InputGroupButton>
+													}
+												></DialogTrigger>
 											</InputGroupAddon>
 										</InputGroup>
 										<DialogContent>

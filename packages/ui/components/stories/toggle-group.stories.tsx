@@ -5,9 +5,7 @@ import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 const meta = {
 	title: 'Components/ToggleGroup',
 	component: ToggleGroup,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		variant: {

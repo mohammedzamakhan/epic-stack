@@ -18,9 +18,7 @@ import { Textarea } from '../ui/textarea'
 const meta = {
 	title: 'Components/Dialog',
 	component: Dialog,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof Dialog>
 

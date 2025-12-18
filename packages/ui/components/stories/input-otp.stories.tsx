@@ -15,9 +15,7 @@ import {
 const meta = {
 	title: 'Components/InputOTP',
 	component: InputOTP,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof InputOTP>
 

@@ -1,14 +1,12 @@
 import { type Meta, type StoryObj } from '@storybook/react'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
-import { Toaster } from '../ui/sonner'
+import { EpicToaster as Toaster } from '../ui/sonner'
 
 const meta = {
 	title: 'Components/Toaster',
 	component: Toaster,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof Toaster>
 

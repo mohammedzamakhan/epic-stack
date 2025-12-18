@@ -107,7 +107,7 @@ export function NavUser({
 						render={
 							<SidebarMenuButton
 								size="lg"
-								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
 							>
 								<UserAvatar
 									user={{
@@ -116,7 +116,6 @@ export function NavUser({
 										image: user.avatar,
 									}}
 									className="h-8 w-8"
-									fallbackClassName="rounded-lg"
 									alt={user.name}
 								/>
 								<div className="grid flex-1 text-sm leading-tight ltr:text-left rtl:text-right">

@@ -2,6 +2,7 @@ import { brand, getErrorTitle } from '@repo/config/brand'
 import { getDirection } from '@repo/i18n'
 import { EpicToaster } from '@repo/ui/sonner'
 import { TooltipProvider } from '@repo/ui/tooltip'
+import { DirectionProvider } from '@base-ui/react/direction-provider'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
@@ -249,7 +250,7 @@ function Document({
 				<Links />
 			</head>
 			<body className="bg-background text-foreground">
-				{children}
+				<DirectionProvider direction={direction}>{children}</DirectionProvider>
 				<script
 					nonce={nonce}
 					dangerouslySetInnerHTML={{

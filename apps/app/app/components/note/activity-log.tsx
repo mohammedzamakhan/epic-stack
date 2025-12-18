@@ -62,7 +62,7 @@ function getActionConfig(action: string): ActionConfig {
 			return {
 				icon: 'plus',
 				label: 'Created',
-				variant: 'default',
+				variant: 'secondary',
 				bgColor: 'bg-green-500/10',
 				iconColor: 'text-green-500',
 			}

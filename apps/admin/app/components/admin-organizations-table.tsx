@@ -375,7 +375,9 @@ export function AdminOrganizationsTable({
 							handleSubscriptionStatusFilter(value as string)
 						}
 					>
-						<SelectTrigger className="w-48">Filter by status</SelectTrigger>
+						<SelectTrigger className="w-48">
+							<SelectValue />
+						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All statuses</SelectItem>
 							{subscriptionStatuses.map((status) => (
@@ -389,7 +391,9 @@ export function AdminOrganizationsTable({
 						value={planFilter || 'all'}
 						onValueChange={(value) => handlePlanFilter(value as string)}
 					>
-						<SelectTrigger className="w-48">Filter by plan</SelectTrigger>
+						<SelectTrigger className="w-48">
+							<SelectValue />
+						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All plans</SelectItem>
 							{planNames.map((plan) => (

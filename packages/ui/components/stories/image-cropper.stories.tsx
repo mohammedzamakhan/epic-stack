@@ -6,9 +6,7 @@ import { ImageCropper } from '../image-cropper'
 const meta = {
 	title: 'Components/ImageCropper',
 	component: ImageCropper,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof ImageCropper>
 

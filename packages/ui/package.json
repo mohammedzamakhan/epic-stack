@@ -78,7 +78,8 @@
     "./cn": "./lib/utils.ts",
     "./theme": "./utils/theme.ts",
     "./client-hints": "./utils/client-hints.tsx",
-    "./use-mobile": "./utils/use-mobile.ts"
+    "./use-mobile": "./utils/use-mobile.ts",
+    "./logo": "./components/logo.tsx"
   },
   "files": [
     "dist/**"

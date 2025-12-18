@@ -16,9 +16,7 @@ import {
 const meta = {
 	title: 'Components/Item',
 	component: Item,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof Item>
 

@@ -11,20 +11,22 @@ import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
 import { HomeIcon } from '@repo/ui/home-icon'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
+import { Logo } from '@repo/ui/logo'
 import { GlobeIcon } from '@repo/ui/globe-icon'
 import { ShieldCheckIcon } from '@repo/ui/shield-check-icon'
+import { useDirection } from '@base-ui/react/direction-provider'
 import * as React from 'react'
 import { Link, useLocation, useRouteLoaderData } from 'react-router'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { Logo } from './icons/logo'
 
 export function AdminSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
 	const rootData = useRouteLoaderData<typeof rootLoader>('root')
 	const location = useLocation()
+	const direction = useDirection()
 
 	// Admin navigation items
 	const navMain = [
@@ -108,7 +110,11 @@ export function AdminSidebar({
 			}
 
 	return (
-		<Sidebar {...props}>
+		<Sidebar
+			side={direction === 'rtl' ? 'right' : 'left'}
+			collapsible="icon"
+			{...props}
+		>
 			<SidebarHeader className="p-2">
 				<Link to="/">
 					<Logo className="mb-0" />

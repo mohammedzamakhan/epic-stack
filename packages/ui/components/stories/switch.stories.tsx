@@ -6,9 +6,7 @@ import { Switch } from '../ui/switch'
 const meta = {
 	title: 'Components/Switch',
 	component: Switch,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		disabled: {

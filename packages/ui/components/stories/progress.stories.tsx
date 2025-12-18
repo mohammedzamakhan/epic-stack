@@ -6,9 +6,7 @@ import { Progress } from '../ui/progress'
 const meta = {
 	title: 'Components/Progress',
 	component: Progress,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		value: {

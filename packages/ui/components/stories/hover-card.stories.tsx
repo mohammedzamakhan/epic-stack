@@ -6,9 +6,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card'
 const meta = {
 	title: 'Components/HoverCard',
 	component: HoverCard,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof HoverCard>
 

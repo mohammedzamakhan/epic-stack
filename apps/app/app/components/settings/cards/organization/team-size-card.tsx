@@ -82,8 +82,14 @@ export default function TeamSizeCard({
 						<Select
 							name={fields.size.name}
 							defaultValue={organization.size || ''}
+							items={[
+								{ label: 'Select team size', value: null },
+								...teamSizeOptions,
+							]}
 						>
-							<SelectTrigger>Select team size</SelectTrigger>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
 							<SelectContent>
 								{teamSizeOptions.map((option) => (
 									<SelectItem key={option.value} value={option.value}>

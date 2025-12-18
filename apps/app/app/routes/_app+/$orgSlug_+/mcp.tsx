@@ -2,6 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
+import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -23,7 +24,7 @@ import {
 import { FieldLabel, FieldGroup, FieldDescription } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
-import { Badge } from '@repo/ui/badge'
+import { Label } from '@repo/ui/label'
 import {
 	Table,
 	TableBody,
@@ -32,7 +33,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
-import { Label } from '@repo/ui/label'
 import { PageTitle } from '@repo/ui/page-title'
 import {
 	Collapsible,
@@ -640,7 +640,7 @@ function SetupInstructionsCard({
 		{
 			mcpServers: {
 				[`epic-notes-${organization.slug}`]: {
-					url: `${serverUrl}/sse`,
+					url: `${serverUrl}`,
 				},
 			},
 		},
@@ -652,7 +652,7 @@ function SetupInstructionsCard({
 		{
 			mcpServers: {
 				[`epic-notes-${organization.slug}`]: {
-					url: `${serverUrl}/sse`,
+					url: `${serverUrl}`,
 					disabled: false,
 					autoApprove: ['find_user', 'get_user_notes'],
 				},
@@ -666,10 +666,7 @@ function SetupInstructionsCard({
 		{
 			mcpServers: {
 				[`epic-notes-${organization.slug}`]: {
-					url: `${serverUrl}/sse`,
-					transport: {
-						type: 'sse',
-					},
+					url: `${serverUrl}`,
 				},
 			},
 		},
@@ -876,17 +873,12 @@ function AuthorizedClientsCard({
 			</CardHeader>
 			<CardContent className="p-0">
 				{authorizations.length === 0 ? (
-					<div className="text-muted-foreground space-y-2 px-6 py-8 text-center">
-						<p className="text-sm">
-							<Trans>No clients have been authorized yet.</Trans>
-						</p>
-						<p className="text-xs">
-							<Trans>
-								Once you connect an AI client using the setup instructions
-								below, it will appear here.
-							</Trans>
-						</p>
-					</div>
+					<EmptyState
+						title={t`No clients have been authorized yet`}
+						description={t`Once you connect an AI client using the setup instructions below, it will appear here.`}
+						icons={['shield-check']}
+						className="m-0"
+					/>
 				) : (
 					<Table>
 						<TableHeader>
@@ -1072,7 +1064,7 @@ function ToolItem({ tool }: { tool: MCPTool }) {
 
 	return (
 		<Collapsible open={isOpen} onOpenChange={setIsOpen}>
-			<CollapsibleTrigger className="hover:bg-muted/50 flex w-full items-center justify-between rounded-lg p-4 text-left transition-colors">
+			<CollapsibleTrigger className="hover:bg-muted/50 flex w-full items-center justify-between p-4 text-left transition-colors">
 				<div className="flex flex-col gap-1">
 					<div className="flex items-center gap-2">
 						<code className="bg-primary/10 text-primary rounded px-2 py-0.5 text-sm font-medium">
@@ -1248,8 +1240,8 @@ export default function McpPage() {
 
 	const serverUrl =
 		typeof window !== 'undefined'
-			? `${window.location.protocol}//${window.location.host}/mcp`
-			: 'https://yourdomain.com/mcp'
+			? `${window.location.protocol}//${window.location.host}/mcp/sse`
+			: 'https://yourdomain.com/mcp/sse'
 
 	// Handle successful API key creation
 	useEffect(() => {

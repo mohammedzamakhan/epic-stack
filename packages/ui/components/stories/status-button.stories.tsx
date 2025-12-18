@@ -5,9 +5,7 @@ import { StatusButton } from '../status-button'
 const meta = {
 	title: 'Components/StatusButton',
 	component: StatusButton,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		status: {

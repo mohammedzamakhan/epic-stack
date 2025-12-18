@@ -2,8 +2,15 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { getCrossAppUrl } from '@repo/common/url'
+import { BuildingIcon } from '@repo/ui/building-icon'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
+import { HomeIcon } from '@repo/ui/home-icon'
+import { Logo } from '@repo/ui/logo'
+import { useDirection } from '@base-ui/react/direction-provider'
+
+import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import {
 	Sidebar,
 	SidebarContent,
@@ -11,10 +18,6 @@ import {
 	SidebarHeader,
 } from '@repo/ui/sidebar'
 import { UserIcon } from '@repo/ui/user-icon'
-import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
-import { HomeIcon } from '@repo/ui/home-icon'
-import { BuildingIcon } from '@repo/ui/building-icon'
-import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import { motion } from 'motion/react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
@@ -33,7 +36,6 @@ import { FeatureUpdates } from './feature-updates'
 import { ArrowLeftIcon } from './icons/arrow-left-icon'
 import { CircleHelpIcon } from './icons/circle-help'
 import { ExternalLinkIcon } from './icons/external-link-icon'
-import { Logo } from './icons/logo'
 import { McpIcon } from './icons/mcp-icon'
 import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { NavSecondary } from './nav-secondary'
@@ -385,6 +387,7 @@ export function AppSidebar({
 	const location = useLocation()
 	const [, setHasVisibleFeatureUpdates] = React.useState(true)
 	const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false)
+	const direction = useDirection()
 
 	const orgSlug =
 		rootData?.userOrganizations?.currentOrganization?.organization.slug
@@ -419,7 +422,12 @@ export function AppSidebar({
 			}
 
 	return (
-		<Sidebar collapsible="icon" {...props} className="overflow-hidden">
+		<Sidebar
+			side={direction === 'rtl' ? 'right' : 'left'}
+			collapsible="icon"
+			{...props}
+			className="overflow-hidden"
+		>
 			<FeedbackModal
 				isOpen={isFeedbackModalOpen}
 				onOpenChange={setIsFeedbackModalOpen}

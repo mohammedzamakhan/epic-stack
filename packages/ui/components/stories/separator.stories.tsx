@@ -4,9 +4,7 @@ import { Separator } from '../ui/separator'
 const meta = {
 	title: 'Components/Separator',
 	component: Separator,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		orientation: {

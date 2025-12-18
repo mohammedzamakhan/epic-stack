@@ -5,9 +5,7 @@ import { Icon } from '../icon'
 const meta = {
 	title: 'Components/Badge',
 	component: Badge,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		variant: {

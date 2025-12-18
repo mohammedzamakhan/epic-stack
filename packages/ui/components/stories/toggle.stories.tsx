@@ -5,9 +5,7 @@ import { Toggle } from '../ui/toggle'
 const meta = {
 	title: 'Components/Toggle',
 	component: Toggle,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		variant: {

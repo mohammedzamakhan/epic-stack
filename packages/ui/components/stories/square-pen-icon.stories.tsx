@@ -6,9 +6,7 @@ import { SquarePenIcon, type SquarePenIconHandle } from '../square-pen-icon'
 const meta = {
 	title: 'Components/SquarePenIcon',
 	component: SquarePenIcon,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		size: {

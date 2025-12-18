@@ -4,9 +4,7 @@ import { ScrollArea } from '../ui/scroll-area'
 const meta = {
 	title: 'Components/ScrollArea',
 	component: ScrollArea,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof ScrollArea>
 

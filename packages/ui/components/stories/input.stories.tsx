@@ -4,9 +4,7 @@ import { Input } from '../ui/input'
 const meta = {
 	title: 'Components/Input',
 	component: Input,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		type: {

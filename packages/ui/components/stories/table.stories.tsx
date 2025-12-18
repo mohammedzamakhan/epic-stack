@@ -12,9 +12,7 @@ import {
 const meta = {
 	title: 'Components/Table',
 	component: Table,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 } satisfies Meta<typeof Table>
 

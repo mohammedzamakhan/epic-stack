@@ -9,9 +9,7 @@ import {
 const meta = {
 	title: 'Components/ButtonGroup',
 	component: ButtonGroup,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		orientation: {

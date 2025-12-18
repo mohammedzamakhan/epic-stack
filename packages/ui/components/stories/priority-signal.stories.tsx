@@ -4,9 +4,7 @@ import { PrioritySignal } from '../priority-signal'
 const meta = {
 	title: 'Components/PrioritySignal',
 	component: PrioritySignal,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		priority: {

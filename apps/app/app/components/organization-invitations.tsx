@@ -254,10 +254,12 @@ export function OrganizationInvitations({
 								<Button
 									variant="outline"
 									className="w-full"
-									{...form.insert.getButtonProps({
-										name: fields.invites.name,
-										defaultValue: { email: '', role: 'member' },
-									})}
+									onClick={() => {
+										form.insert({
+											name: fields.invites.name,
+											defaultValue: { email: '', role: 'member' },
+										})
+									}}
 								>
 									<Icon name="plus" className="h-4 w-4" />
 									<Trans>Add another invitation</Trans>
@@ -398,13 +400,15 @@ function InviteFieldset({
 						align="inline-end"
 					>
 						<DropdownMenu>
-							<DropdownMenuTrigger>
-								<InputGroupButton variant="ghost">
-									{roles.find((r) => r.value === role.value)?.label}
-									<Icon name="chevron-down" />
-								</InputGroupButton>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent side="top" align="end">
+							<DropdownMenuTrigger
+								render={
+									<InputGroupButton variant="ghost">
+										{roles.find((r) => r.value === role.value)?.label}
+										<Icon name="chevron-down" />
+									</InputGroupButton>
+								}
+							></DropdownMenuTrigger>
+							<DropdownMenuContent className="w-[250px]" side="top" align="end">
 								{roles.map((roleOption) => (
 									<DropdownMenuItem
 										key={roleOption.value}

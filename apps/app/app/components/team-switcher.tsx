@@ -62,8 +62,8 @@ export function TeamSwitcher() {
 									<div className="relative flex w-full items-center gap-3">
 										{/* Enhanced Avatar Container */}
 										<div className="relative">
-											<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded bg-gradient-to-br ring-1">
-												<Avatar className="size-8 rounded-sm">
+											<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded-sm bg-gradient-to-br ring-1">
+												<Avatar className="size-8 rounded-sm after:rounded-sm">
 													{activeTeam.image?.objectKey ? (
 														<AvatarImage
 															src={`/resources/images?objectKey=${activeTeam.image.objectKey}`}
@@ -71,10 +71,10 @@ export function TeamSwitcher() {
 																activeTeam.image?.altText ||
 																`${activeTeam.name} logo`
 															}
-															className="rounded-sm object-cover ring ring-2"
+															className="rounded-sm object-cover ring-2"
 														/>
 													) : null}
-													<AvatarFallback className="text-sidebar-primary-foreground bg-transparent text-sm font-semibold">
+													<AvatarFallback className="text-sidebar-primary-foreground rounded-sm border-0 bg-transparent text-sm font-semibold ring-0">
 														{activeTeam.name.slice(0, 2).toUpperCase()}
 													</AvatarFallback>
 												</Avatar>
@@ -136,8 +136,8 @@ export function TeamSwitcher() {
 								>
 									<div className="relative">
 										<div className="from-sidebar-primary/20 to-sidebar-primary/40 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 absolute inset-0 rounded bg-gradient-to-br transition-colors" />
-										<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 group-hover/item:text-sidebar-primary group-hover/item:ring-sidebar-primary relative flex size-6 items-center justify-center rounded bg-gradient-to-br ring-1 transition-colors">
-											<Avatar className="size-6 rounded-sm">
+										<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 group-hover/item:text-sidebar-primary group-hover/item:ring-sidebar-primary relative flex size-6 items-center justify-center rounded-sm bg-gradient-to-br ring-1 transition-colors">
+											<Avatar className="size-6 rounded-sm after:rounded-sm">
 												{userOrg.organization.image?.objectKey ? (
 													<AvatarImage
 														src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}

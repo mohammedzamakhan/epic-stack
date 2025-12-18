@@ -1,11 +1,11 @@
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
+import { Logo } from '@repo/ui/logo'
 import React from 'react'
 import { Form, Link } from 'react-router'
 import { cn } from '#app/utils/misc.tsx'
 import { useOptionalUserOrganizations } from '#app/utils/organizations.ts'
 import { useOptionalUser } from '#app/utils/user.ts'
-import { Logo } from '../icons/logo'
 
 const menuItems = [
 	{ name: 'Features', href: '#link' },

@@ -22,9 +22,7 @@ import { Button } from '../ui/button'
 const meta = {
 	title: 'Components/Animated Icons',
 	component: HomeIcon,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		size: {

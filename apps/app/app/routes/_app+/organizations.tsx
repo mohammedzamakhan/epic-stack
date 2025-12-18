@@ -4,6 +4,15 @@ import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemGroup,
+	ItemMedia,
+	ItemTitle,
+	ItemDescription,
+} from '@repo/ui/item'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { PageTitle } from '@repo/ui/page-title'
@@ -18,6 +27,7 @@ import {
 	redirect,
 } from 'react-router'
 
+import { EmptyState } from '#app/components/empty-state.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import {
 	type UserOrganizationWithRole,
@@ -232,14 +242,11 @@ export default function OrganizationsPage() {
 								</Trans>
 							</p>
 						</CardHeader>
-						<CardContent className="space-y-3">
-							{pendingInvitations.map((invitation) => (
-								<div
-									key={invitation.id}
-									className="flex items-center justify-between rounded-lg border p-4"
-								>
-									<div className="flex items-center gap-3">
-										<div className="ring-muted bg-muted flex h-10 w-10 items-center justify-center overflow-hidden rounded-md text-sm font-medium ring-2 ring-offset-2">
+						<CardContent>
+							<ItemGroup>
+								{pendingInvitations.map((invitation) => (
+									<Item key={invitation.id} variant="outline">
+										<ItemMedia variant="image">
 											{invitation.organization.image?.objectKey ? (
 												<Img
 													src={getOrgImgSrc(
@@ -255,13 +262,11 @@ export default function OrganizationsPage() {
 													{invitation.organization.name.charAt(0).toUpperCase()}
 												</span>
 											)}
-										</div>
-										<div>
-											<div className="font-medium">
-												{invitation.organization.name}
-											</div>
-											<div className="text-muted-foreground flex items-center gap-2 text-sm">
-												<Badge variant="secondary" className="text-xs">
+										</ItemMedia>
+										<ItemContent>
+											<ItemTitle>{invitation.organization.name}</ItemTitle>
+											<ItemDescription>
+												<Badge variant="secondary" className="mr-2 text-xs">
 													{invitation.organizationRole.name}
 												</Badge>
 												{invitation.inviter && (
@@ -273,110 +278,95 @@ export default function OrganizationsPage() {
 														</Trans>
 													</span>
 												)}
-											</div>
-										</div>
-									</div>
-									<div className="flex gap-2">
-										<Form method="POST">
-											<input
-												type="hidden"
-												name="intent"
-												value="accept-invitation"
-											/>
-											<input
-												type="hidden"
-												name="invitationId"
-												value={invitation.id}
-											/>
-											<Button type="submit" size="sm">
-												<Trans>Accept</Trans>
-											</Button>
-										</Form>
-										<Form method="POST">
-											<input
-												type="hidden"
-												name="intent"
-												value="decline-invitation"
-											/>
-											<input
-												type="hidden"
-												name="invitationId"
-												value={invitation.id}
-											/>
-											<Button type="submit" variant="outline" size="sm">
-												<Trans>Decline</Trans>
-											</Button>
-										</Form>
-									</div>
-								</div>
-							))}
+											</ItemDescription>
+										</ItemContent>
+										<ItemActions>
+											<Form method="POST">
+												<input
+													type="hidden"
+													name="intent"
+													value="accept-invitation"
+												/>
+												<input
+													type="hidden"
+													name="invitationId"
+													value={invitation.id}
+												/>
+												<Button type="submit" size="sm">
+													<Trans>Accept</Trans>
+												</Button>
+											</Form>
+											<Form method="POST">
+												<input
+													type="hidden"
+													name="intent"
+													value="decline-invitation"
+												/>
+												<input
+													type="hidden"
+													name="invitationId"
+													value={invitation.id}
+												/>
+												<Button type="submit" variant="outline" size="sm">
+													<Trans>Decline</Trans>
+												</Button>
+											</Form>
+										</ItemActions>
+									</Item>
+								))}
+							</ItemGroup>
 						</CardContent>
 					</Card>
 				)}
 
-				<div className="space-y-2">
+				<ItemGroup>
 					{filteredOrganizations.map((org: UserOrganizationWithRole) => (
-						<Link
+						<Item
 							key={org.organization.id}
-							to={`/${org.organization.slug}`}
-							className="block"
+							render={<Link to={`/${org.organization.slug}`} />}
+							variant="outline"
 						>
-							<div className="bg-background flex items-center justify-between rounded-lg border p-4 transition-colors hover:shadow-sm">
-								<div className="flex items-center gap-3">
-									<div className="ring-muted bg-muted flex h-10 w-10 items-center justify-center overflow-hidden rounded-md text-sm font-medium ring-2 ring-offset-2">
-										{org.organization.image?.objectKey ? (
-											<Img
-												src={getOrgImgSrc(org.organization.image.objectKey)}
-												alt={org.organization.name}
-												className="h-full w-full object-cover"
-												width={40}
-												height={40}
-											/>
-										) : (
-											<span>
-												{org.organization.name.charAt(0).toUpperCase()}
-											</span>
-										)}
-									</div>
-									<div>
-										<div className="font-medium">{org.organization.name}</div>
-										<div className="text-muted-foreground text-sm">
-											/app/{org.organization.slug}
-										</div>
-									</div>
-								</div>
-								<div className="text-muted-foreground flex items-center gap-2">
-									<span className="text-sm">1</span>
-									<Icon name="chevron-right" className="h-4 w-4" />
-								</div>
-							</div>
-						</Link>
-					))}
-
-					{(filteredOrganizations.length === 0 && searchQuery) ||
-					organizations.length === 0 ? (
-						<div className="border-border rounded-lg border p-12">
-							<div className="flex flex-col items-center justify-center text-center">
-								<div className="bg-muted mb-4 rounded-lg p-3">
-									<Icon
-										name="folder-open"
-										className="text-muted-foreground h-8 w-8"
+							<ItemMedia variant="image">
+								{org.organization.image?.objectKey ? (
+									<Img
+										src={getOrgImgSrc(org.organization.image.objectKey)}
+										alt={org.organization.name}
+										className="h-full w-full object-cover"
+										width={40}
+										height={40}
 									/>
-								</div>
-								<div className="mb-2 text-lg font-medium">
-									<Trans>No organization found</Trans>
-								</div>
-								<p className="text-muted-foreground text-sm">
-									{searchQuery ? (
-										<Trans>Adjust your search query to show more.</Trans>
-									) : (
-										<Trans>You haven't joined any organizations yet.</Trans>
-									)}
-								</p>
-							</div>
-						</div>
-					) : null}
-				</div>
+								) : (
+									<span>{org.organization.name.charAt(0).toUpperCase()}</span>
+								)}
+							</ItemMedia>
+							<ItemContent>
+								<ItemTitle>{org.organization.name}</ItemTitle>
+								<ItemDescription>/app/{org.organization.slug}</ItemDescription>
+							</ItemContent>
+							<ItemActions>
+								<span className="text-sm">1</span>
+								<Icon name="chevron-right" className="h-4 w-4" />
+							</ItemActions>
+						</Item>
+					))}
+				</ItemGroup>
+
+				{(filteredOrganizations.length === 0 && searchQuery) ||
+				organizations.length === 0 ? (
+					<EmptyState
+						title={_(t`No organization found`)}
+						description={
+							searchQuery
+								? _(t`Adjust your search query to show more.`)
+								: _(t`You haven't joined any organizations yet.`)
+						}
+						icons={['folder-open']}
+						action={{
+							label: _(t`Add organization`),
+							href: '/organizations/create',
+						}}
+					/>
+				) : null}
 			</div>
 		</div>
 	)

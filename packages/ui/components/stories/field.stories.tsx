@@ -16,9 +16,6 @@ import { Input } from '../ui/input'
 const meta = {
 	title: 'Components/Field',
 	component: Field,
-	parameters: {
-		layout: 'centered',
-	},
 	tags: ['autodocs'],
 } satisfies Meta<typeof Field>
 

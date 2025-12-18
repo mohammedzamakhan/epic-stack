@@ -118,9 +118,7 @@ const allIconNames: IconName[] = [
 const meta = {
 	title: 'Components/Icon',
 	component: Icon,
-	parameters: {
-		layout: 'centered',
-	},
+
 	tags: ['autodocs'],
 	argTypes: {
 		name: {

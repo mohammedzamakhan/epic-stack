@@ -343,35 +343,37 @@ function NotificationBellComponent() {
 
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<PopoverTrigger>
-				<motion.button
-					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
-				>
-					<BellIcon size={16} />
-					<AnimatePresence>
-						{unreadCount > 0 && (
-							<motion.div
-								initial={{ scale: 0 }}
-								animate={{ scale: 1 }}
-								exit={{ scale: 0 }}
-								className="absolute -top-2 -right-3"
-							>
-								<Badge
-									variant="destructive"
-									className="rounded-full px-1 py-0 text-xs"
+			<PopoverTrigger
+				render={
+					<motion.button
+						className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+					>
+						<BellIcon size={16} />
+						<AnimatePresence>
+							{unreadCount > 0 && (
+								<motion.div
+									initial={{ scale: 0 }}
+									animate={{ scale: 1 }}
+									exit={{ scale: 0 }}
+									className="absolute -top-2 -right-3"
 								>
-									{unreadCount}
-								</Badge>
-							</motion.div>
-						)}
-					</AnimatePresence>
-					<span className="sr-only">
-						<Trans>Toggle notifications</Trans>
-					</span>
-				</motion.button>
-			</PopoverTrigger>
+									<Badge
+										variant="destructive"
+										className="rounded-full px-1 py-0 text-xs"
+									>
+										{unreadCount}
+									</Badge>
+								</motion.div>
+							)}
+						</AnimatePresence>
+						<span className="sr-only">
+							<Trans>Toggle notifications</Trans>
+						</span>
+					</motion.button>
+				}
+			></PopoverTrigger>
 			<PopoverContent className="w-[400px] rounded-2xl p-0" align="end">
 				<motion.div
 					initial="hidden"
