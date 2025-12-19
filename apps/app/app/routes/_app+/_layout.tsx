@@ -21,6 +21,13 @@ export async function loader({ request }: { request: Request }) {
 		const defaultOrg = await getUserDefaultOrganization(userId)
 
 		if (defaultOrg?.organization?.id) {
+			// Start fetching trial status in parallel with onboarding checks
+			// as they are independent operations
+			const trialStatusPromise = getTrialStatus(
+				userId,
+				defaultOrg.organization.slug,
+			).catch(() => null)
+
 			// Auto-detect completed steps first
 			try {
 				await autoDetectCompletedSteps(userId, defaultOrg.organization.id)
@@ -39,12 +46,8 @@ export async function loader({ request }: { request: Request }) {
 				onboardingProgress = null
 			}
 
-			// Get trial status using environment variables
-			try {
-				trialStatus = await getTrialStatus(userId, defaultOrg.organization.slug)
-			} catch {
-				// Continue without trial status if there's an error
-			}
+			// Await the trial status result
+			trialStatus = await trialStatusPromise
 		}
 	} catch {
 		// Don't throw, just continue without onboarding progress
