@@ -7,6 +7,7 @@ node_modules
 .cache
 .astro/
 .next/
+.vscode/
 
 /database/data.db
 /database/data.db-journal
@@ -41,7 +42,7 @@ data.db
 reference-saas-app/
 
 .trigger
-packages/prisma/db/data.db-journal
+packages/database/db/data.db-journal
 
 # Compiled TypeScript output in packages/ui
 packages/ui/**/*.js

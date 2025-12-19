@@ -4,7 +4,7 @@
  * Generates local development SSL certificates using mkcert
  */
 
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync } from 'fs'
 import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
@@ -65,8 +65,37 @@ function ensureSSLDirectory() {
 	return sslDir
 }
 
+function getBrandDomain() {
+	try {
+		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
+		if (!existsSync(brandConfigPath)) {
+			log('⚠️  Brand config not found, using default domain', 'yellow')
+			return 'epic-stack.me'
+		}
+
+		const brandContent = readFileSync(brandConfigPath, 'utf-8')
+
+		// Extract brand name from the config
+		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
+		if (!nameMatch) {
+			log('⚠️  Could not parse brand name, using default domain', 'yellow')
+			return 'epic-stack.me'
+		}
+
+		const brandName = nameMatch[1]
+		// Convert brand name to domain format (lowercase, replace spaces with hyphens)
+		const domainName = brandName.toLowerCase().replace(/\s+/g, '-')
+		return `${domainName}.me`
+	} catch (error) {
+		log(`⚠️  Error reading brand config: ${error.message}`, 'yellow')
+		return 'epic-stack.me'
+	}
+}
+
 function generateCertificates(sslDir) {
-	const domain = 'epic-stack.me'
+	const domain = getBrandDomain()
+	log(`🔐 Using domain: ${domain}`, 'blue')
+
 	const keyPath = join(sslDir, '_wildcard.domain.me+2-key.pem')
 	const certPath = join(sslDir, '_wildcard.domain.me+2.pem')
 
@@ -121,4 +150,3 @@ main().catch((error) => {
 	log(`\n✗ SSL setup failed: ${error.message}`, 'red')
 	process.exit(1)
 })
-
