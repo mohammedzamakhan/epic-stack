@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
+import { brand } from '@repo/config/brand'
 import {
 	type SentryReactRouterBuildOptions,
 	sentryReactRouter,
@@ -12,6 +13,7 @@ import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const domain = 'app.' + brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
 const MODE = process.env.NODE_ENV
 
@@ -142,7 +144,7 @@ export default defineConfig((config) => ({
 		},
 	}),
 	server: {
-		allowedHosts: ['app.epic-stack.me', 'localhost'],
+		allowedHosts: [domain, 'localhost'],
 		watch: {
 			ignored: ['**/playwright-report/**', '**/node_modules/.vite-temp/**'],
 		},

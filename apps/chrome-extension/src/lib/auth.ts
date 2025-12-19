@@ -1,9 +1,12 @@
+import { brand } from '@repo/config/brand'
 import browser from 'webextension-polyfill'
 import { logger, debugMessage } from './debug'
 
+const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+
 export const AUTH_STATUS_KEY = 'auth_status'
-export const DOMAIN = '.epic-stack.me'
-export const APP_URL = 'http://app.epic-stack.me:2999'
+export const DOMAIN = `.${domain}`
+export const APP_URL = `https://app.${domain}:2999`
 
 export interface AuthStatus {
 	isLoggedIn: boolean
