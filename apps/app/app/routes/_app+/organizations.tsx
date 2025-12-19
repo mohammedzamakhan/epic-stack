@@ -17,7 +17,7 @@ import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { PageTitle } from '@repo/ui/page-title'
 import { Img } from 'openimg/react'
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
@@ -182,6 +182,7 @@ export default function OrganizationsPage() {
 	const { organizations, pendingInvitations } = useLoaderData<typeof loader>()
 	const [searchQuery, setSearchQuery] = useState('')
 	const { _ } = useLingui()
+	const searchInputId = useId()
 
 	const filteredOrganizations = organizations.filter(
 		(org: UserOrganizationWithRole) =>
@@ -213,12 +214,28 @@ export default function OrganizationsPage() {
 								className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
 							/>
 							<Input
-								type="text"
+								id={searchInputId}
+								type="search"
+								aria-label={_(t`Search organizations`)}
 								placeholder={_(t`Search...`)}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className="bg-background pl-10"
+								className="bg-background pl-10 pr-8"
 							/>
+							{searchQuery ? (
+								<Button
+									variant="ghost"
+									size="icon-xs"
+									className="text-muted-foreground hover:text-foreground absolute top-1/2 right-1 -translate-y-1/2"
+									onClick={() => {
+										setSearchQuery('')
+										document.getElementById(searchInputId)?.focus()
+									}}
+									aria-label={_(t`Clear search`)}
+								>
+									<Icon name="x" />
+								</Button>
+							) : null}
 						</div>
 						<Button render={<Link to="/organizations/create" />}>
 							<span className="mr-1">+</span>
