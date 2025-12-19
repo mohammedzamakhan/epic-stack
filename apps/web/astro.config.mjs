@@ -1,14 +1,16 @@
 import cloudflare from '@astrojs/cloudflare'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
+import { brand } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
 
+const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
 export default defineConfig({
 	output: 'server',
-	site: 'https://epic-stack.me',
+	site: `https://${domain}`,
 	integrations: [
 		react(),
 		sitemap({
@@ -24,7 +26,7 @@ export default defineConfig({
 	vite: {
 		plugins: [tailwindcss(), fontless()],
 		server: {
-			allowedHosts: ['epic-stack.me', 'localhost'],
+			allowedHosts: [domain, 'localhost'],
 		},
 		optimizeDeps: {
 			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],

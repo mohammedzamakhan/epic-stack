@@ -1,4 +1,5 @@
 import { render } from '@react-email/components'
+import { brand } from '@repo/config/brand'
 import { type ReactElement } from 'react'
 import { z } from 'zod'
 import { logger } from '@repo/observability'
@@ -32,7 +33,7 @@ export async function sendEmail({
 	| { html: string; text: string; react?: never }
 	| { react: ReactElement; html?: never; text?: never }
 )) {
-	const from = 'hello@epicstack.dev'
+	const from = brand.email
 
 	const email = {
 		from,

@@ -1,5 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
+import { brand } from '@repo/config/brand'
 import { prisma } from '@repo/database'
 import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
 import {
@@ -62,7 +63,7 @@ test('onboarding with link', async ({ page, getOnboardingData, navigate }) => {
 	const email = await readEmail(onboardingData.email)
 	invariant(email, 'Email not found')
 	expect(email.to).toBe(onboardingData.email.toLowerCase())
-	expect(email.from).toBe('hello@epicstack.dev')
+	expect(email.from).toBe(brand.email)
 	expect(email.subject).toMatch(/welcome/i)
 	const onboardingUrl = extractUrl(email.text)
 	invariant(onboardingUrl, 'Onboarding URL not found')
@@ -120,7 +121,7 @@ test('onboarding with a short code', async ({
 	const email = await readEmail(onboardingData.email)
 	invariant(email, 'Email not found')
 	expect(email.to).toBe(onboardingData.email.toLowerCase())
-	expect(email.from).toBe('hello@epicstack.dev')
+	expect(email.from).toBe(brand.email)
 	expect(email.subject).toMatch(/welcome/i)
 	const codeMatch = email.text.match(CODE_REGEX)
 	const code = codeMatch?.groups?.code
@@ -414,7 +415,7 @@ test('reset password with a link', async ({
 	invariant(email, 'Email not found')
 	expect(email.subject).toMatch(/password reset/i)
 	expect(email.to).toBe(user.email.toLowerCase())
-	expect(email.from).toBe('hello@epicstack.dev')
+	expect(email.from).toBe(brand.email)
 	const resetPasswordUrl = extractUrl(email.text)
 	invariant(resetPasswordUrl, 'Reset password URL not found')
 	await navigate(resetPasswordUrl)
@@ -505,7 +506,7 @@ test('reset password with a short code', async ({
 	invariant(email, 'Email not found')
 	expect(email.subject).toMatch(/password reset/i)
 	expect(email.to).toBe(user.email)
-	expect(email.from).toBe('hello@epicstack.dev')
+	expect(email.from).toBe(brand.email)
 	const codeMatch = email.text.match(CODE_REGEX)
 	const code = codeMatch?.groups?.code
 	invariant(code, 'Reset Password code not found')

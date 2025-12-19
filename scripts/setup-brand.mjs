@@ -303,6 +303,51 @@ function updateEnvFiles(brandName) {
 	}
 }
 
+function updateMobileAppConfig(brandInfo) {
+	const appJsonPath = join(rootDir, 'apps/mobile/app.json')
+	
+	try {
+		if (!existsSync(appJsonPath)) {
+			log(`⚠️  Mobile app.json not found: ${appJsonPath}`, 'yellow')
+			return
+		}
+
+		const content = readFileSync(appJsonPath, 'utf-8')
+		const appConfig = JSON.parse(content)
+		
+		// Update app name and slug based on brand
+		const mobileAppName = `${brandInfo.name} Mobile`
+		const slug = brandInfo.name.toLowerCase().replace(/\s+/g, '-') + '-mobile'
+		const domain = getBrandDomain(brandInfo.name)
+		
+		// Update expo configuration
+		appConfig.expo.name = mobileAppName
+		appConfig.expo.slug = slug
+		
+		// Update bundle identifiers
+		const bundleId = `com.${brandInfo.name.toLowerCase().replace(/\s+/g, '')}.mobile`
+		appConfig.expo.ios.bundleIdentifier = bundleId
+		appConfig.expo.android.package = bundleId
+		
+		// Update linking prefixes
+		appConfig.expo.linking.prefixes = [
+			`${slug}://`,
+			`https://${domain}`
+		]
+		
+		// Write back the updated configuration
+		writeFileSync(appJsonPath, JSON.stringify(appConfig, null, '\t'), 'utf-8')
+		log(`✅ Updated mobile app configuration in apps/mobile/app.json`, 'green')
+		log(`   - App name: ${mobileAppName}`, 'gray')
+		log(`   - Slug: ${slug}`, 'gray')
+		log(`   - Bundle ID: ${bundleId}`, 'gray')
+		log(`   - Domain: ${domain}`, 'gray')
+		
+	} catch (error) {
+		log(`⚠️  Failed to update mobile app.json: ${error.message}`, 'yellow')
+	}
+}
+
 function copyFavicon(faviconPath) {
 	if (!faviconPath) return
 
@@ -362,6 +407,7 @@ async function main() {
 		const brandInfo = await promptBrandInfo()
 		updateBrandConfig(brandInfo)
 		updateEnvFiles(brandInfo.name)
+		updateMobileAppConfig(brandInfo)
 
 		const faviconPath = await promptFavicon()
 		if (faviconPath) {
