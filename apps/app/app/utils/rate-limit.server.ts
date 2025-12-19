@@ -25,6 +25,14 @@ export const RATE_LIMITS = {
 		maxRequests: 20,
 		windowMs: 60 * 60 * 1000, // 1 hour
 	},
+	sso: {
+		maxRequests: 5,
+		windowMs: 60 * 1000, // 1 minute
+	},
+	ssoCallback: {
+		maxRequests: 10,
+		windowMs: 60 * 1000, // 1 minute
+	},
 	toolInvocation: {
 		maxRequests: 1000,
 		windowMs: 60 * 60 * 1000, // 1 hour

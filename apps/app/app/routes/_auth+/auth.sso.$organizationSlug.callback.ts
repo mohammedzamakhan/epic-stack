@@ -6,6 +6,11 @@ import { ensurePrimary } from '#app/utils/litefs.server.ts'
 import { combineHeaders } from '#app/utils/misc.tsx'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
 import {
+	checkRateLimit,
+	createRateLimitResponse,
+	RATE_LIMITS,
+} from '#app/utils/rate-limit.server.ts'
+import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
 } from '#app/utils/redirect-cookie.server.ts'
@@ -51,6 +56,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 		// Validate callback parameters
 		const url = new URL(request.url)
+
+		const rateLimitCheck = await checkRateLimit(
+			{ type: 'ip', value: clientIP },
+			RATE_LIMITS.ssoCallback,
+		)
+
+		if (!rateLimitCheck.allowed) {
+			return createRateLimitResponse(rateLimitCheck.resetAt)
+		}
+
 		const callbackData = SSOCallbackSchema.parse({
 			code: url.searchParams.get('code') || undefined,
 			state: url.searchParams.get('state') || undefined,

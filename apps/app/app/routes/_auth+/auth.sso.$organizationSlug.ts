@@ -3,6 +3,11 @@ import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '#app/utils/auth.server.ts'
 import { getReferrerRoute } from '#app/utils/misc.tsx'
+import {
+	checkRateLimit,
+	createRateLimitResponse,
+	RATE_LIMITS,
+} from '#app/utils/rate-limit.server.ts'
 import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
 import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
 import {
@@ -61,6 +66,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export async function action({ request, params }: Route.ActionArgs) {
 	const clientIP = getClientIp(request)
+
+	const rateLimitCheck = await checkRateLimit(
+		{ type: 'ip', value: clientIP },
+		RATE_LIMITS.sso,
+	)
+
+	if (!rateLimitCheck.allowed) {
+		return createRateLimitResponse(rateLimitCheck.resetAt)
+	}
 
 	try {
 		// Validate and sanitize organization slug (includes suspicious activity check)
