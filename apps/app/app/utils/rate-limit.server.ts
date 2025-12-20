@@ -103,18 +103,25 @@ export async function checkRateLimit(
 
 /**
  * Get the client IP address from request
+ * Prioritizes headers from trusted proxies (Fly.io, Cloudflare)
  */
 export function getClientIp(request: Request): string {
-	// Check for X-Forwarded-For header (proxy)
+	// 1. Fly-Client-IP (Fly.io specific)
+	const flyClientIp = request.headers.get('fly-client-ip')
+	if (flyClientIp) return flyClientIp
+
+	// 2. CF-Connecting-IP (Cloudflare specific)
+	const cfConnectingIp = request.headers.get('cf-connecting-ip')
+	if (cfConnectingIp) return cfConnectingIp
+
+	// 3. X-Real-IP (Common reverse proxy header)
+	const realIp = request.headers.get('x-real-ip')
+	if (realIp) return realIp
+
+	// 4. X-Forwarded-For (Standard proxy header, takes first IP)
 	const forwarded = request.headers.get('x-forwarded-for')
 	if (forwarded) {
 		return forwarded.split(',')[0]?.trim() || 'unknown'
-	}
-
-	// Check for X-Real-IP header
-	const realIp = request.headers.get('x-real-ip')
-	if (realIp) {
-		return realIp
 	}
 
 	// Fallback to connection info

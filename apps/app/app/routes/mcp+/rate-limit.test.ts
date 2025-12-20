@@ -229,7 +229,7 @@ describe('Rate Limiting', () => {
 			expect(ip).toBe('unknown')
 		})
 
-		it('should prefer X-Forwarded-For over X-Real-IP', () => {
+		it('should prefer X-Real-IP over X-Forwarded-For', () => {
 			const request = new Request('http://localhost', {
 				headers: {
 					'x-forwarded-for': '203.0.113.3',
@@ -238,7 +238,34 @@ describe('Rate Limiting', () => {
 			})
 
 			const ip = getClientIp(request)
-			expect(ip).toBe('203.0.113.3')
+			expect(ip).toBe('203.0.113.4')
+		})
+
+		it('should prefer Fly-Client-IP over others', () => {
+			const request = new Request('http://localhost', {
+				headers: {
+					'fly-client-ip': '203.0.113.5',
+					'cf-connecting-ip': '203.0.113.6',
+					'x-real-ip': '203.0.113.4',
+					'x-forwarded-for': '203.0.113.3',
+				},
+			})
+
+			const ip = getClientIp(request)
+			expect(ip).toBe('203.0.113.5')
+		})
+
+		it('should prefer CF-Connecting-IP over X-Real-IP and X-Forwarded-For', () => {
+			const request = new Request('http://localhost', {
+				headers: {
+					'cf-connecting-ip': '203.0.113.6',
+					'x-real-ip': '203.0.113.4',
+					'x-forwarded-for': '203.0.113.3',
+				},
+			})
+
+			const ip = getClientIp(request)
+			expect(ip).toBe('203.0.113.6')
 		})
 	})
 
