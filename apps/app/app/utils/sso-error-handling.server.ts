@@ -1,5 +1,8 @@
 import { destroyRedirectToHeader } from './redirect-cookie.server.ts'
 import { redirectWithToast } from './toast.server.ts'
+import { sendEmail } from '#app/utils/email.server.ts'
+import { brand } from '@repo/config/brand'
+import * as Sentry from '@sentry/react-router'
 
 // SSO-specific error types
 export enum SSOErrorType {
@@ -357,41 +360,86 @@ function categorizeSSOError(error: Error): SSOError {
  */
 async function notifyAdminOfSSOError(error: SSOError): Promise<void> {
 	try {
-		// In a real implementation, this would send notifications via:
-		// - Email to administrators
-		// - Slack/Teams webhook
-		// - Error tracking service (Sentry, Bugsnag, etc.)
-		// - Admin dashboard alerts
-
+		const timestamp = new Date().toISOString()
 		console.warn('Admin notification required for SSO error:', {
 			type: error.type,
 			message: error.message,
 			details: error.details,
-			timestamp: new Date().toISOString(),
+			timestamp,
 		})
 
-		// TODO: Implement actual notification system
-		// Example implementations:
+		// 1. Error tracking (Sentry)
+		Sentry.captureException(new Error(error.message), {
+			tags: {
+				sso_error_type: error.type,
+				source: 'sso-error-handling',
+			},
+			extra: {
+				details: error.details,
+				userMessage: error.userMessage,
+				shouldFallback: error.shouldFallback,
+				statusCode: error.statusCode,
+			},
+		})
 
-		// Email notification
-		// await sendAdminEmail({
-		//   subject: `SSO Error: ${error.userMessage}`,
-		//   body: `Error Type: ${error.type}\nMessage: ${error.message}\nDetails: ${error.details}`,
-		// })
+		// 2. Email notification
+		// Send to support email defined in brand config
+		const to = brand.supportEmail
 
-		// Slack notification
-		// await sendSlackNotification({
-		//   channel: '#admin-alerts',
-		//   message: `🚨 SSO Error: ${error.userMessage}\n\`\`\`${error.message}\`\`\``,
-		// })
+		// If no support email is configured, we can't send an email
+		if (!to) {
+			console.warn(
+				'No support email configured (brand.supportEmail). Skipping admin email notification.',
+			)
+			return
+		}
 
-		// Error tracking
-		// Sentry.captureException(new Error(error.message), {
-		//   tags: { sso_error_type: error.type },
-		//   extra: { details: error.details },
-		// })
+		await sendEmail({
+			to,
+			subject: `[SSO Error] ${error.userMessage}`,
+			text: `
+An SSO error occurred that requires administrative attention.
+
+Type: ${error.type}
+Message: ${error.message}
+Details: ${error.details || 'No details provided'}
+Time: ${timestamp}
+
+User Message: ${error.userMessage}
+User Description: ${error.userDescription}
+      `.trim(),
+			html: `
+<h1>SSO Error Report</h1>
+<p>An SSO error occurred that requires administrative attention.</p>
+
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+  <tr>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Type</td>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${error.type}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Message</td>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${error.message}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Details</td>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${error.details || 'No details provided'}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Time</td>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${timestamp}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">User Message</td>
+    <td style="padding: 8px; border-bottom: 1px solid #ddd;">${error.userMessage}</td>
+  </tr>
+</table>
+      `.trim(),
+		})
 	} catch (notificationError) {
 		console.error('Failed to notify admin of SSO error:', notificationError)
+		// We don't re-throw here to prevent disrupting the user flow
+		// The original error is already handled and logged above
 	}
 }
 
