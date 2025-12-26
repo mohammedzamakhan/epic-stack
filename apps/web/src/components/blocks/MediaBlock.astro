@@ -21,6 +21,11 @@ const { media } = Astro.props
 						src={`${CMS_URL}/${media.url}`}
 						alt={media.alt || 'Media image'}
 						class="w-full max-w-4xl mx-auto h-auto object-cover relative z-10"
+						loading="lazy"
+						decoding="async"
+						width={media.width || 800}
+						height={media.height || 600}
+						fetchpriority="low"
 					/>
 				</div>
 			)
