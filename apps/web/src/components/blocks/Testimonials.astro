@@ -217,6 +217,9 @@ const testimonials = rawTestimonials.map((testimonial) => {
 													src={testimonial.author.image}
 													alt={testimonial.author.name}
 													class="object-cover w-full h-full"
+													loading="lazy"
+													decoding="async"
+													fetchpriority="low"
 												/>
 											</div>
 											<div>
