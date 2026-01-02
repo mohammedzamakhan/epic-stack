@@ -1,7 +1,7 @@
 ---
 import GridDesign from '../GridDesign.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+const CMS_URL = import.meta.env.PUBLIC_CMS_URL
 
 interface Props {
 	media?: any
@@ -9,17 +9,30 @@ interface Props {
 }
 
 const { media } = Astro.props
+
+const getImageUrl = (url?: string) => {
+	if (!url) return undefined
+	if (url.startsWith('http://') || url.startsWith('https://')) return url
+	if (!CMS_URL) return url
+
+	// Ensure single slash joining
+	const baseUrl = CMS_URL.endsWith('/') ? CMS_URL.slice(0, -1) : CMS_URL
+	const path = url.startsWith('/') ? url : `/${url}`
+	return `${baseUrl}${path}`
+}
+
+const imageUrl = media && typeof media === 'object' ? getImageUrl(media.url) : undefined
 ---
 
 <section class="py-16 relative">
 	<GridDesign />
 	<div class="container mx-auto px-4">
 		{
-			media && typeof media === 'object' && media.url && (
+			imageUrl && (
 				<div class="text-center">
 					<img
-						src={`${CMS_URL}/${media.url}`}
-						alt={media.alt || 'Media image'}
+						src={imageUrl}
+						alt={media.alt || ''}
 						class="w-full max-w-4xl mx-auto h-auto object-cover relative z-10"
 						loading="lazy"
 						decoding="async"
