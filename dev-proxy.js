@@ -17,7 +17,7 @@ function getBrandDomain() {
 
 		if (!fs.existsSync(brandConfigPath)) {
 			console.log('⚠️  Brand config not found, using default domain')
-			return 'epic-stack.me'
+			return 'epic-startup.me'
 		}
 
 		const brandContent = fs.readFileSync(brandConfigPath, 'utf-8')
@@ -26,7 +26,7 @@ function getBrandDomain() {
 		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
 		if (!nameMatch) {
 			console.log('⚠️  Could not parse brand name, using default domain')
-			return 'epic-stack.me'
+			return 'epic-startup.me'
 		}
 
 		const brandName = nameMatch[1]
@@ -35,7 +35,7 @@ function getBrandDomain() {
 		return `${domainName}.me`
 	} catch (error) {
 		console.log(`⚠️  Error reading brand config: ${error.message}`)
-		return 'epic-stack.me'
+		return 'epic-startup.me'
 	}
 }
 
@@ -51,6 +51,8 @@ const targets = {
 	[`cms.${domain}:${port}`]: 'http://localhost:3006',
 	[`api.${domain}:${port}`]: 'http://localhost:3007',
 }
+
+console.table(targets)
 
 const proxy = httpProxy.createProxyServer({
 	ws: true,

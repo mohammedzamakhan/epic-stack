@@ -36,7 +36,7 @@
 			"reactCanary": true
 		},
 		"linking": {
-			"prefixes": ["epic-stack://", "https://epic-stack.me"],
+			"prefixes": ["epic-stack://", "https://epic-startup.me"],
 			"config": {
 				"screens": {
 					"index": "",

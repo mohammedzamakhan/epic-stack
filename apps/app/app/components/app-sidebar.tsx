@@ -197,10 +197,10 @@ function OrganizationSidebar({
 }) {
 	const { _ } = useLingui()
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
-	const [helpUrl, setHelpUrl] = useState('https://docs.epic-stack.me:2999')
+	const [helpUrl, setHelpUrl] = useState('https://docs.epic-startup.me:2999')
 
 	useEffect(() => {
-		setHelpUrl(getCrossAppUrl('docs', '', 'https://docs.epic-stack.me:2999'))
+		setHelpUrl(getCrossAppUrl('docs', '', 'https://docs.epic-startup.me:2999'))
 	}, [])
 
 	useEffect(() => {

@@ -70,7 +70,7 @@ function getBrandDomain() {
 		const brandConfigPath = join(rootDir, 'packages/config/brand.ts')
 		if (!existsSync(brandConfigPath)) {
 			log('⚠️  Brand config not found, using default domain', 'yellow')
-			return 'epic-stack.me'
+			return 'epic-startup.me'
 		}
 
 		const brandContent = readFileSync(brandConfigPath, 'utf-8')
@@ -79,7 +79,7 @@ function getBrandDomain() {
 		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
 		if (!nameMatch) {
 			log('⚠️  Could not parse brand name, using default domain', 'yellow')
-			return 'epic-stack.me'
+			return 'epic-startup.me'
 		}
 
 		const brandName = nameMatch[1]
@@ -88,7 +88,7 @@ function getBrandDomain() {
 		return `${domainName}.me`
 	} catch (error) {
 		log(`⚠️  Error reading brand config: ${error.message}`, 'yellow')
-		return 'epic-stack.me'
+		return 'epic-startup.me'
 	}
 }
 

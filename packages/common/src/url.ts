@@ -10,9 +10,9 @@
  * @returns The generated URL
  *
  * @example
- * // On app.epic-stack.me:2999
+ * // On app.epic-startup.me:2999
  * getCrossAppUrl('docs', '/integrations/slack')
- * // Returns: 'http://docs.epic-stack.me:2999/integrations/slack'
+ * // Returns: 'http://docs.epic-startup.me:2999/integrations/slack'
  *
  * @example
  * // On app.xyz.com
@@ -25,7 +25,9 @@ export function getCrossAppUrl(
 	fallbackUrl?: string,
 ): string {
 	if (typeof window === 'undefined') {
-		return fallbackUrl ?? `http://${targetSubdomain}.epic-stack.me:2999${path}`
+		return (
+			fallbackUrl ?? `http://${targetSubdomain}.epic-startup.me:2999${path}`
+		)
 	}
 
 	const currentHost = window.location.host
@@ -44,5 +46,5 @@ export function getCrossAppUrl(
 	}
 
 	// Fallback
-	return fallbackUrl ?? `http://${targetSubdomain}.epic-stack.me:2999${path}`
+	return fallbackUrl ?? `http://${targetSubdomain}.epic-startup.me:2999${path}`
 }
