@@ -190,13 +190,13 @@ Helpful commands:
 
 ```
 # builds the docker container
-docker build -t epic-stack . -f other/Dockerfile --build-arg COMMIT_SHA=`git rev-parse --short HEAD`
+docker build -t epic-startup . -f other/Dockerfile --build-arg COMMIT_SHA=`git rev-parse --short HEAD`
 
 # mountpoint for your sqlite databases
 mkdir ~/litefs
 
 # Runs the docker container.
-docker run -d -p 8081:8081 -e SESSION_SECRET='somesecret' -e HONEYPOT_SECRET='somesecret' -e FLY='false' -v ~/litefs:/litefs epic-stack
+docker run -d -p 8081:8081 -e SESSION_SECRET='somesecret' -e HONEYPOT_SECRET='somesecret' -e FLY='false' -v ~/litefs:/litefs epic-startup
 
 # http://localhost:8081 should now point to your docker instance. ~/litefs directory has the sqlite databases
 ```

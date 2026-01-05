@@ -3,7 +3,7 @@
 Toast messages are great ways to temporarily call someone's attention to
 something. They are often used to notify users of a successful or failed action.
 
-![toasts](https://github.com/epicweb-dev/epic-stack/assets/1500684/715d754a-9e9f-4b61-814f-881121f2fa48)
+![toasts](https://github.com/mohammedzamakhan/epic-startup/assets/1500684/715d754a-9e9f-4b61-814f-881121f2fa48)
 
 There are utilities in the Epic Stack for toast notifications.
 

@@ -84,7 +84,7 @@ you're using until it arrives, which introduces Cumulative Layout Shift and
 impact its web vitals.
 
 In Epic Stack, we fixed this by introducing
-[Font Metric Overrides](https://github.com/epicweb-dev/epic-stack/pull/128/files).
+[Font Metric Overrides](https://github.com/mohammedzamakhan/epic-startup/pull/128/files).
 
 Follow the steps below to add Font Metric Overrides to your custom fonts.
 

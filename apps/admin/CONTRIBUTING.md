@@ -27,7 +27,7 @@ instructions:
 > requests from branches on your fork. To do this, run:
 >
 > ```
-> git remote add upstream https://github.com/epicweb-dev/epic-stack.git
+> git remote add upstream https://github.com/mohammedzamakhan/epic-startup.git
 > git fetch upstream
 > git branch --set-upstream-to=upstream/main main
 > ```
@@ -42,7 +42,7 @@ If the setup script doesn't work, you can try to run the commands manually:
 
 ```sh
 git clone <your-fork>
-cd ./epic-stack
+cd ./epic-startup
 
 # copy the .env.example to .env
 #   everything's mocked out during development so you shouldn't need to

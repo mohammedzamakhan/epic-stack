@@ -1,6 +1,6 @@
 # Server Timing
 
-![Network tab of Chrome DevTools showing the Timing tab of a specific network call and an arrow pointing to the Server Timing section with the words "This is what server timings do"](https://github.com/epicweb-dev/epic-stack/assets/1500684/e5a28253-8204-43b1-8222-3f287d024ca5)
+![Network tab of Chrome DevTools showing the Timing tab of a specific network call and an arrow pointing to the Server Timing section with the words "This is what server timings do"](https://github.com/mohammedzamakhan/epic-startup/assets/1500684/e5a28253-8204-43b1-8222-3f287d024ca5)
 
 The Epic Stack comes with a built-in server timing utility that allows you to
 measure the performance of your application. You can find it in the

@@ -43,7 +43,7 @@ error like this during local development:
 You need to be manually regenerate the icon with `npm run build`.
 
 See
-[the icons decision document](https://github.com/epicweb-dev/epic-stack/blob/main/docs/decisions/020-icons.md)
+[the icons decision document](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/decisions/020-icons.md)
 for more information about icons.
 
 ## Hydration Mismatch
@@ -59,9 +59,10 @@ for more information about hydration errors and how to fix them.
 If the article does not apply to you, there are a few other things to note.
 
 Often people think the issue is caused by the `nonce` prop being empty on the
-client ([like this](https://github.com/epicweb-dev/epic-stack/discussions/768)).
+client
+([like this](https://github.com/mohammedzamakhan/epic-startup/discussions/768)).
 This is not going to be the problem
-[unless you're running Firefox during development mode](https://github.com/epicweb-dev/epic-stack/discussions/768#discussioncomment-10456308)
+[unless you're running Firefox during development mode](https://github.com/mohammedzamakhan/epic-startup/discussions/768#discussioncomment-10456308)
 (if that's the case then you can safely ignore it because that's a firefox bug
 that only affects development). The browser strips the `nonce` from the DOM
 before executing any JavaScript for security reasons and React handles this

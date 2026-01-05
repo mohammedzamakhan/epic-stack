@@ -11,7 +11,7 @@ This page links to examples of how to implement some things with the Epic Stack.
   [@epicweb-dev](https://github.com/epicweb-dev): An example of the Epic Stack
   with an `/mcp` endpoint that can be used to interact with your app through the
   Model Context Protocol with your favorite MCP client (Claude, Cursor, etc.).
-- [Epic Stack with Stripe](https://github.com/epicweb-dev/epic-stack-with-stripe)
+- [Epic Stack with Stripe](https://github.com/mohammedzamakhan/epic-startup-with-stripe)
   by [@epicweb-dev](https://github.com/epicweb-dev): An example of the Epic
   Stack with Stripe. Uses Subscriptions, Stripe Links, and focused on
   simplicity.
@@ -19,7 +19,7 @@ This page links to examples of how to implement some things with the Epic Stack.
   by [@kentcdodds](https://github.com/kentcdodds): Using client hints to avoid
   content layout shift with `prefers-reduced-motion` and framer motion
   animations.
-- [Cross-site Request Forgery Protection (CSRF)](https://github.com/epicweb-dev/epic-stack-example-csrf)
+- [Cross-site Request Forgery Protection (CSRF)](https://github.com/mohammedzamakhan/epic-startup-example-csrf)
   by [@kentcdodds](https://github.com/kentcdodds): An example of the Epic Stack
   with CSRF protection on forms.
 - [Epic Stack + OpenAI](https://github.com/kentcdodds/epic-ai): by
@@ -83,7 +83,7 @@ This page links to examples of how to implement some things with the Epic Stack.
   [Query API](https://github.com/gc-victor/query/blob/main/README.md#apis),
   [Query Funcions](https://github.com/gc-victor/query?tab=readme-ov-file#function)
   and [Query Studio](https://github.com/gc-victor/query-studio).
-- [`has-js` class](https://github.com/epicweb-dev/epic-stack-example-has-js-class)
+- [`has-js` class](https://github.com/mohammedzamakhan/epic-startup-example-has-js-class)
   by [@kentcdodds](https://github.com/kentcdodds): An example of adding a
   `has-js` class on the `<html>` element so you can use that to easily display
   different content for users who do not have JavaScript enabled.
@@ -122,7 +122,7 @@ This page links to examples of how to implement some things with the Epic Stack.
 
 ## How to contribute
 
-[![Kent screencast showing the examples page](https://github.com/epicweb-dev/epic-stack/assets/1500684/7074f1db-c918-42c6-a724-0b082168395f)](https://www.epicweb.dev/tips/contribute-an-epic-stack-example)
+[![Kent screencast showing the examples page](https://github.com/mohammedzamakhan/epic-startup/assets/1500684/7074f1db-c918-42c6-a724-0b082168395f)](https://www.epicweb.dev/tips/contribute-an-epic-stack-example)
 
 Watch:
 [Contribute an Epic Stack Example](https://www.epicweb.dev/tips/contribute-an-epic-stack-example)

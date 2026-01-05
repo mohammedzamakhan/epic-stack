@@ -15,13 +15,13 @@ const escapeRegExp = (string) =>
 const getRandomString = (length) => crypto.randomBytes(length).toString('hex')
 const getRandomString32 = () => getRandomString(32)
 
-async function getEpicStackVersion() {
+async function getEpicStartupVersion() {
 	const response = await fetch(
-		'https://api.github.com/repos/epicweb-dev/epic-stack/commits/main',
+		'https://api.github.com/repos/mohammedzamakhan/epic-startup/commits/main',
 	)
 	if (!response.ok) {
 		throw new Error(
-			`Failed to fetch Epic Stack version: ${response.status} ${response.statusText}`,
+			`Failed to fetch Epic Startup version: ${response.status} ${response.statusText}`,
 		)
 	}
 	const data = await response.json()
@@ -37,7 +37,7 @@ export default async function main({ rootDirectory }) {
 	const ENV_PATH = path.join(rootDirectory, '.env')
 	const PKG_PATH = path.join(rootDirectory, 'package.json')
 
-	const appNameRegex = escapeRegExp('epic-stack-template')
+	const appNameRegex = escapeRegExp('epic-startup-template')
 
 	const DIR_NAME = path.basename(rootDirectory)
 	const SUFFIX = getRandomString(2)
@@ -71,8 +71,8 @@ export default async function main({ rootDirectory }) {
 
 	// Add Epic Stack version information
 	try {
-		const epicStackVersion = await getEpicStackVersion()
-		packageJson['epic-stack'] = epicStackVersion
+		const epicStartupVersion = await getEpicStartupVersion()
+		packageJson['epic-startup'] = epicStartupVersion
 	} catch (error) {
 		console.warn(
 			'Failed to fetch Epic Stack version information. The package.json will not include version details.',
@@ -113,7 +113,7 @@ export default async function main({ rootDirectory }) {
 			console.error(error)
 
 			console.error(
-				`Looks like something went wrong setting up deployment. Sorry about that. Check the docs for instructions on how to get deployment setup yourself (https://github.com/epicweb-dev/epic-stack/blob/main/docs/deployment.md).`,
+				`Looks like something went wrong setting up deployment. Sorry about that. Check the docs for instructions on how to get deployment setup yourself (https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment.md).`,
 			)
 		})
 	}
@@ -144,7 +144,7 @@ async function setupDeployment({ rootDirectory }) {
 
 	if (!shouldSetupDeployment) {
 		console.log(
-			`Ok, check the docs (https://github.com/epicweb-dev/epic-stack/blob/main/docs/deployment.md) when you're ready to set that up.`,
+			`Ok, check the docs (https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment.md) when you're ready to set that up.`,
 		)
 		return
 	}
@@ -162,7 +162,7 @@ async function setupDeployment({ rootDirectory }) {
 	const loggedInUser = await ensureLoggedIn()
 	if (!loggedInUser) {
 		console.log(
-			`Ok, check the docs when you're ready to get this deployed: https://github.com/epicweb-dev/epic-stack/blob/main/docs/deployment.md`,
+			`Ok, check the docs when you're ready to get this deployed: https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment.md`,
 		)
 	}
 
@@ -218,9 +218,9 @@ async function setupDeployment({ rootDirectory }) {
 	console.log(`🗄️ Setting up Tigris object storage`)
 	const $S = $({ stdio: ['inherit', 'ignore', 'inherit'], cwd: rootDirectory })
 	if (shouldSetupStaging) {
-		await $S`fly storage create --yes --app ${APP_NAME}-staging --name epic-stack-${APP_NAME}-staging`
+		await $S`fly storage create --yes --app ${APP_NAME}-staging --name epic-startup-${APP_NAME}-staging`
 	}
-	await $S`fly storage create --yes --app ${APP_NAME} --name epic-stack-${APP_NAME}`
+	await $S`fly storage create --yes --app ${APP_NAME} --name epic-startup-${APP_NAME}`
 
 	const { shouldDeploy } = await inquirer.prompt([
 		{

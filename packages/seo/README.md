@@ -1,11 +1,14 @@
 # @repo/seo
 
-Comprehensive SEO utilities for React Router applications in the Epic Stack monorepo.
+Comprehensive SEO utilities for React Router applications in the Epic Stack
+monorepo.
 
 ## Features
 
-- 🏷️ **Meta Tags**: Generate complete SEO meta tags including Open Graph and Twitter Cards
-- 🌐 **Structured Data**: Create Schema.org JSON-LD structured data for rich snippets
+- 🏷️ **Meta Tags**: Generate complete SEO meta tags including Open Graph and
+  Twitter Cards
+- 🌐 **Structured Data**: Create Schema.org JSON-LD structured data for rich
+  snippets
 - 🤖 **Robots Control**: Fine-grained robots directives and sitemap integration
 - 🔗 **Canonical URLs**: Proper canonical URL management
 - 📱 **Social Media**: Optimized Open Graph and Twitter Card support
@@ -29,11 +32,11 @@ import { type MetaFunction } from 'react-router'
 import { generateSeoMeta } from '@repo/seo'
 
 export const meta: MetaFunction = ({ location }) => {
-  return generateSeoMeta({
-    title: 'My Page Title',
-    description: 'A compelling description of my page content',
-    url: `https://example.com${location.pathname}`,
-  })
+	return generateSeoMeta({
+		title: 'My Page Title',
+		description: 'A compelling description of my page content',
+		url: `https://example.com${location.pathname}`,
+	})
 }
 ```
 
@@ -41,69 +44,73 @@ export const meta: MetaFunction = ({ location }) => {
 
 ```typescript
 export const meta: MetaFunction = ({ data, location }) => {
-  return generateSeoMeta({
-    title: data.page.title,
-    description: data.page.description,
-    url: `https://example.com${location.pathname}`,
-    image: {
-      url: 'https://example.com/og-image.jpg',
-      alt: 'Page image description',
-      width: 1200,
-      height: 630,
-    },
-    siteName: 'Epic Stack',
-    twitter: {
-      card: 'summary_large_image',
-      site: '@epicstartup',
-      creator: '@author',
-    },
-  })
+	return generateSeoMeta({
+		title: data.page.title,
+		description: data.page.description,
+		url: `https://example.com${location.pathname}`,
+		image: {
+			url: 'https://example.com/og-image.jpg',
+			alt: 'Page image description',
+			width: 1200,
+			height: 630,
+		},
+		siteName: 'Epic Stack',
+		twitter: {
+			card: 'summary_large_image',
+			site: '@epicstartup',
+			creator: '@author',
+		},
+	})
 }
 ```
 
 ### Article/Blog Post
 
 ```typescript
-import { generateSeoMeta, generateArticleSchema, structuredDataScriptTag } from '@repo/seo'
+import {
+	generateSeoMeta,
+	generateArticleSchema,
+	structuredDataScriptTag,
+} from '@repo/seo'
 
 export const meta: MetaFunction = ({ data, location }) => {
-  const schema = generateArticleSchema({
-    headline: data.post.title,
-    description: data.post.excerpt,
-    image: data.post.coverImage,
-    datePublished: data.post.publishedAt,
-    dateModified: data.post.updatedAt,
-    author: {
-      name: data.post.author.name,
-      url: `https://example.com/authors/${data.post.author.slug}`,
-    },
-    publisher: {
-      name: 'Epic Stack',
-      url: 'https://example.com',
-      logo: 'https://example.com/logo.png',
-    },
-  })
+	const schema = generateArticleSchema({
+		headline: data.post.title,
+		description: data.post.excerpt,
+		image: data.post.coverImage,
+		datePublished: data.post.publishedAt,
+		dateModified: data.post.updatedAt,
+		author: {
+			name: data.post.author.name,
+			url: `https://example.com/authors/${data.post.author.slug}`,
+		},
+		publisher: {
+			name: 'Epic Stack',
+			url: 'https://example.com',
+			logo: 'https://example.com/logo.png',
+		},
+	})
 
-  return [
-    ...generateSeoMeta({
-      title: data.post.title,
-      description: data.post.excerpt,
-      url: `https://example.com${location.pathname}`,
-      type: 'article',
-      image: {
-        url: data.post.coverImage,
-        alt: data.post.title,
-      },
-      article: {
-        publishedTime: data.post.publishedAt,
-        modifiedTime: data.post.updatedAt,
-        author: data.post.author.name,
-        section: data.post.category,
-        tags: data.post.tags,
-      },
-    }),
-    structuredDataScriptTag(schema),
-  ]
+	return [
+		...generateSeoMeta({
+			title: data.post.title,
+			description: data.post.excerpt,
+			url: `https://example.com${location.pathname}`,
+			type: 'article',
+			image: {
+				url: data.post.coverImage,
+				alt: data.post.title,
+			},
+			article: {
+				publishedTime: data.post.publishedAt,
+				modifiedTime: data.post.updatedAt,
+				author: data.post.author.name,
+				section: data.post.category,
+				tags: data.post.tags,
+			},
+		}),
+		structuredDataScriptTag(schema),
+	]
 }
 ```
 
@@ -144,14 +151,14 @@ Create Organization schema for your company/brand.
 
 ```typescript
 const schema = generateOrganizationSchema({
-  name: 'Epic Stack',
-  url: 'https://example.com',
-  logo: 'https://example.com/logo.png',
-  description: 'Production-ready full-stack SaaS template',
-  sameAs: [
-    'https://twitter.com/epicstartup',
-    'https://github.com/epic-stack',
-  ],
+	name: 'Epic Stack',
+	url: 'https://example.com',
+	logo: 'https://example.com/logo.png',
+	description: 'Production-ready full-stack SaaS template',
+	sameAs: [
+		'https://twitter.com/epicstartup',
+		'https://github.com/mohammedzamakhan/epic-startup',
+	],
 })
 ```
 
@@ -161,14 +168,14 @@ Create WebSite schema with search action (for homepage).
 
 ```typescript
 const schema = generateWebSiteSchema({
-  name: 'Epic Stack',
-  url: 'https://example.com',
-  description: 'Full-stack SaaS template',
-  potentialAction: {
-    type: 'SearchAction',
-    target: 'https://example.com/search?q={search_term_string}',
-    queryInput: 'required name=search_term_string',
-  },
+	name: 'Epic Stack',
+	url: 'https://example.com',
+	description: 'Full-stack SaaS template',
+	potentialAction: {
+		type: 'SearchAction',
+		target: 'https://example.com/search?q={search_term_string}',
+		queryInput: 'required name=search_term_string',
+	},
 })
 ```
 
@@ -178,21 +185,21 @@ Create Article schema for blog posts.
 
 ```typescript
 const schema = generateArticleSchema({
-  headline: 'How to Build SaaS Apps',
-  description: 'Complete guide...',
-  image: 'https://example.com/article-image.jpg',
-  datePublished: '2024-01-01T00:00:00Z',
-  dateModified: '2024-01-15T00:00:00Z',
-  author: {
-    name: 'John Doe',
-    url: 'https://example.com/authors/john',
-  },
-  publisher: {
-    name: 'Epic Stack',
-    url: 'https://example.com',
-    logo: 'https://example.com/logo.png',
-  },
-  keywords: ['saas', 'react', 'typescript'],
+	headline: 'How to Build SaaS Apps',
+	description: 'Complete guide...',
+	image: 'https://example.com/article-image.jpg',
+	datePublished: '2024-01-01T00:00:00Z',
+	dateModified: '2024-01-15T00:00:00Z',
+	author: {
+		name: 'John Doe',
+		url: 'https://example.com/authors/john',
+	},
+	publisher: {
+		name: 'Epic Stack',
+		url: 'https://example.com',
+		logo: 'https://example.com/logo.png',
+	},
+	keywords: ['saas', 'react', 'typescript'],
 })
 ```
 
@@ -202,11 +209,11 @@ Create BreadcrumbList schema for navigation.
 
 ```typescript
 const schema = generateBreadcrumbSchema({
-  itemListElement: [
-    { name: 'Home', item: 'https://example.com', position: 1 },
-    { name: 'Blog', item: 'https://example.com/blog', position: 2 },
-    { name: 'Article Title', position: 3 },
-  ],
+	itemListElement: [
+		{ name: 'Home', item: 'https://example.com', position: 1 },
+		{ name: 'Blog', item: 'https://example.com/blog', position: 2 },
+		{ name: 'Article Title', position: 3 },
+	],
 })
 ```
 
@@ -216,14 +223,14 @@ Create FAQPage schema for FAQ pages.
 
 ```typescript
 const schema = generateFAQPageSchema([
-  {
-    question: 'What is Epic Stack?',
-    answer: 'Epic Stack is a production-ready full-stack SaaS template...',
-  },
-  {
-    question: 'How do I get started?',
-    answer: 'Clone the repository and run npm install...',
-  },
+	{
+		question: 'What is Epic Stack?',
+		answer: 'Epic Stack is a production-ready full-stack SaaS template...',
+	},
+	{
+		question: 'How do I get started?',
+		answer: 'Clone the repository and run npm install...',
+	},
 ])
 ```
 
@@ -233,20 +240,20 @@ Create Product schema for e-commerce/SaaS products.
 
 ```typescript
 const schema = generateProductSchema({
-  name: 'Epic Stack Pro',
-  description: 'Premium SaaS template',
-  image: 'https://example.com/product.jpg',
-  brand: 'Epic Stack',
-  offers: {
-    price: '99.00',
-    priceCurrency: 'USD',
-    availability: 'InStock',
-    url: 'https://example.com/pricing',
-  },
-  aggregateRating: {
-    ratingValue: 4.8,
-    reviewCount: 127,
-  },
+	name: 'Epic Stack Pro',
+	description: 'Premium SaaS template',
+	image: 'https://example.com/product.jpg',
+	brand: 'Epic Stack',
+	offers: {
+		price: '99.00',
+		priceCurrency: 'USD',
+		availability: 'InStock',
+		url: 'https://example.com/pricing',
+	},
+	aggregateRating: {
+		ratingValue: 4.8,
+		reviewCount: 127,
+	},
 })
 ```
 
@@ -288,8 +295,8 @@ const description = extractDescription(htmlContent, 160)
 
 ```typescript
 generateSeoMeta({
-  title: 'SEO Best Practices | Epic Stack',
-  // ...
+	title: 'SEO Best Practices | Epic Stack',
+	// ...
 })
 ```
 
@@ -302,11 +309,11 @@ generateSeoMeta({
 
 ```typescript
 generateSeoMeta({
-  title: 'My Page',
-  description: truncateDescription(
-    'Learn how to build production-ready SaaS applications with Epic Stack. Get started with our comprehensive guides and templates today.',
-    160
-  ),
+	title: 'My Page',
+	description: truncateDescription(
+		'Learn how to build production-ready SaaS applications with Epic Stack. Get started with our comprehensive guides and templates today.',
+		160,
+	),
 })
 ```
 
@@ -342,8 +349,8 @@ image: {
 
 ```typescript
 generateSeoMeta({
-  url: `https://example.com${location.pathname}`,
-  // ...
+	url: `https://example.com${location.pathname}`,
+	// ...
 })
 ```
 
@@ -368,9 +375,12 @@ robots: {
 
 ### Google Tools
 
-- [Rich Results Test](https://search.google.com/test/rich-results) - Test structured data
-- [Mobile-Friendly Test](https://search.google.com/test/mobile-friendly) - Check mobile optimization
-- [PageSpeed Insights](https://pagespeed.web.dev/) - Performance and Core Web Vitals
+- [Rich Results Test](https://search.google.com/test/rich-results) - Test
+  structured data
+- [Mobile-Friendly Test](https://search.google.com/test/mobile-friendly) - Check
+  mobile optimization
+- [PageSpeed Insights](https://pagespeed.web.dev/) - Performance and Core Web
+  Vitals
 
 ### Social Media Validators
 
@@ -385,7 +395,8 @@ robots: {
 
 ## Examples
 
-See the `/apps/web` (Astro marketing site) for comprehensive SEO implementation examples:
+See the `/apps/web` (Astro marketing site) for comprehensive SEO implementation
+examples:
 
 - `/apps/web/src/components/SEO.astro` - Full SEO component implementation
 - `/apps/web/SEO-GUIDE.md` - Detailed SEO guide

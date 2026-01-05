@@ -26,7 +26,7 @@ LiteFS for distributed SQLite.
 ```bash
 # Initial setup (one-time)
 git clone <your-fork>
-cd epic-stack
+cd epic-startup
 cp .env.example .env
 PUPPETEER_SKIP_DOWNLOAD=true npm install && npm run setup -s
 

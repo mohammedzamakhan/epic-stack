@@ -1,16 +1,7 @@
-# Epic Stack Documentation
+# Epic Startup Documentation
 
-The goal of The Epic Stack is to provide solid opinions for teams to hit the
+The goal of The Epic Startup is to provide solid opinions for teams to hit the
 ground running on their web applications.
-
-We recommend you watch Kent's introduction to the Epic Stack to get an
-understanding of the "why" behind the Stack:
-
-[![Epic Stack Talk slide showing Flynn Rider with knives, the text "I've been around and I've got opinions" and Kent speaking in the corner](https://github-production-user-asset-6210df.s3.amazonaws.com/1500684/277818553-47158e68-4efc-43ae-a477-9d1670d4217d.png)](https://www.epicweb.dev/talks/the-epic-stack)
-
-More of a reader? Read [the announcement post](https://epicweb.dev/epic-stack)
-or
-[an AI generated summary of the video](https://www.summarize.tech/www.youtube.com/watch?v=yMK5SVRASxM).
 
 This stack is still under active development. Documentation will rapidly improve
 in the coming weeks. Stay tuned!

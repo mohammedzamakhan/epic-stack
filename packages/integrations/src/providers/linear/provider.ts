@@ -453,7 +453,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				Accept: 'application/json',
-				'User-Agent': 'Epic-Stack-Integration/1.0',
+				'User-Agent': 'epic-startup-Integration/1.0',
 			},
 			body: requestBody,
 		})
@@ -511,7 +511,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				'Content-Type': 'application/json',
-				'User-Agent': 'Epic-Stack-Integration/1.0',
+				'User-Agent': 'epic-startup-Integration/1.0',
 			},
 			body: JSON.stringify({
 				query: query.trim(),

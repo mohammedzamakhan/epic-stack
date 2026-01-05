@@ -45,10 +45,10 @@ You shouldn't feel compelled to keep up-to-date with the latest of the Epic
 Stack template. If what you're using is working fine for you then just keep
 going with it. Only adopt changes as you feel the need to do so. Feel free to
 peruse
-[the Epic Stack's commit history](https://github.com/epicweb-dev/epic-stack/commits/main)
+[the Epic Stack's commit history](https://github.com/mohammedzamakhan/epic-startup/commits/main)
 anytime you'd like to see what updates could be made to your project.
 
-Check the [epic-stack field in the package.json file](../package.json) to see
+Check the [epic-startup field in the package.json file](../package.json) to see
 what the date and commit hash were when you created your project.
 
 ## How to update NPM dependencies

@@ -50,7 +50,7 @@ allow you to ensure all values of a column are only within a set of specific
 possible values for the string. However, with Prisma client extensions, handling
 this kind of enforcement at the client (and typing) level should be possible.
 This would need to be documented in the future
-[#29](https://github.com/epicweb-dev/epic-stack/issues/29).
+[#29](https://github.com/mohammedzamakhan/epic-startup/issues/29).
 
 As a file on disk, you cannot "distribute" SQLite directly. However, with tools
 like [Turso](https://turso.tech/) or [LiteFS](https://fly.io/docs/litefs), you

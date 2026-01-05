@@ -5,8 +5,8 @@ Date: 2023-06-05
 Status: deprecated
 
 > Update: The contribution in
-> [#456](https://github.com/epicweb-dev/epic-stack/pull/456) made it quite easy
-> to handle a sitemap so this decision has been reversed.
+> [#456](https://github.com/mohammedzamakhan/epic-startup/pull/456) made it
+> quite easy to handle a sitemap so this decision has been reversed.
 
 ## Context
 

@@ -124,7 +124,7 @@ export async function action({ request }: ActionFunctionArgs) {
 						tools: {},
 					},
 					serverInfo: {
-						name: 'epic-stack-mcp',
+						name: 'epic-startup-mcp',
 						version: '1.0.0',
 					},
 				},
@@ -320,7 +320,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 						protocolVersion: '2024-11-05',
 						capabilities: {},
 						clientInfo: {
-							name: 'epic-stack-mcp',
+							name: 'epic-startup-mcp',
 							version: '1.0.0',
 						},
 					},

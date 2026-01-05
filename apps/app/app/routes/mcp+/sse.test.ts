@@ -510,7 +510,7 @@ describe('MCP SSE Endpoint', () => {
 			expect(data.result!.protocolVersion).toBe('2024-11-05')
 			expect(data.result!.capabilities).toBeDefined()
 			expect(data.result!.serverInfo).toBeDefined()
-			expect(data.result!.serverInfo.name).toBe('epic-stack-mcp')
+			expect(data.result!.serverInfo.name).toBe('epic-startup-mcp')
 		})
 
 		it('should handle tools/list request', async () => {

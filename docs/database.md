@@ -301,7 +301,7 @@ You've got a few options:
 3. If you do care about the data and don't have a backup, you can follow these
    steps:
    1. Comment out the
-      [`exec` section from `litefs.yml` file](https://github.com/epicweb-dev/epic-stack/blob/main/other/litefs.yml#L31-L37).
+      [`exec` section from `litefs.yml` file](https://github.com/mohammedzamakhan/epic-startup/blob/main/other/litefs.yml#L31-L37).
 
    ```yml
    # exec:
@@ -339,7 +339,7 @@ You've got a few options:
         or by deleting the particular migration folder from `prisma/migrations`
         and re-generating the migration after fixing the error.
    9. Uncomment the
-      [`exec` section from `litefs.yml` file](https://github.com/epicweb-dev/epic-stack/blob/main/other/litefs.yml#L31-L37).
+      [`exec` section from `litefs.yml` file](https://github.com/mohammedzamakhan/epic-startup/blob/main/other/litefs.yml#L31-L37).
 
    ```yml
    exec:
