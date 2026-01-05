@@ -90,6 +90,11 @@ export default defineConfig((config) => ({
 		fs: {
 			allow: ['..'],
 		},
+		hmr: {
+			host: 'localhost',
+			port: 24678,
+			protocol: 'ws',
+		},
 	},
 	sentryConfig,
 	plugins: [

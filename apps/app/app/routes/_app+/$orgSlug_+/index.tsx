@@ -294,12 +294,6 @@ export default function OrganizationDashboard() {
 				)}
 			/>
 
-			<Form method="post">
-				<button type="submit">
-					<Trans>Submit</Trans>
-				</button>
-			</Form>
-
 			<div className="flex flex-wrap gap-8 md:flex-nowrap">
 				{/* Onboarding Checklist */}
 				{onboardingProgress &&
