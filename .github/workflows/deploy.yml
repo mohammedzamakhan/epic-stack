@@ -62,6 +62,9 @@ jobs:
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
 
+      - name: 📥 Install deps
+        run: npm install @rollup/rollup-linux-x64-gnu --save-optional
+
       - name: 🏄 Copy test env vars
         run:
           cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
@@ -94,8 +97,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
       - name: 📥 Install deps
-        run: npm install
+        run: npm install @rollup/rollup-linux-x64-gnu --save-optional
 
       - name: 🏄 Copy test env vars
         run:
@@ -135,6 +141,9 @@ jobs:
 
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
+
+      - name: 📥 Install deps
+        run: npm install @rollup/rollup-linux-x64-gnu --save-optional
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
