@@ -31,40 +31,62 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 	})
 }
 
+// Generate unique slug per test run to avoid conflicts with parallel tests
+const TEST_ORG_SLUG = `test-org-mcp-tools-${Date.now()}-${Math.random().toString(36).substring(7)}`
+
 describe('MCP Tools Service', () => {
 	let mockContext: MCPContext
+	let testOrganization: any
+	let testUser: any
 
 	beforeEach(async () => {
-		// Create test user and organization
-		const user = await prisma.user.create({
+		// Create test user and organization with unique slug
+		testUser = await prisma.user.create({
 			data: {
-				email: 'test@example.com',
-				username: 'testuser',
+				email: `test-${Date.now()}@example.com`,
+				username: `testuser-${Date.now()}`,
 				name: 'Test User',
 			},
 		})
 
-		const organization = await prisma.organization.create({
+		testOrganization = await prisma.organization.create({
 			data: {
 				name: 'Test Organization',
-				slug: 'test-org',
+				slug: TEST_ORG_SLUG,
 			},
 		})
 
 		// Add user to organization
-		await addUserToOrganization(user.id, organization.id)
+		await addUserToOrganization(testUser.id, testOrganization.id)
 
-		mockContext = { user, organization }
+		mockContext = { user: testUser, organization: testOrganization }
 	})
 
 	afterEach(async () => {
-		// Clean up test data
-		await prisma.organizationNote.deleteMany()
-		await prisma.noteAccess.deleteMany()
-		await prisma.userOrganization.deleteMany()
-		await prisma.organizationRole.deleteMany()
-		await prisma.organization.deleteMany()
-		await prisma.user.deleteMany()
+		// Clean up test data by specific IDs to avoid affecting parallel tests
+		if (testOrganization?.id) {
+			await prisma.organizationNote.deleteMany({
+				where: { organizationId: testOrganization.id },
+			})
+			await prisma.noteAccess.deleteMany({
+				where: { note: { organizationId: testOrganization.id } },
+			})
+			await prisma.userOrganization.deleteMany({
+				where: { organizationId: testOrganization.id },
+			})
+			await prisma.organization.deleteMany({
+				where: { id: testOrganization.id },
+			})
+		}
+		if (testUser?.id) {
+			await prisma.user.deleteMany({
+				where: { id: testUser.id },
+			})
+		}
+		// Clean up organization roles created during tests
+		await prisma.organizationRole.deleteMany({
+			where: { name: 'member' },
+		})
 	})
 
 	describe('find_user tool', () => {

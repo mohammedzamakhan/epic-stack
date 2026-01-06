@@ -9,8 +9,10 @@ import { createUser } from '#tests/db-utils.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { loader } from './auth.sso.$organizationSlug.logout.ts'
 
-const ROUTE_PATH = '/auth/sso/test-org/logout'
-const PARAMS = { organizationSlug: 'test-org' }
+// Generate unique slug per test run to avoid conflicts with parallel tests
+const TEST_ORG_SLUG = `test-org-logout-${Date.now()}-${Math.random().toString(36).substring(7)}`
+const ROUTE_PATH = `/auth/sso/${TEST_ORG_SLUG}/logout`
+const PARAMS = { organizationSlug: TEST_ORG_SLUG }
 
 // Mock the SSO services
 vi.mock('#app/utils/sso-auth.server.ts', () => ({
@@ -38,11 +40,11 @@ let testOrganization: any
 let testSSOConfig: any
 
 beforeEach(async () => {
-	// Create test organization
+	// Create test organization with unique slug
 	testOrganization = await prisma.organization.create({
 		data: {
 			name: 'Test Organization',
-			slug: 'test-org',
+			slug: TEST_ORG_SLUG,
 			description: 'Test organization for SSO',
 		},
 	})
@@ -70,12 +72,18 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-	// Clean up test data
-	await (prisma as any).sSOSession.deleteMany({})
-	await (prisma as any).sSOConfiguration.deleteMany({})
-	await prisma.organization.deleteMany({
-		where: { slug: 'test-org' },
-	})
+	// Clean up test data by specific IDs to avoid affecting parallel tests
+	if (testOrganization?.id) {
+		await (prisma as any).sSOSession.deleteMany({
+			where: { ssoConfig: { organizationId: testOrganization.id } },
+		})
+		await (prisma as any).sSOConfiguration.deleteMany({
+			where: { organizationId: testOrganization.id },
+		})
+		await prisma.organization.deleteMany({
+			where: { id: testOrganization.id },
+		})
+	}
 	vi.clearAllMocks()
 })
 
