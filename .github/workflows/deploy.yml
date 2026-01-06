@@ -96,6 +96,8 @@ jobs:
 
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
+        with:
+          install-command: npm ci --include=optional
 
       - name: 🏄 Copy test env vars
         run:
