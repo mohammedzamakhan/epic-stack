@@ -86,6 +86,17 @@ export class SSOHealthChecker {
 	async checkSystemHealth(): Promise<SSOHealthStatus> {
 		const timestamp = new Date().toISOString()
 
+		// Fetch configurations once to avoid redundant queries
+		// This addresses PR feedback about duplicate DB calls
+		let allConfigurations: SSOConfiguration[] = []
+		try {
+			allConfigurations =
+				await this.ssoConfigurationService.listConfigurations()
+		} catch (error) {
+			console.error('Failed to list configurations during health check', error)
+			// Continue with empty list, checks will fail gracefully
+		}
+
 		// Run all health checks in parallel
 		const [
 			databaseCheck,
@@ -97,8 +108,8 @@ export class SSOHealthChecker {
 			this.checkDatabase(),
 			this.checkCache(),
 			this.checkConnectionPool(),
-			this.checkConfigurations(),
-			this.checkIdentityProviders(),
+			this.checkConfigurations(allConfigurations),
+			this.checkIdentityProviders(allConfigurations),
 		])
 
 		// Extract results from settled promises
@@ -282,32 +293,34 @@ export class SSOHealthChecker {
 	/**
 	 * Check SSO configurations validity
 	 */
-	private async checkConfigurations(): Promise<HealthCheck> {
+	private async checkConfigurations(
+		configurations: SSOConfiguration[],
+	): Promise<HealthCheck> {
 		const startTime = Date.now()
 
 		try {
-			const configurations =
-				await this.ssoConfigurationService.listConfigurations()
 			const enabledConfigs = configurations.filter((config) => config.isEnabled)
 
 			let validConfigs = 0
-			let configsWithWarnings = 0
 			let invalidConfigs = 0
 
-			// Validate each enabled configuration
-			for (const config of enabledConfigs) {
-				try {
-					const testResult =
-						await this.ssoConfigurationService.testConnection(config)
-					if (testResult.success) {
-						validConfigs++
-					} else {
-						invalidConfigs++
-					}
-				} catch {
+			// Parallelize connection tests
+			// This addresses PR feedback about sequential execution
+			const results = await Promise.allSettled(
+				enabledConfigs.map((config) =>
+					this.ssoConfigurationService.testConnection(config),
+				),
+			)
+
+			results.forEach((result) => {
+				if (result.status === 'fulfilled' && result.value.success) {
+					validConfigs++
+				} else {
 					invalidConfigs++
 				}
-			}
+			})
+
+			const configsWithWarnings = 0 // testConnection doesn't return warnings currently
 
 			const duration = Date.now() - startTime
 
@@ -348,12 +361,12 @@ export class SSOHealthChecker {
 	/**
 	 * Check identity provider connectivity
 	 */
-	private async checkIdentityProviders(): Promise<HealthCheck> {
+	private async checkIdentityProviders(
+		configurations: SSOConfiguration[],
+	): Promise<HealthCheck> {
 		const startTime = Date.now()
 
 		try {
-			const configurations =
-				await this.ssoConfigurationService.listConfigurations()
 			const enabledConfigs = configurations.filter((config) => config.isEnabled)
 
 			const providerChecks = await Promise.allSettled(
