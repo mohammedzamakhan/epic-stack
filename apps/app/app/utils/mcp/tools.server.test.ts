@@ -1,3 +1,4 @@
+import '#tests/setup/setup-test-env.ts'
 import { prisma } from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
@@ -162,25 +163,41 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should limit results to 10 users', async () => {
-			// Create 15 users in the organization
-			for (let i = 0; i < 15; i++) {
-				const user = await prisma.user.create({
-					data: {
-						email: `user${i}@example.com`,
-						username: `user${i}`,
-						name: `User ${i}`,
-					},
-				})
+			const extraUsers: string[] = []
+			try {
+				// Create 15 users in the organization
+				for (let i = 0; i < 15; i++) {
+					const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}-${i}`
+					const user = await prisma.user.create({
+						data: {
+							email: `limit-user-${uniqueSuffix}@example.com`,
+							username: `limit-user-${uniqueSuffix}`,
+							name: `User ${i}`,
+						},
+					})
+					extraUsers.push(user.id)
 
-				await addUserToOrganization(user.id, mockContext.organization.id)
+					await addUserToOrganization(user.id, mockContext.organization.id)
+				}
+
+				const tool = getTool('find_user')
+				const result = await tool?.handler({ query: 'User' }, mockContext)
+
+				// Count text entries (each user is one text entry, plus potentially images)
+				const textEntries =
+					result?.content.filter((c) => c.type === 'text') || []
+				expect(textEntries.length).toBeLessThanOrEqual(10)
+			} finally {
+				// Clean up extra users
+				if (extraUsers.length > 0) {
+					await prisma.userOrganization.deleteMany({
+						where: { userId: { in: extraUsers } },
+					})
+					await prisma.user.deleteMany({
+						where: { id: { in: extraUsers } },
+					})
+				}
 			}
-
-			const tool = getTool('find_user')
-			const result = await tool?.handler({ query: 'User' }, mockContext)
-
-			// Count text entries (each user is one text entry, plus potentially images)
-			const textEntries = result?.content.filter((c) => c.type === 'text') || []
-			expect(textEntries.length).toBeLessThanOrEqual(10)
 		})
 	})
 
