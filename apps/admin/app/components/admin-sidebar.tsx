@@ -1,20 +1,20 @@
+import { useDirection } from '@base-ui/react/direction-provider'
+import { BuildingIcon } from '@repo/ui/building-icon'
+import { ClockIcon } from '@repo/ui/clock-icon'
+import { FlaskIcon } from '@repo/ui/flask-icon'
+import { GlobeIcon } from '@repo/ui/globe-icon'
+import { HomeIcon } from '@repo/ui/home-icon'
+import { Logo } from '@repo/ui/logo'
+import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
+import { ShieldCheckIcon } from '@repo/ui/shield-check-icon'
 import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
 	SidebarHeader,
 } from '@repo/ui/sidebar'
-import { ClockIcon } from '@repo/ui/clock-icon'
-import { FlaskIcon } from '@repo/ui/flask-icon'
 import { UserIcon } from '@repo/ui/user-icon'
-import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
-import { HomeIcon } from '@repo/ui/home-icon'
-import { BuildingIcon } from '@repo/ui/building-icon'
-import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
-import { Logo } from '@repo/ui/logo'
-import { GlobeIcon } from '@repo/ui/globe-icon'
-import { ShieldCheckIcon } from '@repo/ui/shield-check-icon'
-import { useDirection } from '@base-ui/react/direction-provider'
 import * as React from 'react'
 import { Link, useLocation, useRouteLoaderData } from 'react-router'
 import { NavMain } from '#app/components/nav-main.tsx'
@@ -119,8 +119,8 @@ export function AdminSidebar({
 				<Link to="/">
 					<Logo className="mb-0" />
 				</Link>
-				<div className="bg-sidebar-accent p-2 px-6 text-center">
-					<div className="text-sidebar-foreground text-sm font-medium">
+				<div className="bg-sidebar-accent rounded-lg p-2 px-6 text-center">
+					<div className="text-sidebar-foreground text-sm font-bold">
 						Admin Dashboard
 					</div>
 					<div className="text-sidebar-muted-foreground text-xs">

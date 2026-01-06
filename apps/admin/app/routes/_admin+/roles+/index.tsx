@@ -214,9 +214,7 @@ function CreateRoleDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger>
-				<Button>+ New Role</Button>
-			</DialogTrigger>
+			<DialogTrigger render={<Button>+ New Role</Button>}></DialogTrigger>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Create New Role</DialogTitle>

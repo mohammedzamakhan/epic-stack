@@ -93,15 +93,17 @@ export function SecurityCard({
 							open={isPasswordModalOpen}
 							onOpenChange={setIsPasswordModalOpen}
 						>
-							<DialogTrigger>
-								<Button variant="outline">
-									{hasPassword ? (
-										<Trans>Change Password</Trans>
-									) : (
-										<Trans>Create Password</Trans>
-									)}
-								</Button>
-							</DialogTrigger>
+							<DialogTrigger
+								render={
+									<Button variant="outline">
+										{hasPassword ? (
+											<Trans>Change Password</Trans>
+										) : (
+											<Trans>Create Password</Trans>
+										)}
+									</Button>
+								}
+							></DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
 									<DialogTitle>
@@ -144,17 +146,19 @@ export function SecurityCard({
 							open={isTwoFactorModalOpen}
 							onOpenChange={setIsTwoFactorModalOpen}
 						>
-							<DialogTrigger>
-								<Button
-									variant={isTwoFactorEnabled ? 'destructive' : 'outline'}
-								>
-									{isTwoFactorEnabled ? (
-										<Trans>Disable 2FA</Trans>
-									) : (
-										<Trans>Enable 2FA</Trans>
-									)}
-								</Button>
-							</DialogTrigger>
+							<DialogTrigger
+								render={
+									<Button
+										variant={isTwoFactorEnabled ? 'destructive' : 'outline'}
+									>
+										{isTwoFactorEnabled ? (
+											<Trans>Disable 2FA</Trans>
+										) : (
+											<Trans>Enable 2FA</Trans>
+										)}
+									</Button>
+								}
+							></DialogTrigger>
 							<DialogContent className="max-w-2xl">
 								<TwoFactorForm
 									isTwoFactorEnabled={isTwoFactorEnabled}
@@ -192,11 +196,13 @@ export function SecurityCard({
 							open={isPasskeyModalOpen}
 							onOpenChange={setIsPasskeyModalOpen}
 						>
-							<DialogTrigger>
-								<Button variant="outline">
-									<Trans>Manage Passkeys</Trans>
-								</Button>
-							</DialogTrigger>
+							<DialogTrigger
+								render={
+									<Button variant="outline">
+										<Trans>Manage Passkeys</Trans>
+									</Button>
+								}
+							></DialogTrigger>
 							<DialogContent className="max-w-3xl">
 								<DialogHeader>
 									<DialogTitle>

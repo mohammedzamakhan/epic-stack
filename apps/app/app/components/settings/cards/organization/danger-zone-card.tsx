@@ -69,12 +69,14 @@ export default function DangerZoneCard({
 						</p>
 					</div>
 					<Dialog open={isOpen} onOpenChange={setIsOpen}>
-						<DialogTrigger>
-							<Button variant="destructive">
-								<Icon name="trash-2" />
-								<Trans>Delete organization</Trans>
-							</Button>
-						</DialogTrigger>
+						<DialogTrigger
+							render={
+								<Button variant="destructive">
+									<Icon name="trash-2" />
+									<Trans>Delete organization</Trans>
+								</Button>
+							}
+						></DialogTrigger>
 						<DialogContent className="sm:max-w-md">
 							<DialogHeader>
 								<DialogTitle className="text-destructive">

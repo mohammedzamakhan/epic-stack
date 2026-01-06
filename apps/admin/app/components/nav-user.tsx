@@ -17,11 +17,10 @@ import {
 	useSidebar,
 } from '@repo/ui/sidebar'
 import { useRef } from 'react'
-import { Form, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
-import { LogoutIcon } from './icons/logout-icon'
 import { SunMoonIcon } from './icons/sun-moon-icon'
 
 export function NavUser({
@@ -80,29 +79,35 @@ export function NavUser({
 		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<SidebarMenuButton
-							size="lg"
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
-						>
-							<Avatar className="h-8 w-8">
-								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-							</Avatar>
-							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">{user.name}</span>
-								<span className="text-muted-foreground truncate text-xs">
-									{user.email}
-								</span>
-							</div>
-							<Icon name="ellipsis-vertical" className="ml-auto size-4" />
-						</SidebarMenuButton>
-					</DropdownMenuTrigger>
+					<DropdownMenuTrigger
+						render={
+							<SidebarMenuButton
+								render={
+									<button>
+										<Avatar className="h-8 w-8">
+											<AvatarImage src={user.avatar} alt={user.name} />
+											<AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+										</Avatar>
+										<div className="grid flex-1 text-left text-sm leading-tight">
+											<span className="truncate font-medium">{user.name}</span>
+											<span className="text-muted-foreground truncate text-xs">
+												{user.email}
+											</span>
+										</div>
+										<Icon name="ellipsis-vertical" className="ml-auto size-4" />
+									</button>
+								}
+								size="lg"
+								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
+							></SidebarMenuButton>
+						}
+					></DropdownMenuTrigger>
 					<DropdownMenuContent
 						className="w-(--radix-dropdown-menu-trigger-width) min-w-40 rounded-lg"
 						side={isMobile ? 'bottom' : 'top'}
 						align="start"
 						sideOffset={4}
+						style={{ width: 'var(--anchor-width)' }}
 					>
 						<DropdownMenuSub>
 							<DropdownMenuSubTrigger
@@ -121,7 +126,7 @@ export function NavUser({
 									<DropdownMenuItem
 										key={option.value}
 										className="gap-2"
-										onSelect={(e) => {
+										onClick={(e) => {
 											e.preventDefault()
 											const formData = new FormData()
 											formData.append('theme', option.value)
@@ -147,22 +152,6 @@ export function NavUser({
 								))}
 							</DropdownMenuSubContent>
 						</DropdownMenuSub>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							className="gap-2"
-							onMouseEnter={() => handleMenuItemMouseEnter('logout')}
-							onMouseLeave={() => handleMenuItemMouseLeave('logout')}
-						>
-							<Form action="/logout" method="POST">
-								<LogoutIcon
-									ref={(ref: any) => (iconRefs.current['logout'] = ref)}
-									size={16}
-								/>
-								<button type="submit" className="w-full text-left">
-									Log out
-								</button>
-							</Form>
-						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>

@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center"><a href="https://www.epicweb.dev/epic-stack">The Epic Startup 🚀</a></h1>
+  <h1 align="center"><a href="#">The Epic Startup 🚀</a></h1>
   <strong align="center">
     Ditch analysis paralysis and start shipping Epic Startup.
   </strong>

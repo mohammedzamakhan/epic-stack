@@ -340,7 +340,7 @@ export default function AdminSystemRoleDetailPage() {
 								<h3 className="text-lg font-semibold">System permissions</h3>
 								{!isCoreRole && (
 									<Button size="sm" variant="outline">
-										+ Add permission
+										Add permission
 									</Button>
 								)}
 							</div>

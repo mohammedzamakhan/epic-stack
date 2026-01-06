@@ -1,0 +1,205 @@
+import type { Request, Response, NextFunction } from 'express'
+import {
+	runWithRequestContext,
+	getRequestContext,
+	addWideEventContext,
+} from './request-context.js'
+
+/**
+ * Express middleware options for wide event logging
+ */
+export interface WideEventMiddlewareOptions {
+	/**
+	 * Paths to skip logging for (e.g., health checks, static assets)
+	 * Supports glob-like patterns with *
+	 */
+	skipPaths?: string[]
+
+	/**
+	 * Header name to extract request ID from (default: 'x-request-id')
+	 */
+	requestIdHeader?: string
+
+	/**
+	 * Header name to extract trace ID from (default: 'x-trace-id')
+	 */
+	traceIdHeader?: string
+
+	/**
+	 * Service name to include in logs
+	 */
+	serviceName?: string
+
+	/**
+	 * Service version to include in logs
+	 */
+	serviceVersion?: string
+}
+
+/**
+ * Express middleware that wraps requests in a Wide Event context.
+ *
+ * Features:
+ * - Creates AsyncLocalStorage context for each request
+ * - Generates or extracts request ID
+ * - Emits a single structured "wide event" log at request completion
+ * - Captures duration, status code, and all accumulated context
+ *
+ * @example
+ * ```typescript
+ * import { wideEventMiddleware } from '@repo/observability'
+ *
+ * app.use(wideEventMiddleware({
+ *   serviceName: 'api',
+ *   serviceVersion: '1.0.0',
+ *   skipPaths: ['/health', '/assets/*']
+ * }))
+ * ```
+ */
+export function wideEventMiddleware(
+	options: WideEventMiddlewareOptions = {},
+): (req: Request, res: Response, next: NextFunction) => void {
+	const {
+		skipPaths = [
+			'/resources/healthcheck',
+			'/health',
+			'/assets/*',
+			'/favicons/*',
+		],
+		requestIdHeader = 'x-request-id',
+		traceIdHeader = 'x-trace-id',
+		serviceName = process.env.SERVICE_NAME || 'unknown',
+		serviceVersion = process.env.SERVICE_VERSION ||
+			process.env.npm_package_version ||
+			'unknown',
+	} = options
+
+	return (req: Request, res: Response, next: NextFunction): void => {
+		// Skip logging for specified paths
+		const path = req.path || req.url
+		const shouldSkip = skipPaths.some((pattern) => {
+			if (pattern.includes('*')) {
+				const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$')
+				return regex.test(path)
+			}
+			return path === pattern || path.startsWith(pattern)
+		})
+
+		if (shouldSkip) {
+			next()
+			return
+		}
+
+		// Get or generate request ID
+		const requestId = req.get(requestIdHeader) || undefined
+		const traceId = req.get(traceIdHeader) || undefined
+
+		// Run the request within a Wide Event context
+		runWithRequestContext(requestId, () => {
+			const ctx = getRequestContext()
+			if (!ctx) {
+				next()
+				return
+			}
+
+			// Set response header for request correlation
+			res.setHeader('x-request-id', ctx.requestId)
+
+			// Add initial request context
+			addWideEventContext({
+				// Service info
+				service: serviceName,
+				version: serviceVersion,
+				region: process.env.FLY_REGION || process.env.REGION || undefined,
+				deploymentId: process.env.DEPLOYMENT_ID || undefined,
+
+				// Request info
+				...(traceId && { traceId }),
+				ip: req.get('fly-client-ip') || req.ip || undefined,
+				userAgent: req.get('user-agent'),
+				referer: req.get('referer'),
+
+				// This will be enriched later with user/org context
+			})
+
+			// Emit wide event when response finishes
+			res.on('finish', () => {
+				ctx.wideEvent.emit({
+					method: req.method,
+					path: path,
+					statusCode: res.statusCode,
+				})
+			})
+
+			// Handle errors
+			res.on('error', (error) => {
+				ctx.wideEvent.emit({
+					method: req.method,
+					path: path,
+					statusCode: res.statusCode || 500,
+					error,
+				})
+			})
+
+			next()
+		})
+	}
+}
+
+/**
+ * Helper to add user context to the current request's wide event.
+ * Call this after authentication to enrich logs with user info.
+ *
+ * @example
+ * ```typescript
+ * // In your auth middleware or loader
+ * addUserContext({
+ *   userId: user.id,
+ *   organizationId: org.id,
+ *   subscriptionTier: org.plan,
+ *   userRole: membership.role,
+ * })
+ * ```
+ */
+export function addUserContext(context: {
+	userId?: string
+	organizationId?: string
+	subscriptionTier?: string
+	userRole?: string
+	userEmail?: string // Will be partially redacted in logs
+}): void {
+	const { userEmail, ...rest } = context
+
+	addWideEventContext({
+		...rest,
+		// Redact email to show only domain
+		...(userEmail && { userEmailDomain: userEmail.split('@')[1] }),
+	})
+}
+
+/**
+ * Helper to add error context to the current request's wide event.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await processPayment()
+ * } catch (error) {
+ *   addErrorContext(error, { paymentMethod: 'stripe' })
+ *   throw error
+ * }
+ * ```
+ */
+export function addErrorContext(
+	error: unknown,
+	additionalContext?: Record<string, unknown>,
+): void {
+	const errorInfo: Record<string, unknown> = {
+		errorType: error instanceof Error ? error.name : 'UnknownError',
+		errorMessage: error instanceof Error ? error.message : String(error),
+		...(error instanceof Error && error.stack && { errorStack: error.stack }),
+		...additionalContext,
+	}
+
+	addWideEventContext(errorInfo)
+}

@@ -59,7 +59,7 @@ export function TeamSwitcher() {
 						render={
 							<SidebarMenuButton
 								render={
-									<div className="relative flex w-full items-center gap-3">
+									<button className="relative flex w-full items-center gap-3">
 										{/* Enhanced Avatar Container */}
 										<div className="relative">
 											<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded-sm bg-gradient-to-br ring-1">
@@ -107,7 +107,7 @@ export function TeamSwitcher() {
 												className="text-sidebar-foreground/70 size-3 transition-transform duration-200 group-data-[state=open]:rotate-180"
 											/>
 										</div>
-									</div>
+									</button>
 								}
 								size="lg"
 								className="group bg-background relative h-14 border px-3 py-2 transition-all duration-200"
@@ -120,6 +120,7 @@ export function TeamSwitcher() {
 						align="start"
 						side="bottom"
 						sideOffset={4}
+						style={{ width: 'var(--anchor-width)' }}
 					>
 						<DropdownMenuGroup>
 							<DropdownMenuLabel className="text-muted-foreground text-xs">

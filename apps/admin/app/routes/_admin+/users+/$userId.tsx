@@ -1,12 +1,12 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { getIpAddressesByUser } from '@repo/common/ip-tracking'
+import { prisma } from '@repo/database'
 import { useLoaderData } from 'react-router'
 import {
 	UserDetailView,
 	type AdminUserDetail,
 	type RecentActivity,
 } from '#app/components/admin-user-detail.tsx'
-import { prisma } from '@repo/database'
-import { getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({

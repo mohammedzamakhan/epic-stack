@@ -27,6 +27,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@repo/ui/dialog'
+import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import {
@@ -34,7 +35,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { Textarea } from '@repo/ui/textarea'
@@ -667,11 +667,14 @@ function PermissionGroup({
 function CreateFeatureDialog() {
 	return (
 		<Dialog>
-			<DialogTrigger>
-				<Button size="sm" variant="outline">
-					+ New feature
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button size="sm" variant="outline" className="mt-3">
+						<Icon name="plus" />
+						New feature
+					</Button>
+				}
+			></DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>New feature</DialogTitle>
@@ -734,11 +737,14 @@ function CreatePermissionDialog({
 }) {
 	return (
 		<Dialog>
-			<DialogTrigger>
-				<Button size="sm" variant="outline" className="mt-3">
-					+ Add permission
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button size="sm" variant="outline" className="mt-3">
+						<Icon name="plus" />
+						Add permission
+					</Button>
+				}
+			></DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>New permission</DialogTitle>

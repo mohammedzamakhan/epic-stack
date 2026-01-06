@@ -84,24 +84,26 @@ export function IntegrationControls({
 
 			{/* Manage Connections Dialog */}
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger>
-					<Button
-						variant="outline"
-						size="sm"
-						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-					>
-						<Icon name="link-2" className="h-4 w-4 max-md:scale-125">
-							<span className="ml-1.5 max-md:hidden">
-								{hasConnections ? 'Integrations' : 'Connect'}
-							</span>
-						</Icon>
-						{hasConnections && (
-							<span className="bg-primary/10 text-primary ml-1 rounded-full px-1.5 py-0.5 text-xs max-md:hidden">
-								{connections.length}
-							</span>
-						)}
-					</Button>
-				</DialogTrigger>
+				<DialogTrigger
+					render={
+						<Button
+							variant="outline"
+							size="sm"
+							className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+						>
+							<Icon name="link-2" className="h-4 w-4 max-md:scale-125">
+								<span className="ml-1.5 max-md:hidden">
+									{hasConnections ? 'Integrations' : 'Connect'}
+								</span>
+							</Icon>
+							{hasConnections && (
+								<span className="bg-primary/10 text-primary ml-1 rounded-full px-1.5 py-0.5 text-xs max-md:hidden">
+									{connections.length}
+								</span>
+							)}
+						</Button>
+					}
+				></DialogTrigger>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
 						<DialogTitle>Integration Connections</DialogTitle>

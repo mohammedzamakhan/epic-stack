@@ -298,11 +298,13 @@ export default function AdminIpAddressesPage() {
 											</Form>
 										) : (
 											<Dialog>
-												<DialogTrigger>
-													<Button variant="destructive" size="sm">
-														Blacklist
-													</Button>
-												</DialogTrigger>
+												<DialogTrigger
+													render={
+														<Button variant="destructive" size="sm">
+															Blacklist
+														</Button>
+													}
+												></DialogTrigger>
 												<DialogContent>
 													<DialogHeader>
 														<DialogTitle>Blacklist IP Address</DialogTitle>
@@ -314,7 +316,7 @@ export default function AdminIpAddressesPage() {
 													</DialogHeader>
 													<Form method="post">
 														<div className="space-y-4">
-															<div>
+															<div className="space-y-2">
 																<Label htmlFor="reason">
 																	Reason for blacklisting
 																</Label>

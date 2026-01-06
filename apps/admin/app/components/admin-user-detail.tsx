@@ -1,7 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Separator } from '@repo/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
@@ -136,11 +142,6 @@ export function UserDetailView({
 		})
 	}
 
-	const handleEditUser = () => {
-		// TODO: Navigate to edit user page
-		console.log('Edit user:', user.id)
-	}
-
 	// Check if ban is expired
 	const isBanExpired =
 		user.isBanned &&
@@ -157,7 +158,6 @@ export function UserDetailView({
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
-						<Separator orientation="vertical" className="h-6" />
 						<div className="flex items-center gap-3">
 							<Avatar className="h-12 w-12">
 								<AvatarImage
@@ -194,15 +194,6 @@ export function UserDetailView({
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleEditUser}
-							className="gap-2"
-						>
-							<Icon name="edit" className="h-4 w-4" />
-							Edit
-						</Button>
 						<Button
 							variant="outline"
 							size="sm"

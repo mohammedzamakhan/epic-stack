@@ -15,8 +15,10 @@ export default function OrganizationLayout() {
 	return (
 		<div className="bg-background flex min-h-screen flex-col">
 			<header className="border-b p-2 shadow-xs">
-				<div className="container flex items-center justify-between p-2">
-					<Logo />
+				<div className="container mx-auto flex items-center justify-between p-2">
+					<a href="/">
+						<Logo />
+					</a>
 					<div className="flex items-center gap-2">
 						<Avatar className="h-8 w-8 rounded-full">
 							<AvatarImage

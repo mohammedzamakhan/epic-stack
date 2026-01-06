@@ -259,14 +259,16 @@ export const NoteCard = ({
 								{setEditingNote && (
 									<div className="pointer-events-auto">
 										<Tooltip>
-											<TooltipTrigger>
-												<button
-													className="bg-background text-background-foreground flex items-center gap-1.5 rounded-bl-md border-b border-l border-black/10 px-2 py-1.5"
-													onClick={handleStartEdit}
-												>
-													<Icon name="pencil" className="h-3.5 w-3.5" />
-												</button>
-											</TooltipTrigger>
+											<TooltipTrigger
+												render={
+													<button
+														className="bg-background text-background-foreground flex items-center gap-1.5 rounded-bl-md border-b border-l border-black/10 px-2 py-1.5"
+														onClick={handleStartEdit}
+													>
+														<Icon name="pencil" className="h-3.5 w-3.5" />
+													</button>
+												}
+											></TooltipTrigger>
 											<TooltipContent>
 												<p>Quick edit</p>
 											</TooltipContent>
@@ -275,18 +277,20 @@ export const NoteCard = ({
 								)}
 								<div className="pointer-events-auto">
 									<Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
-										<TooltipTrigger>
-											<button
-												className="bg-background text-background-foreground flex items-center gap-1.5 rounded-tr-[16px] border-b border-l border-black/10 px-2 py-1.5"
-												onClick={handleCopyLink}
-											>
-												{copied ? (
-													<Icon name="check" className="h-3.5 w-3.5" />
-												) : (
-													<Icon name="copy" className="h-3.5 w-3.5" />
-												)}
-											</button>
-										</TooltipTrigger>
+										<TooltipTrigger
+											render={
+												<button
+													className="bg-background text-background-foreground flex items-center gap-1.5 rounded-tr-[16px] border-b border-l border-black/10 px-2 py-1.5"
+													onClick={handleCopyLink}
+												>
+													{copied ? (
+														<Icon name="check" className="h-3.5 w-3.5" />
+													) : (
+														<Icon name="copy" className="h-3.5 w-3.5" />
+													)}
+												</button>
+											}
+										></TooltipTrigger>
 										<TooltipContent>
 											<p>{copied ? 'Link copied!' : 'Copy link'}</p>
 										</TooltipContent>
@@ -374,54 +378,56 @@ export const NoteCard = ({
 								{/* Priority indicator */}
 								{note.priority && (
 									<Tooltip>
-										<TooltipTrigger>
-											<Button
-												size="sm"
-												variant="secondary"
-												className="h-6 w-6 p-0"
-												onClick={(e) => e.stopPropagation()}
-											>
-												{(() => {
-													switch (note.priority) {
-														case 'urgent':
-															return (
-																<Icon
-																	name="octagon-alert"
-																	className="text-muted-foreground h-4 w-4 stroke-3"
-																/>
-															)
-														case 'high':
-															return (
-																<PrioritySignal
-																	priority="high"
-																	className="h-4 w-4"
-																/>
-															)
-														case 'medium':
-															return (
-																<PrioritySignal
-																	priority="medium"
-																	className="h-4 w-4"
-																/>
-															)
-														case 'low':
-															return (
-																<PrioritySignal
-																	priority="low"
-																	className="h-4 w-4"
-																/>
-															)
-														default:
-															return (
-																<Icon
-																	name="minus"
-																	className="text-muted-foreground h-4 w-4 stroke-3"
-																/>
-															)
-													}
-												})()}
-											</Button>
-										</TooltipTrigger>
+										<TooltipTrigger
+											render={
+												<Button
+													size="sm"
+													variant="secondary"
+													className="h-6 w-6 p-0"
+													onClick={(e) => e.stopPropagation()}
+												>
+													{(() => {
+														switch (note.priority) {
+															case 'urgent':
+																return (
+																	<Icon
+																		name="octagon-alert"
+																		className="text-muted-foreground h-4 w-4 stroke-3"
+																	/>
+																)
+															case 'high':
+																return (
+																	<PrioritySignal
+																		priority="high"
+																		className="h-4 w-4"
+																	/>
+																)
+															case 'medium':
+																return (
+																	<PrioritySignal
+																		priority="medium"
+																		className="h-4 w-4"
+																	/>
+																)
+															case 'low':
+																return (
+																	<PrioritySignal
+																		priority="low"
+																		className="h-4 w-4"
+																	/>
+																)
+															default:
+																return (
+																	<Icon
+																		name="minus"
+																		className="text-muted-foreground h-4 w-4 stroke-3"
+																	/>
+																)
+														}
+													})()}
+												</Button>
+											}
+										></TooltipTrigger>
 										<TooltipContent>
 											<p className="capitalize">{note.priority} priority</p>
 										</TooltipContent>

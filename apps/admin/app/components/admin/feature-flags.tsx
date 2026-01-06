@@ -14,7 +14,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { Switch } from '@repo/ui/switch'
 import {
@@ -324,11 +323,6 @@ function SystemTab({ flags }: { flags: ConfigFlag[] }) {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex justify-end">
-				<FeatureFlagDialog>
-					<Button>Add Flag</Button>
-				</FeatureFlagDialog>
-			</div>
 			<Card>
 				<CardHeader>
 					<CardTitle>System Flags</CardTitle>
@@ -650,11 +644,16 @@ export function FeatureFlags() {
 	return (
 		<div className="space-y-6">
 			<Tabs defaultValue="system" className="w-full">
-				<TabsList>
-					<TabsTrigger value="system">System</TabsTrigger>
-					<TabsTrigger value="organization">Organization</TabsTrigger>
-					<TabsTrigger value="user">User</TabsTrigger>
-				</TabsList>
+				<div className="flex gap-3">
+					<TabsList>
+						<TabsTrigger value="system">System</TabsTrigger>
+						<TabsTrigger value="organization">Organization</TabsTrigger>
+						<TabsTrigger value="user">User</TabsTrigger>
+					</TabsList>
+					<FeatureFlagDialog>
+						<Button>Add Flag</Button>
+					</FeatureFlagDialog>
+				</div>
 
 				<TabsContent value="system" className="mt-6">
 					<SystemTab flags={flags} />

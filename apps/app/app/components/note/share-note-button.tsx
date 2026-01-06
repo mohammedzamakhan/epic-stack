@@ -143,17 +143,19 @@ export function ShareNoteButton({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger>
-				<Button
-					variant="outline"
-					size="sm"
-					className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
-				>
-					<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
-						<span className="max-md:hidden">Share</span>
-					</Icon>
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button
+						variant="outline"
+						size="sm"
+						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+					>
+						<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
+							<span className="max-md:hidden">Share</span>
+						</Icon>
+					</Button>
+				}
+			></DialogTrigger>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Share Note</DialogTitle>

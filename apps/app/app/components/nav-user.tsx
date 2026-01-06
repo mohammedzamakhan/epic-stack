@@ -133,6 +133,7 @@ export function NavUser({
 						side={isMobile ? 'bottom' : 'top'}
 						align="start"
 						sideOffset={4}
+						style={{ width: 'var(--anchor-width)' }}
 					>
 						<DropdownMenuItem
 							onClick={() => isMobile && toggleSidebar()}
