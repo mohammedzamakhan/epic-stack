@@ -3,8 +3,9 @@
  * Implements OpenID Connect Discovery 1.0 specification
  */
 
-import { ssoCache } from '../../../app/app/utils/sso/cache.server.ts'
-import { ssoConnectionPool } from '../../../app/app/utils/sso/connection-pool.server.ts'
+import { ssoCache } from './cache.server.ts'
+import { ssoConnectionPool } from './connection-pool.server.ts'
+import { validateOIDCIssuerUrl, validateEndpointUrl } from '@repo/validation'
 
 export interface OIDCDiscoveryDocument {
 	issuer: string
@@ -49,34 +50,35 @@ export interface EndpointValidationResult {
 export async function discoverOIDCEndpoints(
 	issuerUrl: string,
 ): Promise<DiscoveryResult> {
-	console.log('=== OIDC DISCOVERY START ===')
-	console.log('Starting OIDC discovery for:', issuerUrl)
-	console.log('NODE_ENV:', process.env.NODE_ENV)
-
-	// Normalize issuer URL (remove trailing slash)
-	const normalizedIssuer = issuerUrl.replace(/\/$/, '')
+	// Log only in development mode to avoid information disclosure
+	if (process.env.NODE_ENV === 'development') {
+		console.log('Starting OIDC discovery')
+	}
 
 	try {
-		console.log('Normalized issuer URL:', normalizedIssuer)
+		// SECURITY: Validate issuer URL against SSRF attacks
+		const urlValidation = validateOIDCIssuerUrl(issuerUrl)
+		if (!urlValidation.valid) {
+			return {
+				success: false,
+				error: `Invalid issuer URL: ${urlValidation.error}`,
+			}
+		}
+
+		const normalizedIssuer = urlValidation.normalizedUrl!
 
 		// Check cache first
-		console.log('Checking cache for endpoints...')
 		const cachedEndpoints = ssoCache.getEndpoints(normalizedIssuer)
 		if (cachedEndpoints) {
-			console.log('Using cached endpoints:', cachedEndpoints)
 			return {
 				success: true,
 				endpoints: cachedEndpoints,
 			}
 		}
-		console.log('No cached endpoints found, proceeding with discovery...')
 
 		// IMMEDIATE FALLBACK FOR DEVELOPMENT
 		if (process.env.NODE_ENV === 'development') {
-			console.log('=== DEVELOPMENT MODE DETECTED - USING FALLBACK ===')
-
 			if (normalizedIssuer.includes('okta.com')) {
-				console.log('Using fallback Okta OIDC configuration for development')
 				const fallbackEndpoints: EndpointConfiguration = {
 					authorizationUrl: `${normalizedIssuer}/v1/authorize`,
 					tokenUrl: `${normalizedIssuer}/v1/token`,
@@ -84,8 +86,6 @@ export async function discoverOIDCEndpoints(
 					revocationUrl: `${normalizedIssuer}/v1/revoke`,
 					jwksUrl: `${normalizedIssuer}/v1/keys`,
 				}
-
-				console.log('Fallback endpoints:', fallbackEndpoints)
 
 				return {
 					success: true,
@@ -102,7 +102,6 @@ export async function discoverOIDCEndpoints(
 			}
 
 			if (normalizedIssuer === 'https://accounts.google.com') {
-				console.log('Using fallback Google OIDC configuration for development')
 				const fallbackEndpoints: EndpointConfiguration = {
 					authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
 					tokenUrl: 'https://oauth2.googleapis.com/token',
@@ -126,165 +125,23 @@ export async function discoverOIDCEndpoints(
 			}
 		}
 
+		// SECURITY: Validate discovery URL before making request
 		const discoveryUrl = `${normalizedIssuer}/.well-known/openid-configuration`
-		console.log('Making discovery request to:', discoveryUrl)
-		console.log('Current NODE_ENV:', process.env.NODE_ENV)
-
-		// Try direct fetch first to get more detailed error information
-		console.log('About to start direct fetch attempt...')
-		try {
-			console.log('Attempting direct fetch to test connectivity...')
-
-			// Configure fetch for corporate proxy environments
-			const fetchOptions: RequestInit = {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					'User-Agent': 'Epic-Notes-SSO/1.0',
-				},
-				// Add timeout and other options for debugging
-				signal: AbortSignal.timeout(30000), // 30 second timeout for corporate networks
-			}
-
-			// Log environment variables that might affect SSL
-			console.log('SSL Environment:', {
-				NODE_TLS_REJECT_UNAUTHORIZED: process.env.NODE_TLS_REJECT_UNAUTHORIZED,
-				HTTPS_PROXY: process.env.HTTPS_PROXY,
-				HTTP_PROXY: process.env.HTTP_PROXY,
-			})
-
-			const directResponse = await fetch(discoveryUrl, fetchOptions)
-			console.log(
-				'Direct fetch response:',
-				directResponse.status,
-				directResponse.statusText,
-			)
-
-			if (directResponse.ok) {
-				const data = (await directResponse.json()) as any
-				console.log('Direct fetch successful, data keys:', Object.keys(data))
-
-				// If direct fetch works, return the result immediately
-				const validation = validateDiscoveryDocument(data, normalizedIssuer)
-				if (validation.valid) {
-					const endpoints: EndpointConfiguration = {
-						authorizationUrl: data.authorization_endpoint,
-						tokenUrl: data.token_endpoint,
-						userinfoUrl: data.userinfo_endpoint,
-						revocationUrl: data.revocation_endpoint,
-						jwksUrl: data.jwks_uri,
-					}
-
-					// Cache the discovered endpoints
-					ssoCache.setEndpoints(normalizedIssuer, endpoints)
-
-					return {
-						success: true,
-						endpoints,
-						discoveryDocument: data as OIDCDiscoveryDocument,
-					}
-				}
-			}
-		} catch (directError) {
-			console.log('Direct fetch failed:', directError)
-			console.log('Error details:', {
-				name: directError instanceof Error ? directError.name : 'Unknown',
-				message:
-					directError instanceof Error ? directError.message : 'Unknown error',
-				cause: directError instanceof Error ? directError.cause : undefined,
-				stack: directError instanceof Error ? directError.stack : undefined,
-			})
-
-			// If it's a network error, try to provide more helpful information
-			if (
-				directError instanceof Error &&
-				directError.message.includes('fetch failed')
-			) {
-				console.log('This appears to be a network connectivity issue.')
-				console.log('Possible causes:')
-				console.log('1. Corporate firewall/proxy (Zscaler detected)')
-				console.log('2. SSL certificate issues')
-				console.log('3. DNS resolution problems')
-				console.log('4. Network timeout')
+		const discoveryUrlValidation = validateEndpointUrl(discoveryUrl)
+		if (!discoveryUrlValidation.valid) {
+			return {
+				success: false,
+				error: `Invalid discovery URL: ${discoveryUrlValidation.error}`,
 			}
 		}
 
-		console.log('Attempting ssoConnectionPool.request...')
-		let response: Response
-		try {
-			response = await ssoConnectionPool.request(discoveryUrl, {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					'User-Agent': 'Epic-Notes-SSO/1.0',
-				},
-			})
-			console.log(
-				'Discovery response status:',
-				response.status,
-				response.statusText,
-			)
-		} catch (poolError) {
-			console.log('ssoConnectionPool.request failed:', poolError)
-
-			// Immediately fall back to development mode if network request fails
-			if (process.env.NODE_ENV === 'development') {
-				console.log('Network request failed, using development fallback...')
-
-				if (normalizedIssuer.includes('okta.com')) {
-					console.log('Using fallback Okta OIDC configuration for development')
-					const fallbackEndpoints: EndpointConfiguration = {
-						authorizationUrl: `${normalizedIssuer}/v1/authorize`,
-						tokenUrl: `${normalizedIssuer}/v1/token`,
-						userinfoUrl: `${normalizedIssuer}/v1/userinfo`,
-						revocationUrl: `${normalizedIssuer}/v1/revoke`,
-						jwksUrl: `${normalizedIssuer}/v1/keys`,
-					}
-
-					return {
-						success: true,
-						endpoints: fallbackEndpoints,
-						discoveryDocument: {
-							issuer: normalizedIssuer,
-							authorization_endpoint: fallbackEndpoints.authorizationUrl,
-							token_endpoint: fallbackEndpoints.tokenUrl,
-							userinfo_endpoint: fallbackEndpoints.userinfoUrl,
-							revocation_endpoint: fallbackEndpoints.revocationUrl,
-							jwks_uri: fallbackEndpoints.jwksUrl,
-						} as OIDCDiscoveryDocument,
-					}
-				}
-
-				if (normalizedIssuer === 'https://accounts.google.com') {
-					console.log(
-						'Using fallback Google OIDC configuration for development',
-					)
-					const fallbackEndpoints: EndpointConfiguration = {
-						authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-						tokenUrl: 'https://oauth2.googleapis.com/token',
-						userinfoUrl: 'https://openidconnect.googleapis.com/v1/userinfo',
-						revocationUrl: 'https://oauth2.googleapis.com/revoke',
-						jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
-					}
-
-					return {
-						success: true,
-						endpoints: fallbackEndpoints,
-						discoveryDocument: {
-							issuer: 'https://accounts.google.com',
-							authorization_endpoint: fallbackEndpoints.authorizationUrl,
-							token_endpoint: fallbackEndpoints.tokenUrl,
-							userinfo_endpoint: fallbackEndpoints.userinfoUrl,
-							revocation_endpoint: fallbackEndpoints.revocationUrl,
-							jwks_uri: fallbackEndpoints.jwksUrl,
-						} as OIDCDiscoveryDocument,
-					}
-				}
-			}
-
-			// Re-throw the error if not in development mode or no fallback available
-			throw poolError
-		}
+		const response = await ssoConnectionPool.request(discoveryUrl, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				'User-Agent': 'Epic-Notes-SSO/1.0',
+			},
+		})
 
 		if (!response.ok) {
 			return {
@@ -329,87 +186,6 @@ export async function discoverOIDCEndpoints(
 			discoveryDocument: discoveryDoc,
 		}
 	} catch (error) {
-		console.log('OIDC discovery failed with error:', error)
-
-		// For development/testing purposes, provide a fallback when network requests fail
-		if (process.env.NODE_ENV === 'development') {
-			console.log(
-				'Network request failed in development mode, checking for fallback configurations...',
-			)
-
-			if (normalizedIssuer === 'https://accounts.google.com') {
-				console.log('Using fallback Google OIDC configuration for development')
-				const fallbackEndpoints: EndpointConfiguration = {
-					authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-					tokenUrl: 'https://oauth2.googleapis.com/token',
-					userinfoUrl: 'https://openidconnect.googleapis.com/v1/userinfo',
-					revocationUrl: 'https://oauth2.googleapis.com/revoke',
-					jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
-				}
-
-				return {
-					success: true,
-					endpoints: fallbackEndpoints,
-					discoveryDocument: {
-						issuer: 'https://accounts.google.com',
-						authorization_endpoint: fallbackEndpoints.authorizationUrl,
-						token_endpoint: fallbackEndpoints.tokenUrl,
-						userinfo_endpoint: fallbackEndpoints.userinfoUrl,
-						revocation_endpoint: fallbackEndpoints.revocationUrl,
-						jwks_uri: fallbackEndpoints.jwksUrl,
-					} as OIDCDiscoveryDocument,
-				}
-			}
-
-			// Check if it's an Okta URL and provide fallback
-			if (normalizedIssuer.includes('okta.com')) {
-				console.log('Using fallback Okta OIDC configuration for development')
-				const fallbackEndpoints: EndpointConfiguration = {
-					authorizationUrl: `${normalizedIssuer}/v1/authorize`,
-					tokenUrl: `${normalizedIssuer}/v1/token`,
-					userinfoUrl: `${normalizedIssuer}/v1/userinfo`,
-					revocationUrl: `${normalizedIssuer}/v1/revoke`,
-					jwksUrl: `${normalizedIssuer}/v1/keys`,
-				}
-
-				return {
-					success: true,
-					endpoints: fallbackEndpoints,
-					discoveryDocument: {
-						issuer: normalizedIssuer,
-						authorization_endpoint: fallbackEndpoints.authorizationUrl,
-						token_endpoint: fallbackEndpoints.tokenUrl,
-						userinfo_endpoint: fallbackEndpoints.userinfoUrl,
-						revocation_endpoint: fallbackEndpoints.revocationUrl,
-						jwks_uri: fallbackEndpoints.jwksUrl,
-					} as OIDCDiscoveryDocument,
-				}
-			}
-
-			// Generic fallback for any HTTPS URL in development
-			console.log('Using generic fallback OIDC configuration for development')
-			const fallbackEndpoints: EndpointConfiguration = {
-				authorizationUrl: `${normalizedIssuer}/authorize`,
-				tokenUrl: `${normalizedIssuer}/token`,
-				userinfoUrl: `${normalizedIssuer}/userinfo`,
-				revocationUrl: `${normalizedIssuer}/revoke`,
-				jwksUrl: `${normalizedIssuer}/keys`,
-			}
-
-			return {
-				success: true,
-				endpoints: fallbackEndpoints,
-				discoveryDocument: {
-					issuer: normalizedIssuer,
-					authorization_endpoint: fallbackEndpoints.authorizationUrl,
-					token_endpoint: fallbackEndpoints.tokenUrl,
-					userinfo_endpoint: fallbackEndpoints.userinfoUrl,
-					revocation_endpoint: fallbackEndpoints.revocationUrl,
-					jwks_uri: fallbackEndpoints.jwksUrl,
-				} as OIDCDiscoveryDocument,
-			}
-		}
-
 		if (error instanceof Error) {
 			if (error.name === 'AbortError') {
 				return {
@@ -431,6 +207,7 @@ export async function discoverOIDCEndpoints(
 
 /**
  * Validate OIDC discovery document according to specification
+ * SECURITY: Also validates URLs against SSRF attacks
  */
 export function validateDiscoveryDocument(
 	doc: any,
@@ -448,31 +225,49 @@ export function validateDiscoveryDocument(
 		)
 	}
 
+	// SECURITY: Validate authorization_endpoint against SSRF
 	if (!doc.authorization_endpoint) {
 		errors.push('Missing required field: authorization_endpoint')
-	} else if (!isValidUrl(doc.authorization_endpoint)) {
-		errors.push('Invalid authorization_endpoint URL')
+	} else {
+		const validation = validateEndpointUrl(doc.authorization_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid authorization_endpoint URL: ${validation.error}`)
+		}
 	}
 
+	// SECURITY: Validate token_endpoint against SSRF
 	if (!doc.token_endpoint) {
 		errors.push('Missing required field: token_endpoint')
-	} else if (!isValidUrl(doc.token_endpoint)) {
-		errors.push('Invalid token_endpoint URL')
+	} else {
+		const validation = validateEndpointUrl(doc.token_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid token_endpoint URL: ${validation.error}`)
+		}
 	}
 
+	// SECURITY: Validate jwks_uri against SSRF
 	if (!doc.jwks_uri) {
 		warnings.push('Missing jwks_uri (recommended for token validation)')
-	} else if (!isValidUrl(doc.jwks_uri)) {
-		errors.push('Invalid jwks_uri URL')
+	} else {
+		const validation = validateEndpointUrl(doc.jwks_uri)
+		if (!validation.valid) {
+			errors.push(`Invalid jwks_uri URL: ${validation.error}`)
+		}
 	}
 
-	// Optional but commonly used fields
-	if (doc.userinfo_endpoint && !isValidUrl(doc.userinfo_endpoint)) {
-		errors.push('Invalid userinfo_endpoint URL')
+	// SECURITY: Validate optional endpoints against SSRF
+	if (doc.userinfo_endpoint) {
+		const validation = validateEndpointUrl(doc.userinfo_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid userinfo_endpoint URL: ${validation.error}`)
+		}
 	}
 
-	if (doc.revocation_endpoint && !isValidUrl(doc.revocation_endpoint)) {
-		errors.push('Invalid revocation_endpoint URL')
+	if (doc.revocation_endpoint) {
+		const validation = validateEndpointUrl(doc.revocation_endpoint)
+		if (!validation.valid) {
+			errors.push(`Invalid revocation_endpoint URL: ${validation.error}`)
+		}
 	}
 
 	// Validate supported features
@@ -506,6 +301,7 @@ export function validateDiscoveryDocument(
 
 /**
  * Validate manually configured endpoints
+ * SECURITY: Also validates URLs against SSRF attacks
  */
 export function validateManualEndpoints(
 	endpoints: Partial<EndpointConfiguration>,
@@ -513,30 +309,45 @@ export function validateManualEndpoints(
 	const errors: string[] = []
 	const warnings: string[] = []
 
-	// Required endpoints
+	// SECURITY: Validate required endpoints against SSRF
 	if (!endpoints.authorizationUrl) {
 		errors.push('Authorization URL is required')
-	} else if (!isValidUrl(endpoints.authorizationUrl)) {
-		errors.push('Invalid authorization URL')
+	} else {
+		const validation = validateEndpointUrl(endpoints.authorizationUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid authorization URL: ${validation.error}`)
+		}
 	}
 
 	if (!endpoints.tokenUrl) {
 		errors.push('Token URL is required')
-	} else if (!isValidUrl(endpoints.tokenUrl)) {
-		errors.push('Invalid token URL')
+	} else {
+		const validation = validateEndpointUrl(endpoints.tokenUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid token URL: ${validation.error}`)
+		}
 	}
 
-	// Optional endpoints
-	if (endpoints.userinfoUrl && !isValidUrl(endpoints.userinfoUrl)) {
-		errors.push('Invalid userinfo URL')
+	// SECURITY: Validate optional endpoints against SSRF
+	if (endpoints.userinfoUrl) {
+		const validation = validateEndpointUrl(endpoints.userinfoUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid userinfo URL: ${validation.error}`)
+		}
 	}
 
-	if (endpoints.revocationUrl && !isValidUrl(endpoints.revocationUrl)) {
-		errors.push('Invalid revocation URL')
+	if (endpoints.revocationUrl) {
+		const validation = validateEndpointUrl(endpoints.revocationUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid revocation URL: ${validation.error}`)
+		}
 	}
 
-	if (endpoints.jwksUrl && !isValidUrl(endpoints.jwksUrl)) {
-		errors.push('Invalid JWKS URL')
+	if (endpoints.jwksUrl) {
+		const validation = validateEndpointUrl(endpoints.jwksUrl)
+		if (!validation.valid) {
+			errors.push(`Invalid JWKS URL: ${validation.error}`)
+		}
 	}
 
 	// Warnings for missing optional but recommended endpoints
@@ -620,8 +431,6 @@ export async function testEndpointConnectivity(
 	revocationEndpoint?: boolean
 	errors: string[]
 }> {
-	console.log('Testing endpoint connectivity for:', endpoints)
-
 	const results = {
 		authorizationEndpoint: false,
 		tokenEndpoint: false,
@@ -638,32 +447,18 @@ export async function testEndpointConnectivity(
 				method: 'GET',
 			},
 		)
-		// 400 is expected for missing OAuth parameters, 302 for redirects, 200 for some providers
-		results.authorizationEndpoint = [200, 302, 400, 401].includes(
-			authResponse.status,
-		)
+		// 400 is expected for missing OAuth parameters
+		results.authorizationEndpoint =
+			authResponse.status === 400 || authResponse.status === 302
 		if (!results.authorizationEndpoint) {
 			results.errors.push(
 				`Authorization endpoint returned unexpected status: ${authResponse.status}`,
 			)
-		} else {
-			console.log(
-				`Authorization endpoint test passed with status: ${authResponse.status}`,
-			)
 		}
 	} catch (error) {
-		console.log('Authorization endpoint test failed:', error)
-		// In development with network issues, assume endpoint is reachable if we got the discovery document
-		if (process.env.NODE_ENV === 'development') {
-			console.log(
-				'Assuming authorization endpoint is reachable (development mode)',
-			)
-			results.authorizationEndpoint = true
-		} else {
-			results.errors.push(
-				`Authorization endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
-			)
-		}
+		results.errors.push(
+			`Authorization endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+		)
 	}
 
 	// Test token endpoint (should return 400 for missing parameters)
@@ -673,28 +468,17 @@ export async function testEndpointConnectivity(
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: '',
 		})
-		// 400 is expected for missing OAuth parameters, 401 for unauthorized
-		results.tokenEndpoint = [400, 401].includes(tokenResponse.status)
+		// 400 is expected for missing OAuth parameters
+		results.tokenEndpoint = tokenResponse.status === 400
 		if (!results.tokenEndpoint) {
 			results.errors.push(
 				`Token endpoint returned unexpected status: ${tokenResponse.status}`,
 			)
-		} else {
-			console.log(
-				`Token endpoint test passed with status: ${tokenResponse.status}`,
-			)
 		}
 	} catch (error) {
-		console.log('Token endpoint test failed:', error)
-		// In development with network issues, assume endpoint is reachable if we got the discovery document
-		if (process.env.NODE_ENV === 'development') {
-			console.log('Assuming token endpoint is reachable (development mode)')
-			results.tokenEndpoint = true
-		} else {
-			results.errors.push(
-				`Token endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
-			)
-		}
+		results.errors.push(
+			`Token endpoint unreachable: ${error instanceof Error ? error.message : 'Unknown error'}`,
+		)
 	}
 
 	// Test userinfo endpoint if provided (should return 401 for missing token)
@@ -772,18 +556,6 @@ export function normalizeIssuerUrl(input: string): string {
 		return url
 	} catch {
 		throw new Error(`Invalid issuer URL format: ${input}`)
-	}
-}
-
-/**
- * Simple URL validation
- */
-function isValidUrl(urlString: string): boolean {
-	try {
-		const url = new URL(urlString)
-		return url.protocol === 'http:' || url.protocol === 'https:'
-	} catch {
-		return false
 	}
 }
 

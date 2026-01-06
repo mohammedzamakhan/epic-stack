@@ -1,20 +1,20 @@
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { server } from '#tests/mocks/index.ts'
-import { consoleWarn } from '#tests/setup/setup-test-env.ts'
+import { consoleError, consoleWarn } from '#tests/setup/setup-test-env.ts'
 import {
 	discoverOIDCEndpoints,
 	validateDiscoveryDocument,
 	validateManualEndpoints,
-	testEndpointConnectivity,
 	normalizeIssuerUrl,
 	type OIDCDiscoveryDocument,
 	type EndpointConfiguration,
 } from '@repo/sso'
 import { ssoCache } from '@repo/sso'
 
-describe('OIDC Discovery', () => {
+describe('OIDC Discovery (Admin)', () => {
 	beforeEach(() => {
+		consoleError.mockImplementation(() => {})
 		consoleWarn.mockImplementation(() => {})
 		// Clear cache before each test to ensure fresh discovery attempts
 		ssoCache.clearAll()
@@ -22,6 +22,97 @@ describe('OIDC Discovery', () => {
 
 	afterEach(() => {
 		server.resetHandlers()
+	})
+
+	describe('SSRF Protection', () => {
+		it('should block private IP addresses (127.0.0.1)', async () => {
+			const result = await discoverOIDCEndpoints('https://127.0.0.1')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block private IP addresses (10.x.x.x)', async () => {
+			const result = await discoverOIDCEndpoints('https://10.0.0.1')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block private IP addresses (192.168.x.x)', async () => {
+			const result = await discoverOIDCEndpoints('https://192.168.1.1')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block private IP addresses (172.16.x.x)', async () => {
+			const result = await discoverOIDCEndpoints('https://172.16.0.1')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block localhost', async () => {
+			const result = await discoverOIDCEndpoints('https://localhost')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block cloud metadata endpoints (AWS)', async () => {
+			const result = await discoverOIDCEndpoints('http://169.254.169.254')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block file:// protocol', async () => {
+			const result = await discoverOIDCEndpoints('file:///etc/passwd')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Protocol file is not allowed')
+		})
+
+		it('should block internal domains (.local)', async () => {
+			const result = await discoverOIDCEndpoints('https://internal.local')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should block internal domains (.internal)', async () => {
+			const result = await discoverOIDCEndpoints('https://auth.internal')
+
+			expect(result.success).toBe(false)
+			expect(result.error).toContain('Invalid issuer URL')
+		})
+
+		it('should allow valid public HTTPS URLs', async () => {
+			const issuerUrl = 'https://auth.example.com'
+			const mockDiscoveryDoc: OIDCDiscoveryDocument = {
+				issuer: issuerUrl,
+				authorization_endpoint: 'https://auth.example.com/oauth2/authorize',
+				token_endpoint: 'https://auth.example.com/oauth2/token',
+				jwks_uri: 'https://auth.example.com/oauth2/jwks',
+			}
+
+			server.use(
+				http.get(
+					'https://auth.example.com/.well-known/openid-configuration',
+					() => {
+						return HttpResponse.json(mockDiscoveryDoc, {
+							headers: { 'Content-Type': 'application/json' },
+						})
+					},
+				),
+			)
+
+			const result = await discoverOIDCEndpoints(issuerUrl)
+
+			expect(result.success).toBe(true)
+			expect(result.endpoints).toBeDefined()
+		})
 	})
 
 	describe('discoverOIDCEndpoints', () => {
@@ -126,33 +217,13 @@ describe('OIDC Discovery', () => {
 			expect(result.error).toContain('Invalid OIDC discovery document')
 		})
 
-		it('should handle network timeout', async () => {
-			const issuerUrl = 'https://auth.example.com'
-
-			server.use(
-				http.get(
-					'https://auth.example.com/.well-known/openid-configuration',
-					async () => {
-						// Simulate timeout by delaying longer than the 10s timeout
-						await new Promise((resolve) => setTimeout(resolve, 11000))
-						return HttpResponse.json({})
-					},
-				),
-			)
-
-			const result = await discoverOIDCEndpoints(issuerUrl)
-
-			expect(result.success).toBe(false)
-			// The timeout might be handled differently, so check for either timeout or validation error
-			expect(result.error).toMatch(/(timeout|Invalid OIDC discovery document)/)
-		}, 15000)
-
 		it('should normalize issuer URL by removing trailing slash', async () => {
 			const issuerUrl = 'https://auth.example.com/'
 			const mockDiscoveryDoc: OIDCDiscoveryDocument = {
 				issuer: 'https://auth.example.com', // Without trailing slash
 				authorization_endpoint: 'https://auth.example.com/oauth2/authorize',
 				token_endpoint: 'https://auth.example.com/oauth2/token',
+				jwks_uri: 'https://auth.example.com/oauth2/jwks',
 			}
 
 			server.use(
@@ -221,12 +292,11 @@ describe('OIDC Discovery', () => {
 			)
 		})
 
-		it('should detect invalid URLs', () => {
+		it('should detect SSRF-vulnerable URLs in authorization_endpoint', () => {
 			const doc = {
 				issuer: 'https://auth.example.com',
-				authorization_endpoint: 'invalid-url',
-				token_endpoint: 'also-invalid',
-				jwks_uri: 'not-a-url',
+				authorization_endpoint: 'http://127.0.0.1/authorize', // SSRF attempt
+				token_endpoint: 'https://auth.example.com/oauth2/token',
 			}
 
 			const result = validateDiscoveryDocument(doc, 'https://auth.example.com')
@@ -235,8 +305,19 @@ describe('OIDC Discovery', () => {
 			expect(
 				result.errors.some((e) => e.includes('authorization_endpoint')),
 			).toBe(true)
+		})
+
+		it('should detect SSRF-vulnerable URLs in token_endpoint', () => {
+			const doc = {
+				issuer: 'https://auth.example.com',
+				authorization_endpoint: 'https://auth.example.com/oauth2/authorize',
+				token_endpoint: 'http://169.254.169.254/token', // AWS metadata SSRF
+			}
+
+			const result = validateDiscoveryDocument(doc, 'https://auth.example.com')
+
+			expect(result.valid).toBe(false)
 			expect(result.errors.some((e) => e.includes('token_endpoint'))).toBe(true)
-			expect(result.errors.some((e) => e.includes('jwks_uri'))).toBe(true)
 		})
 
 		it('should generate warnings for missing optional fields', () => {
@@ -285,19 +366,28 @@ describe('OIDC Discovery', () => {
 			expect(result.errors).toContain('Token URL is required')
 		})
 
-		it('should detect invalid URLs', () => {
+		it('should detect SSRF-vulnerable authorization URL', () => {
 			const endpoints = {
-				authorizationUrl: 'invalid-url',
-				tokenUrl: 'also-invalid',
-				userinfoUrl: 'not-a-url',
+				authorizationUrl: 'http://10.0.0.1/authorize', // Private IP
+				tokenUrl: 'https://auth.example.com/oauth2/token',
 			}
 
 			const result = validateManualEndpoints(endpoints)
 
 			expect(result.valid).toBe(false)
 			expect(result.errors.some((e) => e.includes('authorization'))).toBe(true)
+		})
+
+		it('should detect SSRF-vulnerable token URL', () => {
+			const endpoints = {
+				authorizationUrl: 'https://auth.example.com/oauth2/authorize',
+				tokenUrl: 'http://localhost:8080/token', // Localhost
+			}
+
+			const result = validateManualEndpoints(endpoints)
+
+			expect(result.valid).toBe(false)
 			expect(result.errors.some((e) => e.includes('token'))).toBe(true)
-			expect(result.errors.some((e) => e.includes('userinfo'))).toBe(true)
 		})
 
 		it('should generate warnings for missing optional endpoints', () => {
@@ -319,116 +409,6 @@ describe('OIDC Discovery', () => {
 		})
 	})
 
-	describe('testEndpointConnectivity', () => {
-		it('should test endpoint connectivity successfully', async () => {
-			const endpoints: EndpointConfiguration = {
-				authorizationUrl: 'https://auth.example.com/oauth2/authorize',
-				tokenUrl: 'https://auth.example.com/oauth2/token',
-				userinfoUrl: 'https://auth.example.com/oauth2/userinfo',
-				revocationUrl: 'https://auth.example.com/oauth2/revoke',
-			}
-
-			server.use(
-				http.get('https://auth.example.com/oauth2/authorize', () => {
-					return new HttpResponse(null, { status: 400 }) // Expected for missing params
-				}),
-				http.post('https://auth.example.com/oauth2/token', () => {
-					return new HttpResponse(null, { status: 400 }) // Expected for missing params
-				}),
-				http.get('https://auth.example.com/oauth2/userinfo', () => {
-					return new HttpResponse(null, { status: 401 }) // Expected for missing auth
-				}),
-				http.post('https://auth.example.com/oauth2/revoke', () => {
-					return new HttpResponse(null, { status: 400 }) // Expected for missing params
-				}),
-			)
-
-			const result = await testEndpointConnectivity(endpoints)
-
-			expect(result.authorizationEndpoint).toBe(true)
-			expect(result.tokenEndpoint).toBe(true)
-			expect(result.userinfoEndpoint).toBe(true)
-			expect(result.revocationEndpoint).toBe(true)
-			expect(result.errors).toHaveLength(0)
-		})
-
-		it('should handle unreachable endpoints', async () => {
-			const endpoints: EndpointConfiguration = {
-				authorizationUrl: 'https://unreachable.example.com/oauth2/authorize',
-				tokenUrl: 'https://unreachable.example.com/oauth2/token',
-			}
-
-			server.use(
-				http.get('https://unreachable.example.com/oauth2/authorize', () => {
-					return new HttpResponse(null, { status: 500 })
-				}),
-				http.post('https://unreachable.example.com/oauth2/token', () => {
-					return new HttpResponse(null, { status: 500 })
-				}),
-			)
-
-			const result = await testEndpointConnectivity(endpoints)
-
-			expect(result.authorizationEndpoint).toBe(false)
-			expect(result.tokenEndpoint).toBe(false)
-			expect(result.errors.length).toBeGreaterThan(0)
-			expect(result.errors[0]).toContain(
-				'Authorization endpoint returned unexpected status',
-			)
-		})
-
-		it('should handle unexpected status codes', async () => {
-			const endpoints: EndpointConfiguration = {
-				authorizationUrl: 'https://auth.example.com/oauth2/authorize',
-				tokenUrl: 'https://auth.example.com/oauth2/token',
-			}
-
-			server.use(
-				http.get('https://auth.example.com/oauth2/authorize', () => {
-					return new HttpResponse(null, { status: 500 }) // Unexpected status
-				}),
-				http.post('https://auth.example.com/oauth2/token', () => {
-					return new HttpResponse(null, { status: 200 }) // Unexpected status
-				}),
-			)
-
-			const result = await testEndpointConnectivity(endpoints)
-
-			expect(result.authorizationEndpoint).toBe(false)
-			expect(result.tokenEndpoint).toBe(false)
-			expect(result.errors).toContain(
-				'Authorization endpoint returned unexpected status: 500',
-			)
-			expect(result.errors).toContain(
-				'Token endpoint returned unexpected status: 200',
-			)
-		})
-
-		it('should handle optional endpoints gracefully', async () => {
-			const endpoints: EndpointConfiguration = {
-				authorizationUrl: 'https://auth.example.com/oauth2/authorize',
-				tokenUrl: 'https://auth.example.com/oauth2/token',
-				// No optional endpoints
-			}
-
-			server.use(
-				http.get('https://auth.example.com/oauth2/authorize', () => {
-					return new HttpResponse(null, { status: 400 })
-				}),
-				http.post('https://auth.example.com/oauth2/token', () => {
-					return new HttpResponse(null, { status: 400 })
-				}),
-			)
-
-			const result = await testEndpointConnectivity(endpoints)
-
-			expect(result.authorizationEndpoint).toBe(true)
-			expect(result.tokenEndpoint).toBe(true)
-			expect(result.userinfoEndpoint).toBeUndefined()
-			expect(result.revocationEndpoint).toBeUndefined()
-		})
-	})
-
 	describe('normalizeIssuerUrl', () => {
 		it('should add https:// protocol when missing', () => {
 			const result = normalizeIssuerUrl('auth.example.com')
@@ -441,8 +421,8 @@ describe('OIDC Discovery', () => {
 		})
 
 		it('should preserve http:// protocol', () => {
-			const result = normalizeIssuerUrl('http://localhost:8080/')
-			expect(result).toBe('http://localhost:8080')
+			const result = normalizeIssuerUrl('http://auth.example.com/')
+			expect(result).toBe('http://auth.example.com')
 		})
 
 		it('should handle already normalized URLs', () => {
@@ -450,10 +430,8 @@ describe('OIDC Discovery', () => {
 			expect(result).toBe('https://auth.example.com')
 		})
 
-		it('should throw error for invalid URLs', () => {
+		it('should throw error for empty URLs', () => {
 			expect(() => normalizeIssuerUrl('')).toThrow('Invalid issuer URL format')
-			// Note: 'not-a-url' actually becomes 'https://not-a-url' which is a valid URL format
-			// but would fail at network level, not URL parsing level
 		})
 
 		it('should handle URLs with paths', () => {

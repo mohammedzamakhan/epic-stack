@@ -17,13 +17,10 @@ export {
 export { ssoConfigurationService } from './configuration.server.ts'
 
 // SSO Cache
-export { ssoCache } from './cache.server.ts'
+export { ssoCache } from '@repo/sso'
 
 // SSO Connection Pool
-export {
-	ssoConnectionPool,
-	SSOConnectionPool,
-} from './connection-pool.server.ts'
+export { ssoConnectionPool, SSOConnectionPool } from '@repo/sso'
 
 // SSO Retry Manager
 export { ssoRetryManager, SSORetryManager } from './retry-logic.server.ts'
@@ -43,7 +40,7 @@ export {
 	type DiscoveryResult,
 	type EndpointValidationResult,
 	type CommonProvider,
-} from './oidc-discovery.server.ts'
+} from '@repo/sso'
 
 // Re-export everything from other SSO files
 export * from './audit-logging.server.ts'

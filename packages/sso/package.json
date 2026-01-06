@@ -20,11 +20,15 @@
     "test": "vitest --run",
     "test:watch": "vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@repo/auth": "*",
+    "@repo/database": "*",
+    "remix-auth-oauth2": "^3.4.1"
+  },
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "@vitest/coverage-v8": "^4.0.1",
     "@repo/config": "*",
+    "@types/node": "^22.19.3",
+    "@vitest/coverage-v8": "^4.0.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.4"
   }

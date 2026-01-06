@@ -191,7 +191,8 @@ export function validateOIDCIssuerUrl(issuerUrl: string): {
 	let normalized = issuerUrl.trim()
 
 	// Add https:// if no protocol specified (only for production)
-	if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+	// Check if URL has a protocol (look for ://)
+	if (!normalized.includes('://')) {
 		normalized = `https://${normalized}`
 	}
 
@@ -225,7 +226,8 @@ export function validateOIDCIssuerUrl(issuerUrl: string): {
 			if (isIPv4 || isIPv6) {
 				return {
 					valid: false,
-					error: 'IP addresses are not allowed for OIDC issuer URLs in production',
+					error:
+						'IP addresses are not allowed for OIDC issuer URLs in production',
 				}
 			}
 		}

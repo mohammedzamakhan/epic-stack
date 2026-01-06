@@ -11,14 +11,14 @@ import {
 	testEndpointConnectivity,
 	type DiscoveryResult as OIDCDiscoveryResult,
 	type EndpointConfiguration,
-} from './oidc-discovery.server.ts'
+} from '@repo/sso'
 import {
 	auditSSOConfigCreated,
 	auditSSOConfigUpdated,
 	ssoAuditLogger,
 	SSOAuditEventType,
 } from './audit-logging.server.ts'
-import { ssoCache } from './cache.server.ts'
+import { ssoCache } from '@repo/sso'
 import { trackSuspiciousActivity } from './rate-limit.server.ts'
 import { sanitizeSSOConfigInput } from './sanitization.server.ts'
 

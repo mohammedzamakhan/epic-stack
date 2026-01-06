@@ -7,14 +7,10 @@ import {
 
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
-import {
-	discoverOIDCEndpoints,
-	type EndpointConfiguration,
-} from './oidc-discovery.server.ts'
+import { discoverOIDCEndpoints, type EndpointConfiguration } from '@repo/sso'
 import { type ProviderUser } from '../providers/provider.ts'
-import { ssoCache } from './cache.server.ts'
+import { ssoCache, ssoConnectionPool } from '@repo/sso'
 import { ssoConfigurationService } from './configuration.server.ts'
-import { ssoConnectionPool } from './connection-pool.server.ts'
 import { ssoRetryManager } from './retry-logic.server.ts'
 
 export interface OIDCUserInfo {

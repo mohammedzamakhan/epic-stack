@@ -6,7 +6,7 @@ import {
 	testEndpointConnectivity,
 	type DiscoveryResult as OIDCDiscoveryResult,
 	type EndpointConfiguration,
-} from './oidc-discovery.server.ts'
+} from '@repo/sso'
 
 export interface SSOConfigInput {
 	providerName: string

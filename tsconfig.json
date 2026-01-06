@@ -21,7 +21,11 @@
 			"@repo/integrations": ["./packages/integrations/src"],
 			"@repo/integrations/*": ["./packages/integrations/src/*"],
 			"@repo/notifications": ["./packages/notifications/src"],
-			"@repo/notifications/*": ["./packages/notifications/src/*"]
+			"@repo/notifications/*": ["./packages/notifications/src/*"],
+			"@repo/sso": ["./packages/sso"],
+			"@repo/sso/*": ["./packages/sso/*"],
+			"@repo/validation": ["./packages/validation"],
+			"@repo/validation/*": ["./packages/validation/*"]
 		}
 	}
 }

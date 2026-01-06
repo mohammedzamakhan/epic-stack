@@ -1,6 +1,6 @@
 import { type SSOConfiguration } from '@repo/database/types'
 import { type OAuth2Strategy } from 'remix-auth-oauth2'
-import { type ProviderUser } from '../providers/provider.ts'
+import { type ProviderUser } from '@repo/auth'
 
 /**
  * In-memory cache for SSO configurations and strategies

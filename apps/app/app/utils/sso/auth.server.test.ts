@@ -65,9 +65,16 @@ vi.mock('./retry-logic.server.ts', () => ({
 	},
 }))
 
-vi.mock('./connection-pool.server.ts', () => ({
+vi.mock('@repo/sso', () => ({
 	ssoConnectionPool: {
 		request: vi.fn(),
+	},
+	ssoCache: {
+		getStrategy: vi.fn(),
+		setStrategy: vi.fn(),
+		getConfiguration: vi.fn(),
+		setConfiguration: vi.fn(),
+		invalidateConfiguration: vi.fn(),
 	},
 }))
 
