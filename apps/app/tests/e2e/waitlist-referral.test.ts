@@ -14,7 +14,7 @@ const test = base.extend<{
 		password: string
 	}
 }>({
-	getOnboardingData: async (_deps, use) => {
+	getOnboardingData: async ({}, use) => {
 		const userData = createUser()
 		await use(() => {
 			const onboardingData = {
