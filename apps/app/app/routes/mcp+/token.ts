@@ -3,12 +3,12 @@ import {
 	logMCPTokenIssued,
 	logMCPTokenRefreshed,
 	logMCPRateLimitExceeded,
-} from '#app/utils/mcp-audit.server.ts'
+} from '#app/utils/mcp/audit.server.ts'
 import {
 	exchangeAuthorizationCode,
 	refreshAccessToken,
 	validateAccessToken,
-} from '#app/utils/mcp-oauth.server.ts'
+} from '#app/utils/mcp/oauth.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,

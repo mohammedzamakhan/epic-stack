@@ -50,8 +50,8 @@ import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
-} from '#app/utils/organization-invitation.server.ts'
-import { createOrganization } from '#app/utils/organizations.server.ts'
+} from '#app/utils/organization/invitation.server.ts'
+import { createOrganization } from '#app/utils/organization/organizations.server.ts'
 import {
 	getTrialConfig,
 	getPlansAndPrices,

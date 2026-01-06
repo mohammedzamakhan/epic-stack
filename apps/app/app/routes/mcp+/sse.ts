@@ -2,13 +2,13 @@ import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
 	logMCPToolInvoked,
 	logMCPRateLimitExceeded,
-} from '#app/utils/mcp-audit.server.ts'
-import { validateAccessToken } from '#app/utils/mcp-oauth.server.ts'
+} from '#app/utils/mcp/audit.server.ts'
+import { validateAccessToken } from '#app/utils/mcp/oauth.server.ts'
 import {
 	getToolDefinitions,
 	handleMCPRequest,
 	type MCPToolRequest,
-} from '#app/utils/mcp-server.server.ts'
+} from '#app/utils/mcp/server.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,
@@ -36,7 +36,7 @@ import {
  */
 export async function action({ request }: ActionFunctionArgs) {
 	// Import to register tools (side-effect import)
-	await import('#app/utils/mcp-tools.server.ts')
+	await import('#app/utils/mcp/tools.server.ts')
 
 	console.log('[MCP SSE] POST request received')
 	console.log('[MCP SSE] URL:', request.url)
@@ -243,7 +243,7 @@ export async function action({ request }: ActionFunctionArgs) {
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	// Import to register tools (side-effect import)
-	await import('#app/utils/mcp-tools.server.ts')
+	await import('#app/utils/mcp/tools.server.ts')
 
 	console.log('[MCP SSE] GET request received')
 	console.log('[MCP SSE] URL:', request.url)

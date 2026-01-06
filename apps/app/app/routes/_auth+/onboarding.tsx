@@ -159,7 +159,7 @@ export async function action({ request }: Route.ActionArgs) {
 	if (inviteToken) {
 		try {
 			const { createInvitationFromLink } = await import(
-				'#app/utils/organization-invitation.server.ts'
+				'#app/utils/organization/invitation.server.ts'
 			)
 			// Create a pending invitation for this user
 			const invitation = await createInvitationFromLink(inviteToken, email)
@@ -183,7 +183,7 @@ export async function action({ request }: Route.ActionArgs) {
 	// Check for pending organization invitations and accept them
 	try {
 		const { acceptInvitationByEmail } = await import(
-			'#app/utils/organization-invitation.server.ts'
+			'#app/utils/organization/invitation.server.ts'
 		)
 		const invitationResults = await acceptInvitationByEmail(
 			email,

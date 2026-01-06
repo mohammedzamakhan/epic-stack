@@ -478,3 +478,10 @@ export async function invalidateUserSecurityCache(userId: string) {
 		lruCache.delete(`user-security:${userId}`),
 	])
 }
+
+export async function invalidateUserFavoritesCache(userId: string) {
+	await Promise.all([
+		cache.delete(`user-favorites:${userId}`),
+		lruCache.delete(`user-favorites:${userId}`),
+	])
+}

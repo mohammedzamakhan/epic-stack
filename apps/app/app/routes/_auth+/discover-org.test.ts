@@ -10,21 +10,21 @@ interface DiscoverOrgResponse {
 }
 
 // Mock dependencies
-vi.mock('#app/utils/organizations.server.ts', () => ({
+vi.mock('#app/utils/organization/organizations.server.ts', () => ({
 	discoverOrganizationFromEmail: vi.fn(),
 }))
 
-vi.mock('#app/utils/sso-configuration.server.ts', () => ({
+vi.mock('#app/utils/sso/configuration.server.ts', () => ({
 	ssoConfigurationService: {
 		getConfiguration: vi.fn(),
 	},
 }))
 
 const { discoverOrganizationFromEmail } = await import(
-	'#app/utils/organizations.server.ts'
+	'#app/utils/organization/organizations.server.ts'
 )
 const { ssoConfigurationService } = await import(
-	'#app/utils/sso-configuration.server.ts'
+	'#app/utils/sso/configuration.server.ts'
 )
 
 describe('discover-org route', () => {
@@ -268,9 +268,7 @@ describe('discover-org route', () => {
 
 		it('should handle errors gracefully', async () => {
 			// Mock console.error to prevent test setup from throwing
-			vi
-				.spyOn(console, 'error')
-				.mockImplementation(() => { })
+			vi.spyOn(console, 'error').mockImplementation(() => {})
 
 			const email = 'user@example.com'
 			const request = new Request(

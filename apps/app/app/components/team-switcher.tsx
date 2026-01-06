@@ -22,7 +22,7 @@ import {
 } from '@repo/ui/sidebar'
 import * as React from 'react'
 import { Link, useSubmit } from 'react-router'
-import { useUserOrganizations } from '#app/utils/organizations.ts'
+import { useUserOrganizations } from '#app/utils/organization/organizations.ts'
 
 export function TeamSwitcher() {
 	const submit = useSubmit()

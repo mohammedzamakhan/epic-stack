@@ -4,7 +4,7 @@ import { Logo } from '@repo/ui/logo'
 import React from 'react'
 import { Form, Link } from 'react-router'
 import { cn } from '#app/utils/misc.tsx'
-import { useOptionalUserOrganizations } from '#app/utils/organizations.ts'
+import { useOptionalUserOrganizations } from '#app/utils/organization/organizations.ts'
 import { useOptionalUser } from '#app/utils/user.ts'
 
 const menuItems = [

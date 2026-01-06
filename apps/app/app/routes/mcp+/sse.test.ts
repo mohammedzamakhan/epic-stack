@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
 	validateAccessToken,
 	createAuthorizationWithTokens,
-} from '#app/utils/mcp-oauth.server.ts'
+} from '#app/utils/mcp/oauth.server.ts'
 
 // Type definitions for JSON-RPC responses
 interface JsonRpcResponse {

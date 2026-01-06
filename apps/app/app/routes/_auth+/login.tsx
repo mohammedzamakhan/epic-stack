@@ -51,8 +51,8 @@ import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
 import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
-} from '#app/utils/organizations.server.ts'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+} from '#app/utils/organization/organizations.server.ts'
+import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { type Route } from './+types/login.ts'
 import { handleNewSession } from './login.server.ts'
 

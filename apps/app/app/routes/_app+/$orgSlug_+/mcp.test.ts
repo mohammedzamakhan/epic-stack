@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createAuthorizationWithTokens } from '#app/utils/mcp-oauth.server.ts'
+import { createAuthorizationWithTokens } from '#app/utils/mcp/oauth.server.ts'
 
 // Helper to create test user
 async function createTestUser() {

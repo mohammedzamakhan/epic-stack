@@ -1,7 +1,7 @@
 import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const orgSlug = params.orgSlug

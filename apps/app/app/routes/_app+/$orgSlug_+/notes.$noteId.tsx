@@ -64,7 +64,7 @@ import {
 import {
 	logNoteActivity,
 	getNoteActivityLogs,
-} from '#app/utils/activity-log.server.ts'
+} from '#app/utils/audit/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '#app/utils/misc.tsx'
@@ -76,8 +76,8 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
-} from '#app/utils/organization-permissions.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+} from '#app/utils/organization/permissions.server.ts'
+import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 // Define comment types based on Prisma query structure
@@ -213,7 +213,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const [connections, availableIntegrations, comments] = await Promise.all([
 		integrationManager.getNoteConnections(note.id),
 		integrationManager.getOrganizationIntegrations(note.organizationId),
-		// Get comments for this note
+		// Get comments for this note (limited to 50 for initial load, implement load more in UI)
 		prisma.noteComment.findMany({
 			where: { noteId: note.id },
 			include: {
@@ -234,6 +234,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				},
 			},
 			orderBy: { createdAt: 'desc' },
+			take: 50, // Limit initial load for performance
 		}),
 	])
 

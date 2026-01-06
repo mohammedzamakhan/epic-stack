@@ -10,7 +10,7 @@ import { prisma } from '@repo/database'
 import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { logNoteActivity } from '#app/utils/activity-log.server.ts'
+import { logNoteActivity } from '#app/utils/audit/activity-log.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
 import {

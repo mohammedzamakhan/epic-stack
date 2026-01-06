@@ -33,7 +33,7 @@ import VerifiedDomainCard, {
 
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { invalidateUserOrganizationsCache } from '#app/utils/cache.server.ts'
-import { requireUserOrganization } from '#app/utils/organization-loader.server.ts'
+import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	updateSeatQuantity,
 	deleteSubscription,

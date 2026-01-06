@@ -30,7 +30,7 @@ import {
 	getNotesViewMode,
 	setNotesViewMode,
 } from '#app/utils/notes-view-cookie.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import { NotesCards } from './notes-cards.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 

@@ -9,7 +9,7 @@ import {
 	hashToken,
 	ACCESS_TOKEN_EXPIRATION,
 	REFRESH_TOKEN_EXPIRATION,
-} from '#app/utils/mcp-oauth.server.ts'
+} from '#app/utils/mcp/oauth.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,

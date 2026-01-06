@@ -26,7 +26,7 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { setUserDefaultOrganization } from '#app/utils/organizations.server.ts'
+import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 
@@ -49,10 +49,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	// Set this organization as the user's default organization
-	// This ensures that when a user visits an organization's dashboard, it becomes their default
-	await setUserDefaultOrganization(userId, organization.id)
-
 	// Calculate appropriate date range - show since org creation or last 30 days, whichever is shorter
 	const now = new Date()
 	const thirtyDaysAgo = new Date()
@@ -67,20 +63,33 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	)
 	const daysToShow = Math.max(7, Math.min(30, daysSinceStart)) // Show at least 7 days, max 30
 
-	const notesData = await prisma.organizationNote.findMany({
-		where: {
-			organizationId: organization.id,
-			createdAt: {
-				gte: startDate,
+	// Run all independent queries in parallel for better performance
+	const [notesData, onboardingProgress, leadershipData] = await Promise.all([
+		// Notes data for chart
+		prisma.organizationNote.findMany({
+			where: {
+				organizationId: organization.id,
+				createdAt: { gte: startDate },
 			},
-		},
-		select: {
-			createdAt: true,
-		},
-		orderBy: {
-			createdAt: 'asc',
-		},
-	})
+			select: { createdAt: true },
+			orderBy: { createdAt: 'asc' },
+		}),
+		// Onboarding progress (auto-detect + get progress)
+		(async () => {
+			await autoDetectCompletedSteps(userId, organization.id)
+			return getOnboardingProgress(userId, organization.id)
+		})(),
+		// Leadership data - top note creators
+		prisma.organizationNote.groupBy({
+			by: ['createdById'],
+			where: { organizationId: organization.id },
+			_count: { id: true },
+			orderBy: { _count: { id: 'desc' } },
+			take: 6,
+		}),
+		// Set default organization (fire and forget, no await needed for result)
+		setUserDefaultOrganization(userId, organization.id),
+	])
 
 	// Group notes by day
 	const dailyNotes = notesData.reduce(
@@ -114,45 +123,20 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		})
 	}
 
-	// Get onboarding progress
-	await autoDetectCompletedSteps(userId, organization.id)
-	const onboardingProgress = await getOnboardingProgress(
-		userId,
-		organization.id,
-	)
-
-	// Get leadership data - top note creators
-	const leadershipData = await prisma.organizationNote.groupBy({
-		by: ['createdById'],
-		where: {
-			organizationId: organization.id,
-		},
-		_count: {
-			id: true,
-		},
-		orderBy: {
-			_count: {
-				id: 'desc',
-			},
-		},
-		take: 6, // Top 6 contributors
-	})
-
-	// Get user details for the top contributors
+	// Get user details for the top contributors (depends on leadershipData)
 	const userIds = leadershipData.map((item) => item.createdById)
-	const users = await prisma.user.findMany({
-		where: {
-			id: {
-				in: userIds,
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			image: { select: { objectKey: true } },
-		},
-	})
+	const users =
+		userIds.length > 0
+			? await prisma.user.findMany({
+					where: { id: { in: userIds } },
+					select: {
+						id: true,
+						name: true,
+						email: true,
+						image: { select: { objectKey: true } },
+					},
+				})
+			: []
 
 	// Combine user data with note counts and add ranking
 	const leaders = leadershipData.map((item, index) => {

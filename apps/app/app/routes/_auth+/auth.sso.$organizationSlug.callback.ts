@@ -4,7 +4,7 @@ import { redirect } from 'react-router'
 import { getUserId, loginWithSSO } from '#app/utils/auth.server.ts'
 import { ensurePrimary } from '#app/utils/litefs.server.ts'
 import { combineHeaders } from '#app/utils/misc.tsx'
-import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
+import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
@@ -14,17 +14,17 @@ import {
 	SSOAuditEventType,
 	auditSSOAuthSuccess,
 	auditSSOAuthFailed,
-} from '#app/utils/sso-audit-logging.server.ts'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+} from '#app/utils/sso/audit-logging.server.ts'
+import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
+import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import {
 	handleSSOError,
 	createSSOError,
 	SSOErrorType,
 	handleOAuthError,
-} from '#app/utils/sso-error-handling.server.ts'
-import { trackSuspiciousActivity } from '#app/utils/sso-rate-limit.server.ts'
-import { validateSSOOrganization } from '#app/utils/sso-sanitization.server.ts'
+} from '#app/utils/sso/error-handling.server.ts'
+import { trackSuspiciousActivity } from '#app/utils/sso/rate-limit.server.ts'
+import { validateSSOOrganization } from '#app/utils/sso/sanitization.server.ts'
 import {
 	createToastHeaders,
 	redirectWithToast,

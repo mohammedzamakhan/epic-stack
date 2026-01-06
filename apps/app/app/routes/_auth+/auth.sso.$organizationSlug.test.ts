@@ -1,6 +1,6 @@
 import { prisma } from '@repo/database'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
+import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { BASE_URL } from '#tests/utils.ts'
 import { action } from './auth.sso.$organizationSlug.ts'
 
@@ -10,7 +10,7 @@ const ROUTE_PATH = `/auth/sso/${TEST_ORG_SLUG}`
 const PARAMS = { organizationSlug: TEST_ORG_SLUG }
 
 // Mock the SSO auth service
-vi.mock('#app/utils/sso-auth.server.ts', () => ({
+vi.mock('#app/utils/sso/auth.server.ts', () => ({
 	ssoAuthService: {
 		initiateAuth: vi.fn(),
 	},

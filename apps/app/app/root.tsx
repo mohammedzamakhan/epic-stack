@@ -194,7 +194,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		? (async () => {
 				try {
 					const { getUserOrganizations, getUserDefaultOrganization } =
-						await import('./utils/organizations.server')
+						await import('./utils/organization/organizations.server')
 					const orgs = await getUserOrganizations(user.id, true)
 					const defaultOrg = await getUserDefaultOrganization(user.id)
 					return {
@@ -219,13 +219,26 @@ export async function loader({ request }: Route.LoaderArgs) {
 		: undefined
 
 	const favoriteNotes = user
-		? await prisma.organizationNoteFavorite.findMany({
-				where: {
-					userId: user.id,
-				},
-				include: {
-					note: true,
-				},
+		? await cachified({
+				key: `user-favorites:${user.id}`,
+				cache,
+				ttl: 1000 * 60 * 2, // 2 minutes
+				getFreshValue: () =>
+					prisma.organizationNoteFavorite.findMany({
+						where: { userId: user.id },
+						select: {
+							id: true,
+							noteId: true,
+							note: {
+								select: {
+									id: true,
+									title: true,
+									organizationId: true,
+									organization: { select: { slug: true } },
+								},
+							},
+						},
+					}),
 			})
 		: undefined
 

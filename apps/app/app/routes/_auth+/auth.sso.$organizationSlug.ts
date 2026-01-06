@@ -3,23 +3,23 @@ import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '#app/utils/auth.server.ts'
 import { getReferrerRoute } from '#app/utils/misc.tsx'
-import { getOrganizationBySlug } from '#app/utils/organizations.server.ts'
+import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
-} from '#app/utils/sso-audit-logging.server.ts'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
+} from '#app/utils/sso/audit-logging.server.ts'
+import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import {
 	handleSSOError,
 	createSSOError,
 	SSOErrorType,
-} from '#app/utils/sso-error-handling.server.ts'
-import { trackSuspiciousActivity } from '#app/utils/sso-rate-limit.server.ts'
+} from '#app/utils/sso/error-handling.server.ts'
+import { trackSuspiciousActivity } from '#app/utils/sso/rate-limit.server.ts'
 import {
 	sanitizeRedirectUrl,
 	validateSSOOrganization,
-} from '#app/utils/sso-sanitization.server.ts'
+} from '#app/utils/sso/sanitization.server.ts'
 import { type Route } from './+types/auth.sso.$organizationSlug.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {

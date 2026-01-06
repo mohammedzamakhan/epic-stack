@@ -4,8 +4,8 @@ import { prisma } from '@repo/database'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
-import { ssoAuthService } from '#app/utils/sso-auth.server.ts'
-import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
+import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { createUser } from '#tests/db-utils.ts'
 import { consoleError } from '#tests/setup/setup-test-env.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
@@ -17,7 +17,7 @@ const ROUTE_PATH = `/auth/sso/${TEST_ORG_SLUG}/callback`
 const PARAMS = { organizationSlug: TEST_ORG_SLUG }
 
 // Mock the SSO services
-vi.mock('#app/utils/sso-auth.server.ts', () => ({
+vi.mock('#app/utils/sso/auth.server.ts', () => ({
 	ssoAuthService: {
 		handleCallback: vi.fn(),
 		provisionUser: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock('#app/utils/sso-auth.server.ts', () => ({
 	},
 }))
 
-vi.mock('#app/utils/sso-configuration.server.ts', () => ({
+vi.mock('#app/utils/sso/configuration.server.ts', () => ({
 	ssoConfigurationService: {
 		getConfiguration: vi.fn(),
 	},

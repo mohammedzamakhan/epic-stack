@@ -34,9 +34,9 @@ import {
 	logMCPAuthorizationRequested,
 	logMCPAuthorizationApproved,
 	logMCPAuthorizationDenied,
-} from '#app/utils/mcp-audit.server.ts'
-import { createAuthorizationCode } from '#app/utils/mcp-oauth.server.ts'
-import { userHasOrgAccess } from '#app/utils/organizations.server.ts'
+} from '#app/utils/mcp/audit.server.ts'
+import { createAuthorizationCode } from '#app/utils/mcp/oauth.server.ts'
+import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,

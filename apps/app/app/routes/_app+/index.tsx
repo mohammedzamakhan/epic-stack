@@ -14,7 +14,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	try {
 		const { getUserDefaultOrganization } = await import(
-			'#app/utils/organizations.server.ts'
+			'#app/utils/organization/organizations.server.ts'
 		)
 		const defaultOrg = await getUserDefaultOrganization(userId)
 

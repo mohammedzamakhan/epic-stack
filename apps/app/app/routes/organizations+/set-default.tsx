@@ -4,7 +4,7 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import {
 	getUserOrganizations,
 	setUserDefaultOrganization,
-} from '#app/utils/organizations.server.ts'
+} from '#app/utils/organization/organizations.server.ts'
 
 const SetDefaultOrganizationSchema = z.object({
 	organizationId: z.string().min(1, 'Organization ID is required'),

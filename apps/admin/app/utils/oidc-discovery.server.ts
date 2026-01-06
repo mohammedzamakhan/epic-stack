@@ -3,8 +3,8 @@
  * Implements OpenID Connect Discovery 1.0 specification
  */
 
-import { ssoCache } from '../../../app/app/utils/sso-cache.server.ts'
-import { ssoConnectionPool } from '../../../app/app/utils/sso-connection-pool.server.ts'
+import { ssoCache } from '../../../app/app/utils/sso/cache.server.ts'
+import { ssoConnectionPool } from '../../../app/app/utils/sso/connection-pool.server.ts'
 
 export interface OIDCDiscoveryDocument {
 	issuer: string

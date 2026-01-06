@@ -9,7 +9,7 @@ import { providers } from './connections.server.ts'
 import { combineHeaders, downloadFile } from './misc.tsx'
 import { type ProviderUser } from './providers/provider.ts'
 import { authSessionStorage } from './session.server.ts'
-import { ssoAuthService } from './sso-auth.server.ts'
+import { ssoAuthService } from './sso/auth.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
 import { getUtmParams } from './utm.server.ts'
 
