@@ -94,10 +94,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: npm ci --include=optional
+      - name: 📥 Install deps
+        run: npm install
 
       - name: 🏄 Copy test env vars
         run:
