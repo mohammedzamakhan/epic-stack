@@ -94,7 +94,7 @@ export const test = base.extend<{
 		await setCookieConsent(page)
 		await use(page)
 	},
-	insertNewUser: async (_deps, use) => {
+	insertNewUser: async ({}, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)
