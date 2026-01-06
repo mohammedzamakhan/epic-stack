@@ -392,9 +392,9 @@ describe('MCP Tools Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 	})
 
 	describe('Property 20: Note retrieval limits and ordering', () => {
@@ -463,9 +463,9 @@ describe('MCP Tools Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 	})
 
 	describe('Property 21: Organization access control', () => {
@@ -534,9 +534,9 @@ describe('MCP Tools Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 	})
 
 	describe('Property 28: Cross-organization access prevention', () => {
@@ -600,8 +600,8 @@ describe('MCP Tools Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 	})
 })

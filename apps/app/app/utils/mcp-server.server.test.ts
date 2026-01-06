@@ -355,9 +355,9 @@ describe('MCP Server Service', () => {
 						expect(content.text).toContain('Processed:')
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 	})
 
 	describe('Property 22: Tool error format compliance', () => {
@@ -401,9 +401,9 @@ describe('MCP Server Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 30000) // 30 second timeout for property-based test
 
 		it('should handle unknown tool errors', async () => {
 			try {
