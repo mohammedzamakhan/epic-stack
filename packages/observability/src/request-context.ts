@@ -46,7 +46,7 @@ export class WideEventBuilder {
 	 * context is merged (later calls override earlier values for same keys).
 	 */
 	addContext(data: Record<string, unknown>): this {
-		this.context = { ...this.context, ...data }
+		Object.assign(this.context, data)
 		return this
 	}
 

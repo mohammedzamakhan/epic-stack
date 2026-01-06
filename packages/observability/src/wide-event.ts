@@ -122,24 +122,46 @@ export function wideEventMiddleware(
 				// This will be enriched later with user/org context
 			})
 
-			// Emit wide event when response finishes
-			res.on('finish', () => {
-				ctx.wideEvent.emit({
-					method: req.method,
-					path: path,
-					statusCode: res.statusCode,
-				})
-			})
+			// Track if we've already emitted the wide event to prevent duplicates
+			// (both 'finish' and 'error' can fire, or 'close' can fire for aborted requests)
+			let hasEmitted = false
 
-			// Handle errors
-			res.on('error', (error) => {
-				ctx.wideEvent.emit({
+			const emitOnce = (error?: unknown) => {
+				if (hasEmitted) return
+				hasEmitted = true
+
+				const emitData: {
+					method: string
+					path: string
+					statusCode: number
+					error?: unknown
+				} = {
 					method: req.method,
 					path: path,
 					statusCode: res.statusCode || 500,
-					error,
-				})
+				}
+
+				if (error !== undefined) {
+					emitData.error = error
+				}
+
+				ctx.wideEvent.emit(emitData)
+			}
+
+			// Emit wide event when response finishes
+			res.on('finish', () => emitOnce())
+
+			// Handle client disconnection (aborted/closed connections)
+			res.on('close', () => {
+				if (!res.writableFinished) {
+					// Response was closed before finishing - client likely disconnected
+					ctx.wideEvent.addContext({ connectionAborted: true })
+					emitOnce()
+				}
 			})
+
+			// Handle errors
+			res.on('error', (error) => emitOnce(error))
 
 			next()
 		})
@@ -190,6 +212,34 @@ export function addUserContext(context: {
  * }
  * ```
  */
+/**
+ * Sanitizes a stack trace to remove sensitive information.
+ * In production, removes absolute file paths and potentially sensitive patterns.
+ */
+function sanitizeStackTrace(stack: string): string {
+	const isProduction = process.env.NODE_ENV === 'production'
+
+	if (!isProduction) {
+		return stack
+	}
+
+	return (
+		stack
+			// Remove absolute file paths (Unix and Windows)
+			.replace(/\/[^\s:]+\//g, './')
+			.replace(/[A-Za-z]:\\[^\s:]+\\/g, '.\\')
+			// Remove home directory references
+			.replace(/\/Users\/[^/]+\//g, '~/')
+			.replace(/\/home\/[^/]+\//g, '~/')
+			// Remove node_modules internal paths for brevity
+			.replace(/node_modules\/[^\s:]+/g, 'node_modules/...')
+			// Limit stack trace depth in production
+			.split('\n')
+			.slice(0, 10)
+			.join('\n')
+	)
+}
+
 export function addErrorContext(
 	error: unknown,
 	additionalContext?: Record<string, unknown>,
@@ -197,7 +247,8 @@ export function addErrorContext(
 	const errorInfo: Record<string, unknown> = {
 		errorType: error instanceof Error ? error.name : 'UnknownError',
 		errorMessage: error instanceof Error ? error.message : String(error),
-		...(error instanceof Error && error.stack && { errorStack: error.stack }),
+		...(error instanceof Error &&
+			error.stack && { errorStack: sanitizeStackTrace(error.stack) }),
 		...additionalContext,
 	}
 
