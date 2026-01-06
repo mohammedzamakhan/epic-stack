@@ -45,7 +45,7 @@ server.listen({
 			return // Don't print warning, just let it pass through
 		}
 
-		if (url.includes('data:application/wasm;')) {
+		if (url.includes('application/wasm;')) {
 			console.log('Unhandled WASM request')
 			return
 		}
