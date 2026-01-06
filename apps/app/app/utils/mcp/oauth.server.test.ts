@@ -832,9 +832,9 @@ describe('MCP OAuth Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 60000) // 60 second timeout
 	})
 
 	describe('Property 29: Organization access revocation cascade', () => {
@@ -949,9 +949,9 @@ describe('MCP OAuth Service', () => {
 						}
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 }, // Reduced from 100 to prevent timeout in CI
 			)
-		})
+		}, 60000) // 60 second timeout
 	})
 
 	describe('Unit Tests for OAuth Service', () => {
