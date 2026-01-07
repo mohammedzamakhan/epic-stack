@@ -255,12 +255,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	)
 
 	// Check rate limit for SSE connection (IP-based)
-	// Using token limits as a proxy for connection limits (20 per hour per IP)
 	// This helps prevent connection exhaustion attacks
 	const clientIp = getClientIp(request)
 	const rateLimitCheck = await checkRateLimit(
 		{ type: 'ip', value: clientIp },
-		RATE_LIMITS.token,
+		RATE_LIMITS.sseConnection,
 	)
 
 	if (!rateLimitCheck.allowed) {

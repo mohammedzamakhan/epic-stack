@@ -25,7 +25,6 @@ import { Link, Form, useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 import { BuildingIcon } from '@repo/ui/building-icon'
-import { GlobeIcon } from '@repo/ui/globe-icon'
 import { LogoutIcon } from './icons/logout-icon'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import { SunMoonIcon } from './icons/sun-moon-icon'
@@ -267,7 +266,9 @@ export function NavUser({
 										}}
 									>
 										<span
-											className={currentLocale === option.value ? 'font-medium' : ''}
+											className={
+												currentLocale === option.value ? 'font-medium' : ''
+											}
 										>
 											{option.nativeName}
 										</span>

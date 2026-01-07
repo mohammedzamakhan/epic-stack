@@ -14,7 +14,6 @@ import {
 } from '@repo/ui/card'
 import {
 	Frame,
-	FrameAction,
 	FramePanel,
 	FrameDescription,
 	FrameHeader,

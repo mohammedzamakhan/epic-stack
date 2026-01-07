@@ -25,6 +25,11 @@ export const RATE_LIMITS = {
 		maxRequests: 20,
 		windowMs: 60 * 60 * 1000, // 1 hour
 	},
+	// Explicit SSE connection limit (separate from token limits)
+	sseConnection: {
+		maxRequests: 20,
+		windowMs: 60 * 60 * 1000, // 1 hour
+	},
 	toolInvocation: {
 		maxRequests: 1000,
 		windowMs: 60 * 60 * 1000, // 1 hour
