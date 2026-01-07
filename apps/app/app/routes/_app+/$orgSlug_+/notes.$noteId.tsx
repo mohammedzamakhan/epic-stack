@@ -10,8 +10,17 @@ import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { StatusButton } from '@repo/ui/status-button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@repo/ui/tabs'
 import { formatDistanceToNow } from 'date-fns'
+import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
-import { useRef, useEffect, useState, lazy, Suspense, Component } from 'react'
+import {
+	useRef,
+	useEffect,
+	useState,
+	lazy,
+	Suspense,
+	Component,
+	useMemo,
+} from 'react'
 import {
 	Form,
 	Link,
@@ -1548,6 +1557,38 @@ export default function NoteRoute() {
 		email: member.user.username, // Using username as email placeholder
 	}))
 
+	const sanitizedNoteContent = useMemo(() => {
+		return DOMPurify.sanitize(note.content, {
+			ALLOWED_TAGS: [
+				'p',
+				'br',
+				'strong',
+				'b',
+				'em',
+				'i',
+				'u',
+				'a',
+				'span',
+				'ul',
+				'ol',
+				'li',
+				'h1',
+				'h2',
+				'h3',
+				'h4',
+				'h5',
+				'h6',
+				'blockquote',
+				'code',
+				'pre',
+				'div',
+			],
+			ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+			ALLOW_DATA_ATTR: false,
+			ALLOW_UNKNOWN_PROTOCOLS: false,
+		})
+	}, [note.content])
+
 	return (
 		<>
 			<SheetHeader className="border-b">
@@ -1682,7 +1723,7 @@ export default function NoteRoute() {
 						<div className="prose prose-sm max-w-none">
 							<div
 								className="text-sm whitespace-break-spaces md:text-lg"
-								dangerouslySetInnerHTML={{ __html: note.content }}
+								dangerouslySetInnerHTML={{ __html: sanitizedNoteContent }}
 							/>
 						</div>
 					</TabsContent>
