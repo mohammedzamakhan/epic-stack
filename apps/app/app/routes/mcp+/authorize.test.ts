@@ -144,6 +144,7 @@ describe('OAuth Authorization Endpoint', () => {
 									userId: user.id,
 									organizationId: org.id,
 									clientName: approval.clientName,
+									redirectUri: 'http://localhost:3000/callback',
 								}),
 							),
 						)
@@ -176,6 +177,7 @@ describe('OAuth Authorization Endpoint', () => {
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
+							redirectUri: 'http://localhost:3000/callback',
 						})
 
 						expect(code).toBeDefined()
@@ -300,6 +302,7 @@ describe('OAuth Authorization Endpoint', () => {
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
+							redirectUri: 'http://localhost:3000/callback',
 						})
 
 						expect(code).toBeDefined()
@@ -332,6 +335,7 @@ describe('OAuth Authorization Endpoint', () => {
 									userId: user.id,
 									organizationId: org.id,
 									clientName: name,
+									redirectUri: 'http://localhost:3000/callback',
 								}),
 							),
 						)
@@ -363,6 +367,7 @@ describe('OAuth Authorization Endpoint', () => {
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
+							redirectUri: 'http://localhost:3000/callback',
 						})
 
 						expect(code).toBeDefined()
