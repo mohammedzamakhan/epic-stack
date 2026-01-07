@@ -160,6 +160,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			userId,
 			organizationId: organizationId as string,
 			clientName: clientName as string,
+			redirectUri: redirectUri as string,
 			codeChallenge: codeChallenge as string | undefined,
 			codeChallengeMethod: codeChallengeMethod as string | undefined,
 		})

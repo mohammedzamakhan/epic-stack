@@ -209,12 +209,16 @@ describe('MCP OAuth Service', () => {
 								userId: user.id,
 								organizationId: organization.id,
 								clientName,
+								redirectUri: 'https://example.com/callback',
 							})
 
 							expect(code).toBeTruthy()
 
 							// Exchange code for tokens
-							const result = await exchangeAuthorizationCode(code)
+							const result = await exchangeAuthorizationCode(
+								code,
+								'https://example.com/callback',
+							)
 
 							// Property: Both tokens should be issued
 							expect(result).not.toBeNull()
@@ -518,16 +522,19 @@ describe('MCP OAuth Service', () => {
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
+									redirectUri: 'https://example.com/callback',
 								}),
 								createAuthorizationCode({
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
+									redirectUri: 'https://example.com/callback',
 								}),
 								createAuthorizationCode({
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
+									redirectUri: 'https://example.com/callback',
 								}),
 							])
 
@@ -596,14 +603,21 @@ describe('MCP OAuth Service', () => {
 								userId: user.id,
 								organizationId: organization.id,
 								clientName,
+								redirectUri: 'https://example.com/callback',
 							})
 
 							// First exchange should succeed
-							const firstExchange = await exchangeAuthorizationCode(code)
+							const firstExchange = await exchangeAuthorizationCode(
+								code,
+								'https://example.com/callback',
+							)
 							expect(firstExchange).not.toBeNull()
 
 							// Property: Second exchange with same code should fail
-							const secondExchange = await exchangeAuthorizationCode(code)
+							const secondExchange = await exchangeAuthorizationCode(
+								code,
+								'https://example.com/callback',
+							)
 							expect(secondExchange).toBeNull()
 						} finally {
 							await prisma.mCPAccessToken.deleteMany({
@@ -1016,11 +1030,15 @@ describe('MCP OAuth Service', () => {
 						userId: user.id,
 						organizationId: organization.id,
 						clientName: 'Test Client',
+						redirectUri: 'https://example.com/callback',
 					})
 
 					expect(code).toBeTruthy()
 
-					const result = await exchangeAuthorizationCode(code)
+					const result = await exchangeAuthorizationCode(
+						code,
+						'https://example.com/callback',
+					)
 					expect(result).not.toBeNull()
 					expect(result?.access_token).toBeTruthy()
 					expect(result?.refresh_token).toBeTruthy()
@@ -1073,12 +1091,16 @@ describe('MCP OAuth Service', () => {
 						userId: user.id,
 						organizationId: organization.id,
 						clientName: 'Test Client',
+						redirectUri: 'https://example.com/callback',
 					})
 
 					// Wait for code to expire (10 minutes in real scenario, but we can't wait that long)
 					// Instead, we'll test with an invalid code
 					const invalidCode = 'invalid-code-that-does-not-exist'
-					const result = await exchangeAuthorizationCode(invalidCode)
+					const result = await exchangeAuthorizationCode(
+						invalidCode,
+						'https://example.com/callback',
+					)
 					expect(result).toBeNull()
 				} finally {
 					await prisma.mCPAuthorization.deleteMany({
@@ -1090,6 +1112,48 @@ describe('MCP OAuth Service', () => {
 					await prisma.user.delete({ where: { id: user.id } })
 				}
 			})
+
+			it('should fail if redirectUri does not match', async () => {
+				const user = await prisma.user.create({
+					data: {
+						id: 'test-user-mismatch',
+						email: 'test-mismatch@example.com',
+						username: 'test-mismatch',
+					},
+				})
+
+				const organization = await prisma.organization.create({
+					data: {
+						id: 'test-org-mismatch',
+						name: 'Test Org Mismatch',
+						slug: 'test-org-mismatch',
+					},
+				})
+
+				try {
+					const code = await createAuthorizationCode({
+						userId: user.id,
+						organizationId: organization.id,
+						clientName: 'Test Client',
+						redirectUri: 'https://example.com/callback',
+					})
+
+					const result = await exchangeAuthorizationCode(
+						code,
+						'https://evil.com/callback',
+					)
+					expect(result).toBeNull()
+				} finally {
+					await prisma.mCPAuthorization.deleteMany({
+						where: { userId: user.id, organizationId: organization.id },
+					})
+					await prisma.organization.delete({
+						where: { id: organization.id },
+					})
+					await prisma.user.delete({ where: { id: user.id } })
+				}
+			})
+
 		})
 
 		describe('Error scenarios', () => {

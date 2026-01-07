@@ -120,7 +120,11 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		// Exchange authorization code for tokens (with PKCE verification if code_verifier provided)
-		const tokenResponse = await exchangeAuthorizationCode(code, codeVerifier)
+		const tokenResponse = await exchangeAuthorizationCode(
+			code,
+			redirectUri,
+			codeVerifier,
+		)
 
 		if (!tokenResponse) {
 			return Response.json(

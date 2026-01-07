@@ -25,10 +25,13 @@ import { Link, Form, useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 import { BuildingIcon } from '@repo/ui/building-icon'
+import { GlobeIcon } from '@repo/ui/globe-icon'
 import { LogoutIcon } from './icons/logout-icon'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import { SunMoonIcon } from './icons/sun-moon-icon'
 import { UserIcon } from '@repo/ui/user-icon'
+import { useRouteLoaderData, useSearchParams } from 'react-router'
+import { type loader } from '#app/root.tsx'
 
 export function NavUser({
 	user,
@@ -84,6 +87,23 @@ export function NavUser({
 		{ value: 'dark', icon: 'moon', label: _(msg`Dark mode`) },
 		{ value: 'system', icon: 'laptop', label: _(msg`System theme`) },
 	] as const
+
+	// Language switching
+	const rootData = useRouteLoaderData<typeof loader>('root')
+	const [searchParams] = useSearchParams()
+	// Extract base language code (e.g., 'ar' from 'ar-SA')
+	const currentLocale = (rootData?.locale ?? 'en').split(/[-_]/)[0] ?? 'en'
+
+	const languageOptions = [
+		{ value: 'en', label: _(msg`English`), nativeName: 'English' },
+		{ value: 'ar', label: _(msg`Arabic`), nativeName: 'العربية' },
+	] as const
+
+	const handleLanguageChange = (newLocale: string) => {
+		const newSearchParams = new URLSearchParams(searchParams)
+		newSearchParams.set('lng', newLocale)
+		window.location.search = newSearchParams.toString()
+	}
 
 	const handleMenuItemMouseEnter = (iconKey: string) => {
 		const iconRef = iconRefs.current[iconKey]
@@ -221,6 +241,37 @@ export function NavUser({
 											{option.label}
 										</span>
 										{mode === option.value && (
+											<Icon name="check" className="ml-auto size-4" />
+										)}
+									</DropdownMenuItem>
+								))}
+							</DropdownMenuSubContent>
+						</DropdownMenuSub>
+						<DropdownMenuSub>
+							<DropdownMenuSubTrigger
+								className="gap-2"
+								onMouseEnter={() => handleMenuItemMouseEnter('language')}
+								onMouseLeave={() => handleMenuItemMouseLeave('language')}
+							>
+								<Icon name="languages" className="size-4" />
+								<Trans>Language</Trans>
+							</DropdownMenuSubTrigger>
+							<DropdownMenuSubContent>
+								{languageOptions.map((option) => (
+									<DropdownMenuItem
+										key={option.value}
+										className="gap-2"
+										onClick={(e) => {
+											e.preventDefault()
+											handleLanguageChange(option.value)
+										}}
+									>
+										<span
+											className={currentLocale === option.value ? 'font-medium' : ''}
+										>
+											{option.nativeName}
+										</span>
+										{currentLocale === option.value && (
 											<Icon name="check" className="ml-auto size-4" />
 										)}
 									</DropdownMenuItem>

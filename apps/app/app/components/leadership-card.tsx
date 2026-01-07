@@ -27,7 +27,7 @@ interface LeadershipCardProps {
 const getRankIcon = (rank: number) => {
 	switch (rank) {
 		case 1:
-			return 'crown'
+			return 'trophy'
 		case 2:
 			return 'trophy'
 		case 3:

@@ -7,6 +7,7 @@ import {
 	type IconAnimationHandle,
 	useIconAnimation,
 } from './use-icon-animation.tsx'
+import { Icon } from '@repo/ui/icon'
 
 export interface BellIconHandle extends IconAnimationHandle {}
 
@@ -28,7 +29,7 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
 
 		return (
 			<div
-				className={cn(className)}
+				className={cn(className, "text-foreground")}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				{...props}

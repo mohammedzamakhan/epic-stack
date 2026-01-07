@@ -7,17 +7,30 @@ export const REFRESH_TOKEN_EXPIRATION = 30 * 24 * 60 * 60 * 1000 // 30 days
 export const AUTHORIZATION_CODE_EXPIRATION = 10 * 60 * 1000 // 10 minutes
 
 // In-memory cache for authorization codes (in production, use Redis)
+// In-memory cache for authorization codes (in production, use Redis)
+// Using a Map with automatic cleanup to prevent memory leaks
 const authorizationCodeCache = new Map<
 	string,
 	{
 		userId: string
 		organizationId: string
 		clientName: string
+		redirectUri: string
 		expiresAt: number
 		codeChallenge?: string
 		codeChallengeMethod?: string
 	}
 >()
+
+// Clean up expired codes every minute
+setInterval(() => {
+	const now = Date.now()
+	for (const [code, entry] of authorizationCodeCache.entries()) {
+		if (entry.expiresAt < now) {
+			authorizationCodeCache.delete(code)
+		}
+	}
+}, 60 * 1000).unref() // unref to allow process to exit if this is the only thing keeping it alive
 
 // Generate cryptographically secure random token
 export function generateToken(): string {
@@ -122,12 +135,14 @@ export async function createAuthorizationCode({
 	userId,
 	organizationId,
 	clientName,
+	redirectUri,
 	codeChallenge,
 	codeChallengeMethod,
 }: {
 	userId: string
 	organizationId: string
 	clientName: string
+	redirectUri: string
 	codeChallenge?: string
 	codeChallengeMethod?: string
 }): Promise<string> {
@@ -139,6 +154,7 @@ export async function createAuthorizationCode({
 		userId,
 		organizationId,
 		clientName,
+		redirectUri,
 		expiresAt: Date.now() + AUTHORIZATION_CODE_EXPIRATION,
 		codeChallenge,
 		codeChallengeMethod,
@@ -150,12 +166,18 @@ export async function createAuthorizationCode({
 // Exchange authorization code for tokens
 export async function exchangeAuthorizationCode(
 	code: string,
+	redirectUri: string,
 	codeVerifier?: string,
 ) {
 	const codeHash = hashToken(code)
 	const authData = authorizationCodeCache.get(codeHash)
 
 	if (!authData || authData.expiresAt < Date.now()) {
+		return null
+	}
+
+	// Verify redirect URI matches
+	if (authData.redirectUri !== redirectUri) {
 		return null
 	}
 

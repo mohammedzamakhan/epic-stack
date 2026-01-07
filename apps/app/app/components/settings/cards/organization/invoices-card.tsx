@@ -7,6 +7,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import {
+	Frame,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import {
 	Item,
@@ -72,14 +79,14 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Invoices</CardTitle>
-				<CardDescription>
+		<Frame>
+			<FrameHeader>
+				<FrameTitle>Invoices</FrameTitle>
+				<FrameDescription>
 					View and download your billing invoices
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="p-0">
+				</FrameDescription>
+			</FrameHeader>
+			<FramePanel className="p-0">
 				{invoices.length === 0 ? (
 					<EmptyState
 						title="No invoices found"
@@ -153,7 +160,7 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 						))}
 					</div>
 				)}
-			</CardContent>
-		</Card>
+			</FramePanel>
+		</Frame>
 	)
 }

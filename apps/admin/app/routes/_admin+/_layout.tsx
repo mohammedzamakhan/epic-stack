@@ -38,10 +38,9 @@ export default function AdminLayout() {
 						'--sidebar-ring': '148 163 184', // slate-400
 					} as React.CSSProperties
 				}
-				className="dark:bg-muted/50"
 			>
 				<div className="flex flex-1 flex-col">
-					<div className="dark:bg-muted/50 @container/main flex flex-1 flex-col gap-2 rounded-lg md:px-2">
+					<div className="@container/main flex flex-1 flex-col gap-2 rounded-lg md:px-2">
 						<div className="container mx-auto px-4 py-8">
 							<Outlet />
 						</div>

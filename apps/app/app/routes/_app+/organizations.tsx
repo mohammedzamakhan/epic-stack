@@ -345,7 +345,7 @@ export default function OrganizationsPage() {
 							</ItemContent>
 							<ItemActions>
 								<span className="text-sm">1</span>
-								<Icon name="chevron-right" className="h-4 w-4" />
+								<Icon name="chevron-right" className="h-4 w-4 rtl:-scale-x-100" />
 							</ItemActions>
 						</Item>
 					))}

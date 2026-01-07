@@ -13,6 +13,7 @@ import {
 	checkRateLimit,
 	RATE_LIMITS,
 	createRateLimitResponse,
+	getClientIp,
 } from '#app/utils/rate-limit.server.ts'
 
 /**
@@ -252,6 +253,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		'[MCP SSE] Headers:',
 		Object.fromEntries(request.headers.entries()),
 	)
+
+	// Check rate limit for SSE connection (IP-based)
+	// Using token limits as a proxy for connection limits (20 per hour per IP)
+	// This helps prevent connection exhaustion attacks
+	const clientIp = getClientIp(request)
+	const rateLimitCheck = await checkRateLimit(
+		{ type: 'ip', value: clientIp },
+		RATE_LIMITS.token,
+	)
+
+	if (!rateLimitCheck.allowed) {
+		console.log(`[MCP SSE] Rate limit exceeded for IP: ${clientIp}`)
+		return createRateLimitResponse(rateLimitCheck.resetAt)
+	}
 
 	// Only GET requests are allowed for SSE
 	if (request.method !== 'GET') {

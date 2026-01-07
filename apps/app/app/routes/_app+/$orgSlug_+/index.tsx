@@ -138,9 +138,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				})
 			: []
 
+	// ⚡ Performance: Build a Map for O(1) lookups instead of O(n) .find() per item
+	// This reduces time complexity from O(n×m) to O(n+m) when combining user data with rankings
+	const userMap = new Map(users.map((u) => [u.id, u]))
+
 	// Combine user data with note counts and add ranking
 	const leaders = leadershipData.map((item, index) => {
-		const user = users.find((u) => u.id === item.createdById)
+		const user = userMap.get(item.createdById)
 		return {
 			id: item.createdById,
 			name: user?.name || 'Unknown User',

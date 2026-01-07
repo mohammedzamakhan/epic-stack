@@ -603,7 +603,7 @@ function Step1({ actionData }: { actionData: any }) {
 												</div>
 											)}
 										</div>
-										<div className="ml-4">
+										<div className="ml-4 rtl:mr-4">
 											<input
 												{...getInputProps(fields.logoFile, { type: 'file' })}
 												accept="image/png,image/jpeg"
@@ -738,11 +738,11 @@ function Step1({ actionData }: { actionData: any }) {
 						<ErrorList errors={form.errors} id={form.errorId} />
 
 						<div className="flex justify-end gap-4 pt-4">
-							<Button variant="outline">
+							<Button variant="outline" render={
 								<Link to="/organizations">
 									<Trans>Cancel</Trans>
 								</Link>
-							</Button>
+							}/>
 							<Button type="submit">
 								<Trans>Continue</Trans>
 							</Button>
@@ -966,9 +966,16 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 							<Select
 								name={fields.organizationSize.name}
 								defaultValue={fields.organizationSize.initialValue}
+								items={[
+									{ value: null, label: 'Select organization size' },
+									...organizationSizes.map((size) => ({
+										value: size.value,
+										label: size.label,
+									})),
+								]}
 							>
 								<SelectTrigger className="mt-1">
-									Select organization size
+									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
 									{organizationSizes.map((size) => (
@@ -996,9 +1003,16 @@ function Step4({ orgId, actionData }: { orgId: string; actionData: any }) {
 							<Select
 								name={fields.userDepartment.name}
 								defaultValue={fields.userDepartment.initialValue}
+								items={[
+									{ value: null, label: 'Select your department' },
+									...departments.map((dept) => ({
+										value: dept.value,
+										label: dept.label,
+									})),
+								]}
 							>
 								<SelectTrigger className="mt-1">
-									Select your department
+									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
 									{departments.map((dept) => (

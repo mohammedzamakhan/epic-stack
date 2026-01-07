@@ -29,6 +29,7 @@ export interface AuthorizationCodeEntry {
 	userId: string
 	organizationId: string
 	clientName: string
+	redirectUri: string
 	expiresAt: number
 	codeChallenge?: string
 	codeChallengeMethod?: 'S256' | 'plain'

@@ -79,7 +79,8 @@
     "./theme": "./utils/theme.ts",
     "./client-hints": "./utils/client-hints.tsx",
     "./use-mobile": "./utils/use-mobile.ts",
-    "./logo": "./components/logo.tsx"
+    "./logo": "./components/logo.tsx",
+    "./frame": "./components/frame.tsx"
   },
   "files": [
     "dist/**"

@@ -12,6 +12,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import {
+	Frame,
+	FrameAction,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { Checkbox } from '@repo/ui/checkbox'
 import {
 	Dialog,
@@ -861,17 +869,17 @@ function AuthorizedClientsCard({
 	onRevokeClick: (authorizationId: string, clientName: string) => void
 }) {
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
+		<Frame>
+			<FrameHeader>
+				<FrameTitle className="flex items-center gap-2">
 					<Icon name="shield-check" className="h-5 w-5" />
 					<Trans>Authorized Clients</Trans>
-				</CardTitle>
-				<CardDescription>
+				</FrameTitle>
+				<FrameDescription>
 					<Trans>MCP clients authorized to access your organization data</Trans>
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="p-0">
+				</FrameDescription>
+			</FrameHeader>
+			<FramePanel className="p-0">
 				{authorizations.length === 0 ? (
 					<EmptyState
 						title={t`No clients have been authorized yet`}
@@ -952,8 +960,8 @@ function AuthorizedClientsCard({
 						</TableBody>
 					</Table>
 				)}
-			</CardContent>
-		</Card>
+			</FramePanel>
+		</Frame>
 	)
 }
 

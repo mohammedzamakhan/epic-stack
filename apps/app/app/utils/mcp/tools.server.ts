@@ -139,7 +139,7 @@ registerTool({
 				content: [
 					{
 						type: 'text',
-						text: `Error searching for users: ${errorMessage}`,
+						text: 'Error searching for users: An internal error occurred',
 					},
 				],
 			}
@@ -263,7 +263,7 @@ registerTool({
 				content: [
 					{
 						type: 'text',
-						text: `Error retrieving notes: ${errorMessage}`,
+						text: 'Error retrieving notes: An internal error occurred',
 					},
 				],
 			}
