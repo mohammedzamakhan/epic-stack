@@ -1,0 +1,53 @@
+---
+import { fetchHeaderData } from '../lib/fetchHeader'
+import type { HeaderNavItem } from '../types/header'
+import MegaMenu from './MegaMenu.astro'
+
+interface Props {
+  isMobile?: boolean
+}
+
+const { isMobile = false } = Astro.props
+
+const headerData = await fetchHeaderData()
+const navItems: HeaderNavItem[] = headerData?.navItems || []
+---
+
+<nav class={isMobile ? 'flex flex-col space-y-1' : 'flex gap-6 items-center'}>
+  {
+    navItems.map((item) => {
+      if (item.menuType === 'megaMenu' && item.megaMenuColumns) {
+        return (
+          <MegaMenu
+            menuLabel={item.menuLabel}
+            columns={item.megaMenuColumns}
+            isMobile={isMobile}
+          />
+        )
+      }
+
+      // Simple link
+      const link = item.link
+      if (!link) return null
+
+      const href =
+        link.type === 'custom'
+          ? link.url || '#'
+          : `/`
+      const target = link.newTab ? '_blank' : undefined
+
+      return (
+        <a
+          href={href}
+          target={target}
+          class={isMobile 
+            ? 'block text-lg py-2 text-foreground hover:text-primary transition-colors'
+            : 'text-sm font-medium hover:text-primary transition-colors'
+          }
+        >
+          {item.menuLabel}
+        </a>
+      )
+    })
+  }
+</nav>

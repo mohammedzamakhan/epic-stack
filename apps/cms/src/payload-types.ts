@@ -2339,7 +2339,15 @@ export interface Header {
   id: string;
   navItems?:
     | {
-        link: {
+        /**
+         * Choose between a simple link or a mega menu dropdown
+         */
+        menuType: 'link' | 'megaMenu';
+        /**
+         * The text shown in the navigation bar
+         */
+        menuLabel: string;
+        link?: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
@@ -2354,6 +2362,42 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        /**
+         * Add columns for the mega menu. Each column can contain multiple links.
+         */
+        megaMenuColumns?:
+          | {
+              /**
+               * Title displayed at the top of this column
+               */
+              columnTitle: string;
+              /**
+               * Optional description text below the column title
+               */
+              columnDescription?: string | null;
+              links?:
+                | {
+                    link: {
+                      type?: ('reference' | 'custom') | null;
+                      newTab?: boolean | null;
+                      reference?:
+                        | ({
+                            relationTo: 'pages';
+                            value: string | Page;
+                          } | null)
+                        | ({
+                            relationTo: 'posts';
+                            value: string | Post;
+                          } | null);
+                      url?: string | null;
+                      label: string;
+                    };
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -2397,6 +2441,8 @@ export interface HeaderSelect<T extends boolean = true> {
   navItems?:
     | T
     | {
+        menuType?: T;
+        menuLabel?: T;
         link?:
           | T
           | {
@@ -2405,6 +2451,27 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+            };
+        megaMenuColumns?:
+          | T
+          | {
+              columnTitle?: T;
+              columnDescription?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
             };
         id?: T;
       };

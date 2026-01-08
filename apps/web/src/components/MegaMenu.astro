@@ -1,0 +1,243 @@
+---
+import type { HeaderNavItem } from '../types/header'
+
+interface Props {
+  menuLabel: string
+  columns: HeaderNavItem['megaMenuColumns']
+  isMobile?: boolean
+}
+
+const { menuLabel, columns = [], isMobile = false } = Astro.props
+const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
+---
+
+{isMobile ? (
+  <!-- Mobile Accordion Style -->
+  <div class="mobile-mega-menu">
+    <button
+      class="mobile-mega-menu-trigger w-full flex items-center justify-between text-lg py-2 text-foreground hover:text-primary transition-colors"
+      aria-expanded="false"
+      aria-controls={uniqueId}
+      data-target={uniqueId}
+    >
+      <span>{menuLabel}</span>
+      <svg
+        class="h-4 w-4 text-muted-foreground transition-transform mobile-chevron"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+    
+    <div
+      id={uniqueId}
+      class="mobile-mega-menu-content hidden pl-4 pt-2 pb-4 space-y-4"
+    >
+      {
+        columns.map((column) => (
+          <div class="space-y-2">
+            <h4 class="text-sm font-semibold text-foreground">
+              {column.columnTitle}
+            </h4>
+            {column.columnDescription && (
+              <p class="text-xs text-muted-foreground mb-2">
+                {column.columnDescription}
+              </p>
+            )}
+            <ul class="space-y-1.5">
+              {column.links.map((linkItem) => {
+                const link = linkItem.link
+                const href =
+                  link.type === 'custom'
+                    ? link.url || '#'
+                    : `/`
+                const target = link.newTab ? '_blank' : undefined
+
+                return (
+                  <li>
+                    <a
+                      href={href}
+                      target={target}
+                      class="block py-2 px-3 hover:bg-accent rounded-md text-sm text-foreground hover:text-primary transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+) : (
+  <!-- Desktop Dropdown Style -->
+  <div class="relative group">
+    <button
+      class="mega-menu-trigger flex items-center space-x-1 text-sm font-medium hover:text-primary transition-colors"
+      aria-expanded="false"
+      aria-haspopup="true"
+    >
+      <span>{menuLabel}</span>
+      <svg
+        class="h-3 w-3 text-muted-foreground transition-transform group-hover:rotate-180"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+
+    <!-- Mega Menu Panel -->
+    <div
+      class="mega-menu-panel absolute top-full left-0 mt-2 bg-background border rounded-lg shadow-xl opacity-0 invisible transition-all duration-200 z-50 min-w-max"
+    >
+      <div class="p-6">
+        <div class="grid gap-8" style={`grid-template-columns: repeat(${Math.min(columns.length, 4)}, minmax(200px, 1fr))`}>
+          {
+            columns.map((column) => (
+              <div class="space-y-3">
+                <div>
+                  <h3 class="text-sm font-semibold text-foreground mb-1">
+                    {column.columnTitle}
+                  </h3>
+                  {column.columnDescription && (
+                    <p class="text-xs text-muted-foreground mb-3">
+                      {column.columnDescription}
+                    </p>
+                  )}
+                </div>
+                <ul class="space-y-2">
+                  {column.links.map((linkItem) => {
+                    const link = linkItem.link
+                    const href =
+                      link.type === 'custom'
+                        ? link.url || '#'
+                        : `/`
+                    const target = link.newTab ? '_blank' : undefined
+
+                    return (
+                      <li>
+                        <a
+                          href={href}
+                          target={target}
+                          class="block p-2 hover:bg-accent rounded-md text-sm text-foreground hover:text-primary transition-colors"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Desktop styles */
+  .group:hover .mega-menu-panel,
+  .mega-menu-panel:hover {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Mobile accordion animation */
+  .mobile-mega-menu-trigger[aria-expanded="true"] .mobile-chevron {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script>
+  // Enhanced mega menu interactions for desktop
+  document.addEventListener('DOMContentLoaded', () => {
+    const triggers = document.querySelectorAll('.mega-menu-trigger')
+
+    triggers.forEach((trigger) => {
+      const panel = trigger.parentElement?.querySelector('.mega-menu-panel')
+
+      if (!panel) return
+
+      // Keyboard accessibility
+      trigger.addEventListener('keydown', (e) => {
+        const keyEvent = e as KeyboardEvent
+        if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+          keyEvent.preventDefault()
+          const isExpanded = trigger.getAttribute('aria-expanded') === 'true'
+          trigger.setAttribute('aria-expanded', String(!isExpanded))
+          panel.classList.toggle('opacity-0')
+          panel.classList.toggle('invisible')
+        }
+
+        if (keyEvent.key === 'Escape') {
+          trigger.setAttribute('aria-expanded', 'false')
+          panel.classList.add('opacity-0', 'invisible')
+          ;(trigger as HTMLElement).focus()
+        }
+      })
+
+      // Update aria-expanded on hover
+      trigger.parentElement?.addEventListener('mouseenter', () => {
+        trigger.setAttribute('aria-expanded', 'true')
+      })
+
+      trigger.parentElement?.addEventListener('mouseleave', () => {
+        trigger.setAttribute('aria-expanded', 'false')
+      })
+    })
+
+    // Close mega menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.mega-menu-trigger') && !target.closest('.mega-menu-panel')) {
+        triggers.forEach((trigger) => {
+          trigger.setAttribute('aria-expanded', 'false')
+          const panel = trigger.parentElement?.querySelector('.mega-menu-panel')
+          panel?.classList.add('opacity-0', 'invisible')
+        })
+      }
+    })
+    
+    // Mobile accordion functionality
+    const mobileTriggers = document.querySelectorAll('.mobile-mega-menu-trigger')
+    
+    mobileTriggers.forEach((trigger) => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault()
+        const targetId = trigger.getAttribute('data-target')
+        const content = document.getElementById(targetId!)
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true'
+        
+        // Close other open mega menus
+        mobileTriggers.forEach((otherTrigger) => {
+          if (otherTrigger !== trigger) {
+            otherTrigger.setAttribute('aria-expanded', 'false')
+            const otherId = otherTrigger.getAttribute('data-target')
+            const otherContent = document.getElementById(otherId!)
+            otherContent?.classList.add('hidden')
+          }
+        })
+        
+        // Toggle current menu
+        trigger.setAttribute('aria-expanded', String(!isExpanded))
+        content?.classList.toggle('hidden')
+      })
+    })
+  })
+</script>

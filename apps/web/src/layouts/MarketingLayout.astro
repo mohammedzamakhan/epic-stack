@@ -1,7 +1,7 @@
 ---
 import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from '~/components/GridDesign.astro'
-import ThemeSwitcher from '~/components/ThemeSwitcher.astro'
+import Header from '~/components/Header.astro'
 import '../styles/tailwind.css'
 import Button from './../components/ui/Button.astro'
 import { getThemeFromCookie } from '~/utils/theme'
@@ -44,201 +44,7 @@ const theme = getThemeFromCookie(cookieHeader)
 		<slot name="head" />
 	</head>
 	<body>
-		<nav class="border-b text-foreground bg-background">
-			<header
-				class="fixed top-0 inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 m-auto"
-			>
-				<GridDesign />
-				<div
-					class="container relative flex h-16 items-center justify-between py-4 md:px-10 mx-auto"
-				>
-					<div class="flex items-center space-x-12 relative z-10">
-						<a href="/" class="flex items-center space-x-2">
-							<div class="h-8 rounded flex gap-2 items-center justify-center">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									height="18"
-									width="18"
-									viewBox="0 0 18 18"
-									><title>rocket</title><g class="nc-icon-wrapper"
-										><path
-											d="M3.504,17H1.75c-.414,0-.75-.336-.75-.75v-1.754c0-.981,.578-1.877,1.473-2.282,.375-.171,.821-.004,.992,.374,.171,.377,.003,.822-.374,.992-.359,.163-.591,.522-.591,.916v1.004h1.004c.394,0,.753-.232,.916-.591,.17-.377,.616-.544,.992-.374,.377,.171,.545,.615,.374,.992-.405,.895-1.301,1.473-2.282,1.473Z"
-											data-color="color-2"></path><path
-											d="M13.775,10.712c3.636-3.994,3.236-8.497,3.175-9.006-.041-.345-.312-.616-.657-.657-.511-.063-5.011-.461-9.006,3.175l-1.013-.181c-1.536-.273-3.107,.37-4.008,1.641L.388,8.336c-.191,.27-.183,.632,.019,.893,.146,.188,.366,.291,.593,.291,.09,0,.181-.016,.268-.049,.013-.005,1.068-.391,2.636-.329-.17,.438-.291,.825-.377,1.139-.071,.26,.002,.538,.193,.729l3.272,3.272c.143,.143,.334,.22,.53,.22,.066,0,.133-.009,.198-.027,.313-.086,.7-.207,1.137-.377,.058,1.555-.324,2.625-.328,2.636-.118,.309-.02,.658,.241,.86,.135,.104,.297,.157,.459,.157,.152,0,.304-.046,.434-.138l2.654-1.88c1.27-.899,1.913-2.471,1.639-4.003l-.182-1.016Zm-2.525-5.712c.966,0,1.75,.783,1.75,1.75s-.784,1.75-1.75,1.75-1.75-.783-1.75-1.75,.784-1.75,1.75-1.75ZM2.7,7.668l.791-1.116c.566-.799,1.551-1.206,2.521-1.032l.034,.006c-.615,.74-1.106,1.482-1.477,2.173-.688-.067-1.331-.079-1.868-.032Zm8.751,6.84l-1.119,.792c.048-.536,.036-1.18-.032-1.868,.691-.371,1.433-.862,2.173-1.477l.007,.038c.172,.963-.232,1.95-1.03,2.515Z"
-											fill="currentColor"></path></g
-									></svg
-								>
-								<span class="font-semibold text-lg">{brand.name}</span>
-							</div>
-						</a>
-
-						<!-- Desktop Navigation -->
-						<div class="hidden lg:flex items-center space-x-8">
-							<!-- <div class="relative">
-								<button
-									id="operation-types-trigger"
-									class="flex items-center space-x-1 text-sm font-medium hover:text-primary transition-colors"
-								>
-									<span>Operation Types</span>
-									<svg
-										class="h-4 w-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M19 9l-7 7-7-7"></path>
-									</svg>
-								</button>
-								<div
-									id="operation-types-content"
-									class="absolute top-full left-0 mt-2 w-64 bg-background border rounded-md shadow-lg opacity-0 invisible transition-all duration-200 z-50"
-								>
-									<div class="p-4">
-										<div class="grid gap-2">
-											<a
-												href="/operations/brokerages"
-												class="block p-2 hover:bg-accent rounded-md"
-											>
-												Freight Brokerages
-											</a>
-											<a
-												href="/operations/forwarders"
-												class="block p-2 hover:bg-accent rounded-md"
-											>
-												Freight Forwarders
-											</a>
-											<a
-												href="/operations/carriers"
-												class="block p-2 hover:bg-accent rounded-md"
-											>
-												Carriers
-											</a>
-											<a
-												href="/operations/shippers"
-												class="block p-2 hover:bg-accent rounded-md"
-											>
-												Shippers
-											</a>
-										</div>
-									</div>
-								</div>
-							</div> -->
-
-							<a
-								href="/blog"
-								class="text-sm font-medium hover:text-primary transition-colors"
-							>
-								Blog
-							</a>
-							<a
-								href="/pricing"
-								class="text-sm font-medium hover:text-primary transition-colors"
-							>
-								Pricing
-							</a>
-							<a
-								href={docsUrl}
-								target="_blank"
-								class="text-sm font-medium hover:text-primary transition-colors"
-							>
-								Docs
-							</a>
-						</div>
-					</div>
-
-					<div class="hidden lg:flex items-center gap-4 relative z-10">
-						<ThemeSwitcher />
-						<Button
-							href={demoUrl}
-							target="_blank"
-							size="xl"
-						>
-							Get started
-						</Button>
-					</div>
-
-					<!-- Mobile Navigation -->
-					<button
-						id="mobile-menu-trigger"
-						class="lg:hidden inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative z-10"
-					>
-						<svg
-							class="h-6 w-6"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 6h16M4 12h16M4 18h16"></path>
-						</svg>
-					</button>
-				</div>
-			</header>
-
-			<!-- Mobile Menu Overlay -->
-			<div
-				id="mobile-menu-overlay"
-				class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300 lg:hidden"
-			>
-				<div
-					id="mobile-menu-content"
-					class="fixed right-0 top-0 h-full w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300"
-				>
-					<!-- Close Button -->
-					<button
-						id="mobile-menu-close"
-						class="absolute top-4 right-4 p-2 rounded-md hover:bg-accent transition-colors"
-						aria-label="Close menu"
-					>
-						<svg
-							class="h-5 w-5"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"></path>
-						</svg>
-					</button>
-
-					<div class="flex flex-col space-y-6 p-6 mt-8">
-						<div class="space-y-4">
-							<a href="/blog" class="block text-lg py-2"> Blog </a>
-							<a href="/pricing" class="block text-lg py-2"> Pricing </a>
-							<a
-								href={docsUrl}
-								target="_blank"
-								class="block text-lg py-2"
-							>
-								Docs
-							</a>
-						</div>
-
-						<div class="space-y-3 pt-6 border-t border-border/50">
-							<div class="flex items-center gap-3">
-								<ThemeSwitcher />
-								<a
-									href={demoUrl}
-									class="flex-1 inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-1 focus-visible:outline-none active:scale-97 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 border-[0.5px] border-white/25 shadow-sm ring-1 shadow-black/10 ring-[color-mix(in_oklab,var(--foreground)_15%,var(--primary))] h-9 px-4 py-2"
-								>
-									Get started
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</nav>
+		<Header />
 		<main class="mt-16 max-w-screen">
 			<slot />
 		</main>
@@ -253,10 +59,10 @@ const theme = getThemeFromCookie(cookieHeader)
 					<!-- Top Section -->
 					<div class="mb-12 md:mb-16">
 						<div
-							class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8"
+							class="flex flex-col lg:flex-row lg:items-end lg:justify-between"
 						>
 							<!-- Logo -->
-							<div class="flex items-center space-x-2">
+							<div class="flex flex-2/3 items-center space-x-2">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									height="18"
@@ -276,7 +82,7 @@ const theme = getThemeFromCookie(cookieHeader)
 							</div>
 
 							<!-- CTA Section -->
-							<div class="lg:max-w-lg">
+							<div class="flex-1/3 pt-4 lg:pt-0">
 								<h2
 									class="text-2xl md:text-3xl font-title text-foreground mb-4 tracking-tight"
 								>
@@ -310,7 +116,7 @@ const theme = getThemeFromCookie(cookieHeader)
 
 					<!-- Navigation -->
 					<nav
-						class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-8 gap-x-4 mb-12 border-t border-border/50 pt-12"
+						class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-8 mb-12 border-t border-border/50 pt-12"
 					>
 						<!-- Home -->
 						<div>
