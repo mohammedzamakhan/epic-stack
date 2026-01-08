@@ -77,7 +77,6 @@
     "./nav-main": "./components/nav-main.tsx",
     "./not-found-page": "./components/not-found-page.tsx",
     "./cn": "./lib/utils.ts",
-    "./theme": "./utils/theme.ts",
     "./client-hints": "./utils/client-hints.tsx",
     "./use-mobile": "./utils/use-mobile.ts",
     "./logo": "./components/logo.tsx",

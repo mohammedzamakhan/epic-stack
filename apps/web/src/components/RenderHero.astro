@@ -79,7 +79,7 @@ const renderLexicalContent = (content: any, textAlign: string) => {
 						return child.text || ''
 					})
 					.join('')
-				return `<p class="text-xl text-muted-foreground leading-relaxed max-w-[600px] ${alignClass}">${text}</p>`
+				return `<p class="text-xl leading-relaxed max-w-[600px] ${alignClass}">${text}</p>`
 			}
 			if (node.type === 'heading' && node.children) {
 				const text = node.children
@@ -184,11 +184,11 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 
 			{!isClosedBeta && links && links.length > 0 && (
 				<div class={buttonsContainerClasses}>
-					<Button href={links[0]?.url || '#'} variant="default" size="lg">
+					<Button href={links[0]?.url || '#'} variant="default" size="xl">
 						{links[0]?.link?.label || 'Get started'}
 					</Button>
 					{links[1] && (
-						<Button href={links[1]?.url || '#'} variant="outline" size="lg">
+						<Button href={links[1]?.url || '#'} variant="outline" size="xl">
 							{links[1]?.link?.label || 'Learn more'}
 						</Button>
 					)}

@@ -1,4 +1,5 @@
 ---
+import { cn } from '../../lib/utils'
 interface Props {
 	variant?:
 		| 'default'
@@ -7,7 +8,7 @@ interface Props {
 		| 'secondary'
 		| 'ghost'
 		| 'link'
-	size?: 'xs' | 'sm' | 'default' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
+	size?: 'xs' | 'sm' | 'default' | 'lg' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
 	href?: string
 	class?: string
 	disabled?: boolean
@@ -52,6 +53,7 @@ const sizeClasses = {
 	xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
 	sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
 	lg: 'h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
+	xl: 'h-11 gap-2 px-4 text-md has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5',
 	icon: 'size-8',
 	'icon-xs':
 		"size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
@@ -74,7 +76,7 @@ const Element = href ? 'a' : 'button'
 
 <Element
 	data-slot="button"
-	class={classes}
+	class={cn(classes)}
 	href={href}
 	disabled={disabled && !href ? disabled : undefined}
 	type={!href ? type : undefined}

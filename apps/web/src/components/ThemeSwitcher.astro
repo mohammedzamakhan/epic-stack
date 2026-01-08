@@ -1,0 +1,112 @@
+---
+// Theme Switcher Component for Astro
+// Toggles between light and dark themes using the en_theme cookie
+---
+
+<button
+	id="theme-switcher"
+	class="flex size-8 cursor-pointer items-center justify-center hover:bg-accent rounded-md transition-colors"
+	aria-label="Toggle theme"
+	type="button"
+>
+	<svg
+		id="theme-icon-sun"
+		class="h-5 w-5 hidden"
+		fill="none"
+		stroke="currentColor"
+		viewBox="0 0 24 24"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+			d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+		></path>
+	</svg>
+	<svg
+		id="theme-icon-moon"
+		class="h-5 w-5 hidden"
+		fill="none"
+		stroke="currentColor"
+		viewBox="0 0 24 24"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+			d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+		></path>
+	</svg>
+</button>
+
+<script>
+	const THEME_COOKIE_NAME = 'en_theme'
+
+	function getCookie(name: string): string | null {
+		const value = `; ${document.cookie}`
+		const parts = value.split(`; ${name}=`)
+		if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+		return null
+	}
+
+	function setCookie(name: string, value: string) {
+		const rootApp = import.meta.env.PUBLIC_ROOT_APP
+		const domain = rootApp ? `.${rootApp}` : ''
+		const domainAttr = domain ? `; domain=${domain}` : ''
+		const maxAge = 31536000 // 1 year
+		document.cookie = `${name}=${value}; path=/${domainAttr}; max-age=${maxAge}; samesite=lax`
+	}
+
+	function getCurrentTheme(): 'light' | 'dark' {
+		const htmlElement = document.documentElement
+		return htmlElement.classList.contains('dark') ? 'dark' : 'light'
+	}
+
+	function updateThemeIcon(theme: 'light' | 'dark') {
+		const sunIcon = document.getElementById('theme-icon-sun')
+		const moonIcon = document.getElementById('theme-icon-moon')
+
+		if (theme === 'dark') {
+			sunIcon?.classList.add('hidden')
+			moonIcon?.classList.remove('hidden')
+		} else {
+			sunIcon?.classList.remove('hidden')
+			moonIcon?.classList.add('hidden')
+		}
+	}
+
+	function toggleTheme() {
+		const currentTheme = getCurrentTheme()
+		const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
+
+		// Update HTML class
+		document.documentElement.classList.remove(currentTheme)
+		document.documentElement.classList.add(newTheme)
+
+		// Update cookie
+		setCookie(THEME_COOKIE_NAME, newTheme)
+
+		// Update icon
+		updateThemeIcon(newTheme)
+	}
+
+	// Initialize on page load
+	document.addEventListener('DOMContentLoaded', () => {
+		const theme = getCurrentTheme()
+		updateThemeIcon(theme)
+
+		const button = document.getElementById('theme-switcher')
+		button?.addEventListener('click', toggleTheme)
+	})
+
+	// Re-initialize on view transitions (if using Astro view transitions)
+	document.addEventListener('astro:page-load', () => {
+		const theme = getCurrentTheme()
+		updateThemeIcon(theme)
+
+		const button = document.getElementById('theme-switcher')
+		button?.addEventListener('click', toggleTheme)
+	})
+</script>

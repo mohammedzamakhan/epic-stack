@@ -89,6 +89,7 @@
     "npm": "10.9.0"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "motion": "^12.23.1",
     "react-image-crop": "^11.0.10",
     "zod": "^3.25.76"

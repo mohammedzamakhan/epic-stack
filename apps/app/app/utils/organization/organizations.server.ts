@@ -165,6 +165,80 @@ export async function setUserDefaultOrganization(
 	return getUserDefaultOrganization(userId)
 }
 
+/**
+ * Get user organizations with optional slug-based organization switching
+ * Handles caching and automatic organization switching if orgSlug differs from current default
+ *
+ * @param userId - User ID
+ * @param orgSlug - Optional organization slug to switch to
+ * @returns User organizations with current organization set based on orgSlug or default
+ */
+export async function getUserOrganizationsWithSlugHandling(
+	userId: string,
+	orgSlug: string | undefined,
+) {
+	const { cache, cachified } = await import('../cache.server')
+
+	// Promise to fetch user organizations
+	const userOrganizationsPromise = (async () => {
+		try {
+			const orgs = await getUserOrganizations(userId, true)
+			const defaultOrg = await getUserDefaultOrganization(userId)
+			return {
+				organizations: orgs,
+				currentOrganization: defaultOrg || orgs[0],
+			}
+		} catch (error) {
+			console.error('Failed to load user organizations', error)
+			return undefined
+		}
+	})()
+
+	// Load and cache user organizations
+	let userOrganizations = await cachified({
+		key: `user-organizations:${userId}`,
+		cache,
+		ttl: 1000 * 60 * 2, // 2 minutes
+		getFreshValue: () => userOrganizationsPromise,
+	})
+
+	// Handle organization switching if orgSlug differs from current
+	if (
+		userOrganizations?.currentOrganization &&
+		orgSlug &&
+		userOrganizations.currentOrganization.organization.slug !== orgSlug
+	) {
+		const org = userOrganizations.organizations.find(
+			(org) => org.organization.slug === orgSlug,
+		)
+
+		if (!org) {
+			throw new Response('Organization not found', { status: 404 })
+		}
+
+		// Update default organization in database and get complete org data with userCount
+		await setUserDefaultOrganization(userId, org.organization.id)
+		const updatedCurrentOrg = await getUserDefaultOrganization(userId)
+
+		// Update in-memory state
+		userOrganizations = {
+			organizations: userOrganizations.organizations,
+			currentOrganization: updatedCurrentOrg || undefined,
+		}
+
+		// Update cache with new value
+		await cache.set(`user-organizations:${userId}`, {
+			metadata: {
+				createdTime: Date.now(),
+				ttl: 1000 * 60 * 2,
+			},
+			value: userOrganizations,
+		})
+	}
+
+	return userOrganizations
+}
+
 export async function createOrganization({
 	name,
 	slug,
