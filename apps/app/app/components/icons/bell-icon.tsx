@@ -1,13 +1,12 @@
 'use client'
 
-import  { type Variants, motion  } from 'motion/react'
-import  { type HTMLAttributes, forwardRef  } from 'react'
+import { type Variants, motion } from 'motion/react'
+import { type HTMLAttributes, forwardRef } from 'react'
 import { cn } from '#app/utils/misc.tsx'
 import {
 	type IconAnimationHandle,
 	useIconAnimation,
 } from './use-icon-animation.tsx'
-import { Icon } from '@repo/ui/icon'
 
 export interface BellIconHandle extends IconAnimationHandle {}
 
@@ -29,7 +28,7 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
 
 		return (
 			<div
-				className={cn(className, "text-foreground")}
+				className={cn(className)}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				{...props}

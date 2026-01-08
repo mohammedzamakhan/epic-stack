@@ -398,7 +398,7 @@ function NotificationBellComponent() {
 												/>
 											</Button>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent>
+										<DropdownMenuContent style={{ width: 'max-content' }}>
 											<DropdownMenuItem
 												onClick={() => handleFilterChange('all')}
 											>
@@ -421,7 +421,10 @@ function NotificationBellComponent() {
 											</span>
 										</Button>
 									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
+									<DropdownMenuContent
+										align="end"
+										style={{ width: 'max-content' }}
+									>
 										<DropdownMenuItem onClick={handleReadAll}>
 											<Icon name="check-circled" className="mr-2 h-4 w-4" />
 											<Trans>Mark all as read</Trans>

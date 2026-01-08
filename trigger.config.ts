@@ -2,7 +2,7 @@ import { ffmpeg, additionalFiles } from '@trigger.dev/build/extensions/core'
 import { defineConfig } from '@trigger.dev/sdk/v3'
 
 export default defineConfig({
-	project: 'proj_bkbgkmawrweyhsrhoaur',
+	project: process.env.TRIGGER_PROJECT_ID!,
 	build: {
 		extensions: [
 			ffmpeg(),

@@ -49,6 +49,7 @@ import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
 import { storeUtmParams } from './utils/utm.server.ts'
+import { setUserDefaultOrganization } from './utils/organization/organizations.server'
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -217,6 +218,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 				getFreshValue: () => userOrganizationsPromise,
 			})
 		: undefined
+
+	if (user && userOrganizations?.currentOrganization) {
+		await setUserDefaultOrganization(
+			user.id,
+			userOrganizations.currentOrganization.organization.id,
+		)
+	}
 
 	const favoriteNotes = user
 		? await cachified({

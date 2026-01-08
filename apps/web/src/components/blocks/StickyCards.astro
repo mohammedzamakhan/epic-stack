@@ -96,7 +96,12 @@ const {
 
 		<!-- Sticky Cards Layout - Inspired by Webflow approach -->
 		<div class="relative pt-[10vh]">
-			<div class="absolute inset-0 bg-[repeating-linear-gradient(135deg,rgb(0,0,0),rgb(68,85,119)_1px,transparent_1px,transparent_5px)]" />
+			<div
+				class="absolute inset-0 z-0 w-full dot-pattern"
+				style={{
+					backgroundSize: "20px 20px",
+				}}
+			/>
 			<div class="max-w-6xl mx-auto relative z-10">
 				<div class="grid grid-cols-1 gap-0 ">
 					{cards.map((card, index) => {
@@ -125,14 +130,12 @@ const {
 											<Button 
 												href={card.primaryButtonUrl}
 												variant="outline"
-												size="md"
 											>
 												{card.primaryButtonText}
 											</Button>
 											<Button 
 												href={card.secondaryButtonUrl}
 												variant="ghost"
-												size="md"
 												class="group"
 											>
 												<span>{card.secondaryButtonText}</span>
@@ -172,6 +175,15 @@ const {
 </section>
 
 <style>
+	.dot-pattern {
+		--dot-color: rgba(0, 0, 0, 0.35);
+		background-image: radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
+	}
+	
+	:global(.dark) .dot-pattern {
+		--dot-color: rgba(255, 255, 255, 0.35);
+	}
+
 	/* Mobile-first: disable sticky on mobile */
 	@media (max-width: 1023px) {
 		.sticky-card {

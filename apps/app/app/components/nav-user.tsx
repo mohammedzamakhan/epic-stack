@@ -24,6 +24,7 @@ import { useRef } from 'react'
 import { Link, Form, useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
+import { LanguagesIcon } from '@repo/ui/languages-icon'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { LogoutIcon } from './icons/logout-icon'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
@@ -252,7 +253,10 @@ export function NavUser({
 								onMouseEnter={() => handleMenuItemMouseEnter('language')}
 								onMouseLeave={() => handleMenuItemMouseLeave('language')}
 							>
-								<Icon name="languages" className="size-4" />
+								<LanguagesIcon
+									size={16}
+									ref={(ref: any) => (iconRefs.current['language'] = ref)}
+								/>
 								<Trans>Language</Trans>
 							</DropdownMenuSubTrigger>
 							<DropdownMenuSubContent>

@@ -66,9 +66,9 @@ const {
 
 		{
 			posts.length > 0 && (
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-[1px]">
 					{posts.map((post) => (
-						<article class="group bg-muted dark:bg-background p-1 transition-all duration-200 hover:shadow-lg">
+						<article class="group bg-muted dark:bg-background transition-all duration-200 hover:shadow-lg">
 							<div class="bg-card ring-border ring-1 shadow-sm overflow-hidden flex flex-col h-full">
 								{post.meta?.image && (
 									<div class="aspect-video overflow-hidden border-b border-border/50">

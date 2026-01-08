@@ -51,7 +51,10 @@ import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,
 } from '#app/utils/organization/invitation.server.ts'
-import { createOrganization } from '#app/utils/organization/organizations.server.ts'
+import {
+	createOrganization,
+	setUserDefaultOrganization,
+} from '#app/utils/organization/organizations.server.ts'
 import {
 	getTrialConfig,
 	getPlansAndPrices,
@@ -59,6 +62,7 @@ import {
 } from '#app/utils/payments.server.ts'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
+import { invalidateUserOrganizationsCache } from '#app/utils/cache.server.ts'
 
 // Photo upload schema
 const MAX_SIZE = 1024 * 1024 * 5 // 5MB
@@ -379,6 +383,9 @@ export async function action({ request }: ActionFunctionArgs) {
 				where: { id: orgId },
 				select: { slug: true },
 			})
+
+			await invalidateUserOrganizationsCache(userId)
+			await setUserDefaultOrganization(userId, orgId)
 
 			return redirect(`/${organization?.slug}?celebrate=true`)
 		} catch (error) {
@@ -738,11 +745,14 @@ function Step1({ actionData }: { actionData: any }) {
 						<ErrorList errors={form.errors} id={form.errorId} />
 
 						<div className="flex justify-end gap-4 pt-4">
-							<Button variant="outline" render={
-								<Link to="/organizations">
-									<Trans>Cancel</Trans>
-								</Link>
-							}/>
+							<Button
+								variant="outline"
+								render={
+									<Link to="/organizations">
+										<Trans>Cancel</Trans>
+									</Link>
+								}
+							/>
 							<Button type="submit">
 								<Trans>Continue</Trans>
 							</Button>

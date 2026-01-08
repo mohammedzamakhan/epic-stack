@@ -143,7 +143,7 @@ const videoClasses = [
 ].filter(Boolean).join(' ')
 
 const buttonsContainerClasses = [
-	'flex flex-wrap gap-4 mt-2',
+	'flex flex-wrap gap-1 mt-2',
 	textPosition === 'center' ? 'justify-center' : 'justify-start',
 ].filter(Boolean).join(' ')
 
@@ -172,7 +172,7 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 		<div class={contentClasses}>
 			<div class="space-y-6">
 				<Badge variant="outline" size="sm">
-					// BY THE MAKERS OF BUGBASHES.DEV
+					BY THE MAKERS OF BUGBASHES.DEV
 				</Badge>
 				{richText && (
 					<div

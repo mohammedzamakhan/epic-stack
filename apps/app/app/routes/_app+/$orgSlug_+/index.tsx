@@ -10,7 +10,7 @@ import {
 import { prisma } from '@repo/database'
 import { PageTitle } from '@repo/ui/page-title'
 import confetti from 'canvas-confetti'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
 	type ActionFunctionArgs,
 	Form,
@@ -231,43 +231,48 @@ export default function OrganizationDashboard() {
 	const [searchParams] = useSearchParams()
 	const navigate = useNavigate()
 
+	const celebrationStartedRef = useRef(false)
+
 	// Trigger confetti animation when celebrate param is present
 	useEffect(() => {
 		const shouldCelebrate = searchParams.get('celebrate') === 'true'
 
-		if (shouldCelebrate) {
+		if (shouldCelebrate && !celebrationStartedRef.current) {
+			celebrationStartedRef.current = true
+
 			// Fire confetti from the top
 			const duration = 3000
 			const animationEnd = Date.now() + duration
 			const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }
 
-			const interval = setInterval(async () => {
+			const interval = setInterval(() => {
 				const timeLeft = animationEnd - Date.now()
 
 				if (timeLeft <= 0) {
 					clearInterval(interval)
+
+					// Clean up query parameter after animation completes
+					const newSearchParams = new URLSearchParams(searchParams)
+					newSearchParams.delete('celebrate')
+					void navigate(
+						{
+							search: newSearchParams.toString(),
+						},
+						{ replace: true },
+					)
+					celebrationStartedRef.current = false
 					return
 				}
 
 				const particleCount = 50 * (timeLeft / duration)
 
 				// Fire confetti from the top center
-				await confetti({
+				void confetti({
 					...defaults,
 					particleCount,
 					origin: { x: 0.5, y: 0 },
 				})
 			}, 250)
-
-			// Clean up query parameter after animation starts
-			const newSearchParams = new URLSearchParams(searchParams)
-			newSearchParams.delete('celebrate')
-			void navigate(
-				{
-					search: newSearchParams.toString(),
-				},
-				{ replace: true },
-			)
 
 			return () => clearInterval(interval)
 		}
