@@ -5,6 +5,12 @@ import ThemeSwitcher from './ThemeSwitcher.astro'
 import Button from './ui/Button.astro'
 import Navigation from './Navigation.astro'
 
+interface Props {
+	bannerEnabled?: boolean
+}
+
+const { bannerEnabled = false } = Astro.props
+
 // Get the current URL and transform it for the app subdomain
 const currentUrl = Astro.url
 const protocol = currentUrl.protocol
@@ -22,7 +28,9 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 
 <nav class="border-b text-foreground bg-background">
 	<header
-		class="fixed top-0 inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 m-auto"
+		id="main-header"
+		data-banner-enabled={bannerEnabled}
+		class={`fixed ${bannerEnabled ? 'top-12' : 'top-0'} inset-x-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 m-auto transition-all duration-200`}
 	>
 		<GridDesign />
 		<div
@@ -93,7 +101,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 	>
 		<div
 			id="mobile-menu-content"
-			class="fixed right-0 top-0 h-full w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300"
+			class={`fixed right-0 ${bannerEnabled ? 'top-28' : 'top-0'} ${bannerEnabled ? 'h-[calc(100vh-7rem)]' : 'h-full'} w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300`}
 		>
 			<!-- Close Button -->
 			<button
@@ -139,6 +147,34 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 </nav>
 
 <script>
+	// Header scroll behavior - move to top when scrolling
+	const header = document.getElementById('main-header')!
+	const isBannerEnabled = header?.dataset.bannerEnabled === 'true'
+
+	if (header && isBannerEnabled) {
+		let lastScrollY = window.scrollY
+
+		function handleScroll() {
+			const currentScrollY = window.scrollY
+			const scrollThreshold = 48 // Banner height (top-12 = 3rem = 48px)
+
+			if (currentScrollY > scrollThreshold) {
+				// Scrolled past banner, move header to top
+				header.classList.remove('top-12')
+				header.classList.add('top-0')
+			} else {
+				// At top, keep header below banner
+				header.classList.remove('top-0')
+				header.classList.add('top-12')
+			}
+
+			lastScrollY = currentScrollY
+		}
+
+		// Use passive listener for better performance
+		window.addEventListener('scroll', handleScroll, { passive: true })
+	}
+
 	// Mobile menu
 	const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
 	const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')

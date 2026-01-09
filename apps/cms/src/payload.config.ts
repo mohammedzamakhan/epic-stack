@@ -14,6 +14,7 @@ import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { Banner } from './Banner/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -70,7 +71,7 @@ export default buildConfig({
     'https://*.vercel.app',
     'https://glorious-space-spork-jr6jrp7r4p3p7pj-3000.app.github.dev',
   ].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, Banner],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder

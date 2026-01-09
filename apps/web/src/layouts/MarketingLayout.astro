@@ -2,9 +2,11 @@
 import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from '~/components/GridDesign.astro'
 import Header from '~/components/Header.astro'
+import Banner from '~/components/Banner.astro'
 import '../styles/tailwind.css'
 import Button from './../components/ui/Button.astro'
 import { getThemeFromCookie } from '~/utils/theme'
+import { fetchBannerData } from '~/lib/fetchBanner'
 
 // Get the current URL and transform it for the app subdomain
 const currentUrl = Astro.url
@@ -23,6 +25,10 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 // Get theme from cookie
 const cookieHeader = Astro.request.headers.get('cookie')
 const theme = getThemeFromCookie(cookieHeader)
+
+// Check if banner is enabled
+const banner = await fetchBannerData()
+const isBannerEnabled = banner?.isEnabled ?? false
 ---
 
 <html class={theme} lang="en" dir="ltr">
@@ -44,8 +50,9 @@ const theme = getThemeFromCookie(cookieHeader)
 		<slot name="head" />
 	</head>
 	<body>
-		<Header />
-		<main class="mt-16 max-w-screen">
+		<Banner />
+		<Header bannerEnabled={isBannerEnabled} />
+		<main class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'}>
 			<slot />
 		</main>
 
