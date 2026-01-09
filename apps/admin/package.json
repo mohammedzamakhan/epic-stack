@@ -130,7 +130,6 @@
     "katex": "^0.16.22",
     "litefs-js": "^2.0.2",
     "lru-cache": "^11.1.0",
-    "lucide-react": "^0.534.0",
     "mime-types": "^3.0.1",
     "morgan": "^1.10.0",
     "openimg": "^1.1.0",

@@ -1,7 +1,7 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Play } from 'lucide-react'
+import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
 import { cn } from '#app/utils/misc.tsx'
 
@@ -136,7 +136,10 @@ export function FeatureUpdates({
 								whileTap={{ scale: 0.95 }}
 								transition={{ duration: 0.15 }}
 							>
-								<X className="text-sidebar-foreground/60 hover:text-sidebar-foreground h-3.5 w-3.5" />
+								<Icon
+									name="x"
+									className="text-sidebar-foreground/60 hover:text-sidebar-foreground h-3.5 w-3.5"
+								/>
 							</motion.button>
 
 							{/* Content */}
@@ -171,7 +174,10 @@ export function FeatureUpdates({
 												whileTap={{ scale: 0.95 }}
 											>
 												<div className="bg-sidebar-foreground rounded-full p-2 shadow-lg transition-all hover:-mt-px">
-													<Play className="text-sidebar ml-0.5 h-4 w-4" />
+													<Icon
+														name="play"
+														className="text-sidebar ml-0.5 h-4 w-4"
+													/>
 												</div>
 											</motion.button>
 										)}

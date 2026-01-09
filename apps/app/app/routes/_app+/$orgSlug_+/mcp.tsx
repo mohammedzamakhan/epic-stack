@@ -47,7 +47,7 @@ import {
 	CollapsibleTrigger,
 } from '@repo/ui/collapsible'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { ChevronDown, Check, Copy } from 'lucide-react'
+
 import { useEffect, useState } from 'react'
 import {
 	Form,
@@ -263,12 +263,12 @@ function CodeBlock({ code }: { code: string }) {
 			>
 				{copied ? (
 					<>
-						<Check className="size-4" />
+						<Icon name="check" className="size-4" />
 						<Trans>Copied!</Trans>
 					</>
 				) : (
 					<>
-						<Copy className="size-4" />
+						<Icon name="copy" className="size-4" />
 						<Trans>Copy</Trans>
 					</>
 				)}
@@ -1083,7 +1083,8 @@ function ToolItem({ tool }: { tool: MCPTool }) {
 					</div>
 					<p className="text-muted-foreground text-sm">{tool.description}</p>
 				</div>
-				<ChevronDown
+				<Icon
+					name="chevron-down"
 					className={`text-muted-foreground size-5 transition-transform ${
 						isOpen ? 'rotate-180' : ''
 					}`}

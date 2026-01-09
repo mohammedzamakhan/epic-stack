@@ -12,7 +12,7 @@ import {
 } from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
 import { Switch } from '@repo/ui/switch'
-import { InfoIcon } from 'lucide-react'
+import { Icon } from '@repo/ui/icon'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { z } from 'zod'
@@ -105,7 +105,10 @@ export default function VerifiedDomainCard({
 					</CardContent>
 					<CardFooter className="flex justify-between gap-4">
 						<div className="text-primary flex items-center text-xs">
-							<InfoIcon className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0" />
+							<Icon
+								name="help-circle"
+								className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0"
+							/>
 							<p className="text-muted-foreground">
 								<Trans>
 									Verified domain must match your current email address domain

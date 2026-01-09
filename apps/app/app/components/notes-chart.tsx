@@ -14,7 +14,7 @@ import {
 	ChartTooltipContent,
 	type ChartConfig,
 } from '@repo/ui/chart'
-import { TrendingUp } from 'lucide-react'
+import { Icon } from '@repo/ui/icon'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 
 const chartConfig = {
@@ -108,14 +108,14 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 							{trendPercentage >= 0 ? (
 								<>
 									<Trans>Trending up by {trendPercentage}% this period</Trans>{' '}
-									<TrendingUp className="h-4 w-4" />
+									<Icon name="trending-up" className="h-4 w-4" />
 								</>
 							) : (
 								<>
 									<Trans>
 										Down by {Math.abs(trendPercentage)}% this period
 									</Trans>{' '}
-									<TrendingUp className="h-4 w-4 rotate-180" />
+									<Icon name="trending-up" className="h-4 w-4 rotate-180" />
 								</>
 							)}
 						</div>
