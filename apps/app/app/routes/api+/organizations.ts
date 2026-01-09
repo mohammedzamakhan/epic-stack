@@ -7,10 +7,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 	try {
 		// Verify JWT token and get user info
 		const payload = requireAuth(request)
-		console.log('🔐 Organizations API: JWT payload:', {
-			sub: payload.sub,
-			email: payload.email,
-		})
 
 		// Check if user exists
 		const user = await prisma.user.findUnique({
@@ -19,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		})
 
 		if (!user) {
-			console.log('❌ Organizations API: User not found:', payload.sub)
+			// SECURITY: Do not log user IDs to prevent information disclosure
 			return data(
 				{
 					success: false,
@@ -29,24 +25,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 				{ status: 404 },
 			)
 		}
-
-		console.log('✅ Organizations API: User found:', user.email)
-
-		// Get user's organizations
-		console.log(
-			'🏢 Organizations API: Querying organizations for user:',
-			payload.sub,
-		)
-
-		// Debug: Check if there are any organizations at all
-		const totalOrgs = await prisma.organization.count()
-		const totalUserOrgs = await prisma.userOrganization.count()
-		const totalOrgRoles = await prisma.organizationRole.count()
-		console.log('🏢 Organizations API: Database stats:', {
-			totalOrgs,
-			totalUserOrgs,
-			totalOrgRoles,
-		})
 
 		const userOrganizations = await prisma.userOrganization.findMany({
 			where: {
@@ -83,12 +61,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 			orderBy: [{ isDefault: 'desc' }, { organization: { name: 'asc' } }],
 		})
 
-		console.log(
-			'🏢 Organizations API: Found',
-			userOrganizations.length,
-			'user organizations',
-		)
-
 		const organizations = userOrganizations.map((userOrg) => ({
 			id: userOrg.organization.id,
 			name: userOrg.organization.name,
@@ -106,11 +78,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 			updatedAt: userOrg.organization.updatedAt.toISOString(),
 		}))
 
-		console.log(
-			'🏢 Organizations API: Returning',
-			organizations.length,
-			'organizations',
-		)
 		return data({
 			success: true,
 			data: { organizations },
@@ -127,7 +94,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 			)
 		}
 
-		console.error('Organizations API error:', error)
+		// SECURITY: Log error message only, not full stack trace or error object
+		// which could contain sensitive information in production logs
+		console.error(
+			'Organizations API error:',
+			error instanceof Error ? error.message : 'Unknown error',
+		)
 		return data(
 			{
 				success: false,
