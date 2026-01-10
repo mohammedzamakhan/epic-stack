@@ -15,7 +15,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 		})
 
 		if (!user) {
-			// SECURITY: Do not log user IDs to prevent information disclosure
 			return data(
 				{
 					success: false,
@@ -94,8 +93,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 			)
 		}
 
-		// SECURITY: Log error message only, not full stack trace or error object
-		// which could contain sensitive information in production logs
 		console.error(
 			'Organizations API error:',
 			error instanceof Error ? error.message : 'Unknown error',
