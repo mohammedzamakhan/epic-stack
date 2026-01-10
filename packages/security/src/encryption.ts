@@ -137,6 +137,18 @@ export function getSSOMasterKey(): string {
 		throw new Error('SSO_ENCRYPTION_KEY is not a valid encryption key')
 	}
 
+	// SECURITY: Prevent using default example key in production
+	if (
+		process.env.NODE_ENV === 'production' &&
+		key ===
+			'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+	) {
+		throw new Error(
+			'SECURITY WARNING: You are using the default SSO_ENCRYPTION_KEY from .env.example in production. ' +
+				'This is a severe security risk. Please generate a new key.',
+		)
+	}
+
 	return key
 }
 
@@ -155,6 +167,17 @@ export function getEncryptionKey(
 
 	if (!isValidEncryptionKey(key)) {
 		throw new Error(`${envVarName} is not a valid encryption key`)
+	}
+
+	// SECURITY: Prevent using default example key in production
+	if (
+		process.env.NODE_ENV === 'production' &&
+		key === 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210'
+	) {
+		throw new Error(
+			`SECURITY WARNING: You are using the default ${envVarName} from .env.example in production. ` +
+				'This is a severe security risk. Please generate a new key.',
+		)
 	}
 
 	return key

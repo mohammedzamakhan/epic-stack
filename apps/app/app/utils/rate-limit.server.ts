@@ -110,6 +110,12 @@ export async function checkRateLimit(
  * Get the client IP address from request
  */
 export function getClientIp(request: Request): string {
+	// Fly.io specific header - most reliable on this platform
+	const flyClientIp = request.headers.get('fly-client-ip')
+	if (flyClientIp) {
+		return flyClientIp
+	}
+
 	// Check for X-Forwarded-For header (proxy)
 	const forwarded = request.headers.get('x-forwarded-for')
 	if (forwarded) {

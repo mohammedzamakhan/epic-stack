@@ -20,6 +20,17 @@ if (sessionSecrets.length === 0 || sessionSecrets.some((s) => s.length === 0)) {
 	)
 }
 
+// SECURITY: Prevent using default example secret in production
+if (
+	process.env.NODE_ENV === 'production' &&
+	sessionSecrets.some((s) => s === 'super-duper-s3cret')
+) {
+	throw new Error(
+		'SECURITY WARNING: You are using the default SESSION_SECRET from .env.example in production. ' +
+			'This is a severe security risk. Please generate a new secret.',
+	)
+}
+
 export const authSessionStorage = createCookieSessionStorage({
 	cookie: {
 		name: 'en_session',
