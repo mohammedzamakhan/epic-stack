@@ -25,6 +25,14 @@ export async function handleUpdateIntegrationConfig(
 ) {
 	const userId = await deps.requireUserId(request)
 	const defaultOrg = await deps.getUserDefaultOrganization(userId)
+
+	if (!defaultOrg) {
+		return Response.json(
+			{ error: 'No organization found for user' },
+			{ status: 403 },
+		)
+	}
+
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
@@ -58,7 +66,7 @@ export async function handleUpdateIntegrationConfig(
 		const integration = await deps.prisma.integration.findUnique({
 			where: {
 				id: integrationId,
-				organizationId: defaultOrg?.organization.id,
+				organizationId: defaultOrg.organization.id,
 			},
 		})
 

@@ -1,0 +1,84 @@
+---
+import GridDesign from '../GridDesign.astro'
+import Button from '../ui/Button.astro'
+
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
+interface Props {
+	richText?: any
+	media?: any
+	links?: any[]
+}
+
+const { richText, media, links } = Astro.props
+
+const renderLexicalContent = (content: any) => {
+	if (!content || !content.root || !content.root.children) {
+		return ''
+	}
+
+	return content.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.format && child.format > 0) {
+							let formattedText = child.text || ''
+							if (child.format & 1)
+								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
+							if (child.format & 2)
+								formattedText = `<em class="italic">${formattedText}</em>`
+							return formattedText
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<p class="text-xl md:text-2xl leading-relaxed max-w-[600px] text-white/90">${text}</p>`
+			}
+			if (node.type === 'heading' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				return `<h1 class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-white leading-tight">${text}</h1>`
+			}
+			return ''
+		})
+		.join('')
+}
+---
+
+<section class="relative -mt-[10.4rem] min-h-[80vh] flex items-center justify-center text-white" data-theme="dark">
+	<GridDesign />
+
+	{media && typeof media === 'object' && (
+		<div class="absolute inset-0 -z-10">
+			<img
+				class="w-full h-full object-cover"
+				src={`${CMS_URL}${media.url}`}
+				alt={media.alt || 'Hero background'}
+				loading="eager"
+			/>
+			<div class="absolute inset-0 bg-black/50"></div>
+		</div>
+	)}
+
+	<div class="container relative z-10 flex flex-col items-center justify-center text-center py-24 gap-8">
+		{richText && (
+			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText)} />
+		)}
+
+		{links && links.length > 0 && (
+			<div class="flex flex-wrap justify-center gap-4 mt-4">
+				{links.map((linkItem: any, i: number) => (
+					<Button
+						href={linkItem?.link?.url || '#'}
+						variant={i === 0 ? 'default' : 'outline'}
+						size="xl"
+					>
+						{linkItem?.link?.label || 'Learn more'}
+					</Button>
+				))}
+			</div>
+		)}
+	</div>
+</section>

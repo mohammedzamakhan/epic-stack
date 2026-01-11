@@ -1,0 +1,90 @@
+---
+import GridDesign from '../GridDesign.astro'
+import Button from '../ui/Button.astro'
+
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
+interface Props {
+	richText?: any
+	media?: any
+	links?: any[]
+}
+
+const { richText, media, links } = Astro.props
+
+const renderLexicalContent = (content: any) => {
+	if (!content || !content.root || !content.root.children) {
+		return ''
+	}
+
+	return content.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.format && child.format > 0) {
+							let formattedText = child.text || ''
+							if (child.format & 1)
+								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
+							if (child.format & 2)
+								formattedText = `<em class="italic">${formattedText}</em>`
+							return formattedText
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<p class="text-lg leading-relaxed max-w-[600px]">${text}</p>`
+			}
+			if (node.type === 'heading' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				return `<h1 class="text-3xl md:text-5xl lg:text-6xl tracking-tight font-title text-foreground leading-tight">${text}</h1>`
+			}
+			return ''
+		})
+		.join('')
+}
+---
+
+<section class="relative w-full py-12 lg:py-16">
+	<GridDesign />
+
+	<div class="container relative z-10">
+		<div class="mb-8 space-y-6">
+			{richText && (
+				<div class="space-y-4" set:html={renderLexicalContent(richText)} />
+			)}
+
+			{links && links.length > 0 && (
+				<div class="flex flex-wrap gap-4 mt-6">
+					{links.map((linkItem: any, i: number) => (
+						<Button
+							href={linkItem?.link?.url || '#'}
+							variant={i === 0 ? 'default' : 'outline'}
+							size="lg"
+						>
+							{linkItem?.link?.label || 'Learn more'}
+						</Button>
+					))}
+				</div>
+			)}
+		</div>
+
+		{media && typeof media === 'object' && (
+			<div class="mt-8">
+				<img
+					class="w-full rounded-lg shadow-xl"
+					src={`${CMS_URL}${media.url}`}
+					alt={media.alt || 'Hero image'}
+					width={media.width || 1200}
+					height={media.height || 600}
+					loading="eager"
+				/>
+				{media?.caption && (
+					<p class="mt-3 text-sm text-muted-foreground">{media.caption}</p>
+				)}
+			</div>
+		)}
+	</div>
+</section>

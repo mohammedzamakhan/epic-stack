@@ -14,8 +14,8 @@ export async function handleVerification({
 		'Submission should be successful by now',
 	)
 	const target = submission.value.target
-	const user = await prisma.user.findFirst({
-		where: { OR: [{ email: target }, { username: target }] },
+	const user = await prisma.user.findUnique({
+		where: { id: target },
 		select: { email: true, username: true },
 	})
 	// we don't want to say the user is not found if the email is not found

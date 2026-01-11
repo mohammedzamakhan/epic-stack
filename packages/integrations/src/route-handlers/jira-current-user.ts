@@ -26,6 +26,14 @@ export async function handleJiraCurrentUser(
 ) {
 	const userId = await deps.requireUserId(request)
 	const defaultOrg = await deps.getUserDefaultOrganization(userId)
+
+	if (!defaultOrg) {
+		return Response.json(
+			{ error: 'No organization found for user' },
+			{ status: 403 },
+		)
+	}
+
 	const integrationId = params.integrationId
 	if (!integrationId) {
 		return Response.json(
@@ -39,7 +47,7 @@ export async function handleJiraCurrentUser(
 		const integration = await deps.prisma.integration.findUnique({
 			where: {
 				id: integrationId,
-				organizationId: defaultOrg?.organization.id,
+				organizationId: defaultOrg.organization.id,
 			},
 		})
 

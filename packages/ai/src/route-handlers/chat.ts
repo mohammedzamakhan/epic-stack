@@ -50,6 +50,13 @@ export async function handleChat(
 			content: true,
 			title: true,
 			organizationId: true,
+			isPublic: true,
+			createdById: true,
+			noteAccess: {
+				select: {
+					userId: true,
+				},
+			},
 			comments: {
 				select: {
 					content: true,
@@ -65,6 +72,19 @@ export async function handleChat(
 
 	if (!note) {
 		invariant(note, 'Note not found')
+	}
+
+	if (!note.isPublic) {
+		const hasPersonalAccess =
+			note.createdById === userId ||
+			note.noteAccess.some(
+				(access: { userId: string }) => access.userId === userId,
+			)
+		if (!hasPersonalAccess) {
+			throw new Response('Not authorized - insufficient note permissions', {
+				status: 403,
+			})
+		}
 	}
 
 	// Track AI chat usage for onboarding (if markStepCompleted is provided)

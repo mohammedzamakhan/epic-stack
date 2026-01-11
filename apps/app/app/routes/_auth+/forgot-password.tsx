@@ -135,14 +135,14 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const user = await prisma.user.findFirstOrThrow({
 		where: { OR: [{ email: usernameOrEmail }, { username: usernameOrEmail }] },
-		select: { email: true, username: true },
+		select: { id: true, email: true, username: true },
 	})
 
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
 		period: 10 * 60,
 		request,
 		type: 'reset-password',
-		target: usernameOrEmail,
+		target: user.id,
 	})
 
 	const response = await sendEmail({

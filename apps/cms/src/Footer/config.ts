@@ -10,49 +10,20 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
-      name: 'columns',
+      name: 'navItems',
       type: 'array',
-      label: 'Footer Columns',
       fields: [
-        {
-          name: 'title',
-          type: 'text',
-          label: 'Column Title',
-          required: true,
-        },
-        {
-          name: 'links',
-          type: 'array',
-          label: 'Links',
-          fields: [
-            link({
-              appearances: false,
-            }),
-          ],
-          admin: {
-            components: {
-              RowLabel: '@/components/RowLabel#RowLabel',
-            },
-          },
-        },
+        link({
+          appearances: false,
+        }),
       ],
-      maxRows: 6, // Assuming reasonable max columns, say 4 or 6
+      maxRows: 6,
       admin: {
         initCollapsed: true,
         components: {
           RowLabel: '@/components/RowLabel#RowLabel',
         },
       },
-    },
-    {
-      name: 'copyrightText',
-      type: 'text',
-      label: 'Copyright Text',
-    },
-    {
-      name: 'tagline',
-      type: 'text',
-      label: 'Tagline',
     },
   ],
   hooks: {

@@ -106,6 +106,15 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'accept-invitation') {
 		try {
+			const user = await prisma.user.findUnique({
+				where: { id: userId },
+				select: { email: true },
+			})
+
+			if (!user) {
+				return Response.json({ error: 'User not found' }, { status: 404 })
+			}
+
 			const invitation = await prisma.organizationInvitation.findUnique({
 				where: { id: invitationId },
 				include: {
@@ -116,6 +125,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			if (!invitation) {
 				return Response.json({ error: 'Invitation not found' }, { status: 404 })
+			}
+
+			if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
+				return Response.json(
+					{ error: 'This invitation was not sent to your email address' },
+					{ status: 403 },
+				)
 			}
 
 			// Check if user is already a member
@@ -163,6 +179,31 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'decline-invitation') {
 		try {
+			const user = await prisma.user.findUnique({
+				where: { id: userId },
+				select: { email: true },
+			})
+
+			if (!user) {
+				return Response.json({ error: 'User not found' }, { status: 404 })
+			}
+
+			const invitation = await prisma.organizationInvitation.findUnique({
+				where: { id: invitationId },
+				select: { email: true },
+			})
+
+			if (!invitation) {
+				return Response.json({ error: 'Invitation not found' }, { status: 404 })
+			}
+
+			if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
+				return Response.json(
+					{ error: 'This invitation was not sent to your email address' },
+					{ status: 403 },
+				)
+			}
+
 			await prisma.organizationInvitation.delete({
 				where: { id: invitationId },
 			})
@@ -345,7 +386,10 @@ export default function OrganizationsPage() {
 							</ItemContent>
 							<ItemActions>
 								<span className="text-sm">1</span>
-								<Icon name="chevron-right" className="h-4 w-4 rtl:-scale-x-100" />
+								<Icon
+									name="chevron-right"
+									className="h-4 w-4 rtl:-scale-x-100"
+								/>
 							</ItemActions>
 						</Item>
 					))}

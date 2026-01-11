@@ -1,0 +1,299 @@
+---
+import GridDesign from './GridDesign.astro'
+import Badge from './ui/Badge.astro'
+import Button from './ui/Button.astro'
+
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
+interface Props {
+	richText?: any
+	media?: any
+	links?: any[]
+	videoUrl?: string
+	isClosedBeta?: boolean
+	assetType?: 'none' | 'image' | 'video'
+	assetPosition?: 'left' | 'right' | 'center'
+	textPosition?: 'left' | 'center'
+	variant?: 'primary' | 'secondary'
+	withBackground?: boolean
+	withBackgroundGlow?: boolean
+	assetShadow?: 'none' | 'soft' | 'hard'
+	imagePerspective?: 'none' | 'left' | 'right' | 'bottom' | 'bottom-lg' | 'paper'
+	minHeight?: number
+	videoSrc?: string
+	videoPoster?: any
+	videoAutoPlay?: boolean
+	videoLoop?: boolean
+	videoMuted?: boolean
+	videoControls?: boolean
+}
+
+const {
+	richText,
+	media,
+	links,
+	isClosedBeta,
+	assetType = 'image',
+	assetPosition = 'right',
+	textPosition = 'left',
+	variant = 'primary',
+	withBackground = false,
+	withBackgroundGlow = false,
+	assetShadow = 'hard',
+	imagePerspective = 'none',
+	minHeight = 350,
+	videoSrc,
+	videoPoster,
+	videoAutoPlay = false,
+	videoLoop = false,
+	videoMuted = true,
+	videoControls = false,
+} = Astro.props
+
+const renderLexicalContent = (content: any, textAlign: string) => {
+	if (!content || !content.root || !content.root.children) {
+		return ''
+	}
+
+	const alignClass = textAlign === 'center' ? 'text-center mx-auto' : ''
+
+	return content.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.format && child.format > 0) {
+							let formattedText = child.text || ''
+							if (child.format & 1)
+								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
+							if (child.format & 2)
+								formattedText = `<em class="italic">${formattedText}</em>`
+							return formattedText
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<p class="text-xl leading-relaxed max-w-[600px] ${alignClass}">${text}</p>`
+			}
+			if (node.type === 'heading' && node.children) {
+				const text = node.children
+					.map((child: any) => child.text || '')
+					.join('')
+				return `<h1 class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-foreground leading-tight ${alignClass}">${text}</h1>`
+			}
+			return ''
+		})
+		.join('')
+}
+
+const sectionClasses = [
+	'relative w-full flex flex-col justify-center items-center gap-8 py-12 lg:py-16',
+	withBackground && variant === 'primary' ? 'bg-primary/5' : '',
+	withBackground && variant === 'secondary' ? 'bg-secondary/5' : '',
+	withBackgroundGlow || imagePerspective !== 'none' ? 'overflow-hidden' : '',
+	imagePerspective === 'paper' ? 'md:pb-24' : '',
+].filter(Boolean).join(' ')
+
+const containerClasses = [
+	'w-full p-6 gap-8 relative z-10',
+	assetPosition === 'center'
+		? 'flex flex-col container max-w-5xl'
+		: 'grid lg:grid-cols-2 container items-center',
+	textPosition === 'center' ? 'items-center' : 'items-start',
+].filter(Boolean).join(' ')
+
+const contentClasses = [
+	'relative z-10 flex flex-col gap-6',
+	textPosition === 'center' ? 'items-center text-center' : 'justify-center',
+	assetPosition === 'left' && 'lg:col-start-2 lg:row-start-1',
+].filter(Boolean).join(' ')
+
+const assetShadowClasses = {
+	none: '',
+	soft: 'shadow-lg',
+	hard: 'shadow-2xl shadow-black/20',
+}
+
+const perspectiveClasses = {
+	none: '',
+	left: 'lg:perspective-left lg:transform lg:rotate-y-12',
+	right: 'lg:perspective-right lg:transform lg:-rotate-y-12',
+	bottom: 'lg:perspective-bottom lg:transform lg:rotate-x-6',
+	'bottom-lg': 'lg:perspective-bottom-lg lg:transform lg:rotate-x-12',
+	paper: 'lg:ml-[7%] lg:shadow-2xl lg:transform lg:rotate-y-6',
+}
+
+const imageClasses = [
+	'w-full rounded-md relative z-10',
+	assetShadowClasses[assetShadow],
+	perspectiveClasses[imagePerspective],
+	imagePerspective === 'none' ? 'my-4' : 'my-8',
+].filter(Boolean).join(' ')
+
+const videoClasses = [
+	'w-full rounded-md overflow-hidden',
+	assetShadowClasses[assetShadow],
+].filter(Boolean).join(' ')
+
+const buttonsContainerClasses = [
+	'flex flex-wrap gap-1 mt-2',
+	textPosition === 'center' ? 'justify-center' : 'justify-start',
+].filter(Boolean).join(' ')
+
+const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoSrc)
+---
+
+<section class={sectionClasses}>
+	<GridDesign />
+
+	{hasAsset && withBackgroundGlow && (
+		<div class="hidden lg:flex justify-center w-full h-full absolute pointer-events-none">
+			<div class={`
+				w-full lg:w-1/2 h-auto z-0 dark:opacity-50
+				${assetPosition === 'center' ? 'top-5' : '-top-1/3'}
+				${imagePerspective === 'paper' ? 'opacity-70' : 'opacity-100'}
+				bg-gradient-to-br ${variant === 'primary' ? 'from-primary/30 to-primary/10' : 'from-secondary/30 to-secondary/10'}
+				blur-[120px] rounded-full aspect-square
+			`}></div>
+		</div>
+	)}
+
+	<div class={containerClasses} style={`min-height: ${minHeight}px;`}>
+		<div class={contentClasses}>
+			<div class="space-y-6">
+				<Badge variant="outline" size="sm">
+					BY THE MAKERS OF BUGBASHES.DEV
+				</Badge>
+				{richText && (
+					<div
+						class="space-y-6"
+						set:html={renderLexicalContent(richText, textPosition)}
+					/>
+				)}
+			</div>
+
+			{!isClosedBeta && links && links.length > 0 && (
+				<div class={buttonsContainerClasses}>
+					<Button href={links[0]?.url || '#'} variant="default" size="xl">
+						{links[0]?.link?.label || 'Get started'}
+					</Button>
+					{links[1] && (
+						<Button href={links[1]?.url || '#'} variant="outline" size="xl">
+							{links[1]?.link?.label || 'Learn more'}
+						</Button>
+					)}
+				</div>
+			)}
+		</div>
+
+		{assetType === 'image' && media && (
+			<>
+				{assetPosition === 'center' ? (
+					<section class="w-full mt-6 md:mt-8">
+						<img
+							class={imageClasses}
+							src={`${CMS_URL}${media.url}`}
+							alt={media.alt || 'Hero image'}
+							width={media.width || 1000}
+							height={media.height || 1000}
+							loading="eager"
+						/>
+					</section>
+				) : (
+					<img
+						class={imageClasses}
+						src={`${CMS_URL}${media.url}`}
+						alt={media.alt || 'Hero image'}
+						width={media.width || 1000}
+						height={media.height || 1000}
+						loading="eager"
+					/>
+				)}
+			</>
+		)}
+
+		{assetType === 'video' && videoSrc && (
+			<>
+				{assetPosition === 'center' ? (
+					<section class="w-full mt-6 md:mt-8">
+						<video
+							class={videoClasses}
+							autoplay={videoAutoPlay}
+							loop={videoLoop}
+							muted={videoMuted}
+							controls={videoControls}
+							poster={videoPoster ? `${CMS_URL}${videoPoster.url}` : undefined}
+							playsinline
+						>
+							<source src={videoSrc} type="video/mp4" />
+							Your browser does not support the video tag.
+						</video>
+					</section>
+				) : (
+					<video
+						class={videoClasses}
+						autoplay={videoAutoPlay}
+						loop={videoLoop}
+						muted={videoMuted}
+						controls={videoControls}
+						poster={videoPoster ? `${CMS_URL}${videoPoster.url}` : undefined}
+						playsinline
+					>
+						<source src={videoSrc} type="video/mp4" />
+						Your browser does not support the video tag.
+					</video>
+				)}
+			</>
+		)}
+	</div>
+</section>
+
+<style>
+	.perspective-left {
+		transform-style: preserve-3d;
+		transform: perspective(1000px) rotateY(-5deg);
+	}
+
+	.perspective-right {
+		transform-style: preserve-3d;
+		transform: perspective(1000px) rotateY(5deg);
+	}
+
+	.perspective-bottom {
+		transform-style: preserve-3d;
+		transform: perspective(1000px) rotateX(5deg);
+	}
+
+	.perspective-bottom-lg {
+		transform-style: preserve-3d;
+		transform: perspective(1000px) rotateX(10deg);
+	}
+
+	@media (min-width: 1024px) {
+		.lg\:perspective-left {
+			transform-style: preserve-3d;
+			transform: perspective(1500px) rotateY(-8deg);
+		}
+
+		.lg\:perspective-right {
+			transform-style: preserve-3d;
+			transform: perspective(1500px) rotateY(8deg);
+		}
+
+		.lg\:perspective-bottom {
+			transform-style: preserve-3d;
+			transform: perspective(1500px) rotateX(5deg);
+		}
+
+		.lg\:perspective-bottom-lg {
+			transform-style: preserve-3d;
+			transform: perspective(1500px) rotateX(10deg);
+		}
+
+		.lg\:perspective-paper {
+			transform-style: preserve-3d;
+			transform: perspective(1500px) rotateY(3deg) rotateX(3deg);
+			box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		}
+	}
+</style>

@@ -2412,34 +2412,26 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  columns?:
+  navItems?:
     | {
-        title: string;
-        links?:
-          | {
-              link: {
-                type?: ('reference' | 'custom') | null;
-                newTab?: boolean | null;
-                reference?:
-                  | ({
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null)
-                  | ({
-                      relationTo: 'posts';
-                      value: string | Post;
-                    } | null);
-                url?: string | null;
-                label: string;
-              };
-              id?: string | null;
-            }[]
-          | null;
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
         id?: string | null;
       }[]
     | null;
-  copyrightText?: string | null;
-  tagline?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2526,28 +2518,20 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  columns?:
+  navItems?:
     | T
     | {
-        title?: T;
-        links?:
+        link?:
           | T
           | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                  };
-              id?: T;
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
             };
         id?: T;
       };
-  copyrightText?: T;
-  tagline?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

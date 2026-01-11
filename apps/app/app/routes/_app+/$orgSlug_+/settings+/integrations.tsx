@@ -84,6 +84,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
+		const integration = await integrationManager.getIntegration(integrationId)
+
+		if (!integration) {
+			return Response.json({ error: 'Integration not found' }, { status: 404 })
+		}
+
+		if (integration.organizationId !== organization.id) {
+			return Response.json({ error: 'Unauthorized' }, { status: 403 })
+		}
+
 		try {
 			await integrationManager.disconnectIntegration(integrationId)
 			return Response.json({ success: true })

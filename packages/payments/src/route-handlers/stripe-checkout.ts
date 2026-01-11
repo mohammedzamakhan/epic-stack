@@ -87,6 +87,13 @@ export async function handleStripeCheckout(
 			throw new Error('Tenant not found in database.')
 		}
 
+		const isMember = user.organizations.some(
+			(org) => org.organizationId === organizationId,
+		)
+		if (!isMember) {
+			throw new Error('User is not authorized to update this organization.')
+		}
+
 		const tenant = await deps.prisma.organization.update({
 			where: { id: organizationId },
 			data: {

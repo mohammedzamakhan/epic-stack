@@ -6,6 +6,93 @@ export const ACCESS_TOKEN_EXPIRATION = 60 * 60 * 1000 // 1 hour
 export const REFRESH_TOKEN_EXPIRATION = 30 * 24 * 60 * 60 * 1000 // 30 days
 export const AUTHORIZATION_CODE_EXPIRATION = 10 * 60 * 1000 // 10 minutes
 
+/**
+ * Allowed custom protocol schemes for MCP OAuth redirect URIs.
+ * These are known MCP client applications (Claude Desktop, Cursor, VSCode, etc.)
+ */
+const ALLOWED_CUSTOM_SCHEMES = [
+	'cursor://',
+	'vscode://',
+	'vscode-insiders://',
+	'claude://',
+	'windsurf://',
+	'amp://',
+]
+
+/**
+ * Validates a redirect URI for MCP OAuth authorization flow.
+ *
+ * This function prevents open redirect attacks by only allowing:
+ * 1. Localhost URLs (http://localhost or http://127.0.0.1) for development/testing
+ * 2. Known MCP client custom protocol schemes (cursor://, vscode://, etc.)
+ *
+ * In production, you should also validate against pre-registered redirect URIs
+ * stored per-client in the database.
+ *
+ * @param redirectUri - The redirect URI to validate
+ * @returns Object with isValid boolean and optional error message
+ */
+export function validateMCPRedirectUri(redirectUri: string): {
+	isValid: boolean
+	error?: string
+} {
+	if (!redirectUri || typeof redirectUri !== 'string') {
+		return { isValid: false, error: 'redirect_uri is required' }
+	}
+
+	const trimmed = redirectUri.trim()
+
+	// Check for allowed custom protocol schemes (cursor://, vscode://, etc.)
+	for (const scheme of ALLOWED_CUSTOM_SCHEMES) {
+		if (trimmed.startsWith(scheme)) {
+			return { isValid: true }
+		}
+	}
+
+	// For HTTP(S) URLs, validate the structure
+	try {
+		const url = new URL(trimmed)
+
+		// Only allow localhost/127.0.0.1 for HTTP(S) redirect URIs
+		// This is safe for MCP clients that run local OAuth callback servers
+		const isLocalhost =
+			url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+
+		if (!isLocalhost) {
+			return {
+				isValid: false,
+				error:
+					'redirect_uri must be a localhost URL or a registered MCP client scheme',
+			}
+		}
+
+		// For localhost, allow http (common for local OAuth callback servers)
+		// and https (for development with self-signed certs)
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+			return {
+				isValid: false,
+				error: 'redirect_uri must use http or https protocol for localhost',
+			}
+		}
+
+		// Basic path validation - allow OAuth callback paths
+		// Only allow safe path characters to prevent URL injection
+		if (!/^\/[a-zA-Z0-9\-_./]*$/.test(url.pathname)) {
+			return {
+				isValid: false,
+				error: 'redirect_uri contains invalid path characters',
+			}
+		}
+
+		return { isValid: true }
+	} catch {
+		return {
+			isValid: false,
+			error: 'redirect_uri is not a valid URL',
+		}
+	}
+}
+
 // In-memory cache for authorization codes (in production, use Redis)
 // Using a Map with automatic cleanup to prevent memory leaks
 const authorizationCodeCache = new Map<
@@ -211,8 +298,11 @@ export async function exchangeAuthorizationCode(
 			return null // code_verifier required but not provided
 		}
 
+		// Default to 'plain' per RFC 7636 when not specified
+		const method = authData.codeChallengeMethod || 'plain'
+
 		// Verify the code_verifier against the code_challenge
-		if (authData.codeChallengeMethod === 'S256') {
+		if (method === 'S256') {
 			const computedChallenge = crypto
 				.createHash('sha256')
 				.update(codeVerifier)
@@ -221,10 +311,12 @@ export async function exchangeAuthorizationCode(
 			if (computedChallenge !== authData.codeChallenge) {
 				return null // PKCE verification failed
 			}
-		} else if (authData.codeChallengeMethod === 'plain') {
+		} else if (method === 'plain') {
 			if (codeVerifier !== authData.codeChallenge) {
 				return null // PKCE verification failed
 			}
+		} else {
+			return null // Unsupported code_challenge_method
 		}
 	}
 

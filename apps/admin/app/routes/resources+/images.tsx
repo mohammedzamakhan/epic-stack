@@ -5,12 +5,12 @@ import { getDomainUrl } from '#app/utils/misc.tsx'
 import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
 
-let cacheDir: string | null = null
+let cacheDir: string | 'no_cache' | null = null
 
 async function getCacheDir() {
 	if (cacheDir) return cacheDir
 
-	let dir = './tests/fixtures/openimg'
+	let dir: string | 'no_cache' = './tests/fixtures/openimg'
 	if (process.env.NODE_ENV === 'production') {
 		const isAccessible = await fs
 			.access('/data', constants.W_OK)
@@ -19,6 +19,11 @@ async function getCacheDir() {
 
 		if (isAccessible) {
 			dir = '/data/images'
+		} else {
+			console.warn(
+				'Production cache directory /data is not writable, disabling image cache',
+			)
+			dir = 'no_cache'
 		}
 	}
 

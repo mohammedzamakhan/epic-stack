@@ -27,9 +27,11 @@ export async function requireUserOrganization<
 	const organization = await prisma.organization.findFirst({
 		where: {
 			slug: orgSlug,
+			active: true,
 			users: {
 				some: {
 					userId,
+					active: true,
 				},
 			},
 		},
@@ -62,7 +64,7 @@ export async function validateOrgAccess(
 
 	const organization = await prisma.organization.findFirst({
 		select: { id: true },
-		where: { slug: orgSlug },
+		where: { slug: orgSlug, active: true },
 	})
 
 	if (!organization) {
