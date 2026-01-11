@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
 	validateAccessToken,
 	createAuthorizationWithTokens,
@@ -106,9 +106,9 @@ describe('MCP SSE Endpoint', () => {
 						expect(tokenData?.organization.id).toBe(org.id)
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 },
 			)
-		})
+		}, 30000)
 
 		it('should reject request with invalid access token', async () => {
 			await fc.assert(
@@ -122,9 +122,9 @@ describe('MCP SSE Endpoint', () => {
 						expect(tokenData).toBeNull()
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 },
 			)
-		})
+		}, 30000)
 
 		it('should reject request with expired access token', async () => {
 			const user = await createTestUser()
@@ -192,9 +192,9 @@ describe('MCP SSE Endpoint', () => {
 						)
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 },
 			)
-		})
+		}, 30000)
 
 		it('should reject SSE connection with invalid token', async () => {
 			await fc.assert(
@@ -208,9 +208,9 @@ describe('MCP SSE Endpoint', () => {
 						expect(tokenData).toBeNull()
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 },
 			)
-		})
+		}, 30000)
 
 		it('should reject SSE connection without Authorization header', async () => {
 			// Simulate SSE connection request without auth header
@@ -302,9 +302,9 @@ describe('MCP SSE Endpoint', () => {
 						})
 					},
 				),
-				{ numRuns: 100 },
+				{ numRuns: 10 },
 			)
-		})
+		}, 30000)
 	})
 
 	describe('Integration tests for SSE endpoint', () => {

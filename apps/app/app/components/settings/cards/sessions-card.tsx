@@ -133,7 +133,7 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 	const revalidator = useRevalidator()
 	const dc = useDoubleCheck()
 
-	const isActive = session.expirationDate > new Date()
+	const isActive = new Date(session.expirationDate) > new Date()
 	const timeAgo = formatDistanceToNow(session.createdAt, { addSuffix: true })
 	const lastActive = formatDistanceToNow(session.updatedAt, { addSuffix: true })
 	const deviceInfo = session.deviceInfo
