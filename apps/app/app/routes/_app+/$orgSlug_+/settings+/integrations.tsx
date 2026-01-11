@@ -1,3 +1,4 @@
+import { invariantResponse } from '@epic-web/invariant'
 import { integrationManager, getAvailableProviders } from '@repo/integrations'
 import {
 	type ActionFunctionArgs,
@@ -77,24 +78,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	if (intent === disconnectIntegrationActionIntent) {
 		const integrationId = formData.get('integrationId') as string
 
-		if (!integrationId) {
-			return Response.json(
-				{ error: 'Integration ID is required' },
-				{ status: 400 },
-			)
-		}
-
-		const integration = await integrationManager.getIntegration(integrationId)
-
-		if (!integration) {
-			return Response.json({ error: 'Integration not found' }, { status: 404 })
-		}
-
-		if (integration.organizationId !== organization.id) {
-			return Response.json({ error: 'Unauthorized' }, { status: 403 })
-		}
+		invariantResponse(integrationId, 'Integration ID is required', {
+			status: 400,
+		})
 
 		try {
+			const integration = await integrationManager.getIntegration(integrationId)
+
+			invariantResponse(integration, 'Integration not found', { status: 404 })
+
+			invariantResponse(
+				integration.organizationId === organization.id,
+				'Unauthorized',
+				{ status: 403 },
+			)
+
 			await integrationManager.disconnectIntegration(integrationId)
 			return Response.json({ success: true })
 		} catch {

@@ -1,9 +1,12 @@
+import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Icon } from '@repo/ui/icon'
+import { Input } from '@repo/ui/input'
 import {
 	Item,
 	ItemActions,
@@ -13,8 +16,6 @@ import {
 	ItemTitle,
 	ItemDescription,
 } from '@repo/ui/item'
-import { Icon } from '@repo/ui/icon'
-import { Input } from '@repo/ui/input'
 import { PageTitle } from '@repo/ui/page-title'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
@@ -98,6 +99,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	return { organizations, pendingInvitations }
 }
 
+/**
+ * Validates that the user owns the invitation (email matches).
+ * Throws invariantResponse errors if validation fails.
+ */
+async function validateInvitationOwnership(
+	userId: string,
+	invitationId: string,
+) {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { email: true },
+	})
+
+	invariantResponse(user, 'User not found', { status: 404 })
+
+	const invitation = await prisma.organizationInvitation.findUnique({
+		where: { id: invitationId },
+		select: { email: true },
+	})
+
+	invariantResponse(invitation, 'Invitation not found', { status: 404 })
+
+	invariantResponse(
+		invitation.email.toLowerCase() === user.email.toLowerCase(),
+		'This invitation was not sent to your email address',
+		{ status: 403 },
+	)
+
+	return { user, invitation }
+}
+
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await request.formData()
@@ -106,14 +138,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'accept-invitation') {
 		try {
-			const user = await prisma.user.findUnique({
-				where: { id: userId },
-				select: { email: true },
-			})
-
-			if (!user) {
-				return Response.json({ error: 'User not found' }, { status: 404 })
-			}
+			await validateInvitationOwnership(userId, invitationId)
 
 			const invitation = await prisma.organizationInvitation.findUnique({
 				where: { id: invitationId },
@@ -123,16 +148,8 @@ export async function action({ request }: ActionFunctionArgs) {
 				},
 			})
 
-			if (!invitation) {
-				return Response.json({ error: 'Invitation not found' }, { status: 404 })
-			}
-
-			if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
-				return Response.json(
-					{ error: 'This invitation was not sent to your email address' },
-					{ status: 403 },
-				)
-			}
+			// This should not happen since validateInvitationOwnership already checked
+			invariantResponse(invitation, 'Invitation not found', { status: 404 })
 
 			// Check if user is already a member
 			const existingMember = await prisma.userOrganization.findUnique({
@@ -179,30 +196,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (intent === 'decline-invitation') {
 		try {
-			const user = await prisma.user.findUnique({
-				where: { id: userId },
-				select: { email: true },
-			})
-
-			if (!user) {
-				return Response.json({ error: 'User not found' }, { status: 404 })
-			}
-
-			const invitation = await prisma.organizationInvitation.findUnique({
-				where: { id: invitationId },
-				select: { email: true },
-			})
-
-			if (!invitation) {
-				return Response.json({ error: 'Invitation not found' }, { status: 404 })
-			}
-
-			if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
-				return Response.json(
-					{ error: 'This invitation was not sent to your email address' },
-					{ status: 403 },
-				)
-			}
+			await validateInvitationOwnership(userId, invitationId)
 
 			await prisma.organizationInvitation.delete({
 				where: { id: invitationId },

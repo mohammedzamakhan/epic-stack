@@ -1,4 +1,4 @@
-import { invariant } from '@epic-web/invariant'
+import { invariant, invariantResponse } from '@epic-web/invariant'
 import type { PrismaClient } from '@prisma/client'
 import type { CoreMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
@@ -80,11 +80,11 @@ export async function handleChat(
 			note.noteAccess.some(
 				(access: { userId: string }) => access.userId === userId,
 			)
-		if (!hasPersonalAccess) {
-			throw new Response('Not authorized - insufficient note permissions', {
-				status: 403,
-			})
-		}
+		invariantResponse(
+			hasPersonalAccess,
+			'Not authorized - insufficient note permissions',
+			{ status: 403 },
+		)
 	}
 
 	// Track AI chat usage for onboarding (if markStepCompleted is provided)

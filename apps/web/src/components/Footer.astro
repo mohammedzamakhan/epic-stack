@@ -1,0 +1,314 @@
+---
+import { brand, getCopyright } from '@repo/config/brand'
+import GridDesign from './GridDesign.astro'
+import Button from './ui/Button.astro'
+import { fetchFooterData } from '../lib/fetchFooter'
+import type { FooterData } from '../types/footer'
+
+const footerData = await fetchFooterData()
+const columns = footerData?.columns || []
+const copyrightText = footerData?.copyrightText || getCopyright()
+const tagline = footerData?.tagline || '// Built with ❤️ for developers'
+
+// Helper to check if we have dynamic columns
+const hasDynamicColumns = columns.length > 0
+
+// Current URL for subdomain logic (if needed for links)
+const currentUrl = Astro.url
+const protocol = currentUrl.protocol
+const hostname = currentUrl.hostname
+const port = currentUrl.port
+
+const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
+const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
+---
+
+<footer
+	class="relative w-full bg-background text-foreground border-t border-dashed border-border"
+>
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6 py-16">
+		<!-- Top Section -->
+		<div class="mb-12 md:mb-16">
+			<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between">
+				<!-- Logo -->
+				<div class="flex flex-2/3 items-center space-x-2">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="18"
+						width="18"
+						viewBox="0 0 18 18"
+						><title>rocket</title><g class="nc-icon-wrapper"
+							><path
+								d="M3.504,17H1.75c-.414,0-.75-.336-.75-.75v-1.754c0-.981,.578-1.877,1.473-2.282,.375-.171,.821-.004,.992,.374,.171,.377,.003,.822-.374,.992-.359,.163-.591,.522-.591,.916v1.004h1.004c.394,0,.753-.232,.916-.591,.17-.377,.616-.544,.992-.374,.377,.171,.545,.615,.374,.992-.405,.895-1.301,1.473-2.282,1.473Z"
+								data-color="color-2"></path><path
+								d="M13.775,10.712c3.636-3.994,3.236-8.497,3.175-9.006-.041-.345-.312-.616-.657-.657-.511-.063-5.011-.461-9.006,3.175l-1.013-.181c-1.536-.273-3.107,.37-4.008,1.641L.388,8.336c-.191,.27-.183,.632,.019,.893,.146,.188,.366,.291,.593,.291,.09,0,.181-.016,.268-.049,.013-.005,1.068-.391,2.636-.329-.17,.438-.291,.825-.377,1.139-.071,.26,.002,.538,.193,.729l3.272,3.272c.143,.143,.334,.22,.53,.22,.066,0,.133-.009,.198-.027,.313-.086,.7-.207,1.137-.377,.058,1.555-.324,2.625-.328,2.636-.118,.309-.02,.658,.241,.86,.135,.104,.297,.157,.459,.157,.152,0,.304-.046,.434-.138l2.654-1.88c1.27-.899,1.913-2.471,1.639-4.003l-.182-1.016Zm-2.525-5.712c.966,0,1.75,.783,1.75,1.75s-.784,1.75-1.75,1.75-1.75-.783-1.75-1.75,.784-1.75,1.75-1.75ZM2.7,7.668l.791-1.116c.566-.799,1.551-1.206,2.521-1.032l.034,.006c-.615,.74-1.106,1.482-1.477,2.173-.688-.067-1.331-.079-1.868-.032Zm8.751,6.84l-1.119,.792c.048-.536,.036-1.18-.032-1.868,.691-.371,1.433-.862,2.173-1.477l.007,.038c.172,.963-.232,1.95-1.03,2.515Z"
+								fill="currentColor"></path></g
+						></svg>
+					<span class="font-semibold text-lg text-foreground">{brand.name}</span>
+				</div>
+
+				<!-- CTA Section -->
+				<div class="flex-1/3 pt-4 lg:pt-0">
+					<h2
+						class="text-2xl md:text-3xl font-title text-foreground mb-4 tracking-tight"
+					>
+						Build your next startup even faster
+					</h2>
+					<p class="text-muted-foreground mb-6 text-sm leading-relaxed">
+						{brand.description}
+					</p>
+					<Button href={demoUrl} size="xl">
+						Get started
+						<svg
+							class="w-4 h-4 transition-transform group-hover:translate-x-1"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+						</svg>
+					</Button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Navigation -->
+		<nav
+			class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-8 mb-12 border-t border-border/50 pt-12"
+		>
+			{
+				hasDynamicColumns ? (
+					columns.map((column) => (
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								{column.title}
+							</h3>
+							<ul class="space-y-3">
+								{column.links.map((linkRef) => {
+									const link = linkRef.link
+									const href = link.url || '#'
+									return (
+										<li>
+											<a
+												href={href}
+												target={link.newTab ? '_blank' : undefined}
+												class="text-sm text-muted-foreground hover:text-primary transition-colors"
+											>
+												{link.label}
+											</a>
+										</li>
+									)
+								})}
+							</ul>
+						</div>
+					))
+				) : (
+					<>
+						{/* Fallback/Default Content if no dynamic data */}
+						<div>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="/"
+										class="text-sm font-medium text-card-foreground hover:text-primary transition-colors"
+									>
+										Home
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								Resources
+							</h3>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="/blog"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Blog
+									</a>
+								</li>
+								<li>
+									<a
+										href="/pricing"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Pricing
+									</a>
+								</li>
+								<li>
+									<a
+										href="/docs"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Documentation
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								Product
+							</h3>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="/features"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Features
+									</a>
+								</li>
+								<li>
+									<a
+										href="/integrations"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Integrations
+									</a>
+								</li>
+								<li>
+									<a
+										href="/api"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										API
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								Company
+							</h3>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="/about"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										About
+									</a>
+								</li>
+								<li>
+									<a
+										href="/careers"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Careers
+									</a>
+								</li>
+								<li>
+									<a
+										href="/contact"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Contact
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								Social
+							</h3>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="https://twitter.com"
+										target="_blank"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Twitter
+									</a>
+								</li>
+								<li>
+									<a
+										href="https://github.com"
+										target="_blank"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										GitHub
+									</a>
+								</li>
+								<li>
+									<a
+										href="https://linkedin.com"
+										target="_blank"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										LinkedIn
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="text-sm font-medium text-card-foreground mb-4">
+								Legal
+							</h3>
+							<ul class="space-y-3">
+								<li>
+									<a
+										href="/privacy"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Privacy Policy
+									</a>
+								</li>
+								<li>
+									<a
+										href="/terms"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Terms of Service
+									</a>
+								</li>
+								<li>
+									<a
+										href="/cookies"
+										class="text-sm text-muted-foreground hover:text-primary transition-colors"
+									>
+										Cookie Policy
+									</a>
+								</li>
+							</ul>
+						</div>
+					</>
+				)
+			}
+		</nav>
+
+		<!-- Bottom Section -->
+		<div class="pt-8 border-t border-border/50">
+			<div
+				class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+			>
+				<div class="flex flex-col gap-2">
+					<p class="text-sm text-muted-foreground">
+						{copyrightText}
+					</p>
+				</div>
+				<div class="flex items-center space-x-4">
+					<span
+						class="text-xs text-muted-foreground font-mono uppercase tracking-wide"
+					>
+						{tagline}
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
