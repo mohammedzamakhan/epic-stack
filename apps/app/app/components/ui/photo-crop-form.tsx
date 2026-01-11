@@ -9,6 +9,7 @@ import ReactCrop, {
 } from 'react-image-crop'
 import { useFetcher } from 'react-router'
 import 'react-image-crop/dist/ReactCrop.css'
+import { Trans } from '@lingui/macro'
 
 export interface PhotoCropFormConfig {
 	// Form submission intent
@@ -213,14 +214,14 @@ export function PhotoCropForm({
 			<input type="hidden" name="intent" value={actionIntent} />
 			<div className="flex gap-3">
 				<Button type="button" variant="outline" onClick={handleCancel}>
-					Cancel
+					<Trans>Cancel</Trans>
 				</Button>
 				<StatusButton
 					type="submit"
 					disabled={!croppedFile}
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				>
-					Save
+					<Trans>Save</Trans>
 				</StatusButton>
 			</div>
 		</form>

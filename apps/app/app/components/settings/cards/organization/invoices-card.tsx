@@ -27,6 +27,7 @@ import {
 import { Link } from 'react-router'
 
 import { EmptyState } from '#app/components/empty-state.tsx'
+import { t, Trans } from '@lingui/macro'
 
 type Invoice = {
 	id?: string
@@ -81,16 +82,18 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 	return (
 		<Frame>
 			<FrameHeader>
-				<FrameTitle>Invoices</FrameTitle>
+				<FrameTitle>
+					<Trans>Invoices</Trans>
+				</FrameTitle>
 				<FrameDescription>
-					View and download your billing invoices
+					<Trans>View and download your billing invoices</Trans>
 				</FrameDescription>
 			</FrameHeader>
 			<FramePanel className="p-0">
 				{invoices.length === 0 ? (
 					<EmptyState
-						title="No invoices found"
-						description="Invoices will appear here once you have an active subscription."
+						title={t`No invoices found`}
+						description={t`Invoices will appear here once you have an active subscription.`}
 						icons={['file-text']}
 					/>
 				) : (
@@ -138,7 +141,7 @@ export function InvoicesCard({ invoices }: InvoicesCardProps) {
 													rel="noopener noreferrer"
 												>
 													<Icon name="external-link" className="h-4 w-4" />
-													View
+													<Trans>View</Trans>
 												</Link>
 											</Button>
 										)}

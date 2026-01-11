@@ -32,7 +32,7 @@ export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
 			<CardContent>
 				<div className="flex flex-col gap-6">
 					<div className="flex items-center">
-						<Icon name="download" className="mr-2" />
+						<Icon name="download" className="ltr:mr-2 rtl:ml-2" />
 						<Link
 							reloadDocument
 							download="my-epic-notes-data.json"

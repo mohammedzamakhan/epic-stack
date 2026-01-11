@@ -13,6 +13,7 @@ import {
 } from '#app/components/forms.tsx'
 
 import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
+import { Trans } from '@lingui/macro'
 
 export const ChangeEmailSchema = z.object({
 	email: EmailSchema,
@@ -59,7 +60,9 @@ export function EmailChangeForm({
 			<input type="hidden" name="intent" value={changeEmailActionIntent} />
 			<FieldGroup>
 				<Field data-invalid={fields.email.errors?.length ? true : undefined}>
-					<FieldLabel htmlFor={fields.email.id}>New Email</FieldLabel>
+					<FieldLabel htmlFor={fields.email.id}>
+						<Trans>New Email</Trans>
+					</FieldLabel>
 					<Input
 						{...getInputProps(fields.email, { type: 'email' })}
 						autoComplete="email"
@@ -76,7 +79,7 @@ export function EmailChangeForm({
 						variant="secondary"
 						onClick={() => setIsOpen(false)}
 					>
-						Cancel
+						<Trans>Cancel</Trans>
 					</Button>
 					<StatusButton
 						type="submit"
@@ -84,7 +87,7 @@ export function EmailChangeForm({
 							fetcher.state !== 'idle' ? 'pending' : (form.status ?? 'idle')
 						}
 					>
-						Save
+						<Trans>Save</Trans>
 					</StatusButton>
 				</div>
 			</FieldGroup>

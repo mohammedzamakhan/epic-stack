@@ -1,6 +1,7 @@
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
 import { ProfilePhotoForm } from '#app/components/settings/profile-photo-form.tsx'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { t } from '@lingui/macro'
 
 export const uploadPhotoActionIntent = 'upload-photo'
 export const deletePhotoActionIntent = 'delete-photo'
@@ -21,7 +22,7 @@ export function ProfilePhoto({ user, size = 'normal' }: ProfilePhotoProps) {
 		<BasePhotoUpload
 			imgSrc={getUserImgSrc(user.image?.objectKey)}
 			alt={user.name ?? user.username}
-			dialogTitle="Update Profile Photo"
+			dialogTitle={t`Update Profile Photo`}
 			renderForm={({ setIsOpen, selectedFile }) => (
 				<ProfilePhotoForm setIsOpen={setIsOpen} selectedFile={selectedFile} />
 			)}

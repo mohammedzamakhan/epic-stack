@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 import { cn, getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
 import { type loader } from './notes'
+import { t, Trans } from '@lingui/macro'
 
 type LoaderNote = {
 	id: string
@@ -270,7 +271,9 @@ export const NoteCard = ({
 												}
 											></TooltipTrigger>
 											<TooltipContent>
-												<p>Quick edit</p>
+												<p>
+													<Trans>Quick edit</Trans>
+												</p>
 											</TooltipContent>
 										</Tooltip>
 									</div>
@@ -292,7 +295,7 @@ export const NoteCard = ({
 											}
 										></TooltipTrigger>
 										<TooltipContent>
-											<p>{copied ? 'Link copied!' : 'Copy link'}</p>
+											<p>{copied ? t`Link copied!` : t`Copy link`}</p>
 										</TooltipContent>
 									</Tooltip>
 								</div>

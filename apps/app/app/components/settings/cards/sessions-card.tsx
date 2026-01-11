@@ -192,7 +192,12 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 								{session.ipAddress ? (
 									<>
 										{session.ipAddress}
-										{lastActive && ` • Last active ${lastActive}`}
+										{lastActive && (
+											<>
+												{' • '}
+												<Trans>Last active {lastActive}</Trans>
+											</>
+										)}
 									</>
 								) : (
 									<Trans>Last active {lastActive}</Trans>
@@ -202,7 +207,7 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 						<ItemActions>
 							<Icon
 								name="chevron-right"
-								className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100"
+								className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100 rtl:rotate-180"
 							/>
 						</ItemActions>
 					</Item>

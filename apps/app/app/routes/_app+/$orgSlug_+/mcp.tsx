@@ -252,7 +252,10 @@ function CodeBlock({ code }: { code: string }) {
 
 	return (
 		<div className="relative">
-			<pre className="bg-muted overflow-x-auto rounded-lg p-4 text-sm">
+			<pre
+				dir="ltr"
+				className="bg-muted overflow-x-auto rounded-lg p-4 text-sm"
+			>
 				<code>{code}</code>
 			</pre>
 			<Button
@@ -1104,7 +1107,7 @@ function ToolItem({ tool }: { tool: MCPTool }) {
 							{params.map(([paramName, paramInfo]) => (
 								<div
 									key={paramName}
-									className="border-border/50 border-l-2 pl-3"
+									className="border-border/50 ltr:border-l-2 ltr:pl-3 rtl:border-r-2 rtl:pr-3"
 								>
 									<div className="flex items-center gap-2">
 										<code className="text-sm font-medium">{paramName}</code>
@@ -1129,7 +1132,10 @@ function ToolItem({ tool }: { tool: MCPTool }) {
 						<h5 className="text-muted-foreground mb-2 text-xs font-medium">
 							<Trans>Example Request</Trans>
 						</h5>
-						<pre className="bg-muted overflow-x-auto rounded p-3 text-xs">
+						<pre
+							dir="ltr"
+							className="bg-muted overflow-x-auto rounded p-3 text-xs"
+						>
 							<code>
 								{JSON.stringify(
 									{

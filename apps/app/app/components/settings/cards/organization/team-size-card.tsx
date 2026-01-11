@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -30,14 +30,6 @@ export const TeamSizeSchema = z.object({
 	organizationId: z.string(),
 })
 
-const teamSizeOptions = [
-	{ value: '1-10', label: '1-10 people' },
-	{ value: '11-50', label: '11-50 people' },
-	{ value: '51-200', label: '51-200 people' },
-	{ value: '201-500', label: '201-500 people' },
-	{ value: '500+', label: '500+ people' },
-]
-
 export default function TeamSizeCard({
 	organization,
 	actionData,
@@ -57,6 +49,14 @@ export default function TeamSizeCard({
 			organizationId: organization.id,
 		},
 	})
+
+	const teamSizeOptions = [
+		{ value: '1-10', label: t`1-10 people` },
+		{ value: '11-50', label: t`11-50 people` },
+		{ value: '51-200', label: t`51-200 people` },
+		{ value: '201-500', label: t`201-500 people` },
+		{ value: '500+', label: t`500+ people` },
+	]
 
 	return (
 		<Form method="POST" {...getFormProps(form)}>

@@ -32,6 +32,7 @@ import { useFetcher, useFetchers } from 'react-router'
 
 import { useDoubleCheck } from '#app/utils/misc.tsx'
 import { NoteCard } from './notes-cards.tsx'
+import { t, Trans } from '@lingui/macro'
 
 type Note = LoaderNote & {
 	position?: number | null
@@ -811,10 +812,10 @@ function EditColumnForm({
 			</div>
 			<div className="flex gap-2">
 				<Button type="submit" variant="default" size="sm" className="flex-1">
-					Save
+					<Trans>Save</Trans>
 				</Button>
 				<Button type="button" variant="outline" size="sm" onClick={onCancel}>
-					Cancel
+					<Trans>Cancel</Trans>
 				</Button>
 			</div>
 		</fetcher.Form>
@@ -848,7 +849,7 @@ function NewColumnButton({ orgSlug }: { orgSlug: string }) {
 						<Input
 							autoFocus
 							name="name"
-							placeholder="Column name"
+							placeholder={t`Column name`}
 							maxLength={24}
 							className="flex-1"
 						/>
@@ -861,7 +862,7 @@ function NewColumnButton({ orgSlug }: { orgSlug: string }) {
 							size="sm"
 							className="flex-1"
 						>
-							Create
+							<Trans>Create</Trans>
 						</Button>
 						<Button
 							type="button"
@@ -869,7 +870,7 @@ function NewColumnButton({ orgSlug }: { orgSlug: string }) {
 							size="sm"
 							onClick={() => setEditing(false)}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 					</div>
 				</fetcher.Form>
@@ -880,7 +881,7 @@ function NewColumnButton({ orgSlug }: { orgSlug: string }) {
 					className="mt-2"
 					onClick={() => setEditing(true)}
 				>
-					<Icon name="plus" className="mr-1" /> Add column
+					<Icon name="plus" className="mr-1" /> <Trans>Add column</Trans>
 				</Button>
 			)}
 		</div>
