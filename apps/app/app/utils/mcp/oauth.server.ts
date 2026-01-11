@@ -206,15 +206,18 @@ export async function validateAccessToken(accessToken: string) {
 
 // Revoke authorization (invalidates all tokens)
 export async function revokeAuthorization(authorizationId: string) {
-	await prisma.mCPAuthorization.update({
-		where: { id: authorizationId },
-		data: { isActive: false },
-	})
+	// Use a transaction to ensure atomicity and reduce risk of database corruption
+	await prisma.$transaction(async (tx) => {
+		await tx.mCPAuthorization.update({
+			where: { id: authorizationId },
+			data: { isActive: false },
+		})
 
-	// Revoke all refresh tokens
-	await prisma.mCPRefreshToken.updateMany({
-		where: { authorizationId },
-		data: { revoked: true, revokedAt: new Date() },
+		// Revoke all refresh tokens
+		await tx.mCPRefreshToken.updateMany({
+			where: { authorizationId },
+			data: { revoked: true, revokedAt: new Date() },
+		})
 	})
 }
 
