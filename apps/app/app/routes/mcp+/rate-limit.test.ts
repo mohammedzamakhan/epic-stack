@@ -1,10 +1,7 @@
 import { prisma } from '@repo/database'
+import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import {
-	checkRateLimit,
-	RATE_LIMITS,
-	getClientIp,
-} from '#app/utils/rate-limit.server.ts'
+import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 
 describe('Rate Limiting', () => {
 	beforeEach(async () => {
@@ -222,14 +219,14 @@ describe('Rate Limiting', () => {
 			expect(ip).toBe('203.0.113.2')
 		})
 
-		it('should return unknown when no IP headers present', () => {
+		it('should return fallback IP when no IP headers present', () => {
 			const request = new Request('http://localhost')
 
 			const ip = getClientIp(request)
-			expect(ip).toBe('unknown')
+			expect(ip).toBe('127.0.0.1')
 		})
 
-		it('should prefer X-Forwarded-For over X-Real-IP', () => {
+		it('should prefer X-Real-IP over X-Forwarded-For', () => {
 			const request = new Request('http://localhost', {
 				headers: {
 					'x-forwarded-for': '203.0.113.3',
@@ -238,7 +235,7 @@ describe('Rate Limiting', () => {
 			})
 
 			const ip = getClientIp(request)
-			expect(ip).toBe('203.0.113.3')
+			expect(ip).toBe('203.0.113.4')
 		})
 	})
 

@@ -1,3 +1,4 @@
+import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
 	logMCPToolInvoked,
@@ -13,7 +14,6 @@ import {
 	checkRateLimit,
 	RATE_LIMITS,
 	createRateLimitResponse,
-	getClientIp,
 } from '#app/utils/rate-limit.server.ts'
 
 /**

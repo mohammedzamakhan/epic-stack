@@ -107,26 +107,6 @@ export async function checkRateLimit(
 }
 
 /**
- * Get the client IP address from request
- */
-export function getClientIp(request: Request): string {
-	// Check for X-Forwarded-For header (proxy)
-	const forwarded = request.headers.get('x-forwarded-for')
-	if (forwarded) {
-		return forwarded.split(',')[0]?.trim() || 'unknown'
-	}
-
-	// Check for X-Real-IP header
-	const realIp = request.headers.get('x-real-ip')
-	if (realIp) {
-		return realIp
-	}
-
-	// Fallback to connection info
-	return 'unknown'
-}
-
-/**
  * Create a rate limit error response
  */
 export function createRateLimitResponse(resetAt: Date) {

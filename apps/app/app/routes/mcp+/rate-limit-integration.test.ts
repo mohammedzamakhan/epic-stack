@@ -1,4 +1,5 @@
 import { prisma } from '@repo/database'
+import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
 	createAuthorizationCode,
@@ -13,7 +14,6 @@ import {
 import {
 	checkRateLimit,
 	RATE_LIMITS,
-	getClientIp,
 	createRateLimitResponse,
 } from '#app/utils/rate-limit.server.ts'
 

@@ -44,7 +44,6 @@ import {
 	checkRateLimit,
 	RATE_LIMITS,
 	createRateLimitResponse,
-	getClientIp,
 } from '#app/utils/rate-limit.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {

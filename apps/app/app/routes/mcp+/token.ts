@@ -1,19 +1,14 @@
+import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs } from 'react-router'
-import {
-	logMCPTokenIssued,
-	logMCPTokenRefreshed,
-	logMCPRateLimitExceeded,
-} from '#app/utils/mcp/audit.server.ts'
+import { logMCPRateLimitExceeded } from '#app/utils/mcp/audit.server.ts'
 import {
 	exchangeAuthorizationCode,
 	refreshAccessToken,
-	validateAccessToken,
 } from '#app/utils/mcp/oauth.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,
 	createRateLimitResponse,
-	getClientIp,
 } from '#app/utils/rate-limit.server.ts'
 
 /**
