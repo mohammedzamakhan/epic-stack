@@ -1,18 +1,18 @@
 import { Trans } from '@lingui/macro'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Link } from 'react-router'
-import { SignOutOfSessions } from '#app/components/settings/account-management.tsx'
-
-export const signOutOfSessionsActionIntent = 'sign-out-of-sessions'
 
 interface AdvancedSettingsCardProps {
 	user: {
 		id: string
 		email: string
-		_count: {
-			sessions: number
-		}
 	}
 }
 
@@ -24,7 +24,9 @@ export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
 					<Trans>Advanced Settings</Trans>
 				</CardTitle>
 				<CardDescription>
-					<Trans>Manage your sessions and download your data.</Trans>
+					<Trans>
+						Download your data and manage advanced account settings.
+					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -40,7 +42,6 @@ export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
 							<Trans>Download your data</Trans>
 						</Link>
 					</div>
-					<SignOutOfSessions data={{ user }} />
 				</div>
 			</CardContent>
 		</Card>

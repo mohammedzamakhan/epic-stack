@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { type Connection, type Password, type User } from '@prisma/client'
 import { prisma } from '@repo/database'
+import { getClientIp } from '@repo/security'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'react-router'
 import { Authenticator } from 'remix-auth'
@@ -12,12 +13,24 @@ import { authSessionStorage } from './session.server.ts'
 import { ssoAuthService } from './sso/auth.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
 import { getUtmParams } from './utm.server.ts'
+import { getUserAgent } from './user-agent.server.ts'
 
 export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30
 export const getSessionExpirationDate = () =>
 	new Date(Date.now() + SESSION_EXPIRATION_TIME)
 
 export const sessionKey = 'sessionId'
+
+/**
+ * Extract IP address and user agent from request for session tracking
+ */
+function getSessionMetadata(request?: Request) {
+	if (!request) return { ipAddress: null, userAgent: null }
+	return {
+		ipAddress: getClientIp(request),
+		userAgent: getUserAgent(request),
+	}
+}
 
 export const authenticator = new Authenticator<ProviderUser>()
 
@@ -200,9 +213,11 @@ export async function canUserLogin(userId: string): Promise<boolean> {
 export async function login({
 	username,
 	password,
+	request,
 }: {
 	username: string
 	password: string
+	request?: Request
 }) {
 	// Try to find user by username first, then by email if it looks like an email
 	let user = null
@@ -228,11 +243,15 @@ export async function login({
 	const canLogin = await canUserLogin(user.id)
 	if (!canLogin) return null
 
+	const { ipAddress, userAgent } = getSessionMetadata(request)
+
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
+			ipAddress,
+			userAgent,
 		},
 	})
 	return session
@@ -276,9 +295,13 @@ export async function signup({
 	// Get UTM parameters from cookies if request is provided
 	const utmParams = request ? await getUtmParams(request) : null
 
+	const { ipAddress, userAgent } = getSessionMetadata(request)
+
 	const session = await prisma.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
+			ipAddress,
+			userAgent,
 			user: {
 				create: {
 					email: email.toLowerCase(),
@@ -319,6 +342,7 @@ export async function signupWithConnection({
 	providerId,
 	providerName,
 	imageUrl,
+	request,
 }: {
 	email: User['email']
 	username: User['username']
@@ -326,6 +350,7 @@ export async function signupWithConnection({
 	providerId: Connection['providerId']
 	providerName: Connection['providerName']
 	imageUrl?: string
+	request?: Request
 }) {
 	const user = await prisma.user.create({
 		data: {
@@ -353,10 +378,14 @@ export async function signupWithConnection({
 	}
 
 	// Create and return the session
+	const { ipAddress, userAgent } = getSessionMetadata(request)
+
 	const session = await prisma.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
+			ipAddress,
+			userAgent,
 		},
 		select: { id: true, expirationDate: true },
 	})
@@ -370,19 +399,25 @@ export async function signupWithConnection({
 export async function loginWithSSO({
 	user,
 	_organizationId,
+	request,
 }: {
 	user: User
 	_organizationId: string
+	request?: Request
 }) {
 	const canLogin = await canUserLogin(user.id)
 	if (!canLogin) {
 		throw new Error('User is banned and cannot login')
 	}
 
+	const { ipAddress, userAgent } = getSessionMetadata(request)
+
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
 			expirationDate: getSessionExpirationDate(),
+			ipAddress,
+			userAgent,
 			userId: user.id,
 		},
 	})

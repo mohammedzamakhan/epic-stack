@@ -2,6 +2,7 @@
  * Unit tests for token encryption service
  */
 
+import { webcrypto as crypto } from 'node:crypto'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import {
 	IntegrationEncryptionService,
@@ -349,6 +350,40 @@ describe('IntegrationEncryptionService', () => {
 
 			expect(result.organizationId).toBe(organizationId)
 			expect(result.providerName).toBe(providerName)
+		})
+
+		it('should reject state with future timestamp', () => {
+			const futureTimestamp = Date.now() + 1000 * 60 * 60 * 24 * 365 * 100 // 100 years in future
+			const maliciousStateData = {
+				organizationId: 'org-malicious',
+				providerName: 'slack',
+				timestamp: futureTimestamp,
+				nonce: crypto.randomUUID(),
+			}
+
+			const maliciousState = Buffer.from(
+				JSON.stringify(maliciousStateData),
+			).toString('base64url')
+
+			expect(() => {
+				encryptionService.validateOAuthState(maliciousState)
+			}).toThrow('Invalid or expired OAuth state')
+		})
+
+		it('should reject state with slightly future timestamp', () => {
+			const futureTimestamp = Date.now() + 10000 // 10 seconds in the future
+			const stateData = {
+				organizationId: 'org-test',
+				providerName: 'github',
+				timestamp: futureTimestamp,
+				nonce: crypto.randomUUID(),
+			}
+
+			const state = Buffer.from(JSON.stringify(stateData)).toString('base64url')
+
+			expect(() => {
+				encryptionService.validateOAuthState(state)
+			}).toThrow('Invalid or expired OAuth state')
 		})
 	})
 

@@ -195,11 +195,19 @@ async function makeSession(
 		})
 	}
 
+	const { getClientIp } = await import('@repo/security')
+	const { getUserAgent } = await import('#app/utils/user-agent.server.ts')
+
+	const ipAddress = getClientIp(request)
+	const userAgent = getUserAgent(request)
+
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId,
+			ipAddress,
+			userAgent,
 		},
 	})
 	return handleNewSession(

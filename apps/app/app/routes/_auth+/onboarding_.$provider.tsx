@@ -130,6 +130,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 			}
 		}).transform(async (data) => {
 			const session = await signupWithConnection({
+				request,
 				...data,
 				email,
 				providerId: String(providerId),

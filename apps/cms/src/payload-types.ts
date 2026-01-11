@@ -2435,7 +2435,7 @@ export interface Footer {
               id?: string | null;
             }[]
           | null;
-          id?: string | null;
+        id?: string | null;
       }[]
     | null;
   copyrightText?: string | null;
@@ -2529,6 +2529,7 @@ export interface FooterSelect<T extends boolean = true> {
   columns?:
     | T
     | {
+        title?: T;
         links?:
           | T
           | {

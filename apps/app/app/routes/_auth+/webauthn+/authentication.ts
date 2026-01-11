@@ -87,11 +87,19 @@ export async function action({ request }: Route.ActionArgs) {
 			)
 		}
 
+		const { getClientIp } = await import('@repo/security')
+		const { getUserAgent } = await import('#app/utils/user-agent.server.ts')
+
+		const ipAddress = getClientIp(request)
+		const userAgent = getUserAgent(request)
+
 		const session = await prisma.session.create({
 			select: { id: true, expirationDate: true, userId: true },
 			data: {
 				expirationDate: getSessionExpirationDate(),
 				userId: passkey.userId,
+				ipAddress,
+				userAgent,
 			},
 		})
 

@@ -16,10 +16,13 @@ import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-se
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
+import { SessionsCard } from '#app/components/settings/cards/sessions-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId, sessionKey } from '#app/utils/auth.server.ts'
+import { authSessionStorage } from '#app/utils/session.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
 import { userSecuritySelect } from '#app/utils/user-security.server.ts'
+import { parseUserAgent } from '#app/utils/user-agent.server.ts'
 import {
 	deleteDataAction,
 	signOutOfSessionsAction,
@@ -84,6 +87,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				createdAt: true,
 			},
 		}),
+		// Get all active sessions for this user
+		prisma.session.findMany({
+			where: {
+				userId,
+				expirationDate: { gt: new Date() },
+			},
+			orderBy: { createdAt: 'desc' },
+			select: {
+				id: true,
+				createdAt: true,
+				expirationDate: true,
+				updatedAt: true,
+				ipAddress: true,
+				userAgent: true,
+			},
+		}),
 	])
 
 	// Extract results with error handling
@@ -98,6 +117,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const password = results[2].status === 'fulfilled' ? results[2].value : null
 	const connections = results[3].status === 'fulfilled' ? results[3].value : []
 	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
+	const rawSessions = results[5].status === 'fulfilled' ? results[5].value : []
+
+	// Get current session ID
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	const currentSessionId = authSession.get(sessionKey) || null
+
+	// Parse user agent for each session
+	const sessions = rawSessions.map((session) => ({
+		...session,
+		deviceInfo: session.userAgent ? parseUserAgent(session.userAgent) : null,
+	}))
 
 	// Generate TOTP QR code if 2FA is not enabled
 	let qrCode = null
@@ -136,6 +168,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		qrCode,
 		otpUri,
 		passkeys,
+		sessions,
+		currentSessionId,
 	}
 }
 
@@ -146,6 +180,7 @@ type SecurityActionArgs = {
 }
 
 export const signOutOfSessionsActionIntent = 'sign-out-of-sessions'
+export const revokeSessionActionIntent = 'revoke-session'
 export const deleteDataActionIntent = 'delete-data'
 export const disconnectProviderActionIntent = 'disconnect-provider'
 export const registerPasskeyActionIntent = 'register-passkey'
@@ -163,6 +198,9 @@ export async function action({ request }: ActionFunctionArgs) {
 	switch (intent) {
 		case signOutOfSessionsActionIntent: {
 			return signOutOfSessionsAction({ request, userId, formData })
+		}
+		case revokeSessionActionIntent: {
+			return revokeSessionAction({ request, userId, formData })
 		}
 		case deleteDataActionIntent: {
 			return deleteDataAction({ request, userId, formData })
@@ -215,6 +253,36 @@ async function deletePasskeyAction({ formData, userId }: SecurityActionArgs) {
 	return { status: 'success' }
 }
 
+async function revokeSessionAction({
+	request,
+	userId,
+	formData,
+}: SecurityActionArgs) {
+	const sessionId = formData.get('sessionId')
+	if (typeof sessionId !== 'string') {
+		throw new Response('Invalid session ID', { status: 400 })
+	}
+
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	const currentSessionId = authSession.get(sessionKey)
+
+	// Prevent revoking the current session
+	if (sessionId === currentSessionId) {
+		throw new Response('Cannot revoke current session', { status: 400 })
+	}
+
+	await prisma.session.delete({
+		where: {
+			id: sessionId,
+			userId, // Ensure the session belongs to the user
+		},
+	})
+
+	return { status: 'success' }
+}
+
 export default function SecuritySettings() {
 	const data = useLoaderData<typeof loader>()
 	const { _ } = useLingui()
@@ -242,6 +310,13 @@ export default function SecuritySettings() {
 
 				<AnnotatedSection>
 					<ConnectionsCard user={data.user} connections={data.connections} />
+				</AnnotatedSection>
+
+				<AnnotatedSection>
+					<SessionsCard
+						sessions={data.sessions}
+						currentSessionId={data.currentSessionId}
+					/>
 				</AnnotatedSection>
 
 				<AnnotatedSection>

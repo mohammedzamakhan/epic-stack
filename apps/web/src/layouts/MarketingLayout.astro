@@ -1,4 +1,5 @@
 ---
+import { ViewTransitions } from 'astro:transitions'
 import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from '~/components/GridDesign.astro'
 import Footer from '~/components/Footer.astro'
@@ -30,6 +31,10 @@ const theme = getThemeFromCookie(cookieHeader)
 // Check if banner is enabled
 const banner = await fetchBannerData()
 const isBannerEnabled = banner?.isEnabled ?? false
+
+// CMS URL for resource hints
+const cmsUrl = (import.meta as any).env?.PUBLIC_CMS_URL || ''
+const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
 ---
 
 <html class={theme} lang="en" dir="ltr">
@@ -38,9 +43,14 @@ const isBannerEnabled = banner?.isEnabled ?? false
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-		<!-- Preconnect to external domains for better performance -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+		<!-- Preconnect to CMS for images and API calls -->
+		{cmsOrigin && (
+			<>
+				<link rel="preconnect" href={cmsOrigin} crossorigin />
+				<link rel="dns-prefetch" href={cmsOrigin} />
+			</>
+		)}
+
 
 		<!-- Favicons -->
 		<link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -49,11 +59,12 @@ const isBannerEnabled = banner?.isEnabled ?? false
 		<link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
 
 		<slot name="head" />
+		<ViewTransitions />
 	</head>
 	<body>
 		<Banner />
 		<Header bannerEnabled={isBannerEnabled} />
-		<main class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'}>
+		<main class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'} transition:animate="fade">
 			<slot />
 		</main>
 

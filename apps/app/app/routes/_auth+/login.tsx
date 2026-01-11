@@ -200,7 +200,7 @@ export async function action({ request }: Route.ActionArgs) {
 			LoginFormSchema.transform(async (data, ctx) => {
 				if (intent !== null) return { ...data, session: null }
 
-				const session = await login(data)
+				const session = await login({ ...data, request })
 				if (!session) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,

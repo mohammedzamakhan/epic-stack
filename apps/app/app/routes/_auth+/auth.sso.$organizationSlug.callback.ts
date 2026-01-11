@@ -314,6 +314,7 @@ async function makeSession(
 
 	// Create session using the SSO login function
 	const session = await loginWithSSO({
+		request,
 		user: user as any, // Type assertion since we know the user structure matches
 		_organizationId: organizationId,
 	})

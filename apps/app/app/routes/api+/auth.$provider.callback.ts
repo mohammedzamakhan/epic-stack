@@ -146,6 +146,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		}
 
 		const session = await signupWithConnection({
+			request,
 			email: normalizeEmail(profile.email),
 			username: uniqueUsername,
 			name: profile.name || profile.username || 'User',

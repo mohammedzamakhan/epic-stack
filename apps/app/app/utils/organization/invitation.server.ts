@@ -1,4 +1,5 @@
 import { webcrypto as crypto } from 'node:crypto'
+import { invariantResponse } from '@epic-web/invariant'
 import { markStepCompleted } from '@repo/common/onboarding'
 import { prisma } from '@repo/database'
 import { OrganizationInviteEmail } from '@repo/email'
@@ -262,9 +263,7 @@ export async function validateAndAcceptInvitation(
 		},
 	})
 
-	if (!invitation) {
-		throw new Error('Invitation not found')
-	}
+	invariantResponse(invitation, 'Invitation not found')
 
 	if (invitation.expiresAt && invitation.expiresAt < new Date()) {
 		throw new Error('Invitation has expired')

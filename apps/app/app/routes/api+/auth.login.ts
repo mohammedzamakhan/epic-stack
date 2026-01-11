@@ -28,7 +28,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const submission = await parseWithZod(formData, {
 		schema: LoginFormSchema.transform(async (data, ctx) => {
-			const session = await login(data)
+			const session = await login({ ...data, request })
 			if (!session) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,

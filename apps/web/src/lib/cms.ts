@@ -5,6 +5,8 @@
 
 const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
 
+const CACHE_TTL_MS = import.meta.env.DEV ? 30 * 1000 : 5 * 60 * 1000
+
 export interface Page {
 	id: string
 	title: string
@@ -47,17 +49,60 @@ export interface PaginatedResponse<T> {
 	hasPrevPage: boolean
 }
 
+interface CacheEntry<T> {
+	data: T
+	expiresAt: number
+}
+
+class ResponseCache {
+	private cache = new Map<string, CacheEntry<unknown>>()
+	private ttlMs: number
+
+	constructor(ttlMs: number) {
+		this.ttlMs = ttlMs
+	}
+
+	get<T>(key: string): T | null {
+		const entry = this.cache.get(key)
+		if (!entry) {
+			return null
+		}
+		if (Date.now() > entry.expiresAt) {
+			this.cache.delete(key)
+			return null
+		}
+		return entry.data as T
+	}
+
+	set<T>(key: string, data: T): void {
+		this.cache.set(key, {
+			data,
+			expiresAt: Date.now() + this.ttlMs,
+		})
+	}
+
+	clear(): void {
+		this.cache.clear()
+	}
+}
+
 class CMSClient {
 	private baseUrl: string
+	private cache: ResponseCache
 
-	constructor(baseUrl: string) {
+	constructor(baseUrl: string, cacheTtlMs: number = CACHE_TTL_MS) {
 		this.baseUrl = baseUrl
+		this.cache = new ResponseCache(cacheTtlMs)
 	}
 
 	private async fetch<T>(endpoint: string): Promise<T> {
 		const url = `${this.baseUrl}/api${endpoint}`
 
-		// In development with HTTPS, bypass SSL verification for self-signed certificates
+		const cached = this.cache.get<T>(url)
+		if (cached !== null) {
+			return cached
+		}
+
 		const fetchOptions: RequestInit = {}
 		if (import.meta.env.DEV && url.startsWith('https://')) {
 			// @ts-ignore - Node.js specific option for self-signed certs
@@ -70,7 +115,10 @@ class CMSClient {
 		if (!response.ok) {
 			throw new Error(`Failed to fetch from CMS: ${response.statusText}`)
 		}
-		return response.json()
+
+		const data: T = await response.json()
+		this.cache.set(url, data)
+		return data
 	}
 
 	async getPage(slug: string): Promise<Page | null> {
@@ -138,6 +186,10 @@ class CMSClient {
 			console.error('Error fetching post:', error)
 			return null
 		}
+	}
+
+	clearCache(): void {
+		this.cache.clear()
 	}
 }
 

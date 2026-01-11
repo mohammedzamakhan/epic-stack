@@ -20,9 +20,8 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import { requireUserId, sessionKey } from '#app/utils/auth.server.ts'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import { getUserImgSrc, useDoubleCheck } from '#app/utils/misc.tsx'
-import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { getUserSecurityData } from '#app/utils/user-security.server.ts'
 import { type Route } from './+types/profile.index.ts'
@@ -57,7 +56,6 @@ type ProfileActionArgs = {
 	formData: FormData
 }
 const profileUpdateActionIntent = 'update-profile'
-const signOutOfSessionsActionIntent = 'sign-out-of-sessions'
 const deleteDataActionIntent = 'delete-data'
 
 export async function action({ request }: Route.ActionArgs) {
@@ -67,9 +65,6 @@ export async function action({ request }: Route.ActionArgs) {
 	switch (intent) {
 		case profileUpdateActionIntent: {
 			return profileUpdateAction({ request, userId, formData })
-		}
-		case signOutOfSessionsActionIntent: {
-			return signOutOfSessionsAction({ request, userId, formData })
 		}
 		case deleteDataActionIntent: {
 			return deleteDataAction({ request, userId, formData })
@@ -170,7 +165,13 @@ export default function EditUserProfile({ loaderData }: Route.ComponentProps) {
 						</Icon>
 					</Link>
 				</div>
-				<SignOutOfSessions loaderData={loaderData} />
+				<div>
+					<Link to="/security">
+						<Icon name="monitor">
+							<Trans>Manage sessions</Trans>
+						</Icon>
+					</Link>
+				</div>
 				<DeleteData />
 			</div>
 		</div>
@@ -291,68 +292,6 @@ function UpdateProfile({
 				</div>
 			</FieldGroup>
 		</fetcher.Form>
-	)
-}
-
-async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
-	const authSession = await authSessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-	const sessionId = authSession.get(sessionKey)
-	invariantResponse(
-		sessionId,
-		'You must be authenticated to sign out of other sessions',
-	)
-	await prisma.session.deleteMany({
-		where: {
-			userId,
-			id: { not: sessionId },
-		},
-	})
-	return { status: 'success' } as const
-}
-
-function SignOutOfSessions({
-	loaderData,
-}: {
-	loaderData: Route.ComponentProps['loaderData']
-}) {
-	const dc = useDoubleCheck()
-
-	const fetcher = useFetcher<typeof signOutOfSessionsAction>()
-	const otherSessionsCount = loaderData.user._count.sessions - 1
-	return (
-		<div>
-			{otherSessionsCount ? (
-				<fetcher.Form method="POST">
-					<StatusButton
-						{...dc.getButtonProps({
-							type: 'submit',
-							name: 'intent',
-							value: signOutOfSessionsActionIntent,
-						})}
-						variant={dc.doubleCheck ? 'destructive' : 'default'}
-						status={
-							fetcher.state !== 'idle'
-								? 'pending'
-								: (fetcher.data?.status ?? 'idle')
-						}
-					>
-						<Icon name="user">
-							{dc.doubleCheck ? (
-								<Trans>Are you sure?</Trans>
-							) : (
-								<Trans>Sign out of {otherSessionsCount} other sessions</Trans>
-							)}
-						</Icon>
-					</StatusButton>
-				</fetcher.Form>
-			) : (
-				<Icon name="user">
-					<Trans>This is your only session</Trans>
-				</Icon>
-			)}
-		</div>
 	)
 }
 

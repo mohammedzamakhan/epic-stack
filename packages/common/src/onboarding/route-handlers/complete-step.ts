@@ -3,6 +3,10 @@ import { type ActionFunctionArgs } from 'react-router'
 
 export interface OnboardingCompleteStepDependencies {
 	requireUserId: (request: Request) => Promise<string>
+	checkUserOrganizationAccess: (
+		userId: string,
+		organizationId: string,
+	) => Promise<unknown>
 	markStepCompleted: (
 		userId: string,
 		organizationId: string,
@@ -34,6 +38,14 @@ export async function handleOnboardingCompleteStep(
 
 	invariant(typeof stepKey === 'string', 'stepKey is required')
 	invariant(typeof organizationId === 'string', 'organizationId is required')
+
+	const userOrg = await deps.checkUserOrganizationAccess(userId, organizationId)
+	if (!userOrg) {
+		return Response.json(
+			{ error: 'Access denied: You do not have access to this organization' },
+			{ status: 403 },
+		)
+	}
 
 	try {
 		await deps.markStepCompleted(userId, organizationId, stepKey, {
