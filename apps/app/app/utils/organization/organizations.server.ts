@@ -515,9 +515,11 @@ export async function getOrganizationWithAccess<
 	const organization = await prisma.organization.findFirst({
 		where: {
 			slug: orgSlug,
+			active: true,
 			users: {
 				some: {
 					userId,
+					active: true,
 				},
 			},
 		},

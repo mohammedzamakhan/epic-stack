@@ -195,6 +195,36 @@ describe('OAuthStateManager', () => {
 				OAuthStateManager.validateState(invalidState)
 			}).toThrow('Invalid state: signature verification failed')
 		})
+
+		it('should throw error for state with future timestamp', () => {
+			// Mock Date.now to create a state, then restore it
+			const originalNow = Date.now
+			const futureTime = Date.now() + 1000 * 60 * 60 * 24 * 365 * 100 // 100 years ahead
+
+			vi.spyOn(Date, 'now').mockReturnValue(futureTime)
+			const futureState = OAuthStateManager.generateState('org-123', 'slack')
+
+			Date.now = originalNow
+
+			expect(() => {
+				OAuthStateManager.validateState(futureState)
+			}).toThrow('Invalid state: timestamp is in the future')
+		})
+
+		it('should throw error for state with slightly future timestamp', () => {
+			// Mock Date.now to create a state 10 seconds in the future, then restore it
+			const originalNow = Date.now
+			const futureTime = Date.now() + 10000 // 10 seconds ahead
+
+			vi.spyOn(Date, 'now').mockReturnValue(futureTime)
+			const futureState = OAuthStateManager.generateState('org-123', 'slack')
+
+			Date.now = originalNow
+
+			expect(() => {
+				OAuthStateManager.validateState(futureState)
+			}).toThrow('Invalid state: timestamp is in the future')
+		})
 	})
 })
 

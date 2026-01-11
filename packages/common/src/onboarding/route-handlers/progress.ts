@@ -3,6 +3,10 @@ import { type LoaderFunctionArgs } from 'react-router'
 
 export interface OnboardingProgressDependencies {
 	requireUserId: (request: Request) => Promise<string>
+	checkUserOrganizationAccess: (
+		userId: string,
+		organizationId: string,
+	) => Promise<unknown>
 	getOnboardingProgress: (
 		userId: string,
 		organizationId: string,
@@ -30,6 +34,14 @@ export async function handleOnboardingProgress(
 	const organizationId = url.searchParams.get('organizationId')
 
 	invariant(typeof organizationId === 'string', 'organizationId is required')
+
+	const userOrg = await deps.checkUserOrganizationAccess(userId, organizationId)
+	if (!userOrg) {
+		return Response.json(
+			{ error: 'Access denied: You do not have access to this organization' },
+			{ status: 403 },
+		)
+	}
 
 	try {
 		// Auto-detect completed steps first

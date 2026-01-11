@@ -174,7 +174,13 @@ export class IntegrationEncryptionService {
 				throw new Error('Invalid state format')
 			}
 
-			const age = Date.now() - stateData.timestamp
+			const now = Date.now()
+
+			if (stateData.timestamp > now) {
+				throw new Error('OAuth state timestamp is in the future')
+			}
+
+			const age = now - stateData.timestamp
 			if (age > maxAge) {
 				throw new Error('OAuth state has expired')
 			}

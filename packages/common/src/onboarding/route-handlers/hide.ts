@@ -3,6 +3,10 @@ import { type ActionFunctionArgs } from 'react-router'
 
 export interface OnboardingHideDependencies {
 	requireUserId: (request: Request) => Promise<string>
+	checkUserOrganizationAccess: (
+		userId: string,
+		organizationId: string,
+	) => Promise<unknown>
 	hideOnboarding: (userId: string, organizationId: string) => Promise<void>
 }
 
@@ -27,6 +31,14 @@ export async function handleOnboardingHide(
 		formData.get('organizationId') || url.searchParams.get('organizationId')
 
 	invariant(typeof organizationId === 'string', 'organizationId is required')
+
+	const userOrg = await deps.checkUserOrganizationAccess(userId, organizationId)
+	if (!userOrg) {
+		return Response.json(
+			{ error: 'Access denied: You do not have access to this organization' },
+			{ status: 403 },
+		)
+	}
 
 	try {
 		await deps.hideOnboarding(userId, organizationId)

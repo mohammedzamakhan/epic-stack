@@ -112,6 +112,11 @@ export class OAuthStateManager {
 			throw new Error('Invalid state: missing required fields')
 		}
 
+		// Check timestamp is not in the future
+		if (stateData.timestamp > Date.now()) {
+			throw new Error('Invalid state: timestamp is in the future')
+		}
+
 		// Check expiration
 		const maxAge = this.STATE_EXPIRY_MINUTES * 60 * 1000
 		if (Date.now() - stateData.timestamp > maxAge) {

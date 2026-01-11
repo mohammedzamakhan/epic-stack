@@ -6,6 +6,7 @@
 
 .font-title {
 	font-family: Poppins, sans-serif;
+	font-display: swap;
 }
 
 :root {
