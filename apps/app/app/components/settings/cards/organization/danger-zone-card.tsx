@@ -1,12 +1,12 @@
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
+	Frame,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { Checkbox } from '@repo/ui/checkbox'
 import {
 	Dialog,
@@ -42,19 +42,19 @@ export default function DangerZoneCard({
 	}
 
 	return (
-		<Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30">
-			<CardHeader>
-				<CardTitle className="text-destructive">
+		<Frame className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30">
+			<FrameHeader>
+				<FrameTitle className="text-destructive">
 					<Trans>Danger</Trans>
-				</CardTitle>
-				<CardDescription>
+				</FrameTitle>
+				<FrameDescription>
 					<Trans>
 						Destructive settings that cannot be undone. All your data will be
 						permanently removed from our servers.
 					</Trans>
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-4">
+				</FrameDescription>
+			</FrameHeader>
+			<FramePanel className="space-y-4">
 				<div className="flex justify-between">
 					<div>
 						<h3 className="text-foreground mb-2 font-medium">
@@ -148,7 +148,7 @@ export default function DangerZoneCard({
 						</DialogContent>
 					</Dialog>
 				</div>
-			</CardContent>
-		</Card>
+			</FramePanel>
+		</Frame>
 	)
 }

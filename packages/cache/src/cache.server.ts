@@ -13,9 +13,11 @@ import {
 	type CreateReporter,
 } from '@epic-web/cachified'
 import { remember } from '@epic-web/remember'
+import { cachifiedTimingReporter, type Timings } from '@repo/common'
+import { getInstanceInfo, getInstanceInfoSync } from '@repo/common/litefs'
 import { LRUCache } from 'lru-cache'
 import { z } from 'zod'
-import { cachifiedTimingReporter, type Timings } from '@repo/common'
+import { updatePrimaryCacheValue } from './cache_.sqlite.server'
 
 const CACHE_DATABASE_PATH = process.env.CACHE_DATABASE_PATH ?? './cache.db'
 
@@ -26,6 +28,8 @@ function createDatabase(tryAgain = true): DatabaseSync {
 	fs.mkdirSync(parentDir, { recursive: true })
 
 	const db = new DatabaseSync(CACHE_DATABASE_PATH)
+	const { currentIsPrimary } = getInstanceInfoSync()
+	if (!currentIsPrimary) return db
 
 	try {
 		// create cache table with metadata JSON column and value JSON column if it does not exist already
@@ -136,11 +140,44 @@ export const cache: CachifiedCache = {
 		return { metadata, value }
 	},
 	async set(key, entry) {
-		const value = JSON.stringify(entry.value, bufferReplacer)
-		setStatement.run(key, value, JSON.stringify(entry.metadata))
+		const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
+
+		if (currentIsPrimary) {
+			const value = JSON.stringify(entry.value, bufferReplacer)
+			setStatement.run(key, value, JSON.stringify(entry.metadata))
+		} else {
+			// fire-and-forget cache update
+			void updatePrimaryCacheValue({
+				key,
+				cacheValue: entry,
+			}).then((response) => {
+				if (!response.ok) {
+					console.error(
+						`Error updating cache value for key "${key}" on primary instance (${primaryInstance}): ${response.status} ${response.statusText}`,
+						{ entry },
+					)
+				}
+			})
+		}
 	},
 	async delete(key) {
-		deleteStatement.run(key)
+		const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
+
+		if (currentIsPrimary) {
+			deleteStatement.run(key)
+		} else {
+			// fire-and-forget cache update
+			void updatePrimaryCacheValue({
+				key,
+				cacheValue: undefined,
+			}).then((response) => {
+				if (!response.ok) {
+					console.error(
+						`Error deleting cache value for key "${key}" on primary instance (${primaryInstance}): ${response.status} ${response.statusText}`,
+					)
+				}
+			})
+		}
 	},
 }
 

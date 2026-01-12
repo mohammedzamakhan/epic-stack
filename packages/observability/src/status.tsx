@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { StatusInfo } from './types.js'
 
 interface StatusComponentProps {
@@ -43,7 +43,7 @@ export function Status({
 			if (!response.ok) {
 				throw new Error('Failed to fetch status')
 			}
-			const data = await response.json() as StatusInfo
+			const data = (await response.json()) as StatusInfo
 			setStatus(data)
 		} catch (error) {
 			console.error('Error fetching status:', error)

@@ -60,13 +60,13 @@ export function NavSecondary({
 											<span>{item.title}</span>
 										</Link>
 									) : (
-										<div>
+										<button>
 											<item.icon
 												ref={(ref: any) => (iconRefs.current[item.title] = ref)}
 												size={16}
 											/>
 											<span>{item.title}</span>
-										</div>
+										</button>
 									)
 								}
 							></SidebarMenuButton>

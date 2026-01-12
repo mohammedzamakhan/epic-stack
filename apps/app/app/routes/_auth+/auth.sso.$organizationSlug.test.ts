@@ -1,8 +1,14 @@
 import { prisma } from '@repo/database'
+import { type AppLoadContext } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { BASE_URL } from '#tests/utils.ts'
 import { action } from './auth.sso.$organizationSlug.ts'
+
+// Mock context helper for tests
+const createMockContext = (): AppLoadContext => ({
+	serverBuild: {} as any,
+})
 
 // Generate unique slug per test run to avoid conflicts with parallel tests
 const TEST_ORG_SLUG = `test-org-sso-${Date.now()}-${Math.random().toString(36).substring(7)}`
@@ -64,7 +70,7 @@ test('successful SSO initiation redirects to identity provider', async () => {
 	const response = await action({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug',
 	})
 
@@ -87,7 +93,7 @@ test('handles organization not found', async () => {
 		await action({
 			request,
 			params: { organizationSlug: 'non-existent-org' },
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
@@ -104,7 +110,7 @@ test('handles missing organization slug', async () => {
 		await action({
 			request,
 			params: { organizationSlug: '' },
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
@@ -126,7 +132,7 @@ test('handles SSO not configured for organization', async () => {
 		await action({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
@@ -153,7 +159,7 @@ test('handles SSO authentication service error', async () => {
 		await action({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
@@ -183,7 +189,7 @@ test('preserves redirect URL in cookie', async () => {
 	const response = await action({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug',
 	})
 

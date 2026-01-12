@@ -2,7 +2,6 @@ node_modules
 
 /build
 /public/build
-/server-build
 .env
 
 # Test artifacts (all workspaces)
@@ -20,7 +19,6 @@ node_modules
 # Build artifacts
 **/dist
 **/build
-**/server-build
 **/.next
 **/.astro
 **/.react-router

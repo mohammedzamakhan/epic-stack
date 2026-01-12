@@ -1,11 +1,17 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
+import { type AppLoadContext } from 'react-router'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
 	validateAccessToken,
 	createAuthorizationWithTokens,
 } from '#app/utils/mcp/oauth.server.ts'
+
+// Mock context helper for tests
+const createMockContext = (): AppLoadContext => ({
+	serverBuild: {} as any,
+})
 
 // Type definitions for JSON-RPC responses
 interface JsonRpcResponse {
@@ -417,7 +423,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify response
@@ -449,7 +455,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify 401 response
@@ -498,7 +504,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify response
@@ -545,7 +551,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify response
@@ -598,7 +604,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify response
@@ -639,7 +645,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify error response
@@ -683,7 +689,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify error response
@@ -718,7 +724,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify error response
@@ -761,7 +767,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify 204 No Content response
@@ -804,7 +810,7 @@ describe('MCP SSE Endpoint', () => {
 			const response = await action({
 				request,
 				params: {},
-				context: {},
+				context: createMockContext(),
 			} as any)
 
 			// Verify error response

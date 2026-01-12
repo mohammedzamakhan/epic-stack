@@ -1,11 +1,11 @@
 import { Trans } from '@lingui/macro'
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
+	Frame,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { DeleteData } from '#app/components/settings/account-management.tsx'
 
 interface DangerCardProps {
@@ -17,16 +17,16 @@ interface DangerCardProps {
 
 export function DangerCard({ user: _user }: DangerCardProps) {
 	return (
-		<Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30 w-full">
-			<CardHeader>
-				<CardTitle className="text-destructive">
+		<Frame className="border-destructive/20 bg-destructive/5 dark:bg-destructive/30 w-full">
+			<FrameHeader>
+				<FrameTitle className="text-destructive">
 					<Trans>Danger</Trans>
-				</CardTitle>
-				<CardDescription>
+				</FrameTitle>
+				<FrameDescription>
 					<Trans>Destructive settings that cannot be undone.</Trans>
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
+				</FrameDescription>
+			</FrameHeader>
+			<FramePanel>
 				<div className="flex justify-between">
 					<div>
 						<h3 className="text-foreground mb-2 font-medium">
@@ -41,7 +41,7 @@ export function DangerCard({ user: _user }: DangerCardProps) {
 					</div>
 					<DeleteData />
 				</div>
-			</CardContent>
-		</Card>
+			</FramePanel>
+		</Frame>
 	)
 }

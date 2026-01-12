@@ -10,12 +10,10 @@
     "#tests/*": "./tests/*"
   },
   "scripts": {
-    "build": "run-s build:*",
-    "build:remix": "react-router build",
-    "build:server": "tsx ./other/build-server.ts",
-    "dev": "cross-env NODE_ENV=development MOCKS=true DISABLE_STRIPE_MOCKS=true tsx ./index.js",
-    "dev:no-mocks": "cross-env NODE_ENV=development node ./server/dev-server.js",
-    "dev:all-mocks": "cross-env NODE_ENV=development MOCKS=true tsx ./index.js",
+    "build": "react-router build",
+    "dev": "cross-env NODE_ENV=development MOCKS=true DISABLE_STRIPE_MOCKS=true node index.ts",
+    "dev:no-mocks": "cross-env NODE_ENV=development node index.ts",
+    "dev:all-mocks": "cross-env NODE_ENV=development MOCKS=true node index.ts",
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:oxc": "oxlint .",
@@ -26,8 +24,8 @@
     "db:migrate:deploy": "cd ../../packages/database && npm run db:migrate:deploy",
     "db:seed": "cd ../../packages/database && npm run db:seed",
     "db:migrate:dev": "cd ../../packages/database && npm run db:migrate:dev",
-    "start": "cross-env NODE_ENV=production node .",
-    "start:mocks": "cross-env NODE_ENV=production MOCKS=true tsx .",
+    "start": "cross-env NODE_ENV=production node index.ts",
+    "start:mocks": "cross-env NODE_ENV=production MOCKS=true node index.ts",
     "test": "vitest --run",
     "test:mcp": "npx @modelcontextprotocol/inspector",
     "coverage": "vitest run --coverage",
@@ -43,8 +41,7 @@
     "/node_modules",
     "/build",
     "/public/build",
-    "/playwright-report",
-    "/server-build"
+    "/playwright-report"
   ],
   "dependencies": {
     "@ai-sdk/google": "^2.0.45",
@@ -214,11 +211,11 @@
     "vitest": "4.0.15"
   },
   "engines": {
-    "node": "22"
+    "node": "^22.18.0"
   },
   "prettier": "@epic-web/config/prettier",
   "volta": {
-    "node": "22.15.0",
+    "node": "22.18.0",
     "npm": "10.9.0"
   }
 }

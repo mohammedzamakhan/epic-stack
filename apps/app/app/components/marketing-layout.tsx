@@ -37,20 +37,7 @@ export function MarketingLayout({
 					trialStatus={trialStatus || undefined}
 					extensionId={extensionId || undefined}
 				/>
-				<SidebarInset
-					style={
-						{
-							'--sidebar-background': '15 23 42', // slate-900
-							'--sidebar-foreground': '248 250 252', // slate-50
-							'--sidebar-primary': '248 250 252', // slate-50Add commentMore actions
-							'--sidebar-primary-foreground': '15 23 42', // slate-900
-							'--sidebar-accent': '30 41 59', // slate-800
-							'--sidebar-accent-foreground': '248 250 252', // slate-50
-							'--sidebar-border': '51 65 85', // slate-600
-							'--sidebar-ring': '148 163 184', // slate-400
-						} as React.CSSProperties
-					}
-				>
+				<SidebarInset>
 					<SiteHeader isCollapsed={isCollapsed} />
 					<div className="flex flex-1 flex-col">
 						<div className="@container/main flex flex-1 flex-col gap-2 px-4 md:px-2">
