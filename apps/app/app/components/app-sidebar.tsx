@@ -316,8 +316,8 @@ function OrganizationSidebar({
 	return (
 		<>
 			<SidebarHeader className="px-2 pt-2 pb-0">
-				<Link to="/">
-					<Logo className="text-md m-1 mx-2" />
+				<Link to="/" aria-label="Go to homepage">
+					<Logo className="text-md m-1 mx-2" aria-hidden="true" />
 				</Link>
 				<TeamSwitcher />
 			</SidebarHeader>

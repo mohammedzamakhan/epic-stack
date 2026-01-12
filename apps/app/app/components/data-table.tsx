@@ -565,6 +565,7 @@ export function DataTable({
 																<th
 																	key={header.id}
 																	colSpan={header.colSpan}
+																	scope="col"
 																	className="text-foreground overflow-hidden px-2 pt-3 pb-2 text-left text-sm font-medium"
 																>
 																	<span

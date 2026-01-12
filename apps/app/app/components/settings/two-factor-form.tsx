@@ -115,7 +115,11 @@ export function TwoFactorForm({
 							</TabsList>
 							<TabsContent value="qr-code" className="mt-4">
 								<div className="flex justify-center">
-									<img alt="qr code" src={qrCode} className="h-48 w-48" />
+									<img
+										alt="QR code for two-factor authentication setup. Scan this code with your authenticator app."
+										src={qrCode}
+										className="h-48 w-48"
+									/>
 								</div>
 							</TabsContent>
 							<TabsContent value="setup-key" className="mt-4">

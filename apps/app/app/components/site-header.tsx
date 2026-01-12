@@ -37,6 +37,8 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 						variant="outline"
 						className="bg-muted/50 text-muted-foreground relative h-8 w-[calc(100%-1rem)] flex-1 flex-row-reverse justify-start rounded-[0.5rem] text-sm font-normal shadow-none md:w-40 lg:w-64 ltr:text-left ltr:sm:pr-12 rtl:text-right rtl:sm:pl-12"
 						onClick={() => setCommandOpen(true)}
+						aria-haspopup="dialog"
+						aria-expanded={commandOpen}
 					>
 						<span className="min-w-0 flex-1 truncate">
 							<Trans>Search notes...</Trans>

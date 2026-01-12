@@ -194,19 +194,20 @@ export function OnboardingChecklist({
 									step.actionConfig && (
 										<div>
 											{step.actionConfig.type === 'navigate' ? (
-												<Link
-													to={`/${orgSlug}${step.actionConfig.target}`}
-													onClick={() => handleStepAction(step)}
+												<Button
+													variant="outline"
+													size="sm"
+													className="shadow-sm"
+													render={
+														<Link
+															to={`/${orgSlug}${step.actionConfig.target}`}
+															onClick={() => handleStepAction(step)}
+														/>
+													}
 												>
-													<Button
-														variant="outline"
-														size="sm"
-														className="shadow-sm"
-													>
-														{step.actionConfig.label}
-														<Icon name="arrow-right" className="ml-2 h-3 w-3" />
-													</Button>
-												</Link>
+													{step.actionConfig.label}
+													<Icon name="arrow-right" className="ml-2 h-3 w-3" />
+												</Button>
 											) : (
 												<Button
 													size="sm"
