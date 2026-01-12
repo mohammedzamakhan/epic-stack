@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker'
 import { SetCookie } from '@mjackson/headers'
 import { prisma } from '@repo/database'
 import { http } from 'msw'
+import { AppLoadContext } from 'react-router'
 import { afterEach, expect, test } from 'vitest'
 import { twoFAVerificationType } from '#app/routes/settings+/profile.two-factor.tsx'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
@@ -12,6 +13,11 @@ import { generateTOTP } from '#app/utils/totp.server.ts'
 import { createUser } from '#tests/db-utils.ts'
 import { insertGitHubUser, deleteGitHubUsers } from '#tests/mocks/github.ts'
 import { server } from '#tests/mocks/index.ts'
+
+// Mock context helper for tests
+const createMockContext = (): AppLoadContext => ({
+	serverBuild: {} as any,
+})
 import { consoleError } from '#tests/setup/setup-test-env.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { loader } from './auth.$provider.callback.ts'
@@ -28,7 +34,7 @@ test('a new user goes to onboarding', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	}).catch((e) => e)
 	expect(response).toHaveRedirect('/onboarding/github')
@@ -45,7 +51,7 @@ test('when auth fails, send the user to login with a toast', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	}).catch((e) => e)
 	invariant(response instanceof Response, 'response should be a Response')
@@ -69,7 +75,7 @@ test('when a user is logged in, it creates the connection', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings/profile/connections')
@@ -110,7 +116,7 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings/profile/connections')
@@ -130,7 +136,7 @@ test('when a user exists with the same email, create connection and make session
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 
@@ -179,7 +185,7 @@ test('gives an error if the account is already connected to another user', async
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings/profile/connections')
@@ -207,7 +213,7 @@ test('if a user is not logged in, but the connection exists, make a session', as
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/')
@@ -236,7 +242,7 @@ test('if a user is not logged in, but the connection exists and they have enable
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
 	const searchParams = new URLSearchParams({

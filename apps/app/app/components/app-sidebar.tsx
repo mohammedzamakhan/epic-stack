@@ -73,11 +73,12 @@ function UpgradeAccountCard({
 					variant="secondary"
 					size="sm"
 					className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/70 w-full"
-				>
-					<Link to={`/${orgSlug}/settings/billing`}>
-						<Trans>Upgrade</Trans>
-					</Link>
-				</Button>
+					render={
+						<Link to={`/${orgSlug}/settings/billing`}>
+							<Trans>Upgrade</Trans>
+						</Link>
+					}
+				/>
 				<Button
 					variant="link"
 					size="sm"

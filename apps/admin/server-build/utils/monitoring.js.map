@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../server/utils/monitoring.ts"],
+  "sourcesContent": ["// Re-export from observability package\nexport { initMonitoring as init } from '@repo/observability'\n"],
+  "mappings": "AACA,SAA2B,sBAAY;",
+  "names": []
+}

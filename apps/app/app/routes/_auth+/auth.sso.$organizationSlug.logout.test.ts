@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
+import { type AppLoadContext } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
@@ -8,6 +9,11 @@ import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { createUser } from '#tests/db-utils.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { loader } from './auth.sso.$organizationSlug.logout.ts'
+
+// Mock context helper for tests
+const createMockContext = (): AppLoadContext => ({
+	serverBuild: {} as any,
+})
 
 // Generate unique slug per test run to avoid conflicts with parallel tests
 const TEST_ORG_SLUG = `test-org-logout-${Date.now()}-${Math.random().toString(36).substring(7)}`
@@ -134,7 +140,7 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -172,7 +178,7 @@ test('handles logout when organization not found', async () => {
 		await loader({
 			request,
 			params: { organizationSlug: 'non-existent-org' },
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -205,7 +211,7 @@ test('handles logout when SSO not configured', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -241,7 +247,7 @@ test('handles logout when SSO disabled', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -272,7 +278,7 @@ test('handles logout when no session exists', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -318,7 +324,7 @@ test('handles logout when no SSO session exists', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -387,7 +393,7 @@ test('continues logout even if token revocation fails', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {
@@ -433,7 +439,7 @@ test('handles custom redirect URL from query params', async () => {
 		await loader({
 			request,
 			params: PARAMS,
-			context: {},
+			context: createMockContext(),
 			unstable_pattern: '/auth/sso/:organizationSlug/logout',
 		})
 	} catch (response) {

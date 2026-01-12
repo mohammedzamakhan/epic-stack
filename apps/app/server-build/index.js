@@ -1,6 +1,7 @@
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
-import { wideEventMiddleware } from '@repo/observability'
+import { createRequestHandler } from '@react-router/express'
+import { logger, sentryLogger, wideEventMiddleware } from '@repo/observability'
 import * as Sentry from '@sentry/react-router'
 import { ip as ipAddress } from 'address'
 import closeWithGrace from 'close-with-grace'
@@ -8,25 +9,41 @@ import compression from 'compression'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
-
 const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = process.env.ALLOW_INDEXING !== 'false'
 const SENTRY_ENABLED = IS_PROD && process.env.SENTRY_DSN
-const BUILD_PATH = '../build/server/index.js'
-
 if (SENTRY_ENABLED) {
-	void import('./utils/monitoring.ts').then(({ init }) => init())
+	void import('./utils/monitoring.js').then(({ init }) => init())
 }
-
+const viteDevServer = IS_PROD
+	? void 0
+	: await import('vite').then((vite) =>
+			vite.createServer({
+				server: {
+					middlewareMode: true,
+				},
+				// We tell Vite we are running a custom app instead of
+				// the SPA default so it doesn't run HTML middleware
+				appType: 'custom',
+			}),
+		)
 const app = express()
-
-// ✅ EARLY CORS + LOGGING MIDDLEWARE
 app.use((req, res, next) => {
 	const origin = req.get('Origin')
-	const allowedOrigins = ['https://dashboard-v0.novu.co']
-
+	const allowedOrigins = [
+		'https://dashboard-v0.novu.co',
+		// Allow localhost origins for development (mobile app)
+		...(IS_DEV
+			? [
+					'http://localhost:8081',
+					'http://localhost:8082',
+					'http://localhost:19006',
+					// Default Expo web port
+				]
+			: []),
+	]
 	if (allowedOrigins.includes(origin || '')) {
 		res.header('Access-Control-Allow-Origin', origin)
 		res.header(
@@ -39,21 +56,13 @@ app.use((req, res, next) => {
 		)
 		res.header('Access-Control-Allow-Credentials', 'true')
 	}
-
 	if (req.method === 'OPTIONS') {
 		return res.sendStatus(204)
 	}
-
 	next()
 })
-
-const getHost = (req: { get: (key: string) => string | undefined }) =>
-	req.get('X-Forwarded-Host') ?? req.get('host') ?? ''
-
-// fly is our proxy
+const getHost = (req) => req.get('X-Forwarded-Host') ?? req.get('host') ?? ''
 app.set('trust proxy', true)
-
-// ensure HTTPS only (X-Forwarded-Proto comes from Fly)
 app.use((req, res, next) => {
 	if (req.method !== 'GET') return next()
 	const proto = req.get('X-Forwarded-Proto')
@@ -65,9 +74,6 @@ app.use((req, res, next) => {
 	}
 	next()
 })
-
-// no ending slashes for SEO reasons
-// https://github.com/mohammedzamakhan/epic-startup/discussions/108
 app.get('*', (req, res, next) => {
 	if (req.path.endsWith('/') && req.path.length > 1) {
 		const query = req.url.slice(req.path.length)
@@ -77,31 +83,29 @@ app.get('*', (req, res, next) => {
 		next()
 	}
 })
-
 app.use(compression())
-
-// http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by')
-
-// Then continue with general middleware handling
 app.use((req, res, next) => {
-	// Apply Helmet for non-Novu routes
 	if (!req.url.includes('/novu')) {
 		helmet(res, { general: { referrerPolicy: false } })
 	}
 	next()
 })
-
+if (viteDevServer) {
+	app.use(viteDevServer.middlewares)
+} else {
+	app.use(
+		'/assets',
+		express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
+	)
+	app.use(express.static('build/client', { maxAge: '1h' }))
+}
 app.get(['/img/*', '/favicons/*'], (_req, res) => {
-	// if we made it past the express.static for these, then we're missing something.
-	// So we'll just send a 404 and won't bother calling other middleware.
 	return res.status(404).send('Not found')
 })
-
-// Wide Event middleware - emits one structured log per request with full context
 app.use(
 	wideEventMiddleware({
-		serviceName: 'admin',
+		serviceName: 'app',
 		serviceVersion: process.env.npm_package_version,
 		skipPaths: [
 			'/resources/healthcheck',
@@ -112,14 +116,10 @@ app.use(
 		],
 	}),
 )
-
-// IP tracking and blacklist middleware
 app.use(async (req, res, next) => {
 	try {
-		// Check if IP is blacklisted first
 		const ipTracking = await import('@repo/common/ip-tracking')
 		const ip = req.get('fly-client-ip') || req.ip || '127.0.0.1'
-
 		const isBlacklisted = await ipTracking.isIpBlacklisted(ip)
 		if (isBlacklisted) {
 			return res.status(403).json({
@@ -129,13 +129,9 @@ app.use(async (req, res, next) => {
 			})
 		}
 	} catch (error) {
-		// If there's an error checking blacklist, log it but don't block the request
-		console.error('Error checking IP blacklist:', error)
+		logger.error({ err: error }, 'Error checking IP blacklist')
 	}
-
-	// Track the request after the response is finished
 	res.on('finish', () => {
-		// Track the request asynchronously
 		setImmediate(async () => {
 			try {
 				const ipTracking = await import('@repo/common/ip-tracking')
@@ -149,36 +145,27 @@ app.use(async (req, res, next) => {
 					statusCode: res.statusCode,
 				})
 			} catch (error) {
-				// Silently fail to not break the app
-				console.error('IP tracking error:', error)
+				logger.error({ err: error }, 'IP tracking error')
 			}
 		})
 	})
-
 	next()
 })
-
-// Periodic cleanup of in-memory request counts (every 5 minutes)
 setInterval(
 	async () => {
 		try {
 			const ipTracking = await import('@repo/common/ip-tracking')
 			ipTracking.cleanupRequestCounts()
 		} catch (error) {
-			console.error('Error cleaning up request counts:', error)
+			logger.error({ err: error }, 'Error cleaning up request counts')
 		}
 	},
-	5 * 60 * 1000,
+	5 * 60 * 1e3,
 )
-
-// When running tests or running in development, we want to effectively disable
-// rate limiting because playwright tests are very fast and we don't want to
-// have to wait for the rate limit to reset between tests.
-const maxMultiple =
-	!IS_PROD || process.env.PLAYWRIGHT_TEST_BASE_URL ? 10_000 : 1
+const maxMultiple = !IS_PROD || process.env.PLAYWRIGHT_TEST_BASE_URL ? 1e4 : 1
 const rateLimitDefault = {
-	windowMs: 60 * 1000,
-	limit: 1000 * maxMultiple,
+	windowMs: 60 * 1e3,
+	limit: 1e3 * maxMultiple,
 	standardHeaders: true,
 	legacyHeaders: false,
 	validate: { trustProxy: false },
@@ -186,23 +173,20 @@ const rateLimitDefault = {
 	// to trusting req.ip when hosted on Fly.io. However, users cannot spoof Fly-Client-Ip.
 	// When sitting behind a CDN such as cloudflare, replace fly-client-ip with the CDN
 	// specific header such as cf-connecting-ip
-	keyGenerator: (req: express.Request) => {
+	keyGenerator: (req) => {
 		return req.get('fly-client-ip') ?? `${req.ip}`
 	},
 }
-
 const strongestRateLimit = rateLimit({
 	...rateLimitDefault,
-	windowMs: 60 * 1000,
+	windowMs: 60 * 1e3,
 	limit: 10 * maxMultiple,
 })
-
 const strongRateLimit = rateLimit({
 	...rateLimitDefault,
-	windowMs: 60 * 1000,
+	windowMs: 60 * 1e3,
 	limit: 100 * maxMultiple,
 })
-
 const generalRateLimit = rateLimit(rateLimitDefault)
 app.use((req, res, next) => {
 	const strongPaths = [
@@ -222,92 +206,122 @@ app.use((req, res, next) => {
 		}
 		return strongRateLimit(req, res, next)
 	}
-
-	// the verify route is a special case because it's a GET route that
-	// can have a token in the query string
 	if (req.path.includes('/verify')) {
 		return strongestRateLimit(req, res, next)
 	}
-
 	return generalRateLimit(req, res, next)
 })
-
+async function getBuild() {
+	try {
+		const build = viteDevServer
+			? await viteDevServer.ssrLoadModule('virtual:react-router/server-build')
+			: // @ts-expect-error - the file might not exist yet but it will
+				await import('../build/server/index.js')
+		return { build, error: null }
+	} catch (error) {
+		sentryLogger.error({ err: error }, 'Error creating build')
+		return { error, build: null }
+	}
+}
 if (!ALLOW_INDEXING) {
 	app.use((_, res, next) => {
 		res.set('X-Robots-Tag', 'noindex, nofollow')
 		next()
 	})
 }
-
-if (IS_DEV) {
-	console.log('Starting development server')
-	const viteDevServer = await import('vite').then((vite) =>
-		vite.createServer({
-			server: { middlewareMode: true },
-			// We tell Vite we are running a custom app instead of
-			// the SPA default so it doesn't run HTML middleware
-			appType: 'custom',
-		}),
-	)
-	app.use(viteDevServer.middlewares)
-	app.use(async (req, res, next) => {
-		try {
-			const source = await viteDevServer.ssrLoadModule('./server/app.ts')
-			return await source.app(req, res, next)
-		} catch (error) {
-			if (typeof error === 'object' && error instanceof Error) {
-				viteDevServer.ssrFixStacktrace(error)
+app.all('/api/novu*', (req, res, next) => {
+	const originalWriteHead = res.writeHead
+	res.writeHead = function (statusCode, reasonPhraseOrHeaders, maybeHeaders) {
+		const headers =
+			typeof reasonPhraseOrHeaders === 'string'
+				? maybeHeaders
+				: reasonPhraseOrHeaders
+		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
+			for (const key of Object.keys(headers)) {
+				if (key.toLowerCase().startsWith('access-control-')) {
+					delete headers[key]
+				}
 			}
-			next(error)
 		}
-	})
-} else {
-	console.log('Starting production server')
-	// React Router fingerprints its assets so we can cache forever.
-	app.use(
-		'/assets',
-		express.static('build/client/assets', {
-			immutable: true,
-			maxAge: '1y',
-			fallthrough: false,
-		}),
-	)
-	// Everything else (like favicon.ico) is cached for an hour. You may want to be
-	// more aggressive with this caching.
-	app.use(express.static('build/client', { maxAge: '1h' }))
-	app.use(await import(BUILD_PATH).then((mod) => mod.app))
-}
-
-const desiredPort = Number(process.env.PORT || 3005)
+		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
+		res.setHeader('Access-Control-Allow-Credentials', 'true')
+		res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
+		res.setHeader(
+			'Access-Control-Allow-Headers',
+			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
+		)
+		if (typeof reasonPhraseOrHeaders === 'string') {
+			if (maybeHeaders) {
+				return originalWriteHead.call(
+					res,
+					statusCode,
+					reasonPhraseOrHeaders,
+					maybeHeaders,
+				)
+			} else {
+				return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+			}
+		} else {
+			return originalWriteHead.call(res, statusCode, reasonPhraseOrHeaders)
+		}
+	}
+	return createRequestHandler({
+		getLoadContext: () => ({ serverBuild: getBuild() }),
+		mode: MODE,
+		build: async () => {
+			const { error, build } = await getBuild()
+			if (error) throw error
+			return build
+		},
+	})(req, res, next)
+})
+app.all(
+	'*',
+	createRequestHandler({
+		getLoadContext: () => ({ serverBuild: getBuild() }),
+		mode: MODE,
+		build: async () => {
+			const { error, build } = await getBuild()
+			if (error) {
+				throw error
+			}
+			return build
+		},
+	}),
+)
+const desiredPort = Number(process.env.PORT || 3001)
 const portToUse = await getPort({
 	port: portNumbers(desiredPort, desiredPort + 100),
 })
 const portAvailable = desiredPort === portToUse
 if (!portAvailable && !IS_DEV) {
-	console.log(`⚠️ Port ${desiredPort} is not available.`)
+	logger.warn({ desiredPort, portToUse }, 'Port not available')
 	process.exit(1)
 }
-
 const server = app.listen(portToUse, () => {
 	if (!portAvailable) {
+		logger.warn(
+			{ desiredPort, portToUse },
+			`Port ${desiredPort} is not available, using ${portToUse} instead`,
+		)
 		console.warn(
 			styleText(
 				'yellow',
-				`⚠️  Port ${desiredPort} is not available, using ${portToUse} instead.`,
+				`\u26A0\uFE0F  Port ${desiredPort} is not available, using ${portToUse} instead.`,
 			),
 		)
 	}
-	console.log(`🚀  We have liftoff!`)
 	const localUrl = `http://localhost:${portToUse}`
-	let lanUrl: string | null = null
+	let lanUrl = null
 	const localIp = ipAddress() ?? 'Unknown'
-	// Check if the address is a private ip
-	// https://en.wikipedia.org/wiki/Private_network#Private_IPv4_address_spaces
-	// https://github.com/facebook/create-react-app/blob/d960b9e38c062584ff6cfb1a70e1512509a966e7/packages/react-dev-utils/WebpackDevServerUtils.js#LL48C9-L54C10
 	if (/^10[.]|^172[.](1[6-9]|2[0-9]|3[0-1])[.]|^192[.]168[.]/.test(localIp)) {
 		lanUrl = `http://${localIp}:${portToUse}`
 	}
-
+	logger.info(
+		{ port: portToUse, localUrl, lanUrl, mode: MODE },
+		'Server started successfully',
+	)
+	console.log(`\u{1F680}  We have liftoff!`)
 	console.log(
 		`
 ${styleText('bold', 'Local:')}            ${styleText('cyan', localUrl)}
@@ -316,7 +330,6 @@ ${styleText('bold', 'Press Ctrl+C to stop')}
 		`.trim(),
 	)
 })
-
 closeWithGrace(async ({ err }) => {
 	await new Promise((resolve, reject) => {
 		server.close((e) => (e ? reject(e) : resolve('ok')))
@@ -325,8 +338,15 @@ closeWithGrace(async ({ err }) => {
 		console.error(styleText('red', String(err)))
 		console.error(styleText('red', String(err.stack)))
 		if (SENTRY_ENABLED) {
-			Sentry.captureException(err)
+			Sentry.captureException(err, {
+				level: 'fatal',
+				extra: { context: 'server_shutdown' },
+			})
 			await Sentry.flush(500)
 		}
+		sentryLogger.fatal({ err }, 'Server shutting down with error')
+	} else {
+		logger.info('Server shutting down gracefully')
 	}
 })
+//# sourceMappingURL=index.js.map

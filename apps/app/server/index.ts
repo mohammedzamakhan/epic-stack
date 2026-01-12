@@ -1,6 +1,5 @@
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
-import { createRequestHandler } from '@react-router/express'
 import { logger, sentryLogger, wideEventMiddleware } from '@repo/observability'
 import * as Sentry from '@sentry/react-router'
 import { ip as ipAddress } from 'address'
@@ -9,31 +8,17 @@ import compression from 'compression'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
-import { type ServerBuild } from 'react-router'
-import { type OutgoingHttpHeader, type OutgoingHttpHeaders } from 'node:http'
 
 const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = process.env.ALLOW_INDEXING !== 'false'
 const SENTRY_ENABLED = IS_PROD && process.env.SENTRY_DSN
+const BUILD_PATH = '../build/server/index.js'
 
 if (SENTRY_ENABLED) {
-	void import('./utils/monitoring.js').then(({ init }) => init())
+	void import('./utils/monitoring.ts').then(({ init }) => init())
 }
-
-const viteDevServer = IS_PROD
-	? undefined
-	: await import('vite').then((vite) =>
-			vite.createServer({
-				server: {
-					middlewareMode: true,
-				},
-				// We tell Vite we are running a custom app instead of
-				// the SPA default so it doesn't run HTML middleware
-				appType: 'custom',
-			}),
-		)
 
 const app = express()
 
@@ -116,20 +101,6 @@ app.use((req, res, next) => {
 	}
 	next()
 })
-
-if (viteDevServer) {
-	app.use(viteDevServer.middlewares)
-} else {
-	// Remix fingerprints its assets so we can cache forever.
-	app.use(
-		'/assets',
-		express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
-	)
-
-	// Everything else (like favicon.ico) is cached for an hour. You may want to be
-	// more aggressive with this caching.
-	app.use(express.static('build/client', { maxAge: '1h' }))
-}
 
 app.get(['/img/*', '/favicons/*'], (_req, res) => {
 	// if we made it past the express.static for these, then we're missing something.
@@ -271,21 +242,6 @@ app.use((req, res, next) => {
 	return generalRateLimit(req, res, next)
 })
 
-async function getBuild() {
-	try {
-		const build = viteDevServer
-			? await viteDevServer.ssrLoadModule('virtual:react-router/server-build')
-			: // @ts-expect-error - the file might not exist yet but it will
-				await import('../build/server/index.js')
-
-		return { build: build as unknown as ServerBuild, error: null }
-	} catch (error) {
-		// Catch error and return null to make express happy and avoid an unrecoverable crash
-		sentryLogger.error({ err: error }, 'Error creating build')
-		return { error: error, build: null as unknown as ServerBuild }
-	}
-}
-
 if (!ALLOW_INDEXING) {
 	app.use((_, res, next) => {
 		res.set('X-Robots-Tag', 'noindex, nofollow')
@@ -293,88 +249,44 @@ if (!ALLOW_INDEXING) {
 	})
 }
 
-app.all('/api/novu*', (req, res, next) => {
-	const originalWriteHead = res.writeHead
-
-	// Force our desired CORS headers right before response is sent
-	res.writeHead = function (
-		statusCode: number,
-		reasonPhraseOrHeaders?: string | OutgoingHttpHeaders | OutgoingHttpHeader[],
-		maybeHeaders?: OutgoingHttpHeaders | OutgoingHttpHeader[],
-	) {
-		const headers =
-			typeof reasonPhraseOrHeaders === 'string'
-				? maybeHeaders
-				: reasonPhraseOrHeaders
-
-		if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
-			// Clear existing access-control-* headers
-			for (const key of Object.keys(headers)) {
-				if (key.toLowerCase().startsWith('access-control-')) {
-					delete (headers as Record<string, any>)[key]
-				}
+if (IS_DEV) {
+	console.log('Starting development server')
+	const viteDevServer = await import('vite').then((vite) =>
+		vite.createServer({
+			server: { middlewareMode: true },
+			// We tell Vite we are running a custom app instead of
+			// the SPA default so it doesn't run HTML middleware
+			appType: 'custom',
+		}),
+	)
+	app.use(viteDevServer.middlewares)
+	app.use(async (req, res, next) => {
+		try {
+			const source = await viteDevServer.ssrLoadModule('./server/app.ts')
+			return await source.app(req, res, next)
+		} catch (error) {
+			if (typeof error === 'object' && error instanceof Error) {
+				viteDevServer.ssrFixStacktrace(error)
 			}
+			next(error)
 		}
-
-		// Our own CORS headers
-		res.setHeader('Access-Control-Allow-Origin', 'https://dashboard-v0.novu.co')
-		res.setHeader('Access-Control-Allow-Credentials', 'true')
-		res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
-		res.setHeader(
-			'Access-Control-Allow-Headers',
-			'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, baggage, sentry-trace, bypass-tunnel-reminder',
-		)
-
-		if (typeof reasonPhraseOrHeaders === 'string') {
-			if (maybeHeaders) {
-				return (originalWriteHead as any).call(
-					res,
-					statusCode,
-					reasonPhraseOrHeaders,
-					maybeHeaders,
-				)
-			} else {
-				return (originalWriteHead as any).call(
-					res,
-					statusCode,
-					reasonPhraseOrHeaders,
-				)
-			}
-		} else {
-			return (originalWriteHead as any).call(
-				res,
-				statusCode,
-				reasonPhraseOrHeaders,
-			)
-		}
-	}
-
-	return createRequestHandler({
-		getLoadContext: () => ({ serverBuild: getBuild() }),
-		mode: MODE,
-		build: async () => {
-			const { error, build } = await getBuild()
-			if (error) throw error
-			return build
-		},
-	})(req, res, next)
-})
-
-app.all(
-	'*',
-	createRequestHandler({
-		getLoadContext: () => ({ serverBuild: getBuild() }),
-		mode: MODE,
-		build: async () => {
-			const { error, build } = await getBuild()
-			// gracefully "catch" the error
-			if (error) {
-				throw error
-			}
-			return build
-		},
-	}),
-)
+	})
+} else {
+	console.log('Starting production server')
+	// React Router fingerprints its assets so we can cache forever.
+	app.use(
+		'/assets',
+		express.static('build/client/assets', {
+			immutable: true,
+			maxAge: '1y',
+			fallthrough: false,
+		}),
+	)
+	// Everything else (like favicon.ico) is cached for an hour. You may want to be
+	// more aggressive with this caching.
+	app.use(express.static('build/client', { maxAge: '1h' }))
+	app.use(await import(BUILD_PATH).then((mod) => mod.app))
+}
 
 const desiredPort = Number(process.env.PORT || 3001)
 const portToUse = await getPort({

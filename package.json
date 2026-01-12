@@ -69,7 +69,7 @@
     "storybook": "^10.1.11"
   },
   "engines": {
-    "node": "22"
+    "node": "^22.18.0"
   },
   "prettier": "@epic-web/config/prettier",
   "lint-staged": {
@@ -85,7 +85,7 @@
     ]
   },
   "volta": {
-    "node": "22.15.0",
+    "node": "22.18.0",
     "npm": "10.9.0"
   },
   "dependencies": {

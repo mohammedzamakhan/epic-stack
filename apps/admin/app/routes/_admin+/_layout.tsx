@@ -25,20 +25,7 @@ export default function AdminLayout() {
 			}
 		>
 			<AdminSidebar variant="inset" />
-			<SidebarInset
-				style={
-					{
-						'--sidebar-background': '15 23 42', // slate-900
-						'--sidebar-foreground': '248 250 252', // slate-50
-						'--sidebar-primary': '248 250 252', // slate-50
-						'--sidebar-primary-foreground': '15 23 42', // slate-900
-						'--sidebar-accent': '30 41 59', // slate-800
-						'--sidebar-accent-foreground': '248 250 252', // slate-50
-						'--sidebar-border': '51 65 85', // slate-600
-						'--sidebar-ring': '148 163 184', // slate-400
-					} as React.CSSProperties
-				}
-			>
+			<SidebarInset>
 				<div className="flex flex-1 flex-col">
 					<div className="@container/main flex flex-1 flex-col gap-2 rounded-lg md:px-2">
 						<div className="container mx-auto px-4 py-8">

@@ -1,6 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
+import { type AppLoadContext } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
@@ -10,6 +11,11 @@ import { createUser } from '#tests/db-utils.ts'
 import { consoleError } from '#tests/setup/setup-test-env.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { loader } from './auth.sso.$organizationSlug.callback.ts'
+
+// Mock context helper for tests
+const createMockContext = (): AppLoadContext => ({
+	serverBuild: {} as any,
+})
 
 // Generate unique slug per test run to avoid conflicts with parallel tests
 const TEST_ORG_SLUG = `test-org-callback-${Date.now()}-${Math.random().toString(36).substring(7)}`
@@ -117,7 +123,7 @@ test('successful SSO authentication creates session for existing user', async ()
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
@@ -178,7 +184,7 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
@@ -209,7 +215,7 @@ test('handles organization not found', async () => {
 	const response = await loader({
 		request,
 		params: { organizationSlug: 'non-existent-org' },
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
@@ -230,7 +236,7 @@ test('handles SSO not configured for organization', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
@@ -254,7 +260,7 @@ test('handles SSO disabled for organization', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
@@ -279,7 +285,7 @@ test('handles OAuth callback failure', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
@@ -316,7 +322,7 @@ test('handles user provisioning failure', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
@@ -350,7 +356,7 @@ test('handles user already logged in', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
@@ -387,7 +393,7 @@ test('handles banned user login attempt', async () => {
 	const response = await loader({
 		request,
 		params: PARAMS,
-		context: {},
+		context: createMockContext(),
 		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 

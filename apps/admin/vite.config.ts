@@ -57,6 +57,7 @@ export default defineConfig((config) => ({
 		cssMinify: MODE === 'production',
 
 		rollupOptions: {
+			input: config.isSsrBuild ? './server/app.ts' : undefined,
 			external: [
 				/node:.*/,
 				'fsevents',
@@ -139,7 +140,7 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 			},
 		},
 		sourcemaps: {
-			filesToDeleteAfterUpload: ['./build/**/*.map', '.server-build/**/*.map'],
+			filesToDeleteAfterUpload: ['./build/**/*.map'],
 		},
 	},
 }
