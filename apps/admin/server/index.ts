@@ -27,7 +27,8 @@ app.use((req, res, next) => {
 	const origin = req.get('Origin')
 	const allowedOrigins = ['https://dashboard-v0.novu.co']
 
-	if (allowedOrigins.includes(origin || '')) {
+	// Only set CORS headers if origin is explicitly allowed
+	if (origin && allowedOrigins.includes(origin)) {
 		res.header('Access-Control-Allow-Origin', origin)
 		res.header(
 			'Access-Control-Allow-Methods',
@@ -35,7 +36,7 @@ app.use((req, res, next) => {
 		)
 		res.header(
 			'Access-Control-Allow-Headers',
-			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace, bypass-tunnel-reminder',
+			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace',
 		)
 		res.header('Access-Control-Allow-Credentials', 'true')
 	}
@@ -66,13 +67,41 @@ app.use((req, res, next) => {
 	next()
 })
 
+/**
+ * Normalize a request path for use in redirects.
+ * Ensures the result is an absolute path on this host (no protocol or host).
+ */
+const normalizePathForRedirect = (path: string): string => {
+	if (typeof path !== 'string') return '/'
+	// Collapse repeated slashes and ensure a single leading slash.
+	let normalized = path.replace(/\/+/g, '/')
+	if (!normalized.startsWith('/')) {
+		normalized = '/' + normalized
+	}
+	// Remove any NUL characters to avoid header splitting issues.
+	normalized = normalized.replace(/\0/g, '')
+	return normalized
+}
+
 // no ending slashes for SEO reasons
 // https://github.com/mohammedzamakhan/epic-startup/discussions/108
 app.get('*', (req, res, next) => {
 	if (req.path.endsWith('/') && req.path.length > 1) {
 		const query = req.url.slice(req.path.length)
-		const safepath = req.path.slice(0, -1).replace(/\/+/g, '/')
-		res.redirect(302, safepath + query)
+		const rawPath = req.path.slice(0, -1)
+		const safePath = normalizePathForRedirect(rawPath)
+		let redirectTarget = safePath + query
+
+		try {
+			// Parse relative to a fixed origin to avoid accidentally creating an external URL.
+			const url = new URL(redirectTarget, 'https://example.com')
+			// Only use the path + search + hash components, keeping the redirect on this host.
+			redirectTarget = url.pathname + url.search + url.hash
+		} catch {
+			redirectTarget = '/'
+		}
+
+		res.redirect(302, redirectTarget)
 	} else {
 		next()
 	}
