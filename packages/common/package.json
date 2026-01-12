@@ -79,6 +79,7 @@
     "@epic-web/cachified": "^5.5.2",
     "@paralleldrive/cuid2": "^2.2.2",
     "@repo/database": "*",
+    "@repo/security": "*",
     "@tusbar/cache-control": "^1.0.0",
     "clsx": "^2.1.1",
     "cookie": "^1.0.2",
