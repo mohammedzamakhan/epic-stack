@@ -18,6 +18,7 @@ import Integration from './blocks/Integration.astro'
 import FAQ from './blocks/FAQ.astro'
 import Tabs from './blocks/Tabs.astro'
 import StickyCards from './blocks/StickyCards.astro'
+import FounderNote from './blocks/FounderNote.astro'
 
 interface Props {
 	blocks?: any[]
@@ -72,6 +73,8 @@ if (!blocks || !Array.isArray(blocks)) {
 					return <Tabs {...block} />
 				case 'stickyCards':
 					return <StickyCards {...block} />
+				case 'founderNote':
+					return <FounderNote {...block} />
 				default:
 					return (
 						<div class="unsupported-block">

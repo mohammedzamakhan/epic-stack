@@ -376,6 +376,7 @@ export interface Page {
         blockName?: string | null;
         blockType: 'stickyCards';
       }
+    | FounderNoteBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1177,6 +1178,38 @@ export interface FAQBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FounderNoteBlock".
+ */
+export interface FounderNoteBlock {
+  heading: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  authorName: string;
+  authorTitle: string;
+  companyName?: string | null;
+  /**
+   * Paste the SVG code for the signature. Leave empty to hide signature.
+   */
+  signatureSvg?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'founderNote';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1615,6 +1648,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        founderNote?: T | FounderNoteBlockSelect<T>;
       };
   meta?:
     | T
@@ -1900,6 +1934,20 @@ export interface FAQBlockSelect<T extends boolean = true> {
   supportText?: T;
   supportLinkLabel?: T;
   supportLinkUrl?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FounderNoteBlock_select".
+ */
+export interface FounderNoteBlockSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
+  authorName?: T;
+  authorTitle?: T;
+  companyName?: T;
+  signatureSvg?: T;
   id?: T;
   blockName?: T;
 }

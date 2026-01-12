@@ -21,6 +21,7 @@ import { FAQ } from '../../blocks/FAQ/config'
 import { Blog } from '../../blocks/Blog/config'
 import { Tabs } from '../../blocks/Tabs/config'
 import { StickyCards } from '../../blocks/StickyCards/config'
+import { FounderNote } from '../../blocks/FounderNote/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -102,6 +103,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 FAQ,
                 Tabs,
                 StickyCards,
+                FounderNote,
               ],
               required: true,
               admin: {

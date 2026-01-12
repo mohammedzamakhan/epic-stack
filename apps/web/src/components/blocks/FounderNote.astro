@@ -1,0 +1,98 @@
+---
+import GridDesign from '../GridDesign.astro'
+interface Props {
+	heading: string
+	content: any
+	authorName: string
+	authorTitle: string
+	companyName?: string
+	signatureSvg?: string
+	blockType: 'founderNote'
+}
+
+const {
+	heading = 'A Note from Our Founder',
+	content,
+	authorName = 'John Doe',
+	authorTitle = 'Founder & CEO',
+	companyName,
+	signatureSvg,
+} = Astro.props
+
+const renderLexicalContent = (lexicalContent: any) => {
+	if (!lexicalContent || !lexicalContent.root || !lexicalContent.root.children) {
+		return ''
+	}
+
+	return lexicalContent.root.children
+		.map((node: any) => {
+			if (node.type === 'paragraph' && node.children) {
+				const text = node.children
+					.map((child: any) => {
+						if (child.format && child.format > 0) {
+							let formattedText = child.text || ''
+							if (child.format & 1)
+								formattedText = `<span class="font-medium">${formattedText}</span>`
+							if (child.format & 2) formattedText = `<em class="italic">${formattedText}</em>`
+							return formattedText
+						}
+						return child.text || ''
+					})
+					.join('')
+				return `<p class="mb-4 last:mb-0">${text}</p>`
+			}
+			return ''
+		})
+		.join('')
+}
+---
+
+<section class="relative w-full py-16 md:py-24 border-b border-dashed">
+	<GridDesign />
+	<div class="container mx-auto px-4 md:px-6">
+		<div class="max-w-5xl mx-auto">
+			<div class="relative">
+				<!-- Keep the original rotated background layers for handwritten note effect -->
+				<div
+					class="absolute inset-0 -rotate-1 transform bg-muted shadow-lg sm:-rotate-2 dark:bg-muted/50 dark:shadow-none dark:ring dark:ring-border"
+				>
+				</div>
+				<div
+					class="absolute inset-0 rotate-1 transform bg-muted shadow-md sm:rotate-2 dark:bg-muted/50 dark:shadow-none dark:ring dark:ring-border"
+				>
+				</div>
+				<div
+					class="relative z-10 bg-card px-5 py-8 shadow-sm sm:px-14 sm:py-10 dark:bg-card dark:ring dark:ring-border"
+				>
+					<div class="mb-8 border-b border-border pb-4 sm:pb-6">
+						<h2 class="text-md font-semibold sm:text-lg font-title">{heading}</h2>
+					</div>
+
+					<div class="max-w-none">
+						<div class="prose prose-neutral dark:prose-invert leading-relaxed">
+							<Fragment set:html={renderLexicalContent(content)} />
+						</div>
+					</div>
+
+					<div class="mt-8 pt-4">
+						<p class="font-semibold text-card-foreground">
+							{authorName}
+							<br />
+							<span class="font-medium text-muted-foreground">
+								{authorTitle}{companyName ? `, ${companyName}` : ''}
+							</span>
+						</p>
+
+						{
+							signatureSvg && (
+								<div class="mt-4 text-muted-foreground opacity-75 [&>svg]:max-w-[153px] [&>svg]:h-auto">
+									<Fragment set:html={signatureSvg} />
+								</div>
+							)
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
