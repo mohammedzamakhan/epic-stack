@@ -13,13 +13,20 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 		where: { name: 'member' },
 	})
 	if (!memberRole) {
-		memberRole = await prisma.organizationRole.create({
-			data: {
-				name: 'member',
-				description: 'Member role',
-				level: 1,
-			},
-		})
+		try {
+			memberRole = await prisma.organizationRole.create({
+				data: {
+					name: 'member',
+					description: 'Member role',
+					level: 1,
+				},
+			})
+		} catch {
+			// Role may have been created by another test in parallel
+			memberRole = await prisma.organizationRole.findFirstOrThrow({
+				where: { name: 'member' },
+			})
+		}
 	}
 
 	await prisma.userOrganization.create({

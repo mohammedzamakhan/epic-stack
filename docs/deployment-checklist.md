@@ -306,6 +306,7 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
   - [ ] `deploy-app` job exists
   - [ ] `deploy-admin` job exists
   - [ ] `deploy-cms` job exists
+  - [ ] `affected` job detects changes for all apps
 
 ---
 

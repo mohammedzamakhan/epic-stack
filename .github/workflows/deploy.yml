@@ -19,6 +19,43 @@ env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
+  affected:
+    name: 📊 Detect Affected Projects
+    runs-on: ubuntu-22.04
+    outputs:
+      app: ${{ steps.affected.outputs.app }}
+      admin: ${{ steps.affected.outputs.admin }}
+      web: ${{ steps.affected.outputs.web }}
+      cms: ${{ steps.affected.outputs.cms }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 📊 Check affected projects
+        id: affected
+        run: |
+          # Get the base ref for comparison
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.ref }}"
+          else
+            BASE_REF="HEAD~1"
+          fi
+          
+          # Check which projects are affected
+          echo "app=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "admin=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "web=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "cms=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
@@ -172,9 +209,9 @@ jobs:
   deploy-web:
     name: 🌐 Deploy Web App
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest]
-    # only deploy web app on pushes or merged PRs to main/dev
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    needs: [lint, typecheck, vitest, affected]
+    # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -218,8 +255,9 @@ jobs:
   container-app:
     name: 📦 Prepare App Container
     runs-on: ubuntu-24.04
-    # only prepare container on pushes or merged PRs
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    needs: [affected]
+    # only prepare container on pushes or merged PRs AND if app was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -268,8 +306,9 @@ jobs:
   container-admin:
     name: 📦 Prepare Admin Container
     runs-on: ubuntu-24.04
-    # only prepare container on pushes or merged PRs
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    needs: [affected]
+    # only prepare container on pushes or merged PRs AND if admin was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -314,13 +353,63 @@ jobs:
             --app ${{ steps.admin_app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          
+  container-cms:
+    name: 📦 Prepare CMS Container
+    runs-on: ubuntu-24.04
+    needs: [affected]
+    # only prepare container on pushes or merged PRs AND if cms was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: 👀 Read CMS app name
+        uses: SebRollen/toml-action@v1.2.0
+        id: cms_app_name
+        with:
+          file: 'apps/cms/fly.toml'
+          field: 'app'
+
+      - name: 🎈 Setup Fly
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      - name: 📦 Build CMS Staging Container
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        run: |
+          flyctl deploy \
+            --build-only \
+            --push \
+            --image-label ${{ github.sha }} \
+            --build-arg COMMIT_SHA=${{ github.sha }} \
+            --config apps/cms/fly.toml \
+            --dockerfile apps/cms/Dockerfile \
+            --app ${{ steps.cms_app_name.outputs.value }}-staging
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: 📦 Build CMS Production Container
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          flyctl deploy \
+            --build-only \
+            --push \
+            --image-label ${{ github.sha }} \
+            --build-arg COMMIT_SHA=${{ github.sha }} \
+            --config apps/cms/fly.toml \
+            --dockerfile apps/cms/Dockerfile \
+            --app ${{ steps.cms_app_name.outputs.value }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   deploy-app:
     name: 🚀 Deploy App
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, playwright, container-app]
-    # only deploy on pushes or merged PRs
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    needs: [lint, typecheck, vitest, playwright, container-app, affected]
+    # only deploy on pushes or merged PRs AND if app was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -356,13 +445,13 @@ jobs:
             --app ${{ steps.app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
+          
   deploy-admin:
     name: 🚀 Deploy Admin
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, playwright, container-admin]
-    # only deploy on pushes or merged PRs
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    needs: [lint, typecheck, vitest, playwright, container-admin, affected]
+    # only deploy on pushes or merged PRs AND if admin was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -396,5 +485,47 @@ jobs:
             --image "registry.fly.io/${{ steps.admin_app_name.outputs.value }}:${{ github.sha }}" \
             --config apps/admin/fly.toml \
             --app ${{ steps.admin_app_name.outputs.value }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-cms:
+    name: 🚀 Deploy CMS
+    runs-on: ubuntu-24.04
+    needs: [lint, typecheck, vitest, container-cms, affected]
+    # only deploy on pushes or merged PRs AND if cms was affected
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '50'
+
+      - name: 👀 Read CMS app name
+        uses: SebRollen/toml-action@v1.2.0
+        id: cms_app_name
+        with:
+          file: 'apps/cms/fly.toml'
+          field: 'app'
+
+      - name: 🎈 Setup Fly
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      - name: 🚀 Deploy CMS Staging
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        run: |
+          flyctl deploy \
+            --image "registry.fly.io/${{ steps.cms_app_name.outputs.value }}-staging:${{ github.sha }}" \
+            --config apps/cms/fly.toml \
+            --app ${{ steps.cms_app_name.outputs.value }}-staging
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: 🚀 Deploy CMS Production
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          flyctl deploy \
+            --image "registry.fly.io/${{ steps.cms_app_name.outputs.value }}:${{ github.sha }}" \
+            --config apps/cms/fly.toml \
+            --app ${{ steps.cms_app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
