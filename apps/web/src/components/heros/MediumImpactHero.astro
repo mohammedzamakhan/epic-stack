@@ -58,15 +58,18 @@ const renderLexicalContent = (content: any) => {
 
 			{links && links.length > 0 && (
 				<div class="flex flex-wrap gap-4 mt-6">
-					{links.map((linkItem: any, i: number) => (
-						<Button
-							href={linkItem?.link?.url || '#'}
-							variant={i === 0 ? 'default' : 'outline'}
-							size="lg"
-						>
-							{linkItem?.link?.label || 'Learn more'}
-						</Button>
-					))}
+					{links.map((linkItem: any, i: number) => {
+						if (!linkItem?.link?.url) return null
+						return (
+							<Button
+								href={linkItem.link.url}
+								variant={i === 0 ? 'default' : 'outline'}
+								size="lg"
+							>
+								{linkItem.link.label || 'Learn more'}
+							</Button>
+						)
+					})}
 				</div>
 			)}
 		</div>
@@ -76,7 +79,7 @@ const renderLexicalContent = (content: any) => {
 				<img
 					class="w-full rounded-lg shadow-xl"
 					src={`${CMS_URL}${media.url}`}
-					alt={media.alt || 'Hero image'}
+					alt={media.alt || ''}
 					width={media.width || 1200}
 					height={media.height || 600}
 					loading="eager"

@@ -55,7 +55,7 @@ const renderLexicalContent = (content: any) => {
 			<img
 				class="w-full h-full object-cover"
 				src={`${CMS_URL}${media.url}`}
-				alt={media.alt || 'Hero background'}
+				alt={media.alt || ''}
 				loading="eager"
 			/>
 			<div class="absolute inset-0 bg-black/50"></div>
@@ -69,15 +69,18 @@ const renderLexicalContent = (content: any) => {
 
 		{links && links.length > 0 && (
 			<div class="flex flex-wrap justify-center gap-4 mt-4">
-				{links.map((linkItem: any, i: number) => (
-					<Button
-						href={linkItem?.link?.url || '#'}
-						variant={i === 0 ? 'default' : 'outline'}
-						size="xl"
-					>
-						{linkItem?.link?.label || 'Learn more'}
-					</Button>
-				))}
+				{links.map((linkItem: any, i: number) => {
+					if (!linkItem?.link?.url) return null
+					return (
+						<Button
+							href={linkItem.link.url}
+							variant={i === 0 ? 'default' : 'outline'}
+							size="xl"
+						>
+							{linkItem.link.label || 'Learn more'}
+						</Button>
+					)
+				})}
 			</div>
 		)}
 	</div>

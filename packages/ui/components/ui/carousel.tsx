@@ -122,6 +122,7 @@ function Carousel({
 				role="region"
 				aria-roledescription="carousel"
 				data-slot="carousel"
+				tabIndex={0}
 				{...props}
 			>
 				{children}
