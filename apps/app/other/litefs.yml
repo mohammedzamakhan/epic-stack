@@ -17,7 +17,7 @@ proxy:
 # The lease section specifies how the cluster will be managed. We're using the
 # "consul" lease type so that our application can dynamically change the primary.
 #
-# These environment variables will be available in your Fly.io application.
+# IMPORTANT: Both apps must use the SAME consul key to share the database
 lease:
   type: 'consul'
   candidate: ${FLY_REGION == PRIMARY_REGION}
@@ -26,10 +26,11 @@ lease:
 
   consul:
     url: '${FLY_CONSUL_URL}'
-    key: 'epic-startup-litefs_20250222/${FLY_APP_NAME}'
+    # SHARED KEY: Both apps use the same key to share database leadership
+    key: 'epic-startup-shared-db/${FLY_APP_NAME}'
 
 exec:
-  - cmd: npx prisma migrate deploy
+  - cmd: cd /myapp/packages/database && npx prisma migrate deploy
     if-candidate: true
 
   # Set the journal mode for the database to WAL. This reduces concurrency deadlock issues
@@ -41,6 +42,6 @@ exec:
     if-candidate: true
 
   # Generate Typed SQL files
-  - cmd: npx prisma generate --sql
+  - cmd: cd /myapp/packages/database && npx prisma generate --sql
 
-  - cmd: npm start
+  - cmd: cd /myapp/apps/app && npm start

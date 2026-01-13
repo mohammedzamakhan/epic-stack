@@ -1,4 +1,4 @@
-app = "epic-saas-template"
+app = "epic-startup"
 primary_region = "sjc"
 kill_signal = "SIGINT"
 kill_timeout = 5
@@ -14,8 +14,8 @@ source = "data"
 destination = "/data"
 
 [build]
-dockerfile = "/other/Dockerfile"
-ignorefile = "/other/Dockerfile.dockerignore"
+dockerfile = "apps/app/other/Dockerfile"
+ignorefile = "apps/app/other/Dockerfile.dockerignore"
 
 [[services]]
 internal_port = 8080

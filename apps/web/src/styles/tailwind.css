@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 .font-title {
-	font-family: Poppins, sans-serif;
+	font-family: Nippo, sans-serif;
 	font-display: swap;
 }
 
