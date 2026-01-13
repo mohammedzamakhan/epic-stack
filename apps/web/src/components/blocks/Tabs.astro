@@ -92,6 +92,10 @@ const {
 						{tabs.map((tab, index) => (
 							<button 
 								class="tab-button w-full text-left p-6 border-b border-dashed border-border hover:bg-muted/20 transition-all duration-200 group"
+								id={`tab-button-${index}`}
+								role="tab"
+								aria-selected={index === 0 ? 'true' : 'false'}
+								aria-controls={`tab-panel-${index}`}
 								data-tab={index}
 								data-active={index === 0 ? 'true' : 'false'}
 							>
@@ -152,6 +156,9 @@ const {
 					{tabs.map((tab, index) => (
 						<div 
 							class="tab-panel absolute inset-0 transition-opacity duration-300"
+							id={`tab-panel-${index}`}
+							role="tabpanel"
+							aria-labelledby={`tab-button-${index}`}
 							data-panel={index}
 							style={index === 0 ? 'opacity: 1;' : 'opacity: 0; pointer-events: none;'}
 						>
@@ -216,6 +223,7 @@ const {
 			tabButtons.forEach((button, index) => {
 				const isActive = index === activeIndex
 				button.setAttribute('data-active', isActive.toString())
+				button.setAttribute('aria-selected', isActive.toString())
 				
 				// Handle description visibility
 				const description = button.querySelector('.tab-description') as HTMLElement

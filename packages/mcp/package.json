@@ -22,7 +22,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.6",
     "@vitest/coverage-v8": "^4.0.1",
     "@repo/config": "*",
     "typescript": "^5.8.3",

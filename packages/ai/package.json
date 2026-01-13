@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@repo/config": "*",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.6",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^19.1.2",
     "@types/react-syntax-highlighter": "^15.5.13",

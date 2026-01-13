@@ -35,7 +35,7 @@
     "@lingui/conf": "^5.3.2",
     "@repo/config": "*",
     "@types/accept-language-parser": "^1.5.0",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.6",
     "typescript": "^5.8.3"
   }
 }

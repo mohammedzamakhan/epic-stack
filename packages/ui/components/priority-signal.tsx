@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { cn } from '../utils/cn'
 
 interface PrioritySignalProps {
@@ -11,6 +12,7 @@ export function PrioritySignal({
 	className,
 	theme = 'light',
 }: PrioritySignalProps) {
+	const patternId = useId()
 	const fill =
 		theme === 'dark' ? 'lch(65.87% 0 0)' : 'lch(39.286% 1 282.863 / 1)'
 
@@ -43,7 +45,7 @@ export function PrioritySignal({
 		>
 			<defs>
 				<pattern
-					id="inactive-pattern"
+					id={patternId}
 					patternUnits="userSpaceOnUse"
 					width="2"
 					height="2"
@@ -58,7 +60,7 @@ export function PrioritySignal({
 				width="2"
 				height="6"
 				rx="1"
-				fill={lowBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fill={lowBar.pattern === 'solid' ? fill : `url(#${patternId})`}
 				fillOpacity={lowBar.pattern === 'solid' ? lowBar.opacity : undefined}
 			/>
 			{/* Medium bar */}
@@ -68,7 +70,7 @@ export function PrioritySignal({
 				width="2"
 				height="9"
 				rx="1"
-				fill={mediumBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fill={mediumBar.pattern === 'solid' ? fill : `url(#${patternId})`}
 				fillOpacity={
 					mediumBar.pattern === 'solid' ? mediumBar.opacity : undefined
 				}
@@ -80,7 +82,7 @@ export function PrioritySignal({
 				width="2"
 				height="12"
 				rx="1"
-				fill={highBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fill={highBar.pattern === 'solid' ? fill : `url(#${patternId})`}
 				fillOpacity={highBar.pattern === 'solid' ? highBar.opacity : undefined}
 			/>
 		</svg>

@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@react-email/preview-server": "^5.0.7",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.6",
     "@types/react": "^19.1.2",
     "next": "^15.5.7",
     "typescript": "^5.8.3"
