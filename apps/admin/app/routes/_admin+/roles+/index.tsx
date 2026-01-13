@@ -238,7 +238,12 @@ function CreateRoleDialog() {
 					{/* Role Type */}
 					<div className="space-y-2">
 						<Label htmlFor="type">Role Type</Label>
-						<Select name="type" defaultValue="organization" required>
+						<Select
+							name="type"
+							defaultValue="organization"
+							required
+							aria-label="Select role type"
+						>
 							<SelectTrigger>Select role type</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="organization">Organization Role</SelectItem>

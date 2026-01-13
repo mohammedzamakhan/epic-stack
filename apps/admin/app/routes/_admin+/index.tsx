@@ -116,6 +116,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							strokeLinejoin="round"
 							strokeWidth="2"
 							className="text-muted-foreground h-4 w-4"
+							aria-hidden="true"
 						>
 							<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
 							<circle cx="9" cy="7" r="4" />
@@ -145,6 +146,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							strokeLinejoin="round"
 							strokeWidth="2"
 							className="text-muted-foreground h-4 w-4"
+							aria-hidden="true"
 						>
 							<path d="M3 21h18" />
 							<path d="M5 21V7l8-4v18" />
@@ -174,6 +176,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							strokeLinejoin="round"
 							strokeWidth="2"
 							className="text-muted-foreground h-4 w-4"
+							aria-hidden="true"
 						>
 							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 							<polyline points="14,2 14,8 20,8" />
@@ -206,6 +209,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							strokeLinejoin="round"
 							strokeWidth="2"
 							className="text-muted-foreground h-4 w-4"
+							aria-hidden="true"
 						>
 							<circle cx="12" cy="12" r="3" />
 							<path d="M12 1v6m0 6v6" />
@@ -371,6 +375,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 								strokeLinejoin="round"
 								strokeWidth="2"
 								className="h-5 w-5"
+								aria-hidden="true"
 							>
 								<circle cx="11" cy="11" r="8" />
 								<path d="M21 21l-4.35-4.35" />

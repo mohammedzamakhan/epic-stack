@@ -204,6 +204,14 @@ export const NoteCard = ({
 			<Card
 				className="group-hover:bg-muted/30 relative h-full cursor-pointer overflow-hidden border-none py-0 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)] transition-all dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]"
 				onClick={handleCardClick}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault()
+						handleCardClick()
+					}
+				}}
+				role="button"
+				tabIndex={0}
 			>
 				{/* Background gradient overlay */}
 				<div className="pointer-events-none absolute inset-0 bg-gradient-to-br opacity-30 transition-opacity duration-500 ease-out group-hover:opacity-40" />

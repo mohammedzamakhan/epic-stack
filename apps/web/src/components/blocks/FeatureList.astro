@@ -132,10 +132,10 @@ const {
 				<div class="flex items-center gap-2 bg-muted p-3" id="pagination-dots">
 					{features.map((_, index) => (
 						<button 
-							class="w-1.5 h-1.5 transition-all duration-200 pagination-dot"
+							class="w-3 h-3 p-4 flex items-center justify-center transition-all duration-200 pagination-dot"
 							data-index={index}
 							aria-label={`Go to feature ${index + 1}`}
-						></button>
+						><span class="w-1.5 h-1.5 block rounded-full bg-current"></span></button>
 					))}
 				</div>
 				<Button 

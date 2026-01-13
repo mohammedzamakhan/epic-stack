@@ -547,15 +547,17 @@ export function NotFoundPage() {
 								variant="outline"
 								size="default"
 								className="bg-transparent shadow-sm"
+								render={<Link to="/" />}
 							>
-								<Link to="/">
-									<span className="px-0.5">Go back</span>
-								</Link>
+								<span className="px-0.5">Go back</span>
 							</Button>
-							<Button variant="default" size="default" className="shadow-sm">
-								<Link to="/">
-									<span className="px-0.5">Take me home</span>
-								</Link>
+							<Button
+								render={<Link to="/" />}
+								variant="default"
+								size="default"
+								className="shadow-sm"
+							>
+								<span className="px-0.5">Take me home</span>
 							</Button>
 						</div>
 					</div>

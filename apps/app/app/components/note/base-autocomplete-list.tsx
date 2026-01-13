@@ -81,7 +81,7 @@ export const BaseAutocompleteList = forwardRef<
 					<button
 						key={index}
 						className={cn(
-							'hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none',
+							'hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring relative flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none focus-visible:ring-2',
 							index === selectedIndex && 'bg-accent text-accent-foreground',
 						)}
 						onClick={(e) => {

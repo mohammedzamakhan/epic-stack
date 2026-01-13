@@ -456,9 +456,9 @@ export default function CacheAdminRoute() {
 								name="database"
 								className="text-muted-foreground mb-4 h-12 w-12"
 							/>
-							<h3 className="mb-2 text-lg font-semibold">
+							<h2 className="mb-2 text-lg font-semibold">
 								No cache entries found
-							</h3>
+							</h2>
 							<p className="text-muted-foreground text-center">
 								{query
 									? `No cache keys match "${query}"`
@@ -652,6 +652,7 @@ function CacheKeyRow({
 						variant="ghost"
 						disabled={isDeleting}
 						onClick={() => setShowConfirmDialog(true)}
+						aria-label="Delete cache key"
 					>
 						{isDeleting ? (
 							<Icon name="loader" className="h-4 w-4 animate-spin" />

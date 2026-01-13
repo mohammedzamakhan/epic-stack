@@ -44,6 +44,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 							height="18"
 							width="18"
 							viewBox="0 0 18 18"
+							aria-hidden="true"
 							><title>rocket</title><g class="nc-icon-wrapper"
 								><path
 									d="M3.504,17H1.75c-.414,0-.75-.336-.75-.75v-1.754c0-.981,.578-1.877,1.473-2.282,.375-.171,.821-.004,.992,.374,.171,.377,.003,.822-.374,.992-.359,.163-.591,.522-.591,.916v1.004h1.004c.394,0,.753-.232,.916-.591,.17-.377,.616-.544,.992-.374,.377,.171,.545,.615,.374,.992-.405,.895-1.301,1.473-2.282,1.473Z"
@@ -77,12 +78,14 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 			<button
 				id="mobile-menu-trigger"
 				class="lg:hidden inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative z-10"
+				aria-label="Open menu"
 			>
 				<svg
 					class="h-6 w-6"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
+					aria-hidden="true"
 				>
 					<path
 						stroke-linecap="round"

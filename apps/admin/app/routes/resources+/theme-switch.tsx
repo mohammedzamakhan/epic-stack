@@ -90,6 +90,7 @@ export function ThemeSwitch({
 				<button
 					type="submit"
 					className="flex size-8 cursor-pointer items-center justify-center"
+					aria-label="Toggle theme"
 				>
 					{modeLabel[mode]}
 				</button>

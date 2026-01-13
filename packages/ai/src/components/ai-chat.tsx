@@ -209,7 +209,7 @@ export function AIChat({ noteId }: AIChatProps) {
 					{isLoading && (
 						<Message from="assistant">
 							<MessageContent>
-								<div className="flex items-center gap-2">
+								<div aria-live="polite" className="flex items-center gap-2">
 									<Loader size={16} />
 									<span className="text-sm">AI is thinking...</span>
 								</div>

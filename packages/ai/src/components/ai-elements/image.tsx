@@ -17,7 +17,7 @@ export const Image = ({
 	<img
 		{...props}
 		src={`data:${mediaType};base64,${base64}`}
-		alt={props.alt}
+		alt={props.alt ?? ''}
 		loading="lazy"
 		decoding="async"
 		className={cn(

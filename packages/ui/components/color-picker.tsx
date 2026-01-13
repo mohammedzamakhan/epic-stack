@@ -82,11 +82,12 @@ export function ColorPicker({
 								value={customColor}
 								onChange={handleCustomColorChange}
 								className="h-8 w-8 cursor-pointer rounded border border-gray-200"
-								title="Choose custom color"
+								aria-label="Custom color picker"
 							/>
 							<input
 								type="text"
 								value={customColor}
+								aria-label="Hex color value"
 								onChange={(e) => {
 									const newColor = e.target.value
 									if (/^#[0-9A-Fa-f]{6}$/.test(newColor)) {

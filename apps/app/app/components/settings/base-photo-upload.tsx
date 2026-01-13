@@ -58,10 +58,19 @@ export function BasePhotoUpload({
 					type="file"
 					accept="image/*"
 					className="sr-only"
+					aria-label="Upload photo"
 					onChange={handleFileSelect}
 				/>
 				<div
 					onClick={handlePhotoClick}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault()
+							handlePhotoClick()
+						}
+					}}
+					role="button"
+					tabIndex={0}
 					className="h-full w-full cursor-pointer"
 				>
 					{!imgSrc && showAvatarChars ? (

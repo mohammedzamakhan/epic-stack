@@ -389,7 +389,7 @@ function NotificationBellComponent() {
 										<DropdownMenuTrigger>
 											<Button
 												variant="ghost"
-												className="h-auto p-0 focus:outline-none"
+												className="focus-visible:ring-ring h-auto p-0 focus:outline-none focus-visible:ring-2"
 											>
 												{filterTitles[filter]}
 												<Icon

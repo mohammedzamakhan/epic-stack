@@ -37,7 +37,7 @@ export const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
 			editorProps: {
 				attributes: {
 					class:
-						'prose prose-sm max-w-none min-h-[120px] focus:outline-none p-3 overflow-y-auto',
+						'prose prose-sm max-w-none min-h-[120px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring p-3 overflow-y-auto',
 				},
 			},
 			onUpdate: ({ editor }: { editor: Editor }) => {

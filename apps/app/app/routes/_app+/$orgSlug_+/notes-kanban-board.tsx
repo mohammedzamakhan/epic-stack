@@ -620,6 +620,7 @@ function KanbanColumn({
 						<button
 							className="flex items-center gap-2 hover:underline"
 							onClick={() => setEditing(true)}
+							aria-label={`Edit ${column.name} column`}
 						>
 							{column.id !== UNCATEGORISED && column.color && (
 								<div
@@ -629,7 +630,10 @@ function KanbanColumn({
 							)}
 							<span className="text-sm">{column.name}</span>
 							{column.id !== UNCATEGORISED && (
-								<button className="invisible p-1 px-2 group-hover:visible">
+								<button
+									className="invisible p-1 px-2 group-hover:visible"
+									aria-label="Edit column"
+								>
 									<Icon name="pencil" size="xs" />
 								</button>
 							)}

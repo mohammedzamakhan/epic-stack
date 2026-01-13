@@ -1312,7 +1312,7 @@ function PlanCard({
 	const isSelected = selectedPriceId === stripePrice.id
 
 	return (
-		<div
+		<button
 			className={`cursor-pointer rounded-lg border-2 p-4 transition-colors ${
 				isSelected
 					? 'border-primary bg-primary/5'
@@ -1363,6 +1363,6 @@ function PlanCard({
 					</li>
 				)}
 			</ul>
-		</div>
+		</button>
 	)
 }

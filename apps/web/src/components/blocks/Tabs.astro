@@ -88,7 +88,7 @@ const {
 
 				<!-- Tabs Navigation -->
 				<div class="flex-1 mb-8">
-					<div class="space-y-0 border-l border-dashed border-border">
+					<div class="space-y-0 border-l border-dashed border-border" role="tablist" aria-label="Feature tabs">
 						{tabs.map((tab, index) => (
 							<button 
 								class="tab-button w-full text-left p-6 border-b border-dashed border-border hover:bg-muted/20 transition-all duration-200 group"
@@ -170,6 +170,7 @@ const {
 									<button 
 										class="video-play-button absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
 										data-video-url={tab.videoUrl}
+										aria-label="Play video"
 									>
 										<div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
 											<svg 

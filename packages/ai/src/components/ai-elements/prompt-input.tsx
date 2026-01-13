@@ -152,17 +152,22 @@ export const PromptInputSubmit = ({
 	...props
 }: PromptInputSubmitProps) => {
 	let iconElement = <Icon name="send" className="size-4" />
+	let ariaLabel = 'Send message'
 
 	if (status === 'submitted') {
 		iconElement = <Icon name="loader" className="size-4 animate-spin" />
+		ariaLabel = 'Sending message'
 	} else if (status === 'streaming') {
 		iconElement = <Icon name="ban" className="size-4" />
+		ariaLabel = 'Stop generation'
 	} else if (status === 'error') {
 		iconElement = <Icon name="x" className="size-4" />
+		ariaLabel = 'Retry'
 	}
 
 	return (
 		<Button
+			aria-label={ariaLabel}
 			className={cn('gap-1.5 rounded-lg', className)}
 			nativeButton
 			size={size}

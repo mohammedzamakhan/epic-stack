@@ -79,7 +79,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
   </div>
 ) : (
   <!-- Desktop Dropdown Style -->
-  <div class="relative group">
+  <div class="relative group mega-menu-container">
     <button
       class="mega-menu-trigger flex items-center space-x-1 text-sm font-medium hover:text-primary transition-colors"
       aria-expanded="false"
@@ -199,6 +199,21 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
 
       trigger.parentElement?.addEventListener('mouseleave', () => {
         trigger.setAttribute('aria-expanded', 'false')
+      })
+
+      // Focus handlers for keyboard accessibility
+      trigger.addEventListener('focus', () => {
+        trigger.setAttribute('aria-expanded', 'true')
+        panel.classList.remove('opacity-0', 'invisible')
+      })
+
+      trigger.parentElement?.addEventListener('focusout', (e) => {
+        const focusEvent = e as FocusEvent
+        const container = trigger.parentElement
+        if (container && !container.contains(focusEvent.relatedTarget as Node)) {
+          trigger.setAttribute('aria-expanded', 'false')
+          panel.classList.add('opacity-0', 'invisible')
+        }
       })
     })
 

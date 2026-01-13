@@ -337,7 +337,7 @@ export default function AdminSystemRoleDetailPage() {
 
 						<TabsContent value="system" className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h3 className="text-lg font-semibold">System permissions</h3>
+								<h2 className="text-lg font-semibold">System permissions</h2>
 								{!isCoreRole && (
 									<Button size="sm" variant="outline">
 										Add permission

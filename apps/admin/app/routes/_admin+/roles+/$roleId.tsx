@@ -534,7 +534,7 @@ export default function AdminRoleDetailPage() {
 
 						<TabsContent value="feature" className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h3 className="text-lg font-semibold">Feature permissions</h3>
+								<h2 className="text-lg font-semibold">Feature permissions</h2>
 								<CreateFeatureDialog />
 							</div>
 
@@ -785,7 +785,11 @@ function CreatePermissionDialog({
 
 						<div className="space-y-2">
 							<Label htmlFor="permissionAccess">Access Level</Label>
-							<Select name="permissionAccess" required>
+							<Select
+								name="permissionAccess"
+								required
+								aria-label="Select access level"
+							>
 								<SelectTrigger>Select access level</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="own">

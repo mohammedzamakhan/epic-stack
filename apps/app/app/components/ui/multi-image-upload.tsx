@@ -274,6 +274,7 @@ function ImagePreview({
 					size="sm"
 					onClick={onRemove}
 					disabled={disabled}
+					aria-label="Remove image"
 				>
 					<Icon name="x" className="h-4 w-4" />
 				</Button>

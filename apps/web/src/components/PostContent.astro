@@ -67,7 +67,7 @@ const renderLexicalContent = (content: any) => {
           h6: 'text-base md:text-lg font-title font-semibold mb-3 text-foreground scroll-mt-24 relative',
         }
         const className = headingClasses[tag as keyof typeof headingClasses] || headingClasses.h2
-        return `<${tag} id="${id}" class="${className}"><strong>${text}</strong><a aria-hidden="true" class="absolute top-0 left-0 w-full h-full" href="#${id}"></a></${tag}>`
+        return `<${tag} id="${id}" class="${className}"><strong>${text}</strong><a class="absolute top-0 left-0 w-full h-full" href="#${id}" aria-label="Link to ${text}"></a></${tag}>`
       }
       if (node.type === 'list' && node.children) {
         const listItems = node.children

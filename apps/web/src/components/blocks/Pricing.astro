@@ -130,11 +130,12 @@ const yearlyDiscount = plans.length
 
 		<!-- Pricing Toggle -->
 		<div class="flex flex-col justify-center items-center mb-12">
-			<div class="inline-flex items-center justify-center bg-muted p-[1px] text-muted-foreground" id="pricing-toggle">
+			<div class="inline-flex items-center justify-center bg-muted p-[1px] text-muted-foreground" id="pricing-toggle" role="group" aria-label="Billing period">
 				<button 
 					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground border border-border shadow-sm cursor-pointer" 
 					data-period="monthly"
 					id="monthly-btn"
+					aria-pressed="true"
 				>
 					Monthly
 				</button>
@@ -142,6 +143,7 @@ const yearlyDiscount = plans.length
 					class="inline-flex items-center justify-center whitespace-nowrap px-6 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground cursor-pointer" 
 					data-period="yearly"
 					id="yearly-btn"
+					aria-pressed="false"
 				>
 					Yearly
 				</button>
@@ -286,10 +288,12 @@ const yearlyDiscount = plans.length
 			// Update active button styles
 			activeBtn.classList.add('bg-background', 'text-foreground', 'border', 'border-border', 'shadow-sm')
 			activeBtn.classList.remove('text-muted-foreground')
+			activeBtn.setAttribute('aria-pressed', 'true')
 			
 			// Update inactive button styles
 			inactiveBtn.classList.remove('bg-background', 'text-foreground', 'border', 'border-border', 'shadow-sm')
 			inactiveBtn.classList.add('text-muted-foreground')
+			inactiveBtn.setAttribute('aria-pressed', 'false')
 		}
 
 		function togglePricing(period: string) {

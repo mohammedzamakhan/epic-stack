@@ -67,7 +67,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		editorProps: {
 			attributes: {
 				class:
-					'text-sm min-h-[40px] focus:outline-none max-w-full prose prose-sm max-w-none',
+					'text-sm min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring max-w-full prose prose-sm max-w-none',
 			},
 		},
 		onUpdate: ({ editor }: { editor: Editor }) => {
@@ -122,7 +122,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			<CardContent className="p-4">
 				<EditorContent
 					editor={editor}
-					className="min-h-[60px] focus:outline-none"
+					className="focus-visible:ring-ring min-h-[60px] focus:outline-none focus-visible:ring-2"
 					placeholder={_(msg`Add a comment...`)}
 				/>
 				{selectedImages.length > 0 && (

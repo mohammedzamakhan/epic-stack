@@ -120,6 +120,7 @@ function FeatureFlagDialog({
 							name="type"
 							defaultValue={type}
 							onValueChange={(value) => setType(value as string)}
+							aria-label="Select flag type"
 						>
 							<SelectTrigger>Type</SelectTrigger>
 							<SelectContent>

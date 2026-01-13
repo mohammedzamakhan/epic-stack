@@ -1,3 +1,5 @@
+import { blacklistIp, unblacklistIp } from '@repo/common/ip-tracking'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -9,6 +11,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@repo/ui/dialog'
+import { Icon } from '@repo/ui/icon'
 import { Label } from '@repo/ui/label'
 import {
 	Table,
@@ -28,8 +31,6 @@ import {
 } from 'react-router'
 
 import { getUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
-import { blacklistIp, unblacklistIp } from '@repo/common/ip-tracking'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -175,16 +176,24 @@ export default function AdminIpAddressesPage() {
 					<h3 className="text-muted-foreground text-sm font-medium">
 						Blacklisted IPs
 					</h3>
-					<p className="text-2xl font-bold text-red-600">
-						{data.stats.blacklistedIps}
+					<p className="flex items-center gap-2 text-2xl font-bold text-red-600">
+						<Icon name="ban" className="h-5 w-5" aria-hidden="true" />
+						<span>{data.stats.blacklistedIps}</span>
+						<span className="sr-only">blocked</span>
 					</p>
 				</div>
 				<div className="bg-card rounded-lg border p-4">
 					<h3 className="text-muted-foreground text-sm font-medium">
 						Suspicious IPs
 					</h3>
-					<p className="text-2xl font-bold text-yellow-600">
-						{data.stats.suspiciousIps}
+					<p className="flex items-center gap-2 text-2xl font-bold text-yellow-600">
+						<Icon
+							name="alert-triangle"
+							className="h-5 w-5"
+							aria-hidden="true"
+						/>
+						<span>{data.stats.suspiciousIps}</span>
+						<span className="sr-only">suspicious</span>
 					</p>
 				</div>
 			</div>

@@ -128,6 +128,14 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 								data-state={row.getIsSelected() && 'selected'}
 								className="cursor-pointer"
 								onClick={() => handleRowClick(row.original)}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault()
+										handleRowClick(row.original)
+									}
+								}}
+								role="button"
+								tabIndex={0}
 							>
 								{row.getVisibleCells().map((cell) => (
 									<TableCell key={cell.id}>

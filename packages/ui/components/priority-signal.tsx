@@ -14,26 +14,21 @@ export function PrioritySignal({
 	const fill =
 		theme === 'dark' ? 'lch(65.87% 0 0)' : 'lch(39.286% 1 282.863 / 1)'
 
-	const getColorAndOpacity = (barIndex: number) => {
-		switch (priority) {
-			case 'low':
-				return {
-					opacity: barIndex === 0 ? '1' : '0.4',
-				}
-			case 'medium':
-				return {
-					opacity: barIndex <= 1 ? '1' : '0.4',
-				}
-			case 'high':
-				return {
-					opacity: '1',
-				}
+	const getBarStyle = (barIndex: number) => {
+		const isActive =
+			priority === 'high' ||
+			(priority === 'medium' && barIndex <= 1) ||
+			(priority === 'low' && barIndex === 0)
+
+		return {
+			opacity: isActive ? '1' : '0.4',
+			pattern: isActive ? 'solid' : 'dashed',
 		}
 	}
 
-	const lowBar = getColorAndOpacity(0)
-	const mediumBar = getColorAndOpacity(1)
-	const highBar = getColorAndOpacity(2)
+	const lowBar = getBarStyle(0)
+	const mediumBar = getBarStyle(1)
+	const highBar = getBarStyle(2)
 
 	return (
 		<svg
@@ -46,6 +41,16 @@ export function PrioritySignal({
 			focusable="false"
 			xmlns="http://www.w3.org/2000/svg"
 		>
+			<defs>
+				<pattern
+					id="inactive-pattern"
+					patternUnits="userSpaceOnUse"
+					width="2"
+					height="2"
+				>
+					<circle cx="1" cy="1" r="0.5" fill={fill} fillOpacity="0.4" />
+				</pattern>
+			</defs>
 			{/* Low bar */}
 			<rect
 				x="1.5"
@@ -53,8 +58,8 @@ export function PrioritySignal({
 				width="2"
 				height="6"
 				rx="1"
-				fill={fill}
-				fillOpacity={lowBar.opacity}
+				fill={lowBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fillOpacity={lowBar.pattern === 'solid' ? lowBar.opacity : undefined}
 			/>
 			{/* Medium bar */}
 			<rect
@@ -63,8 +68,10 @@ export function PrioritySignal({
 				width="2"
 				height="9"
 				rx="1"
-				fill={fill}
-				fillOpacity={mediumBar.opacity}
+				fill={mediumBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fillOpacity={
+					mediumBar.pattern === 'solid' ? mediumBar.opacity : undefined
+				}
 			/>
 			{/* High bar */}
 			<rect
@@ -73,8 +80,8 @@ export function PrioritySignal({
 				width="2"
 				height="12"
 				rx="1"
-				fill={fill}
-				fillOpacity={highBar.opacity}
+				fill={highBar.pattern === 'solid' ? fill : 'url(#inactive-pattern)'}
+				fillOpacity={highBar.pattern === 'solid' ? highBar.opacity : undefined}
 			/>
 		</svg>
 	)

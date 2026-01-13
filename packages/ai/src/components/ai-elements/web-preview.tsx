@@ -114,6 +114,7 @@ export const WebPreviewNavigationButton = ({
 			<TooltipTrigger
 				render={
 					<Button
+						aria-label={tooltip}
 						variant="ghost"
 						size="sm"
 						className="hover:text-foreground h-8 w-8 p-0"
