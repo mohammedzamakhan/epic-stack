@@ -27,7 +27,7 @@ lease:
   consul:
     url: '${FLY_CONSUL_URL}'
     # SHARED KEY: Both apps use the same key to share database leadership
-    key: 'epic-startup-shared-db/${FLY_APP_NAME}'
+    key: 'epic-startup-shared-db'
 
 exec:
   - cmd: cd /myapp/packages/database && npx prisma migrate deploy
