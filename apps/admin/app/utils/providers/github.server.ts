@@ -4,6 +4,7 @@ import { redirect } from 'react-router'
 import { GitHubStrategy } from 'remix-auth-github'
 import { z } from 'zod'
 import { cache, cachified } from '../cache.server.ts'
+import { ENV } from '../env.server.ts'
 import { type Timings } from '../timing.server.ts'
 import { MOCK_CODE_GITHUB_HEADER, MOCK_CODE_GITHUB } from './constants.ts'
 import { type AuthProvider } from './provider.ts'
@@ -21,8 +22,7 @@ const GitHubUserParseResult = z
 	)
 
 const shouldMock =
-	process.env.GITHUB_CLIENT_ID?.startsWith('MOCK_') ||
-	process.env.NODE_ENV === 'test'
+	ENV.GITHUB_CLIENT_ID?.startsWith('MOCK_') || ENV.NODE_ENV === 'test'
 
 const GitHubEmailSchema = z.object({
 	email: z.string(),
@@ -43,9 +43,9 @@ const GitHubUserResponseSchema = z.object({
 export class GitHubProvider implements AuthProvider {
 	getAuthStrategy() {
 		if (
-			!process.env.GITHUB_CLIENT_ID ||
-			!process.env.GITHUB_CLIENT_SECRET ||
-			!process.env.GITHUB_REDIRECT_URI
+			!ENV.GITHUB_CLIENT_ID ||
+			!ENV.GITHUB_CLIENT_SECRET ||
+			!ENV.GITHUB_REDIRECT_URI
 		) {
 			console.log(
 				'GitHub OAuth strategy not available because environment variables are not set',
@@ -54,9 +54,9 @@ export class GitHubProvider implements AuthProvider {
 		}
 		return new GitHubStrategy(
 			{
-				clientId: process.env.GITHUB_CLIENT_ID,
-				clientSecret: process.env.GITHUB_CLIENT_SECRET,
-				redirectURI: process.env.GITHUB_REDIRECT_URI,
+				clientId: ENV.GITHUB_CLIENT_ID,
+				clientSecret: ENV.GITHUB_CLIENT_SECRET,
+				redirectURI: ENV.GITHUB_REDIRECT_URI,
 			},
 			async ({ tokens }) => {
 				// we need to fetch the user and the emails separately, this is a change in remix-auth-github
@@ -112,7 +112,7 @@ export class GitHubProvider implements AuthProvider {
 			async getFreshValue(context) {
 				const response = await fetch(
 					`https://api.github.com/user/${providerId}`,
-					{ headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` } },
+					{ headers: { Authorization: `token ${ENV.GITHUB_TOKEN}` } },
 				)
 				const rawJson = await response.json()
 				const result = GitHubUserSchema.safeParse(rawJson)
@@ -147,7 +147,7 @@ export class GitHubProvider implements AuthProvider {
 			sameSite: 'Lax',
 			httpOnly: true,
 			maxAge: 60 * 10,
-			secure: process.env.NODE_ENV === 'production' || undefined,
+			secure: ENV.NODE_ENV === 'production' || undefined,
 		})
 		throw redirect(`/auth/github/callback?${searchParams}`, {
 			headers: {

@@ -4,6 +4,7 @@ import {
 } from '@simplewebauthn/server'
 import { createCookie } from 'react-router'
 import { z } from 'zod'
+import { ENV } from '#app/utils/env.server.ts'
 import { getDomainUrl } from '#app/utils/misc.tsx'
 
 export const passkeyCookie = createCookie('webauthn-challenge', {
@@ -12,7 +13,7 @@ export const passkeyCookie = createCookie('webauthn-challenge', {
 	httpOnly: true,
 	maxAge: 60 * 60 * 2,
 	secure: true,
-	secrets: [process.env.SESSION_SECRET],
+	secrets: [ENV.SESSION_SECRET],
 })
 
 export const PasskeyCookieSchema = z.object({

@@ -6,6 +6,7 @@ import {
 import { Outlet, useLoaderData } from 'react-router'
 import { MarketingLayout } from '#app/components/marketing-layout.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { getUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
 import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
@@ -54,7 +55,7 @@ export async function loader({ request }: { request: Request }) {
 		isCollapsed,
 		onboardingProgress,
 		trialStatus,
-		extensionId: process.env.EXTENSION_ID,
+		extensionId: ENV.EXTENSION_ID,
 	}
 }
 

@@ -3,6 +3,7 @@ import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { brand } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
+import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
 
@@ -12,6 +13,7 @@ export default defineConfig({
 	output: 'server',
 	site: `https://${domain}`,
 	integrations: [
+		varlockAstroIntegration(),
 		react(),
 		sitemap({
 			filter: (page) =>

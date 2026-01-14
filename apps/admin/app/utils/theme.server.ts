@@ -1,4 +1,5 @@
 import * as cookie from 'cookie'
+import { ENV } from '#app/utils/env.server.ts'
 
 const cookieName = 'en_theme'
 export type Theme = 'light' | 'dark'
@@ -13,7 +14,7 @@ export function getTheme(request: Request): Theme | null {
 export function setTheme(theme: Theme | 'system') {
 	const cookieOptions = {
 		path: '/',
-		...(process.env.ROOT_APP && { domain: `.${process.env.ROOT_APP}` }),
+		...(ENV.ROOT_APP && { domain: `.${ENV.ROOT_APP}` }),
 		sameSite: 'lax' as const,
 	}
 

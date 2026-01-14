@@ -1,9 +1,7 @@
 import { type FooterData } from '../types/footer'
+import { ENV } from 'varlock/env'
 
-// CMS_URL will be populated at build time from environment variables
-// Astro's import.meta.env is typed in astro/client
-const CMS_URL =
-	(import.meta as any).env?.PUBLIC_CMS_URL || 'http://localhost:3000'
+const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3000'
 
 export async function fetchFooterData(): Promise<FooterData | null> {
 	try {

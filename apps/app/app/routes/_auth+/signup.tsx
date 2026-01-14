@@ -33,6 +33,7 @@ import {
 	providerNames,
 } from '#app/utils/connections.tsx'
 import { sendEmail } from '#app/utils/email.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
@@ -109,7 +110,7 @@ export async function action(args: Route.ActionArgs) {
 				return
 			}
 			// Arcjet security protection (skip in test environment)
-			if (process.env.ARCJET_KEY && process.env.NODE_ENV !== 'test') {
+			if (ENV.ARCJET_KEY && ENV.NODE_ENV !== 'test') {
 				const email = formData.get('email') as string
 				try {
 					const decision = await aj.protect(args, { email })

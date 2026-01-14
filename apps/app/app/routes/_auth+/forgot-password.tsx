@@ -28,6 +28,7 @@ import {
 } from '#app/components/forms.tsx'
 import arcjet from '#app/utils/arcjet.server.ts'
 import { sendEmail } from '#app/utils/email.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.ts'
@@ -74,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
 	await checkHoneypot(formData)
 
 	// Arcjet security protection for forgot password (skip in test environment)
-	if (process.env.ARCJET_KEY && process.env.NODE_ENV === 'production') {
+	if (ENV.ARCJET_KEY && ENV.NODE_ENV === 'production') {
 		const usernameOrEmail = formData.get('usernameOrEmail') as string
 		try {
 			const decision = await aj.protect(

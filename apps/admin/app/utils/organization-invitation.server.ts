@@ -1,8 +1,9 @@
 import { webcrypto as crypto } from 'node:crypto'
-import { OrganizationInviteEmail } from '@repo/email'
-import { prisma } from '@repo/database'
-import { sendEmail } from '#app/utils/email.server.ts'
 import { markStepCompleted } from '@repo/common/onboarding'
+import { prisma } from '@repo/database'
+import { OrganizationInviteEmail } from '@repo/email'
+import { sendEmail } from '#app/utils/email.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { type OrganizationRoleName } from './organizations.server'
 
 // Helper function to get organization role ID by name
@@ -103,7 +104,7 @@ export async function sendOrganizationInvitationEmail({
 	inviterName: string
 }) {
 	const baseUrl =
-		process.env.NODE_ENV === 'production'
+		ENV.NODE_ENV === 'production'
 			? 'https://yourapp.com' // Replace with your actual domain
 			: 'http://localhost:3001'
 

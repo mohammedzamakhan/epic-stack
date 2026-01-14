@@ -2,6 +2,7 @@ import { getClientIp } from '@repo/common/ip-tracking'
 import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '#app/utils/auth.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { getReferrerRoute } from '#app/utils/misc.tsx'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import { getRedirectCookieHeader } from '#app/utils/redirect-cookie.server.ts'
@@ -143,7 +144,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 		}
 
 		// Handle unexpected errors - don't log to console in tests
-		if (process.env.NODE_ENV !== 'test') {
+		if (ENV.NODE_ENV !== 'test') {
 			console.error('Unexpected SSO initiation error:', error)
 		}
 

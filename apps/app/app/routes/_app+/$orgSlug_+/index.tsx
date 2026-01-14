@@ -26,12 +26,13 @@ import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
 
 const novu = new Novu({
-	secretKey: process.env.NOVU_SECRET_KEY,
+	secretKey: ENV.NOVU_SECRET_KEY,
 })
 
 export async function loader({ request, params }: LoaderFunctionArgs) {

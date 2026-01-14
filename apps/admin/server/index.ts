@@ -8,12 +8,13 @@ import compression from 'compression'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
+import { ENV } from 'varlock/env'
 
-const MODE = process.env.NODE_ENV ?? 'development'
+const MODE = ENV.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
-const ALLOW_INDEXING = process.env.ALLOW_INDEXING !== 'false'
-const SENTRY_ENABLED = IS_PROD && process.env.SENTRY_DSN
+const ALLOW_INDEXING = ENV.ALLOW_INDEXING
+const SENTRY_ENABLED = IS_PROD && ENV.SENTRY_DSN
 const BUILD_PATH = '../build/server/index.js'
 
 if (SENTRY_ENABLED) {

@@ -1,41 +1,14 @@
-/**
- * This is used in both `entry.server.ts` and `root.tsx` to ensure that
- * the environment variables are set and globally available before the app is
- * started.
- *
- * NOTE: Do *not* add any environment variables in here that you do not wish to
- * be included in the client.
- * @returns all public ENV variables
- */
+export { ENV } from 'varlock/env'
+import { ENV } from 'varlock/env'
+
 export function getEnv() {
 	return {
-		MODE: process.env.NODE_ENV,
-		SENTRY_DSN: process.env.SENTRY_DSN,
-		ALLOW_INDEXING: process.env.ALLOW_INDEXING,
+		MODE: ENV.NODE_ENV,
+		SENTRY_DSN: ENV.SENTRY_DSN,
+		ALLOW_INDEXING: String(ENV.ALLOW_INDEXING),
 	}
 }
 
-type ENV = ReturnType<typeof getEnv>
-
-declare global {
-	var ENV: ENV
-	interface Window {
-		ENV: ENV
-	}
-}
-
-/**
- * Get the current launch status
- * @returns 'CLOSED_BETA' | 'PUBLIC_BETA' | 'LAUNCHED'
- */
-export function getLaunchStatus(): 'CLOSED_BETA' | 'PUBLIC_BETA' | 'LAUNCHED' {
-	const status = process.env.LAUNCH_STATUS
-	if (
-		status === 'CLOSED_BETA' ||
-		status === 'PUBLIC_BETA' ||
-		status === 'LAUNCHED'
-	) {
-		return status
-	}
-	return 'LAUNCHED' // Default to launched if not set
+export function getLaunchStatus() {
+	return ENV.LAUNCH_STATUS
 }

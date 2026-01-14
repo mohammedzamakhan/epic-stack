@@ -13,30 +13,16 @@ import {
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
+import { ENV } from '#app/utils/env.server.ts'
 import { prisma } from './db.server'
-
-// Validate required environment variables
-const requiredEnvVars = [
-	'AWS_ENDPOINT_URL_S3',
-	'BUCKET_NAME',
-	'AWS_ACCESS_KEY_ID',
-	'AWS_SECRET_ACCESS_KEY',
-	'AWS_REGION',
-] as const
-
-for (const envVar of requiredEnvVars) {
-	if (!process.env[envVar]) {
-		throw new Error(`Missing required environment variable: ${envVar}`)
-	}
-}
 
 // Default storage configuration from environment variables
 const DEFAULT_STORAGE_CONFIG: StorageConfig = {
-	endpoint: process.env.AWS_ENDPOINT_URL_S3!,
-	bucket: process.env.BUCKET_NAME!,
-	accessKey: process.env.AWS_ACCESS_KEY_ID!,
-	secretKey: process.env.AWS_SECRET_ACCESS_KEY!,
-	region: process.env.AWS_REGION!,
+	endpoint: ENV.AWS_ENDPOINT_URL_S3,
+	bucket: ENV.BUCKET_NAME,
+	accessKey: ENV.AWS_ACCESS_KEY_ID,
+	secretKey: ENV.AWS_SECRET_ACCESS_KEY,
+	region: ENV.AWS_REGION,
 }
 
 // Create the storage client
@@ -64,7 +50,12 @@ export async function uploadProfileImage(
 	file: File | FileUpload,
 	organizationId?: string,
 ) {
-	return _uploadProfileImage(userId, file, createUploadOptions(), organizationId)
+	return _uploadProfileImage(
+		userId,
+		file,
+		createUploadOptions(),
+		organizationId,
+	)
 }
 
 export async function uploadOrganizationImage(

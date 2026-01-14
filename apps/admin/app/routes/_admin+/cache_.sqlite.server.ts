@@ -1,6 +1,7 @@
 import { redirect } from 'react-router'
 import { z } from 'zod'
 import { cache } from '#app/utils/cache.server.ts'
+import { ENV } from '#app/utils/env.server.ts'
 import { getInstanceInfo } from '#app/utils/litefs.server.ts'
 import { type Route } from './+types/cache_.sqlite.ts'
 
@@ -11,7 +12,7 @@ export async function action({ request }: Route.ActionArgs) {
 			`${request.url} should only be called on the primary instance (${primaryInstance})}`,
 		)
 	}
-	const token = process.env.INTERNAL_COMMAND_TOKEN
+	const token = ENV.INTERNAL_COMMAND_TOKEN
 	const isAuthorized =
 		request.headers.get('Authorization') === `Bearer ${token}`
 	if (!isAuthorized) {

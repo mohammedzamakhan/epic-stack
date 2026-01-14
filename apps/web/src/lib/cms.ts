@@ -3,7 +3,9 @@
  * Combines the benefits of the official Astro guide patterns with proper TypeScript and error handling
  */
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+import { ENV } from 'varlock/env'
+
+const CMS_URL = ENV.PUBLIC_CMS_URL
 
 const CACHE_TTL_MS = import.meta.env.DEV ? 30 * 1000 : 5 * 60 * 1000
 

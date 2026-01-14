@@ -1,5 +1,6 @@
 import { getUptimeStatus } from '@repo/observability'
 import { type LoaderFunctionArgs } from 'react-router'
+import { ENV } from '#app/utils/env.server.ts'
 
 /**
  * Status endpoint that returns uptime monitoring information
@@ -9,8 +10,8 @@ import { type LoaderFunctionArgs } from 'react-router'
  * and returns it to the client for display.
  */
 export async function loader({ request: _request }: LoaderFunctionArgs) {
-	const apiKey = process.env.BETTERSTACK_API_KEY
-	const statusPageUrl = process.env.BETTERSTACK_URL
+	const apiKey = ENV.BETTERSTACK_API_KEY
+	const statusPageUrl = ENV.BETTERSTACK_URL
 
 	if (!apiKey) {
 		return Response.json(

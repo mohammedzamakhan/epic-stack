@@ -4,6 +4,7 @@
  */
 
 import { type Organization } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { TrialEndingEmail } from '@repo/email'
 import {
 	createStripeProvider,
@@ -12,16 +13,11 @@ import {
 } from '@repo/payments'
 import { redirect } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { sendEmail } from '#app/utils/email.server.ts'
-
-if (!process.env.STRIPE_SECRET_KEY) {
-	const errorMsg = 'STRIPE_SECRET_KEY environment variable is not set!'
-	throw new Error(errorMsg)
-}
+import { ENV } from '#app/utils/env.server.ts'
 
 // Create payment provider instance
-const paymentProvider = createStripeProvider(process.env.STRIPE_SECRET_KEY)
+const paymentProvider = createStripeProvider(ENV.STRIPE_SECRET_KEY)
 
 // Export for advanced usage
 export const stripe = paymentProvider.getClient()
@@ -125,7 +121,7 @@ export async function createCheckoutSession(
 
 	// Create test customer in non-production environments
 	if (
-		process.env.NODE_ENV !== 'production' &&
+		ENV.NODE_ENV !== 'production' &&
 		paymentProvider.createTestClock &&
 		paymentProvider.createTestCustomer
 	) {
@@ -143,11 +139,11 @@ export async function createCheckoutSession(
 	const session = await paymentProvider.createCheckoutSession({
 		priceId,
 		quantity,
-		successUrl: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
+		successUrl: `${ENV.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&organizationId=${organization.id}`,
 		cancelUrl:
 			from === 'checkout'
-				? `${process.env.BASE_URL}/${organization.slug}/settings/billing`
-				: `${process.env.BASE_URL}/pricing`,
+				? `${ENV.BASE_URL}/${organization.slug}/settings/billing`
+				: `${ENV.BASE_URL}/pricing`,
 		customerId: organization.stripeCustomerId || testCustomerId || undefined,
 		clientReferenceId: userId.toString(),
 		allowPromotionCodes: true,
@@ -173,7 +169,7 @@ export async function createCustomerPortalSession(organization: Organization) {
 
 	return paymentProvider.createCustomerPortalSession({
 		customerId: organization.stripeCustomerId,
-		returnUrl: `${process.env.BASE_URL}/${organization.slug}/settings`,
+		returnUrl: `${ENV.BASE_URL}/${organization.slug}/settings`,
 		productId: organization.stripeProductId,
 	})
 }
@@ -258,7 +254,7 @@ export async function handleTrialEnd(subscription: {
 				to: user.email,
 				subject: 'Trial Ending Soon',
 				react: TrialEndingEmail({
-					portalUrl: process.env.STRIPE_PORTAL_URL!,
+					portalUrl: ENV.STRIPE_PORTAL_URL!,
 					userName: user.name || undefined,
 					daysRemaining: Math.max(0, daysRemaining), // Ensure non-negative
 				}),

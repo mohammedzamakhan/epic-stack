@@ -1,10 +1,11 @@
 import 'varlock/auto-load'
+import { ENV } from 'varlock/env'
 
 import { ffmpeg, additionalFiles } from '@trigger.dev/build/extensions/core'
 import { defineConfig } from '@trigger.dev/sdk/v3'
 
 export default defineConfig({
-	project: process.env.TRIGGER_PROJECT_ID!,
+	project: ENV.TRIGGER_PROJECT_ID,
 	build: {
 		extensions: [
 			ffmpeg(),
