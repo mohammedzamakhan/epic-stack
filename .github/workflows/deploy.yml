@@ -77,8 +77,7 @@ jobs:
 
       - name: 🛠 Setup Database
         run:
-          npx prisma migrate deploy --schema=packages/database/schema.prisma &&
-          npx prisma generate --sql --schema=packages/database/schema.prisma
+          npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Lint (Oxc - Fast)
         run: npm run lint:oxc
@@ -110,8 +109,7 @@ jobs:
 
       - name: 🛠 Setup Database
         run:
-          npx prisma migrate deploy --schema=packages/database/schema.prisma &&
-          npx prisma generate --sql --schema=packages/database/schema.prisma
+          npm run db:migrate:deploy && npm run db:generate
 
       - name: 🏗 Build
         run: npm run build
@@ -143,8 +141,7 @@ jobs:
 
       - name: 🛠 Setup Database
         run:
-          npx prisma migrate deploy --schema=packages/database/schema.prisma &&
-          npx prisma generate --sql --schema=packages/database/schema.prisma
+          npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Run vitest
         run: npm run test -- -- --coverage
@@ -180,9 +177,7 @@ jobs:
 
       - name: 🛠 Setup Database
         run: |
-          npx prisma migrate deploy --schema=packages/database/schema.prisma
-          npx prisma db seed --schema=packages/database/schema.prisma
-          npx prisma generate --sql --schema=packages/database/schema.prisma
+          npm run db:migrate:deploy && npm run db:seed && npm run db:generate
 
       - name: 🏗 Build
         run: npm run build
