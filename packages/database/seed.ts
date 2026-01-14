@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
-import { MOCK_CODE_GITHUB } from '#app/utils/providers/constants'
+import { MOCK_CODE_GITHUB } from '@repo/auth'
 import {
 	createPassword,
 	createUser,
 	getNoteImages,
 	getUserImages,
-} from '#tests/db-utils.ts'
-import { insertGitHubUser } from '#tests/mocks/github.ts'
+} from '@repo/test-utils/db-utils'
+import { insertGitHubUser } from '@repo/test-utils/mocks/github'
 import { setupRoles } from './setup-roles.ts'
 import { initializeOnboardingSteps } from './setup-onboarding.ts'
 
