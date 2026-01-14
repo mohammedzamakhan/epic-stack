@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
-import 'dotenv/config'
+import 'varlock/auto-load'
 
 const PORT = process.env.PORT || '3001'
 

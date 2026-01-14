@@ -1,10 +1,7 @@
 import path from 'node:path'
 import { execaCommand } from 'execa'
 import fsExtra from 'fs-extra'
-import 'dotenv/config'
-import { init as initEnv } from '#app/utils/env.server.ts'
-
-initEnv()
+import 'varlock/auto-load'
 
 import '#app/utils/cache.server.ts'
 

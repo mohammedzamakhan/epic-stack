@@ -6,6 +6,7 @@ import {
 	sentryReactRouter,
 } from '@sentry/react-router'
 import tailwindcss from '@tailwindcss/vite'
+import { varlockVitePlugin } from '@varlock/vite-integration'
 import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
@@ -99,6 +100,7 @@ export default defineConfig((config) => ({
 	},
 	sentryConfig,
 	plugins: [
+		varlockVitePlugin(),
 		MODE === 'test' ? stubCacheServerPlugin() : null,
 		envOnlyMacros(),
 		tailwindcss(),

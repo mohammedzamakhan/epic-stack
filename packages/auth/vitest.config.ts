@@ -6,6 +6,9 @@ export default defineConfig({
 		environment: 'node',
 		setupFiles: ['./tests/setup.ts'],
 		bail: 0,
+		env: {
+			SESSION_SECRET: 'test-session-secret-min-32-characters-long-for-testing',
+		},
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html', 'lcov', 'text-summary'],

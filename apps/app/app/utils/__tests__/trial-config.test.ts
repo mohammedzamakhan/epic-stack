@@ -19,8 +19,8 @@ describe('Trial Configuration', () => {
 
 	describe('getTrialConfig', () => {
 		it('should return default values when env vars are not set', () => {
-			delete process.env.TRIAL_DAYS
-			delete process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL
+			delete (process.env as any).TRIAL_DAYS
+			delete (process.env as any).CREDIT_CARD_REQUIRED_FOR_TRIAL
 
 			const config = getTrialConfig()
 			expect(config.trialDays).toBe(14)
@@ -45,7 +45,7 @@ describe('Trial Configuration', () => {
 		})
 
 		it('should throw error for invalid CREDIT_CARD_REQUIRED_FOR_TRIAL', () => {
-			process.env.CREDIT_CARD_REQUIRED_FOR_TRIAL = 'invalid'
+			(process.env as any).CREDIT_CARD_REQUIRED_FOR_TRIAL = 'invalid'
 
 			expect(() => getTrialConfig()).toThrow(
 				'CREDIT_CARD_REQUIRED_FOR_TRIAL must be either "stripe" or "manual"',

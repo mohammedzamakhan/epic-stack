@@ -4,9 +4,16 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { authSessionStorage } from '../src/session.server'
-
+process.env.SESSION_SECRET = 'super-duper-s3cret'
 describe('Session Management', () => {
+	beforeEach(() => {
+		process.env.SESSION_SECRET = 'super-duper-s3cret'
+	})
+
 	describe('authSessionStorage', () => {
+		beforeEach(() => {
+			process.env.SESSION_SECRET = 'super-duper-s3cret'
+		})
 		it('should create session storage with correct cookie configuration', () => {
 			expect(authSessionStorage).toBeDefined()
 			expect(authSessionStorage.getSession).toBeDefined()

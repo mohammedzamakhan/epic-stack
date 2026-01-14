@@ -89,9 +89,18 @@
     "npm": "10.9.0"
   },
   "dependencies": {
-    "dotenv": "^17.2.3",
+    "@varlock/nextjs-integration": "^0.1.2",
     "motion": "^12.23.1",
     "react-image-crop": "^11.0.10",
+    "varlock": "^0.1.0",
     "zod": "^3.25.76"
+  },
+  "overrides": {
+    "next": {
+      "@next/env": "npm:@varlock/nextjs-integration"
+    },
+    "payload": {
+      "@next/env": "npm:@varlock/nextjs-integration"
+    }
   }
 }

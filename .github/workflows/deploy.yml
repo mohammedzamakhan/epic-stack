@@ -73,9 +73,7 @@ jobs:
 
       - name: 🏄 Copy test env vars
         run:
-          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
-          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
-          apps/cms/.env
+          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🛠 Setup Database
         run:
@@ -105,9 +103,7 @@ jobs:
 
       - name: 🏄 Copy test env vars
         run:
-          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
-          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
-          apps/cms/.env
+          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
@@ -143,9 +139,7 @@ jobs:
 
       - name: 🏄 Copy test env vars
         run:
-          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
-          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
-          apps/cms/.env
+          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🛠 Setup Database
         run:
@@ -165,9 +159,7 @@ jobs:
 
       - name: 🏄 Copy test env vars
         run:
-          cp .env.example .env && cp apps/app/.env.example apps/app/.env && cp
-          apps/admin/.env.example apps/admin/.env && cp apps/cms/.env.example
-          apps/cms/.env
+          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env

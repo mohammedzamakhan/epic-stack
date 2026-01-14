@@ -7,6 +7,7 @@ node_modules
 .astro/
 .next/
 .vscode/
+env.d.ts
 
 /database/data.db
 /database/data.db-journal
