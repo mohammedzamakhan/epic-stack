@@ -57,6 +57,8 @@ jobs:
 
       - name: 🎭 Playwright tests
         run: npm run test:e2e:run
+        env:
+          JWT_SECRET: test-jwt-secret-for-ci
 
       - name: 📊 Upload report
         uses: actions/upload-artifact@v4
