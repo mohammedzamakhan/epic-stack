@@ -29,14 +29,26 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 		}
 	}
 
-	await prisma.userOrganization.create({
-		data: {
-			userId,
-			organizationId,
-			organizationRoleId: memberRole.id,
-			active: true,
+	// Check if the user-organization relationship already exists
+	const existingRelation = await prisma.userOrganization.findUnique({
+		where: {
+			userId_organizationId: {
+				userId,
+				organizationId,
+			},
 		},
 	})
+
+	if (!existingRelation) {
+		await prisma.userOrganization.create({
+			data: {
+				userId,
+				organizationId,
+				organizationRoleId: memberRole.id,
+				active: true,
+			},
+		})
+	}
 }
 
 // Generate unique slug per test run to avoid conflicts with parallel tests

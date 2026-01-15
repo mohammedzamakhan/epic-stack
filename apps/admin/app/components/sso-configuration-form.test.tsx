@@ -106,16 +106,24 @@ describe('SSOConfigurationForm', () => {
 		const user = userEvent.setup()
 		render(<SSOConfigurationForm {...defaultProps} />)
 
-		// Find and click the auto-discovery toggle to disable it
-		const autoDiscoveryToggle = screen.getByLabelText('Auto-Discovery')
-		await user.click(autoDiscoveryToggle)
+		// Find the first checkbox (auto-discovery) since they don't have accessible names
+		const checkboxes = screen.getAllByRole('checkbox')
+		const autoDiscoveryToggle = checkboxes[0] // First checkbox should be auto-discovery
+
+		// Verify it's initially checked (auto-discovery enabled by default)
+		expect(autoDiscoveryToggle).toBeChecked()
+
+		// Click to disable auto-discovery
+		await user.click(autoDiscoveryToggle!)
 
 		// Wait for the component to update and check if manual fields appear
-		// If the component doesn't show manual fields immediately, we'll just verify the toggle works
-		expect(autoDiscoveryToggle).not.toBeChecked()
-
-		// The component might not show manual endpoint fields in this implementation
-		// Let's just verify the toggle state changed
+		// The manual fields should now be visible since auto-discovery is disabled
+		expect(screen.getByLabelText('Authorization URL')).toBeInTheDocument()
+		expect(screen.getByLabelText('Token URL')).toBeInTheDocument()
+		expect(screen.getByLabelText('UserInfo URL')).toBeInTheDocument()
+		expect(
+			screen.getByLabelText('Revocation URL (Optional)'),
+		).toBeInTheDocument()
 	})
 
 	it('populates form with existing configuration data', () => {

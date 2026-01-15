@@ -1,5 +1,3 @@
-// import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-// import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -20,9 +18,9 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 import { Textarea } from '@repo/ui/textarea'
+import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
-// import { Field, ErrorList, CheckboxField } from './forms.tsx'
 
 const ignoredSSOConfigurationSchema = z.object({
 	providerName: z.string().min(1, 'Provider name is required'),
@@ -96,9 +94,10 @@ export function SSOConfigurationForm({
 	isSubmitting = false,
 	testConnectionResult,
 }: SSOConfigurationFormProps) {
-	// Simplified form without Conform for debugging
-
-	const autoDiscoveryEnabled = existingConfig?.autoDiscovery ?? true
+	// State for reactive form controls
+	const [autoDiscoveryEnabled, setAutoDiscoveryEnabled] = useState(
+		existingConfig?.autoDiscovery ?? true,
+	)
 
 	return (
 		<div className="space-y-6">
@@ -230,6 +229,9 @@ export function SSOConfigurationForm({
 								id="autoDiscovery"
 								name="autoDiscovery"
 								defaultChecked={existingConfig?.autoDiscovery ?? true}
+								onCheckedChange={(checked) =>
+									setAutoDiscoveryEnabled(!!checked)
+								}
 							/>
 							<div className="flex flex-col gap-1">
 								<p>Auto-Discovery</p>

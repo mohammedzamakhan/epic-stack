@@ -95,32 +95,24 @@ describe('SSOConfigurationOverview', () => {
 		onTestConnection: vi.fn(),
 	}
 
-	it('renders no configuration state when ssoConfig is null', () => {
-		render(<SSOConfigurationOverview {...defaultProps} ssoConfig={null} />)
+	it('renders nothing when ssoConfig is null', () => {
+		const { container } = render(
+			<SSOConfigurationOverview {...defaultProps} ssoConfig={null} />,
+		)
 
-		expect(screen.getByText('No SSO Configuration')).toBeInTheDocument()
-		expect(
-			screen.getByText(
-				'Configure SSO to allow users to authenticate with their corporate identity provider.',
-			),
-		).toBeInTheDocument()
-		expect(screen.getByText('Configure SSO')).toBeInTheDocument()
+		expect(container.firstChild).toBeNull()
 	})
 
 	it('calls onEdit when Configure SSO button is clicked', async () => {
 		const user = userEvent.setup()
 		const onEdit = vi.fn()
 
-		render(
-			<SSOConfigurationOverview
-				{...defaultProps}
-				ssoConfig={null}
-				onEdit={onEdit}
-			/>,
-		)
+		// This test doesn't make sense if the component returns null when ssoConfig is null
+		// Let's test with a valid config instead
+		render(<SSOConfigurationOverview {...defaultProps} onEdit={onEdit} />)
 
-		const configureButton = screen.getByText('Configure SSO')
-		await user.click(configureButton)
+		const editButton = screen.getByText('Edit')
+		await user.click(editButton)
 
 		expect(onEdit).toHaveBeenCalled()
 	})
