@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "private": true,
   "sideEffects": false,
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist/**"
+    "dist/**",
+    "src/**",
+    "index.ts"
   ],
   "scripts": {
     "build": "tsc",

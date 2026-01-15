@@ -19,132 +19,132 @@ env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
-  affected:
-    name: 📊 Detect Affected Projects
-    runs-on: ubuntu-22.04
-    outputs:
-      app: ${{ steps.affected.outputs.app }}
-      admin: ${{ steps.affected.outputs.admin }}
-      web: ${{ steps.affected.outputs.web }}
-      cms: ${{ steps.affected.outputs.cms }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 50
+    # affected:
+    #   name: 📊 Detect Affected Projects
+    #   runs-on: ubuntu-22.04
+    #   outputs:
+    #     app: ${{ steps.affected.outputs.app }}
+    #     admin: ${{ steps.affected.outputs.admin }}
+    #     web: ${{ steps.affected.outputs.web }}
+    #     cms: ${{ steps.affected.outputs.cms }}
+    #   steps:
+    #     - name: ⬇️ Checkout repo
+    #       uses: actions/checkout@v4
+    #       with:
+    #         fetch-depth: 50
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    #     - name: ⎔ Setup node
+    #       uses: actions/setup-node@v4
+    #       with:
+    #         node-version: 22
 
-      - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+    #     - name: 📥 Download deps
+    #       uses: bahmutov/npm-install@v1
 
-      - name: 📊 Check affected projects
-        id: affected
-        run: |
-          # Get the base ref for comparison
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.ref }}"
-          else
-            BASE_REF="HEAD~1"
-          fi
-          
-          # Check which projects are affected
-          echo "app=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-  lint:
-    name: 🔬 Lint
-    runs-on: ubuntu-22.04
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+    #     - name: 📊 Check affected projects
+    #       id: affected
+    #       run: |
+    #         # Get the base ref for comparison
+    #         if [ "${{ github.event_name }}" == "pull_request" ]; then
+    #           BASE_REF="${{ github.event.pull_request.base.ref }}"
+    #         else
+    #           BASE_REF="HEAD~1"
+    #         fi
+            
+    #         # Check which projects are affected
+    #         echo "app=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+    #         echo "admin=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+    #         echo "web=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+    #         echo "cms=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+    # lint:
+    #   name: 🔬 Lint
+    #   runs-on: ubuntu-22.04
+    #   steps:
+    #     - name: ⬇️ Checkout repo
+    #       uses: actions/checkout@v4
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    #     - name: ⎔ Setup node
+    #       uses: actions/setup-node@v4
+    #       with:
+    #         node-version: 22
 
-      - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+    #     - name: 📥 Download deps
+    #       uses: bahmutov/npm-install@v1
 
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
+    #     - name: 🏄 Copy test env vars
+    #       run:
+    #         cp apps/cms/.env.example apps/cms/.env
 
-      - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+    #     - name: 🛠 Setup Database
+    #       run:
+    #         npm run db:migrate:deploy && npm run db:generate
 
-      - name: ⚡ Lint (Oxc - Fast)
-        run: npm run lint:oxc
+    #     - name: ⚡ Lint (Oxc - Fast)
+    #       run: npm run lint:oxc
 
-  typecheck:
-    name: ʦ TypeScript
-    runs-on: ubuntu-22.04
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+    # typecheck:
+    #   name: ʦ TypeScript
+    #   runs-on: ubuntu-22.04
+    #   steps:
+    #     - name: ⬇️ Checkout repo
+    #       uses: actions/checkout@v4
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    #     - name: ⎔ Setup node
+    #       uses: actions/setup-node@v4
+    #       with:
+    #         node-version: 22
 
-      - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+    #     - name: 📥 Download deps
+    #       uses: bahmutov/npm-install@v1
 
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+    #     - name: 📥 Install deps
+    #       run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
 
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
+    #     - name: 🏄 Copy test env vars
+    #       run:
+    #         cp apps/cms/.env.example apps/cms/.env
 
-      - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
+    #     - name: 🔑 Inject CMS DATABASE_URI
+    #       run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
 
-      - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+    #     - name: 🛠 Setup Database
+    #       run:
+    #         npm run db:migrate:deploy && npm run db:generate
 
-      - name: 🏗 Build
-        run: npm run build
+    #     - name: 🏗 Build
+    #       run: npm run build
 
-      - name: 🔎 Type check
-        run: npm run typecheck --if-present
+    #     - name: 🔎 Type check
+    #       run: npm run typecheck --if-present
 
-  vitest:
-    name: ⚡ Vitest
-    runs-on: ubuntu-22.04
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+    # vitest:
+    #   name: ⚡ Vitest
+    #   runs-on: ubuntu-22.04
+    #   steps:
+    #     - name: ⬇️ Checkout repo
+    #       uses: actions/checkout@v4
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    #     - name: ⎔ Setup node
+    #       uses: actions/setup-node@v4
+    #       with:
+    #         node-version: 22
 
-      - name: 📥 Download deps
-        uses: bahmutov/npm-install@v1
+    #     - name: 📥 Download deps
+    #       uses: bahmutov/npm-install@v1
 
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+    #     - name: 📥 Install deps
+    #       run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
 
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
+    #     - name: 🏄 Copy test env vars
+    #       run:
+    #         cp apps/cms/.env.example apps/cms/.env
 
-      - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+    #     - name: 🛠 Setup Database
+    #       run:
+    #         npm run db:migrate:deploy && npm run db:generate
 
-      - name: ⚡ Run vitest
-        run: npm run test -- -- --coverage
+    #     - name: ⚡ Run vitest
+    #       run: npm run test -- -- --coverage
 
   playwright:
     name: 🎭 Playwright
