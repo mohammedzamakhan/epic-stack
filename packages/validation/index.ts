@@ -7,7 +7,7 @@ export {
 	PasswordAndConfirmPasswordSchema,
 	USERNAME_MIN_LENGTH,
 	USERNAME_MAX_LENGTH,
-} from './src/user-validation'
+} from './src/user-validation.ts'
 
 // Authentication validation schemas
 export {
@@ -17,7 +17,7 @@ export {
 	MobileSignupSchema,
 	OAuthCallbackSchema,
 	SocialAuthSchema,
-} from './src/auth-validation'
+} from './src/auth-validation.ts'
 
 // SSO validation schemas
 export {
@@ -33,5 +33,5 @@ export {
 	type SSOAuthRequest,
 	type SSOCallback,
 	type OIDCUserInfo,
-} from './src/sso-validation'
-export * from './src/url-validation'
+} from './src/sso-validation.ts'
+export * from './src/url-validation.ts'

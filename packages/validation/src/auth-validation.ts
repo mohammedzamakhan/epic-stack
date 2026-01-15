@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { UsernameSchema, PasswordSchema, EmailSchema } from './user-validation'
+import { UsernameSchema, PasswordSchema, EmailSchema } from './user-validation.ts'
 
 export const LoginFormSchema = z.object({
 	username: UsernameSchema,
