@@ -9,6 +9,22 @@ import './tools.server' // Import to register tools
  * Helper to add a user to an organization
  */
 async function addUserToOrganization(userId: string, organizationId: string) {
+	// Verify user exists
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+	})
+	if (!user) {
+		throw new Error(`User ${userId} not found`)
+	}
+
+	// Verify organization exists
+	const org = await prisma.organization.findUnique({
+		where: { id: organizationId },
+	})
+	if (!org) {
+		throw new Error(`Organization ${organizationId} not found`)
+	}
+
 	let memberRole = await prisma.organizationRole.findFirst({
 		where: { name: 'member' },
 	})
