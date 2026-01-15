@@ -1,8 +1,8 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { data, redirect } from 'react-router'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
-import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
+import { auditService, AuditAction } from '@repo/common/audit'
 import { prisma } from '@repo/database'
+import { data, redirect } from 'react-router'
+import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
@@ -106,8 +106,15 @@ export async function action({
 		startedAt: new Date().toISOString(),
 	})
 
+	const requestUrl = new URL(request.url)
+	if (requestUrl.hostname.startsWith('admin.')) {
+		requestUrl.hostname = requestUrl.hostname.replace(/^admin\./, 'app.')
+	}
+	requestUrl.pathname = '/'
+	requestUrl.search = ''
+
 	// Redirect to main app as the impersonated user
-	throw redirect('/', {
+	throw redirect(requestUrl.toString(), {
 		headers: {
 			'set-cookie': await authSessionStorage.commitSession(authSession),
 			...(await createToastHeaders({

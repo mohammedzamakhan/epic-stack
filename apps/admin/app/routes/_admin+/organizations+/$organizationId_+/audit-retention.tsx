@@ -1,3 +1,5 @@
+import { auditService, AuditAction, AuditService } from '@repo/common/audit'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -18,12 +20,6 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 import { useLoaderData, Form, useNavigation } from 'react-router'
-import {
-	auditService,
-	AuditAction,
-	AuditService,
-} from '#app/utils/audit.server.ts'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 

@@ -4,6 +4,9 @@ import { type ReactNode } from 'react'
 import { AppSidebar } from '#app/components/app-sidebar.tsx'
 import { SiteHeader } from '#app/components/site-header.tsx'
 import { EpicProgress } from './progress-bar'
+import { ImpersonationBanner } from './impersonation-banner'
+import { type loader as rootLoader } from '#app/root.tsx'
+import { useRouteLoaderData } from 'react-router'
 
 type MarketingLayoutProps = {
 	children: ReactNode
@@ -20,6 +23,8 @@ export function MarketingLayout({
 	trialStatus = null,
 	extensionId = null,
 }: MarketingLayoutProps) {
+	const rootData = useRouteLoaderData<typeof rootLoader>('root')
+
 	return (
 		<>
 			<SidebarProvider
@@ -38,6 +43,11 @@ export function MarketingLayout({
 					extensionId={extensionId || undefined}
 				/>
 				<SidebarInset>
+					{rootData?.impersonationInfo && (
+						<ImpersonationBanner
+							impersonationInfo={rootData.impersonationInfo}
+						/>
+					)}
 					<SiteHeader isCollapsed={isCollapsed} />
 					<div className="flex flex-1 flex-col">
 						<div className="@container/main flex flex-1 flex-col gap-2 px-4 md:px-2">

@@ -66,6 +66,11 @@
       "types": "./src/onboarding.ts",
       "import": "./src/onboarding.ts",
       "default": "./src/onboarding.ts"
+    },
+    "./audit": {
+      "types": "./src/audit.server.ts",
+      "import": "./src/audit.server.ts",
+      "default": "./src/audit.server.ts"
     }
   },
   "scripts": {

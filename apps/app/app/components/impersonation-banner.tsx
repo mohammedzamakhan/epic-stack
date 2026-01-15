@@ -16,24 +16,23 @@ export function ImpersonationBanner({
 	const duration = Math.floor((Date.now() - startedAt.getTime()) / 1000 / 60) // minutes
 
 	return (
-		<div className="border-b border-yellow-200 bg-yellow-50 px-4 py-3">
-			<div className="mx-auto flex max-w-7xl items-center justify-between">
-				<div className="flex items-center gap-3">
-					<div className="flex items-center gap-2 text-yellow-800">
+		<div className="border-b px-6 py-3">
+			<div className="mx-auto flex items-center justify-between">
+				<div className="flex items-center gap-2">
+					<div className="text-destructive flex items-center gap-2">
 						<Icon name="alert-triangle" className="h-5 w-5" />
-						<Icon name="user" className="h-4 w-4" />
 					</div>
 					<div className="text-sm">
-						<span className="font-medium text-yellow-900">
+						<span className="text-destructive font-medium">
 							<Trans>Admin Impersonation Active</Trans>
 						</span>
-						<span className="ml-2 text-yellow-700">
+						<span className="text-destructive/80 ml-2">
 							<Trans>
 								You are impersonating{' '}
 								<strong>{impersonationInfo.targetName}</strong>
 							</Trans>
 						</span>
-						<span className="ml-2 text-yellow-600">
+						<span className="text-destructive/60 ml-2">
 							(
 							<Plural
 								value={duration}
@@ -44,12 +43,12 @@ export function ImpersonationBanner({
 						</span>
 					</div>
 				</div>
-				<Form method="post" action="/admin/stop-impersonation">
+				<Form method="post" action="/stop-impersonation">
 					<Button
 						type="submit"
 						variant="outline"
 						size="sm"
-						className="border-yellow-300 bg-white text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50"
+						className="border-destructive/30 bg-background text-destructive hover:border-destructive/50 hover:bg-destructive/5"
 					>
 						<Icon name="x" className="mr-1 h-4 w-4" />
 						<Trans>Stop Impersonation</Trans>

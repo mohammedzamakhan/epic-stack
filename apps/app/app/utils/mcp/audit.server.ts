@@ -1,4 +1,4 @@
-import { auditService, AuditAction } from '#app/utils/audit/audit.server.ts'
+import { auditService, AuditAction } from '@repo/common/audit'
 
 /**
  * MCP OAuth audit logging utilities

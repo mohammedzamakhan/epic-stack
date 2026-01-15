@@ -1,3 +1,4 @@
+import { auditService } from '@repo/common/audit'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -18,7 +19,6 @@ import {
 } from '@repo/ui/select'
 import { useState } from 'react'
 import { useLoaderData, useSearchParams } from 'react-router'
-import { auditService } from '#app/utils/audit.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {

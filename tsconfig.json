@@ -25,7 +25,11 @@
 			"@repo/sso": ["./packages/sso"],
 			"@repo/sso/*": ["./packages/sso/*"],
 			"@repo/validation": ["./packages/validation"],
-			"@repo/validation/*": ["./packages/validation/*"]
+			"@repo/validation/*": ["./packages/validation/*"],
+			"@repo/test-utils": ["./packages/test-utils/src"],
+			"@repo/test-utils/*": ["./packages/test-utils/src/*"],
+			"@repo/database": ["./packages/database"],
+			"@repo/database/*": ["./packages/database/*"]
 		}
 	}
 }

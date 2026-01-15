@@ -1,7 +1,7 @@
-import { data, redirect } from 'react-router'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
-import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
+import { auditService, AuditAction } from '@repo/common/audit'
 import { prisma } from '@repo/database'
+import { data, redirect } from 'react-router'
+import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
 
@@ -60,8 +60,15 @@ export async function action({ request }: { request: Request }) {
 	authSession.set(sessionKey, adminSession.id)
 	authSession.unset('impersonating')
 
+	const requestUrl = new URL(request.url)
+	if (requestUrl.hostname.startsWith('app.')) {
+		requestUrl.hostname = requestUrl.hostname.replace(/^app\./, 'admin.')
+	}
+	requestUrl.pathname = `/users/${targetUserId}`
+	requestUrl.search = ''
+
 	// Redirect back to admin dashboard
-	throw redirect('/users', {
+	throw redirect(requestUrl.toString(), {
 		headers: {
 			'set-cookie': await authSessionStorage.commitSession(authSession),
 			...(await createToastHeaders({

@@ -6,7 +6,7 @@
  * your routes and services.
  */
 
-import { auditService, AuditAction } from './audit.server.ts'
+import { auditService, AuditAction } from '@repo/common/audit'
 
 /**
  * Example 1: User Registration/Creation

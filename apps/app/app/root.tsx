@@ -357,9 +357,6 @@ function AppWithProviders() {
 						subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
 						applicationIdentifier="XQdYIaaQAOv5"
 					>
-						{data.impersonationInfo && (
-							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-						)}
 						<TooltipProvider>
 							<Outlet />
 						</TooltipProvider>
@@ -368,9 +365,6 @@ function AppWithProviders() {
 					</NovuProvider>
 				) : (
 					<>
-						{data.impersonationInfo && (
-							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-						)}
 						<TooltipProvider>
 							<Outlet />
 						</TooltipProvider>

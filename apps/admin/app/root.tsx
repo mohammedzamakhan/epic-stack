@@ -19,7 +19,6 @@ import { type Route } from './+types/root.ts'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
-import { ImpersonationBanner } from './components/impersonation-banner.tsx'
 import { CookieConsentBanner } from './components/privacy-banner.tsx'
 import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
@@ -289,9 +288,6 @@ function AppWithProviders() {
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
 			>
-				{data.impersonationInfo && (
-					<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-				)}
 				<TooltipProvider>
 					<Outlet />
 				</TooltipProvider>
