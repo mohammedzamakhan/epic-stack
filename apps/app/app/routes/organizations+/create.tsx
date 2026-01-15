@@ -227,17 +227,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				imageObjectKey,
 			})
 
-			// Determine next step based on trial configuration and launch status
-			const launchStatus = getLaunchStatus()
-			const shouldShowPricing =
-				trialConfig.creditCardRequired === 'stripe' &&
-				launchStatus !== 'PUBLIC_BETA' &&
-				launchStatus !== 'CLOSED_BETA'
-
-			const nextStep = shouldShowPricing ? 2 : 3
-			return redirect(
-				`/organizations/create?step=${nextStep}&orgId=${organization.id}`,
-			)
+			return redirect(`/organizations/create?step=2&orgId=${organization.id}`)
 		} catch (error) {
 			console.error('Failed to create organization', error)
 			return submission.reply({
@@ -1185,6 +1175,10 @@ function CreateInviteFieldset({
 									role.blur()
 								}
 							}}
+							items={DEFAULT_AVAILABLE_ROLES.map((role) => ({
+								label: role.charAt(0).toUpperCase() + role.slice(1),
+								value: role,
+							}))}
 						>
 							<SelectTrigger>
 								<SelectValue />

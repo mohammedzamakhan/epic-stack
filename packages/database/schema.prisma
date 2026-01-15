@@ -726,9 +726,14 @@ model SSOConfiguration {
   pkceEnabled       Boolean      @default(true) // Use PKCE for security
   
   // User Provisioning Settings
-  autoProvision     Boolean      @default(true) // Auto-create users
-  defaultRole       String       @default("member") // Default organization role
-  attributeMapping  String?      // JSON mapping of OIDC claims to user fields
+  autoProvision        Boolean      @default(true) // Auto-create users
+  defaultRole          String       @default("member") // Default organization role
+  attributeMapping     String?      // JSON mapping of OIDC claims to user fields
+  requireVerifiedEmail Boolean      @default(false) // Require email_verified=true from IdP
+  allowedEmailDomains  String?      // Comma-separated list of allowed email domains (null = allow all)
+  
+  // Security Settings
+  enforceSSOLogin      Boolean      @default(false) // When true, org members must use SSO (no password/social login)
   
   // Status and Metadata
   isEnabled         Boolean      @default(false)

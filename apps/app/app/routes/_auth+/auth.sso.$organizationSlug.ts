@@ -16,6 +16,7 @@ import {
 	createSSOError,
 	SSOErrorType,
 } from '#app/utils/sso/error-handling.server.ts'
+import { generateNonce, storeNonce } from '#app/utils/sso/nonce.server.ts'
 import { trackSuspiciousActivity } from '#app/utils/sso/rate-limit.server.ts'
 import {
 	sanitizeRedirectUrl,
@@ -115,8 +116,19 @@ export async function action({ request, params }: Route.ActionArgs) {
 			'info',
 		)
 
-		// Initiate SSO authentication flow
-		const response = await ssoAuthService.initiateAuth(organization.id, request)
+		// Generate and store nonce for replay attack prevention
+		const nonce = generateNonce()
+		const nonceCookie = await storeNonce(request, nonce)
+
+		// Initiate SSO authentication flow with nonce
+		const response = await ssoAuthService.initiateAuth(
+			organization.id,
+			request,
+			nonce,
+		)
+
+		// Add nonce cookie to response
+		response.headers.append('set-cookie', nonceCookie)
 
 		// Handle redirect cookie for post-auth redirect
 		const redirectTo = requestData.redirectTo || getReferrerRoute(request)

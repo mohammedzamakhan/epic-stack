@@ -117,6 +117,24 @@ export const AttributeMappingSchema = z
 	})
 
 // Main SSO configuration schema
+// Email domain validation (comma-separated domains)
+const EmailDomainsSchema = z
+	.string()
+	.optional()
+	.nullable()
+	.refine(
+		(val) => {
+			if (!val) return true
+			const domains = val.split(',').map((d) => d.trim())
+			const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}$/
+			return domains.every((d) => domainRegex.test(d))
+		},
+		{
+			message:
+				'Invalid email domain format. Use comma-separated domains like: example.com, company.org',
+		},
+	)
+
 export const SSOConfigurationSchema = z.object({
 	providerName: ProviderNameSchema,
 	issuerUrl: UrlSchema,
@@ -132,6 +150,9 @@ export const SSOConfigurationSchema = z.object({
 	tokenUrl: UrlSchema.optional().nullable(),
 	userinfoUrl: UrlSchema.optional().nullable(),
 	revocationUrl: UrlSchema.optional().nullable(),
+	requireVerifiedEmail: z.boolean().default(false),
+	allowedEmailDomains: EmailDomainsSchema,
+	enforceSSOLogin: z.boolean().default(false),
 })
 
 // Update schema (all fields optional except id)
@@ -151,6 +172,9 @@ export const SSOConfigurationUpdateSchema = z.object({
 	tokenUrl: UrlSchema.optional().nullable(),
 	userinfoUrl: UrlSchema.optional().nullable(),
 	revocationUrl: UrlSchema.optional().nullable(),
+	requireVerifiedEmail: z.boolean().optional(),
+	allowedEmailDomains: EmailDomainsSchema.optional(),
+	enforceSSOLogin: z.boolean().optional(),
 })
 
 // Connection test schema

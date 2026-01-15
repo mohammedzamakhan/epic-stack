@@ -1,5 +1,6 @@
 import { Trans } from '@lingui/macro'
 import { Badge } from '@repo/ui/badge'
+import { Button } from '@repo/ui/button'
 import {
 	Card,
 	CardContent,
@@ -29,7 +30,10 @@ import { StatusButton } from '@repo/ui/status-button'
 import { formatDistanceToNow } from 'date-fns'
 import { useState, useEffect } from 'react'
 import { useFetcher, useRevalidator } from 'react-router'
-import { revokeSessionActionIntent } from '#app/routes/_app+/security.tsx'
+import {
+	revokeSessionActionIntent,
+	signOutOfSessionsActionIntent,
+} from '#app/routes/_app+/security.tsx'
 import { useDoubleCheck } from '#app/utils/misc.tsx'
 
 interface DeviceInfo {
@@ -104,6 +108,7 @@ export function SessionsCard({
 						/>
 					))}
 				</div>
+				{sessions.length > 1 && <SignOutAllDevices />}
 			</CardContent>
 		</Card>
 	)
@@ -341,5 +346,48 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 				</div>
 			</DialogContent>
 		</Dialog>
+	)
+}
+
+function SignOutAllDevices() {
+	const fetcher = useFetcher()
+	const revalidator = useRevalidator()
+
+	useEffect(() => {
+		if (fetcher.data?.status === 'success') {
+			void revalidator.revalidate()
+		}
+	}, [fetcher.data?.status, revalidator])
+
+	return (
+		<div className="mt-4 border-t pt-4">
+			<Item variant="outline">
+				<ItemContent>
+					<ItemTitle>
+						<Trans>Sign out of all other devices</Trans>
+					</ItemTitle>
+					<ItemDescription>
+						<Trans>Remove access from all devices except this one</Trans>
+					</ItemDescription>
+				</ItemContent>
+				<ItemActions>
+					<fetcher.Form method="POST">
+						<Button
+							type="submit"
+							name="intent"
+							value={signOutOfSessionsActionIntent}
+							variant="outline"
+							disabled={fetcher.state !== 'idle'}
+						>
+							{fetcher.state !== 'idle' ? (
+								<Trans>Signing out...</Trans>
+							) : (
+								<Trans>Sign out</Trans>
+							)}
+						</Button>
+					</fetcher.Form>
+				</ItemActions>
+			</Item>
+		</div>
 	)
 }

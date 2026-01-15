@@ -9,7 +9,14 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
-import { Separator } from '@repo/ui/separator'
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemTitle,
+} from '@repo/ui/item'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { useState } from 'react'
 import { useNavigate, useSubmit } from 'react-router'
@@ -447,17 +454,12 @@ export function UserDetailView({
 							</CardHeader>
 							<CardContent>
 								{user.organizations.length > 0 ? (
-									<div className="space-y-4">
+									<ItemGroup>
 										{user.organizations.map((membership) => (
-											<div
-												key={membership.organization.id}
-												className="flex items-center justify-between rounded-lg border p-4"
-											>
-												<div className="space-y-1">
-													<div className="flex items-center gap-2">
-														<h4 className="font-medium">
-															{membership.organization.name}
-														</h4>
+											<Item key={membership.organization.id} variant="outline">
+												<ItemContent>
+													<ItemTitle>
+														{membership.organization.name}
 														{membership.isDefault && (
 															<Badge variant="outline" className="text-xs">
 																Default
@@ -468,12 +470,12 @@ export function UserDetailView({
 																Inactive
 															</Badge>
 														)}
-													</div>
-													<p className="text-muted-foreground text-sm">
+													</ItemTitle>
+													<ItemDescription>
 														{membership.organization.description ||
 															'No description'}
-													</p>
-													<div className="text-muted-foreground flex items-center gap-4 text-xs">
+													</ItemDescription>
+													<ItemDescription className="flex items-center gap-4">
 														<span>
 															Role: {membership.organizationRole.name}
 														</span>
@@ -486,9 +488,9 @@ export function UserDetailView({
 																membership.createdAt,
 															).toLocaleDateString()}
 														</span>
-													</div>
-												</div>
-												<div className="flex items-center gap-2">
+													</ItemDescription>
+												</ItemContent>
+												<ItemActions>
 													{membership.organization.subscriptionStatus && (
 														<Badge variant="outline">
 															{membership.organization.subscriptionStatus}
@@ -505,10 +507,10 @@ export function UserDetailView({
 													>
 														<Icon name="external-link" className="h-4 w-4" />
 													</Button>
-												</div>
-											</div>
+												</ItemActions>
+											</Item>
 										))}
-									</div>
+									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
 										User is not a member of any organizations
@@ -529,20 +531,19 @@ export function UserDetailView({
 								</CardHeader>
 								<CardContent>
 									{recentActivity.comments.length > 0 ? (
-										<div className="space-y-3">
+										<ItemGroup>
 											{recentActivity.comments.map((comment) => (
-												<div key={comment.id} className="space-y-1">
-													<p className="text-sm">{comment.content}</p>
-													<div className="text-muted-foreground flex items-center gap-2 text-xs">
-														<span>On: {comment.note.title}</span>
-														<span>•</span>
-														<span>
+												<Item key={comment.id} variant="outline">
+													<ItemContent>
+														<ItemTitle>{comment.content}</ItemTitle>
+														<ItemDescription>
+															On: {comment.note.title} •{' '}
 															{new Date(comment.createdAt).toLocaleDateString()}
-														</span>
-													</div>
-												</div>
+														</ItemDescription>
+													</ItemContent>
+												</Item>
 											))}
-										</div>
+										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
 											No recent comments
@@ -560,20 +561,19 @@ export function UserDetailView({
 								</CardHeader>
 								<CardContent>
 									{recentActivity.activityLogs.length > 0 ? (
-										<div className="space-y-3">
+										<ItemGroup>
 											{recentActivity.activityLogs.map((log) => (
-												<div key={log.id} className="space-y-1">
-													<p className="text-sm font-medium">{log.action}</p>
-													<div className="text-muted-foreground flex items-center gap-2 text-xs">
-														<span>On: {log.note.title}</span>
-														<span>•</span>
-														<span>
+												<Item key={log.id} variant="outline">
+													<ItemContent>
+														<ItemTitle>{log.action}</ItemTitle>
+														<ItemDescription>
+															On: {log.note.title} •{' '}
 															{new Date(log.createdAt).toLocaleDateString()}
-														</span>
-													</div>
-												</div>
+														</ItemDescription>
+													</ItemContent>
+												</Item>
 											))}
-										</div>
+										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
 											No recent activity
@@ -592,24 +592,21 @@ export function UserDetailView({
 							</CardHeader>
 							<CardContent>
 								{user.notes.length > 0 ? (
-									<div className="space-y-3">
+									<ItemGroup>
 										{user.notes.map((note) => (
-											<div
-												key={note.id}
-												className="flex items-center justify-between"
-											>
-												<div>
-													<p className="font-medium">{note.title}</p>
-													<p className="text-muted-foreground text-xs">
+											<Item key={note.id} variant="outline">
+												<ItemContent>
+													<ItemTitle>{note.title}</ItemTitle>
+													<ItemDescription>
 														Created:{' '}
 														{new Date(note.createdAt).toLocaleDateString()} •
 														Updated:{' '}
 														{new Date(note.updatedAt).toLocaleDateString()}
-													</p>
-												</div>
-											</div>
+													</ItemDescription>
+												</ItemContent>
+											</Item>
 										))}
-									</div>
+									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
 										No notes created
@@ -645,28 +642,27 @@ export function UserDetailView({
 								</CardHeader>
 								<CardContent>
 									{user.connections.length > 0 ? (
-										<div className="space-y-2">
+										<ItemGroup>
 											{user.connections.map((connection) => (
-												<div
-													key={connection.id}
-													className="flex items-center justify-between"
-												>
-													<div className="flex items-center gap-2">
-														<Badge variant="outline">
-															{connection.providerName}
-														</Badge>
-														<span className="font-mono text-sm">
-															{connection.providerId}
-														</span>
-													</div>
-													<span className="text-muted-foreground text-xs">
-														{new Date(
-															connection.createdAt,
-														).toLocaleDateString()}
-													</span>
-												</div>
+												<Item key={connection.id} variant="outline">
+													<ItemContent>
+														<ItemTitle>
+															<Badge variant="outline">
+																{connection.providerName}
+															</Badge>
+															<span className="font-mono text-sm font-normal">
+																{connection.providerId}
+															</span>
+														</ItemTitle>
+														<ItemDescription>
+															{new Date(
+																connection.createdAt,
+															).toLocaleDateString()}
+														</ItemDescription>
+													</ItemContent>
+												</Item>
 											))}
-										</div>
+										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
 											No connected accounts
@@ -683,30 +679,27 @@ export function UserDetailView({
 							</CardHeader>
 							<CardContent>
 								{activeSessions.length > 0 ? (
-									<div className="space-y-2">
+									<ItemGroup>
 										{activeSessions.map((session) => (
-											<div
-												key={session.id}
-												className="flex items-center justify-between rounded border p-3"
-											>
-												<div>
-													<p className="text-sm font-medium">
+											<Item key={session.id} variant="outline">
+												<ItemContent>
+													<ItemTitle>
 														Session {session.id.slice(0, 8)}...
-													</p>
-													<p className="text-muted-foreground text-xs">
+													</ItemTitle>
+													<ItemDescription>
 														Created:{' '}
 														{new Date(session.createdAt).toLocaleString()}
-													</p>
-												</div>
-												<div className="text-right">
-													<p className="text-muted-foreground text-xs">
+													</ItemDescription>
+												</ItemContent>
+												<ItemActions>
+													<span className="text-muted-foreground text-xs">
 														Expires:{' '}
 														{new Date(session.expirationDate).toLocaleString()}
-													</p>
-												</div>
-											</div>
+													</span>
+												</ItemActions>
+											</Item>
 										))}
-									</div>
+									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
 										No active sessions
@@ -726,30 +719,27 @@ export function UserDetailView({
 							</CardHeader>
 							<CardContent>
 								{ipAddresses.length > 0 ? (
-									<div className="space-y-2">
+									<ItemGroup>
 										{ipAddresses.map((conn) => (
-											<div
-												key={conn.id}
-												className="flex items-center justify-between rounded border p-3"
-											>
-												<div>
-													<p className="font-mono text-sm">
+											<Item key={conn.id} variant="outline">
+												<ItemContent>
+													<ItemTitle className="font-mono">
 														{conn.ipAddress.ip}
-													</p>
-													<p className="text-muted-foreground text-xs">
+													</ItemTitle>
+													<ItemDescription>
 														{conn.ipAddress.city}, {conn.ipAddress.region},{' '}
 														{conn.ipAddress.country}
-													</p>
-												</div>
-												<div className="text-right">
-													<p className="text-muted-foreground text-xs">
+													</ItemDescription>
+												</ItemContent>
+												<ItemActions>
+													<span className="text-muted-foreground text-xs">
 														Last Seen:{' '}
 														{new Date(conn.lastSeenAt).toLocaleString()}
-													</p>
-												</div>
-											</div>
+													</span>
+												</ItemActions>
+											</Item>
 										))}
-									</div>
+									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
 										No IP addresses recorded for this user

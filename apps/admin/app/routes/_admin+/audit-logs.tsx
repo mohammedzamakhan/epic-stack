@@ -10,6 +10,14 @@ import {
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import {
+	Item,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemHeader,
+	ItemTitle,
+} from '@repo/ui/item'
+import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -278,30 +286,35 @@ export default function EnhancedAuditLogsPage() {
 				</CardHeader>
 				<CardContent>
 					{logs.length > 0 ? (
-						<div className="space-y-3">
+						<ItemGroup>
 							{logs.map((log) => {
 								const metadata = log.metadata ? JSON.parse(log.metadata) : {}
 								const metadataTyped = metadata as Record<string, any>
 								return (
-									<div
-										key={log.id}
-										className="flex items-start justify-between rounded-lg border p-4"
-									>
-										<div className="flex-1 space-y-2">
-											<div className="flex items-center gap-2">
-												<Badge
-													variant={getSeverityBadgeVariant(
-														metadataTyped.severity || 'info',
-													)}
-												>
-													{metadataTyped.severity || 'info'}
-												</Badge>
-												<span className="text-muted-foreground font-mono text-sm">
-													{log.action}
-												</span>
-											</div>
-											<p className="font-medium">{log.details}</p>
-											<div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
+									<Item key={log.id} variant="outline">
+										<ItemContent>
+											<ItemHeader>
+												<div className="flex items-center gap-2">
+													<Badge
+														variant={getSeverityBadgeVariant(
+															metadataTyped.severity || 'info',
+														)}
+													>
+														{metadataTyped.severity || 'info'}
+													</Badge>
+													<span className="text-muted-foreground font-mono text-sm">
+														{log.action}
+													</span>
+												</div>
+												<div className="text-muted-foreground flex items-center gap-1 text-sm">
+													<Icon name="clock" className="h-4 w-4" />
+													<span>
+														{new Date(log.createdAt).toLocaleString()}
+													</span>
+												</div>
+											</ItemHeader>
+											<ItemTitle>{log.details}</ItemTitle>
+											<ItemDescription className="flex flex-wrap gap-4">
 												{log.user && (
 													<span>
 														<Icon name="user" className="mr-1 inline h-3 w-3" />
@@ -336,16 +349,12 @@ export default function EnhancedAuditLogsPage() {
 														{log.resourceId?.substring(0, 8)}
 													</span>
 												)}
-											</div>
-										</div>
-										<div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
-											<Icon name="clock" className="h-4 w-4" />
-											<span>{new Date(log.createdAt).toLocaleString()}</span>
-										</div>
-									</div>
+											</ItemDescription>
+										</ItemContent>
+									</Item>
 								)
 							})}
-						</div>
+						</ItemGroup>
 					) : (
 						<div className="py-12 text-center">
 							<Icon

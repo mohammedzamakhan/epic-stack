@@ -16,6 +16,7 @@ import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
 } from '#app/utils/redirect-cookie.server.ts'
+import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import {
 	createToastHeaders,
 	redirectWithToast,
@@ -123,6 +124,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 	// Connection exists already? Make a new session
 	if (existingConnection) {
+		// Check SSO enforcement before allowing social login
+		const ssoEnforcement = await checkSSOEnforcementByEmail(profile.email)
+		if (ssoEnforcement.enforced) {
+			throw await redirectWithToast(
+				`/auth/sso/${ssoEnforcement.organizationSlug}`,
+				{
+					title: 'SSO Required',
+					description: `Your organization "${ssoEnforcement.organizationName}" requires SSO login.`,
+					type: 'message',
+				},
+				{ headers: destroyRedirectTo },
+			)
+		}
 		return makeSession({ request, userId: existingConnection.userId })
 	}
 
@@ -133,6 +147,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		where: { email: profile.email.toLowerCase() },
 	})
 	if (user) {
+		// Check SSO enforcement before allowing social login
+		const ssoEnforcement = await checkSSOEnforcementByEmail(profile.email)
+		if (ssoEnforcement.enforced) {
+			throw await redirectWithToast(
+				`/auth/sso/${ssoEnforcement.organizationSlug}`,
+				{
+					title: 'SSO Required',
+					description: `Your organization "${ssoEnforcement.organizationName}" requires SSO login.`,
+					type: 'message',
+				},
+				{ headers: destroyRedirectTo },
+			)
+		}
+
 		await prisma.connection.create({
 			data: {
 				providerName,

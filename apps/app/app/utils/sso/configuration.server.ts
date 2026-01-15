@@ -73,6 +73,9 @@ export class SSOConfigurationService {
 					tokenUrl: validatedConfig.tokenUrl || null,
 					userinfoUrl: validatedConfig.userinfoUrl || null,
 					revocationUrl: validatedConfig.revocationUrl || null,
+					requireVerifiedEmail: validatedConfig.requireVerifiedEmail ?? false,
+					allowedEmailDomains: validatedConfig.allowedEmailDomains || null,
+					enforceSSOLogin: validatedConfig.enforceSSOLogin ?? false,
 					createdById,
 				},
 			})
@@ -240,6 +243,27 @@ export class SSOConfigurationService {
 				changes.revocationUrl = {
 					from: existingConfig.revocationUrl,
 					to: validatedConfig.revocationUrl,
+				}
+			}
+			if (validatedConfig.requireVerifiedEmail !== undefined) {
+				updateData.requireVerifiedEmail = validatedConfig.requireVerifiedEmail
+				changes.requireVerifiedEmail = {
+					from: (existingConfig as any).requireVerifiedEmail,
+					to: validatedConfig.requireVerifiedEmail,
+				}
+			}
+			if (validatedConfig.allowedEmailDomains !== undefined) {
+				updateData.allowedEmailDomains = validatedConfig.allowedEmailDomains
+				changes.allowedEmailDomains = {
+					from: (existingConfig as any).allowedEmailDomains,
+					to: validatedConfig.allowedEmailDomains,
+				}
+			}
+			if (validatedConfig.enforceSSOLogin !== undefined) {
+				updateData.enforceSSOLogin = validatedConfig.enforceSSOLogin
+				changes.enforceSSOLogin = {
+					from: (existingConfig as any).enforceSSOLogin,
+					to: validatedConfig.enforceSSOLogin,
 				}
 			}
 

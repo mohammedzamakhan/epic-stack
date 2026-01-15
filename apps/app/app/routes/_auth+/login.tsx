@@ -53,6 +53,7 @@ import {
 	discoverOrganizationFromEmail,
 } from '#app/utils/organization/organizations.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
+import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import { type Route } from './+types/login.ts'
 import { handleNewSession } from './login.server.ts'
 
@@ -199,6 +200,16 @@ export async function action({ request }: Route.ActionArgs) {
 		schema: (intent) =>
 			LoginFormSchema.transform(async (data, ctx) => {
 				if (intent !== null) return { ...data, session: null }
+
+				// Check SSO enforcement before allowing password login
+				const ssoEnforcement = await checkSSOEnforcementByEmail(data.username)
+				if (ssoEnforcement.enforced) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: `Your organization requires SSO login. Please use the SSO login option for ${ssoEnforcement.organizationName || 'your organization'}.`,
+					})
+					return z.NEVER
+				}
 
 				const session = await login({ ...data, request })
 				if (!session) {
@@ -473,7 +484,7 @@ function SocialLoginButtons({ redirectTo }: { redirectTo: string | null }) {
 						redirectTo={redirectTo}
 					/>
 					{lastLoginMethod === providerName && (
-						<div className="bg-primary text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-1 text-xs font-medium">
+						<div className="bg-foreground text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-xs font-medium">
 							<Trans>Last used</Trans>
 						</div>
 					)}

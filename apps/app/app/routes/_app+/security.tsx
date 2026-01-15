@@ -19,10 +19,11 @@ import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { SessionsCard } from '#app/components/settings/cards/sessions-card.tsx'
 
 import { requireUserId, sessionKey } from '#app/utils/auth.server.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
 import { cache, cachified } from '#app/utils/cache.server.ts'
-import { userSecuritySelect } from '#app/utils/user-security.server.ts'
+import { authSessionStorage } from '#app/utils/session.server.ts'
+import { checkSSOEnforcementByUserId } from '#app/utils/sso/enforcement.server.ts'
 import { parseUserAgent } from '#app/utils/user-agent.server.ts'
+import { userSecuritySelect } from '#app/utils/user-security.server.ts'
 import {
 	deleteDataAction,
 	signOutOfSessionsAction,
@@ -103,6 +104,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				userAgent: true,
 			},
 		}),
+		checkSSOEnforcementByUserId(userId),
 	])
 
 	// Extract results with error handling
@@ -118,6 +120,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const connections = results[3].status === 'fulfilled' ? results[3].value : []
 	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
 	const rawSessions = results[5].status === 'fulfilled' ? results[5].value : []
+	const ssoEnforcement =
+		results[6].status === 'fulfilled' ? results[6].value : { enforced: false }
 
 	// Get current session ID
 	const authSession = await authSessionStorage.getSession(
@@ -170,6 +174,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		passkeys,
 		sessions,
 		currentSessionId,
+		ssoEnforcement,
 	}
 }
 
@@ -305,6 +310,7 @@ export default function SecuritySettings() {
 						user={data.user}
 						qrCode={data.qrCode}
 						otpUri={data.otpUri}
+						ssoEnforcement={data.ssoEnforcement}
 					/>
 				</AnnotatedSection>
 

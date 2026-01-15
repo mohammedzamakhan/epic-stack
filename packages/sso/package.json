@@ -23,6 +23,7 @@
   "dependencies": {
     "@repo/auth": "*",
     "@repo/database": "*",
+    "jose": "^5.9.6",
     "remix-auth-oauth2": "^3.4.1"
   },
   "devDependencies": {

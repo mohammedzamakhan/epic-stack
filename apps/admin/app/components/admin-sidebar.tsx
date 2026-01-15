@@ -1,4 +1,4 @@
-import { useDirection } from '@base-ui/react/direction-provider'
+import { useDirection } from '@repo/ui'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { ClockIcon } from '@repo/ui/clock-icon'
 import { FlaskIcon } from '@repo/ui/flask-icon'

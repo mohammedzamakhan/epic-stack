@@ -79,10 +79,11 @@ test('successful SSO initiation redirects to identity provider', async () => {
 		'test-provider.example.com',
 	)
 
-	// Verify SSO auth service was called with correct parameters
+	// Verify SSO auth service was called with correct parameters (including nonce)
 	expect(ssoAuthService.initiateAuth).toHaveBeenCalledWith(
 		testOrganization.id,
 		request,
+		expect.any(String), // nonce is a random string
 	)
 })
 

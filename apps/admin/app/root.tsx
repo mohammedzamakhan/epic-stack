@@ -1,8 +1,8 @@
 import { brand, getErrorTitle } from '@repo/config/brand'
 import { getDirection } from '@repo/i18n'
+import { DirectionProvider } from '@repo/ui'
 import { EpicToaster } from '@repo/ui/sonner'
 import { TooltipProvider } from '@repo/ui/tooltip'
-import { DirectionProvider } from '@base-ui/react/direction-provider'
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,

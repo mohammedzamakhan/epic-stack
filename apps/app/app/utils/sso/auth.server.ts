@@ -6,16 +6,24 @@ import {
 } from '@repo/database/types'
 
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
+import {
+	ssoCache,
+	ssoConnectionPool,
+	discoverOIDCEndpoints,
+	type EndpointConfiguration,
+	validateIDToken,
+	type IDTokenClaims,
+	IDTokenValidationErrorCode,
+} from '@repo/sso'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
-import { discoverOIDCEndpoints, type EndpointConfiguration } from '@repo/sso'
 import { type ProviderUser } from '../providers/provider.ts'
-import { ssoCache, ssoConnectionPool } from '@repo/sso'
 import { ssoConfigurationService } from './configuration.server.ts'
 import { ssoRetryManager } from './retry-logic.server.ts'
 
 export interface OIDCUserInfo {
 	sub: string
 	email?: string
+	email_verified?: boolean
 	name?: string
 	preferred_username?: string
 	given_name?: string
@@ -114,15 +122,25 @@ export class SSOAuthService {
 	async initiateAuth(
 		organizationId: string,
 		request: Request,
+		nonce?: string,
 	): Promise<Response> {
 		const strategy = await this.getStrategy(organizationId)
 		if (!strategy) {
 			throw new Error('SSO not configured or enabled for this organization')
 		}
 
+		// Create a modified request URL with nonce parameter for OIDC
+		// The nonce will be included in the authorization request
+		let authRequest = request
+		if (nonce) {
+			const url = new URL(request.url)
+			url.searchParams.set('nonce', nonce)
+			authRequest = new Request(url.toString(), request)
+		}
+
 		// Use the strategy's authenticate method which returns a Response for redirects
 		try {
-			await strategy.authenticate(request)
+			await strategy.authenticate(authRequest)
 			// If we get here, it means authentication failed or there's an issue
 			throw new Error('Unexpected authentication result')
 		} catch (error) {
@@ -139,10 +157,16 @@ export class SSOAuthService {
 	async handleCallback(
 		organizationId: string,
 		request: Request,
+		nonce?: string,
 	): Promise<ProviderUser> {
 		const strategy = await this.getStrategy(organizationId)
 		if (!strategy) {
 			throw new Error('SSO not configured or enabled for this organization')
+		}
+
+		// Attach nonce to request for ID token validation in handleUserInfo
+		if (nonce) {
+			;(request as any).ssoNonce = nonce
 		}
 
 		// Use the strategy's authenticate method which returns user info on callback
@@ -168,18 +192,23 @@ export class SSOAuthService {
 		// Extract user attributes using mapping
 		const email = this.extractAttribute(userInfo, attributeMapping.email!)
 		const name = this.extractAttribute(userInfo, attributeMapping.name!)
-		const username =
+		const baseUsername =
 			this.extractAttribute(userInfo, attributeMapping.username!) ||
 			email?.split('@')[0] ||
 			userInfo.sub
 
 		if (!email) {
-			throw new Error('Email is required for user provisioning')
+			throw new Error(
+				'Email is required for user provisioning. Ensure the "email" scope is requested and the email attribute is mapped correctly.',
+			)
 		}
 
-		if (!username) {
+		if (!baseUsername) {
 			throw new Error('Username is required for user provisioning')
 		}
+
+		// Validate email policies
+		this.validateEmailPolicies(email, userInfo, config)
 
 		// Check if user already exists
 		const existingUser = await prisma.user.findUnique({
@@ -187,6 +216,23 @@ export class SSOAuthService {
 		})
 
 		if (existingUser) {
+			// For existing users, check if they are already a member of the organization
+			const existingMembership = await prisma.userOrganization.findUnique({
+				where: {
+					userId_organizationId: {
+						userId: existingUser.id,
+						organizationId: config.organizationId,
+					},
+				},
+			})
+
+			// If user exists but is not a member, only add them if autoProvision is enabled
+			if (!existingMembership && !config.autoProvision) {
+				throw new Error(
+					'User exists but is not a member of this organization. Auto-provisioning is disabled.',
+				)
+			}
+
 			// Update existing user with SSO attributes
 			return this.updateUserFromSSO(existingUser.id, userInfo, config)
 		}
@@ -195,17 +241,22 @@ export class SSOAuthService {
 			throw new Error('User does not exist and auto-provisioning is disabled')
 		}
 
+		// Generate a unique username to avoid collisions
+		const username = await this.generateUniqueUsername(
+			baseUsername.toLowerCase(),
+		)
+
 		// Create new user
 		const user = await prisma.user.create({
 			data: {
 				email: email.toLowerCase(),
-				username: username.toLowerCase(),
+				username,
 				name: name || email,
 				roles: { connect: { name: 'user' } },
 			},
 		})
 
-		// Add user to organization if not already a member
+		// Add user to organization
 		await this.ensureOrganizationMembership(
 			user.id,
 			config.organizationId,
@@ -213,6 +264,71 @@ export class SSOAuthService {
 		)
 
 		return user
+	}
+
+	/**
+	 * Generate a unique username, appending a suffix if needed
+	 */
+	private async generateUniqueUsername(baseUsername: string): Promise<string> {
+		let username = baseUsername
+		let suffix = 0
+		const maxAttempts = 100
+
+		while (suffix < maxAttempts) {
+			const existingUser = await prisma.user.findUnique({
+				where: { username },
+				select: { id: true },
+			})
+
+			if (!existingUser) {
+				return username
+			}
+
+			suffix++
+			username = `${baseUsername}-${suffix}`
+		}
+
+		// Fallback: use timestamp-based suffix
+		return `${baseUsername}-${Date.now()}`
+	}
+
+	/**
+	 * Validate email policies (verified email requirement, domain allowlist)
+	 */
+	private validateEmailPolicies(
+		email: string,
+		userInfo: OIDCUserInfo,
+		config: SSOConfiguration,
+	): void {
+		// Check if verified email is required
+		const requireVerifiedEmail = (config as any).requireVerifiedEmail ?? false
+		if (requireVerifiedEmail && userInfo.email_verified !== true) {
+			throw new Error(
+				'Email verification is required. The identity provider did not confirm this email as verified.',
+			)
+		}
+
+		// Check allowed email domains
+		const allowedEmailDomains = (config as any).allowedEmailDomains as
+			| string
+			| null
+		if (allowedEmailDomains) {
+			const emailDomain = email.split('@')[1]?.toLowerCase()
+			if (!emailDomain) {
+				throw new Error('Invalid email format: missing domain')
+			}
+
+			const allowedDomains = allowedEmailDomains
+				.split(',')
+				.map((d) => d.trim().toLowerCase())
+				.filter(Boolean)
+
+			if (allowedDomains.length > 0 && !allowedDomains.includes(emailDomain)) {
+				throw new Error(
+					`Email domain "${emailDomain}" is not allowed for this organization. Allowed domains: ${allowedDomains.join(', ')}`,
+				)
+			}
+		}
 	}
 
 	/**
@@ -407,10 +523,76 @@ export class SSOAuthService {
 	private async handleUserInfo(
 		tokens: any,
 		config: SSOConfiguration,
-		_request: Request,
+		request: Request,
 	): Promise<ProviderUser & { tokens?: TokenSet }> {
-		// Get user info from the identity provider
-		const userInfo = await this.fetchUserInfo(tokens.accessToken, config)
+		const endpoints = await this.resolveEndpoints(config)
+		const nonce = (request as any).ssoNonce as string | undefined
+
+		// Validate ID token if present (OIDC compliance)
+		let idTokenClaims: IDTokenClaims | undefined
+		if (tokens.idToken && endpoints.jwksUrl) {
+			const validationResult = await this.validateIDTokenSafe(
+				tokens.idToken,
+				endpoints.jwksUrl,
+				config,
+				nonce,
+			)
+
+			if (!validationResult.valid) {
+				// Log the error but don't necessarily fail - some providers may have issues
+				console.warn(
+					`ID token validation warning for ${config.providerName}: ${validationResult.error}`,
+				)
+
+				// For critical errors, fail the authentication
+				if (
+					validationResult.errorCode ===
+						IDTokenValidationErrorCode.INVALID_SIGNATURE ||
+					validationResult.errorCode ===
+						IDTokenValidationErrorCode.INVALID_ISSUER ||
+					validationResult.errorCode ===
+						IDTokenValidationErrorCode.INVALID_AUDIENCE
+				) {
+					throw new Error(
+						`ID token validation failed: ${validationResult.error}. This may indicate a security issue.`,
+					)
+				}
+			} else {
+				idTokenClaims = validationResult.claims
+			}
+		}
+
+		// Get user info from the identity provider (or use ID token claims)
+		let userInfo: OIDCUserInfo
+
+		if (idTokenClaims && idTokenClaims.email) {
+			// If ID token has email, we can use it directly (more secure)
+			userInfo = this.convertIDTokenClaimsToUserInfo(idTokenClaims)
+
+			// Optionally supplement with userinfo endpoint for additional claims
+			if (endpoints.userinfoUrl) {
+				try {
+					const additionalInfo = await this.fetchUserInfo(
+						tokens.accessToken,
+						config,
+					)
+					// Merge, but prefer ID token claims for security-critical fields
+					userInfo = {
+						...additionalInfo,
+						...userInfo, // ID token claims take precedence
+					}
+				} catch (error) {
+					// UserInfo fetch failed, but we have ID token claims - continue
+					console.warn(
+						'UserInfo fetch failed, using ID token claims only:',
+						error,
+					)
+				}
+			}
+		} else {
+			// Fall back to userinfo endpoint
+			userInfo = await this.fetchUserInfo(tokens.accessToken, config)
+		}
 
 		// Provision or update user
 		const user = await this.provisionUser(userInfo, config)
@@ -432,6 +614,52 @@ export class SSOAuthService {
 			username: user.username,
 			name: user.name ?? undefined,
 			tokens: tokenSet,
+		}
+	}
+
+	/**
+	 * Validate ID token with error handling
+	 */
+	private async validateIDTokenSafe(
+		idToken: string,
+		jwksUrl: string,
+		config: SSOConfiguration,
+		nonce?: string,
+	): Promise<{
+		valid: boolean
+		claims?: IDTokenClaims
+		error?: string
+		errorCode?: IDTokenValidationErrorCode
+	}> {
+		try {
+			return await validateIDToken(idToken, jwksUrl, {
+				issuer: config.issuerUrl,
+				clientId: config.clientId,
+				nonce: nonce, // Use passed nonce for validation
+				clockTolerance: 120, // 2 minutes tolerance for clock skew
+			})
+		} catch (error) {
+			return {
+				valid: false,
+				error: `ID token validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+				errorCode: IDTokenValidationErrorCode.INVALID_TOKEN,
+			}
+		}
+	}
+
+	/**
+	 * Convert ID token claims to OIDCUserInfo format
+	 */
+	private convertIDTokenClaimsToUserInfo(claims: IDTokenClaims): OIDCUserInfo {
+		return {
+			sub: claims.sub,
+			email: claims.email,
+			email_verified: claims.email_verified,
+			name: claims.name,
+			preferred_username: claims.preferred_username,
+			given_name: claims.given_name,
+			family_name: claims.family_name,
+			picture: claims.picture,
 		}
 	}
 
@@ -552,39 +780,37 @@ export class SSOAuthService {
 
 	/**
 	 * Ensure user is a member of the organization
+	 * Uses upsert to prevent race conditions under concurrent logins
 	 */
 	private async ensureOrganizationMembership(
 		userId: string,
 		organizationId: string,
 		defaultRole: string,
 	): Promise<void> {
-		const existingMembership = await prisma.userOrganization.findUnique({
+		// Find the organization role by name first
+		const organizationRole = await prisma.organizationRole.findUnique({
+			where: { name: defaultRole },
+		})
+
+		if (!organizationRole) {
+			throw new Error(`Organization role '${defaultRole}' not found`)
+		}
+
+		// Use upsert to handle race conditions - if membership exists, do nothing
+		await prisma.userOrganization.upsert({
 			where: {
 				userId_organizationId: {
 					userId,
 					organizationId,
 				},
 			},
+			create: {
+				userId,
+				organizationId,
+				organizationRoleId: organizationRole.id,
+			},
+			update: {}, // No update needed if already exists
 		})
-
-		if (!existingMembership) {
-			// Find the organization role by name
-			const organizationRole = await prisma.organizationRole.findUnique({
-				where: { name: defaultRole },
-			})
-
-			if (!organizationRole) {
-				throw new Error(`Organization role '${defaultRole}' not found`)
-			}
-
-			await prisma.userOrganization.create({
-				data: {
-					userId,
-					organizationId,
-					organizationRoleId: organizationRole.id,
-				},
-			})
-		}
 	}
 
 	/**

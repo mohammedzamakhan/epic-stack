@@ -23,6 +23,7 @@ import {
 	SSOErrorType,
 	handleOAuthError,
 } from '#app/utils/sso/error-handling.server.ts'
+import { consumeNonce } from '#app/utils/sso/nonce.server.ts'
 import { trackSuspiciousActivity } from '#app/utils/sso/rate-limit.server.ts'
 import { validateSSOOrganization } from '#app/utils/sso/sanitization.server.ts'
 import {
@@ -159,9 +160,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			)
 		}
 
-		// Handle OAuth callback
+		// Consume the stored nonce for validation
+		const { nonce, cookieHeader: nonceCookieHeader } =
+			await consumeNonce(request)
+
+		// Handle OAuth callback with nonce for ID token validation
 		const authResult = await ssoAuthService
-			.handleCallback(organization.id, request)
+			.handleCallback(organization.id, request, nonce ?? undefined)
 			.then(
 				(data) =>
 					({
@@ -174,6 +179,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 						error,
 					}) as const,
 			)
+
+		// We'll add the nonce cookie header to clear it in all responses
 
 		if (!authResult.success) {
 			console.error('SSO authentication failed:', authResult.error)

@@ -43,6 +43,11 @@ interface SecurityCardProps {
 	}
 	qrCode: string | null
 	otpUri: string | null
+	ssoEnforcement?: {
+		enforced: boolean
+		organizationName?: string
+		message?: string
+	}
 }
 
 export function SecurityCard({
@@ -52,6 +57,7 @@ export function SecurityCard({
 	user,
 	qrCode,
 	otpUri,
+	ssoEnforcement,
 }: SecurityCardProps) {
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
 	const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false)
@@ -82,7 +88,14 @@ export function SecurityCard({
 								)}
 							</h3>
 							<p className="text-muted-foreground text-sm">
-								{hasPassword ? (
+								{ssoEnforcement?.enforced ? (
+									<span className="text-amber-600 dark:text-amber-500">
+										<Trans>
+											Password login is disabled because your organization "
+											{ssoEnforcement.organizationName}" requires SSO.
+										</Trans>
+									</span>
+								) : hasPassword ? (
 									<Trans>Change your password to something new</Trans>
 								) : (
 									<Trans>Create a password to secure your account</Trans>
@@ -94,8 +107,17 @@ export function SecurityCard({
 							onOpenChange={setIsPasswordModalOpen}
 						>
 							<DialogTrigger
+								disabled={ssoEnforcement?.enforced}
 								render={
-									<Button variant="outline">
+									<Button
+										variant="outline"
+										disabled={ssoEnforcement?.enforced}
+										title={
+											ssoEnforcement?.enforced
+												? `SSO login required by ${ssoEnforcement.organizationName}`
+												: undefined
+										}
+									>
 										{hasPassword ? (
 											<Trans>Change Password</Trans>
 										) : (
@@ -126,11 +148,7 @@ export function SecurityCard({
 					<div className="flex items-center justify-between">
 						<div>
 							<h3 className="font-semibold">
-								{isTwoFactorEnabled ? (
-									<Trans>Two-Factor Authentication</Trans>
-								) : (
-									<Trans>Enable Two-Factor Authentication</Trans>
-								)}
+								<Trans>Multi-factor authentication</Trans>
 							</h3>
 							<p className="text-muted-foreground text-sm">
 								{isTwoFactorEnabled ? (
@@ -138,7 +156,9 @@ export function SecurityCard({
 										Your account is secured with two-factor authentication
 									</Trans>
 								) : (
-									<Trans>Add an extra layer of security to your account</Trans>
+									<Trans>
+										Secure your account with an extra verification step
+									</Trans>
 								)}
 							</p>
 						</div>
@@ -154,7 +174,7 @@ export function SecurityCard({
 										{isTwoFactorEnabled ? (
 											<Trans>Disable 2FA</Trans>
 										) : (
-											<Trans>Enable 2FA</Trans>
+											<Trans>Set up authenticator app</Trans>
 										)}
 									</Button>
 								}

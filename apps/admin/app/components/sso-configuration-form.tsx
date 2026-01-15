@@ -8,9 +8,17 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import { Checkbox } from '@repo/ui/checkbox'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { Textarea } from '@repo/ui/textarea'
 import { Form } from 'react-router'
 import { z } from 'zod'
@@ -217,21 +225,19 @@ export function SSOConfigurationForm({
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						<div className="flex items-center space-x-2">
-							<input
-								type="checkbox"
+						<Label className="hover:bg-accent/50 has-[[data-state=checked]]:border-primary/50 has-[[data-state=checked]]:bg-accent/50 flex items-start gap-2 rounded-lg border p-3">
+							<Checkbox
 								id="autoDiscovery"
 								name="autoDiscovery"
 								defaultChecked={existingConfig?.autoDiscovery ?? true}
-								className="rounded border-gray-300"
 							/>
-							<div className="space-y-0.5">
-								<Label htmlFor="autoDiscovery">Auto-Discovery</Label>
-								<p className="text-muted-foreground text-sm">
+							<div className="flex flex-col gap-1">
+								<p>Auto-Discovery</p>
+								<p className="text-muted-foreground text-xs">
 									Automatically discover OAuth2 endpoints from the issuer URL
 								</p>
 							</div>
-						</div>
+						</Label>
 
 						{!autoDiscoveryEnabled && (
 							<div className="space-y-4 rounded-lg border p-4">
@@ -286,21 +292,19 @@ export function SSOConfigurationForm({
 							</div>
 						)}
 
-						<div className="flex items-center space-x-2">
-							<input
-								type="checkbox"
+						<Label className="hover:bg-accent/50 has-[[data-state=checked]]:border-primary/50 has-[[data-state=checked]]:bg-accent/50 flex items-start gap-2 rounded-lg border p-3">
+							<Checkbox
 								id="pkceEnabled"
 								name="pkceEnabled"
 								defaultChecked={existingConfig?.pkceEnabled ?? true}
-								className="rounded border-gray-300"
 							/>
-							<div className="space-y-0.5">
-								<Label htmlFor="pkceEnabled">PKCE Enabled</Label>
-								<p className="text-muted-foreground text-sm">
+							<div className="flex flex-col gap-1">
+								<p>PKCE Enabled</p>
+								<p className="text-muted-foreground text-xs">
 									Use Proof Key for Code Exchange for enhanced security
 								</p>
 							</div>
-						</div>
+						</Label>
 					</CardContent>
 				</Card>
 
@@ -316,31 +320,42 @@ export function SSOConfigurationForm({
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						<div className="flex items-center space-x-2">
-							<input
-								type="checkbox"
+						<Label className="hover:bg-accent/50 has-[[data-state=checked]]:border-primary/50 has-[[data-state=checked]]:bg-accent/50 flex items-start gap-2 rounded-lg border p-3">
+							<Checkbox
 								id="autoProvision"
 								name="autoProvision"
 								defaultChecked={existingConfig?.autoProvision ?? true}
-								className="rounded border-gray-300"
 							/>
-							<div className="space-y-0.5">
-								<Label htmlFor="autoProvision">Auto-Provision Users</Label>
-								<p className="text-muted-foreground text-sm">
+							<div className="flex flex-col gap-1">
+								<p>Auto-Provision Users</p>
+								<p className="text-muted-foreground text-xs">
 									Automatically create user accounts for new SSO users
 								</p>
 							</div>
-						</div>
+						</Label>
 
 						<div className="space-y-2">
 							<Label htmlFor="defaultRole">Default Role</Label>
-							<Input
-								id="defaultRole"
+							<Select
 								name="defaultRole"
-								type="text"
-								placeholder="member"
 								defaultValue={existingConfig?.defaultRole || 'member'}
-							/>
+								items={[
+									{ value: 'admin', label: 'Admin' },
+									{ value: 'member', label: 'Member' },
+									{ value: 'viewer', label: 'Viewer' },
+									{ value: 'guest', label: 'Guest' },
+								]}
+							>
+								<SelectTrigger id="defaultRole">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="admin">Admin</SelectItem>
+									<SelectItem value="member">Member</SelectItem>
+									<SelectItem value="viewer">Viewer</SelectItem>
+									<SelectItem value="guest">Guest</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div className="space-y-2">

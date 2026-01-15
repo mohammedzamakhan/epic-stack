@@ -1,3 +1,5 @@
+import 'varlock/auto-load'
+
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
 import { logger, sentryLogger, wideEventMiddleware } from '@repo/observability'

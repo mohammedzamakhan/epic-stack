@@ -1,4 +1,3 @@
-import { DirectionProvider } from '@base-ui/react/direction-provider'
 import { NovuProvider } from '@novu/react/hooks'
 import { brand, getErrorTitle } from '@repo/config/brand'
 import { getDirection } from '@repo/i18n'
@@ -7,6 +6,7 @@ import {
 	generateOrganizationSchema,
 	structuredDataScriptTag,
 } from '@repo/seo'
+import { DirectionProvider } from '@repo/ui'
 import { EpicToaster } from '@repo/ui/sonner'
 import { TooltipProvider } from '@repo/ui/tooltip'
 import { OpenImgContextProvider } from 'openimg/react'

@@ -52,36 +52,7 @@ export function SSOConfigurationOverview({
 	onTestConnection,
 }: SSOConfigurationOverviewProps) {
 	if (!ssoConfig) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Icon name="shield" className="h-5 w-5" />
-						SSO Configuration
-					</CardTitle>
-					<CardDescription>
-						Single Sign-On is not configured for this organization
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="py-8 text-center">
-						<Icon
-							name="shield"
-							className="text-muted-foreground mx-auto h-12 w-12"
-						/>
-						<h3 className="mt-4 text-lg font-medium">No SSO Configuration</h3>
-						<p className="text-muted-foreground mt-2 mb-4">
-							Configure SSO to allow users to authenticate with their corporate
-							identity provider.
-						</p>
-						<Button onClick={onEdit}>
-							<Icon name="plus" className="mr-2 h-4 w-4" />
-							Configure SSO
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
-		)
+		return null
 	}
 
 	const isHealthy =
