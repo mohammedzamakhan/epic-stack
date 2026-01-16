@@ -25,8 +25,8 @@ interface JsonRpcResponse {
 }
 
 // Helper to create test user
-async function createTestUser() {
-	return await prisma.user.create({
+async function createTestUser(createdUserIds: string[]) {
+	const user = await prisma.user.create({
 		data: {
 			email: faker.internet.email(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
@@ -34,10 +34,15 @@ async function createTestUser() {
 			roles: { connect: { name: 'user' } },
 		},
 	})
+	createdUserIds.push(user.id)
+	return user
 }
 
 // Helper to create test organization
-async function createTestOrganization(userId: string) {
+async function createTestOrganization(
+	userId: string,
+	createdOrgIds: string[],
+) {
 	// Ensure admin role exists
 	let adminRole = await prisma.organizationRole.findUnique({
 		where: { name: 'admin' },
@@ -52,7 +57,7 @@ async function createTestOrganization(userId: string) {
 		})
 	}
 
-	return await prisma.organization.create({
+	const org = await prisma.organization.create({
 		data: {
 			name: faker.company.name(),
 			slug: `org-${faker.string.uuid().slice(0, 8)}`,
@@ -64,27 +69,66 @@ async function createTestOrganization(userId: string) {
 			},
 		},
 	})
+	createdOrgIds.push(org.id)
+	return org
 }
 
 describe('MCP SSE Endpoint', () => {
-	beforeEach(async () => {
-		// Clean up test data before each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
-	})
+	// Track created resources for cleanup
+	const createdUserIds: string[] = []
+	const createdOrgIds: string[] = []
 
 	afterEach(async () => {
-		// Clean up test data after each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
+		// Clean up only the resources created in this test
+		// Delete in correct order to respect foreign key constraints
+		if (createdUserIds.length > 0 || createdOrgIds.length > 0) {
+			await prisma.mCPRefreshToken.deleteMany({
+				where: {
+					authorization: {
+						OR: [
+							{ userId: { in: createdUserIds } },
+							{ organizationId: { in: createdOrgIds } },
+						],
+					},
+				},
+			})
+			await prisma.mCPAccessToken.deleteMany({
+				where: {
+					authorization: {
+						OR: [
+							{ userId: { in: createdUserIds } },
+							{ organizationId: { in: createdOrgIds } },
+						],
+					},
+				},
+			})
+			await prisma.mCPAuthorization.deleteMany({
+				where: {
+					OR: [
+						{ userId: { in: createdUserIds } },
+						{ organizationId: { in: createdOrgIds } },
+					],
+				},
+			})
+			await prisma.userOrganization.deleteMany({
+				where: {
+					OR: [
+						{ userId: { in: createdUserIds } },
+						{ organizationId: { in: createdOrgIds } },
+					],
+				},
+			})
+			await prisma.organization.deleteMany({
+				where: { id: { in: createdOrgIds } },
+			})
+			await prisma.user.deleteMany({
+				where: { id: { in: createdUserIds } },
+			})
+
+			// Clear the arrays
+			createdUserIds.length = 0
+			createdOrgIds.length = 0
+		}
 	})
 
 	describe('Property 3: Valid token authentication', () => {
@@ -93,8 +137,8 @@ describe('MCP SSE Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization with tokens
 						const { accessToken } = await createAuthorizationWithTokens({
@@ -133,8 +177,8 @@ describe('MCP SSE Endpoint', () => {
 		}, 30000)
 
 		it('should reject request with expired access token', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -170,8 +214,8 @@ describe('MCP SSE Endpoint', () => {
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async (clientName) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create authorization with tokens
 						const { accessToken } = await createAuthorizationWithTokens({
@@ -232,8 +276,8 @@ describe('MCP SSE Endpoint', () => {
 
 	describe('Property 11: Connection resource cleanup', () => {
 		it('should clean up resources when connection closes', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -265,8 +309,8 @@ describe('MCP SSE Endpoint', () => {
 						maxLength: 5,
 					}),
 					async (clientNames) => {
-						const user = await createTestUser()
-						const org = await createTestOrganization(user.id)
+						const user = await createTestUser(createdUserIds)
+						const org = await createTestOrganization(user.id, createdOrgIds)
 
 						// Create multiple authorizations
 						const authorizations = await Promise.all(
@@ -315,8 +359,8 @@ describe('MCP SSE Endpoint', () => {
 
 	describe('Integration tests for SSE endpoint', () => {
 		it('should establish connection with valid token and proper headers', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -367,8 +411,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should reject non-GET requests', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -392,8 +436,8 @@ describe('MCP SSE Endpoint', () => {
 
 	describe('Integration tests for streamableHttp transport', () => {
 		it('should handle POST request with valid token', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -465,8 +509,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should handle initialize handshake', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -520,8 +564,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should handle tools/list request', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -567,8 +611,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should handle tools/call request', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -618,8 +662,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should return error for invalid JSON', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -658,8 +702,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should return error for unknown method', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -737,8 +781,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should handle notifications without response', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
@@ -775,8 +819,8 @@ describe('MCP SSE Endpoint', () => {
 		})
 
 		it('should handle tools/call with missing tool', async () => {
-			const user = await createTestUser()
-			const org = await createTestOrganization(user.id)
+			const user = await createTestUser(createdUserIds)
+			const org = await createTestOrganization(user.id, createdOrgIds)
 
 			// Create authorization with tokens
 			const { accessToken } = await createAuthorizationWithTokens({
