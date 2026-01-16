@@ -20,6 +20,8 @@ import { getInstanceInfo } from './utils/litefs.server.ts'
 import { NonceProvider } from './utils/nonce-provider.ts'
 import { makeTimings } from './utils/timing.server.ts'
 
+import { auditSensitiveRoutes } from '#app/utils/audit-middleware.server.ts'
+
 export const streamTimeout = 5000
 
 const MODE = ENV.NODE_ENV ?? 'development'
@@ -29,6 +31,13 @@ type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
 export default async function handleRequest(...args: DocRequestArgs) {
 	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
 		args
+
+	// Automatic audit logging for sensitive routes
+	void auditSensitiveRoutes(
+		request,
+		new Response(null, { status: responseStatusCode }),
+	)
+
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
 	responseHeaders.set('fly-region', ENV.FLY_REGION ?? 'unknown')
 	responseHeaders.set('fly-app', ENV.FLY_APP_NAME ?? 'unknown')

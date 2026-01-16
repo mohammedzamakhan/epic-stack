@@ -78,6 +78,7 @@
     "@react-router/node": "^7.10.1",
     "@react-router/remix-routes-option-adapter": "^7.10.1",
     "@remix-run/server-runtime": "^2.16.5",
+    "@repo/audit": "*",
     "@repo/background-jobs": "*",
     "@repo/database": "*",
     "@repo/email": "*",

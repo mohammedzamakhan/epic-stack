@@ -1,52 +1,55 @@
-import { prisma } from '@repo/database'
-import { logger, sentryLogger } from '@repo/observability'
-import { getClientIp } from '@repo/security'
+import { auditService, AuditAction } from '@repo/audit'
+import { logger } from '@repo/observability'
 
-// SSO-specific audit event types
-export enum SSOAuditEventType {
+// Map SSO audit event types to unified AuditAction
+// This maintains backward compatibility with existing SSO code
+export const SSOAuditEventType = {
 	// Configuration events
-	CONFIG_CREATED = 'sso_config_created',
-	CONFIG_UPDATED = 'sso_config_updated',
-	CONFIG_ENABLED = 'sso_config_enabled',
-	CONFIG_DISABLED = 'sso_config_disabled',
-	CONFIG_DELETED = 'sso_config_deleted',
-	CONFIG_TESTED = 'sso_config_tested',
+	CONFIG_CREATED: AuditAction.SSO_CONFIG_CREATED,
+	CONFIG_UPDATED: AuditAction.SSO_CONFIG_UPDATED,
+	CONFIG_ENABLED: AuditAction.SSO_CONFIG_ENABLED,
+	CONFIG_DISABLED: AuditAction.SSO_CONFIG_DISABLED,
+	CONFIG_DELETED: AuditAction.SSO_CONFIG_DELETED,
+	CONFIG_TESTED: AuditAction.SSO_CONFIG_TESTED,
 
 	// Authentication events
-	AUTH_INITIATED = 'sso_auth_initiated',
-	AUTH_SUCCESS = 'sso_auth_success',
-	AUTH_FAILED = 'sso_auth_failed',
-	AUTH_CALLBACK_RECEIVED = 'sso_auth_callback_received',
-	AUTH_TOKEN_EXCHANGED = 'sso_auth_token_exchanged',
-	AUTH_USER_PROVISIONED = 'sso_auth_user_provisioned',
+	AUTH_INITIATED: AuditAction.SSO_AUTH_INITIATED,
+	AUTH_SUCCESS: AuditAction.SSO_LOGIN,
+	AUTH_FAILED: AuditAction.SSO_LOGIN_FAILED,
+	AUTH_CALLBACK_RECEIVED: AuditAction.SSO_AUTH_CALLBACK_RECEIVED,
+	AUTH_TOKEN_EXCHANGED: AuditAction.SSO_AUTH_TOKEN_EXCHANGED,
+	AUTH_USER_PROVISIONED: AuditAction.SSO_USER_PROVISIONED,
 
 	// Session events
-	SESSION_CREATED = 'sso_session_created',
-	SESSION_REFRESHED = 'sso_session_refreshed',
-	SESSION_REVOKED = 'sso_session_revoked',
-	SESSION_EXPIRED = 'sso_session_expired',
+	SESSION_CREATED: AuditAction.SESSION_CREATED,
+	SESSION_REFRESHED: AuditAction.SESSION_REFRESHED,
+	SESSION_REVOKED: AuditAction.SESSION_REVOKED,
+	SESSION_EXPIRED: AuditAction.SESSION_EXPIRED,
 
 	// User management events
-	USER_ROLE_CHANGED = 'sso_user_role_changed',
-	USER_ACTIVATED = 'sso_user_activated',
-	USER_DEACTIVATED = 'sso_user_deactivated',
-	USER_PERMISSIONS_UPDATED = 'sso_user_permissions_updated',
+	USER_ROLE_CHANGED: AuditAction.SSO_USER_ROLE_CHANGED,
+	USER_ACTIVATED: AuditAction.USER_ACTIVATED,
+	USER_DEACTIVATED: AuditAction.USER_DEACTIVATED,
+	USER_PERMISSIONS_UPDATED: AuditAction.USER_PERMISSIONS_UPDATED,
 
 	// Security events
-	SUSPICIOUS_ACTIVITY = 'sso_suspicious_activity',
-	RATE_LIMIT_EXCEEDED = 'sso_rate_limit_exceeded',
-	INVALID_REQUEST = 'sso_invalid_request',
-	SECURITY_VIOLATION = 'sso_security_violation',
+	SUSPICIOUS_ACTIVITY: AuditAction.SUSPICIOUS_ACTIVITY_DETECTED,
+	RATE_LIMIT_EXCEEDED: AuditAction.RATE_LIMIT_EXCEEDED,
+	INVALID_REQUEST: AuditAction.INVALID_REQUEST,
+	SECURITY_VIOLATION: AuditAction.SECURITY_VIOLATION,
 
 	// System events
-	HEALTH_CHECK_FAILED = 'sso_health_check_failed',
-	PROVIDER_UNAVAILABLE = 'sso_provider_unavailable',
-	CONFIGURATION_ERROR = 'sso_configuration_error',
-	VALIDATION_FAILED = 'sso_validation_failed',
-	PERIODIC_VALIDATION = 'sso_periodic_validation',
-	CONFIG_WARNING = 'sso_config_warning',
-	CONFIG_ERROR = 'sso_config_error',
-}
+	HEALTH_CHECK_FAILED: AuditAction.SSO_HEALTH_CHECK_FAILED,
+	PROVIDER_UNAVAILABLE: AuditAction.SSO_PROVIDER_UNAVAILABLE,
+	CONFIGURATION_ERROR: AuditAction.SSO_CONFIGURATION_ERROR,
+	VALIDATION_FAILED: AuditAction.SSO_VALIDATION_FAILED,
+	PERIODIC_VALIDATION: AuditAction.SSO_PERIODIC_VALIDATION,
+	CONFIG_WARNING: AuditAction.SSO_CONFIG_WARNING,
+	CONFIG_ERROR: AuditAction.SSO_CONFIG_ERROR,
+} as const
+
+export type SSOAuditEventType =
+	(typeof SSOAuditEventType)[keyof typeof SSOAuditEventType]
 
 export interface SSOAuditLogEntry {
 	eventType: SSOAuditEventType
@@ -59,7 +62,7 @@ export interface SSOAuditLogEntry {
 	details: string
 	metadata?: Record<string, any>
 	severity: 'info' | 'warning' | 'error' | 'critical'
-	timestamp: Date
+	timestamp?: Date
 }
 
 export interface SSOMetrics {
@@ -75,6 +78,7 @@ export interface SSOMetrics {
 
 /**
  * SSO Audit Logging Service
+ * Adapts the SSO logging interface to the unified AuditService
  */
 export class SSOAuditLogger {
 	/**
@@ -82,24 +86,20 @@ export class SSOAuditLogger {
 	 */
 	async logEvent(entry: Omit<SSOAuditLogEntry, 'timestamp'>): Promise<void> {
 		try {
-			const logEntry = {
-				...entry,
-				timestamp: new Date(),
-			}
-
-			// Log to console for immediate visibility
-			this.logToConsole(logEntry)
-
-			// Store in database (if AuditLog model exists)
-			await this.storeInDatabase(logEntry)
-
-			// Send to external monitoring systems
-			await this.sendToMonitoring(logEntry)
-
-			// Handle critical events immediately
-			if (logEntry.severity === 'critical') {
-				await this.handleCriticalEvent(logEntry)
-			}
+			// Convert to unified audit log format
+			await auditService.log({
+				action: entry.eventType as AuditAction,
+				userId: entry.userId,
+				organizationId: entry.organizationId,
+				details: entry.details,
+				metadata: {
+					...entry.metadata,
+					sessionId: entry.sessionId,
+					ssoConfigId: entry.ssoConfigId,
+				},
+				severity: entry.severity,
+				request: this.createMockRequest(entry.ipAddress, entry.userAgent),
+			})
 		} catch (error) {
 			logger.error({ err: error }, 'Failed to log SSO audit event')
 		}
@@ -117,16 +117,17 @@ export class SSOAuditLogger {
 		metadata?: Record<string, any>,
 		request?: Request,
 	): Promise<void> {
-		await this.logEvent({
-			eventType,
-			organizationId,
+		await auditService.log({
+			action: eventType as AuditAction,
 			userId,
-			ssoConfigId,
-			ipAddress: this.extractIPAddress(request),
-			userAgent: request?.headers.get('user-agent') || undefined,
+			organizationId,
 			details,
-			metadata,
+			metadata: {
+				...metadata,
+				ssoConfigId,
+			},
 			severity: 'info',
+			request,
 		})
 	}
 
@@ -143,16 +144,22 @@ export class SSOAuditLogger {
 		request?: Request,
 		severity: 'info' | 'warning' | 'error' = 'info',
 	): Promise<void> {
-		await this.logEvent({
-			eventType,
-			organizationId,
+		await auditService.log({
+			action: eventType as AuditAction,
 			userId,
-			sessionId,
-			ipAddress: this.extractIPAddress(request),
-			userAgent: request?.headers.get('user-agent') || undefined,
+			organizationId,
 			details,
-			metadata,
-			severity,
+			metadata: {
+				...metadata,
+				sessionId,
+			},
+			severity:
+				severity === 'error'
+					? 'error'
+					: severity === 'warning'
+						? 'warning'
+						: 'info',
+			request,
 		})
 	}
 
@@ -167,14 +174,13 @@ export class SSOAuditLogger {
 		request?: Request,
 		severity: 'warning' | 'error' | 'critical' = 'warning',
 	): Promise<void> {
-		await this.logEvent({
-			eventType,
+		await auditService.log({
+			action: eventType as AuditAction,
 			organizationId,
-			ipAddress: this.extractIPAddress(request),
-			userAgent: request?.headers.get('user-agent') || undefined,
 			details,
 			metadata,
 			severity,
+			request,
 		})
 	}
 
@@ -187,11 +193,16 @@ export class SSOAuditLogger {
 		metadata?: Record<string, any>,
 		severity: 'info' | 'warning' | 'error' = 'info',
 	): Promise<void> {
-		await this.logEvent({
-			eventType,
+		await auditService.log({
+			action: eventType as AuditAction,
 			details,
 			metadata,
-			severity,
+			severity:
+				severity === 'error'
+					? 'error'
+					: severity === 'warning'
+						? 'warning'
+						: 'info',
 		})
 	}
 
@@ -199,8 +210,8 @@ export class SSOAuditLogger {
 	 * Get SSO audit logs for an organization
 	 */
 	async getOrganizationLogs(
-		_organizationId: string,
-		_options: {
+		organizationId: string,
+		options: {
 			eventTypes?: SSOAuditEventType[]
 			startDate?: Date
 			endDate?: Date
@@ -208,32 +219,82 @@ export class SSOAuditLogger {
 			offset?: number
 		} = {},
 	): Promise<SSOAuditLogEntry[]> {
-		// This would query the database when AuditLog model is available
-		// For now, return empty array
-		return []
+		const result = await auditService.query({
+			organizationId,
+			actions: options.eventTypes as AuditAction[],
+			startDate: options.startDate,
+			endDate: options.endDate,
+			limit: options.limit,
+			offset: options.offset,
+		})
+
+		// Map back to SSOAuditLogEntry format
+		return result.logs.map((log) => {
+			const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as Record<
+				string,
+				any
+			>
+			return {
+				eventType: log.action as unknown as SSOAuditEventType,
+				organizationId: log.organizationId || undefined,
+				userId: log.userId || undefined,
+				sessionId: metadata.sessionId,
+				ssoConfigId: metadata.ssoConfigId,
+				ipAddress: log.ipAddress || undefined,
+				userAgent: log.userAgent || undefined,
+				details: log.details,
+				metadata,
+				severity: log.severity as any,
+				timestamp: log.createdAt,
+			}
+		})
 	}
 
 	/**
 	 * Get SSO metrics for monitoring dashboard
 	 */
 	async getSSOMetrics(
-		_organizationId?: string,
-		_timeRange: { start: Date; end: Date } = {
+		organizationId?: string,
+		timeRange: { start: Date; end: Date } = {
 			start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
 			end: new Date(),
 		},
 	): Promise<SSOMetrics> {
-		// This would calculate metrics from audit logs
-		// For now, return default metrics
+		// Use the unified audit service statistics
+		const stats = await auditService.getStatistics({
+			organizationId,
+			startDate: timeRange.start,
+			endDate: timeRange.end,
+		})
+
+		// Transform unified stats to SSO specific metrics
+		// Note: This is an approximation based on the unified stats
+		// For detailed metrics, we might need more specific queries in AuditService
+
+		const ssoActions = stats.topActions.filter((a) =>
+			a.action.startsWith('sso_'),
+		)
+		const totalAuthAttempts = ssoActions.reduce(
+			(sum, a) => sum + (a.action.includes('login') ? a._count : 0),
+			0,
+		)
+		const failedAuths = ssoActions.reduce(
+			(sum, a) => sum + (a.action.includes('failed') ? a._count : 0),
+			0,
+		)
+
 		return {
-			totalAuthAttempts: 0,
-			successfulAuths: 0,
-			failedAuths: 0,
-			configurationChanges: 0,
-			suspiciousActivities: 0,
-			averageAuthTime: 0,
-			topFailureReasons: [],
-			organizationStats: [],
+			totalAuthAttempts,
+			successfulAuths: totalAuthAttempts - failedAuths,
+			failedAuths,
+			configurationChanges: ssoActions.reduce(
+				(sum, a) => sum + (a.action.includes('config') ? a._count : 0),
+				0,
+			),
+			suspiciousActivities: stats.recentSecurityEvents.length,
+			averageAuthTime: 0, // Not tracked in audit logs
+			topFailureReasons: [], // Would need detailed parsing
+			organizationStats: [], // Would need detailed parsing
 		}
 	}
 
@@ -249,41 +310,26 @@ export class SSOAuditLogger {
 			activeConfigurations: number
 		}
 	}> {
-		const issues: string[] = []
-		let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy'
-
+		// Delegate to audit service health check logic if available, or keep existing logic
+		// For now, we'll keep a minimal implementation that checks DB
 		try {
-			// Check database connectivity
-			await prisma.$queryRaw`SELECT 1`
-
-			// Check for high error rates
-			const recentErrors = await this.getRecentErrorCount()
-			if (recentErrors > 10) {
-				issues.push(`High error rate: ${recentErrors} errors in the last hour`)
-				status = 'degraded'
-			}
-
-			// Check for configuration issues
-			const configIssues = await this.checkConfigurationHealth()
-			if (configIssues.length > 0) {
-				issues.push(...configIssues)
-				status = status === 'healthy' ? 'degraded' : 'unhealthy'
-			}
+			// Check database connectivity via audit service (implicitly)
+			await auditService.getStatistics({ limit: 1 } as any)
 
 			return {
-				status,
-				issues,
+				status: 'healthy',
+				issues: [],
 				metrics: {
-					errorRate: recentErrors,
-					averageResponseTime: 0, // Would calculate from logs
-					activeConfigurations: 0, // Would count from database
+					errorRate: 0,
+					averageResponseTime: 0,
+					activeConfigurations: 0,
 				},
 			}
 		} catch (error) {
 			return {
 				status: 'unhealthy',
 				issues: [
-					`Database connectivity error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+					`Audit service connectivity error: ${error instanceof Error ? error.message : 'Unknown error'}`,
 				],
 				metrics: {
 					errorRate: 0,
@@ -294,248 +340,19 @@ export class SSOAuditLogger {
 		}
 	}
 
-	/**
-	 * Log to console with structured format using Pino
-	 */
-	private logToConsole(entry: SSOAuditLogEntry): void {
-		// Sanitize sensitive data from metadata
-		const sanitizedMetadata = this.sanitizeMetadata(entry.metadata)
+	private createMockRequest(
+		ip?: string,
+		userAgent?: string,
+	): Request | undefined {
+		if (!ip && !userAgent) return undefined
 
-		// Sanitize details to prevent log injection
-		const sanitizedDetails = this.sanitizeLogMessage(entry.details)
+		const headers = new Headers()
+		if (ip) headers.set('X-Forwarded-For', ip)
+		if (userAgent) headers.set('User-Agent', userAgent)
 
-		// Sanitize IP address (keep first 3 octets for IPv4)
-		const sanitizedIP = this.sanitizeIPAddress(entry.ipAddress)
-
-		const logData = {
-			ssoAuditEvent: true,
-			eventType: entry.eventType,
-			organizationId: entry.organizationId,
-			userId: this.sanitizeUserId(entry.userId),
-			sessionId: entry.sessionId,
-			ssoConfigId: entry.ssoConfigId,
-			ipAddress: sanitizedIP,
-			severity: entry.severity,
-			metadata: sanitizedMetadata,
-		}
-
-		// Use appropriate logger method based on severity
-		// Use sentryLogger only for errors/critical to avoid Sentry noise
-		// SSO warnings (failed logins, validation errors) are frequent during normal operations
-		if (entry.severity === 'critical') {
-			sentryLogger.fatal(logData, `SSO Audit: ${sanitizedDetails}`)
-		} else if (entry.severity === 'error') {
-			sentryLogger.error(logData, `SSO Audit: ${sanitizedDetails}`)
-		} else if (entry.severity === 'warning') {
-			logger.warn(logData, `SSO Audit: ${sanitizedDetails}`)
-		} else {
-			logger.info(logData, `SSO Audit: ${sanitizedDetails}`)
-		}
-	}
-
-	/**
-	 * Sanitize metadata to remove sensitive information
-	 */
-	private sanitizeMetadata(
-		metadata?: Record<string, any>,
-	): Record<string, any> | undefined {
-		if (!metadata) return undefined
-
-		const sensitiveKeys = [
-			'clientSecret',
-			'client_secret',
-			'password',
-			'token',
-			'accessToken',
-			'access_token',
-			'refreshToken',
-			'refresh_token',
-			'idToken',
-			'id_token',
-			'secret',
-			'key',
-			'apiKey',
-			'api_key',
-		]
-
-		const sanitized: Record<string, any> = {}
-
-		for (const [key, value] of Object.entries(metadata)) {
-			if (
-				sensitiveKeys.some((sensitive) =>
-					key.toLowerCase().includes(sensitive.toLowerCase()),
-				)
-			) {
-				sanitized[key] = '[REDACTED]'
-			} else if (typeof value === 'string' && value.length > 1000) {
-				// Truncate very long strings to prevent log flooding
-				sanitized[key] = value.substring(0, 1000) + '...[TRUNCATED]'
-			} else {
-				sanitized[key] = value
-			}
-		}
-
-		return sanitized
-	}
-
-	/**
-	 * Sanitize log messages to prevent injection attacks
-	 */
-	private sanitizeLogMessage(message: string): string {
-		if (!message) return message
-
-		// Remove control characters and ANSI escape sequences
-
-		return message
-
-			.replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
-
-			.replace(/\x1b\[[0-9;]*m/g, '') // Remove ANSI escape sequences
-			.substring(0, 2000) // Limit message length
-	}
-
-	/**
-	 * Sanitize IP addresses for privacy
-	 */
-	private sanitizeIPAddress(ip?: string): string | undefined {
-		if (!ip) return undefined
-
-		// For IPv4, keep first 3 octets
-		const ipv4Match = ip.match(/^(\d+\.\d+\.\d+)\.\d+$/)
-		if (ipv4Match) {
-			return `${ipv4Match[1]}.xxx`
-		}
-
-		// For IPv6, keep first 4 groups
-		const ipv6Match = ip.match(/^([0-9a-fA-F:]+)::[0-9a-fA-F:]+$/)
-		if (ipv6Match) {
-			return `${ipv6Match[1]}::xxxx`
-		}
-
-		// Return as-is for other formats (might be proxy headers)
-		return ip
-	}
-
-	/**
-	 * Sanitize user IDs to prevent XSS in logs
-	 */
-	private sanitizeUserId(userId?: string): string | undefined {
-		if (!userId) return undefined
-
-		// Remove HTML/script tags and limit length
-		return userId
-			.replace(/<[^>]*>/g, '') // Remove HTML tags
-			.replace(/[<>'"&]/g, '') // Remove potentially dangerous characters
-			.substring(0, 100) // Limit length
-	}
-
-	/**
-	 * Store audit log in database
-	 */
-	private async storeInDatabase(_entry: SSOAuditLogEntry): Promise<void> {
-		try {
-			// This would store in AuditLog table when available
-			// For now, we'll use a simple log table or file storage
-			// Example implementation when AuditLog model is available:
-			// await prisma.auditLog.create({
-			//   data: {
-			//     organizationId: entry.organizationId,
-			//     userId: entry.userId,
-			//     action: entry.eventType,
-			//     details: entry.details,
-			//     metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
-			//     ipAddress: entry.ipAddress,
-			//     userAgent: entry.userAgent,
-			//     severity: entry.severity,
-			//     createdAt: entry.timestamp,
-			//   },
-			// })
-		} catch (error) {
-			logger.error({ err: error }, 'Failed to store audit log in database')
-		}
-	}
-
-	/**
-	 * Send audit logs to external monitoring systems
-	 */
-	private async sendToMonitoring(_entry: SSOAuditLogEntry): Promise<void> {
-		try {
-			// Send to monitoring services like DataDog, New Relic, etc.
-			// This would be configured based on environment variables
-
-			if (process.env.DATADOG_API_KEY) {
-				// await sendToDataDog(entry)
-			}
-
-			if (process.env.NEW_RELIC_LICENSE_KEY) {
-				// await sendToNewRelic(entry)
-			}
-
-			if (process.env.SENTRY_DSN) {
-				// await sendToSentry(entry)
-			}
-		} catch (error) {
-			logger.error({ err: error }, 'Failed to send audit log to monitoring')
-		}
-	}
-
-	/**
-	 * Handle critical events that require immediate attention
-	 */
-	private async handleCriticalEvent(_entry: SSOAuditLogEntry): Promise<void> {
-		try {
-			// Send immediate alerts for critical events
-			// This is already logged via logToConsole with sentryLogger.fatal
-
-			// Send to alerting systems
-			if (process.env.SLACK_WEBHOOK_URL) {
-				// await sendSlackAlert(entry)
-			}
-
-			if (process.env.PAGERDUTY_INTEGRATION_KEY) {
-				// await sendPagerDutyAlert(entry)
-			}
-		} catch (error) {
-			logger.error({ err: error }, 'Failed to handle critical SSO event')
-		}
-	}
-
-	/**
-	 * Extract IP address from request
-	 */
-	private extractIPAddress(request?: Request): string | undefined {
-		if (!request) return undefined
-
-		return getClientIp(request, { returnUndefined: true })
-	}
-
-	/**
-	 * Get recent error count for health monitoring
-	 */
-	private async getRecentErrorCount(): Promise<number> {
-		// This would query audit logs for recent errors
-		// For now, return 0
-		return 0
-	}
-
-	/**
-	 * Check configuration health
-	 */
-	private async checkConfigurationHealth(): Promise<string[]> {
-		const issues: string[] = []
-
-		try {
-			// Check for configurations that haven't been tested recently
-			// Check for disabled configurations
-			// Check for configurations with invalid settings
-			// This would query the SSO configurations and validate them
-		} catch (error) {
-			issues.push(
-				`Configuration health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-			)
-		}
-
-		return issues
+		return {
+			headers,
+		} as unknown as Request
 	}
 }
 
@@ -585,9 +402,9 @@ export const auditSSOAuthSuccess = (
 	ssoAuditLogger.logAuthenticationEvent(
 		SSOAuditEventType.AUTH_SUCCESS,
 		organizationId,
+		'SSO authentication successful',
 		userId,
 		sessionId,
-		'SSO authentication successful',
 		undefined,
 		request,
 		'info',
