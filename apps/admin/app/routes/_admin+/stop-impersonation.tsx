@@ -1,7 +1,7 @@
+import { prisma } from '@repo/database'
 import { data, redirect } from 'react-router'
 import { auditService, AuditAction } from '#app/utils/audit.server.ts'
 import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
-import { prisma } from '@repo/database'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'
 
@@ -27,6 +27,20 @@ export async function action({ request }: { request: Request }) {
 	}
 
 	const { adminUserId, targetUserId, targetName } = impersonationInfo
+
+	// Get the current impersonation session ID to delete it
+	const impersonationSessionId = authSession.get(sessionKey)
+
+	// Delete the orphaned impersonation session from the database
+	if (impersonationSessionId) {
+		await prisma.session
+			.delete({
+				where: { id: impersonationSessionId },
+			})
+			.catch(() => {
+				// Session may already be expired/deleted, ignore errors
+			})
+	}
 
 	// Calculate impersonation duration
 	const duration = Date.now() - new Date(impersonationInfo.startedAt).getTime()

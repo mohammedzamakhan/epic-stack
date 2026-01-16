@@ -1,11 +1,9 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { UserAvatar } from './user-avatar'
-
+import { BuildingIcon } from '@repo/ui/building-icon'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuSub,
@@ -14,24 +12,30 @@ import {
 	DropdownMenuTrigger,
 } from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
+import { LanguagesIcon } from '@repo/ui/languages-icon'
+import { LogoutIcon } from '@repo/ui/logout-icon'
+import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	useSidebar,
 } from '@repo/ui/sidebar'
+import { SunMoonIcon } from '@repo/ui/sun-moon-icon'
+import { UserIcon } from '@repo/ui/user-icon'
 import { useRef } from 'react'
-import { Link, Form, useFetcher } from 'react-router'
+import {
+	Link,
+	Form,
+	useFetcher,
+	useRouteLoaderData,
+	useSearchParams,
+} from 'react-router'
+
+import { type loader } from '#app/root.tsx'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
-import { LanguagesIcon } from '@repo/ui/languages-icon'
-import { BuildingIcon } from '@repo/ui/building-icon'
-import { LogoutIcon } from './icons/logout-icon'
-import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
-import { SunMoonIcon } from './icons/sun-moon-icon'
-import { UserIcon } from '@repo/ui/user-icon'
-import { useRouteLoaderData, useSearchParams } from 'react-router'
-import { type loader } from '#app/root.tsx'
+import { UserAvatar } from './user-avatar'
 
 export function NavUser({
 	user,

@@ -12,12 +12,18 @@ import { type ProviderUser } from './providers/provider.ts'
 import { authSessionStorage } from './session.server.ts'
 import { ssoAuthService } from './sso/auth.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
-import { getUtmParams } from './utm.server.ts'
 import { getUserAgent } from './user-agent.server.ts'
+import { getUtmParams } from './utm.server.ts'
 
-export const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30
-export const getSessionExpirationDate = () =>
-	new Date(Date.now() + SESSION_EXPIRATION_TIME)
+export const SESSION_EXPIRATION_TIME_SHORT = 1000 * 60 * 60 * 24 // 24 hours (default)
+export const SESSION_EXPIRATION_TIME_LONG = 1000 * 60 * 60 * 24 * 30 // 30 days (remember me)
+/** @deprecated Use SESSION_EXPIRATION_TIME_SHORT or SESSION_EXPIRATION_TIME_LONG */
+export const SESSION_EXPIRATION_TIME = SESSION_EXPIRATION_TIME_LONG
+export const getSessionExpirationDate = (remember = false) =>
+	new Date(
+		Date.now() +
+			(remember ? SESSION_EXPIRATION_TIME_LONG : SESSION_EXPIRATION_TIME_SHORT),
+	)
 
 export const sessionKey = 'sessionId'
 
@@ -214,10 +220,12 @@ export async function login({
 	username,
 	password,
 	request,
+	remember = false,
 }: {
 	username: string
 	password: string
 	request?: Request
+	remember?: boolean
 }) {
 	// Try to find user by username first, then by email if it looks like an email
 	let user = null
@@ -248,7 +256,7 @@ export async function login({
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
-			expirationDate: getSessionExpirationDate(),
+			expirationDate: getSessionExpirationDate(remember),
 			userId: user.id,
 			ipAddress,
 			userAgent,

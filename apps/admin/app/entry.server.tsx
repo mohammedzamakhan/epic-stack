@@ -15,14 +15,12 @@ import {
 } from 'react-router'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
-import { ENV, getEnv } from './utils/env.server.ts'
+import { ENV } from './utils/env.server.ts'
 import { getInstanceInfo } from './utils/litefs.server.ts'
 import { NonceProvider } from './utils/nonce-provider.ts'
 import { makeTimings } from './utils/timing.server.ts'
 
 export const streamTimeout = 5000
-
-global.ENV = getEnv()
 
 const MODE = ENV.NODE_ENV ?? 'development'
 

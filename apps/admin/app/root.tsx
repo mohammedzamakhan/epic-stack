@@ -30,7 +30,6 @@ import { getUserId, logout } from './utils/auth.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { getCookieConsentState } from './utils/cookie-consent.server.ts'
 import { prisma } from './utils/db.server.ts'
-import { getEnv } from './utils/env.server.ts'
 import { pipeHeaders } from './utils/headers.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
 import { getImpersonationInfo } from './utils/impersonation.server.ts'
@@ -194,7 +193,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 		{
 			user,
 			requestInfo,
-			ENV: getEnv(),
 			toast,
 			honeyProps,
 			locale,
@@ -222,12 +220,10 @@ function Document({
 	children,
 	nonce,
 	theme = 'dark',
-	env = {},
 }: {
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
-	env?: Record<string, string | undefined>
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
 	const { locale } = useLoaderData<typeof loader>()
@@ -251,12 +247,6 @@ function Document({
 			</head>
 			<body className="bg-background text-foreground">
 				<DirectionProvider direction={direction}>{children}</DirectionProvider>
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
-					}}
-				/>
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>
@@ -266,14 +256,13 @@ function Document({
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
-	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useOptionalTheme() || 'dark'
 	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
 	return (
-		<Document nonce={nonce} theme={theme} env={data?.ENV}>
+		<Document nonce={nonce} theme={theme}>
 			{children}
 		</Document>
 	)

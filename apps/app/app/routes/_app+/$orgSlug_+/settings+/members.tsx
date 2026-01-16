@@ -23,12 +23,12 @@ import {
 	deactivateOrganizationInviteLink,
 } from '#app/utils/organization/invitation.server.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
+import { type OrganizationRoleName } from '#app/utils/organization/organizations.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization/permissions.server.ts'
-import { type OrganizationRoleName } from '#app/utils/organization/organizations.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -369,6 +369,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'create-invite-link') {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.CREATE_MEMBER_ANY,
+		)
+
 		try {
 			const inviteLink = await createOrganizationInviteLink({
 				organizationId: organization.id,
@@ -386,6 +392,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'reset-invite-link') {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.CREATE_MEMBER_ANY,
+		)
+
 		try {
 			const inviteLink = await createOrganizationInviteLink({
 				organizationId: organization.id,
@@ -403,6 +415,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === 'deactivate-invite-link') {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.DELETE_MEMBER_ANY,
+		)
+
 		try {
 			await deactivateOrganizationInviteLink(organization.id, userId)
 			return Response.json({ success: true })

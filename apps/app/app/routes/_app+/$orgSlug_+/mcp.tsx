@@ -12,14 +12,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
-import {
-	Frame,
-	FramePanel,
-	FrameDescription,
-	FrameHeader,
-	FrameTitle,
-} from '@repo/ui/frame'
 import { Checkbox } from '@repo/ui/checkbox'
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@repo/ui/collapsible'
 import {
 	Dialog,
 	DialogContent,
@@ -29,9 +27,17 @@ import {
 	DialogTitle,
 } from '@repo/ui/dialog'
 import { FieldLabel, FieldGroup, FieldDescription } from '@repo/ui/field'
+import {
+	Frame,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
+import { PageTitle } from '@repo/ui/page-title'
 import {
 	Table,
 	TableBody,
@@ -40,12 +46,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
-import { PageTitle } from '@repo/ui/page-title'
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from '@repo/ui/collapsible'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 
 import { useEffect, useState } from 'react'
@@ -191,7 +191,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await prisma.apiKey.delete({
 			where: {
 				id: keyId,
-				userId: user.id, // Ensure user can only delete their own keys
+				userId: user.id,
+				organizationId: organization.id,
 			},
 		})
 

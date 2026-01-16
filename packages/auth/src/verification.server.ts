@@ -1,13 +1,34 @@
 import { createCookieSessionStorage } from 'react-router'
 
+if (!process.env.SESSION_SECRET) {
+	throw new Error(
+		'SESSION_SECRET environment variable is required but not set. ' +
+			'Please add SESSION_SECRET to your .env file. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
+const verificationSecrets = process.env.SESSION_SECRET.split(',').map((s) =>
+	s.trim(),
+)
+if (
+	verificationSecrets.length === 0 ||
+	verificationSecrets.some((s) => s.length === 0)
+) {
+	throw new Error(
+		'SESSION_SECRET must contain at least one non-empty secret. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
 export const verifySessionStorage = createCookieSessionStorage({
 	cookie: {
 		name: 'en_verification',
-		sameSite: 'lax', // CSRF protection is advised if changing to 'none'
+		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,
 		maxAge: 60 * 10, // 10 minutes
-		secrets: (process.env.SESSION_SECRET || 'default-secret-change-in-production').split(','),
+		secrets: verificationSecrets,
 		secure: process.env.NODE_ENV === 'production',
 	},
 })

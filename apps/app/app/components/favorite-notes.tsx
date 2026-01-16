@@ -6,6 +6,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@repo/ui/dropdown-menu'
+import { FileTextIcon } from '@repo/ui/file-text-icon'
 import { Icon } from '@repo/ui/icon'
 import {
 	SidebarGroup,
@@ -18,8 +19,6 @@ import {
 } from '@repo/ui/sidebar'
 import { useRef } from 'react'
 import { Form, Link } from 'react-router'
-
-import { FileTextIcon } from './icons/file-text-icon'
 
 interface FavoriteNote {
 	note: {

@@ -21,6 +21,7 @@ import {
 	useMatches,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { ENV } from 'varlock/env'
 import { type Route } from './+types/root.ts'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
@@ -37,7 +38,7 @@ import { cache, cachified } from './utils/cache.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { getCookieConsentState } from './utils/cookie-consent.server.ts'
 import { prisma } from './utils/db.server.ts'
-import { getEnv, getLaunchStatus } from './utils/env.server.ts'
+import { getLaunchStatus } from './utils/env.server.ts'
 import { pipeHeaders } from './utils/headers.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
 import { getImpersonationInfo } from './utils/impersonation.server.ts'
@@ -115,8 +116,8 @@ export const meta: Route.MetaFunction = ({ data, location }) => {
 			'productivity',
 		],
 		robots: {
-			index: data.ENV?.ALLOW_INDEXING !== 'false',
-			follow: data.ENV?.ALLOW_INDEXING !== 'false',
+			index: ENV?.ALLOW_INDEXING !== false,
+			follow: ENV?.ALLOW_INDEXING !== false,
 			maxImagePreview: 'large',
 		},
 	})
@@ -245,7 +246,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		{
 			user,
 			requestInfo,
-			ENV: getEnv(),
 			toast,
 			honeyProps,
 			locale,
@@ -281,7 +281,7 @@ function Document({
 	theme?: Theme
 	env?: Record<string, string | undefined>
 }) {
-	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
+	const allowIndexing = ENV.ALLOW_INDEXING !== false
 	const { locale } = useLoaderData<typeof loader>()
 	const direction = getDirection(locale)
 
@@ -325,14 +325,13 @@ function Document({
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
-	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useOptionalTheme() || 'dark'
 	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
 	return (
-		<Document nonce={nonce} theme={theme} env={data?.ENV}>
+		<Document nonce={nonce} theme={theme}>
 			{children}
 		</Document>
 	)
@@ -344,7 +343,9 @@ function AppWithProviders() {
 
 	// Only load NovuProvider if user is logged in and has an organization
 	const shouldLoadNovu =
-		data.user && data.userOrganizations?.currentOrganization?.organization?.id
+		data.user &&
+		data.userOrganizations?.currentOrganization?.organization?.id &&
+		ENV.NOVU_APPLICATION_IDENTIFIER
 
 	return (
 		<HoneypotProvider {...data.honeyProps}>
@@ -355,7 +356,7 @@ function AppWithProviders() {
 				{shouldLoadNovu ? (
 					<NovuProvider
 						subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
-						applicationIdentifier="XQdYIaaQAOv5"
+						applicationIdentifier={ENV.NOVU_APPLICATION_IDENTIFIER!}
 					>
 						{data.impersonationInfo && (
 							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />

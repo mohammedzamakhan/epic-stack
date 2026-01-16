@@ -3,12 +3,17 @@ import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { getCrossAppUrl } from '@repo/common/url'
 import { useDirection } from '@repo/ui'
+import { ArrowLeftIcon } from '@repo/ui/arrow-left-icon'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
+import { CircleHelpIcon } from '@repo/ui/circle-help'
+import { FoldersIcon } from '@repo/ui/folders-icon'
 import { HomeIcon } from '@repo/ui/home-icon'
+import { LockOpenIcon } from '@repo/ui/lock-open-icon'
 import { Logo } from '@repo/ui/logo'
 
+import { McpIcon } from '@repo/ui/mcp-icon'
 import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import {
@@ -18,12 +23,11 @@ import {
 	SidebarHeader,
 } from '@repo/ui/sidebar'
 import { UserIcon } from '@repo/ui/user-icon'
+import { UserRoundPlusIcon } from '@repo/ui/user-round-plus'
 import { motion } from 'motion/react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
-import { FoldersIcon } from '#app/components/icons/folders-icon.tsx'
-import { LockOpenIcon } from '#app/components/icons/lock-open-icon.tsx'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
@@ -33,11 +37,7 @@ import { type loader as rootLoader } from '#app/root.tsx'
 import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'
-import { ArrowLeftIcon } from './icons/arrow-left-icon'
-import { CircleHelpIcon } from './icons/circle-help'
 import { ExternalLinkIcon } from './icons/external-link-icon'
-import { McpIcon } from './icons/mcp-icon'
-import { UserRoundPlusIcon } from './icons/user-round-plus'
 import { NavSecondary } from './nav-secondary'
 
 // Upgrade Account Card Component
@@ -73,12 +73,10 @@ function UpgradeAccountCard({
 					variant="secondary"
 					size="sm"
 					className="bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/70 w-full"
-					render={
-						<Link to={`/${orgSlug}/settings/billing`}>
-							<Trans>Upgrade</Trans>
-						</Link>
-					}
-				/>
+					render={<Link to={`/${orgSlug}/settings/billing`} />}
+				>
+					<Trans>Upgrade</Trans>
+				</Button>
 				<Button
 					variant="link"
 					size="sm"

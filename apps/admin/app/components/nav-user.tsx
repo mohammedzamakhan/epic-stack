@@ -3,7 +3,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuSub,
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
@@ -16,12 +15,12 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '@repo/ui/sidebar'
+import { SunMoonIcon } from '@repo/ui/sun-moon-icon'
 import { useRef } from 'react'
 import { useFetcher } from 'react-router'
 
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
-import { SunMoonIcon } from './icons/sun-moon-icon'
 
 export function NavUser({
 	user,

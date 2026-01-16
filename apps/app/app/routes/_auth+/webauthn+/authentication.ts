@@ -96,7 +96,7 @@ export async function action({ request }: Route.ActionArgs) {
 		const session = await prisma.session.create({
 			select: { id: true, expirationDate: true, userId: true },
 			data: {
-				expirationDate: getSessionExpirationDate(),
+				expirationDate: getSessionExpirationDate(remember),
 				userId: passkey.userId,
 				ipAddress,
 				userAgent,

@@ -43,15 +43,6 @@ export async function notifyCommentMentions({
 	organizationSlug,
 }: NotifyCommentMentionsParams) {
 	try {
-		console.log('notifyCommentMentions called with:', {
-			noteTitle,
-			commenterName,
-			commenterUserId,
-			organizationSlug,
-			noteId,
-			commentId,
-		})
-
 		// Extract mentions from comment content
 		const mentions = extractMentions(commentContent)
 

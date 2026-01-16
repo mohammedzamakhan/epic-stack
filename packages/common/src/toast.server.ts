@@ -15,13 +15,29 @@ const ToastSchema = z.object({
 export type Toast = z.infer<typeof ToastSchema>
 export type ToastInput = z.input<typeof ToastSchema>
 
+if (!process.env.SESSION_SECRET) {
+	throw new Error(
+		'SESSION_SECRET environment variable is required but not set. ' +
+			'Please add SESSION_SECRET to your .env file. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
+const toastSecrets = process.env.SESSION_SECRET.split(',').map((s) => s.trim())
+if (toastSecrets.length === 0 || toastSecrets.some((s) => s.length === 0)) {
+	throw new Error(
+		'SESSION_SECRET must contain at least one non-empty secret. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
 export const toastSessionStorage = createCookieSessionStorage({
 	cookie: {
 		name: 'en_toast',
 		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,
-		secrets: process.env.SESSION_SECRET?.split(',') || ['fallback-secret'],
+		secrets: toastSecrets,
 		secure: process.env.NODE_ENV === 'production',
 	},
 })

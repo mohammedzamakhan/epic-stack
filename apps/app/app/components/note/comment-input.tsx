@@ -67,7 +67,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		editorProps: {
 			attributes: {
 				class:
-					'text-sm min-h-[40px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring max-w-full prose prose-sm max-w-none',
+					'text-sm min-h-[40px] focus:outline-none max-w-full prose prose-sm max-w-none',
 			},
 		},
 		onUpdate: ({ editor }: { editor: Editor }) => {
@@ -119,10 +119,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
 			)}
 			onKeyDown={handleKeyDown}
 		>
-			<CardContent className="p-4">
+			<CardContent className="py-0">
 				<EditorContent
 					editor={editor}
-					className="focus-visible:ring-ring min-h-[60px] focus:outline-none focus-visible:ring-2"
+					className="min-h-[60px] focus:outline-none"
 					placeholder={_(msg`Add a comment...`)}
 				/>
 				{selectedImages.length > 0 && (
@@ -134,7 +134,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 					</div>
 				)}
 			</CardContent>
-			<CardFooter className="flex items-center justify-between">
+			<CardFooter className="flex items-center justify-between p-1">
 				<div className="flex items-center">
 					<CommentImageUpload
 						onImagesSelected={handleImagesSelected}

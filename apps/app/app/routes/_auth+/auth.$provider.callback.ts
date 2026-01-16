@@ -232,14 +232,14 @@ async function makeSession(
 	const session = await prisma.session.create({
 		select: { id: true, expirationDate: true, userId: true },
 		data: {
-			expirationDate: getSessionExpirationDate(),
+			expirationDate: getSessionExpirationDate(false),
 			userId,
 			ipAddress,
 			userAgent,
 		},
 	})
 	return handleNewSession(
-		{ request, session, redirectTo, remember: true },
+		{ request, session, redirectTo, remember: false },
 		{ headers: combineHeaders(responseInit?.headers, destroyRedirectTo) },
 	)
 }

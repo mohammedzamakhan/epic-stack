@@ -3,10 +3,10 @@ import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { Button } from '@repo/ui/button'
 import { Card, CardHeader, CardAction, CardContent } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import { ListTodoIcon } from '@repo/ui/list-todo'
 import { Progress } from '@repo/ui/progress'
 import React, { useRef } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { ListTodoIcon } from './icons/list-todo'
 
 interface OnboardingChecklistProps {
 	progress: OnboardingProgressData

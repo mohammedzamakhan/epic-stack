@@ -9,14 +9,29 @@ export type UtmParams = {
 	referrer?: string
 }
 
-// Session storage for temporarily storing UTM parameters
+if (!process.env.SESSION_SECRET) {
+	throw new Error(
+		'SESSION_SECRET environment variable is required but not set. ' +
+			'Please add SESSION_SECRET to your .env file. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
+const utmSecrets = process.env.SESSION_SECRET.split(',').map((s) => s.trim())
+if (utmSecrets.length === 0 || utmSecrets.some((s) => s.length === 0)) {
+	throw new Error(
+		'SESSION_SECRET must contain at least one non-empty secret. ' +
+			'Example: SESSION_SECRET=your-secret-key-here',
+	)
+}
+
 const utmSessionStorage = createCookieSessionStorage({
 	cookie: {
 		name: 'epic_utm',
 		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,
-		secrets: ['UTM_SESSION_SECRET'], // Use a simple secret for development
+		secrets: utmSecrets,
 		secure: process.env.NODE_ENV === 'production',
 		maxAge: 60 * 60 * 24 * 30, // 30 days
 	},

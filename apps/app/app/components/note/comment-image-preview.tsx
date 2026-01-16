@@ -73,11 +73,11 @@ export function CommentImagePreview({
 						type="button"
 						variant="destructive"
 						size="sm"
-						className="absolute -top-1 -right-1 h-5 min-h-[44px] w-5 min-w-[44px] p-0 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
+						className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
 						onClick={() => onRemove(index)}
 						aria-label="Remove image"
 					>
-						<Icon name="x" className="h-3 w-3" />
+						<Icon name="x" className="text-foreground h-3 w-3" />
 					</Button>
 				</div>
 			))}

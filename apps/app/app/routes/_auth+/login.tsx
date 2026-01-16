@@ -175,12 +175,22 @@ export async function action({ request }: Route.ActionArgs) {
 				)
 
 				if (ssoConfig && ssoConfig.isEnabled) {
-					// SSO is available - show SSO option
+					const safeSSOConfig = {
+						id: ssoConfig.id,
+						providerName: ssoConfig.providerName,
+						issuerUrl: ssoConfig.issuerUrl,
+						clientId: ssoConfig.clientId,
+						scopes: ssoConfig.scopes,
+						autoDiscovery: ssoConfig.autoDiscovery,
+						pkceEnabled: ssoConfig.pkceEnabled,
+						isEnabled: ssoConfig.isEnabled,
+					}
+
 					return data({
 						result: submission.reply(),
 						ssoAvailable: true,
 						organization,
-						ssoConfig,
+						ssoConfig: safeSSOConfig,
 						username,
 					})
 				}
@@ -211,7 +221,12 @@ export async function action({ request }: Route.ActionArgs) {
 					return z.NEVER
 				}
 
-				const session = await login({ ...data, request })
+				const session = await login({
+					username: data.username,
+					password: data.password,
+					request,
+					remember: data.remember ?? false,
+				})
 				if (!session) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,

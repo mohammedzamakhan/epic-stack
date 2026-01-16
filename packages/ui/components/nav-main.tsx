@@ -190,12 +190,16 @@ export function NavMain({
 															(iconRefs.current[item.title] = ref)
 														}
 														size={16}
+														className={
+															item.icon.displayName === 'ArrowLeftIcon'
+																? 'rtl:rotate-180'
+																: ''
+														}
 													/>
 												)}
 												<span>{item.title}</span>
 											</Link>
 										}
-										// tooltip={item.title}
 										isActive={item.isActive}
 										onMouseEnter={() => handleMenuItemMouseEnter(item.title)}
 										onMouseLeave={() => handleMenuItemMouseLeave(item.title)}
