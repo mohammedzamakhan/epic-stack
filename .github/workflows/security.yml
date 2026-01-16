@@ -73,27 +73,6 @@ jobs:
           sarif_file: semgrep-results.sarif
         if: always()
 
-  codeql:
-    name: 🛡️ CodeQL Analysis
-    runs-on: ubuntu-22.04
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-
-      - name: 🔧 Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-          queries: security-extended
-
-      - name: 🏗️ Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: 🔍 Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:javascript-typescript"
-
   trivy-fs:
     name: 🐋 Trivy Filesystem Scan
     runs-on: ubuntu-22.04
@@ -153,7 +132,7 @@ jobs:
   security-summary:
     name: 📊 Security Summary
     runs-on: ubuntu-22.04
-    needs: [dependency-audit, semgrep, codeql, trivy-fs, secret-scanning, license-compliance]
+    needs: [dependency-audit, semgrep, trivy-fs, secret-scanning, license-compliance]
     if: always()
     steps:
       - name: 📊 Generate summary
@@ -164,9 +143,10 @@ jobs:
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Dependency Audit | ${{ needs.dependency-audit.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Semgrep SAST | ${{ needs.semgrep.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL Analysis | ${{ needs.codeql.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Trivy Filesystem | ${{ needs.trivy-fs.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Secret Detection | ${{ needs.secret-scanning.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| License Compliance | ${{ needs.license-compliance.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** CodeQL runs via GitHub's default setup (not shown here)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See individual job logs for detailed results." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,16 @@
+title = "Epic Stack Gitleaks Config"
+
+[allowlist]
+description = "Allowlist for false positives"
+
+# Ignore documentation files that show examples of what NOT to do
+paths = [
+  '''apps/docs/security/secure-coding\.mdx''',
+  '''docs/.*\.md''',
+  '''.*\.md'''
+]
+
+# Ignore test fixtures and mock data
+regexes = [
+  '''(test|mock|fixture|example)''',
+]
