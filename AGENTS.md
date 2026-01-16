@@ -27,7 +27,6 @@ LiteFS for distributed SQLite.
 # Initial setup (one-time)
 git clone <your-fork>
 cd epic-startup
-cp .env.example .env
 PUPPETEER_SKIP_DOWNLOAD=true npm install && npm run setup -s
 
 # Install Playwright browsers for E2E tests
@@ -355,7 +354,6 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations
 - `USE_S3_STORAGE` - Set to `true` to use S3 in CMS (default: local in dev)
-- See `.env.example` for complete list
 
 **CMS Storage**:
 
