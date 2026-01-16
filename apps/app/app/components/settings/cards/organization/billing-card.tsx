@@ -78,22 +78,6 @@ export function BillingCard({
 		}
 	}, [currentPriceId, plansAndPrices])
 
-	console.log('plansAndPrices', plansAndPrices)
-	console.log('plansAndPrices.prices:', plansAndPrices?.prices)
-	console.log('billingInterval:', billingInterval)
-	console.log(
-		'Base price for',
-		billingInterval,
-		':',
-		plansAndPrices?.prices.base?.[billingInterval],
-	)
-	console.log(
-		'Plus price for',
-		billingInterval,
-		':',
-		plansAndPrices?.prices.plus?.[billingInterval],
-	)
-
 	if (isClosedBeta) {
 		return (
 			<Card>
@@ -352,10 +336,7 @@ function PricingPlan({
 	currentPlan?: boolean
 	priceId?: string
 }) {
-	console.log('PricingPlan stripePrice:', stripePrice)
-
 	if (!stripePrice) {
-		console.log('No stripePrice provided')
 		return (
 			<Card>
 				<CardContent className="p-6">
@@ -398,7 +379,6 @@ function PricingPlan({
 	}
 
 	if (basePrice === 0) {
-		console.log('No pricing found in stripePrice:', stripePrice)
 		return (
 			<Card>
 				<CardContent className="p-6">

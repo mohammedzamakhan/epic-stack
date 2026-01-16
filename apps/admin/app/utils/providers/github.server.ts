@@ -47,9 +47,6 @@ export class GitHubProvider implements AuthProvider {
 			!ENV.GITHUB_CLIENT_SECRET ||
 			!ENV.GITHUB_REDIRECT_URI
 		) {
-			console.log(
-				'GitHub OAuth strategy not available because environment variables are not set',
-			)
 			return null
 		}
 		return new GitHubStrategy(

@@ -9,9 +9,6 @@ import { type LoaderFunctionArgs } from 'react-router'
  * Route: /.well-known/oauth-authorization-server
  */
 export async function loader({ request }: LoaderFunctionArgs) {
-	console.log('[OAuth Discovery] Request received')
-	console.log('[OAuth Discovery] URL:', request.url)
-
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
 

@@ -71,11 +71,6 @@ export default function SignInScreen() {
 
 	const onSubmit = async (data: LoginFormData) => {
 		try {
-			console.log('🔐 Attempting login with:', {
-				username: data.username,
-				remember: data.remember,
-			})
-
 			// Clear any previous errors
 			clearError()
 
@@ -90,8 +85,6 @@ export default function SignInScreen() {
 			})
 
 			// If we get here, login was successful (no error thrown)
-			console.log('✅ Login successful, showing success animation')
-
 			// Show success animation and haptic feedback
 			await triggerSuccessHaptic()
 			setShowSuccess(true)

@@ -1,0 +1,243 @@
+---
+title: 'Data Protection'
+description: 'Encryption, data handling, and privacy controls'
+---
+
+# Data Protection
+
+Epic Stack implements comprehensive data protection measures to safeguard sensitive information.
+
+## Encryption
+
+### Encryption at Rest
+
+Sensitive data is encrypted using **AES-256-GCM**:
+
+```typescript
+import { encrypt, decrypt } from '@repo/security'
+
+// Encrypt sensitive data before storage
+const encryptedSecret = encrypt(clientSecret, masterKey)
+
+// Decrypt when needed
+const decryptedSecret = decrypt(encryptedSecret, masterKey)
+```
+
+**Key Derivation:**
+- Algorithm: PBKDF2-SHA512
+- Iterations: 100,000
+- Key Length: 256 bits
+
+### Encryption in Transit
+
+All communications use TLS 1.3:
+
+- **External traffic**: HTTPS enforced via Fly.io
+- **Internal services**: TLS between application instances
+- **Database**: SQLite on encrypted filesystem
+
+### What Gets Encrypted
+
+| Data Type | Encryption | Storage |
+|-----------|------------|---------|
+| Passwords | Bcrypt hash (cost 12) | Database |
+| SSO Client Secrets | AES-256-GCM | Database |
+| Integration Tokens | AES-256-GCM | Database |
+| Session Data | Signed cookies | Client |
+| API Keys | SHA-256 hash | Database |
+
+## Environment Variables
+
+### Required Security Variables
+
+```bash
+# Session encryption (required)
+SESSION_SECRET=your-secret-key-here
+
+# SSO encryption key (64 hex characters = 32 bytes)
+SSO_ENCRYPTION_KEY=your-64-char-hex-key
+
+# Integration encryption key (64 hex characters = 32 bytes)
+INTEGRATION_ENCRYPTION_KEY=your-64-char-hex-key
+```
+
+### Key Generation
+
+Generate secure encryption keys:
+
+```bash
+# Generate a 32-byte hex key
+openssl rand -hex 32
+```
+
+<Warning>
+  Never commit encryption keys to version control. Use environment variables or a secrets manager.
+</Warning>
+
+## Data Minimization
+
+### Collect Only What's Needed
+
+```typescript
+// ✅ Good - Select only required fields
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    // Don't select password, sessions, etc.
+  },
+})
+```
+
+### Data Retention
+
+| Data Type | Retention Period | Deletion Method |
+|-----------|-----------------|-----------------|
+| Audit Logs | Configurable (default: 1 year) | Automated archival |
+| Sessions | Until expiration or logout | Automatic cleanup |
+| User Data | Until account deletion | Cascade delete |
+| Verification Codes | 10 minutes | Automatic expiration |
+
+## Privacy Controls
+
+### Data Export (GDPR Article 20)
+
+Users can export all their data:
+
+```typescript
+// GET /resources/download-user-data
+const userData = await prisma.user.findUnique({
+  where: { id: userId },
+  include: {
+    notes: true,
+    sessions: true,
+    roles: true,
+    // password: false - explicitly excluded
+  },
+})
+```
+
+### Account Deletion (GDPR Article 17)
+
+Users can delete their accounts with full data removal:
+
+```typescript
+// All related data is cascade deleted
+await prisma.user.delete({
+  where: { id: userId },
+})
+```
+
+### IP Address Anonymization
+
+IP addresses are masked in logs for privacy:
+
+```typescript
+import { sanitizeIpAddress } from '@repo/observability'
+
+// 192.168.1.100 → 192.168.1.xxx
+const maskedIp = sanitizeIpAddress(clientIp)
+```
+
+## Logging Security
+
+### Automatic Redaction
+
+The logging system automatically redacts sensitive fields:
+
+```typescript
+const redactedFields = [
+  '*.password',
+  '*.token',
+  '*.secret',
+  '*.apiKey',
+  '*.accessToken',
+  '*.refreshToken',
+  '*.authorization',
+  '*.cookie',
+  '*.creditCard',
+  '*.ssn',
+]
+```
+
+### What Gets Logged
+
+| Event | Logged Data | Sensitive Data |
+|-------|-------------|----------------|
+| Login attempts | User ID, IP, timestamp | Password: NEVER |
+| API requests | Endpoint, method, status | Tokens: REDACTED |
+| Errors | Stack trace, context | Secrets: REDACTED |
+| Audit events | Action, user, resource | PII: Minimized |
+
+## Backup Security
+
+### Database Backups
+
+<Warning>
+  Database backups contain sensitive data including password hashes. Store backups securely and encrypt at rest.
+</Warning>
+
+Backup security measures:
+- Compressed with gzip
+- 30-day retention in GitHub Artifacts
+- Optional S3 upload with STANDARD_IA storage class
+- Automatic cleanup of old remote backups
+
+### Backup Access Control
+
+Only authorized personnel should access backups:
+- Fly.io SSH access required
+- S3 bucket with IAM policies
+- Audit logging of backup access
+
+## File Upload Security
+
+### Validation
+
+All uploaded files are validated:
+
+```typescript
+const allowedExtensions = [
+  'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg',
+  'mp4', 'webm', 'mov', 'avi',
+  'pdf', 'txt',
+]
+
+// Prevent path traversal
+const sanitizedFilename = filename
+  .replace(/^.*[\\/]/, '')  // Remove path
+  .replace(/\0/g, '')        // Remove null bytes
+```
+
+### Storage
+
+Files are stored in S3-compatible storage (Tigris):
+- Separate bucket per environment
+- Pre-signed URLs for access
+- No public bucket access
+
+## Security Headers
+
+The application sets security headers via Helmet:
+
+```typescript
+helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'script-src': ["'strict-dynamic'", "'self'", `'nonce-${nonce}'`],
+      'connect-src': ["'self'"],
+      'font-src': ["'self'"],
+      'img-src': ["'self'", 'data:'],
+    },
+  },
+})
+```
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| Content-Security-Policy | Strict with nonces | XSS prevention |
+| X-Frame-Options | DENY | Clickjacking prevention |
+| X-Content-Type-Options | nosniff | MIME type sniffing prevention |
+| Referrer-Policy | strict-origin-when-cross-origin | Referrer leakage prevention |

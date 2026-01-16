@@ -1,0 +1,193 @@
+---
+title: 'Authentication Security'
+description: 'Detailed authentication implementation and security measures'
+---
+
+# Authentication Security
+
+Epic Stack implements multiple layers of authentication security to protect user accounts.
+
+## Password Security
+
+### Hashing Algorithm
+
+Passwords are hashed using **bcrypt** with a cost factor of 12:
+
+```typescript
+import bcrypt from 'bcryptjs'
+
+// Cost factor 12 provides strong protection against brute force
+const hash = await bcrypt.hash(password, 12)
+```
+
+<Warning>
+  Never reduce the bcrypt cost factor below 10. The default of 12 is recommended by OWASP.
+</Warning>
+
+### Password Requirements
+
+Passwords must meet these requirements:
+
+| Requirement | Value | Reason |
+|-------------|-------|--------|
+| Minimum length | 6 characters | Basic security |
+| Maximum length | 72 bytes | bcrypt limitation |
+| Complexity | Not required | Length is more important |
+
+### Compromised Password Check
+
+Passwords are checked against the Have I Been Pwned database:
+
+```typescript
+import { checkIsCommonPassword } from '#app/utils/auth.server'
+
+const isCompromised = await checkIsCommonPassword(password)
+if (isCompromised) {
+  return { error: 'This password has been exposed in data breaches' }
+}
+```
+
+## Multi-Factor Authentication
+
+### TOTP (Time-based One-Time Password)
+
+Two-factor authentication using authenticator apps:
+
+```typescript
+import { generateTOTP, verifyTOTP } from '@epic-web/totp'
+
+// Generate secret for user
+const { secret, otp } = await generateTOTP({
+  algorithm: 'SHA-256',
+  digits: 6,
+  period: 30,
+})
+
+// Verify code from user
+const isValid = await verifyTOTP({ otp: userCode, secret })
+```
+
+### Passkeys (WebAuthn)
+
+Passwordless authentication using biometrics or security keys:
+
+- **Platform authenticators**: Face ID, Touch ID, Windows Hello
+- **Roaming authenticators**: YubiKey, hardware security keys
+- **Device-bound keys**: Cannot be phished or stolen remotely
+
+## Session Security
+
+### Session Configuration
+
+Sessions are configured with security best practices:
+
+```typescript
+const sessionStorage = createCookieSessionStorage({
+  cookie: {
+    name: 'en_session',
+    sameSite: 'lax',     // CSRF protection
+    path: '/',
+    httpOnly: true,      // No JavaScript access
+    secure: true,        // HTTPS only in production
+    secrets: sessionSecrets,
+  },
+})
+```
+
+### Session Expiration
+
+| Session Type | Duration | Use Case |
+|-------------|----------|----------|
+| Default | 24 hours | Normal login |
+| Remember Me | 30 days | "Stay logged in" option |
+
+### Session Tracking
+
+Sessions include metadata for security monitoring:
+
+- **IP Address**: Detect session hijacking
+- **User Agent**: Identify device changes
+- **Created/Updated timestamps**: Session age tracking
+
+## Account Security
+
+### User Banning
+
+Administrators can ban users with automatic session invalidation:
+
+```typescript
+// Ban enforcement happens on every authenticated request
+if (session.user.isBanned) {
+  // Check if ban has expired
+  if (session.user.banExpiresAt && new Date(session.user.banExpiresAt) <= now) {
+    // Auto-lift expired ban
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isBanned: false, banReason: null, banExpiresAt: null },
+    })
+  } else {
+    // Destroy all sessions and redirect to login
+    await prisma.session.deleteMany({ where: { userId } })
+    throw redirect('/login?banned=true')
+  }
+}
+```
+
+### Rate Limiting
+
+Authentication endpoints are protected with strict rate limits:
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| /login | 10 requests | 1 minute |
+| /signup | 10 requests | 1 minute |
+| /forgot-password | 3 requests | 1 hour |
+| /verify | 10 requests | 1 minute |
+
+## SSO (Single Sign-On)
+
+### Supported Providers
+
+- Okta
+- Azure AD
+- Auth0
+- Google Workspace
+- Any OIDC-compliant provider
+
+### SSO Security Features
+
+- **PKCE**: Proof Key for Code Exchange prevents authorization code interception
+- **State validation**: Prevents CSRF attacks during OAuth flow
+- **Encrypted secrets**: Client secrets encrypted with AES-256-GCM
+- **Domain restrictions**: Limit SSO to specific email domains
+
+### SSO Audit Logging
+
+All SSO events are logged for security monitoring:
+
+```typescript
+await ssoAuditLogger.logAuthenticationEvent(
+  SSOAuditEventType.AUTH_SUCCESS,
+  organizationId,
+  'SSO authentication successful',
+  userId,
+  sessionId,
+)
+```
+
+## Security Recommendations
+
+<AccordionGroup>
+  <Accordion title="Enable MFA for All Users">
+    Encourage or require all users to enable two-factor authentication. Consider making it mandatory for admin accounts.
+  </Accordion>
+  <Accordion title="Use Passkeys When Possible">
+    Passkeys provide the strongest protection against phishing and credential theft.
+  </Accordion>
+  <Accordion title="Monitor Failed Login Attempts">
+    Set up alerts for unusual patterns of failed authentication attempts.
+  </Accordion>
+  <Accordion title="Regular Session Audit">
+    Encourage users to review their active sessions and revoke any they don't recognize.
+  </Accordion>
+</AccordionGroup>

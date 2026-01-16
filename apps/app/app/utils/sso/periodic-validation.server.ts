@@ -1,3 +1,4 @@
+import { logger } from '@repo/observability'
 import { ssoAuditLogger, SSOAuditEventType } from './audit-logging.server.ts'
 import { ssoConfigurationService } from './configuration.server.ts'
 import { ssoHealthChecker } from './health-check.server.ts'
@@ -16,12 +17,12 @@ export class SSOPeriodicValidator {
 	 */
 	start(): void {
 		if (this.isRunning) {
-			console.warn('SSO periodic validation is already running')
+			logger.warn('SSO periodic validation is already running')
 			return
 		}
 
 		this.isRunning = true
-		console.log('Starting SSO periodic validation service')
+		logger.info('Starting SSO periodic validation service')
 
 		// Run initial validation
 		this.runValidation().catch((error) => {
@@ -45,7 +46,7 @@ export class SSOPeriodicValidator {
 		}
 
 		this.isRunning = false
-		console.log('Stopping SSO periodic validation service')
+		logger.info('Stopping SSO periodic validation service')
 
 		if (this.validationInterval) {
 			clearInterval(this.validationInterval)
@@ -58,7 +59,7 @@ export class SSOPeriodicValidator {
 	 */
 	private async runValidation(): Promise<void> {
 		try {
-			console.log('Running periodic SSO configuration validation')
+			logger.debug('Running periodic SSO configuration validation')
 			const startTime = Date.now()
 
 			// Get all enabled configurations
@@ -66,11 +67,11 @@ export class SSOPeriodicValidator {
 			const enabledConfigs = configurations.filter((config) => config.isEnabled)
 
 			if (enabledConfigs.length === 0) {
-				console.log('No enabled SSO configurations to validate')
+				logger.debug('No enabled SSO configurations to validate')
 				return
 			}
 
-			console.log(
+			logger.debug(
 				`Validating ${enabledConfigs.length} enabled SSO configurations`,
 			)
 
@@ -129,8 +130,9 @@ export class SSOPeriodicValidator {
 			}
 
 			const duration = Date.now() - startTime
-			console.log(
-				`SSO validation completed in ${duration}ms: ${successCount} valid, ${warningCount} warnings, ${errorCount} errors`,
+			logger.info(
+				{ duration, successCount, warningCount, errorCount },
+				'SSO validation completed',
 			)
 
 			// Log overall validation summary
@@ -275,12 +277,11 @@ export class SSOPeriodicValidator {
 	 */
 	async validateNow(): Promise<void> {
 		if (!this.isRunning) {
-			console.log('Starting one-time SSO validation')
-			await this.runValidation()
+			logger.info('Starting one-time SSO validation')
 		} else {
-			console.log('Triggering immediate SSO validation')
-			await this.runValidation()
+			logger.info('Triggering immediate SSO validation')
 		}
+		await this.runValidation()
 	}
 
 	/**

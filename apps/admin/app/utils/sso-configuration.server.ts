@@ -167,32 +167,14 @@ export class SSOConfigurationService {
 	async testConnection(
 		config: SSOConfiguration,
 	): Promise<ConnectionTestResult> {
-		console.log(
-			'Starting SSO connection test for:',
-			config.providerName,
-			config.issuerUrl,
-		)
-
 		try {
 			let endpoints: EndpointConfiguration
 
 			if (config.autoDiscovery) {
-				console.log('Using auto-discovery for endpoints')
-				console.log(
-					'About to call discoverOIDCEndpoints with:',
-					config.issuerUrl,
-				)
-				console.log(
-					'discoverOIDCEndpoints function:',
-					typeof discoverOIDCEndpoints,
-				)
-
 				// Try OIDC discovery first
 				const discoveryResult = await discoverOIDCEndpoints(config.issuerUrl)
-				console.log('Discovery result:', discoveryResult)
 
 				if (!discoveryResult.success || !discoveryResult.endpoints) {
-					console.log('Discovery failed:', discoveryResult.error)
 					return {
 						success: false,
 						message: `OIDC Discovery failed: ${discoveryResult.error}`,
@@ -211,15 +193,12 @@ export class SSOConfigurationService {
 			}
 
 			// Test endpoint connectivity
-			console.log('Testing endpoint connectivity for:', endpoints)
 			const connectivityTest = await testEndpointConnectivity(endpoints)
-			console.log('Connectivity test result:', connectivityTest)
 
 			if (
 				!connectivityTest.authorizationEndpoint ||
 				!connectivityTest.tokenEndpoint
 			) {
-				console.log('Connectivity test failed:', connectivityTest.errors)
 				return {
 					success: false,
 					message: `Connection test failed: ${connectivityTest.errors.join(', ')}`,
@@ -234,8 +213,7 @@ export class SSOConfigurationService {
 						where: { id: config.id },
 						data: { lastTested: new Date() },
 					})
-				} catch (updateError) {
-					console.log('Could not update lastTested timestamp:', updateError)
+				} catch (ignoredUpdateError) {
 					// Don't fail the test if we can't update the timestamp
 				}
 			}

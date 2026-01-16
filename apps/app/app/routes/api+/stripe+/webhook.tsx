@@ -71,15 +71,13 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			case 'invoice.payment_succeeded': {
-				const invoice = event.data.object as Stripe.Invoice
-				console.log(`Payment succeeded for invoice: ${invoice.id}`)
+				const ignoredInvoice = event.data.object as Stripe.Invoice
 				// You can add additional logic here for successful payments
 				break
 			}
 
 			case 'invoice.payment_failed': {
-				const invoice = event.data.object as Stripe.Invoice
-				console.log(`Payment failed for invoice: ${invoice.id}`)
+				const ignoredInvoice = event.data.object as Stripe.Invoice
 				// You can add additional logic here for failed payments
 				// Such as sending notifications to admins
 				break
@@ -98,7 +96,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			}
 
 			default: {
-				console.log(`Unhandled webhook event type: ${event.type}`)
+				// Unhandled webhook event type
 			}
 		}
 

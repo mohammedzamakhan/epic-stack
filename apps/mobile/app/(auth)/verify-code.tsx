@@ -97,10 +97,9 @@ export default function VerifyCodeScreen() {
 					...(redirectTo && { redirectTo }),
 				},
 			})
-		} catch (error) {
+		} catch {
 			// Trigger error haptic feedback
 			await triggerErrorHaptic()
-			console.error('Verification error:', error)
 		}
 	}
 
@@ -184,7 +183,6 @@ export default function VerifyCodeScreen() {
 												.replace(/[^A-Za-z0-9]/g, '')
 												.slice(0, 6)
 												.toUpperCase()
-											console.log('OTP Input changed:', code)
 											onChange(code)
 										}}
 										placeholder="ABC123"

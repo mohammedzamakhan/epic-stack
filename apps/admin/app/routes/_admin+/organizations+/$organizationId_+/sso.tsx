@@ -180,17 +180,9 @@ export async function action({ request, params }: Route['ActionArgs']) {
 
 	const formData = await request.formData()
 
-	// Debug: Log all form data
-	console.log('Form data received:')
-	for (const [key, value] of formData.entries()) {
-		console.log(`  ${key}: ${value}`)
-	}
-
 	const submission = parseWithZod(formData, {
 		schema: SSOConfigurationActionSchema,
 	})
-
-	console.log('Parsed submission:', submission)
 
 	if (submission.status !== 'success') {
 		return Response.json(
@@ -328,16 +320,7 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					}
 				}
 
-				console.log('Testing SSO connection for config:', {
-					id: config.id,
-					providerName: config.providerName,
-					issuerUrl: config.issuerUrl,
-					autoDiscovery: config.autoDiscovery,
-				})
-
 				const testResult = await ssoConfigurationService.testConnection(config)
-
-				console.log('SSO test result:', testResult)
 
 				return Response.json({
 					result: submission.reply(),

@@ -12,8 +12,8 @@ export function createFileInputRef(file?: File) {
 				const dataTransfer = new DataTransfer()
 				dataTransfer.items.add(file)
 				input.files = dataTransfer.files
-			} catch (error) {
-				console.log('Error setting file on input:', error)
+			} catch {
+				// DataTransfer API may not be supported in all environments
 			}
 		}
 	}

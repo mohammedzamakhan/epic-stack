@@ -29,6 +29,18 @@
 							"essentials/code",
 							"essentials/images"
 						]
+					},
+					{
+						"group": "Security",
+						"pages": [
+							"security/index",
+							"security/secure-coding",
+							"security/authentication",
+							"security/data-protection",
+							"security/vulnerabilities",
+							"security/incident-response",
+							"security/compliance"
+						]
 					}
 				]
 			},

@@ -168,7 +168,6 @@ export async function action({ request }: Route.ActionArgs) {
 			const organization = await discoverOrganizationFromEmail(username)
 
 			if (organization) {
-				console.log('organization matched....')
 				// Check if organization has SSO enabled
 				const ssoConfig = await ssoConfigurationService.getConfiguration(
 					organization.id,

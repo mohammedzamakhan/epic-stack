@@ -1,3 +1,4 @@
+import { logger } from '@repo/observability'
 import { ssoAuditLogger, SSOAuditEventType } from './audit-logging.server.ts'
 import { ssoConfigurationService } from './configuration.server.ts'
 
@@ -86,7 +87,7 @@ export class SSOMonitoringService {
 			}
 		}, 60 * 1000) // Collect metrics every minute
 
-		console.log('SSO monitoring started')
+		logger.info('SSO monitoring started')
 	}
 
 	/**
@@ -103,7 +104,7 @@ export class SSOMonitoringService {
 			this.metricsCollectionInterval = null
 		}
 
-		console.log('SSO monitoring stopped')
+		logger.info('SSO monitoring stopped')
 	}
 
 	/**
@@ -416,10 +417,10 @@ export class SSOMonitoringService {
 			const metrics = await this.getCurrentMetrics()
 
 			// Log metrics for monitoring systems
-			console.log('SSO Metrics:', {
-				timestamp: new Date().toISOString(),
-				...metrics,
-			})
+			logger.info(
+				{ timestamp: new Date().toISOString(), ...metrics },
+				'SSO Metrics',
+			)
 		} catch (error) {
 			console.error('Failed to collect SSO metrics:', error)
 		}

@@ -109,16 +109,10 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 	}, [index, value.length, setFocusedIndex])
 
 	const handleChangeText = (text: string) => {
-		console.log(`InputOTP Slot ${index}: handleChangeText called with:`, text)
-
 		// Handle pasted content or multiple characters
 		if (text.length > 1) {
-			console.log(
-				`InputOTP Slot ${index}: Handling paste with ${text.length} characters`,
-			)
 			// If multiple digits are pasted, distribute them across slots
 			const digits = text.replace(/\D/g, '').slice(0, maxLength)
-			console.log(`InputOTP Slot ${index}: Extracted digits:`, digits)
 			onChange(digits)
 
 			// Focus the next empty slot or the last slot
@@ -129,7 +123,6 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 
 		// Handle single character input
 		const digit = text.replace(/\D/g, '') // Only allow digits
-		console.log(`InputOTP Slot ${index}: Single digit input:`, digit)
 
 		// Build new value array
 		const newValueArray = Array(maxLength).fill('')
@@ -142,12 +135,10 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 
 		// Create final value string
 		const finalValue = newValueArray.join('')
-		console.log(`InputOTP Slot ${index}: Final value:`, finalValue)
 		onChange(finalValue)
 
 		// Move to next input if digit was entered and not at the end
 		if (digit && index < maxLength - 1) {
-			console.log(`InputOTP Slot ${index}: Moving focus to slot ${index + 1}`)
 			setFocusedIndex(index + 1)
 		}
 	}

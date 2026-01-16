@@ -37,10 +37,8 @@ export default function ForgotPasswordScreen() {
 		},
 	})
 
-	const onSubmit = async (data: ForgotPasswordFormData) => {
+	const onSubmit = async (_data: ForgotPasswordFormData) => {
 		// TODO: Implement forgot password API call
-		console.log('Forgot password for:', data.email)
-
 		// For now, just show a success message
 		alert(
 			"If an account with that email exists, we've sent you a password reset link.",

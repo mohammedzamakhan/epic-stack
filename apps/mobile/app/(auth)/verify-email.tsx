@@ -25,14 +25,12 @@ export default function VerifyEmailScreen() {
 	const [isVerified, setIsVerified] = useState(false)
 
 	const handleVerifyEmail = React.useCallback(
-		async (verificationToken: string) => {
+		async (_verificationToken: string) => {
 			setIsVerifying(true)
 			setVerificationError(null)
 
 			try {
 				// TODO: Implement email verification API call
-				console.log('Verifying email with token:', verificationToken)
-
 				// Simulate API call
 				await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -80,8 +78,6 @@ export default function VerifyEmailScreen() {
 
 		try {
 			// TODO: Implement resend verification API call
-			console.log('Resending verification to:', email)
-
 			Alert.alert(
 				'Verification Email Sent',
 				"We've sent another verification email to your inbox. Please check your email and click the verification link.",

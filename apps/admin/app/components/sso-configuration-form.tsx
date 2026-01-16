@@ -120,18 +120,7 @@ export function SSOConfigurationForm({
 				</div>
 			)}
 
-			<Form
-				method="post"
-				className="space-y-6"
-				onSubmit={(e) => {
-					console.log('Form submitting...')
-					const formData = new FormData(e.currentTarget)
-					console.log('Form data being submitted:')
-					for (const [key, value] of formData.entries()) {
-						console.log(`  ${key}: ${value}`)
-					}
-				}}
-			>
+			<Form method="post" className="space-y-6">
 				<input type="hidden" name="organizationId" value={organizationId} />
 				{existingConfig && (
 					<input type="hidden" name="configId" value={existingConfig.id} />

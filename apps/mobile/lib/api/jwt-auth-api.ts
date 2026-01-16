@@ -111,7 +111,6 @@ export class JWTAuthApi {
 	private handleAuthError(): void {
 		// This will be called when authentication fails
 		// The auth context should handle this by logging out the user
-		console.log('Authentication error occurred - user should be logged out')
 	}
 
 	/**

@@ -5,8 +5,6 @@ import { router, type Href } from 'expo-router'
  */
 export const handleDeepLink = (url: string): void => {
 	try {
-		console.log('Handling deep link:', url)
-
 		// Handle different URL formats (custom scheme vs http)
 		let pathname: string
 		let searchParams: URLSearchParams
@@ -29,11 +27,6 @@ export const handleDeepLink = (url: string): void => {
 			searchParams = new URLSearchParams(queryPart || '')
 		}
 
-		console.log('Parsed deep link:', {
-			pathname,
-			params: Object.fromEntries(searchParams),
-		})
-
 		// Handle verification links
 		if (pathname.includes('verify') || searchParams.has('type')) {
 			const type = searchParams.get('type')
@@ -50,7 +43,6 @@ export const handleDeepLink = (url: string): void => {
 					...(redirectTo && { redirectTo }),
 				}).toString()
 
-				console.log('Navigating to verify-code with params:', params)
 				router.replace(`/(auth)/verify-code?${params}` as Href)
 				return
 			}
@@ -58,7 +50,6 @@ export const handleDeepLink = (url: string): void => {
 
 		// Handle OAuth callback
 		if (pathname.includes('callback')) {
-			console.log('Navigating to OAuth callback')
 			router.replace('/auth/callback' as Href)
 			return
 		}
@@ -79,16 +70,13 @@ export const handleDeepLink = (url: string): void => {
 			}
 
 			if (authPath) {
-				console.log('Navigating to auth path:', authPath)
 				router.replace(`/(auth)/${authPath}` as Href)
 				return
 			}
 		}
 
 		// Default fallback - let AuthGuard handle it
-		console.log('Deep link will be handled by AuthGuard')
-	} catch (error) {
-		console.warn('Failed to parse deep link URL:', url, error)
+	} catch {
 		// Fallback to sign in on invalid URLs
 		navigateToSignIn()
 	}
@@ -98,17 +86,10 @@ export const handleDeepLink = (url: string): void => {
  * Navigate to the appropriate screen after successful authentication
  */
 export const navigateAfterAuth = (redirectTo?: string): void => {
-	console.log(
-		'🧭 Navigation: navigateAfterAuth called with redirectTo:',
-		redirectTo,
-	)
-
 	if (redirectTo) {
-		console.log('🧭 Navigation: Redirecting to specific URL:', redirectTo)
 		// If there's a specific redirect URL, navigate there
 		router.replace(redirectTo as Href)
 	} else {
-		console.log('🧭 Navigation: Redirecting to dashboard screen')
 		// Default to the main app screen (dashboard)
 		router.replace('/(dashboard)')
 	}

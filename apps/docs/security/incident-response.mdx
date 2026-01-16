@@ -1,0 +1,231 @@
+---
+title: 'Incident Response'
+description: 'How to handle security incidents and breaches'
+---
+
+# Incident Response
+
+This guide outlines the process for handling security incidents in Epic Stack applications.
+
+## Incident Classification
+
+### Severity Levels
+
+| Level | Description | Response Time | Examples |
+|-------|-------------|---------------|----------|
+| **Critical** | Active exploitation, data breach | Immediate | Leaked credentials, ransomware |
+| **High** | Exploitable vulnerability | < 4 hours | SQL injection, auth bypass |
+| **Medium** | Potential security issue | < 24 hours | XSS, missing auth check |
+| **Low** | Minor security improvement | < 1 week | Weak CSP, verbose errors |
+
+## Incident Response Process
+
+### 1. Detection
+
+Incidents may be detected through:
+- Automated security scanning alerts
+- Audit log anomalies
+- User reports
+- External security researchers
+
+**Key Audit Events to Monitor**:
+```typescript
+// High-priority security events
+SSOAuditEventType.SUSPICIOUS_ACTIVITY
+SSOAuditEventType.RATE_LIMIT_EXCEEDED
+SSOAuditEventType.SECURITY_VIOLATION
+AuditAction.UNAUTHORIZED_ACCESS_ATTEMPT
+```
+
+### 2. Containment
+
+Immediate actions to limit damage:
+
+**Disable Compromised Accounts**:
+```typescript
+await prisma.user.update({
+  where: { id: compromisedUserId },
+  data: {
+    isBanned: true,
+    banReason: 'Security incident - under investigation',
+  },
+})
+
+// Invalidate all sessions
+await prisma.session.deleteMany({
+  where: { userId: compromisedUserId },
+})
+```
+
+**Revoke API Keys**:
+```typescript
+await prisma.apiKey.updateMany({
+  where: { userId: compromisedUserId },
+  data: { revoked: true, revokedAt: new Date() },
+})
+```
+
+**Disable SSO Configuration**:
+```typescript
+await prisma.sSOConfiguration.update({
+  where: { organizationId },
+  data: { isEnabled: false },
+})
+```
+
+### 3. Investigation
+
+**Review Audit Logs**:
+```typescript
+const suspiciousActivity = await auditService.query({
+  userId: suspectUserId,
+  startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+  actions: [
+    AuditAction.LOGIN,
+    AuditAction.PERMISSION_CHANGED,
+    AuditAction.DATA_EXPORT_REQUESTED,
+  ],
+})
+```
+
+**Check Session History**:
+- Unusual IP addresses
+- Multiple geographic locations
+- Non-standard user agents
+
+**Database Forensics**:
+- Recent data modifications
+- Bulk data access patterns
+- Privilege escalation attempts
+
+### 4. Eradication
+
+**Patch the Vulnerability**:
+1. Identify the root cause
+2. Develop and test a fix
+3. Deploy through normal CI/CD (or emergency hotfix)
+
+**Reset Affected Credentials**:
+```typescript
+// Force password reset for affected users
+await prisma.password.deleteMany({
+  where: { userId: { in: affectedUserIds } },
+})
+
+// Notify users
+for (const userId of affectedUserIds) {
+  await sendPasswordResetEmail(userId)
+}
+```
+
+**Rotate Secrets**:
+```bash
+# Generate new secrets
+fly secrets set SESSION_SECRET="$(openssl rand -base64 32)"
+fly secrets set SSO_ENCRYPTION_KEY="$(openssl rand -hex 32)"
+```
+
+### 5. Recovery
+
+**Restore from Backup** (if needed):
+```bash
+# Download latest backup
+fly ssh sftp get /backups/backup-YYYYMMDD.db
+
+# Verify backup integrity
+sqlite3 backup-YYYYMMDD.db "SELECT COUNT(*) FROM sqlite_master;"
+
+# Restore (WARNING: destructive)
+fly ssh console -C "litefs import -name sqlite.db /path/to/backup.db"
+```
+
+**Verify System Integrity**:
+- Run security scans
+- Check for persistence mechanisms
+- Verify no unauthorized changes
+
+### 6. Post-Incident
+
+**Document the Incident**:
+- Timeline of events
+- Root cause analysis
+- Actions taken
+- Lessons learned
+
+**Notify Affected Parties**:
+- Users whose data was affected
+- Regulatory bodies (if required by GDPR, etc.)
+- Business stakeholders
+
+**Improve Defenses**:
+- Update security controls
+- Add detection rules
+- Conduct security training
+
+## Emergency Contacts
+
+Create and maintain an incident response contact list:
+
+| Role | Responsibility | Contact |
+|------|----------------|---------|
+| Security Lead | Incident coordination | security@example.com |
+| DevOps Lead | Infrastructure access | devops@example.com |
+| Legal | Compliance, notifications | legal@example.com |
+| Management | Business decisions | management@example.com |
+
+## Runbook Templates
+
+### Compromised User Account
+
+1. [ ] Ban the user account
+2. [ ] Invalidate all sessions
+3. [ ] Revoke API keys
+4. [ ] Review audit logs
+5. [ ] Check for data exfiltration
+6. [ ] Reset password
+7. [ ] Notify user
+8. [ ] Document incident
+
+### Suspected Data Breach
+
+1. [ ] Preserve evidence (don't modify logs)
+2. [ ] Identify scope of access
+3. [ ] Contain the breach
+4. [ ] Assess data exposure
+5. [ ] Notify affected users (within 72 hours for GDPR)
+6. [ ] Report to authorities if required
+7. [ ] Conduct root cause analysis
+8. [ ] Implement preventive measures
+
+### Malicious Insider
+
+1. [ ] Disable account immediately
+2. [ ] Revoke all access
+3. [ ] Preserve audit logs
+4. [ ] Review all actions taken
+5. [ ] Check for data exfiltration
+6. [ ] Involve HR/Legal
+7. [ ] Document thoroughly
+
+## Monitoring and Alerting
+
+Set up alerts for these conditions:
+
+```yaml
+alerts:
+  - name: Multiple Failed Logins
+    condition: failed_logins > 10 in 5 minutes
+    severity: medium
+    
+  - name: Unusual Data Export
+    condition: data_export_size > 100MB
+    severity: high
+    
+  - name: Admin Privilege Escalation
+    condition: role_changed_to_admin
+    severity: high
+    
+  - name: SSO Configuration Changed
+    condition: sso_config_updated
+    severity: medium
+```

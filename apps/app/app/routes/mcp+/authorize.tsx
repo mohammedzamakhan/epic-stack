@@ -175,9 +175,6 @@ export async function action({ request }: ActionFunctionArgs) {
 	await userHasOrgAccess(request, organizationId as string)
 
 	if (intent === 'approve') {
-		console.log('[Authorize Action] Approve intent received')
-		console.log('[Authorize Action] Redirect URI:', redirectUri)
-
 		// Generate authorization code (with PKCE parameters if provided)
 		const authCode = await createAuthorizationCode({
 			userId,
@@ -187,11 +184,6 @@ export async function action({ request }: ActionFunctionArgs) {
 			codeChallenge: codeChallenge as string | undefined,
 			codeChallengeMethod: codeChallengeMethod as string | undefined,
 		})
-
-		console.log(
-			'[Authorize Action] Authorization code generated:',
-			authCode.substring(0, 10) + '...',
-		)
 
 		// Log authorization approval
 		await logMCPAuthorizationApproved(
@@ -210,7 +202,6 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		const redirectUrlString = redirectUrl.toString()
-		console.log('[Authorize Action] Full redirect URL:', redirectUrlString)
 
 		// Check if redirect URI uses a custom protocol (cursor://, vscode://, etc.)
 		// Custom protocols need client-side redirect, HTTP(S) can use server-side redirect
@@ -218,15 +209,9 @@ export async function action({ request }: ActionFunctionArgs) {
 			redirectUrlString.startsWith('http://') ||
 			redirectUrlString.startsWith('https://')
 		) {
-			console.log(
-				'[Authorize Action] Using server-side redirect for HTTP(S) URL',
-			)
 			// Standard HTTP redirect for regular URLs
 			return redirect(redirectUrlString)
 		} else {
-			console.log(
-				'[Authorize Action] Using client-side redirect for custom protocol',
-			)
 			// Client-side redirect for custom protocols
 			return { redirectUrl: redirectUrlString }
 		}
@@ -288,10 +273,6 @@ export default function AuthorizePage() {
 	// Handle client-side redirect for custom protocols (cursor://, etc.)
 	useEffect(() => {
 		if (actionData && 'redirectUrl' in actionData && actionData.redirectUrl) {
-			console.log(
-				'[Authorize] Client-side redirect to:',
-				actionData.redirectUrl,
-			)
 			// Use window.location.href for custom protocol URLs
 			window.location.href = actionData.redirectUrl
 		}

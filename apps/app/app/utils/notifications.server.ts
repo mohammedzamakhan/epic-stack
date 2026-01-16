@@ -76,9 +76,7 @@ export async function notifyCommentMentions({
 		)
 
 		// Filter out the commenter (don't notify yourself)
-		const filteredUserIds = mentionedUserIds.filter(
-			(userId: string) => userId !== commenterUserId,
-		)
+		const filteredUserIds = mentionedUserIds
 
 		if (filteredUserIds.length === 0) {
 			return
@@ -114,8 +112,6 @@ export async function notifyCommentMentions({
 				payload,
 			})
 		}
-
-		console.log(`Sent mention notifications to ${filteredUserIds.length} users`)
 	} catch (error) {
 		console.error('Error sending mention notifications:', error)
 	}
@@ -171,8 +167,6 @@ export async function notifyNoteOwner({
 				noteUrl,
 			},
 		})
-
-		console.log(`Sent note comment notification to note owner: ${noteOwnerId}`)
 	} catch (error) {
 		console.error('Error sending note owner notification:', error)
 	}

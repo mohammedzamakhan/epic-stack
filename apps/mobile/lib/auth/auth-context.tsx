@@ -27,27 +27,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 	const login = useCallback(
 		async (credentials: LoginCredentials) => {
 			try {
-				console.log('🔐 Auth Context: Starting login process')
 				dispatch({ type: 'AUTH_START' })
 
 				const response = await jwtAuthApi.login(credentials)
-				console.log('📡 Auth Context: API response:', {
-					success: response.success,
-					error: response.error,
-					message: response.message,
-				})
-				console.log('📡 Auth Context: Full response:', response)
-				console.log('📡 Auth Context: Response data:', response.data)
 
 				if (
 					response.success &&
 					response?.data?.user &&
 					response.data?.accessToken
 				) {
-					console.log(
-						'✅ Auth Context: Login successful, setting user and tokens',
-					)
-
 					// Transform API response to match mobile app types
 					const user = {
 						id: response.data.user.id,
@@ -78,10 +66,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 						payload: { user, tokens },
 					})
 				} else {
-					console.log(
-						'❌ Auth Context: Login failed:',
-						response.error || response.message,
-					)
 					const errorMessage =
 						response.error || response.message || 'Login failed'
 
@@ -96,7 +80,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error ? error.message : 'Login failed'
-				console.log('❌ Auth Context: Login error:', errorMessage)
 
 				dispatch({
 					type: 'AUTH_ERROR',

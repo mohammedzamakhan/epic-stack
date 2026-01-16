@@ -19,7 +19,6 @@ export default function DashboardScreen() {
 		error: organizationsError,
 	} = useOrganizations()
 
-	console.log(organizations)
 	const handleLogout = async () => {
 		await logout()
 		router.replace('/(auth)/sign-in')

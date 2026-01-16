@@ -1,0 +1,247 @@
+---
+title: 'Secure Coding Guidelines'
+description: 'Best practices for writing secure code in Epic Stack'
+---
+
+# Secure Coding Guidelines
+
+This guide covers secure coding practices that all developers should follow when contributing to Epic Stack.
+
+## Input Validation
+
+### Always Validate User Input
+
+Use Zod schemas for all user input validation:
+
+```typescript
+import { z } from 'zod'
+
+// ✅ Good - Explicit validation with constraints
+const UserInputSchema = z.object({
+  email: z.string().email().max(100),
+  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
+  age: z.number().int().min(13).max(150),
+})
+
+// ❌ Bad - No validation
+function processUser(data: any) {
+  // Never trust unvalidated input
+}
+```
+
+### Sanitize HTML Content
+
+Always sanitize user-generated HTML content:
+
+```typescript
+import { sanitizeCommentContent, sanitizeNoteContent } from '#app/utils/content-sanitization.server'
+
+// ✅ Good - Sanitize before rendering
+const safeContent = sanitizeNoteContent(userProvidedHtml)
+
+// ❌ Bad - Directly rendering user HTML
+<div dangerouslySetInnerHTML={{ __html: userProvidedHtml }} />
+```
+
+## Authentication & Authorization
+
+### Always Check Authentication
+
+Never assume a user is authenticated:
+
+```typescript
+// ✅ Good - Explicit authentication check
+export async function loader({ request }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request)
+  // User is guaranteed to be authenticated
+}
+
+// ❌ Bad - Assuming authentication
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request)
+  const userId = session.get('userId') // Could be undefined!
+}
+```
+
+### Always Check Authorization
+
+Verify permissions for every sensitive operation:
+
+```typescript
+// ✅ Good - Explicit permission check
+await requireUserWithOrganizationPermission(
+  request,
+  organizationId,
+  ORG_PERMISSIONS.UPDATE_MEMBER_ANY,
+)
+
+// ❌ Bad - Only checking authentication
+const userId = await requireUserId(request)
+// Missing authorization check - any authenticated user can access!
+```
+
+### Prevent IDOR Vulnerabilities
+
+Always verify resource ownership:
+
+```typescript
+// ✅ Good - Verify ownership
+const note = await prisma.note.findFirst({
+  where: {
+    id: noteId,
+    organizationId: userOrganizationId, // Verify ownership
+  },
+})
+
+// ❌ Bad - No ownership check (IDOR vulnerability)
+const note = await prisma.note.findUnique({
+  where: { id: noteId }, // Any user can access any note!
+})
+```
+
+## Database Security
+
+### Use Parameterized Queries
+
+Always use Prisma's query builder or parameterized queries:
+
+```typescript
+// ✅ Good - Prisma handles parameterization
+const user = await prisma.user.findUnique({
+  where: { email: userInput },
+})
+
+// ✅ Good - Parameterized raw query
+await prisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`
+
+// ❌ Bad - String concatenation (SQL injection risk)
+await prisma.$queryRawUnsafe(`SELECT * FROM users WHERE id = '${userId}'`)
+```
+
+### Limit Data Exposure
+
+Only select the fields you need:
+
+```typescript
+// ✅ Good - Select only needed fields
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  select: { id: true, name: true, email: true },
+})
+
+// ❌ Bad - Selecting everything including sensitive data
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  include: { password: true, sessions: true }, // Exposes sensitive data
+})
+```
+
+## Secrets Management
+
+### Never Hardcode Secrets
+
+```typescript
+// ✅ Good - Use environment variables
+const apiKey = process.env.STRIPE_SECRET_KEY
+if (!apiKey) {
+  throw new Error('STRIPE_SECRET_KEY is required')
+}
+
+// ❌ Bad - Hardcoded secrets
+const apiKey = 'sk_live_abc123...' // NEVER do this
+```
+
+### Validate Required Secrets at Startup
+
+```typescript
+// ✅ Good - Fail fast if secrets are missing
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is required')
+}
+```
+
+## Logging
+
+### Never Log Sensitive Data
+
+```typescript
+import { logger } from '@repo/observability'
+
+// ✅ Good - Use structured logging with redaction
+logger.info({ userId, action: 'login' }, 'User logged in')
+
+// ❌ Bad - Logging sensitive data
+console.log('User logged in with password:', password)
+console.log('Token:', accessToken)
+```
+
+### Use Structured Logging
+
+```typescript
+// ✅ Good - Structured, queryable logs
+logger.info({
+  userId,
+  action: 'payment_processed',
+  amount: payment.amount,
+  // Note: payment details automatically redacted
+}, 'Payment processed successfully')
+
+// ❌ Bad - Unstructured console.log
+console.log(`Payment of ${amount} processed for user ${userId}`)
+```
+
+## Error Handling
+
+### Don't Expose Internal Errors
+
+```typescript
+// ✅ Good - Generic error message to users
+try {
+  await processPayment(data)
+} catch (error) {
+  logger.error({ err: error }, 'Payment processing failed')
+  return json({ error: 'Payment could not be processed' }, { status: 500 })
+}
+
+// ❌ Bad - Exposing internal details
+try {
+  await processPayment(data)
+} catch (error) {
+  return json({ error: error.message, stack: error.stack }, { status: 500 })
+}
+```
+
+## File Uploads
+
+### Validate File Types and Sizes
+
+```typescript
+// ✅ Good - Validate file uploads
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+
+if (!ALLOWED_TYPES.includes(file.type)) {
+  throw new Error('Invalid file type')
+}
+if (file.size > MAX_SIZE) {
+  throw new Error('File too large')
+}
+
+// Use the sanitizeAndExtractExtension helper
+import { sanitizeAndExtractExtension } from '@repo/storage'
+const safeExtension = sanitizeAndExtractExtension(file.name)
+```
+
+## Security Checklist
+
+Before submitting code, verify:
+
+- [ ] All user input is validated with Zod schemas
+- [ ] Authentication is required for protected routes
+- [ ] Authorization checks verify user permissions
+- [ ] Resource ownership is verified (no IDOR)
+- [ ] No secrets are hardcoded
+- [ ] No sensitive data in logs
+- [ ] Errors don't expose internal details
+- [ ] File uploads are validated
+- [ ] HTML content is sanitized before rendering

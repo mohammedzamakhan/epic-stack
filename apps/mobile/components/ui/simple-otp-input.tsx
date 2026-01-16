@@ -29,8 +29,6 @@ export function SimpleOTPInput({
 	}, [length])
 
 	const handleChangeText = (text: string, index: number) => {
-		console.log(`SimpleOTP: Input ${index} changed to:`, text)
-
 		// Only allow alphanumeric characters
 		const char = text
 			.replace(/[^A-Za-z0-9]/g, '')
@@ -50,7 +48,6 @@ export function SimpleOTPInput({
 
 		// Join and update
 		const finalValue = newValue.join('')
-		console.log(`SimpleOTP: New value:`, finalValue)
 		onChange(finalValue)
 
 		// Move to next input if character entered

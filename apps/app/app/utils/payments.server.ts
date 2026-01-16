@@ -280,9 +280,6 @@ export async function handleSubscriptionChange(subscription: {
 				await paymentProvider.cancelSubscription(
 					organization.stripeSubscriptionId,
 				)
-				console.log(
-					`Cancelled old subscription: ${organization.stripeSubscriptionId}`,
-				)
 			} catch (error) {
 				console.error('Error cancelling old subscription:', error)
 			}
@@ -539,7 +536,6 @@ export async function cleanupDuplicateSubscriptions(
 
 		for (const sub of cancelSubscriptions) {
 			await paymentProvider.cancelSubscription(sub.id)
-			console.log(`Cancelled duplicate subscription: ${sub.id}`)
 		}
 
 		// Get product details
@@ -553,8 +549,6 @@ export async function cleanupDuplicateSubscriptions(
 			planName: product?.name || null,
 			subscriptionStatus: keepSubscription.status,
 		})
-
-		console.log(`Kept subscription: ${keepSubscription.id}`)
 	} catch (error) {
 		console.error('Error cleaning up duplicate subscriptions:', error)
 	}

@@ -196,7 +196,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const invitationId = formData.get('invitationId') as string
 
 		try {
-			await deleteOrganizationInvitation(invitationId)
+			await deleteOrganizationInvitation(invitationId, organization.id)
 			return Response.json({ success: true })
 		} catch (error) {
 			console.error('Error removing invitation:', error)
@@ -259,6 +259,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	// --- update-member-role intent ---
 	if (intent === 'update-member-role') {
+		// Use unified permission system for authorization
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.UPDATE_MEMBER_ANY,
+		)
+
 		const memberUserId = formData.get('userId')
 		const newRole = formData.get('role')
 
@@ -270,33 +277,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 		if (!['admin', 'member'].includes(newRole)) {
 			return Response.json({ error: 'Invalid role' }, { status: 400 })
-		}
-
-		// Only allow admins to change roles
-		const requester = await prisma.userOrganization.findUnique({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId: organization.id,
-				},
-			},
-			include: {
-				organizationRole: {
-					select: { name: true },
-				},
-			},
-		})
-		if (!requester) {
-			return Response.json(
-				{ error: 'Requester not found in organization' },
-				{ status: 403 },
-			)
-		}
-		if (requester.organizationRole.name !== 'admin' || !requester.active) {
-			return Response.json(
-				{ error: 'Only admins can change member roles' },
-				{ status: 403 },
-			)
 		}
 
 		// Prevent demoting the last admin

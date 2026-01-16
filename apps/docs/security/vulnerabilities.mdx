@@ -1,0 +1,215 @@
+---
+title: 'Vulnerability Prevention'
+description: 'Common security vulnerabilities and how Epic Stack prevents them'
+---
+
+# Vulnerability Prevention
+
+This guide covers common security vulnerabilities and how Epic Stack prevents them.
+
+## OWASP Top 10
+
+### A01: Broken Access Control
+
+**Risk**: Users accessing resources they shouldn't have access to.
+
+**Epic Stack Prevention**:
+
+```typescript
+// ✅ Every route checks authentication
+export async function loader({ request }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request)
+  
+  // ✅ Authorization is verified for sensitive operations
+  await requireUserWithOrganizationPermission(
+    request,
+    organizationId,
+    ORG_PERMISSIONS.READ_MEMBER_ANY,
+  )
+  
+  // ✅ Resource ownership is verified
+  const note = await prisma.note.findFirst({
+    where: {
+      id: noteId,
+      organizationId: userOrganization.id, // Prevents IDOR
+    },
+  })
+}
+```
+
+### A02: Cryptographic Failures
+
+**Risk**: Weak encryption or exposed sensitive data.
+
+**Epic Stack Prevention**:
+- Passwords hashed with bcrypt (cost factor 12)
+- Secrets encrypted with AES-256-GCM
+- PBKDF2-SHA512 with 100k iterations for key derivation
+- TLS 1.3 for data in transit
+- Automatic redaction of secrets in logs
+
+### A03: Injection
+
+**Risk**: SQL injection, command injection, XSS.
+
+**Epic Stack Prevention**:
+
+```typescript
+// ✅ Prisma automatically parameterizes queries
+const user = await prisma.user.findUnique({
+  where: { email: userInput }, // Safe from SQL injection
+})
+
+// ✅ Content is sanitized before rendering
+import { sanitizeNoteContent } from '#app/utils/content-sanitization.server'
+const safeHtml = sanitizeNoteContent(userContent)
+
+// ✅ CSP prevents inline script execution
+contentSecurityPolicy: {
+  directives: {
+    'script-src': ["'strict-dynamic'", `'nonce-${nonce}'`],
+  },
+}
+```
+
+### A04: Insecure Design
+
+**Risk**: Missing security controls in application design.
+
+**Epic Stack Prevention**:
+- Security built into the framework from the start
+- Centralized authentication and authorization
+- Unified audit logging
+- Defense in depth with multiple security layers
+
+### A05: Security Misconfiguration
+
+**Risk**: Default credentials, unnecessary features, verbose errors.
+
+**Epic Stack Prevention**:
+- Required environment variables validated at startup
+- Production error messages don't expose internals
+- Debug logging disabled in production
+- Security headers configured by default
+
+### A06: Vulnerable Components
+
+**Risk**: Using components with known vulnerabilities.
+
+**Epic Stack Prevention**:
+- Automated dependency scanning in CI/CD
+- npm audit runs on every build
+- Renovate/Dependabot for dependency updates
+- Lock files ensure reproducible builds
+
+### A07: Authentication Failures
+
+**Risk**: Weak passwords, credential stuffing, session hijacking.
+
+**Epic Stack Prevention**:
+- Bcrypt with high cost factor
+- Rate limiting on auth endpoints
+- Session validation on every request
+- MFA support (TOTP, Passkeys)
+- Have I Been Pwned integration
+
+### A08: Data Integrity Failures
+
+**Risk**: Trusting unsigned data, insecure deserialization.
+
+**Epic Stack Prevention**:
+- Zod validation on all inputs
+- Signed session cookies
+- PKCE for OAuth flows
+- No eval() or unsafe deserialization
+
+### A09: Logging Failures
+
+**Risk**: Missing audit logs, exposed sensitive data in logs.
+
+**Epic Stack Prevention**:
+- Comprehensive audit logging
+- Automatic PII redaction
+- Structured logging with Pino
+- Security event tracking
+
+### A10: Server-Side Request Forgery (SSRF)
+
+**Risk**: Server making requests to unintended destinations.
+
+**Epic Stack Prevention**:
+- URL validation for external requests
+- Allowlist for SSO/OAuth endpoints
+- No user-controlled URLs in server requests
+
+## Cross-Site Request Forgery (CSRF)
+
+**Epic Stack Approach**: SameSite cookies instead of CSRF tokens.
+
+```typescript
+cookie: {
+  sameSite: 'lax', // Prevents CSRF for state-changing requests
+  httpOnly: true,
+  secure: true,
+}
+```
+
+<Note>
+  This approach works because Epic Stack avoids GET-based mutations. All state-changing operations use POST/PUT/DELETE.
+</Note>
+
+## Insecure Direct Object Reference (IDOR)
+
+**Prevention Pattern**:
+
+```typescript
+// ❌ Vulnerable - No ownership check
+const invitation = await prisma.organizationInvitation.delete({
+  where: { id: invitationId }, // Any user can delete any invitation!
+})
+
+// ✅ Secure - Verify ownership
+const invitation = await prisma.organizationInvitation.delete({
+  where: {
+    id: invitationId,
+    organizationId: userOrganization.id, // Only own org's invitations
+  },
+})
+```
+
+## Rate Limiting
+
+Epic Stack implements 3-tier rate limiting:
+
+| Tier | Limit | Endpoints |
+|------|-------|-----------|
+| Strictest | 10/min | /login, /signup, /reset-password |
+| Strict | 100/min | All POST/PUT/DELETE to auth routes |
+| General | 1000/min | All other endpoints |
+
+Additional protections:
+- Arcjet WAF for advanced threat detection
+- Bot detection
+- Honeypot fields on forms
+
+## Security Testing
+
+### Automated Scanning
+
+The CI/CD pipeline includes:
+- **Semgrep**: Static analysis for security patterns
+- **CodeQL**: GitHub's code analysis engine
+- **Trivy**: Container and dependency scanning
+- **Gitleaks**: Secret detection
+- **npm audit**: Dependency vulnerabilities
+
+### Manual Testing Checklist
+
+Before deploying security-sensitive changes:
+
+- [ ] Test authentication bypass attempts
+- [ ] Test authorization for different user roles
+- [ ] Test IDOR with different user accounts
+- [ ] Test XSS with various payloads
+- [ ] Test rate limiting effectiveness
+- [ ] Review audit logs for security events

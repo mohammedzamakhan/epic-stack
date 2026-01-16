@@ -9,14 +9,12 @@ import { handleDeepLink } from '../lib/navigation'
 export default function RootLayout() {
 	useEffect(() => {
 		// Configure deep linking for authentication redirects
-		const url = Linking.createURL('/')
-		console.log('App URL scheme:', url)
+		Linking.createURL('/')
 
 		// Handle initial URL if app was opened via deep link
 		const handleInitialURL = async () => {
 			const initialUrl = await Linking.getInitialURL()
 			if (initialUrl) {
-				console.log('Initial URL:', initialUrl)
 				// Handle the deep link after a short delay to ensure navigation is ready
 				setTimeout(() => {
 					void handleDeepLink(initialUrl)
@@ -28,7 +26,6 @@ export default function RootLayout() {
 
 		// Listen for incoming links while app is running
 		const subscription = Linking.addEventListener('url', (event) => {
-			console.log('Incoming URL:', event.url)
 			void handleDeepLink(event.url)
 		})
 

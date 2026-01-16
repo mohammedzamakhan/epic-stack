@@ -104,10 +104,7 @@ export async function sendOrganizationInvitationEmail({
 	organizationName: string
 	inviterName: string
 }) {
-	const baseUrl =
-		process.env.NODE_ENV === 'production'
-			? 'https://yourapp.com' // Replace with your actual domain
-			: 'http://localhost:3001'
+	const baseUrl = process.env.APP_URL || 'http://localhost:3001'
 
 	const inviteUrl = `${baseUrl}/join/${invitation.token}`
 
@@ -150,10 +147,14 @@ export async function getOrganizationInvitations(organizationId: string) {
 	})
 }
 
-export async function deleteOrganizationInvitation(invitationId: string) {
+export async function deleteOrganizationInvitation(
+	invitationId: string,
+	organizationId: string,
+) {
 	return prisma.organizationInvitation.delete({
 		where: {
 			id: invitationId,
+			organizationId: organizationId,
 		},
 	})
 }

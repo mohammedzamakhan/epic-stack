@@ -10,16 +10,8 @@ import { type ActionFunctionArgs } from 'react-router'
  * NOTE: This endpoint is PUBLIC (no authentication required) as it's part of OAuth discovery.
  */
 export async function action({ request }: ActionFunctionArgs) {
-	console.log('[MCP Register] POST request received')
-	console.log('[MCP Register] URL:', request.url)
-	console.log(
-		'[MCP Register] Headers:',
-		Object.fromEntries(request.headers.entries()),
-	)
-
 	try {
 		const body = (await request.json()) as Record<string, any>
-		console.log('[MCP Register] Request body:', JSON.stringify(body, null, 2))
 
 		const url = new URL(request.url)
 		const baseUrl = `${url.protocol}//${url.host}`
@@ -67,8 +59,6 @@ export async function action({ request }: ActionFunctionArgs) {
  * Handle GET requests - not supported for registration
  */
 export async function loader() {
-	console.log('[MCP Register] GET request received')
-
 	return Response.json(
 		{
 			error: 'invalid_request',

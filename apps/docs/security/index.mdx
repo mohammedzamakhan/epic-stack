@@ -1,0 +1,74 @@
+---
+title: 'Security Overview'
+description: 'Security architecture and best practices for Epic Stack'
+---
+
+# Security Overview
+
+Epic Stack is built with security as a core principle. This section provides comprehensive security guidance for developers, administrators, and security teams.
+
+## Security Architecture
+
+<CardGroup cols={2}>
+  <Card title="Defense in Depth" icon="shield-halved">
+    Multiple security layers protect your application from various attack vectors
+  </Card>
+  <Card title="Zero Trust" icon="lock">
+    Every request is authenticated and authorized, regardless of origin
+  </Card>
+  <Card title="Secure by Default" icon="check-circle">
+    Security controls are enabled by default with sensible configurations
+  </Card>
+  <Card title="Compliance Ready" icon="clipboard-check">
+    Built to meet SOC 2, GDPR, and other compliance requirements
+  </Card>
+</CardGroup>
+
+## Security Controls Summary
+
+| Control Area | Implementation | Status |
+|-------------|----------------|--------|
+| Authentication | Bcrypt (cost 12), MFA, Passkeys, SSO | ✅ Active |
+| Authorization | RBAC with organization-level permissions | ✅ Active |
+| Encryption | AES-256-GCM at rest, TLS 1.3 in transit | ✅ Active |
+| Rate Limiting | 3-tier rate limiting with Arcjet WAF | ✅ Active |
+| Input Validation | Zod schemas + DOMPurify | ✅ Active |
+| Audit Logging | Structured logs with PII redaction | ✅ Active |
+| Security Headers | CSP, HSTS, X-Frame-Options via Helmet | ✅ Active |
+| Secret Management | Environment variables with validation | ✅ Active |
+
+## Quick Links
+
+<CardGroup cols={3}>
+  <Card title="Secure Coding" icon="code" href="/security/secure-coding">
+    Best practices for writing secure code
+  </Card>
+  <Card title="Authentication" icon="user-lock" href="/security/authentication">
+    Authentication implementation details
+  </Card>
+  <Card title="Data Protection" icon="database" href="/security/data-protection">
+    Encryption and data handling
+  </Card>
+  <Card title="Vulnerability Guide" icon="bug" href="/security/vulnerabilities">
+    Common vulnerabilities and prevention
+  </Card>
+  <Card title="Incident Response" icon="triangle-exclamation" href="/security/incident-response">
+    How to handle security incidents
+  </Card>
+  <Card title="Compliance" icon="scale-balanced" href="/security/compliance">
+    SOC 2, GDPR, and regulatory compliance
+  </Card>
+</CardGroup>
+
+## Reporting Security Issues
+
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Do NOT** open a public GitHub issue
+2. Email security concerns to the security team
+3. Include detailed reproduction steps
+4. Allow 90 days for remediation before public disclosure
+
+## Security Updates
+
+Security patches are released as soon as possible after discovery. Enable notifications for security advisories in the repository.

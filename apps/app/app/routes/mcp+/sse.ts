@@ -39,18 +39,9 @@ export async function action({ request }: ActionFunctionArgs) {
 	// Import to register tools (side-effect import)
 	await import('#app/utils/mcp/tools.server.ts')
 
-	console.log('[MCP SSE] POST request received')
-	console.log('[MCP SSE] URL:', request.url)
-	console.log('[MCP SSE] Method:', request.method)
-	console.log(
-		'[MCP SSE] Headers:',
-		Object.fromEntries(request.headers.entries()),
-	)
-
 	// Extract access token from Authorization header
 	const authHeader = request.headers.get('authorization')
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		console.log('[MCP SSE] No valid Authorization header, returning 401')
 		return new Response('Unauthorized', {
 			status: 401,
 			headers: {
@@ -59,8 +50,6 @@ export async function action({ request }: ActionFunctionArgs) {
 			},
 		})
 	}
-
-	console.log('[MCP SSE] Authorization header present')
 
 	const accessToken = authHeader.slice(7) // Remove "Bearer " prefix
 
@@ -83,12 +72,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	let jsonRpcRequest: any
 	try {
 		jsonRpcRequest = await request.json()
-		console.log(
-			'[MCP SSE] JSON-RPC request:',
-			JSON.stringify(jsonRpcRequest, null, 2),
-		)
-	} catch (error) {
-		console.log('[MCP SSE] Failed to parse JSON:', error)
+	} catch (ignoredError) {
 		return Response.json(
 			{
 				jsonrpc: '2.0',
@@ -104,18 +88,15 @@ export async function action({ request }: ActionFunctionArgs) {
 	// Handle different MCP methods
 	try {
 		const { method, params, id } = jsonRpcRequest
-		console.log('[MCP SSE] Handling method:', method)
 
 		// Handle notifications (no id, no response expected)
 		if (!id && method?.startsWith('notifications/')) {
-			console.log('[MCP SSE] Received notification:', method)
 			// Notifications don't require a response, just acknowledge with 204
 			return new Response(null, { status: 204 })
 		}
 
 		// Initialize handshake
 		if (method === 'initialize') {
-			console.log('[MCP SSE] Returning initialize response')
 			return Response.json({
 				jsonrpc: '2.0',
 				id,
@@ -246,14 +227,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	// Import to register tools (side-effect import)
 	await import('#app/utils/mcp/tools.server.ts')
 
-	console.log('[MCP SSE] GET request received')
-	console.log('[MCP SSE] URL:', request.url)
-	console.log('[MCP SSE] Method:', request.method)
-	console.log(
-		'[MCP SSE] Headers:',
-		Object.fromEntries(request.headers.entries()),
-	)
-
 	// Check rate limit for SSE connection (IP-based)
 	// This helps prevent connection exhaustion attacks
 	const clientIp = getClientIp(request)
@@ -263,13 +236,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	)
 
 	if (!rateLimitCheck.allowed) {
-		console.log(`[MCP SSE] Rate limit exceeded for IP: ${clientIp}`)
 		return createRateLimitResponse(rateLimitCheck.resetAt)
 	}
 
 	// Only GET requests are allowed for SSE
 	if (request.method !== 'GET') {
-		console.log('[MCP SSE] Non-GET request to loader, returning 405')
 		return Response.json(
 			{
 				error: 'invalid_request',
@@ -282,8 +253,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	// Extract access token from Authorization header
 	const authHeader = request.headers.get('authorization')
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		console.log('[MCP SSE] No valid Authorization header, returning 401')
-		console.log('[MCP SSE] Auth header value:', authHeader)
 		return new Response('Unauthorized', {
 			status: 401,
 			headers: {
@@ -292,18 +261,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		})
 	}
 
-	console.log('[MCP SSE] Authorization header present')
-
 	const accessToken = authHeader.slice(7) // Remove "Bearer " prefix
-	console.log(
-		'[MCP SSE] Access token (first 10 chars):',
-		accessToken.substring(0, 10),
-	)
 
 	// Validate access token
 	const tokenData = await validateAccessToken(accessToken)
 	if (!tokenData) {
-		console.log('[MCP SSE] Token validation failed')
 		return Response.json(
 			{
 				error: 'invalid_token',
@@ -312,12 +274,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			{ status: 401 },
 		)
 	}
-
-	console.log(
-		'[MCP SSE] Token validated successfully for user:',
-		tokenData.user.username,
-	)
-	console.log('[MCP SSE] Organization:', tokenData.organization.name)
 
 	// Create SSE response with proper headers
 	const encoder = new TextEncoder()
