@@ -580,11 +580,14 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
+						// Generate unique username to avoid conflicts
+						const uniqueUsername = `user-${userId}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+						
 						const user = await prisma.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
-								username: `user-${userId}`,
+								username: uniqueUsername,
 								name: `Test User ${userId}`,
 							},
 						})

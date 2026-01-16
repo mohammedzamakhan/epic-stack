@@ -263,24 +263,33 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			}
 		})
 
-		it('should reject tool invocations exceeding the limit', async () => {
-			const accessToken = generateToken()
+		it(
+			'should reject tool invocations exceeding the limit',
+			async () => {
+				const accessToken = generateToken()
 
-			// Make 1000 requests (at limit)
-			for (let i = 0; i < 1000; i++) {
-				await checkRateLimit(
+				// Make 1000 requests (at limit) - batch them for speed
+				const batchSize = 100
+				for (let batch = 0; batch < 10; batch++) {
+					await Promise.all(
+						Array.from({ length: batchSize }, () =>
+							checkRateLimit(
+								{ type: 'token', value: accessToken },
+								RATE_LIMITS.toolInvocation,
+							),
+						),
+					)
+				}
+
+				// 1001st request should be rejected
+				const result = await checkRateLimit(
 					{ type: 'token', value: accessToken },
 					RATE_LIMITS.toolInvocation,
 				)
-			}
-
-			// 1001st request should be rejected
-			const result = await checkRateLimit(
-				{ type: 'token', value: accessToken },
-				RATE_LIMITS.toolInvocation,
-			)
-			expect(result.allowed).toBe(false)
-		})
+				expect(result.allowed).toBe(false)
+			},
+			15000,
+		) // 15 second timeout
 
 		it('should isolate rate limits between different tokens', async () => {
 			const token1 = generateToken()

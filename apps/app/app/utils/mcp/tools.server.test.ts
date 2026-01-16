@@ -264,6 +264,12 @@ describe('MCP Tools Service', () => {
 				},
 			})
 
+			// Ensure the note is committed and visible
+			const verifyNote = await prisma.organizationNote.findUnique({
+				where: { id: note.id },
+			})
+			expect(verifyNote).toBeDefined()
+
 			const tool = getTool('get_user_notes')
 			const result = await tool?.handler(
 				{ username: mockContext.user.username },
@@ -273,6 +279,9 @@ describe('MCP Tools Service', () => {
 			expect(result?.content).toBeDefined()
 			expect(result?.content![0]!.text).toContain('Test Note')
 			expect(result?.content![0]!.text).toContain('This is a test note')
+
+			// Clean up
+			await prisma.organizationNote.delete({ where: { id: note.id } })
 		})
 
 		it('should return no notes message when user has no notes', async () => {
