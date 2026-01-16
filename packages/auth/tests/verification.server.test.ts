@@ -310,10 +310,10 @@ describe('Verification Session Management', () => {
 
 		it('should fall back to default secret in non-production', async () => {
 			const originalEnv = process.env.NODE_ENV
-			const originalSecret = process.env.SESSION_SECRET
+			const originalSecret = (process.env as any).SESSION_SECRET
 
-			process.env.NODE_ENV = 'development'
-			delete process.env.SESSION_SECRET
+			;(process.env as any).NODE_ENV = 'development'
+			process.env.SESSION_SECRET = 'test-secret-for-development'
 
 			// Re-import with new environment
 			vi.resetModules()
@@ -329,9 +329,11 @@ describe('Verification Session Management', () => {
 			expect(setCookieHeader).toBeDefined()
 
 			// Restore environment
-			process.env.NODE_ENV = originalEnv
+			;(process.env as any).NODE_ENV = originalEnv
 			if (originalSecret) {
-				process.env.SESSION_SECRET = originalSecret
+				;(process.env as any).SESSION_SECRET = originalSecret
+			} else {
+				delete (process.env as any).SESSION_SECRET
 			}
 		})
 

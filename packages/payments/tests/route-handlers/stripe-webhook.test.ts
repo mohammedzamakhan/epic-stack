@@ -3,8 +3,11 @@
  */
 
 import type Stripe from 'stripe'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { handleStripeWebhook, type StripeWebhookDependencies  } from '../../src/route-handlers/stripe-webhook'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import {
+	handleStripeWebhook,
+	type StripeWebhookDependencies,
+} from '../../src/route-handlers/stripe-webhook'
 
 describe('handleStripeWebhook', () => {
 	let mockStripe: any
@@ -28,6 +31,10 @@ describe('handleStripeWebhook', () => {
 			handleTrialEnd: mockHandleTrialEnd,
 			webhookSecret: 'whsec_test_secret',
 		}
+	})
+
+	afterEach(() => {
+		vi.clearAllMocks()
 	})
 
 	describe('Request validation', () => {
@@ -123,19 +130,23 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(await response.text()).toBe('Webhook processed successfully')
-			expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
-				id: 'sub_123',
-				status: 'active',
-				customer: 'cus_123',
-				items: [
-					{
-						price: {
-							id: 'price_123',
-							product: 'prod_123',
+			expect(await response.text()).toBe('Webhook received')
+
+			// Wait for async processing
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
+					id: 'sub_123',
+					status: 'active',
+					customer: 'cus_123',
+					items: [
+						{
+							price: {
+								id: 'price_123',
+								product: 'prod_123',
+							},
 						},
-					},
-				],
+					],
+				})
 			})
 		})
 
@@ -178,18 +189,21 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
-				id: 'sub_123',
-				status: 'past_due',
-				customer: 'cus_123',
-				items: [
-					{
-						price: {
-							id: 'price_123',
-							product: 'prod_123',
+
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
+					id: 'sub_123',
+					status: 'past_due',
+					customer: 'cus_123',
+					items: [
+						{
+							price: {
+								id: 'price_123',
+								product: 'prod_123',
+							},
 						},
-					},
-				],
+					],
+				})
 			})
 		})
 
@@ -232,18 +246,21 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
-				id: 'sub_123',
-				status: 'canceled',
-				customer: 'cus_123',
-				items: [
-					{
-						price: {
-							id: 'price_123',
-							product: 'prod_123',
+
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
+					id: 'sub_123',
+					status: 'canceled',
+					customer: 'cus_123',
+					items: [
+						{
+							price: {
+								id: 'price_123',
+								product: 'prod_123',
+							},
 						},
-					},
-				],
+					],
+				})
 			})
 		})
 
@@ -286,7 +303,10 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleSubscriptionChange).toHaveBeenCalled()
+
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalled()
+			})
 		})
 
 		it('should handle customer.subscription.resumed event', async () => {
@@ -328,7 +348,10 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleSubscriptionChange).toHaveBeenCalled()
+
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalled()
+			})
 		})
 	})
 
@@ -364,10 +387,13 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleTrialEnd).toHaveBeenCalledWith({
-				id: 'sub_123',
-				customer: 'cus_123',
-				trial_end: trialEnd,
+
+			await vi.waitFor(() => {
+				expect(mockHandleTrialEnd).toHaveBeenCalledWith({
+					id: 'sub_123',
+					customer: 'cus_123',
+					trial_end: trialEnd,
+				})
 			})
 		})
 	})
@@ -463,12 +489,12 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(await response.text()).toBe('Webhook processed successfully')
+			expect(await response.text()).toBe('Webhook received')
 		})
 	})
 
 	describe('Error handling', () => {
-		it('should return 500 when handler throws error', async () => {
+		it('should return 200 even when handler throws error (fire-and-forget)', async () => {
 			const mockEvent: Stripe.Event = {
 				id: 'evt_132',
 				type: 'customer.subscription.updated',
@@ -509,8 +535,9 @@ describe('handleStripeWebhook', () => {
 				webhookDeps,
 			)
 
-			expect(response.status).toBe(500)
-			expect(await response.text()).toBe('Webhook processing failed')
+			// Should still return 200 - errors are logged but don't affect response
+			expect(response.status).toBe(200)
+			expect(await response.text()).toBe('Webhook received')
 		})
 
 		it('should handle subscription with multiple items', async () => {
@@ -558,24 +585,27 @@ describe('handleStripeWebhook', () => {
 			)
 
 			expect(response.status).toBe(200)
-			expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
-				id: 'sub_123',
-				status: 'active',
-				customer: 'cus_123',
-				items: [
-					{
-						price: {
-							id: 'price_123',
-							product: 'prod_123',
+
+			await vi.waitFor(() => {
+				expect(mockHandleSubscriptionChange).toHaveBeenCalledWith({
+					id: 'sub_123',
+					status: 'active',
+					customer: 'cus_123',
+					items: [
+						{
+							price: {
+								id: 'price_123',
+								product: 'prod_123',
+							},
 						},
-					},
-					{
-						price: {
-							id: 'price_456',
-							product: 'prod_456',
+						{
+							price: {
+								id: 'price_456',
+								product: 'prod_456',
+							},
 						},
-					},
-				],
+					],
+				})
 			})
 		})
 	})
