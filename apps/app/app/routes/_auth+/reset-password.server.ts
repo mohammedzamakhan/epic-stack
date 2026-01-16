@@ -3,7 +3,7 @@ import { prisma } from '@repo/database'
 import { data, redirect } from 'react-router'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { resetPasswordUsernameSessionKey } from './reset-password.tsx'
-import { type VerifyFunctionArgs } from './verify.server.ts'
+import { type VerifyFunctionArgs } from './verify.server.tsx'
 
 export async function handleVerification({
 	request,

@@ -35,8 +35,6 @@ import {
 	enable2FAAction,
 	setPasswordAction,
 } from '../settings+/actions/security.actions'
-import { twoFAVerificationType } from '../settings+/profile.two-factor'
-import { twoFAVerifyVerificationType } from '../settings+/profile.two-factor.verify'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -194,6 +192,9 @@ export const changePasswordActionIntent = 'change-password'
 export const setPasswordActionIntent = 'set-password'
 export const enable2FAActionIntent = 'enable-2fa'
 export const disable2FAActionIntent = 'disable-2fa'
+export const twoFAVerificationType = '2fa'
+export const twoFAVerifyVerificationType = '2fa-verify'
+export const newEmailAddressSessionKey = 'new-email-address'
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)

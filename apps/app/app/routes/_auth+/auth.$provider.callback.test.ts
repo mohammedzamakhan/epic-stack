@@ -3,9 +3,8 @@ import { faker } from '@faker-js/faker'
 import { SetCookie } from '@mjackson/headers'
 import { prisma } from '@repo/database'
 import { http } from 'msw'
-import { AppLoadContext } from 'react-router'
+import { type AppLoadContext } from 'react-router'
 import { afterEach, expect, test } from 'vitest'
-import { twoFAVerificationType } from '#app/routes/settings+/profile.two-factor.tsx'
 import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
 import { GITHUB_PROVIDER_NAME } from '#app/utils/connections.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
@@ -20,6 +19,7 @@ const createMockContext = (): AppLoadContext => ({
 })
 import { consoleError } from '#tests/setup/setup-test-env.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
+import { twoFAVerificationType } from '../_app+/security.tsx'
 import { loader } from './auth.$provider.callback.ts'
 
 const ROUTE_PATH = '/auth/github/callback'
@@ -78,7 +78,7 @@ test('when a user is logged in, it creates the connection', async () => {
 		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
-	expect(response).toHaveRedirect('/settings/profile/connections')
+	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
 			title: 'Connected',
@@ -119,7 +119,7 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
-	expect(response).toHaveRedirect('/settings/profile/connections')
+	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
 			title: 'Already Connected',
@@ -188,7 +188,7 @@ test('gives an error if the account is already connected to another user', async
 		context: createMockContext(),
 		unstable_pattern: '/auth/:provider/callback',
 	})
-	expect(response).toHaveRedirect('/settings/profile/connections')
+	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
 			title: 'Already Connected',

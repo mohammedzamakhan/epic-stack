@@ -71,10 +71,6 @@ jobs:
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
 
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
-
       - name: 🛠 Setup Database
         run:
           npm run db:migrate:deploy && npm run db:generate
@@ -99,10 +95,6 @@ jobs:
 
       - name: 📥 Install deps
         run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
-
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
@@ -135,10 +127,6 @@ jobs:
       - name: 📥 Install deps
         run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
 
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
-
       - name: 🛠 Setup Database
         run:
           npm run db:migrate:deploy && npm run db:generate
@@ -153,10 +141,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
-
-      - name: 🏄 Copy test env vars
-        run:
-          cp apps/cms/.env.example apps/cms/.env
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env

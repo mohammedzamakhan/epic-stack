@@ -2,9 +2,9 @@ import { parseWithZod } from '@conform-to/zod'
 import { prisma } from '@repo/database'
 import { z } from 'zod'
 
-import { prepareVerification } from '#app/routes/_auth+/verify.server.ts'
+import { newEmailAddressSessionKey } from '#app/routes/_app+/security.tsx'
+import { prepareVerification } from '#app/routes/_auth+/verify.server.tsx'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
-import { newEmailAddressSessionKey } from '../profile.change-email'
 
 export const ChangeEmailSchema = z.object({
 	email: z.string().email({ message: 'Please provide a valid email address' }),

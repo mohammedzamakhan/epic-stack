@@ -3,10 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "mint dev --port 3004",
+    "dev": "npx mint dev --port 3004",
     "lint": "npx mintlify broken-links"
-  },
-  "dependencies": {
-    "mint": "^4.2.105"
   }
 }

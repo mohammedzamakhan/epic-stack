@@ -18,7 +18,11 @@ async function setupWebAuthn(page: any) {
 	return { client, authenticatorId: result.authenticatorId }
 }
 
-test.skip('Users can register and use passkeys', async ({ page, login, navigate }) => {
+test.skip('Users can register and use passkeys', async ({
+	page,
+	login,
+	navigate,
+}) => {
 	const ignored_user = await login()
 
 	const { client, authenticatorId } = await setupWebAuthn(page)
@@ -31,7 +35,7 @@ test.skip('Users can register and use passkeys', async ({ page, login, navigate 
 		'No credentials should exist initially',
 	).toHaveLength(0)
 
-	await navigate('/settings/profile/passkeys')
+	await navigate('/settings')
 
 	const passkeyRegisteredPromise = new Promise<void>((resolve) => {
 		client.once('WebAuthn.credentialAdded', () => resolve())
@@ -88,7 +92,7 @@ test.skip('Users can register and use passkeys', async ({ page, login, navigate 
 	)
 
 	// Go to passkeys page and delete the passkey
-	await navigate('/settings/profile/passkeys')
+	await navigate('/settings')
 	await page.getByRole('button', { name: /delete/i }).click()
 
 	// Verify the passkey is no longer listed on the page
@@ -131,7 +135,7 @@ test.skip('Failed passkey verification shows error', async ({
 	const password = faker.internet.password()
 	await login({ password })
 	const { client, authenticatorId } = await setupWebAuthn(page)
-	await navigate('/settings/profile/passkeys')
+	await navigate('/settings')
 
 	// Try to register with failed verification
 	await client.send('WebAuthn.setUserVerified', {

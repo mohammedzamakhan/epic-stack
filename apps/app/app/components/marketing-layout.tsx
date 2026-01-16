@@ -37,7 +37,7 @@ export function MarketingLayout({
 					trialStatus={trialStatus || undefined}
 					extensionId={extensionId || undefined}
 				/>
-				<SidebarInset>
+				<SidebarInset role="main">
 					<SiteHeader isCollapsed={isCollapsed} />
 					<div className="flex flex-1 flex-col">
 						<div className="@container/main flex flex-1 flex-col gap-2 px-4 md:px-2">

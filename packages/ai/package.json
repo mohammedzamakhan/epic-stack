@@ -7,11 +7,9 @@
   "module": "./index.ts",
   "types": "./index.ts",
   "exports": {
-    ".": {
-      "types": "./index.ts",
-      "import": "./index.ts",
-      "default": "./index.ts"
-    }
+    ".": "./index.ts",
+    "./route-handlers": "./src/route-handlers/index.ts",
+    "./server": "./src/server/index.ts"
   },
   "scripts": {
     "build": "tsc",

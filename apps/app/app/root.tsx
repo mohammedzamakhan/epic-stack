@@ -116,8 +116,8 @@ export const meta: Route.MetaFunction = ({ data, location }) => {
 			'productivity',
 		],
 		robots: {
-			index: ENV?.ALLOW_INDEXING !== false,
-			follow: ENV?.ALLOW_INDEXING !== false,
+			index: data.env?.ALLOW_INDEXING !== false,
+			follow: data.env?.ALLOW_INDEXING !== false,
 			maxImagePreview: 'large',
 		},
 	})
@@ -191,9 +191,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
 	// Load user organizations with slug-based switching handled automatically
-	const { getUserOrganizationsWithSlugHandling } = await import(
-		'./utils/organization/organizations.server'
-	)
+	const { getUserOrganizationsWithSlugHandling } =
+		await import('./utils/organization/organizations.server')
 	const userOrganizations = user
 		? await getUserOrganizationsWithSlugHandling(user.id, orgSlug)
 		: undefined
@@ -254,6 +253,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			impersonationInfo,
 			cookieConsent,
 			launchStatus: getLaunchStatus(),
+			env: {
+				NODE_ENV: ENV.NODE_ENV,
+				ALLOW_INDEXING: ENV.ALLOW_INDEXING,
+			},
 		},
 		{
 			headers: combineHeaders(
@@ -279,9 +282,9 @@ function Document({
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
-	env?: Record<string, string | undefined>
+	env?: Record<string, any>
 }) {
-	const allowIndexing = ENV.ALLOW_INDEXING !== false
+	const allowIndexing = env.ALLOW_INDEXING !== false
 	const { locale } = useLoaderData<typeof loader>()
 	const direction = getDirection(locale)
 

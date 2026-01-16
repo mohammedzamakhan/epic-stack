@@ -12,6 +12,5 @@ export async function loader(args: LoaderFunctionArgs) {
 	return handleJiraSearchUsers(args, {
 		requireUserId,
 		getUserDefaultOrganization,
-		prisma,
 	})
 }

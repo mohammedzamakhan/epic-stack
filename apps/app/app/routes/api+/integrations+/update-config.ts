@@ -12,6 +12,5 @@ export async function action(args: ActionFunctionArgs) {
 	return handleUpdateIntegrationConfig(args, {
 		requireUserId,
 		getUserDefaultOrganization,
-		prisma,
 	})
 }

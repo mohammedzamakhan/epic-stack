@@ -15,6 +15,7 @@ import {
 	useMatches,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { ENV } from 'varlock/env'
 import { type Route } from './+types/root.ts'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
@@ -118,9 +119,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 	let favoriteNotes = undefined
 	if (user) {
 		try {
-			const { getUserOrganizations, getUserDefaultOrganization } = await import(
-				'./utils/organizations.server'
-			)
+			const { getUserOrganizations, getUserDefaultOrganization } =
+				await import('./utils/organizations.server')
 			const orgs = await getUserOrganizations(user.id, true) // Include permissions
 			const defaultOrg = await getUserDefaultOrganization(user.id)
 			userOrganizations = {
@@ -200,6 +200,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 			favoriteNotes,
 			impersonationInfo,
 			cookieConsent,
+			env: {
+				NODE_ENV: ENV.NODE_ENV,
+				ALLOW_INDEXING: ENV.ALLOW_INDEXING,
+			},
 		},
 		{
 			headers: combineHeaders(
@@ -220,12 +224,14 @@ function Document({
 	children,
 	nonce,
 	theme = 'dark',
+	env = {},
 }: {
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
+	env: Record<string, any>
 }) {
-	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
+	const allowIndexing = env.ALLOW_INDEXING !== false
 	const { locale } = useLoaderData<typeof loader>()
 	const direction = getDirection(locale)
 
@@ -256,13 +262,14 @@ function Document({
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
+	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
 	const theme = useOptionalTheme() || 'dark'
 	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document nonce={nonce} theme={theme} env={data.env}>
 			{children}
 		</Document>
 	)

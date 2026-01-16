@@ -3,6 +3,6 @@
 	"compilerOptions": {
 		"baseUrl": "."
 	},
-	"include": ["."],
+	"include": [".", "vite-env.d.ts"],
 	"exclude": ["**/*.stories.tsx", "**/*.stories.ts"]
 }

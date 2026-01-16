@@ -1,11 +1,10 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
-import type { PrismaClient } from '@prisma/client'
 import type { CoreMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
+import { prisma } from '@repo/database'
 
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
-	prisma: PrismaClient
 	createChatStream: (params: {
 		messages: CoreMessage[]
 		systemPrompt: string
@@ -25,7 +24,7 @@ export interface ChatDependencies {
  * Used by both the admin and app applications.
  *
  * @param request - The incoming request
- * @param deps - Dependencies (auth, AI utilities, prisma)
+ * @param deps - Dependencies (auth, AI utilities)
  * @returns Streaming response
  */
 export async function handleChat(
@@ -44,7 +43,7 @@ export async function handleChat(
 		invariant(noteId, 'Note ID is required')
 	}
 
-	const note = await deps.prisma.organizationNote.findUnique({
+	const note = await prisma.organizationNote.findUnique({
 		where: { id: noteId },
 		select: {
 			content: true,

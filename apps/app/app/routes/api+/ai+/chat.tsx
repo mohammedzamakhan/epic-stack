@@ -1,11 +1,7 @@
-import {
-	handleChat,
-	createChatStream,
-	buildNoteChatSystemPrompt,
-} from '@repo/ai'
+import { createChatStream, buildNoteChatSystemPrompt } from '@repo/ai/server'
+import { handleChat } from '@repo/ai/route-handlers'
 import { markStepCompleted } from '@repo/common/onboarding'
 import { brand } from '@repo/config/brand'
-import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 
@@ -15,7 +11,6 @@ export const maxDuration = 30
 export const action = async (args: ActionFunctionArgs) => {
 	return handleChat(args, {
 		requireUserId,
-		prisma,
 		createChatStream,
 		buildNoteChatSystemPrompt,
 		brandSystemPrompt: brand.ai.systemPrompt,

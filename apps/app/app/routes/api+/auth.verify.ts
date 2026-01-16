@@ -1,6 +1,6 @@
 import { data } from 'react-router'
 import { z } from 'zod'
-import { validateRequest } from '#app/routes/_auth+/verify.server.ts'
+import { validateRequest } from '#app/routes/_auth+/verify.server.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/auth.verify.ts'
 

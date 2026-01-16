@@ -31,7 +31,7 @@ import { sendEmail } from '#app/utils/email.server.ts'
 import { ENV } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/forgot-password.ts'
-import { prepareVerification } from './verify.server.ts'
+import { prepareVerification } from './verify.server.tsx'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -66,7 +66,7 @@ const aj = arcjet
 		validateEmail({
 			mode: 'LIVE',
 			// Block disposable, invalid, and email addresses with no MX records.
-			block: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
+			deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
 		}),
 	)
 

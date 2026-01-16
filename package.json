@@ -96,11 +96,6 @@
     "zod": "^3.25.76"
   },
   "overrides": {
-    "next": {
-      "@next/env": "npm:@varlock/nextjs-integration"
-    },
-    "payload": {
-      "@next/env": "npm:@varlock/nextjs-integration"
-    }
+    "@next/env": "npm:@varlock/nextjs-integration"
   }
 }

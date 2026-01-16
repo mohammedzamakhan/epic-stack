@@ -39,7 +39,7 @@ import { useIsPending } from '#app/utils/misc.tsx'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/signup.ts'
 import { onboardingInviteTokenSessionKey } from './onboarding'
-import { prepareVerification } from './verify.server.ts'
+import { prepareVerification } from './verify.server.tsx'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -74,7 +74,7 @@ const aj = arcjet
 		validateEmail({
 			mode: 'LIVE',
 			// Block disposable, invalid, and email addresses with no MX records.
-			block: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
+			deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
 		}),
 	)
 

@@ -19,7 +19,7 @@ import { ErrorList, OTPField } from '#app/components/forms.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
 import { type Route } from './+types/verify.ts'
-import { validateRequest } from './verify.server.ts'
+import { validateRequest } from './verify.server.tsx'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

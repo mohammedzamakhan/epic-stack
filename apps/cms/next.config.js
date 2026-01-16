@@ -1,4 +1,5 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import { varlockNextConfigPlugin } from '@varlock/nextjs-integration/plugin'
 
 const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -29,4 +30,6 @@ const nextConfig = {
   reactStrictMode: true,
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default withPayload(varlockNextConfigPlugin()(nextConfig), {
+  devBundleServerPackages: false,
+})

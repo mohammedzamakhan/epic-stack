@@ -10,7 +10,7 @@ import compression from 'compression'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import getPort, { portNumbers } from 'get-port'
-import { ENV } from '#app/utils/env.server.ts'
+import { ENV } from 'varlock/env'
 
 const MODE = ENV.NODE_ENV
 const IS_PROD = MODE === 'production'

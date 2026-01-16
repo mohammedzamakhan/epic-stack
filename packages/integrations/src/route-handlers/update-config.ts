@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { integrationManager, JiraProvider } from '../index'
 import { type ActionFunctionArgs } from 'react-router'
 
@@ -7,7 +7,6 @@ export interface UpdateConfigDependencies {
 	getUserDefaultOrganization: (
 		userId: string,
 	) => Promise<{ organization: { id: string } } | null>
-	prisma: PrismaClient
 }
 
 /**
@@ -16,7 +15,7 @@ export interface UpdateConfigDependencies {
  * Used by both the admin and app applications.
  *
  * @param request - The incoming request
- * @param deps - Dependencies (auth, org utils, prisma)
+ * @param deps - Dependencies (auth, org utils)
  * @returns JSON response with updated integration
  */
 export async function handleUpdateIntegrationConfig(
@@ -63,7 +62,7 @@ export async function handleUpdateIntegrationConfig(
 
 	try {
 		// Verify the integration belongs to this organization
-		const integration = await deps.prisma.integration.findUnique({
+		const integration = await prisma.integration.findUnique({
 			where: {
 				id: integrationId,
 				organizationId: defaultOrg.organization.id,
@@ -102,7 +101,7 @@ export async function handleUpdateIntegrationConfig(
 		}
 
 		// Update the integration config
-		const updatedIntegration = await deps.prisma.integration.update({
+		const updatedIntegration = await prisma.integration.update({
 			where: {
 				id: integrationId,
 			},

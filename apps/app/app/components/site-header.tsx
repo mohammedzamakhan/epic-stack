@@ -17,7 +17,10 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 
 	return (
 		<>
-			<header className="flex h-(--header-height) w-full shrink-0 items-center justify-between border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+			<header
+				role="banner"
+				className="flex h-(--header-height) w-full shrink-0 items-center justify-between border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+			>
 				<div className="flex items-center px-4">
 					<SidebarTrigger
 						onClick={() => {

@@ -1,10 +1,9 @@
-import { type PrismaClient } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import type Stripe from 'stripe'
 
 export interface StripeCheckoutDependencies {
 	stripe: Stripe
-	prisma: PrismaClient
 }
 
 /**
@@ -13,7 +12,7 @@ export interface StripeCheckoutDependencies {
  * Used by both the admin and app applications.
  *
  * @param request - The incoming request with session_id and organizationId params
- * @param deps - Dependencies (stripe client, prisma client)
+ * @param deps - Dependencies (stripe client)
  * @returns Redirect response to appropriate page
  */
 export async function handleStripeCheckout(
@@ -70,7 +69,7 @@ export async function handleStripeCheckout(
 			throw new Error("No user ID found in session's client_reference_id.")
 		}
 
-		const user = await deps.prisma.user.findUnique({
+		const user = await prisma.user.findUnique({
 			where: { id: userId },
 			include: { organizations: { select: { organizationId: true } } },
 		})
@@ -94,7 +93,7 @@ export async function handleStripeCheckout(
 			throw new Error('User is not authorized to update this organization.')
 		}
 
-		const tenant = await deps.prisma.organization.update({
+		const tenant = await prisma.organization.update({
 			where: { id: organizationId },
 			data: {
 				stripeCustomerId: customerId,

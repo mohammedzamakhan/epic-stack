@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import type { PrismaClient } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { integrationManager, OAuthStateManager } from '../index'
 import { type LoaderFunctionArgs } from 'react-router'
 
@@ -9,7 +9,6 @@ export interface OAuthCallbackDependencies {
 		url: string,
 		options: { title: string; description: string; type: string },
 	) => Response | Promise<Response>
-	prisma: PrismaClient
 }
 
 /**
@@ -18,7 +17,7 @@ export interface OAuthCallbackDependencies {
  * Used by both the admin and app applications.
  *
  * @param request - The incoming request
- * @param deps - Dependencies (auth, toast, prisma)
+ * @param deps - Dependencies (auth, toast)
  * @returns Redirect response with toast message
  */
 export async function handleOAuthCallback(
@@ -139,7 +138,7 @@ export async function handleOAuthCallback(
 		}
 
 		// Get organization slug for redirect
-		const organization = await deps.prisma.organization.findUnique({
+		const organization = await prisma.organization.findUnique({
 			where: { id: integration.organizationId },
 			select: { slug: true },
 		})

@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { integrationManager, JiraProvider } from '../index'
 import { type LoaderFunctionArgs } from 'react-router'
 
@@ -7,7 +7,6 @@ export interface JiraCurrentUserDependencies {
 	getUserDefaultOrganization: (
 		userId: string,
 	) => Promise<{ organization: { id: string } } | null>
-	prisma: PrismaClient
 }
 
 /**
@@ -17,7 +16,7 @@ export interface JiraCurrentUserDependencies {
  *
  * @param request - The incoming request
  * @param params - Route params containing integrationId
- * @param deps - Dependencies (auth, org utils, prisma)
+ * @param deps - Dependencies (auth, org utils)
  * @returns JSON response with current user info
  */
 export async function handleJiraCurrentUser(
@@ -44,7 +43,7 @@ export async function handleJiraCurrentUser(
 
 	try {
 		// Verify the integration belongs to this organization
-		const integration = await deps.prisma.integration.findUnique({
+		const integration = await prisma.integration.findUnique({
 			where: {
 				id: integrationId,
 				organizationId: defaultOrg.organization.id,

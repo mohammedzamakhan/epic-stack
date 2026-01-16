@@ -75,9 +75,7 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 
 export default defineConfig((config) => ({
 	resolve: {
-		alias: {
-			'@repo/ai': path.resolve(__dirname, '../../packages/ai'),
-		},
+		alias: {},
 	},
 	build: {
 		target: 'es2022',

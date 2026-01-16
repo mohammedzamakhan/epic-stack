@@ -1,4 +1,5 @@
-import { handleGenerateContent, generateNoteContent  } from '@repo/ai'
+import { handleGenerateContent } from '@repo/ai/route-handlers'
+import { generateNoteContent } from '@repo/ai/server'
 import { type ActionFunctionArgs } from 'react-router'
 import { requireUserId } from '#app/utils/auth.server.ts'
 

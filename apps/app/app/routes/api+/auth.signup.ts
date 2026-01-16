@@ -3,7 +3,7 @@ import { prisma } from '@repo/database'
 import { EmailSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
-import { prepareVerification } from '#app/routes/_auth+/verify.server.ts'
+import { prepareVerification } from '#app/routes/_auth+/verify.server.tsx'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/auth.signup.ts'
 

@@ -3,14 +3,16 @@ import { prisma } from '@repo/database'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { z } from 'zod'
 
-import { isCodeValid } from '#app/routes/_auth+/verify.server.ts'
+import {
+	twoFAVerificationType,
+	twoFAVerifyVerificationType,
+} from '#app/routes/_app+/security.tsx'
+import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 import {
 	verifyUserPassword,
 	getPasswordHash,
 	checkIsCommonPassword,
 } from '#app/utils/auth.server.ts'
-import { twoFAVerificationType } from '../profile.two-factor'
-import { twoFAVerifyVerificationType } from '../profile.two-factor.verify'
 
 export const ChangePasswordSchema = z
 	.object({
