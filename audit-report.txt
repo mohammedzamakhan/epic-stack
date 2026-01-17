@@ -1,0 +1,73 @@
+
+═══════════════════════════════════════════════════
+RAMS DESIGN REVIEW: Full Codebase Audit
+═══════════════════════════════════════════════════
+
+CRITICAL (3 issues)
+───────────────────
+[A11Y] apps/app/app/components/user-dropdown.tsx:21
+  <DropdownMenuTrigger><Button><Link onClick={...}>...</Link></Button></DropdownMenuTrigger>
+  Issue: Invalid HTML nesting. Interactive controls (Button > Link) cannot be nested.
+  Fix: Remove the inner Link or Button. If the trigger is just for the menu, use a button. If it's a link, use a link as the trigger (if supported) or separate them.
+  WCAG: 4.1.2 (Name, Role, Value)
+
+[A11Y] apps/web/src/components/DefaultHero.astro:162
+  alt={media.alt || 'Hero image'}
+  Issue: Image alt text falls back to non-descriptive "Hero image" if missing.
+  Fix: Use alt="" (empty string) for decorative images if alt is missing, or require alt text.
+  WCAG: 1.1.1 (Non-text Content)
+
+[A11Y] apps/web/src/components/DefaultHero.astro:150
+  <Button href={links[0]?.url || '#'} ...>
+  Issue: Button href defaults to '#' creating a broken link if URL is missing.
+  Fix: Conditionally render the Button only if the URL exists.
+  WCAG: 2.1.1 (Keyboard)
+
+SERIOUS (4 issues)
+──────────────────
+[A11Y] packages/ui/components/ui/input.tsx:5
+  function Input({ ... }: React.ComponentProps<'input'>) { ... }
+  Issue: Component does not use `forwardRef`. Imperative focus management (e.g., focusing on error) will fail.
+  Fix: Wrap with `React.forwardRef`.
+  WCAG: 2.4.3 (Focus Order / Management)
+
+[A11Y] apps/app/app/components/nav-main.tsx:136
+  <SidebarMenuButton onClick={() => toggleItem(item.title)} ...>
+  Issue: Expand/Collapse button missing `aria-expanded` state and `aria-controls`.
+  Fix: Add `aria-expanded={isOpen}` and `aria-controls={subItemId}`.
+  WCAG: 4.1.2 (Name, Role, Value)
+
+[A11Y] apps/web/src/components/Header.astro:100
+  <div id="mobile-menu-overlay" ...>
+  Issue: Mobile menu lacks focus trapping and management. Focus remains on trigger or is lost when opened.
+  Fix: Implement a focus trap (e.g., using `inert` on background or a library) and move focus to the menu container on open.
+  WCAG: 2.4.3 (Focus Order)
+
+[A11Y] packages/ui/components/ui/dialog.tsx:54
+  className="... outline-none ..."
+  Issue: Dialog content removes outline without clear focus ring on the container itself.
+  Fix: Ensure the dialog container or first focusable element has a visible focus indicator.
+  WCAG: 2.4.7 (Focus Visible)
+
+MODERATE (3 issues)
+───────────────────
+[A11Y] packages/ui/components/icon.tsx:43
+  Issue: `aria-hidden` is not explicitly set to "true" when title is missing.
+  Fix: Default `aria-hidden={title ? undefined : 'true'}`.
+  WCAG: 1.1.1 (Non-text Content)
+
+[A11Y] apps/app/app/routes/_auth+/login.tsx
+  Issue: Missing `<h1>` heading. Page starts with `<h3>` (CardTitle).
+  Fix: Add a visually hidden `<h1>` or promote the main visible title to `<h1>`.
+  WCAG: 1.3.1 (Info and Relationships)
+
+[A11Y] apps/app/app/components/marketing-layout.tsx:28
+  <SidebarInset role="main"> <SiteHeader /> ... </SidebarInset>
+  Issue: SiteHeader (Navigation) is inside the `main` landmark.
+  Fix: Move SiteHeader outside of `SidebarInset` or ensure `SidebarInset` is not `role="main"` if it contains the header.
+  WCAG: 1.3.1 (Info and Relationships)
+
+═══════════════════════════════════════════════════
+SUMMARY: 3 critical, 4 serious, 3 moderate
+Score: 45/100
+═══════════════════════════════════════════════════
