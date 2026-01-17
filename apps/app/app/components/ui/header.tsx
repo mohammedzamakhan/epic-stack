@@ -3,7 +3,7 @@ import { Icon } from '@repo/ui/icon'
 import { Logo } from '@repo/ui/logo'
 import React from 'react'
 import { Form, Link } from 'react-router'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 import { useOptionalUserOrganizations } from '#app/utils/organization/organizations.ts'
 import { useOptionalUser } from '#app/utils/user.ts'
 

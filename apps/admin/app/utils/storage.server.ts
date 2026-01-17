@@ -14,7 +14,7 @@ import {
 	type UploadOptions,
 } from '@repo/storage'
 import { ENV } from '#app/utils/env.server.ts'
-import { prisma } from './db.server'
+import { prisma } from '@repo/database'
 
 // Default storage configuration from environment variables
 const DEFAULT_STORAGE_CONFIG: StorageConfig = {

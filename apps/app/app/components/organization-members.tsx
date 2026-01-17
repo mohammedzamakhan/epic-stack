@@ -28,7 +28,7 @@ import {
 import { useState } from 'react'
 import { Form } from 'react-router'
 
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/common'
 
 interface OrganizationMember {
 	userId: string

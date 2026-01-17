@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useMemo, useState } from 'react'
-import { getNoteImgSrc, getUserImgSrc } from '#app/utils/misc.tsx'
+import { getNoteImgSrc, getUserImgSrc } from '@repo/common'
 
 import CommentInput, { type MentionUser } from './comment-input'
 

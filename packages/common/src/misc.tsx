@@ -1,9 +1,7 @@
-import { clsx, type ClassValue } from 'clsx'
 import { type GetSrcArgs, defaultGetSrc } from 'openimg/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFormAction, useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'
-import { twMerge } from 'tailwind-merge'
 
 export function getUserImgSrc(objectKey?: string | null) {
 	return objectKey
@@ -59,10 +57,6 @@ export function getErrorMessage(error: unknown) {
 	}
 	console.error('Unable to get error message for error', error)
 	return 'Unknown Error'
-}
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs))
 }
 
 export function getDomainUrl(request: Request) {

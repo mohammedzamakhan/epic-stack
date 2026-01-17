@@ -51,7 +51,7 @@ const MultiMediaUpload = lazy(() =>
 		default: module.MultiMediaUpload,
 	})),
 )
-import { useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '@repo/common'
 
 const titleMinLength = 1
 const titleMaxLength = 100

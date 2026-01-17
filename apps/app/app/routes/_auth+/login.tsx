@@ -47,7 +47,7 @@ import {
 	saveLastLoginMethod,
 	useLastLoginMethod,
 } from '#app/utils/last-login-method.ts'
-import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
+import { getErrorMessage, useIsPending } from '@repo/common'
 import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,

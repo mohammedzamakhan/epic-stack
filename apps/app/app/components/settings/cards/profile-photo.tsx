@@ -1,6 +1,6 @@
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
 import { ProfilePhotoForm } from '#app/components/settings/profile-photo-form.tsx'
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/common'
 import { t } from '@lingui/macro'
 
 export const uploadPhotoActionIntent = 'upload-photo'

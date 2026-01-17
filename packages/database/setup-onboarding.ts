@@ -1,4 +1,4 @@
-import { prisma } from './db.server'
+import { prisma } from '@repo/database'
 
 // Default onboarding steps to seed the database
 export const DEFAULT_ONBOARDING_STEPS = [

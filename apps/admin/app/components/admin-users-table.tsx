@@ -40,7 +40,7 @@ import {
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/common'
 
 export interface AdminUser {
 	id: string

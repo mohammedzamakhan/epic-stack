@@ -3,7 +3,7 @@ import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
 import { getSSOStrategy } from '#app/utils/auth.server.ts'
 import { ENV } from '#app/utils/env.server.ts'
-import { getReferrerRoute } from '#app/utils/misc.tsx'
+import { getReferrerRoute } from '@repo/common'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import { getRedirectCookieHeader } from '@repo/common/redirect-cookie'
 import {

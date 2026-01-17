@@ -35,7 +35,7 @@ import {
 } from '#app/utils/auth.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '@repo/common'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'

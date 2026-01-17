@@ -5,7 +5,7 @@ import {
 import { createCookie } from 'react-router'
 import { z } from 'zod'
 import { ENV } from '#app/utils/env.server.ts'
-import { getDomainUrl } from '#app/utils/misc.tsx'
+import { getDomainUrl } from '@repo/common'
 
 export const passkeyCookie = createCookie('webauthn-challenge', {
 	path: '/',

@@ -4,7 +4,7 @@ import {
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { getDomainUrl, getErrorMessage } from '#app/utils/misc.tsx'
+import { getDomainUrl, getErrorMessage } from '@repo/common'
 import { type Route } from './+types/registration.ts'
 import {
 	PasskeyCookieSchema,

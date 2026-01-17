@@ -4,7 +4,7 @@ import * as React from 'react'
 
 import { Link } from 'react-router'
 
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 interface EmptyStateProps {
 	title: string

@@ -26,7 +26,7 @@ import {
 	requireAnonymous,
 	resetUserPassword,
 } from '#app/utils/auth.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '@repo/common'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/reset-password.ts'
 

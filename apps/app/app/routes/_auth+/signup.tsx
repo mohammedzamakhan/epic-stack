@@ -35,7 +35,7 @@ import {
 import { sendEmail } from '#app/utils/email.server.ts'
 import { ENV } from '#app/utils/env.server.ts'
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '@repo/common'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/signup.ts'
 import { onboardingInviteTokenSessionKey } from './onboarding'

@@ -7,7 +7,7 @@ import Mention from '@tiptap/extension-mention'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, { useEffect, useState } from 'react'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 import { CommentImagePreview } from './comment-image-preview'
 import { CommentImageUpload } from './comment-image-upload'

@@ -1,6 +1,6 @@
 // learn more: https://fly.io/docs/reference/configuration/#services-http_checks
 
-import { getDomainUrl } from '../misc.tsx'
+import { getDomainUrl } from '@repo/common'
 
 export interface HealthcheckDependencies {
 	prisma: {

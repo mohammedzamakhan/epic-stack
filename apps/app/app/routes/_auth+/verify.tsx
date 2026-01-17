@@ -17,7 +17,7 @@ import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { ErrorList, OTPField } from '#app/components/forms.tsx'
 
 import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '@repo/common'
 import { type Route } from './+types/verify.ts'
 import { validateRequest } from './verify.server.tsx'
 

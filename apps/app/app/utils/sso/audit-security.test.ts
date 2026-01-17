@@ -33,7 +33,7 @@ const mockSsoMonitoringService = {
 }
 
 // Mock dependencies
-vi.mock('./db.server.ts', () => ({
+vi.mock('@repo/database', () => ({
 	prisma: {
 		$queryRaw: vi.fn(),
 		$disconnect: vi.fn(),

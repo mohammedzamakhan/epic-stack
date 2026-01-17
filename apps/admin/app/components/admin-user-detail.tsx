@@ -24,7 +24,7 @@ import { useNavigate, useSubmit } from 'react-router'
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
 
 import { type getIpAddressesByUser } from '@repo/common/ip-tracking'
-import { getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/common'
 
 export interface AdminUserDetail {
 	id: string

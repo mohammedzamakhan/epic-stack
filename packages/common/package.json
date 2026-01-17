@@ -81,13 +81,11 @@
     "@repo/database": "*",
     "@repo/security": "*",
     "@tusbar/cache-control": "^1.0.0",
-    "clsx": "^2.1.1",
     "cookie": "^1.0.2",
     "openimg": "^1.1.0",
     "react": "^19.1.1",
     "react-router": "^7.8.1",
     "spin-delay": "^2.0.1",
-    "tailwind-merge": "^3.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

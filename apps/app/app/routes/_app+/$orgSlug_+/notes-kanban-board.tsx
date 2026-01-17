@@ -30,7 +30,7 @@ import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFetcher, useFetchers } from 'react-router'
 
-import { useDoubleCheck } from '#app/utils/misc.tsx'
+import { useDoubleCheck } from '@repo/common'
 import { NoteCard } from './notes-cards.tsx'
 import { t, Trans } from '@lingui/macro'
 

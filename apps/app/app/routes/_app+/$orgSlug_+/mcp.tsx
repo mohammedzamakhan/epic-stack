@@ -61,7 +61,7 @@ import { EmptyState } from '#app/components/empty-state.tsx'
 import { generateApiKey } from '#app/utils/api-key.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { revokeAuthorization } from '#app/utils/mcp/oauth.server.ts'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
 // Define ApiKey type based on Prisma query result

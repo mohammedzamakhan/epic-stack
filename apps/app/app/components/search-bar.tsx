@@ -6,7 +6,7 @@ import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
 import { useId } from 'react'
 import { Form, useSearchParams, useSubmit } from 'react-router'
-import { useDebounce, useIsPending } from '#app/utils/misc.tsx'
+import { useDebounce, useIsPending } from '@repo/common'
 
 export function SearchBar({
 	status,

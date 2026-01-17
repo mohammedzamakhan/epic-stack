@@ -7,7 +7,7 @@ import {
 } from '#app/utils/auth.server.ts'
 import { ProviderNameSchema, providerLabels } from '#app/utils/connections.tsx'
 import { ensurePrimary } from '#app/utils/litefs.server.ts'
-import { combineHeaders } from '#app/utils/misc.tsx'
+import { combineHeaders } from '@repo/common'
 import {
 	normalizeEmail,
 	normalizeUsername,

@@ -8,7 +8,8 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
-import { cn, getUserImgSrc } from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '@repo/common'
+import { cn } from '@repo/ui'
 
 interface LeadershipUser {
 	id: string

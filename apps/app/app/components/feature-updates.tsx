@@ -3,7 +3,7 @@ import { useLingui } from '@lingui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
-import { cn } from '#app/utils/misc.tsx'
+import { cn } from '@repo/ui'
 
 interface FeatureUpdate {
 	id: string

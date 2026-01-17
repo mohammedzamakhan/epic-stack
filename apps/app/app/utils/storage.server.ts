@@ -13,7 +13,7 @@ import {
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
-import { prisma } from './db.server'
+import { prisma } from '@repo/database'
 
 // Validate required environment variables
 const requiredEnvVars = [

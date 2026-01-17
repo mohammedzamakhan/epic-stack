@@ -2,7 +2,7 @@ import { promises as fs, constants } from 'node:fs'
 import { invariantResponse } from '@epic-web/invariant'
 import { getImgResponse } from 'openimg/node'
 import { ENV } from '#app/utils/env.server.ts'
-import { getDomainUrl } from '#app/utils/misc.tsx'
+import { getDomainUrl } from '@repo/common'
 import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
 

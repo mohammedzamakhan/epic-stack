@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { useState } from 'react'
 import { expect, test } from 'vitest'
-import { useDoubleCheck } from './misc.tsx'
+import { useDoubleCheck } from '@repo/common'
 
 function TestComponent() {
 	const [defaultPrevented, setDefaultPrevented] = useState<

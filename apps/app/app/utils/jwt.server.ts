@@ -252,7 +252,7 @@ export async function createAuthenticatedSessionResponse(
 	request: Request,
 ) {
 	// Import here to avoid circular dependencies
-	const { prisma } = await import('#app/utils/db.server.ts')
+	const { prisma } = await import('@repo/database')
 	const { handleNewDeviceSignin } = await import(
 		'#app/utils/new-device-signin.server.tsx'
 	)

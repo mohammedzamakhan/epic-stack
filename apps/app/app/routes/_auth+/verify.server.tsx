@@ -6,7 +6,7 @@ import { EmailChangeNoticeEmail, sendEmail } from '@repo/email'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
-import { getDomainUrl } from '#app/utils/misc.tsx'
+import { getDomainUrl } from '@repo/common'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import {
 	generateTOTP,
