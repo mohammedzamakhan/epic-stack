@@ -4,28 +4,25 @@ import { cmsClient } from '../../lib/cms'
 import PostContent from '../../components/PostContent.astro'
 import SEO from '../../components/SEO.astro'
 
-const { title, content, meta, publishedAt, categories, heroImage } = Astro.props
+export const prerender = true
 
-export const prerender = true;
-// Use cmsClient but follow guide patterns for getStaticPaths
 export async function getStaticPaths() {
-	const posts = await cmsClient.getPosts(1, 100) // Get all posts for static generation
+	const posts = await cmsClient.getPosts(1, 100)
 
-	return posts.docs.map((post) => {
-		console.log(post)
-		return {
-			params: { slug: post.slug },
-			props: {
-				title: post.title,
-				content: post.content,
-				meta: post.meta,
-				publishedAt: post.publishedAt,
-				categories: post.categories,
-				heroImage: post.heroImage,
-			},
-		}
-	})
+	return posts.docs.map((post) => ({
+		params: { slug: post.slug },
+		props: {
+			title: post.title,
+			content: post.content,
+			meta: post.meta,
+			publishedAt: post.publishedAt,
+			categories: post.categories,
+			heroImage: post.heroImage,
+		},
+	}))
 }
+
+const { title, content, meta, publishedAt, categories, heroImage } = Astro.props
 ---
 
 <MarketingLayout>

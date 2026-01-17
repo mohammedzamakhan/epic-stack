@@ -16,7 +16,7 @@ interface CMSTestimonialHighlight {
 	authorTitle: string
 	authorCompany: string
 	authorCompanyUrl?: string
-	authorImage: string
+	authorImage: string | { url?: string | null; alt?: string | null } | null
 }
 
 interface Props {
@@ -50,34 +50,38 @@ const finalTestimonial = testimonial
 				title: testimonial.authorTitle,
 				company: testimonial.authorCompany,
 				companyUrl: testimonial.authorCompanyUrl,
-				image: testimonial.authorImage,
+				image: typeof testimonial.authorImage === 'string' 
+					? testimonial.authorImage 
+					: testimonial.authorImage?.url || '',
 			},
 		}
 	: { tagline, quote, author }
 ---
 
-<section class="relative border-b border-dashed">
+<section class="relative border-b border-dashed" aria-labelledby="testimonial-heading">
+	<h2 id="testimonial-heading" class="sr-only">Customer Testimonial</h2>
 	<div class="container mx-auto text-center relative z-10 px-4 md:px-6">
-	<div class="absolute inset-0" />
-		<div class="relative bg-muted w-full h-full flex flex-col items-center justify-center gap-4 md:gap-6 border-x border-dashed px-4 py-12 sm:p-12">
+	<div class="absolute inset-0" aria-hidden="true" />
+		<figure class="relative bg-muted w-full h-full flex flex-col items-center justify-center gap-4 md:gap-6 border-x border-dashed px-4 py-12 sm:p-12">
 			<Badge class="bg-transparent" variant="outline" size="sm">
 				{finalTestimonial.tagline}
 			</Badge>
 			
 			<blockquote class="text-foreground max-w-2xl text-lg font-medium md:text-xl">
-				"{finalTestimonial.quote}"
+				<p>"{finalTestimonial.quote}"</p>
 			</blockquote>
 			
-			<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+			<figcaption class="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
 				<div class="relative flex shrink-0 overflow-hidden rounded-full size-12">
 					<img
 						class="aspect-square size-full object-cover"
 						alt={finalTestimonial.author.name}
 						src={finalTestimonial.author.image}
+						aria-hidden="true"
 					/>
 				</div>
 				<div class="flex flex-col">
-					<p class="font-semibold">{finalTestimonial.author.name}</p>
+					<cite class="font-semibold not-italic">{finalTestimonial.author.name}</cite>
 					<p class="text-muted-foreground">
 						{finalTestimonial.author.title}
 						{finalTestimonial.author.companyUrl ? (
@@ -94,7 +98,7 @@ const finalTestimonial = testimonial
 						)}
 					</p>
 				</div>
-			</div>
-		</div>
+			</figcaption>
+		</figure>
 	</div>
 </section>

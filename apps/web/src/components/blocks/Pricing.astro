@@ -150,7 +150,7 @@ const yearlyDiscount = plans.length
 			</div>
 			{yearlyDiscount > 0 && (
 				<div class="flex items-center gap-2 mt-4">
-					<div class="w-2 h-2 bg-primary rounded-sm"></div>
+					<div class="w-2 h-2 bg-primary rounded-sm" aria-hidden="true"></div>
 					<span class="text-sm text-muted-foreground" id="discount-text">
 						Save up to {yearlyDiscount}% with yearly plan
 					</span>
@@ -166,11 +166,14 @@ const yearlyDiscount = plans.length
 			'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 		}`}>
 			{plans.map((plan) => (
-				<div class={`group relative transition-all duration-200 ${
-					plan.highlight 
-						? 'ring-2 ring-primary/50 hover:ring-primary z-10' 
-						: 'hover:shadow-lg'
-				}`}>
+				<article 
+					class={`group relative transition-all duration-200 ${
+						plan.highlight 
+							? 'ring-2 ring-primary/50 hover:ring-primary z-10' 
+							: 'hover:shadow-lg'
+					}`}
+					aria-label={`${plan.title} pricing tier`}
+				>
 					{plan.badge && (
 						<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 text-xs rounded-full border-[0.5px] border-white/20 shadow-sm shadow-black/8">
 							{plan.badge}
@@ -227,12 +230,14 @@ const yearlyDiscount = plans.length
 
 						<!-- Card Body - Features -->
 						<div class="border-t border-border/50 p-5.5 space-y-3 flex-1">
-							{plan.features.map((feature) => (
-								<div class="flex items-start gap-3">
-									<div class="w-2 h-2 bg-primary rounded-sm flex-shrink-0 mt-1.5"></div>
-									<span class="text-sm text-card-foreground leading-relaxed flex-1">{feature.name}</span>
-								</div>
-							))}
+							<ul class="space-y-3" aria-label={`${plan.title} plan features`}>
+								{plan.features.map((feature) => (
+									<li class="flex items-start gap-3">
+										<div class="w-2 h-2 bg-primary rounded-sm flex-shrink-0 mt-1.5" aria-hidden="true"></div>
+										<span class="text-sm text-card-foreground leading-relaxed flex-1">{feature.name}</span>
+									</li>
+								))}
+							</ul>
 						</div>
 
 						<!-- Card Footer -->
@@ -246,7 +251,7 @@ const yearlyDiscount = plans.length
 							</Button>
 						</footer>
 					</div>
-				</div>
+				</article>
 			))}
 		</div>
 

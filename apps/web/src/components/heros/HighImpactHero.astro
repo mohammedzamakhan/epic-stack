@@ -47,16 +47,20 @@ const renderLexicalContent = (content: any) => {
 }
 ---
 
-<section class="relative -mt-[10.4rem] min-h-[80vh] flex items-center justify-center text-white" data-theme="dark">
+<section class="relative -mt-[10.4rem] min-h-[80vh] flex items-center justify-center text-white" data-theme="dark" aria-labelledby="hero-heading">
 	<GridDesign />
 
 	{media && typeof media === 'object' && (
-		<div class="absolute inset-0 -z-10">
+		<div class="absolute inset-0 -z-10" role="img" aria-label={media.alt || 'Decorative hero background'}>
 			<img
 				class="w-full h-full object-cover"
 				src={`${CMS_URL}${media.url}`}
-				alt={media.alt || 'Hero background'}
+				alt=""
+				width={media.width || 1920}
+				height={media.height || 1080}
 				loading="eager"
+				fetchpriority="high"
+				decoding="async"
 			/>
 			<div class="absolute inset-0 bg-black/50"></div>
 		</div>
@@ -64,7 +68,7 @@ const renderLexicalContent = (content: any) => {
 
 	<div class="container relative z-10 flex flex-col items-center justify-center text-center py-24 gap-8">
 		{richText && (
-			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText)} />
+			<div class="space-y-6 max-w-4xl mx-auto" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
 		)}
 
 		{links && links.length > 0 && (

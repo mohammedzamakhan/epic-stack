@@ -7,11 +7,16 @@ interface Card {
 	tagline: string
 	title: string
 	description: string
-	image: string
+	image: string | { url?: string | null; alt?: string | null } | null
 	primaryButtonText: string
 	primaryButtonUrl: string
 	secondaryButtonText: string
 	secondaryButtonUrl: string
+}
+
+function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
+	if (typeof image === 'string') return image
+	return image?.url || ''
 }
 
 interface Props {
@@ -72,11 +77,11 @@ const {
 ---
 
 <!-- STICKY CARDS VERSION -->
-<section class="relative w-full pt-16 md:pt-24">
+<section class="relative w-full pt-16 md:pt-24" aria-labelledby="sticky-cards-title">
 	<GridDesign />
 	<div class="container relative mx-auto px-4 md:px-6">
 		<!-- Header -->
-		<div class="text-center mb-16 md:mb-20">
+		<header class="text-center mb-16 md:mb-20">
 			<div class="max-w-3xl mx-auto">
 				<div class="mb-4">
 					<Badge variant="outline">
@@ -84,7 +89,7 @@ const {
 					</Badge>
 				</div>
 				<div class="mb-6">
-					<h2 class="text-4xl md:text-6xl tracking-tight font-title">
+					<h2 id="sticky-cards-title" class="text-4xl md:text-6xl tracking-tight font-title">
 						{title}
 					</h2>
 				</div>
@@ -92,7 +97,7 @@ const {
 					{description}
 				</p>
 			</div>
-		</div>
+		</header>
 
 		<!-- Sticky Cards Layout - Inspired by Webflow approach -->
 		<div class="relative pt-[10vh]">
@@ -101,13 +106,14 @@ const {
 				style={{
 					backgroundSize: "20px 20px",
 				}}
+				aria-hidden="true"
 			/>
 			<div class="max-w-6xl mx-auto relative z-10">
 				<div class="grid grid-cols-1 gap-0 ">
 					{cards.map((card, index) => {
 						const isEven = index % 2 === 0
 						return (
-							<div class="sticky-card sticky top-[10%] h-[70vh] mb-[10vh] bg-background border border-border overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-stretch">
+							<article class="sticky-card sticky top-[10%] h-[70vh] mb-[10vh] bg-background border border-border overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-stretch">
 								<!-- Content Section -->
 								<div class={`flex flex-col justify-center p-6 md:p-12 lg:p-16 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
 									<div class="max-w-lg">
@@ -126,7 +132,7 @@ const {
 										</p>
 										
 										<!-- Action Buttons -->
-										<div class="flex flex-wrap items-center gap-4">
+										<nav class="flex flex-wrap items-center gap-4" aria-label="Card actions">
 											<Button 
 												href={card.primaryButtonUrl}
 												variant="outline"
@@ -148,11 +154,12 @@ const {
 													stroke="currentColor" 
 													stroke-width="1.5"
 													class="ml-2 group-hover:translate-x-1 transition-transform duration-200"
+													aria-hidden="true"
 												>
 													<path d="M6 3L11 8L6 13" />
 												</svg>
 											</Button>
-										</div>
+										</nav>
 									</div>
 								</div>
 
@@ -160,14 +167,14 @@ const {
 								<div class={`flex flex-col justify-center items-center h-[70vh] ${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
 									<div class="w-full h-full bg-muted/20 border border-dashed border-border overflow-hidden">
 										<img
-											src={card.image}
-											alt={card.title}
+											src={getImageUrl(card.image)}
+											alt={`Illustration for ${card.title}`}
 											class="w-full h-full object-cover"
 											loading="lazy"
 										/>
 									</div>
 								</div>
-							</div>
+							</article>
 						)
 					})}
 				</div>

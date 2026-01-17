@@ -46,12 +46,8 @@ const initialTheme = getThemeFromCookie(cookieHeader)
 <script>
 	const THEME_COOKIE_NAME = 'en_theme'
 
-	function getCookie(name: string): string | null {
-		const value = `; ${document.cookie}`
-		const parts = value.split(`; ${name}=`)
-		if (parts.length === 2) return parts.pop()?.split(';').shift() || null
-		return null
-	}
+	// Store cleanup to avoid duplicate listeners
+	let cleanup: (() => void) | null = null
 
 	function setCookie(name: string, value: string) {
 		const rootApp = import.meta.env.PUBLIC_ROOT_APP
@@ -62,12 +58,10 @@ const initialTheme = getThemeFromCookie(cookieHeader)
 	}
 
 	function getCurrentTheme(): 'light' | 'dark' {
-		const htmlElement = document.documentElement
-		return htmlElement.classList.contains('dark') ? 'dark' : 'light'
+		return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 	}
 
 	function updateThemeIcon(theme: 'light' | 'dark') {
-		// Update all theme switcher instances (desktop and mobile)
 		const sunIcons = document.querySelectorAll('.theme-icon-sun')
 		const moonIcons = document.querySelectorAll('.theme-icon-moon')
 
@@ -84,38 +78,38 @@ const initialTheme = getThemeFromCookie(cookieHeader)
 		const currentTheme = getCurrentTheme()
 		const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
 
-		// Update HTML class
 		document.documentElement.classList.remove(currentTheme)
 		document.documentElement.classList.add(newTheme)
-
-		// Update cookie
 		setCookie(THEME_COOKIE_NAME, newTheme)
-
-		// Update all theme switcher icons
 		updateThemeIcon(newTheme)
 	}
 
-	// Initialize on page load
-	document.addEventListener('DOMContentLoaded', () => {
+	function initThemeSwitcher() {
+		// Clean up previous listeners
+		if (cleanup) {
+			cleanup()
+			cleanup = null
+		}
+
 		const theme = getCurrentTheme()
 		updateThemeIcon(theme)
 
-		// Attach click handlers to all theme switcher buttons (desktop and mobile)
 		const buttons = document.querySelectorAll('.theme-switcher')
 		buttons.forEach(button => {
 			button.addEventListener('click', toggleTheme)
 		})
-	})
 
-	// Re-initialize on view transitions (if using Astro view transitions)
-	document.addEventListener('astro:page-load', () => {
-		const theme = getCurrentTheme()
-		updateThemeIcon(theme)
+		// Store cleanup function
+		cleanup = () => {
+			buttons.forEach(button => {
+				button.removeEventListener('click', toggleTheme)
+			})
+		}
+	}
 
-		// Attach click handlers to all theme switcher buttons
-		const buttons = document.querySelectorAll('.theme-switcher')
-		buttons.forEach(button => {
-			button.addEventListener('click', toggleTheme)
-		})
-	})
+	// Initialize
+	initThemeSwitcher()
+
+	// Re-initialize on Astro page transitions
+	document.addEventListener('astro:page-load', initThemeSwitcher)
 </script>

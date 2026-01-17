@@ -51,14 +51,16 @@ const renderLexicalContent = (lexicalContent: any) => {
 	<GridDesign />
 	<div class="container mx-auto px-4 md:px-6">
 		<div class="max-w-5xl mx-auto">
-			<div class="relative">
+			<article class="relative">
 				<!-- Keep the original rotated background layers for handwritten note effect -->
 				<div
 					class="absolute inset-0 -rotate-1 transform bg-muted shadow-lg sm:-rotate-2 dark:bg-muted/50 dark:shadow-none dark:ring dark:ring-border"
+					aria-hidden="true"
 				>
 				</div>
 				<div
 					class="absolute inset-0 rotate-1 transform bg-muted shadow-md sm:rotate-2 dark:bg-muted/50 dark:shadow-none dark:ring dark:ring-border"
+					aria-hidden="true"
 				>
 				</div>
 				<div
@@ -92,7 +94,7 @@ const renderLexicalContent = (lexicalContent: any) => {
 						}
 					</div>
 				</div>
-			</div>
+			</article>
 		</div>
 	</div>
 </section>

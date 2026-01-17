@@ -6,8 +6,14 @@ interface Tab {
 	title: string
 	description: string
 	icon: string
-	image?: string
+	contentType?: 'image' | 'video'
+	image?: string | { url?: string | null; alt?: string | null } | null
 	videoUrl?: string
+}
+
+function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
+	if (typeof image === 'string') return image
+	return image?.url || ''
 }
 
 interface Props {
@@ -96,12 +102,13 @@ const {
 								role="tab"
 								aria-selected={index === 0 ? 'true' : 'false'}
 								aria-controls={`tab-panel-${index}`}
+								tabindex={index === 0 ? 0 : -1}
 								data-tab={index}
 								data-active={index === 0 ? 'true' : 'false'}
 							>
 								<div class="flex items-start gap-4">
 									<div class="flex-shrink-0 w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors">
-										<div class="text-primary" set:html={tab.icon} />
+										<div class="text-primary" aria-hidden="true" set:html={tab.icon} />
 									</div>
 									<div class="flex-1">
 										<h3 class="text-xl font-medium mb-2 group-hover:translate-x-1 transition-transform duration-200">
@@ -143,6 +150,7 @@ const {
 							stroke="currentColor" 
 							stroke-width="1.5"
 							class="ml-2 group-hover:translate-x-1 transition-transform duration-200"
+							aria-hidden="true"
 						>
 							<path d="M6 3L11 8L6 13" />
 						</svg>
@@ -165,7 +173,7 @@ const {
 							{tab.image && (
 								<div class="w-full h-full">
 									<img
-										src={tab.image}
+										src={getImageUrl(tab.image)}
 										alt={tab.title}
 										class="w-full h-full object-cover"
 										loading="lazy"
@@ -218,12 +226,13 @@ const {
 		const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLElement>
 		const tabPanels = document.querySelectorAll('.tab-panel') as NodeListOf<HTMLElement>
 		
-		function setActiveTab(activeIndex: number) {
+		function setActiveTab(activeIndex: number, shouldFocus: boolean = false) {
 			// Update buttons
 			tabButtons.forEach((button, index) => {
 				const isActive = index === activeIndex
 				button.setAttribute('data-active', isActive.toString())
 				button.setAttribute('aria-selected', isActive.toString())
+				button.setAttribute('tabindex', isActive ? '0' : '-1')
 				
 				// Handle description visibility
 				const description = button.querySelector('.tab-description') as HTMLElement
@@ -249,12 +258,47 @@ const {
 					panel.style.pointerEvents = 'none'
 				}
 			})
+			
+			// Focus the active tab if requested
+			if (shouldFocus) {
+				tabButtons[activeIndex]?.focus()
+			}
 		}
 		
 		// Add click handlers
 		tabButtons.forEach((button, index) => {
 			button.addEventListener('click', () => {
 				setActiveTab(index)
+			})
+			
+			// Add keyboard navigation
+			button.addEventListener('keydown', (e) => {
+				let newIndex = index
+				
+				switch (e.key) {
+					case 'ArrowDown':
+					case 'ArrowRight':
+						e.preventDefault()
+						newIndex = (index + 1) % tabButtons.length
+						break
+					case 'ArrowUp':
+					case 'ArrowLeft':
+						e.preventDefault()
+						newIndex = (index - 1 + tabButtons.length) % tabButtons.length
+						break
+					case 'Home':
+						e.preventDefault()
+						newIndex = 0
+						break
+					case 'End':
+						e.preventDefault()
+						newIndex = tabButtons.length - 1
+						break
+					default:
+						return
+				}
+				
+				setActiveTab(newIndex, true)
 			})
 		})
 		

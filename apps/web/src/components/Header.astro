@@ -79,6 +79,8 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 				id="mobile-menu-trigger"
 				class="lg:hidden inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 relative z-10"
 				aria-label="Open menu"
+				aria-expanded="false"
+				aria-controls="mobile-menu-content"
 			>
 				<svg
 					class="h-6 w-6"
@@ -100,10 +102,13 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 	<!-- Mobile Menu Overlay -->
 	<div
 		id="mobile-menu-overlay"
+		role="dialog"
+		aria-modal="true"
 		class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm opacity-0 invisible transition-all duration-300 lg:hidden"
 	>
 		<div
 			id="mobile-menu-content"
+			aria-label="Mobile navigation menu"
 			class={`fixed right-0 ${bannerEnabled ? 'top-28' : 'top-0'} ${bannerEnabled ? 'h-[calc(100vh-7rem)]' : 'h-full'} w-full sm:w-80 bg-background border-l shadow-lg transform translate-x-full transition-transform duration-300`}
 		>
 			<!-- Close Button -->
@@ -117,6 +122,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
+					aria-hidden="true"
 				>
 					<path
 						stroke-linecap="round"
@@ -150,64 +156,90 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 </nav>
 
 <script>
-	// Header scroll behavior - move to top when scrolling
-	const header = document.getElementById('main-header')!
-	const isBannerEnabled = header?.dataset.bannerEnabled === 'true'
+	// Store cleanup function to avoid duplicate listeners
+	let cleanup: (() => void) | null = null
 
-	if (header && isBannerEnabled) {
-		let lastScrollY = window.scrollY
-
-		function handleScroll() {
-			const currentScrollY = window.scrollY
-			const scrollThreshold = 48 // Banner height (top-12 = 3rem = 48px)
-
-			if (currentScrollY > scrollThreshold) {
-				// Scrolled past banner, move header to top
-				header.classList.remove('top-12')
-				header.classList.add('top-0')
-			} else {
-				// At top, keep header below banner
-				header.classList.remove('top-0')
-				header.classList.add('top-12')
-			}
-
-			lastScrollY = currentScrollY
+	function initHeader() {
+		// Clean up previous listeners before adding new ones
+		if (cleanup) {
+			cleanup()
+			cleanup = null
 		}
 
-		// Use passive listener for better performance
-		window.addEventListener('scroll', handleScroll, { passive: true })
-	}
+		const header = document.getElementById('main-header')
+		if (!header) return
 
-	// Mobile menu
-	const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
-	const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')
-	const mobileMenuContent = document.getElementById('mobile-menu-content')
-	const mobileMenuClose = document.getElementById('mobile-menu-close')
+		const isBannerEnabled = header.dataset.bannerEnabled === 'true'
+		const listeners: Array<{ el: EventTarget; type: string; fn: EventListener }> = []
 
-	if (mobileMenuTrigger && mobileMenuOverlay && mobileMenuContent) {
-		mobileMenuTrigger.addEventListener('click', () => {
-			mobileMenuOverlay.classList.remove('opacity-0', 'invisible')
-			mobileMenuOverlay.classList.add('opacity-100', 'visible')
-			mobileMenuContent.classList.remove('translate-x-full')
-			document.body.style.overflow = 'hidden'
-		})
-
-		mobileMenuOverlay.addEventListener('click', (e) => {
-			if (e.target === mobileMenuOverlay) {
-				closeMobileMenu()
-			}
-		})
-
-		// Close button event listener
-		if (mobileMenuClose) {
-			mobileMenuClose.addEventListener('click', closeMobileMenu)
+		function addListener(el: EventTarget, type: string, fn: EventListener, options?: AddEventListenerOptions) {
+			el.addEventListener(type, fn, options)
+			listeners.push({ el, type, fn })
 		}
+
+		if (isBannerEnabled) {
+			function handleScroll() {
+				const currentScrollY = window.scrollY
+				const scrollThreshold = 48 // Banner height (top-12 = 3rem = 48px)
+
+				if (currentScrollY > scrollThreshold) {
+					header.classList.remove('top-12')
+					header.classList.add('top-0')
+				} else {
+					header.classList.remove('top-0')
+					header.classList.add('top-12')
+				}
+			}
+
+			addListener(window, 'scroll', handleScroll, { passive: true })
+			handleScroll()
+		}
+
+		// Mobile menu
+		const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
+		const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')
+		const mobileMenuContent = document.getElementById('mobile-menu-content')
+		const mobileMenuClose = document.getElementById('mobile-menu-close')
 
 		function closeMobileMenu() {
 			mobileMenuOverlay?.classList.add('opacity-0', 'invisible')
 			mobileMenuOverlay?.classList.remove('opacity-100', 'visible')
 			mobileMenuContent?.classList.add('translate-x-full')
+			mobileMenuTrigger?.setAttribute('aria-expanded', 'false')
 			document.body.style.overflow = ''
 		}
+
+		function openMobileMenu() {
+			mobileMenuOverlay?.classList.remove('opacity-0', 'invisible')
+			mobileMenuOverlay?.classList.add('opacity-100', 'visible')
+			mobileMenuContent?.classList.remove('translate-x-full')
+			mobileMenuTrigger?.setAttribute('aria-expanded', 'true')
+			document.body.style.overflow = 'hidden'
+		}
+
+		function handleOverlayClick(e: Event) {
+			if (e.target === mobileMenuOverlay) {
+				closeMobileMenu()
+			}
+		}
+
+		if (mobileMenuTrigger && mobileMenuOverlay && mobileMenuContent) {
+			addListener(mobileMenuTrigger, 'click', openMobileMenu)
+			addListener(mobileMenuOverlay, 'click', handleOverlayClick)
+			if (mobileMenuClose) {
+				addListener(mobileMenuClose, 'click', closeMobileMenu)
+			}
+		}
+
+		// Store cleanup function
+		cleanup = () => {
+			listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
+		}
 	}
+
+	// Initialize on load
+	initHeader()
+
+	// Re-initialize on Astro page transitions
+	document.addEventListener('astro:page-load', initHeader)
 </script>

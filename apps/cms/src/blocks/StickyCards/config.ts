@@ -37,7 +37,6 @@ export const StickyCards: Block = {
           title: 'Medium length section heading goes here',
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
-          image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
@@ -48,7 +47,6 @@ export const StickyCards: Block = {
           title: 'Medium length section heading goes here',
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
-          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
@@ -59,7 +57,6 @@ export const StickyCards: Block = {
           title: 'Medium length section heading goes here',
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
-          image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
@@ -70,7 +67,6 @@ export const StickyCards: Block = {
           title: 'Medium length section heading goes here',
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.',
-          image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
           primaryButtonText: 'Button',
           primaryButtonUrl: '#',
           secondaryButtonText: 'Button',
@@ -99,12 +95,10 @@ export const StickyCards: Block = {
         },
         {
           name: 'image',
-          type: 'text',
+          type: 'upload',
+          relationTo: 'media',
           required: true,
-          label: 'Image URL',
-          admin: {
-            description: 'URL for the card image',
-          },
+          label: 'Image',
         },
         {
           name: 'primaryButtonText',

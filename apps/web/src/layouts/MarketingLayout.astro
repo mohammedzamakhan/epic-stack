@@ -1,28 +1,10 @@
 ---
-import { ViewTransitions } from 'astro:transitions'
-import { brand, getCopyright } from '@repo/config/brand'
-import GridDesign from '~/components/GridDesign.astro'
 import Footer from '~/components/Footer.astro'
 import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
 import '../styles/tailwind.css'
-import Button from './../components/ui/Button.astro'
 import { getThemeFromCookie } from '~/utils/theme'
 import { fetchBannerData } from '~/lib/fetchBanner'
-
-// Get the current URL and transform it for the app subdomain
-const currentUrl = Astro.url
-const protocol = currentUrl.protocol
-const hostname = currentUrl.hostname
-const port = currentUrl.port
-
-// Create app subdomain URL - works with any domain
-const appHostname = hostname.startsWith('app.') ? hostname : `app.${hostname}`
-const docsHostname = hostname.startsWith('docs.')
-	? hostname
-	: `docs.${hostname}`
-const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
-const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 
 // Get theme from cookie
 const cookieHeader = Astro.request.headers.get('cookie')
@@ -51,6 +33,10 @@ const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
 			</>
 		)}
 
+		<!-- Preconnect to external CDN for logo images -->
+		<link rel="preconnect" href="https://cdn.magicui.design" crossorigin />
+		<link rel="dns-prefetch" href="https://cdn.magicui.design" />
+
 
 		<!-- Favicons -->
 		<link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -59,13 +45,12 @@ const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
 		<link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
 
 		<slot name="head" />
-		<ViewTransitions />
 	</head>
 	<body>
 		<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-background focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
 		<Banner />
 		<Header bannerEnabled={isBannerEnabled} />
-		<main id="main-content" class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'} transition:animate="fade">
+		<main id="main-content" class={isBannerEnabled ? 'mt-16 max-w-screen' : 'mt-16 max-w-screen'}>
 			<slot />
 		</main>
 
@@ -76,80 +61,3 @@ const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
 	</body>
 </html>
 
-<script>
-	// Desktop dropdown menu
-	const operationTypesTrigger = document.getElementById(
-		'operation-types-trigger',
-	)
-	const operationTypesContent = document.getElementById(
-		'operation-types-content',
-	)
-
-	if (operationTypesTrigger && operationTypesContent) {
-		operationTypesTrigger.addEventListener('mouseenter', () => {
-			operationTypesContent.classList.remove('opacity-0', 'invisible')
-			operationTypesContent.classList.add('opacity-100', 'visible')
-		})
-
-		operationTypesTrigger.addEventListener('mouseleave', () => {
-			setTimeout(() => {
-				if (!operationTypesContent.matches(':hover')) {
-					operationTypesContent.classList.add('opacity-0', 'invisible')
-					operationTypesContent.classList.remove('opacity-100', 'visible')
-				}
-			}, 100)
-		})
-
-		operationTypesContent.addEventListener('mouseleave', () => {
-			operationTypesContent.classList.add('opacity-0', 'invisible')
-			operationTypesContent.classList.remove('opacity-100', 'visible')
-		})
-	}
-
-	// Mobile menu
-	const mobileMenuTrigger = document.getElementById('mobile-menu-trigger')
-	const mobileMenuOverlay = document.getElementById('mobile-menu-overlay')
-	const mobileMenuContent = document.getElementById('mobile-menu-content')
-	const mobileMenuClose = document.getElementById('mobile-menu-close')
-
-	if (mobileMenuTrigger && mobileMenuOverlay && mobileMenuContent) {
-		mobileMenuTrigger.addEventListener('click', () => {
-			mobileMenuOverlay.classList.remove('opacity-0', 'invisible')
-			mobileMenuOverlay.classList.add('opacity-100', 'visible')
-			mobileMenuContent.classList.remove('translate-x-full')
-			document.body.style.overflow = 'hidden'
-		})
-
-		mobileMenuOverlay.addEventListener('click', (e) => {
-			if (e.target === mobileMenuOverlay) {
-				closeMobileMenu()
-			}
-		})
-
-		// Close button event listener
-		if (mobileMenuClose) {
-			mobileMenuClose.addEventListener('click', closeMobileMenu)
-		}
-
-		function closeMobileMenu() {
-			mobileMenuOverlay?.classList.add('opacity-0', 'invisible')
-			mobileMenuOverlay?.classList.remove('opacity-100', 'visible')
-			mobileMenuContent?.classList.add('translate-x-full')
-			document.body.style.overflow = ''
-		}
-	}
-
-	// Mobile dropdown
-	const mobileOperationTypesTrigger = document.getElementById(
-		'mobile-operation-types-trigger',
-	)
-	const mobileOperationTypesContent = document.getElementById(
-		'mobile-operation-types-content',
-	)
-
-	if (mobileOperationTypesTrigger && mobileOperationTypesContent) {
-		mobileOperationTypesTrigger.addEventListener('click', () => {
-			mobileOperationTypesContent.classList.toggle('hidden')
-		})
-	}
-</script>

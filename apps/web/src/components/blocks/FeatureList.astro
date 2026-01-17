@@ -5,14 +5,19 @@ import Button from '../ui/Button.astro'
 interface Feature {
 	title: string
 	description: string
-	image?: string
-	backgroundImage?: string
+	image?: string | { url?: string | null; alt?: string | null } | null
+	backgroundImage?: string | { url?: string | null; alt?: string | null } | null
 	testimonial?: {
-		logo?: string
+		logo?: string | { url?: string | null; alt?: string | null } | null
 		logoAlt?: string
 		text: string
 		companyName?: string
 	}
+}
+
+function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
+	if (typeof image === 'string') return image
+	return image?.url || ''
 }
 
 interface Props {
@@ -102,13 +107,13 @@ const {
 } = Astro.props
 ---
 
-<section class="relative w-full py-16 md:py-24">
+<section class="relative w-full py-16 md:py-24" aria-labelledby="feature-list-title">
 	<GridDesign />
 	<div class="container relative mx-auto px-4 md:px-6">
 		<!-- Header -->
-		<div class="mb-8 md:mb-11 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+		<header class="mb-8 md:mb-11 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
 			<div class="px-4 flex flex-col gap-4">
-				<h2 class="text-4xl md:text-6xl tracking-tight font-title">
+				<h2 id="feature-list-title" class="text-4xl md:text-6xl tracking-tight font-title">
 					{title}
 				</h2>
 				<p class="text-lg text-muted-foreground max-w-[600px]">
@@ -116,7 +121,7 @@ const {
 				</p>
 			</div>
 			<!-- Navigation Controls -->
-			<div class="flex items-center gap-2">
+			<nav class="flex items-center gap-2" aria-label="Feature carousel navigation">
 				<Button 
 					id="prev-btn"
 					variant="outline"
@@ -124,18 +129,20 @@ const {
 					class="w-9 h-9 disabled:opacity-30 disabled:cursor-not-allowed"
 					aria-label="Previous feature"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<path d="m15 18-6-6 6-6"></path>
 					</svg>
 				</Button>
 				<!-- Pagination Dots -->
-				<div class="flex items-center gap-2 bg-muted p-3" id="pagination-dots">
+				<div class="flex items-center gap-2 bg-muted p-3" id="pagination-dots" role="tablist" aria-label="Feature slides">
 					{features.map((_, index) => (
 						<button 
 							class="w-3 h-3 p-4 flex items-center justify-center transition-all duration-200 pagination-dot"
 							data-index={index}
+							role="tab"
 							aria-label={`Go to feature ${index + 1}`}
-						><span class="w-1.5 h-1.5 block rounded-full bg-current"></span></button>
+							aria-selected={index === 0 ? "true" : "false"}
+						><span class="w-1.5 h-1.5 block rounded-full bg-current" aria-hidden="true"></span></button>
 					))}
 				</div>
 				<Button 
@@ -145,27 +152,27 @@ const {
 					class="w-9 h-9 disabled:opacity-30 disabled:cursor-not-allowed"
 					aria-label="Next feature"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<path d="m9 18 6-6-6-6"></path>
 					</svg>
 				</Button>
-			</div>
-		</div>
+			</nav>
+		</header>
 
 		<!-- Feature Cards Container -->
-		<div class="relative overflow-hidden">
+		<div class="relative overflow-hidden" role="region" aria-label="Feature carousel">
 			<div 
 				id="features-container"
 				class="flex transition-transform duration-500 ease-in-out gap-5 px-[1px]"
 				style="transform: translateX(0px);"
 			>
 				{features.map((feature, index) => (
-					<div class="flex-shrink-0 w-[90vw] md:w-[544px] feature-card" data-index={index}>
+					<article class="flex-shrink-0 w-[90vw] md:w-[544px] feature-card" data-index={index} role="tabpanel" aria-label={feature.title}>
 						<!-- Content Section -->
 						<div class="py-4 min-h-[140px]">
-							<h5 class="mb-3 text-card-foreground text-2xl font-medium font-title">
+							<h3 class="mb-3 text-card-foreground text-2xl font-medium font-title">
 								{feature.title}
-							</h5>
+							</h3>
 							<p class="text-muted-foreground text-sm leading-relaxed max-w-[500px]">
 								{feature.description}
 							</p>
@@ -177,7 +184,7 @@ const {
 								<div class="bg-muted dark:bg-background overflow-hidden">
 									<div 
 										class="h-80 relative bg-cover bg-center bg-no-repeat overflow-hidden bg-card ring-border ring-1 shadow-sm"
-										style={`background-image: url(${feature.backgroundImage})`}
+										style={`background-image: url(${getImageUrl(feature.backgroundImage)})`}
 									>
 										{feature.testimonial && (
 											<div class="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 p-4">
@@ -195,7 +202,7 @@ const {
 														)}
 														{feature.testimonial.logo && (
 															<img 
-																src={feature.testimonial.logo}
+																src={getImageUrl(feature.testimonial.logo)}
 																alt={feature.testimonial.logoAlt || feature.testimonial.companyName}
 																class="h-7 w-auto object-contain"
 															/>
@@ -213,7 +220,7 @@ const {
 									<div class="bg-muted dark:bg-background p-1">
 										<div class="bg-card overflow-hidden h-[260px] md:h-[380px] ring-border ring-1 shadow-lg">
 											<img
-												src={feature.image}
+												src={getImageUrl(feature.image)}
 												alt={feature.title}
 												class="w-full h-full object-cover"
 											/>
@@ -223,7 +230,7 @@ const {
 							)}
 							<div class="hidden md:block h-20"></div>
 						</div>
-					</div>
+					</article>
 				))}
 			</div>
 		</div>
@@ -253,9 +260,11 @@ const {
 				if (index === currentIndex) {
 					dot.classList.add('bg-primary', 'w-4')
 					dot.classList.remove('bg-muted-foreground', 'hover:bg-primary/60')
+					dot.setAttribute('aria-selected', 'true')
 				} else {
 					dot.classList.remove('bg-primary', 'w-4')
 					dot.classList.add('bg-muted-foreground', 'hover:bg-primary/60')
+					dot.setAttribute('aria-selected', 'false')
 				}
 			})
 			

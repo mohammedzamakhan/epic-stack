@@ -1,0 +1,41 @@
+{
+	"$schema": "https://raw.githubusercontent.com/AlfredoPizarro/web-performance-budget/main/budget.schema.json",
+	"description": "Performance budget for Epic Stack marketing website",
+	"budgets": [
+		{
+			"path": "/*",
+			"name": "All Pages",
+			"resourceSizes": [
+				{ "resourceType": "document", "budget": 50 },
+				{ "resourceType": "script", "budget": 150 },
+				{ "resourceType": "stylesheet", "budget": 50 },
+				{ "resourceType": "image", "budget": 500 },
+				{ "resourceType": "font", "budget": 100 },
+				{ "resourceType": "total", "budget": 850 }
+			],
+			"resourceCounts": [
+				{ "resourceType": "script", "budget": 10 },
+				{ "resourceType": "stylesheet", "budget": 3 },
+				{ "resourceType": "image", "budget": 20 },
+				{ "resourceType": "font", "budget": 4 },
+				{ "resourceType": "third-party", "budget": 5 },
+				{ "resourceType": "total", "budget": 50 }
+			]
+		}
+	],
+	"lighthouse": {
+		"performance": 98,
+		"accessibility": 98,
+		"best-practices": 98,
+		"seo": 98
+	},
+	"coreWebVitals": {
+		"LCP": 2500,
+		"FID": 100,
+		"CLS": 0.1,
+		"FCP": 1500,
+		"TTFB": 600,
+		"TBT": 200,
+		"SI": 3000
+	}
+}

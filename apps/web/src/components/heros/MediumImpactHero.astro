@@ -47,13 +47,13 @@ const renderLexicalContent = (content: any) => {
 }
 ---
 
-<section class="relative w-full py-12 lg:py-16">
+<section class="relative w-full py-12 lg:py-16" aria-labelledby="hero-heading">
 	<GridDesign />
 
 	<div class="container mx-auto px-6 relative z-10">
 		<div class="mb-8 space-y-6">
 			{richText && (
-				<div class="space-y-4" set:html={renderLexicalContent(richText)} />
+				<div class="space-y-4" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
 			)}
 
 			{links && links.length > 0 && (
@@ -80,6 +80,8 @@ const renderLexicalContent = (content: any) => {
 					width={media.width || 1200}
 					height={media.height || 600}
 					loading="eager"
+					fetchpriority="high"
+					decoding="async"
 				/>
 				{media?.caption && (
 					<p class="mt-3 text-sm text-muted-foreground">{media.caption}</p>

@@ -98,31 +98,31 @@ const {
 ---
 
 <div class="dark">
-	<section class="bg-background text-foreground relative w-full py-16 md:py-24">
+	<section class="bg-background text-foreground relative w-full py-16 md:py-24" aria-labelledby="feature-grid-title">
 		<GridDesign />
 		<div class="container relative mx-auto px-4 md:px-6">
 			<!-- Header -->
-			<div class="text-center mb-12">
+			<header class="text-center mb-12">
 				<Badge variant="outline" size="sm">
 					// {subtitle.toUpperCase()}
 				</Badge>
-				<h2 class="text-4xl md:text-6xl tracking-tight font-title mt-4">
+				<h2 id="feature-grid-title" class="text-4xl md:text-6xl tracking-tight font-title mt-4">
 					{title}
 				</h2>
-			</div>
+			</header>
 
 			<!-- Feature Grid -->
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-auto border-l border-dashed">
+			<ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-auto border-l border-dashed list-none p-0 m-0" role="list">
 				{
 					features.map((feature, index) => {
 						return (
-							<div class="group/feature relative flex flex-col border-b border-r border-dashed bg-muted dark:bg-background overflow-hidden transition-all duration-200 hover:shadow-lg">
-								<div class="bg-card ring-border overflow-hidden shadow-sm ring-1 flex flex-col h-full">
+							<li class="group/feature relative flex flex-col border-b border-r border-dashed bg-muted dark:bg-background overflow-hidden transition-all duration-200 hover:shadow-lg">
+								<article class="bg-card ring-border overflow-hidden shadow-sm ring-1 flex flex-col h-full">
 									{/* Card Header */}
 									<header class="px-6 py-4 pb-0">
 										<div class="flex items-center gap-3">
-											<div class="text-muted-foreground group-hover/feature:text-primary transition-colors duration-200">
-												<div class="text-primary" aria-hidden="true" set:html={feature.icon} />
+											<div class="text-muted-foreground group-hover/feature:text-primary transition-colors duration-200" aria-hidden="true">
+												<div class="text-primary" set:html={feature.icon} />
 											</div>
 											<h3 class="text-base font-medium text-card-foreground font-title group-hover/feature:text-primary transition-colors">
 												{feature.title}
@@ -136,12 +136,12 @@ const {
 											{feature.description}
 										</p>
 									</div>
-								</div>
-							</div>
+								</article>
+							</li>
 						)
 					})
 				}
-			</div>
+			</ul>
 		</div>
 	</section>
 </div>

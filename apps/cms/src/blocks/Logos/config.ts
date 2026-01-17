@@ -23,6 +23,15 @@ export const Logos: Block = {
           required: true,
           label: 'Company Name',
         },
+        {
+          name: 'logo',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Company Logo',
+          admin: {
+            description: 'Upload a logo image (optional - company name will be shown if no logo)',
+          },
+        },
       ],
       defaultValue: [
         { name: 'Google' },

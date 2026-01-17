@@ -44,7 +44,7 @@ vi.mock('../toast.server.ts', () => ({
 	}),
 }))
 
-vi.mock('../redirect-cookie.server.ts', () => ({
+vi.mock('@repo/common/redirect-cookie', () => ({
 	destroyRedirectToHeader: 'redirect-to=; Max-Age=0',
 }))
 

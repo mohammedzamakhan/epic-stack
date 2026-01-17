@@ -68,9 +68,10 @@ export const Testimonials: Block = {
             },
             {
               name: 'authorImage',
-              type: 'text',
+              type: 'upload',
+              relationTo: 'media',
               required: true,
-              label: 'Author Image URL',
+              label: 'Author Image',
               admin: {
                 width: '50%',
               },
@@ -105,7 +106,6 @@ export const Testimonials: Block = {
           authorName: 'Captain Deploy',
           authorTitle: 'Chief Meme Officer',
           authorCompany: 'Deploy or Die Inc.',
-          authorImage: 'https://i.pravatar.cc/150?img=68',
           variant: 'vercel',
         },
         {
@@ -114,7 +114,6 @@ export const Testimonials: Block = {
           authorName: 'Bugs Bunyan',
           authorTitle: 'Lead Developer',
           authorCompany: 'Log Overflow',
-          authorImage: 'https://i.pravatar.cc/150?img=11',
           variant: 'default',
         },
         {
@@ -122,7 +121,6 @@ export const Testimonials: Block = {
           authorName: 'Ctrl Alt Delete',
           authorTitle: 'Reformed Code Artist',
           authorCompany: 'Infinite Loop Labs',
-          authorImage: 'https://i.pravatar.cc/150?img=23',
           variant: 'default',
         },
         {
@@ -130,7 +128,6 @@ export const Testimonials: Block = {
           authorName: 'Null Pointer',
           authorTitle: 'Duck Whisperer',
           authorCompany: 'Try-Catch Paradise',
-          authorImage: 'https://i.pravatar.cc/150?img=15',
           variant: 'default',
         },
         {
@@ -139,7 +136,6 @@ export const Testimonials: Block = {
           authorName: 'Legacy Larry',
           authorTitle: 'Time Optimization Specialist',
           authorCompany: '404 Found',
-          authorImage: 'https://i.pravatar.cc/150?img=33',
           variant: 'stripe',
         },
         {
@@ -148,7 +144,6 @@ export const Testimonials: Block = {
           authorName: 'Agile Gandalf',
           authorTitle: 'Sprint Survivor',
           authorCompany: 'You Shall Not Crash',
-          authorImage: 'https://i.pravatar.cc/150?img=3',
           variant: 'default',
         },
       ],

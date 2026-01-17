@@ -317,9 +317,6 @@ export default function OrganizationDashboard() {
 						)}
 				</div>
 			</div>
-			{/* <div className="mt-16">
-				<DataTable data={data} />
-			</div> */}
 		</div>
 	)
 }

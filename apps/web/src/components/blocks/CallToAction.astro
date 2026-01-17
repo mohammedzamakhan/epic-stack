@@ -28,12 +28,10 @@ const renderLexicalContent = (content: any) => {
 				const text = node.children
 					.map((child: any) => child.text || '')
 					.join('')
-				const tag = node.tag || 'h2'
-				const headingClass =
-					tag === 'h1'
-						? 'text-4xl md:text-6xl font-title text-foreground mb-6'
-						: 'text-3xl md:text-5xl font-title text-foreground mb-4'
-				return `<${tag} class="${headingClass}">${text}</${tag}>`
+				const tag = node.tag === 'h1' ? 'h2' : node.tag || 'h2'
+				const headingClass = 'text-3xl md:text-5xl font-title text-foreground mb-4'
+				const idAttr = tag === 'h2' ? ' id="cta-heading"' : ''
+				return `<${tag}${idAttr} class="${headingClass}">${text}</${tag}>`
 			}
 			return ''
 		})
@@ -41,8 +39,8 @@ const renderLexicalContent = (content: any) => {
 }
 ---
 
-<section class="relative w-full py-20 md:py-28">
-	<GridDesign />
+<section class="relative w-full py-20 md:py-28" aria-labelledby="cta-heading">
+	<GridDesign aria-hidden="true" />
 	<div class="container relative mx-auto px-4 text-center">
 		<div class="max-w-4xl mx-auto">
 			<div class="bg-muted dark:bg-background rounded-2xl p-1">
@@ -65,6 +63,7 @@ const renderLexicalContent = (content: any) => {
 										href={link.url || '#'}
 										variant={index === 0 ? 'default' : 'secondary'}
 										size="lg"
+										aria-label={link.label || 'Call to action'}
 									>
 										{link.label}
 									</Button>

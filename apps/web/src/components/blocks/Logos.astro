@@ -3,9 +3,17 @@ import GridDesign from '../GridDesign.astro'
 import Badge from '../ui/Badge.astro'
 
 interface Props {
-	companies?: Array<{ name: string }>
+	companies?: Array<{ 
+		name: string
+		logo?: string | { url?: string | null; alt?: string | null } | null
+	}>
 	title?: string
 	blockType: 'logos'
+}
+
+function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
+	if (typeof image === 'string') return image
+	return image?.url || ''
 }
 
 const {
@@ -27,12 +35,12 @@ const {
 } = Astro.props
 ---
 
-<section id="logos" class="relative">
+<section id="logos" class="relative" aria-labelledby="logos-heading">
 	<GridDesign />
 	<div
 		class="container relative mx-auto px-4  md:px-6 flex justify-center flex-col"
 	>
-	
+		<h2 id="logos-heading" class="sr-only">{title}</h2>
 		<div class="relative">
 			<div
 				class="grid grid-cols-4 border-l border-t border-dashed md:grid-cols-12"
@@ -43,9 +51,9 @@ const {
 							<img
 								width={112}
 								height={40}
-								src={`https://cdn.magicui.design/companies/${company.name}.svg`}
+								src={company.logo ? getImageUrl(company.logo) : `https://cdn.magicui.design/companies/${company.name}.svg`}
 								class="my-4 h-10 w-28"
-								alt={company.name}
+								alt={`${company.name} logo`}
 								loading="lazy"
 								decoding="async"
 							/>

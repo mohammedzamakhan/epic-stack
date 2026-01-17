@@ -73,11 +73,12 @@ const {
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									class="accordion-icon shrink-0 transition-transform duration-300"
+									aria-hidden="true"
 								>
 									<path d="m6 9 6 6 6-6" />
 								</svg>
 							</summary>
-							<div class="accordion-content overflow-hidden transition-all duration-300 ease-out">
+							<div id={`faq-content-${idx}`} class="accordion-content overflow-hidden transition-all duration-300 ease-out">
 								<div class="px-4 pb-4 text-muted-foreground">
 									{faq.answer}
 								</div>

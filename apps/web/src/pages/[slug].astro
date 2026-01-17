@@ -3,27 +3,26 @@ import MarketingLayout from '../layouts/MarketingLayout.astro'
 import { cmsClient } from '../lib/cms'
 import PageContent from '../components/PageContent.astro'
 import SEO from '../components/SEO.astro'
-export const prerender = true;
-const { title, hero, layout, meta } = Astro.props
+
+export const prerender = true
 
 export async function getStaticPaths() {
   const pages = await cmsClient.getPages()
   
-  return pages
-    .map((page) => {
-      return {
-        params: { slug: page.slug },
-        props: { 
-          title: page.title,
-          hero: page.hero,
-          layout: page.layout,
-          meta: page.meta,
-          updatedAt: page.updatedAt,
-          createdAt: page.createdAt
-        },
-      }
-    })
+  return pages.map((page) => ({
+    params: { slug: page.slug },
+    props: { 
+      title: page.title,
+      hero: page.hero,
+      layout: page.layout,
+      meta: page.meta,
+      updatedAt: page.updatedAt,
+      createdAt: page.createdAt
+    },
+  }))
 }
+
+const { title, hero, layout, meta } = Astro.props
 ---
 
 <MarketingLayout>

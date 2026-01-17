@@ -21,7 +21,7 @@ interface CMSTestimonial {
 	authorName: string
 	authorTitle: string
 	authorCompany: string
-	authorImage: string
+	authorImage: string | { url?: string | null; alt?: string | null } | null
 	variant?: 'default' | 'stripe' | 'vercel'
 }
 
@@ -124,13 +124,17 @@ const {
 const testimonials = rawTestimonials.map((testimonial) => {
 	if ('authorName' in testimonial) {
 		// CMS structure - convert to legacy structure
+		// Handle authorImage being either a string URL or a Media object
+		const authorImageUrl = typeof testimonial.authorImage === 'string' 
+			? testimonial.authorImage 
+			: testimonial.authorImage?.url || ''
 		return {
 			quote: testimonial.quote,
 			author: {
 				name: testimonial.authorName,
 				title: testimonial.authorTitle,
 				company: testimonial.authorCompany,
-				image: testimonial.authorImage,
+				image: authorImageUrl,
 			},
 			variant: testimonial.variant,
 		}
@@ -140,12 +144,13 @@ const testimonials = rawTestimonials.map((testimonial) => {
 })
 ---
 
-<section class="relative w-full bg-gradient-to-br pt-12">
+<section class="relative w-full bg-gradient-to-br pt-12" aria-labelledby="testimonials-heading">
 	<GridDesign />
 	<div class="container mx-auto relative px-4 md:px-6">
 		<div class="mb-8 flex flex-col items-center space-y-4">
 			<Badge variant="outline" size="sm"> // WHAT PEOPLE ARE SAYING </Badge>
 			<h2
+				id="testimonials-heading"
 				class="max-w-4xl text-center text-3xl tracking-tight sm:text-5xl md:text-6xl font-title"
 			>
 				{title}
@@ -157,8 +162,10 @@ const testimonials = rawTestimonials.map((testimonial) => {
 	<div class="mt-12 w-full border-y border-dashed">
 		<div class="container mx-auto relative px-4 md:px-6">
 			<div class="relative border-muted bg-background">
-				<div
-					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-foreground/10 border-dashed border-l"
+				<ul
+					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-foreground/10 border-dashed border-l list-none"
+					role="list"
+					aria-label="Customer testimonials"
 				>
 					{
 						testimonials.map((testimonial, index) => {
@@ -167,7 +174,7 @@ const testimonials = rawTestimonials.map((testimonial) => {
 							const isVercelCard = testimonial.variant === 'vercel'
 
 							return (
-								<div
+								<li
 									class={`border-foreground/10 transition-colors border-b border-r border-dashed ${
 										isFirstCard
 											? 'row-span-2 border-foreground/10 bg-muted shadow-lg hover:bg-muted/50'
@@ -178,9 +185,9 @@ const testimonials = rawTestimonials.map((testimonial) => {
 													: 'bg-background hover:bg-muted/50'
 									} ${index === 7 ? 'lg:hidden' : ''}`}
 								>
-									<div class="p-6 flex h-full flex-col justify-between">
+									<article class="p-6 flex h-full flex-col justify-between">
 										{(isFirstCard || isStripeCard) && (
-											<div class="mb-6">
+											<div class="mb-6" aria-hidden="true">
 												{isFirstCard ? (
 													<svg
 														width="32"
@@ -189,6 +196,7 @@ const testimonials = rawTestimonials.map((testimonial) => {
 														fill="none"
 														xmlns="http://www.w3.org/2000/svg"
 														class="text-foreground"
+														aria-hidden="true"
 													>
 														<path
 															d="M37.5274 0L75.0548 65H0L37.5274 0Z"
@@ -202,6 +210,7 @@ const testimonials = rawTestimonials.map((testimonial) => {
 														viewBox="0 0 96 40"
 														fill="currentColor"
 														class="text-background"
+														aria-hidden="true"
 													>
 														<path d="M8.954 14.517c-2.29 0-4.147 1.057-4.147 3.072 0 1.496.812 2.486 2.994 3.127l1.993.587c1.087.321 1.596.724 1.596 1.427 0 .862-.87 1.403-2.112 1.403-1.267 0-2.194-.587-2.29-1.68H4.75c.12 1.888 1.752 3.204 4.252 3.204 2.397 0 4.3-1.195 4.3-3.149 0-1.633-.893-2.552-2.994-3.171l-1.895-.54c-1.136-.346-1.704-.724-1.704-1.427 0-.817.845-1.333 2.002-1.333 1.184 0 1.98.54 2.087 1.61h2.194c-.083-1.935-1.728-3.13-4.036-3.13zm9.835 0c-3.185 0-5.15 2.2-5.15 5.722 0 3.523 1.965 5.722 5.15 5.722 3.173 0 5.15-2.199 5.15-5.722 0-3.522-1.977-5.722-5.15-5.722zm0 1.957c1.74 0 2.835 1.45 2.835 3.765 0 2.304-1.095 3.765-2.835 3.765-1.752 0-2.835-1.461-2.835-3.765 0-2.315 1.083-3.765 2.835-3.765z" />
 													</svg>
@@ -211,7 +220,7 @@ const testimonials = rawTestimonials.map((testimonial) => {
 										<blockquote class="mb-4 text-lg font-title">
 											"{testimonial.quote}"
 										</blockquote>
-										<div class="flex items-center gap-3">
+										<footer class="flex items-center gap-3">
 											<div class="relative h-12 w-12 overflow-hidden rounded-full">
 												<img
 													src={testimonial.author.image}
@@ -220,9 +229,9 @@ const testimonials = rawTestimonials.map((testimonial) => {
 												/>
 											</div>
 											<div>
-												<div class="font-semibold">
+												<cite class="font-semibold not-italic">
 													{testimonial.author.name}
-												</div>
+												</cite>
 												<div
 													class={`text-sm ${
 														isStripeCard
@@ -234,13 +243,13 @@ const testimonials = rawTestimonials.map((testimonial) => {
 													{testimonial.author.company}
 												</div>
 											</div>
-										</div>
-									</div>
-								</div>
+										</footer>
+									</article>
+								</li>
 							)
 						})
 					}
-				</div>
+				</ul>
 			</div>
 		</div>
 	</div>

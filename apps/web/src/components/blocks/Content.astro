@@ -105,23 +105,23 @@ const renderLexicalContent = (content: any) => {
 
 {richText && (
 	<!-- New design with richText field -->
-	<section class="w-full py-16 md:py-24 relative">
+	<section class="w-full py-16 md:py-24 relative" aria-labelledby={subtitle ? "content-section-title" : undefined}>
 		<GridDesign />
 		<div class="container relative mx-auto px-4 md:px-6">
 			{
 				(title || subtitle) && (
-					<div class="text-center mb-12">
+					<header class="text-center mb-12">
 						{title && (
-							<h3 class="font-mono text-xs uppercase tracking-wide text-muted-foreground mb-4">
+							<p class="font-mono text-xs uppercase tracking-wide text-muted-foreground mb-4">
 								// {title}
-							</h3>
+							</p>
 						)}
 						{subtitle && (
-							<h2 class="text-4xl md:text-6xl font-title text-foreground mb-4">
+							<h2 id="content-section-title" class="text-4xl md:text-6xl font-title text-foreground mb-4">
 								{subtitle}
 							</h2>
 						)}
-					</div>
+					</header>
 				)
 			}
 

@@ -1,0 +1,357 @@
+name: 🔦 Lighthouse Performance
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+env:
+  CLOUDFLARE_PROJECT_NAME: epic-startup-web
+
+jobs:
+  preview-deploy:
+    name: 🚀 Preview Deploy
+    runs-on: ubuntu-24.04
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.url }}
+      deployment_id: ${{ steps.deploy.outputs.id }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 📥 Install platform deps
+        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+
+      - name: 🏗 Build Web App
+        run: |
+          cd apps/web
+          npm run build
+        env:
+          PUBLIC_CMS_URL: ${{ secrets.PUBLIC_CMS_URL }}
+
+      - name: 🚀 Deploy Preview to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ env.CLOUDFLARE_PROJECT_NAME }}
+          directory: apps/web/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
+
+      - name: 📝 Comment Preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = '${{ steps.deploy.outputs.url }}';
+            const body = `## 🚀 Preview Deployment
+
+            | Environment | URL |
+            |-------------|-----|
+            | Preview | [${previewUrl}](${previewUrl}) |
+
+            _Lighthouse performance audit will run automatically._`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Preview Deployment')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  lighthouse:
+    name: 🔦 Lighthouse Audit
+    runs-on: ubuntu-24.04
+    needs: preview-deploy
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 📥 Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: ⏳ Wait for deployment to be ready
+        run: |
+          echo "Waiting for preview deployment to be ready..."
+          sleep 30
+          
+          # Verify the URL is accessible
+          max_attempts=10
+          attempt=1
+          url="${{ needs.preview-deploy.outputs.preview_url }}"
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt: Checking $url"
+            status=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            
+            if [ "$status" = "200" ]; then
+              echo "✅ Preview deployment is ready!"
+              break
+            fi
+            
+            echo "Status: $status - Waiting 10 seconds..."
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -gt $max_attempts ]; then
+            echo "❌ Preview deployment not ready after $max_attempts attempts"
+            exit 1
+          fi
+
+      - name: 🔦 Run Lighthouse CI
+        id: lighthouse
+        run: |
+          lhci autorun \
+            --config=apps/web/lighthouserc.js \
+            --collect.url="${{ needs.preview-deploy.outputs.preview_url }}" \
+            --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/about" \
+            --collect.url="${{ needs.preview-deploy.outputs.preview_url }}/blog"
+        env:
+          # Optional: Install https://github.com/apps/lighthouse-ci for enhanced GitHub integration
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN || '' }}
+
+      - name: 📊 Upload Lighthouse Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 14
+
+      - name: 📝 Comment Lighthouse Results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Read lighthouse results
+            const lhciDir = '.lighthouseci';
+            let results = [];
+            
+            try {
+              const files = fs.readdirSync(lhciDir);
+              const jsonFiles = files.filter(f => f.endsWith('.json') && f.startsWith('lhr-'));
+              
+              for (const file of jsonFiles) {
+                const content = fs.readFileSync(path.join(lhciDir, file), 'utf8');
+                const lhr = JSON.parse(content);
+                results.push({
+                  url: lhr.finalUrl || lhr.requestedUrl,
+                  performance: Math.round(lhr.categories.performance.score * 100),
+                  accessibility: Math.round(lhr.categories.accessibility.score * 100),
+                  bestPractices: Math.round(lhr.categories['best-practices'].score * 100),
+                  seo: Math.round(lhr.categories.seo.score * 100),
+                });
+              }
+            } catch (e) {
+              console.log('Could not read lighthouse results:', e.message);
+            }
+            
+            // Calculate averages
+            const avg = (arr, key) => Math.round(arr.reduce((sum, r) => sum + r[key], 0) / arr.length);
+            
+            const getScoreEmoji = (score) => {
+              if (score >= 98) return '🟢';
+              if (score >= 90) return '🟡';
+              return '🔴';
+            };
+            
+            const getStatus = (score) => {
+              if (score >= 98) return 'PASS ✅';
+              return 'FAIL ❌';
+            };
+            
+            let body = `## 🔦 Lighthouse Performance Report
+
+            | Metric | Score | Status |
+            |--------|-------|--------|`;
+            
+            if (results.length > 0) {
+              const perfAvg = avg(results, 'performance');
+              const a11yAvg = avg(results, 'accessibility');
+              const bpAvg = avg(results, 'bestPractices');
+              const seoAvg = avg(results, 'seo');
+              
+              body += `
+            | ${getScoreEmoji(perfAvg)} Performance | **${perfAvg}** | ${getStatus(perfAvg)} |
+            | ${getScoreEmoji(a11yAvg)} Accessibility | **${a11yAvg}** | ${getStatus(a11yAvg)} |
+            | ${getScoreEmoji(bpAvg)} Best Practices | **${bpAvg}** | ${getStatus(bpAvg)} |
+            | ${getScoreEmoji(seoAvg)} SEO | **${seoAvg}** | ${getStatus(seoAvg)} |
+
+            ### 📋 Detailed Results
+
+            | Page | Performance | Accessibility | Best Practices | SEO |
+            |------|-------------|---------------|----------------|-----|`;
+              
+              for (const r of results) {
+                const pagePath = new URL(r.url).pathname || '/';
+                body += `
+            | \`${pagePath}\` | ${getScoreEmoji(r.performance)} ${r.performance} | ${getScoreEmoji(r.accessibility)} ${r.accessibility} | ${getScoreEmoji(r.bestPractices)} ${r.bestPractices} | ${getScoreEmoji(r.seo)} ${r.seo} |`;
+              }
+              
+              body += `
+
+            ---
+            🎯 **Target:** All scores must be ≥ 98
+            📊 **Runs:** 3 per page (median reported)
+            🔗 **Preview:** ${{ needs.preview-deploy.outputs.preview_url }}`;
+              
+              // Check if any score is below threshold
+              const allPassing = perfAvg >= 98 && a11yAvg >= 98 && bpAvg >= 98 && seoAvg >= 98;
+              
+              if (!allPassing) {
+                body += `
+
+            ⚠️ **Performance budget exceeded!** Please optimize before merging.`;
+              }
+            } else {
+              body += `
+
+            ❌ Could not retrieve Lighthouse results. Check the workflow logs.`;
+            }
+            
+            // Find and update existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Lighthouse Performance Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  performance-gate:
+    name: 🚦 Performance Gate
+    runs-on: ubuntu-24.04
+    needs: [preview-deploy, lighthouse]
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Lighthouse Report
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+
+      - name: 🚦 Check Performance Budget
+        run: |
+          echo "Checking performance scores against budget..."
+          
+          # Find all lighthouse result files
+          for file in .lighthouseci/lhr-*.json; do
+            if [ -f "$file" ]; then
+              echo "Checking: $file"
+              
+              # Extract scores using node
+              node -e "
+                const lhr = require('./$file');
+                const url = lhr.finalUrl || lhr.requestedUrl;
+                const perf = Math.round(lhr.categories.performance.score * 100);
+                const a11y = Math.round(lhr.categories.accessibility.score * 100);
+                const bp = Math.round(lhr.categories['best-practices'].score * 100);
+                const seo = Math.round(lhr.categories.seo.score * 100);
+                
+                console.log('URL:', url);
+                console.log('Performance:', perf);
+                console.log('Accessibility:', a11y);
+                console.log('Best Practices:', bp);
+                console.log('SEO:', seo);
+                
+                const threshold = 98;
+                let failed = false;
+                
+                if (perf < threshold) {
+                  console.error('❌ Performance score ' + perf + ' is below threshold ' + threshold);
+                  failed = true;
+                }
+                if (a11y < threshold) {
+                  console.error('❌ Accessibility score ' + a11y + ' is below threshold ' + threshold);
+                  failed = true;
+                }
+                if (bp < threshold) {
+                  console.error('❌ Best Practices score ' + bp + ' is below threshold ' + threshold);
+                  failed = true;
+                }
+                if (seo < threshold) {
+                  console.error('❌ SEO score ' + seo + ' is below threshold ' + threshold);
+                  failed = true;
+                }
+                
+                if (failed) {
+                  process.exit(1);
+                }
+                
+                console.log('✅ All scores pass threshold of', threshold);
+              "
+            fi
+          done
+          
+          echo "✅ All pages pass performance budget!"

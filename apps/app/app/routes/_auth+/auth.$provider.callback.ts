@@ -15,7 +15,7 @@ import {
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
-} from '#app/utils/redirect-cookie.server.ts'
+} from '@repo/common/redirect-cookie'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import {
 	createToastHeaders,

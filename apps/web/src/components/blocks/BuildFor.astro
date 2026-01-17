@@ -47,6 +47,7 @@ const numCircles = rippleSettings?.numCircles || 8
 	<!-- Ripple Effect positioned at section level -->
 	<div
 		class="pointer-events-none select-none absolute top-0 left-0 inset-0 w-full h-full overflow-hidden [mask-image:linear-gradient(to_bottom,white,transparent)]"
+		aria-hidden="true"
 	>
 		{
 			Array.from({ length: numCircles }, (_, i) => {

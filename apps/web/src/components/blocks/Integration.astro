@@ -77,7 +77,8 @@ const {
 					integrations.map((integration) => (
 						<div 
 							class={`${integration.position?.col || 'col-start-1'} ${integration.position?.row || 'row-start-1'} flex items-center justify-center border-b border-l border-t border-dashed bg-background hover:bg-gradient-to-br from-muted/10 to-muted/30 transition-all duration-300 group`}
-							aria-label={integration.name}
+							role="img"
+							aria-label={`${integration.name} integration`}
 						>
 							<div class="text-muted-foreground group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform" aria-hidden="true">
 								<div set:html={integration.icon} />

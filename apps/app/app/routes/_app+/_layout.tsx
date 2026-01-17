@@ -9,7 +9,7 @@ import { requireUserId } from '#app/utils/auth.server.ts'
 import { ENV } from '#app/utils/env.server.ts'
 import { getUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
-import { getSidebarState } from '#app/utils/sidebar-cookie.server.ts'
+import { getSidebarState } from '@repo/common/sidebar-cookie'
 
 export async function loader({ request }: { request: Request }) {
 	const isCollapsed = await getSidebarState(request)

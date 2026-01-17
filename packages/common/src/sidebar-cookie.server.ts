@@ -1,4 +1,3 @@
-// app/utils/sidebar-cookie.server.ts
 import { createCookie } from 'react-router'
 
 export const sidebarCookie = createCookie('sidebar-state', {

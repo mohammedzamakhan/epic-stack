@@ -42,7 +42,6 @@ export const Tabs: Block = {
             <path d="M13 15l3 0" />
             <path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 -2h-14a2 2 0 0 1 -2 -2z" />
           </svg>`,
-          image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop',
         },
         {
           title: 'Video content example',
@@ -62,7 +61,6 @@ export const Tabs: Block = {
             <path d="M12 17l0 .01" />
             <path d="M12 13.5a1.5 1.5 0 0 1 1 -1.5a2.6 2.6 0 1 0 -3 -4" />
           </svg>`,
-          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
         },
       ],
       fields: [
@@ -109,11 +107,11 @@ export const Tabs: Block = {
         },
         {
           name: 'image',
-          type: 'text',
-          label: 'Image URL',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image',
           admin: {
             condition: (data, siblingData) => siblingData?.contentType === 'image',
-            description: 'URL for the tab content image',
           },
         },
         {

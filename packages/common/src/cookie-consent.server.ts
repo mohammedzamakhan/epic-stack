@@ -1,4 +1,3 @@
-// app/utils/sidebar-cookie.server.ts
 import { createCookie } from 'react-router'
 
 export const cookieConsentCookie = createCookie('cconsent', {

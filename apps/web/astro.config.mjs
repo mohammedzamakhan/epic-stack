@@ -1,4 +1,5 @@
 import cloudflare from '@astrojs/cloudflare'
+import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { brand } from '@repo/config/brand'
@@ -6,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
+import lighthouse from 'astro-lighthouse'
 
 const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
@@ -23,6 +25,12 @@ export default defineConfig({
 			priority: 0.7,
 			lastmod: new Date(),
 		}),
+		partytown({
+			config: {
+				forward: ['dataLayer.push', 'gtag'],
+			},
+		}),
+		lighthouse(),
 	],
 
 	vite: {

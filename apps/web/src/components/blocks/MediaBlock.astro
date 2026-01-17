@@ -11,15 +11,16 @@ interface Props {
 const { media } = Astro.props
 ---
 
-<section class="py-16 relative">
+<section class="py-16 relative" aria-label="Media content">
 	<GridDesign />
 	<div class="container mx-auto px-4">
 		{
 			media && typeof media === 'object' && media.url && (
-				<div class="text-center">
+				<figure class="text-center">
 					<img
 						src={`${CMS_URL}/${media.url}`}
-						alt={media.alt || 'Media image'}
+						alt={media.alt || ''}
+						role={media.alt ? undefined : 'presentation'}
 						class="w-full max-w-4xl mx-auto h-auto object-cover relative z-10"
 						loading="lazy"
 						decoding="async"
@@ -27,7 +28,7 @@ const { media } = Astro.props
 						height={media.height || 600}
 						fetchpriority="low"
 					/>
-				</div>
+				</figure>
 			)
 		}
 	</div>

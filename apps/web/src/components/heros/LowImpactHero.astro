@@ -42,11 +42,11 @@ const renderLexicalContent = (content: any) => {
 }
 ---
 
-<section class="container mx-auto mt-16 py-8">
+<section class="container mx-auto mt-16 py-8" aria-labelledby="hero-heading">
 	<GridDesign />
 	<div class="container px-6 max-w-3xl space-y-4">
 		{richText && (
-			<div class="space-y-4" set:html={renderLexicalContent(richText)} />
+			<div class="space-y-4" set:html={renderLexicalContent(richText).replace('<h1 ', '<h1 id="hero-heading" ')} />
 		)}
 	</div>
 </section>

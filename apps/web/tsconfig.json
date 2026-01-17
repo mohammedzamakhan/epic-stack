@@ -1,7 +1,7 @@
 {
 	"extends": "astro/tsconfigs/strict",
 	"compilerOptions": {
-		"types": ["@astrojs/check/types"],
+		"types": [],
 		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./src/*"],

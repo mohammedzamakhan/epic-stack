@@ -62,6 +62,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 					<Button href={demoUrl} size="xl">
 						Get started
 						<svg
+							aria-hidden="true"
 							class="w-4 h-4 transition-transform group-hover:translate-x-1"
 							fill="none"
 							stroke="currentColor"
@@ -81,6 +82,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 
 		<!-- Navigation -->
 		<nav
+			aria-label="Footer navigation"
 			class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-8 mb-12 border-t border-border/50 pt-12"
 		>
 			{
@@ -230,6 +232,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 									<a
 										href="https://twitter.com"
 										target="_blank"
+										rel="noopener noreferrer"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										Twitter
@@ -239,6 +242,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 									<a
 										href="https://github.com"
 										target="_blank"
+										rel="noopener noreferrer"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										GitHub
@@ -248,6 +252,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 									<a
 										href="https://linkedin.com"
 										target="_blank"
+										rel="noopener noreferrer"
 										class="text-sm text-muted-foreground hover:text-primary transition-colors"
 									>
 										LinkedIn

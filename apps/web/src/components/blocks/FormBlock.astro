@@ -5,14 +5,83 @@ interface Props {
 }
 
 const { form } = Astro.props
+const formId = typeof form === 'object' ? form.id : form
+const formTitle = typeof form === 'object' ? form.title : 'Contact Us'
 ---
 
 <section class="py-16">
   <div class="container mx-auto px-4">
     <div class="prose prose-lg max-w-none">
-      <h2>Form Block</h2>
-      <p>This is a placeholder for the form block. Implementation depends on your form handling requirements.</p>
-      {form && <p><strong>Form ID:</strong> {typeof form === 'object' ? form.id : form}</p>}
+      <h2 id={`form-heading-${formId}`}>{formTitle}</h2>
+      <form
+        id={formId}
+        aria-labelledby={`form-heading-${formId}`}
+        class="mt-8 space-y-6"
+        method="post"
+      >
+        <div>
+          <label for={`name-${formId}`} class="block text-sm font-medium">
+            Name <span aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id={`name-${formId}`}
+            name="name"
+            required
+            aria-required="true"
+            aria-describedby={`name-help-${formId}`}
+            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          />
+          <p id={`name-help-${formId}`} class="mt-1 text-sm text-gray-500">
+            Enter your full name
+          </p>
+        </div>
+
+        <div>
+          <label for={`email-${formId}`} class="block text-sm font-medium">
+            Email <span aria-hidden="true">*</span>
+          </label>
+          <input
+            type="email"
+            id={`email-${formId}`}
+            name="email"
+            required
+            aria-required="true"
+            aria-describedby={`email-help-${formId}`}
+            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          />
+          <p id={`email-help-${formId}`} class="mt-1 text-sm text-gray-500">
+            We'll never share your email
+          </p>
+        </div>
+
+        <div>
+          <label for={`message-${formId}`} class="block text-sm font-medium">
+            Message <span aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id={`message-${formId}`}
+            name="message"
+            rows="4"
+            required
+            aria-required="true"
+            aria-describedby={`message-help-${formId}`}
+            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+          ></textarea>
+          <p id={`message-help-${formId}`} class="mt-1 text-sm text-gray-500">
+            Your message (minimum 10 characters)
+          </p>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="inline-flex justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Submit
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </section>

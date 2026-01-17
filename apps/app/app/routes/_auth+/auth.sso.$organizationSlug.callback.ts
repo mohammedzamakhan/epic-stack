@@ -8,7 +8,7 @@ import { getOrganizationBySlug } from '#app/utils/organization/organizations.ser
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
-} from '#app/utils/redirect-cookie.server.ts'
+} from '@repo/common/redirect-cookie'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,

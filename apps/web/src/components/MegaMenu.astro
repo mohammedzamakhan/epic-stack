@@ -15,6 +15,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
   <!-- Mobile Accordion Style -->
   <div class="mobile-mega-menu">
     <button
+      id={`${uniqueId}-trigger`}
       class="mobile-mega-menu-trigger w-full flex items-center justify-between text-lg py-2 text-foreground hover:text-primary transition-colors"
       aria-expanded="false"
       aria-controls={uniqueId}
@@ -26,6 +27,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
+        aria-hidden="true"
       >
         <path
           stroke-linecap="round"
@@ -38,6 +40,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
     <div
       id={uniqueId}
       class="mobile-mega-menu-content hidden pl-4 pt-2 pb-4 space-y-4"
+      aria-labelledby={`${uniqueId}-trigger`}
     >
       {
         columns.map((column) => (
@@ -81,6 +84,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
   <!-- Desktop Dropdown Style -->
   <div class="relative group mega-menu-container">
     <button
+      id={`${uniqueId}-desktop-trigger`}
       class="mega-menu-trigger flex items-center space-x-1 text-sm font-medium hover:text-primary transition-colors"
       aria-expanded="false"
       aria-haspopup="true"
@@ -91,6 +95,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
+        aria-hidden="true"
       >
         <path
           stroke-linecap="round"
@@ -103,6 +108,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
     <!-- Mega Menu Panel -->
     <div
       class="mega-menu-panel absolute top-full left-0 mt-2 bg-background border rounded-lg shadow-xl opacity-0 invisible transition-all duration-200 z-50 min-w-max"
+      aria-labelledby={`${uniqueId}-desktop-trigger`}
     >
       <div class="p-6">
         <div class="grid gap-8" style={`grid-template-columns: repeat(${Math.min(columns.length, 4)}, minmax(200px, 1fr))`}>
@@ -165,17 +171,28 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
 </style>
 
 <script>
-  // Enhanced mega menu interactions for desktop
-  document.addEventListener('DOMContentLoaded', () => {
+  let cleanup: (() => void) | null = null
+
+  function initMegaMenu() {
+    if (cleanup) {
+      cleanup()
+      cleanup = null
+    }
+
+    const listeners: Array<{ el: EventTarget; type: string; fn: EventListener }> = []
+
+    function addListener(el: EventTarget, type: string, fn: EventListener) {
+      el.addEventListener(type, fn)
+      listeners.push({ el, type, fn })
+    }
+
     const triggers = document.querySelectorAll('.mega-menu-trigger')
 
     triggers.forEach((trigger) => {
       const panel = trigger.parentElement?.querySelector('.mega-menu-panel')
-
       if (!panel) return
 
-      // Keyboard accessibility
-      trigger.addEventListener('keydown', (e) => {
+      function handleKeydown(e: Event) {
         const keyEvent = e as KeyboardEvent
         if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
           keyEvent.preventDefault()
@@ -190,35 +207,40 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
           panel.classList.add('opacity-0', 'invisible')
           ;(trigger as HTMLElement).focus()
         }
-      })
+      }
 
-      // Update aria-expanded on hover
-      trigger.parentElement?.addEventListener('mouseenter', () => {
+      function handleMouseEnter() {
         trigger.setAttribute('aria-expanded', 'true')
-      })
+      }
 
-      trigger.parentElement?.addEventListener('mouseleave', () => {
+      function handleMouseLeave() {
         trigger.setAttribute('aria-expanded', 'false')
-      })
+      }
 
-      // Focus handlers for keyboard accessibility
-      trigger.addEventListener('focus', () => {
+      function handleFocus() {
         trigger.setAttribute('aria-expanded', 'true')
         panel.classList.remove('opacity-0', 'invisible')
-      })
+      }
 
-      trigger.parentElement?.addEventListener('focusout', (e) => {
+      function handleFocusOut(e: Event) {
         const focusEvent = e as FocusEvent
         const container = trigger.parentElement
         if (container && !container.contains(focusEvent.relatedTarget as Node)) {
           trigger.setAttribute('aria-expanded', 'false')
           panel.classList.add('opacity-0', 'invisible')
         }
-      })
+      }
+
+      addListener(trigger, 'keydown', handleKeydown)
+      addListener(trigger, 'focus', handleFocus)
+      if (trigger.parentElement) {
+        addListener(trigger.parentElement, 'mouseenter', handleMouseEnter)
+        addListener(trigger.parentElement, 'mouseleave', handleMouseLeave)
+        addListener(trigger.parentElement, 'focusout', handleFocusOut)
+      }
     })
 
-    // Close mega menu when clicking outside
-    document.addEventListener('click', (e) => {
+    function handleDocumentClick(e: Event) {
       const target = e.target as HTMLElement
       if (!target.closest('.mega-menu-trigger') && !target.closest('.mega-menu-panel')) {
         triggers.forEach((trigger) => {
@@ -227,19 +249,20 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
           panel?.classList.add('opacity-0', 'invisible')
         })
       }
-    })
-    
+    }
+
+    addListener(document, 'click', handleDocumentClick)
+
     // Mobile accordion functionality
     const mobileTriggers = document.querySelectorAll('.mobile-mega-menu-trigger')
-    
+
     mobileTriggers.forEach((trigger) => {
-      trigger.addEventListener('click', (e) => {
+      function handleMobileClick(e: Event) {
         e.preventDefault()
         const targetId = trigger.getAttribute('data-target')
         const content = document.getElementById(targetId!)
         const isExpanded = trigger.getAttribute('aria-expanded') === 'true'
-        
-        // Close other open mega menus
+
         mobileTriggers.forEach((otherTrigger) => {
           if (otherTrigger !== trigger) {
             otherTrigger.setAttribute('aria-expanded', 'false')
@@ -248,11 +271,19 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
             otherContent?.classList.add('hidden')
           }
         })
-        
-        // Toggle current menu
+
         trigger.setAttribute('aria-expanded', String(!isExpanded))
         content?.classList.toggle('hidden')
-      })
+      }
+
+      addListener(trigger, 'click', handleMobileClick)
     })
-  })
+
+    cleanup = () => {
+      listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
+    }
+  }
+
+  initMegaMenu()
+  document.addEventListener('astro:page-load', initMegaMenu)
 </script>
