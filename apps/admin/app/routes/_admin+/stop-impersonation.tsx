@@ -1,6 +1,6 @@
 import { prisma } from '@repo/database'
 import { data, redirect } from 'react-router'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+import { auditService, AuditAction } from '@repo/audit'
 import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { createToastHeaders } from '#app/utils/toast.server.ts'

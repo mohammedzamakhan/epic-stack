@@ -1,6 +1,6 @@
 import { prisma } from '@repo/database'
 import { logger } from '@repo/observability'
-import { auditService, AuditAction } from '@repo/audit'
+import { auditService, AuditAction } from './index.ts'
 
 export type ActivityAction =
 	| 'viewed'

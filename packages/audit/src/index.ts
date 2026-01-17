@@ -713,3 +713,15 @@ export class AuditService {
 }
 
 export const auditService = new AuditService()
+
+// Re-export activity log utilities
+export * from './activity-log.ts'
+
+// Re-export middleware
+export * from './middleware.ts'
+
+// Re-export integration examples
+export * from './integration-examples.ts'
+
+// Re-export MCP audit utilities
+export * from './mcp-audit.ts'

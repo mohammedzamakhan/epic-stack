@@ -1,6 +1,6 @@
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs } from 'react-router'
-import { logMCPRateLimitExceeded } from '#app/utils/mcp/audit.server.ts'
+import { logMCPRateLimitExceeded } from '@repo/audit'
 import {
 	exchangeAuthorizationCode,
 	refreshAccessToken,

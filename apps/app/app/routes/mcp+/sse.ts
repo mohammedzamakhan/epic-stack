@@ -3,7 +3,7 @@ import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
 	logMCPToolInvoked,
 	logMCPRateLimitExceeded,
-} from '#app/utils/mcp/audit.server.ts'
+} from '@repo/audit'
 import { validateAccessToken } from '#app/utils/mcp/oauth.server.ts'
 import {
 	getToolDefinitions,

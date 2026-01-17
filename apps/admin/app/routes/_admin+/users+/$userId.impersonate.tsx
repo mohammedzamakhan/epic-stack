@@ -1,6 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { data, redirect } from 'react-router'
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+import { auditService, AuditAction } from '@repo/audit'
 import { sessionKey, getSessionExpirationDate } from '#app/utils/auth.server.ts'
 import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'

@@ -1,4 +1,4 @@
-import { auditService, AuditAction } from '#app/utils/audit.server.ts'
+import { auditService, AuditAction } from '@repo/audit'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/audit-logs.export.ts'
 

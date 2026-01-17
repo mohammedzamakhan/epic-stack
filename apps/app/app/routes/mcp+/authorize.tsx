@@ -18,7 +18,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { useEffect, useState } from 'react'
 import {
@@ -31,10 +30,9 @@ import {
 } from 'react-router'
 import { getUserId } from '#app/utils/auth.server.ts'
 import {
-	logMCPAuthorizationRequested,
 	logMCPAuthorizationApproved,
 	logMCPAuthorizationDenied,
-} from '#app/utils/mcp/audit.server.ts'
+} from '@repo/audit'
 import {
 	createAuthorizationCode,
 	validateMCPRedirectUri,

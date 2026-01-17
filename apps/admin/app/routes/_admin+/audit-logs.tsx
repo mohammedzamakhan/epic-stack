@@ -26,7 +26,7 @@ import {
 } from '@repo/ui/select'
 import { useState } from 'react'
 import { useLoaderData, useSearchParams } from 'react-router'
-import { auditService } from '#app/utils/audit.server.ts'
+import { auditService } from '@repo/audit'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {

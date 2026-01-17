@@ -23,4 +23,3 @@ export {
 // Re-export all from other MCP files
 export * from './server.server.ts'
 export * from './tools.server.ts'
-export * from './audit.server.ts'
