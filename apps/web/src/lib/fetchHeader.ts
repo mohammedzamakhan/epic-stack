@@ -1,5 +1,5 @@
-import type { HeaderData } from '../types/header'
 import { ENV } from 'varlock/env'
+import { type HeaderData } from '../types/header'
 
 const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3000'
 

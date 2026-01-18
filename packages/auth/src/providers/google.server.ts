@@ -1,8 +1,7 @@
 import { SetCookie } from '@mjackson/headers'
 import { createId as cuid } from '@paralleldrive/cuid2'
 import { redirect } from 'react-router'
-import { GoogleStrategy } from '@coji/remix-auth-google'
-import type { OAuth2Tokens } from 'arctic'
+import { GoogleStrategy, type GoogleProfile } from '@coji/remix-auth-google'
 import { z } from 'zod'
 import { cache, cachified } from '@repo/cache'
 import { type Timings } from '@repo/common'
@@ -49,8 +48,7 @@ export class GoogleProvider implements AuthProvider {
 				clientSecret: process.env.GOOGLE_CLIENT_SECRET,
 				redirectURI: process.env.GOOGLE_REDIRECT_URI,
 			},
-			async ({ tokens }: { tokens: OAuth2Tokens }) => {
-				const profile = await GoogleStrategy.userProfile(tokens)
+			async ({ profile }: { profile: GoogleProfile }) => {
 				return {
 					id: profile.id,
 					email: profile.emails?.[0]?.value ?? '',

@@ -52,7 +52,7 @@ const finalTestimonial = testimonial
 				companyUrl: testimonial.authorCompanyUrl,
 				image: typeof testimonial.authorImage === 'string' 
 					? testimonial.authorImage 
-					: testimonial.authorImage?.url || '',
+					: testimonial.authorImage?.url || author.image,
 			},
 		}
 	: { tagline, quote, author }

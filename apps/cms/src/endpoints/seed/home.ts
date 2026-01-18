@@ -146,7 +146,27 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         richText: {
           root: {
             type: 'root',
-            children: [],
+            children: [
+              {
+                type: 'heading',
+                children: [
+                  {
+                    type: 'text',
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Core features',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                tag: 'h2',
+                version: 1,
+              },
+            ],
             direction: 'ltr',
             format: '',
             indent: 0,
@@ -155,40 +175,6 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         },
         columns: [
           {
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Core features',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h2',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
-            size: 'full',
-          },
-          {
-            enableLink: false,
             richText: {
               root: {
                 type: 'root',

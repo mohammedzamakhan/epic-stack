@@ -2,6 +2,9 @@
 import MarketingLayout from '../../../layouts/MarketingLayout.astro'
 import { cmsClient } from '../../../lib/cms'
 import SEO from '../../../components/SEO.astro'
+import { getPageTitle, brand } from '@repo/config/brand'
+
+export const prerender = true;
 
 export async function getStaticPaths() {
 	// Generate paths for pagination using cmsClient
@@ -23,14 +26,30 @@ const pageNumber = parseInt(page as string)
 
 // Use cmsClient for consistency
 const posts = await cmsClient.getPosts(pageNumber, 12)
+
+// Breadcrumbs for SEO
+const breadcrumbs = [
+	{ name: 'Home', url: '/' },
+	{ name: 'Blog', url: '/blog' },
+	...(pageNumber > 1 ? [{ name: `Page ${pageNumber}`, url: `/blog/page/${pageNumber}` }] : []),
+]
+
+const pageTitle = pageNumber === 1 
+	? getPageTitle('Blog') 
+	: getPageTitle(`Blog - Page ${pageNumber}`)
+
+const pageDescription = `Discover the latest insights, tutorials, and updates from ${brand.name}. Learn about best practices and product updates.`
 ---
 
 <MarketingLayout>
 	<Fragment slot="head">
 		<SEO
-			title={`Blog - Page ${pageNumber} - Epic Startup`}
-			description="Discover the latest insights and updates from our team. Learn about best practices, tutorials, and product updates."
+			title={pageTitle}
+			description={pageDescription}
+			breadcrumbs={breadcrumbs}
 		/>
+		{pageNumber > 1 && <link rel="prev" href={pageNumber === 2 ? '/blog' : `/blog/page/${pageNumber - 1}`} />}
+		{posts.totalPages > pageNumber && <link rel="next" href={`/blog/page/${pageNumber + 1}`} />}
 	</Fragment>
 
 	<main class="min-h-screen py-24">

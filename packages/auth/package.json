@@ -24,7 +24,7 @@
   "dependencies": {
     "@coji/remix-auth-google": "^3.0.2",
     "@epic-web/totp": "^4.0.1",
-    "@mjackson/headers": "^0.14.2",
+    "@mjackson/headers": "^0.10.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@playwright/test": "1.57.0",
     "@react-email/preview-server": "^5.0.8",
@@ -35,7 +35,7 @@
     "ai": "5.0.108",
     "litefs-js": "2.0.2",
     "react-router": "^7.8.1",
-    "remix-auth-github": "^4.3.0",
+    "remix-auth-github": "^3.0.2",
     "zod": "^3.25.28"
   },
   "devDependencies": {

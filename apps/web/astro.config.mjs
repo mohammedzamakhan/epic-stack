@@ -7,7 +7,6 @@ import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
-import lighthouse from 'astro-lighthouse'
 
 const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
@@ -30,7 +29,6 @@ export default defineConfig({
 				forward: ['dataLayer.push', 'gtag'],
 			},
 		}),
-		lighthouse(),
 	],
 
 	vite: {
@@ -40,8 +38,24 @@ export default defineConfig({
 		},
 		optimizeDeps: {
 			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+		},
+		ssr: {
+			external: [
+				'zlib', 'http', 'https', 'node:path', 'node:url', 'node:fs', 
+				'node:http2', 'node:buffer', 'node:crypto', 'fs', 'os', 'path', 
+				'child_process', 'crypto', 'tty', 'worker_threads', 'net', 'stream',
+				'util', 'events', 'buffer', 'url', 'querystring', 'assert'
+			],
+			noExternal: ['@payloadcms/live-preview']
+		},
+		define: {
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
 		}
 	},
 
-	adapter: cloudflare(),
+	adapter: cloudflare({
+		platformProxy: {
+			enabled: true
+		}
+	}),
 })

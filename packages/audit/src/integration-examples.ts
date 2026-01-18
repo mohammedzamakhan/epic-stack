@@ -6,7 +6,8 @@
  * your routes and services.
  */
 
-import { auditService, AuditAction } from './index.ts'
+import { AuditAction } from './actions.ts'
+import { auditService } from './index.ts'
 
 /**
  * Example 1: User Registration/Creation

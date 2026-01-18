@@ -189,7 +189,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
     const triggers = document.querySelectorAll('.mega-menu-trigger')
 
     triggers.forEach((trigger) => {
-      const panel = trigger.parentElement?.querySelector('.mega-menu-panel')
+      const panel = trigger.parentElement?.querySelector('.mega-menu-panel')!
       if (!panel) return
 
       function handleKeydown(e: Event) {

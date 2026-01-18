@@ -1,4 +1,5 @@
-import { auditService, AuditAction } from './index.ts'
+import { AuditAction } from './actions.ts'
+import { auditService } from './index.ts'
 
 export interface AuditMiddlewareOptions {
 	getUserId: (request: Request) => Promise<string | null>

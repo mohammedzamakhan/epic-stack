@@ -1,0 +1,25 @@
+name = "epic-startup"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "epic-startup"
+
+[env.preview]
+name = "epic-startup-preview"
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "modules"
+dir = "dist"
+main = "_worker.js"
+
+# Node.js compatibility for modules that need it
+node_compat = true

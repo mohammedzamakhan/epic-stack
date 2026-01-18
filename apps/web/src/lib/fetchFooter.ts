@@ -1,5 +1,5 @@
-import { type FooterData } from '../types/footer'
 import { ENV } from 'varlock/env'
+import { type FooterData } from '../types/footer'
 
 const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3000'
 

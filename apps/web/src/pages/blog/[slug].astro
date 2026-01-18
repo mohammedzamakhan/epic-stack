@@ -12,17 +12,36 @@ export async function getStaticPaths() {
 	return posts.docs.map((post) => ({
 		params: { slug: post.slug },
 		props: {
+			slug: post.slug,
 			title: post.title,
 			content: post.content,
 			meta: post.meta,
 			publishedAt: post.publishedAt,
+			updatedAt: post.updatedAt,
 			categories: post.categories,
 			heroImage: post.heroImage,
 		},
 	}))
 }
 
-const { title, content, meta, publishedAt, categories, heroImage } = Astro.props
+const { slug, title, content, meta, publishedAt, updatedAt, categories, heroImage } = Astro.props
+
+// Calculate reading time (average 200 words per minute)
+function calculateReadingTime(content: unknown): number {
+	if (!content) return 3
+	const text = JSON.stringify(content)
+	const words = text.split(/\s+/).length
+	return Math.max(1, Math.ceil(words / 200))
+}
+
+const readingTime = calculateReadingTime(content)
+
+// Breadcrumbs for SEO
+const breadcrumbs = [
+	{ name: 'Home', url: '/' },
+	{ name: 'Blog', url: '/blog' },
+	{ name: title, url: `/blog/${slug}` },
+]
 ---
 
 <MarketingLayout>
@@ -33,6 +52,10 @@ const { title, content, meta, publishedAt, categories, heroImage } = Astro.props
 			image={meta?.image || heroImage}
 			type="article"
 			publishedTime={publishedAt}
+			modifiedTime={updatedAt}
+			keywords={categories?.map((cat: { title: string }) => cat.title) || []}
+			breadcrumbs={breadcrumbs}
+			readingTime={readingTime}
 		/>
 	</Fragment>
 

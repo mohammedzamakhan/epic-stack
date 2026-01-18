@@ -1,5 +1,5 @@
-import type { BannerData } from '../types/banner'
 import { ENV } from 'varlock/env'
+import { type BannerData } from '../types/banner'
 
 const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3000'
 

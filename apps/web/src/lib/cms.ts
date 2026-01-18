@@ -3,11 +3,11 @@
  * Combines the benefits of the official Astro guide patterns with proper TypeScript and error handling
  */
 
-import { ENV } from 'varlock/env'
+import { ENV } from '../env'
 
 const CMS_URL = ENV.PUBLIC_CMS_URL
 
-const CACHE_TTL_MS = import.meta.env.DEV ? 30 * 1000 : 5 * 60 * 1000
+const CACHE_TTL_MS = ENV.DEV ? 10 * 1000 : 5 * 60 * 1000
 
 export interface Page {
 	id: string
@@ -105,15 +105,9 @@ class CMSClient {
 			return cached
 		}
 
-		const fetchOptions: RequestInit = {}
-		if (import.meta.env.DEV && url.startsWith('https://')) {
-			// @ts-ignore - Node.js specific option for self-signed certs
-			fetchOptions.agent = new (await import('https')).Agent({
-				rejectUnauthorized: false,
-			})
-		}
-
-		const response = await fetch(url, fetchOptions)
+		// For Cloudflare Workers compatibility, we can't use Node.js https module
+		// Instead, we'll rely on the fetch API which handles HTTPS properly
+		const response = await fetch(url)
 		if (!response.ok) {
 			throw new Error(`Failed to fetch from CMS: ${response.statusText}`)
 		}

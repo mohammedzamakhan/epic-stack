@@ -5,6 +5,7 @@ import RenderHero from '../components/RenderHero.astro'
 import RenderBlocks from '../components/RenderBlocks.astro'
 import GridDesign from '../components/GridDesign.astro'
 import SEO from '../components/SEO.astro'
+import { brand } from '@repo/config/brand'
 
 // Fetch recent blog posts using cmsClient
 const recentPostsData = await cmsClient.getPosts(1, 3)
@@ -12,21 +13,26 @@ const recentPosts = recentPostsData
 
 // Try to fetch home page content from CMS
 const homePage = await cmsClient.getHomePage()
+
+// SEO data - always available regardless of CMS content
+const seoTitle = homePage?.meta?.title || homePage?.title || `${brand.name} - ${brand.tagline}`
+const seoDescription = homePage?.meta?.description || brand.description
+const seoImage = homePage?.meta?.image
 ---
 
 <MarketingLayout>
+	<Fragment slot="head">
+		<SEO
+			title={seoTitle}
+			description={seoDescription}
+			image={seoImage}
+		/>
+	</Fragment>
+
 	{/* If we have CMS content for home page, use it */}
 	{
 		homePage ? (
 			<article>
-				<Fragment slot="head">
-					<SEO
-						title={homePage.meta?.title || homePage.title || 'The Epic Startup'}
-						description={homePage.meta?.description}
-						image={homePage.meta?.image}
-					/>
-				</Fragment>
-
 				{/* Render CMS Hero Section */}
 				{homePage.hero && (
 					<div>

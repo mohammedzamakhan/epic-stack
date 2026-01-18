@@ -127,7 +127,7 @@ const testimonials = rawTestimonials.map((testimonial) => {
 		// Handle authorImage being either a string URL or a Media object
 		const authorImageUrl = typeof testimonial.authorImage === 'string' 
 			? testimonial.authorImage 
-			: testimonial.authorImage?.url || ''
+			: testimonial.authorImage?.url || 'https://i.pravatar.cc/150?img=1' // Fallback for missing images
 		return {
 			quote: testimonial.quote,
 			author: {

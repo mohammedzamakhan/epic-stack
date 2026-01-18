@@ -166,7 +166,7 @@ const docsUrl = `${protocol}//${docsHostname}${port ? `:${port}` : ''}`
 			cleanup = null
 		}
 
-		const header = document.getElementById('main-header')
+		const header = document.getElementById('main-header')!
 		if (!header) return
 
 		const isBannerEnabled = header.dataset.bannerEnabled === 'true'

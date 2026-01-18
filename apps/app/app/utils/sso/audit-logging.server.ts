@@ -1,4 +1,4 @@
-import { auditService, AuditAction } from '@repo/audit'
+import { AuditAction, auditService } from '@repo/audit'
 import { logger } from '@repo/observability'
 
 // Map SSO audit event types to unified AuditAction

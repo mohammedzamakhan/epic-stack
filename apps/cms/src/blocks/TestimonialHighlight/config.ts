@@ -73,7 +73,7 @@ export const TestimonialHighlight: Block = {
       name: 'authorImage',
       type: 'upload',
       relationTo: 'media',
-      required: true,
+      required: false,
       label: 'Author Image',
     },
   ],
