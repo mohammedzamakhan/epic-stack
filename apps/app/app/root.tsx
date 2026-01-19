@@ -42,6 +42,7 @@ import { getLaunchStatus } from './utils/env.server.ts'
 import { pipeHeaders } from './utils/headers.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
 import { getImpersonationInfo } from './utils/impersonation.server.ts'
+import { getUserOrganizationsWithSlugHandling } from './utils/organization/organizations.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from '@repo/common'
 import { useNonce } from './utils/nonce-provider.ts'
 import { seoConfig } from './utils/seo.ts'
@@ -190,8 +191,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
 	// Load user organizations with slug-based switching handled automatically
-	const { getUserOrganizationsWithSlugHandling } =
-		await import('./utils/organization/organizations.server')
 	const userOrganizations = user
 		? await getUserOrganizationsWithSlugHandling(user.id, orgSlug)
 		: undefined

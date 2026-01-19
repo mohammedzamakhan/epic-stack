@@ -227,7 +227,6 @@ export default function NotesRoute({
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
 	const [searchParams, setSearchParams] = useSearchParams()
-	const [searchValue, setSearchValue] = useState(loaderData.searchQuery)
 	const direction = useDirection()
 
 	const viewMode = loaderData.viewMode
@@ -247,18 +246,6 @@ export default function NotesRoute({
 			newSearchParams.delete('search')
 		}
 		setSearchParams(newSearchParams)
-	}
-
-	const handleSearchSubmit = (e: React.FormEvent) => {
-		e.preventDefault()
-		handleSearch(searchValue)
-	}
-
-	const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
-			e.preventDefault()
-			handleSearch(searchValue)
-		}
 	}
 
 	return (
@@ -320,25 +307,11 @@ export default function NotesRoute({
 
 			{/* Search Section */}
 			<div className="pb-4">
-				<form onSubmit={handleSearchSubmit} className="relative max-w-md">
-					<Input
-						type="search"
-						role="searchbox"
-						name="search"
-						aria-label="Search notes"
-						placeholder={_(t`Search notes by title or content...`)}
-						value={searchValue}
-						onChange={(e) => {
-							setSearchValue(e.target.value)
-						}}
-						onKeyDown={handleSearchKeyDown}
-						onBlur={() => handleSearch(searchValue)}
-						className="pr-10"
-					/>
-					<div className="absolute inset-y-0 right-0 flex items-center pr-3">
-						<Icon name="search" className="text-muted-foreground h-4 w-4" />
-					</div>
-				</form>
+				<SearchInput
+					defaultValue={loaderData.searchQuery}
+					onSearch={handleSearch}
+					placeholder={_(t`Search notes by title or content...`)}
+				/>
 			</div>
 
 			<div className="flex-grow pb-4">
@@ -417,5 +390,53 @@ export function ErrorBoundary() {
 				),
 			}}
 		/>
+	)
+}
+
+function SearchInput({
+	defaultValue,
+	onSearch,
+	placeholder,
+}: {
+	defaultValue: string
+	onSearch: (value: string) => void
+	placeholder: string
+}) {
+	const [value, setValue] = useState(defaultValue)
+
+	useEffect(() => {
+		setValue(defaultValue)
+	}, [defaultValue])
+
+	const handleSearchSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		onSearch(value)
+	}
+
+	const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			e.preventDefault()
+			onSearch(value)
+		}
+	}
+
+	return (
+		<form onSubmit={handleSearchSubmit} className="relative max-w-md">
+			<Input
+				type="search"
+				role="searchbox"
+				name="search"
+				aria-label="Search notes"
+				placeholder={placeholder}
+				value={value}
+				onChange={(e) => setValue(e.target.value)}
+				onKeyDown={handleSearchKeyDown}
+				onBlur={() => onSearch(value)}
+				className="pr-10"
+			/>
+			<div className="absolute inset-y-0 right-0 flex items-center pr-3">
+				<Icon name="search" className="text-muted-foreground h-4 w-4" />
+			</div>
+		</form>
 	)
 }

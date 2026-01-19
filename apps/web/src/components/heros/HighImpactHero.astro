@@ -1,8 +1,7 @@
 ---
 import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
-
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+import { getCmsImageUrl } from '../../utils/cms'
 
 interface Props {
 	richText?: any
@@ -54,7 +53,7 @@ const renderLexicalContent = (content: any) => {
 		<div class="absolute inset-0 -z-10" role="img" aria-label={media.alt || 'Decorative hero background'}>
 			<img
 				class="w-full h-full object-cover"
-				src={`${CMS_URL}${media.url}`}
+				src={getCmsImageUrl(media.url)}
 				alt=""
 				width={media.width || 1920}
 				height={media.height || 1080}

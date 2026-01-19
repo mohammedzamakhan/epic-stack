@@ -26,7 +26,7 @@ import { ColorPicker } from '@repo/ui/color-picker'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFetcher, useFetchers } from 'react-router'
 
@@ -149,104 +149,128 @@ export function NotesKanbanBoard({
 	// --- Optimistic overlays from Remix fetchers ---
 	const fetchers = useFetchers()
 
-	// Pending note moves / creates
-	const pendingNotes = fetchers
-		.filter((f) => f.formData?.get('intent') === 'reorder-note')
-		.map((f) => ({
-			id: String(f.formData!.get('noteId')),
-			statusId: (f.formData!.get('statusId') as string) ?? null,
-			position: Number(f.formData!.get('position')),
-		}))
+	// Pending changes derived from fetchers
+	const {
+		pendingNotes,
+		pendingNoteCreates,
+		renameMap,
+		pendingCreatesStatus,
+		pendingDeletes,
+	} = useMemo(() => {
+		const pendingNotes = fetchers
+			.filter((f) => f.formData?.get('intent') === 'reorder-note')
+			.map((f) => ({
+				id: String(f.formData!.get('noteId')),
+				statusId: (f.formData!.get('statusId') as string) ?? null,
+				position: Number(f.formData!.get('position')),
+			}))
 
-	const pendingNoteCreates = fetchers
-		.filter((f) => f.formData?.get('intent') === 'create-note')
-		.map(
-			(f) =>
-				({
-					id: String(f.formData!.get('noteId')),
-					title: String(f.formData!.get('title')),
-					content: '',
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
-					createdById: '',
-					createdByName: 'You',
-					statusId: (f.formData!.get('statusId') as string) ?? null,
-					statusName: null,
-					uploads: [],
-				}) as LoaderNote,
-		)
-
-	// Pending status creates / renames / deletes
-	const renameMap: Record<string, string> = {}
-	fetchers
-		.filter((f) => f.formData?.get('intent') === 'rename-status')
-		.forEach((f) => {
-			renameMap[String(f.formData!.get('statusId'))] = String(
-				f.formData!.get('name'),
+		const pendingNoteCreates = fetchers
+			.filter((f) => f.formData?.get('intent') === 'create-note')
+			.map(
+				(f) =>
+					({
+						id: String(f.formData!.get('noteId')),
+						title: String(f.formData!.get('title')),
+						content: '',
+						createdAt: new Date().toISOString(),
+						updatedAt: new Date().toISOString(),
+						createdById: '',
+						createdByName: 'You',
+						statusId: (f.formData!.get('statusId') as string) ?? null,
+						statusName: null,
+						uploads: [],
+					}) as LoaderNote,
 			)
-		})
 
-	const pendingCreatesStatus = fetchers
-		.filter((f) => f.formData?.get('intent') === 'create-status')
-		.map((f) => {
-			const name = String(f.formData!.get('name'))
-			return { id: name, name }
-		})
+		const renameMap: Record<string, string> = {}
+		fetchers
+			.filter((f) => f.formData?.get('intent') === 'rename-status')
+			.forEach((f) => {
+				renameMap[String(f.formData!.get('statusId'))] = String(
+					f.formData!.get('name'),
+				)
+			})
 
-	const pendingDeletes = new Set<string>()
-	for (const f of fetchers) {
-		if (f.formMethod === 'DELETE' && f.formAction?.includes('/notes/status/')) {
-			const statusId = f.formAction.split('/').pop()
-			if (statusId) pendingDeletes.add(statusId)
+		const pendingCreatesStatus = fetchers
+			.filter((f) => f.formData?.get('intent') === 'create-status')
+			.map((f) => {
+				const name = String(f.formData!.get('name'))
+				return { id: name, name }
+			})
+
+		const pendingDeletes = new Set<string>()
+		for (const f of fetchers) {
+			if (
+				f.formMethod === 'DELETE' &&
+				f.formAction?.includes('/notes/status/')
+			) {
+				const statusId = f.formAction.split('/').pop()
+				if (statusId) pendingDeletes.add(statusId)
+			}
 		}
-	}
+
+		return {
+			pendingNotes,
+			pendingNoteCreates,
+			renameMap,
+			pendingCreatesStatus,
+			pendingDeletes,
+		}
+	}, [fetchers])
 
 	// Build columns
-	const columns: Column[] = [
-		...statuses
-			.filter((s) => !pendingDeletes.has(s.id))
-			.map((s) => ({
-				id: s.id,
-				name: renameMap[s.id] ?? s.name,
-				color: s.color,
-			})),
-		...pendingCreatesStatus,
-	]
-	if (notes.some((n) => !n.statusId))
-		columns.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+	const columns: Column[] = useMemo(() => {
+		const cols = [
+			...statuses
+				.filter((s) => !pendingDeletes.has(s.id))
+				.map((s) => ({
+					id: s.id,
+					name: renameMap[s.id] ?? s.name,
+					color: s.color,
+				})),
+			...pendingCreatesStatus,
+		]
+		if (notes.some((n) => !n.statusId))
+			cols.unshift({ id: UNCATEGORISED, name: 'Uncategorised' })
+		return cols
+	}, [statuses, pendingDeletes, renameMap, pendingCreatesStatus, notes])
 
-	// Build notes
-	const noteMap = new Map<string, Note>()
-	notes.forEach((n) => noteMap.set(n.id, { ...n }))
-	pendingNotes.forEach((p) => {
-		const n = noteMap.get(p.id)
-		if (n) {
-			n.statusId = p.statusId
-			n.position = p.position
-		}
-	})
-	pendingNoteCreates.forEach((n) => noteMap.set(n.id, n))
-
-	// Group by statusId
-	const grouped: Record<string, Note[]> = {}
-	columns.forEach((c) => (grouped[c.id] = []))
-	noteMap.forEach((n) => {
-		const bucket =
-			grouped[n.statusId ?? UNCATEGORISED] ??
-			(grouped[n.statusId ?? UNCATEGORISED] = [])
-		bucket.push(n)
-	})
-	Object.values(grouped).forEach((arr) =>
-		arr.sort((a, b) => {
-			const posA = a.position ?? Number.POSITIVE_INFINITY
-			const posB = b.position ?? Number.POSITIVE_INFINITY
-			if (posA === posB) {
-				// Fallback to creation date if positions are equal
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+	// Build notes and group
+	const { noteMap, grouped } = useMemo(() => {
+		const noteMap = new Map<string, Note>()
+		notes.forEach((n) => noteMap.set(n.id, { ...n }))
+		pendingNotes.forEach((p) => {
+			const n = noteMap.get(p.id)
+			if (n) {
+				n.statusId = p.statusId
+				n.position = p.position
 			}
-			return posA - posB
-		}),
-	)
+		})
+		pendingNoteCreates.forEach((n) => noteMap.set(n.id, n))
+
+		// Group by statusId
+		const grouped: Record<string, Note[]> = {}
+		columns.forEach((c) => (grouped[c.id] = []))
+		noteMap.forEach((n) => {
+			const bucket =
+				grouped[n.statusId ?? UNCATEGORISED] ??
+				(grouped[n.statusId ?? UNCATEGORISED] = [])
+			bucket.push(n)
+		})
+		Object.values(grouped).forEach((arr) =>
+			arr.sort((a, b) => {
+				const posA = a.position ?? Number.POSITIVE_INFINITY
+				const posB = b.position ?? Number.POSITIVE_INFINITY
+				if (posA === posB) {
+					// Fallback to creation date if positions are equal
+					return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+				}
+				return posA - posB
+			}),
+		)
+		return { noteMap, grouped }
+	}, [notes, pendingNotes, pendingNoteCreates, columns])
 
 	// --- DnD-kit setup ---
 	const sensors = useSensors(
