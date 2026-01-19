@@ -1,0 +1,92 @@
+
+═══════════════════════════════════════════════════
+RAMS DESIGN REVIEW: Complete Codebase Audit
+═══════════════════════════════════════════════════
+
+CRITICAL (4 issues)
+───────────────────
+[A11Y] apps/app/app/components/app-sidebar.tsx: Lines 285-325
+  Hidden sidebar layers remain in accessibility tree
+  <motion.div animate={{ opacity: isAccountRoute ? 1 : 0 }}>
+  Issue: `opacity: 0` + `pointer-events: none` visually hides content but leaves it discoverable by screen readers.
+  Fix: Add `aria-hidden={!isActive}` or `visibility: hidden` to the container when inactive.
+  WCAG: 1.3.1, 4.1.2
+
+[A11Y] apps/web/src/components/Header.astro: Mobile Menu Script
+  Mobile menu lacks focus trap
+  Issue: When the mobile menu opens, focus is not trapped within it. Keyboard users can tab into the background page content.
+  Fix: Implement focus trap logic (e.g., using `focus-trap` library or manual event interception) when menu is open.
+  WCAG: 2.1.2
+
+[A11Y] packages/ui/components/ui/switch.tsx: Line 15
+  Touch target height too small
+  Issue: Calculated touch target height is ~34.4px (18.4px + 16px padding), which is below the 44px minimum.
+  Fix: Increase vertical padding `after:-inset-y-2` to at least `after:-inset-y-3.5` (approx).
+  WCAG: 2.5.5
+
+[A11Y] apps/web/src/components/ThemeSwitcher.astro: Line 11
+  Touch target too small
+  <button class="flex size-8 ...">
+  Issue: Button size is 32x32px (size-8), below 44px minimum.
+  Fix: Increase size to `size-11` (44px) or add transparent padding.
+  WCAG: 2.5.5
+
+
+SERIOUS (5 issues)
+──────────────────
+[A11Y] packages/ui/components/ui/sidebar.tsx: Line 186
+  Sidebar rail is keyboard inaccessible
+  <button tabIndex={-1} ...>
+  Issue: `tabIndex={-1}` removes the sidebar resize handle from the tab order. Keyboard-only users cannot resize the sidebar.
+  Fix: Remove `tabIndex={-1}` and ensure it has `role="separator"` or proper button semantics with keyboard handlers for resizing.
+  WCAG: 2.1.1
+
+[A11Y] packages/ui/components/icon.tsx: Line 36
+  Icon potentially decorative but readable
+  Issue: If `title` is missing, SVG does not default to `aria-hidden="true"`. It might be read as "image" or skipped inconsistently.
+  Fix: Add `aria-hidden={!title}` or explicit `aria-hidden="true"` when no title is present.
+  WCAG: 1.1.1
+
+[Design] apps/app/app/components/forms.tsx: Line 31
+  Text too small for readability
+  <li class="text-[10px]">
+  Issue: 10px font size in `ErrorList` is likely illegible for many users.
+  Fix: Increase to `text-xs` (12px) or larger.
+  WCAG: 1.4.3 (related)
+
+[A11Y] packages/ui/components/status-button.tsx: Line 85
+  Disabled state prevents focus
+  <Button disabled={internalStatus === 'pending'}>
+  Issue: Using `disabled` attribute removes the button from focus order. If a user submits and it becomes pending, focus is lost/reset to body.
+  Fix: Use `aria-disabled="true"` and `preventDefault` in handler instead of `disabled` attribute to maintain focus.
+  WCAG: 2.1.1
+
+[A11Y] packages/ui/components/ui/checkbox.tsx: Line 11
+  Touch target borderline
+  Issue: Visual size is 16px. Touch area padding expands it to ~40px width, ~32px height.
+  Fix: Increase pseudo-element padding to ensure 44x44px hit area.
+  WCAG: 2.5.5
+
+
+MODERATE (3 issues)
+───────────────────
+[A11Y] packages/ui/components/logo.tsx: Line 13
+  Redundant accessible name
+  <title>rocket</title> next to text "{brand.name}"
+  Issue: Screen reader might read "rocket Acme". "Rocket" is likely decorative.
+  Fix: Add `aria-hidden="true"` to the SVG or remove the title tag if the text provides full context.
+  WCAG: 1.1.1
+
+[A11Y] apps/web/src/components/Footer.astro vs Header.astro
+  Inconsistent Logo implementation
+  Issue: Footer logo uses `aria-hidden="true"`, Header logo uses `<title>rocket</title>`.
+  Fix: Standardize on `aria-hidden="true"` for the icon when adjacent text is present.
+
+[Design] packages/ui/components/ui/input.tsx: Line 11
+  Placeholder contrast
+  Issue: `placeholder:text-muted-foreground`. Verify if `muted-foreground` meets 4.5:1 against input background. Often placeholders are allowed lower contrast, but it impacts usability.
+
+═══════════════════════════════════════════════════
+SUMMARY: 4 critical, 5 serious, 3 moderate
+Score: 65/100
+═══════════════════════════════════════════════════
