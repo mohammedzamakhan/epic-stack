@@ -363,8 +363,14 @@ export default function OnboardingProviderRoute({
 					<div className="text-center text-xs text-balance text-white/80 *:[a]:underline *:[a]:underline-offset-4 *:[a]:hover:text-white">
 						<Trans>
 							By creating an account, you agree to our{' '}
-							<a href="#">Terms of Service</a> and{' '}
-							<a href="#">Privacy Policy</a>.
+							<a href="/tos" target="_blank" rel="noopener noreferrer">
+								Terms of Service
+							</a>{' '}
+							and{' '}
+							<a href="/privacy" target="_blank" rel="noopener noreferrer">
+								Privacy Policy
+							</a>
+							.
 						</Trans>
 					</div>
 				</div>

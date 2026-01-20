@@ -112,10 +112,7 @@ export default function VerifiedDomainCard({
 							<p className="text-muted-foreground">
 								<Trans>
 									Verified domain must match your current email address domain
-									for security.{' '}
-									<a href="#" className="underline">
-										Learn more
-									</a>
+									for security.
 								</Trans>
 							</p>
 						</div>

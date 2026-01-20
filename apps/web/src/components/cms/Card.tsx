@@ -32,7 +32,7 @@ export const Card: React.FC<CardProps> = ({
 				{metaImage && typeof metaImage === 'object' && metaImage.url && (
 					<img
 						src={metaImage.url}
-						alt={metaImage.alt || title || 'Post image'}
+						alt={metaImage.alt || title || ''}
 						className="h-48 w-full object-cover"
 					/>
 				)}
