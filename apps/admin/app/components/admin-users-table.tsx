@@ -1,3 +1,20 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import {
+	type ColumnDef,
+	type ColumnFiltersState,
+	flexRender,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+	type VisibilityState,
+} from '@tanstack/react-table'
+import { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
+import { getUserImgSrc } from '@repo/common'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -25,22 +42,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
-import {
-	type ColumnDef,
-	type ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState,
-} from '@tanstack/react-table'
-import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
-
-import { getUserImgSrc } from '@repo/common'
 
 export interface AdminUser {
 	id: string
@@ -91,10 +92,12 @@ interface AdminUsersTableProps {
 	filters: Filters
 }
 
-const columns: ColumnDef<AdminUser>[] = [
+const getColumns = (
+	_: ReturnType<typeof useLingui>['_'],
+): ColumnDef<AdminUser>[] => [
 	{
 		accessorKey: 'user',
-		header: 'User',
+		header: _(msg`User`),
 		cell: ({ row }) => {
 			const user = row.original
 			return (
@@ -119,24 +122,32 @@ const columns: ColumnDef<AdminUser>[] = [
 	},
 	{
 		accessorKey: 'username',
-		header: 'Username',
+		header: _(msg`Username`),
 		cell: ({ row }) => (
 			<span className="font-mono text-sm">{row.original.username}</span>
 		),
 	},
 	{
 		accessorKey: 'organizations',
-		header: 'Organizations',
+		header: _(msg`Organizations`),
 		cell: ({ row }) => {
 			const orgs = row.original.organizations
 			if (!orgs || orgs.length === 0) {
-				return <span className="text-muted-foreground">None</span>
+				return (
+					<span className="text-muted-foreground">
+						<Trans>None</Trans>
+					</span>
+				)
 			}
 
 			// Get the first valid organization
 			const firstOrg = orgs.find((org) => org?.organization?.name)
 			if (!firstOrg) {
-				return <span className="text-muted-foreground">None</span>
+				return (
+					<span className="text-muted-foreground">
+						<Trans>None</Trans>
+					</span>
+				)
 			}
 
 			if (orgs.length === 1) {
@@ -155,7 +166,7 @@ const columns: ColumnDef<AdminUser>[] = [
 	},
 	{
 		accessorKey: 'status',
-		header: 'Status',
+		header: _(msg`Status`),
 		cell: ({ row }) => {
 			const user = row.original
 			if (user.isBanned) {
@@ -164,20 +175,28 @@ const columns: ColumnDef<AdminUser>[] = [
 				return (
 					<Badge variant="destructive" className="gap-1">
 						<Icon name="ban" className="h-3 w-3" />
-						{isBanExpired ? 'Ban Expired' : 'Banned'}
+						{isBanExpired ? <Trans>Ban Expired</Trans> : <Trans>Banned</Trans>}
 					</Badge>
 				)
 			}
-			return <Badge variant="default">Active</Badge>
+			return (
+				<Badge variant="default">
+					<Trans>Active</Trans>
+				</Badge>
+			)
 		},
 	},
 	{
 		accessorKey: 'lastLoginAt',
-		header: 'Last Login',
+		header: _(msg`Last Login`),
 		cell: ({ row }) => {
 			const lastLogin = row.original.lastLoginAt
 			if (!lastLogin) {
-				return <span className="text-muted-foreground">Never</span>
+				return (
+					<span className="text-muted-foreground">
+						<Trans>Never</Trans>
+					</span>
+				)
 			}
 			return (
 				<span className="text-sm">
@@ -188,7 +207,7 @@ const columns: ColumnDef<AdminUser>[] = [
 	},
 	{
 		accessorKey: 'createdAt',
-		header: 'Created',
+		header: _(msg`Created`),
 		cell: ({ row }) => (
 			<span className="text-sm">
 				{new Date(row.original.createdAt).toLocaleDateString()}
@@ -203,6 +222,7 @@ export function AdminUsersTable({
 	pagination,
 	filters,
 }: AdminUsersTableProps) {
+	const { _ } = useLingui()
 	const navigate = useNavigate()
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -212,6 +232,7 @@ export function AdminUsersTable({
 	const [organizationFilter, setOrganizationFilter] = useState(
 		filters.organization,
 	)
+	const columns = getColumns(_)
 
 	const table = useReactTable({
 		data: users,
@@ -288,7 +309,7 @@ export function AdminUsersTable({
 							className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
 						/>
 						<Input
-							placeholder="Search users..."
+							placeholder={_(msg`Search users...`)}
 							value={searchQuery}
 							onChange={(e) => handleSearch(e.target.value)}
 							className="pl-9"
@@ -299,10 +320,12 @@ export function AdminUsersTable({
 						onValueChange={(value) => handleOrganizationFilter(value as string)}
 					>
 						<SelectTrigger className="w-48">
-							Filter by organization
+							<Trans>Filter by organization</Trans>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="all">All organizations</SelectItem>
+							<SelectItem value="all">
+								<Trans>All organizations</Trans>
+							</SelectItem>
 							{organizations.map((org) => (
 								<SelectItem key={org.id} value={org.name}>
 									{org.name}
@@ -317,7 +340,7 @@ export function AdminUsersTable({
 							onClick={clearFilters}
 							className="h-8 px-2 lg:px-3"
 						>
-							Reset
+							<Trans>Reset</Trans>
 							<Icon name="x" className="ml-2 h-4 w-4" />
 						</Button>
 					)}
@@ -326,7 +349,7 @@ export function AdminUsersTable({
 					<DropdownMenu>
 						<DropdownMenuTrigger>
 							<Button variant="outline" size="sm">
-								Columns
+								<Trans>Columns</Trans>
 								<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -360,12 +383,14 @@ export function AdminUsersTable({
 			{/* Results Summary */}
 			<div className="text-muted-foreground flex items-center justify-between text-sm">
 				<div>
-					Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
-					{Math.min(
-						pagination.page * pagination.pageSize,
-						pagination.totalCount,
-					)}{' '}
-					of {pagination.totalCount} users
+					<Trans>
+						Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
+						{Math.min(
+							pagination.page * pagination.pageSize,
+							pagination.totalCount,
+						)}{' '}
+						of {pagination.totalCount} users
+					</Trans>
 				</div>
 			</div>
 
@@ -398,6 +423,14 @@ export function AdminUsersTable({
 									data-state={row.getIsSelected() && 'selected'}
 									className="hover:bg-muted/50 cursor-pointer"
 									onClick={() => navigate(`/users/${row.original.id}`)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault()
+											void navigate(`/users/${row.original.id}`)
+										}
+									}}
+									role="button"
+									tabIndex={0}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>
@@ -415,7 +448,7 @@ export function AdminUsersTable({
 									colSpan={columns.length}
 									className="h-24 text-center"
 								>
-									No users found.
+									<Trans>No users found.</Trans>
 								</TableCell>
 							</TableRow>
 						)}
@@ -427,7 +460,7 @@ export function AdminUsersTable({
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Label htmlFor="rows-per-page" className="text-sm font-medium">
-						Rows per page
+						<Trans>Rows per page</Trans>
 					</Label>
 					<Select
 						value={pagination.pageSize.toString()}
@@ -447,7 +480,9 @@ export function AdminUsersTable({
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="text-sm font-medium">
-						Page {pagination.page} of {pagination.totalPages}
+						<Trans>
+							Page {pagination.page} of {pagination.totalPages}
+						</Trans>
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
@@ -456,7 +491,9 @@ export function AdminUsersTable({
 							onClick={() => handlePageChange(1)}
 							disabled={pagination.page === 1}
 						>
-							<span className="sr-only">Go to first page</span>
+							<span className="sr-only">
+								<Trans>Go to first page</Trans>
+							</span>
 							<Icon name="chevrons-left" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -465,7 +502,9 @@ export function AdminUsersTable({
 							onClick={() => handlePageChange(pagination.page - 1)}
 							disabled={pagination.page === 1}
 						>
-							<span className="sr-only">Go to previous page</span>
+							<span className="sr-only">
+								<Trans>Go to previous page</Trans>
+							</span>
 							<Icon name="chevron-left" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -474,7 +513,9 @@ export function AdminUsersTable({
 							onClick={() => handlePageChange(pagination.page + 1)}
 							disabled={pagination.page === pagination.totalPages}
 						>
-							<span className="sr-only">Go to next page</span>
+							<span className="sr-only">
+								<Trans>Go to next page</Trans>
+							</span>
 							<Icon name="chevron-right" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -483,7 +524,9 @@ export function AdminUsersTable({
 							onClick={() => handlePageChange(pagination.totalPages)}
 							disabled={pagination.page === pagination.totalPages}
 						>
-							<span className="sr-only">Go to last page</span>
+							<span className="sr-only">
+								<Trans>Go to last page</Trans>
+							</span>
 							<Icon name="chevrons-right" className="h-4 w-4" />
 						</Button>
 					</div>

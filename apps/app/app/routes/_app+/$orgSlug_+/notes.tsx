@@ -278,7 +278,7 @@ export default function NotesRoute({
 						}}
 					>
 						<TabsList>
-							<TabsTrigger value="cards" aria-label="Cards view">
+							<TabsTrigger value="cards" aria-label={_(t`Cards view`)}>
 								<Tooltip>
 									<TooltipTrigger
 										render={
@@ -292,7 +292,7 @@ export default function NotesRoute({
 									</TooltipContent>
 								</Tooltip>
 							</TabsTrigger>
-							<TabsTrigger value="kanban" aria-label="Kanban board">
+							<TabsTrigger value="kanban" aria-label={_(t`Kanban board`)}>
 								<Tooltip>
 									<TooltipTrigger
 										render={
@@ -325,7 +325,7 @@ export default function NotesRoute({
 						type="search"
 						role="searchbox"
 						name="search"
-						aria-label="Search notes"
+						aria-label={_(t`Search notes`)}
 						placeholder={_(t`Search notes by title or content...`)}
 						value={searchValue}
 						onChange={(e) => {

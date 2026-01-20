@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -67,8 +68,10 @@ export function SSOConfigurationOverview({
 				<div className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-yellow-800">
 					<Icon name="alert-triangle" className="h-4 w-4" />
 					<span>
-						SSO is configured but currently disabled. Users cannot authenticate
-						through SSO.
+						<Trans>
+							SSO is configured but currently disabled. Users cannot
+							authenticate through SSO.
+						</Trans>
 					</span>
 				</div>
 			)}
@@ -77,8 +80,10 @@ export function SSOConfigurationOverview({
 				<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
 					<Icon name="octagon-alert" className="h-4 w-4" />
 					<span>
-						SSO connection has not been tested recently or may be experiencing
-						issues. Consider testing the connection.
+						<Trans>
+							SSO connection has not been tested recently or may be experiencing
+							issues. Consider testing the connection.
+						</Trans>
 					</span>
 				</div>
 			)}
@@ -90,23 +95,29 @@ export function SSOConfigurationOverview({
 						<div>
 							<CardTitle className="flex items-center gap-2">
 								<Icon name="shield" className="h-5 w-5" />
-								SSO Configuration
+								<Trans>SSO Configuration</Trans>
 								<Badge variant={ssoConfig.isEnabled ? 'default' : 'secondary'}>
-									{ssoConfig.isEnabled ? 'Enabled' : 'Disabled'}
+									{ssoConfig.isEnabled ? (
+										<Trans>Enabled</Trans>
+									) : (
+										<Trans>Disabled</Trans>
+									)}
 								</Badge>
 							</CardTitle>
 							<CardDescription>
-								{ssoConfig.providerName} identity provider configuration
+								<Trans>
+									{ssoConfig.providerName} identity provider configuration
+								</Trans>
 							</CardDescription>
 						</div>
 						<div className="flex items-center gap-2">
 							<Button variant="outline" size="sm" onClick={onTestConnection}>
 								<Icon name="plug" className="mr-2 h-4 w-4" />
-								Test Connection
+								<Trans>Test Connection</Trans>
 							</Button>
 							<Button variant="outline" size="sm" onClick={onEdit}>
 								<Icon name="settings" className="mr-2 h-4 w-4" />
-								Edit
+								<Trans>Edit</Trans>
 							</Button>
 							<Button
 								variant={ssoConfig.isEnabled ? 'destructive' : 'default'}
@@ -117,7 +128,11 @@ export function SSOConfigurationOverview({
 									name={ssoConfig.isEnabled ? 'ban' : 'check'}
 									className="mr-2 h-4 w-4"
 								/>
-								{ssoConfig.isEnabled ? 'Disable' : 'Enable'}
+								{ssoConfig.isEnabled ? (
+									<Trans>Disable</Trans>
+								) : (
+									<Trans>Enable</Trans>
+								)}
 							</Button>
 						</div>
 					</div>
@@ -127,35 +142,47 @@ export function SSOConfigurationOverview({
 						{/* Configuration Details */}
 						<div className="space-y-4">
 							<div>
-								<h4 className="mb-2 text-sm font-medium">Provider Details</h4>
+								<h4 className="mb-2 text-sm font-medium">
+									<Trans>Provider Details</Trans>
+								</h4>
 								<div className="space-y-2 text-sm">
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Provider:</span>
+										<span className="text-muted-foreground">
+											<Trans>Provider:</Trans>
+										</span>
 										<span className="font-medium">
 											{ssoConfig.providerName}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Issuer URL:</span>
+										<span className="text-muted-foreground">
+											<Trans>Issuer URL:</Trans>
+										</span>
 										<span className="font-mono text-xs break-all">
 											{ssoConfig.issuerUrl}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Client ID:</span>
+										<span className="text-muted-foreground">
+											<Trans>Client ID:</Trans>
+										</span>
 										<span className="font-mono text-xs">
 											{ssoConfig.clientId.slice(0, 8)}...
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Scopes:</span>
+										<span className="text-muted-foreground">
+											<Trans>Scopes:</Trans>
+										</span>
 										<span className="text-xs">{ssoConfig.scopes}</span>
 									</div>
 								</div>
 							</div>
 
 							<div>
-								<h4 className="mb-2 text-sm font-medium">Configuration</h4>
+								<h4 className="mb-2 text-sm font-medium">
+									<Trans>Configuration</Trans>
+								</h4>
 								<div className="space-y-2">
 									<div className="flex items-center gap-2">
 										<Icon
@@ -166,7 +193,9 @@ export function SSOConfigurationOverview({
 													: 'text-red-500'
 											}`}
 										/>
-										<span className="text-sm">Auto-Discovery</span>
+										<span className="text-sm">
+											<Trans>Auto-Discovery</Trans>
+										</span>
 									</div>
 									<div className="flex items-center gap-2">
 										<Icon
@@ -177,7 +206,9 @@ export function SSOConfigurationOverview({
 													: 'text-red-500'
 											}`}
 										/>
-										<span className="text-sm">PKCE Enabled</span>
+										<span className="text-sm">
+											<Trans>PKCE Enabled</Trans>
+										</span>
 									</div>
 									<div className="flex items-center gap-2">
 										<Icon
@@ -188,7 +219,9 @@ export function SSOConfigurationOverview({
 													: 'text-red-500'
 											}`}
 										/>
-										<span className="text-sm">Auto-Provision Users</span>
+										<span className="text-sm">
+											<Trans>Auto-Provision Users</Trans>
+										</span>
 									</div>
 								</div>
 							</div>
@@ -197,10 +230,14 @@ export function SSOConfigurationOverview({
 						{/* Status and Statistics */}
 						<div className="space-y-4">
 							<div>
-								<h4 className="mb-2 text-sm font-medium">Status</h4>
+								<h4 className="mb-2 text-sm font-medium">
+									<Trans>Status</Trans>
+								</h4>
 								<div className="space-y-2 text-sm">
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Last Tested:</span>
+										<span className="text-muted-foreground">
+											<Trans>Last Tested:</Trans>
+										</span>
 										<span>
 											{ssoConfig.lastTested ? (
 												<span
@@ -213,12 +250,16 @@ export function SSOConfigurationOverview({
 													})}
 												</span>
 											) : (
-												<span className="text-red-600">Never</span>
+												<span className="text-red-600">
+													<Trans>Never</Trans>
+												</span>
 											)}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Created:</span>
+										<span className="text-muted-foreground">
+											<Trans>Created:</Trans>
+										</span>
 										<span>
 											{formatDistanceToNow(new Date(ssoConfig.createdAt), {
 												addSuffix: true,
@@ -226,7 +267,9 @@ export function SSOConfigurationOverview({
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Updated:</span>
+										<span className="text-muted-foreground">
+											<Trans>Updated:</Trans>
+										</span>
 										<span>
 											{formatDistanceToNow(new Date(ssoConfig.updatedAt), {
 												addSuffix: true,
@@ -235,7 +278,9 @@ export function SSOConfigurationOverview({
 									</div>
 									{ssoConfig.createdBy && (
 										<div className="flex justify-between">
-											<span className="text-muted-foreground">Created by:</span>
+											<span className="text-muted-foreground">
+												<Trans>Created by:</Trans>
+											</span>
 											<span>
 												{ssoConfig.createdBy.name ||
 													ssoConfig.createdBy.username}
@@ -247,17 +292,19 @@ export function SSOConfigurationOverview({
 
 							{ssoStats && (
 								<div>
-									<h4 className="mb-2 text-sm font-medium">Usage Statistics</h4>
+									<h4 className="mb-2 text-sm font-medium">
+										<Trans>Usage Statistics</Trans>
+									</h4>
 									<div className="space-y-2 text-sm">
 										<div className="flex justify-between">
 											<span className="text-muted-foreground">
-												Total Users:
+												<Trans>Total Users:</Trans>
 											</span>
 											<span className="font-medium">{ssoStats.totalUsers}</span>
 										</div>
 										<div className="flex justify-between">
 											<span className="text-muted-foreground">
-												Active Users:
+												<Trans>Active Users:</Trans>
 											</span>
 											<span className="font-medium">
 												{ssoStats.activeUsers}
@@ -265,7 +312,7 @@ export function SSOConfigurationOverview({
 										</div>
 										<div className="flex justify-between">
 											<span className="text-muted-foreground">
-												Recent Logins:
+												<Trans>Recent Logins:</Trans>
 											</span>
 											<span className="font-medium">
 												{ssoStats.recentLogins}
@@ -274,7 +321,7 @@ export function SSOConfigurationOverview({
 										{ssoStats.lastLogin && (
 											<div className="flex justify-between">
 												<span className="text-muted-foreground">
-													Last Login:
+													<Trans>Last Login:</Trans>
 												</span>
 												<span>
 													{formatDistanceToNow(new Date(ssoStats.lastLogin), {

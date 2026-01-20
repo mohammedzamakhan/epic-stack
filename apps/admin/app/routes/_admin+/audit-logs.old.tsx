@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro'
 import { Badge } from '@repo/ui/badge'
 import {
 	Card,
@@ -145,7 +146,9 @@ export default function AdminAuditLogsPage() {
 								name="user"
 								className="text-muted-foreground mx-auto mb-4 h-12 w-12"
 							/>
-							<p className="text-muted-foreground">No audit logs found</p>
+							<p className="text-muted-foreground">
+								<Trans>No audit logs found</Trans>
+							</p>
 						</div>
 					)}
 				</CardContent>

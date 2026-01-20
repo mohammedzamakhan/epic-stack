@@ -91,6 +91,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 									<TouchableOpacity
 										style={[styles.button, styles.secondaryButton]}
 										onPress={secondaryAction.onPress}
+										accessibilityRole="button"
 									>
 										<Text style={styles.secondaryButtonText}>
 											{secondaryAction.text}
@@ -102,6 +103,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 									<TouchableOpacity
 										style={[styles.button, styles.primaryButton]}
 										onPress={primaryAction.onPress}
+										accessibilityRole="button"
 									>
 										<Text style={styles.primaryButtonText}>
 											{primaryAction.text}
@@ -113,6 +115,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 									<TouchableOpacity
 										style={[styles.button, styles.primaryButton]}
 										onPress={onDismiss}
+										accessibilityRole="button"
 									>
 										<Text style={styles.primaryButtonText}>OK</Text>
 									</TouchableOpacity>

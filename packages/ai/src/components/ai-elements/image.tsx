@@ -20,6 +20,8 @@ export const Image = ({
 		alt={props.alt ?? ''}
 		loading="lazy"
 		decoding="async"
+		width={512}
+		height={512}
 		className={cn(
 			'h-auto max-w-full overflow-hidden rounded-md',
 			props.className,

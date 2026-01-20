@@ -1,3 +1,7 @@
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { getNoteImgSrc, getUserImgSrc } from '@repo/common'
+import { cn } from '@repo/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent } from '@repo/ui/card'
@@ -10,10 +14,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
-import { getNoteImgSrc, getUserImgSrc } from '@repo/common'
-import { cn } from '@repo/ui'
 import { type loader } from './notes'
-import { t, Trans } from '@lingui/macro'
 
 type LoaderNote = {
 	id: string
@@ -75,6 +76,7 @@ export const NoteCard = ({
 	isEditing = false,
 	setEditingNote,
 }: NoteCardProps) => {
+	const { _ } = useLingui()
 	const [copied, setCopied] = useState(false)
 	const [tooltipOpen, setTooltipOpen] = useState(false)
 	const [editTitle, setEditTitle] = useState(note.title)
@@ -294,6 +296,7 @@ export const NoteCard = ({
 												<button
 													className="bg-background text-background-foreground flex items-center gap-1.5 rounded-tr-[16px] border-b border-l border-black/10 px-2 py-1.5"
 													onClick={handleCopyLink}
+													aria-label={copied ? t`Link copied!` : t`Copy link`}
 												>
 													{copied ? (
 														<Icon name="check" className="h-3.5 w-3.5" />
@@ -352,14 +355,14 @@ export const NoteCard = ({
 									onChange={(e) => setEditTitle(e.target.value)}
 									onKeyDown={handleKeyDown}
 									className="h-8 flex-1 px-2 font-semibold"
-									placeholder="Note title..."
+									placeholder={_(t`Note title...`)}
 								/>
 								<div className="flex items-center gap-1">
 									<Button
 										size="icon"
 										onClick={handleSaveEdit}
 										className="h-6 w-6 p-0"
-										aria-label="Save changes"
+										aria-label={_(t`Save changes`)}
 										disabled={fetcher.state !== 'idle'}
 									>
 										<Icon name="check" className="h-4 w-4" />
@@ -369,7 +372,7 @@ export const NoteCard = ({
 										variant="destructive"
 										onClick={handleCancelEdit}
 										className="h-6 w-6 p-0"
-										aria-label="Cancel editing"
+										aria-label={_(t`Cancel editing`)}
 									>
 										<Icon name="x" className="h-4 w-4" />
 									</Button>
@@ -379,7 +382,7 @@ export const NoteCard = ({
 								value={editContent}
 								onChange={(e) => setEditContent(e.target.value)}
 								onKeyDown={handleKeyDown}
-								placeholder="Note content..."
+								placeholder={_(t`Note content...`)}
 								className="max-h-20 min-h-16 resize-none text-sm"
 								rows={2}
 							/>

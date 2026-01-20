@@ -1,3 +1,7 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { useRef } from 'react'
+import { useFetcher } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import {
 	DropdownMenu,
@@ -16,9 +20,6 @@ import {
 	useSidebar,
 } from '@repo/ui/sidebar'
 import { SunMoonIcon } from '@repo/ui/sun-moon-icon'
-import { useRef } from 'react'
-import { useFetcher } from 'react-router'
-
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 
@@ -34,6 +35,7 @@ export function NavUser({
 	}
 	userPreference?: 'light' | 'dark' | 'system' | null
 }) {
+	const { _ } = useLingui()
 	const { isMobile } = useSidebar()
 	const iconRefs = useRef<{ [key: string]: any }>({})
 	const themeFetcher = useFetcher()
@@ -55,9 +57,9 @@ export function NavUser({
 	const mode = optimisticMode ?? userPreference ?? 'system'
 
 	const themeOptions = [
-		{ value: 'light', icon: 'sun', label: 'Light mode' },
-		{ value: 'dark', icon: 'moon', label: 'Dark mode' },
-		{ value: 'system', icon: 'laptop', label: 'System theme' },
+		{ value: 'light', icon: 'sun', label: _(msg`Light mode`) },
+		{ value: 'dark', icon: 'moon', label: _(msg`Dark mode`) },
+		{ value: 'system', icon: 'laptop', label: _(msg`System theme`) },
 	] as const
 
 	const handleMenuItemMouseEnter = (iconKey: string) => {
@@ -118,7 +120,7 @@ export function NavUser({
 									size={16}
 									ref={(ref: any) => (iconRefs.current['theme'] = ref)}
 								/>
-								Theme
+								{_(msg`Theme`)}
 							</DropdownMenuSubTrigger>
 							<DropdownMenuSubContent>
 								{themeOptions.map((option) => (

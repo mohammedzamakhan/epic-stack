@@ -223,6 +223,10 @@ export default function OnboardingScreen() {
 											<TouchableOpacity
 												onPress={() => setShowPassword(!showPassword)}
 												style={styles.eyeButton}
+												accessibilityLabel={
+													showPassword ? 'Hide password' : 'Show password'
+												}
+												accessibilityRole="button"
 											>
 												<Text style={styles.eyeIcon}>
 													{showPassword ? '🙈' : '👁️'}
@@ -261,6 +265,12 @@ export default function OnboardingScreen() {
 													setShowConfirmPassword(!showConfirmPassword)
 												}
 												style={styles.eyeButton}
+												accessibilityLabel={
+													showConfirmPassword
+														? 'Hide confirm password'
+														: 'Show confirm password'
+												}
+												accessibilityRole="button"
 											>
 												<Text style={styles.eyeIcon}>
 													{showConfirmPassword ? '🙈' : '👁️'}
@@ -323,7 +333,10 @@ export default function OnboardingScreen() {
 
 				{/* Footer */}
 				<View style={styles.footer}>
-					<TouchableOpacity onPress={handleBackToVerification}>
+					<TouchableOpacity
+						onPress={handleBackToVerification}
+						accessibilityRole="link"
+					>
 						<Text style={styles.footerLinkText}>Back to verification</Text>
 					</TouchableOpacity>
 				</View>

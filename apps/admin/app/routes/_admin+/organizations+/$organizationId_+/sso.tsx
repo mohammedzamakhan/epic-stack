@@ -1,11 +1,12 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
-import { useLoaderData, useActionData, useNavigation } from 'react-router'
+import { Trans } from '@lingui/macro'
+import { useActionData, useLoaderData, useNavigation } from 'react-router'
 import { z } from 'zod'
+import { prisma } from '@repo/database'
 import { SSOConfigurationForm } from '#app/components/sso-configuration-form.tsx'
 import { SSOConfigurationOverview } from '#app/components/sso-configuration-overview.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -394,10 +395,12 @@ export default function AdminOrganizationSSOPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						SSO Configuration
+						<Trans>SSO Configuration</Trans>
 					</h1>
 					<p className="text-muted-foreground">
-						Configure Single Sign-On for {(organization as any).name}
+						<Trans>
+							Configure Single Sign-On for {(organization as any).name}
+						</Trans>
 					</p>
 				</div>
 			</div>

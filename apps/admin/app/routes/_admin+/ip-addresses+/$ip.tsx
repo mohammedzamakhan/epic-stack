@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -66,14 +67,16 @@ export default function AdminIpDetailPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						IP Address Details
+						<Trans>IP Address Details</Trans>
 					</h1>
 					<p className="text-muted-foreground">
-						Detailed information for IP {ipAddress.ip}
+						<Trans>Detailed information for IP {ipAddress.ip}</Trans>
 					</p>
 				</div>
 				<Button variant="outline">
-					<Link to="/ip-addresses">← Back to IP Addresses</Link>
+					<Link to="/ip-addresses">
+						<Trans>← Back to IP Addresses</Trans>
+					</Link>
 				</Button>
 			</div>
 
@@ -81,19 +84,21 @@ export default function AdminIpDetailPage() {
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>IP Information</CardTitle>
+						<CardTitle>
+							<Trans>IP Information</Trans>
+						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								IP Address
+								<Trans>IP Address</Trans>
 							</label>
 							<p className="font-mono text-lg">{ipAddress.ip}</p>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Location
+								<Trans>Location</Trans>
 							</label>
 							<p>
 								{ipAddress.country && ipAddress.city ? (
@@ -101,36 +106,44 @@ export default function AdminIpDetailPage() {
 								) : ipAddress.country ? (
 									ipAddress.country
 								) : (
-									<span className="text-muted-foreground">Unknown</span>
+									<span className="text-muted-foreground">
+										<Trans>Unknown</Trans>
+									</span>
 								)}
 							</p>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Status
+								<Trans>Status</Trans>
 							</label>
 							<div className="mt-1">
 								{ipAddress.isBlacklisted ? (
-									<Badge variant="destructive">Blacklisted</Badge>
+									<Badge variant="destructive">
+										<Trans>Blacklisted</Trans>
+									</Badge>
 								) : ipAddress.suspiciousScore > 0 ? (
-									<Badge variant="secondary">Suspicious</Badge>
+									<Badge variant="secondary">
+										<Trans>Suspicious</Trans>
+									</Badge>
 								) : (
-									<Badge variant="outline">Active</Badge>
+									<Badge variant="outline">
+										<Trans>Active</Trans>
+									</Badge>
 								)}
 							</div>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Total Requests
+								<Trans>Total Requests</Trans>
 							</label>
 							<p className="text-2xl font-bold">{ipAddress.requestCount}</p>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Suspicious Score
+								<Trans>Suspicious Score</Trans>
 							</label>
 							<p
 								className={
@@ -147,29 +160,31 @@ export default function AdminIpDetailPage() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Activity Information</CardTitle>
+						<CardTitle>
+							<Trans>Activity Information</Trans>
+						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								First Seen
+								<Trans>First Seen</Trans>
 							</label>
 							<p>{formatDate(ipAddress.createdAt)}</p>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Last Request
+								<Trans>Last Request</Trans>
 							</label>
 							<p>{formatDate(ipAddress.lastRequestAt)}</p>
 						</div>
 
 						<div>
 							<label className="text-muted-foreground text-sm font-medium">
-								Last User Agent
+								<Trans>Last User Agent</Trans>
 							</label>
 							<p className="text-sm break-all">
-								{ipAddress.lastUserAgent || 'Unknown'}
+								{ipAddress.lastUserAgent || <Trans>Unknown</Trans>}
 							</p>
 						</div>
 
@@ -177,14 +192,14 @@ export default function AdminIpDetailPage() {
 							<>
 								<div>
 									<label className="text-muted-foreground text-sm font-medium">
-										Blacklisted At
+										<Trans>Blacklisted At</Trans>
 									</label>
 									<p>{formatDate(ipAddress.blacklistedAt)}</p>
 								</div>
 
 								<div>
 									<label className="text-muted-foreground text-sm font-medium">
-										Blacklist Reason
+										<Trans>Blacklist Reason</Trans>
 									</label>
 									<p>{ipAddress.blacklistReason}</p>
 								</div>
@@ -192,7 +207,7 @@ export default function AdminIpDetailPage() {
 								{ipAddress.blacklistedBy && (
 									<div>
 										<label className="text-muted-foreground text-sm font-medium">
-											Blacklisted By
+											<Trans>Blacklisted By</Trans>
 										</label>
 										<p>
 											{ipAddress.blacklistedBy.name ||
@@ -210,7 +225,9 @@ export default function AdminIpDetailPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						Users Associated with this IP ({userConnections.length})
+						<Trans>
+							Users Associated with this IP ({userConnections.length})
+						</Trans>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -218,13 +235,27 @@ export default function AdminIpDetailPage() {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>User</TableHead>
-									<TableHead>Email</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead>First Seen</TableHead>
-									<TableHead>Last Seen</TableHead>
-									<TableHead>Requests</TableHead>
-									<TableHead>Actions</TableHead>
+									<TableHead>
+										<Trans>User</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Email</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Status</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>First Seen</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Last Seen</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Requests</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Actions</Trans>
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -245,9 +276,13 @@ export default function AdminIpDetailPage() {
 										</TableCell>
 										<TableCell>
 											{connection.user.isBanned ? (
-												<Badge variant="destructive">Banned</Badge>
+												<Badge variant="destructive">
+													<Trans>Banned</Trans>
+												</Badge>
 											) : (
-												<Badge variant="outline">Active</Badge>
+												<Badge variant="outline">
+													<Trans>Active</Trans>
+												</Badge>
 											)}
 										</TableCell>
 										<TableCell className="text-sm">
@@ -264,7 +299,7 @@ export default function AdminIpDetailPage() {
 										<TableCell>
 											<Button variant="outline" size="sm">
 												<Link to={`/users/${connection.user.id}`}>
-													View User
+													<Trans>View User</Trans>
 												</Link>
 											</Button>
 										</TableCell>
@@ -275,7 +310,7 @@ export default function AdminIpDetailPage() {
 					) : (
 						<div className="py-8 text-center">
 							<p className="text-muted-foreground">
-								No users have been tracked for this IP address
+								<Trans>No users have been tracked for this IP address</Trans>
 							</p>
 						</div>
 					)}

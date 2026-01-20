@@ -1,4 +1,4 @@
-import { Trans, msg } from '@lingui/macro'
+import { t, Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type Notification } from '@novu/js'
 import { useNotifications, useNovu } from '@novu/react/hooks'
@@ -132,14 +132,22 @@ function NotificationItem({ notification }: { notification: Notification }) {
 
 	return (
 		<div
-			className={`${notification.isRead ? 'bg-background' : 'bg-muted'}`}
+			role="button"
+			tabIndex={0}
+			className={`w-full text-left ${notification.isRead ? 'bg-background' : 'bg-muted'}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			onClick={handlePress}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault()
+					void handlePress()
+				}
+			}}
 		>
 			<div className="flex items-start border-b border-dashed p-2">
 				<Avatar className="mr-2 h-8 w-8">
-					<AvatarImage src={notification.avatar} alt="Avatar" />
+					<AvatarImage src={notification.avatar} alt={_(t`Avatar`)} />
 					<AvatarFallback>{notification.subject?.[0] || 'N'}</AvatarFallback>
 				</Avatar>
 				<div className="flex-1">
@@ -389,7 +397,7 @@ function NotificationBellComponent() {
 										<DropdownMenuTrigger>
 											<Button
 												variant="ghost"
-												className="focus-visible:ring-ring h-auto p-0 focus:outline-none focus-visible:ring-2"
+												className="focus-visible:ring-ring h-auto p-0 focus-visible:ring-2 focus-visible:outline-none"
 											>
 												{filterTitles[filter]}
 												<Icon

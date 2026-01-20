@@ -1,3 +1,5 @@
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import {
 	Dialog,
@@ -31,6 +33,7 @@ export function BasePhotoUpload({
 	size = 'normal',
 	showAvatarChars = false,
 }: BasePhotoUploadProps) {
+	const { _ } = useLingui()
 	const [showPhotoForm, setShowPhotoForm] = useState(false)
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -58,7 +61,7 @@ export function BasePhotoUpload({
 					type="file"
 					accept="image/*"
 					className="sr-only"
-					aria-label="Upload photo"
+					aria-label={_(t`Upload photo`)}
 					onChange={handleFileSelect}
 				/>
 				<div

@@ -1,4 +1,6 @@
 import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
+import { Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -198,6 +200,7 @@ type LoaderData = {
 }
 
 export default function AdminWaitlistPage() {
+	const { _ } = useLingui()
 	const data = useLoaderData() as LoaderData
 	const navigation = useNavigation()
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -239,10 +242,10 @@ export default function AdminWaitlistPage() {
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">
-					Waitlist Management
+					<Trans>Waitlist Management</Trans>
 				</h1>
 				<p className="text-muted-foreground">
-					Manage waitlist users and grant early access
+					<Trans>Manage waitlist users and grant early access</Trans>
 				</p>
 			</div>
 
@@ -255,9 +258,11 @@ export default function AdminWaitlistPage() {
 								className="h-5 w-5 text-yellow-600 dark:text-yellow-400"
 							/>
 							<div className="text-sm text-yellow-800 dark:text-yellow-200">
-								Launch status is currently <strong>{data.launchStatus}</strong>.
-								The waitlist is only active when LAUNCH_STATUS is set to
-								CLOSED_BETA.
+								<Trans>
+									Launch status is currently{' '}
+									<strong>{data.launchStatus}</strong>. The waitlist is only
+									active when LAUNCH_STATUS is set to CLOSED_BETA.
+								</Trans>
 							</div>
 						</div>
 					</CardContent>
@@ -266,14 +271,16 @@ export default function AdminWaitlistPage() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Filters</CardTitle>
+					<CardTitle>
+						<Trans>Filters</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-wrap gap-4">
 						<div className="min-w-[200px] flex-1">
 							<Input
 								type="search"
-								placeholder="Search by name, email, or username..."
+								placeholder={_(t`Search by name, email, or username...`)}
 								value={searchValue}
 								onChange={(e) => setSearchValue(e.target.value)}
 							/>
@@ -284,9 +291,9 @@ export default function AdminWaitlistPage() {
 							value={data.filters.status}
 							onChange={(e) => handleFilterChange('status', e.target.value)}
 						>
-							<option value="all">All Users</option>
-							<option value="pending">Pending Access</option>
-							<option value="granted">Access Granted</option>
+							<option value="all">{_(t`All Users`)}</option>
+							<option value="pending">{_(t`Pending Access`)}</option>
+							<option value="granted">{_(t`Access Granted`)}</option>
 						</select>
 
 						<select
@@ -294,9 +301,9 @@ export default function AdminWaitlistPage() {
 							value={data.filters.sortBy}
 							onChange={(e) => handleFilterChange('sortBy', e.target.value)}
 						>
-							<option value="rank">Sort by Rank</option>
-							<option value="points">Sort by Points</option>
-							<option value="date">Sort by Date</option>
+							<option value="rank">{_(t`Sort by Rank`)}</option>
+							<option value="points">{_(t`Sort by Points`)}</option>
+							<option value="date">{_(t`Sort by Date`)}</option>
 						</select>
 					</div>
 				</CardContent>
@@ -304,21 +311,41 @@ export default function AdminWaitlistPage() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Waitlist Entries ({data.pagination.totalCount})</CardTitle>
+					<CardTitle>
+						<Trans>Waitlist Entries ({data.pagination.totalCount})</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Rank</TableHead>
-								<TableHead>User</TableHead>
-								<TableHead>Email</TableHead>
-								<TableHead>Points</TableHead>
-								<TableHead>Referrals</TableHead>
-								<TableHead>Discord</TableHead>
-								<TableHead>Joined</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead>Actions</TableHead>
+								<TableHead>
+									<Trans>Rank</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>User</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Email</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Points</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Referrals</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Discord</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Joined</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Status</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Actions</Trans>
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -328,7 +355,7 @@ export default function AdminWaitlistPage() {
 										colSpan={9}
 										className="text-muted-foreground text-center"
 									>
-										No waitlist entries found
+										<Trans>No waitlist entries found</Trans>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -375,9 +402,13 @@ export default function AdminWaitlistPage() {
 										</TableCell>
 										<TableCell>
 											{entry.hasEarlyAccess ? (
-												<Badge variant="default">Access Granted</Badge>
+												<Badge variant="default">
+													<Trans>Access Granted</Trans>
+												</Badge>
 											) : (
-												<Badge variant="outline">Pending</Badge>
+												<Badge variant="outline">
+													<Trans>Pending</Trans>
+												</Badge>
 											)}
 										</TableCell>
 										<TableCell>
@@ -397,7 +428,7 @@ export default function AdminWaitlistPage() {
 														disabled={isProcessing}
 													>
 														<Icon name="x" className="mr-1 h-3 w-3" />
-														Revoke
+														<Trans>Revoke</Trans>
 													</Button>
 												) : (
 													<Button
@@ -409,7 +440,7 @@ export default function AdminWaitlistPage() {
 														disabled={isProcessing}
 													>
 														<Icon name="check" className="mr-1 h-3 w-3" />
-														Grant Access
+														<Trans>Grant Access</Trans>
 													</Button>
 												)}
 											</Form>
@@ -424,13 +455,15 @@ export default function AdminWaitlistPage() {
 					{data.pagination.totalPages > 1 && (
 						<div className="mt-4 flex items-center justify-between">
 							<div className="text-muted-foreground text-sm">
-								Showing{' '}
-								{(data.pagination.page - 1) * data.pagination.pageSize + 1} to{' '}
-								{Math.min(
-									data.pagination.page * data.pagination.pageSize,
-									data.pagination.totalCount,
-								)}{' '}
-								of {data.pagination.totalCount} entries
+								<Trans>
+									Showing{' '}
+									{(data.pagination.page - 1) * data.pagination.pageSize + 1} to{' '}
+									{Math.min(
+										data.pagination.page * data.pagination.pageSize,
+										data.pagination.totalCount,
+									)}{' '}
+									of {data.pagination.totalCount} entries
+								</Trans>
 							</div>
 							<div className="flex gap-2">
 								<Button
@@ -439,7 +472,7 @@ export default function AdminWaitlistPage() {
 									disabled={data.pagination.page === 1}
 									onClick={() => handlePageChange(data.pagination.page - 1)}
 								>
-									Previous
+									<Trans>Previous</Trans>
 								</Button>
 								<div className="flex items-center gap-1">
 									{Array.from(
@@ -485,7 +518,7 @@ export default function AdminWaitlistPage() {
 									disabled={data.pagination.page === data.pagination.totalPages}
 									onClick={() => handlePageChange(data.pagination.page + 1)}
 								>
-									Next
+									<Trans>Next</Trans>
 								</Button>
 							</div>
 						</div>

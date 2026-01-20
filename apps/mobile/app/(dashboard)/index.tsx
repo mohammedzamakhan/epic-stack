@@ -54,7 +54,9 @@ export default function DashboardScreen() {
 		return (
 			<Screen>
 				<View style={styles.loadingContainer}>
-					<Text style={styles.loadingText}>Loading...</Text>
+					<Text style={styles.loadingText} accessibilityLiveRegion="polite">
+						Loading...
+					</Text>
 				</View>
 			</Screen>
 		)
@@ -130,7 +132,10 @@ export default function DashboardScreen() {
 													<View style={styles.orgHeader}>
 														<Text style={styles.orgName}>{org.name}</Text>
 														{org.isDefault && (
-															<View style={styles.defaultBadge}>
+															<View
+																style={styles.defaultBadge}
+																accessibilityLabel="Default organization"
+															>
 																<Text style={styles.defaultBadgeText}>
 																	Default
 																</Text>

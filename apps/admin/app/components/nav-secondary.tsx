@@ -1,3 +1,6 @@
+import * as React from 'react'
+import { useRef } from 'react'
+import { Link } from 'react-router'
 import {
 	SidebarGroup,
 	SidebarGroupContent,
@@ -5,10 +8,6 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@repo/ui/sidebar'
-import * as React from 'react'
-import { useRef } from 'react'
-
-import { Link } from 'react-router'
 
 type NavItem = {
 	title: string

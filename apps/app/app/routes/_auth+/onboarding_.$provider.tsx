@@ -238,6 +238,8 @@ export default function OnboardingProviderRoute({
 												src={fields.imageUrl.initialValue}
 												alt={t`Profile`}
 												className="size-24 rounded-full"
+												width={96}
+												height={96}
 											/>
 											<p className="text-muted-foreground text-sm">
 												<Trans>You can change your photo later</Trans>

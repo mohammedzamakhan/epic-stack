@@ -33,6 +33,7 @@ import { useFetcher, useFetchers } from 'react-router'
 import { useDoubleCheck } from '@repo/common'
 import { NoteCard } from './notes-cards.tsx'
 import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 type Note = LoaderNote & {
 	position?: number | null
@@ -564,6 +565,7 @@ function KanbanColumn({
 	dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
 	isActive?: boolean
 }) {
+	const { _ } = useLingui()
 	const { setNodeRef } = useDroppable({ id: column.id })
 	const deleteFetcher = useFetcher()
 	const dc = useDoubleCheck()
@@ -604,7 +606,7 @@ function KanbanColumn({
 					<div
 						{...dragHandleProps}
 						className="cursor-grab touch-none opacity-50 hover:opacity-100 active:cursor-grabbing"
-						title="Drag to reorder column"
+						title={_(t`Drag to reorder column`)}
 					>
 						<Icon name="grip-vertical" size="sm" />
 					</div>
@@ -632,7 +634,7 @@ function KanbanColumn({
 							{column.id !== UNCATEGORISED && (
 								<button
 									className="invisible p-1 px-2 group-hover:visible"
-									aria-label="Edit column"
+									aria-label={_(t`Edit column`)}
 								>
 									<Icon name="pencil" size="xs" />
 								</button>
@@ -811,6 +813,7 @@ function EditColumnForm({
 					autoFocus
 					className="h-8 flex-1 px-2"
 					onKeyDown={(e) => e.key === 'Escape' && onCancel()}
+					aria-label={t`Column name`}
 				/>
 				<ColorPicker value={selectedColor} onChange={setSelectedColor} />
 			</div>
@@ -856,6 +859,7 @@ function NewColumnButton({ orgSlug }: { orgSlug: string }) {
 							placeholder={t`Column name`}
 							maxLength={24}
 							className="flex-1"
+							aria-label={t`Column name`}
 						/>
 						<ColorPicker value={selectedColor} onChange={setSelectedColor} />
 					</div>

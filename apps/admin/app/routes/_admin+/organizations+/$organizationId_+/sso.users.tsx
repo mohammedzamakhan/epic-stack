@@ -1,10 +1,11 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
+import { Trans } from '@lingui/macro'
 import { useLoaderData } from 'react-router'
 import { z } from 'zod'
+import { prisma } from '@repo/database'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
@@ -408,9 +409,13 @@ export default function AdminOrganizationSSOUsersPage() {
 			{/* Page Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">SSO Users</h1>
+					<h1 className="text-3xl font-bold tracking-tight">
+						<Trans>SSO Users</Trans>
+					</h1>
 					<p className="text-muted-foreground">
-						Manage users who authenticate through SSO for {organization.name}
+						<Trans>
+							Manage users who authenticate through SSO for {organization.name}
+						</Trans>
 					</p>
 				</div>
 			</div>

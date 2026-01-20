@@ -17,7 +17,7 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Trans, msg } from '@lingui/macro'
+import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
@@ -154,7 +154,9 @@ function DragHandle({ id }: { id: number }) {
 	)
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const getColumns = (
+	_: ReturnType<typeof useLingui>['_'],
+): ColumnDef<z.infer<typeof schema>>[] => [
 	{
 		id: 'drag',
 		header: () => null,
@@ -168,7 +170,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					checked={table.getIsAllPageRowsSelected()}
 					indeterminate={table.getIsSomePageRowsSelected()}
 					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-					aria-label="Select all"
+					aria-label={_(t`Select all`)}
 				/>
 			</div>
 		),
@@ -177,7 +179,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 				<Checkbox
 					checked={row.getIsSelected()}
 					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label="Select row"
+					aria-label={_(t`Select row`)}
 				/>
 			</div>
 		),
@@ -423,6 +425,7 @@ export function DataTable({
 }: {
 	data: z.infer<typeof schema>[]
 }) {
+	const { _ } = useLingui()
 	const [data, setData] = React.useState(() => initialData)
 	const [rowSelection, setRowSelection] = React.useState({})
 	const [columnVisibility, setColumnVisibility] =
@@ -441,6 +444,8 @@ export function DataTable({
 		useSensor(TouchSensor, {}),
 		useSensor(KeyboardSensor, {}),
 	)
+
+	const columns = React.useMemo(() => getColumns(_), [_])
 
 	const dataIds = React.useMemo<UniqueIdentifier[]>(
 		() => data?.map(({ id }) => id) || [],

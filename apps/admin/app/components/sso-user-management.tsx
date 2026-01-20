@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -86,11 +87,23 @@ interface SSOUserManagementProps {
 const getRoleBadge = (role: string, _level: number) => {
 	switch (role.toLowerCase()) {
 		case 'owner':
-			return <Badge variant="default">Owner</Badge>
+			return (
+				<Badge variant="default">
+					<Trans>Owner</Trans>
+				</Badge>
+			)
 		case 'admin':
-			return <Badge variant="secondary">Admin</Badge>
+			return (
+				<Badge variant="secondary">
+					<Trans>Admin</Trans>
+				</Badge>
+			)
 		case 'member':
-			return <Badge variant="outline">Member</Badge>
+			return (
+				<Badge variant="outline">
+					<Trans>Member</Trans>
+				</Badge>
+			)
 		default:
 			return <Badge variant="outline">{role}</Badge>
 	}
@@ -132,10 +145,10 @@ export function SSOUserManagement({
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Icon name="users" className="h-5 w-5" />
-						SSO Users ({ssoUsers.length})
+						<Trans>SSO Users ({ssoUsers.length})</Trans>
 					</CardTitle>
 					<CardDescription>
-						Users who have authenticated through SSO
+						<Trans>Users who have authenticated through SSO</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -143,12 +156,24 @@ export function SSOUserManagement({
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>User</TableHead>
-									<TableHead>Role</TableHead>
-									<TableHead>SSO Provider</TableHead>
-									<TableHead>Last SSO Login</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead>Actions</TableHead>
+									<TableHead>
+										<Trans>User</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Role</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>SSO Provider</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Last SSO Login</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Status</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Actions</Trans>
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -200,7 +225,7 @@ export function SSOUserManagement({
 													)}
 													{user.isDefault && (
 														<Badge variant="outline" className="text-xs">
-															Default
+															<Trans>Default</Trans>
 														</Badge>
 													)}
 												</div>
@@ -212,7 +237,7 @@ export function SSOUserManagement({
 													</Badge>
 												) : (
 													<span className="text-muted-foreground text-sm">
-														No SSO sessions
+														<Trans>No SSO sessions</Trans>
 													</span>
 												)}
 											</TableCell>
@@ -228,13 +253,17 @@ export function SSOUserManagement({
 													</span>
 												) : (
 													<span className="text-muted-foreground text-sm">
-														Never
+														<Trans>Never</Trans>
 													</span>
 												)}
 											</TableCell>
 											<TableCell>
 												<Badge variant={user.active ? 'default' : 'secondary'}>
-													{user.active ? 'Active' : 'Inactive'}
+													{user.active ? (
+														<Trans>Active</Trans>
+													) : (
+														<Trans>Inactive</Trans>
+													)}
 												</Badge>
 											</TableCell>
 											<TableCell>
@@ -263,7 +292,11 @@ export function SSOUserManagement({
 															onUserStatusChange?.(user.id, !user.active)
 														}
 													>
-														{user.active ? 'Deactivate' : 'Activate'}
+														{user.active ? (
+															<Trans>Deactivate</Trans>
+														) : (
+															<Trans>Activate</Trans>
+														)}
 													</Button>
 												</div>
 											</TableCell>
@@ -278,9 +311,11 @@ export function SSOUserManagement({
 								name="users"
 								className="text-muted-foreground mx-auto h-12 w-12"
 							/>
-							<h3 className="mt-4 text-lg font-medium">No SSO Users</h3>
+							<h3 className="mt-4 text-lg font-medium">
+								<Trans>No SSO Users</Trans>
+							</h3>
 							<p className="text-muted-foreground mt-2">
-								No users have authenticated through SSO yet.
+								<Trans>No users have authenticated through SSO yet.</Trans>
 							</p>
 						</div>
 					)}
@@ -292,10 +327,10 @@ export function SSOUserManagement({
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Icon name="file-text" className="h-5 w-5" />
-						SSO Audit Trail
+						<Trans>SSO Audit Trail</Trans>
 					</CardTitle>
 					<CardDescription>
-						Recent SSO configuration changes and user activities
+						<Trans>Recent SSO configuration changes and user activities</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -327,7 +362,7 @@ export function SSOUserManagement({
 										{log.metadata && (
 											<details className="text-muted-foreground text-xs">
 												<summary className="cursor-pointer">
-													View details
+													<Trans>View details</Trans>
 												</summary>
 												<pre className="bg-muted mt-2 overflow-x-auto rounded p-2 text-xs">
 													{JSON.stringify(log.metadata, null, 2)}
@@ -344,9 +379,11 @@ export function SSOUserManagement({
 								name="file-text"
 								className="text-muted-foreground mx-auto h-12 w-12"
 							/>
-							<h3 className="mt-4 text-lg font-medium">No Audit Logs</h3>
+							<h3 className="mt-4 text-lg font-medium">
+								<Trans>No Audit Logs</Trans>
+							</h3>
 							<p className="text-muted-foreground mt-2">
-								No SSO activities have been recorded yet.
+								<Trans>No SSO activities have been recorded yet.</Trans>
 							</p>
 						</div>
 					)}
@@ -358,21 +395,23 @@ export function SSOUserManagement({
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Total SSO Users
+							<Trans>Total SSO Users</Trans>
 						</CardTitle>
 						<Icon name="users" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{ssoUsers.length}</div>
 						<p className="text-muted-foreground text-xs">
-							{ssoUsers.filter((u) => u.active).length} active
+							<Trans>{ssoUsers.filter((u) => u.active).length} active</Trans>
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Recent Logins</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Recent Logins</Trans>
+						</CardTitle>
 						<Icon name="user" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
@@ -386,14 +425,16 @@ export function SSOUserManagement({
 								).length
 							}
 						</div>
-						<p className="text-muted-foreground text-xs">Last 7 days</p>
+						<p className="text-muted-foreground text-xs">
+							<Trans>Last 7 days</Trans>
+						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Config Changes
+							<Trans>Config Changes</Trans>
 						</CardTitle>
 						<Icon name="settings" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
@@ -408,7 +449,9 @@ export function SSOUserManagement({
 								).length
 							}
 						</div>
-						<p className="text-muted-foreground text-xs">Last 30 days</p>
+						<p className="text-muted-foreground text-xs">
+							<Trans>Last 30 days</Trans>
+						</p>
 					</CardContent>
 				</Card>
 			</div>

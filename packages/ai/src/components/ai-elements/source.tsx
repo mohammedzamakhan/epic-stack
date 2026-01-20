@@ -49,7 +49,7 @@ export const SourcesContent = ({
 	<CollapsibleContent
 		className={cn(
 			'mt-3 flex w-fit flex-col gap-2',
-			'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 outline-none',
+			'motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:slide-out-to-top-2 motion-safe:data-[state=open]:slide-in-from-top-2 outline-none',
 			className,
 		)}
 		{...props}

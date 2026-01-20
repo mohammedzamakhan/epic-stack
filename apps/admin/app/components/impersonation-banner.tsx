@@ -1,7 +1,7 @@
+import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Form } from 'react-router'
-
 import { type ImpersonationInfo } from '#app/utils/impersonation.server.ts'
 
 interface ImpersonationBannerProps {
@@ -24,14 +24,18 @@ export function ImpersonationBanner({
 					</div>
 					<div className="text-sm">
 						<span className="font-medium text-yellow-900">
-							Admin Impersonation Active
+							<Trans>Admin Impersonation Active</Trans>
 						</span>
 						<span className="ml-2 text-yellow-700">
-							You are impersonating{' '}
-							<strong>{impersonationInfo.targetName}</strong>
+							<Trans>
+								You are impersonating{' '}
+								<strong>{impersonationInfo.targetName}</strong>
+							</Trans>
 						</span>
 						<span className="ml-2 text-yellow-600">
-							({duration} minute{duration !== 1 ? 's' : ''} ago)
+							<Trans>
+								({duration} minute{duration !== 1 ? 's' : ''} ago)
+							</Trans>
 						</span>
 					</div>
 				</div>
@@ -43,7 +47,7 @@ export function ImpersonationBanner({
 						className="border-yellow-300 bg-white text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50"
 					>
 						<Icon name="x" className="mr-1 h-4 w-4" />
-						Stop Impersonation
+						<Trans>Stop Impersonation</Trans>
 					</Button>
 				</Form>
 			</div>

@@ -14,7 +14,11 @@ export default function IndexScreen() {
 	if (isLoading) {
 		return (
 			<View style={styles.loadingContainer}>
-				<ActivityIndicator size="large" color="#3b82f6" />
+				<ActivityIndicator
+					size="large"
+					color="#3b82f6"
+					accessibilityLabel="Loading"
+				/>
 				<Text style={styles.loadingText}>Loading...</Text>
 			</View>
 		)

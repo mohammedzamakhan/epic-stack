@@ -1,3 +1,5 @@
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import React, { forwardRef } from 'react'
 import {
 	BaseAutocompleteList,
@@ -17,6 +19,7 @@ interface EmojiListProps {
 
 export const EmojiList = forwardRef<AutocompleteListRef, EmojiListProps>(
 	(props, ref) => {
+		const { _ } = useLingui()
 		return (
 			<BaseAutocompleteList
 				ref={ref}
@@ -28,7 +31,7 @@ export const EmojiList = forwardRef<AutocompleteListRef, EmojiListProps>(
 						<span className="truncate">:{item.name}:</span>
 					</>
 				)}
-				noResultsMessage="No emojis found"
+				noResultsMessage={_(t`No emojis found`)}
 				className="max-w-[16rem] min-w-[12rem]"
 			/>
 		)

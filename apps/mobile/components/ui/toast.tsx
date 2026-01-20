@@ -115,6 +115,8 @@ const Toast: React.FC<ToastProps> = ({
 				style={[styles.toast, getToastStyle()]}
 				onPress={hideToast}
 				activeOpacity={0.9}
+				accessibilityRole="button"
+				accessibilityLabel="Dismiss notification"
 			>
 				<Text style={[styles.message, getTextStyle()]}>{message}</Text>
 			</TouchableOpacity>

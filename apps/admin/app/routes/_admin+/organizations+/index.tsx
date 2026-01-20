@@ -1,6 +1,7 @@
+import { Trans } from '@lingui/macro'
 import { useLoaderData } from 'react-router'
-import { AdminOrganizationsTable } from '#app/components/admin-organizations-table.tsx'
 import { prisma } from '@repo/database'
+import { AdminOrganizationsTable } from '#app/components/admin-organizations-table.tsx'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
@@ -134,9 +135,11 @@ export default function AdminOrganizationsPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Organizations</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<Trans>Organizations</Trans>
+				</h1>
 				<p className="text-muted-foreground">
-					Manage all organizations in the system
+					<Trans>Manage all organizations in the system</Trans>
 				</p>
 			</div>
 

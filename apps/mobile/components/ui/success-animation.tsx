@@ -50,7 +50,7 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({
 	if (!visible) return null
 
 	return (
-		<View style={styles.overlay}>
+		<View style={styles.overlay} accessibilityLabel="Success" accessible={true}>
 			<Animated.View
 				style={[
 					styles.container,

@@ -67,7 +67,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 		editorProps: {
 			attributes: {
 				class:
-					'text-sm min-h-[40px] focus:outline-none max-w-full prose prose-sm max-w-none',
+					'text-sm min-h-[40px] focus-visible:outline-none max-w-full prose prose-sm max-w-none',
 			},
 		},
 		onUpdate: ({ editor }: { editor: Editor }) => {

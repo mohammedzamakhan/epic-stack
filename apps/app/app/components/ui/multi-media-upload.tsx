@@ -4,13 +4,15 @@ import {
 	useForm,
 	type FieldMetadata,
 } from '@conform-to/react'
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
+import { getNoteImgSrc } from '@repo/common'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { FieldLabel } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import React, { useState, useRef, useCallback } from 'react'
 import { type MediaFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
-import { getNoteImgSrc } from '@repo/common'
-import { cn } from '@repo/ui'
 import { useDragAndDrop } from './use-drag-and-drop.tsx'
 import { createFileInputRef } from './use-file-input-ref.tsx'
 
@@ -262,6 +264,7 @@ function MediaPreview({
 	onRemove: () => void
 	disabled?: boolean
 }) {
+	const { _ } = useLingui()
 	const fields = meta.getFieldset()
 	const isVideo = file?.type.startsWith('video/') || existingVideo
 
@@ -298,6 +301,8 @@ function MediaPreview({
 							src={mediaUrl}
 							alt={fields.altText.initialValue ?? ''}
 							className="size-32 rounded-lg object-cover"
+							width={128}
+							height={128}
 						/>
 						{isVideo && (
 							<div className="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -335,7 +340,7 @@ function MediaPreview({
 					size="sm"
 					onClick={onRemove}
 					disabled={disabled}
-					aria-label="Remove media"
+					aria-label={_(t`Remove media`)}
 				>
 					<Icon name="x" className="h-4 w-4" />
 				</Button>

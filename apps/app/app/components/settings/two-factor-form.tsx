@@ -1,6 +1,7 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 import { Button } from '@repo/ui/button'
 import { StatusButton } from '@repo/ui/status-button'
@@ -26,6 +27,7 @@ export function TwoFactorForm({
 	otpUri: string | null
 	setIsOpen: (open: boolean) => void
 }) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher()
 
 	const [form, fields] = useForm({
@@ -116,7 +118,9 @@ export function TwoFactorForm({
 							<TabsContent value="qr-code" className="mt-4">
 								<div className="flex justify-center">
 									<img
-										alt="QR code for two-factor authentication setup. Scan this code with your authenticator app."
+										alt={_(
+											t`QR code for two-factor authentication setup. Scan this code with your authenticator app.`,
+										)}
 										src={qrCode}
 										className="h-48 w-48"
 									/>
@@ -127,7 +131,7 @@ export function TwoFactorForm({
 									<div className="bg-muted rounded-md p-4">
 										<pre
 											className="font-mono text-xs break-all whitespace-pre-wrap"
-											aria-label="One-time Password URI"
+											aria-label={_(t`One-time Password URI`)}
 										>
 											{otpUri}
 										</pre>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@repo/common'
 import { captureException } from '@sentry/react-router'
 import { useEffect, type ReactElement } from 'react'
 import {
@@ -6,7 +7,6 @@ import {
 	useParams,
 	useRouteError,
 } from 'react-router'
-import { getErrorMessage } from '@repo/common'
 
 type StatusHandler = (info: {
 	error: ErrorResponse

@@ -1,7 +1,8 @@
-import { type User, type Organization, type UserImage } from '@prisma/client'
+import { Trans } from '@lingui/macro'
+import { type Organization, type User, type UserImage } from '@prisma/client'
+import { prisma } from '@repo/database'
 import { useLoaderData } from 'react-router'
 import { AdminUsersTable } from '#app/components/admin-users-table.tsx'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
@@ -147,8 +148,12 @@ export default function AdminUsersPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Users</h1>
-				<p className="text-muted-foreground">Manage all users in the system</p>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<Trans>Users</Trans>
+				</h1>
+				<p className="text-muted-foreground">
+					<Trans>Manage all users in the system</Trans>
+				</p>
 			</div>
 
 			<AdminUsersTable

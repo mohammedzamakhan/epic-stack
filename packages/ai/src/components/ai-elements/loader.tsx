@@ -86,7 +86,7 @@ export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
 	<div
 		aria-label="Loading"
 		className={cn(
-			'inline-flex animate-spin items-center justify-center',
+			'inline-flex items-center justify-center motion-safe:animate-spin',
 			className,
 		)}
 		role="status"

@@ -1,3 +1,5 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import { Card, CardHeader, CardContent, CardTitle } from '@repo/ui/card'
 import {
@@ -53,6 +55,7 @@ function FeatureFlagDialog({
 	userId?: string
 	children: React.ReactNode
 }) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher()
 	const [open, setOpen] = useState(false)
 	const [type, setType] = useState(
@@ -86,11 +89,15 @@ function FeatureFlagDialog({
 			<DialogTrigger>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>{flag ? 'Edit Flag' : 'Add Flag'}</DialogTitle>
+					<DialogTitle>
+						{flag ? <Trans>Edit Flag</Trans> : <Trans>Add Flag</Trans>}
+					</DialogTitle>
 					<DialogDescription>
-						{flag
-							? 'Edit the details of the feature flag.'
-							: 'Create a new feature flag at system level.'}
+						{flag ? (
+							<Trans>Edit the details of the feature flag.</Trans>
+						) : (
+							<Trans>Create a new feature flag at system level.</Trans>
+						)}
 					</DialogDescription>
 				</DialogHeader>
 				{fetcher.data?.error && (
@@ -111,7 +118,7 @@ function FeatureFlagDialog({
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<Input
 							name="key"
-							placeholder="Flag Key"
+							placeholder={_(msg`Flag Key`)}
 							required
 							defaultValue={flag?.key}
 							disabled={!!flag}
@@ -120,20 +127,30 @@ function FeatureFlagDialog({
 							name="type"
 							defaultValue={type}
 							onValueChange={(value) => setType(value as string)}
-							aria-label="Select flag type"
+							aria-label={_(msg`Select flag type`)}
 						>
-							<SelectTrigger>Type</SelectTrigger>
+							<SelectTrigger>
+								<Trans>Type</Trans>
+							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="string">String</SelectItem>
-								<SelectItem value="number">Number</SelectItem>
-								<SelectItem value="boolean">Boolean</SelectItem>
-								<SelectItem value="date">Date</SelectItem>
+								<SelectItem value="string">
+									<Trans>String</Trans>
+								</SelectItem>
+								<SelectItem value="number">
+									<Trans>Number</Trans>
+								</SelectItem>
+								<SelectItem value="boolean">
+									<Trans>Boolean</Trans>
+								</SelectItem>
+								<SelectItem value="date">
+									<Trans>Date</Trans>
+								</SelectItem>
 							</SelectContent>
 						</Select>
 						{type === 'string' && (
 							<Input
 								name="value"
-								placeholder="Flag Value"
+								placeholder={_(msg`Flag Value`)}
 								required
 								defaultValue={(flag?.value as string) ?? ''}
 							/>
@@ -142,7 +159,7 @@ function FeatureFlagDialog({
 							<Input
 								name="value"
 								type="number"
-								placeholder="Flag Value"
+								placeholder={_(msg`Flag Value`)}
 								required
 								defaultValue={(flag?.value as number) ?? 0}
 							/>
@@ -167,7 +184,7 @@ function FeatureFlagDialog({
 					</div>
 					<div className="mt-4 flex justify-end">
 						<Button type="submit">
-							{flag ? 'Update Flag' : 'Create Flag'}
+							{flag ? <Trans>Update Flag</Trans> : <Trans>Create Flag</Trans>}
 						</Button>
 					</div>
 				</fetcher.Form>
@@ -191,15 +208,17 @@ function OverrideDialog({
 	userId?: string
 	children: React.ReactNode
 }) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher()
 	const [open, setOpen] = useState(false)
-	const [type, setType] = useState(
+	const [type, ignoredSetType] = useState(
 		typeof systemFlag.value === 'number'
 			? 'number'
 			: typeof systemFlag.value === 'boolean'
 				? 'boolean'
 				: 'string',
 	)
+	void ignoredSetType
 
 	useEffect(() => {
 		if (fetcher.state === 'idle' && fetcher.data?.ok) {
@@ -208,6 +227,7 @@ function OverrideDialog({
 	}, [fetcher.state, fetcher.data])
 
 	const currentValue = existingOverride?.value ?? systemFlag.value
+	const flagKey = systemFlag.key
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -215,13 +235,20 @@ function OverrideDialog({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{existingOverride ? 'Edit Override' : 'Create Override'} for "
-						{systemFlag.key}"
+						{existingOverride ? (
+							<Trans>Edit Override for "{flagKey}"</Trans>
+						) : (
+							<Trans>Create Override for "{flagKey}"</Trans>
+						)}
 					</DialogTitle>
 					<DialogDescription>
-						{existingOverride
-							? 'Modify the override value.'
-							: `Create an override at ${level} level.`}
+						{existingOverride ? (
+							<Trans>Modify the override value.</Trans>
+						) : level === 'organization' ? (
+							<Trans>Create an override at organization level.</Trans>
+						) : (
+							<Trans>Create an override at user level.</Trans>
+						)}
 					</DialogDescription>
 				</DialogHeader>
 				{fetcher.data?.error && (
@@ -245,7 +272,7 @@ function OverrideDialog({
 					<input type="hidden" name="type" value={type} />
 					<div className="space-y-4">
 						<div className="text-muted-foreground text-sm">
-							System value:{' '}
+							<Trans>System value:</Trans>{' '}
 							<span className="font-mono">
 								{JSON.stringify(systemFlag.value)}
 							</span>
@@ -253,7 +280,7 @@ function OverrideDialog({
 						{type === 'string' && (
 							<Input
 								name="value"
-								placeholder="Override Value"
+								placeholder={_(msg`Override Value`)}
 								required
 								defaultValue={(currentValue as string) ?? ''}
 							/>
@@ -262,7 +289,7 @@ function OverrideDialog({
 							<Input
 								name="value"
 								type="number"
-								placeholder="Override Value"
+								placeholder={_(msg`Override Value`)}
 								required
 								defaultValue={(currentValue as number) ?? 0}
 							/>
@@ -273,7 +300,9 @@ function OverrideDialog({
 									name="value"
 									defaultChecked={(currentValue as boolean) ?? false}
 								/>
-								<span className="text-sm">Enabled</span>
+								<span className="text-sm">
+									<Trans>Enabled</Trans>
+								</span>
 							</div>
 						)}
 						{type === 'date' && (
@@ -306,11 +335,15 @@ function OverrideDialog({
 									})
 								}}
 							>
-								Remove Override
+								<Trans>Remove Override</Trans>
 							</Button>
 						)}
 						<Button type="submit">
-							{existingOverride ? 'Update' : 'Create'} Override
+							{existingOverride ? (
+								<Trans>Update Override</Trans>
+							) : (
+								<Trans>Create Override</Trans>
+							)}
 						</Button>
 					</div>
 				</fetcher.Form>
@@ -326,15 +359,23 @@ function SystemTab({ flags }: { flags: ConfigFlag[] }) {
 		<div className="space-y-4">
 			<Card>
 				<CardHeader>
-					<CardTitle>System Flags</CardTitle>
+					<CardTitle>
+						<Trans>System Flags</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Key</TableHead>
-								<TableHead>Value</TableHead>
-								<TableHead>Actions</TableHead>
+								<TableHead>
+									<Trans>Key</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Value</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Actions</Trans>
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -344,7 +385,7 @@ function SystemTab({ flags }: { flags: ConfigFlag[] }) {
 										colSpan={3}
 										className="text-muted-foreground text-center"
 									>
-										No system flags configured
+										<Trans>No system flags configured</Trans>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -357,14 +398,14 @@ function SystemTab({ flags }: { flags: ConfigFlag[] }) {
 										<TableCell>
 											<FeatureFlagDialog flag={flag}>
 												<Button variant="outline" size="sm" className="mr-2">
-													Edit
+													<Trans>Edit</Trans>
 												</Button>
 											</FeatureFlagDialog>
 											<Form method="post" className="inline-block">
 												<input type="hidden" name="_action" value="delete" />
 												<input type="hidden" name="id" value={flag.id} />
 												<Button type="submit" variant="destructive" size="sm">
-													Delete
+													<Trans>Delete</Trans>
 												</Button>
 											</Form>
 										</TableCell>
@@ -380,6 +421,7 @@ function SystemTab({ flags }: { flags: ConfigFlag[] }) {
 }
 
 function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
+	const { _ } = useLingui()
 	const [orgId, setOrgId] = useState('')
 	const [searchedOrgId, setSearchedOrgId] = useState<string | null>(null)
 
@@ -400,17 +442,21 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 		<div className="space-y-4">
 			<Card>
 				<CardHeader>
-					<CardTitle>Search Organization</CardTitle>
+					<CardTitle>
+						<Trans>Search Organization</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex gap-2">
 						<Input
-							placeholder="Enter Organization ID"
+							placeholder={_(msg`Enter Organization ID`)}
 							value={orgId}
 							onChange={(e) => setOrgId(e.target.value)}
 							onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
 						/>
-						<Button onClick={handleSearch}>Search</Button>
+						<Button onClick={handleSearch}>
+							<Trans>Search</Trans>
+						</Button>
 					</div>
 				</CardContent>
 			</Card>
@@ -418,16 +464,26 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 			{searchedOrgId && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Flags for Organization: {searchedOrgId}</CardTitle>
+						<CardTitle>
+							<Trans>Flags for Organization: {searchedOrgId}</Trans>
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Key</TableHead>
-									<TableHead>Effective Value</TableHead>
-									<TableHead>Source</TableHead>
-									<TableHead>Actions</TableHead>
+									<TableHead>
+										<Trans>Key</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Effective Value</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Source</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Actions</Trans>
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -437,7 +493,7 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 											colSpan={4}
 											className="text-muted-foreground text-center"
 										>
-											No flags configured
+											<Trans>No flags configured</Trans>
 										</TableCell>
 									</TableRow>
 								) : (
@@ -446,9 +502,6 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 											(o) => o.key === systemFlag.key,
 										)
 										const effectiveValue = override?.value ?? systemFlag.value
-										const source = override
-											? 'Organization Override'
-											: 'System Default'
 
 										return (
 											<TableRow key={systemFlag.id}>
@@ -466,7 +519,11 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 																: 'text-muted-foreground'
 														}
 													>
-														{source}
+														{override ? (
+															<Trans>Organization Override</Trans>
+														) : (
+															<Trans>System Default</Trans>
+														)}
 													</span>
 												</TableCell>
 												<TableCell>
@@ -477,7 +534,11 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 														organizationId={searchedOrgId}
 													>
 														<Button variant="outline" size="sm">
-															{override ? 'Edit Override' : 'Add Override'}
+															{override ? (
+																<Trans>Edit Override</Trans>
+															) : (
+																<Trans>Add Override</Trans>
+															)}
 														</Button>
 													</OverrideDialog>
 												</TableCell>
@@ -495,6 +556,7 @@ function OrganizationTab({ flags }: { flags: ConfigFlag[] }) {
 }
 
 function UserTab({ flags }: { flags: ConfigFlag[] }) {
+	const { _ } = useLingui()
 	const [userId, setUserId] = useState('')
 	const [searchedUserId, setSearchedUserId] = useState<string | null>(null)
 	const [orgId, setOrgId] = useState('')
@@ -522,13 +584,15 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 		<div className="space-y-4">
 			<Card>
 				<CardHeader>
-					<CardTitle>Search User</CardTitle>
+					<CardTitle>
+						<Trans>Search User</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-col gap-4">
 						<div className="flex gap-2">
 							<Input
-								placeholder="Enter User ID (required)"
+								placeholder={_(msg`Enter User ID (required)`)}
 								value={userId}
 								onChange={(e) => setUserId(e.target.value)}
 								onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -536,20 +600,24 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 						</div>
 						<div className="flex gap-2">
 							<Input
-								placeholder="Enter Organization ID (optional - for per-org overrides)"
+								placeholder={_(
+									msg`Enter Organization ID (optional - for per-org overrides)`,
+								)}
 								value={orgId}
 								onChange={(e) => setOrgId(e.target.value)}
 								onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
 							/>
 						</div>
 						<Button onClick={handleSearch} className="w-fit">
-							Search
+							<Trans>Search</Trans>
 						</Button>
 					</div>
 					<p className="text-muted-foreground mt-2 text-xs">
-						Leave Organization ID empty to view/set global user overrides. Enter
-						an Organization ID to view/set overrides for that specific
-						organization.
+						<Trans>
+							Leave Organization ID empty to view/set global user overrides.
+							Enter an Organization ID to view/set overrides for that specific
+							organization.
+						</Trans>
 					</p>
 				</CardContent>
 			</Card>
@@ -558,18 +626,31 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 				<Card>
 					<CardHeader>
 						<CardTitle>
-							Flags for User: {searchedUserId}
-							{searchedOrgId ? ` (Org: ${searchedOrgId})` : ' (Global)'}
+							{searchedOrgId ? (
+								<Trans>
+									Flags for User: {searchedUserId} (Org: {searchedOrgId})
+								</Trans>
+							) : (
+								<Trans>Flags for User: {searchedUserId} (Global)</Trans>
+							)}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Key</TableHead>
-									<TableHead>Effective Value</TableHead>
-									<TableHead>Source</TableHead>
-									<TableHead>Actions</TableHead>
+									<TableHead>
+										<Trans>Key</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Effective Value</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Source</Trans>
+									</TableHead>
+									<TableHead>
+										<Trans>Actions</Trans>
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -579,7 +660,7 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 											colSpan={4}
 											className="text-muted-foreground text-center"
 										>
-											No flags configured
+											<Trans>No flags configured</Trans>
 										</TableCell>
 									</TableRow>
 								) : (
@@ -588,11 +669,6 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 											(o) => o.key === systemFlag.key,
 										)
 										const effectiveValue = override?.value ?? systemFlag.value
-										const source = override
-											? searchedOrgId
-												? 'User+Org Override'
-												: 'User Override'
-											: 'System Default'
 
 										return (
 											<TableRow key={systemFlag.id}>
@@ -610,7 +686,15 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 																: 'text-muted-foreground'
 														}
 													>
-														{source}
+														{override ? (
+															searchedOrgId ? (
+																<Trans>User+Org Override</Trans>
+															) : (
+																<Trans>User Override</Trans>
+															)
+														) : (
+															<Trans>System Default</Trans>
+														)}
 													</span>
 												</TableCell>
 												<TableCell>
@@ -622,7 +706,11 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 														organizationId={searchedOrgId ?? undefined}
 													>
 														<Button variant="outline" size="sm">
-															{override ? 'Edit Override' : 'Add Override'}
+															{override ? (
+																<Trans>Edit Override</Trans>
+															) : (
+																<Trans>Add Override</Trans>
+															)}
 														</Button>
 													</OverrideDialog>
 												</TableCell>
@@ -647,12 +735,20 @@ export function FeatureFlags() {
 			<Tabs defaultValue="system" className="w-full">
 				<div className="flex gap-3">
 					<TabsList>
-						<TabsTrigger value="system">System</TabsTrigger>
-						<TabsTrigger value="organization">Organization</TabsTrigger>
-						<TabsTrigger value="user">User</TabsTrigger>
+						<TabsTrigger value="system">
+							<Trans>System</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="organization">
+							<Trans>Organization</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="user">
+							<Trans>User</Trans>
+						</TabsTrigger>
 					</TabsList>
 					<FeatureFlagDialog>
-						<Button>Add Flag</Button>
+						<Button>
+							<Trans>Add Flag</Trans>
+						</Button>
 					</FeatureFlagDialog>
 				</div>
 

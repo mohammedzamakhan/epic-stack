@@ -1,3 +1,5 @@
+import { Trans, msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -94,6 +96,7 @@ export function SSOConfigurationForm({
 	isSubmitting = false,
 	testConnectionResult,
 }: SSOConfigurationFormProps) {
+	const { _ } = useLingui()
 	// State for reactive form controls
 	const [autoDiscoveryEnabled, setAutoDiscoveryEnabled] = useState(
 		existingConfig?.autoDiscovery ?? true,
@@ -131,32 +134,38 @@ export function SSOConfigurationForm({
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Icon name="settings" className="h-5 w-5" />
-							Identity Provider Configuration
+							<Trans>Identity Provider Configuration</Trans>
 						</CardTitle>
 						<CardDescription>
-							Configure your organization's identity provider settings
+							<Trans>
+								Configure your organization's identity provider settings
+							</Trans>
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="providerName">Provider Name</Label>
+							<Label htmlFor="providerName">
+								<Trans>Provider Name</Trans>
+							</Label>
 							<Input
 								id="providerName"
 								name="providerName"
 								type="text"
-								placeholder="e.g., Okta, Azure AD, Auth0"
+								placeholder={_(msg`e.g., Okta, Azure AD, Auth0`)}
 								defaultValue={existingConfig?.providerName || ''}
 								required
 							/>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="issuerUrl">Issuer URL</Label>
+							<Label htmlFor="issuerUrl">
+								<Trans>Issuer URL</Trans>
+							</Label>
 							<Input
 								id="issuerUrl"
 								name="issuerUrl"
 								type="url"
-								placeholder="https://your-domain.okta.com"
+								placeholder={_(t`https://your-domain.okta.com`)}
 								defaultValue={existingConfig?.issuerUrl || ''}
 								required
 							/>
@@ -164,24 +173,28 @@ export function SSOConfigurationForm({
 
 						<div className="grid gap-4 md:grid-cols-2">
 							<div className="space-y-2">
-								<Label htmlFor="clientId">Client ID</Label>
+								<Label htmlFor="clientId">
+									<Trans>Client ID</Trans>
+								</Label>
 								<Input
 									id="clientId"
 									name="clientId"
 									type="text"
-									placeholder="OAuth2 Client ID"
+									placeholder={_(msg`OAuth2 Client ID`)}
 									defaultValue={existingConfig?.clientId || ''}
 									required
 								/>
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="clientSecret">Client Secret</Label>
+								<Label htmlFor="clientSecret">
+									<Trans>Client Secret</Trans>
+								</Label>
 								<Input
 									id="clientSecret"
 									name="clientSecret"
 									type="password"
-									placeholder="OAuth2 Client Secret"
+									placeholder={_(msg`OAuth2 Client Secret`)}
 									defaultValue={existingConfig?.clientSecret || ''}
 									required
 								/>
@@ -189,12 +202,14 @@ export function SSOConfigurationForm({
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="scopes">Scopes</Label>
+							<Label htmlFor="scopes">
+								<Trans>Scopes</Trans>
+							</Label>
 							<Input
 								id="scopes"
 								name="scopes"
 								type="text"
-								placeholder="openid email profile"
+								placeholder={_(t`openid email profile`)}
 								defaultValue={existingConfig?.scopes || 'openid email profile'}
 							/>
 						</div>
@@ -206,10 +221,10 @@ export function SSOConfigurationForm({
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Icon name="link-2" className="h-5 w-5" />
-							OAuth2 Configuration
+							<Trans>OAuth2 Configuration</Trans>
 						</CardTitle>
 						<CardDescription>
-							Configure OAuth2 endpoints and security settings
+							<Trans>Configure OAuth2 endpoints and security settings</Trans>
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -223,59 +238,79 @@ export function SSOConfigurationForm({
 								}
 							/>
 							<div className="flex flex-col gap-1">
-								<p>Auto-Discovery</p>
+								<p>
+									<Trans>Auto-Discovery</Trans>
+								</p>
 								<p className="text-muted-foreground text-xs">
-									Automatically discover OAuth2 endpoints from the issuer URL
+									<Trans>
+										Automatically discover OAuth2 endpoints from the issuer URL
+									</Trans>
 								</p>
 							</div>
 						</Label>
 
 						{!autoDiscoveryEnabled && (
 							<div className="space-y-4 rounded-lg border p-4">
-								<h4 className="font-medium">Manual Endpoint Configuration</h4>
+								<h4 className="font-medium">
+									<Trans>Manual Endpoint Configuration</Trans>
+								</h4>
 								<div className="grid gap-4 md:grid-cols-2">
 									<div className="space-y-2">
-										<Label htmlFor="authorizationUrl">Authorization URL</Label>
+										<Label htmlFor="authorizationUrl">
+											<Trans>Authorization URL</Trans>
+										</Label>
 										<Input
 											id="authorizationUrl"
 											name="authorizationUrl"
 											type="url"
-											placeholder="https://your-domain.okta.com/oauth2/v1/authorize"
+											placeholder={_(
+												t`https://your-domain.okta.com/oauth2/v1/authorize`,
+											)}
 											defaultValue={existingConfig?.authorizationUrl || ''}
 										/>
 									</div>
 
 									<div className="space-y-2">
-										<Label htmlFor="tokenUrl">Token URL</Label>
+										<Label htmlFor="tokenUrl">
+											<Trans>Token URL</Trans>
+										</Label>
 										<Input
 											id="tokenUrl"
 											name="tokenUrl"
 											type="url"
-											placeholder="https://your-domain.okta.com/oauth2/v1/token"
+											placeholder={_(
+												t`https://your-domain.okta.com/oauth2/v1/token`,
+											)}
 											defaultValue={existingConfig?.tokenUrl || ''}
 										/>
 									</div>
 
 									<div className="space-y-2">
-										<Label htmlFor="userinfoUrl">UserInfo URL</Label>
+										<Label htmlFor="userinfoUrl">
+											<Trans>UserInfo URL</Trans>
+										</Label>
 										<Input
 											id="userinfoUrl"
 											name="userinfoUrl"
 											type="url"
-											placeholder="https://your-domain.okta.com/oauth2/v1/userinfo"
+											placeholder={_(
+												t`https://your-domain.okta.com/oauth2/v1/userinfo`,
+											)}
 											defaultValue={existingConfig?.userinfoUrl || ''}
 										/>
 									</div>
 
 									<div className="space-y-2">
 										<Label htmlFor="revocationUrl">
-											Revocation URL (Optional)
+											<Trans>Revocation URL (Optional)</Trans>
 										</Label>
 										<Input
 											id="revocationUrl"
 											name="revocationUrl"
 											type="url"
-											placeholder="https://your-domain.okta.com/oauth2/v1/revoke"
+											placeholder={_(
+												t`https://your-domain.okta.com/oauth2/v1/revoke`,
+											)}
 											defaultValue={existingConfig?.revocationUrl || ''}
 										/>
 									</div>
@@ -290,9 +325,13 @@ export function SSOConfigurationForm({
 								defaultChecked={existingConfig?.pkceEnabled ?? true}
 							/>
 							<div className="flex flex-col gap-1">
-								<p>PKCE Enabled</p>
+								<p>
+									<Trans>PKCE Enabled</Trans>
+								</p>
 								<p className="text-muted-foreground text-xs">
-									Use Proof Key for Code Exchange for enhanced security
+									<Trans>
+										Use Proof Key for Code Exchange for enhanced security
+									</Trans>
 								</p>
 							</div>
 						</Label>
@@ -304,10 +343,12 @@ export function SSOConfigurationForm({
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Icon name="user-plus" className="h-5 w-5" />
-							User Provisioning
+							<Trans>User Provisioning</Trans>
 						</CardTitle>
 						<CardDescription>
-							Configure how users are created and managed through SSO
+							<Trans>
+								Configure how users are created and managed through SSO
+							</Trans>
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -318,15 +359,21 @@ export function SSOConfigurationForm({
 								defaultChecked={existingConfig?.autoProvision ?? true}
 							/>
 							<div className="flex flex-col gap-1">
-								<p>Auto-Provision Users</p>
+								<p>
+									<Trans>Auto-Provision Users</Trans>
+								</p>
 								<p className="text-muted-foreground text-xs">
-									Automatically create user accounts for new SSO users
+									<Trans>
+										Automatically create user accounts for new SSO users
+									</Trans>
 								</p>
 							</div>
 						</Label>
 
 						<div className="space-y-2">
-							<Label htmlFor="defaultRole">Default Role</Label>
+							<Label htmlFor="defaultRole">
+								<Trans>Default Role</Trans>
+							</Label>
 							<Select
 								name="defaultRole"
 								defaultValue={existingConfig?.defaultRole || 'member'}
@@ -341,33 +388,45 @@ export function SSOConfigurationForm({
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="admin">Admin</SelectItem>
-									<SelectItem value="member">Member</SelectItem>
-									<SelectItem value="viewer">Viewer</SelectItem>
-									<SelectItem value="guest">Guest</SelectItem>
+									<SelectItem value="admin">
+										<Trans>Admin</Trans>
+									</SelectItem>
+									<SelectItem value="member">
+										<Trans>Member</Trans>
+									</SelectItem>
+									<SelectItem value="viewer">
+										<Trans>Viewer</Trans>
+									</SelectItem>
+									<SelectItem value="guest">
+										<Trans>Guest</Trans>
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="attributeMapping">Attribute Mapping (JSON)</Label>
+							<Label htmlFor="attributeMapping">
+								<Trans>Attribute Mapping (JSON)</Trans>
+							</Label>
 							<Textarea
 								id="attributeMapping"
 								name="attributeMapping"
 								placeholder={`{
-  "email": "email",
-  "name": "name",
-  "firstName": "given_name",
-  "lastName": "family_name",
-  "department": "department"
-}`}
+				"email": "email",
+				"name": "name",
+				"firstName": "given_name",
+				"lastName": "family_name",
+				"department": "department"
+				}`}
 								rows={6}
 								className="font-mono text-sm"
 								defaultValue={existingConfig?.attributeMapping || ''}
 							/>
 							<p className="text-muted-foreground text-sm">
-								Map OIDC claims to user attributes. Leave empty for default
-								mapping.
+								<Trans>
+									Map OIDC claims to user attributes. Leave empty for default
+									mapping.
+								</Trans>
 							</p>
 						</div>
 					</CardContent>
@@ -385,14 +444,16 @@ export function SSOConfigurationForm({
 							{isSubmitting ? (
 								<>
 									<Icon name="loader" className="mr-2 h-4 w-4 animate-spin" />
-									Saving...
+									<Trans>Saving...</Trans>
 								</>
 							) : (
 								<>
 									<Icon name="check" className="mr-2 h-4 w-4" />
-									{existingConfig
-										? 'Update Configuration'
-										: 'Save Configuration'}
+									{existingConfig ? (
+										<Trans>Update Configuration</Trans>
+									) : (
+										<Trans>Save Configuration</Trans>
+									)}
 								</>
 							)}
 						</Button>
@@ -407,12 +468,12 @@ export function SSOConfigurationForm({
 							{isSubmitting ? (
 								<>
 									<Icon name="loader" className="mr-2 h-4 w-4 animate-spin" />
-									Testing...
+									<Trans>Testing...</Trans>
 								</>
 							) : (
 								<>
 									<Icon name="plug" className="mr-2 h-4 w-4" />
-									Test Connection
+									<Trans>Test Connection</Trans>
 								</>
 							)}
 						</Button>
@@ -430,7 +491,11 @@ export function SSOConfigurationForm({
 								name={existingConfig.isEnabled ? 'ban' : 'check'}
 								className="mr-2 h-4 w-4"
 							/>
-							{existingConfig.isEnabled ? 'Disable SSO' : 'Enable SSO'}
+							{existingConfig.isEnabled ? (
+								<Trans>Disable SSO</Trans>
+							) : (
+								<Trans>Enable SSO</Trans>
+							)}
 						</Button>
 					)}
 				</div>

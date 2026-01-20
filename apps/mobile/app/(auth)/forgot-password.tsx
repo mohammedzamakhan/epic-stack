@@ -107,7 +107,10 @@ export default function ForgotPasswordScreen() {
 				{/* Footer */}
 				<View style={styles.footer}>
 					<Text style={styles.footerText}>Remember your password? </Text>
-					<TouchableOpacity onPress={handleBackToSignIn}>
+					<TouchableOpacity
+						onPress={handleBackToSignIn}
+						accessibilityRole="link"
+					>
 						<Text style={styles.footerLinkText}>Back to sign in</Text>
 					</TouchableOpacity>
 				</View>

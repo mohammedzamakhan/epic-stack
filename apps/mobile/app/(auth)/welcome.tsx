@@ -75,7 +75,7 @@ export default function WelcomeScreen() {
 
 					<View style={styles.signInContainer}>
 						<Text style={styles.signInText}>Already have an account? </Text>
-						<TouchableOpacity onPress={handleSignIn}>
+						<TouchableOpacity onPress={handleSignIn} accessibilityRole="link">
 							<Text style={styles.signInLink}>Sign In</Text>
 						</TouchableOpacity>
 					</View>

@@ -70,10 +70,7 @@ import {
 	CanDeleteNote,
 } from '#app/components/permissions/permission-guard.tsx'
 
-import {
-	logNoteActivity,
-	getNoteActivityLogs,
-} from '@repo/audit'
+import { logNoteActivity, getNoteActivityLogs } from '@repo/audit'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
@@ -1149,9 +1146,8 @@ export async function action({ request }: ActionFunctionArgs) {
 				)
 			}
 			if (imageCount > 0) {
-				const { uploadCommentImage } = await import(
-					'#app/utils/storage.server.ts'
-				)
+				const { uploadCommentImage } =
+					await import('#app/utils/storage.server.ts')
 
 				const imagePromises = []
 				for (let i = 0; i < imageCount; i++) {
@@ -1905,9 +1901,15 @@ export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary
 			statusHandlers={{
-				403: () => <p>You do not have permission to view this note</p>,
+				403: () => (
+					<p>
+						<Trans>You do not have permission to view this note</Trans>
+					</p>
+				),
 				404: ({ params }) => (
-					<p>No note with the id "{params.noteId}" exists</p>
+					<p>
+						<Trans>No note with the id "{params.noteId}" exists</Trans>
+					</p>
 				),
 			}}
 		/>

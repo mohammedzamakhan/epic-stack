@@ -1,6 +1,11 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { useState } from 'react'
+import { Form, Link, redirect, useLoaderData } from 'react-router'
+import { z } from 'zod'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
@@ -38,10 +43,6 @@ import {
 } from '@repo/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { Textarea } from '@repo/ui/textarea'
-import { useState } from 'react'
-import { Form, Link, useLoaderData, redirect } from 'react-router'
-import { z } from 'zod'
-
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/$roleId.ts'
 
@@ -387,6 +388,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function AdminRoleDetailPage() {
 	const { role, roleType, allPermissions } = useLoaderData<typeof loader>()
 	const [selectedTab, setSelectedTab] = useState('feature')
+	const { _ } = useLingui()
 
 	// Group permissions by entity for better organization
 	const permissionsByEntity = allPermissions.reduce(
@@ -409,13 +411,17 @@ export default function AdminRoleDetailPage() {
 				<BreadcrumbList>
 					<BreadcrumbItem>
 						<BreadcrumbLink>
-							<Link to="/admin">Admin</Link>
+							<Link to="/admin">
+								<Trans>Admin</Trans>
+							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
 					<BreadcrumbItem>
 						<BreadcrumbLink>
-							<Link to="/roles">Roles</Link>
+							<Link to="/roles">
+								<Trans>Roles</Trans>
+							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
@@ -432,7 +438,9 @@ export default function AdminRoleDetailPage() {
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="text-muted-foreground text-right text-sm">
-						<p>Key</p>
+						<p>
+							<Trans>Key</Trans>
+						</p>
 						<p className="font-mono">{role.name}</p>
 					</div>
 					<Form method="post" className="inline">
@@ -442,12 +450,14 @@ export default function AdminRoleDetailPage() {
 							size="sm"
 							type="submit"
 							onClick={(e) => {
-								if (!confirm('Are you sure you want to delete this role?')) {
+								if (
+									!confirm(_(msg`Are you sure you want to delete this role?`))
+								) {
 									e.preventDefault()
 								}
 							}}
 						>
-							Delete role
+							<Trans>Delete role</Trans>
 						</Button>
 					</Form>
 				</div>
@@ -456,7 +466,9 @@ export default function AdminRoleDetailPage() {
 			{/* Basic Information */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Basic information</CardTitle>
+					<CardTitle>
+						<Trans>Basic information</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Form method="post" className="space-y-4">
@@ -464,16 +476,20 @@ export default function AdminRoleDetailPage() {
 
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
-								<Label htmlFor="name">Name</Label>
+								<Label htmlFor="name">
+									<Trans>Name</Trans>
+								</Label>
 								<Input
 									id="name"
 									name="name"
 									defaultValue={role.name}
-									placeholder="Role name"
+									placeholder={_(msg`Role name`)}
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="key">Key</Label>
+								<Label htmlFor="key">
+									<Trans>Key</Trans>
+								</Label>
 								<Input
 									id="key"
 									value={role.name}
@@ -484,18 +500,20 @@ export default function AdminRoleDetailPage() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="description">Description</Label>
+							<Label htmlFor="description">
+								<Trans>Description</Trans>
+							</Label>
 							<Textarea
 								id="description"
 								name="description"
 								defaultValue={role.description || ''}
-								placeholder="Role description"
+								placeholder={_(msg`Role description`)}
 								rows={3}
 							/>
 						</div>
 
 						<Button type="submit" size="sm">
-							Save Changes
+							<Trans>Save Changes</Trans>
 						</Button>
 					</Form>
 
@@ -503,17 +521,17 @@ export default function AdminRoleDetailPage() {
 					<div className="mt-6 border-t pt-4">
 						<div className="text-muted-foreground flex items-center justify-between text-sm">
 							<span>
-								Created{' '}
-								{new Date(role.createdAt).toLocaleDateString('en-US', {
-									year: 'numeric',
-									month: 'long',
-									day: 'numeric',
-								})}
+								<Trans>
+									Created{' '}
+									{new Date(role.createdAt).toLocaleDateString('en-US', {
+										year: 'numeric',
+										month: 'long',
+										day: 'numeric',
+									})}
+								</Trans>
 							</span>
 							<span>
-								{roleType === 'organization'
-									? `${role._count.users} users`
-									: `${role._count.users} users`}
+								<Trans>{role._count.users} users</Trans>
 							</span>
 						</div>
 					</div>
@@ -523,18 +541,26 @@ export default function AdminRoleDetailPage() {
 			{/* Permissions */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Permissions</CardTitle>
+					<CardTitle>
+						<Trans>Permissions</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Tabs value={selectedTab} onValueChange={setSelectedTab}>
 						<TabsList>
-							<TabsTrigger value="feature">Feature permissions</TabsTrigger>
-							<TabsTrigger value="system">System permissions</TabsTrigger>
+							<TabsTrigger value="feature">
+								<Trans>Feature permissions</Trans>
+							</TabsTrigger>
+							<TabsTrigger value="system">
+								<Trans>System permissions</Trans>
+							</TabsTrigger>
 						</TabsList>
 
 						<TabsContent value="feature" className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h2 className="text-lg font-semibold">Feature permissions</h2>
+								<h2 className="text-lg font-semibold">
+									<Trans>Feature permissions</Trans>
+								</h2>
 								<CreateFeatureDialog />
 							</div>
 
@@ -556,7 +582,9 @@ export default function AdminRoleDetailPage() {
 
 						<TabsContent value="system">
 							<div className="text-muted-foreground py-8 text-center">
-								<p>System permissions management coming soon</p>
+								<p>
+									<Trans>System permissions management coming soon</Trans>
+								</p>
 							</div>
 						</TabsContent>
 					</Tabs>
@@ -665,62 +693,74 @@ function PermissionGroup({
 }
 
 function CreateFeatureDialog() {
+	const { _ } = useLingui()
+
 	return (
 		<Dialog>
 			<DialogTrigger
 				render={
 					<Button size="sm" variant="outline" className="mt-3">
 						<Icon name="plus" />
-						New feature
+						<Trans>New feature</Trans>
 					</Button>
 				}
 			></DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>New feature</DialogTitle>
+					<DialogTitle>
+						<Trans>New feature</Trans>
+					</DialogTitle>
 				</DialogHeader>
 
 				<Form method="post" className="space-y-4">
 					<input type="hidden" name="intent" value="create-feature" />
 
 					<div className="space-y-2">
-						<Label htmlFor="featureName">Name</Label>
+						<Label htmlFor="featureName">
+							<Trans>Name</Trans>
+						</Label>
 						<Input
 							id="featureName"
 							name="featureName"
-							placeholder="Enter feature name"
+							placeholder={_(msg`Enter feature name`)}
 							required
 						/>
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="featureKey">Key</Label>
+						<Label htmlFor="featureKey">
+							<Trans>Key</Trans>
+						</Label>
 						<DialogDescription className="text-muted-foreground text-sm">
-							Use this in your codebase to refer to this feature.
+							<Trans>Use this in your codebase to refer to this feature.</Trans>
 						</DialogDescription>
 						<Input
 							id="featureKey"
 							name="featureKey"
-							placeholder="Enter feature key"
+							placeholder={_(msg`Enter feature key`)}
 							required
 						/>
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="featureDescription">Description</Label>
+						<Label htmlFor="featureDescription">
+							<Trans>Description</Trans>
+						</Label>
 						<div className="mb-1 flex items-center gap-2">
-							<span className="text-muted-foreground text-sm">Optional</span>
+							<span className="text-muted-foreground text-sm">
+								<Trans>Optional</Trans>
+							</span>
 						</div>
 						<Textarea
 							id="featureDescription"
 							name="featureDescription"
-							placeholder="Enter feature description"
+							placeholder={_(msg`Enter feature description`)}
 							rows={3}
 						/>
 					</div>
 
 					<Button type="submit" className="w-full">
-						Add feature
+						<Trans>Add feature</Trans>
 					</Button>
 				</Form>
 			</DialogContent>
@@ -735,25 +775,29 @@ function CreatePermissionDialog({
 	selectedEntity: string
 	_availableEntities: string[]
 }) {
+	const { _ } = useLingui()
+
 	return (
 		<Dialog>
 			<DialogTrigger
 				render={
 					<Button size="sm" variant="outline" className="mt-3">
 						<Icon name="plus" />
-						Add permission
+						<Trans>Add permission</Trans>
 					</Button>
 				}
 			></DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>New permission</DialogTitle>
+					<DialogTitle>
+						<Trans>New permission</Trans>
+					</DialogTitle>
 					<div className="text-muted-foreground flex items-center gap-2 text-sm">
 						<span className="inline-flex items-center gap-1">
 							<svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 								<path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
 							</svg>
-							Feature: {selectedEntity}
+							<Trans>Feature: {selectedEntity}</Trans>
 						</span>
 					</div>
 				</DialogHeader>
@@ -763,62 +807,76 @@ function CreatePermissionDialog({
 					<input type="hidden" name="selectedEntity" value={selectedEntity} />
 
 					<div className="space-y-2">
-						<Label htmlFor="permissionName">Name</Label>
+						<Label htmlFor="permissionName">
+							<Trans>Name</Trans>
+						</Label>
 						<Input
 							id="permissionName"
 							name="permissionName"
-							placeholder="Enter permission name"
+							placeholder={_(msg`Enter permission name`)}
 							required
 						/>
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="permissionAction">Action</Label>
+							<Label htmlFor="permissionAction">
+								<Trans>Action</Trans>
+							</Label>
 							<Input
 								id="permissionAction"
 								name="permissionAction"
-								placeholder="e.g. create, read, approve, publish"
+								placeholder={_(msg`e.g. create, read, approve, publish`)}
 								required
 							/>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="permissionAccess">Access Level</Label>
+							<Label htmlFor="permissionAccess">
+								<Trans>Access Level</Trans>
+							</Label>
 							<Select
 								name="permissionAccess"
 								required
-								aria-label="Select access level"
+								aria-label={_(msg`Select access level`)}
 							>
-								<SelectTrigger>Select access level</SelectTrigger>
+								<SelectTrigger>
+									<Trans>Select access level</Trans>
+								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="own">
-										own - User's own resources
+										<Trans>own - User's own resources</Trans>
 									</SelectItem>
 									<SelectItem value="org">
-										org - Organization resources
+										<Trans>org - Organization resources</Trans>
 									</SelectItem>
-									<SelectItem value="any">any - Any resources</SelectItem>
+									<SelectItem value="any">
+										<Trans>any - Any resources</Trans>
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="permissionDescription">Description</Label>
+						<Label htmlFor="permissionDescription">
+							<Trans>Description</Trans>
+						</Label>
 						<div className="mb-1 flex items-center gap-2">
-							<span className="text-muted-foreground text-sm">Optional</span>
+							<span className="text-muted-foreground text-sm">
+								<Trans>Optional</Trans>
+							</span>
 						</div>
 						<Textarea
 							id="permissionDescription"
 							name="permissionDescription"
-							placeholder="Enter permission description"
+							placeholder={_(msg`Enter permission description`)}
 							rows={3}
 						/>
 					</div>
 
 					<Button type="submit" className="w-full">
-						Add permission
+						<Trans>Add permission</Trans>
 					</Button>
 				</Form>
 			</DialogContent>

@@ -18,6 +18,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
 	disabled?: boolean
 	rightIcon?: React.ReactNode | string
 	onRightIconPress?: () => void
+	rightIconAccessibilityLabel?: string
 	style?: StyleProp<ViewStyle>
 	inputType?: InputType
 	onSubmitEditing?: () => void
@@ -32,6 +33,7 @@ const Input = forwardRef<TextInput, InputProps>(
 			disabled,
 			rightIcon,
 			onRightIconPress,
+			rightIconAccessibilityLabel,
 			style,
 			inputType = 'text',
 			onSubmitEditing,
@@ -77,6 +79,7 @@ const Input = forwardRef<TextInput, InputProps>(
 							keyboardConfig.autoComplete as TextInputProps['autoComplete']
 						}
 						onSubmitEditing={handleSubmitEditing}
+						accessibilityLabel={label || props.placeholder}
 						// Merge with any overrides from props
 						{...props}
 					/>
@@ -85,6 +88,8 @@ const Input = forwardRef<TextInput, InputProps>(
 							style={styles.rightIconContainer}
 							onPress={onRightIconPress}
 							disabled={!onRightIconPress}
+							accessibilityLabel={rightIconAccessibilityLabel || 'Input action'}
+							accessibilityRole="button"
 						>
 							{typeof rightIcon === 'string' ? (
 								<Ionicons

@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -117,7 +118,9 @@ export function IntegrationControls({
 						{/* Existing Connections */}
 						{hasConnections && (
 							<div className="space-y-3">
-								<h4 className="text-sm font-medium">Connected Channels</h4>
+								<h4 className="text-sm font-medium">
+									<Trans>Connected Channels</Trans>
+								</h4>
 								{connections.map((connection) => (
 									<ConnectedChannelItem
 										key={connection.id}
@@ -282,7 +285,9 @@ function AddConnectionForm({
 	return (
 		<div className="space-y-3">
 			<div className="space-y-2">
-				<label className="text-sm font-medium">Service</label>
+				<label className="text-sm font-medium">
+					<Trans>Service</Trans>
+				</label>
 				<Select
 					value={selectedIntegration}
 					onValueChange={(value) => handleIntegrationChange(value as string)}
@@ -307,7 +312,9 @@ function AddConnectionForm({
 
 			{selectedIntegration && (
 				<div className="space-y-2">
-					<label className="text-sm font-medium">Channel</label>
+					<label className="text-sm font-medium">
+						<Trans>Channel</Trans>
+					</label>
 					<p className="text-muted-foreground text-xs">
 						Note: The bot may need to be invited to private channels before it
 						can post messages.
@@ -329,14 +336,18 @@ function AddConnectionForm({
 								<SelectItem value="loading" disabled>
 									<div className="flex items-center space-x-2">
 										<Icon name="refresh-cw" className="h-3 w-3 animate-spin" />
-										<span>Loading channels...</span>
+										<span>
+											<Trans>Loading channels...</Trans>
+										</span>
 									</div>
 								</SelectItem>
 							) : availableChannels.length === 0 ? (
 								<SelectItem value="no-channels" disabled>
 									<div className="flex items-center space-x-2">
 										<Icon name="x" className="h-3 w-3" />
-										<span>No channels available</span>
+										<span>
+											<Trans>No channels available</Trans>
+										</span>
 									</div>
 								</SelectItem>
 							) : (

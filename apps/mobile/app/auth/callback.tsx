@@ -70,7 +70,11 @@ export default function OAuthCallbackScreen() {
 		return (
 			<Screen backgroundColor="#ffffff">
 				<View style={styles.content}>
-					<ActivityIndicator size="large" color="#3b82f6" />
+					<ActivityIndicator
+						size="large"
+						color="#3b82f6"
+						accessibilityLabel="Loading"
+					/>
 					<Text style={styles.title}>Completing Authentication</Text>
 					<Text style={styles.subtitle}>
 						Please wait while we complete your authentication...
@@ -84,7 +88,9 @@ export default function OAuthCallbackScreen() {
 		return (
 			<Screen style={styles.container}>
 				<View style={styles.content}>
-					<Text style={styles.errorIcon}>❌</Text>
+					<Text style={styles.errorIcon} accessibilityLabel="Error">
+						❌
+					</Text>
 					<Text style={styles.title}>Authentication Failed</Text>
 					<ErrorText style={styles.error}>{callbackError}</ErrorText>
 
@@ -109,7 +115,11 @@ export default function OAuthCallbackScreen() {
 	return (
 		<Screen style={styles.container}>
 			<View style={styles.content}>
-				<ActivityIndicator size="large" color="#3b82f6" />
+				<ActivityIndicator
+					size="large"
+					color="#3b82f6"
+					accessibilityLabel="Loading"
+				/>
 				<Text style={styles.title}>Processing...</Text>
 			</View>
 		</Screen>

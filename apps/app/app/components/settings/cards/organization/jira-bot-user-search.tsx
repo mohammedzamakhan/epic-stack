@@ -1,3 +1,5 @@
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import {
@@ -36,6 +38,7 @@ export function JiraBotUserSearch({
 	onSelectUser,
 	initialSelectedUserId,
 }: JiraBotUserSearchProps) {
+	const { _ } = useLingui()
 	const [searchQuery, setSearchQuery] = useState('')
 	const [isSearching, setIsSearching] = useState(false)
 	const [users, setUsers] = useState<JiraUser[]>([])
@@ -62,14 +65,14 @@ export function JiraBotUserSearch({
 			setCurrentUser(userData)
 		} catch (error) {
 			console.error('Error fetching current user:', error)
-			toast.error('Failed to fetch current user information')
+			toast.error(_(t`Failed to fetch current user information`))
 		}
 	}
 
 	// Search for users
 	const searchUsers = async () => {
 		if (!searchQuery.trim()) {
-			toast.error('Please enter a search query')
+			toast.error(_(t`Please enter a search query`))
 			return
 		}
 
@@ -91,7 +94,7 @@ export function JiraBotUserSearch({
 			setUsers(usersData)
 		} catch (error) {
 			console.error('Error searching users:', error)
-			toast.error('Failed to search for users')
+			toast.error(_(t`Failed to search for users`))
 		} finally {
 			setIsSearching(false)
 		}
@@ -110,8 +113,8 @@ export function JiraBotUserSearch({
 	const copyAccountId = (accountId: string) => {
 		navigator.clipboard
 			.writeText(accountId)
-			.then(() => toast.success('Account ID copied to clipboard'))
-			.catch(() => toast.error('Failed to copy account ID'))
+			.then(() => toast.success(_(t`Account ID copied to clipboard`)))
+			.catch(() => toast.error(_(t`Failed to copy account ID`)))
 	}
 
 	return (
@@ -178,7 +181,7 @@ export function JiraBotUserSearch({
 					<div className="mt-1 flex gap-2">
 						<Input
 							id="user-search"
-							placeholder="Search by name or email..."
+							placeholder={_(t`Search by name or email...`)}
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>

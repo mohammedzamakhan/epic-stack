@@ -175,6 +175,8 @@ export default function SignInScreen() {
 										'Please email support@example.com for assistance.',
 									)
 								}
+								accessibilityRole="button"
+								accessibilityLabel="Contact Support"
 							>
 								<Text style={styles.supportButtonText}>Contact Support</Text>
 							</TouchableOpacity>
@@ -233,7 +235,10 @@ export default function SignInScreen() {
 						<View style={styles.inputContainer}>
 							<View style={styles.passwordHeader}>
 								<Text style={styles.label}>Password</Text>
-								<TouchableOpacity onPress={handleForgotPassword}>
+								<TouchableOpacity
+									onPress={handleForgotPassword}
+									accessibilityRole="link"
+								>
 									<Text style={styles.forgotLink}>Forgot password?</Text>
 								</TouchableOpacity>
 							</View>
@@ -256,6 +261,9 @@ export default function SignInScreen() {
 											<TouchableOpacity
 												onPress={() => setShowPassword(!showPassword)}
 												style={styles.eyeButton}
+												accessibilityLabel={
+													showPassword ? 'Hide password' : 'Show password'
+												}
 											>
 												<Text style={styles.eyeIcon}>
 													{showPassword ? '🙈' : '👁️'}
@@ -301,7 +309,10 @@ export default function SignInScreen() {
 				{/* Footer */}
 				<View style={styles.footer}>
 					<Text style={styles.footerText}>Don't have an account? </Text>
-					<TouchableOpacity onPress={handleNavigateToSignUp}>
+					<TouchableOpacity
+						onPress={handleNavigateToSignUp}
+						accessibilityRole="link"
+					>
 						<Text style={styles.footerLinkText}>Create account</Text>
 					</TouchableOpacity>
 				</View>

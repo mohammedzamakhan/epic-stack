@@ -109,6 +109,7 @@ export function SimpleOTPInput({
 					editable={!disabled}
 					autoFocus={index === 0}
 					selectTextOnFocus
+					accessibilityLabel={`Digit ${index + 1} of ${length}`}
 				/>
 			))}
 		</View>

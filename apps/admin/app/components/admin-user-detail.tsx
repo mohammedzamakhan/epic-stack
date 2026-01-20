@@ -1,3 +1,9 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { useState } from 'react'
+import { useNavigate, useSubmit } from 'react-router'
+import { getUserImgSrc } from '@repo/common'
+import { type getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -18,13 +24,7 @@ import {
 	ItemTitle,
 } from '@repo/ui/item'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { useState } from 'react'
-import { useNavigate, useSubmit } from 'react-router'
-
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
-
-import { type getIpAddressesByUser } from '@repo/common/ip-tracking'
-import { getUserImgSrc } from '@repo/common'
 
 export interface AdminUserDetail {
 	id: string
@@ -123,6 +123,7 @@ export function UserDetailView({
 	recentActivity,
 	ipAddresses,
 }: UserDetailViewProps) {
+	const { _ } = useLingui()
 	const navigate = useNavigate()
 	const submit = useSubmit()
 	const [showBanDialog, setShowBanDialog] = useState(false)
@@ -183,7 +184,11 @@ export function UserDetailView({
 									{user.isBanned && (
 										<Badge variant="destructive" className="gap-1">
 											<Icon name="ban" className="h-3 w-3" />
-											{isBanExpired ? 'Ban Expired' : 'Banned'}
+											{isBanExpired ? (
+												<Trans>Ban Expired</Trans>
+											) : (
+												<Trans>Banned</Trans>
+											)}
 										</Badge>
 									)}
 								</div>
@@ -209,7 +214,7 @@ export function UserDetailView({
 							disabled={user.isBanned && !isBanExpired}
 						>
 							<Icon name="user" className="h-4 w-4" />
-							Impersonate
+							<Trans>Impersonate</Trans>
 						</Button>
 						{user.isBanned ? (
 							<Button
@@ -219,7 +224,7 @@ export function UserDetailView({
 								className="gap-2"
 							>
 								<Icon name="shield-check" className="h-4 w-4" />
-								Lift Ban
+								<Trans>Lift Ban</Trans>
 							</Button>
 						) : (
 							<Button
@@ -229,7 +234,7 @@ export function UserDetailView({
 								className="gap-2"
 							>
 								<Icon name="ban" className="h-4 w-4" />
-								Ban User
+								<Trans>Ban User</Trans>
 							</Button>
 						)}
 					</div>
@@ -240,7 +245,7 @@ export function UserDetailView({
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
-								Organizations
+								<Trans>Organizations</Trans>
 							</CardTitle>
 							<Icon name="building" className="text-muted-foreground h-4 w-4" />
 						</CardHeader>
@@ -248,29 +253,41 @@ export function UserDetailView({
 							<div className="text-2xl font-bold">
 								{user.organizations.length}
 							</div>
-							<p className="text-muted-foreground text-xs">
-								{user.organizations.filter((org) => org.active).length} active
-							</p>
+							{(() => {
+								const activeCount = user.organizations.filter(
+									(org) => org.active,
+								).length
+								return (
+									<p className="text-muted-foreground text-xs">
+										<Trans>{activeCount} active</Trans>
+									</p>
+								)
+							})()}
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
-								Active Sessions
+								<Trans>Active Sessions</Trans>
 							</CardTitle>
 							<Icon name="key" className="text-muted-foreground h-4 w-4" />
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">{activeSessions.length}</div>
-							<p className="text-muted-foreground text-xs">
-								{user.sessions.length} total sessions
-							</p>
+							{(() => {
+								const totalSessions = user.sessions.length
+								return (
+									<p className="text-muted-foreground text-xs">
+										<Trans>{totalSessions} total sessions</Trans>
+									</p>
+								)
+							})()}
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
-								Notes Created
+								<Trans>Notes Created</Trans>
 							</CardTitle>
 							<Icon
 								name="file-text"
@@ -280,20 +297,24 @@ export function UserDetailView({
 						<CardContent>
 							<div className="text-2xl font-bold">{user.notes.length}</div>
 							<p className="text-muted-foreground text-xs">
-								Recent notes shown
+								<Trans>Recent notes shown</Trans>
 							</p>
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Security</CardTitle>
+							<CardTitle className="text-sm font-medium">
+								<Trans>Security</Trans>
+							</CardTitle>
 							<Icon name="shield" className="text-muted-foreground h-4 w-4" />
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">
 								{user.hasPassword ? '✓' : '✗'}
 							</div>
-							<p className="text-muted-foreground text-xs">0 passkeys</p>
+							<p className="text-muted-foreground text-xs">
+								<Trans>0 passkeys</Trans>
+							</p>
 						</CardContent>
 					</Card>
 				</div>
@@ -301,11 +322,21 @@ export function UserDetailView({
 				{/* Detailed Information */}
 				<Tabs defaultValue="overview" className="space-y-4">
 					<TabsList>
-						<TabsTrigger value="overview">Overview</TabsTrigger>
-						<TabsTrigger value="organizations">Organizations</TabsTrigger>
-						<TabsTrigger value="activity">Activity</TabsTrigger>
-						<TabsTrigger value="security">Security</TabsTrigger>
-						<TabsTrigger value="ip-addresses">IP Addresses</TabsTrigger>
+						<TabsTrigger value="overview">
+							<Trans>Overview</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="organizations">
+							<Trans>Organizations</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="activity">
+							<Trans>Activity</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="security">
+							<Trans>Security</Trans>
+						</TabsTrigger>
+						<TabsTrigger value="ip-addresses">
+							<Trans>IP Addresses</Trans>
+						</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="overview" className="space-y-4">
@@ -314,45 +345,64 @@ export function UserDetailView({
 								<CardHeader>
 									<CardTitle className="text-destructive flex items-center gap-2">
 										<Icon name="ban" className="h-5 w-5" />
-										Ban Information
+										<Trans>Ban Information</Trans>
 									</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-3">
 									<div className="grid gap-2">
 										<div className="flex items-center gap-2 text-sm">
-											<span className="font-medium">Status:</span>
+											<span className="font-medium">
+												<Trans>Status:</Trans>
+											</span>
 											<Badge variant="destructive">
-												{isBanExpired ? 'Ban Expired' : 'Banned'}
+												{isBanExpired ? (
+													<Trans>Ban Expired</Trans>
+												) : (
+													<Trans>Banned</Trans>
+												)}
 											</Badge>
 										</div>
 										{user.banReason && (
 											<div className="flex items-start gap-2 text-sm">
-												<span className="font-medium">Reason:</span>
+												<span className="font-medium">
+													<Trans>Reason:</Trans>
+												</span>
 												<span className="flex-1">{user.banReason}</span>
 											</div>
 										)}
 										{user.bannedAt && (
 											<div className="flex items-center gap-2 text-sm">
-												<span className="font-medium">Banned:</span>
+												<span className="font-medium">
+													<Trans>Banned:</Trans>
+												</span>
 												<span>{new Date(user.bannedAt).toLocaleString()}</span>
 											</div>
 										)}
 										{user.banExpiresAt && (
 											<div className="flex items-center gap-2 text-sm">
-												<span className="font-medium">Expires:</span>
+												<span className="font-medium">
+													<Trans>Expires:</Trans>
+												</span>
 												<span
 													className={
 														isBanExpired ? 'text-muted-foreground' : ''
 													}
 												>
 													{new Date(user.banExpiresAt).toLocaleString()}
-													{isBanExpired && ' (Expired)'}
+													{isBanExpired && (
+														<>
+															{' '}
+															<Trans>(Expired)</Trans>
+														</>
+													)}
 												</span>
 											</div>
 										)}
 										{user.bannedBy && (
 											<div className="flex items-center gap-2 text-sm">
-												<span className="font-medium">Banned by:</span>
+												<span className="font-medium">
+													<Trans>Banned by:</Trans>
+												</span>
 												<span>
 													{user.bannedBy.name || user.bannedBy.username}
 												</span>
@@ -513,7 +563,7 @@ export function UserDetailView({
 									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
-										User is not a member of any organizations
+										<Trans>User is not a member of any organizations</Trans>
 									</p>
 								)}
 							</CardContent>
@@ -526,7 +576,7 @@ export function UserDetailView({
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
 										<Icon name="message-circle" className="h-5 w-5" />
-										Recent Comments
+										<Trans>Recent Comments</Trans>
 									</CardTitle>
 								</CardHeader>
 								<CardContent>
@@ -546,7 +596,7 @@ export function UserDetailView({
 										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
-											No recent comments
+											<Trans>No recent comments</Trans>
 										</p>
 									)}
 								</CardContent>
@@ -556,7 +606,7 @@ export function UserDetailView({
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
 										<Icon name="activity" className="h-5 w-5" />
-										Recent Activity
+										<Trans>Recent Activity</Trans>
 									</CardTitle>
 								</CardHeader>
 								<CardContent>
@@ -576,7 +626,7 @@ export function UserDetailView({
 										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
-											No recent activity
+											<Trans>No recent activity</Trans>
 										</p>
 									)}
 								</CardContent>
@@ -587,7 +637,7 @@ export function UserDetailView({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
 									<Icon name="file-text" className="h-5 w-5" />
-									Recent Notes
+									<Trans>Recent Notes</Trans>
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
@@ -609,7 +659,7 @@ export function UserDetailView({
 									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
-										No notes created
+										<Trans>No notes created</Trans>
 									</p>
 								)}
 							</CardContent>
@@ -620,25 +670,35 @@ export function UserDetailView({
 						<div className="grid gap-4 md:grid-cols-2">
 							<Card>
 								<CardHeader>
-									<CardTitle>Authentication Methods</CardTitle>
+									<CardTitle>
+										<Trans>Authentication Methods</Trans>
+									</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div className="flex items-center justify-between">
-										<span className="text-sm">Password</span>
+										<span className="text-sm">
+											<Trans>Password</Trans>
+										</span>
 										<Badge variant={user.hasPassword ? 'default' : 'secondary'}>
-											{user.hasPassword ? 'Set' : 'Not Set'}
+											{user.hasPassword ? _(msg`Set`) : _(msg`Not Set`)}
 										</Badge>
 									</div>
 									<div className="flex items-center justify-between">
-										<span className="text-sm">Passkeys</span>
-										<Badge variant="secondary">0 configured</Badge>
+										<span className="text-sm">
+											<Trans>Passkeys</Trans>
+										</span>
+										<Badge variant="secondary">
+											<Trans>0 configured</Trans>
+										</Badge>
 									</div>
 								</CardContent>
 							</Card>
 
 							<Card>
 								<CardHeader>
-									<CardTitle>Connected Accounts</CardTitle>
+									<CardTitle>
+										<Trans>Connected Accounts</Trans>
+									</CardTitle>
 								</CardHeader>
 								<CardContent>
 									{user.connections.length > 0 ? (
@@ -665,7 +725,7 @@ export function UserDetailView({
 										</ItemGroup>
 									) : (
 										<p className="text-muted-foreground text-sm">
-											No connected accounts
+											<Trans>No connected accounts</Trans>
 										</p>
 									)}
 								</CardContent>
@@ -674,35 +734,46 @@ export function UserDetailView({
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Active Sessions</CardTitle>
-								<CardDescription>Current active login sessions</CardDescription>
+								<CardTitle>
+									<Trans>Active Sessions</Trans>
+								</CardTitle>
+								<CardDescription>
+									<Trans>Current active login sessions</Trans>
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								{activeSessions.length > 0 ? (
 									<ItemGroup>
-										{activeSessions.map((session) => (
-											<Item key={session.id} variant="outline">
-												<ItemContent>
-													<ItemTitle>
-														Session {session.id.slice(0, 8)}...
-													</ItemTitle>
-													<ItemDescription>
-														Created:{' '}
-														{new Date(session.createdAt).toLocaleString()}
-													</ItemDescription>
-												</ItemContent>
-												<ItemActions>
-													<span className="text-muted-foreground text-xs">
-														Expires:{' '}
-														{new Date(session.expirationDate).toLocaleString()}
-													</span>
-												</ItemActions>
-											</Item>
-										))}
+										{activeSessions.map((session) => {
+											const sessionId = session.id.slice(0, 8)
+											const createdAt = new Date(
+												session.createdAt,
+											).toLocaleString()
+											const expiresAt = new Date(
+												session.expirationDate,
+											).toLocaleString()
+											return (
+												<Item key={session.id} variant="outline">
+													<ItemContent>
+														<ItemTitle>
+															<Trans>Session {sessionId}...</Trans>
+														</ItemTitle>
+														<ItemDescription>
+															<Trans>Created: {createdAt}</Trans>
+														</ItemDescription>
+													</ItemContent>
+													<ItemActions>
+														<span className="text-muted-foreground text-xs">
+															<Trans>Expires: {expiresAt}</Trans>
+														</span>
+													</ItemActions>
+												</Item>
+											)
+										})}
 									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
-										No active sessions
+										<Trans>No active sessions</Trans>
 									</p>
 								)}
 							</CardContent>
@@ -712,37 +783,43 @@ export function UserDetailView({
 					<TabsContent value="ip-addresses" className="space-y-4">
 						<Card>
 							<CardHeader>
-								<CardTitle>IP Addresses</CardTitle>
+								<CardTitle>
+									<Trans>IP Addresses</Trans>
+								</CardTitle>
 								<CardDescription>
-									IP addresses used by this user
+									<Trans>IP addresses used by this user</Trans>
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								{ipAddresses.length > 0 ? (
 									<ItemGroup>
-										{ipAddresses.map((conn) => (
-											<Item key={conn.id} variant="outline">
-												<ItemContent>
-													<ItemTitle className="font-mono">
-														{conn.ipAddress.ip}
-													</ItemTitle>
-													<ItemDescription>
-														{conn.ipAddress.city}, {conn.ipAddress.region},{' '}
-														{conn.ipAddress.country}
-													</ItemDescription>
-												</ItemContent>
-												<ItemActions>
-													<span className="text-muted-foreground text-xs">
-														Last Seen:{' '}
-														{new Date(conn.lastSeenAt).toLocaleString()}
-													</span>
-												</ItemActions>
-											</Item>
-										))}
+										{ipAddresses.map((conn) => {
+											const lastSeenAt = new Date(
+												conn.lastSeenAt,
+											).toLocaleString()
+											return (
+												<Item key={conn.id} variant="outline">
+													<ItemContent>
+														<ItemTitle className="font-mono">
+															{conn.ipAddress.ip}
+														</ItemTitle>
+														<ItemDescription>
+															{conn.ipAddress.city}, {conn.ipAddress.region},{' '}
+															{conn.ipAddress.country}
+														</ItemDescription>
+													</ItemContent>
+													<ItemActions>
+														<span className="text-muted-foreground text-xs">
+															<Trans>Last Seen: {lastSeenAt}</Trans>
+														</span>
+													</ItemActions>
+												</Item>
+											)
+										})}
 									</ItemGroup>
 								) : (
 									<p className="text-muted-foreground text-sm">
-										No IP addresses recorded for this user
+										<Trans>No IP addresses recorded for this user</Trans>
 									</p>
 								)}
 							</CardContent>

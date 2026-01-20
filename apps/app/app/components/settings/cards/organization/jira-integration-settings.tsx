@@ -1,5 +1,13 @@
+import { Trans } from '@lingui/react/macro'
+
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+} from '@repo/ui/card'
 import { Label } from '@repo/ui/label'
 import { Switch } from '@repo/ui/switch'
 import { useState } from 'react'
@@ -108,7 +116,9 @@ export function JiraIntegrationSettings({
 						<div>
 							{config?.botUser ? (
 								<div className="rounded-md border p-4">
-									<h3 className="mb-1 text-sm font-medium">Current Bot User</h3>
+									<h3 className="mb-1 text-sm font-medium">
+										<Trans>Current Bot User</Trans>
+									</h3>
 									<p className="mb-1 text-sm">
 										{config.botUser.displayName}
 										{config.botUser.emailAddress &&

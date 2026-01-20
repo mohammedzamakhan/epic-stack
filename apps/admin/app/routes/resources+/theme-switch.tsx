@@ -1,6 +1,8 @@
 import { useForm, getFormProps } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Icon } from '@repo/ui/icon'
 import { data, redirect, useFetcher, useFetchers } from 'react-router'
 import { ServerOnly } from 'remix-utils/server-only'
@@ -44,6 +46,7 @@ export function ThemeSwitch({
 }: {
 	userPreference?: Theme | null
 }) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher<typeof action>()
 	const requestInfo = useRequestInfo()
 
@@ -59,17 +62,23 @@ export function ThemeSwitch({
 	const modeLabel = {
 		light: (
 			<Icon name="sun">
-				<span className="sr-only">Light</span>
+				<span className="sr-only">
+					<Trans>Light</Trans>
+				</span>
 			</Icon>
 		),
 		dark: (
 			<Icon name="moon">
-				<span className="sr-only">Dark</span>
+				<span className="sr-only">
+					<Trans>Dark</Trans>
+				</span>
 			</Icon>
 		),
 		system: (
 			<Icon name="laptop">
-				<span className="sr-only">System</span>
+				<span className="sr-only">
+					<Trans>System</Trans>
+				</span>
 			</Icon>
 		),
 	}
@@ -90,7 +99,7 @@ export function ThemeSwitch({
 				<button
 					type="submit"
 					className="flex size-8 cursor-pointer items-center justify-center"
-					aria-label="Toggle theme"
+					aria-label={_(msg`Toggle theme`)}
 				>
 					{modeLabel[mode]}
 				</button>

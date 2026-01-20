@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -187,6 +187,7 @@ export function OrganizationMembers({
 											variant="ghost"
 											size="sm"
 											className="text-destructive hover:text-destructive"
+											aria-label={t`Remove member`}
 										>
 											<Icon name="trash-2" className="h-4 w-4" />
 										</Button>

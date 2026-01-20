@@ -192,6 +192,7 @@ export default function VerifyCodeScreen() {
 										autoFocus={true}
 										selectTextOnFocus={true}
 										returnKeyType="done"
+										accessibilityLabel="Verification code"
 										onSubmitEditing={() => {
 											if (value.length === 6) {
 												void handleSubmit(onSubmit)()
@@ -238,13 +239,16 @@ export default function VerifyCodeScreen() {
 
 				{/* Footer */}
 				<View style={styles.footer}>
-					<TouchableOpacity onPress={handleBackToSignUp}>
+					<TouchableOpacity
+						onPress={handleBackToSignUp}
+						accessibilityRole="link"
+					>
 						<Text style={styles.footerLinkText}>Back to sign up</Text>
 					</TouchableOpacity>
 
 					<Text style={styles.footerSeparator}>•</Text>
 
-					<TouchableOpacity onPress={handleGoToSignIn}>
+					<TouchableOpacity onPress={handleGoToSignIn} accessibilityRole="link">
 						<Text style={styles.footerLinkText}>Already have an account?</Text>
 					</TouchableOpacity>
 				</View>

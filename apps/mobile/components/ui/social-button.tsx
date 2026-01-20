@@ -81,6 +81,7 @@ export function SocialButton({
 			onPress={handlePress}
 			disabled={isDisabled || isLoading}
 			activeOpacity={0.8}
+			accessibilityRole="button"
 			accessibilityState={{ disabled: isDisabled || isLoading }}
 		>
 			<View style={styles.content}>

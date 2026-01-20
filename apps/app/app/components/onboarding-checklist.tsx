@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { Button } from '@repo/ui/button'
 import { Card, CardHeader, CardAction, CardContent } from '@repo/ui/card'
@@ -138,6 +138,7 @@ export function OnboardingChecklist({
 						size="sm"
 						onClick={handleHide}
 						className="h-8 w-8 shrink-0 p-0"
+						aria-label={t`Close`}
 					>
 						<Icon name="x" className="h-4 w-4" />
 					</Button>
@@ -149,7 +150,7 @@ export function OnboardingChecklist({
 					{progress.steps.map((step, index) => (
 						<div
 							key={step.id}
-							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 px-4 transition-colors ${
+							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 px-4 motion-safe:transition-colors ${
 								index > 0 ? 'border-border border-t border-dashed' : ''
 							}`}
 						>

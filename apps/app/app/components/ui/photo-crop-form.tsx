@@ -9,7 +9,8 @@ import ReactCrop, {
 } from 'react-image-crop'
 import { useFetcher } from 'react-router'
 import 'react-image-crop/dist/ReactCrop.css'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 
 export interface PhotoCropFormConfig {
 	// Form submission intent
@@ -31,6 +32,7 @@ export function PhotoCropForm({
 	selectedFile,
 	config,
 }: PhotoCropFormProps) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher()
 	const [newImgSrc, setNewImgSrc] = useState<string | undefined>(undefined)
 	const [currentSelectedFile, setCurrentSelectedFile] = useState<File | null>(
@@ -205,7 +207,7 @@ export function PhotoCropForm({
 					<img
 						ref={imgRef}
 						className="max-h-80 w-full object-contain"
-						alt="Image to crop"
+						alt={_(t`Image to crop`)}
 						src={newImgSrc}
 						onLoad={onImageLoad}
 					/>

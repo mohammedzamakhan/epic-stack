@@ -1,3 +1,5 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { blacklistIp, unblacklistIp } from '@repo/common/ip-tracking'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
@@ -148,6 +150,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function AdminIpAddressesPage() {
+	const { _ } = useLingui()
 	const data = useLoaderData<typeof loader>()
 
 	const formatDate = (date: string | Date | null) => {
@@ -158,9 +161,11 @@ export default function AdminIpAddressesPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">IP Addresses</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<Trans>IP Addresses</Trans>
+				</h1>
 				<p className="text-muted-foreground">
-					Monitor and manage IP addresses accessing your website
+					<Trans>Monitor and manage IP addresses accessing your website</Trans>
 				</p>
 			</div>
 
@@ -168,23 +173,25 @@ export default function AdminIpAddressesPage() {
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-4">
 				<div className="bg-card rounded-lg border p-4">
 					<h3 className="text-muted-foreground text-sm font-medium">
-						Total IPs
+						<Trans>Total IPs</Trans>
 					</h3>
 					<p className="text-2xl font-bold">{data.stats.totalIps}</p>
 				</div>
 				<div className="bg-card rounded-lg border p-4">
 					<h3 className="text-muted-foreground text-sm font-medium">
-						Blacklisted IPs
+						<Trans>Blacklisted IPs</Trans>
 					</h3>
 					<p className="flex items-center gap-2 text-2xl font-bold text-red-600">
 						<Icon name="ban" className="h-5 w-5" aria-hidden="true" />
 						<span>{data.stats.blacklistedIps}</span>
-						<span className="sr-only">blocked</span>
+						<span className="sr-only">
+							<Trans>blocked</Trans>
+						</span>
 					</p>
 				</div>
 				<div className="bg-card rounded-lg border p-4">
 					<h3 className="text-muted-foreground text-sm font-medium">
-						Suspicious IPs
+						<Trans>Suspicious IPs</Trans>
 					</h3>
 					<p className="flex items-center gap-2 text-2xl font-bold text-yellow-600">
 						<Icon
@@ -193,7 +200,9 @@ export default function AdminIpAddressesPage() {
 							aria-hidden="true"
 						/>
 						<span>{data.stats.suspiciousIps}</span>
-						<span className="sr-only">suspicious</span>
+						<span className="sr-only">
+							<Trans>suspicious</Trans>
+						</span>
 					</p>
 				</div>
 			</div>
@@ -203,15 +212,33 @@ export default function AdminIpAddressesPage() {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>IP Address</TableHead>
-							<TableHead>Location</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Requests</TableHead>
-							<TableHead>Last Request</TableHead>
-							<TableHead>Suspicious Score</TableHead>
-							<TableHead>Users</TableHead>
-							<TableHead>First Seen</TableHead>
-							<TableHead>Actions</TableHead>
+							<TableHead>
+								<Trans>IP Address</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Location</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Status</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Requests</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Last Request</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Suspicious Score</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Users</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>First Seen</Trans>
+							</TableHead>
+							<TableHead>
+								<Trans>Actions</Trans>
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -233,16 +260,24 @@ export default function AdminIpAddressesPage() {
 									) : ip.country ? (
 										<span>{ip.country}</span>
 									) : (
-										<span className="text-muted-foreground">Unknown</span>
+										<span className="text-muted-foreground">
+											<Trans>Unknown</Trans>
+										</span>
 									)}
 								</TableCell>
 								<TableCell>
 									{ip.isBlacklisted ? (
-										<Badge variant="destructive">Blacklisted</Badge>
+										<Badge variant="destructive">
+											<Trans>Blacklisted</Trans>
+										</Badge>
 									) : ip.suspiciousScore > 0 ? (
-										<Badge variant="secondary">Suspicious</Badge>
+										<Badge variant="secondary">
+											<Trans>Suspicious</Trans>
+										</Badge>
 									) : (
-										<Badge variant="outline">Active</Badge>
+										<Badge variant="outline">
+											<Trans>Active</Trans>
+										</Badge>
 									)}
 								</TableCell>
 								<TableCell>{ip.requestCount}</TableCell>
@@ -272,19 +307,23 @@ export default function AdminIpAddressesPage() {
 															userConnection.user.username}
 													</span>
 													<div className="text-muted-foreground text-xs">
-														{userConnection.requestCount} requests
+														<Trans>
+															{userConnection.requestCount} requests
+														</Trans>
 													</div>
 												</div>
 											))}
 											{ip.ipAddressUsers.length > 3 && (
 												<div className="text-muted-foreground text-xs">
-													+{ip.ipAddressUsers.length - 3} more users
+													<Trans>
+														+{ip.ipAddressUsers.length - 3} more users
+													</Trans>
 												</div>
 											)}
 										</div>
 									) : (
 										<span className="text-muted-foreground text-sm">
-											No users
+											<Trans>No users</Trans>
 										</span>
 									)}
 								</TableCell>
@@ -302,7 +341,7 @@ export default function AdminIpAddressesPage() {
 												/>
 												<input type="hidden" name="ip" value={ip.ip} />
 												<Button variant="outline" size="sm" type="submit">
-													Unblacklist
+													<Trans>Unblacklist</Trans>
 												</Button>
 											</Form>
 										) : (
@@ -310,29 +349,35 @@ export default function AdminIpAddressesPage() {
 												<DialogTrigger
 													render={
 														<Button variant="destructive" size="sm">
-															Blacklist
+															<Trans>Blacklist</Trans>
 														</Button>
 													}
 												></DialogTrigger>
 												<DialogContent>
 													<DialogHeader>
-														<DialogTitle>Blacklist IP Address</DialogTitle>
+														<DialogTitle>
+															<Trans>Blacklist IP Address</Trans>
+														</DialogTitle>
 														<DialogDescription>
-															Are you sure you want to blacklist {ip.ip}? This
-															will prevent all future requests from this IP
-															address.
+															<Trans>
+																Are you sure you want to blacklist {ip.ip}? This
+																will prevent all future requests from this IP
+																address.
+															</Trans>
 														</DialogDescription>
 													</DialogHeader>
 													<Form method="post">
 														<div className="space-y-4">
 															<div className="space-y-2">
 																<Label htmlFor="reason">
-																	Reason for blacklisting
+																	<Trans>Reason for blacklisting</Trans>
 																</Label>
 																<Textarea
 																	id="reason"
 																	name="reason"
-																	placeholder="Enter reason for blacklisting this IP address..."
+																	placeholder={_(
+																		msg`Enter reason for blacklisting this IP address...`,
+																	)}
 																	required
 																/>
 															</div>
@@ -345,7 +390,7 @@ export default function AdminIpAddressesPage() {
 														<input type="hidden" name="ip" value={ip.ip} />
 														<DialogFooter className="mt-4">
 															<Button type="submit" variant="destructive">
-																Blacklist IP
+																<Trans>Blacklist IP</Trans>
 															</Button>
 														</DialogFooter>
 													</Form>
@@ -362,7 +407,9 @@ export default function AdminIpAddressesPage() {
 
 			{data.ipAddresses.length === 0 && (
 				<div className="py-8 text-center">
-					<p className="text-muted-foreground">No IP addresses found</p>
+					<p className="text-muted-foreground">
+						<Trans>No IP addresses found</Trans>
+					</p>
 				</div>
 			)}
 		</div>

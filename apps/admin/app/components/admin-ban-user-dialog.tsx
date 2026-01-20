@@ -1,7 +1,15 @@
-
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@repo/ui/dialog'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@repo/ui/dialog'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
@@ -21,6 +29,7 @@ interface BanUserDialogProps {
 }
 
 export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
+	const { _ } = useLingui()
 	const [reason, setReason] = useState('')
 	const [hasExpiration, setHasExpiration] = useState(false)
 	const [expirationDate, setExpirationDate] = useState('')
@@ -69,27 +78,30 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="overscroll-contain sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Icon name="ban" className="text-destructive h-5 w-5" />
-						Ban User
+						<Trans>Ban User</Trans>
 					</DialogTitle>
 					<DialogDescription>
-						You are about to ban <strong>{user.name || user.username}</strong> (
-						{user.email}). This will prevent them from accessing the
-						application.
+						<Trans>
+							You are about to ban <strong>{user.name || user.username}</strong>{' '}
+							({user.email}). This will prevent them from accessing the
+							application.
+						</Trans>
 					</DialogDescription>
 				</DialogHeader>
 
 				<Form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
 						<Label htmlFor="ban-reason">
-							Reason for ban <span className="text-destructive">*</span>
+							<Trans>Reason for ban</Trans>{' '}
+							<span className="text-destructive">*</span>
 						</Label>
 						<Textarea
 							id="ban-reason"
-							placeholder="Enter the reason for banning this user..."
+							placeholder={_(msg`Enter the reason for banning this user...`)}
 							value={reason}
 							onChange={(e) => setReason(e.target.value)}
 							required
@@ -112,7 +124,7 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 								disabled={isSubmitting}
 							/>
 							<Label htmlFor="has-expiration" className="text-sm">
-								Set expiration date (optional)
+								<Trans>Set expiration date (optional)</Trans>
 							</Label>
 						</div>
 
@@ -123,7 +135,7 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 									className="flex items-center gap-2"
 								>
 									<Icon name="calendar" className="h-4 w-4" />
-									Expiration Date
+									<Trans>Expiration Date</Trans>
 								</Label>
 								<Input
 									id="expiration-date"
@@ -134,8 +146,10 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 									disabled={isSubmitting}
 								/>
 								<p className="text-muted-foreground text-xs">
-									The ban will be automatically lifted on this date. Leave empty
-									for permanent ban.
+									<Trans>
+										The ban will be automatically lifted on this date. Leave
+										empty for permanent ban.
+									</Trans>
 								</p>
 							</div>
 						)}
@@ -148,7 +162,7 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 							onClick={handleClose}
 							disabled={isSubmitting}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 						<Button
 							type="submit"
@@ -159,12 +173,12 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 							{isSubmitting ? (
 								<>
 									<div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-									Banning...
+									<Trans>Banning...</Trans>
 								</>
 							) : (
 								<>
 									<Icon name="ban" className="h-4 w-4" />
-									Ban User
+									<Trans>Ban User</Trans>
 								</>
 							)}
 						</Button>

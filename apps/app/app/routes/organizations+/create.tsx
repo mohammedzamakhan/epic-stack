@@ -7,7 +7,8 @@ import {
 } from '@conform-to/react'
 
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -497,6 +498,7 @@ export default function CreateOrganizationPage() {
 }
 
 function Step1({ actionData }: { actionData: any }) {
+	const { _ } = useLingui()
 	const [previewImage, setPreviewImage] = useState<string | null>(null)
 	const [isSlugFocused, setIsSlugFocused] = useState(false)
 	const [hasManuallyEditedSlug, setHasManuallyEditedSlug] = useState(false)
@@ -574,7 +576,7 @@ function Step1({ actionData }: { actionData: any }) {
 											{previewImage ? (
 												<img
 													src={previewImage}
-													alt="Organization logo preview"
+													alt={_(t`Organization logo preview`)}
 													className="size-full object-cover"
 												/>
 											) : (
@@ -642,7 +644,7 @@ function Step1({ actionData }: { actionData: any }) {
 									value={nameControl.value ?? ''}
 									onChange={(e) => nameControl.change(e.target.value)}
 									onBlur={nameControl.blur}
-									placeholder="Acme Inc."
+									placeholder={_(t`Acme Inc.`)}
 									aria-invalid={fields.name.errors?.length ? true : undefined}
 								/>
 								<FieldError
@@ -677,7 +679,7 @@ function Step1({ actionData }: { actionData: any }) {
 											setIsSlugFocused(false)
 											slugControl.blur()
 										}}
-										placeholder="acme"
+										placeholder={_(t`acme`)}
 										className="flex-1"
 										aria-invalid={fields.slug.errors?.length ? true : undefined}
 									/>
@@ -721,7 +723,7 @@ function Step1({ actionData }: { actionData: any }) {
 								<Textarea
 									{...getInputProps(fields.description, { type: 'text' })}
 									rows={3}
-									placeholder="Tell us about your organization..."
+									placeholder={_(t`Tell us about your organization...`)}
 									aria-invalid={
 										fields.description.errors?.length ? true : undefined
 									}
@@ -1132,6 +1134,7 @@ function CreateInviteFieldset({
 	form: any
 	index: number
 }) {
+	const { _ } = useLingui()
 	const inviteFields = meta.getFieldset()
 	const role = useInputControl(inviteFields.role)
 
@@ -1145,7 +1148,7 @@ function CreateInviteFieldset({
 					>
 						<Input
 							{...getInputProps(inviteFields.email, { type: 'email' })}
-							placeholder="Enter email address"
+							placeholder={_(t`Enter email address`)}
 							className="w-full"
 							aria-invalid={
 								inviteFields.email.errors?.length ? true : undefined

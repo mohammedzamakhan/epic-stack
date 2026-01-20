@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/macro'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { TableCell, TableRow } from '@repo/ui/table'
@@ -50,11 +51,13 @@ export function RolesTableRows({
 					<TableCell>{role._count.users}</TableCell>
 					<TableCell>{role.permissions.length}</TableCell>
 					<TableCell className="text-muted-foreground">
-						{role.description || 'No description'}
+						{role.description || <Trans>No description</Trans>}
 					</TableCell>
 					<TableCell className="text-right">
 						<Button variant="ghost" size="sm">
-							<Link to={`${baseUrl}/${role.id}`}>Edit</Link>
+							<Link to={`${baseUrl}/${role.id}`}>
+								<Trans>Edit</Trans>
+							</Link>
 						</Button>
 					</TableCell>
 				</TableRow>

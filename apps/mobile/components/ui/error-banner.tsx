@@ -74,6 +74,8 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
 						<TouchableOpacity
 							style={[styles.actionButton, getActionStyle()]}
 							onPress={onAction}
+							accessibilityRole="button"
+							accessibilityLabel={actionText}
 						>
 							<Text style={[styles.actionText, getTextStyle()]}>
 								{actionText}
@@ -82,7 +84,12 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
 					)}
 
 					{dismissible && onDismiss && (
-						<TouchableOpacity style={styles.dismissButton} onPress={onDismiss}>
+						<TouchableOpacity
+							style={styles.dismissButton}
+							onPress={onDismiss}
+							accessibilityRole="button"
+							accessibilityLabel="Dismiss"
+						>
 							<Text style={[styles.dismissText, getTextStyle()]}>×</Text>
 						</TouchableOpacity>
 					)}

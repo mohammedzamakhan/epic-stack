@@ -77,10 +77,14 @@ export default function LandingScreen() {
 
 			{/* Header */}
 			<View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
-				<View style={styles.logoContainer}>
+				<View style={styles.logoContainer} accessibilityElementsHidden={true}>
 					<View style={styles.logo} />
 				</View>
-				<TouchableOpacity onPress={handleSignIn} style={styles.signInButton}>
+				<TouchableOpacity
+					onPress={handleSignIn}
+					style={styles.signInButton}
+					accessibilityRole="link"
+				>
 					<Text style={styles.signInText}>Sign in</Text>
 				</TouchableOpacity>
 			</View>
@@ -120,7 +124,11 @@ export default function LandingScreen() {
 				<Text style={styles.subtitle}>{slides[currentIndex].subtitle}</Text>
 
 				{/* Page Indicators */}
-				<View style={styles.indicators}>
+				<View
+					style={styles.indicators}
+					accessible={true}
+					accessibilityLabel={`Page ${currentIndex + 1} of ${slides.length}`}
+				>
 					{slides.map((_, index) => (
 						<View
 							key={index}
@@ -138,6 +146,7 @@ export default function LandingScreen() {
 				<TouchableOpacity
 					style={styles.getStartedButton}
 					onPress={handleGetStarted}
+					accessibilityRole="button"
 				>
 					<Text style={styles.getStartedText}>Get Started</Text>
 				</TouchableOpacity>

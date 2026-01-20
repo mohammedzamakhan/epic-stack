@@ -189,6 +189,7 @@ export function BillingCard({
 				<div className="flex items-center justify-end">
 					<div className="bg-muted flex items-center space-x-2 rounded-lg p-1">
 						<button
+							type="button"
 							onClick={() => setBillingInterval('monthly')}
 							className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
 								billingInterval === 'monthly'
@@ -199,6 +200,7 @@ export function BillingCard({
 							<Trans>Monthly</Trans>
 						</button>
 						<button
+							type="button"
 							onClick={() => setBillingInterval('yearly')}
 							className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
 								billingInterval === 'yearly'

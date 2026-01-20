@@ -1,4 +1,4 @@
-import { Trans, msg } from '@lingui/macro'
+import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { getCrossAppUrl } from '@repo/common/url'
@@ -195,6 +195,7 @@ function OrganizationSidebar({
 	extensionId?: string
 }) {
 	const { _ } = useLingui()
+	const goToHomepageLabel = _(t`Go to homepage`)
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
 	const [helpUrl, setHelpUrl] = useState('https://docs.epic-startup.me:2999')
 
@@ -314,7 +315,7 @@ function OrganizationSidebar({
 	return (
 		<>
 			<SidebarHeader className="px-2 pt-2 pb-0">
-				<Link to="/" aria-label="Go to homepage">
+				<Link to="/" aria-label={goToHomepageLabel}>
 					<Logo className="text-md m-1 mx-2" aria-hidden="true" />
 				</Link>
 				<TeamSwitcher />

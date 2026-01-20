@@ -14,12 +14,17 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: organization._count.users
-#: app/components/settings/cards/organization/billing-card.tsx:175
+#: app/components/settings/cards/organization/billing-card.tsx:159
 msgid "{0, plural, one {# active member} other {# active members}}"
 msgstr ""
 
+#. placeholder {0}: selectedMemberIds.length
+#: app/components/note/share-note-button.tsx:317
+msgid "{0, plural, one {Share with 1 member} other {Share with # members}}"
+msgstr ""
+
 #. placeholder {0}: step.actionConfig?.completedLabel || 'Completed'
-#: app/components/onboarding-checklist.tsx:189
+#: app/components/onboarding-checklist.tsx:190
 msgid "{0}"
 msgstr ""
 
@@ -59,7 +64,7 @@ msgstr ""
 msgid "{channel}"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:310
+#: app/routes/mcp+/authorize.tsx:289
 msgid "{clientName} is requesting access to your organization data"
 msgstr ""
 
@@ -91,11 +96,11 @@ msgstr ""
 msgid "{workflowName}"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:622
+#: app/routes/organizations+/create.tsx:624
 msgid "*.png, *.jpeg files up to 5 MB"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:763
+#: app/routes/_auth+/login.tsx:777
 msgid "← Back to SSO login"
 msgstr ""
 
@@ -112,8 +117,8 @@ msgid "✓ Discord points claimed"
 msgstr ""
 
 #. placeholder {0}: basePrice.toFixed(2)
-#: app/components/settings/cards/organization/billing-card.tsx:432
-#: app/routes/organizations+/create.tsx:1326
+#: app/components/settings/cards/organization/billing-card.tsx:414
+#: app/routes/organizations+/create.tsx:1329
 msgid "${0} billed annually"
 msgstr ""
 
@@ -130,8 +135,8 @@ msgid "201-500 people"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:123
-msgid "2FA is enabled"
-msgstr ""
+#~ msgid "2FA is enabled"
+#~ msgstr ""
 
 #: app/components/settings/cards/organization/team-size-card.tsx:58
 msgid "500+ people"
@@ -147,7 +152,6 @@ msgstr ""
 
 #: app/routes/_auth+/onboarding_.$provider.tsx:127
 #: app/routes/_auth+/onboarding.tsx:110
-#: app/routes/settings+/profile.index.tsx:193
 msgid "A user already exists with this username"
 msgstr ""
 
@@ -160,25 +164,37 @@ msgstr ""
 msgid "Access Key ID"
 msgstr ""
 
-#: app/components/nav-user.tsx:169
+#: app/components/nav-user.tsx:173
 msgid "Account"
+msgstr ""
+
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:116
+msgid "Account ID copied to clipboard"
 msgstr ""
 
 #: app/components/command-menu.tsx:166
 msgid "Account settings"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:289
+#: app/routes/_auth+/login.tsx:303
 msgid "Account Suspended"
 msgstr ""
 
+#: app/routes/organizations+/create.tsx:682
+msgid "acme"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:647
+msgid "Acme Inc."
+msgstr ""
+
 #: app/components/command-menu.tsx:115
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:906
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:909
 msgid "Actions"
 msgstr ""
 
 #: app/components/settings/cards/sessions-card.tsx:244
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:937
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:940
 msgid "Active"
 msgstr ""
 
@@ -196,16 +212,25 @@ msgstr ""
 #~ msgstr ""
 
 #: app/components/organization-invitations.tsx:265
-#: app/routes/organizations+/create.tsx:1108
+#: app/routes/organizations+/create.tsx:1110
 msgid "Add another invitation"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:888
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:892
 msgid "Add column"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:299
+#: app/components/note/comment-image-upload.tsx:92
+#: app/components/note/comment-image-upload.tsx:93
+msgid "Add images"
+msgstr ""
+
+#: app/components/app-sidebar.tsx:298
 msgid "Add members"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:243
+msgid "Add Members"
 msgstr ""
 
 #: app/components/settings/cards/connections-card.tsx:41
@@ -218,19 +243,19 @@ msgstr ""
 msgid "Add organization"
 msgstr ""
 
-#: app/components/data-table.tsx:323
+#: app/components/data-table.tsx:325
 msgid "Add reviewer"
 msgstr ""
 
-#: app/components/data-table.tsx:540
+#: app/components/data-table.tsx:545
 msgid "Add Section"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:741
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:744
 msgid "Add the following configuration to the file:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:774
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:777
 msgid "Add this configuration to your .kiro/settings/mcp.json:"
 msgstr ""
 
@@ -242,7 +267,7 @@ msgstr ""
 #~ msgid "Add this to your .kiro/settings/mcp.json file:"
 #~ msgstr ""
 
-#: app/routes/organizations+/create.tsx:899
+#: app/routes/organizations+/create.tsx:901
 msgid "Add your team members to get started. You can always invite more people later."
 msgstr ""
 
@@ -250,8 +275,8 @@ msgstr ""
 #. placeholder {0}: billingInterval === 'yearly' ? (additionalUserPrice / 12).toFixed(2) : additionalUserPrice.toFixed(2)
 #. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
 #. placeholder {1}: billingInterval === 'yearly' && ( <span className="block text-xs opacity-75"> (${additionalUserPrice.toFixed(2)} billed annually per user) </span> )
-#: app/components/settings/cards/organization/billing-card.tsx:444
-#: app/routes/organizations+/create.tsx:1337
+#: app/components/settings/cards/organization/billing-card.tsx:426
+#: app/routes/organizations+/create.tsx:1340
 msgid "Additional users: ${0}/user/month{1}"
 msgstr ""
 
@@ -275,33 +300,36 @@ msgstr ""
 msgid "AI Assistant"
 msgstr ""
 
-#: app/components/data-table.tsx:350
+#: app/components/data-table.tsx:352
 msgid "All assigned"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1352
+#: app/routes/organizations+/create.tsx:1355
 msgid "All core features included"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:322
-#: app/components/ui/notification-bell.tsx:405
+#: app/components/ui/notification-bell.tsx:330
+#: app/components/ui/notification-bell.tsx:413
 msgid "All Notifications"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:303
-msgid "All of your data has been deleted"
+#~ msgid "All of your data has been deleted"
+#~ msgstr ""
+
+#: app/components/note/share-note-button.tsx:183
+msgid "All organization members can view this note"
 msgstr ""
 
 #: app/routes/_auth+/signup.tsx:282
 msgid "Already have an account?"
 msgstr ""
 
-#. placeholder {0}: loaderData.user.email
 #: app/routes/settings+/profile.change-email.tsx:141
-msgid "An email notice will also be sent to your old address {0}."
-msgstr ""
+#~ msgid "An email notice will also be sent to your old address {0}."
+#~ msgstr ""
 
-#: app/routes/organizations+/create.tsx:546
+#: app/routes/organizations+/create.tsx:548
 msgid "An organization is a workspace where teams collect, organize, and work together."
 msgstr ""
 
@@ -309,19 +337,19 @@ msgstr ""
 msgid "Anyone with this link can join your organization and will know you invited them. By default, they will have the Member role."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:494
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:497
 msgid "API Key"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:471
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:474
 msgid "API Key Created"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:566
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:569
 msgid "API Keys"
 msgstr ""
 
-#: app/components/nav-user.tsx:99
+#: app/components/nav-user.tsx:103
 msgid "Arabic"
 msgstr ""
 
@@ -329,60 +357,63 @@ msgstr ""
 msgid "Are you sure you want to delete this comment?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:993
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:996
 msgid "Are you sure you want to revoke access for {clientName}? This action cannot be undone."
 msgstr ""
 
 #: app/components/settings/account-management.tsx:26
 #: app/components/settings/cards/sessions-card.tsx:333
 #: app/components/settings/connections.tsx:81
-#: app/routes/settings+/profile.index.tsx:325
 msgid "Are you sure?"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:173
+#: app/components/settings/two-factor-form.tsx:175
 msgid "Authentication Code"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:481
+#: app/routes/mcp+/authorize.tsx:460
 msgid "Authorize"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:307
+#: app/routes/mcp+/authorize.tsx:286
 msgid "Authorize MCP Client"
 msgstr ""
 
 #. placeholder {0}: new Date(auth.createdAt).toLocaleDateString()
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:917
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:920
 msgid "Authorized {0}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:878
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:881
 msgid "Authorized Clients"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1211
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1214
 msgid "Available Tools"
+msgstr ""
+
+#: app/components/ui/notification-bell.tsx:150
+msgid "Avatar"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:237
 msgid "Back to login"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:112
+#: app/components/settings/cards/organization/billing-card.tsx:96
 msgid "Beta Access"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:164
+#: app/components/settings/cards/organization/billing-card.tsx:148
 msgid "Billed monthly"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:275
+#: app/components/app-sidebar.tsx:274
 #: app/components/command-menu.tsx:178
 msgid "Billing"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:102
+#: app/components/settings/cards/organization/billing-card.tsx:86
 msgid "Billing & Subscription"
 msgstr ""
 
@@ -399,7 +430,7 @@ msgstr ""
 msgid "By continuing, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:364
+#: app/routes/_auth+/onboarding_.$provider.tsx:366
 msgid "By creating an account, you agree to our <0>Terms of Service</0> and <1>Privacy Policy</1>."
 msgstr ""
 
@@ -411,23 +442,32 @@ msgstr ""
 #: app/components/core/feedback-modal.tsx:109
 #: app/components/form-actions.tsx:28
 #: app/components/note/comment-input.tsx:165
+#: app/components/note/share-note-button.tsx:307
 #: app/components/settings/cards/organization/danger-zone-card.tsx:131
 #: app/components/settings/email-form.tsx:82
 #: app/components/settings/password-form.tsx:188
-#: app/components/settings/two-factor-form.tsx:60
-#: app/components/settings/two-factor-form.tsx:193
-#: app/components/ui/photo-crop-form.tsx:217
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:419
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1026
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:822
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:877
-#: app/routes/organizations+/create.tsx:742
-#: app/routes/organizations+/create.tsx:878
+#: app/components/settings/two-factor-form.tsx:62
+#: app/components/settings/two-factor-form.tsx:195
+#: app/components/ui/photo-crop-form.tsx:219
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:422
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1029
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:825
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:881
+#: app/routes/organizations+/create.tsx:744
+#: app/routes/organizations+/create.tsx:880
 msgid "Cancel"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:375
+msgid "Cancel editing"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:291
 msgid "Cards"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:281
+msgid "Cards view"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:152
@@ -435,32 +475,31 @@ msgid "Change"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:161
-#: app/routes/settings+/profile.change-email.tsx:36
-#: app/routes/settings+/profile.change-email.tsx:133
 msgid "Change Email"
 msgstr ""
 
-#. placeholder {0}: loaderData.user.email
 #: app/routes/settings+/profile.index.tsx:115
-msgid "Change email from {0}"
-msgstr ""
+#~ msgid "Change email from {0}"
+#~ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:85
 #: app/components/settings/cards/security-card.tsx:122
 #: app/components/settings/cards/security-card.tsx:133
 #: app/components/settings/password-form.tsx:197
-#: app/routes/settings+/profile.index.tsx:136
-#: app/routes/settings+/profile.password.tsx:211
 msgid "Change Password"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:100
 #: app/routes/settings+/profile.index.tsx:101
-msgid "Change profile photo"
-msgstr ""
+#~ msgid "Change profile photo"
+#~ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:99
 msgid "Change your password to something new"
+msgstr ""
+
+#: app/components/note/integration-controls.tsx:311
+msgid "Channel"
 msgstr ""
 
 #: app/components/settings/cards/notification-preferences-card.tsx:359
@@ -479,7 +518,7 @@ msgstr ""
 msgid "Check your email"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:795
+#: app/routes/organizations+/create.tsx:797
 msgid "Choose your plan"
 msgstr ""
 
@@ -487,15 +526,15 @@ msgstr ""
 #~ msgid "Claude Desktop"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:727
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:730
 msgid "Claude Desktop Setup"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:813
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:816
 msgid "Click \"Add Server\" and paste this configuration:"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:736
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:739
 msgid "Click \"Edit Config\" to open claude_desktop_config.json"
 msgstr ""
 
@@ -503,11 +542,11 @@ msgstr ""
 msgid "Click \"Verify Discord membership\" after joining to claim your points automatically."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:824
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:827
 msgid "Click Save and restart Cursor"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:897
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:900
 msgid "Client"
 msgstr ""
 
@@ -515,11 +554,17 @@ msgstr ""
 #~ msgid "Client Configuration"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:856
+#: app/components/onboarding-checklist.tsx:141
+msgid "Close"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:816
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:859
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:862
 msgid "Column name"
 msgstr ""
 
-#: app/components/data-table.tsx:508
+#: app/components/data-table.tsx:513
 msgid "Columns"
 msgstr ""
 
@@ -536,20 +581,20 @@ msgstr ""
 msgid "complete"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1038
+#: app/routes/organizations+/create.tsx:1040
 msgid "Complete Setup"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:82
+#: app/components/settings/two-factor-form.tsx:84
 msgid "Complete the following steps."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:788
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:827
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:791
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:830
 msgid "Complete the OAuth flow when prompted"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:79
+#: app/components/settings/two-factor-form.tsx:81
 msgid "Complete two-factor authentication setup"
 msgstr ""
 
@@ -567,13 +612,11 @@ msgstr ""
 #~ msgstr ""
 
 #: app/components/settings/cards/organization/danger-zone-card.tsx:144
-#: app/components/settings/two-factor-form.tsx:201
+#: app/components/settings/two-factor-form.tsx:203
 msgid "Confirm"
 msgstr ""
 
 #: app/components/settings/password-form.tsx:152
-#: app/routes/settings+/profile.password_.create.tsx:134
-#: app/routes/settings+/profile.password.tsx:193
 msgid "Confirm New Password"
 msgstr ""
 
@@ -596,7 +639,7 @@ msgid "Connect"
 msgstr ""
 
 #. placeholder {0}: organization.name
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1292
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1295
 msgid ""
 "Connect your AI assistants to {0} data using the\n"
 "\t\t\t\t\t\t\tModel Context Protocol"
@@ -606,12 +649,16 @@ msgstr ""
 #~ msgid "Connect your AI assistants to {0} data using the Model Context Protocol"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:694
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:697
 msgid "Connect your favorite AI client to access your organization's data securely. Follow the instructions for your preferred client below."
 msgstr ""
 
 #: app/components/settings/cards/connections-card.tsx:31
 msgid "Connected Accounts"
+msgstr ""
+
+#: app/components/note/integration-controls.tsx:121
+msgid "Connected Channels"
 msgstr ""
 
 #. placeholder {0}: new Date(connection.createdAt).toLocaleDateString()
@@ -620,65 +667,70 @@ msgid "Connected on {0}"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:35
-msgid "Connections"
-msgstr ""
+#~ msgid "Connections"
+#~ msgstr ""
 
-#: app/routes/organizations+/create.tsx:1298
+#: app/routes/organizations+/create.tsx:1301
 msgid "Contact support"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:410
+#: app/components/settings/cards/organization/billing-card.tsx:392
 msgid "Contact support for pricing"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:685
-#: app/routes/organizations+/create.tsx:747
+#: app/routes/_auth+/login.tsx:699
+#: app/routes/organizations+/create.tsx:749
 msgid "Continue"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:882
+#: app/routes/organizations+/create.tsx:884
 msgid "Continue to Payment"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:597
+#: app/routes/_auth+/login.tsx:611
 msgid "Continue with"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:277
+#: app/routes/_auth+/login.tsx:291
 msgid "Continue with your password"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:170
+msgid "Control who can access this note"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:180
 msgid "Copied"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:270
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:510
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:272
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:513
 #: app/routes/_auth+/waitlist.tsx:194
 msgid "Copied!"
 msgstr ""
 
 #: app/components/organization-invitations.tsx:185
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:275
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:510
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:277
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:513
 #: app/routes/_auth+/waitlist.tsx:194
 msgid "Copy"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:306
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:299
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:310
 msgid "Copy link"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:869
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:873
 msgid "Create"
 msgstr ""
 
 #. placeholder {0}: organization.name
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:343
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:346
 msgid "Create a new API key to connect your AI assistants to {0} data."
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:541
+#: app/routes/organizations+/create.tsx:543
 msgid "Create a new organization"
 msgstr ""
 
@@ -687,15 +739,15 @@ msgid "Create a password"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:138
-msgid "Create a Password"
-msgstr ""
+#~ msgid "Create a Password"
+#~ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:101
 msgid "Create a password to secure your account"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:375
-#: app/routes/_auth+/onboarding_.$provider.tsx:357
+#: app/routes/_auth+/login.tsx:389
+#: app/routes/_auth+/onboarding_.$provider.tsx:359
 #: app/routes/_auth+/onboarding.tsx:522
 msgid "Create account"
 msgstr ""
@@ -708,13 +760,13 @@ msgstr ""
 msgid "Create an organization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:569
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:572
 msgid "Create and manage API keys to authenticate your MCP clients"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:340
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:434
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:576
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:343
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:437
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:579
 msgid "Create API Key"
 msgstr ""
 
@@ -739,20 +791,19 @@ msgstr ""
 #: app/components/settings/cards/security-card.tsx:124
 #: app/components/settings/cards/security-card.tsx:135
 #: app/components/settings/password-form.tsx:199
-#: app/routes/settings+/profile.password_.create.tsx:150
 msgid "Create Password"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:630
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:633
 msgid "Create your first API key to get started"
 msgstr ""
 
 #. placeholder {0}: new Date(apiKey.createdAt).toLocaleDateString()
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:597
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:600
 msgid "Created {0}"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:429
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:432
 msgid "Creating..."
 msgstr ""
 
@@ -765,24 +816,27 @@ msgstr ""
 msgid "Current"
 msgstr ""
 
+#: app/components/settings/cards/organization/jira-integration-settings.tsx:114
+msgid "Current Bot User"
+msgstr ""
+
 #: app/components/settings/password-form.tsx:82
-#: app/routes/settings+/profile.password.tsx:157
 msgid "Current Password"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:472
+#: app/components/settings/cards/organization/billing-card.tsx:454
 msgid "Current Plan"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:133
+#: app/components/settings/cards/organization/billing-card.tsx:117
 msgid "Current Subscription"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:803
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:806
 msgid "Cursor Setup"
 msgstr ""
 
-#: app/components/data-table.tsx:505
+#: app/components/data-table.tsx:510
 msgid "Customize Columns"
 msgstr ""
 
@@ -795,25 +849,25 @@ msgstr ""
 msgid "Danger"
 msgstr ""
 
-#: app/components/nav-user.tsx:87
+#: app/components/nav-user.tsx:91
 msgid "Dark mode"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:114
-#: app/components/app-sidebar.tsx:232
+#: app/components/app-sidebar.tsx:112
+#: app/components/app-sidebar.tsx:231
 #: app/components/user-dropdown.tsx:57
 msgid "Dashboard"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:302
-msgid "Data Deleted"
-msgstr ""
+#~ msgid "Data Deleted"
+#~ msgstr ""
 
-#: app/components/data-table.tsx:490
+#: app/components/data-table.tsx:495
 msgid "Data Table"
 msgstr ""
 
-#: app/components/data-table.tsx:493
+#: app/components/data-table.tsx:498
 msgid "Data Table is a table that displays data in a grid format."
 msgstr ""
 
@@ -821,8 +875,8 @@ msgstr ""
 msgid "Decline"
 msgstr ""
 
-#: app/components/data-table.tsx:385
-#: app/components/settings/passkey-manager.tsx:180
+#: app/components/data-table.tsx:387
+#: app/components/settings/passkey-manager.tsx:182
 msgid "Delete"
 msgstr ""
 
@@ -832,7 +886,15 @@ msgid "Delete account"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:327
-msgid "Delete all your data"
+#~ msgid "Delete all your data"
+#~ msgstr ""
+
+#: app/components/note/comment-item.tsx:165
+msgid "Delete comment"
+msgstr ""
+
+#: app/components/organization-invitations.tsx:322
+msgid "Delete invitation"
 msgstr ""
 
 #: app/components/settings/cards/organization/danger-zone-card.tsx:61
@@ -845,18 +907,18 @@ msgid "Delete organization?"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:119
-msgid "Deleted"
-msgstr ""
+#~ msgid "Deleted"
+#~ msgstr ""
 
 #: app/components/settings/cards/danger-card.tsx:36
 msgid "Deleting your user will permanently delete all user data. You should download any data that you wish to retain."
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:447
+#: app/routes/mcp+/authorize.tsx:426
 msgid "Deny"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:719
+#: app/routes/organizations+/create.tsx:721
 msgid "Description"
 msgstr ""
 
@@ -870,7 +932,7 @@ msgstr ""
 
 #: app/components/settings/cards/sessions-card.tsx:180
 #: app/components/settings/cards/sessions-card.tsx:262
-#: app/components/settings/passkey-manager.tsx:155
+#: app/components/settings/passkey-manager.tsx:157
 msgid "Device"
 msgstr ""
 
@@ -879,7 +941,7 @@ msgid "Disable"
 msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:175
-#: app/components/settings/two-factor-form.tsx:67
+#: app/components/settings/two-factor-form.tsx:69
 msgid "Disable 2FA"
 msgstr ""
 
@@ -888,26 +950,26 @@ msgstr ""
 msgid "Disconnect"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1010
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1013
 msgid "Disconnect any active MCP connections"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:210
-msgid "Disconnect this account"
-msgstr ""
+#~ msgid "Disconnect this account"
+#~ msgstr ""
 
 #: app/components/feature-updates.tsx:134
 #: app/components/feature-updates.tsx:214
 msgid "Dismiss"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:366
+#: app/routes/_auth+/login.tsx:380
 msgid "Don't have an account?"
 msgstr ""
 
-#: app/components/data-table.tsx:237
-#: app/components/data-table.tsx:267
-#: app/components/data-table.tsx:943
+#: app/components/data-table.tsx:239
+#: app/components/data-table.tsx:269
+#: app/components/data-table.tsx:948
 msgid "Done"
 msgstr ""
 
@@ -921,7 +983,6 @@ msgid "Down by {0}% this period"
 msgstr ""
 
 #: app/components/settings/cards/advanced-settings-card.tsx:42
-#: app/routes/settings+/profile.index.tsx:164
 msgid "Download your data"
 msgstr ""
 
@@ -933,31 +994,48 @@ msgstr ""
 msgid "Drag to reorder"
 msgstr ""
 
-#: app/components/data-table.tsx:375
-#: app/components/favorite-notes.tsx:111
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:609
+msgid "Drag to reorder column"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/__org-note-editor.tsx:278
+msgid "e.g. urgent, meeting, project"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:361
+msgid "e.g., Claude Desktop, Kiro IDE"
+msgstr ""
+
+#: app/components/data-table.tsx:377
+#: app/components/favorite-notes.tsx:110
+#: app/routes/_app+/$orgSlug_+/notes-table.tsx:79
 msgid "Edit"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:637
+msgid "Edit column"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:87
 msgid "Edit Note"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:392
+#: app/components/organization-invitations.tsx:397
 #: app/components/settings/cards/notification-preferences-card.tsx:29
 #: app/components/settings/cards/profile-card.tsx:132
-#: app/routes/_auth+/login.tsx:778
+#: app/routes/_auth+/login.tsx:792
 #: app/routes/_auth+/signup.tsx:252
 msgid "Email"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:658
-#: app/routes/_auth+/login.tsx:783
+#: app/routes/_auth+/login.tsx:672
+#: app/routes/_auth+/login.tsx:797
 msgid "Email or Username"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:127
-msgid "Enable 2FA"
-msgstr ""
+#~ msgid "Enable 2FA"
+#~ msgstr ""
 
 #: app/components/settings/cards/organization/s3-storage-card.tsx:169
 msgid "Enable Custom S3 Storage"
@@ -967,28 +1045,29 @@ msgstr ""
 #~ msgid "Enable Two-Factor Authentication"
 #~ msgstr ""
 
-#: app/components/nav-user.tsx:98
+#: app/components/nav-user.tsx:102
 msgid "English"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:152
+#: app/components/settings/two-factor-form.tsx:154
 msgid "Enter 6-digit OTP token"
 msgstr ""
 
-#: app/components/organization-invitations.tsx:391
+#: app/components/organization-invitations.tsx:396
+#: app/routes/organizations+/create.tsx:1151
 msgid "Enter email address"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:155
+#: app/components/settings/two-factor-form.tsx:157
 msgid "Enter the 6-digit one time password (OTP) token that your authentication app provides you."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:664
-#: app/routes/_auth+/login.tsx:790
+#: app/routes/_auth+/login.tsx:678
+#: app/routes/_auth+/login.tsx:804
 msgid "Enter your email or username"
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:285
+#: app/routes/_auth+/onboarding_.$provider.tsx:287
 #: app/routes/_auth+/onboarding.tsx:411
 msgid "Enter your full name"
 msgstr ""
@@ -1001,11 +1080,11 @@ msgstr ""
 msgid "Enter your new password below."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:819
+#: app/routes/_auth+/login.tsx:833
 msgid "Enter your password"
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:263
+#: app/routes/_auth+/onboarding_.$provider.tsx:265
 #: app/routes/_auth+/onboarding.tsx:395
 msgid "Enter your username"
 msgstr ""
@@ -1014,20 +1093,20 @@ msgstr ""
 msgid "Enter your username or email"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:283
+#: app/components/settings/cards/organization/billing-card.tsx:269
 msgid "Enterprise Plan"
 msgstr ""
 
-#: app/components/data-table.tsx:238
-#: app/components/data-table.tsx:268
+#: app/components/data-table.tsx:240
+#: app/components/data-table.tsx:270
 msgid "Error"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1133
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1136
 msgid "Example Request"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:392
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:395
 msgid "Expiration Date"
 msgstr ""
 
@@ -1041,17 +1120,25 @@ msgid "Expires"
 msgstr ""
 
 #. placeholder {0}: new Date(apiKey.expiresAt).toLocaleDateString()
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:603
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:606
 msgid "Expires {0}"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:447
+#: app/routes/_auth+/login.tsx:461
 msgid "Failed to authenticate with passkey: {errorMessage}"
+msgstr ""
+
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:117
+msgid "Failed to copy account ID"
 msgstr ""
 
 #: app/routes/settings+/profile.passkeys.tsx:129
 #~ msgid "Failed to create passkey. Please try again."
 #~ msgstr ""
+
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:68
+msgid "Failed to fetch current user information"
+msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1761
 msgid "Failed to load AI Assistant"
@@ -1062,11 +1149,15 @@ msgstr ""
 msgid "Failed to load notification preferences: {0}"
 msgstr ""
 
-#: app/components/data-table.tsx:381
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:97
+msgid "Failed to search for users"
+msgstr ""
+
+#: app/components/data-table.tsx:383
 msgid "Favorite"
 msgstr ""
 
-#: app/components/favorite-notes.tsx:65
+#: app/components/favorite-notes.tsx:64
 msgid "Favorites"
 msgstr ""
 
@@ -1078,16 +1169,16 @@ msgstr ""
 msgid "Forgot Password"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:812
+#: app/routes/_auth+/login.tsx:826
 msgid "Forgot your password?"
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:280
+#: app/routes/_auth+/onboarding_.$provider.tsx:282
 #: app/routes/_auth+/onboarding.tsx:406
 msgid "Full Name"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:256
+#: app/components/app-sidebar.tsx:255
 msgid "General"
 msgstr ""
 
@@ -1095,31 +1186,32 @@ msgstr ""
 msgid "General Settings"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:409
+#: app/routes/_auth+/login.tsx:423
 msgid "Generating Authentication Options"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:291
+#: app/components/app-sidebar.tsx:290
 msgid "Get chrome extension"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:147
-#: app/components/app-sidebar.tsx:304
+#: app/components/app-sidebar.tsx:145
+#: app/components/app-sidebar.tsx:303
 msgid "Get help"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:87
-#: app/components/settings/cards/organization/billing-card.tsx:317
+#: app/components/app-sidebar.tsx:85
+#: app/components/settings/cards/organization/billing-card.tsx:303
 msgid "Get in touch"
 msgstr ""
 
 #: app/components/onboarding-checklist.tsx:86
 #: app/components/onboarding-checklist.tsx:119
+#: app/components/ui/header.tsx:124
 msgid "Get Started"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:152
-#: app/components/app-sidebar.tsx:310
+#: app/components/app-sidebar.tsx:150
+#: app/components/app-sidebar.tsx:309
 #: app/components/core/feedback-modal.tsx:69
 msgid "Give feedback"
 msgstr ""
@@ -1128,8 +1220,12 @@ msgstr ""
 msgid "Global Preferences"
 msgstr ""
 
-#: app/components/data-table.tsx:189
-#: app/components/data-table.tsx:801
+#: app/components/app-sidebar.tsx:198
+msgid "Go to homepage"
+msgstr ""
+
+#: app/components/data-table.tsx:191
+#: app/components/data-table.tsx:806
 msgid "Header"
 msgstr ""
 
@@ -1138,8 +1234,8 @@ msgid "Help us understand your organization size to provide better recommendatio
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:131
-msgid "Here are your current connections:"
-msgstr ""
+#~ msgid "Here are your current connections:"
+#~ msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:142
 msgid "Here's how to do it:"
@@ -1160,7 +1256,7 @@ msgstr ""
 msgid "Hi {0}, please complete your profile{1}."
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:314
+#: app/routes/_auth+/onboarding_.$provider.tsx:316
 #: app/routes/_auth+/onboarding.tsx:480
 msgid "I agree to the Terms of Service and Privacy Policy"
 msgstr ""
@@ -1169,7 +1265,7 @@ msgstr ""
 msgid "I'll not be able to access the organization and its data anymore"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:539
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:542
 msgid "I've Copied the Key"
 msgstr ""
 
@@ -1177,11 +1273,19 @@ msgstr ""
 msgid "If you change your email, you'll need to verify the new address"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1007
+#: app/components/ui/multi-image-upload.tsx:268
+msgid "Image"
+msgstr ""
+
+#: app/components/ui/photo-crop-form.tsx:210
+msgid "Image to crop"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1010
 msgid "Immediately invalidate all tokens for this client"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:837
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:840
 msgid "Important Notes"
 msgstr ""
 
@@ -1189,7 +1293,7 @@ msgstr ""
 msgid "Important Security Note"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:523
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:526
 msgid "Important:"
 msgstr ""
 
@@ -1197,32 +1301,32 @@ msgstr ""
 msgid "In-App"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:440
+#: app/components/settings/cards/organization/billing-card.tsx:422
 msgid "Includes {includesSeats} user seats"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1333
+#: app/routes/organizations+/create.tsx:1336
 msgid "Includes {seats} user seats"
 msgstr ""
 
 #: app/routes/settings+/profile.password.tsx:84
-msgid "Incorrect password."
-msgstr ""
+#~ msgid "Incorrect password."
+#~ msgstr ""
 
-#: app/components/app-sidebar.tsx:266
+#: app/components/app-sidebar.tsx:265
 #: app/components/settings/cards/organization/integrations-card.tsx:58
 msgid "Integrations"
 msgstr ""
 
 #: app/routes/settings+/profile.passkeys.tsx:56
-msgid "Invalid intent"
-msgstr ""
+#~ msgid "Invalid intent"
+#~ msgstr ""
 
 #: app/routes/settings+/profile.passkeys.tsx:41
-msgid "Invalid passkey ID"
-msgstr ""
+#~ msgid "Invalid passkey ID"
+#~ msgstr ""
 
-#: app/routes/_auth+/login.tsx:218
+#: app/routes/_auth+/login.tsx:232
 msgid "Invalid username or password"
 msgstr ""
 
@@ -1242,7 +1346,7 @@ msgstr ""
 msgid "Invite new members"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:896
+#: app/routes/organizations+/create.tsx:898
 msgid "Invite team members"
 msgstr ""
 
@@ -1284,8 +1388,12 @@ msgstr ""
 msgid "Kanban"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:354
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:485
+#: app/routes/_app+/$orgSlug_+/notes.tsx:295
+msgid "Kanban board"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:357
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:488
 msgid "Key Name"
 msgstr ""
 
@@ -1293,11 +1401,11 @@ msgstr ""
 #~ msgid "Kiro IDE"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:764
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:767
 msgid "Kiro IDE Setup"
 msgstr ""
 
-#: app/components/nav-user.tsx:260
+#: app/components/nav-user.tsx:264
 msgid "Language"
 msgstr ""
 
@@ -1310,12 +1418,12 @@ msgstr ""
 msgid "Last active {lastActive}"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:488
-#: app/routes/_auth+/login.tsx:499
+#: app/routes/_auth+/login.tsx:502
+#: app/routes/_auth+/login.tsx:513
 msgid "Last used"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:900
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:903
 msgid "Last Used"
 msgstr ""
 
@@ -1327,26 +1435,31 @@ msgstr ""
 msgid "Leave empty to keep existing secret key, or enter a new one to update."
 msgstr ""
 
-#: app/components/nav-user.tsx:86
+#: app/components/nav-user.tsx:90
 msgid "Light mode"
 msgstr ""
 
-#: app/components/data-table.tsx:257
-#: app/components/data-table.tsx:273
-#: app/components/data-table.tsx:859
+#: app/components/data-table.tsx:259
+#: app/components/data-table.tsx:275
+#: app/components/data-table.tsx:864
 msgid "Limit"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:306
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:299
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:310
 msgid "Link copied!"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:470
+#: app/components/ui/notification-bell.tsx:478
 msgid "Load More"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1777
 msgid "Loading AI Assistant..."
+msgstr ""
+
+#: app/components/note/integration-controls.tsx:333
+msgid "Loading channels..."
 msgstr ""
 
 #: app/components/command-menu.tsx:109
@@ -1357,19 +1470,20 @@ msgstr ""
 msgid "Loading preferences..."
 msgstr ""
 
-#: app/components/nav-user.tsx:301
+#: app/components/nav-user.tsx:305
+#: app/components/ui/header.tsx:137
 msgid "Log out"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:306
+#: app/routes/_auth+/login.tsx:320
 msgid "Login Error"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:403
+#: app/routes/_auth+/login.tsx:417
 msgid "Login with a passkey"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:569
+#: app/routes/organizations+/create.tsx:571
 msgid "Logo"
 msgstr ""
 
@@ -1381,17 +1495,21 @@ msgstr ""
 msgid "m@example.com"
 msgstr ""
 
-#: app/components/data-table.tsx:378
+#: app/components/data-table.tsx:380
 msgid "Make a copy"
 msgstr ""
 
-#: app/routes/settings+/profile.index.tsx:146
-msgid "Manage connections"
+#: app/components/note/share-note-button.tsx:315
+msgid "Make Public"
 msgstr ""
 
+#: app/routes/settings+/profile.index.tsx:146
+#~ msgid "Manage connections"
+#~ msgstr ""
+
 #: app/routes/settings+/profile.index.tsx:153
-msgid "Manage passkeys"
-msgstr ""
+#~ msgid "Manage passkeys"
+#~ msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:222
 #: app/components/settings/cards/security-card.tsx:229
@@ -1399,10 +1517,10 @@ msgid "Manage Passkeys"
 msgstr ""
 
 #: app/routes/settings+/profile.index.tsx:171
-msgid "Manage sessions"
-msgstr ""
+#~ msgid "Manage sessions"
+#~ msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:188
+#: app/components/settings/cards/organization/billing-card.tsx:172
 msgid "Manage Subscription"
 msgstr ""
 
@@ -1450,7 +1568,7 @@ msgstr ""
 msgid "Manage your organization's name, slug, and profile image."
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:105
+#: app/components/settings/cards/organization/billing-card.tsx:89
 msgid "Manage your organization's subscription"
 msgstr ""
 
@@ -1458,7 +1576,7 @@ msgstr ""
 msgid "Manage your password and two-factor authentication settings."
 msgstr ""
 
-#: app/routes/_app+/security.tsx:301
+#: app/routes/_app+/security.tsx:302
 msgid "Manage your password, two-factor authentication, connected accounts, and advanced security settings."
 msgstr ""
 
@@ -1466,28 +1584,28 @@ msgstr ""
 #~ msgid "Manage your sessions and download your data."
 #~ msgstr ""
 
-#: app/components/ui/notification-bell.tsx:430
+#: app/components/ui/notification-bell.tsx:438
 msgid "Mark all as read"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:188
+#: app/components/ui/notification-bell.tsx:196
 msgid "Mark as read"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:186
+#: app/components/ui/notification-bell.tsx:194
 msgid "Mark as unread"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:881
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:884
 msgid "MCP clients authorized to access your organization data"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:691
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:694
 msgid "MCP OAuth Setup Instructions"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:244
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1291
+#: app/components/app-sidebar.tsx:243
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1294
 msgid "MCP Server"
 msgstr ""
 
@@ -1503,17 +1621,17 @@ msgstr ""
 msgid "members"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:261
+#: app/components/app-sidebar.tsx:260
 #: app/components/organization-members.tsx:139
 msgid "Members"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:215
-#: app/routes/organizations+/create.tsx:826
+#: app/components/settings/cards/organization/billing-card.tsx:200
+#: app/routes/organizations+/create.tsx:828
 msgid "Monthly"
 msgstr ""
 
-#: app/components/favorite-notes.tsx:90
+#: app/components/favorite-notes.tsx:89
 msgid "More"
 msgstr ""
 
@@ -1523,16 +1641,15 @@ msgstr ""
 
 #: app/components/settings/cards/organization/general-settings-card.tsx:82
 #: app/components/settings/cards/profile-card.tsx:97
-#: app/routes/organizations+/create.tsx:636
-#: app/routes/settings+/profile.index.tsx:266
+#: app/routes/organizations+/create.tsx:638
 msgid "Name"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:810
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:813
 msgid "Navigate to Features → MCP Servers"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:771
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:774
 msgid "Navigate to MCP Servers configuration"
 msgstr ""
 
@@ -1548,12 +1665,11 @@ msgstr ""
 msgid "Neutral feedback"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:928
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:931
 msgid "Never used"
 msgstr ""
 
 #: app/components/settings/email-form.tsx:64
-#: app/routes/settings+/profile.change-email.tsx:153
 msgid "New Email"
 msgstr ""
 
@@ -1563,8 +1679,6 @@ msgstr ""
 
 #: app/components/settings/password-form.tsx:110
 #: app/routes/_auth+/reset-password.tsx:133
-#: app/routes/settings+/profile.password_.create.tsx:116
-#: app/routes/settings+/profile.password.tsx:175
 msgid "New Password"
 msgstr ""
 
@@ -1576,20 +1690,32 @@ msgstr ""
 msgid "No active sessions"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:170
+#: app/components/settings/cards/organization/billing-card.tsx:154
 msgid "No active subscription"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:629
+#: app/components/note/activity-log.tsx:286
+msgid "No activity yet"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:632
 msgid "No API keys created yet"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:887
+#: app/components/note/integration-controls.tsx:340
+msgid "No channels available"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:890
 msgid "No clients have been authorized yet"
 msgstr ""
 
 #: app/components/note/comments-section.tsx:184
 msgid "No comments yet"
+msgstr ""
+
+#: app/components/note/emoji-list.tsx:34
+msgid "No emojis found"
 msgstr ""
 
 #: app/components/settings/cards/organization/invoices-card.tsx:95
@@ -1601,11 +1727,13 @@ msgid "No members found."
 msgstr ""
 
 #. placeholder {0}: params.noteId
+#: app/routes/_app+/$orgSlug_+/__org-note-editor.tsx:378
 #: app/routes/_app+/$orgSlug_+/notes.$noteId_.edit.tsx:112
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1915
 msgid "No note with the id \"{0}\" exists"
 msgstr ""
 
-#: app/components/leadership-card.tsx:75
+#: app/components/leadership-card.tsx:76
 msgid "No notes created yet"
 msgstr ""
 
@@ -1635,11 +1763,11 @@ msgstr ""
 msgid "No organization with the slug \"{0}\" exists"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1103
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1106
 msgid "No parameters required"
 msgstr ""
 
-#: app/components/settings/passkey-manager.tsx:189
+#: app/components/settings/passkey-manager.tsx:191
 msgid "No passkeys registered yet"
 msgstr ""
 
@@ -1647,11 +1775,11 @@ msgstr ""
 msgid "No preferences found"
 msgstr ""
 
-#: app/components/data-table.tsx:608
+#: app/components/data-table.tsx:613
 msgid "No results."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1224
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1227
 msgid "No tools available."
 msgstr ""
 
@@ -1663,19 +1791,27 @@ msgstr ""
 msgid "No worries, we'll send you reset instructions."
 msgstr ""
 
-#: app/components/leadership-card.tsx:109
+#: app/components/leadership-card.tsx:110
 msgid "note"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:385
+msgid "Note content..."
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:358
+msgid "Note title..."
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:259
 msgid "Note: Discord verification is currently manual. Contact support after joining to claim your points."
 msgstr ""
 
-#: app/components/leadership-card.tsx:107
+#: app/components/leadership-card.tsx:108
 msgid "notes"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:238
+#: app/components/app-sidebar.tsx:237
 #: app/components/command-menu.tsx:137
 #: app/routes/_app+/$orgSlug_+/notes.tsx:268
 msgid "Notes"
@@ -1689,7 +1825,7 @@ msgstr ""
 msgid "Notes help you capture thoughts, meeting minutes, or anything important for your organization. Get started by creating your first note."
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:245
+#: app/components/ui/notification-bell.tsx:253
 msgid "Nothing here yet!"
 msgstr ""
 
@@ -1709,7 +1845,7 @@ msgstr ""
 msgid "Notification Settings"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:132
+#: app/components/app-sidebar.tsx:130
 msgid "Notifications"
 msgstr ""
 
@@ -1722,7 +1858,7 @@ msgid "Notifications when you are mentioned in a comment"
 msgstr ""
 
 #. placeholder {0}: organization.slug
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:841
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:844
 msgid "OAuth tokens are scoped to your organization ({0})"
 msgstr ""
 
@@ -1730,28 +1866,36 @@ msgstr ""
 msgid "of {totalUsers} people"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:888
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:891
 msgid "Once you connect an AI client using the setup instructions below, it will appear here."
 msgstr ""
 
-#: app/components/favorite-notes.tsx:103
+#: app/components/settings/two-factor-form.tsx:132
+msgid "One-time Password URI"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:185
+msgid "Only selected members can access this note"
+msgstr ""
+
+#: app/components/favorite-notes.tsx:102
 msgid "Open"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:731
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:734
 msgid "Open Claude Desktop and go to Settings → Developer"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:807
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:810
 msgid "Open Cursor Settings (Cmd/Ctrl + ,)"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:768
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:771
 msgid "Open Kiro IDE Settings"
 msgstr ""
 
-#: app/components/data-table.tsx:369
-#: app/components/ui/notification-bell.tsx:420
+#: app/components/data-table.tsx:371
+#: app/components/ui/notification-bell.tsx:428
 msgid "Open menu"
 msgstr ""
 
@@ -1763,11 +1907,15 @@ msgstr ""
 msgid "Or continue with"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:324
+#: app/routes/_auth+/login.tsx:338
 msgid "Or continue with email or username"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:964
+#: app/routes/organizations+/create.tsx:579
+msgid "Organization logo preview"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:966
 msgid "Organization size"
 msgstr ""
 
@@ -1775,8 +1923,8 @@ msgstr ""
 msgid "Organization Size"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:138
-#: app/components/nav-user.tsx:186
+#: app/components/app-sidebar.tsx:136
+#: app/components/nav-user.tsx:190
 #: app/components/team-switcher.tsx:127
 #: app/routes/_app+/organizations.tsx:238
 msgid "Organizations"
@@ -1790,32 +1938,30 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1099
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1102
 msgid "Parameters"
 msgstr ""
 
+#: app/components/settings/passkey-manager.tsx:146
+msgid "passkeys"
+msgstr ""
+
 #: app/components/settings/cards/security-card.tsx:197
-#: app/routes/settings+/profile.passkeys.tsx:13
-#: app/routes/settings+/profile.passkeys.tsx:65
 msgid "Passkeys"
 msgstr ""
 
 #: app/components/settings/password-form.tsx:112
-#: app/routes/_auth+/login.tsx:806
+#: app/routes/_auth+/login.tsx:820
 #: app/routes/_auth+/onboarding.tsx:424
-#: app/routes/settings+/profile.password_.create.tsx:29
-#: app/routes/settings+/profile.password.tsx:32
 msgid "Password"
 msgstr ""
 
 #: app/routes/settings+/profile.password.tsx:128
-msgid "Password Changed"
-msgstr ""
+#~ msgid "Password Changed"
+#~ msgstr ""
 
 #: app/routes/_auth+/onboarding.tsx:119
 #: app/routes/_auth+/reset-password.tsx:70
-#: app/routes/settings+/profile.password_.create.tsx:65
-#: app/routes/settings+/profile.password.tsx:92
 msgid "Password is too common"
 msgstr ""
 
@@ -1829,24 +1975,24 @@ msgstr ""
 msgid "Pending Invitations"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:427
-#: app/routes/organizations+/create.tsx:1321
+#: app/components/settings/cards/organization/billing-card.tsx:409
+#: app/routes/organizations+/create.tsx:1324
 msgid "per month"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1258
+#: app/routes/organizations+/create.tsx:1261
 msgid "Plan not available"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1261
+#: app/routes/organizations+/create.tsx:1264
 msgid "Please check configuration"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:367
+#: app/components/settings/cards/organization/billing-card.tsx:350
 msgid "Please check your Stripe configuration"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:268
+#: app/components/settings/cards/organization/billing-card.tsx:254
 msgid "Please check your Stripe configuration or try again later"
 msgstr ""
 
@@ -1858,12 +2004,16 @@ msgstr ""
 msgid "Please ensure you have an active organization to manage notification preferences."
 msgstr ""
 
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:75
+msgid "Please enter a search query"
+msgstr ""
+
 #: app/routes/_auth+/verify.tsx:71
 msgid "Please enter your 2FA code to verify your identity."
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:128
-#: app/routes/_auth+/login.tsx:631
+#: app/routes/_auth+/login.tsx:645
 msgid "Please enter your email or username"
 msgstr ""
 
@@ -1871,16 +2021,16 @@ msgstr ""
 msgid "Positive feedback"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:407
-#: app/routes/organizations+/create.tsx:1295
+#: app/components/settings/cards/organization/billing-card.tsx:389
+#: app/routes/organizations+/create.tsx:1298
 msgid "Price not configured"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:364
+#: app/components/settings/cards/organization/billing-card.tsx:347
 msgid "Pricing not available"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:1356
+#: app/routes/organizations+/create.tsx:1359
 msgid "Priority support"
 msgstr ""
 
@@ -1888,7 +2038,7 @@ msgstr ""
 msgid "Private"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:120
+#: app/components/app-sidebar.tsx:118
 #: app/components/user-dropdown.tsx:50
 #: app/routes/_auth+/onboarding_.$provider.tsx:239
 msgid "Profile"
@@ -1899,23 +2049,31 @@ msgstr ""
 msgid "Profile Settings"
 msgstr ""
 
+#: app/components/note/share-note-button.tsx:179
+msgid "Public Access"
+msgstr ""
+
 #: app/components/settings/cards/notification-preferences-card.tsx:32
 msgid "Push"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:110
+#: app/components/settings/two-factor-form.tsx:112
 msgid "QR code"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:311
+#: app/components/settings/two-factor-form.tsx:121
+msgid "QR code for two-factor authentication setup. Scan this code with your authenticator app."
+msgstr ""
+
+#: app/components/settings/cards/organization/billing-card.tsx:297
 msgid "Questions about billing?"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:283
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:286
 msgid "Quick edit"
 msgstr ""
 
-#: app/components/leadership-card.tsx:67
+#: app/components/leadership-card.tsx:68
 msgid "Rank"
 msgstr ""
 
@@ -1923,7 +2081,7 @@ msgstr ""
 msgid "Read documentation"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:601
+#: app/routes/_auth+/login.tsx:615
 msgid "Recommended for"
 msgstr ""
 
@@ -1935,12 +2093,12 @@ msgstr ""
 msgid "Register a passkey to log in without a password"
 msgstr ""
 
-#: app/components/settings/passkey-manager.tsx:133
+#: app/components/settings/passkey-manager.tsx:135
 msgid "Register new passkey"
 msgstr ""
 
 #. placeholder {0}: formatDistanceToNow(new Date(passkey.createdAt))
-#: app/components/settings/passkey-manager.tsx:162
+#: app/components/settings/passkey-manager.tsx:164
 msgid "Registered {0} ago"
 msgstr ""
 
@@ -1952,8 +2110,8 @@ msgstr ""
 msgid "Reload page"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:841
-#: app/routes/_auth+/onboarding_.$provider.tsx:340
+#: app/routes/_auth+/login.tsx:855
+#: app/routes/_auth+/onboarding_.$provider.tsx:342
 #: app/routes/_auth+/onboarding.tsx:508
 msgid "Remember me"
 msgstr ""
@@ -1962,8 +2120,25 @@ msgstr ""
 msgid "Remember your password?"
 msgstr ""
 
+#: app/components/note/share-note-button.tsx:230
+msgid "Remove"
+msgstr ""
+
 #: app/components/settings/cards/sessions-card.tsx:370
 msgid "Remove access from all devices except this one"
+msgstr ""
+
+#: app/components/note/comment-image-preview.tsx:81
+#: app/components/ui/multi-image-upload.tsx:281
+msgid "Remove image"
+msgstr ""
+
+#: app/components/ui/multi-media-upload.tsx:343
+msgid "Remove media"
+msgstr ""
+
+#: app/components/organization-members.tsx:190
+msgid "Remove member"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/mcp.tsx:624
@@ -1971,7 +2146,7 @@ msgstr ""
 #~ msgstr ""
 
 #: app/components/note/comment-input.tsx:175
-#: app/components/note/comment-item.tsx:231
+#: app/components/note/comment-item.tsx:232
 msgid "Reply"
 msgstr ""
 
@@ -1983,15 +2158,15 @@ msgstr ""
 msgid "Request integration"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:415
+#: app/routes/_auth+/login.tsx:429
 msgid "Requesting your authorization"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1013
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1016
 msgid "Require re-authorization to reconnect"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1119
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1122
 msgid "required"
 msgstr ""
 
@@ -2007,7 +2182,7 @@ msgstr ""
 msgid "Reset Password"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:703
+#: app/routes/organizations+/create.tsx:705
 msgid "Reset to auto-generated"
 msgstr ""
 
@@ -2019,20 +2194,20 @@ msgstr ""
 msgid "Retrying..."
 msgstr ""
 
-#: app/components/data-table.tsx:285
-#: app/components/data-table.tsx:866
+#: app/components/data-table.tsx:287
+#: app/components/data-table.tsx:871
 msgid "Reviewers"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:952
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:955
 msgid "Revoke"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1043
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1046
 msgid "Revoke Access"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:990
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:993
 msgid "Revoke Authorization"
 msgstr ""
 
@@ -2040,12 +2215,12 @@ msgstr ""
 msgid "Revoke session"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:939
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:956
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:942
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:959
 msgid "Revoked"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1038
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1041
 msgid "Revoking..."
 msgstr ""
 
@@ -2061,41 +2236,41 @@ msgstr ""
 #: app/components/settings/cards/organization/s3-storage-card.tsx:303
 #: app/components/settings/cards/organization/verified-domain-card.tsx:123
 #: app/components/settings/email-form.tsx:90
-#: app/components/ui/photo-crop-form.tsx:224
-#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:819
+#: app/components/ui/photo-crop-form.tsx:226
+#: app/routes/_app+/$orgSlug_+/notes-kanban-board.tsx:822
 msgid "Save"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:227
-#: app/routes/organizations+/create.tsx:842
+#: app/components/settings/cards/organization/billing-card.tsx:213
+#: app/routes/organizations+/create.tsx:844
 msgid "Save 20%"
 msgstr ""
 
 #: app/components/settings/cards/organization/general-settings-card.tsx:112
 #: app/components/settings/cards/profile-card.tsx:192
-#: app/routes/settings+/profile.index.tsx:290
+#: app/routes/_app+/$orgSlug_+/notes-cards.tsx:365
 msgid "Save changes"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:750
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:753
 msgid "Save the file and restart Claude Desktop"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:785
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:788
 msgid "Save the file and restart Kiro IDE"
 msgstr ""
 
 #. placeholder {0}: row.original.header
-#: app/components/data-table.tsx:236
-#: app/components/data-table.tsx:266
+#: app/components/data-table.tsx:238
+#: app/components/data-table.tsx:268
 msgid "Saving {0}"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:96
+#: app/components/settings/two-factor-form.tsx:98
 msgid "Scan QR Code or Enter Setup Key"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:297
+#: app/components/settings/cards/organization/billing-card.tsx:283
 msgid "Schedule a call"
 msgstr ""
 
@@ -2105,8 +2280,16 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:382
+#: app/components/settings/cards/organization/jira-bot-user-search.tsx:184
+msgid "Search by name or email..."
+msgstr ""
+
+#: app/routes/mcp+/authorize.tsx:361
 msgid "Search for users in your organization"
+msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.tsx:328
+msgid "Search notes"
 msgstr ""
 
 #: app/routes/_app+/$orgSlug_+/notes.tsx:329
@@ -2114,8 +2297,12 @@ msgid "Search notes by title or content..."
 msgstr ""
 
 #: app/components/command-menu.tsx:102
-#: app/components/site-header.tsx:44
+#: app/components/site-header.tsx:47
 msgid "Search notes..."
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:251
+msgid "Search team members..."
 msgstr ""
 
 #: app/routes/_app+/organizations.tsx:252
@@ -2126,7 +2313,7 @@ msgstr ""
 msgid "Secret Access Key"
 msgstr ""
 
-#: app/components/data-table.tsx:197
+#: app/components/data-table.tsx:199
 msgid "Section Type"
 msgstr ""
 
@@ -2134,51 +2321,63 @@ msgstr ""
 msgid "Secure your account with an extra verification step"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:126
-#: app/routes/mcp+/authorize.tsx:402
+#: app/components/app-sidebar.tsx:124
+#: app/routes/mcp+/authorize.tsx:381
 msgid "Security"
 msgstr ""
 
-#: app/components/settings/passkey-manager.tsx:157
+#: app/components/settings/passkey-manager.tsx:159
 msgid "Security Key"
 msgstr ""
 
 #: app/components/settings/cards/security-card.tsx:70
-#: app/routes/_app+/security.tsx:299
+#: app/routes/_app+/security.tsx:300
 msgid "Security Settings"
 msgstr ""
 
-#: app/components/data-table.tsx:840
+#: app/components/data-table.tsx:845
 msgid "Select a status"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:798
+#: app/routes/organizations+/create.tsx:800
 msgid "Select a subscription plan to get started with your organization. Your trial will begin after payment setup."
 msgstr ""
 
-#: app/components/data-table.tsx:169
-#~ msgid "Select all"
-#~ msgstr ""
+#: app/components/data-table.tsx:173
+msgid "Select all"
+msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:342
+#: app/routes/mcp+/authorize.tsx:321
 msgid "Select Organization"
 msgstr ""
 
-#: app/components/data-table.tsx:178
-#~ msgid "Select row"
-#~ msgstr ""
-
-#: app/routes/settings+/profile.change-email.tsx:169
-msgid "Send Confirmation"
+#: app/components/data-table.tsx:182
+msgid "Select row"
 msgstr ""
 
+#: app/components/note/share-note-button.tsx:290
+msgid "Selected"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:206
+msgid "Selected Members"
+msgstr ""
+
+#: app/routes/settings+/profile.change-email.tsx:169
+#~ msgid "Send Confirmation"
+#~ msgstr ""
+
 #: app/components/organization-invitations.tsx:272
-#: app/routes/organizations+/create.tsx:1115
+#: app/routes/organizations+/create.tsx:1117
 msgid "Send Invitations"
 msgstr ""
 
 #: app/routes/_auth+/forgot-password.tsx:229
 msgid "Send reset instructions"
+msgstr ""
+
+#: app/components/note/integration-controls.tsx:286
+msgid "Service"
 msgstr ""
 
 #: app/components/settings/cards/sessions-card.tsx:224
@@ -2194,7 +2393,7 @@ msgstr ""
 msgid "Sessions"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:381
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:384
 msgid "Set expiration date (optional)"
 msgstr ""
 
@@ -2202,22 +2401,30 @@ msgstr ""
 msgid "Set up authenticator app"
 msgstr ""
 
-#: app/components/app-sidebar.tsx:250
+#: app/components/app-sidebar.tsx:249
 #: app/components/command-menu.tsx:157
 #: app/components/command-menu.tsx:190
 #: app/routes/_app+/$orgSlug_+/settings+/_layout.tsx:17
 msgid "Settings"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:113
+#: app/components/settings/two-factor-form.tsx:115
 msgid "Setup key"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:158
+msgid "Share"
+msgstr ""
+
+#: app/components/note/share-note-button.tsx:167
+msgid "Share Note"
 msgstr ""
 
 #: app/routes/_auth+/waitlist.tsx:172
 msgid "Share with others"
 msgstr ""
 
-#: app/components/data-table.tsx:737
+#: app/components/data-table.tsx:742
 msgid "Showing total visitors for the last 6 months"
 msgstr ""
 
@@ -2225,11 +2432,11 @@ msgstr ""
 msgid "Sign in"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:854
+#: app/routes/_auth+/login.tsx:868
 msgid "Sign In"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:279
+#: app/routes/_auth+/login.tsx:293
 msgid "Sign in to your account"
 msgstr ""
 
@@ -2249,6 +2456,10 @@ msgstr ""
 msgid "Sign up"
 msgstr ""
 
+#: app/components/ui/header.tsx:116
+msgid "Sign Up"
+msgstr ""
+
 #: app/routes/_auth+/signup.tsx:219
 msgid "Sign up with your social account or email"
 msgstr ""
@@ -2257,12 +2468,12 @@ msgstr ""
 msgid "Signed in"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:321
+#: app/routes/mcp+/authorize.tsx:300
 msgid "Signed in as"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:571
-#: app/routes/_auth+/login.tsx:745
+#: app/routes/_auth+/login.tsx:585
+#: app/routes/_auth+/login.tsx:759
 msgid "Signing in as"
 msgstr ""
 
@@ -2270,16 +2481,16 @@ msgstr ""
 msgid "Signing out..."
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:286
+#: app/components/settings/cards/organization/billing-card.tsx:272
 msgid "Single sign-on, custom SLA, private support channel, and more. <0>Learn more</0>"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:919
+#: app/routes/organizations+/create.tsx:921
 msgid "Skip for now"
 msgstr ""
 
 #: app/components/settings/cards/organization/general-settings-card.tsx:90
-#: app/routes/organizations+/create.tsx:657
+#: app/routes/organizations+/create.tsx:659
 msgid "Slug"
 msgstr ""
 
@@ -2291,15 +2502,15 @@ msgstr ""
 msgid "Start the conversation by adding the first comment."
 msgstr ""
 
-#: app/components/data-table.tsx:208
-#: app/components/data-table.tsx:836
+#: app/components/data-table.tsx:210
+#: app/components/data-table.tsx:841
 #: app/components/settings/cards/sessions-card.tsx:234
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:903
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:906
 msgid "Status"
 msgstr ""
 
 #. placeholder {0}: steps.length
-#: app/routes/organizations+/create.tsx:461
+#: app/routes/organizations+/create.tsx:462
 msgid "Step {currentStep} of {0}"
 msgstr ""
 
@@ -2308,37 +2519,37 @@ msgid "Stop Impersonation"
 msgstr ""
 
 #: app/components/core/feedback-modal.tsx:112
-#: app/components/data-table.tsx:939
+#: app/components/data-table.tsx:944
 msgid "Submit"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:194
+#: app/components/settings/cards/organization/billing-card.tsx:178
 msgid "Subscribe"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:168
+#: app/components/settings/cards/organization/billing-card.tsx:152
 msgid "Subscription inactive"
 msgstr ""
 
-#: app/components/nav-user.tsx:201
+#: app/components/nav-user.tsx:205
 msgid "Super Admin"
 msgstr ""
 
-#: app/components/nav-user.tsx:88
+#: app/components/nav-user.tsx:92
 msgid "System theme"
 msgstr ""
 
-#: app/components/data-table.tsx:227
-#: app/components/data-table.tsx:243
-#: app/components/data-table.tsx:853
+#: app/components/data-table.tsx:229
+#: app/components/data-table.tsx:245
+#: app/components/data-table.tsx:858
 msgid "Target"
 msgstr ""
 
-#: app/components/leadership-card.tsx:70
+#: app/components/leadership-card.tsx:71
 msgid "Team member"
 msgstr ""
 
-#: app/components/leadership-card.tsx:60
+#: app/components/leadership-card.tsx:61
 msgid "Team members who have created the most notes"
 msgstr ""
 
@@ -2346,7 +2557,11 @@ msgstr ""
 msgid "Team Size"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:943
+#: app/routes/organizations+/create.tsx:726
+msgid "Tell us about your organization..."
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:945
 msgid "Tell us more about your organization"
 msgstr ""
 
@@ -2376,24 +2591,23 @@ msgstr ""
 msgid "Thanks for signing up! You've been automatically added to {orgNames} based on your email domain."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:403
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:406
 msgid "The API key will expire on this date. Leave unchecked for no expiration."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:792
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:795
 msgid "The autoApprove setting allows automatic approval of these tools without prompting"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:360
+#: app/routes/mcp+/authorize.tsx:339
 msgid "The MCP client will only have access to data from the selected organization"
 msgstr ""
 
 #: app/components/settings/password-form.tsx:33
-#: app/routes/settings+/profile.password.tsx:49
 msgid "The passwords must match"
 msgstr ""
 
-#: app/components/nav-user.tsx:217
+#: app/components/nav-user.tsx:221
 msgid "Theme"
 msgstr ""
 
@@ -2402,15 +2616,15 @@ msgstr ""
 msgid "There are <0>{0} days</0> left in your trial. Get in touch with questions or feedback."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:310
+#: app/routes/_auth+/login.tsx:324
 msgid "There was an issue with your login attempt. Please try again."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1214
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1217
 msgid "These are the MCP tools available in your organization. AI clients can use these tools to interact with your data."
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:371
+#: app/routes/mcp+/authorize.tsx:350
 msgid "This client will have access to:"
 msgstr ""
 
@@ -2419,14 +2633,14 @@ msgid "This device"
 msgstr ""
 
 #: app/routes/settings+/profile.change-email.tsx:74
-msgid "This email is already in use."
-msgstr ""
+#~ msgid "This email is already in use."
+#~ msgstr ""
 
-#: app/routes/organizations+/create.tsx:946
+#: app/routes/organizations+/create.tsx:948
 msgid "This helps us customize your experience and provide better insights."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:526
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:529
 msgid "This is the only time you'll see this API key. Make sure to copy it and store it securely."
 msgstr ""
 
@@ -2442,19 +2656,19 @@ msgstr ""
 #~ msgid "This is your only session"
 #~ msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:709
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:712
 msgid "This is your organization's unique MCP server endpoint. Use this URL when configuring your AI client."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:1003
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:1006
 msgid "This will:"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:372
+#: app/components/ui/notification-bell.tsx:380
 msgid "Toggle notifications"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:853
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:856
 msgid "Tokens automatically expire after 30 days of inactivity"
 msgstr ""
 
@@ -2462,7 +2676,7 @@ msgstr ""
 #~ msgid "Tools available through your MCP server connection"
 #~ msgstr ""
 
-#: app/components/leadership-card.tsx:57
+#: app/components/leadership-card.tsx:58
 msgid "Top Contributors"
 msgstr ""
 
@@ -2470,7 +2684,7 @@ msgstr ""
 msgid "Trending up by {trendPercentage}% this period"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:166
+#: app/components/settings/cards/organization/billing-card.tsx:150
 msgid "Trial period active"
 msgstr ""
 
@@ -2478,11 +2692,11 @@ msgstr ""
 #~ msgid "Two-Factor Authentication"
 #~ msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:49
+#: app/components/settings/two-factor-form.tsx:51
 msgid "Two-factor authentication is currently enabled. Disabling it will make your account less secure."
 msgstr ""
 
-#: app/components/data-table.tsx:808
+#: app/components/data-table.tsx:813
 msgid "Type"
 msgstr ""
 
@@ -2491,16 +2705,16 @@ msgstr ""
 msgid "Type the organization name \"{0}\" to confirm."
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:265
+#: app/components/settings/cards/organization/billing-card.tsx:251
 msgid "Unable to load pricing information"
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:323
-#: app/components/ui/notification-bell.tsx:410
+#: app/components/ui/notification-bell.tsx:331
+#: app/components/ui/notification-bell.tsx:418
 msgid "Unread Notifications"
 msgstr ""
 
-#: app/components/favorite-notes.tsx:137
+#: app/components/favorite-notes.tsx:136
 msgid "Unstar"
 msgstr ""
 
@@ -2510,6 +2724,10 @@ msgstr ""
 
 #: app/components/settings/cards/organization/team-size-card.tsx:109
 msgid "Update"
+msgstr ""
+
+#: app/components/settings/cards/organization/organization-photo-card.tsx:39
+msgid "Update Organization Logo"
 msgstr ""
 
 #: app/components/settings/cards/profile-photo.tsx:25
@@ -2525,11 +2743,15 @@ msgid "Updated {timeAgo} ago"
 msgstr ""
 
 #: app/components/app-sidebar.tsx:78
-#: app/components/settings/cards/organization/billing-card.tsx:475
+#: app/components/settings/cards/organization/billing-card.tsx:457
 msgid "Upgrade"
 msgstr ""
 
-#: app/routes/organizations+/create.tsx:618
+#: app/components/settings/base-photo-upload.tsx:64
+msgid "Upload photo"
+msgstr ""
+
+#: app/routes/organizations+/create.tsx:620
 msgid "Upload your logo"
 msgstr ""
 
@@ -2537,11 +2759,11 @@ msgstr ""
 msgid "Use @ to mention someone • Cmd+Enter to submit"
 msgstr ""
 
-#: app/components/settings/two-factor-form.tsx:99
+#: app/components/settings/two-factor-form.tsx:101
 msgid "Use any authenticator app on your mobile device to scan the QR code, or enter the Setup Key manually."
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:614
+#: app/routes/_auth+/login.tsx:628
 msgid "Use password instead"
 msgstr ""
 
@@ -2550,10 +2772,9 @@ msgid "Use your own S3-compatible storage instead of the default storage"
 msgstr ""
 
 #: app/components/settings/cards/profile-card.tsx:114
-#: app/routes/_auth+/login.tsx:780
-#: app/routes/_auth+/onboarding_.$provider.tsx:257
+#: app/routes/_auth+/login.tsx:794
+#: app/routes/_auth+/onboarding_.$provider.tsx:259
 #: app/routes/_auth+/onboarding.tsx:390
-#: app/routes/settings+/profile.index.tsx:250
 msgid "Username"
 msgstr ""
 
@@ -2562,7 +2783,7 @@ msgid "Username or Email"
 msgstr ""
 
 #: app/routes/_auth+/login.tsx:121
-#: app/routes/_auth+/login.tsx:707
+#: app/routes/_auth+/login.tsx:721
 msgid "Username or email is required"
 msgstr ""
 
@@ -2587,11 +2808,12 @@ msgstr ""
 msgid "Verify Discord membership"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:417
+#: app/routes/_auth+/login.tsx:431
 msgid "Verifying your passkey"
 msgstr ""
 
 #: app/components/settings/cards/organization/invoices-card.tsx:144
+#: app/routes/_app+/$orgSlug_+/notes-table.tsx:74
 msgid "View"
 msgstr ""
 
@@ -2603,7 +2825,7 @@ msgstr ""
 msgid "View and manage this session"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:391
+#: app/routes/mcp+/authorize.tsx:370
 msgid "View notes from users you have access to"
 msgstr ""
 
@@ -2611,7 +2833,7 @@ msgstr ""
 msgid "Want to go to the top of the waitlist?"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:575
+#: app/routes/_auth+/login.tsx:589
 msgid "We found your organization:"
 msgstr ""
 
@@ -2651,7 +2873,7 @@ msgstr ""
 msgid "Welcome aboard!"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:269
+#: app/routes/_auth+/login.tsx:283
 msgid "Welcome back"
 msgstr ""
 
@@ -2665,7 +2887,7 @@ msgstr ""
 msgid "Welcome!"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:753
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:756
 msgid "When prompted, authorize the connection in your browser"
 msgstr ""
 
@@ -2673,16 +2895,20 @@ msgstr ""
 msgid "When someone signs up using an email that matches your verified domain, they will be automatically added to your organization as a member."
 msgstr ""
 
-#: app/components/ui/notification-bell.tsx:248
+#: app/components/ui/notification-bell.tsx:256
 msgid "When you get notifications, they'll show up here."
 msgstr ""
 
-#: app/components/note/comment-item.tsx:255
+#: app/components/note/comment-item.tsx:256
 msgid "Write a reply..."
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:225
-#: app/routes/organizations+/create.tsx:840
+#: app/routes/_app+/$orgSlug_+/__org-note-editor.tsx:306
+msgid "Write your note content..."
+msgstr ""
+
+#: app/components/settings/cards/organization/billing-card.tsx:211
+#: app/routes/organizations+/create.tsx:842
 msgid "Yearly"
 msgstr ""
 
@@ -2690,7 +2916,7 @@ msgstr ""
 msgid "You"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:116
+#: app/components/settings/cards/organization/billing-card.tsx:100
 msgid "You are covered during our beta phase. No billing required at this time."
 msgstr ""
 
@@ -2699,7 +2925,7 @@ msgstr ""
 msgid "You are impersonating <0>{0}</0>"
 msgstr ""
 
-#: app/routes/_auth+/onboarding_.$provider.tsx:243
+#: app/routes/_auth+/onboarding_.$provider.tsx:245
 msgid "You can change your photo later"
 msgstr ""
 
@@ -2707,22 +2933,26 @@ msgstr ""
 msgid "You can create notes for your organization here."
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:847
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:850
 msgid "You can revoke access at any time from the Authorized Clients section above"
 msgstr ""
 
-#: app/routes/mcp+/authorize.tsx:407
+#: app/routes/mcp+/authorize.tsx:386
 msgid "You can revoke this access at any time from your MCP settings page. The access token will expire in 1 hour."
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:107
 #: app/routes/settings+/profile.connections.tsx:222
-msgid "You cannot delete your last connection unless you have a password."
+#~ msgid "You cannot delete your last connection unless you have a password."
+#~ msgstr ""
+
+#: app/routes/_app+/$orgSlug_+/notes.$noteId.tsx:1910
+msgid "You do not have permission to view this note"
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:148
-msgid "You don't have any connections yet."
-msgstr ""
+#~ msgid "You don't have any connections yet."
+#~ msgstr ""
 
 #: app/routes/_app+/organizations.tsx:274
 msgid "You have been invited to join the following organizations. Choose to accept or decline each invitation."
@@ -2744,10 +2974,10 @@ msgid "You must agree to the terms of service and privacy policy"
 msgstr ""
 
 #: app/routes/settings+/profile.change-email.tsx:136
-msgid "You will receive an email at the new email address to confirm."
-msgstr ""
+#~ msgid "You will receive an email at the new email address to confirm."
+#~ msgstr ""
 
-#: app/routes/_auth+/login.tsx:443
+#: app/routes/_auth+/login.tsx:457
 msgid "You're logged in! Navigating..."
 msgstr ""
 
@@ -2761,7 +2991,7 @@ msgstr ""
 msgid "You're signed in on {0, plural, one {# device} other {# devices}} as {1}"
 msgstr ""
 
-#: app/routes/_auth+/login.tsx:293
+#: app/routes/_auth+/login.tsx:307
 msgid "Your account has been suspended. Please contact support if you believe this is an error."
 msgstr ""
 
@@ -2769,15 +2999,15 @@ msgstr ""
 msgid "Your account is secured with two-factor authentication"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:474
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:477
 msgid "Your API key has been created successfully. Copy it now - you won't be able to see it again."
 msgstr ""
 
 #: app/routes/settings+/profile.connections.tsx:120
-msgid "Your connection has been deleted."
-msgstr ""
+#~ msgid "Your connection has been deleted."
+#~ msgstr ""
 
-#: app/routes/organizations+/create.tsx:1001
+#: app/routes/organizations+/create.tsx:1003
 msgid "Your department"
 msgstr ""
 
@@ -2785,17 +3015,17 @@ msgstr ""
 msgid "Your feedback"
 msgstr ""
 
-#: app/routes/_app+/$orgSlug_+/mcp.tsx:705
+#: app/routes/_app+/$orgSlug_+/mcp.tsx:708
 msgid "Your MCP Server URL"
 msgstr ""
 
-#: app/components/settings/cards/organization/billing-card.tsx:136
+#: app/components/settings/cards/organization/billing-card.tsx:120
 msgid "Your organization's current plan and billing status"
 msgstr ""
 
 #: app/routes/settings+/profile.password.tsx:129
-msgid "Your password has been changed."
-msgstr ""
+#~ msgid "Your password has been changed."
+#~ msgstr ""
 
 #: app/components/organization-invitations.tsx:154
 msgid "Your personal invite link"

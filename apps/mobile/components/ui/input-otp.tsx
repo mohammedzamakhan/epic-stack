@@ -203,6 +203,7 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 			selectTextOnFocus={true}
 			autoFocus={index === 0}
 			blurOnSubmit={false}
+			accessibilityLabel={`Digit ${index + 1} of ${maxLength}`}
 		/>
 	)
 }

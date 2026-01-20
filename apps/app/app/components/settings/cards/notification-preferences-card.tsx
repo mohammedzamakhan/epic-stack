@@ -1,6 +1,6 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { usePreferences, useNovu, type Preference  } from '@novu/react'
+import { usePreferences, useNovu, type Preference } from '@novu/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -176,7 +176,10 @@ function NotificationPreferencesCardComponent() {
 				<CardContent>
 					<div className="flex items-center justify-center py-8">
 						<div className="flex items-center gap-2">
-							<Icon name="loader" className="h-4 w-4 animate-spin" />
+							<Icon
+								name="loader"
+								className="h-4 w-4 motion-safe:animate-spin"
+							/>
 							<span className="text-muted-foreground text-sm">
 								<Trans>Loading preferences...</Trans>
 							</span>
@@ -218,7 +221,7 @@ function NotificationPreferencesCardComponent() {
 					>
 						<Icon
 							name="refresh-cw"
-							className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`}
+							className={`mr-2 h-4 w-4 ${isRefetching ? 'motion-safe:animate-spin' : ''}`}
 						/>
 						{isRefetching ? <Trans>Retrying...</Trans> : <Trans>Retry</Trans>}
 					</Button>
@@ -261,7 +264,7 @@ function NotificationPreferencesCardComponent() {
 						>
 							<Icon
 								name="refresh-cw"
-								className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`}
+								className={`mr-2 h-4 w-4 ${isRefetching ? 'motion-safe:animate-spin' : ''}`}
 							/>
 							{isRefetching ? 'Refreshing...' : 'Refresh'}
 						</Button>

@@ -1,3 +1,5 @@
+import { Trans } from '@lingui/react/macro'
+
 import { UserAvatar } from '../user-avatar'
 import { Badge } from '@repo/ui/badge'
 import { cn } from '@repo/ui/cn'
@@ -280,7 +282,9 @@ function EmptyState() {
 			<div className="bg-muted/50 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
 				<Icon name="clock" className="text-muted-foreground h-8 w-8" />
 			</div>
-			<h3 className="text-foreground mb-1 font-medium">No activity yet</h3>
+			<h3 className="text-foreground mb-1 font-medium">
+				<Trans>No activity yet</Trans>
+			</h3>
 			<p className="text-muted-foreground max-w-[240px] text-sm">
 				Activity will appear here as you and your team make changes to this
 				note.

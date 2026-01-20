@@ -100,7 +100,9 @@ export default function VerifyEmailScreen() {
 			<Screen style={styles.screen}>
 				<View style={styles.centerContainer}>
 					<View style={styles.loadingContainer}>
-						<Text style={styles.loadingIcon}>⏳</Text>
+						<Text style={styles.loadingIcon} accessibilityLabel="Loading">
+							⏳
+						</Text>
 						<Text style={styles.title}>Verifying your email...</Text>
 						<Text style={styles.subtitle}>
 							Please wait while we verify your email address.
@@ -116,7 +118,9 @@ export default function VerifyEmailScreen() {
 			<Screen style={styles.screen}>
 				<View style={styles.centerContainer}>
 					<View style={styles.successContainer}>
-						<Text style={styles.successIcon}>✅</Text>
+						<Text style={styles.successIcon} accessibilityLabel="Success">
+							✅
+						</Text>
 						<Text style={styles.title}>Email Verified!</Text>
 						<Text style={styles.subtitle}>
 							Your email has been successfully verified. You can now sign in to
@@ -176,7 +180,10 @@ export default function VerifyEmailScreen() {
 
 				{/* Footer */}
 				<View style={styles.footer}>
-					<TouchableOpacity onPress={handleBackToSignIn}>
+					<TouchableOpacity
+						onPress={handleBackToSignIn}
+						accessibilityRole="link"
+					>
 						<Text style={styles.footerLinkText}>Back to sign in</Text>
 					</TouchableOpacity>
 				</View>

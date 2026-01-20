@@ -1,6 +1,12 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { useState } from 'react'
+import { Form, Link, useLoaderData } from 'react-router'
+import { z } from 'zod'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Breadcrumb,
@@ -28,11 +34,6 @@ import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { Textarea } from '@repo/ui/textarea'
-import { useState } from 'react'
-import { Form, Link, useLoaderData } from 'react-router'
-import { z } from 'zod'
-
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/system.$roleId.ts'
 
@@ -180,6 +181,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function AdminSystemRoleDetailPage() {
 	const { role, allPermissions } = useLoaderData<typeof loader>()
 	const [selectedTab, setSelectedTab] = useState('system')
+	const { _ } = useLingui()
 
 	// Group permissions by entity for better organization
 	const permissionsByEntity = allPermissions.reduce(
@@ -203,13 +205,17 @@ export default function AdminSystemRoleDetailPage() {
 				<BreadcrumbList>
 					<BreadcrumbItem>
 						<BreadcrumbLink>
-							<Link to="/admin">Admin</Link>
+							<Link to="/admin">
+								<Trans>Admin</Trans>
+							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
 					<BreadcrumbItem>
 						<BreadcrumbLink>
-							<Link to="/roles">Roles</Link>
+							<Link to="/roles">
+								<Trans>Roles</Trans>
+							</Link>
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
@@ -222,12 +228,18 @@ export default function AdminSystemRoleDetailPage() {
 				<div>
 					<div className="flex items-center gap-3">
 						<h1 className="text-3xl font-bold">{role.name}</h1>
-						{isCoreRole && <Badge variant="default">Core System Role</Badge>}
+						{isCoreRole && (
+							<Badge variant="default">
+								<Trans>Core System Role</Trans>
+							</Badge>
+						)}
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="text-muted-foreground text-right text-sm">
-						<p>Key</p>
+						<p>
+							<Trans>Key</Trans>
+						</p>
 						<p className="font-mono">{role.name}</p>
 					</div>
 					{!isCoreRole && (
@@ -240,14 +252,14 @@ export default function AdminSystemRoleDetailPage() {
 								onClick={(e) => {
 									if (
 										!confirm(
-											'Are you sure you want to delete this system role?',
+											_(msg`Are you sure you want to delete this system role?`),
 										)
 									) {
 										e.preventDefault()
 									}
 								}}
 							>
-								Delete role
+								<Trans>Delete role</Trans>
 							</Button>
 						</Form>
 					)}
@@ -257,7 +269,9 @@ export default function AdminSystemRoleDetailPage() {
 			{/* Basic Information */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Basic information</CardTitle>
+					<CardTitle>
+						<Trans>Basic information</Trans>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<Form method="post" className="space-y-4">
@@ -265,17 +279,21 @@ export default function AdminSystemRoleDetailPage() {
 
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2">
-								<Label htmlFor="name">Name</Label>
+								<Label htmlFor="name">
+									<Trans>Name</Trans>
+								</Label>
 								<Input
 									id="name"
 									name="name"
 									defaultValue={role.name}
-									placeholder="Role name"
+									placeholder={_(msg`Role name`)}
 									disabled={isCoreRole}
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="key">Key</Label>
+								<Label htmlFor="key">
+									<Trans>Key</Trans>
+								</Label>
 								<Input
 									id="key"
 									value={role.name}
@@ -286,12 +304,14 @@ export default function AdminSystemRoleDetailPage() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="description">Description</Label>
+							<Label htmlFor="description">
+								<Trans>Description</Trans>
+							</Label>
 							<Textarea
 								id="description"
 								name="description"
 								defaultValue={role.description || ''}
-								placeholder="Role description"
+								placeholder={_(msg`Role description`)}
 								rows={3}
 								disabled={isCoreRole}
 							/>
@@ -299,7 +319,7 @@ export default function AdminSystemRoleDetailPage() {
 
 						{!isCoreRole && (
 							<Button type="submit" size="sm">
-								Save Changes
+								<Trans>Save Changes</Trans>
 							</Button>
 						)}
 					</Form>
@@ -308,14 +328,18 @@ export default function AdminSystemRoleDetailPage() {
 					<div className="mt-6 border-t pt-4">
 						<div className="text-muted-foreground flex items-center justify-between text-sm">
 							<span>
-								Created{' '}
-								{new Date(role.createdAt).toLocaleDateString('en-US', {
-									year: 'numeric',
-									month: 'long',
-									day: 'numeric',
-								})}
+								<Trans>
+									Created{' '}
+									{new Date(role.createdAt).toLocaleDateString('en-US', {
+										year: 'numeric',
+										month: 'long',
+										day: 'numeric',
+									})}
+								</Trans>
 							</span>
-							<span>{role._count.users} users</span>
+							<span>
+								<Trans>{role._count.users} users</Trans>
+							</span>
 						</div>
 					</div>
 				</CardContent>
@@ -324,23 +348,29 @@ export default function AdminSystemRoleDetailPage() {
 			{/* Permissions */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Permissions</CardTitle>
+					<CardTitle>
+						<Trans>Permissions</Trans>
+					</CardTitle>
 					<CardDescription>
-						System-wide permissions for this role
+						<Trans>System-wide permissions for this role</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Tabs value={selectedTab} onValueChange={setSelectedTab}>
 						<TabsList>
-							<TabsTrigger value="system">System permissions</TabsTrigger>
+							<TabsTrigger value="system">
+								<Trans>System permissions</Trans>
+							</TabsTrigger>
 						</TabsList>
 
 						<TabsContent value="system" className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h2 className="text-lg font-semibold">System permissions</h2>
+								<h2 className="text-lg font-semibold">
+									<Trans>System permissions</Trans>
+								</h2>
 								{!isCoreRole && (
 									<Button size="sm" variant="outline">
-										Add permission
+										<Trans>Add permission</Trans>
 									</Button>
 								)}
 							</div>

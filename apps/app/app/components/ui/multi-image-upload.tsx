@@ -4,13 +4,15 @@ import {
 	useForm,
 	type FieldMetadata,
 } from '@conform-to/react'
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
+import { getNoteImgSrc } from '@repo/common'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { FieldLabel } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import React, { useState, useRef, useCallback } from 'react'
 import { type ImageFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
-import { getNoteImgSrc } from '@repo/common'
-import { cn } from '@repo/ui'
 import { useDragAndDrop } from './use-drag-and-drop.tsx'
 import { createFileInputRef } from './use-file-input-ref.tsx'
 
@@ -226,6 +228,7 @@ function ImagePreview({
 	onRemove: () => void
 	disabled?: boolean
 }) {
+	const { _ } = useLingui()
 	const fields = meta.getFieldset()
 
 	// Handle existing images using the passed existingImage data
@@ -262,7 +265,7 @@ function ImagePreview({
 				)}
 			</label>
 			<input
-				aria-label="Image"
+				aria-label={_(t`Image`)}
 				className="absolute top-0 left-0 z-0 size-32 cursor-pointer opacity-0"
 				accept="image/*"
 				{...getInputProps(fields.file, { type: 'file' })}
@@ -275,7 +278,7 @@ function ImagePreview({
 					size="sm"
 					onClick={onRemove}
 					disabled={disabled}
-					aria-label="Remove image"
+					aria-label={_(t`Remove image`)}
 				>
 					<Icon name="x" className="h-4 w-4" />
 				</Button>

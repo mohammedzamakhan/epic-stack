@@ -1,3 +1,8 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { Form, useLoaderData, useNavigation } from 'react-router'
+import { auditService, AuditAction, AuditService } from '@repo/audit'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -17,13 +22,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui/select'
-import { useLoaderData, Form, useNavigation } from 'react-router'
-import {
-	auditService,
-	AuditAction,
-	AuditService,
-} from '@repo/audit'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 
@@ -205,14 +203,19 @@ export default function AuditRetentionPage() {
 		useLoaderData<typeof loader>()
 	const navigation = useNavigation()
 	const isSubmitting = navigation.state === 'submitting'
+	const { _ } = useLingui()
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h1 className="text-3xl font-bold">Audit Log Retention Policy</h1>
+				<h1 className="text-3xl font-bold">
+					<Trans>Audit Log Retention Policy</Trans>
+				</h1>
 				<p className="text-muted-foreground">
-					Configure retention and archival settings for {organization.name}
+					<Trans>
+						Configure retention and archival settings for {organization.name}
+					</Trans>
 				</p>
 			</div>
 
@@ -221,7 +224,7 @@ export default function AuditRetentionPage() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Total Audit Logs
+							<Trans>Total Audit Logs</Trans>
 						</CardTitle>
 						<Icon name="database" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
@@ -234,7 +237,9 @@ export default function AuditRetentionPage() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Archived Logs</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Archived Logs</Trans>
+						</CardTitle>
 						<Icon name="folder" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
@@ -242,21 +247,23 @@ export default function AuditRetentionPage() {
 							{statistics.archived.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							{statistics.active.toLocaleString()} active
+							<Trans>{statistics.active.toLocaleString()} active</Trans>
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Oldest Log</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Oldest Log</Trans>
+						</CardTitle>
 						<Icon name="clock" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm font-medium">
 							{statistics.oldestDate
 								? new Date(statistics.oldestDate).toLocaleDateString()
-								: 'N/A'}
+								: _(msg`N/A`)}
 						</div>
 					</CardContent>
 				</Card>
@@ -265,9 +272,11 @@ export default function AuditRetentionPage() {
 			{/* Compliance Presets */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Compliance Presets</CardTitle>
+					<CardTitle>
+						<Trans>Compliance Presets</Trans>
+					</CardTitle>
 					<CardDescription>
-						Quick apply industry-standard retention policies
+						<Trans>Quick apply industry-standard retention policies</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -283,18 +292,24 @@ export default function AuditRetentionPage() {
 												{key.replace(/_/g, ' ')}
 												{retentionPolicy.complianceType ===
 													preset.complianceType && (
-													<Badge variant="default">Active</Badge>
+													<Badge variant="default">
+														<Trans>Active</Trans>
+													</Badge>
 												)}
 											</CardTitle>
 										</CardHeader>
 										<CardContent className="space-y-2">
 											<div className="text-sm">
 												<p className="text-muted-foreground">
-													Retention: {preset.retentionDays} days (
-													{Math.floor(preset.retentionDays / 365)} years)
+													<Trans>
+														Retention: {preset.retentionDays} days (
+														{Math.floor(preset.retentionDays / 365)} years)
+													</Trans>
 												</p>
 												<p className="text-muted-foreground">
-													Hot storage: {preset.hotStorageDays} days
+													<Trans>
+														Hot storage: {preset.hotStorageDays} days
+													</Trans>
 												</p>
 											</div>
 											<Button
@@ -304,7 +319,7 @@ export default function AuditRetentionPage() {
 												className="w-full"
 												disabled={isSubmitting}
 											>
-												Apply Preset
+												<Trans>Apply Preset</Trans>
 											</Button>
 										</CardContent>
 									</Card>
@@ -318,9 +333,11 @@ export default function AuditRetentionPage() {
 			{/* Custom Configuration */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Custom Retention Policy</CardTitle>
+					<CardTitle>
+						<Trans>Custom Retention Policy</Trans>
+					</CardTitle>
 					<CardDescription>
-						Configure custom retention and archival settings
+						<Trans>Configure custom retention and archival settings</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -329,7 +346,9 @@ export default function AuditRetentionPage() {
 
 						<div className="grid gap-6 md:grid-cols-2">
 							<div className="space-y-2">
-								<Label htmlFor="retentionDays">Retention Period (days)</Label>
+								<Label htmlFor="retentionDays">
+									<Trans>Retention Period (days)</Trans>
+								</Label>
 								<Input
 									id="retentionDays"
 									name="retentionDays"
@@ -340,13 +359,13 @@ export default function AuditRetentionPage() {
 									required
 								/>
 								<p className="text-muted-foreground text-xs">
-									How long to keep logs before permanent deletion
+									<Trans>How long to keep logs before permanent deletion</Trans>
 								</p>
 							</div>
 
 							<div className="space-y-2">
 								<Label htmlFor="hotStorageDays">
-									Hot Storage Period (days)
+									<Trans>Hot Storage Period (days)</Trans>
 								</Label>
 								<Input
 									id="hotStorageDays"
@@ -358,12 +377,14 @@ export default function AuditRetentionPage() {
 									required
 								/>
 								<p className="text-muted-foreground text-xs">
-									How long to keep logs readily searchable
+									<Trans>How long to keep logs readily searchable</Trans>
 								</p>
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="archiveEnabled">Enable Archiving</Label>
+								<Label htmlFor="archiveEnabled">
+									<Trans>Enable Archiving</Trans>
+								</Label>
 								<Select
 									name="archiveEnabled"
 									defaultValue={String(retentionPolicy.archiveEnabled)}
@@ -372,17 +393,23 @@ export default function AuditRetentionPage() {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="true">Enabled</SelectItem>
-										<SelectItem value="false">Disabled</SelectItem>
+										<SelectItem value="true">
+											<Trans>Enabled</Trans>
+										</SelectItem>
+										<SelectItem value="false">
+											<Trans>Disabled</Trans>
+										</SelectItem>
 									</SelectContent>
 								</Select>
 								<p className="text-muted-foreground text-xs">
-									Automatically archive old logs to cold storage
+									<Trans>Automatically archive old logs to cold storage</Trans>
 								</p>
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="exportEnabled">Allow Exports</Label>
+								<Label htmlFor="exportEnabled">
+									<Trans>Allow Exports</Trans>
+								</Label>
 								<Select
 									name="exportEnabled"
 									defaultValue={String(retentionPolicy.exportEnabled)}
@@ -391,18 +418,22 @@ export default function AuditRetentionPage() {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="true">Enabled</SelectItem>
-										<SelectItem value="false">Disabled</SelectItem>
+										<SelectItem value="true">
+											<Trans>Enabled</Trans>
+										</SelectItem>
+										<SelectItem value="false">
+											<Trans>Disabled</Trans>
+										</SelectItem>
 									</SelectContent>
 								</Select>
 								<p className="text-muted-foreground text-xs">
-									Allow users to export audit logs
+									<Trans>Allow users to export audit logs</Trans>
 								</p>
 							</div>
 
 							<div className="space-y-2 md:col-span-2">
 								<Label htmlFor="complianceType">
-									Compliance Standard (Optional)
+									<Trans>Compliance Standard (Optional)</Trans>
 								</Label>
 								<Select
 									name="complianceType"
@@ -412,7 +443,9 @@ export default function AuditRetentionPage() {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="none">None</SelectItem>
+										<SelectItem value="none">
+											<Trans>None</Trans>
+										</SelectItem>
 										{Object.keys(compliancePresets).map((key) => (
 											<SelectItem key={key} value={key}>
 												{key.replace(/_/g, ' ')}
@@ -426,7 +459,11 @@ export default function AuditRetentionPage() {
 						<div className="flex gap-2">
 							<Button type="submit" disabled={isSubmitting}>
 								<Icon name="check" className="mr-2 h-4 w-4" />
-								{isSubmitting ? 'Saving...' : 'Save Policy'}
+								{isSubmitting ? (
+									<Trans>Saving...</Trans>
+								) : (
+									<Trans>Save Policy</Trans>
+								)}
 							</Button>
 						</div>
 					</Form>
@@ -436,23 +473,31 @@ export default function AuditRetentionPage() {
 			{/* Manual Actions */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Manual Actions</CardTitle>
-					<CardDescription>Run maintenance tasks on audit logs</CardDescription>
+					<CardTitle>
+						<Trans>Manual Actions</Trans>
+					</CardTitle>
+					<CardDescription>
+						<Trans>Run maintenance tasks on audit logs</Trans>
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Form method="post">
 						<input type="hidden" name="intent" value="archive-old-logs" />
 						<div className="flex items-center justify-between rounded-lg border p-4">
 							<div>
-								<h3 className="font-medium">Archive Old Logs</h3>
+								<h3 className="font-medium">
+									<Trans>Archive Old Logs</Trans>
+								</h3>
 								<p className="text-muted-foreground text-sm">
-									Manually trigger archival of logs older than the hot storage
-									period
+									<Trans>
+										Manually trigger archival of logs older than the hot storage
+										period
+									</Trans>
 								</p>
 							</div>
 							<Button type="submit" variant="outline" disabled={isSubmitting}>
 								<Icon name="folder" className="mr-2 h-4 w-4" />
-								Run Archival
+								<Trans>Run Archival</Trans>
 							</Button>
 						</div>
 					</Form>

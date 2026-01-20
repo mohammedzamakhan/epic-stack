@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { useLoaderData } from 'react-router'
-import { AdminOrganizationDetail } from '#app/components/admin-organization-detail.tsx'
 import { prisma } from '@repo/database'
+import { AdminOrganizationDetail } from '#app/components/admin-organization-detail.tsx'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/$organizationId.ts'
 

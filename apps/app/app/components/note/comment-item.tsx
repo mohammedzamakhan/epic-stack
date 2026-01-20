@@ -1,4 +1,4 @@
-import { Trans, msg } from '@lingui/macro'
+import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
@@ -162,6 +162,7 @@ export function CommentItem({
 									className="absolute top-0 right-0 h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
 									onClick={handleDelete}
 									disabled={isDeleting}
+									aria-label={t`Delete comment`}
 								>
 									<Icon name="trash-2" className="h-4 w-4" />
 								</Button>

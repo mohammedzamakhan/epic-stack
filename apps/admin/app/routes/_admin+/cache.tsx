@@ -1,4 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { Trans, msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -207,6 +209,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function CacheAdminRoute() {
+	const { _ } = useLingui()
 	const data = useLoaderData<typeof loader>()
 	const [searchParams, setSearchParams] = useSearchParams()
 	useSubmit()
@@ -255,9 +258,11 @@ export default function CacheAdminRoute() {
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Cache Management</h1>
+				<h1 className="text-3xl font-bold tracking-tight">
+					<Trans>Cache Management</Trans>
+				</h1>
 				<p className="text-muted-foreground">
-					Monitor and manage system cache performance
+					<Trans>Monitor and manage system cache performance</Trans>
 				</p>
 			</div>
 
@@ -265,7 +270,9 @@ export default function CacheAdminRoute() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">SQLite Cache</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>SQLite Cache</Trans>
+						</CardTitle>
 						<Icon name="database" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
@@ -273,44 +280,56 @@ export default function CacheAdminRoute() {
 							{data.stats.sqlite.totalKeys}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							{formatBytes(data.stats.sqlite.totalSize)} total
+							<Trans>{formatBytes(data.stats.sqlite.totalSize)} total</Trans>
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">LRU Cache</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>LRU Cache</Trans>
+						</CardTitle>
 						<Icon name="database" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{data.stats.lru.totalKeys}</div>
 						<p className="text-muted-foreground text-xs">
-							{data.stats.lru.currentSize} / {data.stats.lru.maxSize} max
+							<Trans>
+								{data.stats.lru.currentSize} / {data.stats.lru.maxSize} max
+							</Trans>
 						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Average Size</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Average Size</Trans>
+						</CardTitle>
 						<Icon name="database" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
 							{formatBytes(data.stats.sqlite.averageSize)}
 						</div>
-						<p className="text-muted-foreground text-xs">per SQLite entry</p>
+						<p className="text-muted-foreground text-xs">
+							<Trans>per SQLite entry</Trans>
+						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Entries</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Total Entries</Trans>
+						</CardTitle>
 						<Icon name="database" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
 							{data.stats.sqlite.totalKeys + data.stats.lru.totalKeys}
 						</div>
-						<p className="text-muted-foreground text-xs">across all caches</p>
+						<p className="text-muted-foreground text-xs">
+							<Trans>across all caches</Trans>
+						</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -324,7 +343,7 @@ export default function CacheAdminRoute() {
 							className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
 						/>
 						<Input
-							placeholder="Search cache keys..."
+							placeholder={_(msg`Search cache keys...`)}
 							value={searchQuery}
 							onChange={(e) => handleSearch(e.target.value)}
 							className="pl-9"
@@ -334,11 +353,19 @@ export default function CacheAdminRoute() {
 						value={cacheType}
 						onValueChange={(value) => handleTypeFilter(value as string)}
 					>
-						<SelectTrigger className="w-48">Filter by cache type</SelectTrigger>
+						<SelectTrigger className="w-48">
+							<Trans>Filter by cache type</Trans>
+						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="all">All caches</SelectItem>
-							<SelectItem value="sqlite">SQLite only</SelectItem>
-							<SelectItem value="lru">LRU only</SelectItem>
+							<SelectItem value="all">
+								<Trans>All caches</Trans>
+							</SelectItem>
+							<SelectItem value="sqlite">
+								<Trans>SQLite only</Trans>
+							</SelectItem>
+							<SelectItem value="lru">
+								<Trans>LRU only</Trans>
+							</SelectItem>
 						</SelectContent>
 					</Select>
 					<Select
@@ -366,7 +393,7 @@ export default function CacheAdminRoute() {
 							onClick={clearFilters}
 							className="h-8 px-2 lg:px-3"
 						>
-							Reset
+							<Trans>Reset</Trans>
 							<Icon name="x" className="ml-2 h-4 w-4" />
 						</Button>
 					)}
@@ -386,7 +413,7 @@ export default function CacheAdminRoute() {
 				<input type="hidden" name="limit" value={limit} />
 				<div className="flex items-center gap-2">
 					<label htmlFor="instance" className="text-sm font-medium">
-						Instance:
+						<Trans>Instance:</Trans>
 					</label>
 					<select
 						name="instance"
@@ -418,18 +445,24 @@ export default function CacheAdminRoute() {
 			{/* Results Summary */}
 			<div className="text-muted-foreground flex items-center justify-between text-sm">
 				<div>
-					Showing {totalKeys} cache entries
-					{query && ` matching "${query}"`}
-					{cacheType !== 'all' && ` in ${cacheType.toUpperCase()} cache`}
+					<Trans>
+						Showing {totalKeys} cache entries
+						{query && ` matching "${query}"`}
+						{cacheType !== 'all' && ` in ${cacheType.toUpperCase()} cache`}
+					</Trans>
 				</div>
-				{selectedKeys.size > 0 && <div>{selectedKeys.size} selected</div>}
+				{selectedKeys.size > 0 && (
+					<div>
+						<Trans>{selectedKeys.size} selected</Trans>
+					</div>
+				)}
 			</div>
 
 			{/* Cache Tables */}
 			<div className="space-y-6">
 				{data.cacheData.sqlite.length > 0 && (
 					<CacheTable
-						title="SQLite Cache"
+						title={_(t`SQLite Cache`)}
 						type="sqlite"
 						keys={data.cacheData.sqlite}
 						instance={instance}
@@ -440,7 +473,7 @@ export default function CacheAdminRoute() {
 
 				{data.cacheData.lru.length > 0 && (
 					<CacheTable
-						title="LRU Cache"
+						title={_(t`LRU Cache`)}
 						type="lru"
 						keys={data.cacheData.lru}
 						instance={instance}
@@ -457,12 +490,14 @@ export default function CacheAdminRoute() {
 								className="text-muted-foreground mb-4 h-12 w-12"
 							/>
 							<h2 className="mb-2 text-lg font-semibold">
-								No cache entries found
+								<Trans>No cache entries found</Trans>
 							</h2>
 							<p className="text-muted-foreground text-center">
-								{query
-									? `No cache keys match "${query}"`
-									: 'The cache is empty'}
+								{query ? (
+									<Trans>No cache keys match "{query}"</Trans>
+								) : (
+									<Trans>The cache is empty</Trans>
+								)}
 							</p>
 						</CardContent>
 					</Card>
@@ -525,9 +560,11 @@ function CacheTable({
 							<Badge variant="secondary">{keys.length}</Badge>
 						</CardTitle>
 						<CardDescription>
-							{type === 'sqlite'
-								? 'Persistent cache stored in SQLite database'
-								: 'In-memory LRU cache'}
+							{type === 'sqlite' ? (
+								<Trans>Persistent cache stored in SQLite database</Trans>
+							) : (
+								<Trans>In-memory LRU cache</Trans>
+							)}
 						</CardDescription>
 					</div>
 					<CacheClearButton type={type} />
@@ -549,11 +586,21 @@ function CacheTable({
 										className="rounded border-gray-300"
 									/>
 								</TableHead>
-								<TableHead>Key</TableHead>
-								<TableHead>Size</TableHead>
-								<TableHead>Created</TableHead>
-								<TableHead>TTL</TableHead>
-								<TableHead className="w-24">Actions</TableHead>
+								<TableHead>
+									<Trans>Key</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Size</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Created</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>TTL</Trans>
+								</TableHead>
+								<TableHead className="w-24">
+									<Trans>Actions</Trans>
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -588,6 +635,7 @@ function CacheKeyRow({
 	isSelected: boolean
 	onSelect: (checked: boolean) => void
 }) {
+	const { _ } = useLingui()
 	const fetcher = useFetcher<typeof action>()
 	const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 	const encodedKey = encodeURIComponent(keyInfo.key)
@@ -652,7 +700,7 @@ function CacheKeyRow({
 						variant="ghost"
 						disabled={isDeleting}
 						onClick={() => setShowConfirmDialog(true)}
-						aria-label="Delete cache key"
+						aria-label={_(msg`Delete cache key`)}
 					>
 						{isDeleting ? (
 							<Icon name="loader" className="h-4 w-4 animate-spin" />
@@ -667,7 +715,7 @@ function CacheKeyRow({
 				isOpen={showConfirmDialog}
 				onClose={() => setShowConfirmDialog(false)}
 				onConfirm={handleConfirm}
-				title="Delete Cache Key"
+				title={_(t`Delete Cache Key`)}
 				description={`This will permanently delete the cache key "${keyInfo.key}" from the ${type.toUpperCase()} cache. This action cannot be undone.`}
 				confirmText="Delete Key"
 				variant="destructive"
@@ -711,7 +759,7 @@ function CacheClearButton({ type }: { type: 'sqlite' | 'lru' }) {
 				) : (
 					<Icon name="trash-2" className="mr-2 h-4 w-4" />
 				)}
-				Clear {type.toUpperCase()}
+				<Trans>Clear {type.toUpperCase()}</Trans>
 			</Button>
 
 			<CacheConfirmationDialog
@@ -786,7 +834,7 @@ function CacheBulkActions({
 			<DropdownMenu>
 				<DropdownMenuTrigger>
 					<Button variant="outline" size="sm" disabled={isDeleting}>
-						Bulk Actions ({selectedKeys.size})
+						<Trans>Bulk Actions ({selectedKeys.size})</Trans>
 						<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
@@ -794,19 +842,19 @@ function CacheBulkActions({
 					{sqliteKeys.length > 0 && (
 						<DropdownMenuItem onClick={() => handleBulkDelete('sqlite')}>
 							<Icon name="trash-2" className="h-4 w-4" />
-							Delete {sqliteKeys.length} SQLite keys
+							<Trans>Delete {sqliteKeys.length} SQLite keys</Trans>
 						</DropdownMenuItem>
 					)}
 					{lruKeys.length > 0 && (
 						<DropdownMenuItem onClick={() => handleBulkDelete('lru')}>
 							<Icon name="trash-2" className="h-4 w-4" />
-							Delete {lruKeys.length} LRU keys
+							<Trans>Delete {lruKeys.length} LRU keys</Trans>
 						</DropdownMenuItem>
 					)}
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onClick={onClearSelection}>
 						<Icon name="x" className="h-4 w-4" />
-						Clear selection
+						<Trans>Clear selection</Trans>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -852,13 +900,15 @@ export function ErrorBoundary() {
 					<div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
 						<div className="text-center">
 							<h2 className="text-foreground mb-2 text-2xl font-bold">
-								Access Denied
+								<Trans>Access Denied</Trans>
 							</h2>
 							<p className="text-muted-foreground mb-4">
-								You don't have permission to access this admin area.
+								<Trans>
+									You don't have permission to access this admin area.
+								</Trans>
 							</p>
 							<p className="text-muted-foreground text-sm">
-								{error?.data?.message || 'Admin role required'}
+								{error?.data?.message || <Trans>Admin role required</Trans>}
 							</p>
 						</div>
 						<div className="text-center">
@@ -866,7 +916,7 @@ export function ErrorBoundary() {
 								href="/admin"
 								className="bg-primary hover:bg-primary/90 focus:ring-primary inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white focus:ring-2 focus:ring-offset-2 focus:outline-none"
 							>
-								Return to Admin Dashboard
+								<Trans>Return to Admin Dashboard</Trans>
 							</a>
 						</div>
 					</div>

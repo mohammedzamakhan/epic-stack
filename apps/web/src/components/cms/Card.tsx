@@ -34,6 +34,8 @@ export const Card: React.FC<CardProps> = ({
 						src={metaImage.url}
 						alt={metaImage.alt || title || 'Post image'}
 						className="h-48 w-full object-cover"
+						width={400}
+						height={192}
 					/>
 				)}
 				{!metaImage && (

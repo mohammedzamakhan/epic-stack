@@ -40,6 +40,15 @@ const numCircles = rippleSettings?.numCircles || 8
 			opacity: 1;
 		}
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		@keyframes heartRipple {
+			0%, 50%, 100% {
+				transform: scale(1);
+				opacity: 1;
+			}
+		}
+	}
 </style>
 
 <section class="relative bg-muted">

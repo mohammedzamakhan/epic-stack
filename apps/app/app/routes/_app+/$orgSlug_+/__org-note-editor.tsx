@@ -5,7 +5,10 @@ import {
 	useForm,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { AIContentGenerator } from '@repo/ai'
+import { useIsPending } from '@repo/common'
 import { Button } from '@repo/ui/button'
 import { Field, FieldLabel, FieldError } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
@@ -51,7 +54,6 @@ const MultiMediaUpload = lazy(() =>
 		default: module.MultiMediaUpload,
 	})),
 )
-import { useIsPending } from '@repo/common'
 
 const titleMinLength = 1
 const titleMaxLength = 100
@@ -141,6 +143,7 @@ export function OrgNoteEditor({
 	onSuccess,
 	organizationId,
 }: OrgNoteEditorProps) {
+	const { _ } = useLingui()
 	const isPending = useIsPending()
 	const params = useParams<{ orgSlug: string }>()
 	const fetcher = useFetcher()
@@ -272,7 +275,7 @@ export function OrgNoteEditor({
 										</FieldLabel>
 										<Input
 											{...getInputProps(fields.tags, { type: 'text' })}
-											placeholder="e.g. urgent, meeting, project"
+											placeholder={_(t`e.g. urgent, meeting, project`)}
 											aria-invalid={
 												fields.tags.errors?.length ? true : undefined
 											}
@@ -300,7 +303,7 @@ export function OrgNoteEditor({
 									onChange={setContentValue}
 									name={fields.content.name}
 									disabled={isPending}
-									placeholder="Write your note content..."
+									placeholder={_(t`Write your note content...`)}
 								/>
 								{fields.content.errors && (
 									<div className="min-h-[32px] px-4 pt-1 pb-3">
@@ -371,7 +374,9 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				404: ({ params }) => (
-					<p>No note with the id "{params.noteId}" exists</p>
+					<p>
+						<Trans>No note with the id "{params.noteId}" exists</Trans>
+					</p>
 				),
 			}}
 		/>

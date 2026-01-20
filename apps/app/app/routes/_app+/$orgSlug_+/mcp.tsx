@@ -1,5 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Badge } from '@repo/ui/badge'
@@ -291,6 +292,7 @@ function CreateApiKeyModal({
 	onClose: () => void
 	organization: { name: string }
 }) {
+	const { _ } = useLingui()
 	const [name, setName] = useState('')
 	const [hasExpiration, setHasExpiration] = useState(false)
 	const [expirationDate, setExpirationDate] = useState('')
@@ -356,7 +358,7 @@ function CreateApiKeyModal({
 							</FieldLabel>
 							<Input
 								id="api-key-name"
-								placeholder="e.g., Claude Desktop, Kiro IDE"
+								placeholder={_(t`e.g., Claude Desktop, Kiro IDE`)}
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 								required

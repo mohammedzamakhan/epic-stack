@@ -1,7 +1,9 @@
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { useState, useEffect } from 'react'
-import { cn } from '@repo/ui'
 
 interface CommentImagePreviewProps {
 	files: File[]
@@ -14,6 +16,7 @@ export function CommentImagePreview({
 	onRemove,
 	className,
 }: CommentImagePreviewProps) {
+	const { _ } = useLingui()
 	const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
 	useEffect(() => {
@@ -75,7 +78,7 @@ export function CommentImagePreview({
 						size="sm"
 						className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
 						onClick={() => onRemove(index)}
-						aria-label="Remove image"
+						aria-label={_(t`Remove image`)}
 					>
 						<Icon name="x" className="text-foreground h-3 w-3" />
 					</Button>

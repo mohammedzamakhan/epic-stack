@@ -1,3 +1,5 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -81,6 +83,7 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export default function EnhancedAuditLogsPage() {
+	const { _ } = useLingui()
 	const { logs, total, page, totalPages, statistics, filters } =
 		useLoaderData<typeof loader>()
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -137,9 +140,13 @@ export default function EnhancedAuditLogsPage() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold">Audit Logs</h1>
+					<h1 className="text-3xl font-bold">
+						<Trans>Audit Logs</Trans>
+					</h1>
 					<p className="text-muted-foreground">
-						Comprehensive activity tracking and compliance audit trail
+						<Trans>
+							Comprehensive activity tracking and compliance audit trail
+						</Trans>
 					</p>
 				</div>
 				<div className="flex gap-2">
@@ -149,7 +156,7 @@ export default function EnhancedAuditLogsPage() {
 						disabled={isExporting}
 					>
 						<Icon name="download" className="mr-2 h-4 w-4" />
-						Export CSV
+						<Trans>Export CSV</Trans>
 					</Button>
 					<Button
 						variant="outline"
@@ -157,7 +164,7 @@ export default function EnhancedAuditLogsPage() {
 						disabled={isExporting}
 					>
 						<Icon name="download" className="mr-2 h-4 w-4" />
-						Export JSON
+						<Trans>Export JSON</Trans>
 					</Button>
 				</div>
 			</div>
@@ -166,7 +173,9 @@ export default function EnhancedAuditLogsPage() {
 			<div className="grid gap-4 md:grid-cols-3">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Events</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Total Events</Trans>
+						</CardTitle>
 						<Icon name="activity" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
 					<CardContent>
@@ -179,7 +188,7 @@ export default function EnhancedAuditLogsPage() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Security Events
+							<Trans>Security Events</Trans>
 						</CardTitle>
 						<Icon name="shield" className="text-muted-foreground h-4 w-4" />
 					</CardHeader>
@@ -187,13 +196,17 @@ export default function EnhancedAuditLogsPage() {
 						<div className="text-2xl font-bold">
 							{statistics.recentSecurityEvents.length}
 						</div>
-						<p className="text-muted-foreground text-xs">In last 100 events</p>
+						<p className="text-muted-foreground text-xs">
+							<Trans>In last 100 events</Trans>
+						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Top Action</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Top Action</Trans>
+						</CardTitle>
 						<Icon
 							name="trending-up"
 							className="text-muted-foreground h-4 w-4"
@@ -201,10 +214,10 @@ export default function EnhancedAuditLogsPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm font-medium">
-							{statistics.topActions[0]?.action || 'N/A'}
+							{statistics.topActions[0]?.action || <Trans>N/A</Trans>}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							{statistics.topActions[0]?._count || 0} occurrences
+							<Trans>{statistics.topActions[0]?._count || 0} occurrences</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -215,22 +228,26 @@ export default function EnhancedAuditLogsPage() {
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Icon name="search" className="h-5 w-5" />
-						Filters
+						<Trans>Filters</Trans>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 						<div>
-							<label className="text-sm font-medium">Search</label>
+							<label className="text-sm font-medium">
+								<Trans>Search</Trans>
+							</label>
 							<Input
 								type="text"
-								placeholder="Search details or action..."
+								placeholder={_(msg`Search details or action...`)}
 								defaultValue={filters.search || ''}
 								onChange={(e) => updateFilter('search', e.target.value)}
 							/>
 						</div>
 						<div>
-							<label className="text-sm font-medium">Start Date</label>
+							<label className="text-sm font-medium">
+								<Trans>Start Date</Trans>
+							</label>
 							<Input
 								type="date"
 								defaultValue={filters.startDate || ''}
@@ -238,7 +255,9 @@ export default function EnhancedAuditLogsPage() {
 							/>
 						</div>
 						<div>
-							<label className="text-sm font-medium">End Date</label>
+							<label className="text-sm font-medium">
+								<Trans>End Date</Trans>
+							</label>
 							<Input
 								type="date"
 								defaultValue={filters.endDate || ''}
@@ -246,7 +265,9 @@ export default function EnhancedAuditLogsPage() {
 							/>
 						</div>
 						<div>
-							<label className="text-sm font-medium">Severity</label>
+							<label className="text-sm font-medium">
+								<Trans>Severity</Trans>
+							</label>
 							<Select
 								value={filters.severity || 'all'}
 								onValueChange={(value) =>
@@ -256,13 +277,25 @@ export default function EnhancedAuditLogsPage() {
 									)
 								}
 							>
-								<SelectTrigger>All severities</SelectTrigger>
+								<SelectTrigger>
+									<Trans>All severities</Trans>
+								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">All</SelectItem>
-									<SelectItem value="info">Info</SelectItem>
-									<SelectItem value="warning">Warning</SelectItem>
-									<SelectItem value="error">Error</SelectItem>
-									<SelectItem value="critical">Critical</SelectItem>
+									<SelectItem value="all">
+										<Trans>All</Trans>
+									</SelectItem>
+									<SelectItem value="info">
+										<Trans>Info</Trans>
+									</SelectItem>
+									<SelectItem value="warning">
+										<Trans>Warning</Trans>
+									</SelectItem>
+									<SelectItem value="error">
+										<Trans>Error</Trans>
+									</SelectItem>
+									<SelectItem value="critical">
+										<Trans>Critical</Trans>
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -270,7 +303,7 @@ export default function EnhancedAuditLogsPage() {
 					<div className="mt-4 flex gap-2">
 						<Button variant="outline" size="sm" onClick={clearFilters}>
 							<Icon name="x" className="mr-2 h-4 w-4" />
-							Clear Filters
+							<Trans>Clear Filters</Trans>
 						</Button>
 					</div>
 				</CardContent>
@@ -279,9 +312,13 @@ export default function EnhancedAuditLogsPage() {
 			{/* Audit Log List */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Audit Trail</CardTitle>
+					<CardTitle>
+						<Trans>Audit Trail</Trans>
+					</CardTitle>
 					<CardDescription>
-						Showing {logs.length} of {total.toLocaleString()} events
+						<Trans>
+							Showing {logs.length} of {total.toLocaleString()} events
+						</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -361,7 +398,9 @@ export default function EnhancedAuditLogsPage() {
 								name="file-text"
 								className="text-muted-foreground mx-auto mb-4 h-12 w-12"
 							/>
-							<p className="text-muted-foreground">No audit logs found</p>
+							<p className="text-muted-foreground">
+								<Trans>No audit logs found</Trans>
+							</p>
 						</div>
 					)}
 
@@ -369,7 +408,9 @@ export default function EnhancedAuditLogsPage() {
 					{totalPages > 1 && (
 						<div className="mt-6 flex items-center justify-between">
 							<p className="text-muted-foreground text-sm">
-								Page {page} of {totalPages}
+								<Trans>
+									Page {page} of {totalPages}
+								</Trans>
 							</p>
 							<div className="flex gap-2">
 								<Button
@@ -379,7 +420,7 @@ export default function EnhancedAuditLogsPage() {
 									onClick={() => updateFilter('page', String(page - 1))}
 								>
 									<Icon name="chevron-left" className="h-4 w-4" />
-									Previous
+									<Trans>Previous</Trans>
 								</Button>
 								<Button
 									variant="outline"
@@ -387,7 +428,7 @@ export default function EnhancedAuditLogsPage() {
 									disabled={page === totalPages}
 									onClick={() => updateFilter('page', String(page + 1))}
 								>
-									Next
+									<Trans>Next</Trans>
 									<Icon name="chevron-right" className="h-4 w-4" />
 								</Button>
 							</div>

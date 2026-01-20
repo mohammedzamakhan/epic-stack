@@ -1,3 +1,19 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import {
+	type ColumnDef,
+	type ColumnFiltersState,
+	flexRender,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+	type VisibilityState,
+} from '@tanstack/react-table'
+import { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -25,20 +41,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
-import {
-	type ColumnDef,
-	type ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState,
-} from '@tanstack/react-table'
-import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
 
 export interface AdminOrganization {
 	id: string
@@ -85,34 +87,64 @@ interface AdminOrganizationsTableProps {
 	filters: Filters
 }
 
-const getSubscriptionStatusBadge = (status: string | null) => {
+const SubscriptionStatusBadge = ({ status }: { status: string | null }) => {
 	if (!status) {
-		return <Badge variant="secondary">No Subscription</Badge>
+		return (
+			<Badge variant="secondary">
+				<Trans>No Subscription</Trans>
+			</Badge>
+		)
 	}
 
 	switch (status.toLowerCase()) {
 		case 'active':
-			return <Badge variant="default">Active</Badge>
+			return (
+				<Badge variant="default">
+					<Trans>Active</Trans>
+				</Badge>
+			)
 		case 'canceled':
 		case 'cancelled':
-			return <Badge variant="destructive">Canceled</Badge>
+			return (
+				<Badge variant="destructive">
+					<Trans>Canceled</Trans>
+				</Badge>
+			)
 		case 'past_due':
-			return <Badge variant="destructive">Past Due</Badge>
+			return (
+				<Badge variant="destructive">
+					<Trans>Past Due</Trans>
+				</Badge>
+			)
 		case 'unpaid':
-			return <Badge variant="destructive">Unpaid</Badge>
+			return (
+				<Badge variant="destructive">
+					<Trans>Unpaid</Trans>
+				</Badge>
+			)
 		case 'trialing':
-			return <Badge variant="secondary">Trial</Badge>
+			return (
+				<Badge variant="secondary">
+					<Trans>Trial</Trans>
+				</Badge>
+			)
 		case 'incomplete':
-			return <Badge variant="outline">Incomplete</Badge>
+			return (
+				<Badge variant="outline">
+					<Trans>Incomplete</Trans>
+				</Badge>
+			)
 		default:
 			return <Badge variant="outline">{status}</Badge>
 	}
 }
 
-const columns: ColumnDef<AdminOrganization>[] = [
+const getColumns = (
+	_: ReturnType<typeof useLingui>['_'],
+): ColumnDef<AdminOrganization>[] => [
 	{
 		accessorKey: 'organization',
-		header: 'Organization',
+		header: _(msg`Organization`),
 		cell: ({ row }) => {
 			const org = row.original
 			return (
@@ -141,11 +173,15 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'description',
-		header: 'Description',
+		header: _(msg`Description`),
 		cell: ({ row }) => {
 			const description = row.original.description
 			if (!description) {
-				return <span className="text-muted-foreground">No description</span>
+				return (
+					<span className="text-muted-foreground">
+						<Trans>No description</Trans>
+					</span>
+				)
 			}
 			return (
 				<span className="max-w-xs truncate text-sm" title={description}>
@@ -156,7 +192,7 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'members',
-		header: 'Members',
+		header: _(msg`Members`),
 		cell: ({ row }) => {
 			const org = row.original
 			return (
@@ -174,7 +210,7 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'notes',
-		header: 'Notes',
+		header: _(msg`Notes`),
 		cell: ({ row }) => {
 			const noteCount = row.original.noteCount
 			return (
@@ -187,7 +223,7 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'integrations',
-		header: 'Integrations',
+		header: _(msg`Integrations`),
 		cell: ({ row }) => {
 			const org = row.original
 			return (
@@ -207,12 +243,12 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'subscription',
-		header: 'Subscription',
+		header: _(msg`Subscription`),
 		cell: ({ row }) => {
 			const org = row.original
 			return (
 				<div className="flex flex-col gap-1">
-					{getSubscriptionStatusBadge(org.subscriptionStatus)}
+					<SubscriptionStatusBadge status={org.subscriptionStatus} />
 					{org.planName && (
 						<span className="text-muted-foreground text-xs">
 							{org.planName}
@@ -224,7 +260,7 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'size',
-		header: 'Size',
+		header: _(msg`Size`),
 		cell: ({ row }) => {
 			const size = row.original.size
 			if (!size) {
@@ -235,19 +271,19 @@ const columns: ColumnDef<AdminOrganization>[] = [
 	},
 	{
 		accessorKey: 'status',
-		header: 'Status',
+		header: _(msg`Status`),
 		cell: ({ row }) => {
 			const isActive = row.original.active
 			return (
 				<Badge variant={isActive ? 'default' : 'secondary'}>
-					{isActive ? 'Active' : 'Inactive'}
+					{isActive ? <Trans>Active</Trans> : <Trans>Inactive</Trans>}
 				</Badge>
 			)
 		},
 	},
 	{
 		accessorKey: 'createdAt',
-		header: 'Created',
+		header: _(msg`Created`),
 		cell: ({ row }) => (
 			<span className="text-sm">
 				{new Date(row.original.createdAt).toLocaleDateString()}
@@ -263,6 +299,7 @@ export function AdminOrganizationsTable({
 	pagination,
 	filters,
 }: AdminOrganizationsTableProps) {
+	const { _ } = useLingui()
 	const navigate = useNavigate()
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -273,6 +310,7 @@ export function AdminOrganizationsTable({
 		filters.subscriptionStatus,
 	)
 	const [planFilter, setPlanFilter] = useState(filters.plan)
+	const columns = getColumns(_)
 
 	const table = useReactTable({
 		data: organizations,
@@ -363,7 +401,7 @@ export function AdminOrganizationsTable({
 							className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
 						/>
 						<Input
-							placeholder="Search organizations..."
+							placeholder={_(msg`Search organizations...`)}
 							value={searchQuery}
 							onChange={(e) => handleSearch(e.target.value)}
 							className="pl-9"
@@ -379,7 +417,9 @@ export function AdminOrganizationsTable({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="all">All statuses</SelectItem>
+							<SelectItem value="all">
+								<Trans>All statuses</Trans>
+							</SelectItem>
 							{subscriptionStatuses.map((status) => (
 								<SelectItem key={status} value={status}>
 									{status}
@@ -395,7 +435,9 @@ export function AdminOrganizationsTable({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="all">All plans</SelectItem>
+							<SelectItem value="all">
+								<Trans>All plans</Trans>
+							</SelectItem>
 							{planNames.map((plan) => (
 								<SelectItem key={plan} value={plan}>
 									{plan}
@@ -410,7 +452,7 @@ export function AdminOrganizationsTable({
 							onClick={clearFilters}
 							className="h-8 px-2 lg:px-3"
 						>
-							Reset
+							<Trans>Reset</Trans>
 							<Icon name="x" className="ml-2 h-4 w-4" />
 						</Button>
 					)}
@@ -419,7 +461,7 @@ export function AdminOrganizationsTable({
 					<DropdownMenu>
 						<DropdownMenuTrigger>
 							<Button variant="outline" size="sm">
-								Columns
+								<Trans>Columns</Trans>
 								<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -453,12 +495,14 @@ export function AdminOrganizationsTable({
 			{/* Results Summary */}
 			<div className="text-muted-foreground flex items-center justify-between text-sm">
 				<div>
-					Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
-					{Math.min(
-						pagination.page * pagination.pageSize,
-						pagination.totalCount,
-					)}{' '}
-					of {pagination.totalCount} organizations
+					<Trans>
+						Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
+						{Math.min(
+							pagination.page * pagination.pageSize,
+							pagination.totalCount,
+						)}{' '}
+						of {pagination.totalCount} organizations
+					</Trans>
 				</div>
 			</div>
 
@@ -491,6 +535,14 @@ export function AdminOrganizationsTable({
 									data-state={row.getIsSelected() && 'selected'}
 									className="hover:bg-muted/50 cursor-pointer"
 									onClick={() => navigate(`/organizations/${row.original.id}`)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault()
+											void navigate(`/organizations/${row.original.id}`)
+										}
+									}}
+									role="button"
+									tabIndex={0}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>
@@ -508,7 +560,7 @@ export function AdminOrganizationsTable({
 									colSpan={columns.length}
 									className="h-24 text-center"
 								>
-									No organizations found.
+									<Trans>No organizations found.</Trans>
 								</TableCell>
 							</TableRow>
 						)}
@@ -520,7 +572,7 @@ export function AdminOrganizationsTable({
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Label htmlFor="rows-per-page" className="text-sm font-medium">
-						Rows per page
+						<Trans>Rows per page</Trans>
 					</Label>
 					<Select
 						value={pagination.pageSize.toString()}
@@ -540,7 +592,9 @@ export function AdminOrganizationsTable({
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="text-sm font-medium">
-						Page {pagination.page} of {pagination.totalPages}
+						<Trans>
+							Page {pagination.page} of {pagination.totalPages}
+						</Trans>
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
@@ -549,7 +603,9 @@ export function AdminOrganizationsTable({
 							onClick={() => handlePageChange(1)}
 							disabled={pagination.page === 1}
 						>
-							<span className="sr-only">Go to first page</span>
+							<span className="sr-only">
+								<Trans>Go to first page</Trans>
+							</span>
 							<Icon name="chevron-left" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -558,7 +614,9 @@ export function AdminOrganizationsTable({
 							onClick={() => handlePageChange(pagination.page - 1)}
 							disabled={pagination.page === 1}
 						>
-							<span className="sr-only">Go to previous page</span>
+							<span className="sr-only">
+								<Trans>Go to previous page</Trans>
+							</span>
 							<Icon name="chevron-left" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -567,7 +625,9 @@ export function AdminOrganizationsTable({
 							onClick={() => handlePageChange(pagination.page + 1)}
 							disabled={pagination.page === pagination.totalPages}
 						>
-							<span className="sr-only">Go to next page</span>
+							<span className="sr-only">
+								<Trans>Go to next page</Trans>
+							</span>
 							<Icon name="chevron-right" className="h-4 w-4" />
 						</Button>
 						<Button
@@ -576,7 +636,9 @@ export function AdminOrganizationsTable({
 							onClick={() => handlePageChange(pagination.totalPages)}
 							disabled={pagination.page === pagination.totalPages}
 						>
-							<span className="sr-only">Go to last page</span>
+							<span className="sr-only">
+								<Trans>Go to last page</Trans>
+							</span>
 							<Icon name="chevron-right" className="h-4 w-4" />
 						</Button>
 					</div>

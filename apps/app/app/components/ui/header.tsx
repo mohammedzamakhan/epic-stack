@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Logo } from '@repo/ui/logo'
@@ -112,7 +113,9 @@ export const HeroHeader = () => {
 										</Button>
 										<Button size="sm" className={cn(isScrolled && 'lg:hidden')}>
 											<Link to="/signup">
-												<span>Sign Up</span>
+												<span>
+													<Trans>Sign Up</Trans>
+												</span>
 											</Link>
 										</Button>
 										<Button
@@ -120,7 +123,9 @@ export const HeroHeader = () => {
 											className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}
 										>
 											<Link to="/signup">
-												<span>Get Started</span>
+												<span>
+													<Trans>Get Started</Trans>
+												</span>
 											</Link>
 										</Button>
 									</>
@@ -133,7 +138,9 @@ export const HeroHeader = () => {
 												size="sm"
 												className={cn(isScrolled && 'lg:hidden')}
 											>
-												<span>Log out</span>
+												<span>
+													<Trans>Log out</Trans>
+												</span>
 											</Button>
 										</Form>
 										<Button size="sm">

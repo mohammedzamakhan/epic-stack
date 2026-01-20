@@ -8,7 +8,7 @@ import {
 	FormProvider,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans, msg } from '@lingui/macro'
+import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -315,7 +315,12 @@ export function OrganizationInvitations({
 														name="invitationId"
 														value={invitation.id}
 													/>
-													<Button type="submit" variant="ghost" size="sm">
+													<Button
+														type="submit"
+														variant="ghost"
+														size="sm"
+														aria-label={t`Delete invitation`}
+													>
 														<Icon name="trash-2" className="h-4 w-4" />
 													</Button>
 												</Form>

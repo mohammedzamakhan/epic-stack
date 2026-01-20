@@ -1,3 +1,5 @@
+import { Plural, Trans, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -47,6 +49,7 @@ export function ShareNoteButton({
 }: ShareNoteButtonProps) {
 	const [open, setOpen] = useState(false)
 	const fetcher = useFetcher()
+	const { _ } = useLingui()
 
 	// Local state for form changes (not submitted yet)
 	const [localIsPublic, setLocalIsPublic] = useState(isPublic)
@@ -151,16 +154,20 @@ export function ShareNoteButton({
 						className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
 					>
 						<Icon name="share-2" className="h-4 w-4 max-md:scale-125">
-							<span className="max-md:hidden">Share</span>
+							<span className="max-md:hidden">
+								<Trans>Share</Trans>
+							</span>
 						</Icon>
 					</Button>
 				}
 			></DialogTrigger>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Share Note</DialogTitle>
+					<DialogTitle>
+						<Trans>Share Note</Trans>
+					</DialogTitle>
 					<DialogDescription>
-						Control who can access this note
+						<Trans>Control who can access this note</Trans>
 					</DialogDescription>
 				</DialogHeader>
 
@@ -169,12 +176,14 @@ export function ShareNoteButton({
 					<div className="flex items-center justify-between">
 						<div className="space-y-0.5">
 							<Label htmlFor="public-toggle" className="text-base">
-								Public Access
+								<Trans>Public Access</Trans>
 							</Label>
 							<div className="text-muted-foreground text-sm">
-								{localIsPublic
-									? 'All organization members can view this note'
-									: 'Only selected members can access this note'}
+								{localIsPublic ? (
+									<Trans>All organization members can view this note</Trans>
+								) : (
+									<Trans>Only selected members can access this note</Trans>
+								)}
 							</div>
 						</div>
 						<Switch
@@ -194,7 +203,7 @@ export function ShareNoteButton({
 							{selectedMemberIds.length > 0 && (
 								<div className="space-y-3">
 									<Label className="text-sm font-medium">
-										Selected Members
+										<Trans>Selected Members</Trans>
 									</Label>
 									<div className="flex flex-wrap gap-2">
 										{getSelectedMemberDetails().map((user) => (
@@ -218,6 +227,7 @@ export function ShareNoteButton({
 													size="sm"
 													className="hover:bg-destructive hover:text-destructive-foreground h-4 w-4 p-0"
 													onClick={() => removeMember(user.id)}
+													aria-label={_(t`Remove`)}
 												>
 													<Icon name="x" className="h-3 w-3" />
 												</Button>
@@ -229,14 +239,16 @@ export function ShareNoteButton({
 
 							{/* Member Search */}
 							<div className="space-y-3">
-								<Label className="text-sm font-medium">Add Members</Label>
+								<Label className="text-sm font-medium">
+									<Trans>Add Members</Trans>
+								</Label>
 								<div className="relative">
 									<Icon
 										name="search"
 										className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
 									/>
 									<Input
-										placeholder="Search team members..."
+										placeholder={_(t`Search team members...`)}
 										value={searchQuery}
 										onChange={(e) => setSearchQuery(e.target.value)}
 										className="pl-9"
@@ -246,9 +258,10 @@ export function ShareNoteButton({
 								{/* Member List */}
 								<div className="max-h-48 space-y-2 overflow-y-auto">
 									{filteredMembers.map((member) => (
-										<div
+										<button
+											type="button"
 											key={member.userId}
-											className={`flex cursor-pointer items-center justify-between rounded-lg border p-2 transition-colors ${
+											className={`flex w-full cursor-pointer items-center justify-between rounded-lg border p-2 text-left transition-colors ${
 												selectedMemberIds.includes(member.user.id)
 													? 'bg-primary/10 border-primary'
 													: 'hover:bg-muted'
@@ -274,10 +287,10 @@ export function ShareNoteButton({
 											</div>
 											{selectedMemberIds.includes(member.user.id) && (
 												<Badge variant="default" className="text-xs">
-													Selected
+													<Trans>Selected</Trans>
 												</Badge>
 											)}
-										</div>
+										</button>
 									))}
 								</div>
 							</div>
@@ -291,16 +304,22 @@ export function ShareNoteButton({
 							onClick={() => setOpen(false)}
 							disabled={fetcher.state !== 'idle'}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 						<StatusButton
 							status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 							onClick={handleSubmit}
 							disabled={fetcher.state !== 'idle'}
 						>
-							{localIsPublic
-								? 'Make Public'
-								: `Share with ${selectedMemberIds.length} member${selectedMemberIds.length !== 1 ? 's' : ''}`}
+							{localIsPublic ? (
+								<Trans>Make Public</Trans>
+							) : (
+								<Plural
+									value={selectedMemberIds.length}
+									one="Share with 1 member"
+									other="Share with # members"
+								/>
+							)}
 						</StatusButton>
 					</div>
 				</div>

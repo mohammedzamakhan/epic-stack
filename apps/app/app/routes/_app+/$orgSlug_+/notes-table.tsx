@@ -1,3 +1,4 @@
+import { t } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import {
@@ -70,12 +71,12 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 				const note = row.original
 				return (
 					<div className="flex justify-end gap-2">
-						<Button variant="ghost" size="icon">
+						<Button variant="ghost" size="icon" aria-label={t`View`}>
 							<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
 								<Icon name="search" className="size-4" />
 							</Link>
 						</Button>
-						<Button variant="ghost" size="icon">
+						<Button variant="ghost" size="icon" aria-label={t`Edit`}>
 							<Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
 								<Icon name="pencil" className="size-4" />
 							</Link>

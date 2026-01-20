@@ -1,8 +1,9 @@
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { prisma } from '@repo/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Link } from 'react-router'
-
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
@@ -92,13 +93,16 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 	const { metrics } = loaderData
+	const { _ } = useLingui()
 
 	return (
 		<div className="space-y-6">
 			<div className="mb-8">
-				<h1 className="text-foreground text-3xl font-bold">Admin Dashboard</h1>
+				<h1 className="text-foreground text-3xl font-bold">
+					<Trans>Admin Dashboard</Trans>
+				</h1>
 				<p className="text-muted-foreground mt-2">
-					Manage users, organizations, and system settings
+					<Trans>Manage users, organizations, and system settings</Trans>
 				</p>
 			</div>
 
@@ -106,7 +110,9 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Users</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Total Users</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -129,14 +135,19 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							{metrics.totalUsers.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							+{metrics.recentUsers} new this week
+							{(() => {
+								const recentUsers = metrics.recentUsers
+								return <Trans>+{recentUsers} new this week</Trans>
+							})()}
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Organizations</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Organizations</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -158,15 +169,19 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							{metrics.totalOrganizations.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							{metrics.activeOrganizations} active • +
-							{metrics.recentOrganizations} new this week
+							<Trans>
+								{metrics.activeOrganizations} active • +
+								{metrics.recentOrganizations} new this week
+							</Trans>
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Notes</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Total Notes</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -190,7 +205,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							{metrics.totalNotes.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							Personal + Organization notes
+							<Trans>Personal + Organization notes</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -198,7 +213,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Active Sessions
+							<Trans>Active Sessions</Trans>
 						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -221,7 +236,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							{metrics.totalSessions.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							Currently logged in users
+							<Trans>Currently logged in users</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -232,7 +247,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-lg font-medium">
-							Subscription Status
+							<Trans>Subscription Status</Trans>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -247,7 +262,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 											{stat._count.subscriptionStatus}
 										</div>
 										<p className="text-muted-foreground text-sm capitalize">
-											{stat.subscriptionStatus || 'No Subscription'}
+											{stat.subscriptionStatus || _(msg`No Subscription`)}
 										</p>
 									</div>
 								),
@@ -261,7 +276,9 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 				<Card className="transition-shadow">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Users</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Users</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -279,22 +296,26 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 						</svg>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">Manage Users</div>
+						<div className="text-2xl font-bold">
+							<Trans>Manage Users</Trans>
+						</div>
 						<p className="text-muted-foreground mt-1 text-xs">
-							View, search, and manage user accounts
+							<Trans>View, search, and manage user accounts</Trans>
 						</p>
 						<Link
 							to="/users"
 							className="text-primary mt-2 inline-flex items-center text-sm hover:underline"
 						>
-							View Users →
+							<Trans>View Users →</Trans>
 						</Link>
 					</CardContent>
 				</Card>
 
 				<Card className="transition-shadow">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Organizations</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Organizations</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -311,22 +332,26 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 						</svg>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">Manage Organizations</div>
+						<div className="text-2xl font-bold">
+							<Trans>Manage Organizations</Trans>
+						</div>
 						<p className="text-muted-foreground mt-1 text-xs">
-							View organization details and subscriptions
+							<Trans>View organization details and subscriptions</Trans>
 						</p>
 						<Link
 							to="/organizations"
 							className="text-primary mt-2 inline-flex items-center text-sm hover:underline"
 						>
-							View Organizations →
+							<Trans>View Organizations →</Trans>
 						</Link>
 					</CardContent>
 				</Card>
 
 				<Card className="transition-shadow">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Cache</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							<Trans>Cache</Trans>
+						</CardTitle>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -343,15 +368,17 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 						</svg>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">Cache Management</div>
+						<div className="text-2xl font-bold">
+							<Trans>Cache Management</Trans>
+						</div>
 						<p className="text-muted-foreground mt-1 text-xs">
-							Monitor and manage system cache
+							<Trans>Monitor and manage system cache</Trans>
 						</p>
 						<Link
 							to="/cache"
 							className="text-primary mt-2 inline-flex items-center text-sm hover:underline"
 						>
-							Manage Cache →
+							<Trans>Manage Cache →</Trans>
 						</Link>
 					</CardContent>
 				</Card>
@@ -359,7 +386,9 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 
 			{/* Quick Actions */}
 			<div className="mt-8">
-				<h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
+				<h2 className="mb-4 text-xl font-semibold">
+					<Trans>Quick Actions</Trans>
+				</h2>
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					<Link
 						to="/users"
@@ -382,9 +411,11 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							</svg>
 						</div>
 						<div>
-							<div className="font-medium">Search Users</div>
+							<div className="font-medium">
+								<Trans>Search Users</Trans>
+							</div>
 							<div className="text-muted-foreground text-sm">
-								Find and manage user accounts
+								<Trans>Find and manage user accounts</Trans>
 							</div>
 						</div>
 					</Link>
@@ -410,9 +441,11 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							</svg>
 						</div>
 						<div>
-							<div className="font-medium">View Organizations</div>
+							<div className="font-medium">
+								<Trans>View Organizations</Trans>
+							</div>
 							<div className="text-muted-foreground text-sm">
-								Monitor organization activity
+								<Trans>Monitor organization activity</Trans>
 							</div>
 						</div>
 					</Link>
@@ -438,9 +471,11 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							</svg>
 						</div>
 						<div>
-							<div className="font-medium">Clear Cache</div>
+							<div className="font-medium">
+								<Trans>Clear Cache</Trans>
+							</div>
 							<div className="text-muted-foreground text-sm">
-								Manage system performance
+								<Trans>Manage system performance</Trans>
 							</div>
 						</div>
 					</Link>

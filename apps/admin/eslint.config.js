@@ -1,8 +1,10 @@
 import { default as defaultConfig } from '@repo/config/eslint-preset'
+import pluginLingui from 'eslint-plugin-lingui'
 
 /** @type {import("eslint").Linter.Config} */
 export default [
 	...defaultConfig,
+	pluginLingui.configs['flat/recommended'],
 	// add custom config objects here:
 	{
 		files: ['**/tests/**/*.ts'],

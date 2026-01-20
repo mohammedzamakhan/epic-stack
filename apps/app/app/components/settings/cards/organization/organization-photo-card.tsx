@@ -1,6 +1,8 @@
+import { t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { cn } from '@repo/ui'
 import { BasePhotoUpload } from '#app/components/settings/base-photo-upload.tsx'
 import { OrganizationPhotoForm } from '#app/components/settings/organization-photo-form.tsx'
-import { cn } from '@repo/ui'
 
 export const uploadOrgPhotoActionIntent = 'upload-org-photo'
 export const deleteOrgPhotoActionIntent = 'delete-org-photo'
@@ -21,6 +23,8 @@ export function OrganizationPhoto({
 	organization,
 	size = 'normal',
 }: OrganizationPhotoProps) {
+	const { _ } = useLingui()
+
 	function getOrgImgSrc(objectKey?: string | null) {
 		return objectKey
 			? `/resources/images?objectKey=${encodeURIComponent(objectKey)}`
@@ -32,7 +36,7 @@ export function OrganizationPhoto({
 			imgSrc={getOrgImgSrc(organization.image?.objectKey)}
 			alt={organization.name}
 			showAvatarChars={true}
-			dialogTitle="Update Organization Logo"
+			dialogTitle={_(t`Update Organization Logo`)}
 			imgClassName={cn(
 				'bg-primary h-full w-full rounded-md object-contain',
 				!organization.image?.objectKey &&

@@ -1,10 +1,8 @@
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon, type IconName } from '@repo/ui/icon'
 import * as React from 'react'
-
 import { Link } from 'react-router'
-
-import { cn } from '@repo/ui'
 
 interface EmptyStateProps {
 	title: string

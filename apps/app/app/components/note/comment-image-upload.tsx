@@ -1,8 +1,9 @@
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { useState, useRef } from 'react'
-import { cn } from '@repo/ui'
-
 
 interface CommentImageUploadProps {
 	onImagesSelected: (files: File[]) => void
@@ -17,6 +18,7 @@ export function CommentImageUpload({
 	disabled = false,
 	className,
 }: CommentImageUploadProps) {
+	const { _ } = useLingui()
 	const [isDragging, setIsDragging] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -86,7 +88,8 @@ export function CommentImageUpload({
 				onClick={handleClick}
 				disabled={disabled}
 				className="h-8 w-8 p-0"
-				title="Add images"
+				title={_(t`Add images`)}
+				aria-label={_(t`Add images`)}
 			>
 				<Icon name="paperclip" className="h-4 w-4" />
 			</Button>

@@ -1,4 +1,5 @@
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { startRegistration } from '@simplewebauthn/browser'
@@ -58,6 +59,7 @@ export function PasskeyManager({
 	data: PasskeyData
 	deleteIntent?: string
 }) {
+	const { _ } = useLingui()
 	const [error, setError] = useState<string | null>(null)
 	const revalidator = useRevalidator()
 
@@ -141,7 +143,7 @@ export function PasskeyManager({
 			) : null}
 
 			{data.passkeys?.length ? (
-				<ul className="flex flex-col gap-4" title="passkeys">
+				<ul className="flex flex-col gap-4" title={_(t`passkeys`)}>
 					{data.passkeys.map((passkey) => (
 						<li
 							key={passkey.id}

@@ -1,5 +1,17 @@
 import { parseWithZod } from '@conform-to/zod'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { useState } from 'react'
+import {
+	Form,
+	redirect,
+	useActionData,
+	useLoaderData,
+	useNavigation,
+} from 'react-router'
+import { z } from 'zod'
+import { prisma } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -34,18 +46,7 @@ import {
 	TableRow,
 } from '@repo/ui/table'
 import { Textarea } from '@repo/ui/textarea'
-import { useState } from 'react'
-import {
-	Form,
-	redirect,
-	useActionData,
-	useNavigation,
-	useLoaderData,
-} from 'react-router'
-import { z } from 'zod'
-
 import { RolesTableRows } from '#app/components/roles/roles-table-rows.tsx'
-import { prisma } from '@repo/database'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
@@ -204,6 +205,7 @@ function CreateRoleDialog() {
 	const [open, setOpen] = useState(false)
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
+	const { _ } = useLingui()
 	const isSubmitting =
 		navigation.formAction === '/roles' && navigation.state === 'submitting'
 
@@ -214,12 +216,20 @@ function CreateRoleDialog() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger render={<Button>+ New Role</Button>}></DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button>
+						<Trans>+ New Role</Trans>
+					</Button>
+				}
+			></DialogTrigger>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Create New Role</DialogTitle>
+					<DialogTitle>
+						<Trans>Create New Role</Trans>
+					</DialogTitle>
 					<DialogDescription>
-						Create a new role with custom permissions
+						<Trans>Create a new role with custom permissions</Trans>
 					</DialogDescription>
 				</DialogHeader>
 
@@ -237,47 +247,61 @@ function CreateRoleDialog() {
 
 					{/* Role Type */}
 					<div className="space-y-2">
-						<Label htmlFor="type">Role Type</Label>
+						<Label htmlFor="type">
+							<Trans>Role Type</Trans>
+						</Label>
 						<Select
 							name="type"
 							defaultValue="organization"
 							required
-							aria-label="Select role type"
+							aria-label={_(msg`Select role type`)}
 						>
-							<SelectTrigger>Select role type</SelectTrigger>
+							<SelectTrigger>
+								<Trans>Select role type</Trans>
+							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="organization">Organization Role</SelectItem>
-								<SelectItem value="system">System Role</SelectItem>
+								<SelectItem value="organization">
+									<Trans>Organization Role</Trans>
+								</SelectItem>
+								<SelectItem value="system">
+									<Trans>System Role</Trans>
+								</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-muted-foreground text-xs">
-							Organization roles apply within specific organizations, while
-							system roles are global.
+							<Trans>
+								Organization roles apply within specific organizations, while
+								system roles are global.
+							</Trans>
 						</p>
 					</div>
 
 					{/* Role Name */}
 					<div className="space-y-2">
-						<Label htmlFor="name">Name *</Label>
+						<Label htmlFor="name">
+							<Trans>Name *</Trans>
+						</Label>
 						<Input
 							id="name"
 							name="name"
-							placeholder="e.g., editor, moderator, contributor"
+							placeholder={_(msg`e.g., editor, moderator, contributor`)}
 							required
 							disabled={isSubmitting}
 						/>
 						<p className="text-muted-foreground text-xs">
-							Use lowercase letters, numbers, and hyphens only
+							<Trans>Use lowercase letters, numbers, and hyphens only</Trans>
 						</p>
 					</div>
 
 					{/* Description */}
 					<div className="space-y-2">
-						<Label htmlFor="description">Description</Label>
+						<Label htmlFor="description">
+							<Trans>Description</Trans>
+						</Label>
 						<Textarea
 							id="description"
 							name="description"
-							placeholder="Describe what this role can do..."
+							placeholder={_(msg`Describe what this role can do...`)}
 							rows={2}
 							disabled={isSubmitting}
 						/>
@@ -285,19 +309,21 @@ function CreateRoleDialog() {
 
 					{/* Level (only for organization roles) */}
 					<div className="space-y-2">
-						<Label htmlFor="level">Level (Organization roles only)</Label>
+						<Label htmlFor="level">
+							<Trans>Level (Organization roles only)</Trans>
+						</Label>
 						<Input
 							id="level"
 							name="level"
 							type="number"
 							min="1"
 							max="10"
-							placeholder="1-10 (higher = more permissions)"
+							placeholder={_(msg`1-10 (higher = more permissions)`)}
 							defaultValue="1"
 							disabled={isSubmitting}
 						/>
 						<p className="text-muted-foreground text-xs">
-							Higher level roles can manage lower level roles
+							<Trans>Higher level roles can manage lower level roles</Trans>
 						</p>
 					</div>
 
@@ -308,10 +334,14 @@ function CreateRoleDialog() {
 							onClick={() => setOpen(false)}
 							disabled={isSubmitting}
 						>
-							Cancel
+							<Trans>Cancel</Trans>
 						</Button>
 						<Button type="submit" disabled={isSubmitting}>
-							{isSubmitting ? 'Creating...' : 'Create Role'}
+							{isSubmitting ? (
+								<Trans>Creating...</Trans>
+							) : (
+								<Trans>Create Role</Trans>
+							)}
 						</Button>
 					</DialogFooter>
 				</Form>
@@ -322,15 +352,18 @@ function CreateRoleDialog() {
 
 export default function AdminRolesPage() {
 	const { organizationRoles, systemRoles } = useLoaderData<typeof loader>()
+	const { _ } = useLingui()
 
 	return (
 		<div className="space-y-8">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold">Roles</h1>
+					<h1 className="text-3xl font-bold">
+						<Trans>Roles</Trans>
+					</h1>
 					<p className="text-muted-foreground mt-2">
-						Manage organization and system roles and permissions
+						<Trans>Manage organization and system roles and permissions</Trans>
 					</p>
 				</div>
 				<CreateRoleDialog />
@@ -339,28 +372,42 @@ export default function AdminRolesPage() {
 			{/* Organization Roles */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Organization Roles</CardTitle>
+					<CardTitle>
+						<Trans>Organization Roles</Trans>
+					</CardTitle>
 					<CardDescription>
-						Roles that apply within specific organizations
+						<Trans>Roles that apply within specific organizations</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="p-0">
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Role</TableHead>
-								<TableHead>Level</TableHead>
-								<TableHead>Users</TableHead>
-								<TableHead>Permissions</TableHead>
-								<TableHead>Description</TableHead>
-								<TableHead className="text-right">Actions</TableHead>
+								<TableHead>
+									<Trans>Role</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Level</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Users</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Permissions</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Description</Trans>
+								</TableHead>
+								<TableHead className="text-right">
+									<Trans>Actions</Trans>
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							<RolesTableRows
 								roles={organizationRoles}
 								baseUrl="/roles"
-								emptyMessage="No organization roles found"
+								emptyMessage={_(msg`No organization roles found`)}
 								emptyColSpan={6}
 								showLevel
 							/>
@@ -372,27 +419,39 @@ export default function AdminRolesPage() {
 			{/* System Roles */}
 			<Card>
 				<CardHeader>
-					<CardTitle>System Roles</CardTitle>
+					<CardTitle>
+						<Trans>System Roles</Trans>
+					</CardTitle>
 					<CardDescription>
-						Global roles that apply across the entire system
+						<Trans>Global roles that apply across the entire system</Trans>
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="p-0">
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Role</TableHead>
-								<TableHead>Users</TableHead>
-								<TableHead>Permissions</TableHead>
-								<TableHead>Description</TableHead>
-								<TableHead className="text-right">Actions</TableHead>
+								<TableHead>
+									<Trans>Role</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Users</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Permissions</Trans>
+								</TableHead>
+								<TableHead>
+									<Trans>Description</Trans>
+								</TableHead>
+								<TableHead className="text-right">
+									<Trans>Actions</Trans>
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							<RolesTableRows
 								roles={systemRoles}
 								baseUrl="/roles/system"
-								emptyMessage="No system roles found"
+								emptyMessage={_(msg`No system roles found`)}
 								emptyColSpan={5}
 							/>
 						</TableBody>

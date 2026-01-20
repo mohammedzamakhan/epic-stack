@@ -51,7 +51,7 @@ function EpicProgress() {
 					<Icon
 						name="refresh-cw"
 						size="md"
-						className="m-1 animate-spin text-blue-500"
+						className="m-1 text-blue-500 motion-safe:animate-spin"
 						aria-hidden
 					/>
 				</div>
