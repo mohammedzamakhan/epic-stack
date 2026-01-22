@@ -7,12 +7,12 @@ import GridDesign from '../components/GridDesign.astro'
 import SEO from '../components/SEO.astro'
 import { brand } from '@repo/config/brand'
 
-// Fetch recent blog posts using cmsClient
-const recentPostsData = await cmsClient.getPosts(1, 3)
+// Fetch recent blog posts and home page content in parallel
+const [recentPostsData, homePage] = await Promise.all([
+	cmsClient.getPosts(1, 3),
+	cmsClient.getHomePage(),
+])
 const recentPosts = recentPostsData
-
-// Try to fetch home page content from CMS
-const homePage = await cmsClient.getHomePage()
 
 // SEO data - always available regardless of CMS content
 const seoTitle = homePage?.meta?.title || homePage?.title || `${brand.name} - ${brand.tagline}`

@@ -38,20 +38,22 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
 	invariantResponse(orgSlug, 'Organization slug is required')
 
-	const organization = await prisma.organization.findFirst({
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			image: { select: { objectKey: true } },
-		},
-		where: { slug: orgSlug },
-	})
+	const [organization, userId] = await Promise.all([
+		prisma.organization.findFirst({
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				image: { select: { objectKey: true } },
+			},
+			where: { slug: orgSlug },
+		}),
+		requireUserId(request),
+	])
 
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
 	// Check if the user has access to this organization
-	const userId = await requireUserId(request)
 	await userHasOrgAccess(request, organization.id)
 
 	// Get search query from URL
@@ -71,6 +73,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	// Get organization notes with access control and search
 	const notes = await prisma.organizationNote.findMany({
+		take: 100, // Limit to 100 notes for performance
 		select: {
 			id: true,
 			title: true,

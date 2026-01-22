@@ -138,12 +138,33 @@ export const meta: Route.MetaFunction = ({ data, location }) => {
 
 export async function loader({ request, params }: Route.LoaderArgs) {
 	const timings = makeTimings('root loader')
-	const userId = await time(() => getUserId(request), {
-		timings,
-		type: 'getUserId',
-		desc: 'getUserId in root',
-	})
-	const locale = await linguiServer.getLocale(request)
+	const requestUrl = new URL(request.url)
+	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
+
+	const [
+		userId,
+		locale,
+		honeyProps,
+		sidebarState,
+		{ toast, headers: toastHeaders },
+		utmResponse,
+		impersonationInfo,
+		cookieConsent,
+	] = await Promise.all([
+		time(() => getUserId(request), {
+			timings,
+			type: 'getUserId',
+			desc: 'getUserId in root',
+		}),
+		linguiServer.getLocale(request),
+		honeypot.getInputProps(),
+		isMarketingRoute ? getSidebarState(request) : Promise.resolve(null),
+		getToast(request),
+		storeUtmParams(request),
+		getImpersonationInfo(request),
+		getCookieConsentState(request),
+	])
+
 	const orgSlug = params.orgSlug
 
 	const user = userId
@@ -182,43 +203,37 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		// Maybe they were deleted? Let's log them out.
 		await logout({ request, redirectTo: '/' })
 	}
-	const honeyProps = await honeypot.getInputProps()
-	const requestUrl = new URL(request.url)
-
-	// Get sidebar state for marketing routes
-	const isMarketingRoute = requestUrl.pathname.startsWith('/dashboard')
-	const sidebarState = isMarketingRoute ? await getSidebarState(request) : null
 
 	// Load user organizations with slug-based switching handled automatically
 	const { getUserOrganizationsWithSlugHandling } =
 		await import('./utils/organization/organizations.server')
-	const userOrganizations = user
-		? await getUserOrganizationsWithSlugHandling(user.id, orgSlug)
-		: undefined
 
-	const favoriteNotes = user
-		? await cachified({
-				key: `user-favorites:${user.id}`,
-				cache,
-				ttl: 1000 * 60 * 2, // 2 minutes
-				getFreshValue: () =>
-					prisma.organizationNoteFavorite.findMany({
-						where: { userId: user.id },
-						select: {
-							id: true,
-							noteId: true,
-							note: {
-								select: {
-									id: true,
-									title: true,
-									organizationId: true,
-									organization: { select: { slug: true } },
+	const [userOrganizations, favoriteNotes] = user
+		? await Promise.all([
+				getUserOrganizationsWithSlugHandling(user.id, orgSlug),
+				cachified({
+					key: `user-favorites:${user.id}`,
+					cache,
+					ttl: 1000 * 60 * 2, // 2 minutes
+					getFreshValue: () =>
+						prisma.organizationNoteFavorite.findMany({
+							where: { userId: user.id },
+							select: {
+								id: true,
+								noteId: true,
+								note: {
+									select: {
+										id: true,
+										title: true,
+										organizationId: true,
+										organization: { select: { slug: true } },
+									},
 								},
 							},
-						},
-					}),
-			})
-		: undefined
+						}),
+				}),
+			])
+		: [undefined, undefined]
 
 	const requestInfo = {
 		hints: getHints(request),
@@ -229,16 +244,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		},
 		sidebarState,
 	}
-	const { toast, headers: toastHeaders } = await getToast(request)
 
 	// Handle UTM parameters if present in the URL
-	const utmResponse = await storeUtmParams(request)
 	const utmHeaders = utmResponse?.headers || {}
-
-	// Get impersonation info if user is an admin
-	const impersonationInfo = await getImpersonationInfo(request)
-
-	const cookieConsent = await getCookieConsentState(request)
 
 	return data(
 		{
