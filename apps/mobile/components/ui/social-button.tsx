@@ -1,12 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useLingui } from '@lingui/react/macro'
 import React from 'react'
-import {
-	TouchableOpacity,
-	Text,
-	StyleSheet,
-	View,
-	ActivityIndicator,
-} from 'react-native'
+import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native'
 import { useOAuth } from '../../lib/auth/hooks/use-oauth'
 
 export interface SocialButtonProps {
@@ -18,19 +13,20 @@ export interface SocialButtonProps {
 	redirectTo?: string
 	onSuccess?: () => void
 	onError?: (error: string) => void
+	className?: string
 }
 
 const providerConfig = {
 	github: {
 		label: 'GitHub',
 		icon: 'logo-github' as const,
-		backgroundColor: '#24292e',
+		bgClass: 'bg-gray-800',
 		textColor: '#ffffff',
 	},
 	google: {
 		label: 'Google',
 		icon: 'logo-google' as const,
-		backgroundColor: '#4285f4',
+		bgClass: 'bg-blue-500',
 		textColor: '#ffffff',
 	},
 }
@@ -44,9 +40,19 @@ export function SocialButton({
 	redirectTo,
 	onSuccess,
 	onError,
+	className,
 }: SocialButtonProps) {
+	const { t } = useLingui()
 	const config = providerConfig[provider]
-	const actionText = type === 'login' ? 'Sign in' : 'Sign up'
+
+	const getButtonText = () => {
+		if (provider === 'github') {
+			return type === 'signup'
+				? t`Sign up with GitHub`
+				: t`Continue with GitHub`
+		}
+		return type === 'signup' ? t`Sign up with Google` : t`Continue with Google`
+	}
 
 	const {
 		authenticate,
@@ -73,49 +79,23 @@ export function SocialButton({
 
 	return (
 		<TouchableOpacity
-			style={[
-				styles.button,
-				{ backgroundColor: config.backgroundColor },
-				isDisabled && styles.disabled,
-			]}
+			className={`my-1 rounded-lg px-4 py-3 ${config.bgClass} ${isDisabled ? 'opacity-60' : ''} ${className ?? ''}`}
 			onPress={handlePress}
 			disabled={isDisabled || isLoading}
 			activeOpacity={0.8}
 			accessibilityRole="button"
 			accessibilityState={{ disabled: isDisabled || isLoading }}
 		>
-			<View style={styles.content}>
+			<View className="flex-row items-center justify-center gap-2">
 				{isLoading ? (
 					<ActivityIndicator size="small" color={config.textColor} />
 				) : (
 					<Ionicons name={config.icon} size={20} color={config.textColor} />
 				)}
-				<Text style={[styles.text, { color: config.textColor }]}>
-					{actionText} with {config.label}
+				<Text className="text-base font-semibold text-white">
+					{getButtonText()}
 				</Text>
 			</View>
 		</TouchableOpacity>
 	)
 }
-
-const styles = StyleSheet.create({
-	button: {
-		borderRadius: 8,
-		paddingVertical: 12,
-		paddingHorizontal: 16,
-		marginVertical: 4,
-	},
-	content: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: 8,
-	},
-	text: {
-		fontSize: 16,
-		fontWeight: '600',
-	},
-	disabled: {
-		opacity: 0.6,
-	},
-})

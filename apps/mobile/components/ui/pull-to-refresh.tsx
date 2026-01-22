@@ -6,6 +6,7 @@ export interface PullToRefreshProps extends ScrollViewProps {
 	onRefresh: () => Promise<void> | void
 	refreshing: boolean
 	hapticFeedback?: boolean
+	className?: string
 }
 
 const PullToRefresh: React.FC<PullToRefreshProps> = ({
@@ -13,6 +14,7 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
 	onRefresh,
 	refreshing,
 	hapticFeedback = true,
+	className,
 	...props
 }) => {
 	const handleRefresh = async () => {
@@ -24,6 +26,7 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
 	return (
 		<ScrollView
+			className={className}
 			refreshControl={
 				<RefreshControl
 					refreshing={refreshing}

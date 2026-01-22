@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Trans } from '@lingui/react/macro'
+import { useLingui } from '@lingui/react/macro'
 import { MobileSignupSchema } from '@repo/validation'
 import { useLocalSearchParams, router } from 'expo-router'
+import * as WebBrowser from 'expo-web-browser'
 import React, { useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import {
 	View,
 	Text,
-	StyleSheet,
 	ScrollView,
 	Alert,
 	TouchableOpacity,
@@ -32,6 +34,7 @@ import { navigateToSignIn, navigateAfterAuth } from '../../lib/navigation'
 type SignupFormData = z.infer<typeof MobileSignupSchema>
 
 export default function SignUpScreen() {
+	const { t } = useLingui()
 	const { redirectTo, inviteToken } = useLocalSearchParams<{
 		redirectTo?: string
 		inviteToken?: string
@@ -75,11 +78,11 @@ export default function SignUpScreen() {
 
 			// Show success alert
 			Alert.alert(
-				'Check your email',
-				"We've sent you a verification link to complete your signup.",
+				t`Check your email`,
+				t`We've sent you a verification link to complete your signup.`,
 				[
 					{
-						text: 'OK',
+						text: t`OK`,
 						onPress: () => {
 							// Navigate to verification screen with email parameter
 							router.push({
@@ -124,7 +127,7 @@ export default function SignUpScreen() {
 
 	const handleSocialError = async (error: string) => {
 		await triggerErrorHaptic()
-		Alert.alert('Authentication Error', error)
+		Alert.alert(t`Authentication Error`, error)
 	}
 
 	const handleNavigateToSignIn = () => {
@@ -138,42 +141,52 @@ export default function SignUpScreen() {
 	const isInviteSignup = !!inviteToken
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-zinc-900">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>
-						{isInviteSignup ? 'Join organization' : 'Create an account'}
+				<View className="mb-10 items-center">
+					<Text className="mb-3 text-center text-3xl font-bold text-zinc-100">
+						{isInviteSignup ? (
+							<Trans>Join organization</Trans>
+						) : (
+							<Trans>Create an account</Trans>
+						)}
 					</Text>
-					<Text style={styles.subtitle}>
-						{isInviteSignup
-							? 'Complete your signup to join the organization'
-							: 'Sign up with your social account or email'}
+					<Text className="text-center text-base leading-6 text-zinc-400">
+						{isInviteSignup ? (
+							<Trans>Complete your signup to join the organization</Trans>
+						) : (
+							<Trans>Sign up with your social account or email</Trans>
+						)}
 					</Text>
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
+				<View className="flex-1">
 					{/* Organization Invite Message */}
 					{isInviteSignup && (
-						<View style={styles.inviteContainer}>
-							<View style={styles.inviteHeader}>
-								<Text style={styles.inviteIcon}>📧</Text>
-								<Text style={styles.inviteTitle}>Organization Invite</Text>
+						<View className="bg-primary/10 border-primary/30 mb-6 rounded-lg border p-4">
+							<View className="mb-2 flex-row items-center">
+								<Text className="mr-2 text-xl">📧</Text>
+								<Text className="text-primary text-base font-semibold">
+									<Trans>Organization Invite</Trans>
+								</Text>
 							</View>
-							<Text style={styles.inviteMessage}>
-								You've been invited to join an organization. Complete your
-								signup to get started.
+							<Text className="text-primary/80 text-sm leading-5">
+								<Trans>
+									You've been invited to join an organization. Complete your
+									signup to get started.
+								</Trans>
 							</Text>
 						</View>
 					)}
 
 					{/* Social Signup Buttons */}
-					<View style={styles.socialContainer}>
+					<View className="mb-6 gap-2">
 						{configuredProviders.map((provider) => (
 							<SocialButton
 								key={provider}
@@ -188,24 +201,26 @@ export default function SignUpScreen() {
 					</View>
 
 					{/* Divider */}
-					<Divider text="Or continue with email" />
+					<Divider text={t`Or continue with email`} />
 
 					{/* Error Display */}
 					{currentError && (
-						<ErrorText style={styles.errorContainer}>{currentError}</ErrorText>
+						<ErrorText className="mb-4 text-center">{currentError}</ErrorText>
 					)}
 
 					{/* Signup Form */}
-					<View style={styles.formContainer}>
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Email</Text>
+					<View className="gap-4">
+						<View className="gap-2">
+							<Text className="text-foreground text-base font-semibold">
+								<Trans>Email</Trans>
+							</Text>
 							<Controller
 								control={control}
 								name="email"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
 										ref={emailRef}
-										placeholder="m@example.com"
+										placeholder={t`m@example.com`}
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -225,50 +240,44 @@ export default function SignUpScreen() {
 							onPress={handleSubmit(onSubmit)}
 							disabled={!isValid || isLoading}
 							loading={isSignupLoading}
-							style={styles.submitButton}
+							className="mt-2"
 						>
-							Sign up
+							<Trans>Sign up</Trans>
 						</Button>
 					</View>
 
 					{/* Terms and Privacy */}
-					<Text style={styles.termsText}>
-						By signing up, you agree to our{' '}
+					<Text className="text-muted-foreground mt-4 text-center text-xs leading-5">
+						<Trans>By signing up, you agree to our</Trans>{' '}
 						<Text
-							style={styles.termsLink}
-							onPress={() =>
-								Alert.alert(
-									'Terms of Service',
-									'Terms of Service will be available soon.',
-								)
-							}
+							className="text-primary font-medium"
+							onPress={() => WebBrowser.openBrowserAsync('https://google.com')}
 						>
-							Terms of Service
+							<Trans>Terms of Service</Trans>
 						</Text>{' '}
-						and{' '}
+						<Trans>and</Trans>{' '}
 						<Text
-							style={styles.termsLink}
-							onPress={() =>
-								Alert.alert(
-									'Privacy Policy',
-									'Privacy Policy will be available soon.',
-								)
-							}
+							className="text-primary font-medium"
+							onPress={() => WebBrowser.openBrowserAsync('https://google.com')}
 						>
-							Privacy Policy
+							<Trans>Privacy Policy</Trans>
 						</Text>
 						.
 					</Text>
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
-					<Text style={styles.footerText}>Already have an account? </Text>
+				<View className="mt-auto flex-row items-center justify-center pt-8">
+					<Text className="text-muted-foreground text-base">
+						<Trans>Already have an account?</Trans>{' '}
+					</Text>
 					<TouchableOpacity
 						onPress={handleNavigateToSignIn}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Sign in</Text>
+						<Text className="text-primary text-base font-semibold">
+							<Trans>Sign in</Trans>
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
@@ -276,123 +285,15 @@ export default function SignUpScreen() {
 			{/* Loading Overlay */}
 			<LoadingOverlay
 				visible={isSignupLoading}
-				message="Creating your account..."
+				message={t`Creating your account...`}
 			/>
 
 			{/* Success Animation */}
 			<SuccessAnimation
 				visible={showSuccess}
-				message="Account created!"
+				message={t`Account created!`}
 				onComplete={() => setShowSuccess(false)}
 			/>
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	inviteContainer: {
-		backgroundColor: '#f0f9ff',
-		borderColor: '#bae6fd',
-		borderWidth: 1,
-		borderRadius: 8,
-		padding: 16,
-		marginBottom: 24,
-	},
-	inviteHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginBottom: 8,
-	},
-	inviteIcon: {
-		fontSize: 20,
-		marginRight: 8,
-	},
-	inviteTitle: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#0369a1',
-	},
-	inviteMessage: {
-		fontSize: 14,
-		color: '#0c4a6e',
-		lineHeight: 20,
-	},
-	socialContainer: {
-		gap: 8,
-		marginBottom: 24,
-	},
-	errorContainer: {
-		marginBottom: 16,
-		textAlign: 'center',
-	},
-	formContainer: {
-		gap: 16,
-	},
-	inputContainer: {
-		gap: 8,
-	},
-	label: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#374151',
-	},
-	submitButton: {
-		marginTop: 8,
-	},
-	termsText: {
-		fontSize: 12,
-		color: '#6b7280',
-		textAlign: 'center',
-		marginTop: 16,
-		lineHeight: 18,
-	},
-	termsLink: {
-		color: '#3b82f6',
-		fontWeight: '500',
-	},
-	footer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-	},
-	footerText: {
-		fontSize: 16,
-		color: '#6b7280',
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-})

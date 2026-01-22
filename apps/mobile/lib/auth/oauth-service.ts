@@ -1,5 +1,6 @@
 import * as AuthSession from 'expo-auth-session'
 import Constants from 'expo-constants'
+import * as Crypto from 'expo-crypto'
 import * as Linking from 'expo-linking'
 import { Platform } from 'react-native'
 
@@ -174,13 +175,10 @@ export class OAuthService {
 	}
 
 	/**
-	 * Generate a random state parameter for CSRF protection
+	 * Generate a cryptographically secure random state parameter for CSRF protection
 	 */
 	private generateState(): string {
-		return (
-			Math.random().toString(36).substring(2, 15) +
-			Math.random().toString(36).substring(2, 15)
-		)
+		return Crypto.randomUUID()
 	}
 
 	/**

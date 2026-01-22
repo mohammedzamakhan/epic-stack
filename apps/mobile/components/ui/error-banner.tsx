@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-	type ViewProps,
-} from 'react-native'
+import { View, Text, TouchableOpacity, type ViewProps } from 'react-native'
 
 export interface ErrorBannerProps extends ViewProps {
 	message: string
@@ -15,7 +9,26 @@ export interface ErrorBannerProps extends ViewProps {
 	actionText?: string
 	onAction?: () => void
 	persistent?: boolean
+	className?: string
 }
+
+const bannerStyles = {
+	error: 'bg-red-50 border-l-destructive',
+	warning: 'bg-amber-50 border-l-amber-500',
+	info: 'bg-blue-50 border-l-blue-500',
+} as const
+
+const textStyles = {
+	error: 'text-red-600',
+	warning: 'text-amber-600',
+	info: 'text-blue-600',
+} as const
+
+const actionStyles = {
+	error: 'bg-red-100',
+	warning: 'bg-amber-100',
+	info: 'bg-blue-100',
+} as const
 
 const ErrorBanner: React.FC<ErrorBannerProps> = ({
 	message,
@@ -25,59 +38,28 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
 	actionText,
 	onAction,
 	persistent: _persistent = false,
-	style,
+	className,
 	...props
 }) => {
-	const getBannerStyle = () => {
-		switch (type) {
-			case 'warning':
-				return styles.warningBanner
-			case 'info':
-				return styles.infoBanner
-			case 'error':
-			default:
-				return styles.errorBanner
-		}
-	}
-
-	const getTextStyle = () => {
-		switch (type) {
-			case 'warning':
-				return styles.warningText
-			case 'info':
-				return styles.infoText
-			case 'error':
-			default:
-				return styles.errorText
-		}
-	}
-
-	const getActionStyle = () => {
-		switch (type) {
-			case 'warning':
-				return styles.warningAction
-			case 'info':
-				return styles.infoAction
-			case 'error':
-			default:
-				return styles.errorAction
-		}
-	}
-
 	return (
-		<View style={[styles.container, getBannerStyle(), style]} {...props}>
-			<View style={styles.content}>
-				<Text style={[styles.message, getTextStyle()]}>{message}</Text>
+		<View
+			className={`mx-4 my-2 rounded-lg border-l-4 px-4 py-3 ${bannerStyles[type]} ${className ?? ''}`}
+			{...props}
+		>
+			<View className="flex-row items-center justify-between">
+				<Text className={`mr-3 flex-1 text-sm font-medium ${textStyles[type]}`}>
+					{message}
+				</Text>
 
-				<View style={styles.actions}>
+				<View className="flex-row items-center">
 					{actionText && onAction && (
 						<TouchableOpacity
-							style={[styles.actionButton, getActionStyle()]}
+							className={`mr-2 rounded px-3 py-1.5 ${actionStyles[type]}`}
 							onPress={onAction}
 							accessibilityRole="button"
 							accessibilityLabel={actionText}
 						>
-							<Text style={[styles.actionText, getTextStyle()]}>
+							<Text className={`text-xs font-semibold ${textStyles[type]}`}>
 								{actionText}
 							</Text>
 						</TouchableOpacity>
@@ -85,12 +67,12 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
 
 					{dismissible && onDismiss && (
 						<TouchableOpacity
-							style={styles.dismissButton}
+							className="px-2 py-1"
 							onPress={onDismiss}
 							accessibilityRole="button"
 							accessibilityLabel="Dismiss"
 						>
-							<Text style={[styles.dismissText, getTextStyle()]}>×</Text>
+							<Text className={`text-lg font-bold ${textStyles[type]}`}>×</Text>
 						</TouchableOpacity>
 					)}
 				</View>
@@ -98,79 +80,5 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		marginHorizontal: 16,
-		marginVertical: 8,
-		borderRadius: 8,
-		borderLeftWidth: 4,
-	},
-	content: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-	},
-	message: {
-		flex: 1,
-		fontSize: 14,
-		fontWeight: '500',
-		marginRight: 12,
-	},
-	actions: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	actionButton: {
-		paddingHorizontal: 12,
-		paddingVertical: 6,
-		borderRadius: 4,
-		marginRight: 8,
-	},
-	actionText: {
-		fontSize: 12,
-		fontWeight: '600',
-	},
-	dismissButton: {
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-	},
-	dismissText: {
-		fontSize: 18,
-		fontWeight: 'bold',
-	},
-	errorBanner: {
-		backgroundColor: '#FEF2F2',
-		borderLeftColor: '#EF4444',
-	},
-	warningBanner: {
-		backgroundColor: '#FFFBEB',
-		borderLeftColor: '#F59E0B',
-	},
-	infoBanner: {
-		backgroundColor: '#EFF6FF',
-		borderLeftColor: '#3B82F6',
-	},
-	errorText: {
-		color: '#DC2626',
-	},
-	warningText: {
-		color: '#D97706',
-	},
-	infoText: {
-		color: '#2563EB',
-	},
-	errorAction: {
-		backgroundColor: '#FEE2E2',
-	},
-	warningAction: {
-		backgroundColor: '#FEF3C7',
-	},
-	infoAction: {
-		backgroundColor: '#DBEAFE',
-	},
-})
 
 export { ErrorBanner }

@@ -239,7 +239,7 @@ export class AuthApi {
 				params.append('state', state)
 			}
 
-			const callbackUrl = `/auth/${provider}/callback?${params.toString()}`
+			const callbackUrl = `/api/auth/${provider}/callback?${params.toString()}`
 
 			// Make a GET request to the callback endpoint
 			// The backend will handle the OAuth code exchange

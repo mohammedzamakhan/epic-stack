@@ -1,14 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useLingui } from '@lingui/react/macro'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import {
-	View,
-	Text,
-	StyleSheet,
-	ScrollView,
-	TouchableOpacity,
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { z } from 'zod'
 import { Screen, Input, Button, ErrorText } from '../../components/ui'
 import { navigateToSignIn } from '../../lib/navigation'
@@ -20,6 +15,7 @@ const ForgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof ForgotPasswordSchema>
 
 export default function ForgotPasswordScreen() {
+	const { t } = useLingui()
 	const { redirectTo } = useLocalSearchParams<{
 		redirectTo?: string
 	}>()
@@ -41,7 +37,7 @@ export default function ForgotPasswordScreen() {
 		// TODO: Implement forgot password API call
 		// For now, just show a success message
 		alert(
-			"If an account with that email exists, we've sent you a password reset link.",
+			t`If an account with that email exists, we've sent you a password reset link.`,
 		)
 		reset()
 	}
@@ -51,26 +47,30 @@ export default function ForgotPasswordScreen() {
 	}
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-background">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>Reset your password</Text>
-					<Text style={styles.subtitle}>
+				<View className="mb-10 items-center">
+					<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+						Reset your password
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
 						Enter your email address and we'll send you a link to reset your
 						password.
 					</Text>
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
-					<View style={styles.formContainer}>
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Email</Text>
+				<View className="flex-1">
+					<View className="gap-4">
+						<View className="gap-2">
+							<Text className="text-foreground text-base font-semibold">
+								Email
+							</Text>
 							<Controller
 								control={control}
 								name="email"
@@ -97,7 +97,7 @@ export default function ForgotPasswordScreen() {
 						<Button
 							onPress={handleSubmit(onSubmit)}
 							disabled={!isValid}
-							style={styles.submitButton}
+							className="mt-2"
 						>
 							Send reset link
 						</Button>
@@ -105,78 +105,20 @@ export default function ForgotPasswordScreen() {
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
-					<Text style={styles.footerText}>Remember your password? </Text>
+				<View className="mt-auto flex-row items-center justify-center pt-8">
+					<Text className="text-muted-foreground text-base">
+						Remember your password?{' '}
+					</Text>
 					<TouchableOpacity
 						onPress={handleBackToSignIn}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Back to sign in</Text>
+						<Text className="text-primary text-base font-semibold">
+							Back to sign in
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	formContainer: {
-		gap: 16,
-	},
-	inputContainer: {
-		gap: 8,
-	},
-	label: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#374151',
-	},
-	submitButton: {
-		marginTop: 8,
-	},
-	footer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-	},
-	footerText: {
-		fontSize: 16,
-		color: '#6b7280',
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-})

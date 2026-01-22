@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, Alert } from 'react-native'
+import { View, Text, Alert } from 'react-native'
 import { useAuth } from '../lib/auth/hooks/use-auth'
 import { useOAuth, useOAuthProviders } from '../lib/auth/hooks/use-oauth'
 import { SocialButton, Button, ErrorText } from './ui'
@@ -45,21 +45,27 @@ export function OAuthDemo() {
 
 	if (isAuthenticated && user) {
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Welcome!</Text>
-				<Text style={styles.subtitle}>You are logged in as:</Text>
+			<View className="flex-1 justify-center p-5">
+				<Text className="text-foreground mb-2 text-center text-2xl font-bold">
+					Welcome!
+				</Text>
+				<Text className="text-muted-foreground mb-8 text-center text-base">
+					You are logged in as:
+				</Text>
 
-				<View style={styles.userInfo}>
-					<Text style={styles.userEmail}>{user.email}</Text>
-					<Text style={styles.username}>@{user.username}</Text>
-					{user.name && <Text style={styles.name}>{user.name}</Text>}
+				<View className="bg-secondary mb-6 items-center rounded-lg p-5">
+					<Text className="text-foreground mb-1 text-lg font-semibold">
+						{user.email}
+					</Text>
+					<Text className="text-muted-foreground mb-1 text-base">
+						@{user.username}
+					</Text>
+					{user.name && (
+						<Text className="text-foreground text-base">{user.name}</Text>
+					)}
 				</View>
 
-				<Button
-					onPress={handleLogout}
-					variant="outline"
-					style={styles.logoutButton}
-				>
+				<Button onPress={handleLogout} variant="outline" className="mt-4">
 					Logout
 				</Button>
 			</View>
@@ -67,15 +73,17 @@ export function OAuthDemo() {
 	}
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>OAuth Demo</Text>
-			<Text style={styles.subtitle}>
+		<View className="flex-1 justify-center p-5">
+			<Text className="text-foreground mb-2 text-center text-2xl font-bold">
+				OAuth Demo
+			</Text>
+			<Text className="text-muted-foreground mb-8 text-center text-base">
 				Choose a provider to authenticate with:
 			</Text>
 
-			{error && <ErrorText style={styles.error}>{error}</ErrorText>}
+			{error && <ErrorText className="mb-4 text-center">{error}</ErrorText>}
 
-			<View style={styles.providersContainer}>
+			<View className="mb-8">
 				{configuredProviders.length > 0 ? (
 					configuredProviders.map((provider) => {
 						return (
@@ -90,11 +98,11 @@ export function OAuthDemo() {
 						)
 					})
 				) : (
-					<View style={styles.noProviders}>
-						<Text style={styles.noProvidersText}>
+					<View className="rounded-lg border border-yellow-500 bg-yellow-100 p-5">
+						<Text className="mb-2 text-center text-base font-semibold text-yellow-800">
 							No OAuth providers configured
 						</Text>
-						<Text style={styles.noProvidersSubtext}>
+						<Text className="text-center text-sm leading-5 text-yellow-800">
 							Please set EXPO_PUBLIC_GITHUB_CLIENT_ID or
 							EXPO_PUBLIC_GOOGLE_CLIENT_ID in your environment variables
 						</Text>
@@ -102,12 +110,14 @@ export function OAuthDemo() {
 				)}
 			</View>
 
-			<View style={styles.infoContainer}>
-				<Text style={styles.infoTitle}>Available Providers:</Text>
+			<View className="border-border bg-card rounded-lg border p-4">
+				<Text className="text-foreground mb-2 text-sm font-semibold">
+					Available Providers:
+				</Text>
 				{configuredProviders.map((provider) => {
 					const info = getProviderInfo(provider)
 					return (
-						<Text key={provider} style={styles.infoText}>
+						<Text key={provider} className="text-muted-foreground mb-1 text-xs">
 							• {info?.displayName} {info?.isConfigured ? '✅' : '❌'}
 						</Text>
 					)
@@ -116,97 +126,6 @@ export function OAuthDemo() {
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		justifyContent: 'center',
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		textAlign: 'center',
-		marginBottom: 8,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		textAlign: 'center',
-		marginBottom: 32,
-		color: '#6b7280',
-	},
-	error: {
-		marginBottom: 16,
-		textAlign: 'center',
-	},
-	providersContainer: {
-		marginBottom: 32,
-	},
-	noProviders: {
-		padding: 20,
-		backgroundColor: '#fef3c7',
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: '#f59e0b',
-	},
-	noProvidersText: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#92400e',
-		textAlign: 'center',
-		marginBottom: 8,
-	},
-	noProvidersSubtext: {
-		fontSize: 14,
-		color: '#92400e',
-		textAlign: 'center',
-		lineHeight: 20,
-	},
-	userInfo: {
-		backgroundColor: '#f3f4f6',
-		padding: 20,
-		borderRadius: 8,
-		marginBottom: 24,
-		alignItems: 'center',
-	},
-	userEmail: {
-		fontSize: 18,
-		fontWeight: '600',
-		color: '#1f2937',
-		marginBottom: 4,
-	},
-	username: {
-		fontSize: 16,
-		color: '#6b7280',
-		marginBottom: 4,
-	},
-	name: {
-		fontSize: 16,
-		color: '#374151',
-	},
-	logoutButton: {
-		marginTop: 16,
-	},
-	infoContainer: {
-		backgroundColor: '#f9fafb',
-		padding: 16,
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: '#e5e7eb',
-	},
-	infoTitle: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#374151',
-		marginBottom: 8,
-	},
-	infoText: {
-		fontSize: 12,
-		color: '#6b7280',
-		marginBottom: 4,
-	},
-})
 
 /**
  * Example usage in a screen:

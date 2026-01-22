@@ -2,7 +2,6 @@ import React from 'react'
 import {
 	View,
 	Text,
-	StyleSheet,
 	Modal,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
@@ -24,7 +23,14 @@ export interface ErrorModalProps {
 	}
 	onDismiss?: () => void
 	dismissible?: boolean
+	className?: string
 }
+
+const iconContainerStyles = {
+	error: 'bg-red-100',
+	warning: 'bg-amber-100',
+	info: 'bg-blue-100',
+} as const
 
 const ErrorModal: React.FC<ErrorModalProps> = ({
 	visible,
@@ -42,18 +48,6 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 		}
 	}
 
-	const getIconStyle = () => {
-		switch (type) {
-			case 'warning':
-				return styles.warningIcon
-			case 'info':
-				return styles.infoIcon
-			case 'error':
-			default:
-				return styles.errorIcon
-		}
-	}
-
 	const getIcon = () => {
 		switch (type) {
 			case 'warning':
@@ -66,6 +60,9 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 		}
 	}
 
+	const { width } = Dimensions.get('window')
+	const modalWidth = Math.min(width - 40, 400)
+
 	return (
 		<Modal
 			visible={visible}
@@ -74,26 +71,35 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 			onRequestClose={dismissible ? onDismiss : undefined}
 		>
 			<TouchableWithoutFeedback onPress={handleBackdropPress}>
-				<View style={styles.backdrop}>
+				<View className="flex-1 items-center justify-center bg-black/50 p-5">
 					<TouchableWithoutFeedback>
-						<View style={styles.modal}>
-							<View style={styles.header}>
-								<View style={[styles.iconContainer, getIconStyle()]}>
-									<Text style={styles.icon}>{getIcon()}</Text>
+						<View
+							className="bg-card rounded-xl p-6 shadow-lg"
+							style={{ width: modalWidth }}
+						>
+							<View className="mb-4 items-center">
+								<View
+									className={`mb-3 h-12 w-12 items-center justify-center rounded-full ${iconContainerStyles[type]}`}
+								>
+									<Text className="text-2xl">{getIcon()}</Text>
 								</View>
-								<Text style={styles.title}>{title}</Text>
+								<Text className="text-foreground text-center text-lg font-semibold">
+									{title}
+								</Text>
 							</View>
 
-							<Text style={styles.message}>{message}</Text>
+							<Text className="text-muted-foreground mb-6 text-center text-sm leading-5">
+								{message}
+							</Text>
 
-							<View style={styles.actions}>
+							<View className="flex-row justify-end gap-3">
 								{secondaryAction && (
 									<TouchableOpacity
-										style={[styles.button, styles.secondaryButton]}
+										className="bg-muted border-input min-w-20 items-center rounded-md border px-4 py-2.5"
 										onPress={secondaryAction.onPress}
 										accessibilityRole="button"
 									>
-										<Text style={styles.secondaryButtonText}>
+										<Text className="text-foreground text-sm font-semibold">
 											{secondaryAction.text}
 										</Text>
 									</TouchableOpacity>
@@ -101,11 +107,11 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 
 								{primaryAction && (
 									<TouchableOpacity
-										style={[styles.button, styles.primaryButton]}
+										className="bg-destructive min-w-20 items-center rounded-md px-4 py-2.5"
 										onPress={primaryAction.onPress}
 										accessibilityRole="button"
 									>
-										<Text style={styles.primaryButtonText}>
+										<Text className="text-primary-foreground text-sm font-semibold">
 											{primaryAction.text}
 										</Text>
 									</TouchableOpacity>
@@ -113,11 +119,13 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 
 								{!primaryAction && !secondaryAction && dismissible && (
 									<TouchableOpacity
-										style={[styles.button, styles.primaryButton]}
+										className="bg-destructive min-w-20 items-center rounded-md px-4 py-2.5"
 										onPress={onDismiss}
 										accessibilityRole="button"
 									>
-										<Text style={styles.primaryButtonText}>OK</Text>
+										<Text className="text-primary-foreground text-sm font-semibold">
+											OK
+										</Text>
 									</TouchableOpacity>
 								)}
 							</View>
@@ -128,98 +136,5 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 		</Modal>
 	)
 }
-
-const { width } = Dimensions.get('window')
-
-const styles = StyleSheet.create({
-	backdrop: {
-		flex: 1,
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		justifyContent: 'center',
-		alignItems: 'center',
-		padding: 20,
-	},
-	modal: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 12,
-		padding: 24,
-		width: Math.min(width - 40, 400),
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 4,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 8,
-	},
-	header: {
-		alignItems: 'center',
-		marginBottom: 16,
-	},
-	iconContainer: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 12,
-	},
-	icon: {
-		fontSize: 24,
-	},
-	title: {
-		fontSize: 18,
-		fontWeight: '600',
-		color: '#111827',
-		textAlign: 'center',
-	},
-	message: {
-		fontSize: 14,
-		color: '#6B7280',
-		textAlign: 'center',
-		lineHeight: 20,
-		marginBottom: 24,
-	},
-	actions: {
-		flexDirection: 'row',
-		justifyContent: 'flex-end',
-		gap: 12,
-	},
-	button: {
-		paddingHorizontal: 16,
-		paddingVertical: 10,
-		borderRadius: 6,
-		minWidth: 80,
-		alignItems: 'center',
-	},
-	primaryButton: {
-		backgroundColor: '#EF4444',
-	},
-	secondaryButton: {
-		backgroundColor: '#F3F4F6',
-		borderWidth: 1,
-		borderColor: '#D1D5DB',
-	},
-	primaryButtonText: {
-		color: '#FFFFFF',
-		fontSize: 14,
-		fontWeight: '600',
-	},
-	secondaryButtonText: {
-		color: '#374151',
-		fontSize: 14,
-		fontWeight: '600',
-	},
-	errorIcon: {
-		backgroundColor: '#FEE2E2',
-	},
-	warningIcon: {
-		backgroundColor: '#FEF3C7',
-	},
-	infoIcon: {
-		backgroundColor: '#DBEAFE',
-	},
-})
 
 export { ErrorModal }

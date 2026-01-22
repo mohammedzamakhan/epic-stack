@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Trans } from '@lingui/react/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useLocalSearchParams, router } from 'expo-router'
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import {
 	View,
 	Text,
-	StyleSheet,
 	ScrollView,
 	TouchableOpacity,
 	Alert,
@@ -32,6 +33,7 @@ const VerifyCodeSchema = z.object({
 type VerifyCodeFormData = z.infer<typeof VerifyCodeSchema>
 
 export default function VerifyCodeScreen() {
+	const { t } = useLingui()
 	const {
 		email,
 		type = 'onboarding',
@@ -70,7 +72,7 @@ export default function VerifyCodeScreen() {
 
 	const onSubmit = async (data: VerifyCodeFormData) => {
 		if (!email) {
-			Alert.alert('Error', 'No email address provided for verification.')
+			Alert.alert(t`Error`, t`No email address provided for verification.`)
 			return
 		}
 
@@ -105,7 +107,7 @@ export default function VerifyCodeScreen() {
 
 	const handleResendCode = async () => {
 		if (!email) {
-			Alert.alert('Error', 'No email address provided for resending code.')
+			Alert.alert(t`Error`, t`No email address provided for resending code.`)
 			return
 		}
 
@@ -123,14 +125,14 @@ export default function VerifyCodeScreen() {
 			reset()
 
 			Alert.alert(
-				'Code Sent',
-				"We've sent a new verification code to your email address.",
-				[{ text: 'OK' }],
+				t`Code Sent`,
+				t`We've sent a new verification code to your email address.`,
+				[{ text: t`OK` }],
 			)
 		} catch {
 			Alert.alert(
-				'Error',
-				'Failed to resend verification code. Please try again later.',
+				t`Error`,
+				t`Failed to resend verification code. Please try again later.`,
 			)
 		} finally {
 			setIsResending(false)
@@ -146,36 +148,42 @@ export default function VerifyCodeScreen() {
 	}
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-background">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>Enter verification code</Text>
-					<Text style={styles.subtitle}>
+				<View className="mb-10 items-center">
+					<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+						<Trans>Enter verification code</Trans>
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
 						{email
-							? `We've sent a 6-character code to ${email}. Enter it below to verify your account.`
-							: 'Enter the 6-character verification code sent to your email.'}
+							? t`We've sent a 6-character code to ${email}. Enter it below to verify your account.`
+							: t`Enter the 6-character verification code sent to your email.`}
 					</Text>
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
-					<View style={styles.formContainer}>
+				<View className="flex-1">
+					<View className="gap-5">
 						<Controller
 							control={control}
 							name="code"
 							render={({ field: { onChange, value } }) => (
-								<View style={styles.otpContainer}>
-									<Text style={styles.otpLabel}>Enter 6-character code:</Text>
+								<View className="mb-2 items-center">
+									<Text className="text-foreground mb-3 text-center text-base font-semibold">
+										<Trans>Enter 6-character code:</Trans>
+									</Text>
 									<TextInput
-										style={[
-											styles.singleOtpInput,
-											errors.code && styles.singleOtpInputError,
-											isLoading && styles.singleOtpInputDisabled,
-										]}
+										className={`bg-background text-foreground h-16 w-full rounded-xl border-2 text-center text-2xl font-semibold tracking-widest ${
+											errors.code
+												? 'border-destructive bg-destructive/5'
+												: isLoading
+													? 'bg-muted text-muted-foreground'
+													: 'border-border'
+										}`}
 										value={value}
 										onChangeText={(text) => {
 											// Allow alphanumeric characters and limit to 6 characters
@@ -185,14 +193,14 @@ export default function VerifyCodeScreen() {
 												.toUpperCase()
 											onChange(code)
 										}}
-										placeholder="ABC123"
+										placeholder={t`ABC123`}
 										keyboardType="default"
 										maxLength={6}
 										editable={!isLoading}
 										autoFocus={true}
 										selectTextOnFocus={true}
 										returnKeyType="done"
-										accessibilityLabel="Verification code"
+										accessibilityLabel={t`Verification code`}
 										onSubmitEditing={() => {
 											if (value.length === 6) {
 												void handleSubmit(onSubmit)()
@@ -204,161 +212,67 @@ export default function VerifyCodeScreen() {
 						/>
 
 						{errors.code && (
-							<ErrorText style={styles.errorText}>
+							<ErrorText className="mt-2 text-center">
 								{errors.code.message}
 							</ErrorText>
 						)}
 
-						{error && <ErrorText style={styles.errorText}>{error}</ErrorText>}
+						{error && (
+							<ErrorText className="mt-2 text-center">{error}</ErrorText>
+						)}
 
-						<View style={styles.actionsContainer}>
+						<View className="mt-6 items-center gap-4">
 							<Button
 								onPress={handleSubmit(onSubmit)}
 								disabled={isLoading || !codeValue || codeValue.length !== 6}
-								style={styles.actionButton}
+								className="w-full"
 							>
-								{isLoading ? 'Verifying...' : 'Verify Code'}
+								{isLoading ? t`Verifying...` : t`Verify Code`}
 							</Button>
 
-							<Text style={styles.helpText}>
-								Didn't receive the code? Check your spam folder or request a new
-								one.
+							<Text className="text-muted-foreground text-center text-sm leading-5">
+								<Trans>
+									Didn't receive the code? Check your spam folder or request a
+									new one.
+								</Trans>
 							</Text>
 
 							<Button
 								onPress={handleResendCode}
 								variant="outline"
-								style={styles.actionButton}
+								className="w-full"
 								disabled={isResending}
 							>
-								{isResending ? 'Sending...' : 'Resend code'}
+								{isResending ? t`Sending...` : t`Resend code`}
 							</Button>
 						</View>
 					</View>
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
+				<View className="mt-auto flex-row items-center justify-center gap-2 pt-8">
 					<TouchableOpacity
 						onPress={handleBackToSignUp}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Back to sign up</Text>
+						<Text className="text-primary text-base font-semibold">
+							<Trans>Back to sign up</Trans>
+						</Text>
 					</TouchableOpacity>
 
-					<Text style={styles.footerSeparator}>•</Text>
+					<Text className="text-muted-foreground text-base">•</Text>
 
 					<TouchableOpacity onPress={handleGoToSignIn} accessibilityRole="link">
-						<Text style={styles.footerLinkText}>Already have an account?</Text>
+						<Text className="text-primary text-base font-semibold">
+							<Trans>Already have an account?</Trans>
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
 			{isLoading && (
-				<LoadingOverlay visible={isLoading} message="Verifying code..." />
+				<LoadingOverlay visible={isLoading} message={t`Verifying code...`} />
 			)}
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	formContainer: {
-		gap: 20,
-	},
-	otpContainer: {
-		alignItems: 'center',
-		marginBottom: 8,
-	},
-	otpLabel: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#374151',
-		marginBottom: 12,
-		textAlign: 'center',
-	},
-	singleOtpInput: {
-		width: '100%',
-		height: 60,
-		borderWidth: 2,
-		borderColor: '#e5e7eb',
-		borderRadius: 12,
-		backgroundColor: '#ffffff',
-		fontSize: 24,
-		fontWeight: '600',
-		color: '#1f2937',
-		textAlign: 'center',
-		letterSpacing: 8,
-	},
-	singleOtpInputError: {
-		borderColor: '#ef4444',
-		backgroundColor: '#fef2f2',
-	},
-	singleOtpInputDisabled: {
-		backgroundColor: '#f3f4f6',
-		color: '#9ca3af',
-	},
-	errorText: {
-		textAlign: 'center',
-		marginTop: 8,
-	},
-	actionsContainer: {
-		gap: 16,
-		alignItems: 'center',
-		marginTop: 24,
-	},
-	helpText: {
-		fontSize: 14,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 20,
-	},
-	actionButton: {
-		width: '100%',
-	},
-	footer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-		gap: 8,
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-	footerSeparator: {
-		fontSize: 16,
-		color: '#9ca3af',
-	},
-})

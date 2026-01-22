@@ -69,12 +69,20 @@ export class HttpClient {
 					this.config.timeout,
 				)
 
+				const attemptStart = Date.now()
 				const response = await fetch(url, {
 					...requestConfig,
 					signal: controller.signal,
 				})
+				const attemptDuration = Date.now() - attemptStart
 
 				clearTimeout(timeoutId)
+
+				if (__DEV__) {
+					console.log(
+						`[HTTP] ${config.method || 'GET'} ${endpoint} - ${response.status} (${attemptDuration}ms)`,
+					)
+				}
 
 				// Handle HTTP error responses
 				if (!response.ok) {

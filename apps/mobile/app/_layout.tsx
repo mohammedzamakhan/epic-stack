@@ -1,9 +1,12 @@
+import './global.css'
+
 import * as Linking from 'expo-linking'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
 import { AuthGuard } from '../components/auth-guard'
 import { AuthProvider } from '../lib/auth/auth-context'
+import { I18nProvider } from '../lib/i18n'
 import { handleDeepLink } from '../lib/navigation'
 
 export default function RootLayout() {
@@ -35,54 +38,56 @@ export default function RootLayout() {
 	}, [])
 
 	return (
-		<AuthProvider>
-			<StatusBar style="auto" />
-			<Stack screenOptions={{ headerShown: false }}>
-				{/* Root index screen for initial routing */}
-				<Stack.Screen
-					name="index"
-					options={{
-						headerShown: false,
-						// Prevent going back to index screen
-						gestureEnabled: false,
-					}}
-				/>
+		<I18nProvider>
+			<AuthProvider>
+				<StatusBar style="auto" />
+				<Stack screenOptions={{ headerShown: false }}>
+					{/* Root index screen for initial routing */}
+					<Stack.Screen
+						name="index"
+						options={{
+							headerShown: false,
+							// Prevent going back to index screen
+							gestureEnabled: false,
+						}}
+					/>
 
-				{/* Authentication group - unauthenticated users */}
-				<Stack.Screen
-					name="(auth)"
-					options={{
-						headerShown: false,
-						// Allow navigation within auth group
-						gestureEnabled: true,
-					}}
-				/>
+					{/* Authentication group - unauthenticated users */}
+					<Stack.Screen
+						name="(auth)"
+						options={{
+							headerShown: false,
+							// Allow navigation within auth group
+							gestureEnabled: true,
+						}}
+					/>
 
-				{/* Dashboard group - authenticated users */}
-				<Stack.Screen
-					name="(dashboard)"
-					options={{
-						headerShown: false,
-						// Prevent going back to auth screens when authenticated
-						gestureEnabled: false,
-					}}
-				/>
+					{/* Dashboard group - authenticated users */}
+					<Stack.Screen
+						name="(dashboard)"
+						options={{
+							headerShown: false,
+							// Prevent going back to auth screens when authenticated
+							gestureEnabled: false,
+						}}
+					/>
 
-				{/* OAuth callback screen - special handling */}
-				<Stack.Screen
-					name="auth/callback"
-					options={{
-						headerShown: false,
-						// Prevent manual navigation to callback
-						gestureEnabled: false,
-						// Hide from navigation history
-						presentation: 'transparentModal',
-					}}
-				/>
-			</Stack>
+					{/* OAuth callback screen - special handling */}
+					<Stack.Screen
+						name="auth/callback"
+						options={{
+							headerShown: false,
+							// Prevent manual navigation to callback
+							gestureEnabled: false,
+							// Hide from navigation history
+							presentation: 'transparentModal',
+						}}
+					/>
+				</Stack>
 
-			{/* Auth guard handles protected route logic */}
-			<AuthGuard />
-		</AuthProvider>
+				{/* Auth guard handles protected route logic */}
+				<AuthGuard />
+			</AuthProvider>
+		</I18nProvider>
 	)
 }

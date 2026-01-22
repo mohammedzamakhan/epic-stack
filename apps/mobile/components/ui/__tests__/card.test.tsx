@@ -13,7 +13,7 @@ describe('Card', () => {
 		expect(getByText('Card content')).toBeTruthy()
 	})
 
-	it('applies default padding', () => {
+	it('applies default className with padding', () => {
 		const { getByText } = render(
 			<Card>
 				<Text>Content</Text>
@@ -21,64 +21,30 @@ describe('Card', () => {
 		)
 
 		const container = getByText('Content').parent
-		expect(container?.props.style).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					padding: 16,
-				}),
-			]),
-		)
+		expect(container?.props.className).toContain('p-4')
 	})
 
-	it('applies custom padding', () => {
+	it('applies custom className', () => {
 		const { getByText } = render(
-			<Card padding={24}>
+			<Card className="p-6">
 				<Text>Content</Text>
 			</Card>,
 		)
 
 		const container = getByText('Content').parent
-		expect(container?.props.style).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					padding: 24,
-				}),
-			]),
-		)
+		expect(container?.props.className).toContain('p-6')
 	})
 
-	it('applies custom margin', () => {
+	it('applies card background and border classes', () => {
 		const { getByText } = render(
-			<Card margin={12}>
+			<Card>
 				<Text>Content</Text>
 			</Card>,
 		)
 
 		const container = getByText('Content').parent
-		expect(container?.props.style).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					margin: 12,
-				}),
-			]),
-		)
-	})
-
-	it('applies custom elevation', () => {
-		const { getByText } = render(
-			<Card elevation={4}>
-				<Text>Content</Text>
-			</Card>,
-		)
-
-		const container = getByText('Content').parent
-		expect(container?.props.style).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					elevation: 4,
-				}),
-			]),
-		)
+		expect(container?.props.className).toContain('bg-card')
+		expect(container?.props.className).toContain('border')
 	})
 
 	it('forwards additional props', () => {
@@ -121,7 +87,7 @@ describe('CardContent', () => {
 		expect(getByText('Content text')).toBeTruthy()
 	})
 
-	it('applies flex: 1 style', () => {
+	it('applies flex-1 class', () => {
 		const { getByText } = render(
 			<CardContent>
 				<Text>Content</Text>
@@ -129,11 +95,7 @@ describe('CardContent', () => {
 		)
 
 		const container = getByText('Content').parent
-		expect(container?.props.style).toEqual(
-			expect.objectContaining({
-				flex: 1,
-			}),
-		)
+		expect(container?.props.className).toContain('flex-1')
 	})
 })
 

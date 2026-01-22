@@ -15,6 +15,7 @@ import {
 	type ApiResponse,
 	type OrganizationsApiResponse,
 	type OrganizationsApiError,
+	type User,
 } from '@repo/types'
 import { JWTHttpClient } from './jwt-http-client'
 
@@ -32,6 +33,9 @@ export interface AuthApiEndpoints {
 	logout: string
 	refresh: string
 	organizations: string
+	createOrganization: string
+	profile: string
+	setDefaultOrganization: string
 	socialAuth: (provider: string) => string
 	socialCallback: (provider: string) => string
 }
@@ -58,6 +62,9 @@ export class JWTAuthApi {
 			logout: '/api/auth/logout',
 			refresh: '/api/auth/refresh',
 			organizations: '/api/organizations',
+			createOrganization: '/api/organizations/create',
+			profile: '/api/profile',
+			setDefaultOrganization: '/api/organizations/set-default',
 			socialAuth: (provider: string) => `/api/auth/${provider}`,
 			socialCallback: (provider: string) => `/api/auth/${provider}/callback`,
 		}
@@ -287,7 +294,7 @@ export class JWTAuthApi {
 				params.append('state', state)
 			}
 
-			const callbackUrl = `/auth/${provider}/callback?${params.toString()}`
+			const callbackUrl = `/api/auth/${provider}/callback?${params.toString()}`
 			const response =
 				await this.httpClient.get<JWTOAuthCallbackApiResponse['data']>(
 					callbackUrl,
@@ -439,6 +446,115 @@ export class JWTAuthApi {
 					error instanceof Error ? error.message : 'Network error occurred',
 				status: 0,
 			}
+		}
+	}
+
+	/**
+	 * Updates user profile
+	 */
+	async updateProfile(data: {
+		name?: string
+		username: string
+	}): Promise<ApiResponse<{ user: User }>> {
+		try {
+			const response = await this.httpClient.postForm<{ user: User }>(
+				this.endpoints.profile,
+				{ ...data, intent: 'update-profile' },
+			)
+
+			if (!response.success) {
+				return {
+					success: false,
+					error: response.error,
+					message: response.message,
+					status: response.status,
+				}
+			}
+
+			return {
+				success: true,
+				data: response.data,
+				status: response.status,
+			}
+		} catch (error) {
+			return this.handleError(error as Error)
+		}
+	}
+
+	/**
+	 * Sets user's default organization
+	 */
+	async setDefaultOrganization(
+		organizationId: string,
+	): Promise<ApiResponse<{ success: boolean }>> {
+		try {
+			const response = await this.httpClient.postForm<{ success: boolean }>(
+				this.endpoints.setDefaultOrganization,
+				{ organizationId },
+			)
+
+			if (!response.success) {
+				return {
+					success: false,
+					error: response.error,
+					message: response.message,
+					status: response.status,
+				}
+			}
+
+			return {
+				success: true,
+				data: response.data,
+				status: response.status,
+			}
+		} catch (error) {
+			return this.handleError(error as Error)
+		}
+	}
+
+	/**
+	 * Creates a new organization
+	 */
+	async createOrganization(data: {
+		name: string
+		slug: string
+		description?: string
+	}): Promise<
+		ApiResponse<{
+			organization: {
+				id: string
+				name: string
+				slug: string
+				description?: string | null
+			}
+		}>
+	> {
+		try {
+			const response = await this.httpClient.postForm<{
+				organization: {
+					id: string
+					name: string
+					slug: string
+					description?: string | null
+				}
+			}>(this.endpoints.createOrganization, data)
+
+			if (!response.success) {
+				return {
+					success: false,
+					error: response.error,
+					message: response.message,
+					status: response.status,
+				}
+			}
+
+			return {
+				success: true,
+				data: response.data,
+				status: response.status,
+			}
+		} catch (error) {
+			return this.handleError(error as Error)
 		}
 	}
 

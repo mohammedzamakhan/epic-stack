@@ -5,7 +5,6 @@ import { useForm, Controller } from 'react-hook-form'
 import {
 	View,
 	Text,
-	StyleSheet,
 	ScrollView,
 	TouchableOpacity,
 	type TextInput,
@@ -136,15 +135,17 @@ export default function OnboardingScreen() {
 	}
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-background">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>Complete your profile</Text>
-					<Text style={styles.subtitle}>
+				<View className="mb-10 items-center">
+					<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+						Complete your profile
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
 						{email
 							? `Almost done! Create your profile for ${email}`
 							: 'Just a few more details to complete your account setup.'}
@@ -152,10 +153,12 @@ export default function OnboardingScreen() {
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
-					<View style={styles.formContainer}>
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Username</Text>
+				<View className="flex-1">
+					<View className="gap-5">
+						<View className="gap-2">
+							<Text className="text-foreground mb-1 text-base font-semibold">
+								Username
+							</Text>
 							<Controller
 								control={control}
 								name="username"
@@ -179,8 +182,10 @@ export default function OnboardingScreen() {
 							)}
 						</View>
 
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Full Name</Text>
+						<View className="gap-2">
+							<Text className="text-foreground mb-1 text-base font-semibold">
+								Full Name
+							</Text>
 							<Controller
 								control={control}
 								name="name"
@@ -201,8 +206,10 @@ export default function OnboardingScreen() {
 							{errors.name && <ErrorText>{errors.name.message}</ErrorText>}
 						</View>
 
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Password</Text>
+						<View className="gap-2">
+							<Text className="text-foreground mb-1 text-base font-semibold">
+								Password
+							</Text>
 							<Controller
 								control={control}
 								name="password"
@@ -222,13 +229,13 @@ export default function OnboardingScreen() {
 										rightIcon={
 											<TouchableOpacity
 												onPress={() => setShowPassword(!showPassword)}
-												style={styles.eyeButton}
+												className="p-1"
 												accessibilityLabel={
 													showPassword ? 'Hide password' : 'Show password'
 												}
 												accessibilityRole="button"
 											>
-												<Text style={styles.eyeIcon}>
+												<Text className="text-lg">
 													{showPassword ? '🙈' : '👁️'}
 												</Text>
 											</TouchableOpacity>
@@ -241,8 +248,10 @@ export default function OnboardingScreen() {
 							)}
 						</View>
 
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Confirm Password</Text>
+						<View className="gap-2">
+							<Text className="text-foreground mb-1 text-base font-semibold">
+								Confirm Password
+							</Text>
 							<Controller
 								control={control}
 								name="confirmPassword"
@@ -264,7 +273,7 @@ export default function OnboardingScreen() {
 												onPress={() =>
 													setShowConfirmPassword(!showConfirmPassword)
 												}
-												style={styles.eyeButton}
+												className="p-1"
 												accessibilityLabel={
 													showConfirmPassword
 														? 'Hide confirm password'
@@ -272,7 +281,7 @@ export default function OnboardingScreen() {
 												}
 												accessibilityRole="button"
 											>
-												<Text style={styles.eyeIcon}>
+												<Text className="text-lg">
 													{showConfirmPassword ? '🙈' : '👁️'}
 												</Text>
 											</TouchableOpacity>
@@ -285,7 +294,7 @@ export default function OnboardingScreen() {
 							)}
 						</View>
 
-						<View style={styles.checkboxGroup}>
+						<View className="gap-2">
 							<Controller
 								control={control}
 								name="agreeToTermsOfServiceAndPrivacyPolicy"
@@ -299,13 +308,13 @@ export default function OnboardingScreen() {
 								)}
 							/>
 							{errors.agreeToTermsOfServiceAndPrivacyPolicy && (
-								<ErrorText style={styles.checkboxError}>
+								<ErrorText className="mt-1">
 									{errors.agreeToTermsOfServiceAndPrivacyPolicy.message}
 								</ErrorText>
 							)}
 						</View>
 
-						<View style={styles.checkboxGroup}>
+						<View className="gap-2">
 							<Controller
 								control={control}
 								name="remember"
@@ -319,12 +328,14 @@ export default function OnboardingScreen() {
 							/>
 						</View>
 
-						{error && <ErrorText style={styles.formError}>{error}</ErrorText>}
+						{error && (
+							<ErrorText className="mt-2 text-center">{error}</ErrorText>
+						)}
 
 						<Button
 							onPress={handleSubmit(onSubmit)}
 							disabled={!isValid || isLoading}
-							style={styles.submitButton}
+							className="mt-2"
 						>
 							{isLoading ? 'Creating account...' : 'Create account'}
 						</Button>
@@ -332,12 +343,14 @@ export default function OnboardingScreen() {
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
+				<View className="mt-auto items-center pt-8">
 					<TouchableOpacity
 						onPress={handleBackToVerification}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Back to verification</Text>
+						<Text className="text-primary text-base font-semibold">
+							Back to verification
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
@@ -351,76 +364,3 @@ export default function OnboardingScreen() {
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	formContainer: {
-		gap: 20,
-	},
-	inputGroup: {
-		gap: 8,
-	},
-	label: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#374151',
-		marginBottom: 4,
-	},
-	checkboxGroup: {
-		gap: 8,
-	},
-	checkboxError: {
-		marginTop: 4,
-	},
-	formError: {
-		textAlign: 'center',
-		marginTop: 8,
-	},
-	submitButton: {
-		marginTop: 8,
-	},
-	eyeButton: {
-		padding: 4,
-	},
-	eyeIcon: {
-		fontSize: 18,
-	},
-	footer: {
-		alignItems: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-})

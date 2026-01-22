@@ -1,13 +1,6 @@
 import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import {
-	View,
-	Text,
-	StyleSheet,
-	ScrollView,
-	TouchableOpacity,
-	Alert,
-} from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import { Screen, Button, ErrorText } from '../../components/ui'
 import { navigateToSignIn } from '../../lib/navigation'
 
@@ -97,14 +90,16 @@ export default function VerifyEmailScreen() {
 
 	if (isVerifying) {
 		return (
-			<Screen style={styles.screen}>
-				<View style={styles.centerContainer}>
-					<View style={styles.loadingContainer}>
-						<Text style={styles.loadingIcon} accessibilityLabel="Loading">
+			<Screen className="bg-background">
+				<View className="flex-1 items-center justify-center px-6">
+					<View className="items-center py-5">
+						<Text className="mb-4 text-5xl" accessibilityLabel="Loading">
 							⏳
 						</Text>
-						<Text style={styles.title}>Verifying your email...</Text>
-						<Text style={styles.subtitle}>
+						<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+							Verifying your email...
+						</Text>
+						<Text className="text-muted-foreground text-center text-base leading-6">
 							Please wait while we verify your email address.
 						</Text>
 					</View>
@@ -115,19 +110,21 @@ export default function VerifyEmailScreen() {
 
 	if (isVerified) {
 		return (
-			<Screen style={styles.screen}>
-				<View style={styles.centerContainer}>
-					<View style={styles.successContainer}>
-						<Text style={styles.successIcon} accessibilityLabel="Success">
+			<Screen className="bg-background">
+				<View className="flex-1 items-center justify-center px-6">
+					<View className="items-center py-5">
+						<Text className="mb-4 text-5xl" accessibilityLabel="Success">
 							✅
 						</Text>
-						<Text style={styles.title}>Email Verified!</Text>
-						<Text style={styles.subtitle}>
+						<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+							Email Verified!
+						</Text>
+						<Text className="text-muted-foreground text-center text-base leading-6">
 							Your email has been successfully verified. You can now sign in to
 							your account.
 						</Text>
 
-						<Button onPress={handleBackToSignIn} style={styles.actionButton}>
+						<Button onPress={handleBackToSignIn} className="mt-2 w-full">
 							Continue to Sign In
 						</Button>
 					</View>
@@ -137,15 +134,17 @@ export default function VerifyEmailScreen() {
 	}
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-background">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>Verify your email</Text>
-					<Text style={styles.subtitle}>
+				<View className="mb-10 items-center">
+					<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+						Verify your email
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
 						{email
 							? `We've sent a verification link to ${email}. Click the link in your email to verify your account.`
 							: 'Check your email for a verification link to complete your account setup.'}
@@ -153,15 +152,15 @@ export default function VerifyEmailScreen() {
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
+				<View className="flex-1">
 					{verificationError && (
-						<ErrorText style={styles.errorContainer}>
+						<ErrorText className="mb-4 text-center">
 							{verificationError}
 						</ErrorText>
 					)}
 
-					<View style={styles.actionsContainer}>
-						<Text style={styles.helpText}>
+					<View className="items-center gap-4">
+						<Text className="text-muted-foreground text-center text-sm leading-5">
 							Didn't receive the email? Check your spam folder or request a new
 							one.
 						</Text>
@@ -170,7 +169,7 @@ export default function VerifyEmailScreen() {
 							<Button
 								onPress={handleResendVerification}
 								variant="outline"
-								style={styles.actionButton}
+								className="mt-2 w-full"
 							>
 								Resend verification email
 							</Button>
@@ -179,97 +178,17 @@ export default function VerifyEmailScreen() {
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
+				<View className="mt-auto items-center pt-8">
 					<TouchableOpacity
 						onPress={handleBackToSignIn}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Back to sign in</Text>
+						<Text className="text-primary text-base font-semibold">
+							Back to sign in
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	centerContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingHorizontal: 24,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	loadingContainer: {
-		alignItems: 'center',
-		paddingVertical: 20,
-	},
-	loadingIcon: {
-		fontSize: 48,
-		marginBottom: 16,
-	},
-	successContainer: {
-		alignItems: 'center',
-		paddingVertical: 20,
-	},
-	successIcon: {
-		fontSize: 48,
-		marginBottom: 16,
-	},
-	errorContainer: {
-		marginBottom: 16,
-		textAlign: 'center',
-	},
-	actionsContainer: {
-		gap: 16,
-		alignItems: 'center',
-	},
-	helpText: {
-		fontSize: 14,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 20,
-	},
-	actionButton: {
-		width: '100%',
-		marginTop: 8,
-	},
-	footer: {
-		alignItems: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-})

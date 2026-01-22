@@ -1,6 +1,6 @@
 import { useLocalSearchParams, router } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import { Screen, Button, ErrorText } from '../../components/ui'
 import { useOAuthCallback } from '../../lib/auth/hooks/use-oauth'
 
@@ -69,14 +69,16 @@ export default function OAuthCallbackScreen() {
 	if (isProcessing) {
 		return (
 			<Screen backgroundColor="#ffffff">
-				<View style={styles.content}>
+				<View className="flex-1 items-center justify-center p-5">
 					<ActivityIndicator
 						size="large"
 						color="#3b82f6"
 						accessibilityLabel="Loading"
 					/>
-					<Text style={styles.title}>Completing Authentication</Text>
-					<Text style={styles.subtitle}>
+					<Text className="text-foreground mt-4 mb-2 text-center text-2xl font-bold">
+						Completing Authentication
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
 						Please wait while we complete your authentication...
 					</Text>
 				</View>
@@ -86,23 +88,23 @@ export default function OAuthCallbackScreen() {
 
 	if (callbackError) {
 		return (
-			<Screen style={styles.container}>
-				<View style={styles.content}>
-					<Text style={styles.errorIcon} accessibilityLabel="Error">
+			<Screen className="bg-background flex-1">
+				<View className="flex-1 items-center justify-center p-5">
+					<Text className="mb-4 text-5xl" accessibilityLabel="Error">
 						❌
 					</Text>
-					<Text style={styles.title}>Authentication Failed</Text>
-					<ErrorText style={styles.error}>{callbackError}</ErrorText>
+					<Text className="text-foreground mt-4 mb-2 text-center text-2xl font-bold">
+						Authentication Failed
+					</Text>
+					<ErrorText className="mb-6 text-center text-base">
+						{callbackError}
+					</ErrorText>
 
-					<View style={styles.buttonContainer}>
-						<Button onPress={handleRetry} style={styles.button}>
+					<View className="w-full max-w-[300px]">
+						<Button onPress={handleRetry} className="mb-3">
 							Try Again
 						</Button>
-						<Button
-							onPress={handleGoHome}
-							variant="outline"
-							style={styles.button}
-						>
+						<Button onPress={handleGoHome} variant="outline" className="mb-3">
 							Go Home
 						</Button>
 					</View>
@@ -113,58 +115,17 @@ export default function OAuthCallbackScreen() {
 
 	// This should not be reached as the effect should handle all cases
 	return (
-		<Screen style={styles.container}>
-			<View style={styles.content}>
+		<Screen className="bg-background flex-1">
+			<View className="flex-1 items-center justify-center p-5">
 				<ActivityIndicator
 					size="large"
 					color="#3b82f6"
 					accessibilityLabel="Loading"
 				/>
-				<Text style={styles.title}>Processing...</Text>
+				<Text className="text-foreground mt-4 mb-2 text-center text-2xl font-bold">
+					Processing...
+				</Text>
 			</View>
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#ffffff',
-	},
-	content: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		padding: 20,
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		color: '#1f2937',
-		textAlign: 'center',
-		marginTop: 16,
-		marginBottom: 8,
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	errorIcon: {
-		fontSize: 48,
-		marginBottom: 16,
-	},
-	error: {
-		textAlign: 'center',
-		marginBottom: 24,
-		fontSize: 16,
-	},
-	buttonContainer: {
-		width: '100%',
-		maxWidth: 300,
-	},
-	button: {
-		marginBottom: 12,
-	},
-})

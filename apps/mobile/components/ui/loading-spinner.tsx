@@ -1,58 +1,36 @@
 import React from 'react'
-import {
-	View,
-	ActivityIndicator,
-	Text,
-	StyleSheet,
-	type ViewProps,
-} from 'react-native'
+import { View, ActivityIndicator, Text, type ViewProps } from 'react-native'
 
 interface LoadingSpinnerProps extends Omit<ViewProps, 'style'> {
 	size?: 'small' | 'large'
-	color?: string
 	text?: string
 	overlay?: boolean
+	className?: string
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 	size = 'large',
-	color = '#3B82F6',
 	text,
 	overlay = false,
+	className,
 	...props
 }) => {
-	const containerStyle = [styles.container, overlay && styles.overlay]
-
 	return (
-		<View style={containerStyle} {...props}>
-			<ActivityIndicator size={size} color={color} />
-			{text && <Text style={styles.text}>{text}</Text>}
+		<View
+			className={`items-center justify-center p-5 ${
+				overlay ? 'absolute top-0 right-0 bottom-0 left-0 z-50 bg-white/80' : ''
+			} ${className ?? ''}`}
+			{...props}
+		>
+			<ActivityIndicator size={size} className="text-primary" />
+			{text && (
+				<Text className="text-muted-foreground mt-3 text-center text-sm">
+					{text}
+				</Text>
+			)}
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		alignItems: 'center',
-		justifyContent: 'center',
-		padding: 20,
-	},
-	overlay: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		backgroundColor: 'rgba(255, 255, 255, 0.8)',
-		zIndex: 1000,
-	},
-	text: {
-		marginTop: 12,
-		fontSize: 14,
-		color: '#6B7280',
-		textAlign: 'center',
-	},
-})
 
 export { LoadingSpinner }
 export type { LoadingSpinnerProps }

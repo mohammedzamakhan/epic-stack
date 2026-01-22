@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import {
 	View,
 	TextInput,
-	StyleSheet,
 	type ViewStyle,
 	type NativeSyntheticEvent,
 	type TextInputKeyPressEventData,
@@ -15,17 +14,19 @@ interface InputOTPProps {
 	disabled?: boolean
 	style?: ViewStyle
 	children?: React.ReactNode
+	className?: string
 }
 
 interface InputOTPGroupProps {
 	children: React.ReactNode
+	className?: string
 }
 
 interface InputOTPSlotProps {
 	index: number
+	className?: string
 }
 
-// Context to share state between InputOTP and its slots
 const InputOTPContext = React.createContext<{
 	value: string
 	onChange: (value: string) => void
@@ -42,10 +43,10 @@ export function InputOTP({
 	disabled,
 	style,
 	children,
+	className,
 }: InputOTPProps) {
 	const [focusedIndex, setFocusedIndex] = useState(0)
 
-	// Reset focus to first slot when value is cleared
 	useEffect(() => {
 		if (value.length === 0) {
 			setFocusedIndex(0)
@@ -63,16 +64,18 @@ export function InputOTP({
 
 	return (
 		<InputOTPContext.Provider value={contextValue}>
-			<View style={[styles.container, style]}>{children}</View>
+			<View className={`items-center ${className ?? ''}`} style={style}>
+				{children}
+			</View>
 		</InputOTPContext.Provider>
 	)
 }
 
-export function InputOTPGroup({ children }: InputOTPGroupProps) {
-	return <View style={styles.group}>{children}</View>
+export function InputOTPGroup({ children, className }: InputOTPGroupProps) {
+	return <View className={`flex-row gap-2 ${className ?? ''}`}>{children}</View>
 }
 
-export function InputOTPSlot({ index }: InputOTPSlotProps) {
+export function InputOTPSlot({ index, className }: InputOTPSlotProps) {
 	const context = React.useContext(InputOTPContext)
 	const inputRef = useRef<TextInput>(null)
 
@@ -92,9 +95,7 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 	const isFocused = focusedIndex === index
 
 	useEffect(() => {
-		// Auto-focus the current focused index
 		if (isFocused && inputRef.current) {
-			// Small delay to ensure the component is ready
 			setTimeout(() => {
 				inputRef.current?.focus()
 			}, 50)
@@ -102,42 +103,33 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 	}, [isFocused])
 
 	useEffect(() => {
-		// Focus the first slot initially if no value
 		if (index === 0 && value.length === 0) {
 			setFocusedIndex(0)
 		}
 	}, [index, value.length, setFocusedIndex])
 
 	const handleChangeText = (text: string) => {
-		// Handle pasted content or multiple characters
 		if (text.length > 1) {
-			// If multiple digits are pasted, distribute them across slots
 			const digits = text.replace(/\D/g, '').slice(0, maxLength)
 			onChange(digits)
 
-			// Focus the next empty slot or the last slot
 			const nextIndex = Math.min(digits.length, maxLength - 1)
 			setFocusedIndex(nextIndex)
 			return
 		}
 
-		// Handle single character input
-		const digit = text.replace(/\D/g, '') // Only allow digits
+		const digit = text.replace(/\D/g, '')
 
-		// Build new value array
 		const newValueArray = Array(maxLength).fill('')
 		for (let i = 0; i < value.length; i++) {
 			newValueArray[i] = value[i] || ''
 		}
 
-		// Set the digit at current index
 		newValueArray[index] = digit
 
-		// Create final value string
 		const finalValue = newValueArray.join('')
 		onChange(finalValue)
 
-		// Move to next input if digit was entered and not at the end
 		if (digit && index < maxLength - 1) {
 			setFocusedIndex(index + 1)
 		}
@@ -146,10 +138,8 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 	const handleKeyPress = ({
 		nativeEvent,
 	}: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-		// Handle backspace
 		if (nativeEvent.key === 'Backspace') {
 			if (currentValue) {
-				// Clear current slot
 				const newValueArray = Array(maxLength).fill('')
 				for (let i = 0; i < value.length; i++) {
 					newValueArray[i] = value[i] || ''
@@ -159,7 +149,6 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 				const finalValue = newValueArray.join('').replace(/undefined/g, '')
 				onChange(finalValue)
 			} else if (index > 0) {
-				// Move to previous slot and clear it
 				setFocusedIndex(index - 1)
 
 				const newValueArray = Array(maxLength).fill('')
@@ -186,11 +175,9 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 	return (
 		<TextInput
 			ref={inputRef}
-			style={[
-				styles.slot,
-				isFocused && styles.slotFocused,
-				disabled && styles.slotDisabled,
-			]}
+			className={`text-foreground bg-background h-12 w-12 rounded-lg border-2 text-center text-lg font-semibold ${
+				isFocused ? 'border-primary bg-slate-50' : 'border-input'
+			} ${disabled ? 'bg-muted text-muted-foreground' : ''} ${className ?? ''}`}
 			value={currentValue}
 			onChangeText={handleChangeText}
 			onKeyPress={handleKeyPress}
@@ -207,32 +194,3 @@ export function InputOTPSlot({ index }: InputOTPSlotProps) {
 		/>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		alignItems: 'center',
-	},
-	group: {
-		flexDirection: 'row',
-		gap: 8,
-	},
-	slot: {
-		width: 48,
-		height: 48,
-		borderWidth: 2,
-		borderColor: '#e5e7eb',
-		borderRadius: 8,
-		fontSize: 18,
-		fontWeight: '600',
-		color: '#1f2937',
-		backgroundColor: '#ffffff',
-	},
-	slotFocused: {
-		borderColor: '#3b82f6',
-		backgroundColor: '#f8fafc',
-	},
-	slotDisabled: {
-		backgroundColor: '#f3f4f6',
-		color: '#9ca3af',
-	},
-})

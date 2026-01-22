@@ -1,61 +1,47 @@
+import { Ionicons } from '@expo/vector-icons'
+import { Trans } from '@lingui/react/macro'
+import { useLingui } from '@lingui/react/macro'
 import { router } from 'expo-router'
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native'
 import {
-	Screen,
-	Card,
-	CardHeader,
-	CardContent,
-	Button,
-} from '../../components/ui'
+	View,
+	Text,
+	ScrollView,
+	TouchableOpacity,
+	RefreshControl,
+} from 'react-native'
+import { Screen, Card, CardHeader, CardContent } from '../../components/ui'
 import { useOrganizations } from '../../lib/api/hooks/use-organizations'
 import { useAuth } from '../../lib/auth/hooks/use-auth'
 
 export default function DashboardScreen() {
-	const { user, logout, isLoading } = useAuth()
+	const { t } = useLingui()
+	const { user } = useAuth()
 	const {
 		organizations,
 		isLoading: organizationsLoading,
-		error: organizationsError,
+		refetch,
 	} = useOrganizations()
 
-	const handleLogout = async () => {
-		await logout()
-		router.replace('/(auth)/sign-in')
-		Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-			{
-				text: 'Cancel',
-				style: 'cancel',
-			},
-			{
-				text: 'Sign Out',
-				style: 'destructive',
-				onPress: async () => {
-					try {
-						await logout()
-						router.replace('/(auth)/sign-in')
-					} catch (error) {
-						console.error('Logout error:', error)
-					}
-				},
-			},
-		])
+	const [refreshing, setRefreshing] = React.useState(false)
+
+	const onRefresh = async () => {
+		setRefreshing(true)
+		await refetch()
+		setRefreshing(false)
 	}
 
-	const handleEditProfile = () => {
-		Alert.alert(
-			'Edit Profile',
-			'Profile editing functionality will be available soon.',
-			[{ text: 'OK' }],
-		)
-	}
+	const defaultOrg = organizations?.find((org) => org.isDefault)
 
 	if (!user) {
 		return (
 			<Screen>
-				<View style={styles.loadingContainer}>
-					<Text style={styles.loadingText} accessibilityLiveRegion="polite">
-						Loading...
+				<View className="flex-1 items-center justify-center">
+					<Text
+						className="text-muted-foreground text-base"
+						accessibilityLiveRegion="polite"
+					>
+						<Trans>Loading...</Trans>
 					</Text>
 				</View>
 			</Screen>
@@ -65,152 +51,146 @@ export default function DashboardScreen() {
 	return (
 		<Screen>
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="flex-grow"
 				showsVerticalScrollIndicator={false}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			>
-				<View style={styles.container}>
-					{/* Header */}
-					<View style={styles.header}>
-						<Text style={styles.welcomeText}>Welcome back!</Text>
-						<Text style={styles.nameText}>{user.name || user.username}</Text>
+				<View className="flex-1 p-5">
+					{/* Welcome Header */}
+					<View className="mb-6">
+						<Text className="text-muted-foreground mb-1 text-lg">
+							<Trans>Welcome back,</Trans>
+						</Text>
+						<Text className="text-foreground text-2xl font-bold">
+							{user.name || user.username}
+						</Text>
+						{defaultOrg && (
+							<Text className="text-muted-foreground mt-1 text-sm">
+								{t`Working in ${defaultOrg.name}`}
+							</Text>
+						)}
 					</View>
 
-					{/* User Info Card */}
-					<Card style={styles.card}>
+					{/* Quick Actions */}
+					<Card className="mb-4">
 						<CardHeader>
-							<Text style={styles.cardTitle}>Profile Information</Text>
+							<Text className="text-foreground text-lg font-semibold">
+								<Trans>Quick Actions</Trans>
+							</Text>
 						</CardHeader>
 						<CardContent>
-							<View style={styles.infoRow}>
-								<Text style={styles.infoLabel}>Username:</Text>
-								<Text style={styles.infoValue}>{user.username}</Text>
-							</View>
-							<View style={styles.infoRow}>
-								<Text style={styles.infoLabel}>Email:</Text>
-								<Text style={styles.infoValue}>{user.email}</Text>
-							</View>
-							{user.name && (
-								<View style={styles.infoRow}>
-									<Text style={styles.infoLabel}>Name:</Text>
-									<Text style={styles.infoValue}>{user.name}</Text>
-								</View>
-							)}
-							<View style={styles.infoRow}>
-								<Text style={styles.infoLabel}>Member since:</Text>
-								<Text style={styles.infoValue}>
-									{new Date(user.createdAt).toLocaleDateString()}
-								</Text>
+							<View className="flex-row flex-wrap gap-3">
+								<TouchableOpacity
+									onPress={() => router.push('/(dashboard)/organizations')}
+									className="bg-muted min-w-[140px] flex-1 items-center rounded-lg p-4"
+								>
+									<Ionicons name="business-outline" size={24} color="#888" />
+									<Text className="text-foreground mt-2 text-sm font-medium">
+										<Trans>Organizations</Trans>
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => router.push('/(dashboard)/settings/profile')}
+									className="bg-muted min-w-[140px] flex-1 items-center rounded-lg p-4"
+								>
+									<Ionicons name="person-outline" size={24} color="#888" />
+									<Text className="text-foreground mt-2 text-sm font-medium">
+										<Trans>Edit Profile</Trans>
+									</Text>
+								</TouchableOpacity>
 							</View>
 						</CardContent>
 					</Card>
 
-					{/* Organizations Card */}
-					<Card style={styles.card}>
+					{/* Organizations Summary */}
+					<Card className="mb-4">
 						<CardHeader>
-							<Text style={styles.cardTitle}>Organizations</Text>
+							<View className="flex-row items-center justify-between">
+								<Text className="text-foreground text-lg font-semibold">
+									<Trans>Your Organizations</Trans>
+								</Text>
+								<TouchableOpacity
+									onPress={() => router.push('/(dashboard)/organizations')}
+								>
+									<Text className="text-primary text-sm">
+										<Trans>View All</Trans>
+									</Text>
+								</TouchableOpacity>
+							</View>
 						</CardHeader>
 						<CardContent>
 							{organizationsLoading ? (
-								<Text style={styles.loadingText}>Loading organizations...</Text>
-							) : organizationsError ? (
-								<Text style={styles.errorText}>{organizationsError}</Text>
+								<Text className="text-muted-foreground text-base">
+									<Trans>Loading organizations...</Trans>
+								</Text>
 							) : organizations && organizations.length === 0 ? (
-								<Text style={styles.emptyText}>No organizations found</Text>
+								<Text className="text-muted-foreground text-center text-sm italic">
+									<Trans>No organizations found</Trans>
+								</Text>
 							) : (
 								<View>
-									{organizations &&
-										organizations.map((org, index) => (
-											<View
-												key={org.id}
-												style={[
-													styles.orgRow,
-													index === organizations.length - 1 &&
-														styles.lastOrgRow,
-												]}
-											>
-												<View style={styles.orgInfo}>
-													<View style={styles.orgHeader}>
-														<Text style={styles.orgName}>{org.name}</Text>
-														{org.isDefault && (
-															<View
-																style={styles.defaultBadge}
-																accessibilityLabel="Default organization"
-															>
-																<Text style={styles.defaultBadgeText}>
-																	Default
-																</Text>
-															</View>
-														)}
-													</View>
-													<Text style={styles.orgRole}>{org.role.name}</Text>
-													{org.description && (
-														<Text style={styles.orgDescription}>
-															{org.description}
-														</Text>
-													)}
-													<View style={styles.orgMeta}>
-														<Text style={styles.orgMetaText}>
-															Joined{' '}
-															{new Date(org.joinedAt).toLocaleDateString()}
-														</Text>
-														{org.size && (
-															<Text style={styles.orgMetaText}>
-																{' '}
-																• {org.size}
-															</Text>
-														)}
-													</View>
-												</View>
+									{organizations?.slice(0, 3).map((org, index) => (
+										<View
+											key={org.id}
+											className={`flex-row items-center py-3 ${
+												index !== Math.min(organizations.length - 1, 2)
+													? 'border-border border-b'
+													: ''
+											}`}
+										>
+											<View className="bg-primary/10 h-10 w-10 items-center justify-center rounded-full">
+												<Text className="text-primary font-semibold">
+													{org.name.charAt(0).toUpperCase()}
+												</Text>
 											</View>
-										))}
+											<View className="ml-3 flex-1">
+												<View className="flex-row items-center">
+													<Text className="text-foreground text-sm font-semibold">
+														{org.name}
+													</Text>
+													{org.isDefault && (
+														<View className="bg-primary ml-2 rounded-full px-2 py-0.5">
+															<Text className="text-primary-foreground text-[10px] font-semibold uppercase">
+																<Trans>Current</Trans>
+															</Text>
+														</View>
+													)}
+												</View>
+												<Text className="text-muted-foreground text-xs capitalize">
+													{org.role.name}
+												</Text>
+											</View>
+										</View>
+									))}
+									{organizations && organizations.length > 3 && (
+										<TouchableOpacity
+											onPress={() => router.push('/(dashboard)/organizations')}
+											className="mt-2 py-2"
+										>
+											<Text className="text-primary text-center text-sm">
+												{t`+${organizations.length - 3} more organizations`}
+											</Text>
+										</TouchableOpacity>
+									)}
 								</View>
 							)}
 						</CardContent>
 					</Card>
 
-					{/* Actions Card */}
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.cardTitle}>Account Actions</Text>
-						</CardHeader>
-						<CardContent>
-							<View style={styles.actionsContainer}>
-								<Button
-									variant="outline"
-									onPress={handleEditProfile}
-									style={styles.actionButton}
-								>
-									Edit Profile
-								</Button>
-								<Button
-									variant="outline"
-									onPress={handleLogout}
-									loading={isLoading}
-									style={styles.actionButton}
-								>
-									Sign Out
-								</Button>
-							</View>
-						</CardContent>
-					</Card>
-
-					{/* App Info Card */}
-					<Card style={styles.card}>
-						<CardHeader>
-							<Text style={styles.cardTitle}>Epic Stack Mobile</Text>
-						</CardHeader>
-						<CardContent>
-							<Text style={styles.appDescription}>
-								You're successfully logged into the Epic Stack mobile app! This
-								is a React Native app built with Expo Router and integrated with
-								the Epic Stack backend.
-							</Text>
-							<View style={styles.featuresContainer}>
-								<Text style={styles.featuresTitle}>Features:</Text>
-								<Text style={styles.featureItem}>• Secure authentication</Text>
-								<Text style={styles.featureItem}>• Session management</Text>
-								<Text style={styles.featureItem}>• Cross-platform support</Text>
-								<Text style={styles.featureItem}>• Modern UI components</Text>
+					{/* App Info */}
+					<Card>
+						<CardContent className="p-4">
+							<View className="flex-row items-center">
+								<Ionicons
+									name="information-circle-outline"
+									size={20}
+									color="#888"
+								/>
+								<Text className="text-muted-foreground ml-2 text-sm">
+									<Trans>Epic Stack Mobile v1.0.0</Trans>
+								</Text>
 							</View>
 						</CardContent>
 					</Card>
@@ -219,158 +199,3 @@ export default function DashboardScreen() {
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	scrollContainer: {
-		flexGrow: 1,
-	},
-	container: {
-		flex: 1,
-		padding: 20,
-	},
-	loadingContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	loadingText: {
-		fontSize: 16,
-		color: '#666',
-	},
-	header: {
-		marginBottom: 24,
-		alignItems: 'center',
-	},
-	welcomeText: {
-		fontSize: 18,
-		color: '#666',
-		marginBottom: 4,
-	},
-	nameText: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: '#1a1a1a',
-		textAlign: 'center',
-	},
-	card: {
-		marginBottom: 16,
-	},
-	cardTitle: {
-		fontSize: 18,
-		fontWeight: '600',
-		color: '#1a1a1a',
-	},
-	infoRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		paddingVertical: 8,
-		borderBottomWidth: 1,
-		borderBottomColor: '#f3f4f6',
-	},
-	infoLabel: {
-		fontSize: 14,
-		color: '#6b7280',
-		fontWeight: '500',
-	},
-	infoValue: {
-		fontSize: 14,
-		color: '#1a1a1a',
-		fontWeight: '600',
-		flex: 1,
-		textAlign: 'right',
-	},
-	actionsContainer: {
-		gap: 12,
-	},
-	actionButton: {
-		width: '100%',
-	},
-	appDescription: {
-		fontSize: 14,
-		color: '#6b7280',
-		lineHeight: 20,
-		marginBottom: 16,
-	},
-	featuresContainer: {
-		marginTop: 8,
-	},
-	featuresTitle: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#1a1a1a',
-		marginBottom: 8,
-	},
-	featureItem: {
-		fontSize: 14,
-		color: '#6b7280',
-		marginBottom: 4,
-	},
-	errorText: {
-		fontSize: 14,
-		color: '#ef4444',
-		textAlign: 'center',
-		fontStyle: 'italic',
-	},
-	emptyText: {
-		fontSize: 14,
-		color: '#6b7280',
-		textAlign: 'center',
-		fontStyle: 'italic',
-	},
-	orgRow: {
-		paddingVertical: 12,
-		borderBottomWidth: 1,
-		borderBottomColor: '#f3f4f6',
-	},
-	lastOrgRow: {
-		borderBottomWidth: 0,
-	},
-	orgInfo: {
-		flex: 1,
-	},
-	orgHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginBottom: 4,
-	},
-	orgName: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#1a1a1a',
-		flex: 1,
-	},
-	defaultBadge: {
-		backgroundColor: '#10b981',
-		paddingHorizontal: 8,
-		paddingVertical: 2,
-		borderRadius: 12,
-	},
-	defaultBadgeText: {
-		fontSize: 10,
-		fontWeight: '600',
-		color: 'white',
-		textTransform: 'uppercase',
-	},
-	orgRole: {
-		fontSize: 14,
-		color: '#6366f1',
-		fontWeight: '500',
-		marginBottom: 4,
-		textTransform: 'capitalize',
-	},
-	orgDescription: {
-		fontSize: 13,
-		color: '#6b7280',
-		marginBottom: 6,
-		lineHeight: 18,
-	},
-	orgMeta: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	orgMetaText: {
-		fontSize: 12,
-		color: '#9ca3af',
-	},
-})

@@ -3,7 +3,6 @@ import {
 	TouchableOpacity,
 	View,
 	Text,
-	StyleSheet,
 	type TouchableOpacityProps,
 } from 'react-native'
 import { triggerSelectionHaptic } from '../../lib/haptics'
@@ -15,6 +14,7 @@ export interface CheckboxProps extends TouchableOpacityProps {
 	disabled?: boolean
 	error?: boolean
 	hapticFeedback?: boolean
+	className?: string
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({
@@ -24,7 +24,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
 	label,
 	disabled = false,
 	hapticFeedback = true,
-	style,
+	className,
 	...props
 }) => {
 	const handlePress = async () => {
@@ -38,7 +38,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
 
 	return (
 		<TouchableOpacity
-			style={[styles.container, disabled && styles.containerDisabled, style]}
+			className={`my-2 flex-row items-center ${disabled ? 'opacity-50' : ''} ${className ?? ''}`}
 			onPress={handlePress}
 			disabled={disabled}
 			activeOpacity={0.7}
@@ -47,22 +47,27 @@ const Checkbox: React.FC<CheckboxProps> = ({
 			{...props}
 		>
 			<View
-				style={[
-					styles.checkbox,
-					checked && styles.checkboxChecked,
-					disabled && styles.checkboxDisabled,
-					error && styles.checkboxError,
-				]}
+				className={`h-5 w-5 items-center justify-center rounded border-2 ${
+					checked
+						? 'bg-primary border-primary'
+						: disabled
+							? 'bg-muted border-border'
+							: 'bg-background border-input'
+				} ${error ? 'border-destructive' : ''}`}
 			>
-				{checked && <Text style={styles.checkmark}>✓</Text>}
+				{checked && (
+					<Text className="text-primary-foreground text-xs font-bold">✓</Text>
+				)}
 			</View>
 			{label && (
 				<Text
-					style={[
-						styles.label,
-						disabled && styles.labelDisabled,
-						error && styles.labelError,
-					]}
+					className={`ml-2 flex-1 text-sm ${
+						disabled
+							? 'text-muted-foreground'
+							: error
+								? 'text-destructive'
+								: 'text-foreground'
+					}`}
 				>
 					{label}
 				</Text>
@@ -70,54 +75,5 @@ const Checkbox: React.FC<CheckboxProps> = ({
 		</TouchableOpacity>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginVertical: 8,
-	},
-	containerDisabled: {
-		opacity: 0.5,
-	},
-	checkbox: {
-		width: 20,
-		height: 20,
-		borderWidth: 2,
-		borderColor: '#D1D5DB',
-		borderRadius: 4,
-		alignItems: 'center',
-		justifyContent: 'center',
-		backgroundColor: '#FFFFFF',
-	},
-	checkboxChecked: {
-		backgroundColor: '#3B82F6',
-		borderColor: '#3B82F6',
-	},
-	checkboxDisabled: {
-		backgroundColor: '#F3F4F6',
-		borderColor: '#E5E7EB',
-	},
-	checkboxError: {
-		borderColor: '#EF4444',
-	},
-	checkmark: {
-		color: '#FFFFFF',
-		fontSize: 12,
-		fontWeight: 'bold',
-	},
-	label: {
-		marginLeft: 8,
-		fontSize: 14,
-		color: '#374151',
-		flex: 1,
-	},
-	labelDisabled: {
-		color: '#9CA3AF',
-	},
-	labelError: {
-		color: '#EF4444',
-	},
-})
 
 export { Checkbox }

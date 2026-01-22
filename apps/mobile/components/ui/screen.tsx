@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-	View,
-	StyleSheet,
-	type ViewProps,
-	StatusBar,
-	Platform,
-} from 'react-native'
+import { View, type ViewProps, StatusBar, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface ScreenProps extends ViewProps {
@@ -13,18 +7,17 @@ interface ScreenProps extends ViewProps {
 	safeArea?: boolean
 	statusBarStyle?: 'default' | 'light-content' | 'dark-content'
 	backgroundColor?: string
+	className?: string
 }
 
 const Screen: React.FC<ScreenProps> = ({
 	children,
 	safeArea = true,
-	statusBarStyle = 'dark-content',
-	backgroundColor = '#FFFFFF',
-	style,
+	statusBarStyle = 'light-content',
+	backgroundColor,
+	className,
 	...props
 }) => {
-	const Container = safeArea ? SafeAreaView : View
-
 	return (
 		<>
 			<StatusBar
@@ -33,21 +26,20 @@ const Screen: React.FC<ScreenProps> = ({
 					Platform.OS === 'android' ? backgroundColor : undefined
 				}
 			/>
-			<Container
-				style={[styles.container, { backgroundColor }, style]}
+			<View
+				className={`flex-1 ${className ?? ''}`}
+				style={backgroundColor ? { backgroundColor } : undefined}
 				{...props}
 			>
-				{children}
-			</Container>
+				{safeArea ? (
+					<SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
+				) : (
+					children
+				)}
+			</View>
 		</>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-})
 
 export { Screen }
 export type { ScreenProps }

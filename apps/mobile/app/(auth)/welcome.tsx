@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router'
 import React from 'react'
 import {
-	StyleSheet,
 	View,
 	Text,
 	TouchableOpacity,
@@ -24,27 +23,39 @@ export default function WelcomeScreen() {
 	}
 
 	return (
-		<Screen style={styles.container}>
+		<Screen className="bg-muted">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Hero Section */}
-				<View style={styles.hero}>
-					<View style={styles.logoContainer}>
-						<Text style={styles.logoEmoji}>🚀</Text>
+				<View
+					className="items-center pb-12"
+					style={{ paddingTop: height * 0.1 }}
+				>
+					<View
+						className="bg-primary mb-8 h-24 w-24 items-center justify-center rounded-full"
+						style={{
+							shadowColor: '#667eea',
+							shadowOffset: { width: 0, height: 8 },
+							shadowOpacity: 0.3,
+							shadowRadius: 16,
+							elevation: 8,
+						}}
+					>
+						<Text className="text-5xl">🚀</Text>
 					</View>
-					<Text style={styles.title}>
+					<Text className="text-foreground mb-4 text-center text-3xl leading-10 font-bold">
 						Welcome to{'\n'}
-						<Text style={styles.brandText}>Epic Stack</Text>
+						<Text className="text-primary">Epic Stack</Text>
 					</Text>
-					<Text style={styles.subtitle}>
+					<Text className="text-muted-foreground px-4 text-center text-lg leading-7">
 						The fastest way to build and ship production-ready apps
 					</Text>
 				</View>
 
 				{/* Features Grid */}
-				<View style={styles.featuresGrid}>
+				<View className="mb-12 flex-row flex-wrap justify-between">
 					<FeatureCard
 						icon="⚡"
 						title="Fast Development"
@@ -68,15 +79,19 @@ export default function WelcomeScreen() {
 				</View>
 
 				{/* CTA Section */}
-				<View style={styles.ctaSection}>
-					<Button onPress={handleGetStarted} style={styles.primaryButton}>
+				<View className="pb-8">
+					<Button onPress={handleGetStarted} className="mb-6">
 						Get Started
 					</Button>
 
-					<View style={styles.signInContainer}>
-						<Text style={styles.signInText}>Already have an account? </Text>
+					<View className="flex-row items-center justify-center">
+						<Text className="text-muted-foreground text-base">
+							Already have an account?{' '}
+						</Text>
 						<TouchableOpacity onPress={handleSignIn} accessibilityRole="link">
-							<Text style={styles.signInLink}>Sign In</Text>
+							<Text className="text-primary text-base font-semibold">
+								Sign In
+							</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -93,122 +108,24 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
 	return (
-		<View style={styles.featureCard}>
-			<Text style={styles.featureIcon}>{icon}</Text>
-			<Text style={styles.featureTitle}>{title}</Text>
-			<Text style={styles.featureDescription}>{description}</Text>
+		<View
+			className="bg-card mb-4 items-center rounded-2xl p-5"
+			style={{
+				width: (width - 64) / 2,
+				shadowColor: '#000',
+				shadowOffset: { width: 0, height: 2 },
+				shadowOpacity: 0.1,
+				shadowRadius: 8,
+				elevation: 3,
+			}}
+		>
+			<Text className="mb-3 text-3xl">{icon}</Text>
+			<Text className="text-foreground mb-2 text-center text-base font-semibold">
+				{title}
+			</Text>
+			<Text className="text-muted-foreground text-center text-sm leading-5">
+				{description}
+			</Text>
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		backgroundColor: '#f8fafc',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-	},
-	hero: {
-		alignItems: 'center',
-		paddingTop: height * 0.1,
-		paddingBottom: 48,
-	},
-	logoContainer: {
-		width: 100,
-		height: 100,
-		backgroundColor: '#667eea',
-		borderRadius: 50,
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 32,
-		shadowColor: '#667eea',
-		shadowOffset: {
-			width: 0,
-			height: 8,
-		},
-		shadowOpacity: 0.3,
-		shadowRadius: 16,
-		elevation: 8,
-	},
-	logoEmoji: {
-		fontSize: 48,
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		color: '#1a202c',
-		textAlign: 'center',
-		marginBottom: 16,
-		lineHeight: 40,
-	},
-	brandText: {
-		color: '#667eea',
-	},
-	subtitle: {
-		fontSize: 18,
-		color: '#64748b',
-		textAlign: 'center',
-		lineHeight: 26,
-		paddingHorizontal: 16,
-	},
-	featuresGrid: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'space-between',
-		marginBottom: 48,
-	},
-	featureCard: {
-		width: (width - 64) / 2,
-		backgroundColor: '#ffffff',
-		borderRadius: 16,
-		padding: 20,
-		marginBottom: 16,
-		alignItems: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
-		elevation: 3,
-	},
-	featureIcon: {
-		fontSize: 32,
-		marginBottom: 12,
-	},
-	featureTitle: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#1a202c',
-		marginBottom: 8,
-		textAlign: 'center',
-	},
-	featureDescription: {
-		fontSize: 14,
-		color: '#64748b',
-		textAlign: 'center',
-		lineHeight: 20,
-	},
-	ctaSection: {
-		paddingBottom: 32,
-	},
-	primaryButton: {
-		marginBottom: 24,
-	},
-	signInContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	signInText: {
-		fontSize: 16,
-		color: '#64748b',
-	},
-	signInLink: {
-		fontSize: 16,
-		color: '#667eea',
-		fontWeight: '600',
-	},
-})

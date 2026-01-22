@@ -1,17 +1,21 @@
+import { useLingui } from '@lingui/react/macro'
 import React from 'react'
-import { View, Text, StyleSheet, Modal, ActivityIndicator } from 'react-native'
+import { View, Text, Modal, ActivityIndicator } from 'react-native'
 
 export interface LoadingOverlayProps {
 	visible: boolean
 	message?: string
 	transparent?: boolean
+	className?: string
 }
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 	visible,
-	message = 'Loading...',
+	message,
 	transparent = true,
 }) => {
+	const { t } = useLingui()
+	const displayMessage = message ?? t`Loading...`
 	if (!visible) return null
 
 	return (
@@ -21,44 +25,18 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 			visible={visible}
 			statusBarTranslucent
 		>
-			<View style={styles.overlay}>
-				<View style={styles.container}>
-					<ActivityIndicator size="large" color="#3B82F6" />
-					{message && <Text style={styles.message}>{message}</Text>}
+			<View className="flex-1 items-center justify-center bg-black/50">
+				<View className="bg-card min-w-30 items-center rounded-xl p-6 shadow-lg">
+					<ActivityIndicator size="large" className="text-primary" />
+					{displayMessage && (
+						<Text className="text-foreground mt-3 text-center text-base">
+							{displayMessage}
+						</Text>
+					)}
 				</View>
 			</View>
 		</Modal>
 	)
 }
-
-const styles = StyleSheet.create({
-	overlay: {
-		flex: 1,
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	container: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 12,
-		padding: 24,
-		alignItems: 'center',
-		minWidth: 120,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	message: {
-		marginTop: 12,
-		fontSize: 16,
-		color: '#374151',
-		textAlign: 'center',
-	},
-})
 
 export { LoadingOverlay }

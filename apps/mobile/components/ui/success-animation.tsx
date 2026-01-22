@@ -1,25 +1,28 @@
+import { useLingui } from '@lingui/react/macro'
 import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native'
+import { View, Text, Animated, Easing, StyleSheet } from 'react-native'
 
 export interface SuccessAnimationProps {
 	visible: boolean
 	message?: string
 	onComplete?: () => void
 	duration?: number
+	className?: string
 }
 
 const SuccessAnimation: React.FC<SuccessAnimationProps> = ({
 	visible,
-	message = 'Success!',
+	message,
 	onComplete,
 	duration = 2000,
 }) => {
+	const { t } = useLingui()
+	const displayMessage = message ?? t`Success!`
 	const scaleAnim = useRef(new Animated.Value(0)).current
 	const opacityAnim = useRef(new Animated.Value(0)).current
 
 	useEffect(() => {
 		if (visible) {
-			// Start animation
 			Animated.sequence([
 				Animated.parallel([
 					Animated.timing(scaleAnim, {
@@ -50,18 +53,25 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({
 	if (!visible) return null
 
 	return (
-		<View style={styles.overlay} accessibilityLabel="Success" accessible={true}>
+		<View
+			style={styles.overlay}
+			className="items-center justify-center"
+			accessibilityLabel={t`Success`}
+			accessible={true}
+		>
 			<Animated.View
 				style={[
-					styles.container,
 					{
 						transform: [{ scale: scaleAnim }],
 						opacity: opacityAnim,
 					},
 				]}
+				className="bg-card items-center rounded-2xl p-8 shadow-lg"
 			>
-				<Text style={styles.checkmark}>✓</Text>
-				<Text style={styles.message}>{message}</Text>
+				<Text className="mb-3 text-5xl text-green-500">✓</Text>
+				<Text className="text-foreground text-center text-lg font-semibold">
+					{displayMessage}
+				</Text>
 			</Animated.View>
 		</View>
 	)
@@ -74,35 +84,8 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		bottom: 0,
-		justifyContent: 'center',
-		alignItems: 'center',
 		backgroundColor: 'rgba(0, 0, 0, 0.3)',
 		zIndex: 1000,
-	},
-	container: {
-		backgroundColor: '#FFFFFF',
-		borderRadius: 16,
-		padding: 32,
-		alignItems: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 4,
-		},
-		shadowOpacity: 0.3,
-		shadowRadius: 4.65,
-		elevation: 8,
-	},
-	checkmark: {
-		fontSize: 48,
-		color: '#10B981',
-		marginBottom: 12,
-	},
-	message: {
-		fontSize: 18,
-		fontWeight: '600',
-		color: '#374151',
-		textAlign: 'center',
 	},
 })
 

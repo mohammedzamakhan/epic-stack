@@ -1,10 +1,11 @@
+import { Trans } from '@lingui/react/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useRouter } from 'expo-router'
 import React, { useState, useRef } from 'react'
 import {
-	StyleSheet,
 	View,
 	Text,
-	TouchableOpacity,
+	Pressable,
 	ScrollView,
 	Dimensions,
 	StatusBar,
@@ -20,34 +21,35 @@ interface OnboardingSlide {
 	title: string
 	subtitle: string
 	emoji: string
-	backgroundColor: string
+	bgClass: string
 }
 
-const slides: OnboardingSlide[] = [
-	{
-		id: 1,
-		title: 'The easiest way to...',
-		subtitle: 'Track what you eat 🍎',
-		emoji: '🍎',
-		backgroundColor: '#f0f9ff',
-	},
-	{
-		id: 2,
-		title: 'The easiest way to...',
-		subtitle: 'Build amazing apps ⚡',
-		emoji: '⚡',
-		backgroundColor: '#fef3c7',
-	},
-	{
-		id: 3,
-		title: 'The easiest way to...',
-		subtitle: 'Ship faster 🚀',
-		emoji: '🚀',
-		backgroundColor: '#f0fdf4',
-	},
-]
-
 export default function LandingScreen() {
+	const { t } = useLingui()
+
+	const slides: OnboardingSlide[] = [
+		{
+			id: 1,
+			title: t`The easiest way to...`,
+			subtitle: t`Track what you eat 🍎`,
+			emoji: '🍎',
+			bgClass: 'bg-primary/10',
+		},
+		{
+			id: 2,
+			title: t`The easiest way to...`,
+			subtitle: t`Build amazing apps ⚡`,
+			emoji: '⚡',
+			bgClass: 'bg-accent',
+		},
+		{
+			id: 3,
+			title: t`The easiest way to...`,
+			subtitle: t`Ship faster 🚀`,
+			emoji: '🚀',
+			bgClass: 'bg-primary/5',
+		},
+	]
 	const router = useRouter()
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const scrollViewRef = useRef<ScrollView>(null)
@@ -68,29 +70,38 @@ export default function LandingScreen() {
 	}
 
 	return (
-		<View style={styles.container}>
+		<View className="bg-background flex-1">
 			<StatusBar
-				barStyle="dark-content"
-				backgroundColor="#ffffff"
-				translucent={false}
+				barStyle="light-content"
+				backgroundColor="transparent"
+				translucent
 			/>
 
 			{/* Header */}
-			<View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
-				<View style={styles.logoContainer} accessibilityElementsHidden={true}>
-					<View style={styles.logo} />
-				</View>
-				<TouchableOpacity
-					onPress={handleSignIn}
-					style={styles.signInButton}
-					accessibilityRole="link"
+			<View
+				className="bg-background z-10 flex-row items-center justify-between px-5 pb-2"
+				style={{ paddingTop: Math.max(insets.top, 16) }}
+			>
+				<View
+					className="flex-1 items-center"
+					accessibilityElementsHidden={true}
 				>
-					<Text style={styles.signInText}>Sign in</Text>
-				</TouchableOpacity>
+					<View className="bg-primary h-6 w-6 rounded-full" />
+				</View>
+				<Pressable
+					onPress={handleSignIn}
+					className="min-h-11 items-center justify-center px-3 py-2"
+					accessibilityRole="link"
+					accessibilityLabel={t`Sign in`}
+				>
+					<Text className="text-muted-foreground text-base font-medium">
+						<Trans>Sign in</Trans>
+					</Text>
+				</Pressable>
 			</View>
 
 			{/* Carousel */}
-			<View style={styles.carouselContainer}>
+			<View className="flex-1 justify-center">
 				<ScrollView
 					ref={scrollViewRef}
 					horizontal
@@ -98,15 +109,27 @@ export default function LandingScreen() {
 					showsHorizontalScrollIndicator={false}
 					onScroll={handleScroll}
 					scrollEventThrottle={16}
-					style={styles.carousel}
+					className="flex-1"
 				>
 					{slides.map((slide) => (
 						<View
 							key={slide.id}
-							style={[styles.slide, { backgroundColor: slide.backgroundColor }]}
+							className={`items-center justify-center px-10 ${slide.bgClass}`}
+							style={{ width }}
 						>
-							<View style={styles.slideContent}>
-								<Text style={styles.slideEmoji}>{slide.emoji}</Text>
+							<View
+								className="bg-card items-center justify-center rounded-2xl shadow-lg"
+								style={{
+									width: width * 0.7,
+									height: width * 0.7,
+									shadowColor: '#000',
+									shadowOffset: { width: 0, height: 4 },
+									shadowOpacity: 0.1,
+									shadowRadius: 12,
+									elevation: 5,
+								}}
+							>
+								<Text className="text-7xl">{slide.emoji}</Text>
 							</View>
 						</View>
 					))}
@@ -115,161 +138,44 @@ export default function LandingScreen() {
 
 			{/* Content */}
 			<View
-				style={[
-					styles.content,
-					{ paddingBottom: Math.max(insets.bottom, 20) + 30 },
-				]}
+				className="items-center px-8 pt-6"
+				style={{ paddingBottom: Math.max(insets.bottom, 20) + 30 }}
 			>
-				<Text style={styles.title}>{slides[currentIndex].title}</Text>
-				<Text style={styles.subtitle}>{slides[currentIndex].subtitle}</Text>
+				<Text className="text-foreground mb-2 text-center text-2xl font-semibold">
+					{slides[currentIndex].title}
+				</Text>
+				<Text className="text-muted-foreground mb-8 text-center text-base">
+					{slides[currentIndex].subtitle}
+				</Text>
 
 				{/* Page Indicators */}
 				<View
-					style={styles.indicators}
+					className="mb-10 flex-row items-center justify-center"
 					accessible={true}
-					accessibilityLabel={`Page ${currentIndex + 1} of ${slides.length}`}
+					accessibilityLabel={t`Page ${currentIndex + 1} of ${slides.length}`}
 				>
 					{slides.map((_, index) => (
 						<View
 							key={index}
-							style={[
-								styles.indicator,
-								index === currentIndex
-									? styles.activeIndicator
-									: styles.inactiveIndicator,
-							]}
+							className={`mx-1 h-2 w-2 rounded-full ${
+								index === currentIndex ? 'bg-foreground' : 'bg-border'
+							}`}
 						/>
 					))}
 				</View>
 
 				{/* Get Started Button */}
-				<TouchableOpacity
-					style={styles.getStartedButton}
+				<Pressable
+					className="bg-primary w-full items-center rounded-3xl px-8 py-4"
 					onPress={handleGetStarted}
 					accessibilityRole="button"
+					accessibilityLabel={t`Get Started`}
 				>
-					<Text style={styles.getStartedText}>Get Started</Text>
-				</TouchableOpacity>
+					<Text className="text-primary-foreground text-base font-semibold">
+						<Trans>Get Started</Trans>
+					</Text>
+				</Pressable>
 			</View>
 		</View>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#ffffff',
-	},
-	header: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		paddingHorizontal: 20,
-		paddingBottom: 8,
-		backgroundColor: '#ffffff',
-		zIndex: 10,
-	},
-	signInButton: {
-		paddingVertical: 8,
-		paddingHorizontal: 12,
-		minHeight: 44,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	logoContainer: {
-		flex: 1,
-		alignItems: 'center',
-	},
-	logo: {
-		width: 24,
-		height: 24,
-		backgroundColor: '#4ade80',
-		borderRadius: 12,
-	},
-	signInText: {
-		fontSize: 16,
-		color: '#6b7280',
-		fontWeight: '500',
-	},
-	carouselContainer: {
-		flex: 1,
-		justifyContent: 'center',
-	},
-	carousel: {
-		flex: 1,
-	},
-	slide: {
-		width: width,
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingHorizontal: 40,
-	},
-	slideContent: {
-		alignItems: 'center',
-		justifyContent: 'center',
-		width: width * 0.7,
-		height: width * 0.7,
-		backgroundColor: '#ffffff',
-		borderRadius: 20,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 4,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 12,
-		elevation: 5,
-	},
-	slideEmoji: {
-		fontSize: 80,
-	},
-	content: {
-		paddingHorizontal: 32,
-		alignItems: 'center',
-		paddingTop: 24,
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: '600',
-		color: '#1f2937',
-		textAlign: 'center',
-		marginBottom: 8,
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		marginBottom: 32,
-	},
-	indicators: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 40,
-	},
-	indicator: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
-		marginHorizontal: 4,
-	},
-	activeIndicator: {
-		backgroundColor: '#1f2937',
-	},
-	inactiveIndicator: {
-		backgroundColor: '#d1d5db',
-	},
-	getStartedButton: {
-		backgroundColor: '#4ade80',
-		paddingVertical: 16,
-		paddingHorizontal: 32,
-		borderRadius: 25,
-		width: '100%',
-		alignItems: 'center',
-	},
-	getStartedText: {
-		color: '#ffffff',
-		fontSize: 16,
-		fontWeight: '600',
-	},
-})

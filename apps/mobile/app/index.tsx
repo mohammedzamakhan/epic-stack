@@ -1,6 +1,7 @@
+import { Trans, useLingui } from '@lingui/react/macro'
 import { Redirect } from 'expo-router'
 import React from 'react'
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import { useAuth } from '../lib/auth/hooks/use-auth'
 
 /**
@@ -8,18 +9,21 @@ import { useAuth } from '../lib/auth/hooks/use-auth'
  * This screen acts as the entry point and redirects users to the appropriate screen
  */
 export default function IndexScreen() {
+	const { t } = useLingui()
 	const { isAuthenticated, isLoading } = useAuth()
 
 	// Show loading screen while determining auth state
 	if (isLoading) {
 		return (
-			<View style={styles.loadingContainer}>
+			<View className="bg-background flex-1 items-center justify-center">
 				<ActivityIndicator
 					size="large"
 					color="#3b82f6"
-					accessibilityLabel="Loading"
+					accessibilityLabel={t`Loading`}
 				/>
-				<Text style={styles.loadingText}>Loading...</Text>
+				<Text className="text-muted-foreground mt-3 text-base">
+					<Trans>Loading...</Trans>
+				</Text>
 			</View>
 		)
 	}
@@ -31,17 +35,3 @@ export default function IndexScreen() {
 		return <Redirect href="/(auth)/landing" />
 	}
 }
-
-const styles = StyleSheet.create({
-	loadingContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: '#ffffff',
-	},
-	loadingText: {
-		fontSize: 16,
-		color: '#6b7280',
-		marginTop: 12,
-	},
-})

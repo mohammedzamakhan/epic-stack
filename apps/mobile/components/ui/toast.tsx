@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { Text, StyleSheet, Animated, TouchableOpacity } from 'react-native'
+import { Text, Animated, TouchableOpacity, StyleSheet } from 'react-native'
 
 export interface ToastProps {
 	message: string
@@ -8,7 +8,22 @@ export interface ToastProps {
 	duration?: number
 	onHide: () => void
 	position?: 'top' | 'bottom'
+	className?: string
 }
+
+const toastStyles = {
+	error: 'bg-red-50 border-l-4 border-l-destructive',
+	success: 'bg-green-50 border-l-4 border-l-green-500',
+	warning: 'bg-amber-50 border-l-4 border-l-amber-500',
+	info: 'bg-blue-50 border-l-4 border-l-blue-500',
+} as const
+
+const textStyles = {
+	error: 'text-red-600',
+	success: 'text-green-600',
+	warning: 'text-amber-600',
+	info: 'text-blue-600',
+} as const
 
 const Toast: React.FC<ToastProps> = ({
 	message,
@@ -42,7 +57,6 @@ const Toast: React.FC<ToastProps> = ({
 
 	useEffect(() => {
 		if (visible) {
-			// Show animation
 			Animated.parallel([
 				Animated.timing(fadeAnim, {
 					toValue: 1,
@@ -56,7 +70,6 @@ const Toast: React.FC<ToastProps> = ({
 				}),
 			]).start()
 
-			// Auto hide after duration
 			const timer = setTimeout(() => {
 				hideToast()
 			}, duration)
@@ -67,37 +80,8 @@ const Toast: React.FC<ToastProps> = ({
 		}
 	}, [visible, duration, fadeAnim, slideAnim, hideToast])
 
-	// Don't render if not visible and animation hasn't started
 	if (!visible) {
 		return null
-	}
-
-	const getToastStyle = () => {
-		switch (type) {
-			case 'success':
-				return styles.successToast
-			case 'warning':
-				return styles.warningToast
-			case 'info':
-				return styles.infoToast
-			case 'error':
-			default:
-				return styles.errorToast
-		}
-	}
-
-	const getTextStyle = () => {
-		switch (type) {
-			case 'success':
-				return styles.successText
-			case 'warning':
-				return styles.warningText
-			case 'info':
-				return styles.infoText
-			case 'error':
-			default:
-				return styles.errorText
-		}
 	}
 
 	return (
@@ -112,13 +96,15 @@ const Toast: React.FC<ToastProps> = ({
 			]}
 		>
 			<TouchableOpacity
-				style={[styles.toast, getToastStyle()]}
+				className={`rounded-lg px-4 py-3 shadow-md ${toastStyles[type]}`}
 				onPress={hideToast}
 				activeOpacity={0.9}
 				accessibilityRole="button"
 				accessibilityLabel="Dismiss notification"
 			>
-				<Text style={[styles.message, getTextStyle()]}>{message}</Text>
+				<Text className={`text-center text-sm font-medium ${textStyles[type]}`}>
+					{message}
+				</Text>
 			</TouchableOpacity>
 		</Animated.View>
 	)
@@ -136,56 +122,6 @@ const styles = StyleSheet.create({
 	},
 	bottomPosition: {
 		bottom: 60,
-	},
-	toast: {
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderRadius: 8,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	message: {
-		fontSize: 14,
-		fontWeight: '500',
-		textAlign: 'center',
-	},
-	errorToast: {
-		backgroundColor: '#FEF2F2',
-		borderLeftWidth: 4,
-		borderLeftColor: '#EF4444',
-	},
-	successToast: {
-		backgroundColor: '#F0FDF4',
-		borderLeftWidth: 4,
-		borderLeftColor: '#22C55E',
-	},
-	warningToast: {
-		backgroundColor: '#FFFBEB',
-		borderLeftWidth: 4,
-		borderLeftColor: '#F59E0B',
-	},
-	infoToast: {
-		backgroundColor: '#EFF6FF',
-		borderLeftWidth: 4,
-		borderLeftColor: '#3B82F6',
-	},
-	errorText: {
-		color: '#DC2626',
-	},
-	successText: {
-		color: '#16A34A',
-	},
-	warningText: {
-		color: '#D97706',
-	},
-	infoText: {
-		color: '#2563EB',
 	},
 })
 

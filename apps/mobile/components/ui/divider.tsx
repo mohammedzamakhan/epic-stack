@@ -1,63 +1,53 @@
 import React from 'react'
-import { View, Text, StyleSheet, type ViewProps } from 'react-native'
+import { View, Text, type ViewProps } from 'react-native'
 
 interface DividerProps extends Omit<ViewProps, 'style'> {
 	text?: string
 	color?: string
 	thickness?: number
 	textColor?: string
+	className?: string
 }
 
 const Divider: React.FC<DividerProps> = ({
 	text,
-	color = '#E5E7EB',
+	color,
 	thickness = 1,
-	textColor = '#6B7280',
+	textColor,
+	className,
 	...props
 }) => {
+	const lineStyle = color
+		? { backgroundColor: color, height: thickness }
+		: { height: thickness }
+	const textStyle = textColor ? { color: textColor } : undefined
+
 	if (text) {
 		return (
-			<View style={styles.container} {...props}>
-				<View
-					style={[styles.line, { backgroundColor: color, height: thickness }]}
-				/>
-				<Text style={[styles.text, { color: textColor }]}>{text}</Text>
-				<View
-					style={[styles.line, { backgroundColor: color, height: thickness }]}
-				/>
+			<View
+				className={`my-4 flex-row items-center ${className ?? ''}`}
+				{...props}
+			>
+				<View className="bg-border flex-1" style={lineStyle} />
+				<Text
+					className="text-muted-foreground px-4 text-sm font-medium"
+					style={textStyle}
+				>
+					{text}
+				</Text>
+				<View className="bg-border flex-1" style={lineStyle} />
 			</View>
 		)
 	}
 
 	return (
 		<View
-			style={[
-				styles.simpleDivider,
-				{ backgroundColor: color, height: thickness },
-			]}
+			className={`bg-border my-2 ${className ?? ''}`}
+			style={lineStyle}
 			{...props}
 		/>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginVertical: 16,
-	},
-	line: {
-		flex: 1,
-	},
-	text: {
-		paddingHorizontal: 16,
-		fontSize: 14,
-		fontWeight: '500',
-	},
-	simpleDivider: {
-		marginVertical: 8,
-	},
-})
 
 export { Divider }
 export type { DividerProps }

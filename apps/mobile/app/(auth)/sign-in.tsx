@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Trans } from '@lingui/react/macro'
+import { useLingui } from '@lingui/react/macro'
 import { MobileLoginFormSchema } from '@repo/validation'
 import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useRef } from 'react'
@@ -6,10 +8,10 @@ import { useForm, Controller } from 'react-hook-form'
 import {
 	View,
 	Text,
-	StyleSheet,
 	Alert,
 	TouchableOpacity,
 	ScrollView,
+	Pressable,
 	type TextInput,
 } from 'react-native'
 import { type z } from 'zod'
@@ -33,6 +35,7 @@ import { navigateToSignUp, navigateAfterAuth } from '../../lib/navigation'
 type LoginFormData = z.infer<typeof MobileLoginFormSchema>
 
 export default function SignInScreen() {
+	const { t } = useLingui()
 	const { banned, redirectTo } = useLocalSearchParams<{
 		banned?: string
 		redirectTo?: string
@@ -121,14 +124,14 @@ export default function SignInScreen() {
 
 	const handleSocialError = async (error: string) => {
 		await triggerErrorHaptic()
-		Alert.alert('Authentication Error', error)
+		Alert.alert(t`Authentication Error`, error)
 	}
 
 	const handleForgotPassword = () => {
 		Alert.alert(
-			'Forgot Password',
-			'Forgot password functionality will be available soon. Please contact support for assistance.',
-			[{ text: 'OK' }],
+			t`Forgot Password`,
+			t`Forgot password functionality will be available soon. Please contact support for assistance.`,
+			[{ text: t`OK` }],
 		)
 	}
 
@@ -140,51 +143,59 @@ export default function SignInScreen() {
 	const isLoading = isLoginLoading
 
 	return (
-		<Screen style={styles.screen}>
+		<Screen className="bg-background">
 			<ScrollView
-				contentContainerStyle={styles.scrollContainer}
+				contentContainerClassName="grow px-6 pt-16 pb-10"
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.title}>Welcome back</Text>
-					<Text style={styles.subtitle}>
-						Sign in with your social account or username
+				<View className="mb-10 items-center">
+					<Text className="text-foreground mb-3 text-center text-3xl font-bold">
+						<Trans>Welcome back</Trans>
+					</Text>
+					<Text className="text-muted-foreground text-center text-base leading-6">
+						<Trans>Sign in with your social account or username</Trans>
 					</Text>
 				</View>
 
 				{/* Content */}
-				<View style={styles.content}>
+				<View className="flex-1">
 					{/* Banned Account Warning */}
 					{isBanned && (
-						<View style={styles.bannedContainer}>
-							<View style={styles.bannedHeader}>
-								<Text style={styles.bannedIcon}>🔒</Text>
-								<Text style={styles.bannedTitle}>Account Suspended</Text>
+						<View className="bg-destructive/10 border-destructive/30 mb-6 rounded-lg border p-4">
+							<View className="mb-2 flex-row items-center">
+								<Text className="mr-2 text-xl">🔒</Text>
+								<Text className="text-destructive text-base font-semibold">
+									<Trans>Account Suspended</Trans>
+								</Text>
 							</View>
-							<Text style={styles.bannedMessage}>
-								Your account has been suspended. Please contact support if you
-								believe this is an error.
+							<Text className="text-destructive/80 mb-3 text-sm leading-5">
+								<Trans>
+									Your account has been suspended. Please contact support if you
+									believe this is an error.
+								</Trans>
 							</Text>
-							<TouchableOpacity
-								style={styles.supportButton}
+							<Pressable
+								className="bg-destructive self-start rounded-md px-3 py-2"
 								onPress={() =>
 									Alert.alert(
-										'Contact Support',
-										'Please email support@example.com for assistance.',
+										t`Contact Support`,
+										t`Please email support@example.com for assistance.`,
 									)
 								}
 								accessibilityRole="button"
-								accessibilityLabel="Contact Support"
+								accessibilityLabel={t`Contact Support`}
 							>
-								<Text style={styles.supportButtonText}>Contact Support</Text>
-							</TouchableOpacity>
+								<Text className="text-sm font-semibold text-white">
+									<Trans>Contact Support</Trans>
+								</Text>
+							</Pressable>
 						</View>
 					)}
 
 					{/* Social Login Buttons */}
-					<View style={styles.socialContainer}>
+					<View className="mb-6 gap-2">
 						{configuredProviders.map((provider) => (
 							<SocialButton
 								key={provider}
@@ -199,24 +210,26 @@ export default function SignInScreen() {
 					</View>
 
 					{/* Divider */}
-					<Divider text="Or continue with username" />
+					<Divider text={t`Or continue with username`} />
 
 					{/* Error Display */}
 					{currentError && (
-						<ErrorText style={styles.errorContainer}>{currentError}</ErrorText>
+						<ErrorText className="mb-4 text-center">{currentError}</ErrorText>
 					)}
 
 					{/* Login Form */}
-					<View style={styles.formContainer}>
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Username</Text>
+					<View className="gap-4">
+						<View className="gap-2">
+							<Text className="text-foreground text-base font-semibold">
+								<Trans>Username</Trans>
+							</Text>
 							<Controller
 								control={control}
 								name="username"
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
 										ref={usernameRef}
-										placeholder="Enter your username"
+										placeholder={t`Enter your username`}
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -232,14 +245,18 @@ export default function SignInScreen() {
 							)}
 						</View>
 
-						<View style={styles.inputContainer}>
-							<View style={styles.passwordHeader}>
-								<Text style={styles.label}>Password</Text>
+						<View className="gap-2">
+							<View className="flex-row items-center justify-between">
+								<Text className="text-foreground text-base font-semibold">
+									<Trans>Password</Trans>
+								</Text>
 								<TouchableOpacity
 									onPress={handleForgotPassword}
 									accessibilityRole="link"
 								>
-									<Text style={styles.forgotLink}>Forgot password?</Text>
+									<Text className="text-primary text-sm font-medium">
+										<Trans>Forgot password?</Trans>
+									</Text>
 								</TouchableOpacity>
 							</View>
 							<Controller
@@ -248,7 +265,7 @@ export default function SignInScreen() {
 								render={({ field: { onChange, onBlur, value } }) => (
 									<Input
 										ref={passwordRef}
-										placeholder="Enter your password"
+										placeholder={t`Enter your password`}
 										value={value}
 										onChangeText={onChange}
 										onBlur={onBlur}
@@ -260,12 +277,12 @@ export default function SignInScreen() {
 										rightIcon={
 											<TouchableOpacity
 												onPress={() => setShowPassword(!showPassword)}
-												style={styles.eyeButton}
+												className="p-1"
 												accessibilityLabel={
-													showPassword ? 'Hide password' : 'Show password'
+													showPassword ? t`Hide password` : t`Show password`
 												}
 											>
-												<Text style={styles.eyeIcon}>
+												<Text className="text-lg">
 													{showPassword ? '🙈' : '👁️'}
 												</Text>
 											</TouchableOpacity>
@@ -279,7 +296,7 @@ export default function SignInScreen() {
 						</View>
 
 						{/* Remember Me Checkbox */}
-						<View style={styles.checkboxContainer}>
+						<View className="mt-2">
 							<Controller
 								control={control}
 								name="remember"
@@ -287,7 +304,7 @@ export default function SignInScreen() {
 									<Checkbox
 										checked={value}
 										onCheckedChange={onChange}
-										label="Remember me"
+										label={t`Remember me`}
 										disabled={isLoading || isBanned}
 									/>
 								)}
@@ -299,163 +316,38 @@ export default function SignInScreen() {
 							onPress={handleSubmit(onSubmit)}
 							disabled={!isValid || isLoading || isBanned}
 							loading={isLoginLoading}
-							style={styles.submitButton}
+							className="mt-2"
 						>
-							Sign In
+							<Trans>Sign In</Trans>
 						</Button>
 					</View>
 				</View>
 
 				{/* Footer */}
-				<View style={styles.footer}>
-					<Text style={styles.footerText}>Don't have an account? </Text>
+				<View className="mt-auto flex-row items-center justify-center pt-8">
+					<Text className="text-muted-foreground text-base">
+						<Trans>Don't have an account?</Trans>{' '}
+					</Text>
 					<TouchableOpacity
 						onPress={handleNavigateToSignUp}
 						accessibilityRole="link"
 					>
-						<Text style={styles.footerLinkText}>Create account</Text>
+						<Text className="text-primary text-base font-semibold">
+							<Trans>Create account</Trans>
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
 			{/* Loading Overlay */}
-			<LoadingOverlay visible={isLoginLoading} message="Signing you in..." />
+			<LoadingOverlay visible={isLoginLoading} message={t`Signing you in...`} />
 
 			{/* Success Animation */}
 			<SuccessAnimation
 				visible={showSuccess}
-				message="Welcome back!"
+				message={t`Welcome back!`}
 				onComplete={() => setShowSuccess(false)}
 			/>
 		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	screen: {
-		backgroundColor: '#ffffff',
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 24,
-		paddingTop: 60,
-		paddingBottom: 40,
-	},
-	header: {
-		marginBottom: 40,
-		alignItems: 'center',
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		textAlign: 'center',
-		marginBottom: 12,
-		color: '#1f2937',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6b7280',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	content: {
-		flex: 1,
-	},
-	bannedContainer: {
-		backgroundColor: '#fef2f2',
-		borderColor: '#fecaca',
-		borderWidth: 1,
-		borderRadius: 8,
-		padding: 16,
-		marginBottom: 24,
-	},
-	bannedHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginBottom: 8,
-	},
-	bannedIcon: {
-		fontSize: 20,
-		marginRight: 8,
-	},
-	bannedTitle: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#dc2626',
-	},
-	bannedMessage: {
-		fontSize: 14,
-		color: '#7f1d1d',
-		marginBottom: 12,
-		lineHeight: 20,
-	},
-	supportButton: {
-		backgroundColor: '#dc2626',
-		paddingVertical: 8,
-		paddingHorizontal: 12,
-		borderRadius: 6,
-		alignSelf: 'flex-start',
-	},
-	supportButtonText: {
-		color: '#ffffff',
-		fontSize: 14,
-		fontWeight: '600',
-	},
-	socialContainer: {
-		gap: 8,
-		marginBottom: 24,
-	},
-	errorContainer: {
-		marginBottom: 16,
-		textAlign: 'center',
-	},
-	formContainer: {
-		gap: 16,
-	},
-	inputContainer: {
-		gap: 8,
-	},
-	label: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#374151',
-	},
-	passwordHeader: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-	},
-	forgotLink: {
-		fontSize: 14,
-		color: '#3b82f6',
-		fontWeight: '500',
-	},
-	eyeButton: {
-		padding: 4,
-	},
-	eyeIcon: {
-		fontSize: 18,
-	},
-	checkboxContainer: {
-		marginTop: 8,
-	},
-	submitButton: {
-		marginTop: 8,
-	},
-	footer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		paddingTop: 32,
-		marginTop: 'auto',
-	},
-	footerText: {
-		fontSize: 16,
-		color: '#6b7280',
-	},
-	footerLinkText: {
-		fontSize: 16,
-		color: '#3b82f6',
-		fontWeight: '600',
-	},
-})

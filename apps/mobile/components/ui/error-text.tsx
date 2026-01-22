@@ -1,11 +1,12 @@
 import React from 'react'
-import { Text, StyleSheet, type TextProps, View } from 'react-native'
+import { Text, type TextProps, View } from 'react-native'
 
 export interface ErrorTextProps extends TextProps {
 	children: React.ReactNode
 	size?: 'sm' | 'default'
 	variant?: 'inline' | 'block'
 	icon?: boolean
+	className?: string
 }
 
 const ErrorText: React.FC<ErrorTextProps> = ({
@@ -13,21 +14,18 @@ const ErrorText: React.FC<ErrorTextProps> = ({
 	size = 'default',
 	variant = 'block',
 	icon = false,
-	style,
+	className,
 	...props
 }) => {
 	if (!children) return null
 
 	const content = (
 		<>
-			{icon && <Text style={styles.icon}>⚠️ </Text>}
+			{icon && <Text className="mr-1 text-xs">⚠️ </Text>}
 			<Text
-				style={[
-					styles.errorText,
-					size === 'sm' && styles.errorTextSm,
-					variant === 'inline' && styles.inlineText,
-					style,
-				]}
+				className={`text-destructive ${size === 'sm' ? 'text-xs' : 'text-sm'} ${
+					variant === 'inline' ? '' : 'flex-1'
+				} ${className ?? ''}`}
 				{...props}
 			>
 				{children}
@@ -36,37 +34,10 @@ const ErrorText: React.FC<ErrorTextProps> = ({
 	)
 
 	if (variant === 'inline') {
-		return <View style={styles.inlineContainer}>{content}</View>
+		return <View className="flex-row flex-wrap items-center">{content}</View>
 	}
 
-	return <View style={styles.blockContainer}>{content}</View>
+	return <View className="mt-1">{content}</View>
 }
-
-const styles = StyleSheet.create({
-	blockContainer: {
-		marginTop: 4,
-	},
-	inlineContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		flexWrap: 'wrap',
-	},
-	errorText: {
-		color: '#EF4444',
-		fontSize: 14,
-		flex: 1,
-	},
-	errorTextSm: {
-		fontSize: 12,
-	},
-	inlineText: {
-		marginTop: 0,
-		flex: 0,
-	},
-	icon: {
-		fontSize: 12,
-		marginRight: 4,
-	},
-})
 
 export { ErrorText }
