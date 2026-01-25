@@ -1,10 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { lruCache } from '#app/utils/cache.server.ts'
 import {
+	ensureInstance,
 	getAllInstances,
 	getInstanceInfo,
-	ensureInstance,
-} from '#app/utils/litefs.server.ts'
+} from '@repo/common/litefs'
+import { lruCache } from '@repo/cache'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/cache_.lru.$cacheKey.ts'
 

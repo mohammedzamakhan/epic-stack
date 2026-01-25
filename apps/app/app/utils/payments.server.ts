@@ -5,15 +5,14 @@
 
 import { type Organization } from '@prisma/client'
 import { prisma } from '@repo/database'
-import { TrialEndingEmail } from '@repo/email'
+import { sendEmail, TrialEndingEmail } from '@repo/email'
 import {
 	createStripeProvider,
 	getTrialConfig,
 	calculateManualTrialDaysRemaining,
 } from '@repo/payments'
 import { data, redirect } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { sendEmail } from '#app/utils/email.server.ts'
+import { requireUserId } from '@repo/auth'
 
 if (!process.env.STRIPE_SECRET_KEY) {
 	const errorMsg = 'STRIPE_SECRET_KEY environment variable is not set!'

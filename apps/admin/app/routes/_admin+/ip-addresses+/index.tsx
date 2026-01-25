@@ -32,7 +32,7 @@ import {
 	Link,
 } from 'react-router'
 
-import { getUserId } from '#app/utils/auth.server.ts'
+import { getUserId } from '@repo/auth'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {

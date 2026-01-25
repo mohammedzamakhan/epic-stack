@@ -9,7 +9,7 @@ import {
 import { BillingCard } from '#app/components/settings/cards/organization/billing-card.tsx'
 import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
@@ -39,7 +39,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const launchStatus = getLaunchStatus()
 	const hasActiveSubscription = Boolean(
 		organization.stripeSubscriptionId &&
-			organization.subscriptionStatus === 'active',
+		organization.subscriptionStatus === 'active',
 	)
 
 	if (
@@ -90,7 +90,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const launchStatus = getLaunchStatus()
 	const hasActiveSubscription = Boolean(
 		organization.stripeSubscriptionId &&
-			organization.subscriptionStatus === 'active',
+		organization.subscriptionStatus === 'active',
 	)
 
 	if (

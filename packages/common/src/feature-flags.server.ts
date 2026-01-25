@@ -1,7 +1,6 @@
-import { type PrismaClient } from '@repo/database/types'
+import { prisma } from '@repo/database'
 
 async function getFlag(
-	prisma: PrismaClient,
 	key: string,
 	level: 'system' | 'organization' | 'user',
 	organizationId?: string,
@@ -18,20 +17,19 @@ async function getFlag(
 }
 
 export async function getFeatureFlag(
-	prisma: PrismaClient,
 	key: string,
 	{ organizationId, userId }: { organizationId?: string; userId?: string },
 ) {
 	if (userId) {
-		const userFlag = await getFlag(prisma, key, 'user', organizationId, userId)
+		const userFlag = await getFlag(key, 'user', organizationId, userId)
 		if (userFlag !== null) return userFlag
 	}
 
 	if (organizationId) {
-		const orgFlag = await getFlag(prisma, key, 'organization', organizationId)
+		const orgFlag = await getFlag(key, 'organization', organizationId)
 		if (orgFlag !== null) return orgFlag
 	}
 
-	const systemFlag = await getFlag(prisma, key, 'system')
+	const systemFlag = await getFlag(key, 'system')
 	return systemFlag
 }

@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Logo } from '@repo/ui/logo'
 import { Outlet, useRouteLoaderData } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 
 export async function loader({ request }: { request: Request }) {
 	// This ensures users must be logged in to access any organization routes

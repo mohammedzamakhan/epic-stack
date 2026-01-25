@@ -1,6 +1,6 @@
 import { getUptimeStatus } from '@repo/observability'
 import { type LoaderFunctionArgs } from 'react-router'
-import { ENV } from '#app/utils/env.server.ts'
+import { ENV } from 'varlock/env'
 
 /**
  * Status endpoint that returns uptime monitoring information

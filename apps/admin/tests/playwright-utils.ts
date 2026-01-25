@@ -1,16 +1,16 @@
 import { test as base } from '@playwright/test'
 import { type User as UserModel } from '@prisma/client'
-import * as setCookieParser from 'set-cookie-parser'
 import {
+	authSessionStorage,
 	getPasswordHash,
 	getSessionExpirationDate,
+	MOCK_CODE_GITHUB_HEADER,
+	normalizeEmail,
 	sessionKey,
-} from '#app/utils/auth.server.ts'
-import { cookieConsentCookie } from '#app/utils/cookie-consent.server.ts'
+} from '@repo/auth'
+import { cookieConsentCookie } from '@repo/common/cookie-consent'
 import { prisma } from '@repo/database'
-import { MOCK_CODE_GITHUB_HEADER } from '#app/utils/providers/constants.ts'
-import { normalizeEmail } from '#app/utils/providers/provider.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
+import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
 import {
 	type GitHubUser,

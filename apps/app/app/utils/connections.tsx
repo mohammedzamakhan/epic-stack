@@ -1,25 +1,14 @@
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import { Form } from 'react-router'
-import { z } from 'zod'
-import { saveLastLoginMethod, type LoginMethod } from './last-login-method.ts'
 import { useIsPending } from '@repo/common'
-
-export const GITHUB_PROVIDER_NAME = 'github'
-export const GOOGLE_PROVIDER_NAME = 'google'
-// to add another provider, set their name here and add it to the providerNames below
-
-export const providerNames = [
+import {
+	type ProviderName,
+	providerLabels,
 	GITHUB_PROVIDER_NAME,
 	GOOGLE_PROVIDER_NAME,
-] as const
-export const ProviderNameSchema = z.enum(providerNames)
-export type ProviderName = z.infer<typeof ProviderNameSchema>
-
-export const providerLabels: Record<ProviderName, string> = {
-	[GITHUB_PROVIDER_NAME]: 'GitHub',
-	[GOOGLE_PROVIDER_NAME]: 'Google',
-} as const
+} from '@repo/auth/constants'
+import { saveLastLoginMethod, type LoginMethod } from './last-login-method.ts'
 
 export const providerIcons: Record<ProviderName, React.ReactNode> = {
 	[GITHUB_PROVIDER_NAME]: <Icon name="github" />,
@@ -45,7 +34,10 @@ export function ProviderConnectionForm({
 			method="POST"
 			onSubmit={() => {
 				// Save the login method when form is submitted
-				if (type === 'Login' && (providerName === 'github' || providerName === 'google')) {
+				if (
+					type === 'Login' &&
+					(providerName === 'github' || providerName === 'google')
+				) {
 					saveLastLoginMethod(providerName as LoginMethod)
 				}
 			}}

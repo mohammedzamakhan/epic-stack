@@ -3,18 +3,11 @@ import { decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	createStorageClient,
 	uploadProfileImage as _uploadProfileImage,
-	uploadOrganizationImage as _uploadOrganizationImage,
-	uploadNoteImage as _uploadNoteImage,
-	uploadCommentImage as _uploadCommentImage,
-	uploadNoteVideo as _uploadNoteVideo,
-	uploadVideoThumbnail as _uploadVideoThumbnail,
-	getSignedGetRequestInfo as _getSignedGetRequestInfo,
-	testS3Connection as _testS3Connection,
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
-import { ENV } from '#app/utils/env.server.ts'
 import { prisma } from '@repo/database'
+import { ENV } from 'varlock/env'
 
 // Default storage configuration from environment variables
 const DEFAULT_STORAGE_CONFIG: StorageConfig = {
@@ -58,81 +51,6 @@ export async function uploadProfileImage(
 	)
 }
 
-export async function uploadOrganizationImage(
-	organizationId: string,
-	file: File | FileUpload,
-) {
-	return _uploadOrganizationImage(organizationId, file, createUploadOptions())
-}
-
-export async function uploadNoteImage(
-	userId: string,
-	noteId: string,
-	file: File | FileUpload,
-	organizationId?: string,
-) {
-	return _uploadNoteImage(
-		userId,
-		noteId,
-		file,
-		createUploadOptions(),
-		organizationId,
-	)
-}
-
-export async function uploadCommentImage(
-	userId: string,
-	commentId: string,
-	file: File | FileUpload,
-	organizationId?: string,
-) {
-	return _uploadCommentImage(
-		userId,
-		commentId,
-		file,
-		createUploadOptions(),
-		organizationId,
-	)
-}
-
-export async function uploadNoteVideo(
-	userId: string,
-	noteId: string,
-	file: File | FileUpload,
-	organizationId?: string,
-) {
-	return _uploadNoteVideo(
-		userId,
-		noteId,
-		file,
-		createUploadOptions(),
-		organizationId,
-	)
-}
-
-export async function uploadVideoThumbnail(
-	userId: string,
-	noteId: string,
-	videoId: string,
-	thumbnailBuffer: Buffer,
-	organizationId?: string,
-) {
-	return _uploadVideoThumbnail(
-		userId,
-		noteId,
-		videoId,
-		thumbnailBuffer,
-		createUploadOptions(),
-		organizationId,
-	)
-}
-
-// Export client functions
-export function getSignedGetRequestInfo(key: string, _organizationId?: string) {
-	// For synchronous calls, use default config only
-	return _getSignedGetRequestInfo(key, DEFAULT_STORAGE_CONFIG)
-}
-
 export async function getSignedGetRequestInfoAsync(
 	key: string,
 	organizationId?: string,
@@ -151,10 +69,3 @@ export async function getSignedGetRequestInfoAsync(
 	)
 	return { url, headers }
 }
-
-export async function testS3Connection(config: StorageConfig) {
-	return _testS3Connection(config)
-}
-
-// Re-export types
-export type { StorageConfig }

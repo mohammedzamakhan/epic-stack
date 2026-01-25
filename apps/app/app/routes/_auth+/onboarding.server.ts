@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
+import { verifySessionStorage } from '@repo/auth'
 import { redirect } from 'react-router'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { onboardingEmailSessionKey } from './onboarding.tsx'
 import { type VerifyFunctionArgs } from './verify.server.tsx'
 

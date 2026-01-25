@@ -1,4 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { redirectWithToast } from '@repo/common/toast'
 import { integrationManager, getAvailableProviders } from '@repo/integrations'
 import {
 	type ActionFunctionArgs,
@@ -13,7 +14,6 @@ import {
 } from '#app/components/settings/cards/organization/integrations-card.tsx'
 
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const organization = await requireUserOrganization(request, params.orgSlug, {

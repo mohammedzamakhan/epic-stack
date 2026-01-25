@@ -29,7 +29,7 @@ import {
 } from 'react-router'
 
 import { EmptyState } from '#app/components/empty-state.tsx'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,

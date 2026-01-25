@@ -1,12 +1,9 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
+import { normalizeEmail, normalizeUsername } from '@repo/auth'
 import { brand } from '@repo/config/brand'
 import { prisma } from '@repo/database'
 import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
-import {
-	normalizeEmail,
-	normalizeUsername,
-} from '#app/utils/providers/provider.ts'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
 

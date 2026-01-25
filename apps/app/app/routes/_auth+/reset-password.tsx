@@ -2,6 +2,8 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { verifySessionStorage } from '@repo/auth'
+import { useIsPending } from '@repo/common'
 import { getPageTitle } from '@repo/config/brand'
 import {
 	Card,
@@ -21,13 +23,8 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import {
-	checkIsCommonPassword,
-	requireAnonymous,
-	resetUserPassword,
-} from '#app/utils/auth.server.ts'
-import { useIsPending } from '@repo/common'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
+import { checkIsCommonPassword, requireAnonymous } from '@repo/auth'
+import { resetUserPassword } from '#app/utils/auth.server.ts'
 import { type Route } from './+types/reset-password.ts'
 
 export const handle: SEOHandle = {

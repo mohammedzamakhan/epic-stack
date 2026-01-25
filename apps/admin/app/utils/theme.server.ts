@@ -1,5 +1,5 @@
 import * as cookie from 'cookie'
-import { ENV } from '#app/utils/env.server.ts'
+import { ENV } from 'varlock/env'
 
 const cookieName = 'en_theme'
 export type Theme = 'light' | 'dark'

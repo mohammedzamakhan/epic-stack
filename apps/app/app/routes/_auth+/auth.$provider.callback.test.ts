@@ -1,14 +1,16 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { SetCookie } from '@mjackson/headers'
+import { authSessionStorage, generateTOTP } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { http } from 'msw'
 import { type AppLoadContext } from 'react-router'
 import { afterEach, expect, test } from 'vitest'
-import { getSessionExpirationDate, sessionKey } from '#app/utils/auth.server.ts'
-import { GITHUB_PROVIDER_NAME } from '#app/utils/connections.tsx'
-import { authSessionStorage } from '#app/utils/session.server.ts'
-import { generateTOTP } from '#app/utils/totp.server.ts'
+import {
+	getSessionExpirationDate,
+	sessionKey,
+	GITHUB_PROVIDER_NAME,
+} from '@repo/auth'
 import { createUser } from '#tests/db-utils.ts'
 import { insertGitHubUser, deleteGitHubUsers } from '#tests/mocks/github.ts'
 import { server } from '#tests/mocks/index.ts'

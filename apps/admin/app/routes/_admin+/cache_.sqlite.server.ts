@@ -1,9 +1,9 @@
+import { getInstanceInfo } from '@repo/common/litefs'
 import { redirect } from 'react-router'
 import { z } from 'zod'
-import { cache } from '#app/utils/cache.server.ts'
-import { ENV } from '#app/utils/env.server.ts'
-import { getInstanceInfo } from '#app/utils/litefs.server.ts'
+import { cache } from '@repo/cache'
 import { type Route } from './+types/cache_.sqlite.ts'
+import { ENV } from 'varlock/env'
 
 export async function action({ request }: Route.ActionArgs) {
 	const { currentIsPrimary, primaryInstance } = await getInstanceInfo()

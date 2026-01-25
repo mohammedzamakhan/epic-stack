@@ -48,7 +48,7 @@ export class SSOConfigurationService {
 		const masterKey = getSSOMasterKey()
 		const encryptedSecret = encrypt(config.clientSecret, masterKey)
 
-		return (prisma as any).sSOConfiguration.create({
+		return prisma.sSOConfiguration.create({
 			data: {
 				organizationId,
 				providerName: config.providerName,
@@ -88,7 +88,7 @@ export class SSOConfigurationService {
 			updateData.attributeMapping = JSON.stringify(config.attributeMapping)
 		}
 
-		return (prisma as any).sSOConfiguration.update({
+		return prisma.sSOConfiguration.update({
 			where: { id },
 			data: updateData,
 		})
@@ -100,7 +100,7 @@ export class SSOConfigurationService {
 	async getConfiguration(
 		organizationId: string,
 	): Promise<SSOConfiguration | null> {
-		return (prisma as any).sSOConfiguration.findUnique({
+		return prisma.sSOConfiguration.findUnique({
 			where: { organizationId },
 			include: {
 				organization: true,
@@ -119,7 +119,7 @@ export class SSOConfigurationService {
 	 * Get SSO configuration by ID
 	 */
 	async getConfigurationById(id: string): Promise<SSOConfiguration | null> {
-		return (prisma as any).sSOConfiguration.findUnique({
+		return prisma.sSOConfiguration.findUnique({
 			where: { id },
 			include: {
 				organization: true,
@@ -138,7 +138,7 @@ export class SSOConfigurationService {
 	 * Delete an SSO configuration
 	 */
 	async deleteConfiguration(id: string): Promise<void> {
-		await (prisma as any).sSOConfiguration.delete({
+		await prisma.sSOConfiguration.delete({
 			where: { id },
 		})
 	}
@@ -147,7 +147,7 @@ export class SSOConfigurationService {
 	 * Enable or disable SSO for an organization
 	 */
 	async toggleConfiguration(id: string, isEnabled: boolean): Promise<void> {
-		await (prisma as any).sSOConfiguration.update({
+		await prisma.sSOConfiguration.update({
 			where: { id },
 			data: { isEnabled },
 		})
@@ -209,7 +209,7 @@ export class SSOConfigurationService {
 			// Update last tested timestamp (only if config exists in database)
 			if (config.id !== 'temp-test-config') {
 				try {
-					await (prisma as any).sSOConfiguration.update({
+					await prisma.sSOConfiguration.update({
 						where: { id: config.id },
 						data: { lastTested: new Date() },
 					})
@@ -278,7 +278,7 @@ export class SSOConfigurationService {
 	 * List all SSO configurations (for admin purposes)
 	 */
 	async listConfigurations(): Promise<SSOConfiguration[]> {
-		return (prisma as any).sSOConfiguration.findMany({
+		return prisma.sSOConfiguration.findMany({
 			include: {
 				organization: {
 					select: {

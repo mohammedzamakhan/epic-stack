@@ -1,9 +1,3 @@
-import {
-	parsePermissionString,
-	userHasPermission as _userHasPermission,
-	userHasRole as _userHasRole,
-	type PermissionString,
-} from '@repo/common/user-permissions'
 import { useRouteLoaderData } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
 
@@ -29,21 +23,4 @@ export function useUser() {
 		)
 	}
 	return maybeUser
-}
-
-// Re-export permission utilities
-export { parsePermissionString, type PermissionString }
-
-export function userHasPermission(
-	user: Pick<ReturnType<typeof useUser>, 'roles'> | null | undefined,
-	permission: PermissionString,
-) {
-	return _userHasPermission(user, permission)
-}
-
-export function userHasRole(
-	user: Pick<ReturnType<typeof useUser>, 'roles'> | null,
-	role: string,
-) {
-	return _userHasRole(user, role)
 }

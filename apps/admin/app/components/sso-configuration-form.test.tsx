@@ -1,9 +1,10 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
+import { renderWithI18n as render } from '#tests/utils.tsx'
 
 // Mock cache.server.ts to avoid node:sqlite in jsdom - MUST be before imports
 vi.mock('#app/utils/cache.server.ts', async () => {

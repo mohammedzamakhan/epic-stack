@@ -1,10 +1,10 @@
+import { type ProviderUser } from '@repo/auth'
 import { prisma } from '@repo/database'
 import {
 	type User,
 	type SSOConfiguration,
 	type SSOSession,
 } from '@repo/database/types'
-
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	ssoCache,
@@ -16,7 +16,6 @@ import {
 	IDTokenValidationErrorCode,
 } from '@repo/sso'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
-import { type ProviderUser } from '../providers/provider.ts'
 import { ssoConfigurationService } from './configuration.server.ts'
 import { ssoRetryManager } from './retry-logic.server.ts'
 
@@ -372,7 +371,7 @@ export class SSOAuthService {
 	): Promise<SSOSession> {
 		const masterKey = getSSOMasterKey()
 
-		return (prisma as any).sSOSession.create({
+		return prisma.sSOSession.create({
 			data: {
 				sessionId,
 				ssoConfigId,
@@ -392,7 +391,7 @@ export class SSOAuthService {
 	 * Refresh access tokens using refresh token
 	 */
 	async refreshTokens(ssoSessionId: string): Promise<TokenSet> {
-		const ssoSession = await (prisma as any).sSOSession.findUnique({
+		const ssoSession = await prisma.sSOSession.findUnique({
 			where: { id: ssoSessionId },
 			include: { ssoConfig: true },
 		})
@@ -450,7 +449,7 @@ export class SSOAuthService {
 		}
 
 		// Update stored tokens
-		await (prisma as any).sSOSession.update({
+		await prisma.sSOSession.update({
 			where: { id: ssoSessionId },
 			data: {
 				accessToken: encrypt(newTokenSet.accessToken, masterKey),
@@ -468,7 +467,7 @@ export class SSOAuthService {
 	 * Revoke tokens at the identity provider
 	 */
 	async revokeTokens(ssoSessionId: string): Promise<void> {
-		const ssoSession = await (prisma as any).sSOSession.findUnique({
+		const ssoSession = await prisma.sSOSession.findUnique({
 			where: { id: ssoSessionId },
 			include: { ssoConfig: true },
 		})
@@ -512,7 +511,7 @@ export class SSOAuthService {
 		}
 
 		// Delete the SSO session
-		await (prisma as any).sSOSession.delete({
+		await prisma.sSOSession.delete({
 			where: { id: ssoSessionId },
 		})
 	}

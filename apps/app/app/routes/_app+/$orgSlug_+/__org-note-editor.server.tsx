@@ -11,7 +11,7 @@ import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { logNoteActivity } from '@repo/audit'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
 import {
 	uploadNoteImage,

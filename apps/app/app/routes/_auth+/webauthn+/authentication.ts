@@ -75,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 
 		// Check if user is banned before creating session
-		const { canUserLogin } = await import('#app/utils/auth.server.ts')
+		const { canUserLogin } = await import('@repo/auth')
 		const allowed = await canUserLogin(passkey.userId)
 		if (!allowed) {
 			return Response.json(

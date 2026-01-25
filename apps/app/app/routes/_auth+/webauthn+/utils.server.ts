@@ -4,7 +4,7 @@ import {
 } from '@simplewebauthn/server'
 import { createCookie } from 'react-router'
 import { z } from 'zod'
-import { ENV } from '#app/utils/env.server.ts'
+import { ENV } from 'varlock/env'
 import { getDomainUrl } from '@repo/common'
 
 export const passkeyCookie = createCookie('webauthn-challenge', {

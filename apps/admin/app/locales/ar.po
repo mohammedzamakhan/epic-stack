@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 
 #. placeholder {0}: details.keys.length - 10
-#: app/components/admin-cache-confirmation-dialog.tsx:92
+#: app/components/admin-cache-confirmation-dialog.tsx:99
 msgid "... and {0} more"
 msgstr "... و {0} أكثر"
 
@@ -23,13 +23,13 @@ msgstr "... و {0} أكثر"
 msgid "({duration} minute{0} ago)"
 msgstr "(منذ {duration} دقيقة{0})"
 
-#: app/components/admin-user-detail.tsx:393
+#: app/components/admin-user-detail.tsx:395
 msgid "(Expired)"
 msgstr "(منتهي الصلاحية)"
 
 #. placeholder {0}: data.stats.lru.currentSize
 #. placeholder {1}: data.stats.lru.maxSize
-#: app/routes/_admin+/cache.tsx:297
+#: app/routes/_admin+/cache.tsx:296
 msgid "{0} / {1} max"
 msgstr "{0} / {1} كحد أقصى"
 
@@ -52,7 +52,7 @@ msgid "{0} identity provider configuration"
 msgstr "إعداد موفر الهوية {0}"
 
 #. placeholder {0}: statistics.topActions[0]?._count || 0
-#: app/routes/_admin+/audit-logs.tsx:218
+#: app/routes/_admin+/audit-logs.tsx:220
 msgid "{0} occurrences"
 msgstr "{0} حدوث"
 
@@ -62,12 +62,12 @@ msgid "{0} requests"
 msgstr "{0} طلب"
 
 #. placeholder {0}: selectedKeys.size
-#: app/routes/_admin+/cache.tsx:456
+#: app/routes/_admin+/cache.tsx:455
 msgid "{0} selected"
 msgstr "{0} محدد"
 
 #. placeholder {0}: formatBytes(data.stats.sqlite.totalSize)
-#: app/routes/_admin+/cache.tsx:283
+#: app/routes/_admin+/cache.tsx:282
 msgid "{0} total"
 msgstr "{0} إجمالي"
 
@@ -81,11 +81,11 @@ msgstr "{0} إجمالي"
 msgid "{0} users"
 msgstr "{0} مستخدم"
 
-#: app/components/admin-user-detail.tsx:260
+#: app/components/admin-user-detail.tsx:262
 msgid "{activeCount} active"
 msgstr "{activeCount} نشط"
 
-#: app/components/admin-user-detail.tsx:279
+#: app/components/admin-user-detail.tsx:281
 msgid "{totalSessions} total sessions"
 msgstr "{totalSessions} جلسة إجمالية"
 
@@ -98,7 +98,7 @@ msgid "+ New Role"
 msgstr "+ دور جديد"
 
 #. placeholder {0}: ip.ipAddressUsers.length - 3
-#: app/routes/_admin+/ip-addresses+/index.tsx:316
+#: app/routes/_admin+/ip-addresses+/index.tsx:318
 msgid "+{0} more users"
 msgstr "+{0} مستخدم آخر"
 
@@ -106,11 +106,11 @@ msgstr "+{0} مستخدم آخر"
 msgid "+{recentUsers} new this week"
 msgstr "+{recentUsers} جديد هذا الأسبوع"
 
-#: app/components/admin-user-detail.tsx:689
+#: app/components/admin-user-detail.tsx:691
 msgid "0 configured"
 msgstr "0 مكوّن"
 
-#: app/components/admin-user-detail.tsx:314
+#: app/components/admin-user-detail.tsx:316
 msgid "0 passkeys"
 msgstr "0 مفاتيح مرور"
 
@@ -123,7 +123,7 @@ msgid "Accept"
 msgstr "قبول"
 
 #: app/routes/_admin+/_layout.tsx:49
-#: app/routes/_admin+/cache.tsx:903
+#: app/routes/_admin+/cache.tsx:902
 msgid "Access Denied"
 msgstr "تم رفض الوصول"
 
@@ -136,7 +136,7 @@ msgstr "تم منح الوصول"
 msgid "Access Level"
 msgstr "مستوى الوصول"
 
-#: app/routes/_admin+/cache.tsx:331
+#: app/routes/_admin+/cache.tsx:330
 msgid "across all caches"
 msgstr "عبر جميع ذاكرات التخزين المؤقت"
 
@@ -148,7 +148,7 @@ msgstr "إجراء"
 #: app/components/admin/feature-flags.tsx:485
 #: app/components/admin/feature-flags.tsx:652
 #: app/components/sso-user-management.tsx:175
-#: app/routes/_admin+/cache.tsx:602
+#: app/routes/_admin+/cache.tsx:601
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:257
 #: app/routes/_admin+/ip-addresses+/index.tsx:240
 #: app/routes/_admin+/roles+/index.tsx:402
@@ -172,8 +172,8 @@ msgstr "تفعيل"
 msgid "Active"
 msgstr "نشط"
 
-#: app/components/admin-user-detail.tsx:269
-#: app/components/admin-user-detail.tsx:736
+#: app/components/admin-user-detail.tsx:271
+#: app/components/admin-user-detail.tsx:738
 #: app/routes/_admin+/index.tsx:216
 msgid "Active Sessions"
 msgstr "الجلسات النشطة"
@@ -182,7 +182,7 @@ msgstr "الجلسات النشطة"
 msgid "Active Users:"
 msgstr "المستخدمون النشطون:"
 
-#: app/components/admin-user-detail.tsx:330
+#: app/components/admin-user-detail.tsx:332
 msgid "Activity"
 msgstr "النشاط"
 
@@ -212,7 +212,7 @@ msgstr "إضافة صلاحية"
 
 #: app/components/admin-sidebar.tsx:101
 #: app/components/admin-sidebar.tsx:109
-#: app/components/sso-configuration-form.tsx:384
+#: app/components/sso-configuration-form.tsx:392
 #: app/components/sso-user-management.tsx:98
 #: app/routes/_admin+/roles+/$roleId.tsx:415
 #: app/routes/_admin+/roles+/system.$roleId.tsx:209
@@ -229,15 +229,15 @@ msgid "Admin Impersonation Active"
 msgstr "انتحال شخصية المدير نشط"
 
 #: app/routes/_admin+/_layout.tsx:57
-#: app/routes/_admin+/cache.tsx:911
+#: app/routes/_admin+/cache.tsx:910
 msgid "Admin role required"
 msgstr "دور المدير مطلوب"
 
-#: app/routes/_admin+/audit-logs.tsx:283
+#: app/routes/_admin+/audit-logs.tsx:285
 msgid "All"
 msgstr "الكل"
 
-#: app/routes/_admin+/cache.tsx:361
+#: app/routes/_admin+/cache.tsx:360
 msgid "All caches"
 msgstr "جميع ذاكرات التخزين المؤقت"
 
@@ -249,7 +249,7 @@ msgstr "جميع المؤسسات"
 msgid "All plans"
 msgstr "جميع الخطط"
 
-#: app/routes/_admin+/audit-logs.tsx:279
+#: app/routes/_admin+/audit-logs.tsx:281
 msgid "All severities"
 msgstr "جميع مستويات الخطورة"
 
@@ -261,11 +261,11 @@ msgstr "جميع الحالات"
 msgid "All Users"
 msgstr "جميع المستخدمين"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:409
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:411
 msgid "Allow Exports"
 msgstr "السماح بالتصدير"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:428
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:430
 msgid "Allow users to export audit logs"
 msgstr "السماح للمستخدمين بتصدير سجلات المراجعة"
 
@@ -273,11 +273,11 @@ msgstr "السماح للمستخدمين بتصدير سجلات المراجع
 msgid "any - Any resources"
 msgstr "أي - أي موارد"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:320
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:322
 msgid "Apply Preset"
 msgstr "تطبيق الإعداد المسبق"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:487
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:489
 msgid "Archive Old Logs"
 msgstr "أرشفة السجلات القديمة"
 
@@ -286,7 +286,7 @@ msgid "Archived Logs"
 msgstr "السجلات المؤرشفة"
 
 #. placeholder {0}: ip.ip
-#: app/routes/_admin+/ip-addresses+/index.tsx:360
+#: app/routes/_admin+/ip-addresses+/index.tsx:362
 msgid "Are you sure you want to blacklist {0}? This will prevent all future requests from this IP address."
 msgstr "هل أنت متأكد من أنك تريد إدراج {0} في القائمة السوداء؟ سيمنع هذا جميع الطلبات المستقبلية من عنوان IP هذا."
 
@@ -298,7 +298,7 @@ msgstr "هل أنت متأكد من أنك تريد حذف هذا الدور؟"
 msgid "Are you sure you want to delete this system role?"
 msgstr "هل أنت متأكد من أنك تريد حذف دور النظام هذا؟"
 
-#: app/components/sso-configuration-form.tsx:401
+#: app/components/sso-configuration-form.tsx:409
 msgid "Attribute Mapping (JSON)"
 msgstr "تعيين الخصائص (JSON)"
 
@@ -311,11 +311,11 @@ msgstr "سياسة الاحتفاظ بسجل المراجعة"
 msgid "Audit Logs"
 msgstr "سجلات المراجعة"
 
-#: app/routes/_admin+/audit-logs.tsx:314
+#: app/routes/_admin+/audit-logs.tsx:316
 msgid "Audit Trail"
 msgstr "مسار المراجعة"
 
-#: app/components/admin-user-detail.tsx:672
+#: app/components/admin-user-detail.tsx:674
 msgid "Authentication Methods"
 msgstr "طرق المصادقة"
 
@@ -328,16 +328,16 @@ msgstr "رابط التفويض"
 msgid "Auto-Discovery"
 msgstr "الاكتشاف التلقائي"
 
-#: app/components/sso-configuration-form.tsx:355
+#: app/components/sso-configuration-form.tsx:363
 #: app/components/sso-configuration-overview.tsx:223
 msgid "Auto-Provision Users"
 msgstr "توفير المستخدمين تلقائياً"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:403
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:405
 msgid "Automatically archive old logs to cold storage"
 msgstr "أرشفة السجلات القديمة تلقائياً في التخزين البارد"
 
-#: app/components/sso-configuration-form.tsx:358
+#: app/components/sso-configuration-form.tsx:366
 msgid "Automatically create user accounts for new SSO users"
 msgstr "إنشاء حسابات المستخدمين تلقائياً لمستخدمي SSO الجدد"
 
@@ -345,42 +345,42 @@ msgstr "إنشاء حسابات المستخدمين تلقائياً لمستخ
 msgid "Automatically discover OAuth2 endpoints from the issuer URL"
 msgstr "اكتشاف نقاط نهاية OAuth2 تلقائياً من رابط المُصدر"
 
-#: app/routes/_admin+/cache.tsx:306
+#: app/routes/_admin+/cache.tsx:305
 msgid "Average Size"
 msgstr "الحجم المتوسط"
 
 #: app/components/admin-user-detail.tsx:188
-#: app/components/admin-user-detail.tsx:357
+#: app/components/admin-user-detail.tsx:359
 #: app/components/admin-users-table.tsx:178
 msgid "Ban Expired"
 msgstr "انتهت صلاحية الحظر"
 
-#: app/components/admin-user-detail.tsx:346
+#: app/components/admin-user-detail.tsx:348
 msgid "Ban Information"
 msgstr "معلومات الحظر"
 
-#: app/components/admin-ban-user-dialog.tsx:78
-#: app/components/admin-ban-user-dialog.tsx:174
+#: app/components/admin-ban-user-dialog.tsx:85
+#: app/components/admin-ban-user-dialog.tsx:181
 #: app/components/admin-user-detail.tsx:237
 msgid "Ban User"
 msgstr "حظر المستخدم"
 
 #: app/components/admin-user-detail.tsx:190
-#: app/components/admin-user-detail.tsx:359
+#: app/components/admin-user-detail.tsx:361
 #: app/components/admin-users-table.tsx:178
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:280
 msgid "Banned"
 msgstr "محظور"
 
-#: app/components/admin-user-detail.tsx:402
+#: app/components/admin-user-detail.tsx:404
 msgid "Banned by:"
 msgstr "محظور بواسطة:"
 
-#: app/components/admin-user-detail.tsx:374
+#: app/components/admin-user-detail.tsx:376
 msgid "Banned:"
 msgstr "محظور:"
 
-#: app/components/admin-ban-user-dialog.tsx:169
+#: app/components/admin-ban-user-dialog.tsx:176
 msgid "Banning..."
 msgstr "جاري الحظر..."
 
@@ -389,15 +389,15 @@ msgstr "جاري الحظر..."
 msgid "Basic information"
 msgstr "المعلومات الأساسية"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:350
+#: app/routes/_admin+/ip-addresses+/index.tsx:352
 msgid "Blacklist"
 msgstr "القائمة السوداء"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:391
+#: app/routes/_admin+/ip-addresses+/index.tsx:393
 msgid "Blacklist IP"
 msgstr "إدراج IP في القائمة السوداء"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:357
+#: app/routes/_admin+/ip-addresses+/index.tsx:359
 msgid "Blacklist IP Address"
 msgstr "إدراج عنوان IP في القائمة السوداء"
 
@@ -431,7 +431,7 @@ msgid "Boolean"
 msgstr "منطقي"
 
 #. placeholder {0}: selectedKeys.size
-#: app/routes/_admin+/cache.tsx:837
+#: app/routes/_admin+/cache.tsx:836
 msgid "Bulk Actions ({0})"
 msgstr "الإجراءات المجمعة ({0})"
 
@@ -440,17 +440,17 @@ msgstr "الإجراءات المجمعة ({0})"
 msgid "Cache"
 msgstr "ذاكرة التخزين المؤقت"
 
-#: app/routes/_admin+/cache.tsx:262
+#: app/routes/_admin+/cache.tsx:261
 #: app/routes/_admin+/index.tsx:372
 msgid "Cache Management"
 msgstr "إدارة ذاكرة التخزين المؤقت"
 
-#: app/components/admin-cache-confirmation-dialog.tsx:64
+#: app/components/admin-cache-confirmation-dialog.tsx:71
 msgid "Cache Type:"
 msgstr "نوع ذاكرة التخزين المؤقت:"
 
-#: app/components/admin-ban-user-dialog.tsx:158
-#: app/components/admin-cache-confirmation-dialog.tsx:104
+#: app/components/admin-ban-user-dialog.tsx:165
+#: app/components/admin-cache-confirmation-dialog.tsx:111
 #: app/routes/_admin+/roles+/index.tsx:337
 msgid "Cancel"
 msgstr "إلغاء"
@@ -460,7 +460,7 @@ msgid "Canceled"
 msgstr "ملغي"
 
 #. placeholder {0}: type.toUpperCase()
-#: app/routes/_admin+/cache.tsx:762
+#: app/routes/_admin+/cache.tsx:761
 msgid "Clear {0}"
 msgstr "مسح {0}"
 
@@ -468,11 +468,11 @@ msgstr "مسح {0}"
 msgid "Clear Cache"
 msgstr "مسح ذاكرة التخزين المؤقت"
 
-#: app/routes/_admin+/audit-logs.tsx:304
+#: app/routes/_admin+/audit-logs.tsx:306
 msgid "Clear Filters"
 msgstr "مسح المرشحات"
 
-#: app/routes/_admin+/cache.tsx:857
+#: app/routes/_admin+/cache.tsx:856
 msgid "Clear selection"
 msgstr "مسح التحديد"
 
@@ -497,7 +497,7 @@ msgstr "الأعمدة"
 msgid "Compliance Presets"
 msgstr "الإعدادات المسبقة للامتثال"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:434
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:436
 msgid "Compliance Standard (Optional)"
 msgstr "معيار الامتثال (اختياري)"
 
@@ -513,11 +513,11 @@ msgstr "تغييرات الإعداد"
 msgid "Configuration"
 msgstr "الإعداد"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:338
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:340
 msgid "Configure custom retention and archival settings"
 msgstr "تكوين إعدادات الاحتفاظ والأرشفة المخصصة"
 
-#: app/components/sso-configuration-form.tsx:341
+#: app/components/sso-configuration-form.tsx:349
 msgid "Configure how users are created and managed through SSO"
 msgstr "تكوين كيفية إنشاء وإدارة المستخدمين من خلال SSO"
 
@@ -539,11 +539,11 @@ msgstr "تكوين تسجيل الدخول الموحد لـ {0}"
 msgid "Configure your organization's identity provider settings"
 msgstr "تكوين إعدادات موفر الهوية لمؤسستك"
 
-#: app/components/admin-cache-confirmation-dialog.tsx:120
+#: app/components/admin-cache-confirmation-dialog.tsx:127
 msgid "Confirm"
 msgstr "تأكيد"
 
-#: app/components/admin-user-detail.tsx:698
+#: app/components/admin-user-detail.tsx:700
 msgid "Connected Accounts"
 msgstr "الحسابات المتصلة"
 
@@ -589,7 +589,7 @@ msgstr "إنشاء دور"
 
 #: app/components/admin-organizations-table.tsx:286
 #: app/components/admin-users-table.tsx:210
-#: app/routes/_admin+/cache.tsx:596
+#: app/routes/_admin+/cache.tsx:595
 msgid "Created"
 msgstr "تم الإنشاء"
 
@@ -607,7 +607,7 @@ msgstr "تم الإنشاء بواسطة:"
 msgid "Created:"
 msgstr "تم الإنشاء:"
 
-#: app/components/admin-user-detail.tsx:756
+#: app/components/admin-user-detail.tsx:762
 msgid "Created: {createdAt}"
 msgstr "تم الإنشاء: {createdAt}"
 
@@ -615,11 +615,11 @@ msgstr "تم الإنشاء: {createdAt}"
 msgid "Creating..."
 msgstr "جاري الإنشاء..."
 
-#: app/routes/_admin+/audit-logs.tsx:295
+#: app/routes/_admin+/audit-logs.tsx:297
 msgid "Critical"
 msgstr "حرج"
 
-#: app/components/admin-user-detail.tsx:739
+#: app/components/admin-user-detail.tsx:741
 msgid "Current active login sessions"
 msgstr "جلسات تسجيل الدخول النشطة الحالية"
 
@@ -627,7 +627,7 @@ msgstr "جلسات تسجيل الدخول النشطة الحالية"
 msgid "Currently logged in users"
 msgstr "المستخدمون المسجلون حالياً"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:335
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:337
 msgid "Custom Retention Policy"
 msgstr "سياسة احتفاظ مخصصة"
 
@@ -655,7 +655,7 @@ msgstr "إلغاء التفعيل"
 msgid "Default"
 msgstr "افتراضي"
 
-#: app/components/sso-configuration-form.tsx:367
+#: app/components/sso-configuration-form.tsx:375
 msgid "Default Role"
 msgstr "الدور الافتراضي"
 
@@ -664,20 +664,20 @@ msgid "Delete"
 msgstr "حذف"
 
 #. placeholder {0}: lruKeys.length
-#: app/routes/_admin+/cache.tsx:851
+#: app/routes/_admin+/cache.tsx:850
 msgid "Delete {0} LRU keys"
 msgstr "حذف {0} مفاتيح LRU"
 
 #. placeholder {0}: sqliteKeys.length
-#: app/routes/_admin+/cache.tsx:845
+#: app/routes/_admin+/cache.tsx:844
 msgid "Delete {0} SQLite keys"
 msgstr "حذف {0} مفاتيح SQLite"
 
-#: app/routes/_admin+/cache.tsx:703
+#: app/routes/_admin+/cache.tsx:702
 msgid "Delete cache key"
 msgstr "حذف مفتاح ذاكرة التخزين المؤقت"
 
-#: app/routes/_admin+/cache.tsx:718
+#: app/routes/_admin+/cache.tsx:717
 msgid "Delete Cache Key"
 msgstr "حذف مفتاح ذاكرة التخزين المؤقت"
 
@@ -710,13 +710,13 @@ msgstr "معلومات مفصلة لعنوان IP {0}"
 msgid "Disable"
 msgstr "تعطيل"
 
-#: app/components/sso-configuration-form.tsx:487
+#: app/components/sso-configuration-form.tsx:495
 msgid "Disable SSO"
 msgstr "تعطيل SSO"
 
 #: app/components/sso-configuration-overview.tsx:103
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:398
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:423
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:400
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:425
 msgid "Disabled"
 msgstr "معطل"
 
@@ -770,41 +770,41 @@ msgid "Email"
 msgstr "البريد الإلكتروني"
 
 #: app/utils/user-validation.ts:42
-msgid "Email is invalid"
-msgstr "البريد الإلكتروني غير صالح"
+#~ msgid "Email is invalid"
+#~ msgstr "البريد الإلكتروني غير صالح"
 
 #: app/utils/user-validation.ts:41
-msgid "Email is required"
-msgstr "البريد الإلكتروني مطلوب"
+#~ msgid "Email is required"
+#~ msgstr "البريد الإلكتروني مطلوب"
 
 #: app/utils/user-validation.ts:44
-msgid "Email is too long"
-msgstr "البريد الإلكتروني طويل جداً"
+#~ msgid "Email is too long"
+#~ msgstr "البريد الإلكتروني طويل جداً"
 
 #: app/utils/user-validation.ts:43
-msgid "Email is too short"
-msgstr "البريد الإلكتروني قصير جداً"
+#~ msgid "Email is too short"
+#~ msgstr "البريد الإلكتروني قصير جداً"
 
 #: app/components/sso-configuration-overview.tsx:134
 msgid "Enable"
 msgstr "تفعيل"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:384
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:386
 msgid "Enable Archiving"
 msgstr "تفعيل الأرشفة"
 
-#: app/components/sso-configuration-form.tsx:489
+#: app/components/sso-configuration-form.tsx:497
 msgid "Enable SSO"
 msgstr "تفعيل SSO"
 
 #: app/components/admin/feature-flags.tsx:304
 #: app/components/sso-configuration-overview.tsx:101
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:395
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:420
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:397
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:422
 msgid "Enabled"
 msgstr "مفعل"
 
-#: app/routes/_admin+/audit-logs.tsx:257
+#: app/routes/_admin+/audit-logs.tsx:259
 msgid "End Date"
 msgstr "تاريخ الانتهاء"
 
@@ -836,11 +836,11 @@ msgstr "أدخل وصف الصلاحية"
 msgid "Enter permission name"
 msgstr "أدخل اسم الصلاحية"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:377
+#: app/routes/_admin+/ip-addresses+/index.tsx:379
 msgid "Enter reason for blacklisting this IP address..."
 msgstr "أدخل سبب إدراج عنوان IP هذا في القائمة السوداء..."
 
-#: app/components/admin-ban-user-dialog.tsx:97
+#: app/components/admin-ban-user-dialog.tsx:104
 msgid "Enter the reason for banning this user..."
 msgstr "أدخل سبب حظر هذا المستخدم..."
 
@@ -848,31 +848,31 @@ msgstr "أدخل سبب حظر هذا المستخدم..."
 msgid "Enter User ID (required)"
 msgstr "أدخل معرف المستخدم (مطلوب)"
 
-#: app/components/admin-cache-confirmation-dialog.tsx:71
+#: app/components/admin-cache-confirmation-dialog.tsx:78
 msgid "Entries:"
 msgstr "الإدخالات:"
 
-#: app/routes/_admin+/audit-logs.tsx:292
+#: app/routes/_admin+/audit-logs.tsx:294
 msgid "Error"
 msgstr "خطأ"
 
-#: app/components/admin-ban-user-dialog.tsx:131
+#: app/components/admin-ban-user-dialog.tsx:138
 msgid "Expiration Date"
 msgstr "تاريخ انتهاء الصلاحية"
 
-#: app/components/admin-user-detail.tsx:382
+#: app/components/admin-user-detail.tsx:384
 msgid "Expires:"
 msgstr "ينتهي:"
 
-#: app/components/admin-user-detail.tsx:761
+#: app/components/admin-user-detail.tsx:767
 msgid "Expires: {expiresAt}"
 msgstr "تنتهي الصلاحية: {expiresAt}"
 
-#: app/routes/_admin+/audit-logs.tsx:157
+#: app/routes/_admin+/audit-logs.tsx:159
 msgid "Export CSV"
 msgstr "تصدير CSV"
 
-#: app/routes/_admin+/audit-logs.tsx:165
+#: app/routes/_admin+/audit-logs.tsx:167
 msgid "Export JSON"
 msgstr "تصدير JSON"
 
@@ -893,7 +893,7 @@ msgstr "الميزة: {selectedEntity}"
 msgid "Feedback"
 msgstr "التعليقات"
 
-#: app/routes/_admin+/cache.tsx:357
+#: app/routes/_admin+/cache.tsx:356
 msgid "Filter by cache type"
 msgstr "تصفية حسب نوع ذاكرة التخزين المؤقت"
 
@@ -901,7 +901,7 @@ msgstr "تصفية حسب نوع ذاكرة التخزين المؤقت"
 msgid "Filter by organization"
 msgstr "تصفية حسب المؤسسة"
 
-#: app/routes/_admin+/audit-logs.tsx:229
+#: app/routes/_admin+/audit-logs.tsx:231
 #: app/routes/_admin+/waitlist.tsx:275
 msgid "Filters"
 msgstr "المرشحات"
@@ -969,7 +969,7 @@ msgstr "الانتقال إلى الصفحة السابقة"
 msgid "Grant Access"
 msgstr "منح الوصول"
 
-#: app/components/sso-configuration-form.tsx:393
+#: app/components/sso-configuration-form.tsx:401
 msgid "Guest"
 msgstr "ضيف"
 
@@ -977,7 +977,7 @@ msgstr "ضيف"
 msgid "Higher level roles can manage lower level roles"
 msgstr "الأدوار ذات المستوى الأعلى يمكنها إدارة الأدوار ذات المستوى الأقل"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:366
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:368
 msgid "Hot Storage Period (days)"
 msgstr "فترة التخزين الساخن (أيام)"
 
@@ -986,11 +986,11 @@ msgstr "فترة التخزين الساخن (أيام)"
 msgid "Hot storage: {0} days"
 msgstr "التخزين الساخن: {0} أيام"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:360
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:362
 msgid "How long to keep logs before permanent deletion"
 msgstr "المدة المراد الاحتفاظ بالسجلات قبل الحذف الدائم"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:378
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:380
 msgid "How long to keep logs readily searchable"
 msgstr "المدة المراد الاحتفاظ بالسجلات قابلة للبحث بسهولة"
 
@@ -998,19 +998,19 @@ msgstr "المدة المراد الاحتفاظ بالسجلات قابلة ل�
 msgid "https://your-domain.okta.com"
 msgstr "https://your-domain.okta.com"
 
-#: app/components/sso-configuration-form.tsx:266
+#: app/components/sso-configuration-form.tsx:267
 msgid "https://your-domain.okta.com/oauth2/v1/authorize"
 msgstr "https://your-domain.okta.com/oauth2/v1/authorize"
 
-#: app/components/sso-configuration-form.tsx:305
+#: app/components/sso-configuration-form.tsx:312
 msgid "https://your-domain.okta.com/oauth2/v1/revoke"
 msgstr "https://your-domain.okta.com/oauth2/v1/revoke"
 
-#: app/components/sso-configuration-form.tsx:279
+#: app/components/sso-configuration-form.tsx:282
 msgid "https://your-domain.okta.com/oauth2/v1/token"
 msgstr "https://your-domain.okta.com/oauth2/v1/token"
 
-#: app/components/sso-configuration-form.tsx:292
+#: app/components/sso-configuration-form.tsx:297
 msgid "https://your-domain.okta.com/oauth2/v1/userinfo"
 msgstr "https://your-domain.okta.com/oauth2/v1/userinfo"
 
@@ -1022,11 +1022,11 @@ msgstr "إعداد موفر الهوية"
 msgid "Impersonate"
 msgstr "انتحال الشخصية"
 
-#: app/routes/_admin+/audit-logs.tsx:198
+#: app/routes/_admin+/audit-logs.tsx:200
 msgid "In last 100 events"
 msgstr "في آخر 100 حدث"
 
-#: app/routes/_admin+/cache.tsx:566
+#: app/routes/_admin+/cache.tsx:565
 msgid "In-memory LRU cache"
 msgstr "ذاكرة التخزين المؤقت LRU في الذاكرة"
 
@@ -1039,11 +1039,11 @@ msgstr "غير نشط"
 msgid "Incomplete"
 msgstr "غير مكتمل"
 
-#: app/routes/_admin+/audit-logs.tsx:286
+#: app/routes/_admin+/audit-logs.tsx:288
 msgid "Info"
 msgstr "معلومات"
 
-#: app/routes/_admin+/cache.tsx:416
+#: app/routes/_admin+/cache.tsx:415
 msgid "Instance:"
 msgstr "المثيل:"
 
@@ -1061,13 +1061,13 @@ msgid "IP Address Details"
 msgstr "تفاصيل عنوان IP"
 
 #: app/components/admin-sidebar.tsx:67
-#: app/components/admin-user-detail.tsx:336
-#: app/components/admin-user-detail.tsx:781
+#: app/components/admin-user-detail.tsx:338
+#: app/components/admin-user-detail.tsx:787
 #: app/routes/_admin+/ip-addresses+/index.tsx:165
 msgid "IP Addresses"
 msgstr "عناوين IP"
 
-#: app/components/admin-user-detail.tsx:784
+#: app/components/admin-user-detail.tsx:790
 msgid "IP addresses used by this user"
 msgstr "عناوين IP المستخدمة من قبل هذا المستخدم"
 
@@ -1090,7 +1090,7 @@ msgstr "انضم"
 #: app/components/admin/feature-flags.tsx:371
 #: app/components/admin/feature-flags.tsx:476
 #: app/components/admin/feature-flags.tsx:643
-#: app/routes/_admin+/cache.tsx:590
+#: app/routes/_admin+/cache.tsx:589
 #: app/routes/_admin+/roles+/$roleId.tsx:442
 #: app/routes/_admin+/roles+/$roleId.tsx:491
 #: app/routes/_admin+/roles+/$roleId.tsx:732
@@ -1099,7 +1099,7 @@ msgstr "انضم"
 msgid "Key"
 msgstr "المفتاح"
 
-#: app/components/admin-cache-confirmation-dialog.tsx:79
+#: app/components/admin-cache-confirmation-dialog.tsx:86
 msgid "Keys to delete:"
 msgstr "المفاتيح المراد حذفها:"
 
@@ -1128,7 +1128,7 @@ msgstr "آخر طلب"
 msgid "Last Seen"
 msgstr "آخر ظهور"
 
-#: app/components/admin-user-detail.tsx:805
+#: app/components/admin-user-detail.tsx:813
 msgid "Last Seen: {lastSeenAt}"
 msgstr "آخر ظهور: {lastSeenAt}"
 
@@ -1178,12 +1178,12 @@ msgstr "الوضع الفاتح"
 msgid "Location"
 msgstr "الموقع"
 
-#: app/routes/_admin+/cache.tsx:290
-#: app/routes/_admin+/cache.tsx:476
+#: app/routes/_admin+/cache.tsx:289
+#: app/routes/_admin+/cache.tsx:475
 msgid "LRU Cache"
 msgstr "ذاكرة التخزين المؤقت LRU"
 
-#: app/routes/_admin+/cache.tsx:367
+#: app/routes/_admin+/cache.tsx:366
 msgid "LRU only"
 msgstr "LRU فقط"
 
@@ -1228,7 +1228,7 @@ msgstr "إدارة المستخدمين والمؤسسات وإعدادات ال
 msgid "Manage waitlist users and grant early access"
 msgstr "إدارة مستخدمي قائمة الانتظار ومنح الوصول المبكر"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:475
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:477
 msgid "Manual Actions"
 msgstr "الإجراءات اليدوية"
 
@@ -1236,15 +1236,15 @@ msgstr "الإجراءات اليدوية"
 msgid "Manual Endpoint Configuration"
 msgstr "إعداد نقطة النهاية اليدوي"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:490
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:492
 msgid "Manually trigger archival of logs older than the hot storage period"
 msgstr "تشغيل أرشفة السجلات الأقدم من فترة التخزين الساخن يدويًا"
 
-#: app/components/sso-configuration-form.tsx:418
+#: app/components/sso-configuration-form.tsx:426
 msgid "Map OIDC claims to user attributes. Leave empty for default mapping."
 msgstr "تعيين مطالبات OIDC إلى سمات المستخدم. اترك فارغاً للتعيين الافتراضي."
 
-#: app/components/sso-configuration-form.tsx:387
+#: app/components/sso-configuration-form.tsx:395
 #: app/components/sso-user-management.tsx:104
 msgid "Member"
 msgstr "عضو"
@@ -1265,7 +1265,7 @@ msgstr "مراقبة وإدارة عناوين IP التي تصل إلى موق�
 msgid "Monitor and manage system cache"
 msgstr "مراقبة وإدارة ذاكرة تخزين النظام المؤقتة"
 
-#: app/routes/_admin+/cache.tsx:265
+#: app/routes/_admin+/cache.tsx:264
 msgid "Monitor and manage system cache performance"
 msgstr "مراقبة وإدارة أداء ذاكرة تخزين النظام المؤقتة"
 
@@ -1273,7 +1273,7 @@ msgstr "مراقبة وإدارة أداء ذاكرة تخزين النظام ا
 msgid "Monitor organization activity"
 msgstr "مراقبة نشاط المؤسسة"
 
-#: app/routes/_admin+/audit-logs.tsx:215
+#: app/routes/_admin+/audit-logs.tsx:217
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:266
 msgid "N/A"
 msgstr "غير متاح"
@@ -1290,16 +1290,16 @@ msgid "Name *"
 msgstr "الاسم *"
 
 #: app/utils/user-validation.ts:34
-msgid "Name is required"
-msgstr "الاسم مطلوب"
+#~ msgid "Name is required"
+#~ msgstr "الاسم مطلوب"
 
 #: app/utils/user-validation.ts:36
-msgid "Name is too long"
-msgstr "الاسم طويل جداً"
+#~ msgid "Name is too long"
+#~ msgstr "الاسم طويل جداً"
 
 #: app/utils/user-validation.ts:35
-msgid "Name is too short"
-msgstr "الاسم قصير جداً"
+#~ msgid "Name is too short"
+#~ msgstr "الاسم قصير جداً"
 
 #: app/components/admin-users-table.tsx:197
 #: app/components/sso-configuration-overview.tsx:254
@@ -1316,12 +1316,12 @@ msgstr "ميزة جديدة"
 msgid "New permission"
 msgstr "صلاحية جديدة"
 
-#: app/routes/_admin+/audit-logs.tsx:429
+#: app/routes/_admin+/audit-logs.tsx:431
 #: app/routes/_admin+/waitlist.tsx:521
 msgid "Next"
 msgstr "التالي"
 
-#: app/components/admin-user-detail.tsx:770
+#: app/components/admin-user-detail.tsx:776
 msgid "No active sessions"
 msgstr "لا توجد جلسات نشطة"
 
@@ -1330,19 +1330,19 @@ msgid "No Audit Logs"
 msgstr "لا توجد سجلات مراجعة"
 
 #: app/routes/_admin+/audit-logs.old.tsx:150
-#: app/routes/_admin+/audit-logs.tsx:400
+#: app/routes/_admin+/audit-logs.tsx:402
 msgid "No audit logs found"
 msgstr "لم يتم العثور على سجلات مراجعة"
 
-#: app/routes/_admin+/cache.tsx:493
+#: app/routes/_admin+/cache.tsx:492
 msgid "No cache entries found"
 msgstr "لم يتم العثور على إدخالات ذاكرة تخزين مؤقت"
 
-#: app/routes/_admin+/cache.tsx:497
+#: app/routes/_admin+/cache.tsx:496
 msgid "No cache keys match \"{query}\""
 msgstr "لا توجد مفاتيح ذاكرة تخزين مؤقت تطابق \"{query}\""
 
-#: app/components/admin-user-detail.tsx:726
+#: app/components/admin-user-detail.tsx:728
 msgid "No connected accounts"
 msgstr "لا توجد حسابات متصلة"
 
@@ -1356,15 +1356,15 @@ msgstr "لا يوجد وصف"
 msgid "No flags configured"
 msgstr "لم يتم تكوين أي مؤشرات"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:409
+#: app/routes/_admin+/ip-addresses+/index.tsx:411
 msgid "No IP addresses found"
 msgstr "لم يتم العثور على عناوين IP"
 
-#: app/components/admin-user-detail.tsx:814
+#: app/components/admin-user-detail.tsx:822
 msgid "No IP addresses recorded for this user"
 msgstr "لم يتم تسجيل عناوين IP لهذا المستخدم"
 
-#: app/components/admin-user-detail.tsx:660
+#: app/components/admin-user-detail.tsx:662
 msgid "No notes created"
 msgstr "لم يتم إنشاء ملاحظات"
 
@@ -1376,11 +1376,11 @@ msgstr "لم يتم العثور على أدوار المؤسسة"
 msgid "No organizations found."
 msgstr "لم يتم العثور على مؤسسات."
 
-#: app/components/admin-user-detail.tsx:627
+#: app/components/admin-user-detail.tsx:629
 msgid "No recent activity"
 msgstr "لا يوجد نشاط حديث"
 
-#: app/components/admin-user-detail.tsx:597
+#: app/components/admin-user-detail.tsx:599
 msgid "No recent comments"
 msgstr "لا توجد تعليقات حديثة"
 
@@ -1409,7 +1409,7 @@ msgstr "لم يتم تكوين أي مؤشرات نظام"
 msgid "No system roles found"
 msgstr "لم يتم العثور على أدوار النظام"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:324
+#: app/routes/_admin+/ip-addresses+/index.tsx:326
 msgid "No users"
 msgstr "لا يوجد مستخدمون"
 
@@ -1431,11 +1431,11 @@ msgstr "لم يتم العثور على إدخالات قائمة الانتظا
 
 #: app/components/admin-users-table.tsx:138
 #: app/components/admin-users-table.tsx:148
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:445
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:447
 msgid "None"
 msgstr "بلا"
 
-#: app/components/admin-user-detail.tsx:681
+#: app/components/admin-user-detail.tsx:683
 msgid "Not Set"
 msgstr "غير محدد"
 
@@ -1443,7 +1443,7 @@ msgstr "غير محدد"
 msgid "Notes"
 msgstr "الملاحظات"
 
-#: app/components/admin-user-detail.tsx:288
+#: app/components/admin-user-detail.tsx:290
 msgid "Notes Created"
 msgstr "الملاحظات المنشأة"
 
@@ -1503,7 +1503,7 @@ msgstr "تنطبق أدوار المؤسسة على مؤسسات محددة، ب
 
 #: app/components/admin-sidebar.tsx:55
 #: app/components/admin-user-detail.tsx:248
-#: app/components/admin-user-detail.tsx:327
+#: app/components/admin-user-detail.tsx:329
 #: app/components/admin-users-table.tsx:132
 #: app/routes/_admin+/index.tsx:149
 #: app/routes/_admin+/index.tsx:317
@@ -1516,7 +1516,7 @@ msgstr "المؤسسات"
 msgid "Override Value"
 msgstr "قيمة التجاوز"
 
-#: app/components/admin-user-detail.tsx:324
+#: app/components/admin-user-detail.tsx:326
 msgid "Overview"
 msgstr "نظرة عامة"
 
@@ -1535,7 +1535,7 @@ msgstr "المالك"
 msgid "Page {0} of {1}"
 msgstr "الصفحة {0} من {1}"
 
-#: app/routes/_admin+/audit-logs.tsx:409
+#: app/routes/_admin+/audit-logs.tsx:411
 msgid "Page {page} of {totalPages}"
 msgstr "الصفحة {page} من {totalPages}"
 
@@ -1543,25 +1543,25 @@ msgstr "الصفحة {page} من {totalPages}"
 msgid "Page Not Found"
 msgstr "الصفحة غير موجودة"
 
-#: app/components/admin-user-detail.tsx:686
+#: app/components/admin-user-detail.tsx:688
 msgid "Passkeys"
 msgstr "مفاتيح المرور"
 
-#: app/components/admin-user-detail.tsx:678
+#: app/components/admin-user-detail.tsx:680
 msgid "Password"
 msgstr "كلمة المرور"
 
 #: app/utils/user-validation.ts:25
-msgid "Password is required"
-msgstr "كلمة المرور مطلوبة"
+#~ msgid "Password is required"
+#~ msgstr "كلمة المرور مطلوبة"
 
 #: app/utils/user-validation.ts:28
-msgid "Password is too long"
-msgstr "كلمة المرور طويلة جداً"
+#~ msgid "Password is too long"
+#~ msgstr "كلمة المرور طويلة جداً"
 
 #: app/utils/user-validation.ts:26
-msgid "Password is too short"
-msgstr "كلمة المرور قصيرة جداً"
+#~ msgid "Password is too short"
+#~ msgstr "كلمة المرور قصيرة جداً"
 
 #: app/components/admin-organizations-table.tsx:116
 msgid "Past Due"
@@ -1575,7 +1575,7 @@ msgstr "قيد الانتظار"
 msgid "Pending Access"
 msgstr "الوصول قيد الانتظار"
 
-#: app/routes/_admin+/cache.tsx:315
+#: app/routes/_admin+/cache.tsx:314
 msgid "per SQLite entry"
 msgstr "لكل إدخال SQLite"
 
@@ -1586,7 +1586,7 @@ msgstr "لكل إدخال SQLite"
 msgid "Permissions"
 msgstr "الصلاحيات"
 
-#: app/routes/_admin+/cache.tsx:564
+#: app/routes/_admin+/cache.tsx:563
 msgid "Persistent cache stored in SQLite database"
 msgstr "ذاكرة التخزين المؤقت الدائمة المخزنة في قاعدة بيانات SQLite"
 
@@ -1594,7 +1594,7 @@ msgstr "ذاكرة التخزين المؤقت الدائمة المخزنة ف�
 msgid "Personal + Organization notes"
 msgstr "الملاحظات الشخصية + المؤسسة"
 
-#: app/components/sso-configuration-form.tsx:321
+#: app/components/sso-configuration-form.tsx:329
 #: app/components/sso-configuration-overview.tsx:210
 msgid "PKCE Enabled"
 msgstr "PKCE مفعل"
@@ -1603,12 +1603,12 @@ msgstr "PKCE مفعل"
 msgid "Points"
 msgstr "النقاط"
 
-#: app/routes/_admin+/audit-logs.tsx:421
+#: app/routes/_admin+/audit-logs.tsx:423
 #: app/routes/_admin+/waitlist.tsx:475
 msgid "Previous"
 msgstr "السابق"
 
-#: app/components/admin-cache-confirmation-dialog.tsx:115
+#: app/components/admin-cache-confirmation-dialog.tsx:122
 msgid "Processing..."
 msgstr "جاري المعالجة..."
 
@@ -1640,23 +1640,23 @@ msgstr "الترتيب"
 msgid "Read our Cookie Policy"
 msgstr "اقرأ سياسة ملفات تعريف الارتباط الخاصة بنا"
 
-#: app/components/admin-ban-user-dialog.tsx:92
+#: app/components/admin-ban-user-dialog.tsx:99
 msgid "Reason for ban"
 msgstr "سبب الحظر"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:371
+#: app/routes/_admin+/ip-addresses+/index.tsx:373
 msgid "Reason for blacklisting"
 msgstr "سبب الإدراج في القائمة السوداء"
 
-#: app/components/admin-user-detail.tsx:366
+#: app/components/admin-user-detail.tsx:368
 msgid "Reason:"
 msgstr "السبب:"
 
-#: app/components/admin-user-detail.tsx:607
+#: app/components/admin-user-detail.tsx:609
 msgid "Recent Activity"
 msgstr "النشاط الأخير"
 
-#: app/components/admin-user-detail.tsx:577
+#: app/components/admin-user-detail.tsx:579
 msgid "Recent Comments"
 msgstr "التعليقات الأخيرة"
 
@@ -1668,11 +1668,11 @@ msgstr "تسجيلات الدخول الأخيرة"
 msgid "Recent Logins:"
 msgstr "تسجيلات الدخول الأخيرة:"
 
-#: app/components/admin-user-detail.tsx:638
+#: app/components/admin-user-detail.tsx:640
 msgid "Recent Notes"
 msgstr "الملاحظات الأخيرة"
 
-#: app/components/admin-user-detail.tsx:298
+#: app/components/admin-user-detail.tsx:300
 msgid "Recent notes shown"
 msgstr "الملاحظات الأخيرة المعروضة"
 
@@ -1699,11 +1699,11 @@ msgstr "الطلبات"
 
 #: app/components/admin-organizations-table.tsx:455
 #: app/components/admin-users-table.tsx:343
-#: app/routes/_admin+/cache.tsx:396
+#: app/routes/_admin+/cache.tsx:395
 msgid "Reset"
 msgstr "إعادة تعيين"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:348
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:350
 msgid "Retention Period (days)"
 msgstr "فترة الاحتفاظ (أيام)"
 
@@ -1714,7 +1714,7 @@ msgid "Retention: {0} days ({1} years)"
 msgstr "الاحتفاظ: {0} أيام ({1} سنة)"
 
 #: app/routes/_admin+/_layout.tsx:85
-#: app/routes/_admin+/cache.tsx:919
+#: app/routes/_admin+/cache.tsx:918
 msgid "Return to Admin Dashboard"
 msgstr "العودة إلى لوحة تحكم المدير"
 
@@ -1722,7 +1722,7 @@ msgstr "العودة إلى لوحة تحكم المدير"
 msgid "Return to App"
 msgstr "العودة إلى التطبيق"
 
-#: app/components/sso-configuration-form.tsx:299
+#: app/components/sso-configuration-form.tsx:305
 msgid "Revocation URL (Optional)"
 msgstr "رابط الإلغاء (اختياري)"
 
@@ -1766,11 +1766,11 @@ msgstr "الأدوار التي تنطبق على مؤسسات محددة"
 msgid "Rows per page"
 msgstr "الصفوف لكل صفحة"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:498
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:500
 msgid "Run Archival"
 msgstr "تشغيل الأرشفة"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:478
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:480
 msgid "Run maintenance tasks on audit logs"
 msgstr "تشغيل مهام الصيانة على سجلات المراجعة"
 
@@ -1779,16 +1779,16 @@ msgstr "تشغيل مهام الصيانة على سجلات المراجعة"
 msgid "Save Changes"
 msgstr "حفظ التغييرات"
 
-#: app/components/sso-configuration-form.tsx:447
+#: app/components/sso-configuration-form.tsx:455
 msgid "Save Configuration"
 msgstr "حفظ الإعداد"
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:463
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:465
 msgid "Save Policy"
 msgstr "حفظ السياسة"
 
-#: app/components/sso-configuration-form.tsx:439
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:461
+#: app/components/sso-configuration-form.tsx:447
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:463
 msgid "Saving..."
 msgstr "جاري الحفظ..."
 
@@ -1802,7 +1802,7 @@ msgstr "النطاقات:"
 
 #: app/components/admin/feature-flags.tsx:458
 #: app/components/admin/feature-flags.tsx:612
-#: app/routes/_admin+/audit-logs.tsx:236
+#: app/routes/_admin+/audit-logs.tsx:238
 msgid "Search"
 msgstr "بحث"
 
@@ -1810,11 +1810,11 @@ msgstr "بحث"
 msgid "Search by name, email, or username..."
 msgstr "البحث بالاسم أو البريد الإلكتروني أو اسم المستخدم..."
 
-#: app/routes/_admin+/cache.tsx:346
+#: app/routes/_admin+/cache.tsx:345
 msgid "Search cache keys..."
 msgstr "البحث عن مفاتيح ذاكرة التخزين المؤقت..."
 
-#: app/routes/_admin+/audit-logs.tsx:240
+#: app/routes/_admin+/audit-logs.tsx:242
 msgid "Search details or action..."
 msgstr "البحث عن التفاصيل أو الإجراء..."
 
@@ -1838,12 +1838,12 @@ msgstr "البحث عن المستخدمين"
 msgid "Search users..."
 msgstr "البحث عن المستخدمين..."
 
-#: app/components/admin-user-detail.tsx:305
-#: app/components/admin-user-detail.tsx:333
+#: app/components/admin-user-detail.tsx:307
+#: app/components/admin-user-detail.tsx:335
 msgid "Security"
 msgstr "الأمان"
 
-#: app/routes/_admin+/audit-logs.tsx:189
+#: app/routes/_admin+/audit-logs.tsx:191
 msgid "Security Events"
 msgstr "أحداث الأمان"
 
@@ -1861,25 +1861,25 @@ msgstr "اختر نوع المؤشر"
 msgid "Select role type"
 msgstr "اختر نوع الدور"
 
-#: app/components/admin-user-detail.tsx:753
+#: app/components/admin-user-detail.tsx:759
 msgid "Session {sessionId}..."
 msgstr "الجلسة {sessionId}..."
 
-#: app/components/admin-user-detail.tsx:681
+#: app/components/admin-user-detail.tsx:683
 msgid "Set"
 msgstr "محدد"
 
-#: app/components/admin-ban-user-dialog.tsx:120
+#: app/components/admin-ban-user-dialog.tsx:127
 msgid "Set expiration date (optional)"
 msgstr "تعيين تاريخ انتهاء الصلاحية (اختياري)"
 
-#: app/routes/_admin+/audit-logs.tsx:267
+#: app/routes/_admin+/audit-logs.tsx:269
 msgid "Severity"
 msgstr "مستوى الخطورة"
 
 #. placeholder {0}: logs.length
 #. placeholder {1}: total.toLocaleString()
-#: app/routes/_admin+/audit-logs.tsx:317
+#: app/routes/_admin+/audit-logs.tsx:319
 msgid "Showing {0} of {1} events"
 msgstr "عرض {0} من {1} حدث"
 
@@ -1906,12 +1906,12 @@ msgstr "عرض {0} إلى {1} من {2} مستخدم"
 
 #. placeholder {0}: query && ` matching "${query}"`
 #. placeholder {1}: cacheType !== 'all' && ` in ${cacheType.toUpperCase()} cache`
-#: app/routes/_admin+/cache.tsx:448
+#: app/routes/_admin+/cache.tsx:447
 msgid "Showing {totalKeys} cache entries{0}{1}"
 msgstr "عرض {totalKeys} إدخال ذاكرة تخزين مؤقت{0}{1}"
 
 #: app/components/admin-organizations-table.tsx:263
-#: app/routes/_admin+/cache.tsx:593
+#: app/routes/_admin+/cache.tsx:592
 msgid "Size"
 msgstr "الحجم"
 
@@ -1932,12 +1932,12 @@ msgstr "الترتيب حسب الترتيب"
 msgid "Source"
 msgstr "المصدر"
 
-#: app/routes/_admin+/cache.tsx:274
-#: app/routes/_admin+/cache.tsx:465
+#: app/routes/_admin+/cache.tsx:273
+#: app/routes/_admin+/cache.tsx:464
 msgid "SQLite Cache"
 msgstr "ذاكرة التخزين المؤقت SQLite"
 
-#: app/routes/_admin+/cache.tsx:364
+#: app/routes/_admin+/cache.tsx:363
 msgid "SQLite only"
 msgstr "SQLite فقط"
 
@@ -1971,7 +1971,7 @@ msgstr "مستخدمو SSO"
 msgid "SSO Users ({0})"
 msgstr "مستخدمو SSO ({0})"
 
-#: app/routes/_admin+/audit-logs.tsx:247
+#: app/routes/_admin+/audit-logs.tsx:249
 msgid "Start Date"
 msgstr "تاريخ البداية"
 
@@ -1986,7 +1986,7 @@ msgstr "تاريخ البداية"
 msgid "Status"
 msgstr "الحالة"
 
-#: app/components/admin-user-detail.tsx:353
+#: app/components/admin-user-detail.tsx:355
 msgid "Status:"
 msgstr "الحالة:"
 
@@ -2072,12 +2072,12 @@ msgstr "قيمة النظام:"
 msgid "System-wide permissions for this role"
 msgstr "صلاحيات على مستوى النظام لهذا الدور"
 
-#: app/components/sso-configuration-form.tsx:468
+#: app/components/sso-configuration-form.tsx:476
 #: app/components/sso-configuration-overview.tsx:116
 msgid "Test Connection"
 msgstr "اختبار الاتصال"
 
-#: app/components/sso-configuration-form.tsx:463
+#: app/components/sso-configuration-form.tsx:471
 msgid "Testing..."
 msgstr "جاري الاختبار..."
 
@@ -2085,17 +2085,17 @@ msgstr "جاري الاختبار..."
 msgid "The admin page you're looking for doesn't exist."
 msgstr "صفحة المدير التي تبحث عنها غير موجودة."
 
-#: app/components/admin-ban-user-dialog.tsx:142
+#: app/components/admin-ban-user-dialog.tsx:149
 msgid "The ban will be automatically lifted on this date. Leave empty for permanent ban."
 msgstr "سيتم رفع الحظر تلقائياً في هذا التاريخ. اترك فارغاً للحظر الدائم."
 
-#: app/routes/_admin+/cache.tsx:499
+#: app/routes/_admin+/cache.tsx:498
 msgid "The cache is empty"
 msgstr "ذاكرة التخزين المؤقت فارغة"
 
 #: app/utils/user-validation.ts:57
-msgid "The passwords must match"
-msgstr "يجب أن تتطابق كلمات المرور"
+#~ msgid "The passwords must match"
+#~ msgstr "يجب أن تتطابق كلمات المرور"
 
 #: app/components/nav-user.tsx:123
 msgid "Theme"
@@ -2105,11 +2105,11 @@ msgstr "المظهر"
 msgid "Toggle theme"
 msgstr "تبديل المظهر"
 
-#: app/components/sso-configuration-form.tsx:273
+#: app/components/sso-configuration-form.tsx:275
 msgid "Token URL"
 msgstr "رابط الرمز"
 
-#: app/routes/_admin+/audit-logs.tsx:206
+#: app/routes/_admin+/audit-logs.tsx:208
 msgid "Top Action"
 msgstr "الإجراء الأعلى"
 
@@ -2117,11 +2117,11 @@ msgstr "الإجراء الأعلى"
 msgid "Total Audit Logs"
 msgstr "إجمالي سجلات المراجعة"
 
-#: app/routes/_admin+/cache.tsx:322
+#: app/routes/_admin+/cache.tsx:321
 msgid "Total Entries"
 msgstr "إجمالي الإدخالات"
 
-#: app/routes/_admin+/audit-logs.tsx:175
+#: app/routes/_admin+/audit-logs.tsx:177
 msgid "Total Events"
 msgstr "إجمالي الأحداث"
 
@@ -2153,7 +2153,7 @@ msgstr "إجمالي المستخدمين:"
 msgid "Trial"
 msgstr "تجربة"
 
-#: app/routes/_admin+/cache.tsx:599
+#: app/routes/_admin+/cache.tsx:598
 msgid "TTL"
 msgstr "TTL"
 
@@ -2161,7 +2161,7 @@ msgstr "TTL"
 msgid "Type"
 msgstr "النوع"
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:342
+#: app/routes/_admin+/ip-addresses+/index.tsx:344
 msgid "Unblacklist"
 msgstr "إزالة من القائمة السوداء"
 
@@ -2175,7 +2175,7 @@ msgstr "غير معروف"
 msgid "Unpaid"
 msgstr "غير مدفوع"
 
-#: app/components/sso-configuration-form.tsx:445
+#: app/components/sso-configuration-form.tsx:453
 msgid "Update Configuration"
 msgstr "تحديث الإعداد"
 
@@ -2199,7 +2199,7 @@ msgstr "إحصائيات الاستخدام"
 msgid "Use lowercase letters, numbers, and hyphens only"
 msgstr "استخدم أحرفاً صغيرة وأرقاماً وشرطات فقط"
 
-#: app/components/sso-configuration-form.tsx:324
+#: app/components/sso-configuration-form.tsx:332
 msgid "Use Proof Key for Code Exchange for enhanced security"
 msgstr "استخدم مفتاح الإثبات لتبادل الرموز لأمان محسّن"
 
@@ -2215,7 +2215,7 @@ msgstr "استخدم هذا في قاعدة الكود الخاصة بك للإ�
 msgid "User"
 msgstr "المستخدم"
 
-#: app/components/admin-user-detail.tsx:564
+#: app/components/admin-user-detail.tsx:566
 msgid "User is not a member of any organizations"
 msgstr "المستخدم ليس عضواً في أي منظمات"
 
@@ -2223,7 +2223,7 @@ msgstr "المستخدم ليس عضواً في أي منظمات"
 msgid "User Override"
 msgstr "تجاوز المستخدم"
 
-#: app/components/sso-configuration-form.tsx:338
+#: app/components/sso-configuration-form.tsx:346
 msgid "User Provisioning"
 msgstr "توفير المستخدم"
 
@@ -2231,7 +2231,7 @@ msgstr "توفير المستخدم"
 msgid "User+Org Override"
 msgstr "تجاوز المستخدم+المؤسسة"
 
-#: app/components/sso-configuration-form.tsx:286
+#: app/components/sso-configuration-form.tsx:290
 msgid "UserInfo URL"
 msgstr "رابط معلومات المستخدم"
 
@@ -2240,20 +2240,20 @@ msgid "Username"
 msgstr "اسم المستخدم"
 
 #: app/utils/user-validation.ts:17
-msgid "Username can only include letters, numbers, and underscores"
-msgstr "يمكن أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات سفلية فقط"
+#~ msgid "Username can only include letters, numbers, and underscores"
+#~ msgstr "يمكن أن يحتوي اسم المستخدم على أحرف وأرقام وشرطات سفلية فقط"
 
 #: app/utils/user-validation.ts:12
-msgid "Username is required"
-msgstr "اسم المستخدم مطلوب"
+#~ msgid "Username is required"
+#~ msgstr "اسم المستخدم مطلوب"
 
 #: app/utils/user-validation.ts:14
-msgid "Username is too long"
-msgstr "اسم المستخدم طويل جداً"
+#~ msgid "Username is too long"
+#~ msgstr "اسم المستخدم طويل جداً"
 
 #: app/utils/user-validation.ts:13
-msgid "Username is too short"
-msgstr "اسم المستخدم قصير جداً"
+#~ msgid "Username is too short"
+#~ msgstr "اسم المستخدم قصير جداً"
 
 #: app/components/admin-sidebar.tsx:43
 #: app/routes/_admin+/index.tsx:280
@@ -2305,7 +2305,7 @@ msgstr "عرض المستخدمين →"
 msgid "View, search, and manage user accounts"
 msgstr "عرض والبحث وإدارة حسابات المستخدمين"
 
-#: app/components/sso-configuration-form.tsx:390
+#: app/components/sso-configuration-form.tsx:398
 msgid "Viewer"
 msgstr "عارض"
 
@@ -2322,7 +2322,7 @@ msgstr "إدخالات قائمة الانتظار ({0})"
 msgid "Waitlist Management"
 msgstr "إدارة قائمة الانتظار"
 
-#: app/routes/_admin+/audit-logs.tsx:289
+#: app/routes/_admin+/audit-logs.tsx:291
 msgid "Warning"
 msgstr "تحذير"
 
@@ -2332,7 +2332,7 @@ msgstr "نستخدم ملفات تعريف الارتباط لتحسين تجر�
 
 #. placeholder {0}: user.name || user.username
 #. placeholder {1}: user.email
-#: app/components/admin-ban-user-dialog.tsx:81
+#: app/components/admin-ban-user-dialog.tsx:88
 msgid "You are about to ban <0>{0}</0> ({1}). This will prevent them from accessing the application."
 msgstr "أنت على وشك حظر <0>{0}</0> ({1}). سيمنع هذا من الوصول إلى التطبيق."
 
@@ -2342,6 +2342,6 @@ msgid "You are impersonating <0>{0}</0>"
 msgstr "أنت تنتحل شخصية <0>{0}</0>"
 
 #: app/routes/_admin+/_layout.tsx:52
-#: app/routes/_admin+/cache.tsx:906
+#: app/routes/_admin+/cache.tsx:905
 msgid "You don't have permission to access this admin area."
 msgstr "ليس لديك إذن للوصول إلى منطقة المدير هذه."

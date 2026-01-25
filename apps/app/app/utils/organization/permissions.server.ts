@@ -1,10 +1,12 @@
-// Re-export most functions from auth package
-export * from '@repo/auth'
 import {
 	requireUserWithOrganizationPermission as _requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+	getUserOrganizationPermissionsForClient,
 	type OrganizationPermissionString,
 } from '@repo/auth'
-import { getUserId } from '../auth.server.ts'
+import { getUserId } from '@repo/auth'
+
+export { ORG_PERMISSIONS, getUserOrganizationPermissionsForClient }
 
 /**
  * Require user to have organization permission - throws 403 if not

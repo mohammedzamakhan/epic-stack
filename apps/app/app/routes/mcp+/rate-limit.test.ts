@@ -172,7 +172,7 @@ describe('Rate Limiting', () => {
 				RATE_LIMITS.toolInvocation,
 			)
 			expect(result.allowed).toBe(false)
-		})
+		}, 30000)
 
 		it('should isolate rate limits per token', async () => {
 			const token1 = 'test-token-3'

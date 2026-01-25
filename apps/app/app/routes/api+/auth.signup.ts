@@ -1,10 +1,10 @@
 import { parseWithZod } from '@conform-to/zod'
 import { prisma } from '@repo/database'
+import { checkHoneypot } from '@repo/security'
 import { EmailSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { prepareVerification } from '#app/routes/_auth+/verify.server.tsx'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { type Route } from './+types/auth.signup.ts'
 
 const SignupFormSchema = z.object({

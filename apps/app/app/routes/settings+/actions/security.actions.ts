@@ -12,7 +12,7 @@ import {
 	verifyUserPassword,
 	getPasswordHash,
 	checkIsCommonPassword,
-} from '#app/utils/auth.server.ts'
+} from '@repo/auth'
 
 export const ChangePasswordSchema = z
 	.object({

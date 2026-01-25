@@ -11,6 +11,11 @@
       "types": "./index.ts",
       "import": "./index.ts",
       "default": "./index.ts"
+    },
+    "./constants": {
+      "types": "./src/constants.ts",
+      "import": "./src/constants.ts",
+      "default": "./src/constants.ts"
     }
   },
   "scripts": {
@@ -33,10 +38,12 @@
     "@repo/database": "*",
     "@sentry/react-router": "10.29.0",
     "ai": "5.0.108",
+    "bcryptjs": "^3.0.2",
     "litefs-js": "2.0.2",
-    "react-router": "^7.8.1",
+    "react-router": "^7.10.1",
     "remix-auth-github": "^3.0.2",
-    "zod": "^3.25.28"
+    "remix-utils": "^8.5.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/config": "*",

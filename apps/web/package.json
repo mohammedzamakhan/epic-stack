@@ -32,7 +32,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.2.0",
-    "tailwindcss": "^4.1.5"
+    "tailwindcss": "^4.1.8"
   },
   "peerDependencies": {
     "varlock": "^0.1.0"

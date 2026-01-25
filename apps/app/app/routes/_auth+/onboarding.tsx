@@ -1,8 +1,12 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { t, Trans } from '@lingui/macro'
+import { authSessionStorage, verifySessionStorage } from '@repo/auth'
+import { useIsPending } from '@repo/common'
+import { redirectWithToast } from '@repo/common/toast'
 import { getPageTitle } from '@repo/config/brand'
 import { prisma } from '@repo/database'
+import { checkHoneypot } from '@repo/security'
 import {
 	Card,
 	CardContent,
@@ -26,20 +30,10 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-
-import {
-	checkIsCommonPassword,
-	requireAnonymous,
-	sessionKey,
-	signup,
-} from '#app/utils/auth.server.ts'
+import { checkIsCommonPassword, requireAnonymous, sessionKey } from '@repo/auth'
+import { signup } from '#app/utils/auth.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
-import { useIsPending } from '@repo/common'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
-import { authSessionStorage } from '#app/utils/session.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/onboarding.ts'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
@@ -158,9 +152,8 @@ export async function action({ request }: Route.ActionArgs) {
 	// Check for invite token first
 	if (inviteToken) {
 		try {
-			const { createInvitationFromLink } = await import(
-				'#app/utils/organization/invitation.server.ts'
-			)
+			const { createInvitationFromLink } =
+				await import('#app/utils/organization/invitation.server.ts')
 			// Create a pending invitation for this user
 			const invitation = await createInvitationFromLink(inviteToken, email)
 
@@ -182,9 +175,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 	// Check for pending organization invitations and accept them
 	try {
-		const { acceptInvitationByEmail } = await import(
-			'#app/utils/organization/invitation.server.ts'
-		)
+		const { acceptInvitationByEmail } =
+			await import('#app/utils/organization/invitation.server.ts')
 		const invitationResults = await acceptInvitationByEmail(
 			email,
 			session.userId,
@@ -290,9 +282,8 @@ export async function action({ request }: Route.ActionArgs) {
 	const referralCode = await getOnboardingReferralCode(request)
 	if (referralCode) {
 		try {
-			const { getOrCreateWaitlistEntry, linkReferral } = await import(
-				'#app/utils/waitlist.server.ts'
-			)
+			const { getOrCreateWaitlistEntry, linkReferral } =
+				await import('#app/utils/waitlist.server.ts')
 			// Ensure waitlist entry exists before linking referral
 			await getOrCreateWaitlistEntry(session.userId)
 			await linkReferral(session.userId, referralCode)

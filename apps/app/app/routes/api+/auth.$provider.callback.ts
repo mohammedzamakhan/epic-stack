@@ -1,12 +1,9 @@
+import { normalizeEmail, normalizeUsername } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
-import { authenticator, canUserLogin } from '#app/utils/auth.server.ts'
-import { ProviderNameSchema } from '#app/utils/connections.tsx'
+import { canUserLogin, ProviderNameSchema } from '@repo/auth'
+import { authenticator } from '#app/utils/auth.server.ts'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
-import {
-	normalizeEmail,
-	normalizeUsername,
-} from '#app/utils/providers/provider.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {

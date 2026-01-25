@@ -171,13 +171,13 @@ import { useState } from 'react' // 1. External dependencies
 import { useNavigate } from 'react-router' // 2. External dependencies
 import { Button } from '@repo/ui/button' // 3. Monorepo packages (@repo/*)
 import { prisma } from '@repo/database' // 4. Monorepo packages
-import { requireUserId } from '#app/utils/auth.server.ts' // 5. App imports (#app/*)
+import { requireUserId } from '@repo/auth' // 5. App imports (#app/*)
 import { EmptyState } from '#app/components/empty-state.tsx' // 6. App imports
 import { type Route } from './+types/route-name' // 7. Relative imports
 import { NoteEditor } from './note-editor' // 8. Relative imports
 
 // ❌ Wrong order - causes warnings
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { Button } from '@repo/ui/button'
 import { useState } from 'react' // External should come first
 ```

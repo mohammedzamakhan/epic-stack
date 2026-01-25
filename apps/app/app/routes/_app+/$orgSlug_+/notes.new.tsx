@@ -3,7 +3,7 @@ import { Trans } from '@lingui/macro'
 import { prisma } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 
 export { action } from './__org-note-editor.server.tsx'

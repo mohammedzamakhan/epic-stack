@@ -20,6 +20,6 @@
     "@vitest/coverage-v8": "^4.0.1",
     "@repo/config": "*",
     "typescript": "^5.8.3",
-    "vitest": "^4.0.4"
+    "vitest": "^4.0.15"
   }
 }

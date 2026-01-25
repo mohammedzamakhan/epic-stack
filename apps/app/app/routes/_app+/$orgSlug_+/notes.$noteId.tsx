@@ -2,6 +2,9 @@ import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
+import { logNoteActivity, getNoteActivityLogs } from '@repo/audit'
+import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
+import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { Button } from '@repo/ui/button'
@@ -70,21 +73,18 @@ import {
 	CanDeleteNote,
 } from '#app/components/permissions/permission-guard.tsx'
 
-import { logNoteActivity, getNoteActivityLogs } from '@repo/audit'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
 import {
 	notifyCommentMentions,
 	notifyNoteOwner,
 } from '#app/utils/notifications.server.ts'
+import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 } from '#app/utils/organization/permissions.server.ts'
-import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 // Define comment types based on Prisma query structure
 type CommentWithUser = {

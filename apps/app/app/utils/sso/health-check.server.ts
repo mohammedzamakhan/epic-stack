@@ -1,4 +1,3 @@
-import { prisma } from '@repo/database'
 import { ssoConfigurationService } from './configuration.server.ts'
 import { SSOHealthChecker } from '@repo/sso'
 
@@ -10,6 +9,6 @@ export {
 	SSOHealthChecker,
 } from '@repo/sso'
 
-export const ssoHealthChecker = new SSOHealthChecker(prisma, {
+export const ssoHealthChecker = new SSOHealthChecker({
 	ssoConfigurationService,
 })

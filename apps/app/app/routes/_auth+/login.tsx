@@ -3,7 +3,9 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { getErrorMessage, useIsPending } from '@repo/common'
 import { getPageTitle } from '@repo/config/brand'
+import { arcjet, checkHoneypot } from '@repo/security'
 import {
 	Card,
 	CardContent,
@@ -36,18 +38,12 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import arcjet from '#app/utils/arcjet.server.ts'
-import { login, requireAnonymous } from '#app/utils/auth.server.ts'
-import {
-	ProviderConnectionForm,
-	providerNames,
-} from '#app/utils/connections.tsx'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { login } from '#app/utils/auth.server.ts'
+import { ProviderConnectionForm } from '#app/utils/connections.tsx'
 import {
 	saveLastLoginMethod,
 	useLastLoginMethod,
 } from '#app/utils/last-login-method.ts'
-import { getErrorMessage, useIsPending } from '@repo/common'
 import {
 	getOrganizationBySlug,
 	discoverOrganizationFromEmail,
@@ -56,6 +52,8 @@ import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import { type Route } from './+types/login.ts'
 import { handleNewSession } from './login.server.ts'
+import { requireAnonymous } from '@repo/auth'
+import { providerNames } from '@repo/auth/constants'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

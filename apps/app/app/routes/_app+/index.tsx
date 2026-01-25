@@ -1,8 +1,8 @@
 import { i18n } from '@lingui/core'
 import { t } from '@lingui/macro'
+import { redirectWithToast } from '@repo/common/toast'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
-import { getUserId } from '#app/utils/auth.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { getUserId } from '@repo/auth'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -13,9 +13,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	}
 
 	try {
-		const { getUserDefaultOrganization } = await import(
-			'#app/utils/organization/organizations.server.ts'
-		)
+		const { getUserDefaultOrganization } =
+			await import('#app/utils/organization/organizations.server.ts')
 		const defaultOrg = await getUserDefaultOrganization(userId)
 
 		if (defaultOrg?.organization?.slug) {

@@ -1,9 +1,9 @@
 import { parseWithZod } from '@conform-to/zod'
+import { checkHoneypot } from '@repo/security'
 import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { login } from '#app/utils/auth.server.ts'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.login.ts'
 

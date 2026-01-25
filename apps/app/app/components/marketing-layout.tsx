@@ -52,5 +52,5 @@ export function MarketingLayout({
 }
 
 // Export these hooks to be used in the layout
-export { useNonce } from '#app/utils/nonce-provider.ts'
+export { useNonce } from '@repo/common'
 export { useOptionalTheme } from '#app/routes/resources+/theme-switch.tsx'

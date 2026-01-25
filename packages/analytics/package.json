@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "react-router": "^7.8.1"
+    "react-router": "^7.10.1"
   },
   "devDependencies": {
     "@repo/config": "*",

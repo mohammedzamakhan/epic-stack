@@ -1,5 +1,5 @@
 import { createAuditMiddleware } from '@repo/audit'
-import { getUserId } from '#app/utils/auth.server.ts'
+import { getUserId } from '@repo/auth'
 
 const auditMiddleware = createAuditMiddleware({
 	getUserId,

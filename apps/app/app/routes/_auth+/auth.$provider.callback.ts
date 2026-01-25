@@ -1,27 +1,24 @@
+import {
+	getUserId,
+	normalizeEmail,
+	normalizeUsername,
+	verifySessionStorage,
+} from '@repo/auth'
+import { combineHeaders } from '@repo/common'
+import { ensurePrimary } from '@repo/common/litefs'
+import {
+	destroyRedirectToHeader,
+	getRedirectCookieValue,
+} from '@repo/common/redirect-cookie'
+import { createToastHeaders, redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { redirect } from 'react-router'
 import {
 	authenticator,
 	getSessionExpirationDate,
-	getUserId,
 } from '#app/utils/auth.server.ts'
-import { ProviderNameSchema, providerLabels } from '#app/utils/connections.tsx'
-import { ensurePrimary } from '#app/utils/litefs.server.ts'
-import { combineHeaders } from '@repo/common'
-import {
-	normalizeEmail,
-	normalizeUsername,
-} from '#app/utils/providers/provider.ts'
-import {
-	destroyRedirectToHeader,
-	getRedirectCookieValue,
-} from '@repo/common/redirect-cookie'
+import { ProviderNameSchema, providerLabels } from '@repo/auth/constants'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
-import {
-	createToastHeaders,
-	redirectWithToast,
-} from '#app/utils/toast.server.ts'
-import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 import { handleNewSession } from './login.server.ts'
 import { onboardingEmailSessionKey } from './onboarding.tsx'
@@ -215,7 +212,7 @@ async function makeSession(
 ) {
 	redirectTo ??= '/'
 
-	const { canUserLogin } = await import('#app/utils/auth.server.ts')
+	const { canUserLogin } = await import('@repo/auth')
 	const allowed = await canUserLogin(userId)
 	if (!allowed) {
 		return redirect('/login?banned=true', {

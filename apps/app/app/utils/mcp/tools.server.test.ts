@@ -9,25 +9,15 @@ import './tools.server' // Import to register tools
  * Helper to add a user to an organization
  */
 async function addUserToOrganization(userId: string, organizationId: string) {
-	let memberRole = await prisma.organizationRole.findFirst({
+	const memberRole = await prisma.organizationRole.upsert({
 		where: { name: 'member' },
+		update: {},
+		create: {
+			name: 'member',
+			description: 'Member role',
+			level: 1,
+		},
 	})
-	if (!memberRole) {
-		try {
-			memberRole = await prisma.organizationRole.create({
-				data: {
-					name: 'member',
-					description: 'Member role',
-					level: 1,
-				},
-			})
-		} catch {
-			// Role may have been created by another test in parallel
-			memberRole = await prisma.organizationRole.findFirstOrThrow({
-				where: { name: 'member' },
-			})
-		}
-	}
 
 	// Check if the user-organization relationship already exists
 	const existingRelation = await prisma.userOrganization.findUnique({

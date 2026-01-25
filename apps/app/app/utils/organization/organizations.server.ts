@@ -2,7 +2,7 @@ import { type User } from '@prisma/client'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { auditService, AuditAction } from '@repo/audit'
-import { getUserId } from '../auth.server.ts'
+import { getUserId } from '@repo/auth'
 
 export type OrganizationWithImage = {
 	id: string
@@ -177,7 +177,7 @@ export async function getUserOrganizationsWithSlugHandling(
 	userId: string,
 	orgSlug: string | undefined,
 ) {
-	const { cache, cachified } = await import('../cache.server')
+	const { cache, cachified } = await import('@repo/cache')
 
 	// Promise to fetch user organizations
 	const userOrganizationsPromise = (async () => {

@@ -19,7 +19,7 @@ import {
 } from '@repo/ui/input-group'
 import * as React from 'react'
 import { redirect } from 'react-router'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,

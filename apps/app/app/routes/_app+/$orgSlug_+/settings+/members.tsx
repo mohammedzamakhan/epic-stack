@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { InvitationsCard } from '#app/components/settings/cards/organization/invitations-card.tsx'
 import { MembersCard } from '#app/components/settings/cards/organization/members-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import {
 	createOrganizationInvitation,
 	sendOrganizationInvitationEmail,

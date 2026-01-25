@@ -5,7 +5,8 @@ import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { prisma } from '@repo/database'
-import { ForgotPasswordEmail } from '@repo/email'
+import { ForgotPasswordEmail, sendEmail } from '@repo/email'
+import { arcjet, checkHoneypot } from '@repo/security'
 import {
 	Card,
 	CardContent,
@@ -26,10 +27,7 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import arcjet from '#app/utils/arcjet.server.ts'
-import { sendEmail } from '#app/utils/email.server.ts'
-import { ENV } from '#app/utils/env.server.ts'
-import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { ENV } from 'varlock/env'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.tsx'
 

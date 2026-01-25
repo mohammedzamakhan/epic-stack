@@ -1,9 +1,8 @@
 import { Trans, Plural } from '@lingui/macro'
+import { type ImpersonationInfo } from '@repo/auth'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { Form } from 'react-router'
-
-import { type ImpersonationInfo } from '#app/utils/impersonation.server.ts'
 
 interface ImpersonationBannerProps {
 	impersonationInfo: ImpersonationInfo

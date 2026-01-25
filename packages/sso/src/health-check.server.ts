@@ -5,6 +5,7 @@ import {
 } from './oidc-discovery.server.ts'
 import { ssoCache } from './cache.server.ts'
 import { ssoConnectionPool } from './connection-pool.server.ts'
+import { prisma } from '@repo/database'
 
 export interface SSOHealthStatus {
 	overall: 'healthy' | 'degraded' | 'unhealthy'
@@ -70,7 +71,6 @@ export interface ISSOConfigurationService {
  */
 export class SSOHealthChecker {
 	constructor(
-		private prisma: any,
 		private startParams: {
 			ssoConfigurationService: ISSOConfigurationService
 		},
@@ -143,11 +143,11 @@ export class SSOHealthChecker {
 
 		try {
 			// Test basic database connectivity
-			await this.prisma.$queryRaw`SELECT 1`
+			await prisma.$queryRaw`SELECT 1`
 
 			// Test SSO-specific tables
-			const configCount = await this.prisma.sSOConfiguration.count()
-			const sessionCount = await this.prisma.sSOSession.count()
+			const configCount = await prisma.sSOConfiguration.count()
+			const sessionCount = await prisma.sSOSession.count()
 
 			const duration = Date.now() - startTime
 
@@ -463,11 +463,11 @@ export class SSOHealthChecker {
 		try {
 			const [configCount, enabledConfigCount, sessionCount] = await Promise.all(
 				[
-					this.prisma.sSOConfiguration.count(),
-					this.prisma.sSOConfiguration.count({
+					prisma.sSOConfiguration.count(),
+					prisma.sSOConfiguration.count({
 						where: { isEnabled: true },
 					}),
-					this.prisma.sSOSession.count(),
+					prisma.sSOSession.count(),
 				],
 			)
 

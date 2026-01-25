@@ -1,5 +1,5 @@
 import { prisma } from '@repo/database'
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { getDomainUrl, getUserImgSrc } from '@repo/common'
 import { type Route } from './+types/download-user-data.ts'
 

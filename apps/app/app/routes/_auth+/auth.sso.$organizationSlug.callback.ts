@@ -1,14 +1,16 @@
-import { getClientIp } from '@repo/common/ip-tracking'
-import { SSOCallbackSchema } from '@repo/validation'
-import { redirect } from 'react-router'
-import { getUserId, loginWithSSO } from '#app/utils/auth.server.ts'
-import { ensurePrimary } from '#app/utils/litefs.server.ts'
 import { combineHeaders } from '@repo/common'
-import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
+import { getClientIp } from '@repo/common/ip-tracking'
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
 } from '@repo/common/redirect-cookie'
+import { createToastHeaders, redirectWithToast } from '@repo/common/toast'
+import { ensurePrimary } from '@repo/common/litefs'
+import { SSOCallbackSchema } from '@repo/validation'
+import { redirect } from 'react-router'
+import { getUserId, canUserLogin } from '@repo/auth'
+import { loginWithSSO } from '#app/utils/auth.server.ts'
+import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,
@@ -26,10 +28,6 @@ import {
 import { consumeNonce } from '#app/utils/sso/nonce.server.ts'
 import { trackSuspiciousActivity } from '#app/utils/sso/rate-limit.server.ts'
 import { validateSSOOrganization } from '#app/utils/sso/sanitization.server.ts'
-import {
-	createToastHeaders,
-	redirectWithToast,
-} from '#app/utils/toast.server.ts'
 import { type Route } from './+types/auth.sso.$organizationSlug.callback.ts'
 import { handleNewSession } from './login.server.ts'
 
@@ -311,7 +309,7 @@ async function makeSession(
 ) {
 	redirectTo ??= '/'
 
-	const { canUserLogin } = await import('#app/utils/auth.server.ts')
+	const { canUserLogin } = await import('@repo/auth')
 	const allowed = await canUserLogin(user.id)
 	if (!allowed) {
 		return redirect('/login?banned=true', {

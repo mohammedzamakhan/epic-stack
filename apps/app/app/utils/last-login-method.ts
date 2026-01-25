@@ -25,7 +25,7 @@ export function saveLastLoginMethod(method: LoginMethod): void {
 /**
  * Get the last used login method from localStorage
  */
-export function getLastLoginMethod(): LoginMethod | null {
+function getLastLoginMethod(): LoginMethod | null {
 	if (typeof window !== 'undefined') {
 		try {
 			const method = localStorage.getItem(LAST_LOGIN_METHOD_KEY)
@@ -41,38 +41,10 @@ export function getLastLoginMethod(): LoginMethod | null {
 }
 
 /**
- * Clear the last used login method from localStorage
- */
-export function clearLastLoginMethod(): void {
-	if (typeof window !== 'undefined') {
-		try {
-			localStorage.removeItem(LAST_LOGIN_METHOD_KEY)
-		} catch (error) {
-			// Silently fail if localStorage is not available
-			console.warn('Failed to clear last login method:', error)
-		}
-	}
-}
-
-/**
  * Check if a string is a valid login method
  */
 function isValidLoginMethod(method: string): method is LoginMethod {
 	return ['password', 'passkey', 'github', 'google', 'sso'].includes(method)
-}
-
-/**
- * Get display label for a login method
- */
-export function getLoginMethodLabel(method: LoginMethod): string {
-	const labels: Record<LoginMethod, string> = {
-		password: 'Email & Password',
-		passkey: 'Passkey',
-		github: 'GitHub',
-		google: 'Google',
-		sso: 'Single Sign-On',
-	}
-	return labels[method]
 }
 
 /**

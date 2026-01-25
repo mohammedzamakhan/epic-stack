@@ -1,6 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { getNotesViewMode, setNotesViewMode } from '@repo/common'
 import { prisma } from '@repo/database'
 import { useDirection } from '@repo/ui'
 import { Button } from '@repo/ui/button'
@@ -25,11 +26,7 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
-import {
-	getNotesViewMode,
-	setNotesViewMode,
-} from '#app/utils/notes-view-cookie.server.ts'
+import { requireUserId } from '@repo/auth'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import { NotesCards } from './notes-cards.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'

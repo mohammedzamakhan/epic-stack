@@ -209,7 +209,7 @@ describe('SSO Error Handling Security Tests', () => {
 			const response = await handleSSOError(error)
 
 			// Should have security headers
-			expect(response.headers.get('Set-Cookie')).toContain('redirectTo=')
+			expect(response.headers.get('Set-Cookie')).toContain('redirect-to=')
 			expect(response.status).toBe(302)
 
 			consoleSpy.mockRestore()

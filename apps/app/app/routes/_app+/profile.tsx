@@ -15,7 +15,7 @@ import {
 } from 'react-router'
 import { ProfileCard } from '#app/components/settings/cards/profile-card.tsx'
 
-import { requireUserId } from '#app/utils/auth.server.ts'
+import { requireUserId } from '@repo/auth'
 import { changeEmailAction } from '../settings+/actions/email.actions'
 import { photoAction } from '../settings+/actions/photo.actions'
 import { profileUpdateAction } from '../settings+/actions/profile.actions'

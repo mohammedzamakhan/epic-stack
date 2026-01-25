@@ -2,6 +2,7 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Form, useLoaderData, useNavigation } from 'react-router'
 import { auditService, AuditAction, AuditService } from '@repo/audit'
+import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -23,7 +24,6 @@ import {
 	SelectValue,
 } from '@repo/ui/select'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 
 export async function loader({
 	request,

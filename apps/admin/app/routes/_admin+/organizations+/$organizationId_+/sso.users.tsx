@@ -3,12 +3,12 @@ import { invariant } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { useLoaderData } from 'react-router'
 import { z } from 'zod'
+import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
 
 const SSOUserActionSchema = z.object({

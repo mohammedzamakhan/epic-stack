@@ -28,7 +28,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 } from 'react-router'
-import { getUserId } from '#app/utils/auth.server.ts'
+import { getUserId } from '@repo/auth'
 import {
 	logMCPAuthorizationApproved,
 	logMCPAuthorizationDenied,

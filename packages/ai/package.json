@@ -47,7 +47,7 @@
     "@vitest/coverage-v8": "^4.0.1",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
-    "vitest": "4.0.15"
+    "vitest": "^4.0.15"
   },
   "peerDependencies": {
     "@remix-run/react": "^2.15.6",
