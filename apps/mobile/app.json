@@ -30,7 +30,7 @@
 			"favicon": "./assets/favicon.png",
 			"bundler": "metro"
 		},
-		"plugins": ["expo-router"],
+		"plugins": ["expo-router", "expo-localization"],
 		"experiments": {
 			"typedRoutes": true,
 			"reactCanary": true

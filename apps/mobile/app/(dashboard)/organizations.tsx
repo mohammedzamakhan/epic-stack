@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { Trans } from '@lingui/react/macro'
 import { useLingui } from '@lingui/react/macro'
+import { type UserOrganization } from '@repo/types'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
@@ -84,7 +85,7 @@ export default function OrganizationsScreen() {
 		<Screen>
 			<FlatList
 				data={organizations}
-				keyExtractor={(item) => item.id}
+				keyExtractor={(item: UserOrganization) => item.id}
 				contentContainerStyle={{ padding: 16 }}
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -119,7 +120,7 @@ export default function OrganizationsScreen() {
 						</Button>
 					</View>
 				}
-				renderItem={({ item }) => (
+				renderItem={({ item }: { item: UserOrganization }) => (
 					<Card className="mb-3">
 						<TouchableOpacity
 							onPress={() => handleSetDefault(item.id, item.name)}

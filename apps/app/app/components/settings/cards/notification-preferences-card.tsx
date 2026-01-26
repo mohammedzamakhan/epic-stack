@@ -1,6 +1,6 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { usePreferences, useNovu, type Preference } from '@novu/react'
+import { usePreferences, type Preference } from '@novu/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -95,7 +95,6 @@ function ChannelSwitchList({
 function NotificationPreferencesCardComponent() {
 	const { _ } = useLingui()
 	const { preferences, isLoading, error, refetch } = usePreferences()
-	const novu = useNovu()
 	const [updatingPreferences, setUpdatingPreferences] = useState<Set<string>>(
 		new Set(),
 	)
@@ -112,24 +111,10 @@ function NotificationPreferencesCardComponent() {
 		}
 	}, [refetch])
 
-	// Force refetch when component mounts to ensure fresh data
+	// Load preferences once when component mounts
 	useEffect(() => {
 		void handleRefetch()
-	}, [handleRefetch])
-
-	// Listen for preference updates from Novu
-	useEffect(() => {
-		const listener = () => {
-			void handleRefetch()
-		}
-
-		// Listen for preference list updates
-		novu.on('preferences.list.updated', listener)
-
-		return () => {
-			novu.off('preferences.list.updated', listener)
-		}
-	}, [novu, handleRefetch])
+	}, [])
 
 	const isLoadingState = isLoading || isRefetching
 
@@ -147,7 +132,8 @@ function NotificationPreferencesCardComponent() {
 					[channelType]: enabled,
 				},
 			})
-			await handleRefetch()
+			// Note: Removed automatic refetch after update to prevent re-rendering issues.
+			// The Novu SDK should handle state updates internally.
 		} catch (error) {
 			console.error('Failed to update preference:', error)
 		} finally {

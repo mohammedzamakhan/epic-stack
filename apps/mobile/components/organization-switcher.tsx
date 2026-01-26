@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useLingui } from '@lingui/react/macro'
+import { type UserOrganization } from '@repo/types'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
@@ -129,8 +130,8 @@ export function OrganizationSwitcher({
 								{/* Organization List */}
 								<FlatList
 									data={organizations}
-									keyExtractor={(item) => item.id}
-									renderItem={({ item }) => (
+									keyExtractor={(item: UserOrganization) => item.id}
+									renderItem={({ item }: { item: UserOrganization }) => (
 										<TouchableOpacity
 											onPress={() => handleSelectOrganization(item.id)}
 											disabled={isUpdating || item.isDefault}

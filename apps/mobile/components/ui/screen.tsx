@@ -31,11 +31,7 @@ const Screen: React.FC<ScreenProps> = ({
 				style={backgroundColor ? { backgroundColor } : undefined}
 				{...props}
 			>
-				{safeArea ? (
-					<SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
-				) : (
-					children
-				)}
+				{safeArea ? <SafeAreaView>{children}</SafeAreaView> : children}
 			</View>
 		</>
 	)
