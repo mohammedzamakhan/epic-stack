@@ -1,0 +1,48 @@
+
+═══════════════════════════════════════════════════
+RAMS DESIGN REVIEW: Full Codebase Audit
+═══════════════════════════════════════════════════
+
+CRITICAL (2 issues)
+───────────────────
+[A11Y] apps/app/app/components/app-sidebar.tsx
+  The AppSidebar uses `opacity: 0` to hide the inactive sidebar (Account vs Organization), but does not remove it from the accessibility tree. Screen reader users will navigate through invisible links.
+  Fix: Add `inert={!isActive}` or `visibility: hidden` to the hidden motion.div.
+  WCAG: 2.4.3 (Focus Order), 4.1.2 (Name, Role, Value)
+
+[A11Y] apps/web/src/components/ThemeSwitcher.astro
+  The theme toggle buttons are icon-only SVGs without `aria-hidden="true"`, and the button label might not be sufficient if the SVG is read as a graphic.
+  Fix: Add `aria-hidden="true"` to the SVG elements.
+  WCAG: 1.1.1 (Non-text Content)
+
+SERIOUS (Systemic issues)
+─────────────────────────
+[UX/A11Y] packages/ui/components/ui/button.tsx & apps/web/src/components/ui/Button.astro
+  Button sizes `default` (h-8/32px), `sm` (h-7/28px), and `xs` (h-6/24px) are significantly below the recommended 44x44px touch target size.
+  Fix: Increase default heights to at least h-10 (40px) or h-11 (44px), or add invisible padding/pseudo-elements to expand hit area.
+  WCAG: 2.5.5 (Target Size)
+
+[UX/A11Y] packages/ui/components/ui/input.tsx, select.tsx
+  Form controls default to `h-8` (32px), making them difficult to tap on mobile devices.
+  Fix: Increase default height to h-10 or h-11.
+  WCAG: 2.5.5 (Target Size)
+
+MODERATE (3 issues)
+───────────────────
+[A11Y] apps/web/src/components/DefaultHero.astro
+  The hero image uses fallback alt text "Hero image" which provides no value.
+  Fix: Use descriptive text describing the image content, or empty string `""` if decorative.
+  WCAG: 1.1.1 (Non-text Content)
+
+[UX] apps/app/app/components/forms.tsx
+  Error messages use `text-[10px]`, which may be illegible for some users.
+  Fix: Increase to `text-xs` (12px) or `text-sm`.
+
+[A11Y] packages/ui/components/icon.tsx
+  The Icon component does not default to `aria-hidden="true"`. If used without a title or label in a parent, it may be noisy to screen readers.
+  Fix: Default `aria-hidden="true"` if no title is provided.
+
+═══════════════════════════════════════════════════
+SUMMARY: 2 critical, 2 serious (systemic), 3 moderate
+Score: 64/100
+═══════════════════════════════════════════════════
