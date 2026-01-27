@@ -1,5 +1,7 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -38,12 +40,14 @@ export type ToolHeaderProps = {
 	className?: string
 }
 
-const getStatusBadge = (status: ToolUIPart['state']) => {
+const useStatusBadge = (status: ToolUIPart['state']) => {
+	const { _ } = useLingui()
+
 	const labels: Record<ToolUIPart['state'], string> = {
-		'input-streaming': 'Pending',
-		'input-available': 'Running',
-		'output-available': 'Completed',
-		'output-error': 'Error',
+		'input-streaming': _(t`Pending`),
+		'input-available': _(t`Running`),
+		'output-available': _(t`Completed`),
+		'output-error': _(t`Error`),
 	}
 
 	const icons: Record<ToolUIPart['state'], ReactNode> = {
@@ -70,25 +74,29 @@ export const ToolHeader = ({
 	type,
 	state,
 	...props
-}: ToolHeaderProps) => (
-	<CollapsibleTrigger
-		className={cn(
-			'flex w-full items-center justify-between gap-4 p-3',
-			className,
-		)}
-		{...props}
-	>
-		<div className="flex items-center gap-2">
-			<Icon name="gear" className="text-muted-foreground size-4" />
-			<span className="text-sm font-medium">{type}</span>
-			{getStatusBadge(state)}
-		</div>
-		<Icon
-			name="chevron-down"
-			className="text-muted-foreground size-4 transition-transform group-data-[state=open]:rotate-180"
-		/>
-	</CollapsibleTrigger>
-)
+}: ToolHeaderProps) => {
+	const statusBadge = useStatusBadge(state)
+
+	return (
+		<CollapsibleTrigger
+			className={cn(
+				'flex w-full items-center justify-between gap-4 p-3',
+				className,
+			)}
+			{...props}
+		>
+			<div className="flex items-center gap-2">
+				<Icon name="gear" className="text-muted-foreground size-4" />
+				<span className="text-sm font-medium">{type}</span>
+				{statusBadge}
+			</div>
+			<Icon
+				name="chevron-down"
+				className="text-muted-foreground size-4 transition-transform group-data-[state=open]:rotate-180"
+			/>
+		</CollapsibleTrigger>
+	)
+}
 
 export type ToolContentProps = ComponentProps<typeof CollapsibleContent>
 
@@ -106,16 +114,20 @@ export type ToolInputProps = ComponentProps<'div'> & {
 	input: any
 }
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
-	<div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
-		<h4 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-			Parameters
-		</h4>
-		<div className="bg-muted/50 rounded-md">
-			<CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+export const ToolInput = ({ className, input, ...props }: ToolInputProps) => {
+	const { _ } = useLingui()
+
+	return (
+		<div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
+			<h4 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+				{_(t`Parameters`)}
+			</h4>
+			<div className="bg-muted/50 rounded-md">
+				<CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+			</div>
 		</div>
-	</div>
-)
+	)
+}
 
 export type ToolOutputProps = ComponentProps<'div'> & {
 	output: ReactNode
@@ -132,10 +144,12 @@ export const ToolOutput = ({
 		return null
 	}
 
+	const { _ } = useLingui()
+
 	return (
 		<div className={cn('space-y-2 p-4', className)} {...props}>
 			<h4 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-				{errorText ? 'Error' : 'Result'}
+				{errorText ? _(t`Error`) : _(t`Result`)}
 			</h4>
 			<div
 				className={cn(

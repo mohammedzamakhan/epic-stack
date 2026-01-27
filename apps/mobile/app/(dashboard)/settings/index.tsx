@@ -64,7 +64,7 @@ export default function SettingsScreen() {
 	return (
 		<Screen>
 			<ScrollView
-				contentContainerClassName="flex-grow p-4"
+				contentContainerClassName="grow p-4"
 				showsVerticalScrollIndicator={false}
 			>
 				{/* User Info Section */}

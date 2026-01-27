@@ -338,7 +338,7 @@ export default function NotesRoute({
 				</form>
 			</div>
 
-			<div className="flex-grow pb-4">
+			<div className="grow pb-4">
 				{loaderData.notes.length > 0 ? (
 					viewMode === 'kanban' ? (
 						<NotesKanbanBoard

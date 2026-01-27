@@ -344,7 +344,7 @@ export function OrgNoteEditor({
 					</fetcher.Form>
 				</div>
 
-				<div className="bg-background flex-shrink-0 border-t px-6 py-4">
+				<div className="bg-background shrink-0 border-t px-6 py-4">
 					<div className="flex items-center justify-end gap-2 md:gap-3">
 						<Button
 							variant="outline"

@@ -13,108 +13,86 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#. placeholder {0}: details.keys.length - 10
 #: app/components/admin-cache-confirmation-dialog.tsx:99
-msgid "... and {0} more"
+msgid "... and {remaining} more"
 msgstr ""
 
-#. placeholder {0}: duration !== 1 ? 's' : ''
-#: app/components/impersonation-banner.tsx:36
-msgid "({duration} minute{0} ago)"
-msgstr ""
-
-#: app/components/admin-user-detail.tsx:395
+#: app/components/admin-user-detail.tsx:386
 msgid "(Expired)"
 msgstr ""
 
-#. placeholder {0}: data.stats.lru.currentSize
-#. placeholder {1}: data.stats.lru.maxSize
-#: app/routes/_admin+/cache.tsx:296
-msgid "{0} / {1} max"
-msgstr ""
-
-#. placeholder {0}: ssoUsers.filter((u) => u.active).length
-#. placeholder {0}: statistics.active.toLocaleString()
-#: app/components/sso-user-management.tsx:405
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:250
-msgid "{0} active"
-msgstr ""
-
-#. placeholder {0}: metrics.activeOrganizations
-#. placeholder {1}: metrics.recentOrganizations
 #: app/routes/_admin+/index.tsx:172
-msgid "{0} active • +{1} new this week"
+msgid "{active} active • +{recent} new this week"
 msgstr ""
 
-#. placeholder {0}: ssoConfig.providerName
-#: app/components/sso-configuration-overview.tsx:108
-msgid "{0} identity provider configuration"
-msgstr ""
-
-#. placeholder {0}: statistics.topActions[0]?._count || 0
-#: app/routes/_admin+/audit-logs.tsx:220
-msgid "{0} occurrences"
-msgstr ""
-
-#. placeholder {0}: userConnection.requestCount
-#: app/routes/_admin+/ip-addresses+/index.tsx:310
-msgid "{0} requests"
-msgstr ""
-
-#. placeholder {0}: selectedKeys.size
-#: app/routes/_admin+/cache.tsx:455
-msgid "{0} selected"
-msgstr ""
-
-#. placeholder {0}: formatBytes(data.stats.sqlite.totalSize)
-#: app/routes/_admin+/cache.tsx:282
-msgid "{0} total"
-msgstr ""
-
-#: app/components/admin-user-detail.tsx:271
-#~ msgid "{0} total sessions"
-#~ msgstr ""
-
-#. placeholder {0}: role._count.users
-#: app/routes/_admin+/roles+/$roleId.tsx:534
-#: app/routes/_admin+/roles+/system.$roleId.tsx:341
-msgid "{0} users"
-msgstr ""
-
-#: app/components/admin-user-detail.tsx:262
+#: app/components/admin-user-detail.tsx:260
+#: app/components/sso-user-management.tsx:407
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:253
 msgid "{activeCount} active"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:281
+#: app/routes/_admin+/audit-logs.tsx:223
+msgid "{count} occurrences"
+msgstr ""
+
+#: app/routes/_admin+/ip-addresses+/index.tsx:317
+msgid "{count} requests"
+msgstr ""
+
+#: app/routes/_admin+/cache.tsx:303
+msgid "{currentSize} / {maxSize} max"
+msgstr ""
+
+#: app/components/impersonation-banner.tsx:37
+msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
+msgstr ""
+
+#: app/components/sso-configuration-overview.tsx:108
+msgid "{providerName} identity provider configuration"
+msgstr ""
+
+#: app/routes/_admin+/cache.tsx:472
+msgid "{selectedCount} selected"
+msgstr ""
+
+#: app/components/admin-user-detail.tsx:274
 msgid "{totalSessions} total sessions"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:78
+#: app/routes/_admin+/cache.tsx:289
+msgid "{totalSize} total"
+msgstr ""
+
+#: app/routes/_admin+/roles+/$roleId.tsx:533
+#: app/routes/_admin+/roles+/system.$roleId.tsx:342
+msgid "{userCount} users"
+msgstr ""
+
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:80
 msgid "← Back to IP Addresses"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:222
+#: app/routes/_admin+/roles+/index.tsx:221
 msgid "+ New Role"
 msgstr ""
 
-#. placeholder {0}: ip.ipAddressUsers.length - 3
-#: app/routes/_admin+/ip-addresses+/index.tsx:318
-msgid "+{0} more users"
+#: app/routes/_admin+/ip-addresses+/index.tsx:324
+msgid "+{moreCount} more users"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:140
+#: app/routes/_admin+/index.tsx:141
 msgid "+{recentUsers} new this week"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:691
+#: app/components/admin-user-detail.tsx:682
 msgid "0 configured"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:316
+#: app/components/admin-user-detail.tsx:307
 msgid "0 passkeys"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:321
+#: app/routes/_admin+/roles+/index.tsx:320
 msgid "1-10 (higher = more permissions)"
 msgstr ""
 
@@ -123,74 +101,74 @@ msgid "Accept"
 msgstr ""
 
 #: app/routes/_admin+/_layout.tsx:49
-#: app/routes/_admin+/cache.tsx:902
+#: app/routes/_admin+/cache.tsx:927
 msgid "Access Denied"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:296
-#: app/routes/_admin+/waitlist.tsx:406
+#: app/routes/_admin+/waitlist.tsx:304
+#: app/routes/_admin+/waitlist.tsx:414
 msgid "Access Granted"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:836
+#: app/routes/_admin+/roles+/$roleId.tsx:835
 msgid "Access Level"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:330
+#: app/routes/_admin+/cache.tsx:337
 msgid "across all caches"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:824
+#: app/routes/_admin+/roles+/$roleId.tsx:823
 msgid "Action"
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:377
 #: app/components/admin/feature-flags.tsx:485
 #: app/components/admin/feature-flags.tsx:652
-#: app/components/sso-user-management.tsx:175
-#: app/routes/_admin+/cache.tsx:601
+#: app/components/sso-user-management.tsx:177
+#: app/routes/_admin+/cache.tsx:619
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:257
-#: app/routes/_admin+/ip-addresses+/index.tsx:240
-#: app/routes/_admin+/roles+/index.tsx:402
-#: app/routes/_admin+/roles+/index.tsx:446
-#: app/routes/_admin+/waitlist.tsx:347
+#: app/routes/_admin+/ip-addresses+/index.tsx:238
+#: app/routes/_admin+/roles+/index.tsx:401
+#: app/routes/_admin+/roles+/index.tsx:445
+#: app/routes/_admin+/waitlist.tsx:355
 msgid "Actions"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:298
+#: app/components/sso-user-management.tsx:300
 msgid "Activate"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:103
 #: app/components/admin-organizations-table.tsx:279
 #: app/components/admin-users-table.tsx:184
-#: app/components/sso-user-management.tsx:263
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:131
+#: app/components/sso-user-management.tsx:265
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:133
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:284
-#: app/routes/_admin+/ip-addresses+/index.tsx:279
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:296
+#: app/routes/_admin+/ip-addresses+/index.tsx:280
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:303
 msgid "Active"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:271
-#: app/components/admin-user-detail.tsx:738
-#: app/routes/_admin+/index.tsx:216
+#: app/components/admin-user-detail.tsx:267
+#: app/components/admin-user-detail.tsx:729
+#: app/routes/_admin+/index.tsx:215
 msgid "Active Sessions"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:307
+#: app/components/sso-configuration-overview.tsx:305
 msgid "Active Users:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:332
+#: app/components/admin-user-detail.tsx:323
 msgid "Activity"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:164
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:166
 msgid "Activity Information"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:763
+#: app/routes/_admin+/roles+/$roleId.tsx:762
 msgid "Add feature"
 msgstr ""
 
@@ -204,9 +182,9 @@ msgstr ""
 msgid "Add Override"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:786
-#: app/routes/_admin+/roles+/$roleId.tsx:879
-#: app/routes/_admin+/roles+/system.$roleId.tsx:373
+#: app/routes/_admin+/roles+/$roleId.tsx:785
+#: app/routes/_admin+/roles+/$roleId.tsx:878
+#: app/routes/_admin+/roles+/system.$roleId.tsx:374
 msgid "Add permission"
 msgstr ""
 
@@ -214,87 +192,86 @@ msgstr ""
 #: app/components/admin-sidebar.tsx:109
 #: app/components/sso-configuration-form.tsx:392
 #: app/components/sso-user-management.tsx:98
-#: app/routes/_admin+/roles+/$roleId.tsx:415
-#: app/routes/_admin+/roles+/system.$roleId.tsx:209
+#: app/routes/_admin+/roles+/$roleId.tsx:421
+#: app/routes/_admin+/roles+/system.$roleId.tsx:217
 msgid "Admin"
 msgstr ""
 
 #: app/components/admin-sidebar.tsx:127
-#: app/routes/_admin+/index.tsx:102
+#: app/routes/_admin+/index.tsx:105
 msgid "Admin Dashboard"
 msgstr ""
 
-#: app/components/impersonation-banner.tsx:27
+#: app/components/impersonation-banner.tsx:28
 msgid "Admin Impersonation Active"
 msgstr ""
 
 #: app/routes/_admin+/_layout.tsx:57
-#: app/routes/_admin+/cache.tsx:910
+#: app/routes/_admin+/cache.tsx:935
 msgid "Admin role required"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:285
+#: app/routes/_admin+/audit-logs.tsx:288
 msgid "All"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:360
+#: app/routes/_admin+/cache.tsx:367
 msgid "All caches"
 msgstr ""
 
-#: app/components/admin-users-table.tsx:327
+#: app/components/admin-users-table.tsx:335
 msgid "All organizations"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:439
+#: app/components/admin-organizations-table.tsx:448
 msgid "All plans"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:281
+#: app/routes/_admin+/audit-logs.tsx:284
 msgid "All severities"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:421
+#: app/components/admin-organizations-table.tsx:430
 msgid "All statuses"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:294
+#: app/routes/_admin+/waitlist.tsx:302
 msgid "All Users"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:411
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:417
 msgid "Allow Exports"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:430
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:436
 msgid "Allow users to export audit logs"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:854
+#: app/routes/_admin+/roles+/$roleId.tsx:853
 msgid "any - Any resources"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:322
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:327
 msgid "Apply Preset"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:489
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:495
 msgid "Archive Old Logs"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:241
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:244
 msgid "Archived Logs"
 msgstr ""
 
-#. placeholder {0}: ip.ip
-#: app/routes/_admin+/ip-addresses+/index.tsx:362
-msgid "Are you sure you want to blacklist {0}? This will prevent all future requests from this IP address."
+#: app/routes/_admin+/ip-addresses+/index.tsx:366
+msgid "Are you sure you want to blacklist {ipAddress}? This will prevent all future requests from this IP address."
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:454
+#: app/routes/_admin+/roles+/$roleId.tsx:460
 msgid "Are you sure you want to delete this role?"
 msgstr ""
 
-#: app/routes/_admin+/roles+/system.$roleId.tsx:255
+#: app/routes/_admin+/roles+/system.$roleId.tsx:263
 msgid "Are you sure you want to delete this system role?"
 msgstr ""
 
@@ -302,20 +279,20 @@ msgstr ""
 msgid "Attribute Mapping (JSON)"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:213
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:216
 msgid "Audit Log Retention Policy"
 msgstr ""
 
 #: app/components/admin-sidebar.tsx:79
-#: app/routes/_admin+/audit-logs.tsx:144
+#: app/routes/_admin+/audit-logs.tsx:147
 msgid "Audit Logs"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:316
+#: app/routes/_admin+/audit-logs.tsx:319
 msgid "Audit Trail"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:674
+#: app/components/admin-user-detail.tsx:665
 msgid "Authentication Methods"
 msgstr ""
 
@@ -324,16 +301,16 @@ msgid "Authorization URL"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:242
-#: app/components/sso-configuration-overview.tsx:197
+#: app/components/sso-configuration-overview.tsx:195
 msgid "Auto-Discovery"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:363
-#: app/components/sso-configuration-overview.tsx:223
+#: app/components/sso-configuration-overview.tsx:221
 msgid "Auto-Provision Users"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:405
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:411
 msgid "Automatically archive old logs to cold storage"
 msgstr ""
 
@@ -345,84 +322,84 @@ msgstr ""
 msgid "Automatically discover OAuth2 endpoints from the issuer URL"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:305
+#: app/routes/_admin+/cache.tsx:312
 msgid "Average Size"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:188
-#: app/components/admin-user-detail.tsx:359
+#: app/components/admin-user-detail.tsx:191
+#: app/components/admin-user-detail.tsx:350
 #: app/components/admin-users-table.tsx:178
 msgid "Ban Expired"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:348
+#: app/components/admin-user-detail.tsx:339
 msgid "Ban Information"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:85
-#: app/components/admin-ban-user-dialog.tsx:181
-#: app/components/admin-user-detail.tsx:237
+#: app/components/admin-ban-user-dialog.tsx:87
+#: app/components/admin-ban-user-dialog.tsx:182
+#: app/components/admin-user-detail.tsx:240
 msgid "Ban User"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:190
-#: app/components/admin-user-detail.tsx:361
+#: app/components/admin-user-detail.tsx:193
+#: app/components/admin-user-detail.tsx:352
 #: app/components/admin-users-table.tsx:178
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:280
 msgid "Banned"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:404
+#: app/components/admin-user-detail.tsx:395
 msgid "Banned by:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:376
+#: app/components/admin-user-detail.tsx:367
 msgid "Banned:"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:176
+#: app/components/admin-ban-user-dialog.tsx:177
 msgid "Banning..."
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:470
-#: app/routes/_admin+/roles+/system.$roleId.tsx:273
+#: app/routes/_admin+/roles+/$roleId.tsx:476
+#: app/routes/_admin+/roles+/system.$roleId.tsx:281
 msgid "Basic information"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:352
+#: app/routes/_admin+/ip-addresses+/index.tsx:356
 msgid "Blacklist"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:393
+#: app/routes/_admin+/ip-addresses+/index.tsx:397
 msgid "Blacklist IP"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:359
+#: app/routes/_admin+/ip-addresses+/index.tsx:363
 msgid "Blacklist IP Address"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:202
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:204
 msgid "Blacklist Reason"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:123
-#: app/routes/_admin+/ip-addresses+/index.tsx:271
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:125
+#: app/routes/_admin+/ip-addresses+/index.tsx:272
 msgid "Blacklisted"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:195
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:197
 msgid "Blacklisted At"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:210
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:212
 msgid "Blacklisted By"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:182
+#: app/routes/_admin+/ip-addresses+/index.tsx:180
 msgid "Blacklisted IPs"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:188
+#: app/routes/_admin+/ip-addresses+/index.tsx:186
 msgid "blocked"
 msgstr ""
 
@@ -430,18 +407,17 @@ msgstr ""
 msgid "Boolean"
 msgstr ""
 
-#. placeholder {0}: selectedKeys.size
-#: app/routes/_admin+/cache.tsx:836
-msgid "Bulk Actions ({0})"
+#: app/routes/_admin+/cache.tsx:861
+msgid "Bulk Actions ({selectedCount})"
 msgstr ""
 
 #: app/components/admin-sidebar.tsx:73
-#: app/routes/_admin+/index.tsx:353
+#: app/routes/_admin+/index.tsx:352
 msgid "Cache"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:261
-#: app/routes/_admin+/index.tsx:372
+#: app/routes/_admin+/cache.tsx:268
+#: app/routes/_admin+/index.tsx:371
 msgid "Cache Management"
 msgstr ""
 
@@ -449,9 +425,9 @@ msgstr ""
 msgid "Cache Type:"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:165
+#: app/components/admin-ban-user-dialog.tsx:166
 #: app/components/admin-cache-confirmation-dialog.tsx:111
-#: app/routes/_admin+/roles+/index.tsx:337
+#: app/routes/_admin+/roles+/index.tsx:336
 msgid "Cancel"
 msgstr ""
 
@@ -459,20 +435,19 @@ msgstr ""
 msgid "Canceled"
 msgstr ""
 
-#. placeholder {0}: type.toUpperCase()
-#: app/routes/_admin+/cache.tsx:761
-msgid "Clear {0}"
+#: app/routes/_admin+/cache.tsx:782
+msgid "Clear {typeUpper}"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:475
+#: app/routes/_admin+/index.tsx:474
 msgid "Clear Cache"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:306
+#: app/routes/_admin+/audit-logs.tsx:309
 msgid "Clear Filters"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:856
+#: app/routes/_admin+/cache.tsx:881
 msgid "Clear selection"
 msgstr ""
 
@@ -480,7 +455,7 @@ msgstr ""
 msgid "Client ID"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:167
+#: app/components/sso-configuration-overview.tsx:165
 msgid "Client ID:"
 msgstr ""
 
@@ -488,32 +463,32 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:464
-#: app/components/admin-users-table.tsx:352
+#: app/components/admin-organizations-table.tsx:473
+#: app/components/admin-users-table.tsx:360
 msgid "Columns"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:276
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:279
 msgid "Compliance Presets"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:436
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:442
 msgid "Compliance Standard (Optional)"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:147
+#: app/routes/_admin+/audit-logs.tsx:150
 msgid "Comprehensive activity tracking and compliance audit trail"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:437
+#: app/components/sso-user-management.tsx:439
 msgid "Config Changes"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:184
+#: app/components/sso-configuration-overview.tsx:182
 msgid "Configuration"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:340
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:346
 msgid "Configure custom retention and archival settings"
 msgstr ""
 
@@ -525,14 +500,12 @@ msgstr ""
 msgid "Configure OAuth2 endpoints and security settings"
 msgstr ""
 
-#. placeholder {0}: organization.name
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:216
-msgid "Configure retention and archival settings for {0}"
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:219
+msgid "Configure retention and archival settings for {organizationName}"
 msgstr ""
 
-#. placeholder {0}: (organization as any).name
-#: app/routes/_admin+/organizations+/$organizationId_+/sso.tsx:401
-msgid "Configure Single Sign-On for {0}"
+#: app/routes/_admin+/organizations+/$organizationId_+/sso.tsx:402
+msgid "Configure Single Sign-On for {organizationName}"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:140
@@ -543,11 +516,11 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:700
+#: app/components/admin-user-detail.tsx:691
 msgid "Connected Accounts"
 msgstr ""
 
-#: app/routes/_admin+/roles+/system.$roleId.tsx:233
+#: app/routes/_admin+/roles+/system.$roleId.tsx:241
 msgid "Core System Role"
 msgstr ""
 
@@ -555,7 +528,7 @@ msgstr ""
 msgid "Create a new feature flag at system level."
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:232
+#: app/routes/_admin+/roles+/index.tsx:231
 msgid "Create a new role with custom permissions"
 msgstr ""
 
@@ -571,7 +544,7 @@ msgstr ""
 msgid "Create Flag"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:229
+#: app/routes/_admin+/roles+/index.tsx:228
 msgid "Create New Role"
 msgstr ""
 
@@ -583,51 +556,50 @@ msgstr ""
 msgid "Create Override for \"{flagKey}\""
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:343
+#: app/routes/_admin+/roles+/index.tsx:342
 msgid "Create Role"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:286
 #: app/components/admin-users-table.tsx:210
-#: app/routes/_admin+/cache.tsx:595
+#: app/routes/_admin+/cache.tsx:613
 msgid "Created"
 msgstr ""
 
-#. placeholder {0}: new Date(role.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', })
-#: app/routes/_admin+/roles+/$roleId.tsx:524
-#: app/routes/_admin+/roles+/system.$roleId.tsx:331
-msgid "Created {0}"
+#: app/routes/_admin+/roles+/$roleId.tsx:530
+#: app/routes/_admin+/roles+/system.$roleId.tsx:339
+msgid "Created {createdDate}"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:282
+#: app/components/sso-configuration-overview.tsx:280
 msgid "Created by:"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:261
+#: app/components/sso-configuration-overview.tsx:259
 msgid "Created:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:762
+#: app/components/admin-user-detail.tsx:753
 msgid "Created: {createdAt}"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:341
+#: app/routes/_admin+/roles+/index.tsx:340
 msgid "Creating..."
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:297
+#: app/routes/_admin+/audit-logs.tsx:300
 msgid "Critical"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:741
+#: app/components/admin-user-detail.tsx:732
 msgid "Current active login sessions"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:239
+#: app/routes/_admin+/index.tsx:238
 msgid "Currently logged in users"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:337
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:343
 msgid "Custom Retention Policy"
 msgstr ""
 
@@ -647,11 +619,11 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:296
+#: app/components/sso-user-management.tsx:298
 msgid "Deactivate"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:228
+#: app/components/sso-user-management.tsx:230
 msgid "Default"
 msgstr ""
 
@@ -663,50 +635,47 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#. placeholder {0}: lruKeys.length
-#: app/routes/_admin+/cache.tsx:850
-msgid "Delete {0} LRU keys"
+#: app/routes/_admin+/cache.tsx:875
+msgid "Delete {lruCount} LRU keys"
 msgstr ""
 
-#. placeholder {0}: sqliteKeys.length
-#: app/routes/_admin+/cache.tsx:844
-msgid "Delete {0} SQLite keys"
+#: app/routes/_admin+/cache.tsx:869
+msgid "Delete {sqliteCount} SQLite keys"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:702
+#: app/routes/_admin+/cache.tsx:720
 msgid "Delete cache key"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:717
+#: app/routes/_admin+/cache.tsx:735
 msgid "Delete Cache Key"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:460
-#: app/routes/_admin+/roles+/system.$roleId.tsx:262
+#: app/routes/_admin+/roles+/$roleId.tsx:466
+#: app/routes/_admin+/roles+/system.$roleId.tsx:270
 msgid "Delete role"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:304
+#: app/routes/_admin+/roles+/index.tsx:303
 msgid "Describe what this role can do..."
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:176
-#: app/routes/_admin+/roles+/$roleId.tsx:504
-#: app/routes/_admin+/roles+/$roleId.tsx:747
-#: app/routes/_admin+/roles+/$roleId.tsx:863
-#: app/routes/_admin+/roles+/index.tsx:299
-#: app/routes/_admin+/roles+/index.tsx:399
-#: app/routes/_admin+/roles+/index.tsx:443
-#: app/routes/_admin+/roles+/system.$roleId.tsx:308
+#: app/routes/_admin+/roles+/$roleId.tsx:510
+#: app/routes/_admin+/roles+/$roleId.tsx:746
+#: app/routes/_admin+/roles+/$roleId.tsx:862
+#: app/routes/_admin+/roles+/index.tsx:298
+#: app/routes/_admin+/roles+/index.tsx:398
+#: app/routes/_admin+/roles+/index.tsx:442
+#: app/routes/_admin+/roles+/system.$roleId.tsx:316
 msgid "Description"
 msgstr ""
 
-#. placeholder {0}: ipAddress.ip
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:73
-msgid "Detailed information for IP {0}"
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:75
+msgid "Detailed information for IP {ip}"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:132
+#: app/components/sso-configuration-overview.tsx:130
 msgid "Disable"
 msgstr ""
 
@@ -715,20 +684,20 @@ msgid "Disable SSO"
 msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:103
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:400
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:425
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:406
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:431
 msgid "Disabled"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:338
+#: app/routes/_admin+/waitlist.tsx:346
 msgid "Discord"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:829
+#: app/routes/_admin+/roles+/$roleId.tsx:828
 msgid "e.g. create, read, approve, publish"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:287
+#: app/routes/_admin+/roles+/index.tsx:286
 msgid "e.g., editor, moderator, contributor"
 msgstr ""
 
@@ -738,7 +707,7 @@ msgstr ""
 
 #: app/components/admin/feature-flags.tsx:401
 #: app/components/roles/roles-table-rows.tsx:59
-#: app/components/sso-configuration-overview.tsx:120
+#: app/components/sso-configuration-overview.tsx:118
 msgid "Edit"
 msgstr ""
 
@@ -765,31 +734,15 @@ msgid "Effective Value"
 msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:242
-#: app/routes/_admin+/waitlist.tsx:329
+#: app/routes/_admin+/waitlist.tsx:337
 msgid "Email"
 msgstr ""
 
-#: app/utils/user-validation.ts:42
-#~ msgid "Email is invalid"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:41
-#~ msgid "Email is required"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:44
-#~ msgid "Email is too long"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:43
-#~ msgid "Email is too short"
-#~ msgstr ""
-
-#: app/components/sso-configuration-overview.tsx:134
+#: app/components/sso-configuration-overview.tsx:132
 msgid "Enable"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:386
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:392
 msgid "Enable Archiving"
 msgstr ""
 
@@ -799,24 +752,24 @@ msgstr ""
 
 #: app/components/admin/feature-flags.tsx:304
 #: app/components/sso-configuration-overview.tsx:101
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:397
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:422
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:403
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:428
 msgid "Enabled"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:259
+#: app/routes/_admin+/audit-logs.tsx:262
 msgid "End Date"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:757
+#: app/routes/_admin+/roles+/$roleId.tsx:756
 msgid "Enter feature description"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:740
+#: app/routes/_admin+/roles+/$roleId.tsx:739
 msgid "Enter feature key"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:725
+#: app/routes/_admin+/roles+/$roleId.tsx:724
 msgid "Enter feature name"
 msgstr ""
 
@@ -828,19 +781,19 @@ msgstr ""
 msgid "Enter Organization ID (optional - for per-org overrides)"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:873
+#: app/routes/_admin+/roles+/$roleId.tsx:872
 msgid "Enter permission description"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:816
+#: app/routes/_admin+/roles+/$roleId.tsx:815
 msgid "Enter permission name"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:379
+#: app/routes/_admin+/ip-addresses+/index.tsx:383
 msgid "Enter reason for blacklisting this IP address..."
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:104
+#: app/components/admin-ban-user-dialog.tsx:105
 msgid "Enter the reason for banning this user..."
 msgstr ""
 
@@ -852,27 +805,27 @@ msgstr ""
 msgid "Entries:"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:294
+#: app/routes/_admin+/audit-logs.tsx:297
 msgid "Error"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:138
+#: app/components/admin-ban-user-dialog.tsx:139
 msgid "Expiration Date"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:384
+#: app/components/admin-user-detail.tsx:375
 msgid "Expires:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:767
+#: app/components/admin-user-detail.tsx:758
 msgid "Expires: {expiresAt}"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:159
+#: app/routes/_admin+/audit-logs.tsx:162
 msgid "Export CSV"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:167
+#: app/routes/_admin+/audit-logs.tsx:170
 msgid "Export JSON"
 msgstr ""
 
@@ -880,12 +833,12 @@ msgstr ""
 msgid "Feature Flags"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:552
-#: app/routes/_admin+/roles+/$roleId.tsx:562
+#: app/routes/_admin+/roles+/$roleId.tsx:551
+#: app/routes/_admin+/roles+/$roleId.tsx:561
 msgid "Feature permissions"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:800
+#: app/routes/_admin+/roles+/$roleId.tsx:799
 msgid "Feature: {selectedEntity}"
 msgstr ""
 
@@ -893,26 +846,26 @@ msgstr ""
 msgid "Feedback"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:356
+#: app/routes/_admin+/cache.tsx:363
 msgid "Filter by cache type"
 msgstr ""
 
-#: app/components/admin-users-table.tsx:323
+#: app/components/admin-users-table.tsx:331
 msgid "Filter by organization"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:231
-#: app/routes/_admin+/waitlist.tsx:275
+#: app/routes/_admin+/audit-logs.tsx:234
+#: app/routes/_admin+/waitlist.tsx:283
 msgid "Filters"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:418
+#: app/routes/_admin+/index.tsx:417
 msgid "Find and manage user accounts"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:170
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:172
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:248
-#: app/routes/_admin+/ip-addresses+/index.tsx:237
+#: app/routes/_admin+/ip-addresses+/index.tsx:235
 msgid "First Seen"
 msgstr ""
 
@@ -937,35 +890,31 @@ msgstr ""
 msgid "Flags for User: {searchedUserId} (Org: {searchedOrgId})"
 msgstr ""
 
-#: app/routes/_marketing+/index.tsx:67
-#~ msgid "Getting Started guide"
-#~ msgstr "Getting Started guide"
-
-#: app/routes/_admin+/roles+/index.tsx:426
+#: app/routes/_admin+/roles+/index.tsx:425
 msgid "Global roles that apply across the entire system"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:607
-#: app/components/admin-users-table.tsx:495
+#: app/components/admin-organizations-table.tsx:611
+#: app/components/admin-users-table.tsx:498
 msgid "Go to first page"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:640
-#: app/components/admin-users-table.tsx:528
+#: app/components/admin-organizations-table.tsx:644
+#: app/components/admin-users-table.tsx:531
 msgid "Go to last page"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:629
-#: app/components/admin-users-table.tsx:517
+#: app/components/admin-organizations-table.tsx:633
+#: app/components/admin-users-table.tsx:520
 msgid "Go to next page"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:618
-#: app/components/admin-users-table.tsx:506
+#: app/components/admin-organizations-table.tsx:622
+#: app/components/admin-users-table.tsx:509
 msgid "Go to previous page"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:443
+#: app/routes/_admin+/waitlist.tsx:451
 msgid "Grant Access"
 msgstr ""
 
@@ -973,24 +922,23 @@ msgstr ""
 msgid "Guest"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:326
+#: app/routes/_admin+/roles+/index.tsx:325
 msgid "Higher level roles can manage lower level roles"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:368
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:374
 msgid "Hot Storage Period (days)"
 msgstr ""
 
-#. placeholder {0}: preset.hotStorageDays
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:310
-msgid "Hot storage: {0} days"
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:317
+msgid "Hot storage: {hotStorageDays} days"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:362
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:368
 msgid "How long to keep logs before permanent deletion"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:380
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:386
 msgid "How long to keep logs readily searchable"
 msgstr ""
 
@@ -1018,20 +966,20 @@ msgstr ""
 msgid "Identity Provider Configuration"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:217
+#: app/components/admin-user-detail.tsx:220
 msgid "Impersonate"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:200
+#: app/routes/_admin+/audit-logs.tsx:203
 msgid "In last 100 events"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:565
+#: app/routes/_admin+/cache.tsx:583
 msgid "In-memory LRU cache"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:279
-#: app/components/sso-user-management.tsx:265
+#: app/components/sso-user-management.tsx:267
 msgid "Inactive"
 msgstr ""
 
@@ -1039,11 +987,11 @@ msgstr ""
 msgid "Incomplete"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:288
+#: app/routes/_admin+/audit-logs.tsx:291
 msgid "Info"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:415
+#: app/routes/_admin+/cache.tsx:422
 msgid "Instance:"
 msgstr ""
 
@@ -1051,27 +999,27 @@ msgstr ""
 msgid "Integrations"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:94
-#: app/routes/_admin+/ip-addresses+/index.tsx:216
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:96
+#: app/routes/_admin+/ip-addresses+/index.tsx:214
 msgid "IP Address"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:70
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:72
 msgid "IP Address Details"
 msgstr ""
 
 #: app/components/admin-sidebar.tsx:67
-#: app/components/admin-user-detail.tsx:338
-#: app/components/admin-user-detail.tsx:787
-#: app/routes/_admin+/ip-addresses+/index.tsx:165
+#: app/components/admin-user-detail.tsx:329
+#: app/components/admin-user-detail.tsx:778
+#: app/routes/_admin+/ip-addresses+/index.tsx:163
 msgid "IP Addresses"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:790
+#: app/components/admin-user-detail.tsx:781
 msgid "IP addresses used by this user"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:88
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:90
 msgid "IP Information"
 msgstr ""
 
@@ -1079,23 +1027,23 @@ msgstr ""
 msgid "Issuer URL"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:159
+#: app/components/sso-configuration-overview.tsx:157
 msgid "Issuer URL:"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:341
+#: app/routes/_admin+/waitlist.tsx:349
 msgid "Joined"
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:371
 #: app/components/admin/feature-flags.tsx:476
 #: app/components/admin/feature-flags.tsx:643
-#: app/routes/_admin+/cache.tsx:589
-#: app/routes/_admin+/roles+/$roleId.tsx:442
-#: app/routes/_admin+/roles+/$roleId.tsx:491
-#: app/routes/_admin+/roles+/$roleId.tsx:732
-#: app/routes/_admin+/roles+/system.$roleId.tsx:241
-#: app/routes/_admin+/roles+/system.$roleId.tsx:295
+#: app/routes/_admin+/cache.tsx:607
+#: app/routes/_admin+/roles+/$roleId.tsx:448
+#: app/routes/_admin+/roles+/$roleId.tsx:497
+#: app/routes/_admin+/roles+/$roleId.tsx:731
+#: app/routes/_admin+/roles+/system.$roleId.tsx:249
+#: app/routes/_admin+/roles+/system.$roleId.tsx:303
 msgid "Key"
 msgstr ""
 
@@ -1103,11 +1051,11 @@ msgstr ""
 msgid "Keys to delete:"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:453
+#: app/components/sso-user-management.tsx:455
 msgid "Last 30 days"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:429
+#: app/components/sso-user-management.tsx:431
 msgid "Last 7 days"
 msgstr ""
 
@@ -1115,12 +1063,12 @@ msgstr ""
 msgid "Last Login"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:324
+#: app/components/sso-configuration-overview.tsx:322
 msgid "Last Login:"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:177
-#: app/routes/_admin+/ip-addresses+/index.tsx:228
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:179
+#: app/routes/_admin+/ip-addresses+/index.tsx:226
 msgid "Last Request"
 msgstr ""
 
@@ -1128,40 +1076,39 @@ msgstr ""
 msgid "Last Seen"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:813
+#: app/components/admin-user-detail.tsx:804
 msgid "Last Seen: {lastSeenAt}"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:169
+#: app/components/sso-user-management.tsx:171
 msgid "Last SSO Login"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:239
+#: app/components/sso-configuration-overview.tsx:237
 msgid "Last Tested:"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:184
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:186
 msgid "Last User Agent"
 msgstr ""
 
-#. placeholder {0}: data.launchStatus
-#: app/routes/_admin+/waitlist.tsx:261
-msgid "Launch status is currently <0>{0}</0>. The waitlist is only active when LAUNCH_STATUS is set to CLOSED_BETA."
+#: app/routes/_admin+/waitlist.tsx:269
+msgid "Launch status is currently <0>{launchStatus}</0>. The waitlist is only active when LAUNCH_STATUS is set to CLOSED_BETA."
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:616
 msgid "Leave Organization ID empty to view/set global user overrides. Enter an Organization ID to view/set overrides for that specific organization."
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:390
+#: app/routes/_admin+/roles+/index.tsx:389
 msgid "Level"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:313
+#: app/routes/_admin+/roles+/index.tsx:312
 msgid "Level (Organization roles only)"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:227
+#: app/components/admin-user-detail.tsx:230
 msgid "Lift Ban"
 msgstr ""
 
@@ -1173,17 +1120,17 @@ msgstr ""
 msgid "Light mode"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:101
-#: app/routes/_admin+/ip-addresses+/index.tsx:219
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:103
+#: app/routes/_admin+/ip-addresses+/index.tsx:217
 msgid "Location"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:289
-#: app/routes/_admin+/cache.tsx:475
+#: app/routes/_admin+/cache.tsx:296
+#: app/routes/_admin+/cache.tsx:493
 msgid "LRU Cache"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:366
+#: app/routes/_admin+/cache.tsx:373
 msgid "LRU only"
 msgstr ""
 
@@ -1195,40 +1142,39 @@ msgstr ""
 msgid "Manage all users in the system"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:381
+#: app/routes/_admin+/index.tsx:380
 msgid "Manage Cache →"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:366
+#: app/routes/_admin+/roles+/index.tsx:365
 msgid "Manage organization and system roles and permissions"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:336
+#: app/routes/_admin+/index.tsx:335
 msgid "Manage Organizations"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:478
+#: app/routes/_admin+/index.tsx:477
 msgid "Manage system performance"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:300
+#: app/routes/_admin+/index.tsx:299
 msgid "Manage Users"
 msgstr ""
 
-#. placeholder {0}: organization.name
-#: app/routes/_admin+/organizations+/$organizationId_+/sso.users.tsx:416
-msgid "Manage users who authenticate through SSO for {0}"
+#: app/routes/_admin+/organizations+/$organizationId_+/sso.users.tsx:417
+msgid "Manage users who authenticate through SSO for {organizationName}"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:105
+#: app/routes/_admin+/index.tsx:108
 msgid "Manage users, organizations, and system settings"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:248
+#: app/routes/_admin+/waitlist.tsx:256
 msgid "Manage waitlist users and grant early access"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:477
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:483
 msgid "Manual Actions"
 msgstr ""
 
@@ -1236,7 +1182,7 @@ msgstr ""
 msgid "Manual Endpoint Configuration"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:492
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:498
 msgid "Manually trigger archival of logs older than the hot storage period"
 msgstr ""
 
@@ -1257,92 +1203,80 @@ msgstr ""
 msgid "Modify the override value."
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:168
+#: app/routes/_admin+/ip-addresses+/index.tsx:166
 msgid "Monitor and manage IP addresses accessing your website"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:375
+#: app/routes/_admin+/index.tsx:374
 msgid "Monitor and manage system cache"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:264
+#: app/routes/_admin+/cache.tsx:271
 msgid "Monitor and manage system cache performance"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:448
+#: app/routes/_admin+/index.tsx:447
 msgid "Monitor organization activity"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:217
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:266
+#: app/routes/_admin+/audit-logs.tsx:220
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:269
 msgid "N/A"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:480
-#: app/routes/_admin+/roles+/$roleId.tsx:720
-#: app/routes/_admin+/roles+/$roleId.tsx:811
-#: app/routes/_admin+/roles+/system.$roleId.tsx:283
+#: app/routes/_admin+/roles+/$roleId.tsx:486
+#: app/routes/_admin+/roles+/$roleId.tsx:719
+#: app/routes/_admin+/roles+/$roleId.tsx:810
+#: app/routes/_admin+/roles+/system.$roleId.tsx:291
 msgid "Name"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:282
+#: app/routes/_admin+/roles+/index.tsx:281
 msgid "Name *"
 msgstr ""
 
-#: app/utils/user-validation.ts:34
-#~ msgid "Name is required"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:36
-#~ msgid "Name is too long"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:35
-#~ msgid "Name is too short"
-#~ msgstr ""
-
 #: app/components/admin-users-table.tsx:197
-#: app/components/sso-configuration-overview.tsx:254
-#: app/components/sso-user-management.tsx:256
+#: app/components/sso-configuration-overview.tsx:252
+#: app/components/sso-user-management.tsx:258
 msgid "Never"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:704
-#: app/routes/_admin+/roles+/$roleId.tsx:711
+#: app/routes/_admin+/roles+/$roleId.tsx:703
+#: app/routes/_admin+/roles+/$roleId.tsx:710
 msgid "New feature"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:793
+#: app/routes/_admin+/roles+/$roleId.tsx:792
 msgid "New permission"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:431
-#: app/routes/_admin+/waitlist.tsx:521
+#: app/routes/_admin+/audit-logs.tsx:434
+#: app/routes/_admin+/waitlist.tsx:523
 msgid "Next"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:776
+#: app/components/admin-user-detail.tsx:767
 msgid "No active sessions"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:383
+#: app/components/sso-user-management.tsx:385
 msgid "No Audit Logs"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.old.tsx:150
-#: app/routes/_admin+/audit-logs.tsx:402
+#: app/routes/_admin+/audit-logs.old.tsx:149
+#: app/routes/_admin+/audit-logs.tsx:405
 msgid "No audit logs found"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:492
+#: app/routes/_admin+/cache.tsx:510
 msgid "No cache entries found"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:496
+#: app/routes/_admin+/cache.tsx:514
 msgid "No cache keys match \"{query}\""
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:728
+#: app/components/admin-user-detail.tsx:719
 msgid "No connected accounts"
 msgstr ""
 
@@ -1356,48 +1290,48 @@ msgstr ""
 msgid "No flags configured"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:411
+#: app/routes/_admin+/ip-addresses+/index.tsx:416
 msgid "No IP addresses found"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:822
+#: app/components/admin-user-detail.tsx:813
 msgid "No IP addresses recorded for this user"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:662
+#: app/components/admin-user-detail.tsx:653
 msgid "No notes created"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:410
+#: app/routes/_admin+/roles+/index.tsx:409
 msgid "No organization roles found"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:563
+#: app/components/admin-organizations-table.tsx:567
 msgid "No organizations found."
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:629
+#: app/components/admin-user-detail.tsx:620
 msgid "No recent activity"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:599
+#: app/components/admin-user-detail.tsx:590
 msgid "No recent comments"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:386
+#: app/components/sso-user-management.tsx:388
 msgid "No SSO activities have been recorded yet."
 msgstr ""
 
-#: app/components/sso-user-management.tsx:240
+#: app/components/sso-user-management.tsx:242
 msgid "No SSO sessions"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:315
+#: app/components/sso-user-management.tsx:317
 msgid "No SSO Users"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:94
-#: app/routes/_admin+/index.tsx:265
+#: app/routes/_admin+/index.tsx:264
 msgid "No Subscription"
 msgstr ""
 
@@ -1405,19 +1339,19 @@ msgstr ""
 msgid "No system flags configured"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:454
+#: app/routes/_admin+/roles+/index.tsx:453
 msgid "No system roles found"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:326
+#: app/routes/_admin+/ip-addresses+/index.tsx:330
 msgid "No users"
 msgstr ""
 
-#: app/components/admin-users-table.tsx:451
+#: app/components/admin-users-table.tsx:454
 msgid "No users found."
 msgstr ""
 
-#: app/components/sso-user-management.tsx:318
+#: app/components/sso-user-management.tsx:320
 msgid "No users have authenticated through SSO yet."
 msgstr ""
 
@@ -1425,17 +1359,17 @@ msgstr ""
 msgid "No users have been tracked for this IP address"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:358
+#: app/routes/_admin+/waitlist.tsx:366
 msgid "No waitlist entries found"
 msgstr ""
 
 #: app/components/admin-users-table.tsx:138
 #: app/components/admin-users-table.tsx:148
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:447
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:453
 msgid "None"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:683
+#: app/components/admin-user-detail.tsx:674
 msgid "Not Set"
 msgstr ""
 
@@ -1443,7 +1377,7 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:290
+#: app/components/admin-user-detail.tsx:281
 msgid "Notes Created"
 msgstr ""
 
@@ -1463,7 +1397,7 @@ msgstr ""
 msgid "OAuth2 Configuration"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:258
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:261
 msgid "Oldest Log"
 msgstr ""
 
@@ -1471,12 +1405,12 @@ msgstr ""
 msgid "openid email profile"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:751
-#: app/routes/_admin+/roles+/$roleId.tsx:867
+#: app/routes/_admin+/roles+/$roleId.tsx:750
+#: app/routes/_admin+/roles+/$roleId.tsx:866
 msgid "Optional"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:851
+#: app/routes/_admin+/roles+/$roleId.tsx:850
 msgid "org - Organization resources"
 msgstr ""
 
@@ -1489,24 +1423,24 @@ msgstr ""
 msgid "Organization Override"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:264
+#: app/routes/_admin+/roles+/index.tsx:263
 msgid "Organization Role"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:376
+#: app/routes/_admin+/roles+/index.tsx:375
 msgid "Organization Roles"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:272
+#: app/routes/_admin+/roles+/index.tsx:271
 msgid "Organization roles apply within specific organizations, while system roles are global."
 msgstr ""
 
 #: app/components/admin-sidebar.tsx:55
-#: app/components/admin-user-detail.tsx:248
-#: app/components/admin-user-detail.tsx:329
+#: app/components/admin-user-detail.tsx:251
+#: app/components/admin-user-detail.tsx:320
 #: app/components/admin-users-table.tsx:132
 #: app/routes/_admin+/index.tsx:149
-#: app/routes/_admin+/index.tsx:317
+#: app/routes/_admin+/index.tsx:316
 #: app/routes/_admin+/organizations+/index.tsx:139
 msgid "Organizations"
 msgstr ""
@@ -1516,11 +1450,11 @@ msgstr ""
 msgid "Override Value"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:326
+#: app/components/admin-user-detail.tsx:317
 msgid "Overview"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:848
+#: app/routes/_admin+/roles+/$roleId.tsx:847
 msgid "own - User's own resources"
 msgstr ""
 
@@ -1528,14 +1462,12 @@ msgstr ""
 msgid "Owner"
 msgstr ""
 
-#. placeholder {0}: pagination.page
-#. placeholder {1}: pagination.totalPages
-#: app/components/admin-organizations-table.tsx:595
-#: app/components/admin-users-table.tsx:483
-msgid "Page {0} of {1}"
+#: app/components/admin-organizations-table.tsx:599
+#: app/components/admin-users-table.tsx:486
+msgid "Page {currentPage} of {totalPages}"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:411
+#: app/routes/_admin+/audit-logs.tsx:414
 msgid "Page {page} of {totalPages}"
 msgstr ""
 
@@ -1543,68 +1475,56 @@ msgstr ""
 msgid "Page Not Found"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:688
+#: app/components/admin-user-detail.tsx:679
 msgid "Passkeys"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:680
+#: app/components/admin-user-detail.tsx:671
 msgid "Password"
 msgstr ""
-
-#: app/utils/user-validation.ts:25
-#~ msgid "Password is required"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:28
-#~ msgid "Password is too long"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:26
-#~ msgid "Password is too short"
-#~ msgstr ""
 
 #: app/components/admin-organizations-table.tsx:116
 msgid "Past Due"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:410
+#: app/routes/_admin+/waitlist.tsx:418
 msgid "Pending"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:295
+#: app/routes/_admin+/waitlist.tsx:303
 msgid "Pending Access"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:314
+#: app/routes/_admin+/cache.tsx:321
 msgid "per SQLite entry"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:545
-#: app/routes/_admin+/roles+/index.tsx:396
-#: app/routes/_admin+/roles+/index.tsx:440
-#: app/routes/_admin+/roles+/system.$roleId.tsx:352
+#: app/routes/_admin+/roles+/$roleId.tsx:544
+#: app/routes/_admin+/roles+/index.tsx:395
+#: app/routes/_admin+/roles+/index.tsx:439
+#: app/routes/_admin+/roles+/system.$roleId.tsx:353
 msgid "Permissions"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:563
+#: app/routes/_admin+/cache.tsx:581
 msgid "Persistent cache stored in SQLite database"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:208
+#: app/routes/_admin+/index.tsx:207
 msgid "Personal + Organization notes"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:329
-#: app/components/sso-configuration-overview.tsx:210
+#: app/components/sso-configuration-overview.tsx:208
 msgid "PKCE Enabled"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:332
+#: app/routes/_admin+/waitlist.tsx:340
 msgid "Points"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:423
-#: app/routes/_admin+/waitlist.tsx:475
+#: app/routes/_admin+/audit-logs.tsx:426
+#: app/routes/_admin+/waitlist.tsx:477
 msgid "Previous"
 msgstr ""
 
@@ -1612,7 +1532,7 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:146
+#: app/components/sso-configuration-overview.tsx:144
 msgid "Provider Details"
 msgstr ""
 
@@ -1620,19 +1540,19 @@ msgstr ""
 msgid "Provider Name"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:151
+#: app/components/sso-configuration-overview.tsx:149
 msgid "Provider:"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:390
+#: app/routes/_admin+/index.tsx:389
 msgid "Quick Actions"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:279
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:282
 msgid "Quick apply industry-standard retention policies"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:323
+#: app/routes/_admin+/waitlist.tsx:331
 msgid "Rank"
 msgstr ""
 
@@ -1640,47 +1560,47 @@ msgstr ""
 msgid "Read our Cookie Policy"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:99
+#: app/components/admin-ban-user-dialog.tsx:100
 msgid "Reason for ban"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:373
+#: app/routes/_admin+/ip-addresses+/index.tsx:377
 msgid "Reason for blacklisting"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:368
+#: app/components/admin-user-detail.tsx:359
 msgid "Reason:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:609
+#: app/components/admin-user-detail.tsx:600
 msgid "Recent Activity"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:579
+#: app/components/admin-user-detail.tsx:570
 msgid "Recent Comments"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:413
+#: app/components/sso-user-management.tsx:415
 msgid "Recent Logins"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:315
+#: app/components/sso-configuration-overview.tsx:313
 msgid "Recent Logins:"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:640
+#: app/components/admin-user-detail.tsx:631
 msgid "Recent Notes"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:300
+#: app/components/admin-user-detail.tsx:291
 msgid "Recent notes shown"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:333
+#: app/components/sso-user-management.tsx:335
 msgid "Recent SSO configuration changes and user activities"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:335
+#: app/routes/_admin+/waitlist.tsx:343
 msgid "Referrals"
 msgstr ""
 
@@ -1693,28 +1613,26 @@ msgid "Remove Override"
 msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:254
-#: app/routes/_admin+/ip-addresses+/index.tsx:225
+#: app/routes/_admin+/ip-addresses+/index.tsx:223
 msgid "Requests"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:455
-#: app/components/admin-users-table.tsx:343
-#: app/routes/_admin+/cache.tsx:395
+#: app/components/admin-organizations-table.tsx:464
+#: app/components/admin-users-table.tsx:351
+#: app/routes/_admin+/cache.tsx:402
 msgid "Reset"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:350
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:356
 msgid "Retention Period (days)"
 msgstr ""
 
-#. placeholder {0}: preset.retentionDays
-#. placeholder {1}: Math.floor(preset.retentionDays / 365)
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:304
-msgid "Retention: {0} days ({1} years)"
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:311
+msgid "Retention: {retentionDays} days ({retentionYears} years)"
 msgstr ""
 
 #: app/routes/_admin+/_layout.tsx:85
-#: app/routes/_admin+/cache.tsx:918
+#: app/routes/_admin+/cache.tsx:943
 msgid "Return to Admin Dashboard"
 msgstr ""
 
@@ -1726,56 +1644,56 @@ msgstr ""
 msgid "Revocation URL (Optional)"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:431
+#: app/routes/_admin+/waitlist.tsx:439
 msgid "Revoke"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:163
-#: app/routes/_admin+/roles+/index.tsx:387
-#: app/routes/_admin+/roles+/index.tsx:434
+#: app/components/sso-user-management.tsx:165
+#: app/routes/_admin+/roles+/index.tsx:386
+#: app/routes/_admin+/roles+/index.tsx:433
 msgid "Role"
-msgstr ""
-
-#: app/routes/_admin+/roles+/$roleId.tsx:510
-#: app/routes/_admin+/roles+/system.$roleId.tsx:314
-msgid "Role description"
-msgstr ""
-
-#: app/routes/_admin+/roles+/$roleId.tsx:486
-#: app/routes/_admin+/roles+/system.$roleId.tsx:289
-msgid "Role name"
-msgstr ""
-
-#: app/routes/_admin+/roles+/index.tsx:251
-msgid "Role Type"
-msgstr ""
-
-#: app/components/admin-sidebar.tsx:61
-#: app/routes/_admin+/roles+/$roleId.tsx:423
-#: app/routes/_admin+/roles+/index.tsx:363
-#: app/routes/_admin+/roles+/system.$roleId.tsx:217
-msgid "Roles"
-msgstr ""
-
-#: app/routes/_admin+/roles+/index.tsx:379
-msgid "Roles that apply within specific organizations"
-msgstr ""
-
-#: app/components/admin-organizations-table.tsx:575
-#: app/components/admin-users-table.tsx:463
-msgid "Rows per page"
-msgstr ""
-
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:500
-msgid "Run Archival"
-msgstr ""
-
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:480
-msgid "Run maintenance tasks on audit logs"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:516
 #: app/routes/_admin+/roles+/system.$roleId.tsx:322
+msgid "Role description"
+msgstr ""
+
+#: app/routes/_admin+/roles+/$roleId.tsx:492
+#: app/routes/_admin+/roles+/system.$roleId.tsx:297
+msgid "Role name"
+msgstr ""
+
+#: app/routes/_admin+/roles+/index.tsx:250
+msgid "Role Type"
+msgstr ""
+
+#: app/components/admin-sidebar.tsx:61
+#: app/routes/_admin+/roles+/$roleId.tsx:429
+#: app/routes/_admin+/roles+/index.tsx:362
+#: app/routes/_admin+/roles+/system.$roleId.tsx:225
+msgid "Roles"
+msgstr ""
+
+#: app/routes/_admin+/roles+/index.tsx:378
+msgid "Roles that apply within specific organizations"
+msgstr ""
+
+#: app/components/admin-organizations-table.tsx:579
+#: app/components/admin-users-table.tsx:466
+msgid "Rows per page"
+msgstr ""
+
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:506
+msgid "Run Archival"
+msgstr ""
+
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:486
+msgid "Run maintenance tasks on audit logs"
+msgstr ""
+
+#: app/routes/_admin+/roles+/$roleId.tsx:522
+#: app/routes/_admin+/roles+/system.$roleId.tsx:330
 msgid "Save Changes"
 msgstr ""
 
@@ -1783,12 +1701,12 @@ msgstr ""
 msgid "Save Configuration"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:465
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:471
 msgid "Save Policy"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:447
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:463
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:469
 msgid "Saving..."
 msgstr ""
 
@@ -1796,25 +1714,25 @@ msgstr ""
 msgid "Scopes"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:175
+#: app/components/sso-configuration-overview.tsx:173
 msgid "Scopes:"
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:458
 #: app/components/admin/feature-flags.tsx:612
-#: app/routes/_admin+/audit-logs.tsx:238
+#: app/routes/_admin+/audit-logs.tsx:241
 msgid "Search"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:283
+#: app/routes/_admin+/waitlist.tsx:291
 msgid "Search by name, email, or username..."
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:345
+#: app/routes/_admin+/cache.tsx:352
 msgid "Search cache keys..."
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:242
+#: app/routes/_admin+/audit-logs.tsx:245
 msgid "Search details or action..."
 msgstr ""
 
@@ -1822,7 +1740,7 @@ msgstr ""
 msgid "Search Organization"
 msgstr ""
 
-#: app/components/admin-organizations-table.tsx:404
+#: app/components/admin-organizations-table.tsx:413
 msgid "Search organizations..."
 msgstr ""
 
@@ -1830,25 +1748,25 @@ msgstr ""
 msgid "Search User"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:415
+#: app/routes/_admin+/index.tsx:414
 msgid "Search Users"
 msgstr ""
 
-#: app/components/admin-users-table.tsx:312
+#: app/components/admin-users-table.tsx:320
 msgid "Search users..."
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:307
-#: app/components/admin-user-detail.tsx:335
+#: app/components/admin-user-detail.tsx:298
+#: app/components/admin-user-detail.tsx:326
 msgid "Security"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:191
+#: app/routes/_admin+/audit-logs.tsx:194
 msgid "Security Events"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:841
-#: app/routes/_admin+/roles+/$roleId.tsx:844
+#: app/routes/_admin+/roles+/$roleId.tsx:840
+#: app/routes/_admin+/roles+/$roleId.tsx:843
 msgid "Select access level"
 msgstr ""
 
@@ -1856,74 +1774,73 @@ msgstr ""
 msgid "Select flag type"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:257
-#: app/routes/_admin+/roles+/index.tsx:260
+#: app/routes/_admin+/roles+/index.tsx:256
+#: app/routes/_admin+/roles+/index.tsx:259
 msgid "Select role type"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:759
+#: app/components/admin-user-detail.tsx:750
 msgid "Session {sessionId}..."
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:683
+#: app/components/admin-user-detail.tsx:674
 msgid "Set"
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:127
+#: app/components/admin-ban-user-dialog.tsx:128
 msgid "Set expiration date (optional)"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:269
+#: app/routes/_admin+/audit-logs.tsx:272
 msgid "Severity"
 msgstr ""
 
-#. placeholder {0}: logs.length
-#. placeholder {1}: total.toLocaleString()
-#: app/routes/_admin+/audit-logs.tsx:319
-msgid "Showing {0} of {1} events"
+#: app/routes/_admin+/audit-logs.tsx:322
+msgid "Showing {showing} of {totalEvents} events"
 msgstr ""
 
-#. placeholder {0}: (data.pagination.page - 1) * data.pagination.pageSize + 1
-#. placeholder {1}: Math.min( data.pagination.page * data.pagination.pageSize, data.pagination.totalCount, )
-#. placeholder {2}: data.pagination.totalCount
-#: app/routes/_admin+/waitlist.tsx:458
-msgid "Showing {0} to {1} of {2} entries"
+#: app/routes/_admin+/waitlist.tsx:466
+msgid "Showing {startEntry} to {endEntry} of {totalCount} entries"
 msgstr ""
 
-#. placeholder {0}: (pagination.page - 1) * pagination.pageSize + 1
-#. placeholder {1}: Math.min( pagination.page * pagination.pageSize, pagination.totalCount, )
-#. placeholder {2}: pagination.totalCount
-#: app/components/admin-organizations-table.tsx:498
-msgid "Showing {0} to {1} of {2} organizations"
+#: app/components/admin-organizations-table.tsx:507
+msgid "Showing {startItem} to {endItem} of {totalCount} organizations"
 msgstr ""
 
-#. placeholder {0}: (pagination.page - 1) * pagination.pageSize + 1
-#. placeholder {1}: Math.min( pagination.page * pagination.pageSize, pagination.totalCount, )
-#. placeholder {2}: pagination.totalCount
-#: app/components/admin-users-table.tsx:386
-msgid "Showing {0} to {1} of {2} users"
+#: app/components/admin-users-table.tsx:394
+msgid "Showing {startItem} to {endItem} of {totalCount} users"
 msgstr ""
 
-#. placeholder {0}: query && ` matching "${query}"`
-#. placeholder {1}: cacheType !== 'all' && ` in ${cacheType.toUpperCase()} cache`
-#: app/routes/_admin+/cache.tsx:447
-msgid "Showing {totalKeys} cache entries{0}{1}"
+#: app/routes/_admin+/cache.tsx:468
+msgid "Showing {totalKeys} cache entries"
+msgstr ""
+
+#: app/routes/_admin+/cache.tsx:464
+msgid "Showing {totalKeys} cache entries in {cacheTypeUpper} cache"
+msgstr ""
+
+#: app/routes/_admin+/cache.tsx:460
+msgid "Showing {totalKeys} cache entries matching \"{query}\""
+msgstr ""
+
+#: app/routes/_admin+/cache.tsx:455
+msgid "Showing {totalKeys} cache entries matching \"{query}\" in {cacheTypeUpper} cache"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:263
-#: app/routes/_admin+/cache.tsx:592
+#: app/routes/_admin+/cache.tsx:610
 msgid "Size"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:306
+#: app/routes/_admin+/waitlist.tsx:314
 msgid "Sort by Date"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:305
+#: app/routes/_admin+/waitlist.tsx:313
 msgid "Sort by Points"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:304
+#: app/routes/_admin+/waitlist.tsx:312
 msgid "Sort by Rank"
 msgstr ""
 
@@ -1932,21 +1849,21 @@ msgstr ""
 msgid "Source"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:273
-#: app/routes/_admin+/cache.tsx:464
+#: app/routes/_admin+/cache.tsx:280
+#: app/routes/_admin+/cache.tsx:482
 msgid "SQLite Cache"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:363
+#: app/routes/_admin+/cache.tsx:370
 msgid "SQLite only"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:330
+#: app/components/sso-user-management.tsx:332
 msgid "SSO Audit Trail"
 msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:98
-#: app/routes/_admin+/organizations+/$organizationId_+/sso.tsx:398
+#: app/routes/_admin+/organizations+/$organizationId_+/sso.tsx:399
 msgid "SSO Configuration"
 msgstr ""
 
@@ -1958,39 +1875,38 @@ msgstr ""
 msgid "SSO is configured but currently disabled. Users cannot authenticate through SSO."
 msgstr ""
 
-#: app/components/sso-user-management.tsx:166
+#: app/components/sso-user-management.tsx:168
 msgid "SSO Provider"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/sso.users.tsx:413
+#: app/routes/_admin+/organizations+/$organizationId_+/sso.users.tsx:414
 msgid "SSO Users"
 msgstr ""
 
-#. placeholder {0}: ssoUsers.length
-#: app/components/sso-user-management.tsx:148
-msgid "SSO Users ({0})"
+#: app/components/sso-user-management.tsx:150
+msgid "SSO Users ({userCount})"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:249
+#: app/routes/_admin+/audit-logs.tsx:252
 msgid "Start Date"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:274
 #: app/components/admin-users-table.tsx:169
-#: app/components/sso-configuration-overview.tsx:234
-#: app/components/sso-user-management.tsx:172
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:118
+#: app/components/sso-configuration-overview.tsx:232
+#: app/components/sso-user-management.tsx:174
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:120
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:245
-#: app/routes/_admin+/ip-addresses+/index.tsx:222
-#: app/routes/_admin+/waitlist.tsx:344
+#: app/routes/_admin+/ip-addresses+/index.tsx:220
+#: app/routes/_admin+/waitlist.tsx:352
 msgid "Status"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:355
+#: app/components/admin-user-detail.tsx:346
 msgid "Status:"
 msgstr ""
 
-#: app/components/impersonation-banner.tsx:50
+#: app/components/impersonation-banner.tsx:54
 msgid "Stop Impersonation"
 msgstr ""
 
@@ -2002,25 +1918,25 @@ msgstr ""
 msgid "Subscription"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:250
+#: app/routes/_admin+/index.tsx:249
 msgid "Subscription Status"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:204
+#: app/routes/_admin+/ip-addresses+/index.tsx:202
 msgid "suspicious"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:127
-#: app/routes/_admin+/ip-addresses+/index.tsx:275
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:129
+#: app/routes/_admin+/ip-addresses+/index.tsx:276
 msgid "Suspicious"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:194
+#: app/routes/_admin+/ip-addresses+/index.tsx:192
 msgid "Suspicious IPs"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:146
-#: app/routes/_admin+/ip-addresses+/index.tsx:231
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:148
+#: app/routes/_admin+/ip-addresses+/index.tsx:229
 msgid "Suspicious Score"
 msgstr ""
 
@@ -2042,21 +1958,21 @@ msgstr ""
 msgid "System Management"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:555
-#: app/routes/_admin+/roles+/system.$roleId.tsx:362
-#: app/routes/_admin+/roles+/system.$roleId.tsx:369
+#: app/routes/_admin+/roles+/$roleId.tsx:554
+#: app/routes/_admin+/roles+/system.$roleId.tsx:363
+#: app/routes/_admin+/roles+/system.$roleId.tsx:370
 msgid "System permissions"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:586
+#: app/routes/_admin+/roles+/$roleId.tsx:585
 msgid "System permissions management coming soon"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:267
+#: app/routes/_admin+/roles+/index.tsx:266
 msgid "System Role"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:423
+#: app/routes/_admin+/roles+/index.tsx:422
 msgid "System Roles"
 msgstr ""
 
@@ -2068,12 +1984,12 @@ msgstr ""
 msgid "System value:"
 msgstr ""
 
-#: app/routes/_admin+/roles+/system.$roleId.tsx:355
+#: app/routes/_admin+/roles+/system.$roleId.tsx:356
 msgid "System-wide permissions for this role"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:476
-#: app/components/sso-configuration-overview.tsx:116
+#: app/components/sso-configuration-overview.tsx:114
 msgid "Test Connection"
 msgstr ""
 
@@ -2085,17 +2001,13 @@ msgstr ""
 msgid "The admin page you're looking for doesn't exist."
 msgstr ""
 
-#: app/components/admin-ban-user-dialog.tsx:149
+#: app/components/admin-ban-user-dialog.tsx:150
 msgid "The ban will be automatically lifted on this date. Leave empty for permanent ban."
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:498
+#: app/routes/_admin+/cache.tsx:516
 msgid "The cache is empty"
 msgstr ""
-
-#: app/utils/user-validation.ts:57
-#~ msgid "The passwords must match"
-#~ msgstr ""
 
 #: app/components/nav-user.tsx:123
 msgid "Theme"
@@ -2109,43 +2021,43 @@ msgstr ""
 msgid "Token URL"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:208
+#: app/routes/_admin+/audit-logs.tsx:211
 msgid "Top Action"
 msgstr ""
 
-#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:227
+#: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:230
 msgid "Total Audit Logs"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:321
+#: app/routes/_admin+/cache.tsx:328
 msgid "Total Entries"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:177
+#: app/routes/_admin+/audit-logs.tsx:180
 msgid "Total Events"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:176
+#: app/routes/_admin+/ip-addresses+/index.tsx:174
 msgid "Total IPs"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:183
+#: app/routes/_admin+/index.tsx:182
 msgid "Total Notes"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:139
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:141
 msgid "Total Requests"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:398
+#: app/components/sso-user-management.tsx:400
 msgid "Total SSO Users"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:114
+#: app/routes/_admin+/index.tsx:117
 msgid "Total Users"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:301
+#: app/components/sso-configuration-overview.tsx:299
 msgid "Total Users:"
 msgstr ""
 
@@ -2153,7 +2065,7 @@ msgstr ""
 msgid "Trial"
 msgstr ""
 
-#: app/routes/_admin+/cache.tsx:598
+#: app/routes/_admin+/cache.tsx:616
 msgid "TTL"
 msgstr ""
 
@@ -2161,13 +2073,13 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/index.tsx:344
+#: app/routes/_admin+/ip-addresses+/index.tsx:348
 msgid "Unblacklist"
 msgstr ""
 
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:110
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:187
-#: app/routes/_admin+/ip-addresses+/index.tsx:264
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:112
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:189
+#: app/routes/_admin+/ip-addresses+/index.tsx:265
 msgid "Unknown"
 msgstr ""
 
@@ -2187,15 +2099,15 @@ msgstr ""
 msgid "Update Override"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:271
+#: app/components/sso-configuration-overview.tsx:269
 msgid "Updated:"
 msgstr ""
 
-#: app/components/sso-configuration-overview.tsx:296
+#: app/components/sso-configuration-overview.tsx:294
 msgid "Usage Statistics"
 msgstr ""
 
-#: app/routes/_admin+/roles+/index.tsx:292
+#: app/routes/_admin+/roles+/index.tsx:291
 msgid "Use lowercase letters, numbers, and hyphens only"
 msgstr ""
 
@@ -2203,19 +2115,19 @@ msgstr ""
 msgid "Use Proof Key for Code Exchange for enhanced security"
 msgstr ""
 
-#: app/routes/_admin+/roles+/$roleId.tsx:735
+#: app/routes/_admin+/roles+/$roleId.tsx:734
 msgid "Use this in your codebase to refer to this feature."
 msgstr ""
 
 #: app/components/admin-users-table.tsx:100
 #: app/components/admin/feature-flags.tsx:745
-#: app/components/sso-user-management.tsx:160
+#: app/components/sso-user-management.tsx:162
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:239
-#: app/routes/_admin+/waitlist.tsx:326
+#: app/routes/_admin+/waitlist.tsx:334
 msgid "User"
 msgstr ""
 
-#: app/components/admin-user-detail.tsx:566
+#: app/components/admin-user-detail.tsx:557
 msgid "User is not a member of any organizations"
 msgstr ""
 
@@ -2239,37 +2151,20 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: app/utils/user-validation.ts:17
-#~ msgid "Username can only include letters, numbers, and underscores"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:12
-#~ msgid "Username is required"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:14
-#~ msgid "Username is too long"
-#~ msgstr ""
-
-#: app/utils/user-validation.ts:13
-#~ msgid "Username is too short"
-#~ msgstr ""
-
 #: app/components/admin-sidebar.tsx:43
-#: app/routes/_admin+/index.tsx:280
-#: app/routes/_admin+/ip-addresses+/index.tsx:234
-#: app/routes/_admin+/roles+/index.tsx:393
-#: app/routes/_admin+/roles+/index.tsx:437
+#: app/routes/_admin+/index.tsx:279
+#: app/routes/_admin+/ip-addresses+/index.tsx:232
+#: app/routes/_admin+/roles+/index.tsx:392
+#: app/routes/_admin+/roles+/index.tsx:436
 #: app/routes/_admin+/users+/index.tsx:152
 msgid "Users"
 msgstr ""
 
-#. placeholder {0}: userConnections.length
-#: app/routes/_admin+/ip-addresses+/$ip.tsx:228
-msgid "Users Associated with this IP ({0})"
+#: app/routes/_admin+/ip-addresses+/$ip.tsx:230
+msgid "Users Associated with this IP ({count})"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:151
+#: app/components/sso-user-management.tsx:153
 msgid "Users who have authenticated through SSO"
 msgstr ""
 
@@ -2277,19 +2172,19 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: app/components/sso-user-management.tsx:365
+#: app/components/sso-user-management.tsx:367
 msgid "View details"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:339
+#: app/routes/_admin+/index.tsx:338
 msgid "View organization details and subscriptions"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:445
+#: app/routes/_admin+/index.tsx:444
 msgid "View Organizations"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:345
+#: app/routes/_admin+/index.tsx:344
 msgid "View Organizations →"
 msgstr ""
 
@@ -2297,11 +2192,11 @@ msgstr ""
 msgid "View User"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:309
+#: app/routes/_admin+/index.tsx:308
 msgid "View Users →"
 msgstr ""
 
-#: app/routes/_admin+/index.tsx:303
+#: app/routes/_admin+/index.tsx:302
 msgid "View, search, and manage user accounts"
 msgstr ""
 
@@ -2313,16 +2208,15 @@ msgstr ""
 msgid "Waitlist"
 msgstr ""
 
-#. placeholder {0}: data.pagination.totalCount
-#: app/routes/_admin+/waitlist.tsx:315
-msgid "Waitlist Entries ({0})"
+#: app/routes/_admin+/waitlist.tsx:323
+msgid "Waitlist Entries ({totalCount})"
 msgstr ""
 
-#: app/routes/_admin+/waitlist.tsx:245
+#: app/routes/_admin+/waitlist.tsx:253
 msgid "Waitlist Management"
 msgstr ""
 
-#: app/routes/_admin+/audit-logs.tsx:291
+#: app/routes/_admin+/audit-logs.tsx:294
 msgid "Warning"
 msgstr ""
 
@@ -2330,18 +2224,15 @@ msgstr ""
 msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content."
 msgstr ""
 
-#. placeholder {0}: user.name || user.username
-#. placeholder {1}: user.email
-#: app/components/admin-ban-user-dialog.tsx:88
-msgid "You are about to ban <0>{0}</0> ({1}). This will prevent them from accessing the application."
+#: app/components/admin-ban-user-dialog.tsx:90
+msgid "You are about to ban <0>{displayName}</0> ({userEmail}). This will prevent them from accessing the application."
 msgstr ""
 
-#. placeholder {0}: impersonationInfo.targetName
-#: app/components/impersonation-banner.tsx:30
-msgid "You are impersonating <0>{0}</0>"
+#: app/components/impersonation-banner.tsx:31
+msgid "You are impersonating <0>{targetName}</0>"
 msgstr ""
 
 #: app/routes/_admin+/_layout.tsx:52
-#: app/routes/_admin+/cache.tsx:905
+#: app/routes/_admin+/cache.tsx:930
 msgid "You don't have permission to access this admin area."
 msgstr ""

@@ -1,5 +1,7 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import { Textarea } from '@repo/ui/textarea'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -41,11 +43,14 @@ export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
 export const PromptInputTextarea = ({
 	onChange,
 	className,
-	placeholder = 'What would you like to know?',
+	placeholder,
 	_minHeight = 48,
 	_maxHeight = 164,
 	...props
 }: PromptInputTextareaProps) => {
+	const { _ } = useLingui()
+	const defaultPlaceholder = _(t`What would you like to know?`)
+
 	const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
 		if (e.key === 'Enter') {
 			if (e.shiftKey) {
@@ -75,7 +80,7 @@ export const PromptInputTextarea = ({
 				onChange?.(e)
 			}}
 			onKeyDown={handleKeyDown}
-			placeholder={placeholder}
+			placeholder={placeholder ?? defaultPlaceholder}
 			{...props}
 		/>
 	)
@@ -151,18 +156,19 @@ export const PromptInputSubmit = ({
 	nativeButton: ignoredNativeButton,
 	...props
 }: PromptInputSubmitProps) => {
+	const { _ } = useLingui()
 	let iconElement = <Icon name="send" className="size-4" />
-	let ariaLabel = 'Send message'
+	let ariaLabel = _(t`Send message`)
 
 	if (status === 'submitted') {
 		iconElement = <Icon name="loader" className="size-4 animate-spin" />
-		ariaLabel = 'Sending message'
+		ariaLabel = _(t`Sending message`)
 	} else if (status === 'streaming') {
 		iconElement = <Icon name="ban" className="size-4" />
-		ariaLabel = 'Stop generation'
+		ariaLabel = _(t`Stop generation`)
 	} else if (status === 'error') {
 		iconElement = <Icon name="x" className="size-4" />
-		ariaLabel = 'Retry'
+		ariaLabel = _(t`Retry`)
 	}
 
 	return (

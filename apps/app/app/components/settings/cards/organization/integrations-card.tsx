@@ -72,7 +72,7 @@ export function IntegrationsCard({
 
 			{/* Request Integration Banner */}
 			<div className="bg-muted relative flex w-full items-baseline gap-2 rounded-md p-2 px-6 text-sm">
-				<div className="relative w-4 flex-shrink-0">
+				<div className="relative w-4 shrink-0">
 					<Icon name="badge-question-mark" className="h-4 w-4" />
 				</div>
 				<div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-2">

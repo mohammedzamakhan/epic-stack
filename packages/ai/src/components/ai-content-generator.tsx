@@ -1,3 +1,4 @@
+import { Trans } from '@lingui/react/macro'
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
 
@@ -52,7 +53,11 @@ export function AIContentGenerator({
 			className="flex items-center gap-2"
 		>
 			<Icon name="sparkles" className="h-4 w-4" />
-			{isGenerating ? 'Generating...' : 'Generate with AI'}
+			{isGenerating ? (
+				<Trans>Generating...</Trans>
+			) : (
+				<Trans>Generate with AI</Trans>
+			)}
 		</Button>
 	)
 }

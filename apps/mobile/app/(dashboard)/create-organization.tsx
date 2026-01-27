@@ -114,7 +114,7 @@ export default function CreateOrganizationScreen() {
 				className="flex-1"
 			>
 				<ScrollView
-					contentContainerClassName="flex-grow p-4"
+					contentContainerClassName="grow p-4"
 					showsVerticalScrollIndicator={false}
 					keyboardShouldPersistTaps="handled"
 				>

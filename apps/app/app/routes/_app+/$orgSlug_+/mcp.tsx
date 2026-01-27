@@ -520,7 +520,7 @@ function NewApiKeyModal({
 							<div className="flex items-start gap-3">
 								<Icon
 									name="alert-triangle"
-									className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400"
+									className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-400"
 								/>
 								<div className="text-sm text-yellow-800 dark:text-yellow-200">
 									<div className="mb-1 font-semibold">

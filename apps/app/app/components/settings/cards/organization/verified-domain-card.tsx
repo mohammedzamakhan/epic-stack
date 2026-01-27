@@ -107,7 +107,7 @@ export default function VerifiedDomainCard({
 						<div className="text-primary flex items-center text-xs">
 							<Icon
 								name="help-circle"
-								className="mt-0.5 mr-1 h-4 w-4 flex-shrink-0"
+								className="mt-0.5 mr-1 h-4 w-4 shrink-0"
 							/>
 							<p className="text-muted-foreground">
 								<Trans>

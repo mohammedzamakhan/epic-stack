@@ -87,7 +87,7 @@ export function TwoFactorForm({
 
 			{/* Step 1: QR Code or Setup Key */}
 			<div className="flex gap-4">
-				<div className="flex-shrink-0">
+				<div className="shrink-0">
 					<div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium">
 						1
 					</div>
@@ -145,7 +145,7 @@ export function TwoFactorForm({
 
 			{/* Step 2: Enter OTP Token */}
 			<div className="flex gap-4">
-				<div className="flex-shrink-0">
+				<div className="shrink-0">
 					<div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium">
 						2
 					</div>

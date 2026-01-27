@@ -84,10 +84,10 @@ export function ProfileCard({ user }: ProfileCardProps) {
 			</CardHeader>
 			<CardContent className="pt-6 pb-0">
 				<div className="mb-6 flex flex-col gap-6 md:flex-row">
-					<div className="w-32 flex-shrink-0">
+					<div className="w-32 shrink-0">
 						<ProfilePhoto user={user} size="small" />
 					</div>
-					<div className="flex-grow">
+					<div className="grow">
 						<fetcher.Form method="POST" {...getFormProps(form)}>
 							<FieldGroup>
 								<Field

@@ -1,5 +1,6 @@
 'use client'
 
+import { Trans } from '@lingui/react/macro'
 import { useControllableState } from '@radix-ui/react-use-controllable-state'
 import {
 	Collapsible,
@@ -122,12 +123,7 @@ export type ReasoningTriggerProps = ComponentProps<
 }
 
 export const ReasoningTrigger = memo(
-	({
-		className,
-		_title = 'Reasoning',
-		children,
-		...props
-	}: ReasoningTriggerProps) => {
+	({ className, _title, children, ...props }: ReasoningTriggerProps) => {
 		const { isStreaming, isOpen, duration } = useReasoning()
 
 		return (
@@ -142,9 +138,13 @@ export const ReasoningTrigger = memo(
 					<>
 						<Icon name="bot" className="size-4" />
 						{isStreaming || duration === 0 ? (
-							<p>Thinking...</p>
+							<p>
+								<Trans>Thinking...</Trans>
+							</p>
 						) : (
-							<p>Thought for {duration} seconds</p>
+							<p>
+								<Trans>Thought for {duration} seconds</Trans>
+							</p>
 						)}
 						<Icon
 							name="chevron-down"

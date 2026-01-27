@@ -1,5 +1,7 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import {
@@ -120,6 +122,7 @@ export const CodeBlockCopyButton = ({
 }: CodeBlockCopyButtonProps) => {
 	const [isCopied, setIsCopied] = useState(false)
 	const { code } = useContext(CodeBlockContext)
+	const { _ } = useLingui()
 
 	const copyToClipboard = async () => {
 		if (typeof window === 'undefined' || !navigator.clipboard.writeText) {
@@ -141,7 +144,7 @@ export const CodeBlockCopyButton = ({
 
 	return (
 		<Button
-			aria-label="Copy code"
+			aria-label={_(t`Copy code`)}
 			className={cn('shrink-0', className)}
 			onClick={copyToClipboard}
 			size="icon"

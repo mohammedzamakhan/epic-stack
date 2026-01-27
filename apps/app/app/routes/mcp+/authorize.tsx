@@ -364,7 +364,7 @@ export default function AuthorizePage() {
 									<li className="flex items-start gap-2">
 										<Icon
 											name="check"
-											className="text-primary mt-0.5 h-4 w-4 flex-shrink-0"
+											className="text-primary mt-0.5 h-4 w-4 shrink-0"
 										/>
 										<span>
 											<Trans>Search for users in your organization</Trans>
@@ -373,7 +373,7 @@ export default function AuthorizePage() {
 									<li className="flex items-start gap-2">
 										<Icon
 											name="check"
-											className="text-primary mt-0.5 h-4 w-4 flex-shrink-0"
+											className="text-primary mt-0.5 h-4 w-4 shrink-0"
 										/>
 										<span>
 											<Trans>View notes from users you have access to</Trans>

@@ -158,7 +158,7 @@ export function OnboardingChecklist({
 								index > 0 ? 'border-border border-t border-dashed' : ''
 							}`}
 						>
-							<div className="flex-shrink-0">
+							<div className="shrink-0">
 								{step.isCompleted ? (
 									<div className="flex h-8 w-8 items-center justify-center rounded-full bg-black ring-2 ring-black/10">
 										<Icon name="check" className="h-4 w-4 text-white" />
@@ -188,7 +188,7 @@ export function OnboardingChecklist({
 								</p>
 							</div>
 
-							<div className="flex-shrink-0">
+							<div className="shrink-0">
 								{step.isCompleted ? (
 									<span className="text-muted-foreground text-sm font-medium">
 										{step.actionConfig?.completedLabel || (

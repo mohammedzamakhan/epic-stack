@@ -1781,7 +1781,7 @@ export default function NoteRoute() {
 					</TabsContent>
 				</Tabs>
 
-				<div className="bg-background flex-shrink-0 border-t px-6 py-4">
+				<div className="bg-background shrink-0 border-t px-6 py-4">
 					<div className="flex items-center justify-between">
 						<span className="text-foreground/90 text-sm max-[524px]:hidden">
 							<Icon name="clock" className="mr-1 h-4 w-4">

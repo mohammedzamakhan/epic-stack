@@ -65,10 +65,10 @@ export function GeneralSettingsCard({
 			</CardHeader>
 			<CardContent className="pt-6">
 				<div className="mb-6 flex flex-col gap-6 md:flex-row">
-					<div className="h-32 w-32 flex-shrink-0">
+					<div className="h-32 w-32 shrink-0">
 						<OrganizationPhoto organization={organization} size="small" />
 					</div>
-					<div className="flex-grow">
+					<div className="grow">
 						<fetcher.Form method="POST" {...getFormProps(form)}>
 							<input
 								type="hidden"

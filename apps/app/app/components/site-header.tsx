@@ -46,7 +46,7 @@ export function SiteHeader({ isCollapsed }: { isCollapsed: boolean }) {
 						<span className="min-w-0 flex-1 truncate">
 							<Trans>Search notes...</Trans>
 						</span>
-						<Icon name="search" className="mr-2 h-4 w-4 flex-shrink-0" />
+						<Icon name="search" className="mr-2 h-4 w-4 shrink-0" />
 						<Kbd className="absolute top-[0.3rem] ltr:right-[0.3rem] rtl:left-[0.3rem]">
 							<span className="text-xs">⌘</span>K
 						</Kbd>

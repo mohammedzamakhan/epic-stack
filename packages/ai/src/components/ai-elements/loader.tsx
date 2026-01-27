@@ -1,3 +1,5 @@
+import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import { type HTMLAttributes } from 'react'
 import { cn } from '@repo/ui/cn'
 
@@ -82,16 +84,20 @@ export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
 	size?: number
 }
 
-export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
-	<div
-		aria-label="Loading"
-		className={cn(
-			'inline-flex items-center justify-center motion-safe:animate-spin',
-			className,
-		)}
-		role="status"
-		{...props}
-	>
-		<LoaderIcon size={size} />
-	</div>
-)
+export const Loader = ({ className, size = 16, ...props }: LoaderProps) => {
+	const { _ } = useLingui()
+
+	return (
+		<div
+			aria-label={_(t`Loading`)}
+			className={cn(
+				'inline-flex items-center justify-center motion-safe:animate-spin',
+				className,
+			)}
+			role="status"
+			{...props}
+		>
+			<LoaderIcon size={size} />
+		</div>
+	)
+}

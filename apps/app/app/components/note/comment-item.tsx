@@ -135,7 +135,7 @@ export function CommentItem({
 					className="flex items-start gap-3 transition-colors duration-150"
 					style={{ marginLeft: depth > 0 ? `${depth * 2}rem` : '0' }}
 				>
-					<Avatar className="h-8 w-8 flex-shrink-0">
+					<Avatar className="h-8 w-8 shrink-0">
 						<AvatarImage
 							src={getUserImgSrc(comment.user.image?.objectKey)}
 							alt={comment.user.name || comment.user.username}

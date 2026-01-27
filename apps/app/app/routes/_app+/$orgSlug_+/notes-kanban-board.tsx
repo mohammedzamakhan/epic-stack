@@ -595,7 +595,7 @@ function KanbanColumn({
 	return (
 		<div
 			ref={setNodeRef}
-			className={`bg-muted/30 flex max-w-[320px] min-w-[320px] flex-shrink-0 snap-center flex-col rounded p-2 shadow-xs ${
+			className={`bg-muted/30 flex max-w-[320px] min-w-[320px] shrink-0 snap-center flex-col rounded p-2 shadow-xs ${
 				isActive ? 'ring-primary/50 ring-2' : ''
 			}`}
 		>
@@ -626,7 +626,7 @@ function KanbanColumn({
 						>
 							{column.id !== UNCATEGORISED && column.color && (
 								<div
-									className="h-3 w-3 flex-shrink-0 rounded-full"
+									className="h-3 w-3 shrink-0 rounded-full"
 									style={{ backgroundColor: column.color }}
 								/>
 							)}

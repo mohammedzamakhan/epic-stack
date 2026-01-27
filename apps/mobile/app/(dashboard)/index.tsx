@@ -50,7 +50,7 @@ export default function DashboardScreen() {
 	return (
 		<Screen>
 			<ScrollView
-				contentContainerClassName="flex-grow"
+				contentContainerClassName="grow"
 				showsVerticalScrollIndicator={false}
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

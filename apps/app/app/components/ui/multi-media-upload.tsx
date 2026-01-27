@@ -282,7 +282,7 @@ function MediaPreview({
 	return (
 		<fieldset
 			{...getFieldsetProps(meta)}
-			className="group relative aspect-square flex-shrink-0"
+			className="group relative aspect-square shrink-0"
 		>
 			<input {...getInputProps(fields.id, { type: 'hidden' })} />
 			<input {...getInputProps(fields.type, { type: 'hidden' })} />
