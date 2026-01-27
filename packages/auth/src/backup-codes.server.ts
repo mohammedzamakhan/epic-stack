@@ -7,13 +7,23 @@ const BACKUP_CODE_COUNT = 10
 const BACKUP_CODE_CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // No ambiguous chars (0, O, I, 1)
 
 /**
- * Generate a single random backup code
+ * Generate a single random backup code using unbiased random selection
  */
 function generateSingleCode(): string {
-	const bytes = crypto.randomBytes(BACKUP_CODE_LENGTH)
 	let code = ''
+	// Use rejection sampling to avoid modulo bias
+	// The largest multiple of charset length that fits in a byte (0-255)
+	const charsetLength = BACKUP_CODE_CHARSET.length
+	const maxValid = Math.floor(256 / charsetLength) * charsetLength
+
 	for (let i = 0; i < BACKUP_CODE_LENGTH; i++) {
-		code += BACKUP_CODE_CHARSET[bytes[i]! % BACKUP_CODE_CHARSET.length]
+		let randomByte: number
+		// Keep generating random bytes until we get one in the unbiased range
+		do {
+			randomByte = crypto.randomBytes(1)[0]!
+		} while (randomByte >= maxValid)
+
+		code += BACKUP_CODE_CHARSET[randomByte % charsetLength]
 	}
 	// Format as XXXX-XXXX for readability
 	return `${code.slice(0, 4)}-${code.slice(4)}`
