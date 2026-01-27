@@ -10,6 +10,7 @@ import {
 	type TextInput,
 } from 'react-native'
 import { z } from 'zod'
+import { PasswordSchema } from '@repo/validation'
 import {
 	Screen,
 	Input,
@@ -41,8 +42,8 @@ const OnboardingSchema = z
 			.string()
 			.min(3, 'Name must be at least 3 characters')
 			.max(40, 'Name must be less than 40 characters'),
-		password: z.string().min(6, 'Password must be at least 6 characters'),
-		confirmPassword: z.string().min(6, 'Please confirm your password'),
+		password: PasswordSchema,
+		confirmPassword: PasswordSchema,
 		agreeToTermsOfServiceAndPrivacyPolicy: z
 			.boolean()
 			.refine((val) => val === true, {

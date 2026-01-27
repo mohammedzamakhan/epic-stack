@@ -4,6 +4,7 @@ import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { useIsPending } from '@repo/common'
 import { checkHoneypot } from '@repo/security'
+import { Button } from '@repo/ui/button'
 import {
 	Card,
 	CardContent,
@@ -11,7 +12,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
+import { Input } from '@repo/ui/input'
+import { Label } from '@repo/ui/label'
 import { StatusButton } from '@repo/ui/status-button'
+import { useState } from 'react'
 import { Form, useSearchParams } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
@@ -33,8 +37,9 @@ const types = ['onboarding', 'reset-password', 'change-email', '2fa'] as const
 const VerificationTypeSchema = z.enum(types)
 export type VerificationTypes = z.infer<typeof VerificationTypeSchema>
 
+// Accept both 6-char TOTP codes and 8-9 char backup codes (XXXX-XXXX format)
 export const VerifySchema = z.object({
-	[codeQueryParam]: z.string().min(6).max(6),
+	[codeQueryParam]: z.string().min(6).max(9),
 	[typeQueryParam]: VerificationTypeSchema,
 	[targetQueryParam]: z.string(),
 	[redirectToQueryParam]: z.string().optional(),
@@ -49,6 +54,7 @@ export async function action({ request }: Route.ActionArgs) {
 export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 	const [searchParams] = useSearchParams()
 	const isPending = useIsPending()
+	const [useBackupCode, setUseBackupCode] = useState(false)
 	const parseWithZoddType = VerificationTypeSchema.safeParse(
 		searchParams.get(typeQueryParam),
 	)
@@ -67,8 +73,10 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 		'reset-password': checkEmail,
 		'change-email': checkEmail,
 		'2fa': {
-			title: t`Check your 2FA app`,
-			description: t`Please enter your 2FA code to verify your identity.`,
+			title: useBackupCode ? t`Enter backup code` : t`Check your 2FA app`,
+			description: useBackupCode
+				? t`Enter one of your backup codes to verify your identity.`
+				: t`Please enter your 2FA code to verify your identity.`,
 		},
 	}
 
@@ -104,20 +112,41 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 				<Form method="POST" {...getFormProps(form)}>
 					<HoneypotInputs />
 					<div className="grid gap-6">
-						<div className="flex items-center justify-center">
-							<OTPField
-								labelProps={{
-									htmlFor: fields[codeQueryParam].id,
-									children: <Trans>Verification Code</Trans>,
-								}}
-								inputProps={{
-									...getInputProps(fields[codeQueryParam], { type: 'text' }),
-									autoComplete: 'one-time-code',
-									autoFocus: true,
-								}}
-								errors={fields[codeQueryParam].errors}
-							/>
-						</div>
+						{type === '2fa' && useBackupCode ? (
+							<div className="space-y-2">
+								<Label htmlFor={fields[codeQueryParam].id}>
+									<Trans>Backup Code</Trans>
+								</Label>
+								<Input
+									{...getInputProps(fields[codeQueryParam], { type: 'text' })}
+									placeholder="XXXX-XXXX"
+									autoComplete="off"
+									autoFocus
+									className="text-center font-mono text-lg tracking-widest"
+								/>
+								{fields[codeQueryParam].errors && (
+									<ErrorList
+										errors={fields[codeQueryParam].errors}
+										id={`${fields[codeQueryParam].id}-error`}
+									/>
+								)}
+							</div>
+						) : (
+							<div className="flex items-center justify-center">
+								<OTPField
+									labelProps={{
+										htmlFor: fields[codeQueryParam].id,
+										children: <Trans>Verification Code</Trans>,
+									}}
+									inputProps={{
+										...getInputProps(fields[codeQueryParam], { type: 'text' }),
+										autoComplete: 'one-time-code',
+										autoFocus: true,
+									}}
+									errors={fields[codeQueryParam].errors}
+								/>
+							</div>
+						)}
 
 						<input
 							{...getInputProps(fields[typeQueryParam], { type: 'hidden' })}
@@ -141,6 +170,21 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 						>
 							<Trans>Verify</Trans>
 						</StatusButton>
+
+						{type === '2fa' && (
+							<Button
+								type="button"
+								variant="link"
+								className="text-muted-foreground text-sm"
+								onClick={() => setUseBackupCode(!useBackupCode)}
+							>
+								{useBackupCode ? (
+									<Trans>Use authenticator app instead</Trans>
+								) : (
+									<Trans>Use a backup code instead</Trans>
+								)}
+							</Button>
+						)}
 					</div>
 				</Form>
 			</CardContent>

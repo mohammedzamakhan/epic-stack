@@ -53,6 +53,7 @@ model User {
   waitlistEntry          WaitlistEntry?
   grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
   mcpAuthorizations      MCPAuthorization[]
+  backupCodes            BackupCode[]
 }
 
 model Note {
@@ -112,16 +113,16 @@ model Session {
 }
 
 model RefreshToken {
-  id        String    @id @default(cuid())
-  tokenHash String    // Hashed refresh token for security
+  id        String   @id @default(cuid())
+  tokenHash String // Hashed refresh token for security
   userId    String
-  userAgent String?   // Device/browser info
-  ipAddress String?   // IP address for security tracking
-  revoked   Boolean   @default(false)
+  userAgent String? // Device/browser info
+  ipAddress String? // IP address for security tracking
+  revoked   Boolean  @default(false)
   expiresAt DateTime
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, revoked])
@@ -203,6 +204,18 @@ model Passkey {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model BackupCode {
+  id        String    @id @default(cuid())
+  codeHash  String // Hashed backup code for security
+  userId    String
+  usedAt    DateTime? // Null if unused, timestamp when used
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, usedAt]) // For finding unused codes
 }
 
 model Organization {
@@ -290,7 +303,7 @@ model OrganizationS3Config {
   endpoint        String
   bucketName      String
   accessKeyId     String
-  secretAccessKey String // This should be encrypted in production
+  secretAccessKey String // Encrypted with AES-256-GCM using SSO_MASTER_KEY
   region          String
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -691,10 +704,10 @@ model ConfigFlag {
   level          ConfigFlagLevel
   organizationId String?
   userId         String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([key, level, organizationId, userId])
   @@index([key])
@@ -704,71 +717,71 @@ model ConfigFlag {
 }
 
 model SSOConfiguration {
-  id                String       @id @default(cuid())
-  organizationId    String       @unique
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   // Identity Provider Configuration
-  providerName      String       // "okta", "azure-ad", "auth0", etc.
-  issuerUrl         String       // Base URL of the identity provider
-  clientId          String       // OAuth2 client ID
-  clientSecret      String       // Encrypted OAuth2 client secret
-  
+  providerName String // "okta", "azure-ad", "auth0", etc.
+  issuerUrl    String // Base URL of the identity provider
+  clientId     String // OAuth2 client ID
+  clientSecret String // Encrypted OAuth2 client secret
+
   // OAuth2 Endpoints (can be auto-discovered or manually configured)
-  authorizationUrl  String?      // Authorization endpoint
-  tokenUrl          String?      // Token endpoint
-  userinfoUrl       String?      // UserInfo endpoint
-  revocationUrl     String?      // Token revocation endpoint
-  
+  authorizationUrl String? // Authorization endpoint
+  tokenUrl         String? // Token endpoint
+  userinfoUrl      String? // UserInfo endpoint
+  revocationUrl    String? // Token revocation endpoint
+
   // Configuration Options
-  scopes            String       @default("openid email profile") // Space-separated scopes
-  autoDiscovery     Boolean      @default(true) // Use OIDC discovery
-  pkceEnabled       Boolean      @default(true) // Use PKCE for security
-  
+  scopes        String  @default("openid email profile") // Space-separated scopes
+  autoDiscovery Boolean @default(true) // Use OIDC discovery
+  pkceEnabled   Boolean @default(true) // Use PKCE for security
+
   // User Provisioning Settings
-  autoProvision        Boolean      @default(true) // Auto-create users
-  defaultRole          String       @default("member") // Default organization role
-  attributeMapping     String?      // JSON mapping of OIDC claims to user fields
-  requireVerifiedEmail Boolean      @default(false) // Require email_verified=true from IdP
-  allowedEmailDomains  String?      // Comma-separated list of allowed email domains (null = allow all)
-  
+  autoProvision        Boolean @default(true) // Auto-create users
+  defaultRole          String  @default("member") // Default organization role
+  attributeMapping     String? // JSON mapping of OIDC claims to user fields
+  requireVerifiedEmail Boolean @default(false) // Require email_verified=true from IdP
+  allowedEmailDomains  String? // Comma-separated list of allowed email domains (null = allow all)
+
   // Security Settings
-  enforceSSOLogin      Boolean      @default(false) // When true, org members must use SSO (no password/social login)
-  
+  enforceSSOLogin Boolean @default(false) // When true, org members must use SSO (no password/social login)
+
   // Status and Metadata
-  isEnabled         Boolean      @default(false)
-  lastTested        DateTime?    // Last successful connection test
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
+  isEnabled  Boolean   @default(false)
+  lastTested DateTime? // Last successful connection test
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
   // Audit Trail
-  createdById       String?
-  createdBy         User?        @relation("SSOConfigCreatedBy", fields: [createdById], references: [id])
-  
+  createdById String?
+  createdBy   User?   @relation("SSOConfigCreatedBy", fields: [createdById], references: [id])
+
   // Relations
-  ssoSessions       SSOSession[]
-  
+  ssoSessions SSOSession[]
+
   @@index([organizationId])
   @@index([isEnabled])
 }
 
 model SSOSession {
-  id                String           @id @default(cuid())
-  sessionId         String           @unique
-  session           Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  ssoConfigId       String
-  ssoConfig         SSOConfiguration @relation(fields: [ssoConfigId], references: [id])
-  
+  id          String           @id @default(cuid())
+  sessionId   String           @unique
+  session     Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  ssoConfigId String
+  ssoConfig   SSOConfiguration @relation(fields: [ssoConfigId], references: [id])
+
   // Identity Provider Data
-  providerUserId    String           // User ID from identity provider
-  accessToken       String?          // Encrypted access token
-  refreshToken      String?          // Encrypted refresh token
-  tokenExpiresAt    DateTime?        // Access token expiration
-  
+  providerUserId String // User ID from identity provider
+  accessToken    String? // Encrypted access token
+  refreshToken   String? // Encrypted refresh token
+  tokenExpiresAt DateTime? // Access token expiration
+
   // Session Metadata
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([ssoConfigId])
   @@index([providerUserId])
 }
@@ -781,26 +794,26 @@ model AuditLog {
   user           User?         @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
 
   // Action details
-  action         String        // e.g., "user_login", "note_created", etc.
-  details        String        // Human-readable description
-  metadata       String?       // JSON metadata for additional context
+  action   String // e.g., "user_login", "note_created", etc.
+  details  String // Human-readable description
+  metadata String? // JSON metadata for additional context
 
   // Request context (for security and compliance)
-  ipAddress      String?       // Source IP address
-  userAgent      String?       // Browser/client user agent
+  ipAddress String? // Source IP address
+  userAgent String? // Browser/client user agent
 
   // Resource tracking (for resource-specific audits)
-  resourceType   String?       // Type of resource (user, note, org, etc.)
-  resourceId     String?       // ID of the affected resource
-  targetUserId   String?       // For user management actions
+  resourceType String? // Type of resource (user, note, org, etc.)
+  resourceId   String? // ID of the affected resource
+  targetUserId String? // For user management actions
 
   // Compliance and retention
-  severity       String        @default("info") // info, warning, error, critical
-  retainUntil    DateTime?     // When this log can be safely deleted (compliance-aware)
-  archived       Boolean       @default(false) // Whether moved to cold storage
+  severity    String    @default("info") // info, warning, error, critical
+  retainUntil DateTime? // When this log can be safely deleted (compliance-aware)
+  archived    Boolean   @default(false) // Whether moved to cold storage
 
   // Timestamps (immutable - do not update after creation)
-  createdAt      DateTime      @default(now())
+  createdAt DateTime @default(now())
 
   @@index([organizationId])
   @@index([userId])
@@ -814,43 +827,43 @@ model AuditLog {
 }
 
 model AuditLogRetentionPolicy {
-  id               String       @id @default(cuid())
-  organizationId   String       @unique
-  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Retention configuration
-  retentionDays    Int          @default(365) // Default: 1 year
-  hotStorageDays   Int          @default(180) // Keep 6 months in hot storage
-  archiveEnabled   Boolean      @default(true) // Enable automatic archiving
-  exportEnabled    Boolean      @default(true) // Allow audit log exports
+  retentionDays  Int     @default(365) // Default: 1 year
+  hotStorageDays Int     @default(180) // Keep 6 months in hot storage
+  archiveEnabled Boolean @default(true) // Enable automatic archiving
+  exportEnabled  Boolean @default(true) // Allow audit log exports
 
   // Compliance settings
-  complianceType   String?      // "SOC2", "HIPAA", "GDPR", "PCI_DSS", etc.
-  immutable        Boolean      @default(true) // Prevent modifications
+  complianceType String? // "SOC2", "HIPAA", "GDPR", "PCI_DSS", etc.
+  immutable      Boolean @default(true) // Prevent modifications
 
   // Timestamps
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([organizationId])
 }
 
 model WaitlistEntry {
-  id               String           @id @default(cuid())
-  userId           String           @unique
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  points           Int              @default(1)
-  referralCode     String           @unique
-  hasJoinedDiscord Boolean          @default(false)
-  hasEarlyAccess   Boolean          @default(false)
+  id               String          @id @default(cuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points           Int             @default(1)
+  referralCode     String          @unique
+  hasJoinedDiscord Boolean         @default(false)
+  hasEarlyAccess   Boolean         @default(false)
   grantedAccessAt  DateTime?
   grantedAccessBy  String?
-  grantedByUser    User?            @relation("AccessGranter", fields: [grantedAccessBy], references: [id], onDelete: SetNull)
+  grantedByUser    User?           @relation("AccessGranter", fields: [grantedAccessBy], references: [id], onDelete: SetNull)
   referredById     String?
-  referredBy       WaitlistEntry?   @relation("Referrals", fields: [referredById], references: [id])
-  referrals        WaitlistEntry[]  @relation("Referrals")
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  referredBy       WaitlistEntry?  @relation("Referrals", fields: [referredById], references: [id])
+  referrals        WaitlistEntry[] @relation("Referrals")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([userId])
   @@index([referralCode])
@@ -861,39 +874,39 @@ model WaitlistEntry {
 
 // MCP Client - registered OAuth client for MCP (RFC 7591)
 model MCPClient {
-  id            String   @id @default(cuid())
-  clientId      String   @unique // Generated unique client identifier
-  clientName    String   // Human-readable client name
-  redirectUris  String   // JSON array of registered redirect URIs
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  id           String @id @default(cuid())
+  clientId     String @unique // Generated unique client identifier
+  clientName   String // Human-readable client name
+  redirectUris String // JSON array of registered redirect URIs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clientId])
 }
 
 // MCP Authorization - represents an authorized MCP client
 model MCPAuthorization {
-  id             String            @id @default(cuid())
+  id             String @id @default(cuid())
   userId         String
   organizationId String
-  clientName     String            // e.g., "Claude Desktop", "Kiro IDE"
-  clientId       String            @unique // Generated client identifier
-  
+  clientName     String // e.g., "Claude Desktop", "Kiro IDE"
+  clientId       String @unique // Generated client identifier
+
   // Status
-  isActive       Boolean           @default(true)
-  lastUsedAt     DateTime?
-  
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+
   // Timestamps
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  accessTokens   MCPAccessToken[]
-  refreshTokens  MCPRefreshToken[]
-  
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  accessTokens  MCPAccessToken[]
+  refreshTokens MCPRefreshToken[]
+
   @@index([userId])
   @@index([organizationId])
   @@index([clientId])
@@ -902,23 +915,23 @@ model MCPAuthorization {
 
 // MCP Access Token - short-lived token for API access
 model MCPAccessToken {
-  id              String           @id @default(cuid())
+  id              String @id @default(cuid())
   authorizationId String
-  tokenHash       String           @unique // SHA-256 hash of the token
-  
+  tokenHash       String @unique // SHA-256 hash of the token
+
   // Expiration
-  expiresAt       DateTime
-  
+  expiresAt DateTime
+
   // Metadata
-  ipAddress       String?
-  userAgent       String?
-  
+  ipAddress String?
+  userAgent String?
+
   // Timestamps
-  createdAt       DateTime         @default(now())
-  
+  createdAt DateTime @default(now())
+
   // Relations
-  authorization   MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
-  
+  authorization MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
+
   @@index([authorizationId])
   @@index([tokenHash])
   @@index([expiresAt])
@@ -926,28 +939,28 @@ model MCPAccessToken {
 
 // MCP Refresh Token - long-lived token for obtaining new access tokens
 model MCPRefreshToken {
-  id              String           @id @default(cuid())
+  id              String @id @default(cuid())
   authorizationId String
-  tokenHash       String           @unique // SHA-256 hash of the token
-  
+  tokenHash       String @unique // SHA-256 hash of the token
+
   // Status
-  revoked         Boolean          @default(false)
-  revokedAt       DateTime?
-  
+  revoked   Boolean   @default(false)
+  revokedAt DateTime?
+
   // Expiration
-  expiresAt       DateTime
-  
+  expiresAt DateTime
+
   // Metadata
-  ipAddress       String?
-  userAgent       String?
-  
+  ipAddress String?
+  userAgent String?
+
   // Timestamps
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  authorization   MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
-  
+  authorization MCPAuthorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
+
   @@index([authorizationId])
   @@index([tokenHash])
   @@index([expiresAt])
@@ -957,11 +970,11 @@ model MCPRefreshToken {
 // Rate Limit Entry - tracks rate limit attempts for sliding window algorithm
 model RateLimitEntry {
   id        String   @id @default(cuid())
-  keyId     String   // Composite key: "type:value"
-  keyType   String   // 'user', 'ip', or 'token'
-  keyValue  String   // The actual value (userId, IP address, or token hash)
+  keyId     String // Composite key: "type:value"
+  keyType   String // 'user', 'ip', or 'token'
+  keyValue  String // The actual value (userId, IP address, or token hash)
   createdAt DateTime @default(now())
-  
+
   @@index([keyId])
   @@index([keyId, createdAt])
   @@index([createdAt]) // For cleanup queries

@@ -65,7 +65,10 @@ export function getDomainUrl(request: Request) {
 		request.headers.get('host') ??
 		new URL(request.url).host
 	const protocol =
-		(request.headers.get('X-Forwarded-Proto') ?? 'http')
+		(
+			request.headers.get('X-Forwarded-Proto') ??
+			new URL(request.url).protocol.slice(0, -1)
+		)
 			.split(',')[0]
 			?.trim() ?? 'http'
 	const hostValue = host.split(',')[0]?.trim() ?? host

@@ -41,18 +41,19 @@ Object.defineProperty(authSessionStorage, 'commitSession', {
 		...args: Parameters<typeof originalCommitSession>
 	) {
 		const [session, options] = args
-		if (options?.expires) {
-			session.set('expires', options.expires)
-		}
 		if (options?.maxAge) {
 			session.set('expires', new Date(Date.now() + options.maxAge * 1000))
 		}
-		const expires = session.has('expires')
-			? new Date(session.get('expires'))
-			: undefined
+
+		const finalExpires =
+			'expires' in (options ?? {})
+				? options?.expires
+				: session.has('expires')
+					? new Date(session.get('expires'))
+					: undefined
 		const setCookieHeader = await originalCommitSession(session, {
 			...options,
-			expires,
+			expires: finalExpires,
 		})
 		return setCookieHeader
 	},

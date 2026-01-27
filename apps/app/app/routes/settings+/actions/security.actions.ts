@@ -3,6 +3,10 @@ import {
 	verifyUserPassword,
 	getPasswordHash,
 	checkIsCommonPassword,
+	authSessionStorage,
+	sessionKey,
+	generateBackupCodes,
+	deleteBackupCodes,
 } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
@@ -38,6 +42,7 @@ type SecurityActionArgs = {
 export async function changePasswordAction({
 	userId,
 	formData,
+	request,
 }: SecurityActionArgs) {
 	const submission = await parseWithZod(formData, {
 		async: true,
@@ -90,6 +95,22 @@ export async function changePasswordAction({
 		},
 	})
 
+	// Invalidate all other sessions except the current one
+	if (request) {
+		const authSession = await authSessionStorage.getSession(
+			request.headers.get('cookie'),
+		)
+		const currentSessionId = authSession.get(sessionKey)
+		if (currentSessionId) {
+			await prisma.session.deleteMany({
+				where: {
+					userId,
+					id: { not: currentSessionId },
+				},
+			})
+		}
+	}
+
 	return Response.json({
 		status: 'success',
 		result: submission.reply(),
@@ -99,6 +120,7 @@ export async function changePasswordAction({
 export async function setPasswordAction({
 	userId,
 	formData,
+	request,
 }: SecurityActionArgs) {
 	const submission = await parseWithZod(formData, {
 		async: true,
@@ -140,6 +162,22 @@ export async function setPasswordAction({
 			},
 		},
 	})
+
+	// Invalidate all other sessions except the current one
+	if (request) {
+		const authSession = await authSessionStorage.getSession(
+			request.headers.get('cookie'),
+		)
+		const currentSessionId = authSession.get(sessionKey)
+		if (currentSessionId) {
+			await prisma.session.deleteMany({
+				where: {
+					userId,
+					id: { not: currentSessionId },
+				},
+			})
+		}
+	}
 
 	return Response.json({
 		status: 'success',
@@ -188,11 +226,56 @@ export async function enable2FAAction({
 }
 
 export async function disable2FAAction({ userId }: SecurityActionArgs) {
+	// Delete 2FA verification
 	await prisma.verification.delete({
 		where: {
 			target_type: { target: userId, type: twoFAVerificationType },
 		},
 	})
 
+	// Also delete any backup codes
+	await deleteBackupCodes(userId)
+
 	return Response.json({ status: 'success' })
+}
+
+/**
+ * Generate new backup codes for a user
+ * This will replace any existing backup codes
+ */
+export async function generateBackupCodesAction({
+	userId,
+}: SecurityActionArgs) {
+	// Verify user has 2FA enabled
+	const verification = await prisma.verification.findUnique({
+		where: {
+			target_type: { target: userId, type: twoFAVerificationType },
+		},
+	})
+
+	if (!verification) {
+		return Response.json(
+			{
+				status: 'error',
+				message: '2FA must be enabled to generate backup codes',
+			},
+			{ status: 400 },
+		)
+	}
+
+	const codes = await generateBackupCodes(userId)
+
+	return Response.json({
+		status: 'success',
+		codes,
+	})
+}
+
+/**
+ * Regenerate backup codes - same as generate but explicit intent
+ */
+export async function regenerateBackupCodesAction({
+	userId,
+}: SecurityActionArgs) {
+	return generateBackupCodesAction({ userId, formData: new FormData() })
 }

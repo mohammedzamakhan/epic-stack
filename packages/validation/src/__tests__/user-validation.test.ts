@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
 	UsernameSchema,
 	PasswordSchema,
+	PASSWORD_MIN_LENGTH,
 	EmailSchema,
 	NameSchema,
 	PasswordAndConfirmPasswordSchema,
@@ -46,8 +47,12 @@ describe('UsernameSchema', () => {
 })
 
 describe('PasswordSchema', () => {
-	it('should accept valid passwords', () => {
-		const validPasswords = ['password123', 'mySecureP@ss', 'a'.repeat(72)]
+	it('should accept valid passwords with complexity requirements', () => {
+		const validPasswords = [
+			'MySecureP@ss1', // 13 chars, has upper, lower, number, special
+			'Abcdefghijk1!', // 13 chars, meets all requirements
+			'A1b2c3d4e5f6!', // 13 chars, meets all requirements
+		]
 
 		validPasswords.forEach((password) => {
 			const result = PasswordSchema.safeParse(password)
@@ -55,17 +60,64 @@ describe('PasswordSchema', () => {
 		})
 	})
 
-	it('should reject invalid passwords', () => {
-		const invalidPasswords = [
-			'', // empty
-			'12345', // too short
-			'a'.repeat(73), // too long (over 72 bytes)
-		]
+	it('should reject passwords that are too short', () => {
+		const result = PasswordSchema.safeParse('Short1!')
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(result.error.issues[0]?.message).toContain(
+				`at least ${PASSWORD_MIN_LENGTH} characters`,
+			)
+		}
+	})
 
-		invalidPasswords.forEach((password) => {
-			const result = PasswordSchema.safeParse(password)
-			expect(result.success).toBe(false)
-		})
+	it('should reject passwords that are too long', () => {
+		const result = PasswordSchema.safeParse('A1!' + 'a'.repeat(70))
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(result.error.issues[0]?.message).toBe('Password is too long')
+		}
+	})
+
+	it('should reject passwords without lowercase letters', () => {
+		const result = PasswordSchema.safeParse('ABCDEFGHIJK1!')
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(
+				result.error.issues.some((i) => i.message.includes('lowercase')),
+			).toBe(true)
+		}
+	})
+
+	it('should reject passwords without uppercase letters', () => {
+		const result = PasswordSchema.safeParse('abcdefghijk1!')
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(
+				result.error.issues.some((i) => i.message.includes('uppercase')),
+			).toBe(true)
+		}
+	})
+
+	it('should reject passwords without numbers', () => {
+		const result = PasswordSchema.safeParse('Abcdefghijkl!')
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(
+				result.error.issues.some((i) => i.message.includes('number')),
+			).toBe(true)
+		}
+	})
+
+	it('should reject passwords without special characters', () => {
+		const result = PasswordSchema.safeParse('Abcdefghijk12')
+		expect(result.success).toBe(false)
+		if (!result.success) {
+			expect(
+				result.error.issues.some((i) =>
+					i.message.includes('special character'),
+				),
+			).toBe(true)
+		}
 	})
 })
 
@@ -137,19 +189,27 @@ describe('NameSchema', () => {
 
 describe('PasswordAndConfirmPasswordSchema', () => {
 	it('should accept matching passwords', () => {
-		const data = { password: 'password123', confirmPassword: 'password123' }
+		const data = {
+			password: 'MySecureP@ss1',
+			confirmPassword: 'MySecureP@ss1',
+		}
 		const result = PasswordAndConfirmPasswordSchema.safeParse(data)
 		expect(result.success).toBe(true)
 	})
 
 	it('should reject non-matching passwords', () => {
-		const data = { password: 'password123', confirmPassword: 'different123' }
+		const data = {
+			password: 'MySecureP@ss1',
+			confirmPassword: 'DifferentP@ss1',
+		}
 		const result = PasswordAndConfirmPasswordSchema.safeParse(data)
 		expect(result.success).toBe(false)
 		if (!result.success) {
-			expect(result.error.issues).toHaveLength(1)
-			expect(result.error.issues[0]?.path).toEqual(['confirmPassword'])
-			expect(result.error.issues[0]?.message).toBe('The passwords must match')
+			const mismatchIssue = result.error.issues.find(
+				(i) => i.message === 'The passwords must match',
+			)
+			expect(mismatchIssue).toBeDefined()
+			expect(mismatchIssue?.path).toEqual(['confirmPassword'])
 		}
 	})
 })

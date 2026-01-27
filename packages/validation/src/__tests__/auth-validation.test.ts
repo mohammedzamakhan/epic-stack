@@ -12,7 +12,7 @@ describe('LoginFormSchema', () => {
 	it('should accept valid login data', () => {
 		const validData = {
 			username: 'testuser',
-			password: 'password123',
+			password: 'MySecureP@ss1',
 			redirectTo: '/dashboard',
 			remember: true,
 		}
@@ -21,7 +21,7 @@ describe('LoginFormSchema', () => {
 		expect(result.success).toBe(true)
 		if (result.success) {
 			expect(result.data.username).toBe('testuser')
-			expect(result.data.password).toBe('password123')
+			expect(result.data.password).toBe('MySecureP@ss1')
 			expect(result.data.redirectTo).toBe('/dashboard')
 			expect(result.data.remember).toBe(true)
 		}
@@ -30,7 +30,7 @@ describe('LoginFormSchema', () => {
 	it('should accept minimal login data', () => {
 		const minimalData = {
 			username: 'testuser',
-			password: 'password123',
+			password: 'MySecureP@ss1',
 		}
 
 		const result = LoginFormSchema.safeParse(minimalData)

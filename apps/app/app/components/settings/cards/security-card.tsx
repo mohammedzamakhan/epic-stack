@@ -16,6 +16,7 @@ import {
 } from '@repo/ui/dialog'
 import { useState } from 'react'
 
+import { BackupCodesDisplay } from '#app/components/settings/backup-codes-display.tsx'
 import { PasskeyManager } from '#app/components/settings/passkey-manager.tsx'
 import { PasswordForm } from '#app/components/settings/password-form.tsx'
 import { TwoFactorForm } from '#app/components/settings/two-factor-form.tsx'
@@ -30,6 +31,7 @@ export const deletePasskeyActionIntent = 'delete-passkey'
 interface SecurityCardProps {
 	hasPassword: boolean
 	isTwoFactorEnabled: boolean
+	backupCodesRemaining: number
 	passkeys: Array<{
 		id: string
 		deviceType: string
@@ -53,6 +55,7 @@ interface SecurityCardProps {
 export function SecurityCard({
 	hasPassword,
 	isTwoFactorEnabled,
+	backupCodesRemaining,
 	passkeys,
 	user,
 	qrCode,
@@ -193,6 +196,16 @@ export function SecurityCard({
 							</DialogContent>
 						</Dialog>
 					</div>
+
+					{/* Backup Codes Section - only show when 2FA is enabled */}
+					{isTwoFactorEnabled && (
+						<div className="border-muted rounded-lg border p-4">
+							<BackupCodesDisplay
+								backupCodesRemaining={backupCodesRemaining}
+								isTwoFactorEnabled={isTwoFactorEnabled}
+							/>
+						</div>
+					)}
 
 					{/* Passkeys Section */}
 					<div className="flex items-center justify-between">

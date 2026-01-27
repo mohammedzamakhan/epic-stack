@@ -103,26 +103,7 @@ export async function action({ request }: Route.ActionArgs) {
 		}
 	}
 	const submission = await parseWithZod(formData, {
-		schema: ForgotPasswordSchema.superRefine(async (data, ctx) => {
-			const user = await prisma.user.findFirst({
-				where: {
-					OR: [
-						{ email: data.usernameOrEmail },
-						{ username: data.usernameOrEmail },
-					],
-				},
-				select: { id: true },
-			})
-			if (!user) {
-				ctx.addIssue({
-					path: ['usernameOrEmail'],
-					code: z.ZodIssueCode.custom,
-					message: t`No user exists with this username or email`,
-				})
-				return
-			}
-		}),
-		async: true,
+		schema: ForgotPasswordSchema,
 	})
 	if (submission.status !== 'success') {
 		return data(
@@ -132,34 +113,33 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 	const { usernameOrEmail } = submission.value
 
-	const user = await prisma.user.findFirstOrThrow({
+	const user = await prisma.user.findFirst({
 		where: { OR: [{ email: usernameOrEmail }, { username: usernameOrEmail }] },
 		select: { id: true, email: true, username: true },
 	})
 
-	const { verifyUrl, redirectTo, otp } = await prepareVerification({
-		period: 10 * 60,
-		request,
-		type: 'reset-password',
-		target: user.id,
-	})
+	if (user) {
+		const { verifyUrl, redirectTo, otp } = await prepareVerification({
+			period: 10 * 60,
+			request,
+			type: 'reset-password',
+			target: user.id,
+		})
 
-	const response = await sendEmail({
-		to: user.email,
-		subject: brand.email.passwordReset,
-		react: (
-			<ForgotPasswordEmail onboardingUrl={verifyUrl.toString()} otp={otp} />
-		),
-	})
+		const response = await sendEmail({
+			to: user.email,
+			subject: brand.email.passwordReset,
+			react: (
+				<ForgotPasswordEmail onboardingUrl={verifyUrl.toString()} otp={otp} />
+			),
+		})
 
-	if (response.status === 'success') {
-		return redirect(redirectTo.toString())
-	} else {
-		return data(
-			{ result: submission.reply({ formErrors: [response.error.message] }) },
-			{ status: 500 },
-		)
+		if (response.status === 'success') {
+			return redirect(redirectTo.toString())
+		}
 	}
+
+	return redirect('/forgot-password/sent')
 }
 
 export const meta: Route.MetaFunction = () => {

@@ -1,6 +1,7 @@
 export * from './src/auth.server.js'
 export * from './src/verification.server.js'
 export * from './src/totp.server.js'
+export * from './src/backup-codes.server.js'
 export * from './src/provider.js'
 export * from './src/constants.js'
 export * from './src/connections.server.js'

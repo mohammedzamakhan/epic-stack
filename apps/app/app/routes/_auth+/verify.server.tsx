@@ -6,6 +6,7 @@ import {
 	verifySessionStorage,
 	verifyTOTP,
 	requireUserId,
+	validateAndConsumeBackupCode,
 } from '@repo/auth'
 import { getDomainUrl } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
@@ -197,9 +198,15 @@ export async function isCodeValid({
 		otp: code,
 		...verification,
 	})
-	if (!result) return false
+	if (result) return true
 
-	return true
+	// For 2FA verification, also try backup codes as fallback
+	if (type === twoFAVerificationType) {
+		const backupCodeValid = await validateAndConsumeBackupCode(target, code)
+		if (backupCodeValid) return true
+	}
+
+	return false
 }
 
 export async function validateRequest(

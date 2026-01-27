@@ -131,7 +131,7 @@ async function seed() {
 				email: 'kody@kcd.dev',
 				username: 'kody',
 				name: 'Kody',
-				password: { create: createPassword('kodylovesyou') },
+				password: { create: createPassword('KodyLovesYou!2026') },
 				connections: {
 					create: {
 						providerName: 'github',

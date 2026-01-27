@@ -42,36 +42,42 @@ export async function action({ request }: Route.ActionArgs) {
 		}
 		const { authResponse, remember, redirectTo } = result.data
 
-		const passkey = await prisma.passkey.findUnique({
-			where: { id: authResponse.id },
-			include: { user: true },
-		})
-		if (!passkey) {
-			throw new Error('Passkey not found')
-		}
-
 		const config = getWebAuthnConfig(request)
 
-		const verification = await verifyAuthenticationResponse({
-			response: authResponse,
-			expectedChallenge: cookie.challenge,
-			expectedOrigin: config.origin,
-			expectedRPID: config.rpID,
-			credential: {
-				id: authResponse.id,
-				publicKey: passkey.publicKey,
-				counter: Number(passkey.counter),
-			},
-		})
+		// Wrap read-verify-update in a transaction to prevent race conditions
+		// that could allow replay attacks with the same counter value
+		const { passkey } = await prisma.$transaction(async (tx) => {
+			const passkey = await tx.passkey.findUnique({
+				where: { id: authResponse.id },
+				include: { user: true },
+			})
+			if (!passkey) {
+				throw new Error('Passkey not found')
+			}
 
-		if (!verification.verified) {
-			throw new Error('Authentication verification failed')
-		}
+			const verification = await verifyAuthenticationResponse({
+				response: authResponse,
+				expectedChallenge: cookie.challenge,
+				expectedOrigin: config.origin,
+				expectedRPID: config.rpID,
+				credential: {
+					id: authResponse.id,
+					publicKey: passkey.publicKey,
+					counter: Number(passkey.counter),
+				},
+			})
 
-		// Update the authenticator's counter in the DB to the newest count
-		await prisma.passkey.update({
-			where: { id: passkey.id },
-			data: { counter: BigInt(verification.authenticationInfo.newCounter) },
+			if (!verification.verified) {
+				throw new Error('Authentication verification failed')
+			}
+
+			// Update the authenticator's counter in the DB to the newest count
+			await tx.passkey.update({
+				where: { id: passkey.id },
+				data: { counter: BigInt(verification.authenticationInfo.newCounter) },
+			})
+
+			return { passkey }
 		})
 
 		// Check if user is banned before creating session

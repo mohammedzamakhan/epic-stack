@@ -2,7 +2,12 @@ import { generateTOTP, getTOTPAuthUri } from '@epic-web/totp'
 import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { authSessionStorage, requireUserId, sessionKey } from '@repo/auth'
+import {
+	authSessionStorage,
+	requireUserId,
+	sessionKey,
+	getUnusedBackupCodeCount,
+} from '@repo/auth'
 import { cache, cachified } from '@repo/cache'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
@@ -32,6 +37,8 @@ import {
 	changePasswordAction,
 	disable2FAAction,
 	enable2FAAction,
+	generateBackupCodesAction,
+	regenerateBackupCodesAction,
 	setPasswordAction,
 } from '../settings+/actions/security.actions'
 
@@ -102,6 +109,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			},
 		}),
 		checkSSOEnforcementByUserId(userId),
+		getUnusedBackupCodeCount(userId),
 	])
 
 	// Extract results with error handling
@@ -119,6 +127,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const rawSessions = results[5].status === 'fulfilled' ? results[5].value : []
 	const ssoEnforcement =
 		results[6].status === 'fulfilled' ? results[6].value : { enforced: false }
+	const backupCodesRemaining =
+		results[7].status === 'fulfilled' ? results[7].value : 0
 
 	// Get current session ID
 	const authSession = await authSessionStorage.getSession(
@@ -172,6 +182,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		sessions,
 		currentSessionId,
 		ssoEnforcement,
+		backupCodesRemaining,
 	}
 }
 
@@ -191,6 +202,8 @@ export const changePasswordActionIntent = 'change-password'
 export const setPasswordActionIntent = 'set-password'
 export const enable2FAActionIntent = 'enable-2fa'
 export const disable2FAActionIntent = 'disable-2fa'
+export const generateBackupCodesActionIntent = 'generate-backup-codes'
+export const regenerateBackupCodesActionIntent = 'regenerate-backup-codes'
 export const twoFAVerificationType = '2fa'
 export const twoFAVerifyVerificationType = '2fa-verify'
 export const newEmailAddressSessionKey = 'new-email-address'
@@ -224,6 +237,12 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 		case disable2FAActionIntent: {
 			return disable2FAAction({ request, userId, formData })
+		}
+		case generateBackupCodesActionIntent: {
+			return generateBackupCodesAction({ request, userId, formData })
+		}
+		case regenerateBackupCodesActionIntent: {
+			return regenerateBackupCodesAction({ request, userId, formData })
 		}
 		case registerPasskeyActionIntent: {
 			return registerPasskeyAction({ request, userId, formData })
@@ -306,6 +325,7 @@ export default function SecuritySettings() {
 					<SecurityCard
 						hasPassword={data.hasPassword}
 						isTwoFactorEnabled={data.isTwoFactorEnabled}
+						backupCodesRemaining={data.backupCodesRemaining}
 						passkeys={data.passkeys}
 						user={data.user}
 						qrCode={data.qrCode}
