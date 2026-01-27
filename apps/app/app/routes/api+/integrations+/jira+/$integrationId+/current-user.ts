@@ -1,7 +1,6 @@
-import { prisma } from '@repo/database'
+import { requireUserId } from '@repo/auth'
 import { handleJiraCurrentUser } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
 import { getUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 
 /**

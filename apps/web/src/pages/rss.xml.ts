@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss'
 import { brand } from '@repo/config/brand'
-import type { APIContext } from 'astro'
+import { type APIContext } from 'astro'
 import { cmsClient } from '../lib/cms'
 
 export async function GET(context: APIContext) {

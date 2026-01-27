@@ -290,10 +290,12 @@ test.describe('Organization Management', () => {
 			.filter({
 				has: page.getByRole('button', { name: /remove/i }),
 			})
+			/* eslint-disable playwright/no-raw-locators -- hidden input value filter needed to target specific member form */
 			.filter({
 				has: page.locator(`input[value="${member.id}"]`),
 			})
 		await removeForm.locator('button[type="submit"]').click()
+		/* eslint-enable playwright/no-raw-locators */
 
 		// Wait for the removal to complete (no confirmation dialog needed)
 		await page.waitForLoadState('networkidle')

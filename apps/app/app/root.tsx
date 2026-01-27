@@ -1,6 +1,7 @@
 import { NovuProvider } from '@novu/react/hooks'
 import { storeUtmParams } from '@repo/analytics'
-import { getImpersonationInfo } from '@repo/auth'
+import { getImpersonationInfo, getUserId, logout } from '@repo/auth'
+import { cache, cachified } from '@repo/cache'
 import {
 	combineHeaders,
 	getDomainUrl,
@@ -23,6 +24,7 @@ import {
 	structuredDataScriptTag,
 } from '@repo/seo'
 import { DirectionProvider } from '@repo/ui'
+import { ClientHintCheck, getHints } from '@repo/ui/client-hints'
 import { EpicToaster } from '@repo/ui/sonner'
 import { TooltipProvider } from '@repo/ui/tooltip'
 import { OpenImgContextProvider } from 'openimg/react'
@@ -49,9 +51,6 @@ import iconsHref from './components/ui/icons/sprite.svg?url'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-import { getUserId, logout } from '@repo/auth'
-import { cache, cachified } from '@repo/cache'
-import { ClientHintCheck, getHints } from '@repo/ui/client-hints'
 import { getLaunchStatus } from './utils/env.server.ts'
 import { seoConfig } from './utils/seo.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'

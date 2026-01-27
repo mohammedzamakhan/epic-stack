@@ -13,6 +13,6 @@ export default [
 		},
 	},
 	{
-		ignores: ['.react-router/*'],
+		ignores: ['.react-router/*', 'env.d.ts'],
 	},
 ]

@@ -1,4 +1,6 @@
 import { Trans } from '@lingui/macro'
+import { getUserImgSrc } from '@repo/common'
+import { cn } from '@repo/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import {
 	Card,
@@ -8,8 +10,6 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
-import { getUserImgSrc } from '@repo/common'
-import { cn } from '@repo/ui'
 
 interface LeadershipUser {
 	id: string

@@ -1,14 +1,14 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
-import { useActionData, useLoaderData, useNavigation } from 'react-router'
-import { z } from 'zod'
+import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
+import { useActionData, useLoaderData, useNavigation } from 'react-router'
+import { z } from 'zod'
 import { SSOConfigurationForm } from '#app/components/sso-configuration-form.tsx'
 import { SSOConfigurationOverview } from '#app/components/sso-configuration-overview.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { type Route } from './+types/$organizationId.sso.ts'
 
@@ -388,6 +388,7 @@ export default function AdminOrganizationSSOPage() {
 	const navigation = useNavigation()
 
 	const isSubmitting = navigation.state === 'submitting'
+	const organizationName = (organization as any).name
 
 	return (
 		<div className="space-y-6">
@@ -398,9 +399,7 @@ export default function AdminOrganizationSSOPage() {
 						<Trans>SSO Configuration</Trans>
 					</h1>
 					<p className="text-muted-foreground">
-						<Trans>
-							Configure Single Sign-On for {(organization as any).name}
-						</Trans>
+						<Trans>Configure Single Sign-On for {organizationName}</Trans>
 					</p>
 				</div>
 			</div>

@@ -16,7 +16,9 @@ interface AdvancedSettingsCardProps {
 	}
 }
 
-export function AdvancedSettingsCard({ user }: AdvancedSettingsCardProps) {
+export function AdvancedSettingsCard({
+	user: _user,
+}: AdvancedSettingsCardProps) {
 	return (
 		<Card className="w-full">
 			<CardHeader>

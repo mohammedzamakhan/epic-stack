@@ -1,10 +1,10 @@
 import { Trans } from '@lingui/react/macro'
 
-import { UserAvatar } from '../user-avatar'
 import { Badge } from '@repo/ui/badge'
 import { cn } from '@repo/ui/cn'
 import { Icon } from '@repo/ui/icon'
 import { format, isToday, isYesterday } from 'date-fns'
+import { UserAvatar } from '../user-avatar'
 
 export type ActivityLog = {
 	id: string
@@ -45,7 +45,7 @@ function parseMetadata(metadata: string | null): Record<string, any> {
 	if (!metadata) return {}
 	try {
 		return JSON.parse(metadata) as Record<string, any>
-	} catch (error) {
+	} catch {
 		return {}
 	}
 }

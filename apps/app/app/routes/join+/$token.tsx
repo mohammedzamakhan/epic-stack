@@ -1,9 +1,8 @@
-import { verifySessionStorage } from '@repo/auth'
+import { verifySessionStorage, requireUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import { onboardingInviteTokenSessionKey } from '#app/routes/_auth+/onboarding.tsx'
-import { requireUserId } from '@repo/auth'
 import {
 	validateInviteLink,
 	createInvitationFromLink,

@@ -1,10 +1,10 @@
+import { requireUserId } from '@repo/auth'
+import { getDomainUrl, getErrorMessage } from '@repo/common'
 import { prisma } from '@repo/database'
 import {
 	generateRegistrationOptions,
 	verifyRegistrationResponse,
 } from '@simplewebauthn/server'
-import { requireUserId } from '@repo/auth'
-import { getDomainUrl, getErrorMessage } from '@repo/common'
 import { type Route } from './+types/registration.ts'
 import {
 	PasskeyCookieSchema,

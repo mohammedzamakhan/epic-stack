@@ -1,5 +1,5 @@
 import { auditService, AuditAction } from '@repo/audit'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { requireUserWithRole } from '@repo/auth'
 import { type Route } from './+types/audit-logs.export.ts'
 
 /**

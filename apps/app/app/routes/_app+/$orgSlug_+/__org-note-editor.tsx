@@ -373,11 +373,14 @@ export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary
 			statusHandlers={{
-				404: ({ params }) => (
-					<p>
-						<Trans>No note with the id "{params.noteId}" exists</Trans>
-					</p>
-				),
+				404: ({ params }) => {
+					const noteId = params.noteId
+					return (
+						<p>
+							<Trans>No note with the id "{noteId}" exists</Trans>
+						</p>
+					)
+				},
 			}}
 		/>
 	)

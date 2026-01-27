@@ -4,6 +4,7 @@ import { Command as CommandPrimitive } from 'cmdk'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
+import { Icon } from '../icon'
 import {
 	Dialog,
 	DialogContent,
@@ -11,7 +12,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from './dialog'
-import { Icon } from '../icon'
 import { InputGroup, InputGroupAddon } from './input-group'
 
 function Command({
@@ -172,7 +172,7 @@ function CommandShortcut({
 		<span
 			data-slot="command-shortcut"
 			className={cn(
-				'text-muted-foreground group-data-selected/command-item:text-foreground ltr:ml-auto rtl:mr-auto text-xs tracking-widest',
+				'text-muted-foreground group-data-selected/command-item:text-foreground text-xs tracking-widest ltr:ml-auto rtl:mr-auto',
 				className,
 			)}
 			{...props}

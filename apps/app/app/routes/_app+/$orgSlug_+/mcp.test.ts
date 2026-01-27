@@ -226,11 +226,12 @@ describe('MCP Settings Page', () => {
 			const org = await createTestOrganization(user.id)
 
 			// Create authorization
-			const { accessToken } = await createAuthorizationWithTokens({
-				userId: user.id,
-				organizationId: org.id,
-				clientName: 'Test Client',
-			})
+			const { accessToken: ignoredAccessToken } =
+				await createAuthorizationWithTokens({
+					userId: user.id,
+					organizationId: org.id,
+					clientName: 'Test Client',
+				})
 
 			// Get initial authorization
 			let authorization = await prisma.mCPAuthorization.findFirst({

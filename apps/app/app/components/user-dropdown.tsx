@@ -1,4 +1,5 @@
 import { Trans } from '@lingui/macro'
+import { getUserImgSrc } from '@repo/common'
 import { Button } from '@repo/ui/button'
 import {
 	DropdownMenu,
@@ -11,7 +12,6 @@ import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
 import { Link, Form } from 'react-router'
-import { getUserImgSrc } from '@repo/common'
 import { useCurrentOrganization } from '#app/utils/organization/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 

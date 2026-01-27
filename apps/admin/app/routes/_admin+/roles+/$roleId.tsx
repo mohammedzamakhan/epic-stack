@@ -3,9 +3,7 @@ import { invariant } from '@epic-web/invariant'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { useState } from 'react'
-import { Form, Link, redirect, useLoaderData } from 'react-router'
-import { z } from 'zod'
+import { requireUserWithRole } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
@@ -43,7 +41,9 @@ import {
 } from '@repo/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 import { Textarea } from '@repo/ui/textarea'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { useState } from 'react'
+import { Form, Link, redirect, useLoaderData } from 'react-router'
+import { z } from 'zod'
 import { type Route } from './+types/$roleId.ts'
 
 export const handle: SEOHandle = {
@@ -386,7 +386,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function AdminRoleDetailPage() {
-	const { role, roleType, allPermissions } = useLoaderData<typeof loader>()
+	const { role, allPermissions } = useLoaderData<typeof loader>()
 	const [selectedTab, setSelectedTab] = useState('feature')
 	const { _ } = useLingui()
 
@@ -403,6 +403,12 @@ export default function AdminRoleDetailPage() {
 	)
 
 	const rolePermissionIds = new Set(role.permissions?.map((p) => p.id) ?? [])
+	const createdDate = new Date(role.createdAt).toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	})
+	const userCount = role._count.users
 
 	return (
 		<div className="space-y-6">
@@ -521,17 +527,10 @@ export default function AdminRoleDetailPage() {
 					<div className="mt-6 border-t pt-4">
 						<div className="text-muted-foreground flex items-center justify-between text-sm">
 							<span>
-								<Trans>
-									Created{' '}
-									{new Date(role.createdAt).toLocaleDateString('en-US', {
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric',
-									})}
-								</Trans>
+								<Trans>Created {createdDate}</Trans>
 							</span>
 							<span>
-								<Trans>{role._count.users} users</Trans>
+								<Trans>{userCount} users</Trans>
 							</span>
 						</div>
 					</div>

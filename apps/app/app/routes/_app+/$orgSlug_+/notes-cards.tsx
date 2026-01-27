@@ -202,6 +202,41 @@ export const NoteCard = ({
 		}
 	})()
 
+	// Helper function to render priority icon
+	const getPriorityIcon = (priority: string | null) => {
+		switch (priority) {
+			case 'urgent':
+				return (
+					<Icon
+						name="octagon-alert"
+						className="text-muted-foreground h-4 w-4 stroke-3"
+					/>
+				)
+			case 'high':
+				return <PrioritySignal priority="high" className="h-4 w-4" />
+			case 'medium':
+				return <PrioritySignal priority="medium" className="h-4 w-4" />
+			case 'low':
+				return <PrioritySignal priority="low" className="h-4 w-4" />
+			default:
+				return (
+					<Icon
+						name="minus"
+						className="text-muted-foreground h-4 w-4 stroke-3"
+					/>
+				)
+		}
+	}
+
+	// Extract status info for display
+	const statusInfo = note.status
+		? typeof note.status === 'string'
+			? { name: note.status, color: '#6b7280' }
+			: (note.status as { name: string; color?: string })
+		: null
+	const statusColor = statusInfo?.color || '#6b7280'
+	const statusName = statusInfo?.name ? statusInfo.name.replace('-', ' ') : ''
+
 	return (
 		<div className="group h-full">
 			<Card
@@ -317,27 +352,12 @@ export const NoteCard = ({
 							{!isKanbanView && note.status && (
 								<div className="pointer-events-none absolute top-[-1px] left-[-1px] z-10">
 									<div className="bg-background flex items-center gap-1.5 rounded-tl-xl rounded-br border-r border-b border-black/10 px-2 py-1">
-										{(() => {
-											const status =
-												typeof note.status === 'string'
-													? { name: note.status, color: '#6b7280' }
-													: (note.status as { name: string; color?: string })
-											const color = status.color || '#6b7280'
-											return (
-												<div
-													className="h-1.5 w-1.5 rounded-full"
-													style={{ backgroundColor: color }}
-												/>
-											)
-										})()}
+										<div
+											className="h-1.5 w-1.5 rounded-full"
+											style={{ backgroundColor: statusColor }}
+										/>
 										<span className="text-background-foreground text-xs font-medium">
-											{(() => {
-												const statusName =
-													typeof note.status === 'string'
-														? note.status
-														: (note.status as { name: string })?.name
-												return statusName ? statusName.replace('-', ' ') : ''
-											})()}
+											{statusName}
 										</span>
 									</div>
 								</div>
@@ -401,45 +421,7 @@ export const NoteCard = ({
 													className="h-6 w-6 p-0"
 													onClick={(e) => e.stopPropagation()}
 												>
-													{(() => {
-														switch (note.priority) {
-															case 'urgent':
-																return (
-																	<Icon
-																		name="octagon-alert"
-																		className="text-muted-foreground h-4 w-4 stroke-3"
-																	/>
-																)
-															case 'high':
-																return (
-																	<PrioritySignal
-																		priority="high"
-																		className="h-4 w-4"
-																	/>
-																)
-															case 'medium':
-																return (
-																	<PrioritySignal
-																		priority="medium"
-																		className="h-4 w-4"
-																	/>
-																)
-															case 'low':
-																return (
-																	<PrioritySignal
-																		priority="low"
-																		className="h-4 w-4"
-																	/>
-																)
-															default:
-																return (
-																	<Icon
-																		name="minus"
-																		className="text-muted-foreground h-4 w-4 stroke-3"
-																	/>
-																)
-														}
-													})()}
+													{getPriorityIcon(note.priority)}
 												</Button>
 											}
 										></TooltipTrigger>

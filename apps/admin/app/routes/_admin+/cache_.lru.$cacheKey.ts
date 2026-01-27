@@ -1,11 +1,11 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { requireUserWithRole } from '@repo/auth'
+import { lruCache } from '@repo/cache'
 import {
 	ensureInstance,
 	getAllInstances,
 	getInstanceInfo,
 } from '@repo/common/litefs'
-import { lruCache } from '@repo/cache'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/cache_.lru.$cacheKey.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {

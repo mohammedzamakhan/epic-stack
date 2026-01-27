@@ -53,6 +53,11 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 				: 0
 			: Math.round(((lastHalfTotal - firstHalfTotal) / firstHalfTotal) * 100)
 
+	const absTrendPercentage = Math.abs(trendPercentage)
+	const daysShownValue = daysShown
+	const totalNotesValue = totalNotes
+	const avgNotesPerDayValue = avgNotesPerDay
+
 	return (
 		<Card>
 			<CardHeader>
@@ -61,7 +66,8 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 				</CardTitle>
 				<CardDescription>
 					<Trans>
-						Notes created by your organization over the last {daysShown} days
+						Notes created by your organization over the last {daysShownValue}{' '}
+						days
 					</Trans>
 				</CardDescription>
 			</CardHeader>
@@ -112,16 +118,15 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 								</>
 							) : (
 								<>
-									<Trans>
-										Down by {Math.abs(trendPercentage)}% this period
-									</Trans>{' '}
+									<Trans>Down by {absTrendPercentage} % this period</Trans>{' '}
 									<Icon name="trending-up" className="h-4 w-4 rotate-180" />
 								</>
 							)}
 						</div>
 						<div className="text-muted-foreground flex items-center gap-2 leading-none">
 							<Trans>
-								{totalNotes} total notes • {avgNotesPerDay} avg per day
+								{totalNotesValue} total notes • {avgNotesPerDayValue} avg per
+								day
 							</Trans>
 						</div>
 					</div>

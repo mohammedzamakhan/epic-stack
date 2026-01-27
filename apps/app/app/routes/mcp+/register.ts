@@ -1,11 +1,13 @@
+import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
+import { generateToken } from '#app/utils/mcp/oauth.server.ts'
 
 /**
  * OAuth Dynamic Client Registration Endpoint (RFC 7591)
  *
  * This endpoint handles dynamic client registration for MCP clients.
- * Since we don't require client authentication (public clients), we simply
- * return a success response with the client metadata.
+ * Each client receives a unique client_id and their redirect URIs are
+ * stored for validation during the authorization flow.
  *
  * NOTE: This endpoint is PUBLIC (no authentication required) as it's part of OAuth discovery.
  */
@@ -16,13 +18,32 @@ export async function action({ request }: ActionFunctionArgs) {
 		const url = new URL(request.url)
 		const baseUrl = `${url.protocol}//${url.host}`
 
-		// For MCP OAuth, we use public clients (no client secret required)
+		// Validate redirect_uris
+		const redirectUris = Array.isArray(body.redirect_uris)
+			? body.redirect_uris.filter(
+					(uri: unknown) => typeof uri === 'string' && uri.length > 0,
+				)
+			: []
+
+		// Generate unique client ID
+		const clientId = generateToken()
+		const clientName = body.client_name || 'MCP Client'
+
+		// Store client registration in database
+		await prisma.mCPClient.create({
+			data: {
+				clientId,
+				clientName,
+				redirectUris: JSON.stringify(redirectUris),
+			},
+		})
+
 		// Return the registration response with the OAuth endpoints
 		return Response.json(
 			{
-				client_id: 'mcp-public-client',
-				client_name: body.client_name || 'MCP Client',
-				redirect_uris: body.redirect_uris || [],
+				client_id: clientId,
+				client_name: clientName,
+				redirect_uris: redirectUris,
 				grant_types: ['authorization_code', 'refresh_token'],
 				response_types: ['code'],
 				token_endpoint_auth_method: 'none',

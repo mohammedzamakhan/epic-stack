@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@repo/ui'
 import { type Variants, motion } from 'motion/react'
 import { type HTMLAttributes, forwardRef } from 'react'
-import { cn } from '@repo/ui'
 import {
 	type IconAnimationHandle,
 	useIconAnimation,

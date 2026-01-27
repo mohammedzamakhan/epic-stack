@@ -1,10 +1,10 @@
+import { cn } from '@repo/ui'
 import React, {
 	forwardRef,
 	useEffect,
 	useImperativeHandle,
 	useState,
 } from 'react'
-import { cn } from '@repo/ui'
 
 export interface AutocompleteListRef {
 	onKeyDown: (args: { event: React.KeyboardEvent }) => boolean

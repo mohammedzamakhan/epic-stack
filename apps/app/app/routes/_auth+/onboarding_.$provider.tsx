@@ -6,7 +6,13 @@ import {
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
-import { authSessionStorage, verifySessionStorage } from '@repo/auth'
+import {
+	authSessionStorage,
+	verifySessionStorage,
+	sessionKey,
+	requireAnonymous,
+	ProviderNameSchema,
+} from '@repo/auth'
 import { useIsPending } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { getPageTitle } from '@repo/config/brand'
@@ -36,7 +42,6 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import { sessionKey, requireAnonymous, ProviderNameSchema } from '@repo/auth'
 import { signupWithConnection } from '#app/utils/auth.server.ts'
 import { type Route } from './+types/onboarding_.$provider.ts'
 import { onboardingEmailSessionKey } from './onboarding'
@@ -173,7 +178,7 @@ export const meta: Route.MetaFunction = () => {
 }
 
 export default function OnboardingProviderRoute({
-	loaderData,
+	loaderData: { email, submission },
 	actionData,
 }: Route.ComponentProps) {
 	const isPending = useIsPending()
@@ -194,12 +199,22 @@ export default function OnboardingProviderRoute({
 	const [form, fields] = useForm({
 		id: 'onboarding-provider-form',
 		constraint: getZodConstraint(SignupFormSchema),
-		lastResult: actionData?.result ?? loaderData.submission,
+		lastResult: actionData?.result ?? submission,
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema: SignupFormSchema })
 		},
 		shouldRevalidate: 'onBlur',
 	})
+
+	const { type: _agreeType, ...agreeCheckboxProps } = getInputProps(
+		fields.agreeToTermsOfServiceAndPrivacyPolicy,
+		{ type: 'checkbox' },
+	)
+
+	const { type: _rememberType, ...rememberCheckboxProps } = getInputProps(
+		fields.remember,
+		{ type: 'checkbox' },
+	)
 
 	return (
 		<div
@@ -220,7 +235,7 @@ export default function OnboardingProviderRoute({
 							</CardTitle>
 							<CardDescription>
 								<Trans>
-									Hi {loaderData.email}, just a few more details to get started.
+									Hi {email}, just a few more details to get started.
 								</Trans>
 							</CardDescription>
 						</CardHeader>
@@ -293,13 +308,7 @@ export default function OnboardingProviderRoute({
 									<FieldGroup>
 										<Field orientation="horizontal">
 											<Checkbox
-												{...(() => {
-													const { type: _type, ...props } = getInputProps(
-														fields.agreeToTermsOfServiceAndPrivacyPolicy,
-														{ type: 'checkbox' },
-													)
-													return props
-												})()}
+												{...agreeCheckboxProps}
 												id={fields.agreeToTermsOfServiceAndPrivacyPolicy.id}
 											/>
 											<FieldLabel
@@ -321,13 +330,7 @@ export default function OnboardingProviderRoute({
 
 										<Field orientation="horizontal">
 											<Checkbox
-												{...(() => {
-													const { type: _type, ...props } = getInputProps(
-														fields.remember,
-														{ type: 'checkbox' },
-													)
-													return props
-												})()}
+												{...rememberCheckboxProps}
 												id={fields.remember.id}
 											/>
 											<FieldLabel

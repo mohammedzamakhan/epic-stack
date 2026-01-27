@@ -7,7 +7,6 @@ import {
 	exchangeAuthorizationCode,
 	refreshAccessToken,
 	ACCESS_TOKEN_EXPIRATION,
-	REFRESH_TOKEN_EXPIRATION,
 } from '#app/utils/mcp/oauth.server.ts'
 
 // Helper to create test user with session

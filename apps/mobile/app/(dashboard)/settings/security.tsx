@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Trans } from '@lingui/react/macro'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import React from 'react'
 import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import { Screen, Card, Divider } from '../../../components/ui'

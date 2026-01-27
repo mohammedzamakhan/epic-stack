@@ -1,4 +1,4 @@
-import { authSessionStorage } from '@repo/auth'
+import { authSessionStorage, sessionKey } from '@repo/auth'
 import {
 	type ToastInput,
 	toastSessionStorage,
@@ -7,7 +7,6 @@ import {
 import { prisma } from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import { expect } from 'vitest'
-import { sessionKey } from '@repo/auth'
 import { convertSetCookieToCookie } from '#tests/utils.ts'
 
 import '@testing-library/jest-dom/vitest'

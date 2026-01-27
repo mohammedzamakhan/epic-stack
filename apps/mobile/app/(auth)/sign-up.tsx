@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trans } from '@lingui/react/macro'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { MobileSignupSchema } from '@repo/validation'
 import { useLocalSearchParams, router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'

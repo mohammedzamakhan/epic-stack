@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/macro'
+import { useDoubleCheck } from '@repo/common'
 import { Icon, type IconName } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import { useFetcher } from 'react-router'
 import { disconnectProviderActionIntent } from '#app/routes/_app+/security.tsx'
-import { useDoubleCheck } from '@repo/common'
 
 interface Connection {
 	id: string
@@ -26,28 +26,33 @@ export function Connections({ data }: ConnectionsProps) {
 	return (
 		<div className="flex flex-col gap-4">
 			<ul className="flex flex-col gap-4">
-				{data.connections.map((connection) => (
-					<li key={connection.id} className="flex items-center justify-between">
-						<div className="flex gap-2">
-							<Icon
-								name={connection.providerName as IconName}
-								className="text-background-foreground h-8 w-8"
-							/>
-							<div className="flex flex-col gap-0">
-								<div className="font-medium capitalize">
-									{connection.providerName}
+				{data.connections.map((connection) => {
+					const createdAtDate = new Date(
+						connection.createdAt,
+					).toLocaleDateString()
+					return (
+						<li
+							key={connection.id}
+							className="flex items-center justify-between"
+						>
+							<div className="flex gap-2">
+								<Icon
+									name={connection.providerName as IconName}
+									className="text-background-foreground h-8 w-8"
+								/>
+								<div className="flex flex-col gap-0">
+									<div className="font-medium capitalize">
+										{connection.providerName}
+									</div>
+									<span className="text-muted-foreground text-xs">
+										<Trans>Connected on {createdAtDate}</Trans>
+									</span>
 								</div>
-								<span className="text-muted-foreground text-xs">
-									<Trans>
-										Connected on{' '}
-										{new Date(connection.createdAt).toLocaleDateString()}
-									</Trans>
-								</span>
 							</div>
-						</div>
-						<DisconnectProvider connectionId={connection.id} />
-					</li>
-				))}
+							<DisconnectProvider connectionId={connection.id} />
+						</li>
+					)
+				})}
 			</ul>
 		</div>
 	)
@@ -78,7 +83,11 @@ export function DisconnectProvider({
 				status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				size="sm"
 			>
-				{dc.doubleCheck ? <Trans>Are you sure?</Trans> : <Trans>Disconnect</Trans>}
+				{dc.doubleCheck ? (
+					<Trans>Are you sure?</Trans>
+				) : (
+					<Trans>Disconnect</Trans>
+				)}
 			</StatusButton>
 		</fetcher.Form>
 	)

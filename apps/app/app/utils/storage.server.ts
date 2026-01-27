@@ -1,4 +1,5 @@
 import { type FileUpload } from '@mjackson/form-data-parser'
+import { prisma } from '@repo/database'
 import { decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	createStorageClient,
@@ -13,7 +14,6 @@ import {
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
-import { prisma } from '@repo/database'
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -64,7 +64,12 @@ export async function uploadProfileImage(
 	file: File | FileUpload,
 	organizationId?: string,
 ) {
-	return _uploadProfileImage(userId, file, createUploadOptions(), organizationId)
+	return _uploadProfileImage(
+		userId,
+		file,
+		createUploadOptions(),
+		organizationId,
+	)
 }
 
 export async function uploadOrganizationImage(

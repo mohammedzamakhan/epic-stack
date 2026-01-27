@@ -28,6 +28,7 @@ test.describe('File Operations', () => {
 			await photoUploadButton.click()
 
 			// Upload the test image
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 			await fileInput.setInputFiles(testImagePath)
 
@@ -71,6 +72,7 @@ test.describe('File Operations', () => {
 			await logoUploadButton.click()
 
 			// Upload the test image
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 			await fileInput.setInputFiles(testImagePath)
 
@@ -101,6 +103,7 @@ test.describe('File Operations', () => {
 		await page.getByRole('textbox', { name: /title/i }).fill('Note with Image')
 
 		// Content editor is a TipTap rich text editor
+		// eslint-disable-next-line playwright/no-raw-locators -- TipTap uses .ProseMirror class without accessible role
 		const contentEditor = page
 			.locator('.ProseMirror')
 			.or(page.getByRole('textbox', { name: /content/i }))
@@ -126,6 +129,7 @@ test.describe('File Operations', () => {
 			} else {
 				// Button that opens file dialog
 				await imageUploadButton.click()
+				// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 				const fileInput = page.locator('input[type="file"]')
 				await fileInput.setInputFiles(testImagePath)
 			}
@@ -192,6 +196,7 @@ test.describe('File Operations', () => {
 			const invalidFilePath = path.join(__dirname, '../fixtures/test-file.txt')
 
 			await photoUploadButton.click()
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 			await fileInput.setInputFiles(invalidFilePath)
 
@@ -221,6 +226,7 @@ test.describe('File Operations', () => {
 			)
 
 			await photoUploadButton.click()
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 
 			try {
@@ -294,6 +300,7 @@ test.describe('File Operations', () => {
 			)
 
 			await photoUploadButton.click()
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 			await fileInput.setInputFiles(testImagePath)
 
@@ -334,12 +341,14 @@ test.describe('File Operations', () => {
 				await imageUploadButton.setInputFiles(testImagePath)
 			} else {
 				await imageUploadButton.click()
+				// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 				const fileInput = page.locator('input[type="file"]')
 				await fileInput.setInputFiles(testImagePath)
 			}
 
 			// Look for image preview
 			await expect(
+				// eslint-disable-next-line playwright/no-raw-locators -- blob src attribute check has no semantic alternative
 				page.getByRole('img').filter({ has: page.locator('[src*="blob:"]') }),
 			).toBeVisible() // Fixed .first() syntax - using conditional logic instead
 			// expect(page.getByText(/preview/i)).toBeVisible())
@@ -372,6 +381,7 @@ test.describe('File Operations', () => {
 			)
 
 			await photoUploadButton.click()
+			// eslint-disable-next-line playwright/no-raw-locators -- file inputs have no accessible role
 			const fileInput = page.locator('input[type="file"]')
 			await fileInput.setInputFiles(testImagePath)
 

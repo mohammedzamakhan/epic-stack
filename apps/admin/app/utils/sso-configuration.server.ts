@@ -1,6 +1,6 @@
+import { prisma } from '@repo/database'
 import { type SSOConfiguration } from '@repo/database/types'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
-import { prisma } from '@repo/database'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,
@@ -213,7 +213,7 @@ export class SSOConfigurationService {
 						where: { id: config.id },
 						data: { lastTested: new Date() },
 					})
-				} catch (ignoredUpdateError) {
+				} catch {
 					// Don't fail the test if we can't update the timestamp
 				}
 			}

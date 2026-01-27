@@ -1,5 +1,6 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
@@ -13,7 +14,6 @@ import {
 } from '#app/components/forms.tsx'
 
 import { changeEmailActionIntent } from '#app/routes/_app+/profile.tsx'
-import { Trans } from '@lingui/macro'
 
 export const ChangeEmailSchema = z.object({
 	email: EmailSchema,

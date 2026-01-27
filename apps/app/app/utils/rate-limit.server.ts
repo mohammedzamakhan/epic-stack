@@ -96,12 +96,13 @@ export async function checkRateLimit(
 			resetAt,
 		}
 	} catch (error) {
-		// If database fails, allow the request but log the error
+		// SECURITY: Fail closed - deny request when rate limiting is unavailable
+		// This prevents brute force attacks during database outages
 		console.error('Rate limit check failed:', error)
 		return {
-			allowed: true,
-			remaining: config.maxRequests - 1,
-			resetAt: new Date(now.getTime() + config.windowMs),
+			allowed: false,
+			remaining: 0,
+			resetAt: new Date(now.getTime() + 60000), // Retry in 1 minute
 		}
 	}
 }

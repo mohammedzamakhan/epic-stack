@@ -1,9 +1,8 @@
 import { invariantResponse } from '@epic-web/invariant'
 
-import { authSessionStorage } from '@repo/auth'
+import { authSessionStorage, sessionKey } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
-import { sessionKey } from '@repo/auth'
 
 type AccountActionArgs = {
 	request: Request

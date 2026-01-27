@@ -1,6 +1,6 @@
-import { redirect } from 'react-router'
 import { requireUserId, logout } from '@repo/auth'
 import { prisma } from '@repo/database'
+import { redirect } from 'react-router'
 import { type Route } from './+types/me.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {

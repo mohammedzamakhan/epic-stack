@@ -1,6 +1,6 @@
+import { requireUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { redirect } from 'react-router'
-import { requireUserId } from '@repo/auth'
 import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/auth.discord.verify.ts'
 

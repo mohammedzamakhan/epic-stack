@@ -1,4 +1,5 @@
-import { Trans, t } from '@lingui/macro'
+import { Trans, Plural, t } from '@lingui/macro'
+import { requireUserId } from '@repo/auth'
 import { getPageTitle } from '@repo/config/brand'
 import { prisma } from '@repo/database'
 import {
@@ -19,7 +20,6 @@ import {
 } from '@repo/ui/input-group'
 import * as React from 'react'
 import { redirect } from 'react-router'
-import { requireUserId } from '@repo/auth'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
 	getOrCreateWaitlistEntry,
@@ -93,6 +93,9 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 		hasDiscordOAuth,
 	} = loaderData
 	const [copied, setCopied] = React.useState(false)
+	const userEmail = user.email
+	const referralCount = waitlistEntry.referralCount
+	const points = waitlistEntry.points
 
 	const copyToClipboard = async () => {
 		try {
@@ -146,7 +149,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 							<p className="text-muted-foreground mb-1 text-xs">
 								<Trans>Your points</Trans>
 							</p>
-							<p className="text-3xl font-bold">{waitlistEntry.points}</p>
+							<p className="text-3xl font-bold">{points}</p>
 						</div>
 						<div className="text-center">
 							<p className="text-muted-foreground mb-1 text-xs">
@@ -154,7 +157,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 							</p>
 							<p className="text-3xl font-bold">#{rank}</p>
 							<p className="text-muted-foreground text-xs">
-								<Trans>of {totalUsers} people</Trans>
+								<Trans>of ${totalUsers} people</Trans>
 							</p>
 						</div>
 					</div>
@@ -197,13 +200,14 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 									</InputGroup>
 								</FieldContent>
 							</Field>
-							{waitlistEntry.referralCount > 0 && (
+							{referralCount > 0 && (
 								<p className="mt-2 text-xs text-green-600">
-									<Trans>
-										{waitlistEntry.referralCount}{' '}
-										{waitlistEntry.referralCount === 1 ? 'person' : 'people'}{' '}
-										joined using your link! Thanks for referring.
-									</Trans>
+									<Plural
+										value={referralCount}
+										one="# person joined using your link!"
+										other="# people joined using your link!"
+									/>{' '}
+									<Trans>Thanks for referring.</Trans>
 								</p>
 							)}
 						</div>
@@ -273,7 +277,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 				<p className="text-muted-foreground text-sm">
 					<Trans>
 						We'll send you an email at{' '}
-						<span className="font-semibold">{user.email}</span> when we're ready
+						<span className="font-semibold">${userEmail}</span> when we're ready
 						to welcome you.
 					</Trans>
 				</p>

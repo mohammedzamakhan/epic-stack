@@ -1,19 +1,5 @@
 import { msg, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import {
-	type ColumnDef,
-	type ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState,
-} from '@tanstack/react-table'
-import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
 import { getUserImgSrc } from '@repo/common'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
@@ -42,6 +28,20 @@ import {
 	TableHeader,
 	TableRow,
 } from '@repo/ui/table'
+import {
+	type ColumnDef,
+	type ColumnFiltersState,
+	flexRender,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+	type VisibilityState,
+} from '@tanstack/react-table'
+import { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 
 export interface AdminUser {
 	id: string
@@ -297,6 +297,14 @@ export function AdminUsersTable({
 	}
 
 	const hasActiveFilters = filters.search || filters.organization
+	const startItem = (pagination.page - 1) * pagination.pageSize + 1
+	const endItem = Math.min(
+		pagination.page * pagination.pageSize,
+		pagination.totalCount,
+	)
+	const totalCount = pagination.totalCount
+	const currentPage = pagination.page
+	const totalPages = pagination.totalPages
 
 	return (
 		<div className="space-y-4">
@@ -384,12 +392,7 @@ export function AdminUsersTable({
 			<div className="text-muted-foreground flex items-center justify-between text-sm">
 				<div>
 					<Trans>
-						Showing {(pagination.page - 1) * pagination.pageSize + 1} to{' '}
-						{Math.min(
-							pagination.page * pagination.pageSize,
-							pagination.totalCount,
-						)}{' '}
-						of {pagination.totalCount} users
+						Showing {startItem} to {endItem} of {totalCount} users
 					</Trans>
 				</div>
 			</div>
@@ -481,7 +484,7 @@ export function AdminUsersTable({
 				<div className="flex items-center gap-2">
 					<div className="text-sm font-medium">
 						<Trans>
-							Page {pagination.page} of {pagination.totalPages}
+							Page {currentPage} of {totalPages}
 						</Trans>
 					</div>
 					<div className="flex items-center gap-2">

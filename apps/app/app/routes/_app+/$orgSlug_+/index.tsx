@@ -1,8 +1,9 @@
 import { invariant } from '@epic-web/invariant'
 
-import { Trans, t } from '@lingui/macro'
+import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Novu } from '@novu/api'
+import { requireUserId } from '@repo/auth'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
@@ -13,20 +14,18 @@ import confetti from 'canvas-confetti'
 import { useEffect, useRef } from 'react'
 import {
 	type ActionFunctionArgs,
-	Form,
 	type LoaderFunctionArgs,
 	useLoaderData,
 	useRouteLoaderData,
 	useSearchParams,
 	useNavigate,
 } from 'react-router'
+import { ENV } from 'varlock/env'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
 import { NotesChart } from '#app/components/notes-chart.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
 import { type loader as rootLoader } from '#app/root.tsx'
-import { requireUserId } from '@repo/auth'
-import { ENV } from 'varlock/env'
 import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
@@ -41,7 +40,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	invariant(orgSlug, 'orgSlug is required')
 
 	const organization = await prisma.organization.findFirst({
-		where: { slug: orgSlug, users: { some: { userId: userId } } },
+		where: {
+			slug: orgSlug,
+			active: true,
+			users: { some: { userId: userId, active: true } },
+		},
 		select: { id: true, name: true, createdAt: true },
 	})
 
@@ -171,7 +174,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	invariant(orgSlug, 'orgSlug is required')
 
 	const organization = await prisma.organization.findFirst({
-		where: { slug: orgSlug, users: { some: { userId: userId } } },
+		where: {
+			slug: orgSlug,
+			active: true,
+			users: { some: { userId: userId, active: true } },
+		},
 		select: { id: true },
 	})
 
@@ -279,10 +286,12 @@ export default function OrganizationDashboard() {
 		}
 	}, [searchParams, navigate])
 
+	const userName = user?.name || 'User'
+
 	return (
 		<div className="py-8 md:p-8">
 			<PageTitle
-				title={_(t`Welcome ${user?.name || 'User'}!`)}
+				title={_(t`Welcome ${userName}!`)}
 				description={_(
 					t`Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics.`,
 				)}

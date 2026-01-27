@@ -1,7 +1,7 @@
-import { data } from 'react-router'
-import { authenticator } from '#app/utils/auth.server.ts'
 import { handleMockAction } from '@repo/auth'
 import { ProviderNameSchema } from '@repo/auth/constants'
+import { data } from 'react-router'
+import { authenticator } from '#app/utils/auth.server.ts'
 import { type Route } from './+types/auth.$provider.ts'
 
 export async function action({ request, params }: Route.ActionArgs) {

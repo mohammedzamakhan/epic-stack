@@ -1,8 +1,8 @@
+import { cn } from '@repo/ui'
 import { Icon } from '@repo/ui/icon'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'
-import { cn } from '@repo/ui'
 
 function EpicProgress() {
 	const transition = useNavigation()

@@ -1,11 +1,11 @@
+import { getReferrerRoute } from '@repo/common'
 import { getClientIp } from '@repo/common/ip-tracking'
+import { getRedirectCookieHeader } from '@repo/common/redirect-cookie'
 import { SSOAuthRequestSchema } from '@repo/validation'
 import { redirect } from 'react-router'
-import { getSSOStrategy } from '#app/utils/auth.server.ts'
 import { ENV } from 'varlock/env'
-import { getReferrerRoute } from '@repo/common'
+import { getSSOStrategy } from '#app/utils/auth.server.ts'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
-import { getRedirectCookieHeader } from '@repo/common/redirect-cookie'
 import {
 	ssoAuditLogger,
 	SSOAuditEventType,

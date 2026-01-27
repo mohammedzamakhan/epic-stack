@@ -1,12 +1,5 @@
 import { Trans } from '@lingui/macro'
 import { Button } from '@repo/ui/button'
-import {
-	Frame,
-	FramePanel,
-	FrameDescription,
-	FrameHeader,
-	FrameTitle,
-} from '@repo/ui/frame'
 import { Checkbox } from '@repo/ui/checkbox'
 import {
 	Dialog,
@@ -17,6 +10,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@repo/ui/dialog'
+import {
+	Frame,
+	FramePanel,
+	FrameDescription,
+	FrameHeader,
+	FrameTitle,
+} from '@repo/ui/frame'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { Label } from '@repo/ui/label'
@@ -33,6 +33,7 @@ export default function DangerZoneCard({
 	const [isConfirmed, setIsConfirmed] = useState(false)
 
 	const isDeleteEnabled = confirmationText === organization.name && isConfirmed
+	const orgName = organization.name
 
 	const handleSubmit = () => {
 		if (isDeleteEnabled) {
@@ -95,8 +96,7 @@ export default function DangerZoneCard({
 								<div className="space-y-2">
 									<Label htmlFor="confirmation">
 										<Trans>
-											Type the organization name "{organization.name}" to
-											confirm.
+											Type the organization name "{orgName}" to confirm.
 										</Trans>
 									</Label>
 									<Input

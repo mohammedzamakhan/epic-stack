@@ -25,7 +25,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
-import { useNavigate, useLocation } from 'react-router'
+import { useNavigate } from 'react-router'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
 interface Action {
@@ -47,29 +47,37 @@ function formatRelativeTime(
 	const now = new Date()
 	const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-	if (diffInSeconds < 60)
-		return _(msg`${diffInSeconds}s ago` as { id: string; message: string })
-	if (diffInSeconds < 3600)
+	if (diffInSeconds < 60) {
+		const seconds = diffInSeconds
+		return _(msg`${seconds}s ago` as { id: string; message: string })
+	}
+	if (diffInSeconds < 3600) {
+		const minutes = Math.floor(diffInSeconds / 60)
 		return _(
-			msg`${Math.floor(diffInSeconds / 60)}m ago` as {
+			msg`${minutes}m ago` as {
 				id: string
 				message: string
 			},
 		)
-	if (diffInSeconds < 86400)
+	}
+	if (diffInSeconds < 86400) {
+		const hours = Math.floor(diffInSeconds / 3600)
 		return _(
-			msg`${Math.floor(diffInSeconds / 3600)}h ago` as {
+			msg`${hours}h ago` as {
 				id: string
 				message: string
 			},
 		)
-	if (diffInSeconds < 604800)
+	}
+	if (diffInSeconds < 604800) {
+		const days = Math.floor(diffInSeconds / 86400)
 		return _(
-			msg`${Math.floor(diffInSeconds / 86400)}d ago` as {
+			msg`${days}d ago` as {
 				id: string
 				message: string
 			},
 		)
+	}
 
 	return date.toLocaleDateString()
 }
@@ -282,7 +290,6 @@ function NotificationBellComponent() {
 		useOptionalNotifications(filter === 'unread' ? { read: false } : {}) || {}
 	const novu = useOptionalNovu()
 	const [isOpen, setIsOpen] = useState(false)
-	const location = useLocation()
 
 	const unreadCount = notifications?.filter((n) => !n.isRead).length || 0
 

@@ -1,5 +1,7 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { auditService } from '@repo/audit'
+import { requireUserWithRole } from '@repo/auth'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -24,12 +26,9 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { useState } from 'react'
 import { useLoaderData, useSearchParams } from 'react-router'
-import { auditService } from '@repo/audit'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')
@@ -135,6 +134,10 @@ export default function EnhancedAuditLogsPage() {
 		}
 	}
 
+	const count = statistics.topActions[0]?._count || 0
+	const showing = logs.length
+	const totalEvents = total.toLocaleString()
+
 	return (
 		<div className="space-y-6">
 			{/* Header */}
@@ -217,7 +220,7 @@ export default function EnhancedAuditLogsPage() {
 							{statistics.topActions[0]?.action || <Trans>N/A</Trans>}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							<Trans>{statistics.topActions[0]?._count || 0} occurrences</Trans>
+							<Trans>{count} occurrences</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -317,7 +320,7 @@ export default function EnhancedAuditLogsPage() {
 					</CardTitle>
 					<CardDescription>
 						<Trans>
-							Showing {logs.length} of {total.toLocaleString()} events
+							Showing {showing} of {totalEvents} events
 						</Trans>
 					</CardDescription>
 				</CardHeader>

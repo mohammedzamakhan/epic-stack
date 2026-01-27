@@ -12,7 +12,7 @@ import {
 } from '@repo/ui/command'
 import { Icon } from '@repo/ui/icon'
 import { useEffect, useState, useCallback } from 'react'
-import { useRouteLoaderData, useFetcher, Link, useNavigate } from 'react-router'
+import { useRouteLoaderData, useFetcher, useNavigate } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
 
 interface Note {
@@ -135,23 +135,26 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 
 					{notes.length > 0 && (
 						<CommandGroup heading={_(t`Notes`)}>
-							{notes.map((note) => (
-								<CommandItem
-									key={note.id}
-									onSelect={() => {
-										void navigate(`/${orgSlug}/notes/${note.id}`)
-										onOpenChange(false)
-									}}
-								>
-									<Icon name="file-text" />
-									<div className="flex flex-col items-start">
-										<span className="font-medium">{note.title}</span>
-										<span className="text-muted-foreground text-xs">
-											<Trans>by {note.createdByName}</Trans>
-										</span>
-									</div>
-								</CommandItem>
-							))}
+							{notes.map((note) => {
+								const createdByName = note.createdByName
+								return (
+									<CommandItem
+										key={note.id}
+										onSelect={() => {
+											void navigate(`/${orgSlug}/notes/${note.id}`)
+											onOpenChange(false)
+										}}
+									>
+										<Icon name="file-text" />
+										<div className="flex flex-col items-start">
+											<span className="font-medium">{note.title}</span>
+											<span className="text-muted-foreground text-xs">
+												<Trans>by {createdByName}</Trans>
+											</span>
+										</div>
+									</CommandItem>
+								)
+							})}
 						</CommandGroup>
 					)}
 					<CommandGroup heading={_(t`Settings`)}>

@@ -144,47 +144,47 @@ export function PasskeyManager({
 
 			{data.passkeys?.length ? (
 				<ul className="flex flex-col gap-4" title={_(t`passkeys`)}>
-					{data.passkeys.map((passkey) => (
-						<li
-							key={passkey.id}
-							className="border-muted-foreground flex items-center justify-between gap-4 rounded-lg border p-4"
-						>
-							<div className="flex flex-col gap-2">
-								<div className="flex items-center gap-2">
-									<Icon name="lock" />
-									<span className="font-semibold">
-										{passkey.deviceType === 'platform' ? (
-											<Trans>Device</Trans>
-										) : (
-											<Trans>Security Key</Trans>
-										)}
-									</span>
+					{data.passkeys.map((passkey) => {
+						const timeAgo = formatDistanceToNow(new Date(passkey.createdAt))
+						return (
+							<li
+								key={passkey.id}
+								className="border-muted-foreground flex items-center justify-between gap-4 rounded-lg border p-4"
+							>
+								<div className="flex flex-col gap-2">
+									<div className="flex items-center gap-2">
+										<Icon name="lock" />
+										<span className="font-semibold">
+											{passkey.deviceType === 'platform' ? (
+												<Trans>Device</Trans>
+											) : (
+												<Trans>Security Key</Trans>
+											)}
+										</span>
+									</div>
+									<div className="text-muted-foreground text-sm">
+										<Trans>Registered {timeAgo} ago</Trans>
+									</div>
 								</div>
-								<div className="text-muted-foreground text-sm">
-									<Trans>
-										Registered{' '}
-										{formatDistanceToNow(new Date(passkey.createdAt))} ago
-									</Trans>
-								</div>
-							</div>
-							<Form method="POST">
-								<input type="hidden" name="passkeyId" value={passkey.id} />
-								<Button
-									type="submit"
-									name="intent"
-									value={deleteIntent}
-									variant="destructive"
-									size="sm"
-									className="flex items-center gap-2"
-								>
-									<Icon name="trash-2" />
-									<span>
-										<Trans>Delete</Trans>
-									</span>
-								</Button>
-							</Form>
-						</li>
-					))}
+								<Form method="POST">
+									<input type="hidden" name="passkeyId" value={passkey.id} />
+									<Button
+										type="submit"
+										name="intent"
+										value={deleteIntent}
+										variant="destructive"
+										size="sm"
+										className="flex items-center gap-2"
+									>
+										<Icon name="trash-2" />
+										<span>
+											<Trans>Delete</Trans>
+										</span>
+									</Button>
+								</Form>
+							</li>
+						)
+					})}
 				</ul>
 			) : (
 				<div className="text-muted-foreground text-center">

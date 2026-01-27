@@ -4,6 +4,7 @@ import {
 	parsePermissionString,
 	type PermissionString,
 } from '@repo/common/user-permissions'
+import { requireUserId } from './auth.server'
 
 export async function checkUserHasPermission(
 	userId: string,
@@ -70,4 +71,18 @@ export async function checkUserHasRole(
 		id: user.id,
 		defaultOrganizationId: user.organizations[0]?.organizationId ?? null,
 	}
+}
+
+export async function requireUserWithPermission(
+	request: Request,
+	permission: PermissionString,
+) {
+	const userId = await requireUserId(request)
+	return checkUserHasPermission(userId, permission)
+}
+
+export async function requireUserWithRole(request: Request, name: string) {
+	const userId = await requireUserId(request)
+	const result = await checkUserHasRole(userId, name)
+	return result.id
 }

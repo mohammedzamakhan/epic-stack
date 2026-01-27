@@ -1,4 +1,6 @@
 import { Trans } from '@lingui/react/macro'
+import { requireUserWithRole } from '@repo/auth'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Card,
@@ -9,9 +11,6 @@ import {
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { useLoaderData } from 'react-router'
-
-import { prisma } from '@repo/database'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')

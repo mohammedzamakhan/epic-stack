@@ -1,9 +1,12 @@
-import { data, redirect } from 'react-router'
 import { auditService, AuditAction } from '@repo/audit'
-import { authSessionStorage } from '@repo/auth'
+import {
+	authSessionStorage,
+	sessionKey,
+	getSessionExpirationDate,
+} from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
 import { prisma } from '@repo/database'
-import { sessionKey, getSessionExpirationDate } from '@repo/auth'
+import { data, redirect } from 'react-router'
 
 export async function action({ request }: { request: Request }) {
 	const authSession = await authSessionStorage.getSession(

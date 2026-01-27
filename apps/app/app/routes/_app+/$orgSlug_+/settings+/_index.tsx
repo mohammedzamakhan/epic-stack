@@ -1,5 +1,7 @@
 import { parseWithZod } from '@conform-to/zod'
 import { parseFormData } from '@mjackson/form-data-parser'
+import { requireUserId } from '@repo/auth'
+import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { markStepCompleted } from '@repo/common/onboarding'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
@@ -32,8 +34,6 @@ import VerifiedDomainCard, {
 	VerifiedDomainSchema,
 } from '#app/components/settings/cards/organization/verified-domain-card.tsx'
 
-import { requireUserId } from '@repo/auth'
-import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	updateSeatQuantity,

@@ -1,6 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { requireUserId } from '@repo/auth'
 import { getNotesViewMode, setNotesViewMode } from '@repo/common'
 import { prisma } from '@repo/database'
 import { useDirection } from '@repo/ui'
@@ -26,7 +27,6 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-import { requireUserId } from '@repo/auth'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import { NotesCards } from './notes-cards.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
@@ -357,7 +357,7 @@ export default function NotesRoute({
 					<EmptyState
 						title={_(t`No notes found`)}
 						description={_(
-							t`No notes match your search for "${loaderData.searchQuery}". Try a different search term or create a new note.`,
+							t`No notes match your search for "${searchValue}". Try a different search term or create a new note.`,
 						)}
 						icons={['search', 'file-text']}
 						action={{
@@ -405,13 +405,14 @@ export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary
 			statusHandlers={{
-				404: ({ params }) => (
-					<p>
-						<Trans>
-							No organization with the slug "{params.orgSlug}" exists
-						</Trans>
-					</p>
-				),
+				404: ({ params }) => {
+					const orgSlug = params.orgSlug
+					return (
+						<p>
+							<Trans>No organization with the slug "{orgSlug}" exists</Trans>
+						</p>
+					)
+				},
 			}}
 		/>
 	)

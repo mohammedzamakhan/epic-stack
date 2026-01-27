@@ -859,6 +859,19 @@ model WaitlistEntry {
   @@index([grantedAccessBy])
 }
 
+// MCP Client - registered OAuth client for MCP (RFC 7591)
+model MCPClient {
+  id            String   @id @default(cuid())
+  clientId      String   @unique // Generated unique client identifier
+  clientName    String   // Human-readable client name
+  redirectUris  String   // JSON array of registered redirect URIs
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([clientId])
+}
+
 // MCP Authorization - represents an authorized MCP client
 model MCPAuthorization {
   id             String            @id @default(cuid())

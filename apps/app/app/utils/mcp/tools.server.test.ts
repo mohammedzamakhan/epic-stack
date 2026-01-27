@@ -2,7 +2,7 @@ import '#tests/setup/setup-test-env.ts'
 import { prisma } from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { clearTools, getTool, type MCPContext } from './server.server'
+import { getTool, type MCPContext } from './server.server'
 import './tools.server' // Import to register tools
 
 /**
@@ -305,7 +305,7 @@ describe('MCP Tools Service', () => {
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
 			// Create a public note
-			const publicNote = await prisma.organizationNote.create({
+			await prisma.organizationNote.create({
 				data: {
 					title: 'Public Note',
 					content: 'Public content',
@@ -316,7 +316,7 @@ describe('MCP Tools Service', () => {
 			})
 
 			// Create a private note not shared with mockContext.user
-			const privateNote = await prisma.organizationNote.create({
+			await prisma.organizationNote.create({
 				data: {
 					title: 'Private Note',
 					content: 'Private content',

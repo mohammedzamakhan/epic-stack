@@ -1,7 +1,5 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { useState } from 'react'
-import { useNavigate, useSubmit } from 'react-router'
 import { getUserImgSrc } from '@repo/common'
 import { type getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
@@ -24,6 +22,8 @@ import {
 	ItemTitle,
 } from '@repo/ui/item'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
+import { useState } from 'react'
+import { useNavigate, useSubmit } from 'react-router'
 import { BanUserDialog } from '#app/components/admin-ban-user-dialog.tsx'
 
 export interface AdminUserDetail {
@@ -160,6 +160,9 @@ export function UserDetailView({
 		(session) => new Date(session.expirationDate) > new Date(),
 	)
 
+	const activeCount = user.organizations.filter((org) => org.active).length
+	const totalSessions = user.sessions.length
+
 	return (
 		<>
 			<div className="space-y-6">
@@ -253,16 +256,9 @@ export function UserDetailView({
 							<div className="text-2xl font-bold">
 								{user.organizations.length}
 							</div>
-							{(() => {
-								const activeCount = user.organizations.filter(
-									(org) => org.active,
-								).length
-								return (
-									<p className="text-muted-foreground text-xs">
-										<Trans>{activeCount} active</Trans>
-									</p>
-								)
-							})()}
+							<p className="text-muted-foreground text-xs">
+								<Trans>{activeCount} active</Trans>
+							</p>
 						</CardContent>
 					</Card>
 					<Card>
@@ -274,14 +270,9 @@ export function UserDetailView({
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">{activeSessions.length}</div>
-							{(() => {
-								const totalSessions = user.sessions.length
-								return (
-									<p className="text-muted-foreground text-xs">
-										<Trans>{totalSessions} total sessions</Trans>
-									</p>
-								)
-							})()}
+							<p className="text-muted-foreground text-xs">
+								<Trans>{totalSessions} total sessions</Trans>
+							</p>
 						</CardContent>
 					</Card>
 					<Card>

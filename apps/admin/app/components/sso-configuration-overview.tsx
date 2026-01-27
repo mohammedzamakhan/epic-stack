@@ -55,7 +55,7 @@ export function SSOConfigurationOverview({
 	if (!ssoConfig) {
 		return null
 	}
-
+	const providerName = ssoConfig.providerName
 	const isHealthy =
 		ssoConfig.isEnabled &&
 		ssoConfig.lastTested &&
@@ -105,9 +105,7 @@ export function SSOConfigurationOverview({
 								</Badge>
 							</CardTitle>
 							<CardDescription>
-								<Trans>
-									{ssoConfig.providerName} identity provider configuration
-								</Trans>
+								<Trans>{providerName} identity provider configuration</Trans>
 							</CardDescription>
 						</div>
 						<div className="flex items-center gap-2">

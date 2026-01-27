@@ -3,8 +3,8 @@ import {
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
 	type OrganizationPermissionString,
+	getUserId,
 } from '@repo/auth'
-import { getUserId } from '@repo/auth'
 
 export { ORG_PERMISSIONS, getUserOrganizationPermissionsForClient }
 

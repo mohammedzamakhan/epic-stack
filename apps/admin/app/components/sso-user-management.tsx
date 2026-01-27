@@ -138,6 +138,8 @@ export function SSOUserManagement({
 	onRoleChange,
 	onUserStatusChange,
 }: SSOUserManagementProps) {
+	const userCount = ssoUsers.length
+	const activeCount = ssoUsers.filter((u) => u.active).length
 	return (
 		<div className="space-y-6">
 			{/* SSO Users Table */}
@@ -145,7 +147,7 @@ export function SSOUserManagement({
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Icon name="users" className="h-5 w-5" />
-						<Trans>SSO Users ({ssoUsers.length})</Trans>
+						<Trans>SSO Users ({userCount})</Trans>
 					</CardTitle>
 					<CardDescription>
 						<Trans>Users who have authenticated through SSO</Trans>
@@ -402,7 +404,7 @@ export function SSOUserManagement({
 					<CardContent>
 						<div className="text-2xl font-bold">{ssoUsers.length}</div>
 						<p className="text-muted-foreground text-xs">
-							<Trans>{ssoUsers.filter((u) => u.active).length} active</Trans>
+							<Trans>{activeCount} active</Trans>
 						</p>
 					</CardContent>
 				</Card>

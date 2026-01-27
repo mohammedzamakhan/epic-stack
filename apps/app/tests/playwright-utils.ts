@@ -4,15 +4,13 @@ import {
 	authSessionStorage,
 	MOCK_CODE_GITHUB_HEADER,
 	normalizeEmail,
-} from '@repo/auth'
-import { cookieConsentCookie } from '@repo/common/cookie-consent'
-import { prisma } from '@repo/database'
-import * as setCookieParser from 'set-cookie-parser'
-import {
 	getPasswordHash,
 	getSessionExpirationDate,
 	sessionKey,
 } from '@repo/auth'
+import { cookieConsentCookie } from '@repo/common/cookie-consent'
+import { prisma } from '@repo/database'
+import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
 import {
 	type GitHubUser,

@@ -20,19 +20,10 @@ const ALLOWED_CUSTOM_SCHEMES = [
 ]
 
 /**
- * Validates a redirect URI for MCP OAuth authorization flow.
- *
- * This function prevents open redirect attacks by only allowing:
- * 1. Localhost URLs (http://localhost or http://127.0.0.1) for development/testing
- * 2. Known MCP client custom protocol schemes (cursor://, vscode://, etc.)
- *
- * In production, you should also validate against pre-registered redirect URIs
- * stored per-client in the database.
- *
- * @param redirectUri - The redirect URI to validate
- * @returns Object with isValid boolean and optional error message
+ * Validates redirect URI format (basic security checks).
+ * This checks that the URI is well-formed and uses allowed protocols.
  */
-export function validateMCPRedirectUri(redirectUri: string): {
+function validateRedirectUriFormat(redirectUri: string): {
 	isValid: boolean
 	error?: string
 } {
@@ -91,6 +82,108 @@ export function validateMCPRedirectUri(redirectUri: string): {
 			error: 'redirect_uri is not a valid URL',
 		}
 	}
+}
+
+/**
+ * Validates a redirect URI for MCP OAuth authorization flow.
+ *
+ * This function prevents open redirect attacks by:
+ * 1. Validating the URI format (localhost or allowed custom schemes)
+ * 2. Checking the URI against pre-registered redirect URIs for the client
+ *
+ * @param redirectUri - The redirect URI to validate
+ * @param clientId - The client ID to validate against (optional for backward compatibility)
+ * @returns Object with isValid boolean and optional error message
+ */
+export async function validateMCPRedirectUri(
+	redirectUri: string,
+	clientId?: string,
+): Promise<{
+	isValid: boolean
+	error?: string
+}> {
+	// First, validate the basic format
+	const formatValidation = validateRedirectUriFormat(redirectUri)
+	if (!formatValidation.isValid) {
+		return formatValidation
+	}
+
+	// If no clientId provided, fall back to format validation only
+	// This maintains backward compatibility
+	if (!clientId) {
+		return { isValid: true }
+	}
+
+	// Look up the client registration
+	const client = await prisma.mCPClient.findUnique({
+		where: { clientId },
+		select: { redirectUris: true },
+	})
+
+	if (!client) {
+		return { isValid: false, error: 'Client not registered' }
+	}
+
+	// Parse the stored redirect URIs
+	let registeredUris: string[] = []
+	try {
+		const parsed: unknown = JSON.parse(client.redirectUris)
+		if (Array.isArray(parsed)) {
+			registeredUris = parsed.filter(
+				(uri): uri is string => typeof uri === 'string',
+			)
+		}
+	} catch {
+		return { isValid: false, error: 'Invalid client configuration' }
+	}
+
+	// Normalize the redirect URI for comparison
+	const normalizedRedirectUri = normalizeRedirectUriForComparison(redirectUri)
+
+	// Check if the redirect URI is in the registered list
+	const isRegistered = registeredUris.some(
+		(uri) => normalizeRedirectUriForComparison(uri) === normalizedRedirectUri,
+	)
+
+	if (!isRegistered) {
+		return {
+			isValid: false,
+			error: 'redirect_uri not registered for this client',
+		}
+	}
+
+	return { isValid: true }
+}
+
+/**
+ * Normalize a redirect URI for comparison.
+ * Handles trailing slashes and hostname case.
+ */
+function normalizeRedirectUriForComparison(uri: string): string {
+	try {
+		const url = new URL(uri)
+		// Remove trailing slash from pathname unless it's just '/'
+		if (url.pathname !== '/' && url.pathname.endsWith('/')) {
+			url.pathname = url.pathname.slice(0, -1)
+		}
+		// Lowercase the host
+		url.hostname = url.hostname.toLowerCase()
+		return url.toString()
+	} catch {
+		// For custom schemes, just normalize case and trailing slashes
+		return uri.toLowerCase().replace(/\/+$/, '')
+	}
+}
+
+/**
+ * Synchronous format-only validation for simple checks.
+ * Use validateMCPRedirectUri for full validation with client lookup.
+ */
+export function validateMCPRedirectUriFormat(redirectUri: string): {
+	isValid: boolean
+	error?: string
+} {
+	return validateRedirectUriFormat(redirectUri)
 }
 
 // In-memory cache for authorization codes (in production, use Redis)

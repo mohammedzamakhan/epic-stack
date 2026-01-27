@@ -32,7 +32,7 @@ function getChannelLabel(channel: string, _: (msg: any) => string): string {
 		push: msg`Push`,
 		chat: msg`Chat`,
 	}
-	return _(labels[channel] || msg`${channel}`)
+	return _(labels[channel]) || channel
 }
 
 // Workflow labels function that uses lingui
@@ -45,7 +45,7 @@ function getWorkflowLabel(
 		'comment-mention-workflow': msg`Notifications when you are mentioned in a comment`,
 		'note-comment-workflow': msg`Notifications when someone comments on your notes`,
 	}
-	return _(labels[workflowName] || msg`${workflowName}`)
+	return _(labels[workflowName]) || workflowName
 }
 
 function getChannelIcon(channel: string): IconName {
@@ -114,7 +114,7 @@ function NotificationPreferencesCardComponent() {
 	// Load preferences once when component mounts
 	useEffect(() => {
 		void handleRefetch()
-	}, [])
+	}, [handleRefetch])
 
 	const isLoadingState = isLoading || isRefetching
 
@@ -177,6 +177,7 @@ function NotificationPreferencesCardComponent() {
 	}
 
 	if (error) {
+		const errorMessage = error.message
 		return (
 			<Card className="w-full">
 				<CardHeader>
@@ -195,7 +196,7 @@ function NotificationPreferencesCardComponent() {
 						<Icon name="octagon-alert" className="h-4 w-4 text-red-600" />
 						<p className="text-sm text-red-800">
 							<Trans>
-								Failed to load notification preferences: {error.message}
+								Failed to load notification preferences: {errorMessage}
 							</Trans>
 						</p>
 					</div>

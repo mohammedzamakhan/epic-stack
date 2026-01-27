@@ -1,9 +1,9 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { requireUserId } from '@repo/auth'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 
@@ -107,11 +107,14 @@ export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary
 			statusHandlers={{
-				404: ({ params }) => (
-					<p>
-						<Trans>No note with the id "{params.noteId}" exists</Trans>
-					</p>
-				),
+				404: ({ params }) => {
+					const noteId = params.noteId
+					return (
+						<p>
+							<Trans>No note with the id "{noteId}" exists</Trans>
+						</p>
+					)
+				},
 			}}
 		/>
 	)

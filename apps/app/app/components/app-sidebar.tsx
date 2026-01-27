@@ -1,4 +1,4 @@
-import { Trans, msg, t } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { getCrossAppUrl } from '@repo/common/url'
@@ -55,15 +55,16 @@ function UpgradeAccountCard({
 	if (launchStatus === 'PUBLIC_BETA' || launchStatus === 'CLOSED_BETA')
 		return null
 
+	// Extract for lingui compliance
+	const daysRemaining = trialStatus.daysRemaining
+
 	return (
 		<Card className="bg-sidebar-accent dark:bg-sidebar-accent border-sidebar-border mx-2 mb-4 gap-1 border p-2 group-data-[collapsible=icon]:hidden">
 			<CardHeader className="p-2">
 				<CardDescription className="text-sidebar-foreground">
 					<Trans>
 						There are{' '}
-						<span className="font-bold text-red-400">
-							{trialStatus.daysRemaining} days
-						</span>{' '}
+						<span className="font-bold text-red-400">{daysRemaining} days</span>{' '}
 						left in your trial. Get in touch with questions or feedback.
 					</Trans>
 				</CardDescription>
@@ -195,7 +196,7 @@ function OrganizationSidebar({
 	extensionId?: string
 }) {
 	const { _ } = useLingui()
-	const goToHomepageLabel = _(t`Go to homepage`)
+	const goToHomepageLabel = _(msg`Go to homepage`)
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
 	const [helpUrl, setHelpUrl] = useState('https://docs.epic-startup.me:2999')
 

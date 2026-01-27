@@ -2,15 +2,7 @@ import { parseWithZod } from '@conform-to/zod'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { useState } from 'react'
-import {
-	Form,
-	redirect,
-	useActionData,
-	useLoaderData,
-	useNavigation,
-} from 'react-router'
-import { z } from 'zod'
+import { requireUserWithRole } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import {
@@ -36,7 +28,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import {
 	Table,
@@ -46,8 +37,16 @@ import {
 	TableRow,
 } from '@repo/ui/table'
 import { Textarea } from '@repo/ui/textarea'
+import { useState } from 'react'
+import {
+	Form,
+	redirect,
+	useActionData,
+	useLoaderData,
+	useNavigation,
+} from 'react-router'
+import { z } from 'zod'
 import { RolesTableRows } from '#app/components/roles/roles-table-rows.tsx'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
 export const handle: SEOHandle = {

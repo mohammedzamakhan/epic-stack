@@ -1,10 +1,10 @@
 'use client'
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { Icon } from '../icon'
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
+import { Icon } from '../icon'
 import { Button } from './button'
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {

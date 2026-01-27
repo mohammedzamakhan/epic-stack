@@ -1,6 +1,6 @@
+import { type Toast } from '@repo/common/toast'
 import { useEffect } from 'react'
 import { toast as showToast } from 'sonner'
-import { type Toast } from '@repo/common/toast'
 
 export function useToast(toast?: Toast | null) {
 	useEffect(() => {

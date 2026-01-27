@@ -1,14 +1,18 @@
 import { type Submission } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
-import { generateTOTP, verifySessionStorage, verifyTOTP } from '@repo/auth'
+import {
+	generateTOTP,
+	verifySessionStorage,
+	verifyTOTP,
+	requireUserId,
+} from '@repo/auth'
 import { getDomainUrl } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { EmailChangeNoticeEmail, sendEmail } from '@repo/email'
 import { data } from 'react-router'
 import { z } from 'zod'
-import { requireUserId } from '@repo/auth'
 import {
 	newEmailAddressSessionKey,
 	twoFAVerificationType,

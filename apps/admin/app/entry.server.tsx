@@ -3,6 +3,8 @@ import { PassThrough } from 'node:stream'
 import { styleText } from 'node:util'
 import { contentSecurity } from '@nichtsam/helmet/content'
 import { createReadableStreamFromReadable } from '@react-router/node'
+import { NonceProvider, makeTimings } from '@repo/common'
+import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
 import * as Sentry from '@sentry/react-router'
 import { isbot } from 'isbot'
@@ -13,13 +15,10 @@ import {
 	type ActionFunctionArgs,
 	type HandleDocumentRequestFunction,
 } from 'react-router'
-import { NonceProvider, makeTimings } from '@repo/common'
-import { getInstanceInfo } from '@repo/common/litefs'
+import { ENV } from 'varlock/env'
+import { auditSensitiveRoutes } from '#app/utils/audit-middleware.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
-import { ENV } from 'varlock/env'
-
-import { auditSensitiveRoutes } from '#app/utils/audit-middleware.server.ts'
 
 export const streamTimeout = 5000
 

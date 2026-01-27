@@ -11,6 +11,6 @@ export default [
 		rules: { 'react-hooks/rules-of-hooks': 'off' },
 	},
 	{
-		ignores: ['.react-router/*'],
+		ignores: ['.react-router/*', 'env.d.ts'],
 	},
 ]

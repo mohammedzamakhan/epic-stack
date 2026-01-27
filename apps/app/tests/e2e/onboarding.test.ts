@@ -268,9 +268,11 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 	await usernameInput.fill('U$er_name') // $ is invalid char, see app/utils/user-validation.ts.
 	await createAccountButton.click()
 
+	/* eslint-disable playwright/no-raw-locators -- SVG elements don't have accessible roles */
 	await expect(
 		createAccountButton.getByRole('img').or(createAccountButton.locator('svg')),
 	).toBeVisible()
+	/* eslint-enable playwright/no-raw-locators */
 	await expect(
 		page.getByText(
 			/username can only include letters, numbers, and underscores/i,
@@ -354,9 +356,11 @@ test('login as existing user', async ({ page, insertNewUser, navigate }) => {
 		console.log('Login did not redirect to home page. Current URL:', page.url())
 
 		// Check if there are any error messages (but don't wait too long)
+		/* eslint-disable playwright/no-raw-locators -- CSS classes needed as fallback for error elements without role */
 		const errorElements = page
 			.getByRole('alert')
 			.or(page.locator('.error, .text-red-500, .text-destructive'))
+		/* eslint-enable playwright/no-raw-locators */
 		const errorCount = await errorElements.count()
 
 		if (errorCount > 0) {

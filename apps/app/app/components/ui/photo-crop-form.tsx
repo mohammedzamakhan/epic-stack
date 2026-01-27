@@ -1,3 +1,5 @@
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Button } from '@repo/ui/button'
 import { StatusButton } from '@repo/ui/status-button'
 import React, { useState, useRef } from 'react'
@@ -9,8 +11,6 @@ import ReactCrop, {
 } from 'react-image-crop'
 import { useFetcher } from 'react-router'
 import 'react-image-crop/dist/ReactCrop.css'
-import { t, Trans } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 
 export interface PhotoCropFormConfig {
 	// Form submission intent

@@ -1,6 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { generateApiKey } from '@repo/security'
 import { cn } from '@repo/ui'
@@ -61,7 +62,6 @@ import {
 	type LoaderFunctionArgs,
 } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
-import { requireUserId } from '@repo/auth'
 import { revokeAuthorization } from '#app/utils/mcp/oauth.server.ts'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
@@ -333,6 +333,7 @@ function CreateApiKeyModal({
 	const tomorrow = new Date()
 	tomorrow.setDate(tomorrow.getDate() + 1)
 	const minDate = tomorrow.toISOString().split('T')[0]
+	const orgName = organization.name
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
@@ -344,8 +345,8 @@ function CreateApiKeyModal({
 					</DialogTitle>
 					<DialogDescription>
 						<Trans>
-							Create a new API key to connect your AI assistants to{' '}
-							{organization.name} data.
+							Create a new API key to connect your AI assistants to {orgName}{' '}
+							data.
 						</Trans>
 					</DialogDescription>
 				</DialogHeader>
@@ -548,7 +549,8 @@ function NewApiKeyModal({
 }
 
 // API Keys Management Card Component
-function ApiKeysCard({
+// TODO: Maybe use this when we have API page
+export function ApiKeysCard({
 	organization: _organization,
 	apiKeys,
 	actionData: _actionData,
@@ -588,45 +590,45 @@ function ApiKeysCard({
 			>
 				{/* Existing API keys */}
 				<div className="space-y-3">
-					{apiKeys.map((apiKey) => (
-						<div
-							key={apiKey.id}
-							className="flex items-center justify-between rounded-lg border p-4"
-						>
-							<div className="flex flex-1 items-center justify-between">
-								<div>
-									<div className="font-medium">{apiKey.name}</div>
-									<div className="text-muted-foreground text-sm">
-										<Trans>
-											Created {new Date(apiKey.createdAt).toLocaleDateString()}
-										</Trans>
-										{apiKey.expiresAt && (
-											<span className="ml-2">
-												•{' '}
-												<Trans>
-													Expires{' '}
-													{new Date(apiKey.expiresAt).toLocaleDateString()}
-												</Trans>
-											</span>
-										)}
+					{apiKeys.map((apiKey) => {
+						const createdDate = new Date(apiKey.createdAt).toLocaleDateString()
+						const expireDate = apiKey.expiresAt
+							? new Date(apiKey.expiresAt).toLocaleDateString()
+							: null
+						return (
+							<div
+								key={apiKey.id}
+								className="flex items-center justify-between rounded-lg border p-4"
+							>
+								<div className="flex flex-1 items-center justify-between">
+									<div>
+										<div className="font-medium">{apiKey.name}</div>
+										<div className="text-muted-foreground text-sm">
+											<Trans>Created {createdDate}</Trans>
+											{expireDate && (
+												<span className="ml-2">
+													• <Trans>Expires {expireDate}</Trans>
+												</span>
+											)}
+										</div>
+									</div>
+									<div className="bg-muted mr-2 flex h-8 items-center gap-2 rounded p-4 py-0 font-mono text-xs">
+										<span>
+											{apiKey.key.substring(0, 8)}...
+											{apiKey.key.substring(apiKey.key.length - 8)}
+										</span>
 									</div>
 								</div>
-								<div className="bg-muted mr-2 flex h-8 items-center gap-2 rounded p-4 py-0 font-mono text-xs">
-									<span>
-										{apiKey.key.substring(0, 8)}...
-										{apiKey.key.substring(apiKey.key.length - 8)}
-									</span>
-								</div>
+								<Form method="post">
+									<input type="hidden" name="intent" value="delete" />
+									<input type="hidden" name="keyId" value={apiKey.id} />
+									<Button variant="secondary" size="sm" type="submit">
+										<Icon name="trash-2" className="h-4 w-4" />
+									</Button>
+								</Form>
 							</div>
-							<Form method="post">
-								<input type="hidden" name="intent" value="delete" />
-								<input type="hidden" name="keyId" value={apiKey.id} />
-								<Button variant="secondary" size="sm" type="submit">
-									<Icon name="trash-2" className="h-4 w-4" />
-								</Button>
-							</Form>
-						</div>
-					))}
+						)
+					})}
 					{apiKeys.length === 0 && (
 						<EmptyState
 							title={t`No API keys created yet`}
@@ -686,6 +688,8 @@ function SetupInstructionsCard({
 		null,
 		2,
 	)
+
+	const orgSlug = organization.slug
 
 	return (
 		<Card className="w-full">
@@ -842,8 +846,7 @@ function SetupInstructionsCard({
 						<ul className="text-muted-foreground list-inside list-disc space-y-1 text-xs">
 							<li>
 								<Trans>
-									OAuth tokens are scoped to your organization (
-									{organization.slug})
+									OAuth tokens are scoped to your organization ({orgSlug})
 								</Trans>
 							</li>
 							<li>
@@ -911,57 +914,59 @@ function AuthorizedClientsCard({
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{authorizations.map((auth) => (
-								<TableRow key={auth.id}>
-									<TableCell>
-										<div className="flex flex-col">
-											<span className="font-medium">{auth.clientName}</span>
-											<span className="text-muted-foreground text-xs">
-												<Trans>
-													Authorized{' '}
-													{new Date(auth.createdAt).toLocaleDateString()}
-												</Trans>
-											</span>
-										</div>
-									</TableCell>
-									<TableCell className="text-muted-foreground text-sm">
-										{auth.lastUsedAt ? (
-											new Date(auth.lastUsedAt).toLocaleString()
-										) : (
-											<Trans>Never used</Trans>
-										)}
-									</TableCell>
-									<TableCell>
-										<Badge
-											variant={auth.isActive ? 'default' : 'destructive'}
-											className="text-xs"
-										>
-											{auth.isActive ? (
-												<Trans>Active</Trans>
+							{authorizations.map((auth) => {
+								const createdAt = new Date(auth.createdAt).toLocaleDateString()
+								return (
+									<TableRow key={auth.id}>
+										<TableCell>
+											<div className="flex flex-col">
+												<span className="font-medium">{auth.clientName}</span>
+												<span className="text-muted-foreground text-xs">
+													<Trans>Authorized {createdAt}</Trans>
+												</span>
+											</div>
+										</TableCell>
+										<TableCell className="text-muted-foreground text-sm">
+											{auth.lastUsedAt ? (
+												new Date(auth.lastUsedAt).toLocaleString()
 											) : (
-												<Trans>Revoked</Trans>
+												<Trans>Never used</Trans>
 											)}
-										</Badge>
-									</TableCell>
-									<TableCell className="text-right">
-										{auth.isActive ? (
-											<Button
-												variant="destructive"
-												size="xs"
-												onClick={() => onRevokeClick(auth.id, auth.clientName)}
-												className="gap-2"
+										</TableCell>
+										<TableCell>
+											<Badge
+												variant={auth.isActive ? 'default' : 'destructive'}
+												className="text-xs"
 											>
-												<Icon name="trash-2" className="h-4 w-4" />
-												<Trans>Revoke</Trans>
-											</Button>
-										) : (
-											<Badge variant="outline" className="text-xs">
-												<Trans>Revoked</Trans>
+												{auth.isActive ? (
+													<Trans>Active</Trans>
+												) : (
+													<Trans>Revoked</Trans>
+												)}
 											</Badge>
-										)}
-									</TableCell>
-								</TableRow>
-							))}
+										</TableCell>
+										<TableCell className="text-right">
+											{auth.isActive ? (
+												<Button
+													variant="destructive"
+													size="xs"
+													onClick={() =>
+														onRevokeClick(auth.id, auth.clientName)
+													}
+													className="gap-2"
+												>
+													<Icon name="trash-2" className="h-4 w-4" />
+													<Trans>Revoke</Trans>
+												</Button>
+											) : (
+												<Badge variant="outline" className="text-xs">
+													<Trans>Revoked</Trans>
+												</Badge>
+											)}
+										</TableCell>
+									</TableRow>
+								)
+							})}
 						</TableBody>
 					</Table>
 				)}
@@ -1240,8 +1245,7 @@ function AvailableToolsCard({
 }
 
 export default function McpPage() {
-	const { organization, apiKeys, mcpAuthorizations } =
-		useLoaderData<typeof loader>()
+	const { organization, mcpAuthorizations } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 	const submit = useSubmit()
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -1287,13 +1291,14 @@ export default function McpPage() {
 		setIsRevoking(false)
 	}
 
+	const organizationName = organization.name
+
 	return (
 		<div className="py-8 md:p-8">
 			<div className="mb-8">
 				<PageTitle
 					title={t`MCP Server`}
-					description={t`Connect your AI assistants to ${organization.name} data using the
-							Model Context Protocol`}
+					description={t`Connect your AI assistants to ${organizationName} data using the Model Context Protocol`}
 				/>
 			</div>
 

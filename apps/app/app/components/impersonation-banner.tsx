@@ -14,6 +14,9 @@ export function ImpersonationBanner({
 	const startedAt = new Date(impersonationInfo.startedAt)
 	const duration = Math.floor((Date.now() - startedAt.getTime()) / 1000 / 60) // minutes
 
+	// Extract for lingui compliance
+	const targetName = impersonationInfo.targetName
+
 	return (
 		<div className="border-b border-yellow-200 bg-yellow-50 px-4 py-3">
 			<div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -28,8 +31,7 @@ export function ImpersonationBanner({
 						</span>
 						<span className="ml-2 text-yellow-700">
 							<Trans>
-								You are impersonating{' '}
-								<strong>{impersonationInfo.targetName}</strong>
+								You are impersonating <strong>{targetName}</strong>
 							</Trans>
 						</span>
 						<span className="ml-2 text-yellow-600">

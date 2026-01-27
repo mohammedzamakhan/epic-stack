@@ -1,15 +1,15 @@
+import { requireUserId } from '@repo/auth'
 import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 	type OnboardingProgressData,
 } from '@repo/common/onboarding'
+import { getSidebarState } from '@repo/common/sidebar-cookie'
 import { Outlet, useLoaderData } from 'react-router'
-import { MarketingLayout } from '#app/components/marketing-layout.tsx'
-import { requireUserId } from '@repo/auth'
 import { ENV } from 'varlock/env'
+import { MarketingLayout } from '#app/components/marketing-layout.tsx'
 import { getUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 import { getTrialStatus } from '#app/utils/payments.server.ts'
-import { getSidebarState } from '@repo/common/sidebar-cookie'
 
 export async function loader({ request }: { request: Request }) {
 	const isCollapsed = await getSidebarState(request)

@@ -1,5 +1,6 @@
 import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { getNoteImgSrc, getUserImgSrc } from '@repo/common'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -7,7 +8,6 @@ import { formatDistanceToNow } from 'date-fns'
 import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useMemo, useState } from 'react'
-import { getNoteImgSrc, getUserImgSrc } from '@repo/common'
 
 import CommentInput, { type MentionUser } from './comment-input'
 

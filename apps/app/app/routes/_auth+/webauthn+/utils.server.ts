@@ -1,11 +1,11 @@
+import { getDomainUrl } from '@repo/common'
 import {
 	type AuthenticationResponseJSON,
 	type RegistrationResponseJSON,
 } from '@simplewebauthn/server'
 import { createCookie } from 'react-router'
-import { z } from 'zod'
 import { ENV } from 'varlock/env'
-import { getDomainUrl } from '@repo/common'
+import { z } from 'zod'
 
 export const passkeyCookie = createCookie('webauthn-challenge', {
 	path: '/',

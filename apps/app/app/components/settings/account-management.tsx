@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/macro'
+import { useDoubleCheck } from '@repo/common'
 import { Icon } from '@repo/ui/icon'
 import { StatusButton } from '@repo/ui/status-button'
 import { useFetcher } from 'react-router'
 import { deleteDataActionIntent } from '#app/routes/_app+/security.tsx'
-import { useDoubleCheck } from '@repo/common'
 
 export function DeleteData() {
 	const dc = useDoubleCheck()

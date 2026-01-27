@@ -1,24 +1,16 @@
-import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
-import { prisma } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
+import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import { OrgNoteEditor } from './__org-note-editor.tsx'
 
 export { action } from './__org-note-editor.server.tsx'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-	await requireUserId(request)
-	const orgSlug = params.orgSlug
-
-	// Get the organization ID
-	const organization = await prisma.organization.findFirst({
-		where: { slug: orgSlug },
-		select: { id: true },
+	// Verify user is authenticated AND is a member of the organization
+	const organization = await requireUserOrganization(request, params.orgSlug, {
+		id: true,
 	})
-
-	invariantResponse(organization, 'Organization not found', { status: 404 })
 
 	return { organizationId: organization.id }
 }

@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
 import { verifyUserPassword } from '@repo/auth'
+import { prisma } from '@repo/database'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, createUser, waitFor } from '#tests/playwright-utils.ts'
 
@@ -87,6 +87,7 @@ test('Users can update their profile photo', async ({
 		.getAttribute('src')
 
 	// Set the file input directly - this will trigger the dialog to open
+	// eslint-disable-next-line playwright/no-raw-locators -- file inputs don't have accessible roles, must use attribute selector
 	const fileInput = page.locator('input[type="file"][accept="image/*"]')
 	await expect(fileInput).toBeAttached()
 	await fileInput.setInputFiles('./tests/fixtures/images/user/kody.png')
@@ -133,9 +134,11 @@ test('Users can change their email address', async ({
 
 	// Target the DialogTrigger button specifically using data attributes
 	// This is the button that actually opens the email dialog
+	/* eslint-disable playwright/no-raw-locators -- data-slot attribute filter needed to distinguish dialog trigger button */
 	const changeEmailButton = page
 		.getByRole('button', { name: /change/i })
 		.filter({ has: page.locator('[data-slot="dialog-trigger"]') })
+	/* eslint-enable playwright/no-raw-locators */
 	await expect(changeEmailButton).toBeVisible()
 	await changeEmailButton.click()
 

@@ -1,10 +1,10 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { requireUserWithRole } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Link } from 'react-router'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
 export const handle: SEOHandle = {
@@ -94,6 +94,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 	const { metrics } = loaderData
 	const { _ } = useLingui()
+	const recentUsers = metrics.recentUsers
+	const active = metrics.activeOrganizations
+	const recent = metrics.recentOrganizations
 
 	return (
 		<div className="space-y-6">
@@ -135,10 +138,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 							{metrics.totalUsers.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							{(() => {
-								const recentUsers = metrics.recentUsers
-								return <Trans>+{recentUsers} new this week</Trans>
-							})()}
+							<Trans>+{recentUsers} new this week</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -170,8 +170,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 						</div>
 						<p className="text-muted-foreground text-xs">
 							<Trans>
-								{metrics.activeOrganizations} active • +
-								{metrics.recentOrganizations} new this week
+								{active} active • +{recent} new this week
 							</Trans>
 						</p>
 					</CardContent>

@@ -1,16 +1,7 @@
 import { prisma } from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import {
-	createAuthorizationCode,
-	exchangeAuthorizationCode,
-	refreshAccessToken,
-	validateAccessToken,
-	generateToken,
-	hashToken,
-	ACCESS_TOKEN_EXPIRATION,
-	REFRESH_TOKEN_EXPIRATION,
-} from '#app/utils/mcp/oauth.server.ts'
+import { generateToken } from '#app/utils/mcp/oauth.server.ts'
 import {
 	checkRateLimit,
 	RATE_LIMITS,
@@ -25,7 +16,6 @@ import {
 describe('MCP OAuth Rate Limiting Integration Tests', () => {
 	let testUserId: string
 	let testOrgId: string
-	let testAuthorizationId: string
 
 	beforeEach(async () => {
 		// Clean up test data
@@ -77,7 +67,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		// Create a test authorization
-		const auth = await prisma.mCPAuthorization.create({
+		await prisma.mCPAuthorization.create({
 			data: {
 				userId: testUserId,
 				organizationId: testOrgId,
@@ -85,7 +75,6 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 				clientId: generateToken(),
 			},
 		})
-		testAuthorizationId = auth.id
 	})
 
 	afterEach(async () => {
@@ -263,33 +252,29 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			}
 		})
 
-		it(
-			'should reject tool invocations exceeding the limit',
-			async () => {
-				const accessToken = generateToken()
+		it('should reject tool invocations exceeding the limit', async () => {
+			const accessToken = generateToken()
 
-				// Make 1000 requests (at limit) - batch them for speed
-				const batchSize = 100
-				for (let batch = 0; batch < 10; batch++) {
-					await Promise.all(
-						Array.from({ length: batchSize }, () =>
-							checkRateLimit(
-								{ type: 'token', value: accessToken },
-								RATE_LIMITS.toolInvocation,
-							),
+			// Make 1000 requests (at limit) - batch them for speed
+			const batchSize = 100
+			for (let batch = 0; batch < 10; batch++) {
+				await Promise.all(
+					Array.from({ length: batchSize }, () =>
+						checkRateLimit(
+							{ type: 'token', value: accessToken },
+							RATE_LIMITS.toolInvocation,
 						),
-					)
-				}
-
-				// 1001st request should be rejected
-				const result = await checkRateLimit(
-					{ type: 'token', value: accessToken },
-					RATE_LIMITS.toolInvocation,
+					),
 				)
-				expect(result.allowed).toBe(false)
-			},
-			15000,
-		) // 15 second timeout
+			}
+
+			// 1001st request should be rejected
+			const result = await checkRateLimit(
+				{ type: 'token', value: accessToken },
+				RATE_LIMITS.toolInvocation,
+			)
+			expect(result.allowed).toBe(false)
+		}, 15000) // 15 second timeout
 
 		it('should isolate rate limits between different tokens', async () => {
 			const token1 = generateToken()

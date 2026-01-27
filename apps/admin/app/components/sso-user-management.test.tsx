@@ -244,7 +244,7 @@ describe('SSOUserManagement', () => {
 	})
 
 	it('calls onRoleChange when role is changed', async () => {
-		const user = userEvent.setup()
+		const ignoredUser = userEvent.setup()
 		const onRoleChange = vi.fn()
 
 		render(<SSOUserManagement {...defaultProps} onRoleChange={onRoleChange} />)

@@ -1,3 +1,4 @@
+import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
@@ -9,7 +10,6 @@ import {
 import { BillingCard } from '#app/components/settings/cards/organization/billing-card.tsx'
 import { InvoicesCard } from '#app/components/settings/cards/organization/invoices-card.tsx'
 
-import { requireUserId } from '@repo/auth'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {

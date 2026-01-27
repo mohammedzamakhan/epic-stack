@@ -1,13 +1,13 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invariant } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
-import { useLoaderData } from 'react-router'
-import { z } from 'zod'
+import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
+import { useLoaderData } from 'react-router'
+import { z } from 'zod'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
 import { type Route } from './+types/$organizationId.sso.users.ts'
 
@@ -355,6 +355,7 @@ export default function AdminOrganizationSSOUsersPage() {
 	}
 
 	const organization = org as { id: string; name: string; slug: string }
+	const organizationName = organization.name
 
 	const handleRoleChange = (userId: string, roleId: string) => {
 		const form = document.createElement('form')
@@ -414,7 +415,7 @@ export default function AdminOrganizationSSOUsersPage() {
 					</h1>
 					<p className="text-muted-foreground">
 						<Trans>
-							Manage users who authenticate through SSO for {organization.name}
+							Manage users who authenticate through SSO for {organizationName}
 						</Trans>
 					</p>
 				</div>

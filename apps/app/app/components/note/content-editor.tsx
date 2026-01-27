@@ -1,8 +1,8 @@
+import { cn } from '@repo/ui'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useImperativeHandle, forwardRef } from 'react'
 import { Markdown } from 'tiptap-markdown'
-import { cn } from '@repo/ui'
 
 interface ContentEditorProps {
 	value: string

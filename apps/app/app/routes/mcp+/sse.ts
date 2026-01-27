@@ -1,9 +1,6 @@
+import { logMCPToolInvoked, logMCPRateLimitExceeded } from '@repo/audit'
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import {
-	logMCPToolInvoked,
-	logMCPRateLimitExceeded,
-} from '@repo/audit'
 import { validateAccessToken } from '#app/utils/mcp/oauth.server.ts'
 import {
 	getToolDefinitions,
@@ -72,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	let jsonRpcRequest: any
 	try {
 		jsonRpcRequest = await request.json()
-	} catch (ignoredError) {
+	} catch {
 		return Response.json(
 			{
 				jsonrpc: '2.0',
@@ -315,7 +312,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 							controller.enqueue(
 								encoder.encode(`data: ${JSON.stringify(heartbeat)}\n\n`),
 							)
-						} catch (error) {
+						} catch {
 							clearInterval(heartbeatInterval)
 							isClosed = true
 						}

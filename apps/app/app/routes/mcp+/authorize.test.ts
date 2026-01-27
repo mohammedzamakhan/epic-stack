@@ -5,7 +5,6 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
 	createAuthorizationCode,
 	hashToken,
-	generateToken,
 	AUTHORIZATION_CODE_EXPIRATION,
 } from '#app/utils/mcp/oauth.server.ts'
 
@@ -66,7 +65,7 @@ describe('OAuth Authorization Endpoint', () => {
 			await fc.assert(
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
-					async (clientName) => {
+					async () => {
 						const { user, session } = await createTestUserWithSession()
 						const org = await createTestOrganization(user.id)
 
@@ -98,7 +97,7 @@ describe('OAuth Authorization Endpoint', () => {
 			await fc.assert(
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
-					async (clientName) => {
+					async () => {
 						// Create user without session
 						const user = await prisma.user.create({
 							data: {
@@ -200,7 +199,7 @@ describe('OAuth Authorization Endpoint', () => {
 			await fc.assert(
 				fc.asyncProperty(
 					fc.string({ minLength: 1, maxLength: 100 }),
-					async (clientName) => {
+					async () => {
 						const { user } = await createTestUserWithSession()
 						const org = await createTestOrganization(user.id)
 

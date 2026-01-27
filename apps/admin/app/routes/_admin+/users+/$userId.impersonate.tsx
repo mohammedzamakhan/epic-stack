@@ -1,11 +1,14 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { data, redirect } from 'react-router'
 import { auditService, AuditAction } from '@repo/audit'
-import { authSessionStorage } from '@repo/auth'
+import {
+	authSessionStorage,
+	sessionKey,
+	getSessionExpirationDate,
+	requireUserWithRole,
+} from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
 import { prisma } from '@repo/database'
-import { sessionKey, getSessionExpirationDate } from '@repo/auth'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { data, redirect } from 'react-router'
 
 export async function action({
 	request,

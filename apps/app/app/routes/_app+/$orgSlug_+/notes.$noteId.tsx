@@ -3,6 +3,7 @@ import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { logNoteActivity, getNoteActivityLogs } from '@repo/audit'
+import { requireUserId } from '@repo/auth'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
@@ -73,7 +74,6 @@ import {
 	CanDeleteNote,
 } from '#app/components/permissions/permission-guard.tsx'
 
-import { requireUserId } from '@repo/auth'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
 import {
 	notifyCommentMentions,
@@ -1906,11 +1906,14 @@ export function ErrorBoundary() {
 						<Trans>You do not have permission to view this note</Trans>
 					</p>
 				),
-				404: ({ params }) => (
-					<p>
-						<Trans>No note with the id "{params.noteId}" exists</Trans>
-					</p>
-				),
+				404: ({ params }) => {
+					const noteId = params.noteId
+					return (
+						<p>
+							<Trans>No note with the id "{noteId}" exists</Trans>
+						</p>
+					)
+				},
 			}}
 		/>
 	)

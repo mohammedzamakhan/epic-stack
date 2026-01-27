@@ -19,7 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			}),
 		])
 		return new Response('OK')
-	} catch (ignoredError: unknown) {
+	} catch {
 		return new Response('ERROR', { status: 500 })
 	}
 }

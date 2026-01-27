@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trans } from '@lingui/react/macro'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { useLocalSearchParams, router } from 'expo-router'
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -114,7 +113,6 @@ export default function VerifyCodeScreen() {
 		setIsResending(true)
 		try {
 			// TODO: Implement resend verification code API call
-			console.log('Resending verification code to:', email)
 
 			// Clear any existing errors
 			if (error) {

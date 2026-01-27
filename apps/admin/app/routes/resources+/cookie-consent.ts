@@ -1,5 +1,5 @@
-import { type ActionFunctionArgs } from 'react-router'
 import { setCookieConsentState } from '@repo/common/cookie-consent'
+import { type ActionFunctionArgs } from 'react-router'
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()

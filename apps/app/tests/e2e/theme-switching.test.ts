@@ -17,11 +17,13 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// First open the user dropdown menu in the sidebar
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
 		// Find and click theme switcher
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -52,10 +54,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Switch to light theme
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -86,10 +90,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Find and click theme switcher
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -129,10 +135,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -170,10 +178,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -218,10 +228,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Switch to dark theme and verify it works
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
@@ -253,6 +265,7 @@ test.describe('Theme Switching', () => {
 		await navigate('/:slug', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
@@ -294,10 +307,12 @@ test.describe('Theme Switching', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Use mouse interaction for more reliable theme switching
+		// eslint-disable-next-line playwright/no-raw-locators
 		const userMenuButton = page.locator('[data-sidebar="menu-button"]').last()
 		await userMenuButton.scrollIntoViewIfNeeded()
 		await userMenuButton.click()
 
+		// eslint-disable-next-line playwright/no-raw-locators
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })

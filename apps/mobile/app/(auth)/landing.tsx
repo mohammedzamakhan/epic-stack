@@ -1,5 +1,4 @@
-import { Trans } from '@lingui/react/macro'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { useRouter } from 'expo-router'
 import React, { useState, useRef } from 'react'
 import {

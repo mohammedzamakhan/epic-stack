@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/macro'
 import { type Organization, type User, type UserImage } from '@prisma/client'
+import { requireUserWithRole } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { useLoaderData } from 'react-router'
 import { AdminUsersTable } from '#app/components/admin-users-table.tsx'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/index.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {

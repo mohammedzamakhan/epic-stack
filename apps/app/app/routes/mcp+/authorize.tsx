@@ -1,5 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
+import {
+	logMCPAuthorizationApproved,
+	logMCPAuthorizationDenied,
+} from '@repo/audit'
+import { getUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -28,11 +33,6 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 } from 'react-router'
-import { getUserId } from '@repo/auth'
-import {
-	logMCPAuthorizationApproved,
-	logMCPAuthorizationDenied,
-} from '@repo/audit'
 import {
 	createAuthorizationCode,
 	validateMCPRedirectUri,
@@ -61,7 +61,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	})
 
 	// Validate redirect URI to prevent open redirect attacks
-	const redirectUriValidation = validateMCPRedirectUri(redirectUri)
+	// Pass clientId to validate against registered redirect URIs
+	const redirectUriValidation = await validateMCPRedirectUri(
+		redirectUri,
+		clientId || undefined,
+	)
 	invariantResponse(
 		redirectUriValidation.isValid,
 		redirectUriValidation.error || 'Invalid redirect_uri',
@@ -114,6 +118,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	return {
 		user,
+		clientId,
 		clientName,
 		redirectUri,
 		state,
@@ -145,6 +150,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 	const organizationId = formData.get('organizationId')
+	const clientId = formData.get('clientId')
 	const clientName = formData.get('clientName')
 	const redirectUri = formData.get('redirectUri')
 	const state = formData.get('state')
@@ -158,8 +164,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	// Validate redirect URI again in action (defense in depth)
 	// This prevents attacks where form data could be tampered with
-	const actionRedirectUriValidation = validateMCPRedirectUri(
+	// Also validates against registered redirect URIs for the client
+	const actionRedirectUriValidation = await validateMCPRedirectUri(
 		redirectUri as string,
+		(clientId as string) || undefined,
 	)
 	invariantResponse(
 		actionRedirectUriValidation.isValid,
@@ -256,6 +264,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function AuthorizePage() {
 	const {
 		user,
+		clientId,
 		clientName,
 		redirectUri,
 		state,
@@ -400,6 +409,9 @@ export default function AuthorizePage() {
 								name="organizationId"
 								value={selectedOrgId}
 							/>
+							{clientId && (
+								<input type="hidden" name="clientId" value={clientId} />
+							)}
 							<input type="hidden" name="clientName" value={clientName} />
 							<input type="hidden" name="redirectUri" value={redirectUri} />
 							{state && <input type="hidden" name="state" value={state} />}
@@ -434,6 +446,9 @@ export default function AuthorizePage() {
 								name="organizationId"
 								value={selectedOrgId}
 							/>
+							{clientId && (
+								<input type="hidden" name="clientId" value={clientId} />
+							)}
 							<input type="hidden" name="clientName" value={clientName} />
 							<input type="hidden" name="redirectUri" value={redirectUri} />
 							{state && <input type="hidden" name="state" value={state} />}

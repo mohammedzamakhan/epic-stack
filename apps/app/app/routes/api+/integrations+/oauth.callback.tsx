@@ -1,7 +1,7 @@
+import { requireUserId } from '@repo/auth'
 import { redirectWithToast as _redirectWithToast } from '@repo/common/toast'
 import { handleOAuthCallback, OAuthStateManager } from '@repo/integrations'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserId } from '@repo/auth'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
 export async function loader(args: LoaderFunctionArgs) {

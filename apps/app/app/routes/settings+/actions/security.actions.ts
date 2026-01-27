@@ -1,4 +1,9 @@
 import { parseWithZod } from '@conform-to/zod'
+import {
+	verifyUserPassword,
+	getPasswordHash,
+	checkIsCommonPassword,
+} from '@repo/auth'
 import { prisma } from '@repo/database'
 import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
 import { z } from 'zod'
@@ -8,11 +13,6 @@ import {
 	twoFAVerifyVerificationType,
 } from '#app/routes/_app+/security.tsx'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import {
-	verifyUserPassword,
-	getPasswordHash,
-	checkIsCommonPassword,
-} from '@repo/auth'
 
 export const ChangePasswordSchema = z
 	.object({

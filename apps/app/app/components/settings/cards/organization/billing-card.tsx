@@ -398,6 +398,15 @@ function PricingPlan({
 	}
 
 	const displayPrice = billingInterval === 'yearly' ? basePrice / 12 : basePrice
+
+	const basePriceValue = basePrice.toFixed(2)
+	const includesSeatsValue = includesSeats
+	const monthlyPrice =
+		billingInterval === 'yearly'
+			? (additionalUserPrice / 12).toFixed(2)
+			: additionalUserPrice.toFixed(2)
+	const annualPrice = additionalUserPrice.toFixed(2)
+
 	return (
 		<Card className={currentPlan ? 'ring-primary ring-2' : ''}>
 			<CardHeader>
@@ -411,7 +420,7 @@ function PricingPlan({
 				</div>
 				{billingInterval === 'yearly' && (
 					<div className="text-muted-foreground text-sm">
-						<Trans>${basePrice.toFixed(2)} billed annually</Trans>
+						<Trans>${basePriceValue} billed annually</Trans>
 					</div>
 				)}
 				<CardDescription>{title}</CardDescription>
@@ -419,22 +428,16 @@ function PricingPlan({
 			<CardContent>
 				<ul className="text-muted-foreground mb-4 space-y-2 text-sm">
 					<li>
-						<Trans>Includes {includesSeats} user seats</Trans>
+						<Trans>Includes {includesSeatsValue} user seats</Trans>
 					</li>
 					{additionalUserPrice > 0 && (
 						<li>
-							<Trans>
-								Additional users: $
-								{billingInterval === 'yearly'
-									? (additionalUserPrice / 12).toFixed(2)
-									: additionalUserPrice.toFixed(2)}
-								/user/month
-								{billingInterval === 'yearly' && (
-									<span className="block text-xs opacity-75">
-										(${additionalUserPrice.toFixed(2)} billed annually per user)
-									</span>
-								)}
-							</Trans>
+							<Trans>Additional users: ${monthlyPrice}/user/month</Trans>
+							{billingInterval === 'yearly' && (
+								<span className="block text-xs opacity-75">
+									<Trans>(${annualPrice} billed annually per user)</Trans>
+								</span>
+							)}
 						</li>
 					)}
 				</ul>

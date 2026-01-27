@@ -21,6 +21,7 @@ test.describe('Notes CRUD Operations', () => {
 		// Content editor is a TipTap rich text editor using ProseMirror
 		const contentEditor = page
 			.getByRole('textbox', { name: /content/i })
+			// eslint-disable-next-line playwright/no-raw-locators
 			.or(page.locator('.ProseMirror'))
 		await contentEditor.waitFor({ state: 'visible' })
 		await contentEditor.fill(newNote.content)
@@ -61,6 +62,7 @@ test.describe('Notes CRUD Operations', () => {
 		// Content editor is a TipTap rich text editor using ProseMirror
 		const contentEditor = page
 			.getByRole('textbox', { name: /content/i })
+			// eslint-disable-next-line playwright/no-raw-locators
 			.or(page.locator('.ProseMirror'))
 		await contentEditor.waitFor({ state: 'visible' })
 		await contentEditor.fill(updatedNote.content)

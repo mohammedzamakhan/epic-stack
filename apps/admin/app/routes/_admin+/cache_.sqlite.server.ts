@@ -1,9 +1,9 @@
+import { cache } from '@repo/cache'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { redirect } from 'react-router'
-import { z } from 'zod'
-import { cache } from '@repo/cache'
-import { type Route } from './+types/cache_.sqlite.ts'
 import { ENV } from 'varlock/env'
+import { z } from 'zod'
+import { type Route } from './+types/cache_.sqlite.ts'
 
 export async function action({ request }: Route.ActionArgs) {
 	const { currentIsPrimary, primaryInstance } = await getInstanceInfo()

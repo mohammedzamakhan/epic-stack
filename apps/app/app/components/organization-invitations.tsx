@@ -284,49 +284,50 @@ export function OrganizationInvitations({
 									<Trans>Pending Invitations</Trans>
 								</h4>
 								<ItemGroup>
-									{pendingInvitations.map((invitation) => (
-										<Item key={invitation.id} variant="outline" size="sm">
-											<ItemContent>
-												<ItemTitle>
-													<span>{invitation.email}</span>
-													<Badge variant="secondary" className="text-xs">
-														{invitation.organizationRole.name}
-													</Badge>
-												</ItemTitle>
-												{invitation.inviter && (
-													<ItemDescription>
-														<Trans>
-															Invited by{' '}
-															{invitation.inviter.name ||
-																invitation.inviter.email}
-														</Trans>
-													</ItemDescription>
-												)}
-											</ItemContent>
-											<ItemActions>
-												<Form method="POST">
-													<input
-														type="hidden"
-														name="intent"
-														value="remove-invitation"
-													/>
-													<input
-														type="hidden"
-														name="invitationId"
-														value={invitation.id}
-													/>
-													<Button
-														type="submit"
-														variant="ghost"
-														size="sm"
-														aria-label={t`Delete invitation`}
-													>
-														<Icon name="trash-2" className="h-4 w-4" />
-													</Button>
-												</Form>
-											</ItemActions>
-										</Item>
-									))}
+									{pendingInvitations.map((invitation) => {
+										const inviterName = invitation.inviter
+											? invitation.inviter.name || invitation.inviter.email
+											: ''
+										return (
+											<Item key={invitation.id} variant="outline" size="sm">
+												<ItemContent>
+													<ItemTitle>
+														<span>{invitation.email}</span>
+														<Badge variant="secondary" className="text-xs">
+															{invitation.organizationRole.name}
+														</Badge>
+													</ItemTitle>
+													{invitation.inviter && (
+														<ItemDescription>
+															<Trans>Invited by {inviterName}</Trans>
+														</ItemDescription>
+													)}
+												</ItemContent>
+												<ItemActions>
+													<Form method="POST">
+														<input
+															type="hidden"
+															name="intent"
+															value="remove-invitation"
+														/>
+														<input
+															type="hidden"
+															name="invitationId"
+															value={invitation.id}
+														/>
+														<Button
+															type="submit"
+															variant="ghost"
+															size="sm"
+															aria-label={t`Delete invitation`}
+														>
+															<Icon name="trash-2" className="h-4 w-4" />
+														</Button>
+													</Form>
+												</ItemActions>
+											</Item>
+										)
+									})}
 								</ItemGroup>
 							</div>
 						</>

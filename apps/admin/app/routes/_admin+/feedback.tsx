@@ -1,3 +1,5 @@
+import { requireUserWithRole } from '@repo/auth'
+import { prisma } from '@repo/database'
 import {
 	type Feedback,
 	type Organization,
@@ -12,9 +14,6 @@ import {
 	TableRow,
 } from '@repo/ui/table'
 import { useLoaderData } from 'react-router'
-
-import { prisma } from '@repo/database'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')

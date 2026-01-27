@@ -1,6 +1,6 @@
+import { logMCPRateLimitExceeded } from '@repo/audit'
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs } from 'react-router'
-import { logMCPRateLimitExceeded } from '@repo/audit'
 import {
 	exchangeAuthorizationCode,
 	refreshAccessToken,
@@ -62,7 +62,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				{ status: 400 },
 			)
 		}
-	} catch (error) {
+	} catch {
 		return Response.json(
 			{
 				error: 'invalid_request',

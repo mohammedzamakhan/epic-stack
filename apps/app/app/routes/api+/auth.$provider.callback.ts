@@ -1,7 +1,11 @@
-import { normalizeEmail, normalizeUsername } from '@repo/auth'
+import {
+	normalizeEmail,
+	normalizeUsername,
+	canUserLogin,
+	ProviderNameSchema,
+} from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
-import { canUserLogin, ProviderNameSchema } from '@repo/auth'
 import { authenticator } from '#app/utils/auth.server.ts'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'

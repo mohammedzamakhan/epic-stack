@@ -1,5 +1,3 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { brand } from '@repo/config/brand'
@@ -13,7 +11,6 @@ import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const domain = 'app.' + brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
 const MODE = process.env.NODE_ENV

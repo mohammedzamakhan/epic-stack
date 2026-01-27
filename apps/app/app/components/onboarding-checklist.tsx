@@ -34,6 +34,10 @@ export function OnboardingChecklist({
 	const progressPercentage =
 		(progress.completedCount / progress.totalSteps) * 100
 
+	const percentage = Math.round(progressPercentage)
+	const completedCount = progress.completedCount
+	const totalSteps = progress.totalSteps
+
 	const handleStepAction = (step: any) => {
 		if (!step.actionConfig) return
 
@@ -97,7 +101,7 @@ export function OnboardingChecklist({
 						<Progress value={progressPercentage} />
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-medium">
-								<Trans>{Math.round(progressPercentage)}% complete</Trans>
+								<Trans>{percentage}% complete</Trans>
 							</span>
 							{progressPercentage === 100 && (
 								<div className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
@@ -120,7 +124,7 @@ export function OnboardingChecklist({
 				</h3>
 				<p className="text-muted-foreground text-sm">
 					<Trans>
-						{progress.completedCount} of {progress.totalSteps} completed
+						{completedCount} of {totalSteps} completed
 					</Trans>
 				</p>
 
@@ -187,9 +191,9 @@ export function OnboardingChecklist({
 							<div className="flex-shrink-0">
 								{step.isCompleted ? (
 									<span className="text-muted-foreground text-sm font-medium">
-										<Trans>
-											{step.actionConfig?.completedLabel || 'Completed'}
-										</Trans>
+										{step.actionConfig?.completedLabel || (
+											<Trans>Completed</Trans>
+										)}
 									</span>
 								) : (
 									step.actionConfig && (

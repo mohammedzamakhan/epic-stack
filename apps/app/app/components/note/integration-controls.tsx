@@ -15,7 +15,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { StatusButton } from '@repo/ui/status-button'
 import { useState } from 'react'

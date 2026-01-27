@@ -289,6 +289,7 @@ test.describe('Organization Invitations', () => {
 			name: /pending invitations/i,
 		})
 		const invitationRow = pendingSection.getByText(invitationEmail)
+		// eslint-disable-next-line playwright/no-raw-locators -- parent traversal needed to find submit button in same row
 		await invitationRow.locator('..').locator('button[type="submit"]').click()
 
 		// Verify invitation is no longer displayed (check that the email is not in pending invitations)

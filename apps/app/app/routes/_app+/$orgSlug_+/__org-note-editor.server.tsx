@@ -1,6 +1,8 @@
 import { parseWithZod } from '@conform-to/zod'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { createId as cuid } from '@paralleldrive/cuid2'
+import { logNoteActivity } from '@repo/audit'
+import { requireUserId } from '@repo/auth'
 import {
 	triggerVideoProcessing,
 	triggerImageProcessing,
@@ -10,8 +12,6 @@ import { prisma } from '@repo/database'
 import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { logNoteActivity } from '@repo/audit'
-import { requireUserId } from '@repo/auth'
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
 import {
 	uploadNoteImage,
@@ -45,9 +45,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	// Video processing will handle thumbnail uploads internally
 
-	// Find organization ID
+	// Find organization ID - ensure user is an active member
 	const organization = await prisma.organization.findFirst({
-		where: { slug: orgSlug, users: { some: { userId } } },
+		where: {
+			slug: orgSlug,
+			active: true,
+			users: { some: { userId, active: true } },
+		},
 		select: { id: true },
 	})
 

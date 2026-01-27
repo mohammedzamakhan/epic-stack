@@ -1,6 +1,6 @@
 import { prisma } from '@repo/database'
 import { getClientIp } from '@repo/security'
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 
 describe('Rate Limiting', () => {
@@ -245,7 +245,7 @@ describe('Rate Limiting', () => {
 			const now = Date.now()
 
 			// Create an entry that's outside the window
-			const oldEntry = await prisma.rateLimitEntry.create({
+			await prisma.rateLimitEntry.create({
 				data: {
 					keyId: `user:${userId}`,
 					keyType: 'user',

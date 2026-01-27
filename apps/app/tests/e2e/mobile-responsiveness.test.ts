@@ -65,6 +65,7 @@ test.describe('Mobile Responsiveness', () => {
 		// Look for sidebar trigger button (the sidebar should be collapsible on mobile)
 		const sidebarTrigger = page
 			.getByRole('button', { name: /toggle sidebar/i })
+			// eslint-disable-next-line playwright/no-raw-locators -- data-sidebar attribute not supported by semantic queries
 			.or(page.locator('[data-sidebar="trigger"]'))
 			.first()
 
@@ -128,6 +129,7 @@ test.describe('Mobile Responsiveness', () => {
 		await titleInput.fill('Mobile Test Note')
 
 		// Content editor is a TipTap rich text editor
+		// eslint-disable-next-line playwright/no-raw-locators -- ProseMirror uses CSS class, no semantic alternative
 		const contentInput = page
 			.locator('.ProseMirror')
 			.or(page.getByRole('textbox', { name: /content/i }))
@@ -238,6 +240,7 @@ test.describe('Mobile Responsiveness', () => {
 				}
 			}
 		} // Test swipe gestures if applicable
+		// eslint-disable-next-line playwright/no-raw-locators -- custom data attribute and CSS class combo
 		const swipeableElements = page.locator('[data-swipeable], .swipeable')
 		const swipeCount = await swipeableElements.count()
 
@@ -375,6 +378,7 @@ test.describe('Mobile Responsiveness', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Check for viewport meta tag
+		// eslint-disable-next-line playwright/no-raw-locators -- meta tags require CSS selector, no semantic query available
 		const viewportMeta = page.locator('head meta[name="viewport"]')
 		await expect(viewportMeta).toHaveAttribute('content', /width=device-width/)
 	})
@@ -434,6 +438,7 @@ test.describe('Mobile Responsiveness', () => {
 		await navigate('/:slug', { slug: org.slug })
 
 		// Look for loading indicators
+		// eslint-disable-next-line playwright/no-raw-locators -- combo selector with CSS classes for loading states
 		const loadingIndicators = page.locator(
 			'[data-testid="loading"], .loading, .spinner',
 		)

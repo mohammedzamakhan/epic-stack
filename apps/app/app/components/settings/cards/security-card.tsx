@@ -63,6 +63,10 @@ export function SecurityCard({
 	const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false)
 	const [isPasskeyModalOpen, setIsPasskeyModalOpen] = useState(false)
 
+	const orgName = ssoEnforcement?.organizationName
+	const sessionCount = user._count.sessions
+	const userEmail = user.email
+
 	return (
 		<Card className="w-full">
 			<CardHeader>
@@ -92,7 +96,7 @@ export function SecurityCard({
 									<span className="text-amber-600 dark:text-amber-500">
 										<Trans>
 											Password login is disabled because your organization "
-											{ssoEnforcement.organizationName}" requires SSO.
+											{orgName}" requires SSO.
 										</Trans>
 									</span>
 								) : hasPassword ? (
@@ -201,11 +205,11 @@ export function SecurityCard({
 									<Trans>
 										You're signed in on{' '}
 										<Plural
-											value={user._count.sessions}
+											value={sessionCount}
 											one="# device"
 											other="# devices"
 										/>{' '}
-										as {user.email}
+										as {userEmail}
 									</Trans>
 								) : (
 									<Trans>Register a passkey to log in without a password</Trans>

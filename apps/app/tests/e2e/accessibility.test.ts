@@ -112,6 +112,7 @@ test.describe('Accessibility', () => {
 		await page.keyboard.press('Tab')
 
 		// Verify focus is visible
+		// eslint-disable-next-line playwright/no-raw-locators -- *:focus is a CSS pseudo-selector with no semantic equivalent
 		const focusedElement = page.locator('*:focus')
 		await expect(focusedElement).toBeVisible()
 
@@ -225,6 +226,7 @@ test.describe('Accessibility', () => {
 			}
 
 			// Check text elements have sufficient contrast
+			// eslint-disable-next-line playwright/no-raw-locators -- CSS element selectors have no semantic equivalent
 			const textElements = page
 				.locator('p, span, div, h1, h2, h3, h4, h5, h6')
 				.or(page.getByRole('button'))
@@ -443,6 +445,7 @@ test.describe('Accessibility', () => {
 
 			if (errorCount > 0) {
 				// Verify error messages are associated with form fields
+				// eslint-disable-next-line playwright/no-raw-locators -- aria-invalid attribute selector has no semantic equivalent
 				const invalidFields = page.locator('[aria-invalid="true"]')
 				const invalidCount = await invalidFields.count()
 
@@ -452,6 +455,7 @@ test.describe('Accessibility', () => {
 					// Check if field has aria-describedby pointing to error message
 					const describedBy = await field.getAttribute('aria-describedby')
 					if (describedBy) {
+						// eslint-disable-next-line playwright/no-raw-locators -- dynamic ID selector required for aria-describedby lookup
 						const errorElement = page.locator(`#${describedBy}`)
 						await expect(errorElement).toBeVisible()
 					}
@@ -486,6 +490,7 @@ test.describe('Accessibility', () => {
 
 		// Test focus trap - focus should stay within dialog
 		await page.keyboard.press('Tab')
+		// eslint-disable-next-line playwright/no-raw-locators -- *:focus is a CSS pseudo-selector with no semantic equivalent
 		const focusedElement = page.locator('*:focus')
 
 		// Verify focused element is within the dialog

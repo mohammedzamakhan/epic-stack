@@ -64,7 +64,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@repo/ui/select'
 import { Separator } from '@repo/ui/separator'
 import {
@@ -234,8 +233,9 @@ const getColumns = (
 				onSubmit={(e) => {
 					e.preventDefault()
 					const { _ } = useLingui()
+					const headerValue = row.original.header
 					toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-						loading: _(msg`Saving ${row.original.header}`),
+						loading: _(msg`Saving ${headerValue}`),
 						success: _(msg`Done`),
 						error: _(msg`Error`),
 					})
@@ -264,8 +264,9 @@ const getColumns = (
 				onSubmit={(e) => {
 					e.preventDefault()
 					const { _ } = useLingui()
+					const headerValue = row.original.header
 					toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-						loading: _(msg`Saving ${row.original.header}`),
+						loading: _(msg`Saving ${headerValue}`),
 						success: _(msg`Done`),
 						error: _(msg`Error`),
 					})

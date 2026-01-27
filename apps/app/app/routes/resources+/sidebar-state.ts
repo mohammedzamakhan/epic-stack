@@ -1,6 +1,6 @@
 // app/routes/resources+/sidebar-state.ts
-import { type ActionFunctionArgs } from 'react-router'
 import { setSidebarState } from '@repo/common/sidebar-cookie'
+import { type ActionFunctionArgs } from 'react-router'
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()

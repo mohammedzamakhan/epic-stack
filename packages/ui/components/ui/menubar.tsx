@@ -1,10 +1,10 @@
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
-import { Icon } from '../icon'
 import { Menubar as MenubarPrimitive } from '@base-ui/react/menubar'
 
 import * as React from 'react'
 
 import { cn } from '../../lib/utils'
+import { Icon } from '../icon'
 import {
 	DropdownMenu,
 	DropdownMenuContent,

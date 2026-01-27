@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
 import { type AppLoadContext } from 'react-router'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import {
 	validateAccessToken,
 	createAuthorizationWithTokens,
@@ -39,10 +39,7 @@ async function createTestUser(createdUserIds: string[]) {
 }
 
 // Helper to create test organization
-async function createTestOrganization(
-	userId: string,
-	createdOrgIds: string[],
-) {
+async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	// Ensure admin role exists
 	let adminRole = await prisma.organizationRole.findUnique({
 		where: { name: 'admin' },

@@ -75,6 +75,8 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 	const tomorrow = new Date()
 	tomorrow.setDate(tomorrow.getDate() + 1)
 	const minDate = tomorrow.toISOString().split('T')[0]
+	const displayName = user.name || user.username
+	const userEmail = user.email
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
@@ -86,9 +88,8 @@ export function BanUserDialog({ user, isOpen, onClose }: BanUserDialogProps) {
 					</DialogTitle>
 					<DialogDescription>
 						<Trans>
-							You are about to ban <strong>{user.name || user.username}</strong>{' '}
-							({user.email}). This will prevent them from accessing the
-							application.
+							You are about to ban <strong>{displayName}</strong> ({userEmail}).
+							This will prevent them from accessing the application.
 						</Trans>
 					</DialogDescription>
 				</DialogHeader>

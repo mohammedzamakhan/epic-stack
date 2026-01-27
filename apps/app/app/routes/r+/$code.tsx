@@ -1,8 +1,7 @@
-import { verifySessionStorage } from '@repo/auth'
+import { verifySessionStorage, getUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { redirect } from 'react-router'
-import { getUserId } from '@repo/auth'
 import { linkReferral } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/$code.ts'
 

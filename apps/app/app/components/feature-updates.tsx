@@ -1,9 +1,9 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Icon } from '@repo/ui/icon'
-import { useState, useEffect } from 'react'
 import { cn } from '@repo/ui'
+import { Icon } from '@repo/ui/icon'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 interface FeatureUpdate {
 	id: string

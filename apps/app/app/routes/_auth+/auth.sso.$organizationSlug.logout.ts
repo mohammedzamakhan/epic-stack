@@ -1,7 +1,6 @@
-import { authSessionStorage } from '@repo/auth'
+import { authSessionStorage, logout, sessionKey } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { safeRedirect } from 'remix-utils/safe-redirect'
-import { logout, sessionKey } from '@repo/auth'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'

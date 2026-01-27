@@ -486,7 +486,7 @@ export class AuditService {
 		organizationId?: string,
 	): Promise<Date | null> {
 		// Default retention: 1 year (365 days)
-		// In a real implementation, this would query organization settings
+		// TODO: In a real implementation, this would query organization settings
 		const date = new Date()
 		date.setDate(date.getDate() + 365)
 		return date
@@ -515,7 +515,7 @@ export class AuditService {
 	}
 
 	async getRetentionPolicy(organizationId: string) {
-		// Mock implementation - in real world this would query DB
+		// TODO: In real world this would query DB
 		return {
 			retentionDays: 365,
 			hotStorageDays: 90,
@@ -526,12 +526,12 @@ export class AuditService {
 	}
 
 	async updateRetentionPolicy(organizationId: string, data: any) {
-		// Mock implementation
+		// TODO: In real world this would query DB
 		return data
 	}
 
 	async archiveOldLogs() {
-		// Mock implementation
+		// TODO: In real world this would query DB
 		return { archived: 0, deleted: 0 }
 	}
 

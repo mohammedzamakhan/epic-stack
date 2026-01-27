@@ -1,4 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { requireUserWithRole } from '@repo/auth'
 import { getIpAddressesByUser } from '@repo/common/ip-tracking'
 import { prisma } from '@repo/database'
 import { useLoaderData } from 'react-router'
@@ -7,7 +8,6 @@ import {
 	type AdminUserDetail,
 	type RecentActivity,
 } from '#app/components/admin-user-detail.tsx'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({
 	request,

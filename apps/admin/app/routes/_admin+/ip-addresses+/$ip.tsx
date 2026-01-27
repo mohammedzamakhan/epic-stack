@@ -1,4 +1,6 @@
 import { Trans } from '@lingui/macro'
+import { requireUserWithRole } from '@repo/auth'
+import { getUsersByIpAddress } from '@repo/common/ip-tracking'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -12,9 +14,6 @@ import {
 	TableRow,
 } from '@repo/ui/table'
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
-
-import { getUsersByIpAddress } from '@repo/common/ip-tracking'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
@@ -62,6 +61,9 @@ export default function AdminIpDetailPage() {
 		return new Date(date).toLocaleString()
 	}
 
+	const ip = ipAddress.ip
+	const count = userConnections.length
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -70,7 +72,7 @@ export default function AdminIpDetailPage() {
 						<Trans>IP Address Details</Trans>
 					</h1>
 					<p className="text-muted-foreground">
-						<Trans>Detailed information for IP {ipAddress.ip}</Trans>
+						<Trans>Detailed information for IP {ip}</Trans>
 					</p>
 				</div>
 				<Button variant="outline">
@@ -93,7 +95,7 @@ export default function AdminIpDetailPage() {
 							<label className="text-muted-foreground text-sm font-medium">
 								<Trans>IP Address</Trans>
 							</label>
-							<p className="font-mono text-lg">{ipAddress.ip}</p>
+							<p className="font-mono text-lg">{ip}</p>
 						</div>
 
 						<div>
@@ -225,9 +227,7 @@ export default function AdminIpDetailPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						<Trans>
-							Users Associated with this IP ({userConnections.length})
-						</Trans>
+						<Trans>Users Associated with this IP ({count})</Trans>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>

@@ -1,13 +1,13 @@
-import { Icon } from '@repo/ui/icon'
-import { StatusButton } from '@repo/ui/status-button'
-import { Form } from 'react-router'
-import { useIsPending } from '@repo/common'
 import {
 	type ProviderName,
 	providerLabels,
 	GITHUB_PROVIDER_NAME,
 	GOOGLE_PROVIDER_NAME,
 } from '@repo/auth/constants'
+import { useIsPending } from '@repo/common'
+import { Icon } from '@repo/ui/icon'
+import { StatusButton } from '@repo/ui/status-button'
+import { Form } from 'react-router'
 import { saveLastLoginMethod, type LoginMethod } from './last-login-method.ts'
 
 export const providerIcons: Record<ProviderName, React.ReactNode> = {

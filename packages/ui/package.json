@@ -89,6 +89,7 @@
     "dev": "node generate-icons.js --watch",
     "build": "node generate-icons.js && tsc",
     "lint": "oxlint . && eslint . --ignore-pattern '.storybook/**' --ignore-pattern '**/*.stories.tsx' --ignore-pattern '**/*.stories.ts'",
+    "lint:fix": "eslint . --ignore-pattern '.storybook/**' --ignore-pattern '**/*.stories.tsx' --ignore-pattern '**/*.stories.ts' --fix",
     "lint:oxc": "oxlint .",
     "lint:oxc:fix": "oxlint --fix .",
     "typecheck": "tsc --noEmit",

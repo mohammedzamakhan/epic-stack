@@ -1,6 +1,8 @@
-import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
+import { requireUserWithRole } from '@repo/auth'
+import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -22,9 +24,7 @@ import {
 	useNavigation,
 	useSearchParams,
 } from 'react-router'
-import { prisma } from '@repo/database'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import {
 	grantEarlyAccess,
 	revokeEarlyAccess,
@@ -238,6 +238,14 @@ export default function AdminWaitlistPage() {
 		setSearchParams(newParams)
 	}
 
+	const launchStatus = data.launchStatus
+	const totalCount = data.pagination.totalCount
+	const startEntry = (data.pagination.page - 1) * data.pagination.pageSize + 1
+	const endEntry = Math.min(
+		data.pagination.page * data.pagination.pageSize,
+		data.pagination.totalCount,
+	)
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -249,7 +257,7 @@ export default function AdminWaitlistPage() {
 				</p>
 			</div>
 
-			{data.launchStatus !== 'CLOSED_BETA' && (
+			{launchStatus !== 'CLOSED_BETA' && (
 				<Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
 					<CardContent>
 						<div className="flex items-start gap-2">
@@ -259,9 +267,9 @@ export default function AdminWaitlistPage() {
 							/>
 							<div className="text-sm text-yellow-800 dark:text-yellow-200">
 								<Trans>
-									Launch status is currently{' '}
-									<strong>{data.launchStatus}</strong>. The waitlist is only
-									active when LAUNCH_STATUS is set to CLOSED_BETA.
+									Launch status is currently <strong>{launchStatus}</strong>.
+									The waitlist is only active when LAUNCH_STATUS is set to
+									CLOSED_BETA.
 								</Trans>
 							</div>
 						</div>
@@ -312,7 +320,7 @@ export default function AdminWaitlistPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle>
-						<Trans>Waitlist Entries ({data.pagination.totalCount})</Trans>
+						<Trans>Waitlist Entries ({totalCount})</Trans>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -456,13 +464,7 @@ export default function AdminWaitlistPage() {
 						<div className="mt-4 flex items-center justify-between">
 							<div className="text-muted-foreground text-sm">
 								<Trans>
-									Showing{' '}
-									{(data.pagination.page - 1) * data.pagination.pageSize + 1} to{' '}
-									{Math.min(
-										data.pagination.page * data.pagination.pageSize,
-										data.pagination.totalCount,
-									)}{' '}
-									of {data.pagination.totalCount} entries
+									Showing {startEntry} to {endEntry} of {totalCount} entries
 								</Trans>
 							</div>
 							<div className="flex gap-2">

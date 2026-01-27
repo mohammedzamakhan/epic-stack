@@ -1,12 +1,6 @@
+import { t, Trans } from '@lingui/macro'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
 import {
 	Frame,
 	FramePanel,
@@ -27,7 +21,6 @@ import {
 import { Link } from 'react-router'
 
 import { EmptyState } from '#app/components/empty-state.tsx'
-import { t, Trans } from '@lingui/macro'
 
 type Invoice = {
 	id?: string

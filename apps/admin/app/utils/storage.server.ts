@@ -1,4 +1,5 @@
 import { type FileUpload } from '@mjackson/form-data-parser'
+import { prisma } from '@repo/database'
 import { decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	createStorageClient,
@@ -6,7 +7,6 @@ import {
 	type StorageConfig,
 	type UploadOptions,
 } from '@repo/storage'
-import { prisma } from '@repo/database'
 import { ENV } from 'varlock/env'
 
 // Default storage configuration from environment variables

@@ -21,13 +21,13 @@ import { StatusButton } from '@repo/ui/status-button'
 import { EmailSchema, UsernameSchema } from '@repo/validation'
 import { data, redirect, Link, Form, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import { ENV } from 'varlock/env'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.tsx'
 

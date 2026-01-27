@@ -1,8 +1,8 @@
 import { i18n } from '@lingui/core'
 import { t } from '@lingui/macro'
+import { getUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
-import { getUserId } from '@repo/auth'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
 
 export async function loader({ request }: LoaderFunctionArgs) {

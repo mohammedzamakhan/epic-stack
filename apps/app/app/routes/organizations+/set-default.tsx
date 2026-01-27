@@ -1,6 +1,6 @@
+import { requireUserId } from '@repo/auth'
 import { redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
-import { requireUserId } from '@repo/auth'
 import {
 	getUserOrganizations,
 	setUserDefaultOrganization,

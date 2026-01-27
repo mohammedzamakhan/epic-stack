@@ -1,7 +1,5 @@
 import { msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { useRef } from 'react'
-import { useFetcher } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import {
 	DropdownMenu,
@@ -20,6 +18,8 @@ import {
 	useSidebar,
 } from '@repo/ui/sidebar'
 import { SunMoonIcon } from '@repo/ui/sun-moon-icon'
+import { useRef } from 'react'
+import { useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 

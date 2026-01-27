@@ -1,7 +1,13 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { t, Trans } from '@lingui/macro'
-import { authSessionStorage, verifySessionStorage } from '@repo/auth'
+import {
+	authSessionStorage,
+	verifySessionStorage,
+	checkIsCommonPassword,
+	requireAnonymous,
+	sessionKey,
+} from '@repo/auth'
 import { useIsPending } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { getPageTitle } from '@repo/config/brand'
@@ -30,7 +36,6 @@ import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
-import { checkIsCommonPassword, requireAnonymous, sessionKey } from '@repo/auth'
 import { signup } from '#app/utils/auth.server.ts'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import { updateSeatQuantity } from '#app/utils/payments.server.ts'
@@ -159,11 +164,12 @@ export async function action({ request }: Route.ActionArgs) {
 
 			const inviterName =
 				invitation.inviter?.name || invitation.inviter?.email || 'Someone'
+			const orgName = invitation.organization.name
 			return redirectWithToast(
 				'/organizations',
 				{
 					title: t`Welcome!`,
-					description: t`Thanks for signing up! ${inviterName} has invited you to join ${invitation.organization.name}. Review the invitation below.`,
+					description: t`Thanks for signing up! ${inviterName} has invited you to join ${orgName}. Review the invitation below.`,
 				},
 				{ headers },
 			)
@@ -323,7 +329,7 @@ export const meta: Route.MetaFunction = () => {
 }
 
 export default function OnboardingRoute({
-	loaderData,
+	loaderData: { email, inviteToken },
 	actionData,
 }: Route.ComponentProps) {
 	const SignupFormSchema = z
@@ -340,7 +346,6 @@ export default function OnboardingRoute({
 	const isPending = useIsPending()
 	const [searchParams] = useSearchParams()
 	const redirectTo = searchParams.get('redirectTo')
-	const inviteToken = loaderData.inviteToken
 
 	const [form, fields] = useForm({
 		id: 'onboarding-form',
@@ -353,6 +358,16 @@ export default function OnboardingRoute({
 		shouldRevalidate: 'onBlur',
 	})
 
+	const { type: _agreeType, ...agreeCheckboxProps } = getInputProps(
+		fields.agreeToTermsOfServiceAndPrivacyPolicy,
+		{ type: 'checkbox' },
+	)
+
+	const { type: _rememberType, ...rememberCheckboxProps } = getInputProps(
+		fields.remember,
+		{ type: 'checkbox' },
+	)
+
 	return (
 		<Card>
 			<CardHeader>
@@ -364,10 +379,13 @@ export default function OnboardingRoute({
 					)}
 				</CardTitle>
 				<CardDescription>
-					<Trans>
-						Hi {loaderData.email}, please complete your profile
-						{inviteToken ? ' to join the organization' : ''}.
-					</Trans>
+					{inviteToken ? (
+						<Trans>
+							Hi {email}, please complete your profile to join the organization.
+						</Trans>
+					) : (
+						<Trans>Hi {email}, please complete your profile.</Trans>
+					)}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -455,13 +473,7 @@ export default function OnboardingRoute({
 						<FieldGroup>
 							<Field orientation="horizontal">
 								<Checkbox
-									{...(() => {
-										const { type: _type, ...props } = getInputProps(
-											fields.agreeToTermsOfServiceAndPrivacyPolicy,
-											{ type: 'checkbox' },
-										)
-										return props
-									})()}
+									{...agreeCheckboxProps}
 									id={fields.agreeToTermsOfServiceAndPrivacyPolicy.id}
 								/>
 								<FieldLabel
@@ -480,18 +492,7 @@ export default function OnboardingRoute({
 							/>
 
 							<Field orientation="horizontal">
-								<Checkbox
-									{...(() => {
-										const { type: _type, ...props } = getInputProps(
-											fields.remember,
-											{
-												type: 'checkbox',
-											},
-										)
-										return props
-									})()}
-									id={fields.remember.id}
-								/>
+								<Checkbox {...rememberCheckboxProps} id={fields.remember.id} />
 								<FieldLabel
 									htmlFor={fields.remember.id}
 									className="font-normal"

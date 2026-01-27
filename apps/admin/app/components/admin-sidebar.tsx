@@ -1,7 +1,5 @@
 import { msg, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import * as React from 'react'
-import { Link, useLocation, useRouteLoaderData } from 'react-router'
 import { useDirection } from '@repo/ui'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { ClockIcon } from '@repo/ui/clock-icon'
@@ -19,6 +17,8 @@ import {
 	SidebarHeader,
 } from '@repo/ui/sidebar'
 import { UserIcon } from '@repo/ui/user-icon'
+import * as React from 'react'
+import { Link, useLocation, useRouteLoaderData } from 'react-router'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { type loader as rootLoader } from '#app/root.tsx'

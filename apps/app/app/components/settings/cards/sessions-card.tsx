@@ -1,4 +1,5 @@
 import { Trans } from '@lingui/macro'
+import { useDoubleCheck } from '@repo/common'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -34,7 +35,6 @@ import {
 	revokeSessionActionIntent,
 	signOutOfSessionsActionIntent,
 } from '#app/routes/_app+/security.tsx'
-import { useDoubleCheck } from '@repo/common'
 
 interface DeviceInfo {
 	browserName: string
@@ -65,6 +65,9 @@ export function SessionsCard({
 	sessions,
 	currentSessionId,
 }: SessionsCardProps) {
+	const sessionCount = sessions.length
+	const deviceText = sessionCount === 1 ? 'device' : 'devices'
+
 	if (sessions.length === 0) {
 		return (
 			<Card className="w-full">
@@ -93,8 +96,8 @@ export function SessionsCard({
 				</CardTitle>
 				<CardDescription>
 					<Trans>
-						Manage your active sessions. You're signed in on {sessions.length}{' '}
-						{sessions.length === 1 ? 'device' : 'devices'}
+						Manage your active sessions. You're signed in on {sessionCount}{' '}
+						{deviceText}
 					</Trans>
 				</CardDescription>
 			</CardHeader>
@@ -143,6 +146,8 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 	const lastActive = formatDistanceToNow(session.updatedAt, { addSuffix: true })
 	const deviceInfo = session.deviceInfo
 	const deviceIcon = getDeviceIcon(deviceInfo?.deviceType)
+
+	const lastActiveValue = lastActive
 
 	// Close modal and revalidate after successful revocation
 	useEffect(() => {
@@ -200,12 +205,12 @@ function SessionItem({ session, isCurrentSession }: SessionItemProps) {
 										{lastActive && (
 											<>
 												{' • '}
-												<Trans>Last active {lastActive}</Trans>
+												<Trans>Last active {lastActiveValue}</Trans>
 											</>
 										)}
 									</>
 								) : (
-									<Trans>Last active {lastActive}</Trans>
+									<Trans>Last active {lastActiveValue}</Trans>
 								)}
 							</ItemDescription>
 						</ItemContent>

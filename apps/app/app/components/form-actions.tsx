@@ -1,8 +1,8 @@
 import { Trans } from '@lingui/macro'
+import { useIsPending } from '@repo/common'
 import { Button } from '@repo/ui/button'
 import { StatusButton } from '@repo/ui/status-button'
 import { Link } from 'react-router'
-import { useIsPending } from '@repo/common'
 
 interface FormActionsProps {
 	submitText: React.ReactNode

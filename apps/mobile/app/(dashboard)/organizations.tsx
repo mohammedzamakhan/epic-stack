@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Trans } from '@lingui/react/macro'
-import { useLingui } from '@lingui/react/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { type UserOrganization } from '@repo/types'
 import { router } from 'expo-router'
 import React, { useState } from 'react'

@@ -7,6 +7,14 @@
 
 import { createCookieSessionStorage } from 'react-router'
 
+// Validate SESSION_SECRET is set - required for secure nonce storage
+if (!process.env.SESSION_SECRET) {
+	throw new Error(
+		'SESSION_SECRET environment variable is required for SSO nonce storage. ' +
+			'Please add SESSION_SECRET to your .env file.',
+	)
+}
+
 // Session storage for SSO nonces (short-lived, 10 minutes max)
 const ssoNonceStorage = createCookieSessionStorage({
 	cookie: {
@@ -14,7 +22,7 @@ const ssoNonceStorage = createCookieSessionStorage({
 		httpOnly: true,
 		path: '/',
 		sameSite: 'lax',
-		secrets: [process.env.SESSION_SECRET || 'sso-nonce-fallback-secret'],
+		secrets: [process.env.SESSION_SECRET],
 		secure: process.env.NODE_ENV === 'production',
 		maxAge: 60 * 10, // 10 minutes - nonces should be short-lived
 	},

@@ -1,5 +1,5 @@
-import { ssoConfigurationService } from './configuration.server.ts'
 import { SSOHealthChecker } from '@repo/sso'
+import { ssoConfigurationService } from './configuration.server.ts'
 
 export {
 	type SSOHealthStatus,

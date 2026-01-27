@@ -1,9 +1,9 @@
 import { Trans } from '@lingui/macro'
+import { requireUserWithRole } from '@repo/auth'
 import { SidebarInset, SidebarProvider } from '@repo/ui/sidebar'
 import { Outlet } from 'react-router'
 import { AdminSidebar } from '#app/components/admin-sidebar.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/_layout.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {

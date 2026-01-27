@@ -1,6 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -29,7 +30,6 @@ import {
 } from 'react-router'
 
 import { EmptyState } from '#app/components/empty-state.tsx'
-import { requireUserId } from '@repo/auth'
 import {
 	type UserOrganizationWithRole,
 	getUserOrganizations,
@@ -279,76 +279,78 @@ export default function OrganizationsPage() {
 						</CardHeader>
 						<CardContent>
 							<ItemGroup>
-								{pendingInvitations.map((invitation) => (
-									<Item key={invitation.id} variant="outline">
-										<ItemMedia variant="image">
-											{invitation.organization.image?.objectKey ? (
-												<Img
-													src={getOrgImgSrc(
-														invitation.organization.image.objectKey,
-													)}
-													alt={invitation.organization.name}
-													className="h-full w-full object-cover"
-													width={40}
-													height={40}
-												/>
-											) : (
-												<span>
-													{invitation.organization.name.charAt(0).toUpperCase()}
-												</span>
-											)}
-										</ItemMedia>
-										<ItemContent>
-											<ItemTitle>{invitation.organization.name}</ItemTitle>
-											<ItemDescription>
-												<Badge variant="secondary" className="mr-2 text-xs">
-													{invitation.organizationRole.name}
-												</Badge>
-												{invitation.inviter && (
+								{pendingInvitations.map((invitation) => {
+									const invitedBy =
+										invitation?.inviter?.name || invitation?.inviter?.email
+									return (
+										<Item key={invitation.id} variant="outline">
+											<ItemMedia variant="image">
+												{invitation.organization.image?.objectKey ? (
+													<Img
+														src={getOrgImgSrc(
+															invitation.organization.image.objectKey,
+														)}
+														alt={invitation.organization.name}
+														className="h-full w-full object-cover"
+														width={40}
+														height={40}
+													/>
+												) : (
 													<span>
-														<Trans>
-															Invited by{' '}
-															{invitation.inviter.name ||
-																invitation.inviter.email}
-														</Trans>
+														{invitation.organization.name
+															.charAt(0)
+															.toUpperCase()}
 													</span>
 												)}
-											</ItemDescription>
-										</ItemContent>
-										<ItemActions>
-											<Form method="POST">
-												<input
-													type="hidden"
-													name="intent"
-													value="accept-invitation"
-												/>
-												<input
-													type="hidden"
-													name="invitationId"
-													value={invitation.id}
-												/>
-												<Button type="submit" size="sm">
-													<Trans>Accept</Trans>
-												</Button>
-											</Form>
-											<Form method="POST">
-												<input
-													type="hidden"
-													name="intent"
-													value="decline-invitation"
-												/>
-												<input
-													type="hidden"
-													name="invitationId"
-													value={invitation.id}
-												/>
-												<Button type="submit" variant="outline" size="sm">
-													<Trans>Decline</Trans>
-												</Button>
-											</Form>
-										</ItemActions>
-									</Item>
-								))}
+											</ItemMedia>
+											<ItemContent>
+												<ItemTitle>{invitation.organization.name}</ItemTitle>
+												<ItemDescription>
+													<Badge variant="secondary" className="mr-2 text-xs">
+														{invitation.organizationRole.name}
+													</Badge>
+													{invitation.inviter && (
+														<span>
+															<Trans>Invited by {invitedBy}</Trans>
+														</span>
+													)}
+												</ItemDescription>
+											</ItemContent>
+											<ItemActions>
+												<Form method="POST">
+													<input
+														type="hidden"
+														name="intent"
+														value="accept-invitation"
+													/>
+													<input
+														type="hidden"
+														name="invitationId"
+														value={invitation.id}
+													/>
+													<Button type="submit" size="sm">
+														<Trans>Accept</Trans>
+													</Button>
+												</Form>
+												<Form method="POST">
+													<input
+														type="hidden"
+														name="intent"
+														value="decline-invitation"
+													/>
+													<input
+														type="hidden"
+														name="invitationId"
+														value={invitation.id}
+													/>
+													<Button type="submit" variant="outline" size="sm">
+														<Trans>Decline</Trans>
+													</Button>
+												</Form>
+											</ItemActions>
+										</Item>
+									)
+								})}
 							</ItemGroup>
 						</CardContent>
 					</Card>

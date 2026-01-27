@@ -6,7 +6,7 @@ import tsparser from '@typescript-eslint/parser'
 export default [
 	...defaultConfig,
 	{
-		ignores: ['uniwind.d.ts'],
+		ignores: ['uniwind.d.ts', 'locales/*.js'],
 	},
 	{
 		files: ['**/*.{ts,tsx}'],

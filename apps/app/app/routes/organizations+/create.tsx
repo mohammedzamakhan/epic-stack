@@ -9,6 +9,8 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { requireUserId } from '@repo/auth'
+import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -46,7 +48,6 @@ import {
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
 
-import { requireUserId } from '@repo/auth'
 import { getLaunchStatus } from '#app/utils/env.server.ts'
 import {
 	createOrganizationInvitation,
@@ -63,7 +64,6 @@ import {
 } from '#app/utils/payments.server.ts'
 import { uploadOrganizationImage } from '#app/utils/storage.server.ts'
 import { shouldBeOnWaitlist } from '#app/utils/waitlist.server.ts'
-import { invalidateUserOrganizationsCache } from '@repo/cache'
 
 // Photo upload schema
 const MAX_SIZE = 1024 * 1024 * 5 // 5MB
@@ -441,6 +441,7 @@ export default function CreateOrganizationPage() {
 						description: 'Complete setup',
 					},
 				]
+	const totalSteps = steps.length
 
 	return (
 		<div className="container mx-auto max-w-xl px-4 py-8">
@@ -460,7 +461,7 @@ export default function CreateOrganizationPage() {
 				</div>
 				<p className="text-muted-foreground text-sm">
 					<Trans>
-						Step {currentStep} of {steps.length}
+						Step {currentStep} of {totalSteps}
 					</Trans>
 				</p>
 			</div>
@@ -765,7 +766,7 @@ function SubscriptionStep({
 	plansAndPrices: Awaited<ReturnType<typeof getPlansAndPrices>>
 	actionData: any
 }) {
-	const [form, ignored_fields] = useForm({
+	const [form] = useForm({
 		id: 'create-organization-subscription',
 		constraint: getZodConstraint(SubscriptionSchema),
 		lastResult: actionData,
@@ -1307,6 +1308,16 @@ function PlanCard({
 
 	const displayPrice = billingInterval === 'yearly' ? basePrice / 12 : basePrice
 	const isSelected = selectedPriceId === stripePrice.id
+	const basePriceLabel = basePrice.toFixed(2)
+	const displayPriceLabel = displayPrice.toFixed(2)
+
+	const monthlyPrice =
+		billingInterval === 'yearly'
+			? additionalUserPrice / 12
+			: additionalUserPrice
+	const annualPrice = additionalUserPrice
+	const monthlyPriceLabel = monthlyPrice.toFixed(2)
+	const annualPriceLabel = annualPrice.toFixed(2)
 
 	return (
 		<button
@@ -1319,14 +1330,14 @@ function PlanCard({
 		>
 			<div className="mb-4">
 				<div className="flex items-baseline gap-2">
-					<span className="text-2xl font-bold">${displayPrice.toFixed(2)}</span>
+					<span className="text-2xl font-bold">${displayPriceLabel}</span>
 					<span className="text-muted-foreground text-sm">
 						<Trans>per month</Trans>
 					</span>
 				</div>
 				{billingInterval === 'yearly' && (
 					<div className="text-muted-foreground text-sm">
-						<Trans>${basePrice.toFixed(2)} billed annually</Trans>
+						<Trans>{basePriceLabel} billed annually</Trans>
 					</div>
 				)}
 				<h3 className="text-lg font-semibold">{title}</h3>
@@ -1337,18 +1348,16 @@ function PlanCard({
 				</li>
 				{additionalUserPrice > 0 && (
 					<li>
-						<Trans>
-							Additional users: $
-							{billingInterval === 'yearly'
-								? (additionalUserPrice / 12).toFixed(2)
-								: additionalUserPrice.toFixed(2)}
-							/user/month
-							{billingInterval === 'yearly' && (
+						{billingInterval === 'yearly' ? (
+							<Trans>
+								Additional users: {monthlyPriceLabel}/user/month
 								<span className="block text-xs opacity-75">
-									(${additionalUserPrice.toFixed(2)} billed annually per user)
+									({annualPriceLabel} billed annually per user)
 								</span>
-							)}
-						</Trans>
+							</Trans>
+						) : (
+							<Trans>Additional users: {monthlyPriceLabel}/user/month</Trans>
+						)}
 					</li>
 				)}
 				<li>

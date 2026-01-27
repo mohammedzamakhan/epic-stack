@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { Icon } from '../icon'
 import {
 	DayPicker,
 	getDefaultClassNames,
@@ -9,6 +8,7 @@ import {
 } from 'react-day-picker'
 
 import { cn } from '../../lib/utils'
+import { Icon } from '../icon'
 import { Button, buttonVariants } from './button'
 
 function Calendar({

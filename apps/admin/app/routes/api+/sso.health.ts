@@ -1,6 +1,7 @@
+import { requireUserWithRole } from '@repo/auth'
+import { logger } from '@repo/observability'
 import { type LoaderFunctionArgs } from 'react-router'
 import { ssoHealthChecker } from '../../utils/sso-health-check.server.ts'
-import { requireUserWithRole } from '../../utils/permissions.server.ts'
 
 /**
  * SSO system health check endpoint for admin app
@@ -40,13 +41,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			)
 		}
 
-		// For other errors, return 500
+		// For other errors, log details server-side and return generic message
+		logger.error({ err: error }, 'SSO health check failed')
 		return Response.json(
 			{
 				overall: 'unhealthy',
 				timestamp: new Date().toISOString(),
 				error: 'Health check failed',
-				message: error instanceof Error ? error.message : 'Unknown error',
+				message: 'An internal error occurred. Please check server logs.',
 			},
 			{ status: 500 },
 		)
@@ -91,10 +93,12 @@ export async function action({ request }: LoaderFunctionArgs) {
 			)
 		}
 
+		// Log details server-side and return generic message
+		logger.error({ err: error }, 'SSO configuration validation failed')
 		return Response.json(
 			{
 				error: 'Configuration validation failed',
-				message: error instanceof Error ? error.message : 'Unknown error',
+				message: 'An internal error occurred. Please check server logs.',
 			},
 			{ status: 500 },
 		)

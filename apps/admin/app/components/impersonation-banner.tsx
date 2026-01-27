@@ -1,8 +1,8 @@
-import { Trans } from '@lingui/macro'
-import { Form } from 'react-router'
+import { Plural, Trans } from '@lingui/macro'
 import { type ImpersonationInfo } from '@repo/auth'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
+import { Form } from 'react-router'
 
 interface ImpersonationBannerProps {
 	impersonationInfo: ImpersonationInfo
@@ -11,6 +11,7 @@ interface ImpersonationBannerProps {
 export function ImpersonationBanner({
 	impersonationInfo,
 }: ImpersonationBannerProps) {
+	const { targetName } = impersonationInfo
 	const startedAt = new Date(impersonationInfo.startedAt)
 	const duration = Math.floor((Date.now() - startedAt.getTime()) / 1000 / 60) // minutes
 
@@ -28,14 +29,17 @@ export function ImpersonationBanner({
 						</span>
 						<span className="ml-2 text-yellow-700">
 							<Trans>
-								You are impersonating{' '}
-								<strong>{impersonationInfo.targetName}</strong>
+								You are impersonating <strong>{targetName}</strong>
 							</Trans>
 						</span>
 						<span className="ml-2 text-yellow-600">
-							<Trans>
-								({duration} minute{duration !== 1 ? 's' : ''} ago)
-							</Trans>
+							(
+							<Plural
+								value={duration}
+								one="# minute ago"
+								other="# minutes ago"
+							/>
+							)
 						</span>
 					</div>
 				</div>

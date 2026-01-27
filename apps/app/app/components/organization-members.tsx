@@ -1,4 +1,5 @@
 import { Trans, t } from '@lingui/macro'
+import { getUserImgSrc } from '@repo/common'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -27,8 +28,6 @@ import {
 } from '@repo/ui/select'
 import { useState } from 'react'
 import { Form } from 'react-router'
-
-import { getUserImgSrc } from '@repo/common'
 
 interface OrganizationMember {
 	userId: string

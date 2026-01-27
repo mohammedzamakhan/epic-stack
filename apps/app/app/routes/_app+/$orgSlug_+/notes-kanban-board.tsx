@@ -21,6 +21,9 @@ import {
 	useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { useDoubleCheck } from '@repo/common'
 import { Button } from '@repo/ui/button'
 import { ColorPicker } from '@repo/ui/color-picker'
 import { Icon } from '@repo/ui/icon'
@@ -30,10 +33,7 @@ import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useFetcher, useFetchers } from 'react-router'
 
-import { useDoubleCheck } from '@repo/common'
 import { NoteCard } from './notes-cards.tsx'
-import { t, Trans } from '@lingui/macro'
-import { useLingui } from '@lingui/react'
 
 type Note = LoaderNote & {
 	position?: number | null

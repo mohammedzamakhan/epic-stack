@@ -1,7 +1,7 @@
 import React from 'react'
+import { cn } from '../../lib/utils'
 import { Card } from './Card'
 import { type Post } from '@/lib/cms'
-import { cn } from '../../lib/utils'
 
 export interface CollectionArchiveProps {
 	posts: Post[]

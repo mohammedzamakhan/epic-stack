@@ -1,7 +1,7 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { Form, useLoaderData, useNavigation } from 'react-router'
 import { auditService, AuditAction, AuditService } from '@repo/audit'
+import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
@@ -23,7 +23,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui/select'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+import { Form, useLoaderData, useNavigation } from 'react-router'
 
 export async function loader({
 	request,
@@ -205,6 +205,9 @@ export default function AuditRetentionPage() {
 	const isSubmitting = navigation.state === 'submitting'
 	const { _ } = useLingui()
 
+	const organizationName = organization.name
+	const activeCount = statistics.active.toLocaleString()
+
 	return (
 		<div className="space-y-6">
 			{/* Header */}
@@ -214,7 +217,7 @@ export default function AuditRetentionPage() {
 				</h1>
 				<p className="text-muted-foreground">
 					<Trans>
-						Configure retention and archival settings for {organization.name}
+						Configure retention and archival settings for {organizationName}
 					</Trans>
 				</p>
 			</div>
@@ -247,7 +250,7 @@ export default function AuditRetentionPage() {
 							{statistics.archived.toLocaleString()}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							<Trans>{statistics.active.toLocaleString()} active</Trans>
+							<Trans>{activeCount} active</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -282,49 +285,52 @@ export default function AuditRetentionPage() {
 				<CardContent>
 					<div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
 						{Object.entries(compliancePresets).map(
-							([key, preset]: [string, any]) => (
-								<Form method="post" key={key}>
-									<input type="hidden" name="intent" value="apply-preset" />
-									<input type="hidden" name="presetType" value={key} />
-									<Card className="relative">
-										<CardHeader>
-											<CardTitle className="flex items-center justify-between text-base">
-												{key.replace(/_/g, ' ')}
-												{retentionPolicy.complianceType ===
-													preset.complianceType && (
-													<Badge variant="default">
-														<Trans>Active</Trans>
-													</Badge>
-												)}
-											</CardTitle>
-										</CardHeader>
-										<CardContent className="space-y-2">
-											<div className="text-sm">
-												<p className="text-muted-foreground">
-													<Trans>
-														Retention: {preset.retentionDays} days (
-														{Math.floor(preset.retentionDays / 365)} years)
-													</Trans>
-												</p>
-												<p className="text-muted-foreground">
-													<Trans>
-														Hot storage: {preset.hotStorageDays} days
-													</Trans>
-												</p>
-											</div>
-											<Button
-												type="submit"
-												variant="outline"
-												size="sm"
-												className="w-full"
-												disabled={isSubmitting}
-											>
-												<Trans>Apply Preset</Trans>
-											</Button>
-										</CardContent>
-									</Card>
-								</Form>
-							),
+							([key, preset]: [string, any]) => {
+								const retentionDays = preset.retentionDays
+								const retentionYears = Math.floor(retentionDays / 365)
+								const hotStorageDays = preset.hotStorageDays
+								return (
+									<Form method="post" key={key}>
+										<input type="hidden" name="intent" value="apply-preset" />
+										<input type="hidden" name="presetType" value={key} />
+										<Card className="relative">
+											<CardHeader>
+												<CardTitle className="flex items-center justify-between text-base">
+													{key.replace(/_/g, ' ')}
+													{retentionPolicy.complianceType ===
+														preset.complianceType && (
+														<Badge variant="default">
+															<Trans>Active</Trans>
+														</Badge>
+													)}
+												</CardTitle>
+											</CardHeader>
+											<CardContent className="space-y-2">
+												<div className="text-sm">
+													<p className="text-muted-foreground">
+														<Trans>
+															Retention: {retentionDays} days ({retentionYears}{' '}
+															years)
+														</Trans>
+													</p>
+													<p className="text-muted-foreground">
+														<Trans>Hot storage: {hotStorageDays} days</Trans>
+													</p>
+												</div>
+												<Button
+													type="submit"
+													variant="outline"
+													size="sm"
+													className="w-full"
+													disabled={isSubmitting}
+												>
+													<Trans>Apply Preset</Trans>
+												</Button>
+											</CardContent>
+										</Card>
+									</Form>
+								)
+							},
 						)}
 					</div>
 				</CardContent>

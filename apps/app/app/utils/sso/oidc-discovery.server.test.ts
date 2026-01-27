@@ -1,7 +1,3 @@
-import { http, HttpResponse } from 'msw'
-import { describe, expect, it, beforeEach, afterEach } from 'vitest'
-import { server } from '#tests/mocks/index.ts'
-import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 import {
 	discoverOIDCEndpoints,
 	validateDiscoveryDocument,
@@ -10,8 +6,12 @@ import {
 	normalizeIssuerUrl,
 	type OIDCDiscoveryDocument,
 	type EndpointConfiguration,
+	ssoCache,
 } from '@repo/sso'
-import { ssoCache } from '@repo/sso'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
+import { server } from '#tests/mocks/index.ts'
+import { consoleWarn } from '#tests/setup/setup-test-env.ts'
 
 describe('OIDC Discovery', () => {
 	beforeEach(() => {

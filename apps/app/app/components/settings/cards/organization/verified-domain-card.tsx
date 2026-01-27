@@ -11,8 +11,8 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
-import { Switch } from '@repo/ui/switch'
 import { Icon } from '@repo/ui/icon'
+import { Switch } from '@repo/ui/switch'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
 import { z } from 'zod'

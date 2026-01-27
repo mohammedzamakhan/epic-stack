@@ -9,7 +9,6 @@ import {
 	clearTools,
 	getTool,
 	type MCPContext,
-	type MCPToolResponse,
 } from './server.server'
 
 // Generate unique slug per test run to avoid conflicts with parallel tests

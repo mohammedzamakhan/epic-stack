@@ -1,12 +1,11 @@
 import { t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { requireUserId } from '@repo/auth'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
 import { type LoaderFunctionArgs } from 'react-router'
 import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
-
-import { requireUserId } from '@repo/auth'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,

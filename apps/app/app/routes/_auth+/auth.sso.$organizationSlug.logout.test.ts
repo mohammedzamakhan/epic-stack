@@ -1,9 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { authSessionStorage } from '@repo/auth'
+import {
+	authSessionStorage,
+	getSessionExpirationDate,
+	sessionKey,
+} from '@repo/auth'
 import { prisma } from '@repo/database'
 import { type AppLoadContext } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { getSessionExpirationDate, sessionKey } from '@repo/auth'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
 import { createUser } from '#tests/db-utils.ts'

@@ -1,5 +1,5 @@
+import { requireUserWithRole } from '@repo/auth'
 import { type LoaderFunctionArgs } from 'react-router'
-import { requireUserWithRole } from '../../utils/permissions.server.ts'
 import { ssoHealthChecker } from '../../utils/sso/health-check.server.ts'
 
 /**

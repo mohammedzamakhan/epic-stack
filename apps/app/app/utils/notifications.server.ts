@@ -1,6 +1,6 @@
 import { Novu } from '@novu/api'
-import { extractMentions, resolveMentionsToUserIds } from '@repo/notifications'
 import { prisma } from '@repo/database'
+import { extractMentions, resolveMentionsToUserIds } from '@repo/notifications'
 
 const novu = new Novu({
 	secretKey: process.env.NOVU_SECRET_KEY,
@@ -76,7 +76,9 @@ export async function notifyCommentMentions({
 		)
 
 		// Filter out the commenter (don't notify yourself)
-		const filteredUserIds = mentionedUserIds
+		const filteredUserIds = mentionedUserIds.filter(
+			(id) => id !== commenterUserId,
+		)
 
 		if (filteredUserIds.length === 0) {
 			return

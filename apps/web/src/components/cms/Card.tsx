@@ -1,6 +1,6 @@
 import React from 'react'
-import { type Post } from '@/lib/cms'
 import { cn } from '../../lib/utils'
+import { type Post } from '@/lib/cms'
 
 export interface CardProps {
 	className?: string

@@ -3,6 +3,7 @@ import { PassThrough } from 'node:stream'
 import { contentSecurity } from '@nichtsam/helmet/content'
 import { createReadableStreamFromReadable } from '@react-router/node'
 import { NonceProvider, makeTimings } from '@repo/common'
+import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
 import { sentryLogger, sanitizeUrl } from '@repo/observability'
 import { isbot } from 'isbot'
@@ -13,7 +14,6 @@ import {
 	type ActionFunctionArgs,
 	type HandleDocumentRequestFunction,
 } from 'react-router'
-import { getInstanceInfo } from '@repo/common/litefs'
 import { auditSensitiveRoutes } from '#app/utils/audit/audit-middleware.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'

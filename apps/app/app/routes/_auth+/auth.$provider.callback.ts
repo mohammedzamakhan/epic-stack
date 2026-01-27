@@ -4,6 +4,7 @@ import {
 	normalizeUsername,
 	verifySessionStorage,
 } from '@repo/auth'
+import { ProviderNameSchema, providerLabels } from '@repo/auth/constants'
 import { combineHeaders } from '@repo/common'
 import { ensurePrimary } from '@repo/common/litefs'
 import {
@@ -17,7 +18,6 @@ import {
 	authenticator,
 	getSessionExpirationDate,
 } from '#app/utils/auth.server.ts'
-import { ProviderNameSchema, providerLabels } from '@repo/auth/constants'
 import { checkSSOEnforcementByEmail } from '#app/utils/sso/enforcement.server.ts'
 import { type Route } from './+types/auth.$provider.callback.ts'
 import { handleNewSession } from './login.server.ts'

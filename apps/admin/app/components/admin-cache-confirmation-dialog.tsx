@@ -53,7 +53,7 @@ export function CacheConfirmationDialog({
 		setConfirmed(false)
 		onClose()
 	}
-
+	const remaining = details?.keys && details.keys.length - 10
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
 			<DialogContent className="overscroll-contain sm:max-w-md">
@@ -96,7 +96,7 @@ export function CacheConfirmationDialog({
 											))}
 											{details.keys.length > 10 && (
 												<div className="text-muted-foreground text-xs">
-													<Trans>... and {details.keys.length - 10} more</Trans>
+													<Trans>... and {remaining} more</Trans>
 												</div>
 											)}
 										</div>

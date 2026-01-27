@@ -1,14 +1,14 @@
+import { getUserId } from '@repo/auth'
 import { combineHeaders } from '@repo/common'
 import { getClientIp } from '@repo/common/ip-tracking'
+import { ensurePrimary } from '@repo/common/litefs'
 import {
 	destroyRedirectToHeader,
 	getRedirectCookieValue,
 } from '@repo/common/redirect-cookie'
 import { createToastHeaders, redirectWithToast } from '@repo/common/toast'
-import { ensurePrimary } from '@repo/common/litefs'
 import { SSOCallbackSchema } from '@repo/validation'
 import { redirect } from 'react-router'
-import { getUserId, canUserLogin } from '@repo/auth'
 import { loginWithSSO } from '#app/utils/auth.server.ts'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import {
@@ -159,7 +159,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		}
 
 		// Consume the stored nonce for validation
-		const { nonce, cookieHeader: nonceCookieHeader } =
+		const { nonce, cookieHeader: ignoredNonceCookieHeader } =
 			await consumeNonce(request)
 
 		// Handle OAuth callback with nonce for ID token validation

@@ -1,6 +1,7 @@
 import { prisma } from '@repo/database'
-import { registerTool, type MCPContext } from './server.server'
+import { logger } from '@repo/observability'
 import { getSignedGetRequestInfo } from '../storage.server'
+import { registerTool, type MCPContext } from './server.server'
 
 /**
  * MCP Tools Service
@@ -135,6 +136,7 @@ registerTool({
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
+			logger.error(errorMessage)
 			return {
 				content: [
 					{
@@ -259,6 +261,7 @@ registerTool({
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
+			logger.error(errorMessage)
 			return {
 				content: [
 					{

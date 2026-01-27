@@ -2,6 +2,17 @@ import { invariantResponse } from '@epic-web/invariant'
 import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { requireUserWithRole } from '@repo/auth'
+import {
+	cache,
+	lruCache,
+	getAllCacheKeysWithDetails,
+	searchCacheKeysWithDetails,
+	getCacheStats,
+	clearCacheByType,
+	deleteCacheKeys,
+	type CacheKeyInfo,
+} from '@repo/cache'
 import {
 	ensureInstance,
 	getAllInstances,
@@ -54,17 +65,6 @@ import {
 import { CacheConfirmationDialog } from '#app/components/admin-cache-confirmation-dialog.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { useToast } from '#app/components/toaster.tsx'
-import {
-	cache,
-	lruCache,
-	getAllCacheKeysWithDetails,
-	searchCacheKeysWithDetails,
-	getCacheStats,
-	clearCacheByType,
-	deleteCacheKeys,
-	type CacheKeyInfo,
-} from '@repo/cache'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 import { type Route } from './+types/cache.ts'
 
 export const handle: SEOHandle = {
@@ -223,6 +223,12 @@ export default function CacheAdminRoute() {
 	const cacheType = searchParams.get('type') ?? 'all'
 	const instance = searchParams.get('instance') ?? data.instance
 
+	// Extract values for lingui compliance
+	const currentSize = data.stats.lru.currentSize
+	const maxSize = data.stats.lru.maxSize
+	const selectedCount = selectedKeys.size
+	const cacheTypeUpper = cacheType.toUpperCase()
+
 	const handleSearch = (value: string) => {
 		setSearchQuery(value)
 		const newSearchParams = new URLSearchParams(searchParams)
@@ -252,6 +258,7 @@ export default function CacheAdminRoute() {
 
 	const hasActiveFilters = query || cacheType !== 'all'
 	const totalKeys = data.cacheData.sqlite.length + data.cacheData.lru.length
+	const totalSize = formatBytes(data.stats.sqlite.totalSize)
 
 	return (
 		<div className="space-y-6">
@@ -279,7 +286,7 @@ export default function CacheAdminRoute() {
 							{data.stats.sqlite.totalKeys}
 						</div>
 						<p className="text-muted-foreground text-xs">
-							<Trans>{formatBytes(data.stats.sqlite.totalSize)} total</Trans>
+							<Trans>{totalSize} total</Trans>
 						</p>
 					</CardContent>
 				</Card>
@@ -294,7 +301,7 @@ export default function CacheAdminRoute() {
 						<div className="text-2xl font-bold">{data.stats.lru.totalKeys}</div>
 						<p className="text-muted-foreground text-xs">
 							<Trans>
-								{data.stats.lru.currentSize} / {data.stats.lru.maxSize} max
+								{currentSize} / {maxSize} max
 							</Trans>
 						</p>
 					</CardContent>
@@ -444,17 +451,28 @@ export default function CacheAdminRoute() {
 			{/* Results Summary */}
 			<div className="text-muted-foreground flex items-center justify-between text-sm">
 				<div>
-					<Trans>
-						Showing {totalKeys} cache entries
-						{query && ` matching "${query}"`}
-						{cacheType !== 'all' && ` in ${cacheType.toUpperCase()} cache`}
-					</Trans>
+					{query && cacheType !== 'all' ? (
+						<Trans>
+							Showing {totalKeys} cache entries matching "{query}" in{' '}
+							{cacheTypeUpper} cache
+						</Trans>
+					) : query ? (
+						<Trans>
+							Showing {totalKeys} cache entries matching "{query}"
+						</Trans>
+					) : cacheType !== 'all' ? (
+						<Trans>
+							Showing {totalKeys} cache entries in {cacheTypeUpper} cache
+						</Trans>
+					) : (
+						<Trans>Showing {totalKeys} cache entries</Trans>
+					)}
+					{selectedCount > 0 && (
+						<span className="ml-2">
+							<Trans>{selectedCount} selected</Trans>
+						</span>
+					)}
 				</div>
-				{selectedKeys.size > 0 && (
-					<div>
-						<Trans>{selectedKeys.size} selected</Trans>
-					</div>
-				)}
 			</div>
 
 			{/* Cache Tables */}
@@ -734,6 +752,9 @@ function CacheClearButton({ type }: { type: 'sqlite' | 'lru' }) {
 	const isClearing =
 		fetcher.state !== 'idle' && fetcher.formData?.get('type') === type
 
+	// Extract for lingui compliance
+	const typeUpper = type.toUpperCase()
+
 	const handleConfirm = () => {
 		void fetcher.submit(
 			{
@@ -758,20 +779,20 @@ function CacheClearButton({ type }: { type: 'sqlite' | 'lru' }) {
 				) : (
 					<Icon name="trash-2" className="mr-2 h-4 w-4" />
 				)}
-				<Trans>Clear {type.toUpperCase()}</Trans>
+				<Trans>Clear {typeUpper}</Trans>
 			</Button>
 
 			<CacheConfirmationDialog
 				isOpen={showConfirmDialog}
 				onClose={() => setShowConfirmDialog(false)}
 				onConfirm={handleConfirm}
-				title={`Clear ${type.toUpperCase()} Cache`}
-				description={`This will permanently delete all entries in the ${type.toUpperCase()} cache. This action cannot be undone.`}
-				confirmText={`Clear ${type.toUpperCase()} Cache`}
+				title={`Clear ${typeUpper} Cache`}
+				description={`This will permanently delete all entries in the ${typeUpper} cache. This action cannot be undone.`}
+				confirmText={`Clear ${typeUpper} Cache`}
 				variant="destructive"
 				isLoading={isClearing}
 				details={{
-					type: type.toUpperCase(),
+					type: typeUpper,
 				}}
 			/>
 		</>
@@ -801,6 +822,10 @@ function CacheBulkActions({
 	const lruKeys = Array.from(selectedKeys)
 		.filter((key) => key.startsWith('lru:'))
 		.map((key) => key.replace('lru:', ''))
+
+	const selectedCount = selectedKeys.size
+	const sqliteCount = sqliteKeys.length
+	const lruCount = lruKeys.length
 
 	const handleBulkDelete = (type: 'sqlite' | 'lru') => {
 		const keys = type === 'sqlite' ? sqliteKeys : lruKeys
@@ -833,7 +858,7 @@ function CacheBulkActions({
 			<DropdownMenu>
 				<DropdownMenuTrigger>
 					<Button variant="outline" size="sm" disabled={isDeleting}>
-						<Trans>Bulk Actions ({selectedKeys.size})</Trans>
+						<Trans>Bulk Actions ({selectedCount})</Trans>
 						<Icon name="chevron-down" className="ml-2 h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
@@ -841,13 +866,13 @@ function CacheBulkActions({
 					{sqliteKeys.length > 0 && (
 						<DropdownMenuItem onClick={() => handleBulkDelete('sqlite')}>
 							<Icon name="trash-2" className="h-4 w-4" />
-							<Trans>Delete {sqliteKeys.length} SQLite keys</Trans>
+							<Trans>Delete {sqliteCount} SQLite keys</Trans>
 						</DropdownMenuItem>
 					)}
 					{lruKeys.length > 0 && (
 						<DropdownMenuItem onClick={() => handleBulkDelete('lru')}>
 							<Icon name="trash-2" className="h-4 w-4" />
-							<Trans>Delete {lruKeys.length} LRU keys</Trans>
+							<Trans>Delete {lruCount} LRU keys</Trans>
 						</DropdownMenuItem>
 					)}
 					<DropdownMenuSeparator />
