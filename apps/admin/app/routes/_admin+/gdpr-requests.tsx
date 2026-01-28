@@ -165,7 +165,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			await auditService.log({
 				action: AuditAction.DATA_DELETION_CANCELLED,
 				userId: adminId,
-				targetUserId: dsr.userId,
+				targetUserId: dsr.userId!,
 				details: `Admin cancelled deletion request for user ${dsr.user?.email}`,
 				resourceType: 'data_subject_request',
 				resourceId: requestId,
@@ -195,7 +195,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 			try {
 				await prisma.user.delete({
-					where: { id: dsr.userId },
+					where: { id: dsr.userId! },
 				})
 
 				await prisma.dataSubjectRequest.update({
@@ -251,7 +251,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 
 		case 'export-for-user': {
-			const userId = dsr.userId
+			const userId = dsr.userId!
 
 			const newDsr = await prisma.dataSubjectRequest.create({
 				data: {

@@ -2,6 +2,7 @@ import {
 	createErasureRequest,
 	cancelErasureRequest,
 } from '#app/utils/gdpr.server.ts'
+import { redirectWithToast } from '@repo/common/toast'
 
 type PrivacyActionArgs = {
 	request: Request
@@ -16,14 +17,11 @@ export async function requestDataDeletionAction({
 	const result = await createErasureRequest(userId, request)
 
 	if (!result.success) {
-		return Response.json(
-			{
-				status: 'error',
-				error: result.error,
-				scheduledFor: result.scheduledFor?.toISOString(),
-			},
-			{ status: 400 },
-		)
+		return redirectWithToast('/security', {
+			title: 'Account Deletion Request Failed',
+			description: result.error!,
+			type: 'error',
+		})
 	}
 
 	return Response.json({

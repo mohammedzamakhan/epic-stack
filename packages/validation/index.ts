@@ -2,6 +2,7 @@
 export {
 	UsernameSchema,
 	PasswordSchema,
+	LoginPasswordSchema,
 	NameSchema,
 	EmailSchema,
 	PasswordAndConfirmPasswordSchema,

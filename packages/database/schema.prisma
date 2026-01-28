@@ -10,53 +10,53 @@ datasource db {
 }
 
 model User {
-  id                     String                     @id @default(cuid())
-  email                  String                     @unique
-  username               String                     @unique
-  name                   String?
-  createdAt              DateTime                   @default(now())
-  updatedAt              DateTime                   @updatedAt
-  isBanned               Boolean                    @default(false)
-  banReason              String?
-  banExpiresAt           DateTime?
-  bannedAt               DateTime?
-  bannedById             String?
-  bannedBy               User?                      @relation("UserBans", fields: [bannedById], references: [id])
-  bannedUsers            User[]                     @relation("UserBans")
-  connections            Connection[]
-  notes                  Note[]
-  noteAccess             NoteAccess[]
-  targetedActivityLogs   NoteActivityLog[]          @relation("ActivityLogTarget")
-  activityLogs           NoteActivityLog[]
-  noteComments           NoteComment[]
-  onboardingProgress     OnboardingProgress[]
-  onboardingStepProgress OnboardingStepProgress[]
-  sentInvitations        OrganizationInvitation[]   @relation("inviter")
-  createdInviteLinks     OrganizationInviteLink[]
-  createdOrgNotes        OrganizationNote[]         @relation("createdBy")
-  passkey                Passkey[]
-  password               Password?
-  sessions               Session[]
-  refreshTokens          RefreshToken[]
-  image                  UserImage?
-  organizations          UserOrganization[]
-  utmSource              UtmSource?
-  roles                  Role[]                     @relation("RoleToUser")
-  orgNoteFavorites       OrganizationNoteFavorite[]
-  Feedback               Feedback[]
-  blacklistedIps         IpAddress[]                @relation("IpBlacklists")
-  ipAddressUsers         IpAddressUser[]
-  apiKeys                ApiKey[]
-  configFlags            ConfigFlag[]
-  createdSSOConfigs      SSOConfiguration[]         @relation("SSOConfigCreatedBy")
-  auditLogs              AuditLog[]                 @relation("AuditLogUser")
-  waitlistEntry          WaitlistEntry?
-  grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
-  mcpAuthorizations         MCPAuthorization[]
-  backupCodes               BackupCode[]
-  dataSubjectRequests       DataSubjectRequest[]
-  impersonationSessionsAsAdmin  ImpersonationSession[] @relation("ImpersonationAdmin")
-  impersonationSessionsAsTarget ImpersonationSession[] @relation("ImpersonationTarget")
+  id                            String                     @id @default(cuid())
+  email                         String                     @unique
+  username                      String                     @unique
+  name                          String?
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  isBanned                      Boolean                    @default(false)
+  banReason                     String?
+  banExpiresAt                  DateTime?
+  bannedAt                      DateTime?
+  bannedById                    String?
+  bannedBy                      User?                      @relation("UserBans", fields: [bannedById], references: [id])
+  bannedUsers                   User[]                     @relation("UserBans")
+  connections                   Connection[]
+  notes                         Note[]
+  noteAccess                    NoteAccess[]
+  targetedActivityLogs          NoteActivityLog[]          @relation("ActivityLogTarget")
+  activityLogs                  NoteActivityLog[]
+  noteComments                  NoteComment[]
+  onboardingProgress            OnboardingProgress[]
+  onboardingStepProgress        OnboardingStepProgress[]
+  sentInvitations               OrganizationInvitation[]   @relation("inviter")
+  createdInviteLinks            OrganizationInviteLink[]
+  createdOrgNotes               OrganizationNote[]         @relation("createdBy")
+  passkey                       Passkey[]
+  password                      Password?
+  sessions                      Session[]
+  refreshTokens                 RefreshToken[]
+  image                         UserImage?
+  organizations                 UserOrganization[]
+  utmSource                     UtmSource?
+  roles                         Role[]                     @relation("RoleToUser")
+  orgNoteFavorites              OrganizationNoteFavorite[]
+  Feedback                      Feedback[]
+  blacklistedIps                IpAddress[]                @relation("IpBlacklists")
+  ipAddressUsers                IpAddressUser[]
+  apiKeys                       ApiKey[]
+  configFlags                   ConfigFlag[]
+  createdSSOConfigs             SSOConfiguration[]         @relation("SSOConfigCreatedBy")
+  auditLogs                     AuditLog[]                 @relation("AuditLogUser")
+  waitlistEntry                 WaitlistEntry?
+  grantedWaitlistAccess         WaitlistEntry[]            @relation("AccessGranter")
+  mcpAuthorizations             MCPAuthorization[]
+  backupCodes                   BackupCode[]
+  dataSubjectRequests           DataSubjectRequest[]
+  impersonationSessionsAsAdmin  ImpersonationSession[]     @relation("ImpersonationAdmin")
+  impersonationSessionsAsTarget ImpersonationSession[]     @relation("ImpersonationTarget")
 }
 
 model Note {
@@ -1004,9 +1004,9 @@ model ImpersonationSession {
 // GDPR Data Subject Request - tracks export and erasure requests
 // Supports Article 17 (Right to Erasure) and Article 20 (Right to Portability)
 model DataSubjectRequest {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   // Request type: EXPORT (Article 20) or ERASURE (Article 17)
   type   String // 'export' or 'erasure'

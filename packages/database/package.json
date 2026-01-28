@@ -21,6 +21,7 @@
     "db:seed": "npx varlock run -- tsx seed.ts",
     "db:migrate:dev": "npx varlock run -- prisma migrate dev",
     "db:migrate:deploy": "npx varlock run -- prisma migrate deploy",
+    "db:reset": "npx varlock run -- prisma migrate reset --force",
     "setup": "npm run db:migrate:deploy && npm run db:generate"
   },
   "dependencies": {

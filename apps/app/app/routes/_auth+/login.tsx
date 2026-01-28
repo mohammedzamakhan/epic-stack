@@ -21,7 +21,7 @@ import { Field, FieldLabel, FieldError, FieldGroup } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import { Input } from '@repo/ui/input'
 import { StatusButton } from '@repo/ui/status-button'
-import { PasswordSchema } from '@repo/validation'
+import { LoginPasswordSchema } from '@repo/validation'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { type PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server'
 import { useOptimistic, useState, useTransition } from 'react'
@@ -117,7 +117,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const LoginFormSchema = z.object({
 		username: z.string().min(1, t`Username or email is required`),
-		password: PasswordSchema,
+		password: LoginPasswordSchema,
 		redirectTo: z.string().optional(),
 		remember: z.boolean().optional(),
 	})
@@ -717,7 +717,7 @@ function PasswordLoginStep({
 }) {
 	const LoginFormSchema = z.object({
 		username: z.string().min(1, t`Username or email is required`),
-		password: PasswordSchema,
+		password: LoginPasswordSchema,
 		redirectTo: z.string().optional(),
 		remember: z.boolean().optional(),
 	})

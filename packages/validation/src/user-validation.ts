@@ -39,6 +39,10 @@ export const PasswordSchema = z
 		message: 'Password must contain at least one special character',
 	})
 
+export const LoginPasswordSchema = z
+	.string({ required_error: 'Password is required' })
+	.transform((val) => val.normalize('NFC'))
+
 export const NameSchema = z
 	.string({ required_error: 'Name is required' })
 	.min(3, { message: 'Name is too short' })

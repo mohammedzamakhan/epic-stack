@@ -566,7 +566,7 @@ export async function processDueErasureRequests(): Promise<{
 			})
 
 			await prisma.user.delete({
-				where: { id: dsr.userId },
+				where: { id: dsr.userId! },
 			})
 
 			await prisma.dataSubjectRequest.update({
