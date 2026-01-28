@@ -29,19 +29,11 @@ export const Footer: GlobalConfig = {
               appearances: false,
             }),
           ],
-          admin: {
-            components: {
-              RowLabel: '@/components/RowLabel#RowLabel',
-            },
-          },
         },
       ],
       maxRows: 6,
       admin: {
         initCollapsed: true,
-        components: {
-          RowLabel: '@/components/RowLabel#RowLabel',
-        },
       },
     },
     {

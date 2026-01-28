@@ -64,9 +64,6 @@ export const Header: GlobalConfig = {
       maxRows: 8,
       admin: {
         initCollapsed: true,
-        components: {
-          RowLabel: '@/components/RowLabel#RowLabel',
-        },
       },
     },
   ],

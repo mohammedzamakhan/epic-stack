@@ -8,9 +8,11 @@ interface Props {
 
 const { data } = Astro.props
 
-// Posts have content field, Pages have hero or layout fields
-const isPost = data.content && !data.hero && !data.layout
-const isPage = data.hero || data.layout
+const heroExists = typeof data.hero === 'object' && data.hero !== null
+const layoutExists = 'layout' in data
+const contentExists = !!data.content
+const isPage = heroExists || layoutExists
+const isPost = contentExists && !heroExists && !layoutExists
 ---
 
 {isPage && (
@@ -48,13 +50,18 @@ const isPage = data.hero || data.layout
     <!-- Debug info -->
     <div class="mt-8 p-4 bg-gray-100 rounded text-left text-xs">
       <strong>Debug Info:</strong><br>
-      Available keys: {Object.keys(data).join(', ')}<br>
-      Has content: {data.content ? 'yes' : 'no'}<br>
-      Has hero: {data.hero ? 'yes' : 'no'}<br>
-      Has layout: {data.layout ? 'yes' : 'no'}<br>
-      Content type: {typeof data.content}<br>
-      Hero type: {typeof data.hero}<br>
-      Layout type: {typeof data.layout}<br>
+      <strong>Detection Logic:</strong><br>
+      heroExists: {heroExists.toString()}<br>
+      layoutExists: {layoutExists.toString()}<br>
+      contentExists: {contentExists.toString()}<br>
+      isPage: {isPage.toString()}<br>
+      isPost: {isPost.toString()}<br>
+      <br>
+      <strong>Raw Data:</strong><br>
+      Available keys: {Object.keys(data || {}).join(', ')}<br>
+      data.hero typeof: {typeof data.hero}<br>
+      data.layout typeof: {typeof data.layout}<br>
+      data.content typeof: {typeof data.content}<br>
       <details class="mt-2">
         <summary class="cursor-pointer">Full Data</summary>
         <pre class="mt-2 text-xs overflow-auto max-h-40">{JSON.stringify(data, null, 2)}</pre>

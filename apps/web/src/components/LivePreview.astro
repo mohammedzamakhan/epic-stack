@@ -1,19 +1,34 @@
+---
+interface Props {
+  initialData?: Record<string, any>;
+}
+
+const { initialData = {} } = Astro.props;
+---
+
 <div id="live-preview">
   <div class="p-8 text-center text-gray-500">
     Loading preview...
   </div>
 </div>
 
+<script define:vars={{ initialData }}>
+  window.__INITIAL_PREVIEW_DATA__ = initialData;
+</script>
+
 <script>
   const CMS_URL = import.meta.env.PUBLIC_CMS_URL
 
-  import { subscribe, unsubscribe, ready } from '@payloadcms/live-preview';
+  import { ready } from '@payloadcms/live-preview';
 
   const previewElement = document.getElementById('live-preview') as HTMLElement;
+  
+  // Get initial data from server-rendered script
+  let currentData = structuredClone((window as any).__INITIAL_PREVIEW_DATA__ || {});
 
-  const onChange = async (mergedData: any) => {
-    if (!mergedData) {
-      console.error('No data received');
+  const renderPreview = async (data: any) => {
+    if (!data || Object.keys(data).length === 0) {
+      console.error('[LivePreview] No data available for preview');
       return;
     }
 
@@ -23,7 +38,7 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ post: mergedData }),
+        body: JSON.stringify({ post: data }),
       });
 
       if (!response.ok) {
@@ -32,26 +47,62 @@
 
       const html = await response.text();
       if (html) {
-        (previewElement as HTMLElement).innerHTML = html;
-      } else {
-        console.error('Received empty HTML response');
+        previewElement.innerHTML = html;
       }
     } catch (error) {
-      console.error('Failed to update preview:', error);
-      (previewElement as HTMLElement).innerHTML = `<div class="error p-4 bg-red-50 text-red-600 rounded">Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
+      console.error('[LivePreview] Failed to update preview:', error);
+      previewElement.innerHTML = `<div class="error p-4 bg-red-50 text-red-600 rounded">Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
     }
   };
 
-  const subscription = subscribe({
-    callback: onChange,
-    depth: 2,
-    initialData: {},
-    serverURL: CMS_URL,
+  // Deep merge function to properly merge nested objects
+  const deepMerge = (target: any, source: any): any => {
+    if (!source) return target;
+    if (!target) return source;
+    
+    const result = { ...target };
+    
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = deepMerge(target[key], source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    
+    return result;
+  };
+
+  // Custom postMessage handler to properly merge CMS changes
+  window.addEventListener('message', (event) => {
+    // Verify origin matches CMS URL
+    if (!CMS_URL || !event.origin.includes(new URL(CMS_URL).hostname)) {
+      return;
+    }
+
+    const message = event.data;
+    
+    if (message?.type === 'payload-live-preview' && message?.data) {
+      console.log('[LivePreview] Received live preview update');
+      console.log('[LivePreview] Changed data:', message.data);
+      
+      // Merge the changed data with current data
+      currentData = deepMerge(currentData, message.data);
+      
+      console.log('[LivePreview] Merged data title:', currentData.title);
+      
+      // Re-render with merged data
+      renderPreview(currentData);
+    }
   });
 
+  // Render initial content
+  if (currentData && Object.keys(currentData).length > 0) {
+    console.log('[LivePreview] Rendering initial content');
+    renderPreview(currentData);
+  }
+
+  // Signal to CMS that we're ready
+  console.log('[LivePreview] Calling ready()');
   ready({ serverURL: CMS_URL });
-
-  document.addEventListener('astro:unmount', () => {
-    unsubscribe(subscription);
-  });
 </script>

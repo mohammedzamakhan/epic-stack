@@ -1,10 +1,34 @@
 ---
 import Layout from '@/layouts/MarketingLayout.astro';
 import LivePreview from '@/components/LivePreview.astro';
+import { cmsClient } from '@/lib/cms';
 
 export const prerender = false;
+
+// Get query params from URL
+const url = new URL(Astro.request.url);
+const slug = url.searchParams.get('slug') || '';
+const collection = url.searchParams.get('collection') || 'pages';
+
+// Fetch initial data based on collection type
+let initialData = {};
+try {
+  if (collection === 'pages') {
+    const page = await cmsClient.getPage(slug);
+    if (page) {
+      initialData = page;
+    }
+  } else if (collection === 'posts') {
+    const post = await cmsClient.getPost(slug);
+    if (post) {
+      initialData = post;
+    }
+  }
+} catch (error) {
+  console.error('Failed to fetch initial preview data:', error);
+}
 ---
 
 <Layout>
-  <LivePreview />
+  <LivePreview initialData={initialData} />
 </Layout>

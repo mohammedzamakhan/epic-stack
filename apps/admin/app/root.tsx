@@ -28,7 +28,6 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useMatches,
 } from 'react-router'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { ENV } from 'varlock/env'
@@ -268,7 +267,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
 	const theme = useOptionalTheme() || 'dark'
-	useMatches()
 
 	// For non-marketing routes, use the regular Document with App component
 	return (

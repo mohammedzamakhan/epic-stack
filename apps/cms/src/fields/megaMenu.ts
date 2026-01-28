@@ -44,9 +44,6 @@ export const megaMenu: MegaMenuType = ({ overrides = {} } = {}) => {
         ],
         admin: {
           initCollapsed: true,
-          components: {
-            RowLabel: '@/components/RowLabel#RowLabel',
-          },
         },
       },
     ],
