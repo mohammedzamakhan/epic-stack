@@ -1,10 +1,13 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { auditService, AuditAction } from '@repo/audit'
 import {
-	authSessionStorage,
-	sessionKey,
-	getSessionExpirationDate,
 	requireUserWithRole,
+	impersonationSessionStorage,
+	impersonationSessionKey,
+	getImpersonationExpirationDate,
+	getClientIp,
+	hashIp,
+	IMPERSONATION_COOKIE_MAX_AGE,
 } from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
 import { prisma } from '@repo/database'
@@ -69,13 +72,24 @@ export async function action({
 
 	invariantResponse(adminUser, 'Admin user not found')
 
-	// Create a new session for the target user
-	const impersonationSession = await prisma.session.create({
+	// Get client IP and create hash for binding
+	const clientIp = getClientIp(request)
+	const ipHash = hashIp(clientIp)
+
+	// Delete any existing impersonation sessions for this admin
+	await prisma.impersonationSession.deleteMany({
+		where: { adminUserId },
+	})
+
+	// Create a new impersonation session with 15-minute TTL and IP binding
+	const impersonationSession = await prisma.impersonationSession.create({
 		data: {
-			expirationDate: getSessionExpirationDate(),
-			userId: targetUser.id,
+			adminUserId,
+			targetUserId: targetUser.id,
+			expiresAt: getImpersonationExpirationDate(),
+			ipHash,
 		},
-		select: { id: true, expirationDate: true, userId: true },
+		select: { id: true, expiresAt: true },
 	})
 
 	// Log the impersonation start using the audit service
@@ -89,34 +103,28 @@ export async function action({
 			targetUserId: targetUser.id,
 			targetName: targetUser.name || targetUser.username,
 			targetEmail: targetUser.email,
-			sessionId: impersonationSession.id,
+			impersonationSessionId: impersonationSession.id,
+			expiresAt: impersonationSession.expiresAt.toISOString(),
+			ipBound: true,
 		},
 		request,
 	)
 
-	// Get current session to store admin info
-	const authSession = await authSessionStorage.getSession(
-		request.headers.get('cookie'),
-	)
-
-	// Store impersonation info in session
-	authSession.set(sessionKey, impersonationSession.id)
-	authSession.set('impersonating', {
-		adminUserId: adminUserId,
-		adminName: adminUser.name || adminUser.username,
-		targetUserId: targetUser.id,
-		targetName: targetUser.name || targetUser.username,
-		startedAt: new Date().toISOString(),
-	})
+	// Create impersonation cookie session (separate from auth session)
+	const impSession = await impersonationSessionStorage.getSession()
+	impSession.set(impersonationSessionKey, impersonationSession.id)
 
 	// Redirect to main app as the impersonated user
 	throw redirect('/', {
 		headers: {
-			'set-cookie': await authSessionStorage.commitSession(authSession),
+			'set-cookie': await impersonationSessionStorage.commitSession(
+				impSession,
+				{ maxAge: IMPERSONATION_COOKIE_MAX_AGE },
+			),
 			...(await createToastHeaders({
 				type: 'success',
 				title: 'Impersonation Started',
-				description: `Now impersonating ${targetUser.name || targetUser.username}`,
+				description: `Now impersonating ${targetUser.name || targetUser.username}. Session expires in 15 minutes.`,
 			})),
 		},
 	})

@@ -27,7 +27,7 @@ import {
 	TableCell,
 } from '@repo/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useFetcher, useLoaderData, Form } from 'react-router'
 import { type loader } from '#app/routes/_admin+/feature-flags.tsx'
 
@@ -562,16 +562,23 @@ function UserTab({ flags }: { flags: ConfigFlag[] }) {
 	const [orgId, setOrgId] = useState('')
 	const [searchedOrgId, setSearchedOrgId] = useState<string | null>(null)
 
-	const systemFlags = flags.filter((f) => f.level === 'system')
-	const userOverrides = searchedUserId
-		? flags.filter((f) => {
-				if (f.level !== 'user' || f.userId !== searchedUserId) return false
-				if (searchedOrgId) {
-					return f.organizationId === searchedOrgId
-				}
-				return f.organizationId === null
-			})
-		: []
+	const systemFlags = useMemo(
+		() => flags.filter((f) => f.level === 'system'),
+		[flags],
+	)
+	const userOverrides = useMemo(
+		() =>
+			searchedUserId
+				? flags.filter((f) => {
+						if (f.level !== 'user' || f.userId !== searchedUserId) return false
+						if (searchedOrgId) {
+							return f.organizationId === searchedOrgId
+						}
+						return f.organizationId === null
+					})
+				: [],
+		[flags, searchedUserId, searchedOrgId],
+	)
 
 	const handleSearch = () => {
 		if (userId.trim()) {

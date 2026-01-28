@@ -1,5 +1,7 @@
 import { msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { useRef, useMemo } from 'react'
+import { useFetcher } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import {
 	DropdownMenu,
@@ -18,8 +20,6 @@ import {
 	useSidebar,
 } from '@repo/ui/sidebar'
 import { SunMoonIcon } from '@repo/ui/sun-moon-icon'
-import { useRef } from 'react'
-import { useFetcher } from 'react-router'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
 import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 
@@ -41,16 +41,16 @@ export function NavUser({
 	const themeFetcher = useFetcher()
 	const requestInfo = useOptionalRequestInfo()
 
-	const getInitials = (name: string) => {
-		const parts = name
+	const userInitials = useMemo(() => {
+		const parts = user.name
 			.trim()
 			.split(/\s+/)
 			.filter((part) => part.length > 0)
 		if (parts.length >= 2) {
 			return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase()
 		}
-		return name.slice(0, 2).toUpperCase()
-	}
+		return user.name.slice(0, 2).toUpperCase()
+	}, [user.name])
 
 	// Theme switching logic
 	const optimisticMode = useOptimisticThemeMode()
@@ -87,7 +87,7 @@ export function NavUser({
 									<button>
 										<Avatar className="h-8 w-8">
 											<AvatarImage src={user.avatar} alt={user.name} />
-											<AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+											<AvatarFallback>{userInitials}</AvatarFallback>
 										</Avatar>
 										<div className="grid flex-1 text-left text-sm leading-tight">
 											<span className="truncate font-medium">{user.name}</span>

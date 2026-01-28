@@ -18,7 +18,7 @@ import {
 	type SortingState,
 } from '@tanstack/react-table'
 import { formatDistanceToNow } from 'date-fns'
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router'
 
 export type Note = {
@@ -39,53 +39,60 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 	const [sorting, setSorting] = useState<SortingState>([])
 	const navigate = useNavigate()
 
-	const columns: ColumnDef<Note>[] = [
-		{
-			accessorKey: 'title',
-			header: 'Title',
-			cell: ({ row }) => {
-				return <div className="font-medium">{row.getValue('title')}</div>
+	// Memoize column definitions to avoid recreation on every render
+	const columns = useMemo<ColumnDef<Note>[]>(
+		() => [
+			{
+				accessorKey: 'title',
+				header: 'Title',
+				cell: ({ row }) => {
+					return <div className="font-medium">{row.getValue('title')}</div>
+				},
 			},
-		},
-		{
-			accessorKey: 'updatedAt',
-			header: 'Last Updated',
-			cell: ({ row }) => {
-				const date = new Date(row.original.updatedAt)
-				const timeAgo = formatDistanceToNow(date, { addSuffix: true })
-				return <div className="text-muted-foreground">{timeAgo}</div>
+			{
+				accessorKey: 'updatedAt',
+				header: 'Last Updated',
+				cell: ({ row }) => {
+					const date = new Date(row.original.updatedAt)
+					const timeAgo = formatDistanceToNow(date, { addSuffix: true })
+					return <div className="text-muted-foreground">{timeAgo}</div>
+				},
+				sortingFn: 'datetime',
 			},
-			sortingFn: 'datetime',
-		},
-		{
-			accessorKey: 'createdByName',
-			header: 'Created By',
-			cell: ({ row }) => {
-				const createdBy = row.original.createdByName || 'Unknown'
-				return <div className="text-muted-foreground">{createdBy}</div>
+			{
+				accessorKey: 'createdByName',
+				header: 'Created By',
+				cell: ({ row }) => {
+					const createdBy = row.original.createdByName || 'Unknown'
+					return <div className="text-muted-foreground">{createdBy}</div>
+				},
 			},
-		},
-		{
-			id: 'actions',
-			cell: ({ row }) => {
-				const note = row.original
-				return (
-					<div className="flex justify-end gap-2">
-						<Button variant="ghost" size="icon" aria-label={t`View`}>
-							<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
-								<Icon name="search" className="size-4" />
-							</Link>
-						</Button>
-						<Button variant="ghost" size="icon" aria-label={t`Edit`}>
-							<Link to={`${note.id}/edit`} onClick={(e) => e.stopPropagation()}>
-								<Icon name="pencil" className="size-4" />
-							</Link>
-						</Button>
-					</div>
-				)
+			{
+				id: 'actions',
+				cell: ({ row }) => {
+					const note = row.original
+					return (
+						<div className="flex justify-end gap-2">
+							<Button variant="ghost" size="icon" aria-label={t`View`}>
+								<Link to={`${note.id}`} onClick={(e) => e.stopPropagation()}>
+									<Icon name="search" className="size-4" />
+								</Link>
+							</Button>
+							<Button variant="ghost" size="icon" aria-label={t`Edit`}>
+								<Link
+									to={`${note.id}/edit`}
+									onClick={(e) => e.stopPropagation()}
+								>
+									<Icon name="pencil" className="size-4" />
+								</Link>
+							</Button>
+						</div>
+					)
+				},
 			},
-		},
-	]
+		],
+		[],
+	)
 
 	const table = useReactTable({
 		data: notes,
@@ -98,9 +105,12 @@ export function NotesTable({ notes }: { notes: Note[] }) {
 		getSortedRowModel: getSortedRowModel(),
 	})
 
-	function handleRowClick(note: Note) {
-		void navigate(`${note.id}`)
-	}
+	const handleRowClick = useCallback(
+		(note: Note) => {
+			void navigate(`${note.id}`)
+		},
+		[navigate],
+	)
 
 	return (
 		<div className="rounded-md border">

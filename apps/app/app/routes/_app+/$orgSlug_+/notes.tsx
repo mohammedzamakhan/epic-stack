@@ -13,21 +13,21 @@ import { Sheet, SheetContent } from '@repo/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@repo/ui/tabs'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
-	Outlet,
 	Link,
+	Outlet,
+	useFetcher,
 	useLocation,
 	useNavigate,
-	useFetcher,
 	useSearchParams,
-	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
-
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
+import { useDebounce } from '#app/utils/use-debounce.ts'
 import { NotesCards } from './notes-cards.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 
@@ -235,28 +235,38 @@ export default function NotesRoute({
 		setHasOutlet(location.pathname !== baseNotesPath)
 	}, [location.pathname, loaderData.organization.slug])
 
-	// Handle search
-	const handleSearch = (value: string) => {
-		const newSearchParams = new URLSearchParams(searchParams)
-		if (value.trim()) {
-			newSearchParams.set('search', value.trim())
-		} else {
-			newSearchParams.delete('search')
-		}
-		setSearchParams(newSearchParams)
-	}
+	const handleSearch = useCallback(
+		(value: string) => {
+			const newSearchParams = new URLSearchParams(searchParams)
+			if (value.trim()) {
+				newSearchParams.set('search', value.trim())
+			} else {
+				newSearchParams.delete('search')
+			}
+			setSearchParams(newSearchParams)
+		},
+		[searchParams, setSearchParams],
+	)
 
-	const handleSearchSubmit = (e: React.FormEvent) => {
-		e.preventDefault()
-		handleSearch(searchValue)
-	}
+	const handleDebouncedSearch = useDebounce(handleSearch, 300)
 
-	const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
+	const handleSearchSubmit = useCallback(
+		(e: React.FormEvent) => {
 			e.preventDefault()
 			handleSearch(searchValue)
-		}
-	}
+		},
+		[handleSearch, searchValue],
+	)
+
+	const handleSearchKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter') {
+				e.preventDefault()
+				handleSearch(searchValue)
+			}
+		},
+		[handleSearch, searchValue],
+	)
 
 	return (
 		<div className="flex h-full flex-col py-8 md:p-8">
@@ -327,9 +337,9 @@ export default function NotesRoute({
 						value={searchValue}
 						onChange={(e) => {
 							setSearchValue(e.target.value)
+							handleDebouncedSearch(e.target.value)
 						}}
 						onKeyDown={handleSearchKeyDown}
-						onBlur={() => handleSearch(searchValue)}
 						className="pr-10"
 					/>
 					<div className="absolute inset-y-0 right-0 flex items-center pr-3">

@@ -163,8 +163,11 @@ export enum AuditAction {
 	// Data Privacy & Compliance
 	DATA_EXPORT_REQUESTED = 'data_export_requested',
 	DATA_EXPORT_COMPLETED = 'data_export_completed',
+	DATA_EXPORT_FAILED = 'data_export_failed',
 	DATA_DELETION_REQUESTED = 'data_deletion_requested',
 	DATA_DELETION_COMPLETED = 'data_deletion_completed',
+	DATA_DELETION_CANCELLED = 'data_deletion_cancelled',
+	DATA_DELETION_FAILED = 'data_deletion_failed',
 	GDPR_ACCESS_REQUEST = 'gdpr_access_request',
 	AUDIT_LOG_EXPORTED = 'audit_log_exported',
 	AUDIT_LOG_VIEWED = 'audit_log_viewed',

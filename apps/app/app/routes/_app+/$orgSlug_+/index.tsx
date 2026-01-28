@@ -11,7 +11,7 @@ import {
 import { prisma } from '@repo/database'
 import { PageTitle } from '@repo/ui/page-title'
 import confetti from 'canvas-confetti'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, lazy, Suspense } from 'react'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -22,8 +22,13 @@ import {
 } from 'react-router'
 import { ENV } from 'varlock/env'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
-import { NotesChart } from '#app/components/notes-chart.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
+
+const NotesChart = lazy(() =>
+	import('#app/components/notes-chart.tsx').then((m) => ({
+		default: m.NotesChart,
+	})),
+)
 
 import { type loader as rootLoader } from '#app/root.tsx'
 import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
@@ -318,7 +323,13 @@ export default function OrganizationDashboard() {
 				)}
 
 				<div className="mt-8 w-full lg:w-1/2">
-					<NotesChart data={chartData} daysShown={daysToShow} />
+					<Suspense
+						fallback={
+							<div className="bg-muted/50 h-64 animate-pulse rounded-lg" />
+						}
+					>
+						<NotesChart data={chartData} daysShown={daysToShow} />
+					</Suspense>
 					{onboardingProgress &&
 						!onboardingProgress.isCompleted &&
 						onboardingProgress.isVisible && (

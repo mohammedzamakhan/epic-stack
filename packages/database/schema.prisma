@@ -52,8 +52,11 @@ model User {
   auditLogs              AuditLog[]                 @relation("AuditLogUser")
   waitlistEntry          WaitlistEntry?
   grantedWaitlistAccess  WaitlistEntry[]            @relation("AccessGranter")
-  mcpAuthorizations      MCPAuthorization[]
-  backupCodes            BackupCode[]
+  mcpAuthorizations         MCPAuthorization[]
+  backupCodes               BackupCode[]
+  dataSubjectRequests       DataSubjectRequest[]
+  impersonationSessionsAsAdmin  ImpersonationSession[] @relation("ImpersonationAdmin")
+  impersonationSessionsAsTarget ImpersonationSession[] @relation("ImpersonationTarget")
 }
 
 model Note {
@@ -978,4 +981,59 @@ model RateLimitEntry {
   @@index([keyId])
   @@index([keyId, createdAt])
   @@index([createdAt]) // For cleanup queries
+}
+
+// Impersonation Session - separate session for admin impersonation with enhanced security
+// Provides defense-in-depth: separate cookie, shorter TTL, IP binding
+model ImpersonationSession {
+  id           String   @id @default(cuid())
+  adminUserId  String
+  targetUserId String
+  ipHash       String // HMAC of client IP for binding
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime // Absolute expiration (15 minutes from creation)
+
+  adminUser  User @relation("ImpersonationAdmin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  targetUser User @relation("ImpersonationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([targetUserId])
+  @@index([expiresAt])
+}
+
+// GDPR Data Subject Request - tracks export and erasure requests
+// Supports Article 17 (Right to Erasure) and Article 20 (Right to Portability)
+model DataSubjectRequest {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Request type: EXPORT (Article 20) or ERASURE (Article 17)
+  type   String // 'export' or 'erasure'
+  // Status: requested, processing, scheduled, completed, cancelled, failed
+  status String @default("requested")
+
+  // Timestamps
+  requestedAt DateTime  @default(now())
+  processedAt DateTime? // When processing started
+  completedAt DateTime? // When completed successfully
+  cancelledAt DateTime? // When cancelled by user
+
+  // For erasure only: grace period support
+  scheduledFor DateTime? // When deletion should execute (after grace period)
+  executedAt   DateTime? // When deletion was actually executed
+
+  // Failure tracking
+  failureReason String?
+
+  // Metadata (JSON string) - stores export stats, file info, etc.
+  metadata String?
+
+  // Request context snapshot for audit
+  ipAddress String?
+  userAgent String?
+
+  @@index([userId, type, status])
+  @@index([status, scheduledFor])
+  @@index([requestedAt])
 }

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { PasswordSchema } from '@repo/validation'
 import { useLocalSearchParams, router } from 'expo-router'
 import React, { useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -10,7 +11,6 @@ import {
 	type TextInput,
 } from 'react-native'
 import { z } from 'zod'
-import { PasswordSchema } from '@repo/validation'
 import {
 	Screen,
 	Input,

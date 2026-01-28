@@ -60,6 +60,14 @@ export async function loader({ request }: { request: Request }) {
 		offset,
 	})
 
+	// Parse metadata in loader to avoid JSON.parse in render loop
+	const logsWithParsedMetadata = result.logs.map((log) => ({
+		...log,
+		parsedMetadata: log.metadata
+			? (JSON.parse(log.metadata) as Record<string, unknown>)
+			: {},
+	}))
+
 	// Get statistics
 	const statistics = await auditService.getStatistics({
 		organizationId,
@@ -69,6 +77,7 @@ export async function loader({ request }: { request: Request }) {
 
 	return {
 		...result,
+		logs: logsWithParsedMetadata,
 		statistics,
 		filters: {
 			organizationId,
@@ -328,8 +337,7 @@ export default function EnhancedAuditLogsPage() {
 					{logs.length > 0 ? (
 						<ItemGroup>
 							{logs.map((log) => {
-								const metadata = log.metadata ? JSON.parse(log.metadata) : {}
-								const metadataTyped = metadata as Record<string, any>
+								const metadata = log.parsedMetadata
 								return (
 									<Item key={log.id} variant="outline">
 										<ItemContent>
@@ -337,10 +345,10 @@ export default function EnhancedAuditLogsPage() {
 												<div className="flex items-center gap-2">
 													<Badge
 														variant={getSeverityBadgeVariant(
-															metadataTyped.severity || 'info',
+															String(metadata.severity || 'info'),
 														)}
 													>
-														{metadataTyped.severity || 'info'}
+														{String(metadata.severity || 'info')}
 													</Badge>
 													<span className="text-muted-foreground font-mono text-sm">
 														{log.action}
@@ -370,13 +378,13 @@ export default function EnhancedAuditLogsPage() {
 														{log.organization.name}
 													</span>
 												)}
-												{metadataTyped.ipAddress && (
+												{metadata.ipAddress && (
 													<span>
 														<Icon
 															name="external-link"
 															className="mr-1 inline h-3 w-3"
 														/>
-														{metadataTyped.ipAddress}
+														{metadata.ipAddress as string}
 													</span>
 												)}
 												{log.resourceType && (

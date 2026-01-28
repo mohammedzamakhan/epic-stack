@@ -3,6 +3,7 @@ import { useLingui } from '@lingui/react'
 import { useDirection } from '@repo/ui'
 import { BuildingIcon } from '@repo/ui/building-icon'
 import { ClockIcon } from '@repo/ui/clock-icon'
+import { FileTextIcon } from '@repo/ui/file-text-icon'
 import { FlaskIcon } from '@repo/ui/flask-icon'
 import { GlobeIcon } from '@repo/ui/globe-icon'
 import { HomeIcon } from '@repo/ui/home-icon'
@@ -80,6 +81,12 @@ export function AdminSidebar({
 			url: '/audit-logs',
 			isActive: location.pathname.startsWith('/audit-logs'),
 			icon: ShieldCheckIcon,
+		},
+		{
+			title: _(msg`GDPR Requests`),
+			url: '/gdpr-requests',
+			isActive: location.pathname.startsWith('/gdpr-requests'),
+			icon: FileTextIcon,
 		},
 		{
 			title: _(msg`Feedback`),

@@ -40,6 +40,7 @@
     "db:migrate:deploy": "cd packages/database && npm run db:migrate:deploy",
     "db:seed": "nx run @repo/database:db:seed",
     "db:migrate:dev": "cd packages/database && npm run db:migrate:dev",
+    "gdpr:process": "node scripts/process-gdpr-requests.mjs",
     "docs:dev": "cd apps/docs && npx mint dev",
     "docs:build": "cd apps/docs && npx mint build",
     "prepare": "husky"

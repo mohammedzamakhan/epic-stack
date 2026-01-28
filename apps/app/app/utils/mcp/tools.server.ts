@@ -1,5 +1,6 @@
 import { prisma } from '@repo/database'
 import { logger } from '@repo/observability'
+import { getAccessibleNotes } from '../organization/note-access.server'
 import { getSignedGetRequestInfo } from '../storage.server'
 import { registerTool, type MCPContext } from './server.server'
 
@@ -216,26 +217,16 @@ registerTool({
 
 			// Property 20: Note retrieval limits and ordering
 			// The system should return at most 10 notes, ordered by creation date (most recent first)
-			const notes = await prisma.organizationNote.findMany({
-				where: {
-					organizationId: context.organization.id,
-					createdById: user.id,
-					OR: [
-						{ isPublic: true },
-						{ createdById: context.user.id },
-						{ noteAccess: { some: { userId: context.user.id } } },
-					],
+			// Uses centralized permission system via getAccessibleNotes for consistent authorization
+			const notes = await getAccessibleNotes(
+				context.user.id,
+				context.organization.id,
+				{
+					targetUserId: user.id,
+					take: 10,
+					orderBy: { createdAt: 'desc' },
 				},
-				select: {
-					id: true,
-					title: true,
-					content: true,
-					createdAt: true,
-					isPublic: true,
-				},
-				take: 10,
-				orderBy: { createdAt: 'desc' },
-			})
+			)
 
 			const content: Array<{
 				type: 'text'

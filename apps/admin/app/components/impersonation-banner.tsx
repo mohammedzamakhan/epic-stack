@@ -11,9 +11,11 @@ interface ImpersonationBannerProps {
 export function ImpersonationBanner({
 	impersonationInfo,
 }: ImpersonationBannerProps) {
-	const { targetName } = impersonationInfo
-	const startedAt = new Date(impersonationInfo.startedAt)
-	const duration = Math.floor((Date.now() - startedAt.getTime()) / 1000 / 60) // minutes
+	const { targetName, expiresAt } = impersonationInfo
+	const expiresAtDate = expiresAt ? new Date(expiresAt) : null
+	const remainingMinutes = expiresAtDate
+		? Math.max(0, Math.ceil((expiresAtDate.getTime() - Date.now()) / 1000 / 60))
+		: null
 
 	return (
 		<div className="border-b border-yellow-200 bg-yellow-50 px-4 py-3">
@@ -32,15 +34,17 @@ export function ImpersonationBanner({
 								You are impersonating <strong>{targetName}</strong>
 							</Trans>
 						</span>
-						<span className="ml-2 text-yellow-600">
-							(
-							<Plural
-								value={duration}
-								one="# minute ago"
-								other="# minutes ago"
-							/>
-							)
-						</span>
+						{remainingMinutes !== null && (
+							<span className="ml-2 text-yellow-600">
+								(
+								<Plural
+									value={remainingMinutes}
+									one="expires in # minute"
+									other="expires in # minutes"
+								/>
+								)
+							</span>
+						)}
 					</div>
 				</div>
 				<Form method="post" action="/stop-impersonation">

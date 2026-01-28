@@ -1,21 +1,21 @@
 import { auditService, AuditAction } from '@repo/audit'
 import {
-	authSessionStorage,
-	sessionKey,
-	getSessionExpirationDate,
+	impersonationSessionStorage,
+	impersonationSessionKey,
+	destroyImpersonationSession,
 } from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { data, redirect } from 'react-router'
 
 export async function action({ request }: { request: Request }) {
-	const authSession = await authSessionStorage.getSession(
+	const impSession = await impersonationSessionStorage.getSession(
 		request.headers.get('cookie'),
 	)
 
-	const impersonationInfo = authSession.get('impersonating')
+	const impersonationSessionId = impSession.get(impersonationSessionKey)
 
-	if (!impersonationInfo) {
+	if (!impersonationSessionId) {
 		throw data(
 			{ error: 'Not currently impersonating' },
 			{
@@ -29,24 +29,48 @@ export async function action({ request }: { request: Request }) {
 		)
 	}
 
-	const { adminUserId, targetUserId, targetName } = impersonationInfo
+	// Get impersonation session details for audit logging
+	const impersonationSession = await prisma.impersonationSession.findUnique({
+		where: { id: impersonationSessionId },
+		include: {
+			adminUser: { select: { id: true, name: true, username: true } },
+			targetUser: { select: { id: true, name: true, username: true } },
+		},
+	})
 
-	// Get the current impersonation session ID to delete it
-	const impersonationSessionId = authSession.get(sessionKey)
+	let adminUserId: string
+	let targetName: string
+	let targetUserId: string
+	let duration: number
 
-	// Delete the orphaned impersonation session from the database
-	if (impersonationSessionId) {
-		await prisma.session
-			.delete({
-				where: { id: impersonationSessionId },
-			})
+	if (impersonationSession) {
+		adminUserId = impersonationSession.adminUserId
+		targetUserId = impersonationSession.targetUserId
+		targetName =
+			impersonationSession.targetUser.name ||
+			impersonationSession.targetUser.username
+		duration = Date.now() - impersonationSession.createdAt.getTime()
+
+		// Delete the impersonation session from database
+		await prisma.impersonationSession
+			.delete({ where: { id: impersonationSessionId } })
 			.catch(() => {
-				// Session may already be expired/deleted, ignore errors
+				// Session may already be deleted, ignore errors
 			})
+	} else {
+		// Session not found in DB (expired/deleted), still clear cookie
+		throw redirect('/users', {
+			headers: {
+				'set-cookie': await destroyImpersonationSession(request),
+				...(await createToastHeaders({
+					type: 'message',
+					title: 'Session Expired',
+					description: 'Impersonation session had already expired.',
+				})),
+			},
+		})
 	}
 
-	// Calculate impersonation duration
-	const duration = Date.now() - new Date(impersonationInfo.startedAt).getTime()
 	const durationMinutes = Math.floor(duration / 1000 / 60)
 
 	// Log the end of impersonation using the audit service
@@ -56,31 +80,19 @@ export async function action({ request }: { request: Request }) {
 		`Stopped impersonating user: ${targetName}`,
 		{
 			adminId: adminUserId,
-			targetUserId: targetUserId,
-			targetName: targetName,
+			targetUserId,
+			targetName,
 			duration,
 			durationMinutes,
+			impersonationSessionId,
 		},
 		request,
 	)
 
-	// Create a new session for the admin user
-	const adminSession = await prisma.session.create({
-		data: {
-			expirationDate: getSessionExpirationDate(),
-			userId: adminUserId,
-		},
-		select: { id: true },
-	})
-
-	// Clear impersonation info and set admin session
-	authSession.set(sessionKey, adminSession.id)
-	authSession.unset('impersonating')
-
-	// Redirect back to admin dashboard
+	// Destroy impersonation cookie and redirect back to admin dashboard
 	throw redirect('/users', {
 		headers: {
-			'set-cookie': await authSessionStorage.commitSession(authSession),
+			'set-cookie': await destroyImpersonationSession(request),
 			...(await createToastHeaders({
 				type: 'success',
 				title: 'Impersonation Ended',

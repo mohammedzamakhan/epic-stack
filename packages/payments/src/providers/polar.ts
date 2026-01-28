@@ -6,6 +6,7 @@
  */
 
 import { Polar } from '@polar-sh/sdk'
+import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks'
 import {
 	type PaymentProvider,
 	type Product,
@@ -75,11 +76,14 @@ export class PolarProvider implements PaymentProvider {
 				const result = page.result
 				if (result.items) {
 					for (const product of result.items) {
+						const firstPrice = product.prices?.[0]
+						const defaultPriceId =
+							firstPrice && 'id' in firstPrice ? firstPrice.id : undefined
 						products.push({
 							id: product.id,
 							name: product.name,
 							description: product.description || null,
-							defaultPriceId: product.prices?.[0]?.id,
+							defaultPriceId,
 						})
 					}
 				}
@@ -112,24 +116,37 @@ export class PolarProvider implements PaymentProvider {
 					for (const product of result.items) {
 						if (product.prices && product.prices.length > 0) {
 							for (const price of product.prices) {
-								// Map Polar's price interval types to our standard types
+								if (!('id' in price)) continue
+
 								let interval: 'month' | 'year' | 'week' | 'day' | null = null
-								if (price.type === 'recurring' && price.recurringInterval) {
-									if (
-										price.recurringInterval === 'month' ||
-										price.recurringInterval === 'year'
-									) {
-										interval = price.recurringInterval
+								if (
+									'type' in price &&
+									price.type === 'recurring' &&
+									'recurringInterval' in price &&
+									price.recurringInterval
+								) {
+									const recInt = price.recurringInterval
+									if (recInt === 'month') {
+										interval = 'month'
+									} else if (recInt === 'year') {
+										interval = 'year'
 									}
 								}
+
+								const unitAmount =
+									'priceAmount' in price ? (price.priceAmount as number) : null
+								const currency =
+									'priceCurrency' in price
+										? ((price.priceCurrency as string)?.toLowerCase() ?? 'usd')
+										: 'usd'
 
 								prices.push({
 									id: price.id,
 									productId: product.id,
-									unitAmount: price.priceAmount || null,
+									unitAmount,
 									interval,
 									trialPeriodDays: null,
-									currency: price.priceCurrency?.toLowerCase() || 'usd',
+									currency,
 								})
 							}
 						}
@@ -272,12 +289,10 @@ export class PolarProvider implements PaymentProvider {
 				const result = page.result
 				if (result.items) {
 					for (const sub of result.items) {
-						// Filter by customerId if provided
-						if (customerId && sub.userId !== customerId) {
+						if (customerId && sub.customerId !== customerId) {
 							continue
 						}
 
-						// Map Polar subscription status to our standard status
 						let status: Subscription['status'] = 'active'
 						if (sub.status === 'active') status = 'active'
 						else if (sub.status === 'canceled') status = 'canceled'
@@ -286,15 +301,17 @@ export class PolarProvider implements PaymentProvider {
 						else if (sub.status === 'past_due') status = 'past_due'
 						else if (sub.status === 'unpaid') status = 'unpaid'
 
+						const firstPrice = sub.prices?.[0]
+						const priceId =
+							firstPrice && 'id' in firstPrice ? firstPrice.id : ''
+
 						subscriptions.push({
 							id: sub.id,
 							status,
-							customerId: sub.userId || '',
+							customerId: sub.customerId || '',
 							productId: sub.productId,
-							priceId: sub.priceId || '',
-							trialEnd: sub.currentPeriodEnd
-								? new Date(sub.currentPeriodEnd)
-								: null,
+							priceId,
+							trialEnd: sub.trialEnd ? new Date(sub.trialEnd) : null,
 							currentPeriodEnd: sub.currentPeriodEnd
 								? new Date(sub.currentPeriodEnd)
 								: undefined,
@@ -303,7 +320,7 @@ export class PolarProvider implements PaymentProvider {
 							items: [
 								{
 									id: sub.id,
-									priceId: sub.priceId || '',
+									priceId,
 									quantity: 1,
 								},
 							],
@@ -362,30 +379,27 @@ export class PolarProvider implements PaymentProvider {
 				const result = page.result
 				if (result.items) {
 					for (const order of result.items) {
-						// Filter by customerId if needed
-						if (customerId && order.userId !== customerId) {
+						if (customerId && order.customerId !== customerId) {
 							continue
 						}
 
+						const createdTimestamp = order.createdAt
+							? new Date(order.createdAt).getTime() / 1000
+							: 0
+
 						invoices.push({
 							id: order.id,
-							number: order.id,
-							status: null,
-							amountPaid: order.amount || 0,
-							amountDue: 0,
+							number: order.invoiceNumber || order.id,
+							status: order.paid ? 'paid' : null,
+							amountPaid: order.paid ? order.totalAmount : 0,
+							amountDue: order.dueAmount || 0,
 							currency: order.currency?.toLowerCase() || 'usd',
-							created: order.createdAt
-								? new Date(order.createdAt).getTime() / 1000
-								: 0,
+							created: createdTimestamp,
 							dueDate: null,
 							hostedInvoiceUrl: null,
 							invoicePdf: null,
-							periodStart: order.createdAt
-								? new Date(order.createdAt).getTime() / 1000
-								: 0,
-							periodEnd: order.createdAt
-								? new Date(order.createdAt).getTime() / 1000
-								: 0,
+							periodStart: createdTimestamp,
+							periodEnd: createdTimestamp,
 						})
 					}
 				}
@@ -400,36 +414,32 @@ export class PolarProvider implements PaymentProvider {
 
 	async constructWebhookEvent(
 		payload: string | Buffer,
-		_signature: string,
-		_secret: string,
+		signature: string,
+		secret: string,
 	): Promise<WebhookEvent> {
-		// Polar SDK doesn't export webhook validation utilities in the same way as Stripe
-		// For now, we'll parse the payload as JSON and return it
-		// In production, you should implement proper webhook signature verification
-
 		try {
 			const payloadString =
 				typeof payload === 'string' ? payload : payload.toString('utf8')
-			const event = JSON.parse(payloadString) as {
-				id?: string
-				type?: string
-				data?: any
+
+			const headers: Record<string, string> = {
+				'webhook-signature': signature,
 			}
 
-			console.warn(
-				'PolarProvider: Webhook signature verification is not implemented. Please implement proper validation in production.',
-			)
+			const event = validateEvent(payloadString, headers, secret)
 
 			return {
-				id: event.id || '',
-				type: event.type || '',
-				data: event.data || event,
+				id: (event as { id?: string }).id || '',
+				type: (event as { type?: string }).type || '',
+				data: (event as { data?: unknown }).data || event,
 			}
-		} catch (error: any) {
-			console.error('PolarProvider: Failed to construct webhook event:', error)
-			throw new Error(
-				`Failed to parse Polar webhook: ${error?.message || error}`,
-			)
+		} catch (error: unknown) {
+			if (error instanceof WebhookVerificationError) {
+				throw new Error(
+					`Polar webhook signature verification failed: ${error.message}`,
+				)
+			}
+			const message = error instanceof Error ? error.message : String(error)
+			throw new Error(`Failed to parse Polar webhook: ${message}`)
 		}
 	}
 }

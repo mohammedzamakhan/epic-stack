@@ -13,7 +13,7 @@ import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { Divider } from '@repo/ui/divider'
 import { PageTitle } from '@repo/ui/page-title'
-import * as QRCode from 'qrcode'
+import { toDataURL as qrCodeToDataURL } from 'qrcode'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -22,9 +22,14 @@ import {
 import { AdvancedSettingsCard } from '#app/components/settings/cards/advanced-settings-card.tsx'
 import { ConnectionsCard } from '#app/components/settings/cards/connections-card.tsx'
 import { DangerCard } from '#app/components/settings/cards/danger-card.tsx'
+import { PrivacyCard } from '#app/components/settings/cards/privacy-card.tsx'
 import { SecurityCard } from '#app/components/settings/cards/security-card.tsx'
 import { SessionsCard } from '#app/components/settings/cards/sessions-card.tsx'
 
+import {
+	getActiveErasureRequest,
+	getLatestExportRequest,
+} from '#app/utils/gdpr.server.ts'
 import { checkSSOEnforcementByUserId } from '#app/utils/sso/enforcement.server.ts'
 import { parseUserAgent } from '#app/utils/user-agent.server.ts'
 import { userSecuritySelect } from '#app/utils/user-security.server.ts'
@@ -33,6 +38,10 @@ import {
 	signOutOfSessionsAction,
 } from '../settings+/actions/account.actions'
 import { disconnectProviderAction } from '../settings+/actions/connections.actions'
+import {
+	requestDataDeletionAction,
+	cancelDataDeletionAction,
+} from '../settings+/actions/privacy.actions'
 import {
 	changePasswordAction,
 	disable2FAAction,
@@ -110,6 +119,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}),
 		checkSSOEnforcementByUserId(userId),
 		getUnusedBackupCodeCount(userId),
+		getActiveErasureRequest(userId),
+		getLatestExportRequest(userId),
 	])
 
 	// Extract results with error handling
@@ -129,6 +140,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		results[6].status === 'fulfilled' ? results[6].value : { enforced: false }
 	const backupCodesRemaining =
 		results[7].status === 'fulfilled' ? results[7].value : 0
+	const activeErasureRequest =
+		results[8].status === 'fulfilled' ? results[8].value : null
+	const latestExportRequest =
+		results[9].status === 'fulfilled' ? results[9].value : null
 
 	// Get current session ID
 	const authSession = await authSessionStorage.getSession(
@@ -153,7 +168,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			issuer: 'Epic Stack',
 		})
 
-		qrCode = await QRCode.toDataURL(otpUri)
+		qrCode = await qrCodeToDataURL(otpUri)
 
 		const verificationData = {
 			...config,
@@ -183,6 +198,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		currentSessionId,
 		ssoEnforcement,
 		backupCodesRemaining,
+		gdpr: {
+			activeErasureRequest: activeErasureRequest
+				? {
+						id: activeErasureRequest.id,
+						status: activeErasureRequest.status,
+						scheduledFor: activeErasureRequest.scheduledFor?.toISOString(),
+						requestedAt: activeErasureRequest.requestedAt.toISOString(),
+					}
+				: null,
+			latestExportRequest: latestExportRequest
+				? {
+						id: latestExportRequest.id,
+						status: latestExportRequest.status,
+						completedAt: latestExportRequest.completedAt?.toISOString(),
+						requestedAt: latestExportRequest.requestedAt.toISOString(),
+					}
+				: null,
+		},
 	}
 }
 
@@ -204,6 +237,8 @@ export const enable2FAActionIntent = 'enable-2fa'
 export const disable2FAActionIntent = 'disable-2fa'
 export const generateBackupCodesActionIntent = 'generate-backup-codes'
 export const regenerateBackupCodesActionIntent = 'regenerate-backup-codes'
+export const requestDataDeletionActionIntent = 'request-data-deletion'
+export const cancelDataDeletionActionIntent = 'cancel-data-deletion'
 export const twoFAVerificationType = '2fa'
 export const twoFAVerifyVerificationType = '2fa-verify'
 export const newEmailAddressSessionKey = 'new-email-address'
@@ -249,6 +284,12 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 		case deletePasskeyActionIntent: {
 			return deletePasskeyAction({ request, userId, formData })
+		}
+		case requestDataDeletionActionIntent: {
+			return requestDataDeletionAction({ request, userId, formData })
+		}
+		case cancelDataDeletionActionIntent: {
+			return cancelDataDeletionAction({ request, userId, formData })
 		}
 		default: {
 			throw new Response(`Invalid intent "${intent}"`, { status: 400 })
@@ -347,6 +388,10 @@ export default function SecuritySettings() {
 
 				<AnnotatedSection>
 					<AdvancedSettingsCard user={data.user} />
+				</AnnotatedSection>
+
+				<AnnotatedSection>
+					<PrivacyCard gdpr={data.gdpr} />
 				</AnnotatedSection>
 
 				<AnnotatedSection>

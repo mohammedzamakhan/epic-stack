@@ -52,7 +52,7 @@ import {
 } from '@repo/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
 	Form,
 	useActionData,
@@ -246,11 +246,16 @@ function copyToClipboard(text: string) {
 function CodeBlock({ code }: { code: string }) {
 	const [copied, setCopied] = useState(false)
 
-	const handleCopy = () => {
+	useEffect(() => {
+		if (!copied) return
+		const timeoutId = setTimeout(() => setCopied(false), 2000)
+		return () => clearTimeout(timeoutId)
+	}, [copied])
+
+	const handleCopy = useCallback(() => {
 		copyToClipboard(code)
 		setCopied(true)
-		setTimeout(() => setCopied(false), 2000)
-	}
+	}, [code])
 
 	return (
 		<div className="relative">
@@ -458,13 +463,19 @@ function NewApiKeyModal({
 }) {
 	const [copied, setCopied] = useState(false)
 
-	const handleCopy = () => {
+	// Clear copied state after 2 seconds with proper cleanup
+	useEffect(() => {
+		if (!copied) return
+		const timeoutId = setTimeout(() => setCopied(false), 2000)
+		return () => clearTimeout(timeoutId)
+	}, [copied])
+
+	const handleCopy = useCallback(() => {
 		if (apiKey) {
 			copyToClipboard(apiKey.key)
 			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
 		}
-	}
+	}, [apiKey])
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>

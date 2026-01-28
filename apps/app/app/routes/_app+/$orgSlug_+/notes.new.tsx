@@ -1,8 +1,13 @@
 import { Trans } from '@lingui/macro'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
+import { lazy, Suspense } from 'react'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
-import { OrgNoteEditor } from './__org-note-editor.tsx'
+
+// Lazy load the heavy rich text editor
+const OrgNoteEditor = lazy(() =>
+	import('./__org-note-editor.tsx').then((m) => ({ default: m.OrgNoteEditor })),
+)
 
 export { action } from './__org-note-editor.server.tsx'
 
@@ -30,7 +35,15 @@ export default function NewNote() {
 				aria-labelledby="new-note-title"
 				tabIndex={-1}
 			>
-				<OrgNoteEditor organizationId={organizationId} />
+				<Suspense
+					fallback={
+						<div className="flex flex-1 items-center justify-center">
+							<div className="bg-muted/50 h-48 w-full animate-pulse rounded-lg" />
+						</div>
+					}
+				>
+					<OrgNoteEditor organizationId={organizationId} />
+				</Suspense>
 			</section>
 		</>
 	)

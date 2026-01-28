@@ -3,9 +3,14 @@ import { Trans } from '@lingui/macro'
 import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
+import { lazy, Suspense } from 'react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
-import { OrgNoteEditor } from './__org-note-editor.tsx'
+
+// Lazy load the heavy rich text editor
+const OrgNoteEditor = lazy(() =>
+	import('./__org-note-editor.tsx').then((m) => ({ default: m.OrgNoteEditor })),
+)
 
 export { action } from './__org-note-editor.server.tsx'
 
@@ -93,11 +98,19 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 				aria-labelledby="edit-note-title"
 				tabIndex={-1}
 			>
-				<OrgNoteEditor
-					note={loaderData.note}
-					actionData={actionData}
-					organizationId={loaderData.organizationId}
-				/>
+				<Suspense
+					fallback={
+						<div className="flex flex-1 items-center justify-center">
+							<div className="bg-muted/50 h-48 w-full animate-pulse rounded-lg" />
+						</div>
+					}
+				>
+					<OrgNoteEditor
+						note={loaderData.note}
+						actionData={actionData}
+						organizationId={loaderData.organizationId}
+					/>
+				</Suspense>
 			</section>
 		</>
 	)

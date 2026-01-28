@@ -18,7 +18,7 @@ import {
 	InputGroupAddon,
 	InputGroupButton,
 } from '@repo/ui/input-group'
-import * as React from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { redirect } from 'react-router'
 import { getLaunchStatus, getDiscordInviteUrl } from '#app/utils/env.server.ts'
 import {
@@ -92,16 +92,21 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 		discordInviteUrl,
 		hasDiscordOAuth,
 	} = loaderData
-	const [copied, setCopied] = React.useState(false)
+	const [copied, setCopied] = useState(false)
 	const userEmail = user.email
 	const referralCount = waitlistEntry.referralCount
 	const points = waitlistEntry.points
 
-	const copyToClipboard = async () => {
+	useEffect(() => {
+		if (!copied) return
+		const timeoutId = setTimeout(() => setCopied(false), 2000)
+		return () => clearTimeout(timeoutId)
+	}, [copied])
+
+	const copyToClipboard = useCallback(async () => {
 		try {
 			await navigator.clipboard.writeText(referralUrl)
 			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
 		} catch (err) {
 			console.error('Failed to copy:', err)
 			// Fallback for browsers that don't support clipboard API
@@ -112,13 +117,12 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 			try {
 				document.execCommand('copy')
 				setCopied(true)
-				setTimeout(() => setCopied(false), 2000)
 			} catch (fallbackErr) {
 				console.error('Fallback copy failed:', fallbackErr)
 			}
 			document.body.removeChild(textArea)
 		}
-	}
+	}, [referralUrl])
 
 	return (
 		<Card className="mx-auto w-full max-w-md bg-white/95 backdrop-blur">

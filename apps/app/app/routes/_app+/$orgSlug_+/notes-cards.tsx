@@ -12,7 +12,7 @@ import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import { formatDistanceToNow } from 'date-fns'
 import { Img } from 'openimg/react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
 import { type loader } from './notes'
 
@@ -110,20 +110,40 @@ export const NoteCard = ({
 		}
 	}, [isEditing])
 
-	const handleCardClick = () => {
+	useEffect(() => {
+		if (!copied) return
+		const timeoutId = setTimeout(() => {
+			setCopied(false)
+			setTooltipOpen(false)
+		}, 2000)
+		return () => clearTimeout(timeoutId)
+	}, [copied])
+
+	const handleCardClick = useCallback(() => {
 		if (!isEditing) {
 			void navigate(`${note.id}`)
 		}
-	}
+	}, [isEditing, navigate, note.id])
 
-	const handleStartEdit = (e: React.MouseEvent) => {
-		e.stopPropagation()
+	const handleStartEdit = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation()
+			if (setEditingNote) {
+				setEditingNote(note.id)
+			}
+		},
+		[setEditingNote, note.id],
+	)
+
+	const handleCancelEdit = useCallback(() => {
+		setEditTitle(note.title)
+		setEditContent(note.content ? note.content.replace(/<[^>]*>/g, '') : '')
 		if (setEditingNote) {
-			setEditingNote(note.id)
+			setEditingNote(null)
 		}
-	}
+	}, [note.title, note.content, setEditingNote])
 
-	const handleSaveEdit = () => {
+	const handleSaveEdit = useCallback(() => {
 		if (fetcher.state === 'idle') {
 			const formData = new FormData()
 			formData.append('actionType', 'inline-edit')
@@ -139,36 +159,37 @@ export const NoteCard = ({
 		if (setEditingNote) {
 			setEditingNote(null)
 		}
-	}
+	}, [
+		fetcher,
+		note.id,
+		editTitle,
+		editContent,
+		loaderData?.organization.slug,
+		setEditingNote,
+	])
 
-	const handleCancelEdit = () => {
-		setEditTitle(note.title)
-		setEditContent(note.content ? note.content.replace(/<[^>]*>/g, '') : '')
-		if (setEditingNote) {
-			setEditingNote(null)
-		}
-	}
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter' && !e.shiftKey) {
+				e.preventDefault()
+				handleSaveEdit()
+			} else if (e.key === 'Escape') {
+				handleCancelEdit()
+			}
+		},
+		[handleSaveEdit, handleCancelEdit],
+	)
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault()
-			handleSaveEdit()
-		} else if (e.key === 'Escape') {
-			handleCancelEdit()
-		}
-	}
-
-	const handleCopyLink = (e: React.MouseEvent) => {
-		e.stopPropagation()
-		const noteUrl = `${window.location.origin}${window.location.pathname}/${note.id}`
-		void navigator.clipboard.writeText(noteUrl)
-		setCopied(true)
-		setTooltipOpen(true)
-		setTimeout(() => {
-			setCopied(false)
-			setTooltipOpen(false)
-		}, 2000)
-	}
+	const handleCopyLink = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation()
+			const noteUrl = `${window.location.origin}${window.location.pathname}/${note.id}`
+			void navigator.clipboard.writeText(noteUrl)
+			setCopied(true)
+			setTooltipOpen(true)
+		},
+		[note.id],
+	)
 
 	// Get the first media item for display (prioritize videos with thumbnails, then images)
 	const firstVideo = note.uploads.find(
@@ -178,14 +199,13 @@ export const NoteCard = ({
 	const firstMedia = firstVideo || firstImage
 	const isVideo = !!firstVideo
 
-	// Parse tags from JSON string
-	const tags = (() => {
+	// Parse tags from JSON string - memoized to avoid re-parsing on every render
+	const tags = useMemo(() => {
 		try {
 			if (!note.tags) return []
 			const parsed = JSON.parse(note.tags)
 			type Tag = string | { name: string }
 			if (Array.isArray(parsed)) {
-				// Ensure all items are strings
 				return (parsed as Tag[])
 					.map((tag) =>
 						typeof tag === 'string'
@@ -200,7 +220,7 @@ export const NoteCard = ({
 		} catch {
 			return []
 		}
-	})()
+	}, [note.tags])
 
 	// Helper function to render priority icon
 	const getPriorityIcon = (priority: string | null) => {
