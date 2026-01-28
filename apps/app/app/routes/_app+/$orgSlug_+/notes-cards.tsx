@@ -11,6 +11,7 @@ import { PrioritySignal } from '@repo/ui/priority-signal'
 import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import { formatDistanceToNow } from 'date-fns'
+import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
@@ -81,7 +82,9 @@ export const NoteCard = ({
 	const [tooltipOpen, setTooltipOpen] = useState(false)
 	const [editTitle, setEditTitle] = useState(note.title)
 	const [editContent, setEditContent] = useState(
-		note.content ? note.content.replace(/<[^>]*>/g, '') : '',
+		note.content
+			? DOMPurify.sanitize(note.content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+			: '',
 	)
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
@@ -137,7 +140,14 @@ export const NoteCard = ({
 
 	const handleCancelEdit = useCallback(() => {
 		setEditTitle(note.title)
-		setEditContent(note.content ? note.content.replace(/<[^>]*>/g, '') : '')
+		setEditContent(
+			note.content
+				? DOMPurify.sanitize(note.content, {
+						ALLOWED_TAGS: [],
+						ALLOWED_ATTR: [],
+					})
+				: '',
+		)
 		if (setEditingNote) {
 			setEditingNote(null)
 		}
@@ -455,12 +465,19 @@ export const NoteCard = ({
 								</h3>
 							</div>
 							{/* Content preview */}
-							{note.content && (
-								<p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
-									{note.content.replace(/<[^>]*>/g, '').substring(0, 120)}
-									{note.content.replace(/<[^>]*>/g, '').length > 120 && '...'}
-								</p>
-							)}
+							{note.content &&
+								(() => {
+									const sanitizedContent = DOMPurify.sanitize(note.content, {
+										ALLOWED_TAGS: [],
+										ALLOWED_ATTR: [],
+									})
+									return (
+										<p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">
+											{sanitizedContent.substring(0, 120)}
+											{sanitizedContent.length > 120 && '...'}
+										</p>
+									)
+								})()}
 						</div>
 					)}
 
