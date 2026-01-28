@@ -66,6 +66,11 @@
       "types": "./src/onboarding.ts",
       "import": "./src/onboarding.ts",
       "default": "./src/onboarding.ts"
+    },
+    "./gdpr-export": {
+      "types": "./src/gdpr-export.server.ts",
+      "import": "./src/gdpr-export.server.ts",
+      "default": "./src/gdpr-export.server.ts"
     }
   },
   "scripts": {

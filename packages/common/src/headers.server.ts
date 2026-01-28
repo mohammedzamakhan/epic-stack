@@ -112,3 +112,46 @@ export function getConservativeCacheControl(
 			}, {}),
 	)
 }
+
+/**
+ * Validates and extracts the host from a request, checking against allowed hosts.
+ * Returns the validated host or null if invalid.
+ *
+ * Accepts localhost, 127.0.0.1, ::1, and hosts matching the BASE_URL.
+ */
+export function getValidatedHost(
+	request: Request,
+	baseUrl: string,
+): string | null {
+	const forwardedHost = request.headers.get('X-Forwarded-Host')
+	const host = request.headers.get('host')
+	const candidateHost = forwardedHost ?? host
+
+	if (!candidateHost) {
+		return null
+	}
+
+	const hostWithoutPort = candidateHost.split(':')[0]?.toLowerCase()
+
+	if (!hostWithoutPort) {
+		return null
+	}
+
+	if (
+		hostWithoutPort === 'localhost' ||
+		hostWithoutPort === '127.0.0.1' ||
+		hostWithoutPort === '::1'
+	) {
+		return candidateHost
+	}
+
+	const baseUrlHost = new URL(baseUrl).hostname.toLowerCase()
+	if (
+		hostWithoutPort === baseUrlHost ||
+		hostWithoutPort.endsWith(`.${baseUrlHost}`)
+	) {
+		return candidateHost
+	}
+
+	return host
+}

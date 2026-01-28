@@ -1,44 +1,11 @@
 // learn more: https://fly.io/docs/reference/configuration/#services-http_checks
+import { getValidatedHost } from '@repo/common/headers'
 import { prisma } from '@repo/database'
 import { ENV } from 'varlock/env'
 import { type Route } from './+types/healthcheck.ts'
 
-function getValidatedHost(request: Request): string | null {
-	const forwardedHost = request.headers.get('X-Forwarded-Host')
-	const host = request.headers.get('host')
-	const candidateHost = forwardedHost ?? host
-
-	if (!candidateHost) {
-		return null
-	}
-
-	const hostWithoutPort = candidateHost.split(':')[0]?.toLowerCase()
-
-	if (!hostWithoutPort) {
-		return null
-	}
-
-	if (
-		hostWithoutPort === 'localhost' ||
-		hostWithoutPort === '127.0.0.1' ||
-		hostWithoutPort === '::1'
-	) {
-		return candidateHost
-	}
-
-	const baseUrlHost = new URL(ENV.BASE_URL).hostname.toLowerCase()
-	if (
-		hostWithoutPort === baseUrlHost ||
-		hostWithoutPort.endsWith(`.${baseUrlHost}`)
-	) {
-		return candidateHost
-	}
-
-	return host
-}
-
 export async function loader({ request }: Route.LoaderArgs) {
-	const host = getValidatedHost(request)
+	const host = getValidatedHost(request, ENV.BASE_URL)
 
 	if (!host) {
 		return new Response('ERROR: Invalid host', { status: 400 })

@@ -27,7 +27,7 @@ import {
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
-import { useDebounce } from '#app/utils/use-debounce.ts'
+import { useDebounce } from '@repo/common'
 import { NotesCards } from './notes-cards.tsx'
 import { NotesKanbanBoard } from './notes-kanban-board.tsx'
 

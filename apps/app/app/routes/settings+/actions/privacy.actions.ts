@@ -7,7 +7,6 @@ import { redirectWithToast } from '@repo/common/toast'
 type PrivacyActionArgs = {
 	request: Request
 	userId: string
-	formData: FormData
 }
 
 export async function requestDataDeletionAction({

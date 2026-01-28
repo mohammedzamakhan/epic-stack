@@ -286,10 +286,10 @@ export async function action({ request }: ActionFunctionArgs) {
 			return deletePasskeyAction({ request, userId, formData })
 		}
 		case requestDataDeletionActionIntent: {
-			return requestDataDeletionAction({ request, userId, formData })
+			return requestDataDeletionAction({ request, userId })
 		}
 		case cancelDataDeletionActionIntent: {
-			return cancelDataDeletionAction({ request, userId, formData })
+			return cancelDataDeletionAction({ request, userId })
 		}
 		default: {
 			throw new Response(`Invalid intent "${intent}"`, { status: 400 })
