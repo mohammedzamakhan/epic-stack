@@ -171,4 +171,9 @@ export enum AuditAction {
 	GDPR_ACCESS_REQUEST = 'gdpr_access_request',
 	AUDIT_LOG_EXPORTED = 'audit_log_exported',
 	AUDIT_LOG_VIEWED = 'audit_log_viewed',
+
+	// Cookie Consent
+	COOKIE_CONSENT_GRANTED = 'cookie_consent_granted',
+	COOKIE_CONSENT_UPDATED = 'cookie_consent_updated',
+	COOKIE_CONSENT_REVOKED = 'cookie_consent_revoked',
 }

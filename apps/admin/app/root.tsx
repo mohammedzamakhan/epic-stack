@@ -8,7 +8,10 @@ import {
 	makeTimings,
 	time,
 } from '@repo/common'
-import { getCookieConsentState } from '@repo/common/cookie-consent'
+import {
+	getConsentPreferences,
+	hasMarketingConsent,
+} from '@repo/common/cookie-consent'
 import { pipeHeaders } from '@repo/common/headers'
 import { getSidebarState } from '@repo/common/sidebar-cookie'
 import { getToast } from '@repo/common/toast'
@@ -182,14 +185,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 	}
 	const { toast, headers: toastHeaders } = await getToast(request)
 
-	// Handle UTM parameters if present in the URL
-	const utmResponse = await storeUtmParams(request)
+	// Handle UTM parameters only if the user has consented to marketing cookies
+	const canTrackMarketing = await hasMarketingConsent(request)
+	const utmResponse = canTrackMarketing
+		? await storeUtmParams(request)
+		: null
 	const utmHeaders = utmResponse?.headers || {}
 
 	// Get impersonation info if user is an admin
 	const impersonationInfo = await getImpersonationInfo(request)
 
-	const cookieConsent = await getCookieConsentState(request)
+	const cookieConsent = await getConsentPreferences(request)
 
 	return data(
 		{

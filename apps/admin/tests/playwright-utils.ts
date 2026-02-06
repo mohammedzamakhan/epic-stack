@@ -8,7 +8,10 @@ import {
 	normalizeEmail,
 	sessionKey,
 } from '@repo/auth'
-import { cookieConsentCookie } from '@repo/common/cookie-consent'
+import {
+	cookieConsentCookie,
+	COOKIE_POLICY_VERSION,
+} from '@repo/common/cookie-consent'
 import { prisma } from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
@@ -65,7 +68,14 @@ async function getOrInsertUser({
 }
 
 async function setCookieConsent(page: any, isCollapsed: boolean = true) {
-	const cookieValue = await cookieConsentCookie.serialize({ isCollapsed })
+	const cookieValue = await cookieConsentCookie.serialize({
+		necessary: true as const,
+		analytics: isCollapsed,
+		marketing: isCollapsed,
+		preferences: isCollapsed,
+		consentedAt: new Date().toISOString(),
+		policyVersion: COOKIE_POLICY_VERSION,
+	})
 	const cookieConfig = setCookieParser.parseString(cookieValue)
 	const newConfig = {
 		name: cookieConfig.name,
