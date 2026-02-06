@@ -2,13 +2,18 @@
 import Footer from '~/components/Footer.astro'
 import Header from '~/components/Header.astro'
 import Banner from '~/components/Banner.astro'
+import CookieConsentBanner from '~/components/CookieConsentBanner.astro'
 import '../styles/tailwind.css'
 import { getThemeFromCookie } from '~/utils/theme'
+import { getConsentFromCookieHeader } from '~/utils/cookie-consent'
 import { fetchBannerData } from '~/lib/fetchBanner'
 
 // Get theme from cookie
 const cookieHeader = Astro.request.headers.get('cookie')
 const theme = getThemeFromCookie(cookieHeader)
+
+// Get cookie consent state
+const cookieConsent = getConsentFromCookieHeader(cookieHeader)
 
 // Check if banner is enabled
 const banner = await fetchBannerData()
@@ -58,6 +63,9 @@ const cmsOrigin = cmsUrl ? new URL(cmsUrl).origin : null
 		<div class="dark">
 			<Footer />
 		</div>
+
+		<!-- Cookie Consent Banner -->
+		<CookieConsentBanner consent={cookieConsent} />
 	</body>
 </html>
 

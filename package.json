@@ -102,6 +102,7 @@
     "@repo/seo": "^0.0.0",
     "@repo/ui": "^0.0.0",
     "@varlock/nextjs-integration": "^0.1.2",
+    "astro": "^5.17.1",
     "motion": "^12.23.1",
     "openimg": "^1.1.0",
     "react": "^19.2.4",

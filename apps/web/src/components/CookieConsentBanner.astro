@@ -1,0 +1,313 @@
+---
+import type { CookieConsentPreferences } from '~/utils/cookie-consent'
+
+interface Props {
+	consent: CookieConsentPreferences | null
+}
+
+const { consent } = Astro.props
+const hasConsent = consent !== null
+---
+
+<!-- Cookie Settings button (shown when consent already exists) -->
+<button
+	id="cookie-settings-btn"
+	type="button"
+	class:list={[
+		'fixed bottom-4 left-4 z-[100] rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground',
+		{ hidden: !hasConsent },
+	]}
+	aria-label="Open cookie preferences"
+>
+	Cookie Settings
+</button>
+
+<!-- Initial consent banner (shown when no consent exists) -->
+<div
+	id="cookie-banner"
+	class:list={[
+		'fixed bottom-0 left-0 z-[100] box-border p-5',
+		{ hidden: hasConsent },
+	]}
+>
+	<div class="w-full max-w-[360px] overflow-hidden rounded-2xl border border-border bg-background shadow-lg">
+		<div class="p-5">
+			<p class="text-sm leading-relaxed text-foreground">
+				We use cookies to enhance your experience, analyze site traffic
+				and deliver personalized content.{' '}
+				<a
+					href="/legal/cookie-policy/"
+					target="_blank"
+					rel="noreferrer"
+					class="text-primary underline underline-offset-2"
+				>
+					Read our Cookie Policy
+				</a>.
+			</p>
+			<div class="mt-4 flex flex-col gap-2">
+				<div class="flex gap-2">
+					<button
+						type="button"
+						data-action="reject-all"
+						class="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+					>
+						Reject All
+					</button>
+					<button
+						type="button"
+						data-action="accept-all"
+						class="flex-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+					>
+						Accept All
+					</button>
+				</div>
+				<button
+					type="button"
+					id="manage-prefs-btn"
+					class="w-full rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+				>
+					Manage Preferences
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Preferences detail panel (initially hidden) -->
+<div id="cookie-prefs-panel" class="fixed bottom-0 left-0 z-[100] box-border p-5 hidden">
+	<div class="w-full max-w-[420px] overflow-hidden rounded-2xl border border-border bg-background shadow-lg">
+		<div class="p-5">
+			<h3 class="text-balance text-sm font-semibold text-foreground">Cookie Preferences</h3>
+			<p class="mt-1 text-xs leading-relaxed text-muted-foreground">
+				Choose which cookies you allow. You can change these settings at any time.{' '}
+				<a
+					href="/legal/cookie-policy/"
+					target="_blank"
+					rel="noreferrer"
+					class="text-primary underline underline-offset-2"
+				>
+					Cookie Policy
+				</a>
+			</p>
+
+			<div class="mt-4 flex flex-col gap-3">
+				<!-- Necessary (always on) -->
+				<div class="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+					<div class="flex-1">
+						<p class="text-sm font-medium text-foreground">Necessary</p>
+						<p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+							Essential for the website to function. These cannot be disabled.
+						</p>
+					</div>
+					<button
+						type="button"
+						disabled
+						aria-label="Necessary cookies are always enabled"
+						class="relative inline-flex h-5 w-9 shrink-0 cursor-not-allowed items-center rounded-full bg-primary opacity-70"
+					>
+						<span class="pointer-events-none block h-4 w-4 translate-x-[18px] rounded-full bg-primary-foreground shadow-sm"></span>
+					</button>
+				</div>
+
+				<!-- Analytics -->
+				<div class="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+					<div class="flex-1">
+						<p class="text-sm font-medium text-foreground">Analytics</p>
+						<p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+							Help us understand how visitors interact with the website by collecting anonymous usage data.
+						</p>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						data-toggle="analytics"
+						aria-checked={consent?.analytics ? 'true' : 'false'}
+						aria-label="Toggle Analytics cookies"
+						class:list={[
+							'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors',
+							consent?.analytics ? 'bg-primary' : 'bg-muted',
+						]}
+					>
+						<span
+							class:list={[
+								'pointer-events-none block h-4 w-4 rounded-full bg-primary-foreground shadow-sm transition-transform',
+								consent?.analytics ? 'translate-x-[18px]' : 'translate-x-[2px]',
+							]}
+						></span>
+					</button>
+				</div>
+
+				<!-- Marketing -->
+				<div class="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+					<div class="flex-1">
+						<p class="text-sm font-medium text-foreground">Marketing</p>
+						<p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+							Used to track visitors across websites for personalized advertising and campaign attribution.
+						</p>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						data-toggle="marketing"
+						aria-checked={consent?.marketing ? 'true' : 'false'}
+						aria-label="Toggle Marketing cookies"
+						class:list={[
+							'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors',
+							consent?.marketing ? 'bg-primary' : 'bg-muted',
+						]}
+					>
+						<span
+							class:list={[
+								'pointer-events-none block h-4 w-4 rounded-full bg-primary-foreground shadow-sm transition-transform',
+								consent?.marketing ? 'translate-x-[18px]' : 'translate-x-[2px]',
+							]}
+						></span>
+					</button>
+				</div>
+
+				<!-- Preferences -->
+				<div class="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+					<div class="flex-1">
+						<p class="text-sm font-medium text-foreground">Preferences</p>
+						<p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+							Remember your settings like theme, language, and sidebar state for a better experience.
+						</p>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						data-toggle="preferences"
+						aria-checked={consent?.preferences ? 'true' : 'false'}
+						aria-label="Toggle Preferences cookies"
+						class:list={[
+							'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors',
+							consent?.preferences ? 'bg-primary' : 'bg-muted',
+						]}
+					>
+						<span
+							class:list={[
+								'pointer-events-none block h-4 w-4 rounded-full bg-primary-foreground shadow-sm transition-transform',
+								consent?.preferences ? 'translate-x-[18px]' : 'translate-x-[2px]',
+							]}
+						></span>
+					</button>
+				</div>
+			</div>
+
+			<div class="mt-4 flex flex-col gap-2">
+				<div class="flex gap-2">
+					<button
+						type="button"
+						data-action="reject-all"
+						class="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+					>
+						Reject All
+					</button>
+					<button
+						type="button"
+						data-action="accept-all"
+						class="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+					>
+						Accept All
+					</button>
+				</div>
+				<button
+					type="button"
+					data-action="save-preferences"
+					class="w-full rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+				>
+					Save Preferences
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const banner = document.getElementById('cookie-banner')!
+	const prefsPanel = document.getElementById('cookie-prefs-panel')!
+	const settingsBtn = document.getElementById('cookie-settings-btn')!
+	const manageBtn = document.getElementById('manage-prefs-btn')!
+
+	// Toggle state for preference switches
+	const toggles: Record<string, boolean> = {
+		analytics: false,
+		marketing: false,
+		preferences: false,
+	}
+
+	// Initialise toggle state from existing aria-checked values
+	document.querySelectorAll<HTMLButtonElement>('[data-toggle]').forEach((btn) => {
+		const key = btn.dataset.toggle!
+		toggles[key] = btn.getAttribute('aria-checked') === 'true'
+	})
+
+	// --- Toggle switch interaction ------------------------------------------
+
+	document.querySelectorAll<HTMLButtonElement>('[data-toggle]').forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const key = btn.dataset.toggle!
+			toggles[key] = !toggles[key]
+			const isOn = toggles[key]
+
+			btn.setAttribute('aria-checked', String(isOn))
+			btn.classList.toggle('bg-primary', isOn)
+			btn.classList.toggle('bg-muted', !isOn)
+
+			const dot = btn.querySelector('span')!
+			dot.classList.toggle('translate-x-[18px]', isOn)
+			dot.classList.toggle('translate-x-[2px]', !isOn)
+		})
+	})
+
+	// --- Show/hide panels ---------------------------------------------------
+
+	manageBtn.addEventListener('click', () => {
+		banner.classList.add('hidden')
+		prefsPanel.classList.remove('hidden')
+	})
+
+	settingsBtn.addEventListener('click', () => {
+		settingsBtn.classList.add('hidden')
+		prefsPanel.classList.remove('hidden')
+	})
+
+	// --- Submit consent -----------------------------------------------------
+
+	async function submitConsent(body: Record<string, unknown>) {
+		try {
+			await fetch('/api/cookie-consent', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(body),
+			})
+		} catch {
+			// Silently fail -- consent will be re-prompted on next load
+		}
+
+		// Hide everything, show the small settings button
+		banner.classList.add('hidden')
+		prefsPanel.classList.add('hidden')
+		settingsBtn.classList.remove('hidden')
+	}
+
+	// Wire up all action buttons (in both the banner and the prefs panel)
+	document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const action = btn.dataset.action!
+
+			if (action === 'accept-all') {
+				submitConsent({ intent: 'accept-all' })
+			} else if (action === 'reject-all') {
+				submitConsent({ intent: 'reject-all' })
+			} else if (action === 'save-preferences') {
+				submitConsent({
+					intent: 'save-preferences',
+					analytics: toggles.analytics,
+					marketing: toggles.marketing,
+					preferences: toggles.preferences,
+				})
+			}
+		})
+	})
+</script>
