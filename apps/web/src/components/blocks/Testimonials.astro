@@ -3,26 +3,20 @@ import { brand } from '@repo/config/brand'
 import GridDesign from '../GridDesign.astro'
 import Badge from '../ui/Badge.astro'
 
-interface Author {
-	name: string
-	title: string
-	company: string
-	image: string
-}
-
 interface Testimonial {
+	name: string
+	role: string
+	image: string
+	company?: string
 	quote: string
-	author: Author
-	variant?: 'default' | 'stripe' | 'vercel'
 }
 
 interface CMSTestimonial {
 	quote: string
 	authorName: string
 	authorTitle: string
-	authorCompany: string
+	authorCompany?: string
 	authorImage: string | { url?: string | null; alt?: string | null } | null
-	variant?: 'default' | 'stripe' | 'vercel'
 }
 
 interface Props {
@@ -39,108 +33,86 @@ const {
 		{
 			quote:
 				'I was going to build my own authentication system using blockchain, AI, and quantum computing... then I discovered this and saved 3 years of my life.',
-			author: {
-				name: 'Captain Deploy',
-				title: 'Chief Meme Officer',
-				company: 'Deploy or Die Inc.',
-				image: 'https://i.pravatar.cc/150?img=68',
-			},
-			variant: 'vercel',
+			name: 'Captain Deploy',
+			role: 'Chief Meme Officer',
+			company: 'Deploy or Die Inc.',
+			image: 'https://i.pravatar.cc/150?img=68',
 		},
 		{
 			quote:
 				'The integrations are incredible. We connected all our tools in minutes instead of spending weeks building custom solutions.',
-			author: {
-				name: 'Bugs Bunyan',
-				title: 'Lead Developer',
-				company: 'Log Overflow',
-				image: 'https://i.pravatar.cc/150?img=11',
-			},
+			name: 'Bugs Bunyan',
+			role: 'Lead Developer',
+			company: 'Log Overflow',
+			image: 'https://i.pravatar.cc/150?img=11',
 		},
 		{
 			quote: `${brand.name} saved me 127.3 hours of boilerplate setup...`,
-			author: {
-				name: 'Ctrl Alt Delete',
-				title: 'Reformed Code Artist',
-				company: 'Infinite Loop Labs',
-				image: 'https://i.pravatar.cc/150?img=23',
-			},
+			name: 'Ctrl Alt Delete',
+			role: 'Reformed Code Artist',
+			company: 'Infinite Loop Labs',
+			image: 'https://i.pravatar.cc/150?img=23',
 		},
 		{
 			quote:
 				"The TypeScript setup is so good, it caught errors I hadn't even made yet...",
-			author: {
-				name: 'Null Pointer',
-				title: 'Duck Whisperer',
-				company: 'Try-Catch Paradise',
-				image: 'https://i.pravatar.cc/150?img=15',
-			},
+			name: 'Null Pointer',
+			role: 'Duck Whisperer',
+			company: 'Try-Catch Paradise',
+			image: 'https://i.pravatar.cc/150?img=15',
 		},
 		{
 			quote:
 				'Implementing auth used to take longer than explaining why I still use PHP. Not anymore! Well, at least the auth part.',
-			author: {
-				name: 'Legacy Larry',
-				title: 'Time Optimization Specialist',
-				company: '404 Found',
-				image: 'https://i.pravatar.cc/150?img=33',
-			},
-			variant: 'stripe',
+			name: 'Legacy Larry',
+			role: 'Time Optimization Specialist',
+			company: '404 Found',
+			image: 'https://i.pravatar.cc/150?img=33',
 		},
 		{
 			quote:
 				'Our sprint planning used to be "Fix auth bugs" every week. Now we actually build features! What a concept!',
-			author: {
-				name: 'Agile Gandalf',
-				title: 'Sprint Survivor',
-				company: 'You Shall Not Crash',
-				image: 'https://i.pravatar.cc/150?img=3',
-			},
+			name: 'Agile Gandalf',
+			role: 'Sprint Survivor',
+			company: 'You Shall Not Crash',
+			image: 'https://i.pravatar.cc/150?img=3',
 		},
 		{
 			quote:
 				'I was about to switch careers and become a goat farmer. Then I found this solution. The goats are disappointed.',
-			author: {
-				name: 'Git Shepherd',
-				title: 'Almost Goat Farmer',
-				company: 'Stack Overflow Farms',
-				image: 'https://i.pravatar.cc/150?img=42',
-			},
+			name: 'Git Shepherd',
+			role: 'Almost Goat Farmer',
+			company: 'Stack Overflow Farms',
+			image: 'https://i.pravatar.cc/150?img=42',
 		},
 		{
 			quote:
 				'Finally, something that makes auth less painful than explaining blockchain to my grandma.',
-			author: {
-				name: 'Hash',
-				title: 'Professional Problem Avoider',
-				company: 'Stripe',
-				image: 'https://i.pravatar.cc/150?img=8',
-			},
+			name: 'Hash',
+			role: 'Professional Problem Avoider',
+			company: 'Stripe',
+			image: 'https://i.pravatar.cc/150?img=8',
 		},
 	],
 } = Astro.props
 
-// Transform testimonials to consistent structure
-const testimonials = rawTestimonials.map((testimonial) => {
+// Transform CMS testimonials to consistent flat structure
+const testimonials: Testimonial[] = rawTestimonials.map((testimonial) => {
 	if ('authorName' in testimonial) {
-		// CMS structure - convert to legacy structure
-		// Handle authorImage being either a string URL or a Media object
-		const authorImageUrl = typeof testimonial.authorImage === 'string' 
-			? testimonial.authorImage 
-			: testimonial.authorImage?.url || 'https://i.pravatar.cc/150?img=1' // Fallback for missing images
+		const cms = testimonial as CMSTestimonial
+		const imageUrl =
+			typeof cms.authorImage === 'string'
+				? cms.authorImage
+				: (cms.authorImage?.url || 'https://i.pravatar.cc/150?img=1')
 		return {
-			quote: testimonial.quote,
-			author: {
-				name: testimonial.authorName,
-				title: testimonial.authorTitle,
-				company: testimonial.authorCompany,
-				image: authorImageUrl,
-			},
-			variant: testimonial.variant,
+			quote: cms.quote,
+			name: cms.authorName,
+			role: cms.authorTitle,
+			company: cms.authorCompany,
+			image: imageUrl,
 		}
 	}
-	// Legacy structure - use as is
-	return testimonial
+	return testimonial as Testimonial
 })
 ---
 
@@ -168,88 +140,35 @@ const testimonials = rawTestimonials.map((testimonial) => {
 					aria-label="Customer testimonials"
 				>
 					{
-						testimonials.map((testimonial, index) => {
-							const isFirstCard = index === 0
-							const isStripeCard = testimonial.variant === 'stripe'
-							const isVercelCard = testimonial.variant === 'vercel'
-
-							return (
-								<li
-									class={`border-foreground/10 transition-colors border-b border-r border-dashed ${
-										isFirstCard
-											? 'row-span-2 border-foreground/10 bg-muted shadow-lg hover:bg-muted/50'
-											: isStripeCard
-												? 'bg-foreground text-background shadow-lg md:row-span-2 border-foreground'
-												: isVercelCard
-													? 'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90'
-													: 'bg-background hover:bg-muted/50'
-									} ${index === 7 ? 'lg:hidden' : ''}`}
-								>
-									<article class="p-6 flex h-full flex-col justify-between">
-										{(isFirstCard || isStripeCard) && (
-											<div class="mb-6" aria-hidden="true">
-												{isFirstCard ? (
-													<svg
-														width="32"
-														height="32"
-														viewBox="0 0 76 65"
-														fill="none"
-														xmlns="http://www.w3.org/2000/svg"
-														class="text-foreground"
-														aria-hidden="true"
-													>
-														<path
-															d="M37.5274 0L75.0548 65H0L37.5274 0Z"
-															fill="currentColor"
-														/>
-													</svg>
-												) : (
-													<svg
-														width="96"
-														height="40"
-														viewBox="0 0 96 40"
-														fill="currentColor"
-														class="text-background"
-														aria-hidden="true"
-													>
-														<path d="M8.954 14.517c-2.29 0-4.147 1.057-4.147 3.072 0 1.496.812 2.486 2.994 3.127l1.993.587c1.087.321 1.596.724 1.596 1.427 0 .862-.87 1.403-2.112 1.403-1.267 0-2.194-.587-2.29-1.68H4.75c.12 1.888 1.752 3.204 4.252 3.204 2.397 0 4.3-1.195 4.3-3.149 0-1.633-.893-2.552-2.994-3.171l-1.895-.54c-1.136-.346-1.704-.724-1.704-1.427 0-.817.845-1.333 2.002-1.333 1.184 0 1.98.54 2.087 1.61h2.194c-.083-1.935-1.728-3.13-4.036-3.13zm9.835 0c-3.185 0-5.15 2.2-5.15 5.722 0 3.523 1.965 5.722 5.15 5.722 3.173 0 5.15-2.199 5.15-5.722 0-3.522-1.977-5.722-5.15-5.722zm0 1.957c1.74 0 2.835 1.45 2.835 3.765 0 2.304-1.095 3.765-2.835 3.765-1.752 0-2.835-1.461-2.835-3.765 0-2.315 1.083-3.765 2.835-3.765z" />
-													</svg>
-												)}
+						testimonials.map((testimonial) => (
+							<li class="border-foreground/10 transition-colors border-b border-r border-dashed bg-background hover:bg-muted/50">
+								<article class="p-6 flex h-full flex-col justify-between">
+									<blockquote class="mb-4 text-lg font-title">
+										"{testimonial.quote}"
+									</blockquote>
+									<footer class="flex items-center gap-3">
+										<div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
+											<img
+												src={testimonial.image}
+												alt={testimonial.name}
+												class="object-cover w-full h-full"
+												width="48"
+												height="48"
+											/>
+										</div>
+										<div>
+											<cite class="font-semibold not-italic">
+												{testimonial.name}
+											</cite>
+											<div class="text-sm text-muted-foreground">
+												{testimonial.role}
+												{testimonial.company && `, ${testimonial.company}`}
 											</div>
-										)}
-										<blockquote class="mb-4 text-lg font-title">
-											"{testimonial.quote}"
-										</blockquote>
-										<footer class="flex items-center gap-3">
-											<div class="relative h-12 w-12 overflow-hidden rounded-full">
-												<img
-													src={testimonial.author.image}
-													alt={testimonial.author.name}
-													class="object-cover w-full h-full"
-													width="48"
-													height="48"
-												/>
-											</div>
-											<div>
-												<cite class="font-semibold not-italic">
-													{testimonial.author.name}
-												</cite>
-												<div
-													class={`text-sm ${
-														isStripeCard
-															? 'text-muted'
-															: 'text-muted-foreground'
-													}`}
-												>
-													{testimonial.author.title} /{' '}
-													{testimonial.author.company}
-												</div>
-											</div>
-										</footer>
-									</article>
-								</li>
-							)
-						})
+										</div>
+									</footer>
+								</article>
+							</li>
+						))
 					}
 				</ul>
 			</div>

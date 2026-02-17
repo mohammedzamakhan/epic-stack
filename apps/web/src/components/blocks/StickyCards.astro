@@ -3,20 +3,47 @@ import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
 import Badge from '../ui/Badge.astro'
 
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 interface Card {
 	tagline: string
 	title: string
 	description: string
 	image: string | { url?: string | null; alt?: string | null } | null
+	backgroundImage?: string | { url?: string | null; alt?: string | null } | null
+	imagePosition?: 'center' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
 	primaryButtonText: string
 	primaryButtonUrl: string
 	secondaryButtonText: string
 	secondaryButtonUrl: string
 }
 
+const imagePositionConfig: Record<string, { wrapper: string; innerHeight: string }> = {
+	center: {
+		wrapper: 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] md:w-[380px]',
+		innerHeight: 'h-[260px] md:h-[380px]',
+	},
+	topLeft: {
+		wrapper: 'top-0 left-0 w-[85%] h-[85%]',
+		innerHeight: 'h-full',
+	},
+	topRight: {
+		wrapper: 'top-0 right-0 w-[85%] h-[85%]',
+		innerHeight: 'h-full',
+	},
+	bottomLeft: {
+		wrapper: 'bottom-0 left-0 w-[85%] h-[85%]',
+		innerHeight: 'h-full',
+	},
+	bottomRight: {
+		wrapper: 'bottom-0 right-0 w-[85%] h-[85%]',
+		innerHeight: 'h-full',
+	},
+}
+
 function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
 	if (typeof image === 'string') return image
-	return image?.url || ''
+	return `${CMS_URL}${image?.url}` || ''
 }
 
 interface Props {
@@ -112,6 +139,7 @@ const {
 				<div class="grid grid-cols-1 gap-0 ">
 					{cards.map((card, index) => {
 						const isEven = index % 2 === 0
+						const posConfig = imagePositionConfig[card.imagePosition || 'center']
 						return (
 							<article class="sticky-card sticky top-[10%] h-[70vh] mb-[10vh] bg-background border border-border overflow-hidden grid grid-cols-1 lg:grid-cols-2 items-stretch">
 								<!-- Content Section -->
@@ -164,15 +192,42 @@ const {
 								</div>
 
 								<!-- Image Section -->
-								<div class={`flex flex-col justify-center items-center h-[70vh] ${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
-									<div class="w-full h-full bg-muted/20 border border-dashed border-border overflow-hidden">
-										<img
-											src={getImageUrl(card.image)}
-											alt={`Illustration for ${card.title}`}
-											class="w-full h-full object-cover"
-											loading="lazy"
-										/>
-									</div>
+								<div class={`relative flex flex-col justify-center items-center h-[70vh] ${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
+									{card.backgroundImage ? (
+										<div class="w-full h-full overflow-hidden relative">
+											<div class="absolute inset-0 dithered-bg">
+												<img
+													src={getImageUrl(card.backgroundImage)}
+													alt=""
+													class="dithered-bg-source"
+													style="display:none;"
+												/>
+											</div>
+											{card.image && (
+												<div class={`absolute z-10 ${posConfig.wrapper}`}>
+													<div class="dark:bg-background h-full">
+														<div class={`bg-card overflow-hidden shadow-lg ${posConfig.innerHeight}`}>
+															<img
+																src={getImageUrl(card.image)}
+																alt={`Illustration for ${card.title}`}
+																class="w-full h-full object-cover"
+																loading="lazy"
+															/>
+														</div>
+													</div>
+												</div>
+											)}
+										</div>
+									) : (
+										<div class="w-full h-full bg-muted/20 border border-dashed border-border overflow-hidden">
+											<img
+												src={getImageUrl(card.image)}
+												alt={`Illustration for ${card.title}`}
+												class="w-full h-full object-cover"
+												loading="lazy"
+											/>
+										</div>
+									)}
 								</div>
 							</article>
 						)
@@ -180,6 +235,73 @@ const {
 				</div>
 		</div>
 </section>
+
+<script>
+	import {
+		ShaderMount,
+		imageDitheringFragmentShader,
+		getShaderColorFromString,
+		ShaderFitOptions,
+		DitheringTypes,
+	} from '@paper-design/shaders'
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const ditheredBgs = document.querySelectorAll('.sticky-card .dithered-bg') as NodeListOf<HTMLElement>
+		ditheredBgs.forEach((el) => {
+			const sourceImg = el.querySelector('.dithered-bg-source') as HTMLImageElement | null
+			if (!sourceImg) return
+
+			const imageUrl = sourceImg.src
+
+			const mountShader = (img: HTMLImageElement) => {
+				try {
+					new ShaderMount(
+						el,
+						imageDitheringFragmentShader,
+						{
+							u_image: img,
+							u_colorFront: getShaderColorFromString('#000000'),
+							u_colorBack: getShaderColorFromString('#ffffff'),
+							u_colorHighlight: getShaderColorFromString('#000000'),
+							u_type: DitheringTypes['8x8'],
+							u_pxSize: 3,
+							u_colorSteps: 4,
+							u_originalColors: true,
+							u_inverted: false,
+							u_fit: ShaderFitOptions.cover,
+							u_scale: 1,
+							u_rotation: 0,
+							u_originX: 0.5,
+							u_originY: 0.5,
+							u_offsetX: 0,
+							u_offsetY: 0,
+							u_worldWidth: 0,
+							u_worldHeight: 0,
+						},
+						undefined,
+						0, // speed = 0 (static, no animation)
+					)
+				} catch {
+					// WebGL texture security error — fall back to CSS background
+					applyFallback()
+				}
+			}
+
+			const applyFallback = () => {
+				el.style.backgroundImage = `url(${imageUrl})`
+				el.style.backgroundSize = 'cover'
+				el.style.backgroundPosition = 'center'
+			}
+
+			// Try loading with CORS for WebGL texture use
+			const corsImg = new Image()
+			corsImg.crossOrigin = 'anonymous'
+			corsImg.onload = () => mountShader(corsImg)
+			corsImg.onerror = () => applyFallback() // CORS blocked — use CSS fallback
+			corsImg.src = imageUrl
+		})
+	})
+</script>
 
 <style>
 	.dot-pattern {
@@ -190,6 +312,10 @@ const {
 	
 	:global(.dark) .dot-pattern {
 		--dot-color: rgba(255, 255, 255, 0.35);
+	}
+
+	.dithered-bg :global(canvas) {
+		z-index: 0 !important;
 	}
 
 	/* Mobile-first: disable sticky on mobile */

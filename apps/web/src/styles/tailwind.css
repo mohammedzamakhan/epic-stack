@@ -5,8 +5,13 @@
 @custom-variant dark (&:is(.dark *));
 
 .font-title {
-	font-family: Nippo, sans-serif;
-	font-display: swap;
+	font-family: GeistPixel, sans-serif;
+}
+
+.font-cursive {
+	font-family:
+		Dancing Script,
+		sans-serif;
 }
 
 :root {

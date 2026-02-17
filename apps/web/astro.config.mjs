@@ -32,7 +32,15 @@ export default defineConfig({
 	],
 
 	vite: {
-		plugins: [tailwindcss(), fontless()],
+		plugins: [tailwindcss(), fontless({
+			families: [
+				{
+					name: 'GeistPixel',
+					weights: ['400'],
+					src: [{ url: '/fonts/GeistPixel-Square.woff2', format: 'woff2' }],
+				}
+			]
+		})],
 		server: {
 			allowedHosts: [domain, 'localhost'],
 		},

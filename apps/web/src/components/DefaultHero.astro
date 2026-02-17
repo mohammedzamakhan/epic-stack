@@ -57,47 +57,76 @@ const renderLexicalContent = (content: any, textAlign: string) => {
 
 	const alignClass = textAlign === 'center' ? 'text-center mx-auto' : ''
 
+	// Color state map matching the TextStateFeature config in heros/config.ts
+	const colorStateMap: Record<string, string> = {
+		primary: 'var(--primary)',
+		muted: 'var(--muted-foreground)',
+		accent: 'var(--accent-foreground)',
+		destructive: 'var(--destructive)',
+		success: 'var(--success)',
+		warning: 'var(--warning)',
+	}
+
+	/**
+	 * Wrap text with inline style if the node has a TextState color
+	 */
+	const applyTextState = (text: string, node: any): string => {
+		const colorKey = node?.$?.color
+		if (colorKey && colorStateMap[colorKey]) {
+			return `<span style="color: ${colorStateMap[colorKey]}">${text}</span>`
+		}
+		return text
+	}
+
+	/**
+	 * Render a single text/inline child node with formatting + state
+	 */
+	const renderChild = (child: any): string => {
+		// Handle link nodes
+		if (child.type === 'link') {
+			const linkText = child.children
+				?.map((linkChild: any) => {
+					if (linkChild.format && linkChild.format > 0) {
+						let formattedText = linkChild.text || ''
+						if (linkChild.format & 1)
+							formattedText = `<strong class="font-semibold">${formattedText}</strong>`
+						if (linkChild.format & 2)
+							formattedText = `<em class="italic">${formattedText}</em>`
+						return applyTextState(formattedText, linkChild)
+					}
+					return applyTextState(linkChild.text || '', linkChild)
+				})
+				.join('') || ''
+			const url = child.fields?.url || child.url || '#'
+			const target = child.fields?.newTab || child.newTab ? ' target="_blank" rel="noopener noreferrer"' : ''
+			return `<a href="${url}"${target} class="text-primary underline hover:text-primary/80 transition-colors">${linkText}</a>`
+		}
+		// Handle formatted text
+		if (child.format && child.format > 0) {
+			let formattedText = child.text || ''
+			if (child.format & 1)
+				formattedText = `<strong class="font-semibold">${formattedText}</strong>`
+			if (child.format & 2)
+				formattedText = `<em class="italic">${formattedText}</em>`
+			return applyTextState(formattedText, child)
+		}
+		return applyTextState(child.text || '', child)
+	}
+
 	return content.root.children
 		.map((node: any) => {
 			if (node.type === 'paragraph' && node.children) {
-				const text = node.children
-					.map((child: any) => {
-						// Handle link nodes
-						if (child.type === 'link') {
-							const linkText = child.children
-								?.map((linkChild: any) => {
-									if (linkChild.format && linkChild.format > 0) {
-										let formattedText = linkChild.text || ''
-										if (linkChild.format & 1)
-											formattedText = `<strong class="font-semibold">${formattedText}</strong>`
-										if (linkChild.format & 2)
-											formattedText = `<em class="italic">${formattedText}</em>`
-										return formattedText
-									}
-									return linkChild.text || ''
-								})
-								.join('') || ''
-							const url = child.fields?.url || child.url || '#'
-							const target = child.fields?.newTab || child.newTab ? ' target="_blank" rel="noopener noreferrer"' : ''
-							return `<a href="${url}"${target} class="text-primary underline hover:text-primary/80 transition-colors">${linkText}</a>`
-						}
-						// Handle formatted text
-						if (child.format && child.format > 0) {
-							let formattedText = child.text || ''
-							if (child.format & 1)
-								formattedText = `<strong class="font-semibold">${formattedText}</strong>`
-							if (child.format & 2)
-								formattedText = `<em class="italic">${formattedText}</em>`
-							return formattedText
-						}
-						return child.text || ''
-					})
-					.join('')
+				const text = node.children.map(renderChild).join('')
 				return `<p class="text-xl leading-relaxed max-w-[600px] ${alignClass}">${text}</p>`
 			}
 			if (node.type === 'heading' && node.children) {
 				const text = node.children
-					.map((child: any) => child.text || '')
+					.map((child: any) => {
+						if (child.format === 2) {
+							return applyTextState(`<span class="italic font-cursive">${child.text}</span>`, child)
+						}
+						return applyTextState(child.text || '', child)
+					})
 					.join('')
 				return `<h1 class="text-4xl md:text-6xl lg:text-7xl tracking-tight font-title text-foreground leading-tight ${alignClass}">${text}</h1>`
 			}
@@ -181,8 +210,8 @@ const hasAsset = assetType !== 'none' && (assetType === 'image' ? media : videoS
 	<div class={containerClasses} style={`min-height: ${minHeight}px;`}>
 		<div class={contentClasses}>
 			<div class="space-y-6">
-				<Badge variant="outline" size="sm">
-					BY THE MAKERS OF BUGBASHES.DEV
+				<Badge variant="outline" size="sm" badgeText="NEW">
+					BY THE MAKERS OF BUGBASHER.DEV
 				</Badge>
 				{richText && (
 					<div

@@ -60,6 +60,16 @@ export const FounderNote: Block = {
       label: 'Company Name (optional)',
     },
     {
+      name: 'authorImage',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+      label: 'Author Image',
+      admin: {
+        description: 'Upload a photo of the author/founder.',
+      },
+    },
+    {
       name: 'signatureSvg',
       type: 'textarea',
       label: 'Signature SVG',

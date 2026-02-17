@@ -1,0 +1,127 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
+
+interface TeamMember {
+	name: string
+	role: string
+	photo?: string | { url?: string | null; alt?: string | null } | null
+}
+
+interface Props {
+	title?: string
+	description?: string
+	members?: TeamMember[]
+	blockType: 'team'
+}
+
+function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
+	if (typeof image === 'string') return `${CMS_URL}${image}`
+	return `${CMS_URL}${image?.url}` || ''
+}
+
+function getImageAlt(
+	image: string | { alt?: string | null } | null | undefined,
+	fallback: string,
+): string {
+	if (typeof image === 'object' && image?.alt) return image.alt
+	return fallback
+}
+
+const {
+	title = 'Meet Our Founders',
+	description = 'The visionary leaders behind our mission to transform how teams work and collaborate.',
+	members = [
+		{ name: 'Alex Turner', role: 'Founder & CEO' },
+		{ name: 'Jordan Lee', role: 'CTO' },
+		{ name: 'Sarah Chen', role: 'Head of Design' },
+	],
+} = Astro.props
+---
+
+<section
+	class="relative w-full py-16 md:py-24"
+	aria-labelledby={title ? 'team-heading' : undefined}
+>
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6">
+		<!-- Header -->
+		{
+			(title || description) && (
+				<header class="mb-12 max-w-2xl">
+					{title && (
+						<h2
+							id="team-heading"
+							class="text-balance text-4xl font-title tracking-tight md:text-6xl"
+						>
+							{title}
+						</h2>
+					)}
+					{description && (
+						<p class="text-muted-foreground mt-4 text-pretty text-lg leading-relaxed">
+							{description}
+						</p>
+					)}
+				</header>
+			)
+		}
+
+		<!-- Team Grid -->
+		<div class="relative z-10 grid grid-cols-12 border-l border-t border-dashed">
+			{
+				members.map((member) => {
+					const photoUrl = getImageUrl(member.photo)
+					const photoAlt = getImageAlt(member.photo, member.name)
+
+					return (
+						<div class="col-span-6 sm:col-span-4 lg:col-span-3 border-b border-r border-dashed overflow-hidden">
+							<div class="bg-card ring-border ring-1 shadow-sm h-full">
+								<div class="flex flex-col gap-4 p-6 md:p-8">
+									{photoUrl ? (
+										<div class="relative size-28 shrink-0 rounded-xl shadow-md before:absolute before:inset-0 before:rounded-xl before:border before:border-foreground/10">
+											<img
+												src={photoUrl}
+												alt={photoAlt}
+												width={120}
+												height={120}
+												class="size-28 rounded-xl object-cover"
+												loading="lazy"
+												decoding="async"
+											/>
+										</div>
+									) : (
+										<div class="flex size-28 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground shadow-md">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="32"
+												height="32"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												aria-hidden="true"
+											>
+												<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+												<circle cx="12" cy="7" r="4" />
+											</svg>
+										</div>
+									)}
+									<div class="space-y-1">
+										<p class="text-foreground text-sm font-medium font-title">
+											{member.name}
+										</p>
+										<p class="text-muted-foreground text-sm">{member.role}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					)
+				})
+			}
+		</div>
+	</div>
+</section>

@@ -1,0 +1,169 @@
+---
+import GridDesign from '../GridDesign.astro'
+
+interface StatItem {
+	value: string
+	label: string
+}
+
+interface Props {
+	title?: string
+	description?: string
+	stats?: StatItem[]
+	blockType: 'stats'
+}
+
+const {
+	title = 'Delivering measurable Results',
+	description = 'Our platform has helped companies increase conversion rates and boost engagement across all digital channels.',
+	stats = [
+		{ value: '+85%', label: 'Conversion Rate' },
+		{ value: '12K', label: 'Active Users' },
+		{ value: '40%', label: 'Revenue Growth' },
+	],
+} = Astro.props
+---
+
+<section class="relative w-full py-16 md:py-24" aria-labelledby={title ? 'stats-heading' : undefined}>
+	<GridDesign />
+	<div class="container relative mx-auto px-4 md:px-6">
+		<!-- Header -->
+		{
+			(title || description) && (
+				<header class="mx-auto max-w-2xl text-center mb-12">
+					{title && (
+						<h2
+							id="stats-heading"
+							class="text-balance text-4xl font-title tracking-tight md:text-6xl"
+						>
+							{title}
+						</h2>
+					)}
+					{description && (
+						<p class="text-muted-foreground mt-6 text-pretty text-lg leading-relaxed">
+							{description}
+						</p>
+					)}
+				</header>
+			)
+		}
+
+		<!-- Stats Grid -->
+		<div class="relative z-10 grid grid-cols-12 border-l border-dashed border-t">
+			{
+				stats.map((stat, index) => (
+					<div
+						class:list={[
+							'col-span-6 lg:col-span-4 border-b border-r border-dashed overflow-hidden',
+							index >= 2 && 'max-lg:border-t-0',
+						]}
+					>
+						<div class="bg-card ring-border ring-1 shadow-sm h-full">
+							<div class="stat-item space-y-2 p-6 md:p-8 text-center transition-colors duration-200 hover:bg-muted/50">
+								<div
+									class="stat-value text-3xl font-medium text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary/70 md:text-5xl"
+									data-value={stat.value}
+								>
+									{stat.value}
+								</div>
+								<p class="text-muted-foreground text-sm">{stat.label}</p>
+							</div>
+						</div>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>
+
+<script>
+	function animateStats() {
+		const section = document.querySelector('section:has(.stat-value)')
+		if (!section) return
+
+		const statElements = section.querySelectorAll('.stat-value') as NodeListOf<HTMLElement>
+
+		/**
+		 * Parse a stat value string into its components.
+		 * Handles: "+85%", "12K", "$2.4M", "40%", "100+", "24/7"
+		 */
+		function parseStatValue(raw: string): {
+			prefix: string
+			number: number
+			decimals: number
+			suffix: string
+		} {
+			const match = raw.match(/^([^0-9]*?)([\d.]+)(.*)$/)
+			if (!match) return { prefix: raw, number: 0, decimals: 0, suffix: '' }
+
+			const prefix = match[1]
+			const numStr = match[2]
+			const suffix = match[3]
+			const number = parseFloat(numStr)
+			const decimalPart = numStr.split('.')[1]
+			const decimals = decimalPart ? decimalPart.length : 0
+
+			return { prefix, number, decimals, suffix }
+		}
+
+		/**
+		 * Ease-out cubic for smooth deceleration
+		 */
+		function easeOutCubic(t: number): number {
+			return 1 - Math.pow(1 - t, 3)
+		}
+
+		/**
+		 * Animate a single stat element from 0 to its target value
+		 */
+		function animateValue(el: HTMLElement) {
+			const raw = el.dataset.value || el.textContent || ''
+			const { prefix, number, decimals, suffix } = parseStatValue(raw)
+
+			if (number === 0) return // Nothing numeric to animate
+
+			const duration = 2000 // ms
+			const startTime = performance.now()
+
+			function update(currentTime: number) {
+				const elapsed = currentTime - startTime
+				const progress = Math.min(elapsed / duration, 1)
+				const easedProgress = easeOutCubic(progress)
+				const currentValue = easedProgress * number
+
+				el.textContent = `${prefix}${currentValue.toFixed(decimals)}${suffix}`
+
+				if (progress < 1) {
+					requestAnimationFrame(update)
+				} else {
+					// Ensure final value matches exactly
+					el.textContent = raw
+				}
+			}
+
+			// Start from zero
+			el.textContent = `${prefix}${(0).toFixed(decimals)}${suffix}`
+			requestAnimationFrame(update)
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						statElements.forEach((el) => animateValue(el))
+						observer.disconnect()
+					}
+				})
+			},
+			{
+				threshold: 0.3,
+			},
+		)
+
+		observer.observe(section)
+	}
+
+	// Run on page load and Astro page transitions
+	animateStats()
+	document.addEventListener('astro:page-load', animateStats)
+</script>

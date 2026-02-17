@@ -94,11 +94,48 @@ export const StickyCards: Block = {
           label: 'Card Description',
         },
         {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-          label: 'Image',
+          type: 'row',
+          fields: [
+            {
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
+              required: true,
+              label: 'Main Image',
+              admin: {
+                description:
+                  'Main card image (overlaid on background when background image is set)',
+                width: '50%',
+              },
+            },
+            {
+              name: 'backgroundImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Background Image (Optional)',
+              admin: {
+                description: 'Optional dithered background behind the main image',
+                width: '50%',
+              },
+            },
+          ],
+        },
+        {
+          name: 'imagePosition',
+          type: 'select',
+          label: 'Image Position',
+          defaultValue: 'center',
+          admin: {
+            description:
+              'Position of the foreground image over the background (only applies when a background image is set)',
+          },
+          options: [
+            { label: 'Center', value: 'center' },
+            { label: 'Top Left', value: 'topLeft' },
+            { label: 'Top Right', value: 'topRight' },
+            { label: 'Bottom Left', value: 'bottomLeft' },
+            { label: 'Bottom Right', value: 'bottomRight' },
+          ],
         },
         {
           name: 'primaryButtonText',
