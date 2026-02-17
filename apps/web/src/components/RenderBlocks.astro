@@ -20,6 +20,8 @@ import Tabs from './blocks/Tabs.astro'
 import StickyCards from './blocks/StickyCards.astro'
 import FounderNote from './blocks/FounderNote.astro'
 import ScrollHighlight from './blocks/ScrollHighlight.astro'
+import Stats from './blocks/Stats.astro'
+import Team from './blocks/Team.astro'
 
 interface Props {
 	blocks?: any[]
@@ -78,6 +80,10 @@ if (!blocks || !Array.isArray(blocks)) {
 					return <FounderNote {...block} />
 				case 'scrollHighlight':
 					return <ScrollHighlight {...block} />
+				case 'stats':
+					return <Stats {...block} />
+				case 'team':
+					return <Team {...block} />
 				default:
 					return (
 						<div class="unsupported-block">

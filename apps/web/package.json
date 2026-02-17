@@ -20,6 +20,7 @@
     "@astrojs/react": "^4.3.0",
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.6.0",
+    "@paper-design/shaders": "^0.0.71",
     "@payloadcms/live-preview": "^3.54.0",
     "@tailwindcss/vite": "^4.1.5",
     "@types/react": "^19.1.2",

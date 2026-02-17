@@ -95,7 +95,7 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 									<h2 class="text-xl font-semibold mb-3">
 										<a
 											href={`/blog/${post.slug}`}
-											class="hover:text-blue-600 transition-colors"
+											class="hover:text-primary font-title transition-colors"
 											set:html={post.title}
 										/>
 									</h2>
@@ -140,7 +140,7 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 											? '/posts'
 											: `/posts/page/${posts.page - 1}`
 									}
-									class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+									class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
 								>
 									Previous
 								</a>
@@ -151,7 +151,7 @@ const pageDescription = `Discover the latest insights, tutorials, and updates fr
 							{posts.page < posts.totalPages && (
 								<a
 									href={`/blog/page/${posts.page + 1}`}
-									class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+									class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700"
 								>
 									Next
 								</a>

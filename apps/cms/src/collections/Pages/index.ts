@@ -23,6 +23,8 @@ import { Tabs } from '../../blocks/Tabs/config'
 import { StickyCards } from '../../blocks/StickyCards/config'
 import { FounderNote } from '../../blocks/FounderNote/config'
 import { ScrollHighlight } from '../../blocks/ScrollHighlight/config'
+import { Stats } from '../../blocks/Stats/config'
+import { Team } from '../../blocks/Team/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -106,6 +108,8 @@ export const Pages: CollectionConfig<'pages'> = {
                 StickyCards,
                 FounderNote,
                 ScrollHighlight,
+                Stats,
+                Team,
               ],
               required: true,
               admin: {

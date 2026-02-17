@@ -2,6 +2,8 @@
 import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
 
+const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 interface Feature {
 	title: string
 	description: string
@@ -17,7 +19,7 @@ interface Feature {
 
 function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
 	if (typeof image === 'string') return image
-	return image?.url || ''
+	return `${CMS_URL}${image?.url}` || ''
 }
 
 interface Props {
@@ -137,7 +139,7 @@ const {
 				<div class="flex items-center gap-2 bg-muted p-3" id="pagination-dots" role="tablist" aria-label="Feature slides">
 					{features.map((_, index) => (
 						<button 
-							class="w-3 h-3 p-4 flex items-center justify-center transition-all duration-200 pagination-dot"
+							class="w-3 h-3 p-2 flex items-center justify-center transition-all duration-200 pagination-dot"
 							data-index={index}
 							role="tab"
 							aria-label={`Go to feature ${index + 1}`}
@@ -181,13 +183,18 @@ const {
 						<!-- Image Section -->
 						<div class="relative">
 							{feature.backgroundImage && (
-								<div class="bg-muted dark:bg-background overflow-hidden">
+								<div class="overflow-hidden">
 									<div 
-										class="h-80 relative bg-cover bg-center bg-no-repeat overflow-hidden bg-card ring-border ring-1 shadow-sm"
-										style={`background-image: url(${getImageUrl(feature.backgroundImage)})`}
+										class="h-80 relative overflow-hidden ring-border ring-1 shadow-sm dithered-bg"
 									>
+										<img
+											src={getImageUrl(feature.backgroundImage)}
+											alt=""
+											class="dithered-bg-source"
+											style="display:none;"
+										/>
 										{feature.testimonial && (
-											<div class="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 p-4">
+											<div class="absolute top-0 left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 p-4 z-10">
 												<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
 													<div class="max-w-[380px]">
 														<p class="text-sm text-muted-foreground leading-relaxed">
@@ -242,6 +249,14 @@ const {
 </section>
 
 <script>
+	import {
+		ShaderMount,
+		imageDitheringFragmentShader,
+		getShaderColorFromString,
+		ShaderFitOptions,
+		DitheringTypes,
+	} from '@paper-design/shaders'
+
 	document.addEventListener('DOMContentLoaded', function() {
 		const container = document.getElementById('features-container') as HTMLElement | null
 		const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement | null
@@ -251,6 +266,62 @@ const {
 		
 		if (!container || !prevBtn || !nextBtn) return
 		
+		// Initialize image dithering shaders
+		const ditheredBgs = document.querySelectorAll('.dithered-bg') as NodeListOf<HTMLElement>
+		ditheredBgs.forEach((el) => {
+			const sourceImg = el.querySelector('.dithered-bg-source') as HTMLImageElement | null
+			if (!sourceImg) return
+
+			const imageUrl = sourceImg.src
+
+			const mountShader = (img: HTMLImageElement) => {
+				try {
+					new ShaderMount(
+						el,
+						imageDitheringFragmentShader,
+						{
+							u_image: img,
+							u_colorFront: getShaderColorFromString('#000000'),
+							u_colorBack: getShaderColorFromString('#ffffff'),
+							u_colorHighlight: getShaderColorFromString('#000000'),
+							u_type: DitheringTypes['8x8'],
+							u_pxSize: 3,
+							u_colorSteps: 4,
+							u_originalColors: true,
+							u_inverted: false,
+							u_fit: ShaderFitOptions.cover,
+							u_scale: 1,
+							u_rotation: 0,
+							u_originX: 0.5,
+							u_originY: 0.5,
+							u_offsetX: 0,
+							u_offsetY: 0,
+							u_worldWidth: 0,
+							u_worldHeight: 0,
+						},
+						undefined,
+						0, // speed = 0 (static, no animation)
+					)
+				} catch {
+					// WebGL texture security error — fall back to CSS background
+					applyFallback()
+				}
+			}
+
+			const applyFallback = () => {
+				el.style.backgroundImage = `url(${imageUrl})`
+				el.style.backgroundSize = 'cover'
+				el.style.backgroundPosition = 'center'
+			}
+
+			// Try loading with CORS for WebGL texture use
+			const corsImg = new Image()
+			corsImg.crossOrigin = 'anonymous'
+			corsImg.onload = () => mountShader(corsImg)
+			corsImg.onerror = () => applyFallback() // CORS blocked — use CSS fallback
+			corsImg.src = imageUrl
+		})
+
 		let currentIndex = 0
 		const totalFeatures = featureCards.length
 		const cardWidth = window.innerWidth < 768 ? window.innerWidth * 0.9 + 20 : 564 // card width + gap
@@ -314,3 +385,9 @@ const {
 		updateCarousel()
 	})
 </script>
+
+<style>
+	.dithered-bg :global(canvas) {
+		z-index: 0 !important;
+	}
+</style>

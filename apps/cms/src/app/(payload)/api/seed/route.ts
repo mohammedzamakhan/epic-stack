@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
         user: null,
         headers: new Headers(),
         context: {},
-      } as any,
+      } as unknown as any,
     })
 
     return NextResponse.json({
