@@ -7,13 +7,13 @@ export function init() {
 		environment: process.env.NODE_ENV,
 		denyUrls: [
 			/\/resources\/healthcheck/,
-			// TODO: be smarter about the public assets...
-			/\/build\//,
-			/\/favicons\//,
-			/\/img\//,
-			/\/fonts\//,
-			/\/favicon.ico/,
-			/\/site\.webmanifest/,
+			/^(?:https?:\/\/[^/]+)?\/build\//,
+			/^(?:https?:\/\/[^/]+)?\/favicons\//,
+			/^(?:https?:\/\/[^/]+)?\/img\//,
+			/^(?:https?:\/\/[^/]+)?\/images\//,
+			/^(?:https?:\/\/[^/]+)?\/fonts\//,
+			/^(?:https?:\/\/[^/]+)?\/favicon\.ico/,
+			/^(?:https?:\/\/[^/]+)?\/site\.webmanifest/,
 		],
 		integrations: [
 			Sentry.prismaIntegration({
