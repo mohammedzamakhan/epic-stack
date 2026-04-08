@@ -1,5 +1,6 @@
 import { destroyRedirectToHeader } from '@repo/common/redirect-cookie'
 import { redirectWithToast } from '@repo/common/toast'
+import { sentryLogger } from '@repo/observability'
 
 // SSO-specific error types
 export enum SSOErrorType {
@@ -357,39 +358,15 @@ function categorizeSSOError(error: Error): SSOError {
  */
 async function notifyAdminOfSSOError(error: SSOError): Promise<void> {
 	try {
-		// In a real implementation, this would send notifications via:
-		// - Email to administrators
-		// - Slack/Teams webhook
-		// - Error tracking service (Sentry, Bugsnag, etc.)
-		// - Admin dashboard alerts
-
-		console.warn('Admin notification required for SSO error:', {
-			type: error.type,
-			message: error.message,
-			details: error.details,
-			timestamp: new Date().toISOString(),
-		})
-
-		// TODO: Implement actual notification system
-		// Example implementations:
-
-		// Email notification
-		// await sendAdminEmail({
-		//   subject: `SSO Error: ${error.userMessage}`,
-		//   body: `Error Type: ${error.type}\nMessage: ${error.message}\nDetails: ${error.details}`,
-		// })
-
-		// Slack notification
-		// await sendSlackNotification({
-		//   channel: '#admin-alerts',
-		//   message: `🚨 SSO Error: ${error.userMessage}\n\`\`\`${error.message}\`\`\``,
-		// })
-
-		// Error tracking
-		// Sentry.captureException(new Error(error.message), {
-		//   tags: { sso_error_type: error.type },
-		//   extra: { details: error.details },
-		// })
+		sentryLogger.error(
+			{
+				sso_error_type: error.type,
+				details: error.details,
+				userMessage: error.userMessage,
+				timestamp: new Date().toISOString(),
+			},
+			`Admin notification required for SSO error: ${error.message}`
+		)
 	} catch (notificationError) {
 		console.error('Failed to notify admin of SSO error:', notificationError)
 	}
