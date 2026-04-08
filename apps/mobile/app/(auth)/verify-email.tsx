@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import { Screen, Button, ErrorText } from '../../components/ui'
+import { jwtAuthApi } from '../../lib/api'
 import { navigateToSignIn } from '../../lib/navigation'
 
 export default function VerifyEmailScreen() {
@@ -23,11 +24,20 @@ export default function VerifyEmailScreen() {
 			setVerificationError(null)
 
 			try {
-				// TODO: Implement email verification API call
-				// Simulate API call
-				await new Promise((resolve) => setTimeout(resolve, 2000))
+				if (!email) {
+					throw new Error('Email address is missing')
+				}
 
-				// For now, just mark as verified
+				const response = await jwtAuthApi.verify({
+					code: _verificationToken,
+					type: 'onboarding',
+					target: email,
+				})
+
+				if (!response.success) {
+					throw new Error(response.message || 'Email verification failed')
+				}
+
 				setIsVerified(true)
 
 				Alert.alert(
