@@ -1,14 +1,17 @@
 import { generateSitemap } from '@nasa-gcn/remix-seo'
 import { getDomainUrl } from '@repo/common'
 import { type Route } from './+types/sitemap[.]xml.ts'
+import type { ServerBuild } from '@remix-run/server-runtime'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	// TODO: This is typeerror is coming up since of the remix-run/server-runtime package. We might need to remove/update that one.
-	// @ts-expect-error
-	return generateSitemap(request, context.serverBuild.routes, {
-		siteUrl: getDomainUrl(request),
-		headers: {
-			'Cache-Control': `public, max-age=${60 * 5}`,
+	return generateSitemap(
+		request,
+		context.serverBuild.routes as unknown as ServerBuild['routes'],
+		{
+			siteUrl: getDomainUrl(request),
+			headers: {
+				'Cache-Control': `public, max-age=${60 * 5}`,
+			},
 		},
-	})
+	)
 }
