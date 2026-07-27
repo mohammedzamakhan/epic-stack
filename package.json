@@ -93,6 +93,8 @@
     "zod": "^3.25.76"
   },
   "optionalDependencies": {
+    "@oxlint/binding-linux-x64-gnu": "^1.23.0",
+    "@oxlint/binding-linux-x64-musl": "^1.23.0",
     "@rollup/rollup-linux-x64-gnu": "^4.32.1",
     "@tailwindcss/oxide-linux-x64-gnu": "^4.0.0",
     "lightningcss-linux-x64-gnu": "^1.29.0"
