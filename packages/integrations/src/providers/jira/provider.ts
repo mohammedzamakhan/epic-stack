@@ -2,6 +2,7 @@
  * Jira integration provider implementation
  */
 
+import { validateInstanceUrl } from '@repo/security'
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -127,6 +128,10 @@ export class JiraProvider extends BaseIntegrationProvider {
 		const instanceUrl = (config as any)?.instanceUrl as string
 		if (!instanceUrl) {
 			throw new Error('Jira instance URL is required in integration config')
+		}
+		const validation = validateInstanceUrl(instanceUrl)
+		if (!validation.valid) {
+			throw new Error(`SSRF security validation failed: ${validation.reason}`)
 		}
 		return instanceUrl.endsWith('/') ? instanceUrl.slice(0, -1) : instanceUrl
 	}
