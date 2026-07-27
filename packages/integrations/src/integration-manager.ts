@@ -153,20 +153,8 @@ export class IntegrationManager {
 		authUrl: string
 		state: string
 	}> {
-		const provider = this.getProvider(providerName)
-
-		// Get authorization URL from provider (provider will generate its own state)
-		const authUrl = await provider.getAuthUrl(
-			organizationId,
-			redirectUri,
-			additionalParams,
-		)
-
-		// Extract state from the URL for consistency
-		const url = new URL(authUrl)
-		const state = url.searchParams.get('state') || ''
-
-		return { authUrl, state }
+		const { oauthFlow } = await import('./oauth-flow')
+		return oauthFlow.start(organizationId, providerName, redirectUri, additionalParams)
 	}
 
 	/**
@@ -179,53 +167,8 @@ export class IntegrationManager {
 		providerName: string,
 		params: OAuthCallbackParams,
 	): Promise<Integration> {
-		const provider = this.getProvider(providerName)
-
-		// Parse simplified state
-		let stateData
-
-		// Check if this is an OAuth 1.0a flow (Trello) with a generated state
-		if (params.state.startsWith('trello-oauth1-')) {
-			// For OAuth 1.0a flows, we don't validate the state in the traditional way
-			// The organization context was already validated in the callback handler
-			stateData = {
-				organizationId: params.organizationId,
-				providerName: providerName,
-				timestamp: Date.now(),
-			}
-		} else {
-			// Standard OAuth 2.0 state validation
-			try {
-				stateData = OAuthStateManager.validateState(params.state)
-			} catch {
-				throw new Error('Invalid OAuth state')
-			}
-
-			if (stateData.providerName !== providerName) {
-				throw new Error('Provider name mismatch in OAuth state')
-			}
-		}
-
-		// Handle OAuth callback with provider
-		const tokenData = await provider.handleCallback(params)
-
-		// Create integration in database
-		const integration = await this.createIntegration({
-			organizationId: stateData.organizationId,
-			providerName,
-			tokenData,
-			config: {},
-		})
-
-		// Log successful OAuth completion
-		await this.logIntegrationActivity(
-			integration.id,
-			'oauth_complete',
-			'success',
-			{ provider: providerName },
-		)
-
-		return integration
+		const { oauthFlow } = await import('./oauth-flow')
+		return oauthFlow.complete(providerName, params)
 	}
 
 	// Integration CRUD Operations

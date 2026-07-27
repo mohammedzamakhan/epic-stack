@@ -67,11 +67,9 @@ export {
 } from './token-manager'
 
 // OAuth flow management
+export { oauthFlow } from './oauth-flow'
 export {
-	OAuthStateManager,
-	OAuthCallbackHandler,
 	TokenRefreshManager,
-	OAuthFlowManager,
 } from './oauth-manager'
 
 // Note notification system

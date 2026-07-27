@@ -22,11 +22,8 @@ export {
 	type CommonProvider,
 } from './src/types.ts'
 
-// Connection Pool
-export {
-	SSOConnectionPool,
-	createConnectionPool,
-} from './src/connection-pool.ts'
+
+// Connection Pool (exported from .server.ts below)
 
 // Retry Logic
 export { SSORetryManager, createRetryManager } from './src/retry-logic.ts'

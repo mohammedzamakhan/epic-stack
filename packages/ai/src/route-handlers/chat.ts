@@ -5,6 +5,15 @@ import { prisma } from '@repo/database'
 
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
+	/**
+	 * Must verify the user is an active member of the given organization.
+	 * Throw a 403 Response if not. Matches the same permission check used
+	 * by the note detail loader (READ_NOTE_OWN).
+	 */
+	requireOrgMembership: (
+		request: Request,
+		organizationId: string,
+	) => Promise<void>
 	createChatStream: (params: {
 		messages: CoreMessage[]
 		systemPrompt: string
@@ -72,6 +81,10 @@ export async function handleChat(
 	if (!note) {
 		invariant(note, 'Note not found')
 	}
+
+	// Enforce org membership before branching on isPublic.
+	// "public" means public within the organization, not to all authenticated users.
+	await deps.requireOrgMembership(request, note.organizationId)
 
 	if (!note.isPublic) {
 		const hasPersonalAccess =
