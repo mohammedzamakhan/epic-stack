@@ -13,7 +13,7 @@ export interface ChatDependencies {
 	requireOrgMembership: (
 		request: Request,
 		organizationId: string,
-	) => Promise<void>
+	) => Promise<unknown>
 	createChatStream: (params: {
 		messages: CoreMessage[]
 		systemPrompt: string

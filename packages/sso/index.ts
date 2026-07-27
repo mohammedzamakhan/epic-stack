@@ -26,7 +26,7 @@ export {
 // Connection Pool (exported from .server.ts below)
 
 // Retry Logic
-export { SSORetryManager, createRetryManager } from './src/retry-logic.ts'
+export { SSORetryManager, createRetryManager, ssoRetryManager } from './src/retry-logic.ts'
 export * from './src/cache.server.ts'
 export * from './src/connection-pool.server.ts'
 export * from './src/oidc-discovery.server.ts'
