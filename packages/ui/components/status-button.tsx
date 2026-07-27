@@ -2,7 +2,7 @@ import { type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { useSpinDelay } from 'spin-delay'
-import { cn } from '../utils/cn'
+import { cn } from '../lib/utils'
 import { Icon } from './icon'
 import { Button, type buttonVariants } from './ui/button'
 import {

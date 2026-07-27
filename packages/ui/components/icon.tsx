@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { type SVGProps } from 'react'
-import { cn } from '../utils/cn'
+import { cn } from '../lib/utils'
 import { type IconName } from './icons/icon-name'
 import spriteUrl from './icons/sprite.svg?url'
 
