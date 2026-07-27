@@ -19,6 +19,11 @@ export interface GetClientIpOptions {
 	 * @default false
 	 */
 	returnUndefined?: boolean
+	/**
+	 * Whether to trust proxy headers (Fly-Client-IP, X-Forwarded-For, etc.)
+	 * Defaults to true unless TRUST_PROXY='false' environment variable is explicitly set
+	 */
+	trustProxy?: boolean
 }
 
 /**
@@ -45,38 +50,6 @@ function hasHeadersGet(
  * This function handles both Express-style requests (with `.get()` method) and
  * Web API Requests (with `.headers.get()` method). It checks multiple headers
  * in order of reliability to determine the true client IP address.
- *
- * Header priority order:
- * 1. Fly-Client-IP (Fly.io specific)
- * 2. CF-Connecting-IP (Cloudflare specific)
- * 3. X-Real-IP (Common reverse proxy header)
- * 4. X-Forwarded-For (Standard proxy header, takes first IP)
- * 5. request.ip (Direct connection IP)
- *
- * @param request - Express request or Web API Request object
- * @param options - Configuration options for IP extraction
- * @returns The client IP address, or fallback/undefined if not found
- *
- * @example
- * // Web API Request (Remix)
- * export async function loader({ request }: LoaderFunctionArgs) {
- *   const clientIp = getClientIp(request)
- *   console.log('Client IP:', clientIp)
- * }
- *
- * @example
- * // With custom options
- * const clientIp = getClientIp(request, {
- *   fallback: 'unknown',
- *   returnUndefined: false
- * })
- *
- * @example
- * // Return undefined if IP cannot be determined
- * const clientIp = getClientIp(request, { returnUndefined: true })
- * if (clientIp) {
- *   // IP was found
- * }
  */
 export function getClientIp(
 	request: any,
@@ -87,10 +60,21 @@ export function getClientIp(
 	request: any,
 	options: GetClientIpOptions = {},
 ): string | undefined {
-	const { fallback = '127.0.0.1', returnUndefined = false } = options
+	const {
+		fallback = '127.0.0.1',
+		returnUndefined = false,
+		trustProxy = process.env.TRUST_PROXY !== 'false',
+	} = options
 
 	// Handle null/undefined requests early
 	if (request == null) {
+		return returnUndefined ? undefined : fallback
+	}
+
+	// If proxy headers are untrusted, rely strictly on direct request connection IP
+	if (!trustProxy) {
+		if (request.ip) return request.ip
+		if (request.socket?.remoteAddress) return request.socket.remoteAddress
 		return returnUndefined ? undefined : fallback
 	}
 
