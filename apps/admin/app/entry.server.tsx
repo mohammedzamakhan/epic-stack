@@ -42,8 +42,18 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	responseHeaders.set('fly-primary-instance', primaryInstance)
 	responseHeaders.set('fly-instance', currentInstance)
 
-	if (ENV.NODE_ENV === 'production' && ENV.SENTRY_DSN) {
-		responseHeaders.append('Document-Policy', 'js-profiling')
+	responseHeaders.set('X-Content-Type-Options', 'nosniff')
+	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
+	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+	if (ENV.NODE_ENV === 'production') {
+		responseHeaders.set(
+			'Strict-Transport-Security',
+			'max-age=31536000; includeSubDomains; preload',
+		)
+		if (ENV.SENTRY_DSN) {
+			responseHeaders.append('Document-Policy', 'js-profiling')
+		}
 	}
 
 	const callbackName = isbot(request.headers.get('user-agent'))
