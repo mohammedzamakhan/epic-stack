@@ -11,7 +11,7 @@ import {
 	triggerNoteDeleted,
 	NoteOperationWrapper,
 } from '../../src/note-hooks'
-import { noteEventHandler } from '../../src/note-event-handler'
+import { noteNotifier } from '../../src/note-notifier'
 import { prisma } from '@repo/database'
 
 // Mock dependencies
@@ -23,24 +23,19 @@ vi.mock('@repo/database', () => ({
 	},
 }))
 
-vi.mock('../../src/note-event-handler', () => ({
-	noteEventHandler: {
-		handleNoteCreated: vi.fn(),
-		handleNoteUpdated: vi.fn(),
-		handleNoteDeleted: vi.fn(),
+vi.mock('../../src/note-notifier', () => ({
+	noteNotifier: {
+		notify: vi.fn(),
 	},
 }))
 
 // Mock setImmediate for testing - store callbacks to manually flush them
 const pendingCallbacks: Array<() => Promise<void>> = []
-const originalSetImmediate = global.setImmediate
 
-// Create a wrapper function that won't be affected by mockClear()
 const setImmediateImpl = (
 	callback: (...args: any[]) => void,
 	...args: any[]
 ) => {
-	// Store the callback to be executed later
 	const asyncCallback = async () => {
 		try {
 			await callback(...args)
@@ -55,7 +50,6 @@ const setImmediateImpl = (
 const mockSetImmediate = vi.fn(setImmediateImpl)
 global.setImmediate = setImmediateImpl as any
 
-// Helper to flush all pending callbacks synchronously
 const flushCallbacks = async () => {
 	while (pendingCallbacks.length > 0) {
 		const callback = pendingCallbacks.shift()
@@ -68,16 +62,13 @@ const flushCallbacks = async () => {
 describe('NoteHooks', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-		// Don't call mockClear() as it clears the implementation
 		mockSetImmediate.mock.calls = []
-		pendingCallbacks.length = 0 // Clear pending callbacks
-		// Ensure setImmediate is set to our implementation
+		pendingCallbacks.length = 0
 		global.setImmediate = setImmediateImpl as any
 	})
 
 	afterEach(() => {
 		vi.restoreAllMocks()
-		// Restore setImmediate to our implementation in case a test overrode it
 		global.setImmediate = setImmediateImpl as any
 	})
 
@@ -97,21 +88,16 @@ describe('NoteHooks', () => {
 	describe('afterNoteCreated', () => {
 		it('should trigger note created event successfully', async () => {
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 			await noteHooks.afterNoteCreated('note-123', 'user-123')
-
-			// Wait for the async callback to complete
-			// Flush all pending setImmediate callbacks (needed for Vitest v4)
 			await flushCallbacks()
 
-			// setImmediate should have been called (we don't check the mock as it's not tracked properly in Vitest v4)
-			expect(noteEventHandler.handleNoteCreated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'created',
 				'user-123',
 			)
 			expect(consoleSpy).toHaveBeenCalledWith(
@@ -127,16 +113,11 @@ describe('NoteHooks', () => {
 				connectionsNotified: 0,
 				errors: ['Test error'],
 			}
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 			await noteHooks.afterNoteCreated('note-123', 'user-123')
-
-			// Wait for the async callback to complete
-			// Flush all pending setImmediate callbacks (needed for Vitest v4)
 			await flushCallbacks()
 
 			expect(consoleSpy).toHaveBeenCalledWith(
@@ -149,9 +130,7 @@ describe('NoteHooks', () => {
 
 		it('should handle no connections notified', async () => {
 			const mockResult = { success: true, connectionsNotified: 0, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
@@ -165,7 +144,6 @@ describe('NoteHooks', () => {
 		it('should handle errors in hook setup', async () => {
 			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-			// Mock setImmediate to throw an error
 			global.setImmediate = (() => {
 				throw new Error('Setup error')
 			}) as any
@@ -181,16 +159,13 @@ describe('NoteHooks', () => {
 		})
 
 		it('should handle errors in async callback', async () => {
-			vi.mocked(noteEventHandler.handleNoteCreated).mockRejectedValue(
+			vi.mocked(noteNotifier.notify).mockRejectedValue(
 				new Error('Async error'),
 			)
 
 			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
 			await noteHooks.afterNoteCreated('note-123', 'user-123')
-
-			// Wait for the async callback to complete
-			// Flush all pending setImmediate callbacks (needed for Vitest v4)
 			await flushCallbacks()
 
 			expect(consoleSpy).toHaveBeenCalledWith(
@@ -207,22 +182,17 @@ describe('NoteHooks', () => {
 			const mockResult = { success: true, connectionsNotified: 2, errors: [] }
 			const previousData = { title: 'Old Title', content: 'Old Content' }
 
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 			await noteHooks.afterNoteUpdated('note-123', 'user-123', previousData)
-
-			// Wait for the async callback to complete
-			// Flush all pending setImmediate callbacks (needed for Vitest v4)
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				previousData,
 			)
 			expect(consoleSpy).toHaveBeenCalledWith(
 				'Note update notified 2 connections',
@@ -234,24 +204,21 @@ describe('NoteHooks', () => {
 		it('should handle note updated without previous data', async () => {
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await noteHooks.afterNoteUpdated('note-123', 'user-123')
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				undefined,
 			)
 		})
 
 		it('should handle errors in hook setup', async () => {
 			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-			// Mock setImmediate to throw an error
 			global.setImmediate = (() => {
 				throw new Error('Setup error')
 			}) as any
@@ -276,17 +243,12 @@ describe('NoteHooks', () => {
 			}
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
-			vi.mocked(noteEventHandler.handleNoteDeleted).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 			await noteHooks.beforeNoteDeleted('note-123', 'user-123')
-
-			// Wait for the async callback to complete
-			// Flush all pending setImmediate callbacks (needed for Vitest v4)
 			await flushCallbacks()
 
 			expect(prisma.organizationNote.findUnique).toHaveBeenCalledWith({
@@ -294,13 +256,15 @@ describe('NoteHooks', () => {
 				select: {
 					id: true,
 					title: true,
+					content: true,
 					organizationId: true,
 				},
 			})
-			expect(noteEventHandler.handleNoteDeleted).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'deleted',
 				'user-123',
-				{ title: 'Test Note', organizationId: 'org-123' },
+				mockNote,
 			)
 			expect(consoleSpy).toHaveBeenCalledWith(
 				'Note deletion notified 1 connections',
@@ -320,7 +284,7 @@ describe('NoteHooks', () => {
 				'Note not found for deletion hook:',
 				'note-123',
 			)
-			expect(noteEventHandler.handleNoteDeleted).not.toHaveBeenCalled()
+			expect(noteNotifier.notify).not.toHaveBeenCalled()
 
 			consoleSpy.mockRestore()
 		})
@@ -353,15 +317,14 @@ describe('NoteHooks', () => {
 			}
 
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await noteHooks.onNoteCreated(noteData, 'user-123')
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteCreated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'created',
 				'user-123',
 			)
 		})
@@ -381,9 +344,7 @@ describe('NoteHooks', () => {
 			}
 
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await noteHooks.onNoteUpdated(
 				'note-123',
@@ -393,10 +354,10 @@ describe('NoteHooks', () => {
 			)
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				{ title: 'Old Title', content: 'Old Content' },
 			)
 		})
 
@@ -408,11 +369,9 @@ describe('NoteHooks', () => {
 				organizationId: 'org-123',
 			}
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(noteData)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(noteData as any)
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteDeleted).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await noteHooks.onNoteDeleted(noteData, 'user-123')
 
@@ -429,7 +388,7 @@ describe('NoteHooks', () => {
 				organizationId: 'org-123',
 			}
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
 
 			const snapshot = await noteHooks.captureNoteSnapshot('note-123')
 
@@ -472,102 +431,17 @@ describe('NoteHooks', () => {
 		})
 	})
 
-	describe('processBatchChanges', () => {
-		it('should process batch changes successfully', async () => {
-			const changes = [
-				{
-					type: 'created' as const,
-					noteId: 'note-1',
-					userId: 'user-123',
-					afterSnapshot: {
-						id: 'note-1',
-						title: 'Note 1',
-						content: 'Content 1',
-						organizationId: 'org-123',
-					},
-				},
-				{
-					type: 'updated' as const,
-					noteId: 'note-2',
-					userId: 'user-123',
-					beforeSnapshot: {
-						id: 'note-2',
-						title: 'Old Title',
-						content: 'Old Content',
-						organizationId: 'org-123',
-					},
-					afterSnapshot: {
-						id: 'note-2',
-						title: 'New Title',
-						content: 'New Content',
-						organizationId: 'org-123',
-					},
-				},
-				{
-					type: 'deleted' as const,
-					noteId: 'note-3',
-					userId: 'user-123',
-					beforeSnapshot: {
-						id: 'note-3',
-						title: 'Deleted Note',
-						content: 'Deleted Content',
-						organizationId: 'org-123',
-					},
-				},
-			]
-
-			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue({
-				id: 'note-3',
-				title: 'Deleted Note',
-				organizationId: 'org-123',
-			})
-			vi.mocked(noteEventHandler.handleNoteDeleted).mockResolvedValue(
-				mockResult,
-			)
-
-			await noteHooks.processBatchChanges(changes)
-
-			// setImmediate should have been called (we don't check the mock as it's not tracked properly in Vitest v4)
-		})
-
-		it('should handle errors in batch processing setup', async () => {
-			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-			// Mock setImmediate to throw an error
-			global.setImmediate = (() => {
-				throw new Error('Batch setup error')
-			}) as any
-
-			await noteHooks.processBatchChanges([])
-
-			expect(consoleSpy).toHaveBeenCalledWith(
-				'Error setting up batch change processing:',
-				expect.any(Error),
-			)
-
-			consoleSpy.mockRestore()
-		})
-	})
-
 	describe('Convenience functions', () => {
 		it('should call triggerNoteCreated', async () => {
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await triggerNoteCreated('note-123', 'user-123')
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteCreated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'created',
 				'user-123',
 			)
 		})
@@ -575,17 +449,15 @@ describe('NoteHooks', () => {
 		it('should call triggerNoteUpdated', async () => {
 			const previousData = { title: 'Old Title', content: 'Old Content' }
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			await triggerNoteUpdated('note-123', 'user-123', previousData)
 			await flushCallbacks()
 
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				previousData,
 			)
 		})
 
@@ -595,7 +467,7 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				organizationId: 'org-123',
 			}
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
 
 			await triggerNoteDeleted('note-123', 'user-123')
 
@@ -607,9 +479,7 @@ describe('NoteHooks', () => {
 		it('should wrap create operation', async () => {
 			const operation = vi.fn().mockResolvedValue('result')
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteCreated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const result = await NoteOperationWrapper.create(
 				operation,
@@ -620,8 +490,9 @@ describe('NoteHooks', () => {
 
 			expect(operation).toHaveBeenCalled()
 			expect(result).toBe('result')
-			expect(noteEventHandler.handleNoteCreated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'created',
 				'user-123',
 			)
 		})
@@ -637,11 +508,9 @@ describe('NoteHooks', () => {
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 
 			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
-				mockSnapshot,
+				mockSnapshot as any,
 			)
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const result = await NoteOperationWrapper.update(
 				operation,
@@ -654,19 +523,17 @@ describe('NoteHooks', () => {
 			expect(operation).toHaveBeenCalled()
 			expect(result).toBe('result')
 			expect(prisma.organizationNote.findUnique).toHaveBeenCalled()
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				{ title: 'Old Title', content: 'Old Content' },
 			)
 		})
 
 		it('should wrap update operation without snapshot', async () => {
 			const operation = vi.fn().mockResolvedValue('result')
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
-			vi.mocked(noteEventHandler.handleNoteUpdated).mockResolvedValue(
-				mockResult,
-			)
+			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const result = await NoteOperationWrapper.update(
 				operation,
@@ -679,10 +546,10 @@ describe('NoteHooks', () => {
 			expect(operation).toHaveBeenCalled()
 			expect(result).toBe('result')
 			expect(prisma.organizationNote.findUnique).not.toHaveBeenCalled()
-			expect(noteEventHandler.handleNoteUpdated).toHaveBeenCalledWith(
+			expect(noteNotifier.notify).toHaveBeenCalledWith(
 				'note-123',
+				'updated',
 				'user-123',
-				undefined,
 			)
 		})
 
@@ -693,7 +560,7 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				organizationId: 'org-123',
 			}
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
 
 			const result = await NoteOperationWrapper.delete(
 				operation,

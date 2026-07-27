@@ -49,6 +49,7 @@ vi.mock('../../src/encryption', () => ({
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { integrationManager } from '../../src/integration-manager'
+import { noteNotifier } from '../../src/note-notifier'
 
 describe('Provider Interactions Integration Tests', () => {
 	beforeEach(async () => {
@@ -285,7 +286,7 @@ describe('Provider Interactions Integration Tests', () => {
 			})
 
 			// Handle note update (which triggers message posting)
-			await integrationManager.handleNoteUpdate(
+			await noteNotifier.notify(
 				'note-123',
 				'created',
 				'user-123',
@@ -314,7 +315,7 @@ describe('Provider Interactions Integration Tests', () => {
 			vi.mocked(prisma.noteIntegrationConnection.findMany).mockResolvedValue([])
 
 			// Should complete without error
-			await integrationManager.handleNoteUpdate(
+			await noteNotifier.notify(
 				'note-123',
 				'created',
 				'user-123',

@@ -69,17 +69,16 @@ export {
 // OAuth flow management
 export { oauthFlow } from './oauth-flow'
 export {
-	TokenRefreshManager,
 } from './oauth-manager'
 
 // Note notification system
 export {
-	NoteEventHandler,
-	noteEventHandler,
+	NoteNotifier,
+	noteNotifier,
 	type NoteChangeType,
 	type NoteChangeEvent,
 	type NoteEventResult,
-} from './note-event-handler'
+} from './note-notifier'
 
 export {
 	NoteHooks,

@@ -6,9 +6,8 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import {
 	OAuthStateManager,
 	OAuthCallbackHandler,
-	TokenRefreshManager,
-	OAuthFlowManager,
 } from '../../src/oauth-manager'
+import { TokenManager, tokenManager } from '../../src/token-manager'
 import { providerRegistry } from '../../src/provider'
 import type {
 	OAuthCallbackParams,
@@ -406,7 +405,7 @@ describe('OAuthCallbackHandler', () => {
 	})
 })
 
-describe('TokenRefreshManager', () => {
+describe('TokenManager', () => {
 	beforeEach(() => {
 		providerRegistry.register(mockProvider)
 	})
@@ -427,7 +426,7 @@ describe('TokenRefreshManager', () => {
 
 			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
 
-			const result = await TokenRefreshManager.refreshTokenWithRetry(
+			const result = await tokenManager.refreshTokenWithRetry(
 				'test-provider',
 				refreshToken,
 			)
@@ -450,7 +449,7 @@ describe('TokenRefreshManager', () => {
 				.mockRejectedValueOnce(new Error('connection refused'))
 				.mockResolvedValue(newTokenData)
 
-			const result = await TokenRefreshManager.refreshTokenWithRetry(
+			const result = await tokenManager.refreshTokenWithRetry(
 				'test-provider',
 				refreshToken,
 			)
@@ -467,7 +466,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -486,7 +485,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -507,7 +506,7 @@ describe('TokenRefreshManager', () => {
 			providerRegistry.register(providerWithoutRefresh as any)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					'refresh-token',
 				),
@@ -526,7 +525,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -540,7 +539,7 @@ describe('TokenRefreshManager', () => {
 				accessToken: 'access-token',
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -551,7 +550,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes from now
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(true)
 		})
@@ -562,7 +561,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -573,7 +572,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() - 1000), // 1 second ago
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(true)
 		})
@@ -585,7 +584,7 @@ describe('TokenRefreshManager', () => {
 				accessToken: 'access-token',
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -596,7 +595,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -607,7 +606,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() - 1000), // 1 second ago
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(true)
 		})

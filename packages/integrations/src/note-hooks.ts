@@ -6,7 +6,7 @@
  */
 
 import { prisma } from '@repo/database'
-import { noteEventHandler } from './note-event-handler'
+import { noteNotifier } from './note-notifier'
 
 /**
  * Note data for change detection
@@ -48,9 +48,10 @@ export class NoteHooks {
 			// Don't await to avoid blocking the main request
 			setImmediate(async () => {
 				try {
-					const result = await noteEventHandler.handleNoteCreated(
+					const result = await noteNotifier.notify(
 						noteId,
-						userId,
+						'created',
+						userId
 					)
 					if (!result.success) {
 						console.warn('Note creation notification failed:', result.errors)
@@ -84,10 +85,10 @@ export class NoteHooks {
 			// Trigger integration notifications asynchronously
 			setImmediate(async () => {
 				try {
-					const result = await noteEventHandler.handleNoteUpdated(
+					const result = await noteNotifier.notify(
 						noteId,
-						userId,
-						previousData,
+						'updated',
+						userId
 					)
 					if (!result.success) {
 						console.warn('Note update notification failed:', result.errors)
@@ -118,6 +119,7 @@ export class NoteHooks {
 				select: {
 					id: true,
 					title: true,
+					content: true,
 					organizationId: true,
 				},
 			})
@@ -130,10 +132,11 @@ export class NoteHooks {
 			// Trigger integration notifications asynchronously
 			setImmediate(async () => {
 				try {
-					const result = await noteEventHandler.handleNoteDeleted(
+					const result = await noteNotifier.notify(
 						noteId,
+						'deleted',
 						userId,
-						{ title: note.title, organizationId: note.organizationId },
+						note
 					)
 					if (!result.success) {
 						console.warn('Note deletion notification failed:', result.errors)

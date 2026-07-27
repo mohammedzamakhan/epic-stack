@@ -14,6 +14,7 @@ import {
 	type ProviderType,
 } from './types'
 import { OAuthStateManager } from './oauth-manager'
+import { TokenManager } from './token-manager'
 
 /**
  * Core interface that all integration providers must implement
@@ -91,6 +92,12 @@ export interface IntegrationProvider {
 	validateConnection(
 		connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean>
+
+	/**
+	 * Optionally revoke an access token
+	 * @param token - Access token to revoke
+	 */
+	revokeToken?: (token: string) => Promise<void>
 
 	/**
 	 * Get provider-specific configuration schema
@@ -176,9 +183,7 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 		bufferMinutes: number = 5,
 	): boolean {
 		if (!expiresAt) return false
-
-		const bufferMs = bufferMinutes * 60 * 1000
-		return Date.now() >= expiresAt.getTime() - bufferMs
+		return TokenManager.isTokenExpired(expiresAt, bufferMinutes)
 	}
 
 	/**

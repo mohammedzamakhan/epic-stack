@@ -10,7 +10,9 @@ import {
 	type EncryptedTokenData,
 	type TokenValidationResult,
 } from './encryption'
-import { type TokenData, type IntegrationProvider } from './types'
+import { providerRegistry } from './provider'
+import { type TokenData } from './types'
+import { type IntegrationProvider } from './provider'
 
 /**
  * Token refresh result
@@ -34,6 +36,117 @@ export interface TokenStorageResult {
  * Token manager service for handling secure token operations
  */
 export class TokenManager {
+	static readonly TOKEN_BUFFER_MINUTES = 5
+	private static readonly MAX_RETRIES = 3
+	private static readonly RETRY_DELAYS = [1000, 2000, 4000]
+
+	/**
+	 * Check if a token is completely expired or expiring within buffer
+	 */
+	static isTokenExpired(
+		tokenDataOrExpiresAt?: TokenData | Date | null,
+		bufferMinutes: number = 0,
+	): boolean {
+		if (!tokenDataOrExpiresAt) return false
+		const expiresAt =
+			tokenDataOrExpiresAt instanceof Date
+				? tokenDataOrExpiresAt
+				: tokenDataOrExpiresAt.expiresAt
+		if (!expiresAt) return false
+
+		const bufferMs = bufferMinutes * 60 * 1000
+		return Date.now() >= expiresAt.getTime() - bufferMs
+	}
+
+	/**
+	 * Check if a token should be refreshed (within 5 min buffer)
+	 */
+	static shouldRefreshToken(tokenData: TokenData | null | undefined): boolean {
+		if (!tokenData || !tokenData.expiresAt) return false
+		return TokenManager.isTokenExpired(
+			tokenData,
+			TokenManager.TOKEN_BUFFER_MINUTES,
+		)
+	}
+
+	/**
+	 * Determine if an error during token refresh is retryable
+	 */
+	static isRetryableError(error: unknown): boolean {
+		if (!(error instanceof Error)) return false
+		const message = error.message.toLowerCase()
+		const retryablePatterns = [
+			'network',
+			'timeout',
+			'connection',
+			'econnreset',
+			'enotfound',
+			'econnrefused',
+			'socket hang up',
+			'rate limit',
+			'too many requests',
+			'service unavailable',
+			'internal server error',
+			'bad gateway',
+			'gateway timeout',
+		]
+		return retryablePatterns.some((pattern) => message.includes(pattern))
+	}
+
+	/**
+	 * Refresh token with retry logic and exponential backoff
+	 */
+	async refreshTokenWithRetry(
+		providerName: string,
+		refreshToken: string,
+		attempt: number = 1,
+	): Promise<TokenData> {
+		const provider = providerRegistry.get(providerName)
+
+		if (!provider.refreshToken) {
+			throw new Error(
+				`Provider ${providerName} does not support token refresh`,
+			)
+		}
+
+		try {
+			const tokenData = await provider.refreshToken(refreshToken)
+			if (!tokenData.accessToken) {
+				throw new Error('Invalid token data: missing access token')
+			}
+			return tokenData
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : 'Unknown error'
+
+			if (
+				attempt < TokenManager.MAX_RETRIES &&
+				TokenManager.isRetryableError(error)
+			) {
+				const delayMs =
+					TokenManager.RETRY_DELAYS[attempt - 1] ||
+					(TokenManager.RETRY_DELAYS[
+						TokenManager.RETRY_DELAYS.length - 1
+					] as number)
+
+				console.warn(
+					`Token refresh attempt ${attempt} failed for ${providerName}: ${errorMessage}. Retrying in ${delayMs}ms...`,
+				)
+
+				await new Promise((resolve) => setTimeout(resolve, delayMs))
+				return this.refreshTokenWithRetry(
+					providerName,
+					refreshToken,
+					attempt + 1,
+				)
+			}
+
+			throw new Error(
+				`Token refresh failed for ${providerName} after ${attempt} attempts: ${errorMessage}`,
+			)
+		}
+	}
+
 	/**
 	 * Store encrypted token data for an integration
 	 */
@@ -42,11 +155,9 @@ export class TokenManager {
 		tokenData: TokenData,
 	): Promise<TokenStorageResult> {
 		try {
-			// Encrypt the token data
 			const encryptedData =
 				await integrationEncryption.encryptTokenData(tokenData)
 
-			// Store in database
 			await prisma.integration.update({
 				where: { id: integrationId },
 				data: {
@@ -88,16 +199,14 @@ export class TokenManager {
 				return null
 			}
 
-			// Reconstruct encrypted data structure
 			const encryptedData: EncryptedTokenData = {
 				encryptedAccessToken: integration.accessToken,
 				encryptedRefreshToken: integration.refreshToken || undefined,
 				expiresAt: integration.tokenExpiresAt || undefined,
 				scope: (integration.config as any)?.scope,
-				iv: '', // Will be extracted from encrypted data
+				iv: '',
 			}
 
-			// Decrypt and return token data
 			return await integrationEncryption.decryptTokenData(encryptedData)
 		} catch (error) {
 			console.error('Failed to retrieve token data:', error)
@@ -106,39 +215,67 @@ export class TokenManager {
 	}
 
 	/**
-	 * Get a valid access token, refreshing if necessary
+	 * Single source of truth for getting a valid access token.
+	 * Decrypts current token, checks expiry, refreshes with retry if needed, re-encrypts + persists,
+	 * and returns the usable access token string.
 	 */
 	async getValidAccessToken(
-		integration: Integration,
-		provider: IntegrationProvider,
+		integrationOrId: string | Integration,
+		provider?: IntegrationProvider,
 	): Promise<string | null> {
 		try {
-			const tokenData = await this.getTokenData(integration.id)
+			const integrationId =
+				typeof integrationOrId === 'string'
+					? integrationOrId
+					: integrationOrId.id
+
+			const providerName =
+				typeof integrationOrId === 'string'
+					? undefined
+					: integrationOrId.providerName
+
+			const tokenData = await this.getTokenData(integrationId)
 			if (!tokenData) {
 				return null
 			}
 
-			// Validate token
 			const validation = integrationEncryption.validateToken(tokenData)
-
 			if (validation.isValid && !validation.needsRefresh) {
 				return tokenData.accessToken
 			}
 
-			// Token needs refresh or is expired
-			if (tokenData.refreshToken && provider.refreshToken) {
-				const refreshResult = await this.refreshToken(
-					integration,
-					provider,
-					tokenData.refreshToken,
-				)
+			const effectiveProviderName =
+				providerName ||
+				provider?.name ||
+				(
+					await prisma.integration.findUnique({
+						where: { id: integrationId },
+						select: { providerName: true },
+					})
+				)?.providerName
 
-				if (refreshResult.success && refreshResult.tokenData) {
-					return refreshResult.tokenData.accessToken
+			if (!effectiveProviderName) {
+				return null
+			}
+
+			if (tokenData.refreshToken) {
+				const refreshedTokenData = provider?.refreshToken
+					? await provider.refreshToken(tokenData.refreshToken)
+					: await this.refreshTokenWithRetry(
+							effectiveProviderName,
+							tokenData.refreshToken,
+					  )
+
+				if (refreshedTokenData && refreshedTokenData.accessToken) {
+					if (!refreshedTokenData.refreshToken) {
+						refreshedTokenData.refreshToken = tokenData.refreshToken
+					}
+					await this.storeTokenData(integrationId, refreshedTokenData)
+					await this.logTokenOperation(integrationId, 'token_refresh', 'success')
+					return refreshedTokenData.accessToken
 				}
 			}
 
-			// Token refresh failed or no refresh token available
 			return null
 		} catch (error) {
 			console.error('Failed to get valid access token:', error)
@@ -163,10 +300,13 @@ export class TokenManager {
 				}
 			}
 
-			// Attempt to refresh the token
-			const newTokenData = await provider.refreshToken(refreshToken)
+			const newTokenData = provider?.refreshToken
+				? await provider.refreshToken(refreshToken)
+				: await this.refreshTokenWithRetry(
+						integration.providerName,
+						refreshToken,
+				  )
 
-			// Store the new token data
 			const storeResult = await this.storeTokenData(
 				integration.id,
 				newTokenData,
@@ -179,7 +319,6 @@ export class TokenManager {
 				}
 			}
 
-			// Log successful refresh
 			await this.logTokenOperation(integration.id, 'token_refresh', 'success')
 
 			return {
@@ -187,7 +326,6 @@ export class TokenManager {
 				tokenData: newTokenData,
 			}
 		} catch (error) {
-			// Log failed refresh
 			await this.logTokenOperation(
 				integration.id,
 				'token_refresh',
@@ -195,7 +333,6 @@ export class TokenManager {
 				error instanceof Error ? error.message : 'Unknown error',
 			)
 
-			// Determine if this requires re-authentication
 			const requiresReauth = this.isReauthError(error)
 
 			return {
@@ -246,7 +383,7 @@ export class TokenManager {
 
 			const needingRefresh: string[] = []
 			const now = new Date()
-			const refreshThreshold = 5 * 60 * 1000 // 5 minutes in milliseconds
+			const refreshThreshold = 5 * 60 * 1000
 
 			for (const integration of integrations) {
 				if (integration.tokenExpiresAt) {
@@ -273,20 +410,16 @@ export class TokenManager {
 		provider?: IntegrationProvider,
 	): Promise<boolean> {
 		try {
-			// Get current token data
 			const tokenData = await this.getTokenData(integrationId)
 
-			// Attempt to revoke with provider if supported
-			if (tokenData && provider?.revokeToken) {
+			if (tokenData && provider && typeof (provider as any).revokeToken === 'function') {
 				try {
-					await provider.revokeToken(tokenData.accessToken)
+					await (provider as any).revokeToken(tokenData.accessToken)
 				} catch (error) {
 					console.warn('Failed to revoke token with provider:', error)
-					// Continue with local cleanup even if provider revocation fails
 				}
 			}
 
-			// Clear token data from database
 			await prisma.integration.update({
 				where: { id: integrationId },
 				data: {
@@ -297,9 +430,7 @@ export class TokenManager {
 				},
 			})
 
-			// Log revocation
 			await this.logTokenOperation(integrationId, 'token_revoke', 'success')
-
 			return true
 		} catch (error) {
 			console.error('Failed to revoke token:', error)
@@ -347,7 +478,6 @@ export class TokenManager {
 		const errorMessage = error.message?.toLowerCase() || ''
 		const errorCode = error.code || error.status
 
-		// Common error patterns that indicate need for re-authentication
 		const reauthPatterns = [
 			'invalid_grant',
 			'invalid_token',

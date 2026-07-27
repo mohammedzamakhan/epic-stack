@@ -46,6 +46,23 @@ vi.mock('@repo/database', () => ({
 vi.mock('../../src/encryption', () => ({
 	encryptToken: vi.fn().mockResolvedValue('encrypted-token'),
 	decryptToken: vi.fn().mockResolvedValue('decrypted-token'),
+	integrationEncryption: {
+		encryptTokenData: vi.fn().mockResolvedValue({
+			encryptedAccessToken: 'encrypted-access',
+			encryptedRefreshToken: 'encrypted-refresh',
+			expiresAt: new Date(),
+			iv: 'iv',
+		}),
+		decryptTokenData: vi.fn().mockResolvedValue({
+			accessToken: 'decrypted-token',
+			refreshToken: 'decrypted-refresh-token',
+			expiresAt: new Date(Date.now() + 3600000),
+		}),
+		validateToken: vi.fn().mockReturnValue({
+			isValid: true,
+			needsRefresh: false,
+		}),
+	},
 }))
 
 describe('IntegrationManager', () => {
@@ -338,6 +355,7 @@ describe('IntegrationManager', () => {
 		})
 
 		it('should handle note update with connections', async () => {
+			const { noteNotifier } = await import('../../src/note-notifier')
 			const mockConnections = [
 				{
 					id: 'connection-123',
@@ -372,15 +390,16 @@ describe('IntegrationManager', () => {
 			)
 			vi.mocked(prisma.integrationLog.create).mockResolvedValue({} as any)
 
-			await manager.handleNoteUpdate('note-123', 'updated', 'user-123')
+			await noteNotifier.notify('note-123', 'updated', 'user-123')
 
 			expect(mockProvider.postMessage).toHaveBeenCalled()
 		})
 
-		it('should handle note update with no connections', async () => {
+		it('should handle notes with no connections', async () => {
+			const { noteNotifier } = await import('../../src/note-notifier')
 			vi.mocked(prisma.noteIntegrationConnection.findMany).mockResolvedValue([])
 
-			await manager.handleNoteUpdate('note-123', 'updated', 'user-123')
+			await noteNotifier.notify('note-123', 'updated', 'user-123')
 
 			expect(prisma.organizationNote.findUnique).not.toHaveBeenCalled()
 		})
