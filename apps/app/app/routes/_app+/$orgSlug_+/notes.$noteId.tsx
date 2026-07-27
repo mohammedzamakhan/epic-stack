@@ -334,73 +334,67 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	}
 }
 
-const DeleteFormSchema = z.object({
+export const DeleteFormSchema = z.object({
 	intent: z.literal('delete-note'),
 	noteId: z.string(),
 })
 
-const ConnectNoteSchema = z.object({
+export const ConnectNoteSchema = z.object({
 	intent: z.literal('connect-note-to-channel'),
 	noteId: z.string(),
 	integrationId: z.string(),
 	channelId: z.string(),
 })
 
-const DisconnectNoteSchema = z.object({
+export const DisconnectNoteSchema = z.object({
 	intent: z.literal('disconnect-note-from-channel'),
 	connectionId: z.string(),
 })
 
-const GetChannelsSchema = z.object({
+export const GetChannelsSchema = z.object({
 	intent: z.literal('get-integration-channels'),
 	integrationId: z.string(),
 })
 
-const ShareNoteSchema = z.object({
+export const ShareNoteSchema = z.object({
 	intent: z.literal('update-note-sharing'),
 	noteId: z.string(),
-	isPublic: z
-		.string()
-		.transform((val) => val === 'true')
-		.pipe(z.boolean()),
+	isPublic: z.preprocess((val) => val === 'true', z.boolean()),
 })
 
-const AddNoteAccessSchema = z.object({
+export const AddNoteAccessSchema = z.object({
 	intent: z.literal('add-note-access'),
 	noteId: z.string(),
 	userId: z.string(),
 })
 
-const RemoveNoteAccessSchema = z.object({
+export const RemoveNoteAccessSchema = z.object({
 	intent: z.literal('remove-note-access'),
 	noteId: z.string(),
 	userId: z.string(),
 })
 
-const BatchUpdateNoteAccessSchema = z.object({
+export const BatchUpdateNoteAccessSchema = z.object({
 	intent: z.literal('batch-update-note-access'),
 	noteId: z.string(),
-	isPublic: z
-		.string()
-		.transform((val) => val === 'true')
-		.pipe(z.boolean()),
-	usersToAdd: z.array(z.string()).optional().default([]),
-	usersToRemove: z.array(z.string()).optional().default([]),
+	isPublic: z.preprocess((val) => val === 'true', z.boolean()),
+	usersToAdd: z.array(z.string()).default([]),
+	usersToRemove: z.array(z.string()).default([]),
 })
 
-const AddCommentSchema = z.object({
+export const AddCommentSchema = z.object({
 	intent: z.literal('add-comment'),
 	noteId: z.string(),
-	content: z.string().min(1, 'Comment cannot be empty'),
+	content: z.string().min(1, 'Comment content cannot be empty'),
 	parentId: z.string().optional(),
 })
 
-const DeleteCommentSchema = z.object({
+export const DeleteCommentSchema = z.object({
 	intent: z.literal('delete-comment'),
 	commentId: z.string(),
 })
 
-const ToggleFavoriteSchema = z.object({
+export const ToggleFavoriteSchema = z.object({
 	intent: z.literal('toggle-favorite'),
 	noteId: z.string(),
 })

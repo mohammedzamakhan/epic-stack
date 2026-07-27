@@ -11,14 +11,14 @@ import { prisma } from '@repo/database'
 import {
 	type ImageFieldset,
 	type MediaFieldset,
-} from '#app/routes/_app+/$orgSlug_+/__org-note-editor'
+} from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 
 type UploadFieldset = (ImageFieldset | MediaFieldset) & { type?: string }
 
 function uploadHasId(
 	upload: UploadFieldset,
 ): upload is UploadFieldset & { id: string } {
-	return Boolean(upload.id)
+	return typeof upload.id === 'string' && upload.id.length > 0
 }
 
 function uploadHasFile(

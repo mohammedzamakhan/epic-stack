@@ -4,13 +4,13 @@ import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '@repo/auth'
+import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { invariantResponse } from '@epic-web/invariant'
-import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import { notifyCommentMentions, notifyNoteOwner } from '#app/utils/comment-notifications.server.ts'
+import { notifyCommentMentions, notifyNoteOwner } from '#app/utils/notifications.server.ts'
 import {
 	DeleteFormSchema,
 	ConnectNoteSchema,
@@ -30,15 +30,15 @@ export interface IntentContext extends ActionFunctionArgs {
 	userId: string
 }
 
-export async function userHasOrgAccess(request: Request, organizationId: string) {
+export async function userHasOrgAccess(userId: string, organizationId: string) {
 	await requireUserWithOrganizationPermission(
-		request,
+		userId,
 		organizationId,
 		ORG_PERMISSIONS.READ_NOTE_OWN,
 	)
 }
 
-export async function handleDeleteNoteIntent({ request, formData, userId }: IntentContext) {
+export async function handleDeleteNoteIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DeleteFormSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -63,7 +63,7 @@ export async function handleDeleteNoteIntent({ request, formData, userId }: Inte
 	let canDelete = false
 	try {
 		await requireUserWithOrganizationPermission(
-			request,
+			userId,
 			note.organizationId,
 			ORG_PERMISSIONS.DELETE_NOTE_ANY,
 		)
@@ -72,7 +72,7 @@ export async function handleDeleteNoteIntent({ request, formData, userId }: Inte
 		if (note.createdById === userId) {
 			try {
 				await requireUserWithOrganizationPermission(
-					request,
+					userId,
 					note.organizationId,
 					ORG_PERMISSIONS.DELETE_NOTE_OWN,
 				)
@@ -106,7 +106,7 @@ export async function handleDeleteNoteIntent({ request, formData, userId }: Inte
 	})
 }
 
-export async function handleConnectChannelIntent({ request, formData, userId }: IntentContext) {
+export async function handleConnectChannelIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ConnectNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -121,7 +121,7 @@ export async function handleConnectChannelIntent({ request, formData, userId }: 
 		where: { id: noteId },
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
-	await userHasOrgAccess(request, note.organizationId)
+	await userHasOrgAccess(userId, note.organizationId)
 
 	try {
 		await integrationManager.connectNoteToChannel({
@@ -147,7 +147,7 @@ export async function handleConnectChannelIntent({ request, formData, userId }: 
 	}
 }
 
-export async function handleDisconnectChannelIntent({ request, formData, userId }: IntentContext) {
+export async function handleDisconnectChannelIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DisconnectNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -162,7 +162,7 @@ export async function handleDisconnectChannelIntent({ request, formData, userId 
 		where: { id: connectionId },
 	})
 	invariantResponse(connection, 'Connection not found', { status: 404 })
-	await userHasOrgAccess(request, connection.note.organizationId)
+	await userHasOrgAccess(userId, connection.note.organizationId)
 
 	try {
 		const connectionDetails = await prisma.noteIntegrationConnection.findFirst({
@@ -194,7 +194,7 @@ export async function handleDisconnectChannelIntent({ request, formData, userId 
 	}
 }
 
-export async function handleGetChannelsIntent({ request, formData }: IntentContext) {
+export async function handleGetChannelsIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: GetChannelsSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -210,7 +210,7 @@ export async function handleGetChannelsIntent({ request, formData }: IntentConte
 			return data({ error: 'Integration not found' }, { status: 404 })
 		}
 
-		await userHasOrgAccess(request, integration.organizationId)
+		await userHasOrgAccess(userId, integration.organizationId)
 		const channels = await integrationManager.getAvailableChannels(integrationId)
 		return data({ channels })
 	} catch (error) {
@@ -221,7 +221,7 @@ export async function handleGetChannelsIntent({ request, formData }: IntentConte
 	}
 }
 
-export async function handleUpdateSharingIntent({ request, formData, userId }: IntentContext) {
+export async function handleUpdateSharingIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ShareNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -236,7 +236,7 @@ export async function handleUpdateSharingIntent({ request, formData, userId }: I
 		where: { id: noteId },
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
-	await userHasOrgAccess(request, note.organizationId)
+	await userHasOrgAccess(userId, note.organizationId)
 
 	if (note.createdById !== userId) {
 		throw new Response('Not authorized', { status: 403 })
@@ -268,7 +268,7 @@ export async function handleUpdateSharingIntent({ request, formData, userId }: I
 	}
 }
 
-export async function handleAddAccessIntent({ request, formData, userId }: IntentContext) {
+export async function handleAddAccessIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: AddNoteAccessSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -283,7 +283,7 @@ export async function handleAddAccessIntent({ request, formData, userId }: Inten
 		where: { id: noteId },
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
-	await userHasOrgAccess(request, note.organizationId)
+	await userHasOrgAccess(userId, note.organizationId)
 
 	if (note.createdById !== userId) {
 		throw new Response('Not authorized', { status: 403 })
@@ -327,7 +327,7 @@ export async function handleAddAccessIntent({ request, formData, userId }: Inten
 	}
 }
 
-export async function handleRemoveAccessIntent({ request, formData, userId }: IntentContext) {
+export async function handleRemoveAccessIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: RemoveNoteAccessSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -342,7 +342,7 @@ export async function handleRemoveAccessIntent({ request, formData, userId }: In
 		where: { id: noteId },
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
-	await userHasOrgAccess(request, note.organizationId)
+	await userHasOrgAccess(userId, note.organizationId)
 
 	if (note.createdById !== userId) {
 		throw new Response('Not authorized', { status: 403 })
@@ -369,7 +369,7 @@ export async function handleRemoveAccessIntent({ request, formData, userId }: In
 	}
 }
 
-export async function handleBatchUpdateAccessIntent({ request, formData, userId }: IntentContext) {
+export async function handleBatchUpdateAccessIntent({ formData, userId }: IntentContext) {
 	const usersToAdd = formData.getAll('usersToAdd') as string[]
 	const usersToRemove = formData.getAll('usersToRemove') as string[]
 
@@ -396,7 +396,7 @@ export async function handleBatchUpdateAccessIntent({ request, formData, userId 
 		where: { id: noteId },
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
-	await userHasOrgAccess(request, note.organizationId)
+	await userHasOrgAccess(userId, note.organizationId)
 
 	if (note.createdById !== userId) {
 		throw new Response('Not authorized', { status: 403 })
@@ -448,7 +448,7 @@ export async function handleBatchUpdateAccessIntent({ request, formData, userId 
 				await tx.noteAccess.deleteMany({
 					where: { noteId, userId: { in: validUsersToRemove } },
 				})
-				const revokedLogs = validUsersToRemove.map((targetUserId) => ({
+				const revokedLogs = validUsersToRemove.map((targetUserId: string) => ({
 					noteId,
 					userId,
 					action: 'access_revoked' as const,
@@ -468,7 +468,7 @@ export async function handleBatchUpdateAccessIntent({ request, formData, userId 
 					})
 				}
 
-				const grantedLogs = confirmedUserIdsToAdd.map((targetUserId) => ({
+				const grantedLogs = confirmedUserIdsToAdd.map((targetUserId: string) => ({
 					noteId,
 					userId,
 					action: 'access_granted' as const,
@@ -503,7 +503,7 @@ export async function handleBatchUpdateAccessIntent({ request, formData, userId 
 	}
 }
 
-export async function handleAddCommentIntent({ request, formData, userId }: IntentContext) {
+export async function handleAddCommentIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: AddCommentSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -525,7 +525,7 @@ export async function handleAddCommentIntent({ request, formData, userId }: Inte
 	invariantResponse(note, 'Note not found', { status: 404 })
 
 	await requireUserWithOrganizationPermission(
-		request,
+		userId,
 		note.organizationId,
 		ORG_PERMISSIONS.CREATE_NOTE_OWN,
 	)
@@ -533,7 +533,7 @@ export async function handleAddCommentIntent({ request, formData, userId }: Inte
 	if (!note.isPublic) {
 		try {
 			await requireUserWithOrganizationPermission(
-				request,
+				userId,
 				note.organizationId,
 				ORG_PERMISSIONS.READ_NOTE_ANY,
 			)
@@ -673,7 +673,7 @@ export async function handleAddCommentIntent({ request, formData, userId }: Inte
 	}
 }
 
-export async function handleDeleteCommentIntent({ request, formData, userId }: IntentContext) {
+export async function handleDeleteCommentIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DeleteCommentSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -691,7 +691,7 @@ export async function handleDeleteCommentIntent({ request, formData, userId }: I
 		where: { id: commentId },
 	})
 	invariantResponse(comment, 'Comment not found', { status: 404 })
-	await userHasOrgAccess(request, comment.note.organizationId)
+	await userHasOrgAccess(userId, comment.note.organizationId)
 
 	if (comment.userId !== userId) {
 		throw new Response('Not authorized', { status: 403 })
@@ -723,7 +723,7 @@ export async function handleDeleteCommentIntent({ request, formData, userId }: I
 	}
 }
 
-export async function handleToggleFavoriteIntent({ request, formData, userId }: IntentContext) {
+export async function handleToggleFavoriteIntent({ formData, userId }: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ToggleFavoriteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -745,7 +745,7 @@ export async function handleToggleFavoriteIntent({ request, formData, userId }: 
 	invariantResponse(note, 'Note not found', { status: 404 })
 
 	await requireUserWithOrganizationPermission(
-		request,
+		userId,
 		note.organizationId,
 		ORG_PERMISSIONS.READ_NOTE_OWN,
 	)
@@ -753,7 +753,7 @@ export async function handleToggleFavoriteIntent({ request, formData, userId }: 
 	if (!note.isPublic) {
 		try {
 			await requireUserWithOrganizationPermission(
-				request,
+				userId,
 				note.organizationId,
 				ORG_PERMISSIONS.READ_NOTE_ANY,
 			)

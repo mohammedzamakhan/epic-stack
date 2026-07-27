@@ -37,6 +37,22 @@ function getAuditSecrets(): string[] {
 	return Array.from(new Set(keys))
 }
 
+export interface IntegrityFields {
+	id: string
+	action: string
+	userId: string | null
+	organizationId: string | null
+	details: string
+	metadata: string | null
+	ipAddress: string | null
+	userAgent: string | null
+	resourceType: string | null
+	resourceId: string | null
+	targetUserId: string | null
+	severity: string
+	createdAt: Date
+}
+
 /**
  * Compute HMAC-SHA256 hash for audit log integrity
  *
