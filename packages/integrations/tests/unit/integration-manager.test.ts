@@ -109,6 +109,10 @@ describe('IntegrationManager', () => {
 			}
 
 			mockProvider.handleCallback.mockResolvedValue(mockTokenData)
+			mockProvider.getRequestTokenContext = vi.fn().mockResolvedValue({
+				organizationId: 'org-123',
+				timestamp: Date.now(),
+			})
 			vi.mocked(prisma.integration.create).mockResolvedValue(mockIntegration)
 			vi.mocked(prisma.integrationLog.create).mockResolvedValue({} as any)
 
@@ -116,6 +120,8 @@ describe('IntegrationManager', () => {
 				code: 'auth-code',
 				state: 'trello-oauth1-12345',
 				organizationId: 'org-123',
+				oauthToken: 'token',
+				oauthVerifier: 'verifier',
 			})
 
 			expect(result).toEqual(mockIntegration)

@@ -49,6 +49,7 @@ vi.mock('../../src/oauth-manager', () => ({
 }))
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { oauthFlow } from '../../src/oauth-flow'
 import { integrationManager } from '../../src/integration-manager'
 
 describe('OAuth Flow Integration Tests (Simplified)', () => {
@@ -101,7 +102,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		const organizationId = 'org-123'
 		const redirectUri = 'https://example.com/callback'
 
-		const { authUrl, state } = await integrationManager.initiateOAuth(
+		const { authUrl, state } = await oauthFlow.start(
 			organizationId,
 			'slack',
 			redirectUri,
@@ -119,7 +120,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		const redirectUri = 'https://example.com/callback'
 
 		// Step 1: Initiate OAuth
-		const { state } = await integrationManager.initiateOAuth(
+		const { state } = await oauthFlow.start(
 			organizationId,
 			'slack',
 			redirectUri,
@@ -132,7 +133,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 			state,
 		}
 
-		const integration = await integrationManager.handleOAuthCallback(
+		const integration = await oauthFlow.complete(
 			'slack',
 			callbackParams,
 		)
@@ -153,7 +154,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		const organizationId = 'org-123'
 		const redirectUri = 'https://example.com/callback'
 
-		const { authUrl, state } = await integrationManager.initiateOAuth(
+		const { authUrl, state } = await oauthFlow.start(
 			organizationId,
 			'jira',
 			redirectUri,
@@ -183,7 +184,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		}
 
 		await expect(
-			integrationManager.handleOAuthCallback('slack', callbackParams),
+			oauthFlow.complete('slack', callbackParams),
 		).rejects.toThrow('Invalid OAuth state')
 	})
 
@@ -200,7 +201,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		})
 
 		// Initiate OAuth for Slack
-		const { state } = await integrationManager.initiateOAuth(
+		const { state } = await oauthFlow.start(
 			organizationId,
 			'slack',
 			redirectUri,
@@ -214,7 +215,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 		}
 
 		await expect(
-			integrationManager.handleOAuthCallback('jira', callbackParams),
+			oauthFlow.complete('jira', callbackParams),
 		).rejects.toThrow('Provider name mismatch in OAuth state')
 	})
 })
