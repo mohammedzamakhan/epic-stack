@@ -14,10 +14,10 @@ import {
 	validateIDToken,
 	type IDTokenClaims,
 	IDTokenValidationErrorCode,
+	ssoRetryManager,
 } from '@repo/sso'
 import { OAuth2Strategy, CodeChallengeMethod } from 'remix-auth-oauth2'
 import { ssoConfigurationService } from './configuration.server.ts'
-import { ssoRetryManager } from './retry-logic.server.ts'
 
 export interface OIDCUserInfo {
 	sub: string
