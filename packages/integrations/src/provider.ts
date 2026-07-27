@@ -63,6 +63,7 @@ export interface IntegrationProvider {
 	 * @returns Promise resolving to new token data
 	 */
 	refreshToken(refreshToken: string): Promise<TokenData>
+	revokeToken?(token: string): Promise<void>
 
 	// Provider-specific operations
 
@@ -125,6 +126,7 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 
 	abstract handleCallback(params: OAuthCallbackParams): Promise<TokenData>
 	abstract refreshToken(refreshToken: string): Promise<TokenData>
+	revokeToken?(token: string): Promise<void>
 	abstract getAvailableChannels(integration: Integration): Promise<Channel[]>
 	abstract postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },

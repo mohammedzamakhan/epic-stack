@@ -12,3 +12,5 @@ export * from './src/impersonation.server.js'
 export * from './src/impersonation-session.server.js'
 export * from './src/providers/google.server.js'
 export * from './src/providers/github.server.js'
+export * from './src/authorize.server.js'
+
