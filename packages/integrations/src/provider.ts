@@ -187,21 +187,51 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 	}
 
 	/**
-	 * Make an authenticated HTTP request to the provider's API
-	 * @param integration - Integration with credentials
-	 * @param endpoint - API endpoint
-	 * @param _options - Fetch options
-	 * @returns Promise resolving to response
+	 * Make an authenticated HTTP request to the provider's API.
+	 * Resolves a valid access token from TokenManager, injects Authorization header,
+	 * and performs automatic 401 retry after forced token refresh.
 	 */
 	protected async makeAuthenticatedRequest(
-		_integration: Integration,
-		_endpoint: string,
-		_options: RequestInit = {},
+		integration: Integration,
+		endpoint: string,
+		options: RequestInit = {},
 	): Promise<Response> {
-		// This will be implemented with token decryption in a later task
-		throw new Error(
-			'makeAuthenticatedRequest not yet implemented - requires token encryption utilities',
-		)
+		const { tokenManager } = await import('./token-manager')
+		let accessToken = await tokenManager.getValidAccessToken(integration, this)
+
+		if (!accessToken) {
+			throw new Error(`Failed to obtain access token for integration ${integration.id}`)
+		}
+
+		const headers = new Headers(options.headers || {})
+		headers.set('Authorization', `Bearer ${accessToken}`)
+
+		let response = await fetch(endpoint, {
+			...options,
+			headers,
+		})
+
+		// On 401 Unauthorized, force token refresh and retry request once
+		if (response.status === 401 && integration.refreshToken) {
+			try {
+				const refreshResult = await tokenManager.refreshToken(
+					integration,
+					this,
+					integration.refreshToken,
+				)
+				if (refreshResult.success && refreshResult.tokenData?.accessToken) {
+					headers.set('Authorization', `Bearer ${refreshResult.tokenData.accessToken}`)
+					response = await fetch(endpoint, {
+						...options,
+						headers,
+					})
+				}
+			} catch (refreshError) {
+				console.warn('Auto-refresh after 401 failed:', refreshError)
+			}
+		}
+
+		return response
 	}
 
 	/**
