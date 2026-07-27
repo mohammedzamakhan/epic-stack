@@ -18,6 +18,9 @@ permissions:
 
 env:
   CLOUDFLARE_PROJECT_NAME: epic-startup-web
+  HUSKY: 0
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
 jobs:
   preview-deploy:
@@ -37,7 +40,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🏗 Build Web App
         run: |
