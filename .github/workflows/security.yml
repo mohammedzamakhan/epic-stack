@@ -26,9 +26,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci
 
       - name: 🔍 Run npm audit
         run: npm audit --audit-level=high
@@ -119,9 +120,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci
 
       - name: 🔍 Check licenses
         run: npx license-checker --production --failOn "GPL;AGPL;LGPL" --summary

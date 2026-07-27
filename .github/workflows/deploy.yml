@@ -37,9 +37,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci
 
       - name: 📊 Check affected projects
         id: affected
@@ -67,9 +68,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci
 
       - name: 🛠 Setup Database
         run:
@@ -89,12 +91,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
-
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+        run: npm ci
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
@@ -120,12 +120,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
-
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+        run: npm ci
 
       - name: 🛠 Setup Database
         run:
@@ -149,12 +147,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
-
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+        run: npm ci
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
@@ -191,12 +187,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
-
-      - name: 📥 Install deps
-        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+        run: npm ci
 
       - name: 🏗 Build Web App
         run: |
