@@ -32,7 +32,6 @@ jobs:
 
       - name: 🔍 Run npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       - name: 📊 Generate audit report
         run: npm audit --json > npm-audit-report.json || true
@@ -65,7 +64,6 @@ jobs:
             p/sql-injection
             p/xss
             p/command-injection
-        continue-on-error: true
 
       - name: 📤 Upload SARIF results
         uses: github/codeql-action/upload-sarif@439137e1b50c27ba9e2f9befc93e43091b449c34 # v3
@@ -127,7 +125,6 @@ jobs:
 
       - name: 🔍 Check licenses
         run: npx license-checker --production --failOn "GPL;AGPL;LGPL" --summary
-        continue-on-error: true
 
   security-summary:
     name: 📊 Security Summary
