@@ -27,7 +27,7 @@ npm install @repo/integrations
 
 ```typescript
 import {
-	IntegrationService,
+	integrationManager,
 	createWebAppIntegrationsConfig,
 } from '@repo/integrations'
 
@@ -51,11 +51,8 @@ const config = createWebAppIntegrationsConfig({
 	},
 })
 
-// Initialize the service
-const integrationService = new IntegrationService(config)
-
 // Start OAuth flow
-const { authUrl, state } = await integrationService.initiateOAuth(
+const { authUrl, state } = await integrationManager.initiateOAuth(
 	organizationId,
 	'slack',
 	redirectUri,

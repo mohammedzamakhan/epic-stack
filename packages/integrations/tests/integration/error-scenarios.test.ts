@@ -37,7 +37,6 @@ vi.mock('../../src/encryption', () => ({
 }))
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { integrationService } from '../../src/service'
 import { integrationManager } from '../../src/integration-manager'
 
 describe('Error Scenarios Integration Tests', () => {
@@ -105,7 +104,7 @@ describe('Error Scenarios Integration Tests', () => {
 			)
 
 			// The Slack provider has fallback behavior, so it returns demo channels instead of throwing
-			const channels = await integrationService.getAvailableChannels(
+			const channels = await integrationManager.getAvailableChannels(
 				'slack-integration-123',
 			)
 
@@ -132,7 +131,7 @@ describe('Error Scenarios Integration Tests', () => {
 			)
 
 			await expect(
-				integrationService.getAvailableChannels('slack-integration-123'),
+				integrationManager.getAvailableChannels('slack-integration-123'),
 			).rejects.toThrow('Database query failed')
 		})
 
@@ -163,7 +162,7 @@ describe('Error Scenarios Integration Tests', () => {
 			)
 
 			// Should still succeed despite logging failure
-			const channels = await integrationService.getAvailableChannels(
+			const channels = await integrationManager.getAvailableChannels(
 				'slack-integration-123',
 			)
 
@@ -175,7 +174,7 @@ describe('Error Scenarios Integration Tests', () => {
 	describe('Provider Error Handling', () => {
 		it('should handle unknown provider errors', async () => {
 			await expect(
-				integrationService.initiateOAuth(
+				integrationManager.initiateOAuth(
 					'org-123',
 					'unknown-provider',
 					'https://example.com/callback',
@@ -230,7 +229,7 @@ describe('Error Scenarios Integration Tests', () => {
 			)
 
 			// The Slack provider has fallback behavior, so it returns demo channels instead of throwing
-			const channels = await integrationService.getAvailableChannels(
+			const channels = await integrationManager.getAvailableChannels(
 				'slack-integration-123',
 			)
 
@@ -283,11 +282,11 @@ describe('Error Scenarios Integration Tests', () => {
 			})
 
 			await expect(
-				integrationService.connectNoteToChannel(
-					'note-123',
-					'slack-integration-123',
-					'C1234567890',
-				),
+				integrationManager.connectNoteToChannel({
+					noteId: 'note-123',
+					integrationId: 'slack-integration-123',
+					externalId: 'C1234567890',
+				}),
 			).rejects.toThrow(
 				'Note and integration must belong to the same organization',
 			)
@@ -300,7 +299,7 @@ describe('Error Scenarios Integration Tests', () => {
 			vi.mocked(prisma.integration.findUnique).mockResolvedValue(null)
 
 			await expect(
-				integrationService.getAvailableChannels('non-existent-integration'),
+				integrationManager.getAvailableChannels('non-existent-integration'),
 			).rejects.toThrow('Integration not found or inactive')
 		})
 	})

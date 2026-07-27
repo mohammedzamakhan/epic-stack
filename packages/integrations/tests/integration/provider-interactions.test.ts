@@ -48,7 +48,6 @@ vi.mock('../../src/encryption', () => ({
 }))
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { integrationService } from '../../src/service'
 import { integrationManager } from '../../src/integration-manager'
 
 describe('Provider Interactions Integration Tests', () => {
@@ -102,7 +101,7 @@ describe('Provider Interactions Integration Tests', () => {
 				createdAt: new Date(),
 			})
 
-			const channels = await integrationService.getAvailableChannels(
+			const channels = await integrationManager.getAvailableChannels(
 				'slack-integration-123',
 			)
 
@@ -157,7 +156,7 @@ describe('Provider Interactions Integration Tests', () => {
 				createdAt: new Date(),
 			})
 
-			const channels = await integrationService.getAvailableChannels(
+			const channels = await integrationManager.getAvailableChannels(
 				'jira-integration-456',
 			)
 
@@ -198,7 +197,7 @@ describe('Provider Interactions Integration Tests', () => {
 			})
 
 			await expect(
-				integrationService.getAvailableChannels('inactive-integration'),
+				integrationManager.getAvailableChannels('inactive-integration'),
 			).rejects.toThrow('Integration not found or inactive')
 		})
 	})
@@ -286,7 +285,7 @@ describe('Provider Interactions Integration Tests', () => {
 			})
 
 			// Handle note update (which triggers message posting)
-			await integrationService.handleNoteUpdate(
+			await integrationManager.handleNoteUpdate(
 				'note-123',
 				'created',
 				'user-123',
@@ -315,7 +314,7 @@ describe('Provider Interactions Integration Tests', () => {
 			vi.mocked(prisma.noteIntegrationConnection.findMany).mockResolvedValue([])
 
 			// Should complete without error
-			await integrationService.handleNoteUpdate(
+			await integrationManager.handleNoteUpdate(
 				'note-123',
 				'created',
 				'user-123',
@@ -393,11 +392,11 @@ describe('Provider Interactions Integration Tests', () => {
 				createdAt: new Date(),
 			})
 
-			const connection = await integrationService.connectNoteToChannel(
-				'note-123',
-				'slack-integration-123',
-				'C1234567890',
-			)
+			const connection = await integrationManager.connectNoteToChannel({
+				noteId: 'note-123',
+				integrationId: 'slack-integration-123',
+				externalId: 'C1234567890',
+			})
 
 			expect(connection).toBeDefined()
 			expect(connection.noteId).toBe('note-123')
@@ -458,11 +457,11 @@ describe('Provider Interactions Integration Tests', () => {
 
 			// Try to connect to non-existent channel
 			await expect(
-				integrationService.connectNoteToChannel(
-					'note-123',
-					'slack-integration-123',
-					'INVALID_CHANNEL',
-				),
+				integrationManager.connectNoteToChannel({
+					noteId: 'note-123',
+					integrationId: 'slack-integration-123',
+					externalId: 'INVALID_CHANNEL',
+				}),
 			).rejects.toThrow('Channel not found or not accessible')
 
 			// Verify no connection was created

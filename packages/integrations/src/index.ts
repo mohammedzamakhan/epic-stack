@@ -30,13 +30,14 @@ export {
 	providerRegistry,
 } from './provider'
 
-// Integration service and manager
+// Message formatting
 export {
-	IntegrationService,
 	type MessageFormatter,
 	BaseMessageFormatter,
-	integrationService,
-} from './service'
+	formatNoteMessage,
+	truncateContent,
+	generateNoteUrl,
+} from './message-formatting'
 
 export {
 	IntegrationManager,
