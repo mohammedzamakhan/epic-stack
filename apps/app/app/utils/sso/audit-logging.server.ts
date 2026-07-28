@@ -221,19 +221,19 @@ export class SSOAuditLogger {
 	): Promise<SSOAuditLogEntry[]> {
 		const result = await auditService.query({
 			organizationId,
-			actions: options.eventTypes as AuditAction[],
+			action: options.eventTypes as AuditAction[],
 			startDate: options.startDate,
 			endDate: options.endDate,
 			limit: options.limit,
 			offset: options.offset,
 		})
 
-		// Map back to SSOAuditLogEntry format
 		return result.logs.map((log) => {
-			const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as Record<
-				string,
-				any
-			>
+			const metadata = (
+				typeof log.metadata === 'string'
+					? JSON.parse(log.metadata)
+					: log.metadata || {}
+			) as Record<string, any>
 			return {
 				eventType: log.action as unknown as SSOAuditEventType,
 				organizationId: log.organizationId || undefined,
@@ -255,31 +255,22 @@ export class SSOAuditLogger {
 	 */
 	async getSSOMetrics(
 		organizationId?: string,
-		timeRange: { start: Date; end: Date } = {
-			start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+		_timeRange: { start: Date; end: Date } = {
+			start: new Date(Date.now() - 24 * 60 * 60 * 1000),
 			end: new Date(),
 		},
 	): Promise<SSOMetrics> {
-		// Use the unified audit service statistics
-		const stats = await auditService.getStatistics({
-			organizationId,
-			startDate: timeRange.start,
-			endDate: timeRange.end,
-		})
-
-		// Transform unified stats to SSO specific metrics
-		// Note: This is an approximation based on the unified stats
-		// For detailed metrics, we might need more specific queries in AuditService
+		const stats = await auditService.getStatistics(organizationId, 1)
 
 		const ssoActions = stats.topActions.filter((a) =>
 			a.action.startsWith('sso_'),
 		)
 		const totalAuthAttempts = ssoActions.reduce(
-			(sum, a) => sum + (a.action.includes('login') ? a._count : 0),
+			(sum, a) => sum + (a.action.includes('login') ? a.count : 0),
 			0,
 		)
 		const failedAuths = ssoActions.reduce(
-			(sum, a) => sum + (a.action.includes('failed') ? a._count : 0),
+			(sum, a) => sum + (a.action.includes('failed') ? a.count : 0),
 			0,
 		)
 
@@ -288,13 +279,13 @@ export class SSOAuditLogger {
 			successfulAuths: totalAuthAttempts - failedAuths,
 			failedAuths,
 			configurationChanges: ssoActions.reduce(
-				(sum, a) => sum + (a.action.includes('config') ? a._count : 0),
+				(sum, a) => sum + (a.action.includes('config') ? a.count : 0),
 				0,
 			),
-			suspiciousActivities: stats.recentSecurityEvents.length,
-			averageAuthTime: 0, // Not tracked in audit logs
-			topFailureReasons: [], // Would need detailed parsing
-			organizationStats: [], // Would need detailed parsing
+			suspiciousActivities: stats.unusualActivityCount,
+			averageAuthTime: 0,
+			topFailureReasons: [],
+			organizationStats: [],
 		}
 	}
 
@@ -310,11 +301,8 @@ export class SSOAuditLogger {
 			activeConfigurations: number
 		}
 	}> {
-		// Delegate to audit service health check logic if available, or keep existing logic
-		// For now, we'll keep a minimal implementation that checks DB
 		try {
-			// Check database connectivity via audit service (implicitly)
-			await auditService.getStatistics({ limit: 1 } as any)
+			await auditService.getStatistics(undefined, 1)
 
 			return {
 				status: 'healthy',

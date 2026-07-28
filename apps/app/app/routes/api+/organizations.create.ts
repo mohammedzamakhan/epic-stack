@@ -23,7 +23,7 @@ const CreateOrganizationSchema = z.object({
 
 export async function action({ request }: Route.ActionArgs) {
 	try {
-		const payload = requireAuth(request)
+		const payload = await requireAuth(request)
 		const userId = payload.sub
 
 		const contentType = request.headers.get('content-type') ?? ''

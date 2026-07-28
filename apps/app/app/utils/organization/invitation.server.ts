@@ -103,7 +103,15 @@ export async function sendOrganizationInvitationEmail({
 	organizationName: string
 	inviterName: string
 }) {
-	const baseUrl = process.env.APP_URL || 'http://localhost:3001'
+	const baseUrl =
+		process.env.APP_URL ||
+		(process.env.NODE_ENV === 'production'
+			? (() => {
+					throw new Error(
+						'APP_URL environment variable is required in production',
+					)
+				})()
+			: 'http://localhost:3001')
 
 	const inviteUrl = `${baseUrl}/join/${invitation.token}`
 

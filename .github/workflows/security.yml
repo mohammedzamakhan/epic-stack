@@ -154,3 +154,14 @@ jobs:
           echo "**Note:** CodeQL runs via GitHub's default setup (not shown here)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See individual job logs for detailed results." >> $GITHUB_STEP_SUMMARY
+
+      - name: 🛑 Fail if any scan failed
+        run: |
+          if [ "${{ needs.dependency-audit.result }}" != "success" ] || \
+             [ "${{ needs.semgrep.result }}" != "success" ] || \
+             [ "${{ needs.trivy-fs.result }}" != "success" ] || \
+             [ "${{ needs.secret-scanning.result }}" != "success" ] || \
+             [ "${{ needs.license-compliance.result }}" != "success" ]; then
+            echo "Security scanning detected failures in upstream jobs."
+            exit 1
+          fi

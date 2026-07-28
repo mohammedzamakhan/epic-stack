@@ -2,12 +2,24 @@
  * SSRF (Server-Side Request Forgery) protection utilities
  */
 
-export function validateInstanceUrl(urlStr: string): { valid: boolean; reason?: string } {
+export function validateInstanceUrl(urlStr: string): {
+	valid: boolean
+	reason?: string
+} {
 	try {
 		const parsed = new URL(urlStr)
 
-		if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-			return { valid: false, reason: 'Invalid protocol: only HTTP and HTTPS are allowed' }
+		// Require HTTPS scheme exclusively
+		if (parsed.protocol !== 'https:') {
+			return { valid: false, reason: 'Invalid protocol: HTTPS is required' }
+		}
+
+		// Block credentials in URLs (e.g., https://user:pass@host)
+		if (parsed.username || parsed.password) {
+			return {
+				valid: false,
+				reason: 'URL contains credentials (SSRF protection)',
+			}
 		}
 
 		const hostname = parsed.hostname.toLowerCase()
@@ -22,7 +34,30 @@ export function validateInstanceUrl(urlStr: string): { valid: boolean; reason?: 
 			hostname === '::1' ||
 			hostname === '[::1]'
 		) {
-			return { valid: false, reason: 'Forbidden target domain or IP (SSRF protection)' }
+			return {
+				valid: false,
+				reason: 'Forbidden target domain or IP (SSRF protection)',
+			}
+		}
+
+		// Block IPv6 unique-local (fd00::/8) and link-local (fe80::/10) ranges
+		if (
+			hostname.startsWith('fd') ||
+			hostname.startsWith('[fd') ||
+			hostname.startsWith('fe8') ||
+			hostname.startsWith('[fe8') ||
+			hostname.startsWith('fe9') ||
+			hostname.startsWith('[fe9') ||
+			hostname.startsWith('fea') ||
+			hostname.startsWith('[fea') ||
+			hostname.startsWith('feb') ||
+			hostname.startsWith('[feb')
+		) {
+			return {
+				valid: false,
+				reason:
+					'IPv6 unique-local/link-local address blocked (SSRF protection)',
+			}
 		}
 
 		// Private IPv4 ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8, 169.254.0.0/16)
@@ -38,7 +73,10 @@ export function validateInstanceUrl(urlStr: string): { valid: boolean; reason?: 
 				(p1 === 192 && p2 === 168) ||
 				(p1 === 169 && p2 === 254)
 			) {
-				return { valid: false, reason: 'Private/Internal IP address blocked (SSRF protection)' }
+				return {
+					valid: false,
+					reason: 'Private/Internal IP address blocked (SSRF protection)',
+				}
 			}
 		}
 

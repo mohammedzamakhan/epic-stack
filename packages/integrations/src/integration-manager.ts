@@ -152,7 +152,12 @@ export class IntegrationManager {
 		state: string
 	}> {
 		const { oauthFlow } = await import('./oauth-flow')
-		return oauthFlow.start(organizationId, providerName, redirectUri, additionalParams)
+		return oauthFlow.start(
+			organizationId,
+			providerName,
+			redirectUri,
+			additionalParams,
+		)
 	}
 
 	/**
@@ -278,6 +283,26 @@ export class IntegrationManager {
 		integrationId: string,
 		config: Record<string, any>,
 	): Promise<Integration> {
+		const existing = await prisma.integration.findUnique({
+			where: { id: integrationId },
+			select: { providerName: true },
+		})
+
+		if (existing?.providerName === 'jira') {
+			const instanceUrl = config.instanceUrl ?? config.siteUrl
+			if (instanceUrl !== undefined) {
+				const jiraUrlPattern = /^https:\/\/[a-zA-Z0-9-]+\.atlassian\.net\/?$/
+				if (
+					typeof instanceUrl !== 'string' ||
+					!jiraUrlPattern.test(instanceUrl)
+				) {
+					throw new Error(
+						'Invalid Jira instance URL. Must be a valid Atlassian Cloud domain.',
+					)
+				}
+			}
+		}
+
 		const integration = await prisma.integration.update({
 			where: { id: integrationId },
 			data: {
@@ -784,8 +809,15 @@ export class IntegrationManager {
 	 * @returns Note URL
 	 */
 	private generateNoteUrl(note: OrganizationNote): string {
-		// Get the base URL from environment or use localhost for development
-		const baseUrl = process.env.APP_BASE_URL || 'http://localhost:3001'
+		const baseUrl =
+			process.env.APP_BASE_URL ||
+			(process.env.NODE_ENV === 'production'
+				? (() => {
+						throw new Error(
+							'APP_BASE_URL environment variable is required in production',
+						)
+					})()
+				: 'http://localhost:3001')
 		return `${baseUrl}/app/notes/${note.id}`
 	}
 

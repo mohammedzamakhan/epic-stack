@@ -20,15 +20,20 @@ function getAuditSecrets(): string[] {
 
 	const keys: string[] = []
 	if (commaSeparated) {
-		keys.push(...commaSeparated.split(',').map((k) => k.trim()).filter(Boolean))
+		keys.push(
+			...commaSeparated
+				.split(',')
+				.map((k) => k.trim())
+				.filter(Boolean),
+		)
 	}
 	if (primary) keys.push(primary)
 	if (oldSecret) keys.push(oldSecret)
 
 	if (keys.length === 0) {
 		if (process.env.NODE_ENV === 'production') {
-			logger.warn(
-				'SECURITY WARNING: AUDIT_LOG_SECRET_KEY is not set in production! Falling back to default key.',
+			throw new Error(
+				'AUDIT_LOG_SECRET_KEY environment variable is required in production. Please set it in your environment.',
 			)
 		}
 		keys.push('dev-audit-secret-change-in-production')
@@ -57,10 +62,14 @@ export interface IntegrityFields {
  * Compute HMAC-SHA256 hash for audit log integrity
  *
  * Uses a deterministic JSON serialization of critical fields
- * to ensure consistent hash computation.
+ * to ensure consistent hash computation, formatted with key version prefix (v1:).
  */
-export function computeIntegrityHash(fields: IntegrityFields, secretKey?: string): string {
-	const key = secretKey || getAuditSecrets()[0] || 'dev-audit-secret-change-in-production'
+export function computeIntegrityHash(
+	fields: IntegrityFields,
+	secretKey?: string,
+): string {
+	const secrets = getAuditSecrets()
+	const key = secretKey || secrets[0] || 'dev-audit-secret-change-in-production'
 	// Create deterministic payload by sorting keys
 	const payload = JSON.stringify({
 		action: fields.action,
@@ -80,7 +89,7 @@ export function computeIntegrityHash(fields: IntegrityFields, secretKey?: string
 
 	const hmac = crypto.createHmac('sha256', key)
 	hmac.update(payload)
-	return hmac.digest('hex')
+	return `v1:${hmac.digest('hex')}`
 }
 
 /**
@@ -94,14 +103,19 @@ export function verifyLogIntegrity(
 		return false
 	}
 
+	const rawHash = log.integrityHash.startsWith('v1:')
+		? log.integrityHash.slice(3)
+		: log.integrityHash
+
 	const secrets = getAuditSecrets()
 
 	for (const secret of secrets) {
-		const computedHash = computeIntegrityHash(log, secret)
+		const computedHashWithPrefix = computeIntegrityHash(log, secret)
+		const computedRaw = computedHashWithPrefix.slice(3)
 
 		// Compare using SHA-256 digest of both hashes to guarantee constant-length comparison
-		const hashA = crypto.createHash('sha256').update(log.integrityHash).digest()
-		const hashB = crypto.createHash('sha256').update(computedHash).digest()
+		const hashA = crypto.createHash('sha256').update(rawHash).digest()
+		const hashB = crypto.createHash('sha256').update(computedRaw).digest()
 
 		if (crypto.timingSafeEqual(hashA, hashB)) {
 			return true

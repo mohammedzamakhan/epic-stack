@@ -125,6 +125,21 @@ export class AuditRetentionManager {
 			totalArchived += archiveResult.count
 		}
 
+		// Handle logs without organization (system logs - 180 day archive threshold)
+		const systemArchiveThreshold = new Date(now)
+		systemArchiveThreshold.setDate(systemArchiveThreshold.getDate() - 180)
+
+		const systemArchiveResult = await prisma.auditLog.updateMany({
+			where: {
+				organizationId: null,
+				archived: false,
+				createdAt: { lt: systemArchiveThreshold },
+			},
+			data: { archived: true },
+		})
+		totalArchived += systemArchiveResult.count
+
+		// Delete organization and system logs past retention period
 		const deleteResult = await prisma.auditLog.deleteMany({
 			where: {
 				retainUntil: { lt: now },

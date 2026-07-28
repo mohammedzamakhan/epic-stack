@@ -1,10 +1,9 @@
 import { prisma } from '@repo/database'
-import { data } from 'react-router'
 import {
 	parsePermissionString,
 	type PermissionString,
 } from '@repo/common/user-permissions'
-import { requireUserId } from './auth.server'
+import { authorize } from './authorize.server'
 
 export async function checkUserHasPermission(
 	userId: string,
@@ -30,14 +29,9 @@ export async function checkUserHasPermission(
 		},
 	})
 	if (!user) {
-		throw data(
-			{
-				error: 'Unauthorized',
-				requiredPermission: permissionData,
-				message: `Unauthorized: required permissions: ${permission}`,
-			},
-			{ status: 403 },
-		)
+		throw new Response(`Unauthorized: required permissions: ${permission}`, {
+			status: 403,
+		})
 	}
 	return user.id
 }
@@ -58,14 +52,7 @@ export async function checkUserHasRole(
 	})
 
 	if (!user) {
-		throw data(
-			{
-				error: 'Unauthorized',
-				requiredRole: name,
-				message: `Unauthorized: required role: ${name}`,
-			},
-			{ status: 403 },
-		)
+		throw new Response(`Unauthorized: required role: ${name}`, { status: 403 })
 	}
 	return {
 		id: user.id,
@@ -77,12 +64,9 @@ export async function requireUserWithPermission(
 	request: Request,
 	permission: PermissionString,
 ) {
-	const userId = await requireUserId(request)
-	return checkUserHasPermission(userId, permission)
+	return authorize.userPermission(request, permission)
 }
 
 export async function requireUserWithRole(request: Request, name: string) {
-	const userId = await requireUserId(request)
-	const result = await checkUserHasRole(userId, name)
-	return result.id
+	return authorize.userRole(request, name)
 }

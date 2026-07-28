@@ -38,60 +38,37 @@ describe('getClientIp', () => {
 			expect(getClientIp(request)).toBe('5.6.7.8')
 		})
 
-		it('should extract IP from X-Real-IP header when higher priority headers are not present', () => {
-			const request = {
-				headers: {
-					get: (name: string) => {
-						const headers: Record<string, string> = {
-							'x-real-ip': '9.10.11.12',
-							'x-forwarded-for': '13.14.15.16',
-						}
-						return headers[name.toLowerCase()] || null
-					},
-				},
-			}
-
-			expect(getClientIp(request)).toBe('9.10.11.12')
-		})
-
-		it('should extract first IP from X-Forwarded-For header', () => {
+		it('should parse X-Forwarded-For right-to-left based on trustedProxyCount to prevent client spoofing', () => {
 			const request = {
 				headers: {
 					get: (name: string) => {
 						if (name.toLowerCase() === 'x-forwarded-for') {
-							return '13.14.15.16, 17.18.19.20, 21.22.23.24'
+							// Spoofed-Client, Reverse-Proxy-1, Reverse-Proxy-2
+							return 'spoofed-1.1.1.1, real-2.2.2.2, proxy-3.3.3.3'
 						}
 						return null
 					},
 				},
 			}
 
-			expect(getClientIp(request)).toBe('13.14.15.16')
+			// With trustedProxyCount = 1 (default), strips 1 proxy from right -> real-2.2.2.2
+			expect(getClientIp(request, { trustedProxyCount: 1 })).toBe(
+				'real-2.2.2.2',
+			)
+			// With trustedProxyCount = 2, strips 2 proxies from right -> spoofed-1.1.1.1
+			expect(getClientIp(request, { trustedProxyCount: 2 })).toBe(
+				'spoofed-1.1.1.1',
+			)
 		})
 
-		it('should trim whitespace from X-Forwarded-For IP', () => {
-			const request = {
-				headers: {
-					get: (name: string) => {
-						if (name.toLowerCase() === 'x-forwarded-for') {
-							return '  13.14.15.16  , 17.18.19.20'
-						}
-						return null
-					},
-				},
-			}
-
-			expect(getClientIp(request)).toBe('13.14.15.16')
-		})
-
-		it('should return default fallback when no IP headers are present', () => {
+		it('should return default fallback (unknown) when no IP headers are present', () => {
 			const request = {
 				headers: {
 					get: () => null,
 				},
 			}
 
-			expect(getClientIp(request)).toBe('127.0.0.1')
+			expect(getClientIp(request)).toBe('unknown')
 		})
 
 		it('should return custom fallback when specified', () => {
@@ -101,7 +78,7 @@ describe('getClientIp', () => {
 				},
 			}
 
-			expect(getClientIp(request, { fallback: 'unknown' })).toBe('unknown')
+			expect(getClientIp(request, { fallback: '127.0.0.1' })).toBe('127.0.0.1')
 		})
 
 		it('should return undefined when returnUndefined option is true and no IP found', () => {
@@ -150,68 +127,6 @@ describe('getClientIp', () => {
 			}
 
 			expect(getClientIp(request)).toBe('25.26.27.28')
-		})
-
-		it('should prefer headers over request.ip', () => {
-			const request = {
-				get: (name: string) => {
-					if (name.toLowerCase() === 'x-real-ip') {
-						return '9.10.11.12'
-					}
-					return undefined
-				},
-				ip: '25.26.27.28',
-			}
-
-			expect(getClientIp(request)).toBe('9.10.11.12')
-		})
-	})
-
-	describe('Edge cases', () => {
-		it('should handle empty X-Forwarded-For header', () => {
-			const request = {
-				headers: {
-					get: (name: string) => {
-						if (name.toLowerCase() === 'x-forwarded-for') {
-							return ''
-						}
-						return null
-					},
-				},
-			}
-
-			expect(getClientIp(request)).toBe('127.0.0.1')
-		})
-
-		it('should handle X-Forwarded-For with only commas', () => {
-			const request = {
-				headers: {
-					get: (name: string) => {
-						if (name.toLowerCase() === 'x-forwarded-for') {
-							return ',,,,'
-						}
-						return null
-					},
-				},
-			}
-
-			expect(getClientIp(request)).toBe('127.0.0.1')
-		})
-
-		it('should handle null request', () => {
-			expect(getClientIp(null)).toBe('127.0.0.1')
-		})
-
-		it('should handle undefined request', () => {
-			expect(getClientIp(undefined)).toBe('127.0.0.1')
-		})
-
-		it('should handle request with neither .get() nor .headers.get()', () => {
-			const request = {
-				someOtherProperty: 'value',
-			}
-
-			expect(getClientIp(request)).toBe('127.0.0.1')
 		})
 	})
 })

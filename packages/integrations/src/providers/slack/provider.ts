@@ -103,9 +103,8 @@ export class SlackProvider extends BaseIntegrationProvider {
 		redirectUri: string,
 		additionalParams?: Record<string, any>,
 	): Promise<string> {
-		// Create state with organization and provider info using the standardized format
 		const state = this.generateOAuthState(organizationId, {
-			redirectUri, // Include redirect URI in state for validation
+			redirectUri,
 			...additionalParams,
 		})
 
@@ -117,9 +116,7 @@ export class SlackProvider extends BaseIntegrationProvider {
 			response_type: 'code',
 		})
 
-		const authUrl = `https://slack.com/oauth/v2/authorize?${params.toString()}`
-
-		return authUrl
+		return `https://slack.com/oauth/v2/authorize?${params.toString()}`
 	}
 
 	/**
@@ -128,7 +125,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 	async handleCallback(params: OAuthCallbackParams): Promise<TokenData> {
 		const { code, state } = params
 
-		// Parse and validate the OAuth state using the standardized format
 		try {
 			this.parseOAuthState(state)
 		} catch (error) {
@@ -137,7 +133,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			)
 		}
 
-		// Check if we have real Slack credentials
 		const hasRealCredentials =
 			this.clientId !== 'demo-slack-client-id' &&
 			this.clientSecret !== 'demo-slack-client-secret'
@@ -154,7 +149,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			}
 		}
 
-		// Make real OAuth token exchange with Slack
 		try {
 			const response = await fetch('https://slack.com/api/oauth.v2.access', {
 				method: 'POST',
@@ -165,8 +159,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 					client_id: this.clientId,
 					client_secret: this.clientSecret,
 					code,
-					// Note: redirect_uri should match what was used in the authorization request
-					// For now, we'll omit it as it's optional if it matches the registered URI
 				}),
 			})
 
@@ -201,27 +193,21 @@ export class SlackProvider extends BaseIntegrationProvider {
 
 	/**
 	 * Refresh Slack access token
-	 * Note: Slack doesn't use refresh tokens in the same way as other providers
 	 */
 	async refreshToken(_refreshToken: string): Promise<TokenData> {
-		// Slack doesn't typically use refresh tokens for bot tokens
-		// Bot tokens are long-lived and don't expire
 		throw new Error('Slack bot tokens do not require refresh')
 	}
 
 	/**
-	 * Get available Slack channels
+	 * Get available Slack channels using shared makeAuthenticatedRequest
 	 */
 	async getAvailableChannels(integration: Integration): Promise<Channel[]> {
 		try {
-			// Get the access token (in production, this would be decrypted)
 			const accessToken = integration.accessToken
-
 			if (!accessToken) {
 				throw new Error('No access token available for Slack integration')
 			}
 
-			// Check if this is a mock token (for demo purposes)
 			if (accessToken.startsWith('mock-slack-token-')) {
 				return [
 					{
@@ -260,27 +246,29 @@ export class SlackProvider extends BaseIntegrationProvider {
 				]
 			}
 
-			// Fetch all channels (public and private) that the bot is a member of
 			let allChannels: SlackChannelsResponse['channels'] = []
 			let cursor: string | undefined = undefined
 
 			do {
 				const channelsUrl = new URL('https://slack.com/api/conversations.list')
-				channelsUrl.searchParams.set('types', 'public_channel,private_channel') // Include both public and private
-				channelsUrl.searchParams.set('exclude_archived', 'true') // Exclude archived channels
-				channelsUrl.searchParams.set('limit', '200') // Get up to 200 channels per request
+				channelsUrl.searchParams.set('types', 'public_channel,private_channel')
+				channelsUrl.searchParams.set('exclude_archived', 'true')
+				channelsUrl.searchParams.set('limit', '200')
 
 				if (cursor) {
 					channelsUrl.searchParams.set('cursor', cursor)
 				}
 
-				const channelsResponse = await fetch(channelsUrl.toString(), {
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						'Content-Type': 'application/json',
+				const channelsResponse = await this.makeAuthenticatedRequest(
+					integration,
+					channelsUrl.toString(),
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
 					},
-				})
+				)
 
 				if (!channelsResponse.ok) {
 					const errorText = await channelsResponse.text()
@@ -300,24 +288,17 @@ export class SlackProvider extends BaseIntegrationProvider {
 
 				if (!channelsData.ok) {
 					console.error('Slack API response error:', channelsData.error)
-					console.error(
-						'Full Slack API response:',
-						JSON.stringify(channelsData, null, 2),
-					)
 					throw new Error(
 						`Slack API error: ${channelsData.error || 'Unknown error'}`,
 					)
 				}
 
-				// Add channels from this page
 				if (channelsData.channels) {
 					allChannels.push(...channelsData.channels)
 				}
 
-				// Check if there are more pages
 				cursor = channelsData.response_metadata?.next_cursor
 
-				// Safety limit to prevent infinite loops
 				if (allChannels.length > 1000) {
 					console.warn('Reached channel limit of 1000, stopping pagination')
 					break
@@ -339,28 +320,22 @@ export class SlackProvider extends BaseIntegrationProvider {
 								member_count: channel.num_members || 0,
 								purpose: channel.purpose?.value || '',
 								topic: channel.topic?.value || '',
-								// Add helpful info about bot membership
 								bot_needs_invite: !channel.is_member,
-								can_post: true, // Bot can post to any channel with chat:write scope
+								can_post: true,
 							},
 						}) as Channel,
 				)
-				.sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
+				.sort((a, b) => a.name.localeCompare(b.name))
 			return channels
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
 			console.error('Error fetching Slack channels:', errorMessage)
 
-			// Check if it's an authentication error
 			if (
 				errorMessage.includes('invalid_auth') ||
 				errorMessage.includes('token_revoked')
 			) {
-				console.warn(
-					'Slack authentication failed, likely due to demo/mock token. Returning demo channels.',
-				)
-				// For demo purposes, return mock channels instead of throwing
 				return [
 					{
 						id: 'C1234567890',
@@ -386,33 +361,15 @@ export class SlackProvider extends BaseIntegrationProvider {
 							auth_error: true,
 						},
 					},
-					{
-						id: 'C1122334455',
-						name: 'dev-team',
-						type: 'private',
-						metadata: {
-							is_member: true,
-							member_count: 8,
-							purpose: 'Development team (Demo)',
-							demo: true,
-							auth_error: true,
-						},
-					},
 				]
 			}
 
-			// Check if it's a permission error
 			if (errorMessage.includes('missing_scope')) {
 				throw new Error(
 					'Slack integration is missing required permissions. Please reconnect with proper scopes.',
 				)
 			}
 
-			// For other errors, fall back to mock channels for demo purposes
-			console.warn(
-				'Falling back to mock channels due to API error:',
-				errorMessage,
-			)
 			return [
 				{
 					id: 'C1234567890',
@@ -426,50 +383,34 @@ export class SlackProvider extends BaseIntegrationProvider {
 						fallback_reason: errorMessage,
 					},
 				},
-				{
-					id: 'C0987654321',
-					name: 'random',
-					type: 'public',
-					metadata: {
-						is_member: true,
-						member_count: 25,
-						purpose: 'Random conversations (Fallback)',
-						demo: true,
-						fallback_reason: errorMessage,
-					},
-				},
 			]
 		}
 	}
 
 	/**
-	 * Post a message to a Slack channel
+	 * Post a message to a Slack channel using makeAuthenticatedRequest
 	 */
 	async postMessage(
 		connection: NoteIntegrationConnection & { integration: Integration },
 		message: MessageData,
 	): Promise<void> {
 		try {
-			// Get the access token (in production, this would be decrypted)
 			const accessToken = connection.integration.accessToken
 
 			if (!accessToken) {
 				throw new Error('No access token available for Slack integration')
 			}
 
-			// Check if this is a mock token
 			if (accessToken.startsWith('mock-slack-token-')) {
 				return
 			}
 
-			// Parse connection config to get posting preferences
 			const connectionConfig = connection.config
 				? JSON.parse(connection.config as string)
 				: {}
 			const useBlocks = (connectionConfig as any).postFormat !== 'text'
 			const includeContent = (connectionConfig as any).includeContent !== false
 
-			// Prepare the message payload
 			const payload: any = {
 				channel: connection.externalId,
 				username: 'Note Bot',
@@ -477,22 +418,23 @@ export class SlackProvider extends BaseIntegrationProvider {
 			}
 
 			if (useBlocks) {
-				// Use rich Slack blocks for better formatting
 				payload.blocks = this.formatSlackBlocks(message, includeContent)
 				payload.text = `${this.getChangeTypeEmoji(message.changeType)} ${message.title} was ${message.changeType} by ${message.author}`
 			} else {
-				// Use simple text format
 				payload.text = this.formatSlackText(message, includeContent)
 			}
 
-			const response = await fetch('https://slack.com/api/chat.postMessage', {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json',
+			const response = await this.makeAuthenticatedRequest(
+				connection.integration,
+				'https://slack.com/api/chat.postMessage',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(payload),
 				},
-				body: JSON.stringify(payload),
-			})
+			)
 
 			if (!response.ok) {
 				throw new Error(
@@ -509,7 +451,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
 
-			// Provide specific error messages for common issues
 			if (errorMessage.includes('channel_not_found')) {
 				throw new Error(
 					'Slack channel not found. The channel may have been deleted or renamed.',
@@ -548,8 +489,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 	async validateConnection(
 		_connection: NoteIntegrationConnection & { integration: Integration },
 	): Promise<boolean> {
-		// For now, we'll return true for mock implementation
-		// In a real implementation, we would check if the channel still exists and is accessible
 		return true
 	}
 
@@ -588,7 +527,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			},
 		]
 
-		// Add content section if enabled and content exists
 		if (includeContent && message.content && message.content.trim()) {
 			blocks.push({
 				type: 'section',
@@ -599,7 +537,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			})
 		}
 
-		// Add action buttons (only if we have a valid absolute URL)
 		if (this.isValidUrl(message.noteUrl)) {
 			blocks.push({
 				type: 'actions',
@@ -617,7 +554,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 				],
 			})
 		} else {
-			// If URL is not valid, add it as text instead
 			blocks.push({
 				type: 'context',
 				elements: [
@@ -629,7 +565,6 @@ export class SlackProvider extends BaseIntegrationProvider {
 			})
 		}
 
-		// Add divider for visual separation
 		blocks.push({
 			type: 'divider',
 		})
@@ -689,15 +624,12 @@ export class SlackProvider extends BaseIntegrationProvider {
 			return content || ''
 		}
 
-		// Try to truncate at a word boundary
 		const truncated = content.substring(0, maxLength - 3)
 		const lastSpace = truncated.lastIndexOf(' ')
 
 		if (lastSpace > maxLength * 0.8) {
-			// If we can find a space in the last 20% of the content, use it
 			return truncated.substring(0, lastSpace) + '...'
 		} else {
-			// Otherwise, just truncate at the character limit
 			return truncated + '...'
 		}
 	}
