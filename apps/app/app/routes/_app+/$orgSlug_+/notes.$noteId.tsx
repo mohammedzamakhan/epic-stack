@@ -73,6 +73,10 @@ import {
 } from '#app/components/permissions/permission-guard.tsx'
 
 import {
+	sanitizeNoteContent,
+	sanitizeCommentContent,
+} from '#app/utils/content-sanitization.server.ts'
+import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 	getUserOrganizationPermissionsForClient,
@@ -153,6 +157,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	})
 
 	invariantResponse(note, 'Not found', { status: 404 })
+
+	// Sanitize note content to prevent XSS during SSR
+	note.content = sanitizeNoteContent(note.content)
 
 	// Check if user has permission to read notes in this organization
 	// This will automatically verify organization access and specific permissions
@@ -266,6 +273,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		comment: CommentWithReplies,
 	): SerializedComment => ({
 		...comment,
+		content: sanitizeCommentContent(comment.content),
 		createdAt: comment.createdAt.toISOString(),
 		replies: comment.replies.map(serializeComment),
 	})
