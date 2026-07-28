@@ -69,14 +69,14 @@ export async function loader({ request }: { request: Request }) {
 	}))
 
 	// Get statistics
-	const statistics = await auditService.getStatistics({
-		organizationId,
-		startDate,
-		endDate,
-	})
+	const statistics = await auditService.getStatistics(organizationId)
+	const totalPages = Math.ceil(result.totalCount / limit)
 
 	return {
 		...result,
+		total: result.totalCount,
+		page,
+		totalPages,
 		logs: logsWithParsedMetadata,
 		statistics,
 		filters: {
@@ -369,13 +369,13 @@ export default function EnhancedAuditLogsPage() {
 														{log.user.name || log.user.username}
 													</span>
 												)}
-												{log.organization && (
+												{log.organizationId && (
 													<span>
 														<Icon
 															name="building"
 															className="mr-1 inline h-3 w-3"
 														/>
-														{log.organization.name}
+														{log.organizationId}
 													</span>
 												)}
 												{metadata.ipAddress && (

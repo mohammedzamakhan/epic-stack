@@ -350,6 +350,8 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 **Environment Variables**:
 
 - `SESSION_SECRET` - Required, validated on startup
+- `AUDIT_LOG_SECRET_KEY` - Required in production for HMAC audit log integrity
+  verification
 - `ENCRYPTION_KEY` - 32 characters for general encryption
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations

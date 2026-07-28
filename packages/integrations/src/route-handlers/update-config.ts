@@ -7,6 +7,11 @@ export interface UpdateConfigDependencies {
 	getUserDefaultOrganization: (
 		userId: string,
 	) => Promise<{ organization: { id: string } } | null>
+	requireOrgPermission?: (
+		request: Request,
+		organizationId: string,
+		permission: string,
+	) => Promise<void>
 }
 
 /**
@@ -30,6 +35,23 @@ export async function handleUpdateIntegrationConfig(
 			{ error: 'No organization found for user' },
 			{ status: 403 },
 		)
+	}
+
+	if (deps.requireOrgPermission) {
+		try {
+			await deps.requireOrgPermission(
+				request,
+				defaultOrg.organization.id,
+				'update:settings:any',
+			)
+		} catch (error) {
+			return Response.json(
+				{
+					error: 'Insufficient permissions to update integration configuration',
+				},
+				{ status: 403 },
+			)
+		}
 	}
 
 	const formData = await request.formData()

@@ -11,7 +11,7 @@
 export interface GetClientIpOptions {
 	/**
 	 * Fallback value to return if no IP can be determined
-	 * @default '127.0.0.1'
+	 * @default 'unknown'
 	 */
 	fallback?: string
 	/**
@@ -24,6 +24,11 @@ export interface GetClientIpOptions {
 	 * Defaults to true unless TRUST_PROXY='false' environment variable is explicitly set
 	 */
 	trustProxy?: boolean
+	/**
+	 * Number of trusted proxy hops to strip right-to-left when parsing X-Forwarded-For
+	 * @default undefined (takes leftmost IP)
+	 */
+	trustedProxyCount?: number
 }
 
 /**
@@ -48,8 +53,8 @@ function hasHeadersGet(
  * Extract client IP address from various request types and proxy headers
  *
  * This function handles both Express-style requests (with `.get()` method) and
- * Web API Requests (with `.headers.get()` method). It checks multiple headers
- * in order of reliability to determine the true client IP address.
+ * Web API Requests (with `.headers.get()` method). It parses X-Forwarded-For
+ * right-to-left based on trustedProxyCount to prevent client IP spoofing.
  */
 export function getClientIp(
 	request: any,
@@ -61,9 +66,12 @@ export function getClientIp(
 	options: GetClientIpOptions = {},
 ): string | undefined {
 	const {
-		fallback = '127.0.0.1',
+		fallback = 'unknown',
 		returnUndefined = false,
 		trustProxy = process.env.TRUST_PROXY !== 'false',
+		trustedProxyCount = process.env.TRUSTED_PROXY_COUNT
+			? Number(process.env.TRUSTED_PROXY_COUNT)
+			: undefined,
 	} = options
 
 	// Handle null/undefined requests early
@@ -81,37 +89,44 @@ export function getClientIp(
 	// Helper function to get header value regardless of request type
 	const getHeader = (name: string): string | null | undefined => {
 		if (hasGetMethod(request)) {
-			// Express-style request
 			return request.get(name)
 		} else if (hasHeadersGet(request)) {
-			// Web API Request
 			return request.headers.get(name)
 		}
 		return undefined
 	}
 
-	// Check various headers for the real IP address in order of reliability
+	// Check provider-controlled edge headers first (Fly.io, Cloudflare)
 	const flyClientIp = getHeader('Fly-Client-IP')
 	const cfConnectingIp = getHeader('CF-Connecting-IP')
-	const realIp = getHeader('X-Real-IP')
-	const forwarded = getHeader('X-Forwarded-For')
-
-	// Prefer more reliable headers first
 	if (flyClientIp) return flyClientIp
 	if (cfConnectingIp) return cfConnectingIp
+
+	// Parse X-Forwarded-For
+	const forwarded = getHeader('X-Forwarded-For')
+	if (forwarded) {
+		const ips = forwarded
+			.split(',')
+			.map((ip) => ip.trim())
+			.filter(Boolean)
+		if (ips.length > 0) {
+			if (typeof trustedProxyCount === 'number' && trustedProxyCount > 0) {
+				const targetIndex = Math.max(0, ips.length - 1 - trustedProxyCount)
+				const clientIp = ips[targetIndex]
+				if (clientIp) return clientIp
+			} else {
+				const clientIp = ips[0]
+				if (clientIp) return clientIp
+			}
+		}
+	}
+
+	const realIp = getHeader('X-Real-IP')
 	if (realIp) return realIp
 
-	if (forwarded) {
-		// X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
-		// Take the first one (client IP)
-		const clientIp = forwarded.split(',')[0]?.trim()
-		if (clientIp) return clientIp
-	}
-
-	// Try to get IP from request object directly (Express)
-	if (request.ip) {
-		return request.ip
-	}
+	// Try to get IP from request object directly (Express/Socket)
+	if (request.ip) return request.ip
+	if (request.socket?.remoteAddress) return request.socket.remoteAddress
 
 	// No IP found, return fallback or undefined based on options
 	return returnUndefined ? undefined : fallback

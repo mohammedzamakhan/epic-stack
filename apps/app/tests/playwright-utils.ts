@@ -94,7 +94,7 @@ export const test = base.extend<{
 		await setCookieConsent(page)
 		await use(page)
 	},
-	insertNewUser: async ({}: Record<string, never>, use) => {
+	insertNewUser: async (_: any, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)

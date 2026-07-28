@@ -78,6 +78,7 @@ export async function action({ request }: Route.ActionArgs) {
 				success: false,
 				error: 'two_factor_required',
 				message: 'Two-factor authentication required',
+				userId: session.userId,
 			},
 			{ status: 400 },
 		)

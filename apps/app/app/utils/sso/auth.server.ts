@@ -749,7 +749,15 @@ export class SSOAuthService {
 			throw new Error(`Organization not found: ${organizationId}`)
 		}
 
-		const baseUrl = process.env.BASE_URL || 'http://localhost:3000'
+		const baseUrl =
+			process.env.BASE_URL ||
+			(process.env.NODE_ENV === 'production'
+				? (() => {
+						throw new Error(
+							'BASE_URL environment variable is required in production',
+						)
+					})()
+				: 'http://localhost:3000')
 		return `${baseUrl}/auth/sso/${organization.slug}/callback`
 	}
 

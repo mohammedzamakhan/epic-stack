@@ -6,7 +6,7 @@ import { type Route } from './+types/organizations.ts'
 export async function loader({ request }: Route.LoaderArgs) {
 	try {
 		// Verify JWT token and get user info
-		const payload = requireAuth(request)
+		const payload = await requireAuth(request)
 
 		// Check if user exists
 		const user = await prisma.user.findUnique({

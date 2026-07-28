@@ -13,7 +13,7 @@ const SetDefaultSchema = z.object({
 
 export async function action({ request }: Route.ActionArgs) {
 	try {
-		const payload = requireAuth(request)
+		const payload = await requireAuth(request)
 		const userId = payload.sub
 
 		const formData = await request.formData()

@@ -10,7 +10,10 @@ import { noteHooks, integrationManager } from '@repo/integrations'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { invariantResponse } from '@epic-web/invariant'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import { notifyCommentMentions, notifyNoteOwner } from '#app/utils/notifications.server.ts'
+import {
+	notifyCommentMentions,
+	notifyNoteOwner,
+} from '#app/utils/notifications.server.ts'
 import {
 	DeleteFormSchema,
 	ConnectNoteSchema,
@@ -38,7 +41,10 @@ export async function userHasOrgAccess(userId: string, organizationId: string) {
 	)
 }
 
-export async function handleDeleteNoteIntent({ formData, userId }: IntentContext) {
+export async function handleDeleteNoteIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DeleteFormSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -106,7 +112,10 @@ export async function handleDeleteNoteIntent({ formData, userId }: IntentContext
 	})
 }
 
-export async function handleConnectChannelIntent({ formData, userId }: IntentContext) {
+export async function handleConnectChannelIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ConnectNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -141,13 +150,18 @@ export async function handleConnectChannelIntent({ formData, userId }: IntentCon
 		return data({ result: { status: 'success' } })
 	} catch {
 		return data(
-			{ result: { status: 'error', error: 'Failed to connect note to channel' } },
+			{
+				result: { status: 'error', error: 'Failed to connect note to channel' },
+			},
 			{ status: 500 },
 		)
 	}
 }
 
-export async function handleDisconnectChannelIntent({ formData, userId }: IntentContext) {
+export async function handleDisconnectChannelIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DisconnectNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -188,13 +202,21 @@ export async function handleDisconnectChannelIntent({ formData, userId }: Intent
 		return data({ result: { status: 'success' } })
 	} catch {
 		return data(
-			{ result: { status: 'error', error: 'Failed to disconnect note from channel' } },
+			{
+				result: {
+					status: 'error',
+					error: 'Failed to disconnect note from channel',
+				},
+			},
 			{ status: 500 },
 		)
 	}
 }
 
-export async function handleGetChannelsIntent({ formData, userId }: IntentContext) {
+export async function handleGetChannelsIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: GetChannelsSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -211,17 +233,22 @@ export async function handleGetChannelsIntent({ formData, userId }: IntentContex
 		}
 
 		await userHasOrgAccess(userId, integration.organizationId)
-		const channels = await integrationManager.getAvailableChannels(integrationId)
+		const channels =
+			await integrationManager.getAvailableChannels(integrationId)
 		return data({ channels })
 	} catch (error) {
 		return data({
 			channels: [],
-			error: error instanceof Error ? error.message : 'Failed to fetch channels',
+			error:
+				error instanceof Error ? error.message : 'Failed to fetch channels',
 		})
 	}
 }
 
-export async function handleUpdateSharingIntent({ formData, userId }: IntentContext) {
+export async function handleUpdateSharingIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ShareNoteSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -268,7 +295,10 @@ export async function handleUpdateSharingIntent({ formData, userId }: IntentCont
 	}
 }
 
-export async function handleAddAccessIntent({ formData, userId }: IntentContext) {
+export async function handleAddAccessIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: AddNoteAccessSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -299,7 +329,12 @@ export async function handleAddAccessIntent({ formData, userId }: IntentContext)
 
 	if (!targetUserInOrg) {
 		return data(
-			{ result: { status: 'error', error: 'User is not a member of this organization' } },
+			{
+				result: {
+					status: 'error',
+					error: 'User is not a member of this organization',
+				},
+			},
 			{ status: 400 },
 		)
 	}
@@ -327,7 +362,10 @@ export async function handleAddAccessIntent({ formData, userId }: IntentContext)
 	}
 }
 
-export async function handleRemoveAccessIntent({ formData, userId }: IntentContext) {
+export async function handleRemoveAccessIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: RemoveNoteAccessSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -369,7 +407,10 @@ export async function handleRemoveAccessIntent({ formData, userId }: IntentConte
 	}
 }
 
-export async function handleBatchUpdateAccessIntent({ formData, userId }: IntentContext) {
+export async function handleBatchUpdateAccessIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const usersToAdd = formData.getAll('usersToAdd') as string[]
 	const usersToRemove = formData.getAll('usersToRemove') as string[]
 
@@ -389,7 +430,12 @@ export async function handleBatchUpdateAccessIntent({ formData, userId }: Intent
 		)
 	}
 
-	const { noteId, isPublic, usersToAdd: validUsersToAdd, usersToRemove: validUsersToRemove } = validationResult.data
+	const {
+		noteId,
+		isPublic,
+		usersToAdd: validUsersToAdd,
+		usersToRemove: validUsersToRemove,
+	} = validationResult.data
 
 	const note = await prisma.organizationNote.findFirst({
 		select: { organizationId: true, createdById: true, isPublic: true },
@@ -448,14 +494,13 @@ export async function handleBatchUpdateAccessIntent({ formData, userId }: Intent
 				await tx.noteAccess.deleteMany({
 					where: { noteId, userId: { in: validUsersToRemove } },
 				})
-				const revokedLogs = validUsersToRemove.map((targetUserId: string) => ({
-					noteId,
-					userId,
-					action: 'access_revoked' as const,
-					targetUserId,
-				}))
-				if (revokedLogs.length > 0) {
-					await tx.noteActivityLog.createMany({ data: revokedLogs })
+				for (const targetUserId of validUsersToRemove) {
+					await logNoteActivity({
+						noteId,
+						userId,
+						action: 'access_revoked',
+						targetUserId,
+					})
 				}
 			}
 
@@ -466,16 +511,12 @@ export async function handleBatchUpdateAccessIntent({ formData, userId }: Intent
 						update: {},
 						create: { noteId, userId: targetUserId },
 					})
-				}
-
-				const grantedLogs = confirmedUserIdsToAdd.map((targetUserId: string) => ({
-					noteId,
-					userId,
-					action: 'access_granted' as const,
-					targetUserId,
-				}))
-				if (grantedLogs.length > 0) {
-					await tx.noteActivityLog.createMany({ data: grantedLogs })
+					await logNoteActivity({
+						noteId,
+						userId,
+						action: 'access_granted',
+						targetUserId,
+					})
 				}
 			}
 		})
@@ -495,7 +536,10 @@ export async function handleBatchUpdateAccessIntent({ formData, userId }: Intent
 			{
 				result: {
 					status: 'error',
-					error: error instanceof Error ? error.message : 'Failed to update note access',
+					error:
+						error instanceof Error
+							? error.message
+							: 'Failed to update note access',
 				},
 			},
 			{ status: 500 },
@@ -503,7 +547,10 @@ export async function handleBatchUpdateAccessIntent({ formData, userId }: Intent
 	}
 }
 
-export async function handleAddCommentIntent({ formData, userId }: IntentContext) {
+export async function handleAddCommentIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: AddCommentSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -587,7 +634,8 @@ export async function handleAddCommentIntent({ formData, userId }: IntentContext
 			)
 		}
 		if (imageCount > 0) {
-			const { uploadCommentImage } = await import('#app/utils/storage.server.ts')
+			const { uploadCommentImage } =
+				await import('#app/utils/storage.server.ts')
 			const imagePromises = []
 			for (let i = 0; i < imageCount; i++) {
 				const imageFile = formData.get(`image-${i}`) as File
@@ -673,7 +721,10 @@ export async function handleAddCommentIntent({ formData, userId }: IntentContext
 	}
 }
 
-export async function handleDeleteCommentIntent({ formData, userId }: IntentContext) {
+export async function handleDeleteCommentIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: DeleteCommentSchema })
 	if (submission.status !== 'success') {
 		return data(
@@ -723,7 +774,10 @@ export async function handleDeleteCommentIntent({ formData, userId }: IntentCont
 	}
 }
 
-export async function handleToggleFavoriteIntent({ formData, userId }: IntentContext) {
+export async function handleToggleFavoriteIntent({
+	formData,
+	userId,
+}: IntentContext) {
 	const submission = parseWithZod(formData, { schema: ToggleFavoriteSchema })
 	if (submission.status !== 'success') {
 		return data(

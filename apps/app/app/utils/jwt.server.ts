@@ -1,4 +1,5 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
+import { canUserLogin } from '@repo/auth'
 import { prisma } from '@repo/database'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
@@ -195,7 +196,7 @@ export async function createTokenPair(
 /**
  * Middleware helper to extract and verify JWT from Authorization header
  */
-export function requireAuth(request: Request): JWTPayload {
+export async function requireAuth(request: Request): Promise<JWTPayload> {
 	const header = request.headers.get('authorization')
 
 	if (!header) {
@@ -220,15 +221,22 @@ export function requireAuth(request: Request): JWTPayload {
 		throw new Error('Invalid or expired token')
 	}
 
+	const canLogin = await canUserLogin(payload.sub)
+	if (!canLogin) {
+		throw new Error('User account is disabled or banned')
+	}
+
 	return payload
 }
 
 /**
  * Optional auth - returns payload if valid token, null otherwise
  */
-export function optionalAuth(request: Request): JWTPayload | null {
+export async function optionalAuth(
+	request: Request,
+): Promise<JWTPayload | null> {
 	try {
-		return requireAuth(request)
+		return await requireAuth(request)
 	} catch {
 		return null
 	}
@@ -253,9 +261,8 @@ export async function createAuthenticatedSessionResponse(
 ) {
 	// Import here to avoid circular dependencies
 	const { prisma } = await import('@repo/database')
-	const { handleNewDeviceSignin } = await import(
-		'#app/utils/new-device-signin.server.tsx'
-	)
+	const { handleNewDeviceSignin } =
+		await import('#app/utils/new-device-signin.server.tsx')
 	const { getClientIp } = await import('@repo/common/ip-tracking')
 
 	// Get user data for the response

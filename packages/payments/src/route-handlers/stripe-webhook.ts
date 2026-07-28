@@ -1,3 +1,4 @@
+import { logger } from '@repo/observability'
 import { type ActionFunctionArgs } from 'react-router'
 import type Stripe from 'stripe'
 
@@ -57,13 +58,13 @@ async function processWebhookEvent(
 
 		case 'invoice.payment_succeeded': {
 			const invoice = event.data.object as Stripe.Invoice
-			console.log(`Payment succeeded for invoice: ${invoice.id}`)
+			logger.info({ invoiceId: invoice.id }, 'Payment succeeded for invoice')
 			break
 		}
 
 		case 'invoice.payment_failed': {
 			const invoice = event.data.object as Stripe.Invoice
-			console.log(`Payment failed for invoice: ${invoice.id}`)
+			logger.warn({ invoiceId: invoice.id }, 'Payment failed for invoice')
 			break
 		}
 
@@ -100,7 +101,7 @@ async function processWebhookEvent(
 		}
 
 		default: {
-			console.log(`Unhandled webhook event type: ${event.type}`)
+			logger.debug({ eventType: event.type }, 'Unhandled webhook event type')
 		}
 	}
 }
@@ -128,7 +129,7 @@ export async function handleStripeWebhook(
 	const signature = request.headers.get('stripe-signature')
 
 	if (!signature) {
-		console.error('Missing Stripe signature')
+		logger.warn('Missing Stripe signature in webhook request')
 		return new Response('Missing signature', { status: 400 })
 	}
 
@@ -141,12 +142,15 @@ export async function handleStripeWebhook(
 			deps.webhookSecret,
 		)
 	} catch (error) {
-		console.error('Webhook signature verification failed:', error)
+		logger.error({ err: error }, 'Webhook signature verification failed')
 		return new Response('Invalid signature', { status: 400 })
 	}
 
 	processWebhookEvent(event, deps).catch((error) => {
-		console.error(`Error processing webhook ${event.type}:`, error)
+		logger.error(
+			{ err: error, eventType: event.type },
+			'Error processing webhook',
+		)
 	})
 
 	return new Response('Webhook received', { status: 200 })

@@ -6,8 +6,8 @@ description = "Allowlist for false positives"
 # Ignore documentation files that show examples of what NOT to do
 paths = [
   '''apps/docs/security/secure-coding\.mdx''',
-  '''docs/.*\.md''',
-  '''.*\.md''',
+  '''docs/security.*\.md''',
+  '''docs/environment.*\.md''',
   '''tests/fixtures/.*''',
   '''__mocks__/.*'''
 ]
