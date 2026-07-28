@@ -1,6 +1,6 @@
 import { useInputControl } from '@conform-to/react'
 import { Checkbox } from '@repo/ui/checkbox'
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 import { FieldLabel, FieldError, Field as UIField } from '@repo/ui/field'
 import { Input } from '@repo/ui/input'
 import {

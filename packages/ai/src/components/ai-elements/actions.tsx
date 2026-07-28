@@ -9,7 +9,7 @@ import {
 } from '@repo/ui/tooltip'
 import { Button } from '@repo/ui/button'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type ActionsProps = ComponentProps<'div'>
 

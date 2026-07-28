@@ -59,6 +59,7 @@ vi.mock('@repo/database', () => ({
 			findMany: vi.fn(),
 			update: vi.fn(),
 		},
+		$disconnect: vi.fn(),
 	},
 }))
 
@@ -93,6 +94,7 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 	const mockRequirePermission = vi.mocked(requireUserWithOrganizationPermission)
 	const mockPrismaOrg = vi.mocked(prisma.organization.findFirst)
 	const mockPrismaNoteFindFirst = vi.mocked(prisma.organizationNote.findFirst)
+	const mockPrismaNoteUpsert = vi.mocked(prisma.organizationNote.upsert)
 
 	beforeEach(() => {
 		vi.clearAllMocks()
@@ -100,15 +102,14 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 		mockPrismaOrg.mockResolvedValue({ id: 'org-123' } as any)
 	})
 
-	it('denies note creation when user lacks CREATE_NOTE_OWN (403)', async () => {
+	it('denies note creation when member lacks CREATE_NOTE_OWN', async () => {
 		mockRequirePermission.mockRejectedValue(
 			new Response('Insufficient permissions', { status: 403 }),
 		)
 
 		const formData = new FormData()
-		formData.append('title', 'Test Note')
+		formData.append('title', 'New Note')
 		formData.append('content', 'Content')
-		formData.append('agreeToTermsOfServiceAndPrivacyPolicy', 'true')
 
 		const request = new Request('http://localhost:3000/org-slug/notes/new', {
 			method: 'POST',
@@ -124,9 +125,10 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'create:note:own',
 		)
+		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
 	})
 
-	it('denies update when member lacks UPDATE_NOTE_ANY for note owned by another user', async () => {
+	it('denies update and prevents blind-overwrite when note is owned by another user and member lacks UPDATE_NOTE_ANY', async () => {
 		mockPrismaNoteFindFirst.mockResolvedValue({
 			id: 'note-456',
 			createdById: 'user-other',
@@ -158,6 +160,7 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'update:note:org',
 		)
+		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
 	})
 
 	it('throws 404 when target note id does not exist in organization', async () => {

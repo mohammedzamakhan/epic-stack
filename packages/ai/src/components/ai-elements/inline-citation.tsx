@@ -16,7 +16,7 @@ import {
 import React from 'react'
 import { type ComponentProps } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type InlineCitationProps = ComponentProps<'span'>
 

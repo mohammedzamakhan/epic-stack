@@ -1,5 +1,6 @@
 // Export utilities
 export { cn } from './lib/utils.js'
+export { useIsMobile } from './utils/use-mobile.js'
 export {
 	DirectionProvider,
 	useDirection,

@@ -6,7 +6,7 @@ import {
 	useRef,
 	type HTMLAttributes,
 } from 'react'
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export interface SunMoonIconHandle {
 	startAnimation: () => void

@@ -1,7 +1,7 @@
 import { t } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
 import { type HTMLAttributes } from 'react'
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 type LoaderIconProps = {
 	size?: number

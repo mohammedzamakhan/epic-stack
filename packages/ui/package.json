@@ -76,7 +76,6 @@
     "./image-cropper": "./components/image-cropper.tsx",
     "./nav-main": "./components/nav-main.tsx",
     "./not-found-page": "./components/not-found-page.tsx",
-    "./cn": "./lib/utils.ts",
     "./client-hints": "./utils/client-hints.tsx",
     "./use-mobile": "./utils/use-mobile.ts",
     "./logo": "./components/logo.tsx",

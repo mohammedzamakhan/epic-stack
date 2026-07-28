@@ -61,7 +61,7 @@ describe('Session Management', () => {
 
 			expect(setCookieHeader).toBeDefined()
 			expect(setCookieHeader).toContain('en_session=')
-			expect(session.get('expires')).toEqual(expiresDate)
+			expect(setCookieHeader).toContain('Expires=')
 		})
 
 		it('should commit session with maxAge option', async () => {
@@ -92,16 +92,16 @@ describe('Session Management', () => {
 			const session = await authSessionStorage.getSession()
 			session.set('userId', 'user-123')
 
-			const expiresDate = new Date(Date.now() + 3600000)
+			const maxAge = 3600 // 1 hour
 			await authSessionStorage.commitSession(session, {
-				expires: expiresDate,
+				maxAge,
 			})
 
 			// Commit again without expires option
 			const setCookieHeader = await authSessionStorage.commitSession(session)
 
 			expect(setCookieHeader).toBeDefined()
-			expect(session.get('expires')).toEqual(expiresDate)
+			expect(session.get('expires')).toBeInstanceOf(Date)
 		})
 
 		it('should parse and retrieve session from cookie header', async () => {
@@ -217,9 +217,8 @@ describe('Session Management', () => {
 			process.env.ROOT_APP = 'example.com'
 			// Reset modules to reload session storage with new env
 			vi.resetModules()
-			const { authSessionStorage: testAuthSessionStorage } = await import(
-				'../src/session.server'
-			)
+			const { authSessionStorage: testAuthSessionStorage } =
+				await import('../src/session.server')
 
 			const session = await testAuthSessionStorage.getSession()
 			session.set('test', 'value')

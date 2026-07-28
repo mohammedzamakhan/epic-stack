@@ -810,14 +810,12 @@ export class IntegrationManager {
 	 */
 	private generateNoteUrl(note: OrganizationNote): string {
 		const baseUrl =
-			process.env.APP_BASE_URL ||
-			(process.env.NODE_ENV === 'production'
-				? (() => {
-						throw new Error(
-							'APP_BASE_URL environment variable is required in production',
-						)
-					})()
-				: 'http://localhost:3001')
+			process.env.APP_BASE_URL || process.env.APP_URL || process.env.BASE_URL
+		if (!baseUrl) {
+			throw new Error(
+				'APP_BASE_URL environment variable is required (or set APP_URL/BASE_URL)',
+			)
+		}
 		return `${baseUrl}/app/notes/${note.id}`
 	}
 

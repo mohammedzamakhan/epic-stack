@@ -4,7 +4,7 @@ import { type ComponentProps } from 'react'
 import { Button } from '@repo/ui/button'
 import { ScrollArea, ScrollBar } from '@repo/ui/scroll-area'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type SuggestionsProps = ComponentProps<typeof ScrollArea>
 
