@@ -14,9 +14,10 @@ import {
 	triggerMediaProcessingJobs,
 } from '#app/utils/note-media-pipeline.server.ts'
 import {
-	MAX_UPLOAD_SIZE,
-	OrgNoteEditorSchema,
-} from './__org-note-editor'
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+} from '#app/utils/organization/permissions.server.ts'
+import { MAX_UPLOAD_SIZE, OrgNoteEditorSchema } from './__org-note-editor'
 
 export async function action({ request, params }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -41,6 +42,41 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const formData = await parseFormData(request, {
 		maxFileSize: MAX_UPLOAD_SIZE * 10, // Allow larger files for videos
 	})
+
+	const rawId = formData.get('id')
+	const targetId =
+		typeof rawId === 'string' && rawId.trim() !== '' ? rawId.trim() : undefined
+
+	if (targetId) {
+		const existingNoteForAuth = await prisma.organizationNote.findFirst({
+			where: { id: targetId, organizationId: organization.id },
+			select: { id: true, createdById: true },
+		})
+
+		if (!existingNoteForAuth) {
+			throw new Response('Note not found', { status: 404 })
+		}
+
+		if (existingNoteForAuth.createdById === userId) {
+			await requireUserWithOrganizationPermission(
+				request,
+				organization.id,
+				ORG_PERMISSIONS.UPDATE_NOTE_OWN,
+			)
+		} else {
+			await requireUserWithOrganizationPermission(
+				request,
+				organization.id,
+				ORG_PERMISSIONS.UPDATE_NOTE_ANY,
+			)
+		}
+	} else {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.CREATE_NOTE_OWN,
+		)
+	}
 
 	const submission = await parseWithZod(formData, {
 		schema: OrgNoteEditorSchema.superRefine(async (data, ctx) => {
@@ -117,8 +153,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			: null
 
 	// Check if this is a new note or an update
-	const existingNote = await prisma.organizationNote.findUnique({
-		where: { id: noteId },
+	const existingNote = await prisma.organizationNote.findFirst({
+		where: { id: noteId, organizationId: organization.id },
 		select: {
 			id: true,
 			title: true,

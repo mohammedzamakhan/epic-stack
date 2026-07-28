@@ -120,7 +120,7 @@ export const PromptInputButton = ({
 	variant = 'ghost',
 	className,
 	size,
-	nativeButton: ignoredNativeButton,
+	nativeButton: _ignoredNativeButton,
 	...props
 }: PromptInputButtonProps) => {
 	const newSize =
@@ -153,7 +153,7 @@ export const PromptInputSubmit = ({
 	size = 'icon',
 	status,
 	children,
-	nativeButton: ignoredNativeButton,
+	nativeButton: _ignoredNativeButton,
 	...props
 }: PromptInputSubmitProps) => {
 	const { _ } = useLingui()

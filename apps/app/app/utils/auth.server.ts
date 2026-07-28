@@ -7,6 +7,7 @@ import {
 	verifyUserPassword,
 	providers,
 } from '@repo/auth'
+
 import { downloadFile } from '@repo/common'
 import { prisma } from '@repo/database'
 import { getClientIp } from '@repo/security'
@@ -14,6 +15,8 @@ import { Authenticator } from 'remix-auth'
 import { ssoAuthService } from './sso/auth.server.ts'
 import { uploadProfileImage } from './storage.server.ts'
 import { getUserAgent } from './user-agent.server.ts'
+
+export { canUserLogin }
 
 export const SESSION_EXPIRATION_TIME_SHORT = 1000 * 60 * 60 * 24 // 24 hours (default)
 export const SESSION_EXPIRATION_TIME_LONG = 1000 * 60 * 60 * 24 * 30 // 30 days (remember me)

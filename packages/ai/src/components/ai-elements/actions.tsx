@@ -31,7 +31,7 @@ export const Action = ({
 	className,
 	variant = 'ghost',
 	size = 'sm',
-	nativeButton: ignoredNativeButton,
+	nativeButton: _ignoredNativeButton,
 	...props
 }: ActionProps) => {
 	const button = (

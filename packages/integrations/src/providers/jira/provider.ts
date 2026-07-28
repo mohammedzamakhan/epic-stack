@@ -119,21 +119,32 @@ export class JiraProvider extends BaseIntegrationProvider {
 		return clientSecret
 	}
 
-	private getBaseUrl(integration: Integration): string {
-		// For Jira Cloud, we'll use the instance URL from the integration config
-		const config =
-			typeof integration.config === 'string'
-				? JSON.parse(integration.config)
-				: integration.config
-		const instanceUrl = (config as any)?.instanceUrl as string
-		if (!instanceUrl) {
-			throw new Error('Jira instance URL is required in integration config')
-		}
-		const validation = validateInstanceUrl(instanceUrl)
+	private async safeFetch(
+		urlStr: string,
+		init?: RequestInit,
+	): Promise<Response> {
+		const validation = validateInstanceUrl(urlStr)
 		if (!validation.valid) {
 			throw new Error(`SSRF security validation failed: ${validation.reason}`)
 		}
-		return instanceUrl.endsWith('/') ? instanceUrl.slice(0, -1) : instanceUrl
+		return fetch(urlStr, {
+			...init,
+			redirect: 'manual',
+		})
+	}
+
+	private async getBaseUrl(
+		integrationOrToken: Integration | string,
+	): Promise<string> {
+		let accessToken: string
+		if (typeof integrationOrToken === 'string') {
+			accessToken = integrationOrToken
+		} else {
+			const { decryptToken } = await import('../../encryption')
+			accessToken = await decryptToken(integrationOrToken.accessToken!)
+		}
+		const cloudId = await this.getCloudId(accessToken)
+		return `https://api.atlassian.com/ex/jira/${cloudId}`
 	}
 
 	/**
@@ -229,7 +240,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 
 		// Make real OAuth token exchange with Jira
 		try {
-			const tokenResponse = await fetch(
+			const tokenResponse = await this.safeFetch(
 				'https://auth.atlassian.com/oauth/token',
 				{
 					method: 'POST',
@@ -301,19 +312,22 @@ export class JiraProvider extends BaseIntegrationProvider {
 		}
 
 		try {
-			const response = await fetch('https://auth.atlassian.com/oauth/token', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Accept: 'application/json',
+			const response = await this.safeFetch(
+				'https://auth.atlassian.com/oauth/token',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Accept: 'application/json',
+					},
+					body: JSON.stringify({
+						grant_type: 'refresh_token',
+						client_id: this.clientId,
+						client_secret: this.clientSecret,
+						refresh_token: refreshToken,
+					}),
 				},
-				body: JSON.stringify({
-					grant_type: 'refresh_token',
-					client_id: this.clientId,
-					client_secret: this.clientSecret,
-					refresh_token: refreshToken,
-				}),
-			})
+			)
 
 			if (!response.ok) {
 				const errorText = await response.text()
@@ -453,14 +467,11 @@ export class JiraProvider extends BaseIntegrationProvider {
 		botAccountId: string,
 	): Promise<JiraUser> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const config =
-				typeof integration.config === 'string'
-					? JSON.parse(integration.config)
-					: (integration.config as any)
+			const baseUrl = await this.getBaseUrl(accessToken)
 
 			// Fetch bot user details from Jira
-			const response = await fetch(
-				`${config.instanceUrl}/rest/api/3/user?accountId=${botAccountId}`,
+			const response = await this.safeFetch(
+				`${baseUrl}/rest/api/3/user?accountId=${encodeURIComponent(botAccountId)}`,
 				{
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
@@ -488,15 +499,12 @@ export class JiraProvider extends BaseIntegrationProvider {
 		projectKey: string,
 	): Promise<{ valid: boolean; reason?: string }> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const config =
-				typeof integration.config === 'string'
-					? JSON.parse(integration.config)
-					: (integration.config as any)
+			const baseUrl = await this.getBaseUrl(accessToken)
 
 			try {
 				// Check if bot user exists
-				const userResponse = await fetch(
-					`${config.instanceUrl}/rest/api/3/user?accountId=${botAccountId}`,
+				const userResponse = await this.safeFetch(
+					`${baseUrl}/rest/api/3/user?accountId=${encodeURIComponent(botAccountId)}`,
 					{
 						headers: {
 							Authorization: `Bearer ${accessToken}`,
@@ -510,8 +518,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 				}
 
 				// Check if bot user has permission to create issues in the project
-				const permissionResponse = await fetch(
-					`${config.instanceUrl}/rest/api/3/user/permission/search?permissions=CREATE_ISSUES&projectKey=${projectKey}&accountId=${botAccountId}`,
+				const permissionResponse = await this.safeFetch(
+					`${baseUrl}/rest/api/3/user/permission/search?permissions=CREATE_ISSUES&projectKey=${encodeURIComponent(projectKey)}&accountId=${encodeURIComponent(botAccountId)}`,
 					{
 						headers: {
 							Authorization: `Bearer ${accessToken}`,
@@ -663,7 +671,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 	private async getCurrentUser(
 		accessToken: string,
 	): Promise<JiraCurrentUserResponse> {
-		const response = await fetch('https://api.atlassian.com/me', {
+		const response = await this.safeFetch('https://api.atlassian.com/me', {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				Accept: 'application/json',
@@ -694,9 +702,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 			if (error instanceof Error && error.message.includes('Unauthorized')) {
 				try {
 					// Import integration manager to refresh tokens
-					const { integrationManager } = await import(
-						'../../integration-manager'
-					)
+					const { integrationManager } =
+						await import('../../integration-manager')
 
 					// Try to refresh tokens if refresh token is available
 					if (integration.refreshToken) {
@@ -735,7 +742,7 @@ export class JiraProvider extends BaseIntegrationProvider {
 	 * Get accessible Jira resources
 	 */
 	private async getAccessibleResources(accessToken: string): Promise<any[]> {
-		const response = await fetch(
+		const response = await this.safeFetch(
 			'https://api.atlassian.com/oauth/token/accessible-resources',
 			{
 				headers: {
@@ -758,10 +765,10 @@ export class JiraProvider extends BaseIntegrationProvider {
 	 * Get Jira projects
 	 */
 	private async getProjects(accessToken: string): Promise<JiraProject[]> {
-		const cloudId = await this.getCloudId(accessToken)
+		const baseUrl = await this.getBaseUrl(accessToken)
 
-		const response = await fetch(
-			`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/project/search?expand=lead,description`,
+		const response = await this.safeFetch(
+			`${baseUrl}/rest/api/3/project/search?expand=lead,description`,
 			{
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
@@ -785,10 +792,10 @@ export class JiraProvider extends BaseIntegrationProvider {
 		accessToken: string,
 		projectKey: string,
 	): Promise<JiraProject> {
-		const cloudId = await this.getCloudId(accessToken)
+		const baseUrl = await this.getBaseUrl(accessToken)
 
-		const response = await fetch(
-			`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/project/${projectKey}?expand=lead,description`,
+		const response = await this.safeFetch(
+			`${baseUrl}/rest/api/3/project/${projectKey}?expand=lead,description`,
 			{
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
@@ -811,10 +818,10 @@ export class JiraProvider extends BaseIntegrationProvider {
 		accessToken: string,
 		projectKey: string,
 	): Promise<JiraIssueType[]> {
-		const cloudId = await this.getCloudId(accessToken)
+		const baseUrl = await this.getBaseUrl(accessToken)
 
-		const response = await fetch(
-			`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes`,
+		const response = await this.safeFetch(
+			`${baseUrl}/rest/api/3/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes`,
 			{
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
@@ -846,20 +853,17 @@ export class JiraProvider extends BaseIntegrationProvider {
 		accessToken: string,
 		issueData: any,
 	): Promise<JiraCreateIssueResponse> {
-		const cloudId = await this.getCloudId(accessToken)
+		const baseUrl = await this.getBaseUrl(accessToken)
 
-		const response = await fetch(
-			`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/issue`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json',
-					Accept: 'application/json',
-				},
-				body: JSON.stringify(issueData),
+		const response = await this.safeFetch(`${baseUrl}/rest/api/3/issue`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'Content-Type': 'application/json',
+				Accept: 'application/json',
 			},
-		)
+			body: JSON.stringify(issueData),
+		})
 
 		if (!response.ok) {
 			const errorText = await response.text()
@@ -877,11 +881,8 @@ export class JiraProvider extends BaseIntegrationProvider {
 		integration: Integration,
 	): Promise<JiraCurrentUserResponse> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			const config =
-				typeof integration.config === 'string'
-					? JSON.parse(integration.config)
-					: (integration.config as any)
-			const response = await fetch(`${config.instanceUrl}/rest/api/3/myself`, {
+			const baseUrl = await this.getBaseUrl(accessToken)
+			const response = await this.safeFetch(`${baseUrl}/rest/api/3/myself`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					Accept: 'application/json',
@@ -899,41 +900,18 @@ export class JiraProvider extends BaseIntegrationProvider {
 	/**
 	 * Search for Jira users
 	 * Public method for UI utilities to find bot users
-	 *
-	 *
-	 *
-	 *
 	 */
 	async searchUsers(
 		integration: Integration,
 		query: string,
 	): Promise<JiraUser[]> {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
-			// Get instance URL from config
-			let instanceUrl: string
-
-			// Get config object
-			const config =
-				typeof integration.config === 'string'
-					? JSON.parse(integration.config)
-					: (integration.config as any)
-
-			// First try to get from siteUrl in config
-			if (config?.siteUrl) {
-				instanceUrl = config.siteUrl
-			} else if (config?.instanceUrl) {
-				// Fall back to instanceUrl if available
-				instanceUrl = config.instanceUrl
-			} else {
-				// Default to Atlassian API as last resort
-				instanceUrl = 'https://api.atlassian.com'
-			}
-
-			const url = new URL(`${instanceUrl}/rest/api/3/user/search`)
+			const baseUrl = await this.getBaseUrl(accessToken)
+			const url = new URL(`${baseUrl}/rest/api/3/user/search`)
 			url.searchParams.append('query', query)
 
 			// Make API request to search users
-			const response = await fetch(url.toString(), {
+			const response = await this.safeFetch(url.toString(), {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					Accept: 'application/json',

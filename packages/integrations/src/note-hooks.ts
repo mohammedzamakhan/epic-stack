@@ -79,7 +79,7 @@ export class NoteHooks {
 	async afterNoteUpdated(
 		noteId: string,
 		userId: string,
-		previousData?: { title: string; content: string },
+		_previousData?: { title: string; content: string },
 	): Promise<void> {
 		try {
 			// Trigger integration notifications asynchronously

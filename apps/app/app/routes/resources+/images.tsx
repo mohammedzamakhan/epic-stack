@@ -45,7 +45,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 		if (
 			objectKey.length < 16 ||
 			objectKey.includes('..') ||
-			!/^[a-zA-Z0-9_\-\.\/]+$/.test(objectKey)
+			!/^[a-zA-Z0-9_\-./]+$/.test(objectKey)
 		) {
 			invariantResponse(false, 'Invalid or low-entropy objectKey parameter', {
 				status: 400,

@@ -2,6 +2,7 @@
 import { s3Storage } from '@payloadcms/storage-s3'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
+import crypto from 'node:crypto'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
@@ -105,7 +106,6 @@ export default buildConfig({
         const cronSecret = process.env.CRON_SECRET
         if (!authHeader || !cronSecret) return false
 
-        const crypto = require('crypto')
         const expectedHeader = `Bearer ${cronSecret}`
         const hashA = crypto.createHash('sha256').update(authHeader).digest()
         const hashB = crypto.createHash('sha256').update(expectedHeader).digest()

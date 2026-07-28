@@ -2,8 +2,8 @@ import { prisma } from '@repo/database'
 import { logger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
 import { AuditAction } from './actions.ts'
-import { computeIntegrityHash } from './integrity.ts'
 import { securityAlertService } from './alerting.ts'
+import { computeIntegrityHash } from './integrity.ts'
 
 export interface AuditLogInput {
 	action: AuditAction
@@ -561,8 +561,11 @@ export class AuditService {
 		if (!message) return message
 
 		// Remove control characters and limit length
+		// oxlint-disable-next-line eslint(no-control-regex)
 		return message
+			// oxlint-disable-next-line eslint(no-control-regex)
 			.replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+			// oxlint-disable-next-line eslint(no-control-regex)
 			.replace(/\x1b\[[0-9;]*m/g, '')
 			.substring(0, 2000)
 	}

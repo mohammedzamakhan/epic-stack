@@ -41,6 +41,8 @@ describe('JiraProvider', () => {
 		// Reset environment variables
 		process.env.JIRA_CLIENT_ID = 'test-client-id'
 		process.env.JIRA_CLIENT_SECRET = 'test-client-secret'
+		process.env.INTEGRATIONS_OAUTH_STATE_SECRET =
+			'test-oauth-state-secret-32-chars'
 
 		// Reset fetch mock
 		global.fetch = vi.fn()
@@ -123,6 +125,7 @@ describe('JiraProvider', () => {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 		})
@@ -178,6 +181,13 @@ describe('JiraProvider', () => {
 
 	describe('User Management', () => {
 		it('should get current user details', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockUserResponse = {
 				ok: true,
 				json: vi.fn().mockResolvedValue({
@@ -189,7 +199,10 @@ describe('JiraProvider', () => {
 				}),
 			}
 
-			global.fetch = vi.fn().mockResolvedValue(mockUserResponse)
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
+				.mockResolvedValueOnce(mockUserResponse)
 
 			const userDetails = await provider.getCurrentUserDetails(mockIntegration)
 
@@ -202,17 +215,25 @@ describe('JiraProvider', () => {
 			})
 
 			expect(fetch).toHaveBeenCalledWith(
-				'https://test.atlassian.net/rest/api/3/myself',
+				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/myself',
 				{
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 		})
 
 		it('should search for users', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockUsersResponse = {
 				ok: true,
 				json: vi.fn().mockResolvedValue([
@@ -229,7 +250,10 @@ describe('JiraProvider', () => {
 				]),
 			}
 
-			global.fetch = vi.fn().mockResolvedValue(mockUsersResponse)
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
+				.mockResolvedValueOnce(mockUsersResponse)
 
 			const users = await provider.searchUsers(mockIntegration, 'john')
 
@@ -238,17 +262,25 @@ describe('JiraProvider', () => {
 			expect(users[1].displayName).toBe('Jane Smith')
 
 			expect(fetch).toHaveBeenCalledWith(
-				'https://test.atlassian.net/rest/api/3/user/search?query=john',
+				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user/search?query=john',
 				{
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 		})
 
 		it('should configure bot user', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockBotUserResponse = {
 				ok: true,
 				json: vi.fn().mockResolvedValue({
@@ -258,7 +290,10 @@ describe('JiraProvider', () => {
 				}),
 			}
 
-			global.fetch = vi.fn().mockResolvedValue(mockBotUserResponse)
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
+				.mockResolvedValueOnce(mockBotUserResponse)
 
 			const botUser = await provider.configureBotUser(
 				mockIntegration,
@@ -272,17 +307,25 @@ describe('JiraProvider', () => {
 			})
 
 			expect(fetch).toHaveBeenCalledWith(
-				'https://test.atlassian.net/rest/api/3/user?accountId=123456:bot-user',
+				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user?accountId=123456%3Abot-user',
 				{
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 		})
 
 		it('should validate bot user permissions', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockUserResponse = {
 				ok: true,
 				json: vi.fn().mockResolvedValue({
@@ -303,6 +346,7 @@ describe('JiraProvider', () => {
 
 			global.fetch = vi
 				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
 				.mockResolvedValueOnce(mockUserResponse)
 				.mockResolvedValueOnce(mockPermissionResponse)
 
@@ -315,27 +359,36 @@ describe('JiraProvider', () => {
 			expect(validation).toEqual({ valid: true })
 
 			expect(fetch).toHaveBeenCalledWith(
-				'https://test.atlassian.net/rest/api/3/user?accountId=123456:bot-user',
+				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user?accountId=123456%3Abot-user',
 				{
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 
 			expect(fetch).toHaveBeenCalledWith(
-				'https://test.atlassian.net/rest/api/3/user/permission/search?permissions=CREATE_ISSUES&projectKey=TEST&accountId=123456:bot-user',
+				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/user/permission/search?permissions=CREATE_ISSUES&projectKey=TEST&accountId=123456%3Abot-user',
 				{
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
+					redirect: 'manual',
 				},
 			)
 		})
 
 		it('should return invalid when bot user lacks permissions', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockUserResponse = {
 				ok: true,
 				json: vi.fn().mockResolvedValue({
@@ -356,6 +409,7 @@ describe('JiraProvider', () => {
 
 			global.fetch = vi
 				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
 				.mockResolvedValueOnce(mockUserResponse)
 				.mockResolvedValueOnce(mockPermissionResponse)
 
@@ -373,12 +427,22 @@ describe('JiraProvider', () => {
 		})
 
 		it('should return invalid when bot user not found', async () => {
+			const mockResourcesResponse = {
+				ok: true,
+				json: vi
+					.fn()
+					.mockResolvedValue(fixtures.jira.accessibleResourcesResponse),
+			}
+
 			const mockUserErrorResponse = {
 				ok: false,
 				statusText: 'Not Found',
 			}
 
-			global.fetch = vi.fn().mockResolvedValue(mockUserErrorResponse)
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce(mockResourcesResponse)
+				.mockResolvedValueOnce(mockUserErrorResponse)
 
 			const validation = await provider.validateBotUser(
 				mockIntegration,

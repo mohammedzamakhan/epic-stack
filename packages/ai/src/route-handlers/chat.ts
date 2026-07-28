@@ -52,6 +52,21 @@ export async function handleChat(
 		invariant(noteId, 'Note ID is required')
 	}
 
+	const noteMeta = await prisma.organizationNote.findUnique({
+		where: { id: noteId },
+		select: {
+			id: true,
+			organizationId: true,
+		},
+	})
+
+	if (!noteMeta) {
+		invariant(noteMeta, 'Note not found')
+	}
+
+	// Enforce org membership before reading note details or comments.
+	await deps.requireOrgMembership(request, noteMeta.organizationId)
+
 	const note = await prisma.organizationNote.findUnique({
 		where: { id: noteId },
 		select: {
@@ -81,10 +96,6 @@ export async function handleChat(
 	if (!note) {
 		invariant(note, 'Note not found')
 	}
-
-	// Enforce org membership before branching on isPublic.
-	// "public" means public within the organization, not to all authenticated users.
-	await deps.requireOrgMembership(request, note.organizationId)
 
 	if (!note.isPublic) {
 		const hasPersonalAccess =

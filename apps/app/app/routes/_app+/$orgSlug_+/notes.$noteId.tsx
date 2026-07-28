@@ -1,13 +1,11 @@
 import { getFormProps, useForm } from '@conform-to/react'
-import { parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
-import { logNoteActivity, getNoteActivityLogs } from '@repo/audit'
+import { getNoteActivityLogs } from '@repo/audit'
 import { requireUserId } from '@repo/auth'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
-import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
-import { noteHooks, integrationManager } from '@repo/integrations'
+import { integrationManager } from '@repo/integrations'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
@@ -74,12 +72,6 @@ import {
 	CanDeleteNote,
 } from '#app/components/permissions/permission-guard.tsx'
 
-import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
-import {
-	notifyCommentMentions,
-	notifyNoteOwner,
-} from '#app/utils/notifications.server.ts'
-import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,

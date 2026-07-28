@@ -1,5 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { auditService, AuditAction } from '@repo/audit'
+import { prisma } from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
@@ -65,6 +66,22 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 
 	const { session } = submission.value
+
+	// Check if user has 2FA enrolled
+	const twoFactorVerification = await prisma.verification.findFirst({
+		where: { target: session.userId, type: '2fa' },
+	})
+
+	if (twoFactorVerification) {
+		return data(
+			{
+				success: false,
+				error: 'two_factor_required',
+				message: 'Two-factor authentication required',
+			},
+			{ status: 400 },
+		)
+	}
 
 	// Log successful login (SOC 2 CC7.2)
 	void auditService.logAuth(

@@ -68,8 +68,6 @@ export {
 
 // OAuth flow management
 export { oauthFlow } from './oauth-flow'
-export {
-} from './oauth-manager'
 
 // Note notification system
 export {

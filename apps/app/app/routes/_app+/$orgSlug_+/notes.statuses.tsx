@@ -1,7 +1,9 @@
-import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
-import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
+import {
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+} from '#app/utils/organization/permissions.server.ts'
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const orgSlug = params.orgSlug
@@ -14,8 +16,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	if (!organization)
 		return new Response('Organization not found', { status: 404 })
 
-	await requireUserId(request)
-	await userHasOrgAccess(request, organization.id)
+	await requireUserWithOrganizationPermission(
+		request,
+		organization.id,
+		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+	)
 
 	const formData = await request.formData()
 	const name = formData.get('name')?.toString().trim()

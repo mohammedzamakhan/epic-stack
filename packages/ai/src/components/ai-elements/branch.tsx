@@ -148,7 +148,7 @@ export type BranchPreviousProps = ComponentProps<typeof Button>
 export const BranchPrevious = ({
 	className,
 	children,
-	nativeButton: ignoredNativeButton,
+	nativeButton: _ignoredNativeButton,
 	...props
 }: BranchPreviousProps) => {
 	const { goToPrevious, totalBranches } = useBranch()
@@ -180,7 +180,7 @@ export type BranchNextProps = ComponentProps<typeof Button>
 export const BranchNext = ({
 	className,
 	children,
-	nativeButton: ignoredNativeButton,
+	nativeButton: _ignoredNativeButton,
 	...props
 }: BranchNextProps) => {
 	const { goToNext, totalBranches } = useBranch()

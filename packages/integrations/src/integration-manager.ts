@@ -21,13 +21,11 @@ import { type IntegrationProvider, providerRegistry } from './provider'
 import {
 	type TokenData,
 	type Channel,
-	type MessageData,
 	type OAuthCallbackParams,
 	type IntegrationStatus,
 	type ProviderType,
 	type IntegrationLogEntry,
 } from './types'
-import { OAuthStateManager } from './oauth-manager'
 
 /**
  * Extended Integration type with relations
