@@ -57,14 +57,6 @@ vi.mock('./configuration.server.ts', () => ({
 	},
 }))
 
-vi.mock('./retry-logic.server.ts', () => ({
-	ssoRetryManager: {
-		retryTokenExchange: vi.fn(),
-		retryUserInfoFetch: vi.fn(),
-		retryOIDCDiscovery: vi.fn(),
-	},
-}))
-
 vi.mock('@repo/sso', () => ({
 	ssoConnectionPool: {
 		request: vi.fn(),

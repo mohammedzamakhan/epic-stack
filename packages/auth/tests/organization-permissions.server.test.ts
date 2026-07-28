@@ -41,8 +41,7 @@ describe('Organization Permissions', () => {
 		})
 
 		it('should parse permission without access level', () => {
-			const result =
-				parseOrganizationPermissionString('delete:organization:')
+			const result = parseOrganizationPermissionString('delete:organization:')
 
 			expect(result).toEqual({
 				action: 'delete',
@@ -247,9 +246,7 @@ describe('Organization Permissions', () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(Response)
 				expect((error as Response).status).toBe(401)
-				expect(await (error as Response).text()).toBe(
-					'Authentication required',
-				)
+				expect(await (error as Response).text()).toBe('Authentication required')
 			}
 		})
 
@@ -274,7 +271,7 @@ describe('Organization Permissions', () => {
 				expect(error).toBeInstanceOf(Response)
 				expect((error as Response).status).toBe(403)
 				expect(await (error as Response).text()).toBe(
-					'Insufficient permissions: required delete:note:any in organization',
+					'Unauthorized: required permissions: delete:note:any',
 				)
 			}
 		})
@@ -322,10 +319,7 @@ describe('Organization Permissions', () => {
 				},
 			})
 
-			const result = await getUserOrganizationPermissions(
-				'user-123',
-				'org-123',
-			)
+			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
 			expect(result).toEqual(mockPermissions)
 		})
@@ -340,10 +334,7 @@ describe('Organization Permissions', () => {
 				},
 			})
 
-			const result = await getUserOrganizationPermissions(
-				'user-123',
-				'org-123',
-			)
+			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
 			expect(result).toEqual([])
 		})
@@ -351,10 +342,7 @@ describe('Organization Permissions', () => {
 		it('should return empty array when user is not organization member', async () => {
 			mockPrisma.userOrganization.findFirst.mockResolvedValue(null)
 
-			const result = await getUserOrganizationPermissions(
-				'user-123',
-				'org-123',
-			)
+			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
 			expect(result).toEqual([])
 		})
@@ -376,10 +364,7 @@ describe('Organization Permissions', () => {
 				},
 			})
 
-			const result = await getUserOrganizationPermissions(
-				'user-123',
-				'org-123',
-			)
+			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
 			expect(mockPrisma.userOrganization.findFirst).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -455,10 +440,7 @@ describe('Organization Permissions', () => {
 		})
 
 		it('should return false for empty permissions array', () => {
-			const result = userHasOrganizationPermissionClient(
-				[],
-				'create:note:own',
-			)
+			const result = userHasOrganizationPermissionClient([], 'create:note:own')
 
 			expect(result).toBe(false)
 		})

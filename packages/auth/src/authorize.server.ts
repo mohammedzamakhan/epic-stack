@@ -1,8 +1,5 @@
 import { requireUserId } from './auth.server'
-import {
-	checkUserHasPermission,
-	checkUserHasRole,
-} from './permissions.server'
+import { checkUserHasPermission, checkUserHasRole } from './permissions.server'
 import {
 	userHasOrganizationPermission,
 	type OrganizationPermissionString,
@@ -14,6 +11,32 @@ export interface AuthorizeOptions {
 	role?: string
 	organizationId?: string
 	orgPermission?: OrganizationPermissionString
+}
+
+/**
+ * Single unified permission string parser for both global and organization permissions.
+ */
+export function parsePermissionString(permissionString: string) {
+	const [action, entity, access] = permissionString.split(':')
+	return {
+		action: action?.trim() || '',
+		entity: entity?.trim() || '',
+		access:
+			access !== undefined ? access.split(',').map((a) => a.trim()) : undefined,
+	}
+}
+
+/**
+ * Single unified 403 response builder across all authorization checks.
+ */
+export function createForbiddenResponse(
+	permissionOrRole: string,
+	isRole = false,
+): Response {
+	const label = isRole ? 'role' : 'permissions'
+	return new Response(`Unauthorized: required ${label}: ${permissionOrRole}`, {
+		status: 403,
+	})
 }
 
 /**
@@ -41,10 +64,7 @@ export async function authorize(
 			options.orgPermission,
 		)
 		if (!hasOrgPermission) {
-			throw new Response(
-				`Insufficient permissions: required ${options.orgPermission} in organization`,
-				{ status: 403 },
-			)
+			throw createForbiddenResponse(options.orgPermission)
 		}
 	}
 

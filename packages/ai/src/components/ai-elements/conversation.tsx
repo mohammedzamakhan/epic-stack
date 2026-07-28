@@ -5,7 +5,7 @@ import { Icon } from '@repo/ui/icon'
 import { type ComponentProps, useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
 

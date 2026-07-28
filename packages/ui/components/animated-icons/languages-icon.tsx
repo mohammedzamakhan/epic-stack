@@ -8,7 +8,7 @@ import {
 	useImperativeHandle,
 	useRef,
 } from 'react'
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export interface LanguagesIconHandle {
 	startAnimation: () => void

@@ -16,7 +16,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark'
 import oneLight from 'react-syntax-highlighter/dist/esm/styles/prism/one-light'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 type CodeBlockContextType = {
 	code: string

@@ -17,7 +17,7 @@ import {
 	useState,
 } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 import { Response } from './response'
 
 type ReasoningContextValue = {

@@ -22,7 +22,7 @@ import React, {
 	useState,
 } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type WebPreviewContextValue = {
 	url: string

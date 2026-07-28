@@ -20,7 +20,7 @@ import React, {
 	Children,
 } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error'
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>

@@ -1,5 +1,8 @@
-// No longer need data import
 import { prisma } from '@repo/database'
+import {
+	parsePermissionString,
+	createForbiddenResponse,
+} from './authorize.server'
 
 export type OrganizationPermissionString = `${string}:${string}:${string}`
 
@@ -9,13 +12,7 @@ export type OrganizationPermissionString = `${string}:${string}:${string}`
 export function parseOrganizationPermissionString(
 	permissionString: OrganizationPermissionString,
 ) {
-	const [action, entity, access] = permissionString.split(':')
-	return {
-		action: action?.trim() || '',
-		entity: entity?.trim() || '',
-		access:
-			access !== undefined ? access.split(',').map((a) => a.trim()) : undefined,
-	}
+	return parsePermissionString(permissionString)
 }
 
 /**
@@ -75,10 +72,7 @@ export async function requireUserWithOrganizationPermission(
 		permission,
 	)
 	if (!hasPermission) {
-		throw new Response(
-			`Insufficient permissions: required ${permission} in organization`,
-			{ status: 403 },
-		)
+		throw createForbiddenResponse(permission)
 	}
 
 	return userId

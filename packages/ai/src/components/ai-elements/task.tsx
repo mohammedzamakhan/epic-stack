@@ -8,7 +8,7 @@ import {
 import { Icon } from '@repo/ui/icon'
 import { ReactElement, type ComponentProps } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 
 export type TaskItemFileProps = ComponentProps<'div'>
 

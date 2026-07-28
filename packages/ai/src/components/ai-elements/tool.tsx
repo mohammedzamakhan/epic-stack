@@ -11,7 +11,7 @@ import { Icon } from '@repo/ui/icon'
 import { Badge } from '@repo/ui/badge'
 import { type ComponentProps, type ReactNode } from 'react'
 
-import { cn } from '@repo/ui/cn'
+import { cn } from '@repo/ui'
 type ToolUIPart = {
 	type: 'tool-code'
 	state:

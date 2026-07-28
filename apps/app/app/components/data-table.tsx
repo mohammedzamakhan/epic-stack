@@ -37,7 +37,7 @@ import {
 	type ChartConfig,
 } from '@repo/ui/chart'
 import { Checkbox } from '@repo/ui/checkbox'
-import { cn } from '@repo/ui/cn'
+import { cn, useIsMobile } from '@repo/ui'
 import {
 	Drawer,
 	DrawerClose,
@@ -85,8 +85,6 @@ import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { toast } from 'sonner'
 import { z } from 'zod'
-
-import { useIsMobile } from '@repo/ui/use-mobile'
 
 // Helper function to get initials from a name
 function getInitials(name: string): string {
