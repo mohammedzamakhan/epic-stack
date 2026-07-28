@@ -1,0 +1,147 @@
+[
+  {
+    "verdict": "confirmed",
+    "title": "Stored XSS via Note Content (DOMPurify bypass on server render)",
+    "description": "The Note viewing page at `apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx` passes user-supplied HTML from `note.content` directly into `dangerouslySetInnerHTML`. While the code attempts to sanitize the content using `DOMPurify.sanitize()` wrapped in a `useMemo` hook, `DOMPurify` does not work safely during Server-Side Rendering (SSR) unless explicitly configured with a JSDOM window, which is not happening here. Furthermore, `isomorphic-dompurify` relies on the environment. If it doesn't correctly sanitize during SSR, the initial HTML payload sent to the client will contain the raw XSS payload, which the browser will parse and execute before React hydration even finishes. Also, `apps/docs/security/secure-coding.mdx` states: \"Always sanitize user-generated HTML content... Sanitize before rendering\" and references a server-side sanitization function `sanitizeNoteContent`. The implementation in `notes.$noteId.tsx` fails to use the provided server-side sanitization in its loader, relying instead on client-side/render-time sanitization which exposes the application to XSS attacks.",
+    "root_cause": "The note component in `apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx` does not sanitize note content on the server loader, passing unsanitized content to a component that renders it via dangerouslySetInnerHTML.",
+    "intended_behavior": "The application should sanitize the note content on the server side using the `sanitizeNoteContent` utility before sending it to the client, preventing any malicious HTML or JavaScript from being rendered in the user's browser.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+        "line": 115,
+        "scope": "loader",
+        "description": "Untrusted note content is fetched from the database."
+      },
+      {
+        "kind": "propagation",
+        "file": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+        "line": 285,
+        "scope": "loader",
+        "description": "The loader returns the note content to the component without sanitization."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+        "line": 761,
+        "scope": "NoteRoute",
+        "description": "The untrusted content is passed into dangerouslySetInnerHTML during the initial server-side render."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "A user must view a note containing a malicious payload."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "A user with permission to create or edit notes in an organization.",
+      "payloads": [
+        "<img src=x onerror=alert(1)>"
+      ],
+      "instructions": [
+        "1. Create a new note or edit an existing one.",
+        "2. Inject an XSS payload into the note's content field.",
+        "3. Wait for another user (e.g., an administrator or another organization member) to view the note.",
+        "4. The payload will execute in the victim's browser context."
+      ],
+      "expected_result": "The injected JavaScript executes in the context of the victim's session."
+    },
+    "remediation": {
+      "strategy": "Sanitize the note content on the server side within the loader before returning it to the client, using the established `sanitizeNoteContent` utility.",
+      "code_changes": [
+        {
+          "file_name": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+          "fixed_code": "import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'\n// ... inside loader ...\n\treturn {\n\t\tnote: { ...note, content: sanitizeNoteContent(note.content) },\n// ...\n"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Any user who can create a note can inject a payload, and it will execute automatically when viewed by others."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Allows full control over the victim's session, potentially leading to account takeover or data exfiltration."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The code clearly shows `dangerouslySetInnerHTML` being used without prior server-side sanitization in the loader."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "title": "Stored XSS via Note Comment Content (DOMPurify bypass on server render)",
+    "description": "Similar to the Note Content XSS, the `CommentItem` component in `apps/app/app/components/note/comment-item.tsx` uses `dangerouslySetInnerHTML` to render comment content. While it uses `DOMPurify.sanitize()` client-side, this approach allows an attacker to bypass the sanitization if they can control the initial server-side render, since the raw unsanitized HTML is shipped to the browser before client-side hydration takes place. The comments are loaded in the `loader` of `notes.$noteId.tsx`, which does not sanitize them. While `handleAddCommentIntent` (in `apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.server.ts`) sanitizes comments on creation using `sanitizeCommentContent`, comments created before this protection was added, or comments modified through alternative access methods (e.g., direct DB access or missing coverage in other flows) will execute stored XSS. A defense-in-depth approach requires that the data be sanitized on read inside the loader.",
+    "root_cause": "The loader in `apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx` does not sanitize note comments before rendering them with dangerouslySetInnerHTML in `apps/app/app/components/note/comment-item.tsx`.",
+    "intended_behavior": "The application should sanitize the note comments on the server side in the loader using `sanitizeCommentContent` to ensure no malicious HTML reaches the client during SSR.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+        "line": 156,
+        "scope": "loader",
+        "description": "Untrusted note comments are fetched from the database."
+      },
+      {
+        "kind": "propagation",
+        "file": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+        "line": 285,
+        "scope": "loader",
+        "description": "The loader returns the note comments to the component without sanitization."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/app/app/components/note/comment-item.tsx",
+        "line": 174,
+        "scope": "CommentItem",
+        "description": "The untrusted content is passed into dangerouslySetInnerHTML during the initial server-side render."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "user_interaction",
+        "description": "A user must view a note containing a malicious comment payload."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "A user with permission to comment on notes.",
+      "payloads": [
+        "<img src=x onerror=alert(1)>"
+      ],
+      "instructions": [
+        "1. Identify an unsanitized comment path or exploit a legacy comment.",
+        "2. Wait for another user to view the note and its comments.",
+        "3. The payload will execute in the victim's browser context."
+      ],
+      "expected_result": "The injected JavaScript executes in the context of the victim's session."
+    },
+    "remediation": {
+      "strategy": "Sanitize the comments on the server side within the loader before returning them to the client.",
+      "code_changes": [
+        {
+          "file_name": "apps/app/app/routes/_app+/$orgSlug_+/notes.$noteId.tsx",
+          "fixed_code": "import { sanitizeNoteContent, sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'\n// ... inside loader ...\n\tconst sanitizedComments = comments.map(c => ({...c, content: sanitizeCommentContent(c.content)}));\n// ... update the returned object\n"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Comment creation already sanitizes input, reducing the attack surface to legacy data or missed API paths."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Allows full control over the victim's session, potentially leading to account takeover or data exfiltration."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The code trace clearly shows that data read from the database is not sanitized before being rendered with `dangerouslySetInnerHTML`."
+    }
+  }
+]
