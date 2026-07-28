@@ -17,7 +17,6 @@ export const onboardingEmailSessionKey = 'onboardingEmail'
 
 const OnboardingFormSchema = z
 	.object({
-		email: z.string().email('Invalid email address').optional(), // Allow email in request body for mobile
 		username: UsernameSchema,
 		name: NameSchema,
 		agreeToTermsOfServiceAndPrivacyPolicy: z
@@ -59,32 +58,16 @@ export async function action({ request }: Route.ActionArgs) {
 	try {
 		const formData = await request.formData()
 
-		// First, try to get email from the form data (mobile app approach)
-		let email: string | undefined = formData.get('email')?.toString()
-
-		// If no email in form data, try to get it from the verification session (web app approach)
-		if (!email) {
-			try {
-				email = await requireOnboardingEmail(request)
-			} catch {
-				return data(
-					{
-						success: false,
-						error: 'no_verification_session',
-						message:
-							'No verification session found. Please start the signup process again.',
-					},
-					{ status: 400 },
-				)
-			}
-		}
-
-		if (!email) {
+		let email: string
+		try {
+			email = await requireOnboardingEmail(request)
+		} catch {
 			return data(
 				{
 					success: false,
-					error: 'no_email',
-					message: 'Email is required for account creation.',
+					error: 'no_verification_session',
+					message:
+						'No verification session found. Please start the signup process again.',
 				},
 				{ status: 400 },
 			)

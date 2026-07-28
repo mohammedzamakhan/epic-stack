@@ -318,3 +318,9 @@ export function createRetryManager(
 ): SSORetryManager {
 	return new SSORetryManager(options)
 }
+
+/**
+ * Default shared SSO retry manager instance.
+ * Import this instead of creating your own instance unless you need custom options.
+ */
+export const ssoRetryManager = new SSORetryManager()

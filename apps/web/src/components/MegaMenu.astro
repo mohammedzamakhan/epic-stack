@@ -189,8 +189,9 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
     const triggers = document.querySelectorAll('.mega-menu-trigger')
 
     triggers.forEach((trigger) => {
-      const panel = trigger.parentElement?.querySelector('.mega-menu-panel')!
+      const panel = trigger.parentElement?.querySelector('.mega-menu-panel')
       if (!panel) return
+      const targetPanel = panel
 
       function handleKeydown(e: Event) {
         const keyEvent = e as KeyboardEvent
@@ -198,13 +199,13 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
           keyEvent.preventDefault()
           const isExpanded = trigger.getAttribute('aria-expanded') === 'true'
           trigger.setAttribute('aria-expanded', String(!isExpanded))
-          panel.classList.toggle('opacity-0')
-          panel.classList.toggle('invisible')
+          targetPanel.classList.toggle('opacity-0')
+          targetPanel.classList.toggle('invisible')
         }
 
         if (keyEvent.key === 'Escape') {
           trigger.setAttribute('aria-expanded', 'false')
-          panel.classList.add('opacity-0', 'invisible')
+          targetPanel.classList.add('opacity-0', 'invisible')
           ;(trigger as HTMLElement).focus()
         }
       }
@@ -219,7 +220,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
 
       function handleFocus() {
         trigger.setAttribute('aria-expanded', 'true')
-        panel.classList.remove('opacity-0', 'invisible')
+        targetPanel.classList.remove('opacity-0', 'invisible')
       }
 
       function handleFocusOut(e: Event) {
@@ -227,7 +228,7 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
         const container = trigger.parentElement
         if (container && !container.contains(focusEvent.relatedTarget as Node)) {
           trigger.setAttribute('aria-expanded', 'false')
-          panel.classList.add('opacity-0', 'invisible')
+          targetPanel.classList.add('opacity-0', 'invisible')
         }
       }
 

@@ -268,6 +268,7 @@ export interface OAuthCallbackParams {
 	error?: string
 	errorDescription?: string
 	oauthToken?: string
+	oauthVerifier?: string
 }
 
 // OAuth state data

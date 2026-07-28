@@ -1,9 +1,17 @@
+import crypto from 'node:crypto'
 import { cache } from '@repo/cache'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { redirect } from 'react-router'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import { type Route } from './+types/cache_.sqlite.ts'
+
+function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
+	if (!a || !b) return false
+	const hashA = crypto.createHash('sha256').update(a).digest()
+	const hashB = crypto.createHash('sha256').update(b).digest()
+	return crypto.timingSafeEqual(hashA, hashB)
+}
 
 export async function action({ request }: Route.ActionArgs) {
 	const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
@@ -13,8 +21,8 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 	}
 	const token = ENV.INTERNAL_COMMAND_TOKEN
-	const isAuthorized =
-		request.headers.get('Authorization') === `Bearer ${token}`
+	const authHeader = request.headers.get('Authorization')
+	const isAuthorized = safeCompare(authHeader, `Bearer ${token}`)
 	if (!isAuthorized) {
 		// nah, you can't be here...
 		return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')

@@ -1,10 +1,16 @@
+import { requireUserId } from '@repo/auth'
 import { calculateReorderPosition } from '@repo/common'
 import { prisma } from '@repo/database'
 import { type ActionFunction } from 'react-router'
 import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import {
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+} from '#app/utils/organization/permissions.server.ts'
 
 export const action: ActionFunction = async ({ request, params }) => {
 	const organization = await validateOrgAccess(request, params.orgSlug)
+	const userId = await requireUserId(request)
 
 	const formData = await request.formData()
 	const noteId = formData.get('noteId')?.toString()
@@ -15,6 +21,26 @@ export const action: ActionFunction = async ({ request, params }) => {
 	const targetIndex = Number(positionStr)
 	if (!Number.isInteger(targetIndex) || targetIndex < 0) {
 		return new Response('Invalid position', { status: 400 })
+	}
+
+	const noteToMove = await prisma.organizationNote.findFirst({
+		where: { id: noteId, organizationId: organization.id },
+		select: { id: true, createdById: true },
+	})
+	if (!noteToMove) return new Response('Note not found', { status: 404 })
+
+	if (noteToMove.createdById === userId) {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.UPDATE_NOTE_OWN,
+		)
+	} else {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.UPDATE_NOTE_ANY,
+		)
 	}
 
 	// Validate statusId (if provided)

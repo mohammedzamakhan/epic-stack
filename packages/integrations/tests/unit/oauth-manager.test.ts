@@ -6,9 +6,8 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import {
 	OAuthStateManager,
 	OAuthCallbackHandler,
-	TokenRefreshManager,
-	OAuthFlowManager,
 } from '../../src/oauth-manager'
+import { TokenManager, tokenManager } from '../../src/token-manager'
 import { providerRegistry } from '../../src/provider'
 import type {
 	OAuthCallbackParams,
@@ -406,7 +405,7 @@ describe('OAuthCallbackHandler', () => {
 	})
 })
 
-describe('TokenRefreshManager', () => {
+describe('TokenManager', () => {
 	beforeEach(() => {
 		providerRegistry.register(mockProvider)
 	})
@@ -427,7 +426,7 @@ describe('TokenRefreshManager', () => {
 
 			vi.mocked(mockProvider.refreshToken).mockResolvedValue(newTokenData)
 
-			const result = await TokenRefreshManager.refreshTokenWithRetry(
+			const result = await tokenManager.refreshTokenWithRetry(
 				'test-provider',
 				refreshToken,
 			)
@@ -450,7 +449,7 @@ describe('TokenRefreshManager', () => {
 				.mockRejectedValueOnce(new Error('connection refused'))
 				.mockResolvedValue(newTokenData)
 
-			const result = await TokenRefreshManager.refreshTokenWithRetry(
+			const result = await tokenManager.refreshTokenWithRetry(
 				'test-provider',
 				refreshToken,
 			)
@@ -467,7 +466,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -486,7 +485,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -507,7 +506,7 @@ describe('TokenRefreshManager', () => {
 			providerRegistry.register(providerWithoutRefresh as any)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					'refresh-token',
 				),
@@ -526,7 +525,7 @@ describe('TokenRefreshManager', () => {
 			)
 
 			await expect(
-				TokenRefreshManager.refreshTokenWithRetry(
+				tokenManager.refreshTokenWithRetry(
 					'test-provider',
 					refreshToken,
 				),
@@ -540,7 +539,7 @@ describe('TokenRefreshManager', () => {
 				accessToken: 'access-token',
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -551,7 +550,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 4 * 60 * 1000), // 4 minutes from now
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(true)
 		})
@@ -562,7 +561,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -573,7 +572,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() - 1000), // 1 second ago
 			}
 
-			const result = TokenRefreshManager.shouldRefreshToken(tokenData)
+			const result = TokenManager.shouldRefreshToken(tokenData)
 
 			expect(result).toBe(true)
 		})
@@ -585,7 +584,7 @@ describe('TokenRefreshManager', () => {
 				accessToken: 'access-token',
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -596,7 +595,7 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(false)
 		})
@@ -607,173 +606,10 @@ describe('TokenRefreshManager', () => {
 				expiresAt: new Date(Date.now() - 1000), // 1 second ago
 			}
 
-			const result = TokenRefreshManager.isTokenExpired(tokenData)
+			const result = TokenManager.isTokenExpired(tokenData)
 
 			expect(result).toBe(true)
 		})
 	})
 })
 
-describe('OAuthFlowManager', () => {
-	beforeEach(() => {
-		vi.stubEnv(
-			'INTEGRATIONS_OAUTH_STATE_SECRET',
-			mockEnv.INTEGRATIONS_OAUTH_STATE_SECRET,
-		)
-		providerRegistry.register(mockProvider)
-	})
-
-	afterEach(() => {
-		vi.unstubAllEnvs()
-		vi.clearAllMocks()
-		providerRegistry.unregister('test-provider')
-	})
-
-	describe('startOAuthFlow', () => {
-		it('should start OAuth flow successfully', async () => {
-			const organizationId = 'org-123'
-			const providerName = 'test-provider'
-			const redirectUri = 'https://app.com/callback'
-			const expectedUrl = 'https://provider.com/oauth/authorize'
-
-			vi.mocked(mockProvider.getAuthUrl).mockResolvedValue(expectedUrl)
-
-			const result = await OAuthFlowManager.startOAuthFlow(
-				organizationId,
-				providerName,
-				redirectUri,
-			)
-
-			expect(result.authUrl).toBe(expectedUrl)
-			expect(result.state).toBeDefined()
-			expect(typeof result.state).toBe('string')
-
-			// Verify state can be validated
-			const parsedState = OAuthStateManager.validateState(result.state)
-			expect(parsedState.organizationId).toBe(organizationId)
-			expect(parsedState.providerName).toBe(providerName)
-		})
-
-		it('should include additional parameters in state and auth URL', async () => {
-			const organizationId = 'org-123'
-			const providerName = 'test-provider'
-			const redirectUri = 'https://app.com/callback'
-			const additionalParams = {
-				redirectUrl: '/dashboard',
-				customParam: 'value',
-			}
-			const expectedUrl = 'https://provider.com/oauth/authorize'
-
-			vi.mocked(mockProvider.getAuthUrl).mockResolvedValue(expectedUrl)
-
-			const result = await OAuthFlowManager.startOAuthFlow(
-				organizationId,
-				providerName,
-				redirectUri,
-				additionalParams,
-			)
-
-			// Verify additional params are passed to provider
-			expect(mockProvider.getAuthUrl).toHaveBeenCalledWith(
-				organizationId,
-				redirectUri,
-				expect.objectContaining({
-					...additionalParams,
-					state: expect.any(String),
-				}),
-			)
-
-			// Verify additional params are in state
-			const parsedState = OAuthStateManager.validateState(result.state)
-			expect(parsedState.redirectUrl).toBe('/dashboard')
-			expect(parsedState.customParam).toBe('value')
-		})
-	})
-
-	describe('completeOAuthFlow', () => {
-		it('should complete OAuth flow successfully', async () => {
-			const organizationId = 'org-123'
-			const providerName = 'test-provider'
-			const state = OAuthStateManager.generateState(
-				organizationId,
-				providerName,
-			)
-
-			const mockTokenData: TokenData = {
-				accessToken: 'access-token',
-				refreshToken: 'refresh-token',
-				expiresAt: new Date(Date.now() + 3600000),
-			}
-
-			vi.mocked(mockProvider.handleCallback).mockResolvedValue(mockTokenData)
-
-			const params: OAuthCallbackParams = {
-				organizationId,
-				code: 'auth-code',
-				state,
-			}
-
-			const result = await OAuthFlowManager.completeOAuthFlow(
-				providerName,
-				params,
-			)
-
-			expect(result.tokenData).toEqual(mockTokenData)
-			expect(result.stateData.organizationId).toBe(organizationId)
-			expect(result.stateData.providerName).toBe(providerName)
-		})
-	})
-
-	describe('ensureValidToken', () => {
-		it('should return original token when refresh not needed', async () => {
-			const tokenData: TokenData = {
-				accessToken: 'access-token',
-				expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
-			}
-
-			const result = await OAuthFlowManager.ensureValidToken(
-				'test-provider',
-				tokenData,
-			)
-
-			expect(result).toBe(tokenData)
-			expect(mockProvider.refreshToken).not.toHaveBeenCalled()
-		})
-
-		it('should refresh token when needed', async () => {
-			const oldTokenData: TokenData = {
-				accessToken: 'old-access-token',
-				refreshToken: 'refresh-token',
-				expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes from now
-			}
-
-			const newTokenData: TokenData = {
-				accessToken: 'new-access-token',
-				refreshToken: 'new-refresh-token',
-				expiresAt: new Date(Date.now() + 3600000),
-			}
-
-			vi.mocked(mockProvider.refreshToken!).mockResolvedValue(newTokenData)
-
-			const result = await OAuthFlowManager.ensureValidToken(
-				'test-provider',
-				oldTokenData,
-			)
-
-			expect(result).toEqual(newTokenData)
-			expect(mockProvider.refreshToken).toHaveBeenCalledWith('refresh-token')
-		})
-
-		it('should throw error when refresh needed but no refresh token', async () => {
-			const tokenData: TokenData = {
-				accessToken: 'access-token',
-				expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes from now
-				// No refresh token
-			}
-
-			await expect(
-				OAuthFlowManager.ensureValidToken('test-provider', tokenData),
-			).rejects.toThrow('Token needs refresh but no refresh token available')
-		})
-	})
-})

@@ -7,10 +7,14 @@ description = "Allowlist for false positives"
 paths = [
   '''apps/docs/security/secure-coding\.mdx''',
   '''docs/.*\.md''',
-  '''.*\.md'''
+  '''.*\.md''',
+  '''tests/fixtures/.*''',
+  '''__mocks__/.*'''
 ]
 
-# Ignore test fixtures and mock data
+# Allow specific dummy/mock secret strings used in automated unit test environment setup
 regexes = [
-  '''(test|mock|fixture|example)''',
+  '''0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef''',
+  '''test-secret-key-for-oauth-state-validation-12345''',
+  '''dev-audit-secret-change-in-production'''
 ]

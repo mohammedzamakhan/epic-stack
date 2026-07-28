@@ -70,7 +70,7 @@ const JWKS_CACHE_TTL = 60 * 60 * 1000 // 1 hour
 /**
  * Fetch JWKS from the identity provider
  */
-async function fetchJWKS(jwksUrl: string): Promise<jose.JSONWebKeySet> {
+export async function fetchJWKS(jwksUrl: string): Promise<jose.JSONWebKeySet> {
 	// Check cache first
 	const cached = jwksCache.get(jwksUrl)
 	if (cached && Date.now() - cached.timestamp < JWKS_CACHE_TTL) {

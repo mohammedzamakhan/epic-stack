@@ -2,9 +2,18 @@ import { calculateReorderPosition } from '@repo/common'
 import { prisma } from '@repo/database'
 import { type ActionFunction } from 'react-router'
 import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import {
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+} from '#app/utils/organization/permissions.server.ts'
 
 export const action: ActionFunction = async ({ request, params }) => {
 	const organization = await validateOrgAccess(request, params.orgSlug)
+	await requireUserWithOrganizationPermission(
+		request,
+		organization.id,
+		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+	)
 
 	const formData = await request.formData()
 	const statusId = formData.get('statusId')?.toString()

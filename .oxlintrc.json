@@ -1,6 +1,7 @@
 {
 	"$schema": "https://oxc.rs/schema/oxlintrc.json",
 	"rules": {
+		"no-unused-vars": ["warn", { "varsIgnorePattern": "^(_|ignored)", "argsIgnorePattern": "^(_|ignored)" }],
 		"react": "warn",
 		"typescript": "warn",
 		"import": "warn",

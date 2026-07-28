@@ -4,6 +4,7 @@ import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
+import { revokeAllRefreshTokens } from '#app/utils/jwt.server.ts'
 
 export async function action({ request, params }: ActionFunctionArgs) {
 	const adminUserId = await requireUserWithRole(request, 'admin')
@@ -70,6 +71,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		await prisma.session.deleteMany({
 			where: { userId },
 		})
+
+		// Revoke all mobile refresh tokens
+		await revokeAllRefreshTokens(userId)
 
 		// Log the ban action
 		await auditService.logUserManagement(

@@ -2,6 +2,7 @@
 import { s3Storage } from '@payloadcms/storage-s3'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
+import crypto from 'node:crypto'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
@@ -102,7 +103,13 @@ export default buildConfig({
         // for the Vercel Cron secret to be present as an
         // Authorization header:
         const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+        const cronSecret = process.env.CRON_SECRET
+        if (!authHeader || !cronSecret) return false
+
+        const expectedHeader = `Bearer ${cronSecret}`
+        const hashA = crypto.createHash('sha256').update(authHeader).digest()
+        const hashB = crypto.createHash('sha256').update(expectedHeader).digest()
+        return crypto.timingSafeEqual(hashA, hashB)
       },
     },
     tasks: [],

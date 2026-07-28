@@ -73,6 +73,26 @@ export async function handleUpdateIntegrationConfig(
 			return Response.json({ error: 'Integration not found' }, { status: 404 })
 		}
 
+		// Validate Jira configuration instanceUrl / siteUrl before saving
+		if (integration.providerName === 'jira') {
+			const instanceUrl = config.instanceUrl ?? config.siteUrl
+			if (instanceUrl !== undefined) {
+				const jiraUrlPattern = /^https:\/\/[a-zA-Z0-9-]+\.atlassian\.net\/?$/
+				if (
+					typeof instanceUrl !== 'string' ||
+					!jiraUrlPattern.test(instanceUrl)
+				) {
+					return Response.json(
+						{
+							error:
+								'Invalid Jira instance URL. Must be a valid Atlassian Cloud domain.',
+						},
+						{ status: 400 },
+					)
+				}
+			}
+		}
+
 		// Special handling for Jira bot user configuration
 		if (integration.providerName === 'jira' && 'useBotUser' in config) {
 			// Validate bot user if enabled

@@ -40,6 +40,19 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const objectKey = searchParams.get('objectKey')
 	const organizationId = searchParams.get('organizationId')
 
+	if (objectKey) {
+		// SECURITY: Verify object-key entropy and format safety to prevent brute-force enumeration or path traversal
+		if (
+			objectKey.length < 16 ||
+			objectKey.includes('..') ||
+			!/^[a-zA-Z0-9_\-./]+$/.test(objectKey)
+		) {
+			invariantResponse(false, 'Invalid or low-entropy objectKey parameter', {
+				status: 400,
+			})
+		}
+	}
+
 	return getImgResponse(request, {
 		headers,
 		allowlistedOrigins: [

@@ -19,9 +19,8 @@ third-party services like Slack, Microsoft Teams, and other productivity tools.
 - **BaseIntegrationProvider**: Abstract base class with common functionality
 - **ProviderRegistry**: Registry for managing integration providers
 
-### Integration Service (`service.ts`)
+### Message Formatting (`message-formatting.ts`)
 
-- **IntegrationService**: Main service for managing integrations
 - **MessageFormatter**: Interface for formatting messages for different
   providers
 - **BaseMessageFormatter**: Base implementation with common formatting utilities
@@ -203,7 +202,7 @@ console.log('INTEGRATION_ENCRYPTION_KEY=' + key)
 import {
 	initializeIntegrations,
 	providerRegistry,
-	integrationService,
+	integrationManager,
 	tokenManager,
 } from '#app/utils/integrations'
 
@@ -214,14 +213,14 @@ initializeIntegrations()
 const slackProvider = providerRegistry.get('slack')
 
 // Start OAuth flow (now returns auth URL and state)
-const { authUrl, state } = await integrationService.initiateOAuth(
+const { authUrl, state } = await integrationManager.initiateOAuth(
 	'org-123',
 	'slack',
 	'https://app.example.com/oauth/callback',
 )
 
 // Handle OAuth callback
-const { tokenData, stateData } = await integrationService.handleOAuthCallback(
+const { tokenData, stateData } = await integrationManager.handleOAuthCallback(
 	'slack',
 	{
 		code: 'auth-code',
@@ -255,7 +254,7 @@ npx tsx apps/web/app/utils/integrations/verify-oauth-manager.ts
 - Core type definitions and interfaces
 - IntegrationProvider interface and base classes
 - ProviderRegistry for managing providers
-- IntegrationService base structure
+- IntegrationManager base structure
 - **Token encryption and security utilities (AES-256-GCM)**
 - **Secure token storage and management**
 - **Rate limiting and security validation**

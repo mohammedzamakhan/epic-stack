@@ -2,6 +2,7 @@ import { getClientIp } from '@repo/common/ip-tracking'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
 import { z } from 'zod'
+import { canUserLogin } from '#app/utils/auth.server.ts'
 import { rotateRefreshToken, createAccessToken } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.refresh.ts'
 
@@ -48,6 +49,19 @@ export async function action({ request }: Route.ActionArgs) {
 					success: false,
 					error: 'user_not_found',
 					message: 'Invalid user',
+				},
+				{ status: 401 },
+			)
+		}
+
+		// Verify user is allowed to log in (not banned)
+		const canLogin = await canUserLogin(userId)
+		if (!canLogin) {
+			return data(
+				{
+					success: false,
+					error: 'user_banned',
+					message: 'User account is disabled or banned',
 				},
 				{ status: 401 },
 			)

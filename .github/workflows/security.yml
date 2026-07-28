@@ -14,6 +14,11 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  HUSKY: 0
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
 jobs:
   dependency-audit:
     name: 📦 Dependency Audit
@@ -26,13 +31,13 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci --ignore-scripts
 
       - name: 🔍 Run npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       - name: 📊 Generate audit report
         run: npm audit --json > npm-audit-report.json || true
@@ -65,7 +70,6 @@ jobs:
             p/sql-injection
             p/xss
             p/command-injection
-        continue-on-error: true
 
       - name: 📤 Upload SARIF results
         uses: github/codeql-action/upload-sarif@439137e1b50c27ba9e2f9befc93e43091b449c34 # v3
@@ -121,13 +125,13 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: 📥 Download deps
-        uses: bahmutov/npm-install@3e063b974f0d209807684aa23e534b3dde517fd9 # v1
+        run: npm ci --ignore-scripts
 
       - name: 🔍 Check licenses
         run: npx license-checker --production --failOn "GPL;AGPL;LGPL" --summary
-        continue-on-error: true
 
   security-summary:
     name: 📊 Security Summary

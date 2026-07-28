@@ -2,6 +2,7 @@
  * GitLab integration provider implementation
  */
 
+import { validateInstanceUrl } from '@repo/security'
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -152,6 +153,10 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		const instanceUrl = (config as any)?.instanceUrl as string
 
 		if (instanceUrl) {
+			const validation = validateInstanceUrl(instanceUrl)
+			if (!validation.valid) {
+				throw new Error(`SSRF security validation failed: ${validation.reason}`)
+			}
 			return instanceUrl.endsWith('/')
 				? `${instanceUrl}api/v4`
 				: `${instanceUrl}/api/v4`

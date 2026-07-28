@@ -30,13 +30,14 @@ export {
 	providerRegistry,
 } from './provider'
 
-// Integration service and manager
+// Message formatting
 export {
-	IntegrationService,
 	type MessageFormatter,
 	BaseMessageFormatter,
-	integrationService,
-} from './service'
+	formatNoteMessage,
+	truncateContent,
+	generateNoteUrl,
+} from './message-formatting'
 
 export {
 	IntegrationManager,
@@ -66,21 +67,16 @@ export {
 } from './token-manager'
 
 // OAuth flow management
-export {
-	OAuthStateManager,
-	OAuthCallbackHandler,
-	TokenRefreshManager,
-	OAuthFlowManager,
-} from './oauth-manager'
+export { oauthFlow } from './oauth-flow'
 
 // Note notification system
 export {
-	NoteEventHandler,
-	noteEventHandler,
+	NoteNotifier,
+	noteNotifier,
 	type NoteChangeType,
 	type NoteChangeEvent,
 	type NoteEventResult,
-} from './note-event-handler'
+} from './note-notifier'
 
 export {
 	NoteHooks,

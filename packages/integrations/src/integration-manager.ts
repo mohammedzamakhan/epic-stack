@@ -21,13 +21,11 @@ import { type IntegrationProvider, providerRegistry } from './provider'
 import {
 	type TokenData,
 	type Channel,
-	type MessageData,
 	type OAuthCallbackParams,
 	type IntegrationStatus,
 	type ProviderType,
 	type IntegrationLogEntry,
 } from './types'
-import { OAuthStateManager } from './oauth-manager'
 
 /**
  * Extended Integration type with relations
@@ -153,20 +151,8 @@ export class IntegrationManager {
 		authUrl: string
 		state: string
 	}> {
-		const provider = this.getProvider(providerName)
-
-		// Get authorization URL from provider (provider will generate its own state)
-		const authUrl = await provider.getAuthUrl(
-			organizationId,
-			redirectUri,
-			additionalParams,
-		)
-
-		// Extract state from the URL for consistency
-		const url = new URL(authUrl)
-		const state = url.searchParams.get('state') || ''
-
-		return { authUrl, state }
+		const { oauthFlow } = await import('./oauth-flow')
+		return oauthFlow.start(organizationId, providerName, redirectUri, additionalParams)
 	}
 
 	/**
@@ -179,53 +165,8 @@ export class IntegrationManager {
 		providerName: string,
 		params: OAuthCallbackParams,
 	): Promise<Integration> {
-		const provider = this.getProvider(providerName)
-
-		// Parse simplified state
-		let stateData
-
-		// Check if this is an OAuth 1.0a flow (Trello) with a generated state
-		if (params.state.startsWith('trello-oauth1-')) {
-			// For OAuth 1.0a flows, we don't validate the state in the traditional way
-			// The organization context was already validated in the callback handler
-			stateData = {
-				organizationId: params.organizationId,
-				providerName: providerName,
-				timestamp: Date.now(),
-			}
-		} else {
-			// Standard OAuth 2.0 state validation
-			try {
-				stateData = OAuthStateManager.validateState(params.state)
-			} catch {
-				throw new Error('Invalid OAuth state')
-			}
-
-			if (stateData.providerName !== providerName) {
-				throw new Error('Provider name mismatch in OAuth state')
-			}
-		}
-
-		// Handle OAuth callback with provider
-		const tokenData = await provider.handleCallback(params)
-
-		// Create integration in database
-		const integration = await this.createIntegration({
-			organizationId: stateData.organizationId,
-			providerName,
-			tokenData,
-			config: {},
-		})
-
-		// Log successful OAuth completion
-		await this.logIntegrationActivity(
-			integration.id,
-			'oauth_complete',
-			'success',
-			{ provider: providerName },
-		)
-
-		return integration
+		const { oauthFlow } = await import('./oauth-flow')
+		return oauthFlow.complete(providerName, params)
 	}
 
 	// Integration CRUD Operations
@@ -579,112 +520,6 @@ export class IntegrationManager {
 
 	// Message Posting and Notifications
 
-	/**
-	 * Handle note updates and post to connected channels
-	 * @param noteId - Note ID that was updated
-	 * @param changeType - Type of change
-	 * @param userId - User who made the change
-	 */
-	async handleNoteUpdate(
-		noteId: string,
-		changeType: 'created' | 'updated' | 'deleted',
-		userId: string,
-	): Promise<void> {
-		// Get note connections
-		const connections = await this.getNoteConnections(noteId)
-
-		if (connections.length === 0) {
-			return // No connections to notify
-		}
-
-		// Get note and user details
-		const note = await prisma.organizationNote.findUnique({
-			where: { id: noteId },
-		})
-
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-		})
-
-		if (!note || !user) {
-			throw new Error('Note or user not found')
-		}
-
-		// Format message
-		const message: MessageData = {
-			title: note.title,
-			content: this.truncateContent(note.content || ''),
-			author: user.name || user.username,
-			noteUrl: this.generateNoteUrl(note),
-			changeType,
-		}
-
-		// Post to all connected channels
-		const results = await Promise.allSettled(
-			connections.map((connection) =>
-				this.postMessageToConnection(connection, message),
-			),
-		)
-
-		// Log overall results
-		const successCount = results.filter((r) => r.status === 'fulfilled').length
-		const errorCount = results.filter((r) => r.status === 'rejected').length
-
-		if (errorCount > 0) {
-			console.warn(
-				`Note update notification: ${successCount} succeeded, ${errorCount} failed`,
-			)
-		}
-	}
-
-	/**
-	 * Post a message to a specific connection
-	 * @param connection - Connection to post to
-	 * @param message - Message to post
-	 */
-	private async postMessageToConnection(
-		connection: ConnectionWithRelations,
-		message: MessageData,
-	): Promise<void> {
-		try {
-			const provider = this.getProvider(connection.integration.providerName)
-			await provider.postMessage(connection, message)
-
-			// Update last posted timestamp
-			await prisma.noteIntegrationConnection.update({
-				where: { id: connection.id },
-				data: { lastPostedAt: new Date() },
-			})
-
-			// Log successful post
-			await this.logIntegrationActivity(
-				connection.integrationId,
-				'post_message',
-				'success',
-				{
-					noteId: connection.noteId,
-					channelId: connection.externalId,
-					changeType: message.changeType,
-				},
-			)
-		} catch (error) {
-			// Log error but don't throw to allow other connections to succeed
-			await this.logIntegrationActivity(
-				connection.integrationId,
-				'post_message',
-				'error',
-				{
-					noteId: connection.noteId,
-					channelId: connection.externalId,
-					changeType: message.changeType,
-				},
-				error instanceof Error ? error.message : 'Unknown error',
-			)
-
-			throw error // Re-throw for Promise.allSettled handling
-		}
-	}
-
 	// Token Management
 
 	/**
@@ -702,54 +537,26 @@ export class IntegrationManager {
 			throw new Error('No refresh token available')
 		}
 
+		const { tokenManager } = await import('./token-manager')
 		const provider = this.getProvider(integration.providerName)
-
-		// Decrypt current refresh token
 		const { decryptToken } = await import('./encryption')
 		const refreshToken = await decryptToken(integration.refreshToken)
 
-		try {
-			// Get new tokens from provider
-			const tokenData = await provider.refreshToken(refreshToken)
+		const result = await tokenManager.refreshToken(
+			integration,
+			provider,
+			refreshToken,
+		)
 
-			// Encrypt new tokens
-			const { encryptToken } = await import('./encryption')
-			const encryptedAccessToken = await encryptToken(tokenData.accessToken)
-			const encryptedRefreshToken = tokenData.refreshToken
-				? await encryptToken(tokenData.refreshToken)
-				: integration.refreshToken // Keep existing if not provided
-
-			// Update integration
-			const updatedIntegration = await prisma.integration.update({
-				where: { id: integrationId },
-				data: {
-					accessToken: encryptedAccessToken,
-					refreshToken: encryptedRefreshToken,
-					tokenExpiresAt: tokenData.expiresAt,
-					lastSyncAt: new Date(),
-				},
-			})
-
-			// Log successful refresh
-			await this.logIntegrationActivity(
-				integrationId,
-				'token_refresh',
-				'success',
-			)
-
-			return updatedIntegration
-		} catch (error) {
-			// Log error
-			await this.logIntegrationActivity(
-				integrationId,
-				'token_refresh',
-				'error',
-				undefined,
-				error instanceof Error ? error.message : 'Unknown error',
-			)
-
-			throw error
+		if (!result.success) {
+			throw new Error(result.error || 'Token refresh failed')
 		}
+
+		const updated = await this.getIntegration(integrationId)
+		if (!updated) {
+			throw new Error('Failed to retrieve updated integration')
+		}
+		return updated
 	}
 
 	// Validation and Health Checks

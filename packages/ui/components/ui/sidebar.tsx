@@ -3,7 +3,7 @@ import { useRender } from '@base-ui/react/use-render'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 
-import { useIsMobile } from '../../hooks/use-mobile'
+import { useIsMobile } from '../../utils/use-mobile'
 import { cn } from '../../lib/utils'
 import { Icon } from '../icon'
 import { Button } from './button'

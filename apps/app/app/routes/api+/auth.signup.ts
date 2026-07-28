@@ -62,20 +62,18 @@ export async function action({ request }: Route.ActionArgs) {
 		const { email } = submission.value
 
 		// Prepare verification (sends email with 6-digit code)
-		const { verifyUrl, otp } = await prepareVerification({
+		await prepareVerification({
 			period: 10 * 60, // 10 minutes
 			request,
 			type: 'onboarding',
 			target: email,
 		})
 
-		// For API, we return the verification info instead of sending email
 		return data({
 			success: true,
 			data: {
 				email,
 				verificationRequired: true,
-				verifyUrl: verifyUrl.toString(),
 			},
 		})
 	} catch (error) {

@@ -6,7 +6,7 @@ import {
 	useRef,
 	type HTMLAttributes,
 } from 'react'
-import { cn } from '../utils/cn'
+import { cn } from '../lib/utils'
 
 export interface SquarePenIconHandle {
 	startAnimation: () => void
