@@ -17,6 +17,7 @@ permissions:
   deployments: write
 
 env:
+  CI: 'true'
   CLOUDFLARE_PROJECT_NAME: epic-startup-web
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
@@ -26,6 +27,7 @@ jobs:
   preview-deploy:
     name: 🚀 Preview Deploy
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     outputs:
       preview_url: ${{ steps.deploy.outputs.url }}
       deployment_id: ${{ steps.deploy.outputs.id }}
@@ -104,6 +106,7 @@ jobs:
   lighthouse:
     name: 🔦 Lighthouse Audit
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: preview-deploy
     steps:
       - name: ⬇️ Checkout repo
@@ -291,6 +294,7 @@ jobs:
   performance-gate:
     name: 🚦 Performance Gate
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     needs: [preview-deploy, lighthouse]
     steps:
       - name: ⬇️ Checkout repo

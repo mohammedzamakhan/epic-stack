@@ -16,6 +16,7 @@ permissions:
   contents: read
 
 env:
+  CI: 'true'
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
@@ -25,6 +26,7 @@ jobs:
   affected:
     name: 📊 Detect Affected Projects
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     outputs:
       app: ${{ steps.affected.outputs.app }}
       admin: ${{ steps.affected.outputs.admin }}
@@ -63,6 +65,7 @@ jobs:
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -86,6 +89,7 @@ jobs:
   typecheck:
     name: ʦ TypeScript
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -115,6 +119,7 @@ jobs:
   vitest:
     name: ⚡ Vitest
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -179,6 +184,7 @@ jobs:
   deploy-web:
     name: 🌐 Deploy Web App
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: [lint, typecheck, vitest, affected]
     # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
@@ -223,6 +229,7 @@ jobs:
   container-app:
     name: 📦 Prepare App Container
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
@@ -274,6 +281,7 @@ jobs:
   container-admin:
     name: 📦 Prepare Admin Container
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if admin was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
@@ -325,6 +333,7 @@ jobs:
   container-cms:
     name: 📦 Prepare CMS Container
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if cms was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
@@ -375,6 +384,7 @@ jobs:
   deploy-app:
     name: 🚀 Deploy App
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     needs: [lint, typecheck, vitest, playwright, container-app, affected]
     # only deploy on pushes or merged PRs AND if app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
@@ -417,6 +427,7 @@ jobs:
   deploy-admin:
     name: 🚀 Deploy Admin
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     needs: [lint, typecheck, vitest, playwright, container-admin, affected]
     # only deploy on pushes or merged PRs AND if admin was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
@@ -459,6 +470,7 @@ jobs:
   deploy-cms:
     name: 🚀 Deploy CMS
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     needs: [lint, typecheck, vitest, container-cms, affected]
     # only deploy on pushes or merged PRs AND if cms was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
