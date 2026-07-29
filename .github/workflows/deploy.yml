@@ -17,7 +17,7 @@ permissions:
 
 env:
   CI: 'true'
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+  NX_NO_CLOUD: 'true'
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -58,10 +58,10 @@ jobs:
           fi
           
           # Check which projects are affected
-          echo "app=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "app=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "admin=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "web=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "cms=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
