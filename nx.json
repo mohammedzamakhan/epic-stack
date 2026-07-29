@@ -77,6 +77,5 @@
 			"outputs": ["{projectRoot}/.mintlify/doc-build/**"],
 			"cache": true
 		}
-	},
-	"nxCloudId": "68f550d1653e03e11b484ba9"
+	}
 }
