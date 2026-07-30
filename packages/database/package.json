@@ -26,9 +26,7 @@
   },
   "dependencies": {
     "@epic-web/remember": "^1.1.0",
-    "@prisma/client": "^6.19.2",
-    "@repo/auth": "*",
-    "@repo/test-utils": "*"
+    "@prisma/client": "^6.19.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.7.0",
