@@ -52,31 +52,19 @@ jobs:
       - name: 📊 Check affected projects
         id: affected
         run: |
-          set -x
-          echo "=== DEBUG: Testing git & nx environment ==="
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             BASE_REF="${{ github.event.pull_request.base.ref }}"
           else
             BASE_REF="HEAD~1"
           fi
-          echo "BASE_REF is: $BASE_REF"
-
-          echo "=== Fetching origin/$BASE_REF ==="
           git fetch origin $BASE_REF || true
 
-          echo "=== Testing nx show projects --affected ==="
-          npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD || npx nx show projects --affected --base=$BASE_REF --head=HEAD || true
+          AFFECTED_LIST=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app 2>/dev/null || npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app 2>/dev/null || echo "")
 
-          APP_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'app' && echo 'true' || echo 'false')
-          ADMIN_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'admin' && echo 'true' || echo 'false')
-          WEB_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'web' && echo 'true' || echo 'false')
-          CMS_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'cms' && echo 'true' || echo 'false')
-
-          echo "app=$APP_VAL" >> $GITHUB_OUTPUT
-          echo "admin=$ADMIN_VAL" >> $GITHUB_OUTPUT
-          echo "web=$WEB_VAL" >> $GITHUB_OUTPUT
-          echo "cms=$CMS_VAL" >> $GITHUB_OUTPUT
-          echo "Detected outputs: app=$APP_VAL admin=$ADMIN_VAL web=$WEB_VAL cms=$CMS_VAL"
+          echo "app=$(echo "$AFFECTED_LIST" | grep -w 'app' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "admin=$(echo "$AFFECTED_LIST" | grep -w 'admin' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "web=$(echo "$AFFECTED_LIST" | grep -w 'web' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "cms=$(echo "$AFFECTED_LIST" | grep -w 'cms' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
   lint:
     name: 🔬 Lint
@@ -102,11 +90,10 @@ jobs:
       - name: ⚡ Lint (Oxc - Fast)
         run: npm run lint:oxc
 
-  # Temporarily testing step-by-step: TypeScript job enabled with debug logs
   typecheck:
     name: ʦ TypeScript
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -127,26 +114,76 @@ jobs:
         run:
           npm run db:migrate:deploy && npm run db:generate
 
-      - name: 🏗 Build (Debug mode)
-        run: |
-          echo "=== Running icons generation ==="
-          node packages/ui/generate-icons.js
-          echo "=== Running nx build with --verbose ==="
-          npx nx run-many -t build --verbose
+      - name: 🏗 Generate UI Icons
+        run: node packages/ui/generate-icons.js
 
       - name: 🔎 Type check
         run: npm run typecheck --if-present
 
-# Other jobs temporarily commented out to test step-by-step:
-#  vitest: ...
-#  playwright: ...
+  vitest:
+    name: ⚡ Vitest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
 
-  deploy-web:
-    name: 🌐 Deploy Web App
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    needs: [lint, typecheck, affected]
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
+
+      - name: 🛠 Setup Database
+        run:
+          npm run db:migrate:deploy && npm run db:generate
+
+      - name: ⚡ Run vitest
+        run: npm run test -- -- --coverage
+
+  playwright:
+    name: 🎭 Playwright
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: 🔑 Inject CMS DATABASE_URI
+        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
+
+      - name: 📥 Install Playwright Browsers
+        run: npm run test:e2e:install
+
+      - name: 🛠 Setup Database
+        run: |
+          npm run db:migrate:deploy && npm run db:generate && npm run db:seed
+
+      - name: 🏗 Build
+        run: npm run build
+
+      - name: 🎭 Playwright tests
+        run: npm run test:e2e:run
+
+      - name: 📊 Upload report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/app/playwright-report/
+          retention-days: 30
     # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
     steps:
