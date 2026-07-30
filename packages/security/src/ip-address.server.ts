@@ -11,7 +11,7 @@
 export interface GetClientIpOptions {
 	/**
 	 * Fallback value to return if no IP can be determined
-	 * @default 'unknown'
+	 * @default '127.0.0.1'
 	 */
 	fallback?: string
 	/**
@@ -66,7 +66,7 @@ export function getClientIp(
 	options: GetClientIpOptions = {},
 ): string | undefined {
 	const {
-		fallback = 'unknown',
+		fallback = '127.0.0.1',
 		returnUndefined = false,
 		trustProxy = process.env.TRUST_PROXY !== 'false',
 		trustedProxyCount = process.env.TRUSTED_PROXY_COUNT
@@ -102,6 +102,9 @@ export function getClientIp(
 	if (flyClientIp) return flyClientIp
 	if (cfConnectingIp) return cfConnectingIp
 
+	const realIp = getHeader('X-Real-IP')
+	if (realIp) return realIp
+
 	// Parse X-Forwarded-For
 	const forwarded = getHeader('X-Forwarded-For')
 	if (forwarded) {
@@ -120,9 +123,6 @@ export function getClientIp(
 			}
 		}
 	}
-
-	const realIp = getHeader('X-Real-IP')
-	if (realIp) return realIp
 
 	// Try to get IP from request object directly (Express/Socket)
 	if (request.ip) return request.ip

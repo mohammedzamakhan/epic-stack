@@ -955,6 +955,7 @@ describe('MCP SSE Endpoint', () => {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
+					'MCP-Protocol-Version': '2025-11-25',
 				},
 				body: JSON.stringify({
 					jsonrpc: '2.0',
@@ -998,6 +999,7 @@ describe('MCP SSE Endpoint', () => {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
 					'MCP-Session-Id': 'invalid-session-id-12345',
+					'MCP-Protocol-Version': '2025-11-25',
 				},
 				body: JSON.stringify({
 					jsonrpc: '2.0',
