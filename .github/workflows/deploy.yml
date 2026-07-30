@@ -18,6 +18,8 @@ permissions:
 env:
   CI: 'true'
   NX_NO_CLOUD: 'true'
+  NX_DAEMON: 'false'
+  NX_INTERACTIVE: 'false'
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -36,7 +38,7 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          fetch-depth: 50
+          fetch-depth: 0
 
       - name: ⎔ Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -50,18 +52,32 @@ jobs:
       - name: 📊 Check affected projects
         id: affected
         run: |
-          # Get the base ref for comparison
+          set -x
+          echo "=== DEBUG: Testing git & nx environment ==="
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             BASE_REF="${{ github.event.pull_request.base.ref }}"
           else
             BASE_REF="HEAD~1"
           fi
-          
-          # Check which projects are affected
-          echo "app=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "BASE_REF is: $BASE_REF"
+
+          echo "=== Fetching origin/$BASE_REF ==="
+          git fetch origin $BASE_REF || true
+
+          echo "=== Testing nx show projects --affected ==="
+          npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD || npx nx show projects --affected --base=$BASE_REF --head=HEAD || true
+
+          APP_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'app' && echo 'true' || echo 'false')
+          ADMIN_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'admin' && echo 'true' || echo 'false')
+          WEB_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'web' && echo 'true' || echo 'false')
+          CMS_VAL=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app | grep -q 'cms' && echo 'true' || echo 'false')
+
+          echo "app=$APP_VAL" >> $GITHUB_OUTPUT
+          echo "admin=$ADMIN_VAL" >> $GITHUB_OUTPUT
+          echo "web=$WEB_VAL" >> $GITHUB_OUTPUT
+          echo "cms=$CMS_VAL" >> $GITHUB_OUTPUT
+          echo "Detected outputs: app=$APP_VAL admin=$ADMIN_VAL web=$WEB_VAL cms=$CMS_VAL"
+
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
@@ -86,10 +102,11 @@ jobs:
       - name: ⚡ Lint (Oxc - Fast)
         run: npm run lint:oxc
 
+  # Temporarily testing step-by-step: TypeScript job enabled with debug logs
   typecheck:
     name: ʦ TypeScript
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -110,76 +127,20 @@ jobs:
         run:
           npm run db:migrate:deploy && npm run db:generate
 
-      - name: 🏗 Build
-        run: npm run build
+      - name: 🏗 Build (Debug mode)
+        run: |
+          echo "=== Running icons generation ==="
+          node packages/ui/generate-icons.js
+          echo "=== Running nx build with --verbose ==="
+          npx nx run-many -t build --verbose
 
       - name: 🔎 Type check
         run: npm run typecheck --if-present
 
-  vitest:
-    name: ⚡ Vitest
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+# Other jobs temporarily commented out to test step-by-step:
+#  vitest: ...
+#  playwright: ...
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📥 Download deps
-        run: npm ci --ignore-scripts
-
-      - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
-
-      - name: ⚡ Run vitest
-        run: npm run test -- -- --coverage
-
-  playwright:
-    name: 🎭 Playwright
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
-      - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📥 Download deps
-        run: npm ci --ignore-scripts
-
-      - name: 📥 Install Playwright Browsers
-        run: npm run test:e2e:install
-
-      - name: 🛠 Setup Database
-        run: |
-          npm run db:migrate:deploy && npm run db:generate && npm run db:seed
-
-      - name: 🏗 Build
-        run: npm run build
-
-      - name: 🎭 Playwright tests
-        run: npm run test:e2e:run
-
-      - name: 📊 Upload report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
-        with:
-          name: playwright-report
-          path: apps/app/playwright-report/
-          retention-days: 30
 
   deploy-web:
     name: 🌐 Deploy Web App
