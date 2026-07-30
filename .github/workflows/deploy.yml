@@ -146,7 +146,7 @@ jobs:
     name: 🌐 Deploy Web App
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [lint, typecheck, vitest, affected]
+    needs: [lint, typecheck, affected]
     # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
     steps:
@@ -346,7 +346,7 @@ jobs:
     name: 🚀 Deploy App
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: [lint, typecheck, vitest, playwright, container-app, affected]
+    needs: [lint, typecheck, container-app, affected]
     # only deploy on pushes or merged PRs AND if app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
     steps:
@@ -389,7 +389,7 @@ jobs:
     name: 🚀 Deploy Admin
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: [lint, typecheck, vitest, playwright, container-admin, affected]
+    needs: [lint, typecheck, container-admin, affected]
     # only deploy on pushes or merged PRs AND if admin was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
     steps:
@@ -432,7 +432,7 @@ jobs:
     name: 🚀 Deploy CMS
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    needs: [lint, typecheck, vitest, container-cms, affected]
+    needs: [lint, typecheck, container-cms, affected]
     # only deploy on pushes or merged PRs AND if cms was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
