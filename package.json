@@ -35,7 +35,7 @@
     "setup:brand": "node scripts/setup-brand.mjs",
     "setup:hosts": "node scripts/setup-hosts.mjs",
     "db:setup": "cd packages/database && npm run setup",
-    "db:generate": "cd packages/database && npm run db:generate",
+    "db:generate": "npx prisma generate --schema=packages/database/schema.prisma && cd packages/database && npm run db:generate",
     "db:push": "cd packages/database && npm run db:push",
     "db:migrate:deploy": "cd packages/database && npm run db:migrate:deploy",
     "db:seed": "cd packages/database && npm run db:seed",
@@ -93,6 +93,7 @@
     "zod": "^3.25.76"
   },
   "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.25.0",
     "@oxlint/binding-linux-x64-gnu": "^1.23.0",
     "@oxlint/binding-linux-x64-musl": "^1.23.0",
     "@rollup/rollup-linux-x64-gnu": "^4.32.1",
