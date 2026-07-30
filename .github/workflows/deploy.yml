@@ -132,10 +132,10 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate
 
       - name: 🏗 Build
-        run: npm run build
+        run: node packages/ui/generate-icons.js && npx nx run-many -t build --skip-nx-cache --outputStyle=stream
 
       - name: 🔎 Type check
-        run: npm run typecheck
+        run: npx nx run-many -t typecheck --skip-nx-cache --outputStyle=stream
 
   vitest:
     name: ⚡ Vitest
@@ -159,7 +159,7 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Run vitest
-        run: npm run test -- -- --coverage
+        run: npx nx run-many -t test --skip-nx-cache --outputStyle=stream -- --coverage
 
   playwright:
     name: 🎭 Playwright
@@ -189,10 +189,10 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate && npm run db:seed
 
       - name: 🏗 Build
-        run: npm run build
+        run: node packages/ui/generate-icons.js && npx nx run-many -t build --skip-nx-cache --outputStyle=stream
 
       - name: 🎭 Playwright tests
-        run: npm run test:e2e:run
+        run: npx nx run-many -t test:e2e:run --skip-nx-cache --outputStyle=stream
 
       - name: 📊 Upload report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
