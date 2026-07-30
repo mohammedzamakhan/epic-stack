@@ -1,7 +1,7 @@
 {
   "extends": "@epic-web/config/typescript",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "${configDir}/dist",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

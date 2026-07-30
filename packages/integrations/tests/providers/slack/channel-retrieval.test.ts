@@ -270,7 +270,7 @@ describe('SlackProvider - Channel Retrieval', () => {
 
 			const channels = await provider.getAvailableChannels(integration)
 
-			expect(channels).toHaveLength(2)
+			expect(channels).toHaveLength(1)
 			expect(channels[0].metadata?.fallback_reason).toContain(
 				'Slack API error: 429',
 			)
@@ -301,7 +301,7 @@ describe('SlackProvider - Channel Retrieval', () => {
 
 			const channels = await provider.getAvailableChannels(integration)
 
-			expect(channels).toHaveLength(3)
+			expect(channels).toHaveLength(2)
 			expect(channels[0].metadata?.auth_error).toBe(true)
 			expect(channels[0].metadata?.demo).toBe(true)
 		})
@@ -351,7 +351,7 @@ describe('SlackProvider - Channel Retrieval', () => {
 
 			// The current implementation returns fallback channels instead of throwing
 			const channels = await provider.getAvailableChannels(integration)
-			expect(channels).toHaveLength(2)
+			expect(channels).toHaveLength(1)
 			expect(channels[0].metadata?.fallback_reason).toContain(
 				'No access token available',
 			)

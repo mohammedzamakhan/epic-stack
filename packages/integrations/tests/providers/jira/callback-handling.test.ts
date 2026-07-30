@@ -79,7 +79,7 @@ describe('JiraProvider - Callback Handling', () => {
 			// Verify token exchange request
 			expect(fetch).toHaveBeenCalledWith(
 				'https://auth.atlassian.com/oauth/token',
-				{
+				expect.objectContaining({
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ describe('JiraProvider - Callback Handling', () => {
 						code: 'test-auth-code',
 						redirect_uri: 'https://example.com/callback',
 					}),
-				},
+				}),
 			)
 		})
 

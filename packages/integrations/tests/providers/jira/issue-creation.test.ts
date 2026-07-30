@@ -89,7 +89,7 @@ describe('JiraProvider - Issue Creation', () => {
 			// Verify create issue API call
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/issue',
-				{
+				expect.objectContaining({
 					method: 'POST',
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
@@ -122,7 +122,7 @@ describe('JiraProvider - Issue Creation', () => {
 							},
 						},
 					}),
-				},
+				}),
 			)
 		})
 

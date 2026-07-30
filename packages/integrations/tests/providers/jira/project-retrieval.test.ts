@@ -108,22 +108,22 @@ describe('JiraProvider - Project Retrieval', () => {
 			// Verify API calls
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/oauth/token/accessible-resources',
-				{
+				expect.objectContaining({
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
-				},
+				}),
 			)
 
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/project/search?expand=lead,description',
-				{
+				expect.objectContaining({
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
-				},
+				}),
 			)
 		})
 

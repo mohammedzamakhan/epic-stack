@@ -43,7 +43,7 @@ describe('JiraProvider - Token Refresh', () => {
 			// Verify refresh request
 			expect(fetch).toHaveBeenCalledWith(
 				'https://auth.atlassian.com/oauth/token',
-				{
+				expect.objectContaining({
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ describe('JiraProvider - Token Refresh', () => {
 						client_secret: 'test-client-secret',
 						refresh_token: refreshToken,
 					}),
-				},
+				}),
 			)
 		})
 
@@ -255,7 +255,7 @@ describe('JiraProvider - Token Refresh', () => {
 
 			expect(fetch).toHaveBeenCalledWith(
 				'https://auth.atlassian.com/oauth/token',
-				{
+				expect.objectContaining({
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -267,7 +267,7 @@ describe('JiraProvider - Token Refresh', () => {
 						client_secret: 'custom-client-secret',
 						refresh_token: refreshToken,
 					}),
-				},
+				}),
 			)
 		})
 

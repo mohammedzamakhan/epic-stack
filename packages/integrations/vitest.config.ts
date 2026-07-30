@@ -6,6 +6,9 @@ export default defineConfig({
 		environment: 'node',
 		setupFiles: ['./tests/setup.ts'],
 		bail: 0, // Don't stop on first failure
+		env: {
+			DATABASE_URL: 'file:./data.db',
+		},
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html', 'lcov', 'text-summary'],

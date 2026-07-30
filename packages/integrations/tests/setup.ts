@@ -2,6 +2,12 @@ import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 import { setupServer } from 'msw/node'
 import { handlers } from './utils/mocks'
 
+// Mock Arcjet to avoid WASM compilation errors in Vitest
+vi.mock('@arcjet/remix', () => ({
+	default: vi.fn(() => ({})),
+	shield: vi.fn(),
+}))
+
 // Setup MSW server
 export const server = setupServer(...handlers)
 
