@@ -246,14 +246,20 @@ async function seed() {
 	]
 
 	for (const noteData of kodyNotes) {
-		const note = await prisma.note.create({
-			select: { id: true },
-			data: {
+		const note = await prisma.note.upsert({
+			where: { id: noteData.id },
+			update: {
+				title: noteData.title,
+				content: noteData.content,
+				ownerId: kody.id,
+			},
+			create: {
 				id: noteData.id,
 				title: noteData.title,
 				content: noteData.content,
 				ownerId: kody.id,
 			},
+			select: { id: true },
 		})
 
 		for (const image of noteData.images) {
