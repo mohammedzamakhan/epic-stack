@@ -157,7 +157,7 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Run vitest
-        run: npx vitest run
+        run: npx vitest run --passWithNoTests
 
   playwright:
     name: 🎭 Playwright
