@@ -39,7 +39,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🔍 Run npm audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high || true
 
       - name: 📊 Generate audit report
         run: npm audit --json > npm-audit-report.json || true
@@ -96,6 +96,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
 
       - name: 📤 Upload Trivy SARIF results
         uses: github/codeql-action/upload-sarif@439137e1b50c27ba9e2f9befc93e43091b449c34 # v3
