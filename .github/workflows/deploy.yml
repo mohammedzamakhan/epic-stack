@@ -54,18 +54,25 @@ jobs:
         id: affected
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.ref }}"
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
           else
             BASE_REF="HEAD~1"
           fi
-          git fetch origin $BASE_REF || true
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=100 || true
 
-          AFFECTED_LIST=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app 2>/dev/null || npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app 2>/dev/null || echo "app admin web cms")
+          CHANGED_FILES=$(git diff --name-only $BASE_REF HEAD 2>/dev/null || echo "packages/apps")
 
-          echo "app=$(echo "$AFFECTED_LIST" | grep -w 'app' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(echo "$AFFECTED_LIST" | grep -w 'admin' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(echo "$AFFECTED_LIST" | grep -w 'web' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(echo "$AFFECTED_LIST" | grep -w 'cms' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          if echo "$CHANGED_FILES" | grep -qE '^(packages/|package.json|nx.json)'; then
+            echo "app=true" >> $GITHUB_OUTPUT
+            echo "admin=true" >> $GITHUB_OUTPUT
+            echo "web=true" >> $GITHUB_OUTPUT
+            echo "cms=true" >> $GITHUB_OUTPUT
+          else
+            echo "app=$(echo "$CHANGED_FILES" | grep -q '^apps/app/' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "admin=$(echo "$CHANGED_FILES" | grep -q '^apps/admin/' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "web=$(echo "$CHANGED_FILES" | grep -q '^apps/web/' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "cms=$(echo "$CHANGED_FILES" | grep -q '^apps/cms/' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          fi
 
   lint:
     name: 🔬 Lint
@@ -119,7 +126,7 @@ jobs:
         run: node packages/ui/generate-icons.js
 
       - name: 🔎 Type check
-        run: npx nx run-many -t typecheck --parallel=2 < /dev/null
+        run: npx nx run-many -t typecheck --skip-nx-cache --parallel=2
 
   vitest:
     name: ⚡ Vitest
@@ -143,7 +150,7 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Run vitest
-        run: npx nx run-many -t test --parallel=2 < /dev/null
+        run: npx nx run-many -t test --skip-nx-cache --parallel=2
 
   playwright:
     name: 🎭 Playwright
@@ -173,10 +180,10 @@ jobs:
           npm run db:migrate:deploy && npm run db:generate && npm run db:seed
 
       - name: 🏗 Build App for E2E
-        run: node packages/ui/generate-icons.js && npx nx run app:build
+        run: node packages/ui/generate-icons.js && npx nx run app:build --skip-nx-cache
 
       - name: 🎭 Playwright tests
-        run: npx nx run app:test:e2e:run < /dev/null
+        run: npx nx run app:test:e2e:run --skip-nx-cache
 
       - name: 📊 Upload report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
