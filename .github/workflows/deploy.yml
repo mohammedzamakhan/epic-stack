@@ -184,6 +184,12 @@ jobs:
           name: playwright-report
           path: apps/app/playwright-report/
           retention-days: 30
+
+  deploy-web:
+    name: 🌐 Deploy Web App
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: [lint, typecheck, vitest, affected]
     # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
     if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
     steps:
