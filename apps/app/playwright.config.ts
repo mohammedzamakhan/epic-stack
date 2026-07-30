@@ -29,14 +29,15 @@ export default defineConfig({
 	],
 
 	webServer: {
-		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
+		command: process.env.CI ? 'node index.ts' : 'npm run dev',
 		port: Number(PORT),
 		reuseExistingServer: true,
 		stdout: 'pipe',
 		stderr: 'pipe',
 		env: {
 			PORT,
-			NODE_ENV: 'test',
+			NODE_ENV: process.env.CI ? 'production' : 'test',
+			MOCKS: process.env.CI ? 'true' : '',
 			// Set LAUNCH_STATUS for waitlist referral tests
 			// Individual tests can override this if needed
 			LAUNCH_STATUS: process.env.LAUNCH_STATUS || 'LAUNCHED',
