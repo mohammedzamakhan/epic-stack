@@ -55,7 +55,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 📊 Check affected projects
         id: affected
@@ -96,7 +96,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🛠 Setup Database
         run:
@@ -120,7 +120,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
@@ -150,7 +150,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🛠 Setup Database
         run:
@@ -177,7 +177,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
@@ -218,7 +218,7 @@ jobs:
           cache: 'npm'
 
       - name: 📥 Download deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: 🏗 Build Web App
         run: |
