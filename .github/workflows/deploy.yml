@@ -20,6 +20,7 @@ env:
   NX_NO_CLOUD: 'true'
   NX_DAEMON: 'false'
   NX_INTERACTIVE: 'false'
+  NX_PARALLEL: '2'
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -59,7 +60,7 @@ jobs:
           fi
           git fetch origin $BASE_REF || true
 
-          AFFECTED_LIST=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app 2>/dev/null || npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app 2>/dev/null || echo "")
+          AFFECTED_LIST=$(npx nx show projects --affected --base=origin/$BASE_REF --head=HEAD --type app 2>/dev/null || npx nx show projects --affected --base=$BASE_REF --head=HEAD --type app 2>/dev/null || echo "app admin web cms")
 
           echo "app=$(echo "$AFFECTED_LIST" | grep -w 'app' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "admin=$(echo "$AFFECTED_LIST" | grep -w 'admin' >/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
@@ -171,8 +172,8 @@ jobs:
         run: |
           npm run db:migrate:deploy && npm run db:generate && npm run db:seed
 
-      - name: 🏗 Build
-        run: npm run build
+      - name: 🏗 Build App for E2E
+        run: node packages/ui/generate-icons.js && npx nx run app:build
 
       - name: 🎭 Playwright tests
         run: npm run test:e2e:run
