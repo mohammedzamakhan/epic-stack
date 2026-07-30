@@ -63,9 +63,11 @@
 			"cache": true
 		},
 		"test": {
+			"dependsOn": ["^build"],
 			"cache": true
 		},
 		"test:e2e:run": {
+			"dependsOn": ["^build"],
 			"cache": true
 		},
 		"dev": {
