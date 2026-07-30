@@ -21,6 +21,12 @@ env:
   NX_DAEMON: 'false'
   NX_INTERACTIVE: 'false'
   NX_PARALLEL: '2'
+  VARLOCK_NON_INTERACTIVE: 'true'
+  SESSION_SECRET: 'mock-session-secret-for-ci-tests-min-32-chars-long'
+  HONEYPOT_SECRET: 'mock-honeypot-secret-for-ci-tests-min-32-chars'
+  INTERNAL_COMMAND_TOKEN: 'mock-internal-command-token-for-ci-tests'
+  ENCRYPTION_KEY: 'mock-encryption-key-32-characters!'
+  DATABASE_URL: 'file:./packages/database/data.db'
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
