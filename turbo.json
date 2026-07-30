@@ -1,0 +1,81 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "build/**",
+        "public/build/**",
+        "dist/**",
+        ".expo/**"
+      ],
+      "cache": true
+    },
+    "@repo/auth#build": {
+      "dependsOn": ["^build", "@repo/cache#build"]
+    },
+    "@repo/email#build": {
+      "dependsOn": ["^build", "@repo/cache#build", "@repo/observability#build"]
+    },
+    "@repo/observability#build": {
+      "dependsOn": ["^build", "@repo/security#build"]
+    },
+    "app#build": {
+      "dependsOn": [
+        "^build",
+        "@repo/auth#build",
+        "@repo/email#build",
+        "@repo/observability#build",
+        "@repo/integrations#build",
+        "@repo/ui#build",
+        "@repo/i18n#build",
+        "@repo/payments#build",
+        "@repo/storage#build",
+        "@repo/security#build",
+        "@repo/notifications#build",
+        "@repo/ai#build"
+      ]
+    },
+    "admin#build": {
+      "dependsOn": [
+        "^build",
+        "@repo/auth#build",
+        "@repo/email#build",
+        "@repo/observability#build",
+        "@repo/integrations#build",
+        "@repo/ui#build",
+        "@repo/i18n#build",
+        "@repo/payments#build",
+        "@repo/storage#build",
+        "@repo/security#build",
+        "@repo/notifications#build",
+        "@repo/ai#build"
+      ]
+    },
+    "lint": {
+      "cache": true
+    },
+    "typecheck": {
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test:e2e:run": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build:docs": {
+      "outputs": [".mintlify/doc-build/**"],
+      "cache": true
+    }
+  }
+}

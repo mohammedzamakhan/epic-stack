@@ -6,7 +6,7 @@
 		"dist",
 		"build",
 		".next",
-		".nx",
+		".turbo",
 		"coverage",
 		"test-results",
 		"*.config.js",

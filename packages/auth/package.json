@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "git clean -xdf .cache .nx dist node_modules",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

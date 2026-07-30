@@ -5,8 +5,8 @@ Epic Startup monorepo.
 
 ## Project Overview
 
-**Epic Startup** is a production-ready, full-stack SaaS template built as an
-Nx-based monorepo with npm workspaces. It includes multiple apps (main app,
+**Epic Startup** is a production-ready, full-stack SaaS template built as a
+Turborepo-based monorepo with npm workspaces. It includes multiple apps (main app,
 marketing site, admin dashboard, mobile app, CMS, background jobs, email
 templates, notifications) and shared packages (UI, auth, AI, payments, storage,
 security, i18n, etc.).
@@ -76,7 +76,7 @@ npm run build
 npm run typecheck
 
 # Linting
-npm run lint           # ESLint via Nx
+npm run lint           # ESLint via Turbo
 npm run lint:oxc       # Fast Oxlint (Rust-based)
 npm run lint:all       # Both linters
 
@@ -473,35 +473,3 @@ npm install --prefix packages/<name>                   # Install deps in package
 - **Getting Started**: See `docs/getting-started.md`
 - **Testing Guide**: See `docs/testing.md`
 
-<!-- nx configuration start-->
-<!-- Leave the start & end comments to automatically receive updates. -->
-
-## General Guidelines for working with Nx
-
-- For navigating/exploring the workspace, invoke the `nx-workspace` skill
-  first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer
-  running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`)
-  instead of using the underlying tooling directly
-- Prefix nx commands with the workspace's package manager (e.g.,
-  `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
-- You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not
-  all plugins have this file - proceed without it if unavailable.
-- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
-
-## Scaffolding & Generators
-
-- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS
-  invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
-
-## When to use nx_docs
-
-- USE for: advanced config options, unfamiliar flags, migration guides, plugin
-  configuration, edge cases
-- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard
-  commands, things you already know
-- The `nx-generate` skill handles generator discovery internally - don't call
-  nx_docs just to look up generator syntax
-
-<!-- nx configuration end-->

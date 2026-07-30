@@ -56,10 +56,10 @@ jobs:
           fi
           
           # Check which projects are affected
-          echo "app=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'app' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "admin=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'admin' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "web=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'web' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "cms=$(npx nx affected:apps --base=$BASE_REF --head=HEAD | grep -q 'cms' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "app=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*app\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "web=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*web\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "cms=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*cms\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04

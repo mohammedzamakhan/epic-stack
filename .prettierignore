@@ -22,7 +22,7 @@ node_modules
 **/.next
 **/.astro
 **/.react-router
-**/.nx
+**/.turbo
 **/.turbo
 **/.cache
 
