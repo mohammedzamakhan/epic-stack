@@ -22,6 +22,7 @@ env:
   NX_DAEMON: 'false'
   NX_INTERACTIVE: 'false'
   NX_PARALLEL: '2'
+  NX_SKIP_NX_CACHE: 'true'
   VARLOCK_NON_INTERACTIVE: 'true'
   SESSION_SECRET: 'mock-session-secret-for-ci-tests-min-32-chars-long'
   HONEYPOT_SECRET: 'mock-honeypot-secret-for-ci-tests-min-32-chars'
