@@ -89,7 +89,7 @@
     "@varlock/nextjs-integration": "^0.1.2",
     "motion": "^12.23.1",
     "react-image-crop": "^11.0.10",
-    "varlock": "^0.1.0",
+    "varlock": "^0.1.6",
     "zod": "^3.25.76"
   },
   "optionalDependencies": {
@@ -102,6 +102,6 @@
     "lightningcss-linux-x64-gnu": "^1.29.0"
   },
   "overrides": {
-    "@next/env": "npm:@varlock/nextjs-integration"
+    "@next/env": "npm:@varlock/nextjs-integration@0.1.2"
   }
 }
