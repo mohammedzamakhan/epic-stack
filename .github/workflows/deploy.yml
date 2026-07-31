@@ -19,7 +19,6 @@ env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
-  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
 jobs:
   affected:
@@ -157,8 +156,6 @@ jobs:
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
-        env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
 
       - name: 🛠 Setup Database
         run: |
