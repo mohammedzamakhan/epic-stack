@@ -26,7 +26,7 @@
     "lint:all": "npm run lint:oxc && npm run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e:run": "turbo run test:e2e:run",
+    "test:e2e:run": "turbo run test:e2e:run --concurrency=1",
     "test:e2e:install": "npx playwright install --with-deps",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
