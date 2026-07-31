@@ -61,6 +61,9 @@
     "typecheck": {
       "cache": true
     },
+    "db:seed": {
+      "cache": false
+    },
     "test": {
       "dependsOn": ["^build"],
       "cache": true
