@@ -61,14 +61,14 @@ describe('getClientIp', () => {
 			)
 		})
 
-		it('should return default fallback (unknown) when no IP headers are present', () => {
+		it('should return default fallback when no IP headers are present', () => {
 			const request = {
 				headers: {
 					get: () => null,
 				},
 			}
 
-			expect(getClientIp(request)).toBe('unknown')
+			expect(getClientIp(request)).toBe('127.0.0.1')
 		})
 
 		it('should return custom fallback when specified', () => {

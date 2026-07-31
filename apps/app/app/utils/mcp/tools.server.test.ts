@@ -9,11 +9,9 @@ import './tools.server' // Import to register tools
  * Helper to add a user to an organization
  */
 async function addUserToOrganization(userId: string, organizationId: string) {
-	const memberRole = await prisma.organizationRole.upsert({
-		where: { name: 'test_member' },
-		update: {},
-		create: {
-			name: 'test_member',
+	const memberRole = await prisma.organizationRole.create({
+		data: {
+			name: `test_member_${Date.now()}_${Math.random().toString(36).substring(7)}`,
 			description: 'Test Member role',
 			level: 1,
 		},
