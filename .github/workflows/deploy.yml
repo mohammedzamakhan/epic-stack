@@ -157,6 +157,8 @@ jobs:
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
 
       - name: 🛠 Setup Database
         run: |
