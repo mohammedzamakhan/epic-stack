@@ -8,9 +8,8 @@ const databasePath = path.join(process.cwd(), databaseFile)
 process.env.DATABASE_URL = `file:${databasePath}`
 
 beforeEach(async () => {
-
 	await fsExtra.copyFile(BASE_DATABASE_PATH, databasePath)
-	
+
 	if (fsExtra.existsSync(`${BASE_DATABASE_PATH}-wal`)) {
 		await fsExtra.copyFile(`${BASE_DATABASE_PATH}-wal`, `${databasePath}-wal`)
 	} else {

@@ -393,20 +393,28 @@ describe('BaseIntegrationProvider', () => {
 
 	describe('makeAuthenticatedRequest', () => {
 		it('should make fetch request with access token', async () => {
-			const mockIntegration = { id: 'integration-123', accessToken: 'mock-test-token' } as Integration
+			const mockIntegration = {
+				id: 'integration-123',
+				accessToken: 'mock-test-token',
+			} as Integration
 			global.fetch = vi.fn().mockResolvedValue({ ok: true })
-			
-			await provider['makeAuthenticatedRequest'](mockIntegration, '/test-endpoint')
-			
+
+			await provider['makeAuthenticatedRequest'](
+				mockIntegration,
+				'/test-endpoint',
+			)
+
 			expect(fetch).toHaveBeenCalled()
 			const fetchArgs = vi.mocked(fetch).mock.calls[0]
 			expect(fetchArgs[0]).toBe('/test-endpoint')
-			expect((fetchArgs[1]?.headers as Headers).get('Authorization')).toBe('Bearer mock-test-token')
+			expect((fetchArgs[1]?.headers as Headers).get('Authorization')).toBe(
+				'Bearer mock-test-token',
+			)
 		})
-		
+
 		it('should throw error when access token is unavailable', async () => {
 			const mockIntegration = { id: 'integration-123' } as Integration
-			
+
 			await expect(
 				provider['makeAuthenticatedRequest'](mockIntegration, '/test-endpoint'),
 			).rejects.toThrow('Failed to obtain access token')
@@ -503,9 +511,8 @@ describe('Global provider registry', () => {
 		providerRegistry.register(mockProvider)
 
 		// Simulate different import
-		const { providerRegistry: importedRegistry } = await import(
-			'../../src/provider'
-		)
+		const { providerRegistry: importedRegistry } =
+			await import('../../src/provider')
 
 		expect(importedRegistry.has('mock-communication')).toBe(true)
 		expect(importedRegistry.get('mock-communication')).toBe(mockProvider)

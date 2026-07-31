@@ -16,7 +16,8 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.45",

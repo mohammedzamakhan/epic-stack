@@ -116,12 +116,7 @@ async function stopServices() {
 	console.log('🛑 Stopping Docker services...')
 
 	try {
-		await runCommand('docker', [
-			'compose',
-			'-f',
-			DOCKER_COMPOSE_FILE,
-			'down',
-		])
+		await runCommand('docker', ['compose', '-f', DOCKER_COMPOSE_FILE, 'down'])
 		console.log('✅ Docker services stopped')
 	} catch (error) {
 		console.error('❌ Failed to stop Docker services:', error.message)

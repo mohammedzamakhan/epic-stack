@@ -286,11 +286,7 @@ describe('Provider Interactions Integration Tests', () => {
 			})
 
 			// Handle note update (which triggers message posting)
-			await noteNotifier.notify(
-				'note-123',
-				'created',
-				'user-123',
-			)
+			await noteNotifier.notify('note-123', 'created', 'user-123')
 
 			// Verify connection was updated with last posted time
 			expect(prisma.noteIntegrationConnection.update).toHaveBeenCalledWith({
@@ -315,11 +311,7 @@ describe('Provider Interactions Integration Tests', () => {
 			vi.mocked(prisma.noteIntegrationConnection.findMany).mockResolvedValue([])
 
 			// Should complete without error
-			await noteNotifier.notify(
-				'note-123',
-				'created',
-				'user-123',
-			)
+			await noteNotifier.notify('note-123', 'created', 'user-123')
 
 			// Verify no database operations were performed
 			expect(prisma.organizationNote.findUnique).not.toHaveBeenCalled()

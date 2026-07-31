@@ -6,7 +6,8 @@ export default defineConfig({
 		passWithNoTests: true,
 		env: {
 			DATABASE_URL: 'file:./data.db',
-			SSO_ENCRYPTION_KEY: 'test-sso-encryption-key-that-is-at-least-32-chars-long',
+			SSO_ENCRYPTION_KEY:
+				'test-sso-encryption-key-that-is-at-least-32-chars-long',
 		},
 		coverage: {
 			provider: 'v8',

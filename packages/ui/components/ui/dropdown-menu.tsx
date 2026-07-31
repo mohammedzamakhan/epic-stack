@@ -120,7 +120,10 @@ function DropdownMenuSubTrigger({
 			{...props}
 		>
 			{children}
-			<Icon name="chevron-right" className="ltr:ml-auto rtl:mr-auto rtl:-scale-x-100" />
+			<Icon
+				name="chevron-right"
+				className="ltr:ml-auto rtl:mr-auto rtl:-scale-x-100"
+			/>
 		</MenuPrimitive.SubmenuTrigger>
 	)
 }

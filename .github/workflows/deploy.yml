@@ -53,7 +53,7 @@ jobs:
           else
             BASE_REF="HEAD~1"
           fi
-          
+
           # Check which projects are affected
           echo "app=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*app\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
@@ -76,8 +76,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+        run: npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Lint (Oxc - Fast)
         run: npm run lint:oxc
@@ -102,8 +101,7 @@ jobs:
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
 
       - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+        run: npm run db:migrate:deploy && npm run db:generate
 
       - name: 🏗 Build
         run: npm run build
@@ -128,8 +126,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: 🛠 Setup Database
-        run:
-          npm run db:migrate:deploy && npm run db:generate
+        run: npm run db:migrate:deploy && npm run db:generate
 
       - name: ⚡ Run vitest
         run: npm run test -- -- --coverage
@@ -180,7 +177,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, affected]
     # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.web == 'true' }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      needs.affected.outputs.web == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -200,7 +200,10 @@ jobs:
           npm run build
 
       - name: 🚀 Deploy to Cloudflare Pages (Production)
-        if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.merged == true) }}
+        if:
+          ${{ github.ref == 'refs/heads/main' || (github.event_name ==
+          'pull_request' && github.event.pull_request.base.ref == 'main' &&
+          github.event.pull_request.merged == true) }}
         uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -210,7 +213,10 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🚀 Deploy to Cloudflare Pages (Staging)
-        if: ${{ github.ref == 'refs/heads/dev' || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'dev' && github.event.pull_request.merged == true) }}
+        if:
+          ${{ github.ref == 'refs/heads/dev' || (github.event_name ==
+          'pull_request' && github.event.pull_request.base.ref == 'dev' &&
+          github.event.pull_request.merged == true) }}
         uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -224,7 +230,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if app was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -275,7 +284,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if admin was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -320,13 +332,17 @@ jobs:
             --app ${{ steps.admin_app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          
+
   container-cms:
     name: 📦 Prepare CMS Container
     runs-on: ubuntu-24.04
     needs: [affected]
     # only prepare container on pushes or merged PRs AND if cms was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin ==
+      'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -376,7 +392,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-app, affected]
     # only deploy on pushes or merged PRs AND if app was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.app == 'true' }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -412,13 +431,16 @@ jobs:
             --app ${{ steps.app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          
+
   deploy-admin:
     name: 🚀 Deploy Admin
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-admin, affected]
     # only deploy on pushes or merged PRs AND if admin was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.affected.outputs.admin == 'true' }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -460,7 +482,11 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, container-cms, affected]
     # only deploy on pushes or merged PRs AND if cms was affected
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+    if:
+      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true)) &&
+      (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin ==
+      'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4

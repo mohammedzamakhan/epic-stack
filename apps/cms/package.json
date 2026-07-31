@@ -19,7 +19,8 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test:disable": "npm run test:int",
     "test:e2e:disable": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" npm exec playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^11.0.2",
@@ -67,7 +68,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "1.57.0",
     "@tailwindcss/typography": "^0.5.13",
     "@testing-library/react": "16.3.0",
     "@types/escape-html": "^1.0.2",

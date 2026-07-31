@@ -7,7 +7,7 @@ export default defineConfig({
 		setupFiles: ['./tests/setup.ts'],
 		bail: 0,
 		env: {
-			DATABASE_URL: "file:./data.db",
+			DATABASE_URL: 'file:./data.db',
 			SESSION_SECRET: 'test-session-secret-min-32-characters-long-for-testing',
 		},
 		coverage: {

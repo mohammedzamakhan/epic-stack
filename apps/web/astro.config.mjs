@@ -17,9 +17,7 @@ export default defineConfig({
 		varlockAstroIntegration(),
 		react(),
 		sitemap({
-			filter: (page) =>
-				!page.includes('/preview/') &&
-				!page.includes('/api/'),
+			filter: (page) => !page.includes('/preview/') && !page.includes('/api/'),
 			changefreq: 'weekly',
 			priority: 0.7,
 			lastmod: new Date(),
@@ -32,15 +30,18 @@ export default defineConfig({
 	],
 
 	vite: {
-		plugins: [tailwindcss(), fontless({
-			families: [
-				{
-					name: 'GeistPixel',
-					weights: ['400'],
-					src: [{ url: '/fonts/GeistPixel-Square.woff2', format: 'woff2' }],
-				}
-			]
-		})],
+		plugins: [
+			tailwindcss(),
+			fontless({
+				families: [
+					{
+						name: 'GeistPixel',
+						weights: ['400'],
+						src: [{ url: '/fonts/GeistPixel-Square.woff2', format: 'woff2' }],
+					},
+				],
+			}),
+		],
 		server: {
 			allowedHosts: [domain, 'localhost'],
 		},
@@ -49,23 +50,44 @@ export default defineConfig({
 		},
 		ssr: {
 			external: [
-				'zlib', 'http', 'https', 'node:path', 'node:url', 'node:fs', 
-				'node:http2', 'node:buffer', 'node:crypto', 'fs', 'os', 'path', 
-				'child_process', 'crypto', 'tty', 'worker_threads', 'net', 'stream',
-				'util', 'events', 'buffer', 'url', 'querystring', 'assert'
+				'zlib',
+				'http',
+				'https',
+				'node:path',
+				'node:url',
+				'node:fs',
+				'node:http2',
+				'node:buffer',
+				'node:crypto',
+				'fs',
+				'os',
+				'path',
+				'child_process',
+				'crypto',
+				'tty',
+				'worker_threads',
+				'net',
+				'stream',
+				'util',
+				'events',
+				'buffer',
+				'url',
+				'querystring',
+				'assert',
 			],
-			noExternal: ['@payloadcms/live-preview']
+			noExternal: ['@payloadcms/live-preview'],
 		},
 		define: {
-			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
-		}
+			'process.env.NODE_ENV': JSON.stringify(
+				process.env.NODE_ENV || 'production',
+			),
+		},
 	},
 
 	adapter: cloudflare({
 		imageService: 'passthrough',
 		platformProxy: {
-			enabled: true
-		}
+			enabled: true,
+		},
 	}),
 })
-

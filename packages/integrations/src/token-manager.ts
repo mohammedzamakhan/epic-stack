@@ -104,9 +104,7 @@ export class TokenManager {
 		const provider = providerRegistry.get(providerName)
 
 		if (!provider.refreshToken) {
-			throw new Error(
-				`Provider ${providerName} does not support token refresh`,
-			)
+			throw new Error(`Provider ${providerName} does not support token refresh`)
 		}
 
 		try {
@@ -273,14 +271,18 @@ export class TokenManager {
 					: await this.refreshTokenWithRetry(
 							effectiveProviderName,
 							tokenData.refreshToken,
-					  )
+						)
 
 				if (refreshedTokenData && refreshedTokenData.accessToken) {
 					if (!refreshedTokenData.refreshToken) {
 						refreshedTokenData.refreshToken = tokenData.refreshToken
 					}
 					await this.storeTokenData(integrationId, refreshedTokenData)
-					await this.logTokenOperation(integrationId, 'token_refresh', 'success')
+					await this.logTokenOperation(
+						integrationId,
+						'token_refresh',
+						'success',
+					)
 					return refreshedTokenData.accessToken
 				}
 			}
@@ -314,7 +316,7 @@ export class TokenManager {
 				: await this.refreshTokenWithRetry(
 						integration.providerName,
 						refreshToken,
-				  )
+					)
 
 			const storeResult = await this.storeTokenData(
 				integration.id,
@@ -421,7 +423,11 @@ export class TokenManager {
 		try {
 			const tokenData = await this.getTokenData(integrationId)
 
-			if (tokenData && provider && typeof (provider as any).revokeToken === 'function') {
+			if (
+				tokenData &&
+				provider &&
+				typeof (provider as any).revokeToken === 'function'
+			) {
 				try {
 					await (provider as any).revokeToken(tokenData.accessToken)
 				} catch (error) {

@@ -27,7 +27,7 @@ export class AuditLogWriter {
 		if (process.env.NODE_ENV === 'test') {
 			return
 		}
-		
+
 		try {
 			const ipAddress = this.extractIPAddress(input.request)
 			const userAgent = input.request?.headers.get('user-agent') || undefined

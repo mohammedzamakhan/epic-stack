@@ -83,11 +83,7 @@ export {
 } from './structured-data.js'
 
 // SEO configuration utilities
-export {
-	SeoConfig,
-	createSeoConfig,
-	type SeoConfigOptions,
-} from './config.js'
+export { SeoConfig, createSeoConfig, type SeoConfigOptions } from './config.js'
 
 // Re-export from @nasa-gcn/remix-seo for convenience
 export { type SEOHandle } from '@nasa-gcn/remix-seo'

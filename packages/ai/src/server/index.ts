@@ -9,7 +9,4 @@ export {
 } from './generate.js'
 
 // Prompt builders
-export {
-	buildNoteChatSystemPrompt,
-	type NoteContext,
-} from './prompts.js'
+export { buildNoteChatSystemPrompt, type NoteContext } from './prompts.js'

@@ -6,8 +6,8 @@ Epic Startup monorepo.
 ## Project Overview
 
 **Epic Startup** is a production-ready, full-stack SaaS template built as a
-Turborepo-based monorepo with npm workspaces. It includes multiple apps (main app,
-marketing site, admin dashboard, mobile app, CMS, background jobs, email
+Turborepo-based monorepo with npm workspaces. It includes multiple apps (main
+app, marketing site, admin dashboard, mobile app, CMS, background jobs, email
 templates, notifications) and shared packages (UI, auth, AI, payments, storage,
 security, i18n, etc.).
 
@@ -472,4 +472,3 @@ npm install --prefix packages/<name>                   # Install deps in package
 - **Security**: See `SECURITY_AUDIT_REPORT.md`
 - **Getting Started**: See `docs/getting-started.md`
 - **Testing Guide**: See `docs/testing.md`
-

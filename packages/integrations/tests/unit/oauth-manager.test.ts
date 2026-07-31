@@ -466,10 +466,7 @@ describe('TokenManager', () => {
 			)
 
 			await expect(
-				tokenManager.refreshTokenWithRetry(
-					'test-provider',
-					refreshToken,
-				),
+				tokenManager.refreshTokenWithRetry('test-provider', refreshToken),
 			).rejects.toThrow(
 				'Token refresh failed for test-provider after 3 attempts',
 			)
@@ -485,10 +482,7 @@ describe('TokenManager', () => {
 			)
 
 			await expect(
-				tokenManager.refreshTokenWithRetry(
-					'test-provider',
-					refreshToken,
-				),
+				tokenManager.refreshTokenWithRetry('test-provider', refreshToken),
 			).rejects.toThrow(
 				'Token refresh failed for test-provider after 1 attempts',
 			)
@@ -506,10 +500,7 @@ describe('TokenManager', () => {
 			providerRegistry.register(providerWithoutRefresh as any)
 
 			await expect(
-				tokenManager.refreshTokenWithRetry(
-					'test-provider',
-					'refresh-token',
-				),
+				tokenManager.refreshTokenWithRetry('test-provider', 'refresh-token'),
 			).rejects.toThrow('Provider test-provider does not support token refresh')
 		})
 
@@ -525,10 +516,7 @@ describe('TokenManager', () => {
 			)
 
 			await expect(
-				tokenManager.refreshTokenWithRetry(
-					'test-provider',
-					refreshToken,
-				),
+				tokenManager.refreshTokenWithRetry('test-provider', refreshToken),
 			).rejects.toThrow('Invalid token data: missing access token')
 		})
 	})
@@ -612,4 +600,3 @@ describe('TokenManager', () => {
 		})
 	})
 })
-

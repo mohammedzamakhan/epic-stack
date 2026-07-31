@@ -19,7 +19,8 @@
     "dev": "tsc --watch",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@playwright/test": "1.57.0",

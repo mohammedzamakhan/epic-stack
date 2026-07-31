@@ -159,9 +159,7 @@ describe('NoteHooks', () => {
 		})
 
 		it('should handle errors in async callback', async () => {
-			vi.mocked(noteNotifier.notify).mockRejectedValue(
-				new Error('Async error'),
-			)
+			vi.mocked(noteNotifier.notify).mockRejectedValue(new Error('Async error'))
 
 			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -243,7 +241,9 @@ describe('NoteHooks', () => {
 			}
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
+				mockNote as any,
+			)
 			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
 			const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -369,7 +369,9 @@ describe('NoteHooks', () => {
 				organizationId: 'org-123',
 			}
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(noteData as any)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
+				noteData as any,
+			)
 			const mockResult = { success: true, connectionsNotified: 1, errors: [] }
 			vi.mocked(noteNotifier.notify).mockResolvedValue(mockResult)
 
@@ -388,7 +390,9 @@ describe('NoteHooks', () => {
 				organizationId: 'org-123',
 			}
 
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
+				mockNote as any,
+			)
 
 			const snapshot = await noteHooks.captureNoteSnapshot('note-123')
 
@@ -467,7 +471,9 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				organizationId: 'org-123',
 			}
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
+				mockNote as any,
+			)
 
 			await triggerNoteDeleted('note-123', 'user-123')
 
@@ -560,7 +566,9 @@ describe('NoteHooks', () => {
 				title: 'Test Note',
 				organizationId: 'org-123',
 			}
-			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(mockNote as any)
+			vi.mocked(prisma.organizationNote.findUnique).mockResolvedValue(
+				mockNote as any,
+			)
 
 			const result = await NoteOperationWrapper.delete(
 				operation,

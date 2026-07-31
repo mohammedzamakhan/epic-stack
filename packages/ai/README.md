@@ -1,14 +1,19 @@
 # @repo/ai
 
-AI functionality package for the Epic Stack monorepo. This package abstracts all AI-related code (server utilities and UI components) for reuse across the application.
+AI functionality package for the Epic Stack monorepo. This package abstracts all
+AI-related code (server utilities and UI components) for reuse across the
+application.
 
 ## Features
 
 ### Server Utilities
 
-- **Chat Streaming**: `createChatStream()` - Create streaming AI chat responses with Google's Gemini
-- **Content Generation**: `generateNoteContent()` - Generate markdown content from titles
-- **Prompt Building**: `buildNoteChatSystemPrompt()` - Build context-aware system prompts
+- **Chat Streaming**: `createChatStream()` - Create streaming AI chat responses
+  with Google's Gemini
+- **Content Generation**: `generateNoteContent()` - Generate markdown content
+  from titles
+- **Prompt Building**: `buildNoteChatSystemPrompt()` - Build context-aware
+  system prompts
 
 ### UI Components
 
@@ -42,20 +47,18 @@ import { brand } from '@repo/config/brand'
 
 // Build prompt with context
 const systemPrompt = buildNoteChatSystemPrompt(brand.ai.systemPrompt, {
-  title: 'My Note',
-  content: 'Note content...',
-  wordCount: 100,
-  hasComments: true,
-  commentCount: 5,
-  comments: [
-    { content: 'Great note!', userName: 'John' }
-  ]
+	title: 'My Note',
+	content: 'Note content...',
+	wordCount: 100,
+	hasComments: true,
+	commentCount: 5,
+	comments: [{ content: 'Great note!', userName: 'John' }],
 })
 
 // Create streaming response
 const result = createChatStream({
-  messages: [{ role: 'user', content: 'Summarize this' }],
-  systemPrompt,
+	messages: [{ role: 'user', content: 'Summarize this' }],
+	systemPrompt,
 })
 
 return result.toDataStreamResponse()

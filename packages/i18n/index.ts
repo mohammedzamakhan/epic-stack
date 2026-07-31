@@ -1,7 +1,12 @@
 // Re-export Lingui core packages for convenience (client-safe)
 export { i18n } from '@lingui/core'
 export { I18nProvider } from '@lingui/react'
-export { detect, fromUrl, fromNavigator, fromHtmlTag } from '@lingui/detect-locale'
+export {
+	detect,
+	fromUrl,
+	fromNavigator,
+	fromHtmlTag,
+} from '@lingui/detect-locale'
 
 // Core Lingui utilities (client-safe)
 export { createCatalogLoader, loadCatalog } from './src/lingui'

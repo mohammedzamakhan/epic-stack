@@ -561,9 +561,8 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 		})
 
 		it('should be the same instance across imports', async () => {
-			const { integrationEncryption: imported } = await import(
-				'../../src/encryption'
-			)
+			const { integrationEncryption: imported } =
+				await import('../../src/encryption')
 			expect(integrationEncryption).toBe(imported)
 		})
 	})

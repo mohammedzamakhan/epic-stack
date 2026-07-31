@@ -240,9 +240,8 @@ test.describe('Waitlist Referral System', () => {
 	test('referral code format is username-XXXX', async ({ insertNewUser }) => {
 		const user = await insertNewUser()
 
-		const { getOrCreateWaitlistEntry } = await import(
-			'#app/utils/waitlist.server.ts'
-		)
+		const { getOrCreateWaitlistEntry } =
+			await import('#app/utils/waitlist.server.ts')
 
 		const entry = await getOrCreateWaitlistEntry(user.id)
 
@@ -294,9 +293,8 @@ test.describe('Waitlist Referral System', () => {
 	}) => {
 		const user = await insertNewUser()
 
-		const { getOrCreateWaitlistEntry } = await import(
-			'#app/utils/waitlist.server.ts'
-		)
+		const { getOrCreateWaitlistEntry } =
+			await import('#app/utils/waitlist.server.ts')
 
 		const entry = await getOrCreateWaitlistEntry(user.id)
 

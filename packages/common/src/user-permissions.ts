@@ -21,11 +21,12 @@ export function parsePermissionString(permissionString: PermissionString) {
 }
 
 export function userHasPermission<
-	TUser extends { roles: Array<{ permissions: Array<{ action: string; entity: string; access: string }> }> }
->(
-	user: TUser | null | undefined,
-	permission: PermissionString,
-) {
+	TUser extends {
+		roles: Array<{
+			permissions: Array<{ action: string; entity: string; access: string }>
+		}>
+	},
+>(user: TUser | null | undefined, permission: PermissionString) {
 	if (!user) return false
 	const { action, entity, access } = parsePermissionString(permission)
 	return user.roles.some((role) =>
@@ -33,14 +34,12 @@ export function userHasPermission<
 			(perm) =>
 				perm.entity === entity &&
 				perm.action === action &&
-				(!access || access.some(a => perm.access === a)),
+				(!access || access.some((a) => perm.access === a)),
 		),
 	)
 }
 
-export function userHasRole<
-	TUser extends { roles: Array<{ name: string }> }
->(
+export function userHasRole<TUser extends { roles: Array<{ name: string }> }>(
 	user: TUser | null,
 	role: string,
 ) {

@@ -59,7 +59,11 @@ export class NoteNotifier {
 			}
 
 			if (!note) {
-				return { success: false, connectionsNotified: 0, errors: ['Note not found'] }
+				return {
+					success: false,
+					connectionsNotified: 0,
+					errors: ['Note not found'],
+				}
 			}
 
 			const user = await prisma.user.findUnique({
@@ -67,18 +71,28 @@ export class NoteNotifier {
 			})
 
 			if (!user) {
-				return { success: false, connectionsNotified: 0, errors: ['Author not found'] }
+				return {
+					success: false,
+					connectionsNotified: 0,
+					errors: ['Author not found'],
+				}
 			}
 
-			const message = formatNoteMessage(note, changeType, { name: user.name || user.username || 'Unknown' })
+			const message = formatNoteMessage(note, changeType, {
+				name: user.name || user.username || 'Unknown',
+			})
 			const errors: string[] = []
 
 			const results = await Promise.allSettled(
 				connections.map(async (connection) => {
 					try {
-						const provider = providerRegistry.get(connection.integration.providerName)
+						const provider = providerRegistry.get(
+							connection.integration.providerName,
+						)
 						if (!provider) {
-							throw new Error(`Provider not found: ${connection.integration.providerName}`)
+							throw new Error(
+								`Provider not found: ${connection.integration.providerName}`,
+							)
 						}
 
 						await provider.postMessage(connection, message)
@@ -111,7 +125,8 @@ export class NoteNotifier {
 									channelId: connection.externalId,
 									changeType: message.changeType,
 								}),
-								errorMessage: error instanceof Error ? error.message : 'Unknown error',
+								errorMessage:
+									error instanceof Error ? error.message : 'Unknown error',
 							},
 						})
 						throw error
@@ -124,7 +139,11 @@ export class NoteNotifier {
 				if (result.status === 'fulfilled') {
 					successCount++
 				} else {
-					errors.push(result.reason instanceof Error ? result.reason.message : String(result.reason))
+					errors.push(
+						result.reason instanceof Error
+							? result.reason.message
+							: String(result.reason),
+					)
 				}
 			}
 

@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "testing": "jest",
     "lingui:extract": "lingui extract --clean",
-    "lingui:compile": "lingui compile"
+    "lingui:compile": "lingui compile",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",

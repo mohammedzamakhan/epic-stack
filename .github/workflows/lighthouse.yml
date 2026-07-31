@@ -121,12 +121,12 @@ jobs:
         run: |
           echo "Waiting for preview deployment to be ready..."
           sleep 30
-          
+
           # Verify the URL is accessible
           max_attempts=10
           attempt=1
           url="${{ needs.preview-deploy.outputs.preview_url }}"
-          
+
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt: Checking $url"
             status=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "000")
@@ -140,7 +140,7 @@ jobs:
             sleep 10
             attempt=$((attempt + 1))
           done
-          
+
           if [ $attempt -gt $max_attempts ]; then
             echo "❌ Preview deployment not ready after $max_attempts attempts"
             exit 1
@@ -173,11 +173,11 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             // Read lighthouse results
             const lhciDir = '.lighthouseci';
             let results = [];
-            
+
             try {
               const files = fs.readdirSync(lhciDir);
               const jsonFiles = files.filter(f => f.endsWith('.json') && f.startsWith('lhr-'));
@@ -196,26 +196,26 @@ jobs:
             } catch (e) {
               console.log('Could not read lighthouse results:', e.message);
             }
-            
+
             // Calculate averages
             const avg = (arr, key) => Math.round(arr.reduce((sum, r) => sum + r[key], 0) / arr.length);
-            
+
             const getScoreEmoji = (score) => {
               if (score >= 98) return '🟢';
               if (score >= 90) return '🟡';
               return '🔴';
             };
-            
+
             const getStatus = (score) => {
               if (score >= 98) return 'PASS ✅';
               return 'FAIL ❌';
             };
-            
+
             let body = `## 🔦 Lighthouse Performance Report
 
             | Metric | Score | Status |
             |--------|-------|--------|`;
-            
+
             if (results.length > 0) {
               const perfAvg = avg(results, 'performance');
               const a11yAvg = avg(results, 'accessibility');
@@ -259,7 +259,7 @@ jobs:
 
             ❌ Could not retrieve Lighthouse results. Check the workflow logs.`;
             }
-            
+
             // Find and update existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -305,7 +305,7 @@ jobs:
       - name: 🚦 Check Performance Budget
         run: |
           echo "Checking performance scores against budget..."
-          
+
           # Find all lighthouse result files
           for file in .lighthouseci/lhr-*.json; do
             if [ -f "$file" ]; then
@@ -354,5 +354,5 @@ jobs:
               "
             fi
           done
-          
+
           echo "✅ All pages pass performance budget!"

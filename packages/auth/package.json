@@ -24,7 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@coji/remix-auth-google": "^3.0.2",

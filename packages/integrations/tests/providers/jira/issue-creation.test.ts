@@ -410,9 +410,8 @@ describe('JiraProvider - Issue Creation', () => {
 
 		it('should handle authentication error and attempt token refresh', async () => {
 			const { decryptToken } = await import('../../../src/encryption')
-			const { integrationManager } = await import(
-				'../../../src/integration-manager'
-			)
+			const { integrationManager } =
+				await import('../../../src/integration-manager')
 
 			// First call fails with auth error
 			const mockAuthErrorResponse = {
