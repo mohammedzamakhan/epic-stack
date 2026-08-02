@@ -372,14 +372,10 @@ function formatPersonOrOrg(entity: Person | Organization): Record<string, any> {
  * Use this in your route meta function
  */
 export function structuredDataScriptTag(schema: Record<string, any>): {
-	tagName: string
-	children: string
-	[key: string]: any
+	'script:ld+json': Record<string, any>
 } {
 	return {
-		tagName: 'script',
-		type: 'application/ld+json',
-		children: JSON.stringify(schema),
+		'script:ld+json': schema,
 	}
 }
 
@@ -387,13 +383,9 @@ export function structuredDataScriptTag(schema: Record<string, any>): {
  * Combine multiple schemas into a single JSON-LD script
  */
 export function combineStructuredData(schemas: Array<Record<string, any>>): {
-	tagName: string
-	children: string
-	[key: string]: any
+	'script:ld+json': Record<string, any> | Array<Record<string, any>>
 } {
 	return {
-		tagName: 'script',
-		type: 'application/ld+json',
-		children: JSON.stringify(schemas.length === 1 ? schemas[0] : schemas),
+		'script:ld+json': schemas.length === 1 ? schemas[0]! : schemas,
 	}
 }
