@@ -85,7 +85,10 @@ export async function getOnboardingProgress(
 			},
 		})
 	} catch (error) {
-		console.error('Error upserting onboarding progress:', error)
+		// If it's a foreign key constraint error (P2003), the user or organization was probably deleted
+		if (!(error instanceof Error && (error.message.includes('Foreign key constraint') || (error as any).code === 'P2003'))) {
+			console.error('Error upserting onboarding progress:', error)
+		}
 		// Return safe default if foreign key constraint fails - show onboarding if steps exist
 		return {
 			totalSteps: steps.length,
@@ -225,8 +228,6 @@ export async function markStepCompleted(
 			},
 		})
 	} catch (error) {
-		// Log the error but don't throw it to prevent breaking the main flow
-		console.error('Error marking onboarding step as completed:', error)
 		// If it's a unique constraint error, it means the record already exists, which is fine
 		if (error instanceof Error && error.message.includes('Unique constraint')) {
 			console.log(
@@ -234,6 +235,15 @@ export async function markStepCompleted(
 			)
 			return
 		}
+
+		// If it's a foreign key constraint error (P2003), the user or organization was probably deleted (e.g., during E2E test teardown)
+		if (error instanceof Error && (error.message.includes('Foreign key constraint') || (error as any).code === 'P2003')) {
+			return // Don't log this to avoid test output pollution
+		}
+
+		// Log the error but don't throw it to prevent breaking the main flow
+		console.error('Error marking onboarding step as completed:', error)
+
 		// For other errors, we still don't want to break the main flow
 		console.error(
 			`Failed to mark onboarding step ${stepKey} as completed:`,
