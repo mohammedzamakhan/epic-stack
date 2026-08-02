@@ -9,13 +9,16 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/database": "*",
     "@repo/observability": "*",
-    "@repo/security": "*"
+    "@repo/security": "*",
+    "react-router": "^7.18.2"
   },
   "devDependencies": {
     "@repo/config": "*",
     "eslint": "^9.26.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.10"
   }
 }

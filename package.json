@@ -63,7 +63,8 @@
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-test-renderer": "^19.1.1",
     "storybook": "^10.1.11",
-    "turbo": "latest"
+    "turbo": "latest",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": "^22.18.0"
@@ -87,8 +88,10 @@
   },
   "dependencies": {
     "@varlock/nextjs-integration": "^0.1.2",
+    "liquidjs": "^10.28.0",
     "motion": "^12.23.1",
     "react-image-crop": "^11.0.10",
+    "react-router": "^7.18.2",
     "varlock": "^0.1.6",
     "zod": "^3.25.76"
   },
@@ -102,6 +105,9 @@
     "lightningcss-linux-x64-gnu": "^1.29.0"
   },
   "overrides": {
-    "@next/env": "npm:@varlock/nextjs-integration@0.1.2"
+    "@next/env": "npm:@varlock/nextjs-integration@0.1.2",
+    "@remix-run/server-runtime": {
+      "turbo-stream": "3.2.0"
+    }
   }
 }
