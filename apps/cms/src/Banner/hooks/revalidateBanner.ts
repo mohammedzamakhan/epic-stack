@@ -6,7 +6,7 @@ export const revalidateBanner: GlobalAfterChangeHook = ({ doc, req: { payload, c
   if (!context.disableRevalidate) {
     payload.logger.info(`Revalidating banner`)
 
-    revalidateTag('global_banner')
+    revalidateTag('global_banner', 'max')
   }
 
   return doc

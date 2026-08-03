@@ -84,7 +84,7 @@ export class NoteNotifier {
 			const errors: string[] = []
 
 			const results = await Promise.allSettled(
-				connections.map(async (connection) => {
+				connections.map(async (connection: any) => {
 					try {
 						const provider = providerRegistry.get(
 							connection.integration.providerName,

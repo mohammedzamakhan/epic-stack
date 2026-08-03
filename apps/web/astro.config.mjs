@@ -56,7 +56,7 @@ export default defineConfig({
 			allowedHosts: [domain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler', 'varlock'],
+			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
 		},
 		resolve: {
 			alias: {
@@ -95,7 +95,6 @@ export default defineConfig({
 				'node:events',
 				'node:querystring',
 				'node:assert',
-				'varlock',
 			],
 			noExternal: ['@payloadcms/live-preview'],
 		},

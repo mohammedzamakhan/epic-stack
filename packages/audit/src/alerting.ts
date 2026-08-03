@@ -329,7 +329,7 @@ export class SecurityAlertService {
 			highAlerts: suspiciousActivities,
 			failedLogins,
 			suspiciousActivities,
-			recentAlertActions: alertActions.map((a) => ({
+			recentAlertActions: alertActions.map((a: any) => ({
 				action: a.action,
 				count: a._count,
 			})),
