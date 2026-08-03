@@ -31,6 +31,16 @@ export default defineConfig({
 
 	vite: {
 		plugins: [
+			{
+				name: 'fix-varlock-name',
+				enforce: 'pre',
+				transform(code, id) {
+					if (id.includes('varlock/dist/')) {
+						const polyfill = `if (!globalThis.__name) { globalThis.__name = (target, value) => Object.defineProperty(target, "name", { value, configurable: true }); }\n`;
+						return polyfill + code.replace(/\b__name\(/g, 'globalThis.__name(');
+					}
+				}
+			},
 			tailwindcss(),
 			fontless({
 				families: [
@@ -46,34 +56,46 @@ export default defineConfig({
 			allowedHosts: [domain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler', 'varlock'],
+		},
+		resolve: {
+			alias: {
+				'zlib': 'node:zlib',
+				'http': 'node:http',
+				'https': 'node:https',
+				'crypto': 'node:crypto',
+				'util': 'node:util',
+				'stream': 'node:stream',
+				'buffer': 'node:buffer',
+				'events': 'node:events',
+				'path': 'node:path',
+				'url': 'node:url',
+				'fs': 'node:fs',
+				'os': 'node:os',
+			}
 		},
 		ssr: {
 			external: [
-				'zlib',
-				'http',
-				'https',
+				'node:zlib',
+				'node:http',
+				'node:https',
 				'node:path',
 				'node:url',
 				'node:fs',
 				'node:http2',
 				'node:buffer',
 				'node:crypto',
-				'fs',
-				'os',
-				'path',
-				'child_process',
-				'crypto',
-				'tty',
-				'worker_threads',
-				'net',
-				'stream',
-				'util',
-				'events',
-				'buffer',
-				'url',
-				'querystring',
-				'assert',
+				'node:os',
+				'node:child_process',
+				'node:tty',
+				'node:worker_threads',
+				'node:net',
+				'node:stream',
+				'node:util',
+				'node:events',
+				'node:querystring',
+				'node:assert',
+				'varlock',
 			],
 			noExternal: ['@payloadcms/live-preview'],
 		},
@@ -84,10 +106,10 @@ export default defineConfig({
 		},
 	},
 
-	adapter: cloudflare({
+	adapter: process.env.npm_lifecycle_event === 'build' ? cloudflare({
 		imageService: 'passthrough',
 		platformProxy: {
 			enabled: true,
 		},
-	}),
+	}) : undefined,
 })

@@ -24,7 +24,7 @@
     "@react-email/preview-server": "^5.0.8",
     "@types/node": "^22.19.6",
     "@types/react": "^19.1.2",
-    "next": "^15.5.7",
+    "next": "^16.2.12",
     "typescript": "^5.8.3",
     "vitest": "^4.1.10"
   }
