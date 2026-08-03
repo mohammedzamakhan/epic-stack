@@ -107,8 +107,5 @@ export default defineConfig({
 
 	adapter: process.env.npm_lifecycle_event === 'build' ? cloudflare({
 		imageService: 'passthrough',
-		platformProxy: {
-			enabled: true,
-		},
 	}) : undefined,
 })
