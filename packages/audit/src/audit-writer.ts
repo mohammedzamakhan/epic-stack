@@ -293,10 +293,14 @@ export class AuditLogWriter {
 
 	private sanitizeLogMessage(message: string): string {
 		if (!message) return message
-		return message
-			.replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
-			.replace(/\x1b\[[0-9;]*m/g, '')
-			.substring(0, 2000)
+		// oxlint-disable-next-line no-control-regex – intentional removal of control characters
+		return (
+			message
+				.replace(/[\u0000-\u001f\u007f-\u009f]/g, '') // oxlint-disable-line no-control-regex
+				// oxlint-disable-next-line no-control-regex – intentional removal of ANSI escape codes
+				.replace(/\x1b\[[0-9;]*m/g, '') // oxlint-disable-line no-control-regex
+				.substring(0, 2000)
+		)
 	}
 
 	private logToStructuredLogger(data: any): void {

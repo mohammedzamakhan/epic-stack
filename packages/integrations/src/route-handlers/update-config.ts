@@ -44,7 +44,7 @@ export async function handleUpdateIntegrationConfig(
 				defaultOrg.organization.id,
 				'update:settings:any',
 			)
-		} catch (error) {
+		} catch {
 			return Response.json(
 				{
 					error: 'Insufficient permissions to update integration configuration',

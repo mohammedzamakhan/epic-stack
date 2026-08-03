@@ -7,12 +7,7 @@
 				"varsIgnorePattern": "^(_|ignored)",
 				"argsIgnorePattern": "^(_|ignored)"
 			}
-		],
-		"react": "warn",
-		"typescript": "warn",
-		"import": "warn",
-		"jsx-a11y": "warn",
-		"unicorn": "warn"
+		]
 	},
 	"env": {
 		"browser": true,
@@ -26,6 +21,7 @@
 		"**/*.test.ts",
 		"**/*.test.tsx",
 		"**/*.spec.ts",
-		"**/*.spec.tsx"
+		"**/*.spec.tsx",
+		"**/next-env.d.ts"
 	]
 }
