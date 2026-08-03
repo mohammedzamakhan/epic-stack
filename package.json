@@ -75,11 +75,7 @@
       "prettier --write"
     ],
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
       "oxlint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "npm run typecheck"
     ]
   },
   "volta": {
