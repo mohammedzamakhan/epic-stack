@@ -15,6 +15,31 @@ export default defineConfig({
 	site: `https://${domain}`,
 	integrations: [
 		varlockAstroIntegration(),
+		{
+			name: 'fix-varlock-entry-detection',
+			hooks: {
+				'astro:config:done': ({ config }) => {
+					const varlockPlugin = config.vite.plugins.flat().find(p => p && p.name === 'inject-varlock-config');
+					if (varlockPlugin && varlockPlugin.transform) {
+						const originalTransform = varlockPlugin.transform;
+						varlockPlugin.transform = function(code, id, options) {
+							if (id.includes('node_modules/varlock/')) {
+								const originalGetModuleIds = this.getModuleIds;
+								this.getModuleIds = function() {
+									const ids = Array.from(originalGetModuleIds.call(this));
+									if (ids[0] === id) ids.unshift('FAKE_ID');
+									return ids.values();
+								};
+								const result = originalTransform.call(this, code, id, options);
+								this.getModuleIds = originalGetModuleIds;
+								return result;
+							}
+							return originalTransform.call(this, code, id, options);
+						};
+					}
+				}
+			}
+		},
 		react(),
 		sitemap({
 			filter: (page) => !page.includes('/preview/') && !page.includes('/api/'),
