@@ -3,7 +3,7 @@ import { getDomainUrl } from '@repo/common'
 import { type Route } from './+types/sitemap[.]xml.ts'
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	return generateSitemap(request, context.serverBuild.routes, {
+	return generateSitemap(request, context.serverBuild.routes as any, {
 		siteUrl: getDomainUrl(request),
 		headers: {
 			'Cache-Control': `public, max-age=${60 * 5}`,
