@@ -81,17 +81,13 @@ test('checkIsCommonPassword returns false when API returns 500', async () => {
 	expect(result).toBe(false)
 })
 
-test('checkIsCommonPassword returns false when response has invalid format', async () => {
+test('checkIsCommonPassword returns false when fetch encounters a network error', async () => {
 	const password = 'testpassword'
 	const [prefix] = getPasswordHashParts(password)
 
 	server.use(
 		http.get(`https://api.pwnedpasswords.com/range/${prefix}`, () => {
-			const response = new Response()
-			Object.defineProperty(response, 'text', {
-				value: () => Promise.resolve(null),
-			})
-			return response
+			return HttpResponse.error()
 		}),
 	)
 
