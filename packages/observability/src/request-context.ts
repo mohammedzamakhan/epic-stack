@@ -93,7 +93,7 @@ export class WideEventBuilder {
 		}
 
 		if (process.env.CI) {
-			// Do not log anything on CI/CD while running E2E tests
+			// Do not log anything on CI/CD while running E2E tests!
 		} else if (finalData.error) {
 			logger.error(
 				{ ...event, err: finalData.error },
