@@ -127,7 +127,6 @@ test('successful SSO authentication creates session for existing user', async ()
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
 	expect(response).toHaveRedirect('/')
@@ -188,7 +187,6 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
 	expect(response).toHaveRedirect('/')
@@ -219,7 +217,6 @@ test('handles organization not found', async () => {
 		request,
 		params: { organizationSlug: 'non-existent-org' },
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -240,7 +237,6 @@ test('handles SSO not configured for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -264,7 +260,6 @@ test('handles SSO disabled for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -289,7 +284,6 @@ test('handles OAuth callback failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -326,7 +320,6 @@ test('handles user provisioning failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	}).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
@@ -360,7 +353,6 @@ test('handles user already logged in', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
 	expect(response).toHaveRedirect('/settings/profile')
@@ -397,7 +389,6 @@ test('handles banned user login attempt', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
 	})
 
 	expect(response).toHaveRedirect('/login?banned=true')

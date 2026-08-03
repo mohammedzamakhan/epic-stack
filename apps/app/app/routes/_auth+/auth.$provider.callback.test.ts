@@ -38,7 +38,6 @@ test('a new user goes to onboarding', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	}).catch((e) => e)
 	expect(response).toHaveRedirect('/onboarding/github')
 })
@@ -55,7 +54,6 @@ test('when auth fails, send the user to login with a toast', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	}).catch((e) => e)
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -79,7 +77,6 @@ test('when a user is logged in, it creates the connection', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
@@ -120,7 +117,6 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
@@ -140,7 +136,6 @@ test('when a user exists with the same email, create connection and make session
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 
 	expect(response).toHaveRedirect('/')
@@ -189,7 +184,6 @@ test('gives an error if the account is already connected to another user', async
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
@@ -217,7 +211,6 @@ test('if a user is not logged in, but the connection exists, make a session', as
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 	expect(response).toHaveRedirect('/')
 	await expect(response).toHaveSessionForUser(userId)
@@ -246,7 +239,6 @@ test('if a user is not logged in, but the connection exists and they have enable
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
 	})
 	const searchParams = new URLSearchParams({
 		type: twoFAVerificationType,

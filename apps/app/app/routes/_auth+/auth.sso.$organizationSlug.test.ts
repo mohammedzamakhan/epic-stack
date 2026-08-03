@@ -71,7 +71,6 @@ test('successful SSO initiation redirects to identity provider', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug',
 	})
 
 	expect(response.status).toBe(302)
@@ -95,7 +94,6 @@ test('handles organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -112,7 +110,6 @@ test('handles missing organization slug', async () => {
 			request,
 			params: { organizationSlug: '' },
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -134,7 +131,6 @@ test('handles SSO not configured for organization', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -161,7 +157,6 @@ test('handles SSO authentication service error', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
 		})
 		expect.fail('Should have thrown an error')
 	} catch (error) {
@@ -191,7 +186,6 @@ test('preserves redirect URL in cookie', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug',
 	})
 
 	// Check that redirect cookie was set
