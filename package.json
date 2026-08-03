@@ -104,6 +104,7 @@
     "@next/env": "npm:@varlock/nextjs-integration@0.1.2",
     "@remix-run/server-runtime": {
       "turbo-stream": "3.2.0"
-    }
+    },
+    "sharp": "^0.35.3"
   }
 }

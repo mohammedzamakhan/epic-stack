@@ -42,6 +42,9 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp
+
       - name: 🏗 Build Web App
         run: |
           cd apps/web

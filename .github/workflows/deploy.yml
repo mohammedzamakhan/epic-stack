@@ -19,6 +19,7 @@ env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
 jobs:
   affected:
@@ -97,6 +98,9 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp
+
       - name: 🔑 Inject CMS DATABASE_URI
         run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
 
@@ -125,6 +129,9 @@ jobs:
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
 
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp
+
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
 
@@ -150,6 +157,9 @@ jobs:
 
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
+
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp
 
       - name: 📥 Install Playwright Browsers
         run: npm run test:e2e:install
@@ -193,6 +203,9 @@ jobs:
 
       - name: 📥 Download deps
         run: npm ci --ignore-scripts
+
+      - name: 🔧 Rebuild native dependencies
+        run: npm rebuild sharp
 
       - name: 🏗 Build Web App
         run: |
