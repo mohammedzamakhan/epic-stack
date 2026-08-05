@@ -569,8 +569,7 @@ export function ApiKeysCard({
 	organization: { name: string }
 	apiKeys: ApiKeyData[]
 	actionData:
-		| { success?: boolean; message?: string; newApiKey?: ApiKeyData }
-		| undefined
+		{ success?: boolean; message?: string; newApiKey?: ApiKeyData } | undefined
 	onCreateClick: () => void
 }) {
 	return (

@@ -1,11 +1,5 @@
 export type HapticFeedbackType =
-	| 'light'
-	| 'medium'
-	| 'heavy'
-	| 'success'
-	| 'warning'
-	| 'error'
-	| 'selection'
+	'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection'
 
 export interface HapticConfig {
 	enabled: boolean

@@ -60,11 +60,13 @@ export async function loader({ request }: { request: Request }) {
 		offset,
 	})
 
-	// Parse metadata in loader to avoid JSON.parse in render loop
+	// Metadata is already parsed by the auditService, but we ensure it's a valid object
 	const logsWithParsedMetadata = result.logs.map((log) => ({
 		...log,
 		parsedMetadata: log.metadata
-			? (JSON.parse(log.metadata) as Record<string, unknown>)
+			? ((typeof log.metadata === 'string'
+					? JSON.parse(log.metadata)
+					: log.metadata) as Record<string, unknown>)
 			: {},
 	}))
 

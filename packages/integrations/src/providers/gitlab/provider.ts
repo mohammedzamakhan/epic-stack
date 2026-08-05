@@ -353,22 +353,20 @@ export class GitLabProvider extends BaseIntegrationProvider {
 		return this.makeAuthenticatedApiCall(integration, async (accessToken) => {
 			const projects = await this.getProjects(accessToken, integration)
 
-			return projects.map(
-				(project): Channel => ({
-					id: project.id.toString(),
-					name: project.name_with_namespace,
-					type: project.visibility === 'private' ? 'private' : 'public',
-					metadata: {
-						projectId: project.id,
-						projectPath: project.path_with_namespace,
-						description: project.description,
-						webUrl: project.web_url,
-						avatarUrl: project.avatar_url,
-						defaultBranch: project.default_branch,
-						namespace: project.namespace,
-					},
-				}),
-			)
+			return projects.map((project): Channel => ({
+				id: project.id.toString(),
+				name: project.name_with_namespace,
+				type: project.visibility === 'private' ? 'private' : 'public',
+				metadata: {
+					projectId: project.id,
+					projectPath: project.path_with_namespace,
+					description: project.description,
+					webUrl: project.web_url,
+					avatarUrl: project.avatar_url,
+					defaultBranch: project.default_branch,
+					namespace: project.namespace,
+				},
+			}))
 		})
 	}
 

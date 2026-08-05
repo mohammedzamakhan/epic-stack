@@ -277,8 +277,7 @@ export const imageProcessingTask = task({
 			// Load image using Jimp to get dimensions and create thumbnail
 
 			let metadata:
-				| { width?: number; height?: number; format?: string }
-				| undefined
+				{ width?: number; height?: number; format?: string } | undefined
 			let jimp: any
 
 			try {

@@ -10,7 +10,6 @@ import {
 	PasswordSchema,
 	PasswordAndConfirmPasswordSchema,
 } from '@repo/validation'
-import { useEffect } from 'react'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import {
@@ -58,11 +57,9 @@ export function PasswordForm({
 		},
 	})
 
-	useEffect(() => {
-		if (fetcher.data?.status === 'success') {
-			setIsOpen(false)
-		}
-	}, [fetcher.data?.status, setIsOpen])
+	if (fetcher.state === 'idle' && fetcher.data?.status === 'success') {
+		setIsOpen(false)
+	}
 
 	return (
 		<fetcher.Form method="POST" {...getFormProps(form)}>

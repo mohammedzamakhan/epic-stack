@@ -15,10 +15,7 @@ import { cn } from '@repo/ui'
 type ToolUIPart = {
 	type: 'tool-code'
 	state:
-		| 'input-streaming'
-		| 'input-available'
-		| 'output-available'
-		| 'output-error'
+		'input-streaming' | 'input-available' | 'output-available' | 'output-error'
 	input: any
 	output: any
 	errorText?: string

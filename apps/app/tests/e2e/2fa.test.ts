@@ -68,7 +68,10 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 		.getByRole('button', { name: user.name ?? user.username })
 		.first()
 		.click()
-	await page.getByRole('menuitem', { name: /(log out|logout)/i }).click()
+	await page
+		.getByRole('menuitem', { name: /(log out|logout)/i })
+		.click({ force: true })
+	await page.waitForURL(/\/login|\/signup/)
 
 	await navigate('/login')
 	await expect(page).toHaveURL(`/login`)
@@ -77,7 +80,9 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 		.fill(user.username)
 	await page.getByRole('button', { name: 'Continue', exact: true }).click()
 	await page.getByLabel(/^password$/i).fill(password)
-	await page.getByRole('button', { name: 'Sign In', exact: true }).click()
+	await page
+		.getByRole('button', { name: 'Sign In', exact: true })
+		.click({ force: true })
 
 	await expect(page).toHaveURL(/\/verify/)
 	await page.getByRole('textbox', { name: /code/i }).fill(

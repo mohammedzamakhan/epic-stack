@@ -19,26 +19,28 @@ export default defineConfig({
 			name: 'fix-varlock-entry-detection',
 			hooks: {
 				'astro:config:done': ({ config }) => {
-					const varlockPlugin = config.vite.plugins.flat().find(p => p && p.name === 'inject-varlock-config');
+					const varlockPlugin = config.vite.plugins
+						.flat()
+						.find((p) => p && p.name === 'inject-varlock-config')
 					if (varlockPlugin && varlockPlugin.transform) {
-						const originalTransform = varlockPlugin.transform;
-						varlockPlugin.transform = function(code, id, options) {
+						const originalTransform = varlockPlugin.transform
+						varlockPlugin.transform = function (code, id, options) {
 							if (id.includes('node_modules/varlock/')) {
-								const originalGetModuleIds = this.getModuleIds;
-								this.getModuleIds = function() {
-									const ids = Array.from(originalGetModuleIds.call(this));
-									if (ids[0] === id) ids.unshift('FAKE_ID');
-									return ids.values();
-								};
-								const result = originalTransform.call(this, code, id, options);
-								this.getModuleIds = originalGetModuleIds;
-								return result;
+								const originalGetModuleIds = this.getModuleIds
+								this.getModuleIds = function () {
+									const ids = Array.from(originalGetModuleIds.call(this))
+									if (ids[0] === id) ids.unshift('FAKE_ID')
+									return ids.values()
+								}
+								const result = originalTransform.call(this, code, id, options)
+								this.getModuleIds = originalGetModuleIds
+								return result
 							}
-							return originalTransform.call(this, code, id, options);
-						};
+							return originalTransform.call(this, code, id, options)
+						}
 					}
-				}
-			}
+				},
+			},
 		},
 		react(),
 		sitemap({
@@ -61,10 +63,10 @@ export default defineConfig({
 				enforce: 'pre',
 				transform(code, id) {
 					if (id.includes('varlock/dist/')) {
-						const polyfill = `if (!globalThis.__name) { globalThis.__name = (target, value) => Object.defineProperty(target, "name", { value, configurable: true }); }\n`;
-						return polyfill + code.replace(/\b__name\(/g, 'globalThis.__name(');
+						const polyfill = `if (!globalThis.__name) { globalThis.__name = (target, value) => Object.defineProperty(target, "name", { value, configurable: true }); }\n`
+						return polyfill + code.replace(/\b__name\(/g, 'globalThis.__name(')
 					}
-				}
+				},
 			},
 			tailwindcss(),
 			fontless({
@@ -85,19 +87,19 @@ export default defineConfig({
 		},
 		resolve: {
 			alias: {
-				'zlib': 'node:zlib',
-				'http': 'node:http',
-				'https': 'node:https',
-				'crypto': 'node:crypto',
-				'util': 'node:util',
-				'stream': 'node:stream',
-				'buffer': 'node:buffer',
-				'events': 'node:events',
-				'path': 'node:path',
-				'url': 'node:url',
-				'fs': 'node:fs',
-				'os': 'node:os',
-			}
+				zlib: 'node:zlib',
+				http: 'node:http',
+				https: 'node:https',
+				crypto: 'node:crypto',
+				util: 'node:util',
+				stream: 'node:stream',
+				buffer: 'node:buffer',
+				events: 'node:events',
+				path: 'node:path',
+				url: 'node:url',
+				fs: 'node:fs',
+				os: 'node:os',
+			},
 		},
 		ssr: {
 			external: [
@@ -130,7 +132,10 @@ export default defineConfig({
 		},
 	},
 
-	adapter: process.env.npm_lifecycle_event === 'build' ? cloudflare({
-		imageService: 'passthrough',
-	}) : undefined,
+	adapter:
+		process.env.npm_lifecycle_event === 'build'
+			? cloudflare({
+					imageService: 'passthrough',
+				})
+			: undefined,
 })

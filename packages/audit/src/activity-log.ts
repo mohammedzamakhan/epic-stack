@@ -138,7 +138,10 @@ export async function getNoteActivityLogs(noteId: string, limit = 50) {
 				username: true,
 			},
 		})
-		targetUsers = users.reduce((acc: any, user: any) => ({ ...acc, [user.id]: user }), {})
+		targetUsers = users.reduce(
+			(acc: any, user: any) => ({ ...acc, [user.id]: user }),
+			{},
+		)
 	}
 
 	return logs.map((log: any) => {

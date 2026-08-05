@@ -2,10 +2,7 @@ import { type TokenData } from '../../types'
 
 export interface StorageError extends Error {
 	code:
-		| 'STORAGE_ERROR'
-		| 'ENCRYPTION_ERROR'
-		| 'DECRYPTION_ERROR'
-		| 'KEY_NOT_FOUND'
+		'STORAGE_ERROR' | 'ENCRYPTION_ERROR' | 'DECRYPTION_ERROR' | 'KEY_NOT_FOUND'
 }
 
 export enum StorageKeys {
