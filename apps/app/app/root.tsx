@@ -45,7 +45,7 @@ import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
-import tailwindStyleSheetUrl from './styles/tailwind.css?url'
+import './styles/tailwind.css'
 import { getLaunchStatus } from './utils/env.server.ts'
 import { seoConfig } from './utils/seo.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
@@ -59,7 +59,6 @@ export const links: Route.LinksFunction = () => {
 
 		// Preload critical assets
 		{ rel: 'preload', href: iconsHref, as: 'image' },
-		{ rel: 'preload', href: tailwindStyleSheetUrl, as: 'style' },
 
 		// Favicons
 		{
@@ -74,9 +73,6 @@ export const links: Route.LinksFunction = () => {
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
 		} as const,
-
-		// Stylesheet
-		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
 

@@ -98,9 +98,7 @@ export interface GenerateSeoMetaOptions {
 /**
  * Generate comprehensive SEO meta tags for React Router routes
  */
-export function generateSeoMeta(
-	options: GenerateSeoMetaOptions,
-): Array<{
+export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{
 	tagName?: string
 	name?: string
 	property?: string
@@ -326,13 +324,13 @@ export function extractDescription(
 	maxLength: number = 160,
 ): string {
 	// Remove HTML tags
-	const textOnly = content.replace(/<[^>]*>/g, ' ')
+	const textOnly = content.replace(/<[^<>]*>/g, ' ')
 	// Remove markdown syntax
 	const cleanText = textOnly
-		.replace(/#+\s/g, '') // Remove headers
+		.replace(/(?:^|\s)#+\s+/g, ' ') // Remove headers
 		.replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
 		.replace(/\*([^*]+)\*/g, '$1') // Remove italic
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
+		.replace(/\[([^\][]+)\]\([^)(]+\)/g, '$1') // Remove links
 		.replace(/\s+/g, ' ') // Normalize whitespace
 		.trim()
 
