@@ -16,7 +16,7 @@ test('Users can update their basic info', async ({ page, login, navigate }) => {
 
 	const newUserData = createUser()
 
-	await page.getByRole('textbox', { name: /name/i }).fill(newUserData.name)
+	await page.getByRole('textbox', { name: /^name$/i }).fill(newUserData.name)
 	await page
 		.getByRole('textbox', { name: /username/i })
 		.fill(newUserData.username)
@@ -25,8 +25,8 @@ test('Users can update their basic info', async ({ page, login, navigate }) => {
 })
 
 test('Users can update their password', async ({ page, login, navigate }) => {
-	const oldPassword = faker.internet.password()
-	const newPassword = faker.internet.password()
+	const oldPassword = faker.internet.password() + 'A1!'
+	const newPassword = faker.internet.password() + 'A1!'
 	const user = await login({ password: oldPassword })
 	await navigate('/security')
 
@@ -53,7 +53,7 @@ test('Users can update their password', async ({ page, login, navigate }) => {
 	await dialog.getByLabel(/^new password$/i).fill(newPassword)
 	await dialog.getByLabel(/confirm.*password/i).fill(newPassword)
 
-	await page.getByRole('button', { name: /^change password/i }).click()
+	await dialog.getByRole('button', { name: /^change password/i }).click()
 
 	// Password dialog should close after successful change (target the dialog h2, not page h3)
 	await expect(
@@ -90,7 +90,9 @@ test('Users can update their profile photo', async ({
 	// eslint-disable-next-line playwright/no-raw-locators -- file inputs don't have accessible roles, must use attribute selector
 	const fileInput = page.locator('input[type="file"][accept="image/*"]')
 	await expect(fileInput).toBeAttached()
-	await fileInput.setInputFiles('./tests/fixtures/images/user/kody.png')
+	await fileInput.setInputFiles(
+		'../../packages/test-utils/fixtures/images/user/kody.png',
+	)
 
 	// Wait for the dialog to appear
 	await expect(
@@ -135,9 +137,7 @@ test('Users can change their email address', async ({
 	// Target the DialogTrigger button specifically using data attributes
 	// This is the button that actually opens the email dialog
 	/* eslint-disable playwright/no-raw-locators -- data-slot attribute filter needed to distinguish dialog trigger button */
-	const changeEmailButton = page
-		.getByRole('button', { name: /change/i })
-		.filter({ has: page.locator('[data-slot="dialog-trigger"]') })
+	const changeEmailButton = page.getByRole('button', { name: /^change$/i })
 	/* eslint-enable playwright/no-raw-locators */
 	await expect(changeEmailButton).toBeVisible()
 	await changeEmailButton.click()

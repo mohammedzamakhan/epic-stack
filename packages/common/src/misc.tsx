@@ -112,8 +112,18 @@ export function mergeHeaders(
 	const merged = new Headers()
 	for (const header of headers) {
 		if (!header) continue
-		for (const [key, value] of new Headers(header).entries()) {
+		const h = header instanceof Headers ? header : new Headers(header)
+		for (const [key, value] of h.entries()) {
 			merged.set(key, value)
+		}
+		if (h.getSetCookie) {
+			const setCookies = h.getSetCookie()
+			if (setCookies.length > 0) {
+				merged.delete('set-cookie')
+				for (const setCookie of setCookies) {
+					merged.append('set-cookie', setCookie)
+				}
+			}
 		}
 	}
 	return merged
@@ -128,8 +138,20 @@ export function combineHeaders(
 	const combined = new Headers()
 	for (const header of headers) {
 		if (!header) continue
-		for (const [key, value] of new Headers(header).entries()) {
+		const h = header instanceof Headers ? header : new Headers(header)
+		for (const [key, value] of h.entries()) {
+			if (key === 'set-cookie') continue
 			combined.append(key, value)
+		}
+		if (h.getSetCookie) {
+			for (const setCookie of h.getSetCookie()) {
+				combined.append('set-cookie', setCookie)
+			}
+		} else {
+			const setCookie = h.get('set-cookie')
+			if (setCookie) {
+				combined.append('set-cookie', setCookie)
+			}
 		}
 	}
 	return combined

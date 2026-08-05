@@ -264,11 +264,20 @@ export default function OrganizationsPage() {
 
 				{/* Pending Invitations */}
 				{pendingInvitations.length > 0 && (
-					<Card className="mb-6">
+					<Card
+						className="mb-6"
+						role="region"
+						aria-labelledby="pending-invitations-heading"
+					>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Icon name="mail" className="h-5 w-5" />
-								<Trans>Pending Invitations</Trans>
+								<h2
+									id="pending-invitations-heading"
+									className="m-0 text-base leading-snug font-medium"
+								>
+									<Trans>Pending Invitations</Trans>
+								</h2>
 							</CardTitle>
 							<p className="text-muted-foreground text-sm">
 								<Trans>

@@ -144,7 +144,9 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -181,7 +183,9 @@ test('handles logout when organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -213,7 +217,9 @@ test('handles logout when SSO not configured', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -248,7 +254,9 @@ test('handles logout when SSO disabled', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -278,7 +286,9 @@ test('handles logout when no session exists', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -323,7 +333,9 @@ test('handles logout when no SSO session exists', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -391,7 +403,9 @@ test('continues logout even if token revocation fails', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}
@@ -436,7 +450,9 @@ test('handles custom redirect URL from query params', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 	} catch (response) {
 		thrownResponse = response as Response
 	}

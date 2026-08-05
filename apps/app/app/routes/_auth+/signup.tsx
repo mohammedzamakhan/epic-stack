@@ -105,7 +105,11 @@ export async function action(args: Route.ActionArgs) {
 				return
 			}
 			// Arcjet security protection (skip in test environment)
-			if (ENV.ARCJET_KEY && ENV.NODE_ENV !== 'test') {
+			if (
+				ENV.ARCJET_KEY &&
+				ENV.NODE_ENV !== 'test' &&
+				process['env'].MOCKS !== 'true'
+			) {
 				const email = formData.get('email') as string
 				try {
 					const decision = await aj.protect(args, { email })

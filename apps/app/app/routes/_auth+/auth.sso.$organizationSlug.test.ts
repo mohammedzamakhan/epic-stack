@@ -71,7 +71,9 @@ test('successful SSO initiation redirects to identity provider', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response.status).toBe(302)
 	expect(response.headers.get('Location')).toContain(
@@ -94,7 +96,9 @@ test('handles organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -110,7 +114,9 @@ test('handles missing organization slug', async () => {
 			request,
 			params: { organizationSlug: '' },
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -131,7 +137,9 @@ test('handles SSO not configured for organization', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -157,7 +165,9 @@ test('handles SSO authentication service error', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Error)
@@ -186,7 +196,9 @@ test('preserves redirect URL in cookie', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	// Check that redirect cookie was set
 	const setCookieHeader = response.headers.get('set-cookie')

@@ -304,7 +304,7 @@ export class AuditLogWriter {
 	}
 
 	private logToStructuredLogger(data: any): void {
-		const { action, details, ...meta } = data
+		const { action, details, request, ...meta } = data
 		logger.info(meta, `[Audit] ${action}: ${details}`)
 	}
 }

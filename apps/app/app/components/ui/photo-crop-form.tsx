@@ -220,7 +220,7 @@ export function PhotoCropForm({
 				</Button>
 				<StatusButton
 					type="submit"
-					disabled={!croppedFile}
+					disabled={!croppedFile && !currentSelectedFile}
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
 				>
 					<Trans>Save</Trans>

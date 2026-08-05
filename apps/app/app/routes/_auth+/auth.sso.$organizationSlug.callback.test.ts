@@ -127,7 +127,9 @@ test('successful SSO authentication creates session for existing user', async ()
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -187,7 +189,9 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -217,7 +221,9 @@ test('handles organization not found', async () => {
 		request,
 		params: { organizationSlug: 'non-existent-org' },
 		context: createMockContext(),
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -237,7 +243,9 @@ test('handles SSO not configured for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -260,7 +268,9 @@ test('handles SSO disabled for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -284,7 +294,9 @@ test('handles OAuth callback failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -320,7 +332,9 @@ test('handles user provisioning failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -353,7 +367,9 @@ test('handles user already logged in', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/settings/profile')
 	await expect(response).toSendToast(
@@ -389,7 +405,9 @@ test('handles banned user login attempt', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/login?banned=true')
 })

@@ -34,7 +34,7 @@ export async function createTestOrganizationWithMultipleUsers(
 	return await prisma.organization.create({
 		data: {
 			name: faker.company.name(),
-			slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+			slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${Date.now()}-${faker.string.alphanumeric(4)}`,
 			description: faker.company.catchPhrase(),
 			users: {
 				create: users.map((user) => ({

@@ -279,8 +279,11 @@ export function OrganizationInvitations({
 					{pendingInvitations.length > 0 && (
 						<>
 							<Separator />
-							<div>
-								<h4 className="mb-3 text-sm font-medium">
+							<div role="region" aria-labelledby="pending-invitations-heading">
+								<h4
+									id="pending-invitations-heading"
+									className="mb-3 text-sm font-medium"
+								>
 									<Trans>Pending Invitations</Trans>
 								</h4>
 								<ItemGroup>

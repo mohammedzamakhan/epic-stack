@@ -15,13 +15,17 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	await page.waitForLoadState('networkidle')
 
 	const main = page.getByRole('main')
-	const enable2FAButton = main.getByRole('button', { name: /Enable 2FA/i })
+	const enable2FAButton = main.getByRole('button', {
+		name: /Set up authenticator app/i,
+	})
 	await expect(enable2FAButton).toBeVisible()
 	await enable2FAButton.click()
 
 	// Wait for the specific dialog title instead of generic dialog role
 	await expect(
-		page.getByRole('heading', { name: 'Two-Factor Authentication' }),
+		page.getByRole('heading', {
+			name: 'Complete two-factor authentication setup',
+		}),
 	).toBeVisible()
 
 	// Wait for the authentication code input which should always be present
@@ -51,7 +55,10 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	await page.getByRole('button', { name: /Confirm/i }).click()
 	// Wait specifically for the dialog heading (level 2) to be hidden, not the main page heading
 	await expect(
-		page.getByRole('heading', { name: 'Two-Factor Authentication', level: 2 }),
+		page.getByRole('heading', {
+			name: 'Complete two-factor authentication setup',
+			level: 2,
+		}),
 	).toBeHidden()
 
 	await expect(main.getByRole('button', { name: /Disable 2FA/i })).toBeVisible()
@@ -61,7 +68,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 		.getByRole('button', { name: user.name ?? user.username })
 		.first()
 		.click()
-	await page.getByRole('button', { name: /log out/i }).click()
+	await page.getByRole('menuitem', { name: /(log out|logout)/i }).click()
 
 	await navigate('/login')
 	await expect(page).toHaveURL(`/login`)

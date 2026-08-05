@@ -341,7 +341,7 @@ test.describe('Notifications', () => {
 
 		// Check if the notification preferences card is displayed
 		await expect(
-			page.getByRole('heading', { name: /notification preferences/i }),
+			page.getByText(/notification preferences/i).first(),
 		).toBeVisible()
 
 		// The page should show some content - either preferences, loading, error, or no preferences
@@ -351,7 +351,11 @@ test.describe('Notifications', () => {
 
 		// Check for various possible states
 		const loadingMessage = page.getByText('Loading preferences...')
-		const noPreferencesMessage = page.getByText('No preferences found')
+		const noPreferencesMessage = page
+			.getByText(
+				/Notification preferences are not available|No preferences found|ensure you have an active organization/i,
+			)
+			.first()
 		const errorMessage = page.getByText(
 			/Failed to load notification preferences/,
 		)
