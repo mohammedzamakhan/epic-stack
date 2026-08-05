@@ -20,7 +20,6 @@ uniwind-env.d.ts
 /playwright/.cache/
 /packages/**/fixtures/email/
 /packages/**/fixtures/uploaded/
-/packages/**/fixtures/openimg/
 /coverage
 /apps/email/out/
 
