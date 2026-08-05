@@ -76,7 +76,7 @@ export const links: Route.LinksFunction = () => {
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data, location }) => {
+export const meta: Route.MetaFunction = ({ loaderData: data, location }) => {
 	// If there's an error, return minimal meta tags
 	if (!data) {
 		return [
