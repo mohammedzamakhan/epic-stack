@@ -10,7 +10,7 @@
 ## Docs
 
 [Read the docs](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs)
-(please 🙏).
+(please).
 
 ## Support
 
