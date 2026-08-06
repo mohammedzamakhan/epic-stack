@@ -10,7 +10,6 @@ import {
 } from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
-import { useRef } from 'react'
 import { Link, useSubmit } from 'react-router'
 import { useCurrentOrganization } from '#app/utils/organization/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
