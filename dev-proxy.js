@@ -137,7 +137,7 @@ function requestHandler(req, res) {
 					</html>
 				`)
 			} else {
-				console.error(`Proxy error for ${req.url}:`, err)
+				console.error('Proxy error for:', req.url, err)
 				res.writeHead(500, { 'Content-Type': 'text/plain' })
 				res.end('Proxy error: ' + err.message)
 			}
