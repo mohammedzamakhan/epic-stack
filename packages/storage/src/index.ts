@@ -24,4 +24,6 @@ export {
 	uploadCommentImage,
 	uploadNoteVideo,
 	uploadVideoThumbnail,
+	uploadRecordingVideo,
+	uploadRecordingVideoThumbnail,
 } from './upload-helpers'

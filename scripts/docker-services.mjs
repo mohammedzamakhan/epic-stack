@@ -54,7 +54,7 @@ async function waitForMongoDB() {
 				'docker',
 				[
 					'exec',
-					'epic-startup-mongodb',
+					'bugbasher-mongodb',
 					'mongosh',
 					'--quiet',
 					'--eval',

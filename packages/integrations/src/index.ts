@@ -87,6 +87,14 @@ export {
 	NoteOperationWrapper,
 } from './note-hooks'
 
+// Project notification system
+export {
+	ProjectEventHandler,
+	projectEventHandler,
+} from './project-event-handler'
+
+export { ProjectHooks, projectHooks } from './project-hooks'
+
 export * from './providers'
 
 // Re-export commonly used types for convenience

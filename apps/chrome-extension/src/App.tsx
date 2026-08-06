@@ -21,6 +21,8 @@ function App() {
 	const [hasPermission, setHasPermission] = useState(false)
 	const [isLoggedIn, setIsLoggedIn] = useState(false)
 	const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+	const [isRecording, setIsRecording] = useState(false)
+	const [recordingError, setRecordingError] = useState<string | null>(null)
 
 	useEffect(() => {
 		let mounted = true
@@ -173,6 +175,61 @@ function App() {
 		window.close()
 	}
 
+	const handleStartRecording = async () => {
+		if (!tabId) return
+		setRecordingError(null)
+
+		try {
+			// Get stream ID directly in popup context (has user gesture from clicking extension icon)
+			const streamId = await new Promise<string>((resolve, reject) => {
+				chrome.tabCapture.getMediaStreamId(
+					{ targetTabId: tabId },
+					(streamId: string) => {
+						if (chrome.runtime.lastError) {
+							reject(new Error(chrome.runtime.lastError.message))
+						} else {
+							resolve(streamId)
+						}
+					},
+				)
+			})
+
+			// Send stream ID to background to start recording
+			const response = await browser.runtime.sendMessage({
+				type: 'BB_START_RECORDING_WITH_STREAM',
+				streamId,
+				tabId,
+			})
+
+			if (response?.ok) {
+				setIsRecording(true)
+				window.close()
+			} else {
+				setRecordingError(
+					response?.error?.message || 'Failed to start recording',
+				)
+			}
+		} catch (error) {
+			setRecordingError(
+				error instanceof Error ? error.message : 'Failed to start recording',
+			)
+		}
+	}
+
+	const handleStopRecording = async () => {
+		try {
+			const response = await browser.runtime.sendMessage({
+				type: 'BB_STOP_RECORDING',
+			})
+
+			if (response?.ok) {
+				setIsRecording(false)
+			}
+		} catch (error) {
+			console.error('Failed to stop recording:', error)
+		}
+	}
+
 	return (
 		<Card className="w-80 rounded-none border-none shadow-none">
 			<CardHeader>
@@ -230,15 +287,31 @@ function App() {
 					<br />
 					<span className="text-foreground font-semibold">{url}</span>
 				</p>
-				<div>
+				<div className="space-y-2">
 					{hasPermission ? (
-						<Button
-							variant="destructive"
-							className="w-full"
-							onClick={handleDisable}
-						>
-							Disable
-						</Button>
+						<>
+							<Button
+								variant={isRecording ? 'destructive' : 'default'}
+								className="w-full"
+								onClick={
+									isRecording ? handleStopRecording : handleStartRecording
+								}
+							>
+								{isRecording ? '⏹ Stop Recording' : '🔴 Start Recording'}
+							</Button>
+							{recordingError && (
+								<p className="text-center text-xs text-red-600">
+									{recordingError}
+								</p>
+							)}
+							<Button
+								variant="outline"
+								className="w-full"
+								onClick={handleDisable}
+							>
+								Disable on this site
+							</Button>
+						</>
 					) : (
 						<Button className="w-full" onClick={handleAllow}>
 							Allow

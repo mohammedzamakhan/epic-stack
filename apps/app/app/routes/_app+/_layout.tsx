@@ -5,7 +5,7 @@ import {
 	type OnboardingProgressData,
 } from '@repo/common/onboarding'
 import { getSidebarState } from '@repo/common/sidebar-cookie'
-import { Outlet, useLoaderData } from 'react-router'
+import { Outlet, useLoaderData, useLocation } from 'react-router'
 import { ENV } from 'varlock/env'
 import { MarketingLayout } from '#app/components/marketing-layout.tsx'
 import { getUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
@@ -67,6 +67,8 @@ export default function MarketingLayoutRoute() {
 			trialStatus: { isActive: boolean; daysRemaining: number } | null
 			extensionId: string | null
 		}>()
+
+	const location = useLocation()
 
 	return (
 		<MarketingLayout

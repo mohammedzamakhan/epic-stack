@@ -12,19 +12,34 @@ const baseManifest: ManifestV3Export = {
 	name: brand.products.extension.name,
 	version: '1.0',
 	description: brand.products.extension.description,
-	permissions: ['storage', 'activeTab', 'scripting', 'tabs', 'cookies'],
+	permissions: [
+		'storage',
+		'activeTab',
+		'scripting',
+		'tabs',
+		'cookies',
+		'tabCapture',
+		'desktopCapture',
+		'offscreen',
+	],
 	host_permissions: ['<all_urls>'],
 	action: {
 		default_popup: 'index.html',
 	},
 	web_accessible_resources: [
 		{
-			resources: ['assets/*.js'],
+			resources: ['assets/*.js', 'src/offscreen/*'],
 			matches: ['<all_urls>'],
 		},
 	],
 	externally_connectable: {
-		matches: [`*://*.${domain}/*`],
+		matches: [
+			`*://*.${domain}/*`,
+			`https://*.bugbasher.me/*`,
+			`https://app.bugbasher.me:*/*`,
+			'http://localhost:*/*',
+			'https://localhost:*/*',
+		],
 	},
 }
 
@@ -61,6 +76,9 @@ export default defineConfig(() => {
 			emptyOutDir: true,
 			outDir: `build/${BROWSER}`,
 			rollupOptions: {
+				input: {
+					offscreen: 'src/offscreen/offscreen.html',
+				},
 				output: {
 					chunkFileNames: 'assets/chunk-[hash].js',
 				},

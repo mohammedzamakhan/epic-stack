@@ -187,3 +187,59 @@ export async function uploadVideoThumbnail(
 	const config = await options.getConfig(organizationId)
 	return uploadToStorage(thumbnailFile, key, config)
 }
+
+/**
+ * Upload a recording video
+ */
+export async function uploadRecordingVideo(
+	userId: string,
+	recordingId: string,
+	file: File | FileUpload,
+	options: UploadOptions,
+	organizationId?: string,
+) {
+	if (!organizationId) {
+		throw new Error('organizationId is required for recording video uploads')
+	}
+
+	const fileId = createId()
+	const fileExtension = sanitizeAndExtractExtension(file.name)
+	const timestamp = Date.now()
+	const key = `orgs/${organizationId}/recordings/${recordingId}/videos/${timestamp}-${fileId}.${fileExtension}`
+	const config = await options.getConfig(organizationId)
+	return uploadToStorage(file, key, config)
+}
+
+/**
+ * Upload a recording video thumbnail
+ */
+export async function uploadRecordingVideoThumbnail(
+	userId: string,
+	recordingId: string,
+	videoId: string,
+	thumbnailBuffer: Buffer,
+	options: UploadOptions,
+	organizationId?: string,
+) {
+	if (!organizationId) {
+		throw new Error(
+			'organizationId is required for recording video thumbnail uploads',
+		)
+	}
+
+	const fileId = createId()
+	const timestamp = Date.now()
+	const key = `orgs/${organizationId}/recordings/${recordingId}/videos/thumbnails/${timestamp}-${videoId}-${fileId}.jpg`
+
+	// Create a File-like object from the buffer
+	const thumbnailFile = new File(
+		[new Uint8Array(thumbnailBuffer)],
+		'thumbnail.jpg',
+		{
+			type: 'image/jpeg',
+		},
+	)
+
+	const config = await options.getConfig(organizationId)
+	return uploadToStorage(thumbnailFile, key, config)
+}

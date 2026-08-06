@@ -235,10 +235,16 @@ function OrganizationSidebar({
 			isActive: location.pathname === `/${orgSlug}`,
 			icon: HomeIcon,
 		},
+		// {
+		// 	title: _(msg`Notes`),
+		// 	url: `/${orgSlug}/notes`,
+		// 	isActive: location.pathname.includes(`/${orgSlug}/notes`),
+		// 	icon: FoldersIcon,
+		// },
 		{
-			title: _(msg`Notes`),
-			url: `/${orgSlug}/notes`,
-			isActive: location.pathname.includes(`/${orgSlug}/notes`),
+			title: _(msg`Projects`),
+			url: `/${orgSlug}/projects`,
+			isActive: location.pathname.includes(`/${orgSlug}/projects`),
 			icon: FoldersIcon,
 		},
 		{

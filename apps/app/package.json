@@ -159,6 +159,7 @@
     "tippy.js": "^6.3.7",
     "tiptap-markdown": "^0.8.10",
     "vaul": "^1.1.2",
+    "video.js": "^8.23.4",
     "vite-env-only": "^3.0.3",
     "zod": "^3.25.76"
   },

@@ -1,0 +1,49 @@
+{
+  "type": "module",
+  "name": "@repo/bugbasher-script",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./script": "./dist/script.js"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build && vite build --config vite.iife.config.ts && vite build --config vite.presets.config.ts",
+    "lint": "eslint .",
+    "lint:oxc": "oxlint .",
+    "lint:oxc:fix": "oxlint --fix .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "modern-screenshot": "^4.4.39",
+    "preact": "^10.25.4",
+    "tailwind-merge": "^3.1.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.4",
+    "@repo/config": "*",
+    "@types/node": "^22.15.0",
+    "@vitest/ui": "^2.1.8",
+    "fast-check": "^3.22.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^2.1.8"
+  },
+  "volta": {
+    "node": "22.15.0",
+    "npm": "10.9.0"
+  }
+}

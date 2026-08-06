@@ -57,6 +57,19 @@ model User {
   dataSubjectRequests           DataSubjectRequest[]
   impersonationSessionsAsAdmin  ImpersonationSession[]     @relation("ImpersonationAdmin")
   impersonationSessionsAsTarget ImpersonationSession[]     @relation("ImpersonationTarget")
+
+  // Project relations
+  createdProjects               Project[]              @relation("ProjectCreatedBy")
+  projectFavorites              ProjectFavorite[]
+  projectActivityLogs           ProjectActivityLog[]
+  targetedProjectActivityLogs   ProjectActivityLog[]   @relation("ProjectActivityLogTarget")
+  // Recording relations
+  createdRecordings             Recording[]            @relation("RecordingCreatedBy")
+  recordingFavorites            RecordingFavorite[]
+  recordingAccess               RecordingAccess[]
+  recordingComments             RecordingComment[]
+  recordingActivityLogs         RecordingActivityLog[]
+  targetedRecordingActivityLogs RecordingActivityLog[] @relation("RecordingActivityLogTarget")
 }
 
 model Note {
@@ -253,6 +266,9 @@ model Organization {
   apiKeys                ApiKey[]
   configFlags            ConfigFlag[]
   mcpAuthorizations      MCPAuthorization[]
+  // Project relations
+  projects               Project[]
+  recordings             Recording[]
 }
 
 model OrganizationRole {
@@ -416,22 +432,26 @@ model OrganizationNoteUpload {
 }
 
 model Integration {
-  id             String                      @id @default(cuid())
-  organizationId String
-  providerName   String
-  providerType   String
-  accessToken    String?
-  refreshToken   String?
-  tokenExpiresAt DateTime?
-  config         String
-  isActive       Boolean                     @default(true)
-  lastSyncAt     DateTime?
-  createdAt      DateTime                    @default(now())
-  updatedAt      DateTime                    @updatedAt
-  organization   Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  logs           IntegrationLog[]
-  activityLogs   NoteActivityLog[]
-  connections    NoteIntegrationConnection[]
+  id                    String                           @id @default(cuid())
+  organizationId        String
+  providerName          String
+  providerType          String
+  accessToken           String?
+  refreshToken          String?
+  tokenExpiresAt        DateTime?
+  config                String
+  isActive              Boolean                          @default(true)
+  lastSyncAt            DateTime?
+  createdAt             DateTime                         @default(now())
+  updatedAt             DateTime                         @updatedAt
+  organization          Organization                     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  logs                  IntegrationLog[]
+  activityLogs          NoteActivityLog[]
+  connections           NoteIntegrationConnection[]
+  // Project and Recording relations
+  projectConnections    ProjectIntegrationConnection[]
+  recordingConnections  RecordingIntegrationConnection[]
+  recordingActivityLogs RecordingActivityLog[]
 
   @@unique([organizationId, providerName])
   @@index([organizationId])
@@ -1039,4 +1059,262 @@ model DataSubjectRequest {
   @@index([userId, type, status])
   @@index([status, scheduledFor])
   @@index([requestedAt])
+}
+
+// Project - represents a project folder for organizing recordings
+model Project {
+  id                     String                         @id @default(cuid())
+  name                   String
+  description            String?
+  color                  String                         @default("gray") // Folder color from FOLDER_COLORS
+  organizationId         String
+  createdById            String
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  organization           Organization                   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy              User                           @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  recordings             Recording[]
+  favorites              ProjectFavorite[]
+  activityLogs           ProjectActivityLog[]
+  integrationConnections ProjectIntegrationConnection[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([organizationId, updatedAt])
+}
+
+// Recording - represents a bug recording session
+model Recording {
+  id                     String                           @id @default(cuid())
+  title                  String
+  description            String?
+  projectId              String
+  organizationId         String
+  createdById            String
+  videoObjectKey         String? // S3 object key for video file
+  videoThumbnailKey      String? // S3 object key for video thumbnail
+  videoDuration          Int? // Duration in seconds
+  videoFileSize          Int? // File size in bytes
+  sessionData            String? // JSON string of RecordingSessionData
+  openReplaySessionId    String? // OpenReplay session ID
+  openReplaySessionHash  String? // OpenReplay session hash
+  status                 String                           @default("processing") // processing, completed, failed
+  priority               String? // "low", "medium", "high"
+  tags                   String? // JSON array of tags stored as string
+  isPublic               Boolean                          @default(true)
+  createdAt              DateTime                         @default(now())
+  updatedAt              DateTime                         @updatedAt
+  project                Project                          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization           Organization                     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy              User                             @relation("RecordingCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  openReplaySession      OpenReplaySession?               @relation(fields: [openReplaySessionId], references: [sessionId])
+  comments               RecordingComment[]
+  activityLogs           RecordingActivityLog[]
+  integrationConnections RecordingIntegrationConnection[]
+  access                 RecordingAccess[]
+  favorites              RecordingFavorite[]
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([organizationId, updatedAt])
+  @@index([projectId, updatedAt])
+  @@index([status])
+  @@index([openReplaySessionId])
+}
+
+// Project Favorite - tracks user favorites for projects
+model ProjectFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// Recording Favorite - tracks user favorites for recordings
+model RecordingFavorite {
+  id          String    @id @default(cuid())
+  userId      String
+  recordingId String
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recording   Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recordingId])
+  @@index([userId])
+  @@index([recordingId])
+}
+
+// Recording Access - controls access to recordings
+model RecordingAccess {
+  id          String    @id @default(cuid())
+  recordingId String
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recording   Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+
+  @@unique([recordingId, userId])
+  @@index([recordingId])
+  @@index([userId])
+}
+
+// Recording Comment - comments on recordings
+model RecordingComment {
+  id          String                  @id @default(cuid())
+  content     String
+  recordingId String
+  userId      String
+  parentId    String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  parent      RecordingComment?       @relation("RecordingCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     RecordingComment[]      @relation("RecordingCommentReplies")
+  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recording   Recording               @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+  images      RecordingCommentImage[]
+
+  @@index([recordingId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([recordingId, createdAt])
+}
+
+// Recording Comment Image - images attached to recording comments
+model RecordingCommentImage {
+  id        String           @id @default(cuid())
+  altText   String?
+  objectKey String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  commentId String
+  comment   RecordingComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+}
+
+// Project Activity Log - audit trail for project actions
+model ProjectActivityLog {
+  id           String   @id @default(cuid())
+  projectId    String
+  userId       String
+  action       String
+  metadata     String?
+  targetUserId String?
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  targetUser   User?    @relation("ProjectActivityLogTarget", fields: [targetUserId], references: [id])
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([projectId, createdAt])
+  @@index([action])
+}
+
+// Recording Activity Log - audit trail for recording actions
+model RecordingActivityLog {
+  id            String       @id @default(cuid())
+  recordingId   String
+  userId        String
+  action        String
+  metadata      String?
+  targetUserId  String?
+  integrationId String?
+  commentId     String?
+  createdAt     DateTime     @default(now())
+  integration   Integration? @relation(fields: [integrationId], references: [id])
+  targetUser    User?        @relation("RecordingActivityLogTarget", fields: [targetUserId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recording     Recording    @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+
+  @@index([recordingId])
+  @@index([userId])
+  @@index([recordingId, createdAt])
+  @@index([action])
+}
+
+// Project Integration Connection - links projects to external integrations
+model ProjectIntegrationConnection {
+  id            String      @id @default(cuid())
+  projectId     String
+  integrationId String
+  externalId    String
+  config        String
+  isActive      Boolean     @default(true)
+  lastPostedAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, integrationId, externalId])
+  @@index([projectId])
+  @@index([integrationId])
+}
+
+// Recording Integration Connection - links recordings to external integrations
+model RecordingIntegrationConnection {
+  id            String      @id @default(cuid())
+  recordingId   String
+  integrationId String
+  externalId    String
+  config        String
+  isActive      Boolean     @default(true)
+  lastPostedAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  recording     Recording   @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+
+  @@unique([recordingId, integrationId, externalId])
+  @@index([recordingId])
+  @@index([integrationId])
+}
+
+// OpenReplay Session - stores OpenReplay session metadata
+model OpenReplaySession {
+  id          String              @id @default(cuid())
+  sessionId   String              @unique // OpenReplay session ID
+  sessionHash String? // Session hash for stitching
+  projectKey  String // Project identifier
+  userUUID    String? // User identifier from OpenReplay
+  metadata    String? // JSON metadata
+  startTime   DateTime
+  endTime     DateTime?
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  messages    OpenReplayMessage[]
+  recordings  Recording[] // Link to recordings that use this session
+
+  @@index([sessionId])
+  @@index([projectKey])
+  @@index([userUUID])
+  @@index([startTime])
+  @@index([isActive])
+}
+
+// OpenReplay Message - stores individual messages from OpenReplay sessions
+model OpenReplayMessage {
+  id            String            @id @default(cuid())
+  sessionId     String
+  messageType   String // Message type name (e.g., 'ConsoleLog', 'MouseClick')
+  messageTypeId Int // Numeric message type ID
+  timestamp     BigInt // Message timestamp
+  data          String // JSON data for the message
+  createdAt     DateTime          @default(now())
+  session       OpenReplaySession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([messageType])
+  @@index([sessionId, timestamp])
+  @@index([sessionId, messageType])
 }

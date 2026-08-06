@@ -9,6 +9,8 @@ import {
 	uploadCommentImage as _uploadCommentImage,
 	uploadNoteVideo as _uploadNoteVideo,
 	uploadVideoThumbnail as _uploadVideoThumbnail,
+	uploadRecordingVideo as _uploadRecordingVideo,
+	uploadRecordingVideoThumbnail as _uploadRecordingVideoThumbnail,
 	getSignedGetRequestInfo as _getSignedGetRequestInfo,
 	testS3Connection as _testS3Connection,
 	type StorageConfig,
@@ -134,6 +136,38 @@ export async function uploadVideoThumbnail(
 	return _uploadVideoThumbnail(
 		userId,
 		noteId,
+		videoId,
+		thumbnailBuffer,
+		createUploadOptions(),
+		organizationId,
+	)
+}
+
+export async function uploadRecordingVideo(
+	userId: string,
+	recordingId: string,
+	file: File | FileUpload,
+	organizationId?: string,
+) {
+	return _uploadRecordingVideo(
+		userId,
+		recordingId,
+		file,
+		createUploadOptions(),
+		organizationId,
+	)
+}
+
+export async function uploadRecordingVideoThumbnail(
+	userId: string,
+	recordingId: string,
+	videoId: string,
+	thumbnailBuffer: Buffer,
+	organizationId?: string,
+) {
+	return _uploadRecordingVideoThumbnail(
+		userId,
+		recordingId,
 		videoId,
 		thumbnailBuffer,
 		createUploadOptions(),

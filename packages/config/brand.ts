@@ -5,62 +5,62 @@
 
 export const brand = {
 	// Core brand identity
-	name: 'Epic Startup',
-	shortName: 'Epic Startup',
-	tagline: 'Build your next startup even faster',
+	name: 'BugBasher',
+	shortName: 'bugbasher',
+	tagline: 'Fix bugs in hours, not days. One tap. Full Capture. Ship.',
 	description:
-		'Epic Startup is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.',
+		'Bug reports with all the context, captured with tap of a button, including Console logs, Network requests, Performance metrics, Device information. All the details that your developer needs to fix the bugs without back and forth communication.',
 
 	// URLs
-	url: 'https://epicstartup.com',
-	supportEmail: 'support@epicstartup.com',
+	url: 'https://bugbasher.dev',
+	supportEmail: 'zama@bugbasher.dev',
 
 	// Social/Meta
-	twitterHandle: '@epicstartup',
+	twitterHandle: '@bugbasher',
 
 	// Legal
-	companyName: 'Epic Startup',
+	companyName: 'BugBasher',
 	copyrightYear: new Date().getFullYear(),
 
 	// Product-specific descriptions
 	products: {
 		app: {
-			name: 'Epic Startup',
+			name: 'BugBasher',
 			description: "Your own captain's log",
 			tagline: 'Comprehensive note-taking and organization management platform',
 		},
 		admin: {
-			name: 'Epic Startup Admin',
-			description: 'Admin dashboard for Epic Startup',
+			name: 'BugBasher Admin',
+			description: 'Admin dashboard for BugBasher',
 		},
 		web: {
-			name: 'Epic Startup',
+			name: 'BugBasher',
 			description:
 				'Modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.',
 		},
 		extension: {
-			name: 'Epic Startup Extension',
-			chrome: 'Epic Startup Chrome Extension',
-			firefox: 'Epic Startup Firefox Extension',
-			description: 'Chrome extension for Epic Startup',
+			name: 'BugBasher Extension',
+			chrome: 'BugBasher Chrome Extension',
+			firefox: 'BugBasher Firefox Extension',
+			description: 'Chrome extension for BugBasher',
 		},
 		cms: {
-			name: 'Epic Startup CMS',
-			description: 'Content management system for Epic Startup',
+			name: 'BugBasher CMS',
+			description: 'Content management system for BugBasher',
 		},
 	},
 
 	// Email subjects
 	email: {
-		passwordReset: 'Epic Startup Password Reset',
-		welcome: 'Welcome to Epic Startup!',
-		emailChange: 'Epic Startup Email Change Verification',
+		passwordReset: 'BugBasher Password Reset',
+		welcome: 'Welcome to BugBasher!',
+		emailChange: 'BugBasher Email Change Verification',
 	},
 
 	// AI Assistant configuration
 	ai: {
 		systemPrompt:
-			'You are an intelligent AI assistant for Epic Startup, a comprehensive note-taking and organization management platform. You specialize in helping users maximize their productivity and collaboration through smart note management.',
+			'You are an intelligent AI assistant for BugBasher, a comprehensive note-taking and organization management platform. You specialize in helping users maximize their productivity and collaboration through smart note management.',
 	},
 } as const
 

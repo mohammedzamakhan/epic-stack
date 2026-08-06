@@ -171,7 +171,7 @@ export default defineConfig((config) => ({
 			: null,
 	].filter(Boolean) as Plugin[],
 	test: {
-		include: ['./app/**/*.test.{ts,tsx}'],
+		include: ['./app/**/*.test.{ts,tsx}', './app/**/*.property.test.{ts,tsx}'],
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
 		globalSetup: ['./tests/setup/global-setup.ts'],
 		environment: 'node',

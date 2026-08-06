@@ -97,6 +97,8 @@
     "uuid": "^11.1.1",
     "varlock": "^0.1.6",
     "ws": "^8.21.1",
+    "@paper-design/shaders-react": "^0.0.68",
+    "video.js": "^8.23.4",
     "zod": "^3.25.76"
   },
   "optionalDependencies": {

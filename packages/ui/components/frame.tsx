@@ -10,7 +10,7 @@ function Frame({
 	return (
 		<div
 			className={cn(
-				'bg-muted/50 relative flex flex-col rounded-2xl p-1',
+				'bg-muted/50 relative flex flex-col rounded-2xl p-0.5',
 				stackedPanels
 					? '*:has-[+[data-slot=frame-panel]]:rounded-b-none *:has-[+[data-slot=frame-panel]]:before:hidden dark:*:has-[+[data-slot=frame-panel]]:before:block *:[[data-slot=frame-panel]+[data-slot=frame-panel]]:rounded-t-none *:[[data-slot=frame-panel]+[data-slot=frame-panel]]:border-t-0 dark:*:[[data-slot=frame-panel]+[data-slot=frame-panel]]:before:hidden'
 					: '*:[[data-slot=frame-panel]+[data-slot=frame-panel]]:mt-1',
@@ -87,7 +87,7 @@ function FrameAction({ className, ...props }: React.ComponentProps<'div'>) {
 function FrameFooter({ className, ...props }: React.ComponentProps<'footer'>) {
 	return (
 		<footer
-			className={cn('flex flex-col gap-1 px-5 py-4', className)}
+			className={cn('flex flex-col gap-1 px-3 py-2', className)}
 			data-slot="frame-panel-footer"
 			{...props}
 		/>

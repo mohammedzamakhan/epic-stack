@@ -19,6 +19,7 @@ import {
 	useRouteLoaderData,
 	useSearchParams,
 	useNavigate,
+	Link,
 } from 'react-router'
 import { ENV } from 'varlock/env'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'

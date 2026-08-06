@@ -8,6 +8,7 @@
   "types": "./index.ts",
   "exports": {
     ".": "./index.ts",
+    "./alert-dialog": "./components/ui/alert-dialog.tsx",
     "./button": "./components/ui/button.tsx",
     "./input": "./components/ui/input.tsx",
     "./label": "./components/ui/label.tsx",
@@ -45,6 +46,7 @@
     "./item": "./components/ui/item.tsx",
     "./input-group": "./components/ui/input-group.tsx",
     "./kbd": "./components/ui/kbd.tsx",
+    "./resizable": "./components/ui/resizable.tsx",
     "./icon": "./components/icon.tsx",
     "./arrow-left-icon": "./components/animated-icons/arrow-left-icon.tsx",
     "./building-icon": "./components/animated-icons/building-icon.tsx",
@@ -76,10 +78,13 @@
     "./image-cropper": "./components/image-cropper.tsx",
     "./nav-main": "./components/nav-main.tsx",
     "./not-found-page": "./components/not-found-page.tsx",
+    "./devtools-tabs": "./components/devtools-tabs.tsx",
+    "./cn": "./lib/utils.ts",
     "./client-hints": "./utils/client-hints.tsx",
     "./use-mobile": "./utils/use-mobile.ts",
     "./logo": "./components/logo.tsx",
-    "./frame": "./components/frame.tsx"
+    "./frame": "./components/frame.tsx",
+    "./shimmering-text": "./components/shimmering-text.tsx"
   },
   "files": [
     "dist/**"

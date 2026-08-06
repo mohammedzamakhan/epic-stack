@@ -1,5 +1,12 @@
 import 'varlock/auto-load'
 
+if (
+	process.env.MOCKS === 'true' &&
+	process.env.DISABLE_STRIPE_MOCKS !== 'true'
+) {
+	await import('../tests/mocks/index.ts')
+}
+
 import { styleText } from 'node:util'
 import { helmet } from '@nichtsam/helmet/node-http'
 import { logger, sentryLogger, wideEventMiddleware } from '@repo/observability'
@@ -28,6 +35,29 @@ const app = express()
 // ✅ EARLY CORS + LOGGING MIDDLEWARE
 app.use((req, res, next) => {
 	const origin = req.get('Origin')
+
+	// Special handling for OpenReplay API endpoints - allow any origin
+	if (req.path.startsWith('/api/openreplay/')) {
+		res.header('Access-Control-Allow-Origin', origin || '*')
+		res.header('Access-Control-Allow-Credentials', 'true')
+		res.header(
+			'Access-Control-Allow-Methods',
+			'GET, POST, PUT, DELETE, OPTIONS',
+		)
+		res.header(
+			'Access-Control-Allow-Headers',
+			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Content-Encoding',
+		)
+		res.header('Access-Control-Max-Age', '86400')
+
+		if (req.method === 'OPTIONS') {
+			return res.sendStatus(204)
+		}
+
+		return next()
+	}
+
+	// Regular CORS handling for other endpoints
 	const allowedOrigins = [
 		'https://dashboard-v0.novu.co',
 		// Allow localhost origins for development (mobile app)
