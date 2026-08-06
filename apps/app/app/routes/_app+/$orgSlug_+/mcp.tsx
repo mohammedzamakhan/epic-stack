@@ -164,6 +164,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const expiresAt = formData.get('expiresAt')
 
 		const crypto = await import('node:crypto')
+		// codeql[js/insufficient-password-hash] - API keys are high-entropy and do not require computationally expensive password hashes
 		const keyHash = crypto.createHash('sha256').update(key).digest('hex')
 		const keyPrefix = key.substring(0, 8)
 

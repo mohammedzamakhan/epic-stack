@@ -221,6 +221,7 @@ export function generateToken(): string {
 
 // Hash token for storage (SHA-256)
 export function hashToken(token: string): string {
+	// codeql[js/insufficient-password-hash] - Tokens are high-entropy and do not require computationally expensive password hashes
 	return crypto.createHash('sha256').update(token).digest('hex')
 }
 

@@ -87,6 +87,7 @@ export function computeIntegrityHash(
 		userId: fields.userId,
 	})
 
+	// codeql[js/insufficient-password-hash] - HMAC-SHA256 is secure for audit log integrity, this is not a password hash
 	const hmac = crypto.createHmac('sha256', key)
 	hmac.update(payload)
 	return `v1:${hmac.digest('hex')}`
@@ -114,6 +115,7 @@ export function verifyLogIntegrity(
 		const computedRaw = computedHashWithPrefix.slice(3)
 
 		// Compare using SHA-256 digest of both hashes to guarantee constant-length comparison
+		// codeql[js/insufficient-password-hash] - Using SHA-256 for timing-safe comparison padding, not password hashing
 		const hashA = crypto.createHash('sha256').update(rawHash).digest()
 		const hashB = crypto.createHash('sha256').update(computedRaw).digest()
 
