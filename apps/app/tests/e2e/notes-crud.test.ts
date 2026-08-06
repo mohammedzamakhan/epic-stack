@@ -76,78 +76,32 @@ test.describe('Notes CRUD Operations', () => {
 				isPublic: true,
 			},
 		})
-		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
+
+		// Go straight to the edit sheet — avoids TipTap/ProseMirror fill issues.
+		// Playwright fill() does not update TipTap's document model; clearing the
+		// editor empties the hidden content field and Conform rejects the submit.
+		await navigate('/:slug/notes/:id/edit', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
-		// edit the note
-		const editLink = page.getByRole('link', { name: 'Edit', exact: true })
-		const hasEditLink = await editLink
-			.isVisible({ timeout: 5000 })
-			.catch(() => false)
+		const updatedTitle = faker.lorem.words(3)
+		const titleInput = page.getByRole('textbox', { name: /title/i })
+		await expect(titleInput).toBeVisible()
+		await titleInput.fill(updatedTitle)
 
-		if (hasEditLink) {
-			await editLink.click()
+		const updateButton = page.getByRole('button', { name: /^update$/i })
+		await expect(updateButton).toBeVisible()
+		await updateButton.click()
 
-			// Wait for the edit form to load
-			await page.waitForLoadState('networkidle')
-			await page.waitForTimeout(2000) // Wait for form to be fully interactive
+		await expect(page).toHaveURL(`/${org.slug}/notes/${note.id}`)
 
-			const updatedNote = createNote()
-
-			const titleInput = page
-				.getByRole('textbox', { name: /title/i })
-				.or(page.getByLabel(/title/i))
-			if (await titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-				await titleInput.clear()
-				await titleInput.fill(updatedNote.title)
-			}
-
-			// Content editor is a TipTap rich text editor using ProseMirror
-			const contentEditor = page
-				.getByRole('textbox', { name: /content/i })
-				// eslint-disable-next-line playwright/no-raw-locators
-				.or(page.locator('.ProseMirror'))
-
-			if (await contentEditor.isVisible({ timeout: 5000 }).catch(() => false)) {
-				await contentEditor.clear()
-				await contentEditor.fill(updatedNote.content)
-			}
-
-			// Wait for any pending operations before looking for update button
-			await page.waitForTimeout(1000)
-
-			// Try multiple selectors for the update button
-			const updateButton = page.getByRole('button', { name: /update|save/i })
-			if (await updateButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-				await updateButton.click()
-
-				// Wait for the navigation or dialog close to complete
-				// The form might be in a dialog that closes, or it might navigate
-				await page.waitForTimeout(2000)
-
-				// If we're still on the same base URL, check if dialog closed
-				const currentUrl = page.url()
-				if (currentUrl.includes('/edit')) {
-					// Wait for navigation away from edit page
-					await page
-						.waitForURL(`/${org.slug}/notes/${note.id}`, { timeout: 10000 })
-						.catch(() => {})
-				}
-
-				// Wait a moment for the database transaction to complete
-				await page.waitForTimeout(2000)
-			}
-
-			// Verify with database using waitFor to avoid flakiness
-			await waitFor(async () => {
-				const updatedNoteInDb = await prisma.organizationNote.findUnique({
-					where: { id: note.id },
-					select: { title: true },
-				})
-				expect(updatedNoteInDb?.title).toBe(updatedNote.title)
-				return true
+		await waitFor(async () => {
+			const updatedNoteInDb = await prisma.organizationNote.findUnique({
+				where: { id: note.id },
+				select: { title: true },
 			})
-		}
+			expect(updatedNoteInDb?.title).toBe(updatedTitle)
+			return true
+		})
 	})
 
 	test('Users can delete notes', async ({ page, login, navigate }) => {

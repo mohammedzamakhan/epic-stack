@@ -315,12 +315,10 @@ export default function NotesRoute({
 							</TabsTrigger>
 						</TabsList>
 					</Tabs>
-					<Button variant="default">
-						<Link to="new">
-							<Icon name="plus">
-								<Trans>New Note</Trans>
-							</Icon>
-						</Link>
+					<Button variant="default" render={<Link to="new" />}>
+						<Icon name="plus">
+							<Trans>New Note</Trans>
+						</Icon>
 					</Button>
 				</div>
 			</div>
