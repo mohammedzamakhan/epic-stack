@@ -4,6 +4,7 @@ import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { generateApiKey } from '@repo/security'
+import { hashApiKey } from '@repo/security'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -67,7 +68,9 @@ import { userHasOrgAccess } from '#app/utils/organization/organizations.server.t
 // Define ApiKey type based on Prisma query result
 type ApiKeyData = {
 	id: string
-	key: string
+	hashedKey: string
+	keyPrefix: string
+	key?: string
 	name: string
 	createdAt: Date
 	expiresAt: Date | null
@@ -162,11 +165,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		)
 
 		const key = generateApiKey()
+		const hashedKey = hashApiKey(key)
+		const keyPrefix = key.substring(0, 8)
 		const expiresAt = formData.get('expiresAt')
 
 		const createdKey = await prisma.apiKey.create({
 			data: {
-				key,
+				hashedKey,
+				keyPrefix,
 				name,
 				userId: user.id,
 				organizationId: organization.id,
@@ -180,7 +186,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		return {
 			success: true,
 			message: 'API key created successfully',
-			newApiKey: createdKey,
+			newApiKey: { ...createdKey, key },
 		}
 	}
 
@@ -623,8 +629,7 @@ export function ApiKeysCard({
 									</div>
 									<div className="bg-muted mr-2 flex h-8 items-center gap-2 rounded p-4 py-0 font-mono text-xs">
 										<span>
-											{apiKey.key.substring(0, 8)}...
-											{apiKey.key.substring(apiKey.key.length - 8)}
+											{apiKey.keyPrefix}...********
 										</span>
 									</div>
 								</div>

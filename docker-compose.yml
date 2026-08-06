@@ -5,10 +5,12 @@ services:
     image: mongo:7
     container_name: epic-startup-mongodb
     ports:
-      - '27017:27017'
+      - '127.0.0.1:27017:27017'
     volumes:
       - mongo-data:/data/db
     environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: epic-cms
     healthcheck:
       test:

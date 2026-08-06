@@ -11,3 +11,9 @@ export function validateApiKeyFormat(key: string): boolean {
 	// Check if the key has the expected format
 	return key.startsWith('epic_') && key.length === 69 // epic_ (5) + 64 hex chars
 }
+
+import { createHash } from 'node:crypto'
+
+export function hashApiKey(key: string): string {
+    return createHash('sha256').update(key).digest('hex')
+}

@@ -679,7 +679,8 @@ model IpAddressUser {
 
 model ApiKey {
   id             String       @id @default(cuid())
-  key            String       @unique
+  hashedKey      String       @unique
+  keyPrefix      String
   name           String
   userId         String
   organizationId String
@@ -691,7 +692,7 @@ model ApiKey {
 
   @@index([userId])
   @@index([organizationId])
-  @@index([key])
+  @@index([hashedKey])
 }
 
 enum ConfigFlagLevel {

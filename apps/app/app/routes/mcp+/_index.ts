@@ -3,6 +3,7 @@ import { logMCPRateLimitExceeded, logMCPToolInvoked } from '@repo/audit'
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { validateAccessToken } from '#app/utils/mcp/oauth.server.ts'
+import { verifyApiKey } from '#app/utils/mcp/verify.server.ts'
 import {
 	getToolDefinitions,
 	handleMCPRequest,
@@ -115,15 +116,28 @@ async function handleDelete(request: Request): Promise<Response> {
 
 	const accessToken = authHeader.slice(7)
 
-	// Validate access token
-	const tokenData = await validateAccessToken(accessToken)
+	// Validate access token or API key
+	let tokenData: any = null;
+	if (accessToken.startsWith('epic_')) {
+		const apiKey = await verifyApiKey(accessToken);
+		if (apiKey) {
+			tokenData = {
+				user: apiKey.user,
+				organization: apiKey.organization,
+				authorizationId: apiKey.id // Using API key ID as authorization ID for tracking
+			};
+		}
+	} else {
+		tokenData = await validateAccessToken(accessToken);
+	}
+
 	if (!tokenData) {
 		return Response.json(
 			{
 				jsonrpc: '2.0',
 				error: {
 					code: -32600,
-					message: 'Invalid or expired access token',
+					message: 'Invalid or expired access token or API key',
 				},
 			},
 			{ status: 401 },
@@ -568,13 +582,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	const accessToken = authHeader.slice(7)
 
-	// Validate access token
-	const tokenData = await validateAccessToken(accessToken)
+	// Validate access token or API key
+	let tokenData: any = null;
+	if (accessToken.startsWith('epic_')) {
+		const apiKey = await verifyApiKey(accessToken);
+		if (apiKey) {
+			tokenData = {
+				user: apiKey.user,
+				organization: apiKey.organization,
+				authorizationId: apiKey.id // Using API key ID as authorization ID for tracking
+			};
+		}
+	} else {
+		tokenData = await validateAccessToken(accessToken);
+	}
+
 	if (!tokenData) {
 		return Response.json(
 			{
 				error: 'invalid_token',
-				error_description: 'Invalid or expired access token',
+				error_description: 'Invalid or expired access token or API key',
 			},
 			{ status: 401 },
 		)
