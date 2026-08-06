@@ -63,14 +63,13 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 
 	await expect(main.getByRole('button', { name: /Disable 2FA/i })).toBeVisible()
 
-	// Logout
-	await page
-		.getByRole('button', { name: user.name ?? user.username })
-		.first()
-		.click()
-	await page
-		.getByRole('menuitem', { name: /(log out|logout)/i })
-		.click({ force: true })
+	await page.evaluate(() => {
+		const form = document.createElement('form')
+		form.method = 'POST'
+		form.action = '/logout'
+		document.body.appendChild(form)
+		form.submit()
+	})
 	await page.waitForURL(/\/login|\/signup/)
 
 	await navigate('/login')

@@ -287,7 +287,52 @@ export function S3StorageCard({
 					</fetcher.Form>
 				</div>
 			</CardContent>
-			<CardFooter className="justify-end">
+			<CardFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+				{fields.s3Endpoint.value &&
+					fields.s3BucketName.value &&
+					fields.s3AccessKeyId.value &&
+					fields.s3SecretAccessKey.value &&
+					fields.s3Region.value && (
+						<testConnectionFetcher.Form method="POST" className="contents">
+							<input type="hidden" name="intent" value="test-s3-connection" />
+							<input
+								type="hidden"
+								name="s3Endpoint"
+								value={fields.s3Endpoint.value}
+							/>
+							<input
+								type="hidden"
+								name="s3BucketName"
+								value={fields.s3BucketName.value}
+							/>
+							<input
+								type="hidden"
+								name="s3AccessKeyId"
+								value={fields.s3AccessKeyId.value}
+							/>
+							<input
+								type="hidden"
+								name="s3SecretAccessKey"
+								value={fields.s3SecretAccessKey.value}
+							/>
+							<input
+								type="hidden"
+								name="s3Region"
+								value={fields.s3Region.value}
+							/>
+							<StatusButton
+								type="submit"
+								variant="outline"
+								size="sm"
+								status={
+									testConnectionFetcher.state !== 'idle' ? 'pending' : 'idle'
+								}
+							>
+								<Icon name="link-2" className="mr-1 h-4 w-4" />
+								Test Connection
+							</StatusButton>
+						</testConnectionFetcher.Form>
+					)}
 				<StatusButton
 					size="sm"
 					form={form.id}
@@ -301,104 +346,52 @@ export function S3StorageCard({
 				>
 					<Trans>Save</Trans>
 				</StatusButton>
-				{fields.s3Endpoint.value &&
-					fields.s3BucketName.value &&
-					fields.s3AccessKeyId.value &&
-					fields.s3SecretAccessKey.value &&
-					fields.s3Region.value && (
-						<div className="border-t pt-4">
-							<testConnectionFetcher.Form
-								method="POST"
-								className="flex items-center gap-2"
+				{testConnectionFetcher.data?.connectionTest ? (
+					<div
+						className={`w-full rounded-lg border p-3 ${
+							testConnectionFetcher.data.connectionTest.success
+								? 'border-green-200 bg-green-50'
+								: 'border-red-200 bg-red-50'
+						}`}
+					>
+						<div className="flex items-center gap-2">
+							<Icon
+								name={
+									testConnectionFetcher.data.connectionTest.success
+										? 'check'
+										: 'x'
+								}
+								className={`h-4 w-4 ${
+									testConnectionFetcher.data.connectionTest.success
+										? 'text-green-600'
+										: 'text-red-600'
+								}`}
+							/>
+							<p
+								className={`text-sm font-medium ${
+									testConnectionFetcher.data.connectionTest.success
+										? 'text-green-800'
+										: 'text-red-800'
+								}`}
 							>
-								<input type="hidden" name="intent" value="test-s3-connection" />
-								<input
-									type="hidden"
-									name="s3Endpoint"
-									value={fields.s3Endpoint.value}
-								/>
-								<input
-									type="hidden"
-									name="s3BucketName"
-									value={fields.s3BucketName.value}
-								/>
-								<input
-									type="hidden"
-									name="s3AccessKeyId"
-									value={fields.s3AccessKeyId.value}
-								/>
-								<input
-									type="hidden"
-									name="s3SecretAccessKey"
-									value={fields.s3SecretAccessKey.value}
-								/>
-								<input
-									type="hidden"
-									name="s3Region"
-									value={fields.s3Region.value}
-								/>
-
-								<StatusButton
-									type="submit"
-									variant="outline"
-									size="sm"
-									status={
-										testConnectionFetcher.state !== 'idle' ? 'pending' : 'idle'
-									}
-								>
-									<Icon name="link-2" className="mr-1 h-4 w-4" />
-									Test Connection
-								</StatusButton>
-							</testConnectionFetcher.Form>
-
-							{testConnectionFetcher.data?.connectionTest && (
-								<div
-									className={`mt-2 rounded-lg border p-3 ${
-										testConnectionFetcher.data.connectionTest.success
-											? 'border-green-200 bg-green-50'
-											: 'border-red-200 bg-red-50'
-									}`}
-								>
-									<div className="flex items-center gap-2">
-										<Icon
-											name={
-												testConnectionFetcher.data.connectionTest.success
-													? 'check'
-													: 'x'
-											}
-											className={`h-4 w-4 ${
-												testConnectionFetcher.data.connectionTest.success
-													? 'text-green-600'
-													: 'text-red-600'
-											}`}
-										/>
-										<p
-											className={`text-sm font-medium ${
-												testConnectionFetcher.data.connectionTest.success
-													? 'text-green-800'
-													: 'text-red-800'
-											}`}
-										>
-											{testConnectionFetcher.data.connectionTest.success
-												? 'Connection successful!'
-												: 'Connection failed'}
-										</p>
-									</div>
-									{testConnectionFetcher.data.connectionTest.message && (
-										<p
-											className={`mt-1 text-sm ${
-												testConnectionFetcher.data.connectionTest.success
-													? 'text-green-700'
-													: 'text-red-700'
-											}`}
-										>
-											{testConnectionFetcher.data.connectionTest.message}
-										</p>
-									)}
-								</div>
-							)}
+								{testConnectionFetcher.data.connectionTest.success
+									? 'Connection successful!'
+									: 'Connection failed'}
+							</p>
 						</div>
-					)}
+						{testConnectionFetcher.data.connectionTest.message ? (
+							<p
+								className={`mt-1 text-sm ${
+									testConnectionFetcher.data.connectionTest.success
+										? 'text-green-700'
+										: 'text-red-700'
+								}`}
+							>
+								{testConnectionFetcher.data.connectionTest.message}
+							</p>
+						) : null}
+					</div>
+				) : null}
 			</CardFooter>
 		</Card>
 	)

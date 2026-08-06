@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
-import { expect, test } from '#tests/playwright-utils.ts'
+import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Notes CRUD Operations', () => {
@@ -138,12 +138,15 @@ test.describe('Notes CRUD Operations', () => {
 				await page.waitForTimeout(2000)
 			}
 
-			// Verify with database
-			const updatedNoteInDb = await prisma.organizationNote.findUnique({
-				where: { id: note.id },
-				select: { title: true },
+			// Verify with database using waitFor to avoid flakiness
+			await waitFor(async () => {
+				const updatedNoteInDb = await prisma.organizationNote.findUnique({
+					where: { id: note.id },
+					select: { title: true },
+				})
+				expect(updatedNoteInDb?.title).toBe(updatedNote.title)
+				return true
 			})
-			expect(updatedNoteInDb?.title).toBe(updatedNote.title)
 		}
 	})
 

@@ -7,7 +7,6 @@ import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { encrypt, getSSOMasterKey } from '@repo/security'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
-import { Divider } from '@repo/ui/divider'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -550,14 +549,15 @@ export default function GeneralSettings() {
 
 	return (
 		<AnnotatedLayout>
+			{/* Identity: high-frequency profile fields + secondary team size */}
 			<AnnotatedSection>
-				<GeneralSettingsCard organization={organization} />
+				<div className="flex flex-col gap-4">
+					<GeneralSettingsCard organization={organization} />
+					<TeamSizeCard organization={organization} actionData={actionData} />
+				</div>
 			</AnnotatedSection>
 
-			<AnnotatedSection>
-				<TeamSizeCard organization={organization} actionData={actionData} />
-			</AnnotatedSection>
-
+			{/* Access policy */}
 			<AnnotatedSection>
 				<VerifiedDomainCard
 					organization={organization}
@@ -565,14 +565,15 @@ export default function GeneralSettings() {
 				/>
 			</AnnotatedSection>
 
+			{/* Infrastructure */}
 			<AnnotatedSection>
 				<S3StorageCard organization={organization} actionData={actionData} />
 			</AnnotatedSection>
 
-			<AnnotatedSection>
-				<Divider className="mt-2" />
+			{/* Destructive — separated from routine settings */}
+			<section className="border-border mt-2 border-t pt-10">
 				<DangerZoneCard organization={organization} />
-			</AnnotatedSection>
+			</section>
 		</AnnotatedLayout>
 	)
 }

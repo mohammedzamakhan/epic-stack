@@ -5,6 +5,7 @@ import express from 'express'
 import { serverBuildContext } from '../app/server-context.ts'
 
 export const app = express()
+app.set('trust proxy', true)
 
 app.use(
 	createRequestHandler({

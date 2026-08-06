@@ -6,7 +6,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@repo/ui/card'
@@ -61,54 +60,57 @@ export default function TeamSizeCard({
 	return (
 		<Form method="POST" {...getFormProps(form)}>
 			<Card>
-				<CardHeader>
-					<CardTitle>
+				<CardHeader className="pb-3">
+					<CardTitle className="text-base">
 						<Trans>Team Size</Trans>
 					</CardTitle>
 					<CardDescription>
-						<Trans>
-							Help us understand your organization size to provide better
-							recommendations.
-						</Trans>
+						<Trans>Help us tailor recommendations to your organization.</Trans>
 					</CardDescription>
 				</CardHeader>
 				<input type="hidden" name="intent" value="update-team-size" />
 				<input {...getInputProps(fields.organizationId, { type: 'hidden' })} />
-				<CardContent>
+				<CardContent className="pt-0">
 					<Field data-invalid={fields.size.errors?.length ? true : undefined}>
 						<FieldLabel htmlFor={fields.size.id}>
 							<Trans>Organization Size</Trans>
 						</FieldLabel>
-						<Select
-							name={fields.size.name}
-							defaultValue={organization.size || ''}
-							items={[
-								{ label: 'Select team size', value: null },
-								...teamSizeOptions,
-							]}
-						>
-							<SelectTrigger>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{teamSizeOptions.map((option) => (
-									<SelectItem key={option.value} value={option.value}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<FieldError
-							errors={convertErrorsToFieldFormat(fields.size.errors)}
-						/>
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+							<div className="min-w-0 flex-1">
+								<Select
+									name={fields.size.name}
+									defaultValue={organization.size || ''}
+									items={[
+										{ label: 'Select team size', value: null },
+										...teamSizeOptions,
+									]}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{teamSizeOptions.map((option) => (
+											<SelectItem key={option.value} value={option.value}>
+												{option.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FieldError
+									errors={convertErrorsToFieldFormat(fields.size.errors)}
+								/>
+							</div>
+							<Button
+								size="sm"
+								type="submit"
+								className="shrink-0 self-stretch sm:self-auto"
+							>
+								<Trans>Update</Trans>
+							</Button>
+						</div>
 					</Field>
 					<ErrorList errors={form.errors} id={form.errorId} />
 				</CardContent>
-				<CardFooter className="justify-end">
-					<Button size="sm" type="submit">
-						<Trans>Update</Trans>
-					</Button>
-				</CardFooter>
 			</Card>
 		</Form>
 	)

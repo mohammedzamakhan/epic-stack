@@ -20,14 +20,16 @@ export default function NotificationSettings() {
 	const { _ } = useLingui()
 
 	return (
-		<div className="my-8 flex flex-1 flex-col gap-4 md:m-8">
-			<AnnotatedLayout>
+		<div className="mx-auto w-full max-w-4xl py-8 md:p-8">
+			<div className="mb-8 md:mb-10">
 				<PageTitle
 					title={_(t`Notification Settings`)}
 					description={_(
 						t`Manage your notification preferences for different channels and workflows.`,
 					)}
 				/>
+			</div>
+			<AnnotatedLayout>
 				<AnnotatedSection>
 					<NotificationPreferencesCard />
 				</AnnotatedSection>

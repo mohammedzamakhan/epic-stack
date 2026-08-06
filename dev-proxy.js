@@ -106,7 +106,7 @@ function requestHandler(req, res) {
 	if (target) {
 		req.headers['x-forwarded-proto'] = protocol
 		req.headers['x-forwarded-host'] = host
-		proxy.web(req, res, { target }, (err) => {
+		proxy.web(req, res, { target, changeOrigin: true }, (err) => {
 			if (err.code === 'ECONNREFUSED') {
 				console.log(`⏳ Waiting for ${target} to start...`)
 				res.writeHead(503, {
@@ -137,7 +137,7 @@ function requestHandler(req, res) {
 					</html>
 				`)
 			} else {
-				console.error('Proxy error:', err)
+				console.error(`Proxy error for ${req.url}:`, err)
 				res.writeHead(500, { 'Content-Type': 'text/plain' })
 				res.end('Proxy error: ' + err.message)
 			}

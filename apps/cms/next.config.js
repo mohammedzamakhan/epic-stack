@@ -28,6 +28,15 @@ const nextConfig = {
     return webpackConfig
   },
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/admin',
+        permanent: false,
+      },
+    ]
+  },
 }
 
 export default withPayload(varlockNextConfigPlugin()(nextConfig), {

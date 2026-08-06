@@ -37,6 +37,7 @@ export default defineConfig({
 		env: {
 			PORT,
 			NODE_ENV: 'test',
+			ROOT_APP: '',
 			// Set LAUNCH_STATUS for waitlist referral tests
 			// Individual tests can override this if needed
 			LAUNCH_STATUS: process.env.LAUNCH_STATUS || 'LAUNCHED',

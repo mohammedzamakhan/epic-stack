@@ -219,7 +219,7 @@ export async function enable2FAAction({
 		where: {
 			target_type: { type: twoFAVerifyVerificationType, target: userId },
 		},
-		data: { type: twoFAVerificationType },
+		data: { type: twoFAVerificationType, expiresAt: null },
 	})
 
 	return Response.json({ status: 'success' })
