@@ -48,8 +48,8 @@ export function DangerCard({ gdpr }: DangerCardProps) {
 				</FrameDescription>
 			</FrameHeader>
 			<FramePanel>
-				<div className="flex items-start justify-between gap-4">
-					<div className="flex-1">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+					<div className="min-w-0 flex-1">
 						<h3 className="text-foreground mb-2 font-medium">
 							<Trans>Delete account</Trans>
 						</h3>
@@ -61,7 +61,7 @@ export function DangerCard({ gdpr }: DangerCardProps) {
 										{deletionDateFormatted}.
 									</Trans>
 								</p>
-								<p className="text-muted-foreground text-sm">
+								<p className="text-muted-foreground text-sm text-pretty">
 									<Trans>
 										You can cancel this request before the scheduled date to
 										keep your account. After deletion, all your data will be
@@ -70,7 +70,7 @@ export function DangerCard({ gdpr }: DangerCardProps) {
 								</p>
 							</div>
 						) : (
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground text-sm text-pretty">
 								<Trans>
 									Request permanent deletion of your account and all associated
 									data. A 7-day grace period allows you to cancel if needed.
@@ -78,7 +78,7 @@ export function DangerCard({ gdpr }: DangerCardProps) {
 							</p>
 						)}
 					</div>
-					<div className="flex items-center gap-2">
+					<div className="flex shrink-0 items-center gap-2 self-start">
 						{hasActiveErasureRequest ? (
 							<cancelFetcher.Form method="POST">
 								<StatusButton

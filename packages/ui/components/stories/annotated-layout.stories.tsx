@@ -22,13 +22,10 @@ export const Default: Story = {
 	},
 	render: () => (
 		<AnnotatedLayout>
-			<AnnotatedSection>
-				<div className="flex flex-col gap-2">
-					<h2 className="text-lg font-semibold">Personal Information</h2>
-					<p className="text-muted-foreground text-sm">
-						Update your personal details here.
-					</p>
-				</div>
+			<AnnotatedSection
+				title="Personal Information"
+				description="Update your personal details here."
+			>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
 						<Label htmlFor="name">Name</Label>
@@ -40,13 +37,10 @@ export const Default: Story = {
 					</div>
 				</div>
 			</AnnotatedSection>
-			<AnnotatedSection>
-				<div className="flex flex-col gap-2">
-					<h2 className="text-lg font-semibold">Security</h2>
-					<p className="text-muted-foreground text-sm">
-						Manage your security settings and password.
-					</p>
-				</div>
+			<AnnotatedSection
+				title="Security"
+				description="Manage your security settings and password."
+			>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
 						<Label htmlFor="current-password">Current Password</Label>
@@ -68,13 +62,10 @@ export const WithActions: Story = {
 	},
 	render: () => (
 		<AnnotatedLayout>
-			<AnnotatedSection>
-				<div className="flex flex-col gap-2">
-					<h2 className="text-lg font-semibold">Profile Settings</h2>
-					<p className="text-muted-foreground text-sm">
-						Customize your profile information.
-					</p>
-				</div>
+			<AnnotatedSection
+				title="Profile Settings"
+				description="Customize your profile information."
+			>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
 						<Label htmlFor="username">Username</Label>
@@ -88,6 +79,25 @@ export const WithActions: Story = {
 						<Button variant="outline">Cancel</Button>
 						<Button>Save Changes</Button>
 					</div>
+				</div>
+			</AnnotatedSection>
+		</AnnotatedLayout>
+	),
+}
+
+export const ContentOnly: Story = {
+	args: {
+		children: null,
+	},
+	render: () => (
+		<AnnotatedLayout>
+			<AnnotatedSection>
+				<div className="bg-card rounded-xl border p-6">
+					<h2 className="text-base font-semibold">Full-width card section</h2>
+					<p className="text-muted-foreground mt-1 text-sm">
+						When cards carry their own headers, sections span the full measure —
+						no empty third column.
+					</p>
 				</div>
 			</AnnotatedSection>
 		</AnnotatedLayout>

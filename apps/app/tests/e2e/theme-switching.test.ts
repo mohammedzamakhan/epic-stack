@@ -27,6 +27,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 
 		// Select dark theme
@@ -63,6 +64,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /light/i }).first().click()
 		await page.waitForTimeout(500)
@@ -99,6 +101,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 
 		// Select system theme
@@ -144,6 +147,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /dark/i }).first().click()
 		await page.waitForTimeout(500)
@@ -187,6 +191,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /dark/i }).first().click()
 		await page.waitForTimeout(500)
@@ -237,6 +242,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /dark/i }).first().click()
 
@@ -271,6 +277,7 @@ test.describe('Theme Switching', () => {
 		await userMenuButton.click()
 
 		const themeButton = page.getByRole('menuitem', { name: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /dark/i }).first().click()
 		await page.waitForTimeout(1000)
@@ -316,6 +323,7 @@ test.describe('Theme Switching', () => {
 		const themeButton = page
 			.locator('[data-slot="dropdown-menu-sub-trigger"]')
 			.filter({ hasText: 'Theme' })
+		await themeButton.hover()
 		await themeButton.click()
 		await page.getByRole('menuitem', { name: /dark/i }).first().click()
 

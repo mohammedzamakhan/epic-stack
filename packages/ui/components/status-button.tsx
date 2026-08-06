@@ -15,8 +15,7 @@ import {
 type ButtonVariant = VariantProps<typeof buttonVariants>
 
 interface StatusButtonProps
-	extends React.ComponentProps<'button'>,
-		ButtonVariant {
+	extends React.ComponentProps<'button'>, ButtonVariant {
 	status: 'pending' | 'success' | 'error' | 'idle'
 	message?: string | null
 	spinDelay?: Parameters<typeof useSpinDelay>[1]

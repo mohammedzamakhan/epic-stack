@@ -26,14 +26,16 @@
   "dependencies": {
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/security": "*",
     "lru-cache": "^11.1.0",
+    "react-router": "^8.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.1",
     "msw": "^2.11.4",
     "typescript": "^5.8.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.10"
   }
 }

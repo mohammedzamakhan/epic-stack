@@ -309,8 +309,7 @@ export class SSOAuthService {
 
 		// Check allowed email domains
 		const allowedEmailDomains = (config as any).allowedEmailDomains as
-			| string
-			| null
+			string | null
 		if (allowedEmailDomains) {
 			const emailDomain = email.split('@')[1]?.toLowerCase()
 			if (!emailDomain) {

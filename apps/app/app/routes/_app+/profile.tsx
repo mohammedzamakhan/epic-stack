@@ -103,14 +103,16 @@ export default function ProfileSettings() {
 	const { _ } = useLingui()
 
 	return (
-		<div className="my-8 flex flex-1 flex-col gap-4 md:m-8">
-			<AnnotatedLayout>
+		<div className="mx-auto w-full max-w-4xl py-8 md:p-8">
+			<div className="mb-8 md:mb-10">
 				<PageTitle
 					title={_(t`Profile Settings`)}
 					description={_(
 						t`Manage your account settings and set e-mail preferences.`,
 					)}
 				/>
+			</div>
+			<AnnotatedLayout>
 				<AnnotatedSection>
 					<ProfileCard user={data.user} />
 				</AnnotatedSection>

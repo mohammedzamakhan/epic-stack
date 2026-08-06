@@ -40,12 +40,12 @@ export function PrivacyCard({ gdpr }: PrivacyCardProps) {
 				</FrameDescription>
 			</FrameHeader>
 			<FramePanel>
-				<div className="flex items-start justify-between gap-4">
-					<div className="flex-1">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+					<div className="min-w-0 flex-1">
 						<h3 className="text-foreground mb-2 font-medium">
 							<Trans>Download your data</Trans>
 						</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-muted-foreground text-sm text-pretty">
 							<Trans>
 								Download a copy of all your personal data including notes,
 								profile information, and account activity (GDPR Article 20 -
@@ -60,6 +60,7 @@ export function PrivacyCard({ gdpr }: PrivacyCardProps) {
 					</div>
 					<Button
 						variant="outline"
+						className="shrink-0 self-start"
 						render={<Link to="/resources/download-user-data" reloadDocument />}
 					>
 						<Icon name="download" />

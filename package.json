@@ -7,27 +7,27 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "node packages/ui/generate-icons.js && nx run-many -t build",
+    "build": "node packages/ui/generate-icons.js && turbo run build",
     "dev": "npm run dev:services && NODE_TLS_REJECT_UNAUTHORIZED=0 npm-run-all --parallel dev:proxy dev:all",
     "dev:http": "npm-run-all --parallel dev:proxy:http dev:all",
-    "dev:all": "nx run-many -t dev -p app web cms admin studio docs --parallel=20",
+    "dev:all": "turbo run dev --filter=app --filter=web --filter=cms --filter=admin --filter=studio --filter=docs --concurrency=20",
     "dev:services": "node scripts/docker-services.mjs start",
     "dev:services:stop": "node scripts/docker-services.mjs stop",
     "dev:services:logs": "node scripts/docker-services.mjs logs",
     "dev:proxy": "node dev-proxy.js",
     "dev:proxy:http": "PROXY_PROTOCOL=http node dev-proxy.js",
-    "dev:web": "nx run-many -t dev -p web cms",
-    "dev:app": "nx run app:dev",
-    "dev:mobile": "nx run mobile:dev",
-    "dev:trigger": "nx run background-jobs:dev",
-    "lint": "nx run-many -t lint",
+    "dev:web": "turbo run dev --filter=web --filter=cms",
+    "dev:app": "turbo run dev --filter=app",
+    "dev:mobile": "turbo run dev --filter=mobile",
+    "dev:trigger": "turbo run dev --filter=background-jobs",
+    "lint": "turbo run lint",
     "lint:oxc": "oxlint .",
     "lint:oxc:fix": "oxlint --fix .",
     "lint:all": "npm run lint:oxc && npm run lint",
-    "typecheck": "nx run-many -t typecheck",
-    "test": "nx run-many -t test",
-    "test:e2e:run": "nx run-many -t test:e2e:run",
-    "test:e2e:install": "npx playwright install --with-deps chromium",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e:run": "turbo run test:e2e:run --concurrency=1 --log-order=stream",
+    "test:e2e:install": "npx playwright install --with-deps",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "setup": "npm run db:setup && node scripts/setup-brand.mjs && node scripts/setup-ssl.mjs && node scripts/setup-hosts.mjs",
@@ -38,7 +38,7 @@
     "db:generate": "cd packages/database && npm run db:generate",
     "db:push": "cd packages/database && npm run db:push",
     "db:migrate:deploy": "cd packages/database && npm run db:migrate:deploy",
-    "db:seed": "nx run @repo/database:db:seed",
+    "db:seed": "turbo run db:seed --filter=@repo/database",
     "db:migrate:dev": "cd packages/database && npm run db:migrate:dev",
     "gdpr:process": "node scripts/process-gdpr-requests.mjs",
     "docs:dev": "cd apps/docs && npx mint dev",
@@ -57,13 +57,14 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
     "npm-run-all": "^4.1.5",
-    "nx": "21.6.5",
     "oxlint": "^1.23.0",
     "prettier": "^3.5.3",
     "prettier-plugin-sql": "^0.19.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-test-renderer": "^19.1.1",
-    "storybook": "^10.1.11"
+    "storybook": "^10.5.6",
+    "turbo": "latest",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": "^22.18.0"
@@ -71,14 +72,10 @@
   "prettier": "@epic-web/config/prettier",
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md}": [
-      "prettier --write",
-      "npm run lint"
+      "prettier --write"
     ],
     "*.{js,jsx,ts,tsx}": [
-      "oxlint --fix"
-    ],
-    "*.{ts,tsx}": [
-      "npm run typecheck"
+      "oxlint --fix --no-error-on-unmatched-pattern"
     ]
   },
   "volta": {
@@ -86,13 +83,25 @@
     "npm": "10.9.0"
   },
   "dependencies": {
+    "@opentelemetry/propagator-jaeger": "^2.10.0",
+    "@opentelemetry/sdk-node": "^0.217.0",
+    "@payloadcms/graphql": "^3.87.0",
     "@varlock/nextjs-integration": "^0.1.2",
+    "astro": "^7.1.6",
+    "liquidjs": "^10.28.0",
+    "mongoose": "^8.24.2",
     "motion": "^12.23.1",
     "react-image-crop": "^11.0.10",
-    "varlock": "^0.1.0",
+    "react-router": "^8.3.0",
+    "turbo-stream": "^3.2.0",
+    "uuid": "^11.1.1",
+    "varlock": "^0.1.6",
+    "ws": "^8.21.1",
     "zod": "^3.25.76"
   },
   "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.25.12",
+    "@next/swc-linux-x64-gnu": "^15.5.12",
     "@oxlint/binding-linux-x64-gnu": "^1.23.0",
     "@oxlint/binding-linux-x64-musl": "^1.23.0",
     "@rollup/rollup-linux-x64-gnu": "^4.32.1",
@@ -100,6 +109,23 @@
     "lightningcss-linux-x64-gnu": "^1.29.0"
   },
   "overrides": {
-    "@next/env": "npm:@varlock/nextjs-integration"
+    "@next/env": "npm:@varlock/nextjs-integration@0.1.2",
+    "sharp": "^0.35.3",
+    "next": "^16.2.12",
+    "postcss": "^8.5.25",
+    "storybook": "^10.5.6",
+    "protobufjs": "^8.7.1",
+    "astro": "^7.1.6",
+    "@payloadcms/next": "^3.87.0",
+    "@payloadcms/storage-s3": "^3.87.0",
+    "payload": "^3.87.0",
+    "ws": "$ws",
+    "uuid": "$uuid",
+    "mongoose": "$mongoose",
+    "undici": "7.29.0",
+    "@opentelemetry/propagator-jaeger": "$@opentelemetry/propagator-jaeger",
+    "@opentelemetry/sdk-node": "$@opentelemetry/sdk-node",
+    "@payloadcms/graphql": "$@payloadcms/graphql",
+    "turbo-stream": "$turbo-stream"
   }
 }

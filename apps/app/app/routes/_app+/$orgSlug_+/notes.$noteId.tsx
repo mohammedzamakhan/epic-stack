@@ -848,12 +848,11 @@ export default function NoteRoute() {
 									variant="outline"
 									size="sm"
 									className="min-[525px]:max-md:aspect-square min-[525px]:max-md:px-0"
+									render={<Link to="edit" />}
 								>
-									<Link to="edit">
-										<Icon name="pencil" className="h-4 w-4">
-											<span className="max-md:hidden">Edit</span>
-										</Icon>
-									</Link>
+									<Icon name="pencil" className="h-4 w-4">
+										<span className="max-md:hidden">Edit</span>
+									</Icon>
 								</Button>
 							</CanEditNote>
 							<CanDeleteNote

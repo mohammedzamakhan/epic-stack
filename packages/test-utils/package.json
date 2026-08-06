@@ -20,6 +20,7 @@
     "@epic-web/invariant": "^1.0.0",
     "@faker-js/faker": "^9.7.0",
     "@prisma/client": "^6.18.0",
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/database": "*",
     "@repo/i18n": "*",
     "@repo/validation": "*",
@@ -31,9 +32,11 @@
     "mime-types": "^3.0.1",
     "msw": "^2.11.4",
     "react": "^19.0.0",
+    "react-router": "^8.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4"
+    "@types/fs-extra": "^11.0.4",
+    "vitest": "^4.1.10"
   }
 }

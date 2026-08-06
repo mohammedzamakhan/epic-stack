@@ -235,7 +235,7 @@ const components: Options['components'] = {
 			{children}
 		</h6>
 	),
-	pre: ({ node, className, children }) => {
+	pre: ({ node, className, children }: any) => {
 		let language = 'javascript'
 
 		if (typeof node?.properties?.className === 'string') {

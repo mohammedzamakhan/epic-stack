@@ -14,7 +14,9 @@ node_modules
 /playwright/.cache/
 /tests/fixtures/email/
 /tests/fixtures/uploaded/
-/tests/fixtures/openimg/
+/tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/org/
+/tests/fixtures/openimg/fly-storage-tigris-dev/mock-bucket/users/
+/tests/fixtures/openimg/metadata.json
 /coverage
 
 /other/cache.db

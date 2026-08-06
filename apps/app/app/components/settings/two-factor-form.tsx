@@ -39,7 +39,7 @@ export function TwoFactorForm({
 		},
 	})
 
-	if (fetcher.data?.status === 'success') {
+	if (fetcher.state === 'idle' && fetcher.data?.status === 'success') {
 		setIsOpen(false)
 	}
 

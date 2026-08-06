@@ -92,8 +92,9 @@ export class WideEventBuilder {
 			...this.context,
 		}
 
-		// Log based on status code
-		if (finalData.error) {
+		if (process.env.CI) {
+			// Do not log anything on CI/CD while running E2E tests!
+		} else if (finalData.error) {
 			logger.error(
 				{ ...event, err: finalData.error },
 				'Request completed with error',

@@ -108,12 +108,21 @@ expect.extend({
 			where: { userId, id: sessionValue },
 		})
 
+		if (!session) {
+			const allSessions = await prisma.session.findMany({ where: { userId } })
+			console.log('DEBUG toHaveSessionForUser:', {
+				userId,
+				sessionValue,
+				allSessions,
+			})
+		}
+
 		return {
 			pass: Boolean(session),
 			message: () =>
-				`A session was${
-					this.isNot ? ' not' : ''
-				} created in the database for ${userId}`,
+				session
+					? `A session was created in the database for ${userId}`
+					: `A session was NOT found in the database for ${userId}`,
 		}
 	},
 	async toSendToast(response: Response, toast: ToastInput) {

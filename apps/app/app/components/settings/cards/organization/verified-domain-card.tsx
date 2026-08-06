@@ -80,50 +80,52 @@ export default function VerifiedDomainCard({
 				</CardDescription>
 			</CardHeader>
 			<div
-				className={`overflow-hidden transition-all duration-300 ${
-					isChecked ? 'max-h-60' : 'max-h-0'
+				className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+					isChecked ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
 				}`}
 			>
-				<Form method="POST" {...getFormProps(form)}>
-					<input type="hidden" name="intent" value="verified-domain" />
-					<input
-						{...getInputProps(fields.organizationId, { type: 'hidden' })}
-					/>
-					<CardContent className="pb-4">
-						<FieldGroup>
-							<Field
-								labelProps={{ children: <Trans>Verified domain</Trans> }}
-								inputProps={{
-									...getInputProps(fields.verifiedDomain, { type: 'text' }),
-									placeholder: 'example.com',
-								}}
-								className="w-full pt-2"
-								errors={fields.verifiedDomain.errors}
-							/>
-						</FieldGroup>
-						<ErrorList id={form.errorId} errors={form.errors} />
-					</CardContent>
-					<CardFooter className="flex justify-between gap-4">
-						<div className="text-primary flex items-center text-xs">
-							<Icon
-								name="help-circle"
-								className="mt-0.5 mr-1 h-4 w-4 shrink-0"
-							/>
-							<p className="text-muted-foreground">
-								<Trans>
-									Verified domain must match your current email address domain
-									for security.{' '}
-									<a href="#" className="underline">
-										Learn more
-									</a>
-								</Trans>
-							</p>
-						</div>
-						<Button type="submit">
-							<Trans>Save</Trans>
-						</Button>
-					</CardFooter>
-				</Form>
+				<div className="overflow-hidden">
+					<Form method="POST" {...getFormProps(form)}>
+						<input type="hidden" name="intent" value="verified-domain" />
+						<input
+							{...getInputProps(fields.organizationId, { type: 'hidden' })}
+						/>
+						<CardContent className="pb-4">
+							<FieldGroup>
+								<Field
+									labelProps={{ children: <Trans>Verified domain</Trans> }}
+									inputProps={{
+										...getInputProps(fields.verifiedDomain, { type: 'text' }),
+										placeholder: 'example.com',
+									}}
+									className="w-full pt-2"
+									errors={fields.verifiedDomain.errors}
+								/>
+							</FieldGroup>
+							<ErrorList id={form.errorId} errors={form.errors} />
+						</CardContent>
+						<CardFooter className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+							<div className="text-muted-foreground flex min-w-0 items-start gap-1.5 text-xs">
+								<Icon name="help-circle" className="mt-0.5 h-4 w-4 shrink-0" />
+								<p className="text-pretty">
+									<Trans>
+										Verified domain must match your current email address domain
+										for security.{' '}
+										<a href="#" className="underline">
+											Learn more
+										</a>
+									</Trans>
+								</p>
+							</div>
+							<Button
+								type="submit"
+								className="shrink-0 self-stretch sm:self-start"
+							>
+								<Trans>Save</Trans>
+							</Button>
+						</CardFooter>
+					</Form>
+				</div>
 			</div>
 		</Card>
 	)

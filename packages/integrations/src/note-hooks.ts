@@ -48,11 +48,7 @@ export class NoteHooks {
 			// Don't await to avoid blocking the main request
 			setImmediate(async () => {
 				try {
-					const result = await noteNotifier.notify(
-						noteId,
-						'created',
-						userId
-					)
+					const result = await noteNotifier.notify(noteId, 'created', userId)
 					if (!result.success) {
 						console.warn('Note creation notification failed:', result.errors)
 					} else if (result.connectionsNotified > 0) {
@@ -85,11 +81,7 @@ export class NoteHooks {
 			// Trigger integration notifications asynchronously
 			setImmediate(async () => {
 				try {
-					const result = await noteNotifier.notify(
-						noteId,
-						'updated',
-						userId
-					)
+					const result = await noteNotifier.notify(noteId, 'updated', userId)
 					if (!result.success) {
 						console.warn('Note update notification failed:', result.errors)
 					} else if (result.connectionsNotified > 0) {
@@ -136,7 +128,7 @@ export class NoteHooks {
 						noteId,
 						'deleted',
 						userId,
-						note
+						note,
 					)
 					if (!result.success) {
 						console.warn('Note deletion notification failed:', result.errors)

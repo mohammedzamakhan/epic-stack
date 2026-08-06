@@ -27,10 +27,16 @@ test.describe('Organization Invitations', () => {
 		const inviteEmail = faker.internet.email()
 		await page.getByPlaceholder('Enter email address').fill(inviteEmail)
 
-		// Select role from dropdown
-		await page.getByRole('combobox').click()
+		// Select role via the visual dropdown - scope to invite form to avoid the org switcher button
+		// (the org switcher has "1 member" which would match generic role patterns)
 		await page
-			.getByRole('option', { name: 'Member Standard organization' })
+			.locator('#invite-form')
+			.getByRole('button', { name: 'Admin', exact: true })
+			.click()
+		// Wait for the dropdown menu and click Member (filter by text starting with "Member")
+		await page
+			.getByRole('menuitem')
+			.filter({ hasText: /^Member/ })
 			.click()
 
 		// Send invitation
@@ -289,8 +295,12 @@ test.describe('Organization Invitations', () => {
 			name: /pending invitations/i,
 		})
 		const invitationRow = pendingSection.getByText(invitationEmail)
-		// eslint-disable-next-line playwright/no-raw-locators -- parent traversal needed to find submit button in same row
-		await invitationRow.locator('..').locator('button[type="submit"]').click()
+		// Use aria-label to find the delete button associated with this invitation row
+		// The button is in ItemActions (sibling to ItemContent), so parent traversal from the text span
+		// would not reach it. Instead, find the delete button within the region scope.
+		await pendingSection
+			.getByRole('button', { name: /delete invitation/i })
+			.click()
 
 		// Verify invitation is no longer displayed (check that the email is not in pending invitations)
 		await expect(pendingSection.getByText(invitationEmail)).not.toBeVisible()

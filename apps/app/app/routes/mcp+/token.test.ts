@@ -35,7 +35,10 @@ async function createTestOrganization(userId: string) {
 	return await prisma.organization.create({
 		data: {
 			name: faker.company.name(),
-			slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+			slug:
+				faker.helpers.slugify(faker.company.name()).toLowerCase() +
+				'-' +
+				faker.string.uuid(),
 			users: {
 				create: {
 					userId,

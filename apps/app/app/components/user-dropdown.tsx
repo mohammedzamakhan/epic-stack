@@ -11,14 +11,14 @@ import {
 import { Icon } from '@repo/ui/icon'
 import { Img } from 'openimg/react'
 import { useRef } from 'react'
-import { Link, Form } from 'react-router'
+import { Link, useSubmit } from 'react-router'
 import { useCurrentOrganization } from '#app/utils/organization/organizations.ts'
 import { useUser } from '#app/utils/user.ts'
 
 export function UserDropdown() {
 	const user = useUser()
 	const { organization } = useCurrentOrganization()
-	const formRef = useRef<HTMLFormElement>(null)
+	const submit = useSubmit()
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger>
@@ -58,15 +58,16 @@ export function UserDropdown() {
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
-					<Form action="/logout" method="POST" ref={formRef}>
-						<DropdownMenuItem>
-							<button type="submit" className="w-full">
-								<Icon className="text-body-md" name="log-out">
-									<Trans>Logout</Trans>
-								</Icon>
-							</button>
-						</DropdownMenuItem>
-					</Form>
+					<DropdownMenuItem
+						render={<button className="flex w-full items-center" />}
+						onClick={() =>
+							submit(new FormData(), { method: 'POST', action: '/logout' })
+						}
+					>
+						<Icon className="text-body-md" name="log-out">
+							<Trans>Logout</Trans>
+						</Icon>
+					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenuPortal>
 		</DropdownMenu>

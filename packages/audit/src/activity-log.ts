@@ -125,8 +125,8 @@ export async function getNoteActivityLogs(noteId: string, limit = 50) {
 	// Map AuditLog back to the expected structure for backward compatibility
 	// We need to fetch target users if present to fully match the expected return type
 	const targetUserIds = logs
-		.filter((l) => l.targetUserId)
-		.map((l) => l.targetUserId!)
+		.filter((l: any) => l.targetUserId)
+		.map((l: any) => l.targetUserId!)
 	let targetUsers: Record<string, any> = {}
 
 	if (targetUserIds.length > 0) {
@@ -138,10 +138,13 @@ export async function getNoteActivityLogs(noteId: string, limit = 50) {
 				username: true,
 			},
 		})
-		targetUsers = users.reduce((acc, user) => ({ ...acc, [user.id]: user }), {})
+		targetUsers = users.reduce(
+			(acc: any, user: any) => ({ ...acc, [user.id]: user }),
+			{},
+		)
 	}
 
-	return logs.map((log) => {
+	return logs.map((log: any) => {
 		const metadata = (log.metadata ? JSON.parse(log.metadata) : {}) as Record<
 			string,
 			any

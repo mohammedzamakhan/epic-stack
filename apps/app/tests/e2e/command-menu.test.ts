@@ -2,7 +2,11 @@ import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Command Menu', () => {
-	test('Command menu opens with Cmd+K shortcut', async ({ page, login, navigate }) => {
+	test('Command menu opens with Cmd+K shortcut', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -14,13 +18,17 @@ test.describe('Command Menu', () => {
 
 		// Open command menu with keyboard shortcut
 		await page.keyboard.press('Meta+k') // Mac
-		
+
 		// Verify command menu is visible
 		await expect(page.getByRole('dialog')).toBeVisible()
 		await expect(page.getByPlaceholder(/search/i)).toBeVisible()
 	})
 
-	test('Command menu opens with Ctrl+K shortcut on Windows/Linux', async ({ page, login, navigate }) => {
+	test('Command menu opens with Ctrl+K shortcut on Windows/Linux', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -32,13 +40,17 @@ test.describe('Command Menu', () => {
 
 		// Open command menu with keyboard shortcut
 		await page.keyboard.press('Control+k') // Windows/Linux
-		
+
 		// Verify command menu is visible
 		await expect(page.getByRole('dialog')).toBeVisible()
 		await expect(page.getByPlaceholder(/search/i)).toBeVisible()
 	})
 
-	test('Command menu can be closed with Escape key', async ({ page, login, navigate }) => {
+	test('Command menu can be closed with Escape key', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -57,7 +69,11 @@ test.describe('Command Menu', () => {
 		await expect(page.getByRole('dialog')).not.toBeVisible()
 	})
 
-	test('Command menu search functionality', async ({ page, login, navigate }) => {
+	test('Command menu search functionality', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -74,11 +90,11 @@ test.describe('Command Menu', () => {
 		// Test search input functionality
 		const searchInput = page.getByPlaceholder(/search/i)
 		await expect(searchInput).toBeVisible()
-		
+
 		// Type in search box
 		await searchInput.fill('test')
 		await page.waitForTimeout(500)
-		
+
 		// Verify search box accepts input
 		await expect(searchInput).toHaveValue('test')
 	})
@@ -121,7 +137,11 @@ test.describe('Command Menu', () => {
 		await expect(page.getByRole('listbox')).toBeVisible()
 	})
 
-	test('Command menu keyboard interaction', async ({ page, login, navigate }) => {
+	test('Command menu keyboard interaction', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user
@@ -138,7 +158,7 @@ test.describe('Command Menu', () => {
 		// Test keyboard navigation
 		await page.keyboard.press('ArrowDown')
 		await page.keyboard.press('ArrowUp')
-		
+
 		// Close with Escape
 		await page.keyboard.press('Escape')
 		await expect(page.getByRole('dialog')).not.toBeVisible()
@@ -146,7 +166,11 @@ test.describe('Command Menu', () => {
 
 	// Remove duplicate test - functionality covered in previous test
 
-	test('Command menu shows empty state when no results', async ({ page, login, navigate }) => {
+	test('Command menu shows empty state when no results', async ({
+		page,
+		login,
+		navigate,
+	}) => {
 		const user = await login()
 
 		// Create an organization for the user

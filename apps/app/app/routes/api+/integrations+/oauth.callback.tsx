@@ -11,7 +11,10 @@ export async function loader(args: LoaderFunctionArgs) {
 	if (state) {
 		try {
 			// Extract organizationId directly from state
-			const stateDataStr = Buffer.from(state.split('.')[0] || '', 'base64').toString()
+			const stateDataStr = Buffer.from(
+				state.split('.')[0] || '',
+				'base64',
+			).toString()
 			const stateData = JSON.parse(stateDataStr) as Record<string, any>
 			if (stateData.organizationId) {
 				await userHasOrgAccess(args.request, stateData.organizationId as string)

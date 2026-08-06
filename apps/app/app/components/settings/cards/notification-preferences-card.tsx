@@ -67,13 +67,16 @@ function ChannelSwitchList({
 }: ChannelSwitchListProps) {
 	const { _ } = useLingui()
 	return (
-		<div className="grid gap-1 pl-4">
+		<div className="grid gap-1 sm:pl-4">
 			{Object.entries(preference.channels).map(([channel, enabled]) => (
-				<div key={channel} className="flex items-center justify-between py-2">
-					<div className="flex items-center gap-3">
+				<div
+					key={channel}
+					className="flex items-center justify-between gap-3 py-2"
+				>
+					<div className="flex min-w-0 items-center gap-3">
 						<Icon
 							name={getChannelIcon(channel)}
-							className="text-muted-foreground h-4 w-4"
+							className="text-muted-foreground h-4 w-4 shrink-0"
 						/>
 						<span className="text-sm font-medium">
 							{getChannelLabel(channel, _)}
@@ -291,8 +294,8 @@ function NotificationPreferencesCardComponent() {
 						return (
 							<div key={preferenceId} className="space-y-2">
 								<div className="flex items-center gap-2">
-									<Icon name="settings" className="h-5 w-5" />
-									<h3 className="text-lg font-medium">
+									<Icon name="settings" className="h-4 w-4 shrink-0" />
+									<h3 className="text-base font-medium">
 										<Trans>Global Preferences</Trans>
 									</h3>
 								</div>
@@ -316,9 +319,9 @@ function NotificationPreferencesCardComponent() {
 
 						return (
 							<div key={preferenceId} className="space-y-2">
-								<div className="flex items-center gap-2">
-									<Icon name="cog" className="h-5 w-5" />
-									<h3 className="text-lg font-medium">
+								<div className="flex flex-wrap items-center gap-2">
+									<Icon name="cog" className="h-4 w-4 shrink-0" />
+									<h3 className="text-base font-medium">
 										{preference.workflow?.name
 											? getWorkflowLabel(preference.workflow?.name, _)
 											: preference.workflow?.name}
@@ -342,13 +345,13 @@ function NotificationPreferencesCardComponent() {
 						)
 					})}
 
-				{/* Channel Overview */}
+				{/* Channel Overview — summary strip, not nested cards */}
 				{availableChannels.length > 0 && (
-					<div className="mt-8 space-y-4">
-						<h3 className="text-lg font-medium">
+					<div className="border-border space-y-3 border-t pt-6">
+						<h3 className="text-base font-medium">
 							<Trans>Channel Overview</Trans>
 						</h3>
-						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{availableChannels.map((channel) => {
 								const enabledCount = preferences.filter(
 									(pref) =>
@@ -359,22 +362,25 @@ function NotificationPreferencesCardComponent() {
 								).length
 
 								return (
-									<Card key={channel} className="p-4">
-										<div className="mb-2 flex items-center gap-3">
+									<div
+										key={channel}
+										className="bg-muted/40 flex flex-col gap-1 rounded-lg px-3 py-2.5"
+									>
+										<div className="flex items-center gap-2">
 											<Icon
 												name={getChannelIcon(channel)}
-												className="h-5 w-5"
+												className="text-muted-foreground h-4 w-4 shrink-0"
 											/>
-											<span className="font-medium">
+											<span className="text-sm font-medium">
 												{getChannelLabel(channel, _)}
 											</span>
 										</div>
-										<p className="text-muted-foreground text-sm">
+										<p className="text-muted-foreground text-xs">
 											<Trans>
 												{enabledCount} of {totalCount} notifications enabled
 											</Trans>
 										</p>
-									</Card>
+									</div>
 								)
 							})}
 						</div>

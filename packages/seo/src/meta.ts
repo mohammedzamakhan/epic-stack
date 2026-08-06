@@ -66,7 +66,15 @@ export interface GenerateSeoMetaOptions {
 	/** Open Graph image */
 	image?: SeoImage
 	/** Open Graph type (default: 'website') */
-	type?: 'website' | 'article' | 'profile' | 'book' | 'video.movie' | 'video.episode' | 'music.song' | 'music.album'
+	type?:
+		| 'website'
+		| 'article'
+		| 'profile'
+		| 'book'
+		| 'video.movie'
+		| 'video.episode'
+		| 'music.song'
+		| 'music.album'
 	/** Site name for Open Graph */
 	siteName?: string
 	/** Locale (default: 'en_US') */
@@ -90,7 +98,15 @@ export interface GenerateSeoMetaOptions {
 /**
  * Generate comprehensive SEO meta tags for React Router routes
  */
-export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{ tagName?: string; name?: string; property?: string; content?: string; rel?: string; href?: string; [key: string]: any }> {
+export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{
+	tagName?: string
+	name?: string
+	property?: string
+	content?: string
+	rel?: string
+	href?: string
+	[key: string]: any
+}> {
 	const {
 		title,
 		description,
@@ -134,9 +150,12 @@ export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{ tagNam
 
 		if (robots.noarchive) robotsContent.push('noarchive')
 		if (robots.nosnippet) robotsContent.push('nosnippet')
-		if (robots.maxImagePreview) robotsContent.push(`max-image-preview:${robots.maxImagePreview}`)
-		if (robots.maxSnippet) robotsContent.push(`max-snippet:${robots.maxSnippet}`)
-		if (robots.maxVideoPreview) robotsContent.push(`max-video-preview:${robots.maxVideoPreview}`)
+		if (robots.maxImagePreview)
+			robotsContent.push(`max-image-preview:${robots.maxImagePreview}`)
+		if (robots.maxSnippet)
+			robotsContent.push(`max-snippet:${robots.maxSnippet}`)
+		if (robots.maxVideoPreview)
+			robotsContent.push(`max-video-preview:${robots.maxVideoPreview}`)
 
 		if (robotsContent.length > 0) {
 			meta.push({ name: 'robots', content: robotsContent.join(', ') })
@@ -184,10 +203,16 @@ export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{ tagNam
 	// Article-specific Open Graph tags
 	if (type === 'article' && article) {
 		if (article.publishedTime) {
-			meta.push({ property: 'article:published_time', content: article.publishedTime })
+			meta.push({
+				property: 'article:published_time',
+				content: article.publishedTime,
+			})
 		}
 		if (article.modifiedTime) {
-			meta.push({ property: 'article:modified_time', content: article.modifiedTime })
+			meta.push({
+				property: 'article:modified_time',
+				content: article.modifiedTime,
+			})
 		}
 		if (article.author) {
 			meta.push({ property: 'article:author', content: article.author })
@@ -196,14 +221,15 @@ export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{ tagNam
 			meta.push({ property: 'article:section', content: article.section })
 		}
 		if (article.tags) {
-			article.tags.forEach(tag => {
+			article.tags.forEach((tag) => {
 				meta.push({ property: 'article:tag', content: tag })
 			})
 		}
 	}
 
 	// Twitter Card tags
-	const twitterCard = twitter?.card || (image ? 'summary_large_image' : 'summary')
+	const twitterCard =
+		twitter?.card || (image ? 'summary_large_image' : 'summary')
 	meta.push({ name: 'twitter:card', content: twitterCard })
 	meta.push({ name: 'twitter:title', content: title })
 	meta.push({ name: 'twitter:description', content: description })
@@ -234,7 +260,10 @@ export function generateSeoMeta(options: GenerateSeoMetaOptions): Array<{ tagNam
 /**
  * Generate robots meta tag
  */
-export function generateRobotsMeta(directives: SeoRobots): { name: string; content: string } {
+export function generateRobotsMeta(directives: SeoRobots): {
+	name: string
+	content: string
+} {
 	const content: string[] = []
 
 	if (directives.index === false) content.push('noindex')
@@ -245,9 +274,12 @@ export function generateRobotsMeta(directives: SeoRobots): { name: string; conte
 
 	if (directives.noarchive) content.push('noarchive')
 	if (directives.nosnippet) content.push('nosnippet')
-	if (directives.maxImagePreview) content.push(`max-image-preview:${directives.maxImagePreview}`)
-	if (directives.maxSnippet) content.push(`max-snippet:${directives.maxSnippet}`)
-	if (directives.maxVideoPreview) content.push(`max-video-preview:${directives.maxVideoPreview}`)
+	if (directives.maxImagePreview)
+		content.push(`max-image-preview:${directives.maxImagePreview}`)
+	if (directives.maxSnippet)
+		content.push(`max-snippet:${directives.maxSnippet}`)
+	if (directives.maxVideoPreview)
+		content.push(`max-video-preview:${directives.maxVideoPreview}`)
 
 	return { name: 'robots', content: content.join(', ') }
 }
@@ -255,7 +287,10 @@ export function generateRobotsMeta(directives: SeoRobots): { name: string; conte
 /**
  * Truncate description to optimal length (155-160 characters for SEO)
  */
-export function truncateDescription(text: string, maxLength: number = 160): string {
+export function truncateDescription(
+	text: string,
+	maxLength: number = 160,
+): string {
 	if (text.length <= maxLength) return text
 
 	// Find the last space before maxLength
@@ -272,7 +307,11 @@ export function truncateDescription(text: string, maxLength: number = 160): stri
 /**
  * Generate title with site name
  */
-export function generateTitle(pageTitle: string, siteName?: string, separator: string = '|'): string {
+export function generateTitle(
+	pageTitle: string,
+	siteName?: string,
+	separator: string = '|',
+): string {
 	if (!siteName) return pageTitle
 	return `${pageTitle} ${separator} ${siteName}`
 }
@@ -280,15 +319,18 @@ export function generateTitle(pageTitle: string, siteName?: string, separator: s
 /**
  * Extract first 160 characters from HTML/Markdown content for meta description
  */
-export function extractDescription(content: string, maxLength: number = 160): string {
+export function extractDescription(
+	content: string,
+	maxLength: number = 160,
+): string {
 	// Remove HTML tags
-	const textOnly = content.replace(/<[^>]*>/g, ' ')
+	const textOnly = content.replace(/<[^<>]*>/g, ' ')
 	// Remove markdown syntax
 	const cleanText = textOnly
-		.replace(/#+\s/g, '') // Remove headers
+		.replace(/(?:^|\s)#+\s+/g, ' ') // Remove headers
 		.replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
 		.replace(/\*([^*]+)\*/g, '$1') // Remove italic
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
+		.replace(/\[([^\][]+)\]\([^)(]+\)/g, '$1') // Remove links
 		.replace(/\s+/g, ' ') // Normalize whitespace
 		.trim()
 

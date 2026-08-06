@@ -3,7 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "clean": "rm -rf .nx node_modules dist",
+    "clean": "rm -rf .turbo node_modules dist",
     "dev": "npx trigger.dev@latest dev -c ../../trigger.config.ts"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@remix-run/server-runtime": "^2.17.5",
+    "react-router": "^8.3.0"
   }
 }

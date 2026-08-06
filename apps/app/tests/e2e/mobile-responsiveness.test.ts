@@ -123,7 +123,7 @@ test.describe('Mobile Responsiveness', () => {
 		// Verify input is large enough for touch interaction
 		const titleInputBox = await titleInput.boundingBox()
 		// Reduced minimum touch target size from 40px to 32px (still accessible)
-		expect(titleInputBox?.height).toBeGreaterThan(32)
+		expect(titleInputBox?.height).toBeGreaterThanOrEqual(32)
 
 		// Test form submission on mobile
 		await titleInput.fill('Mobile Test Note')

@@ -16,20 +16,22 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "git clean -xdf .cache .nx dist node_modules",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "test": "vitest --run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@arcjet/remix": "^1.0.0-beta.9",
+    "@remix-run/server-runtime": "^2.17.5",
+    "react-router": "^8.3.0",
     "remix-utils": "^8.5.0"
   },
   "devDependencies": {
+    "@repo/config": "*",
     "@types/node": "^22.19.6",
     "@vitest/coverage-v8": "^4.0.1",
-    "@repo/config": "*",
     "typescript": "^5.8.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.10"
   }
 }

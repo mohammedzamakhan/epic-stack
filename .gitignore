@@ -20,7 +20,6 @@ uniwind-env.d.ts
 /playwright/.cache/
 /packages/**/fixtures/email/
 /packages/**/fixtures/uploaded/
-/packages/**/fixtures/openimg/
 /coverage
 /apps/email/out/
 
@@ -62,13 +61,12 @@ packages/**/*.d.ts.map
 !packages/**/generate-icons.js
 !packages/ui/vitest.config.ts
 
-.nx/cache
-.nx/workspace-data
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
+.turbo
 static
 graph.html
 
 /other/ssl
 
 .orchids/
+.wrangler/
+.commandcode/

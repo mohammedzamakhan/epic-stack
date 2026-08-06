@@ -29,6 +29,7 @@ The primary user-facing application built with React Router and Remix.
   - Background job processing
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start with mocks enabled
 npm run dev:no-mocks     # Start without mocks
@@ -51,6 +52,7 @@ Super admin dashboard for managing the platform.
   - User management capabilities
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start admin app with mocks
 npm run build            # Build for production
@@ -71,6 +73,7 @@ Public-facing marketing and documentation site.
   - Cloudflare deployment ready
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start development server
 npm run build            # Build for production
@@ -94,6 +97,7 @@ Headless CMS powered by Payload CMS for managing marketing website content.
   - Redirects management
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start CMS development server
 npm run build            # Build for production
@@ -113,6 +117,7 @@ Browser extension for Chrome and Firefox.
   - WebExtension polyfill for cross-browser APIs
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start development mode
 npm run build:chrome     # Build for Chrome
@@ -133,6 +138,7 @@ Native mobile application built with Expo and React Native.
   - TypeScript validation with Zod
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start Expo development server
 npm run android          # Run on Android with tunnel
@@ -158,6 +164,7 @@ Technical documentation site built with Mintlify.
   - Search functionality
 
 **Development Commands**:
+
 ```bash
 mintlify dev             # Start documentation server
 mintlify broken-links    # Validate all links
@@ -176,6 +183,7 @@ Development server for previewing email templates.
   - Export templates for production use
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start email preview server
 npm run export           # Export email templates
@@ -194,6 +202,7 @@ Development server for Novu notification workflows.
   - Template management
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start Novu dev server
 ```
@@ -210,6 +219,7 @@ Background job processing with Trigger.dev.
   - Job monitoring and debugging
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start Trigger.dev dev server
 ```
@@ -227,6 +237,7 @@ Database management interface.
   - Visual schema exploration
 
 **Development Commands**:
+
 ```bash
 npm run dev              # Start Prisma Studio
 ```
@@ -260,6 +271,7 @@ The Epic Stack uses a monorepo structure with the following benefits:
 To work on any application:
 
 1. **Install dependencies** (from root):
+
    ```bash
    npm install
    ```
@@ -269,6 +281,7 @@ To work on any application:
    - Fill in required values
 
 3. **Start the development server**:
+
    ```bash
    cd apps/[app-name]
    npm run dev
@@ -283,14 +296,15 @@ To work on any application:
 
 Default development ports for each application:
 
-| Application | Port | URL |
-|------------|------|-----|
-| Main App | 3000 | http://localhost:3000 |
-| Admin | 3001 | http://localhost:3001 |
+| Application     | Port | URL                   |
+| --------------- | ---- | --------------------- |
+| Main App        | 3000 | http://localhost:3000 |
+| Admin           | 3001 | http://localhost:3001 |
 | Web (Marketing) | 3002 | http://localhost:3002 |
-| Prisma Studio | 3003 | http://localhost:3003 |
-| CMS | 3006 | http://localhost:3006 |
+| Prisma Studio   | 3003 | http://localhost:3003 |
+| CMS             | 3006 | http://localhost:3006 |
 
 <Note>
-  Ports may vary if the default port is already in use. Check the terminal output for the actual port being used.
+	Ports may vary if the default port is already in use. Check the terminal
+	output for the actual port being used.
 </Note>

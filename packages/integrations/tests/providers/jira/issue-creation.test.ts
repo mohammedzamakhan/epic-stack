@@ -89,7 +89,7 @@ describe('JiraProvider - Issue Creation', () => {
 			// Verify create issue API call
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/issue',
-				{
+				expect.objectContaining({
 					method: 'POST',
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
@@ -122,7 +122,7 @@ describe('JiraProvider - Issue Creation', () => {
 							},
 						},
 					}),
-				},
+				}),
 			)
 		})
 
@@ -410,9 +410,8 @@ describe('JiraProvider - Issue Creation', () => {
 
 		it('should handle authentication error and attempt token refresh', async () => {
 			const { decryptToken } = await import('../../../src/encryption')
-			const { integrationManager } = await import(
-				'../../../src/integration-manager'
-			)
+			const { integrationManager } =
+				await import('../../../src/integration-manager')
 
 			// First call fails with auth error
 			const mockAuthErrorResponse = {

@@ -38,9 +38,7 @@ export function parseUserAgent(userAgent: string | null): DeviceInfo {
 	}
 }
 
-function getBrowserInfo(
-	userAgent: string,
-): { name: string; version?: string } {
+function getBrowserInfo(userAgent: string): { name: string; version?: string } {
 	// Edge (Chromium-based)
 	if (userAgent.includes('Edg/')) {
 		const match = userAgent.match(/Edg\/(\d+\.\d+)/)

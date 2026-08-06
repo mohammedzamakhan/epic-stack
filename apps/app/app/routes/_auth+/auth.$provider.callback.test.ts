@@ -10,16 +10,19 @@ import {
 } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { http } from 'msw'
-import { type AppLoadContext } from 'react-router'
+import { RouterContextProvider } from 'react-router'
+import { serverBuildContext } from '#app/server-context.ts'
 import { afterEach, expect, test } from 'vitest'
 import { createUser } from '#tests/db-utils.ts'
 import { insertGitHubUser, deleteGitHubUsers } from '#tests/mocks/github.ts'
 import { server } from '#tests/mocks/index.ts'
 
 // Mock context helper for tests
-const createMockContext = (): AppLoadContext => ({
-	serverBuild: {} as any,
-})
+const createMockContext = () => {
+	const ctx = new RouterContextProvider()
+	ctx.set(serverBuildContext, {} as any)
+	return ctx
+}
 import { consoleError } from '#tests/setup/setup-test-env.ts'
 import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { twoFAVerificationType } from '../_app+/security.tsx'
@@ -38,8 +41,9 @@ test('a new user goes to onboarding', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 	expect(response).toHaveRedirect('/onboarding/github')
 })
 
@@ -55,8 +59,9 @@ test('when auth fails, send the user to login with a toast', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
 	await expect(response).toSendToast(
@@ -79,8 +84,9 @@ test('when a user is logged in, it creates the connection', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -120,8 +126,9 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -140,8 +147,9 @@ test('when a user exists with the same email, create connection and make session
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/')
 
@@ -189,8 +197,9 @@ test('gives an error if the account is already connected to another user', async
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 	expect(response).toHaveRedirect('/settings')
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -217,8 +226,9 @@ test('if a user is not logged in, but the connection exists, make a session', as
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 	expect(response).toHaveRedirect('/')
 	await expect(response).toHaveSessionForUser(userId)
 })
@@ -246,8 +256,9 @@ test('if a user is not logged in, but the connection exists and they have enable
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/:provider/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 	const searchParams = new URLSearchParams({
 		type: twoFAVerificationType,
 		target: userId,

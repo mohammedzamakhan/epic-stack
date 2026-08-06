@@ -18,22 +18,22 @@ This guide covers common security vulnerabilities and how Epic Stack prevents th
 ```typescript
 // ✅ Every route checks authentication
 export async function loader({ request }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request)
-  
-  // ✅ Authorization is verified for sensitive operations
-  await requireUserWithOrganizationPermission(
-    request,
-    organizationId,
-    ORG_PERMISSIONS.READ_MEMBER_ANY,
-  )
-  
-  // ✅ Resource ownership is verified
-  const note = await prisma.note.findFirst({
-    where: {
-      id: noteId,
-      organizationId: userOrganization.id, // Prevents IDOR
-    },
-  })
+	const userId = await requireUserId(request)
+
+	// ✅ Authorization is verified for sensitive operations
+	await requireUserWithOrganizationPermission(
+		request,
+		organizationId,
+		ORG_PERMISSIONS.READ_MEMBER_ANY,
+	)
+
+	// ✅ Resource ownership is verified
+	const note = await prisma.note.findFirst({
+		where: {
+			id: noteId,
+			organizationId: userOrganization.id, // Prevents IDOR
+		},
+	})
 }
 ```
 
@@ -42,6 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 **Risk**: Weak encryption or exposed sensitive data.
 
 **Epic Stack Prevention**:
+
 - Passwords hashed with bcrypt (cost factor 12)
 - Secrets encrypted with AES-256-GCM
 - PBKDF2-SHA512 with 100k iterations for key derivation
@@ -77,6 +78,7 @@ contentSecurityPolicy: {
 **Risk**: Missing security controls in application design.
 
 **Epic Stack Prevention**:
+
 - Security built into the framework from the start
 - Centralized authentication and authorization
 - Unified audit logging
@@ -87,6 +89,7 @@ contentSecurityPolicy: {
 **Risk**: Default credentials, unnecessary features, verbose errors.
 
 **Epic Stack Prevention**:
+
 - Required environment variables validated at startup
 - Production error messages don't expose internals
 - Debug logging disabled in production
@@ -97,6 +100,7 @@ contentSecurityPolicy: {
 **Risk**: Using components with known vulnerabilities.
 
 **Epic Stack Prevention**:
+
 - Automated dependency scanning in CI/CD
 - npm audit runs on every build
 - Renovate/Dependabot for dependency updates
@@ -107,6 +111,7 @@ contentSecurityPolicy: {
 **Risk**: Weak passwords, credential stuffing, session hijacking.
 
 **Epic Stack Prevention**:
+
 - Bcrypt with high cost factor
 - Rate limiting on auth endpoints
 - Session validation on every request
@@ -118,6 +123,7 @@ contentSecurityPolicy: {
 **Risk**: Trusting unsigned data, insecure deserialization.
 
 **Epic Stack Prevention**:
+
 - Zod validation on all inputs
 - Signed session cookies
 - PKCE for OAuth flows
@@ -128,6 +134,7 @@ contentSecurityPolicy: {
 **Risk**: Missing audit logs, exposed sensitive data in logs.
 
 **Epic Stack Prevention**:
+
 - Comprehensive audit logging
 - Automatic PII redaction
 - Structured logging with Pino
@@ -138,6 +145,7 @@ contentSecurityPolicy: {
 **Risk**: Server making requests to unintended destinations.
 
 **Epic Stack Prevention**:
+
 - URL validation for external requests
 - Allowlist for SSO/OAuth endpoints
 - No user-controlled URLs in server requests
@@ -155,7 +163,8 @@ cookie: {
 ```
 
 <Note>
-  This approach works because Epic Stack avoids GET-based mutations. All state-changing operations use POST/PUT/DELETE.
+	This approach works because Epic Stack avoids GET-based mutations. All
+	state-changing operations use POST/PUT/DELETE.
 </Note>
 
 ## Insecure Direct Object Reference (IDOR)
@@ -165,15 +174,15 @@ cookie: {
 ```typescript
 // ❌ Vulnerable - No ownership check
 const invitation = await prisma.organizationInvitation.delete({
-  where: { id: invitationId }, // Any user can delete any invitation!
+	where: { id: invitationId }, // Any user can delete any invitation!
 })
 
 // ✅ Secure - Verify ownership
 const invitation = await prisma.organizationInvitation.delete({
-  where: {
-    id: invitationId,
-    organizationId: userOrganization.id, // Only own org's invitations
-  },
+	where: {
+		id: invitationId,
+		organizationId: userOrganization.id, // Only own org's invitations
+	},
 })
 ```
 
@@ -181,13 +190,14 @@ const invitation = await prisma.organizationInvitation.delete({
 
 Epic Stack implements 3-tier rate limiting:
 
-| Tier | Limit | Endpoints |
-|------|-------|-----------|
-| Strictest | 10/min | /login, /signup, /reset-password |
-| Strict | 100/min | All POST/PUT/DELETE to auth routes |
-| General | 1000/min | All other endpoints |
+| Tier      | Limit    | Endpoints                          |
+| --------- | -------- | ---------------------------------- |
+| Strictest | 10/min   | /login, /signup, /reset-password   |
+| Strict    | 100/min  | All POST/PUT/DELETE to auth routes |
+| General   | 1000/min | All other endpoints                |
 
 Additional protections:
+
 - Arcjet WAF for advanced threat detection
 - Bot detection
 - Honeypot fields on forms
@@ -197,6 +207,7 @@ Additional protections:
 ### Automated Scanning
 
 The CI/CD pipeline includes:
+
 - **Semgrep**: Static analysis for security patterns
 - **CodeQL**: GitHub's code analysis engine
 - **Trivy**: Container and dependency scanning

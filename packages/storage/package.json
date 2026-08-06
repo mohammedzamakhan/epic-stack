@@ -15,17 +15,20 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "git clean -xdf .cache .nx dist node_modules",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@mjackson/form-data-parser": "^0.7.0",
     "@paralleldrive/cuid2": "^2.2.2",
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/database": "*",
+    "react-router": "^8.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.19.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.10"
   }
 }

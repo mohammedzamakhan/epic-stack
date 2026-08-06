@@ -202,7 +202,9 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 		let accessToken = await tokenManager.getValidAccessToken(integration, this)
 
 		if (!accessToken) {
-			throw new Error(`Failed to obtain access token for integration ${integration.id}`)
+			throw new Error(
+				`Failed to obtain access token for integration ${integration.id}`,
+			)
 		}
 
 		const headers = new Headers(options.headers || {})
@@ -222,7 +224,10 @@ export abstract class BaseIntegrationProvider implements IntegrationProvider {
 					integration.refreshToken,
 				)
 				if (refreshResult.success && refreshResult.tokenData?.accessToken) {
-					headers.set('Authorization', `Bearer ${refreshResult.tokenData.accessToken}`)
+					headers.set(
+						'Authorization',
+						`Bearer ${refreshResult.tokenData.accessToken}`,
+					)
 					response = await fetch(endpoint, {
 						...options,
 						headers,

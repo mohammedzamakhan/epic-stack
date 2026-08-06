@@ -6,7 +6,10 @@ import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import { type Route } from './+types/cache_.sqlite.ts'
 
-function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
+function safeCompare(
+	a: string | null | undefined,
+	b: string | null | undefined,
+): boolean {
 	if (!a || !b) return false
 	const hashA = crypto.createHash('sha256').update(a).digest()
 	const hashB = crypto.createHash('sha256').update(b).digest()

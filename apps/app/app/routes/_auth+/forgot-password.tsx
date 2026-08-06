@@ -73,7 +73,11 @@ export async function action({ request }: Route.ActionArgs) {
 	await checkHoneypot(formData)
 
 	// Arcjet security protection for forgot password (skip in test environment)
-	if (ENV.ARCJET_KEY && ENV.NODE_ENV === 'production') {
+	if (
+		ENV.ARCJET_KEY &&
+		ENV.NODE_ENV === 'production' &&
+		process['env'].MOCKS !== 'true'
+	) {
 		const usernameOrEmail = formData.get('usernameOrEmail') as string
 		try {
 			const decision = await aj.protect(

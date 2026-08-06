@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
-import { type AppLoadContext } from 'react-router'
+import { RouterContextProvider } from 'react-router'
+import { serverBuildContext } from '#app/server-context.ts'
 import { describe, it, expect, afterEach } from 'vitest'
 import {
 	validateAccessToken,
@@ -10,9 +11,11 @@ import {
 import { MCP_PROTOCOL_VERSION } from '#app/utils/mcp/streamable-http.server.ts'
 
 // Mock context helper for tests
-const createMockContext = (): AppLoadContext => ({
-	serverBuild: {} as any,
-})
+const createMockContext = () => {
+	const ctx = new RouterContextProvider()
+	ctx.set(serverBuildContext, {} as any)
+	return ctx
+}
 
 // Type definitions for JSON-RPC responses
 interface JsonRpcResponse {
@@ -955,6 +958,7 @@ describe('MCP SSE Endpoint', () => {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
+					'MCP-Protocol-Version': '2025-11-25',
 				},
 				body: JSON.stringify({
 					jsonrpc: '2.0',
@@ -998,6 +1002,7 @@ describe('MCP SSE Endpoint', () => {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
 					'MCP-Session-Id': 'invalid-session-id-12345',
+					'MCP-Protocol-Version': '2025-11-25',
 				},
 				body: JSON.stringify({
 					jsonrpc: '2.0',

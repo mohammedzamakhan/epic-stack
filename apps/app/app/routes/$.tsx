@@ -8,7 +8,6 @@
 import { NotFoundPage } from '@repo/ui/not-found-page'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
-
 export function loader() {
 	throw new Response('Not found', { status: 404 })
 }

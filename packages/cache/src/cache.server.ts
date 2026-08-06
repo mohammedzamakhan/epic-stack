@@ -417,8 +417,7 @@ export async function getCacheKeyDetails(
 ): Promise<CacheKeyInfo | null> {
 	if (type === 'sqlite') {
 		const row = getCacheKeyDetailsStatement.get(key) as
-			| { key: string; size: number; metadata: string }
-			| undefined
+			{ key: string; size: number; metadata: string } | undefined
 		if (!row) return null
 
 		let metadata: any = {}

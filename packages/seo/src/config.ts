@@ -42,7 +42,9 @@ export class SeoConfig {
 	 * Get default SEO meta options
 	 * Override with page-specific values in route meta functions
 	 */
-	getDefaults(overrides?: Partial<GenerateSeoMetaOptions>): GenerateSeoMetaOptions {
+	getDefaults(
+		overrides?: Partial<GenerateSeoMetaOptions>,
+	): GenerateSeoMetaOptions {
 		return {
 			title: this.config.siteName,
 			description: this.config.description,
@@ -63,7 +65,9 @@ export class SeoConfig {
 	/**
 	 * Generate SEO meta for homepage
 	 */
-	getHomepageMeta(overrides?: Partial<GenerateSeoMetaOptions>): GenerateSeoMetaOptions {
+	getHomepageMeta(
+		overrides?: Partial<GenerateSeoMetaOptions>,
+	): GenerateSeoMetaOptions {
 		return this.getDefaults({
 			type: 'website',
 			...overrides,

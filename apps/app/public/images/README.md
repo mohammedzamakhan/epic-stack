@@ -4,7 +4,8 @@ This directory contains Open Graph (OG) images used for social media sharing.
 
 ## Default OG Image
 
-Place your default Open Graph image here as `og-image.jpg` with the following specifications:
+Place your default Open Graph image here as `og-image.jpg` with the following
+specifications:
 
 ### Recommended Specifications
 
@@ -19,7 +20,8 @@ Place your default Open Graph image here as `og-image.jpg` with the following sp
 1. **Text**: Use large, bold text that's readable at small sizes
 2. **Branding**: Include your logo and brand colors
 3. **Contrast**: Ensure high contrast for visibility on different backgrounds
-4. **Safe Zone**: Keep important content within 1140x570px center area (avoid edges)
+4. **Safe Zone**: Keep important content within 1140x570px center area (avoid
+   edges)
 5. **Mobile**: Remember it will be displayed small on mobile devices
 
 ### Testing Your OG Image
@@ -47,6 +49,7 @@ Test how your OG image appears on different platforms:
 ### Option 3: Templates
 
 Free OG image templates:
+
 - [Figma Community](https://www.figma.com/community/search?model_type=files&q=og%20image)
 - [Canva Templates](https://www.canva.com/templates/)
 - [Unsplash](https://unsplash.com/) - Free stock photos
@@ -72,26 +75,28 @@ Free OG image templates:
 
 ## Per-Page OG Images
 
-While this directory contains the default OG image, you can specify custom OG images per-page in your route's meta function:
+While this directory contains the default OG image, you can specify custom OG
+images per-page in your route's meta function:
 
 ```typescript
 export const meta: MetaFunction = ({ location }) => {
-  return generateSeoMeta({
-    title: 'My Page',
-    description: 'My page description',
-    image: {
-      url: '/images/my-page-og.jpg',
-      alt: 'My page image description',
-      width: 1200,
-      height: 630,
-    },
-  })
+	return generateSeoMeta({
+		title: 'My Page',
+		description: 'My page description',
+		image: {
+			url: '/images/my-page-og.jpg',
+			alt: 'My page image description',
+			width: 1200,
+			height: 630,
+		},
+	})
 }
 ```
 
 ## Dynamic OG Images
 
-For dynamic content (blog posts, products, etc.), consider generating OG images on-the-fly using:
+For dynamic content (blog posts, products, etc.), consider generating OG images
+on-the-fly using:
 
 1. **Server-side rendering**: Use Puppeteer or similar to screenshot HTML
 2. **Image manipulation**: Use Sharp or Jimp to compose images
@@ -109,5 +114,6 @@ For dynamic content (blog posts, products, etc.), consider generating OG images 
 ⚠️ **Action Required**: Add your default `og-image.jpg` to this directory
 
 Default OG image referenced in:
+
 - `apps/app/app/utils/seo.server.ts` - Main app SEO configuration
 - Update `DEFAULT_OG_IMAGE` constant after adding the file

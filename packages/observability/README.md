@@ -33,23 +33,23 @@ import { json } from 'react-router'
 import { getUptimeStatus } from '@repo/observability'
 
 export async function loader() {
-  const apiKey = process.env.BETTERSTACK_API_KEY
-  const statusPageUrl = process.env.BETTERSTACK_URL
+	const apiKey = process.env.BETTERSTACK_API_KEY
+	const statusPageUrl = process.env.BETTERSTACK_URL
 
-  if (!apiKey) {
-    return json(
-      {
-        status: 'degraded',
-        message: 'Status monitoring not configured',
-        upMonitors: 0,
-        totalMonitors: 0,
-      },
-      { status: 503 }
-    )
-  }
+	if (!apiKey) {
+		return json(
+			{
+				status: 'degraded',
+				message: 'Status monitoring not configured',
+				upMonitors: 0,
+				totalMonitors: 0,
+			},
+			{ status: 503 },
+		)
+	}
 
-  const status = await getUptimeStatus(apiKey, statusPageUrl)
-  return json(status)
+	const status = await getUptimeStatus(apiKey, statusPageUrl)
+	return json(status)
 }
 ```
 
@@ -61,14 +61,14 @@ Use the `Status` component to display the status in your UI:
 import { Status } from '@repo/observability'
 
 export function Footer() {
-  return (
-    <footer>
-      <div className="flex items-center gap-4">
-        <Status statusEndpoint="/api/status" />
-        <a href="https://status.yoursite.com">Status Page</a>
-      </div>
-    </footer>
-  )
+	return (
+		<footer>
+			<div className="flex items-center gap-4">
+				<Status statusEndpoint="/api/status" />
+				<a href="https://status.yoursite.com">Status Page</a>
+			</div>
+		</footer>
+	)
 }
 ```
 
@@ -96,6 +96,7 @@ export function Footer() {
 Fetches the current uptime status from BetterStack.
 
 **Parameters:**
+
 - `apiKey`: Your BetterStack API key
 - `statusPageUrl`: (Optional) Your status page URL
 
@@ -106,9 +107,11 @@ Fetches the current uptime status from BetterStack.
 React component that displays the current system status.
 
 **Props:**
+
 - `statusEndpoint`: API endpoint that returns status information
 - `className`: (Optional) CSS class name for the container
-- `refreshInterval`: (Optional) Refresh interval in milliseconds (default: 60000)
+- `refreshInterval`: (Optional) Refresh interval in milliseconds
+  (default: 60000)
 
 ## Types
 
@@ -116,10 +119,10 @@ React component that displays the current system status.
 
 ```typescript
 interface StatusInfo {
-  status: 'operational' | 'partial_outage' | 'degraded'
-  message: string
-  upMonitors: number
-  totalMonitors: number
+	status: 'operational' | 'partial_outage' | 'degraded'
+	message: string
+	upMonitors: number
+	totalMonitors: number
 }
 ```
 

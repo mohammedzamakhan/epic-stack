@@ -5,12 +5,7 @@ import {
 } from 'react-native'
 
 export type InputType =
-	| 'email'
-	| 'password'
-	| 'username'
-	| 'text'
-	| 'number'
-	| 'phone'
+	'email' | 'password' | 'username' | 'text' | 'number' | 'phone'
 
 export interface KeyboardConfig {
 	keyboardType: KeyboardTypeOptions

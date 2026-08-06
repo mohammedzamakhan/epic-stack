@@ -11,7 +11,6 @@ import {
 import { cache, cachified } from '@repo/cache'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
-import { Divider } from '@repo/ui/divider'
 import { PageTitle } from '@repo/ui/page-title'
 import { toDataURL as qrCodeToDataURL } from 'qrcode'
 import {
@@ -345,15 +344,18 @@ export default function SecuritySettings() {
 	const { _ } = useLingui()
 
 	return (
-		<div className="my-8 flex flex-1 flex-col gap-4 md:m-8">
-			<AnnotatedLayout>
+		<div className="mx-auto w-full max-w-4xl py-8 md:p-8">
+			<div className="mb-8 md:mb-10">
 				<PageTitle
 					title={_(t`Security Settings`)}
 					description={_(
 						t`Manage your password, two-factor authentication, connected accounts, and advanced security settings.`,
 					)}
 				/>
+			</div>
 
+			<AnnotatedLayout>
+				{/* Credentials: password, 2FA, passkeys */}
 				<AnnotatedSection>
 					<SecurityCard
 						hasPassword={data.hasPassword}
@@ -367,29 +369,30 @@ export default function SecuritySettings() {
 					/>
 				</AnnotatedSection>
 
+				{/* Access: providers + active sessions */}
 				<AnnotatedSection>
-					<ConnectionsCard user={data.user} connections={data.connections} />
+					<div className="flex flex-col gap-4">
+						<ConnectionsCard user={data.user} connections={data.connections} />
+						<SessionsCard
+							sessions={data.sessions}
+							currentSessionId={data.currentSessionId}
+						/>
+					</div>
 				</AnnotatedSection>
 
-				<AnnotatedSection>
-					<SessionsCard
-						sessions={data.sessions}
-						currentSessionId={data.currentSessionId}
-					/>
-				</AnnotatedSection>
-
+				{/* Data rights */}
 				<AnnotatedSection>
 					<PrivacyCard
 						gdpr={{ latestExportRequest: data.gdpr.latestExportRequest }}
 					/>
 				</AnnotatedSection>
 
-				<AnnotatedSection>
-					<Divider className="mt-2" />
+				{/* Destructive — separated from routine settings */}
+				<section className="border-border mt-2 border-t pt-10">
 					<DangerCard
 						gdpr={{ activeErasureRequest: data.gdpr.activeErasureRequest }}
 					/>
-				</AnnotatedSection>
+				</section>
 			</AnnotatedLayout>
 		</div>
 	)

@@ -16,7 +16,9 @@ test.describe('Organization Management', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Click create organization button (it's labeled "Add organization")
-		await page.getByRole('link', { name: /add organization/i }).click()
+		await page
+			.getByRole('link', { name: '+ Add organization', exact: true })
+			.click()
 		await expect(page).toHaveURL('/organizations/create')
 
 		// Fill in organization details
@@ -84,7 +86,7 @@ test.describe('Organization Management', () => {
 		const org1 = await prisma.organization.create({
 			data: {
 				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
 				users: {
 					create: {
@@ -98,7 +100,7 @@ test.describe('Organization Management', () => {
 		const org2 = await prisma.organization.create({
 			data: {
 				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
 				users: {
 					create: {
@@ -215,7 +217,7 @@ test.describe('Organization Management', () => {
 		const org = await prisma.organization.create({
 			data: {
 				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
 				users: {
 					create: [
@@ -268,7 +270,7 @@ test.describe('Organization Management', () => {
 		const org = await prisma.organization.create({
 			data: {
 				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
 				users: {
 					create: [
@@ -286,7 +288,7 @@ test.describe('Organization Management', () => {
 		// Find and click remove button for the member
 		// Look for the form with remove-member intent
 		const removeForm = page
-			.getByRole('form')
+			.locator('form')
 			.filter({
 				has: page.getByRole('button', { name: /remove/i }),
 			})
@@ -340,7 +342,7 @@ test.describe('Organization Management', () => {
 		const org = await prisma.organization.create({
 			data: {
 				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
 				users: {
 					create: [
@@ -360,7 +362,7 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(currentUserName).first()).toBeVisible()
 
 		// Check the actual behavior - there seems to be 1 remove button visible
-		const removeButtons = page.getByRole('form').filter({
+		const removeButtons = page.locator('form').filter({
 			has: page.getByRole('button', { name: /remove/i }),
 		})
 

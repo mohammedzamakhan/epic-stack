@@ -18,14 +18,18 @@ import { z } from 'zod'
 
 // ✅ Good - Explicit validation with constraints
 const UserInputSchema = z.object({
-  email: z.string().email().max(100),
-  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
-  age: z.number().int().min(13).max(150),
+	email: z.string().email().max(100),
+	username: z
+		.string()
+		.min(3)
+		.max(20)
+		.regex(/^[a-zA-Z0-9_]+$/),
+	age: z.number().int().min(13).max(150),
 })
 
 // ❌ Bad - No validation
 function processUser(data: any) {
-  // Never trust unvalidated input
+	// Never trust unvalidated input
 }
 ```
 
@@ -52,14 +56,14 @@ Never assume a user is authenticated:
 ```typescript
 // ✅ Good - Explicit authentication check
 export async function loader({ request }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request)
-  // User is guaranteed to be authenticated
+	const userId = await requireUserId(request)
+	// User is guaranteed to be authenticated
 }
 
 // ❌ Bad - Assuming authentication
 export async function loader({ request }: LoaderFunctionArgs) {
-  const session = await getSession(request)
-  const userId = session.get('userId') // Could be undefined!
+	const session = await getSession(request)
+	const userId = session.get('userId') // Could be undefined!
 }
 ```
 
@@ -70,9 +74,9 @@ Verify permissions for every sensitive operation:
 ```typescript
 // ✅ Good - Explicit permission check
 await requireUserWithOrganizationPermission(
-  request,
-  organizationId,
-  ORG_PERMISSIONS.UPDATE_MEMBER_ANY,
+	request,
+	organizationId,
+	ORG_PERMISSIONS.UPDATE_MEMBER_ANY,
 )
 
 // ❌ Bad - Only checking authentication
@@ -87,15 +91,15 @@ Always verify resource ownership:
 ```typescript
 // ✅ Good - Verify ownership
 const note = await prisma.note.findFirst({
-  where: {
-    id: noteId,
-    organizationId: userOrganizationId, // Verify ownership
-  },
+	where: {
+		id: noteId,
+		organizationId: userOrganizationId, // Verify ownership
+	},
 })
 
 // ❌ Bad - No ownership check (IDOR vulnerability)
 const note = await prisma.note.findUnique({
-  where: { id: noteId }, // Any user can access any note!
+	where: { id: noteId }, // Any user can access any note!
 })
 ```
 
@@ -108,7 +112,7 @@ Always use Prisma's query builder or parameterized queries:
 ```typescript
 // ✅ Good - Prisma handles parameterization
 const user = await prisma.user.findUnique({
-  where: { email: userInput },
+	where: { email: userInput },
 })
 
 // ✅ Good - Parameterized raw query
@@ -125,14 +129,14 @@ Only select the fields you need:
 ```typescript
 // ✅ Good - Select only needed fields
 const user = await prisma.user.findUnique({
-  where: { id: userId },
-  select: { id: true, name: true, email: true },
+	where: { id: userId },
+	select: { id: true, name: true, email: true },
 })
 
 // ❌ Bad - Selecting everything including sensitive data
 const user = await prisma.user.findUnique({
-  where: { id: userId },
-  include: { password: true, sessions: true }, // Exposes sensitive data
+	where: { id: userId },
+	include: { password: true, sessions: true }, // Exposes sensitive data
 })
 ```
 
@@ -144,7 +148,7 @@ const user = await prisma.user.findUnique({
 // ✅ Good - Use environment variables
 const apiKey = process.env.STRIPE_SECRET_KEY
 if (!apiKey) {
-  throw new Error('STRIPE_SECRET_KEY is required')
+	throw new Error('STRIPE_SECRET_KEY is required')
 }
 
 // ❌ Bad - Hardcoded secrets
@@ -156,7 +160,7 @@ const apiKey = 'sk_live_abc123...' // NEVER do this
 ```typescript
 // ✅ Good - Fail fast if secrets are missing
 if (!process.env.SESSION_SECRET) {
-  throw new Error('SESSION_SECRET environment variable is required')
+	throw new Error('SESSION_SECRET environment variable is required')
 }
 ```
 
@@ -179,12 +183,15 @@ console.log('Token:', accessToken)
 
 ```typescript
 // ✅ Good - Structured, queryable logs
-logger.info({
-  userId,
-  action: 'payment_processed',
-  amount: payment.amount,
-  // Note: payment details automatically redacted
-}, 'Payment processed successfully')
+logger.info(
+	{
+		userId,
+		action: 'payment_processed',
+		amount: payment.amount,
+		// Note: payment details automatically redacted
+	},
+	'Payment processed successfully',
+)
 
 // ❌ Bad - Unstructured console.log
 console.log(`Payment of ${amount} processed for user ${userId}`)
@@ -197,17 +204,17 @@ console.log(`Payment of ${amount} processed for user ${userId}`)
 ```typescript
 // ✅ Good - Generic error message to users
 try {
-  await processPayment(data)
+	await processPayment(data)
 } catch (error) {
-  logger.error({ err: error }, 'Payment processing failed')
-  return json({ error: 'Payment could not be processed' }, { status: 500 })
+	logger.error({ err: error }, 'Payment processing failed')
+	return json({ error: 'Payment could not be processed' }, { status: 500 })
 }
 
 // ❌ Bad - Exposing internal details
 try {
-  await processPayment(data)
+	await processPayment(data)
 } catch (error) {
-  return json({ error: error.message, stack: error.stack }, { status: 500 })
+	return json({ error: error.message, stack: error.stack }, { status: 500 })
 }
 ```
 
@@ -221,10 +228,10 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 if (!ALLOWED_TYPES.includes(file.type)) {
-  throw new Error('Invalid file type')
+	throw new Error('Invalid file type')
 }
 if (file.size > MAX_SIZE) {
-  throw new Error('File too large')
+	throw new Error('File too large')
 }
 
 // Use the sanitizeAndExtractExtension helper

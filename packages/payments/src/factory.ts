@@ -5,7 +5,7 @@
 
 import { PolarProvider } from './providers/polar'
 import { StripeProvider } from './providers/stripe'
-import  { type PaymentProvider, type PaymentProviderConfig } from './types'
+import { type PaymentProvider, type PaymentProviderConfig } from './types'
 
 /**
  * Create a payment provider instance

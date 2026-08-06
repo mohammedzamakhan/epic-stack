@@ -231,44 +231,52 @@ export default function OrganizationsPage() {
 	}
 
 	return (
-		<div className="flex flex-1 flex-col gap-4 py-4 pt-0">
-			<div className="mx-auto py-8 md:container md:max-w-2xl">
-				<div className="mb-8">
-					<PageTitle
-						title={_(t`Organizations`)}
-						description={_(
-							t`Jump into an existing organization, accept pending invitations, or add a new one.`,
-						)}
-					/>
+		<div className="mx-auto w-full max-w-3xl py-8 md:p-8">
+			<div className="mb-8 md:mb-10">
+				<PageTitle
+					title={_(t`Organizations`)}
+					description={_(
+						t`Jump into an existing organization, accept pending invitations, or add a new one.`,
+					)}
+				/>
 
-					<div className="mt-4 flex items-center gap-3">
-						<div className="relative flex-1">
-							<Icon
-								name="search"
-								className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
-							/>
-							<Input
-								type="text"
-								placeholder={_(t`Search...`)}
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								className="bg-background pl-10"
-							/>
-						</div>
-						<Button render={<Link to="/organizations/create" />}>
-							<span className="mr-1">+</span>
-							<Trans>Add organization</Trans>
-						</Button>
+				<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+					<div className="relative min-w-0 flex-1">
+						<Icon
+							name="search"
+							className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+						/>
+						<Input
+							type="text"
+							placeholder={_(t`Search...`)}
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="bg-background pl-10"
+						/>
 					</div>
+					<Button
+						render={<Link to="/organizations/create" />}
+						className="shrink-0 self-stretch sm:self-auto"
+					>
+						<span className="mr-1">+</span>
+						<Trans>Add organization</Trans>
+					</Button>
 				</div>
+			</div>
 
-				{/* Pending Invitations */}
+			<div className="flex flex-col gap-8">
+				{/* Pending Invitations — lead when present */}
 				{pendingInvitations.length > 0 && (
-					<Card className="mb-6">
+					<Card role="region" aria-labelledby="pending-invitations-heading">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Icon name="mail" className="h-5 w-5" />
-								<Trans>Pending Invitations</Trans>
+								<h2
+									id="pending-invitations-heading"
+									className="m-0 text-base leading-snug font-medium"
+								>
+									<Trans>Pending Invitations</Trans>
+								</h2>
 							</CardTitle>
 							<p className="text-muted-foreground text-sm">
 								<Trans>
@@ -316,8 +324,11 @@ export default function OrganizationsPage() {
 													)}
 												</ItemDescription>
 											</ItemContent>
-											<ItemActions>
-												<Form method="POST">
+											<ItemActions className="w-full flex-wrap justify-stretch sm:w-auto sm:justify-end">
+												<Form
+													method="POST"
+													className="min-w-0 flex-1 sm:flex-initial"
+												>
 													<input
 														type="hidden"
 														name="intent"
@@ -328,11 +339,18 @@ export default function OrganizationsPage() {
 														name="invitationId"
 														value={invitation.id}
 													/>
-													<Button type="submit" size="sm">
+													<Button
+														type="submit"
+														size="sm"
+														className="w-full sm:w-auto"
+													>
 														<Trans>Accept</Trans>
 													</Button>
 												</Form>
-												<Form method="POST">
+												<Form
+													method="POST"
+													className="min-w-0 flex-1 sm:flex-initial"
+												>
 													<input
 														type="hidden"
 														name="intent"
@@ -343,7 +361,12 @@ export default function OrganizationsPage() {
 														name="invitationId"
 														value={invitation.id}
 													/>
-													<Button type="submit" variant="outline" size="sm">
+													<Button
+														type="submit"
+														variant="outline"
+														size="sm"
+														className="w-full sm:w-auto"
+													>
 														<Trans>Decline</Trans>
 													</Button>
 												</Form>
@@ -356,64 +379,66 @@ export default function OrganizationsPage() {
 					</Card>
 				)}
 
-				<ItemGroup>
-					{filteredOrganizations.map((org: UserOrganizationWithRole) => (
-						<Item
-							key={org.organization.id}
-							render={<Link to={`/${org.organization.slug}`} />}
-							variant="outline"
-						>
-							<ItemMedia variant="image">
-								{org.organization.image?.objectKey ? (
-									<Img
-										src={getOrgImgSrc(org.organization.image.objectKey)}
-										alt={org.organization.name}
-										className="h-full w-full object-cover"
-										width={40}
-										height={40}
+				<section className="min-w-0" aria-label={_(t`Your organizations`)}>
+					<ItemGroup>
+						{filteredOrganizations.map((org: UserOrganizationWithRole) => (
+							<Item
+								key={org.organization.id}
+								render={<Link to={`/${org.organization.slug}`} />}
+								variant="outline"
+							>
+								<ItemMedia variant="image">
+									{org.organization.image?.objectKey ? (
+										<Img
+											src={getOrgImgSrc(org.organization.image.objectKey)}
+											alt={org.organization.name}
+											className="h-full w-full object-cover"
+											width={40}
+											height={40}
+										/>
+									) : (
+										<span>{org.organization.name.charAt(0).toUpperCase()}</span>
+									)}
+								</ItemMedia>
+								<ItemContent>
+									<ItemTitle>{org.organization.name}</ItemTitle>
+									<ItemDescription>/{org.organization.slug}</ItemDescription>
+								</ItemContent>
+								<ItemActions>
+									<Link
+										to={`/${org.organization.slug}/settings`}
+										onClick={(e) => e.stopPropagation()}
+										className="hover:bg-accent rounded-md p-2 transition-colors"
+										title="Organization settings"
+									>
+										<Icon name="gear" className="block h-4 w-4" />
+									</Link>
+									<Icon
+										name="chevron-right"
+										className="h-4 w-4 rtl:-scale-x-100"
 									/>
-								) : (
-									<span>{org.organization.name.charAt(0).toUpperCase()}</span>
-								)}
-							</ItemMedia>
-							<ItemContent>
-								<ItemTitle>{org.organization.name}</ItemTitle>
-								<ItemDescription>/{org.organization.slug}</ItemDescription>
-							</ItemContent>
-							<ItemActions>
-								<Link
-									to={`/${org.organization.slug}/settings`}
-									onClick={(e) => e.stopPropagation()}
-									className="hover:bg-accent rounded-md p-2 transition-colors"
-									title="Organization settings"
-								>
-									<Icon name="gear" className="block h-4 w-4" />
-								</Link>
-								<Icon
-									name="chevron-right"
-									className="h-4 w-4 rtl:-scale-x-100"
-								/>
-							</ItemActions>
-						</Item>
-					))}
-				</ItemGroup>
+								</ItemActions>
+							</Item>
+						))}
+					</ItemGroup>
 
-				{(filteredOrganizations.length === 0 && searchQuery) ||
-				organizations.length === 0 ? (
-					<EmptyState
-						title={_(t`No organization found`)}
-						description={
-							searchQuery
-								? _(t`Adjust your search query to show more.`)
-								: _(t`You haven't joined any organizations yet.`)
-						}
-						icons={['folder-open']}
-						action={{
-							label: _(t`Add organization`),
-							href: '/organizations/create',
-						}}
-					/>
-				) : null}
+					{(filteredOrganizations.length === 0 && searchQuery) ||
+					organizations.length === 0 ? (
+						<EmptyState
+							title={_(t`No organization found`)}
+							description={
+								searchQuery
+									? _(t`Adjust your search query to show more.`)
+									: _(t`You haven't joined any organizations yet.`)
+							}
+							icons={['folder-open']}
+							action={{
+								label: _(t`Add organization`),
+								href: '/organizations/create',
+							}}
+						/>
+					) : null}
+				</section>
 			</div>
 		</div>
 	)

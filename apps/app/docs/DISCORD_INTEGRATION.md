@@ -1,10 +1,12 @@
 # Discord Integration for Waitlist
 
-This document explains how to set up Discord OAuth verification for the waitlist feature.
+This document explains how to set up Discord OAuth verification for the waitlist
+feature.
 
 ## Overview
 
 The Discord integration allows waitlist users to:
+
 1. Join your Discord server via an invite link
 2. Verify their Discord membership through OAuth
 3. Automatically earn +2 points after verification
@@ -23,7 +25,8 @@ The Discord integration allows waitlist users to:
    - Development: `http://localhost:3001/auth/discord/verify`
    - Production: `https://yourdomain.com/auth/discord/verify`
 
-2. Note your Client ID and Client Secret (you'll need these for environment variables)
+2. Note your Client ID and Client Secret (you'll need these for environment
+   variables)
 
 ### 3. Create a Bot (Optional but Recommended)
 
@@ -64,7 +67,8 @@ DISCORD_GUILD_ID="your-discord-server-guild-id"
 
 ### 6. Restart Your Application
 
-After setting the environment variables, restart your development server or redeploy your application.
+After setting the environment variables, restart your development server or
+redeploy your application.
 
 ## How It Works
 
@@ -106,6 +110,7 @@ After setting the environment variables, restart your development server or rede
 ## Fallback Behavior
 
 If Discord OAuth is not configured:
+
 - The invite link will still be shown (if `DISCORD_INVITE_URL` is set)
 - The "Verify Discord membership" button will not appear
 - A message will inform users that verification is manual
@@ -113,10 +118,14 @@ If Discord OAuth is not configured:
 
 ## Security Considerations
 
-1. **Client Secret**: Never expose your Discord client secret in client-side code
-2. **State Parameter**: The OAuth flow uses the userId as state to prevent CSRF attacks
-3. **Token Storage**: Access tokens are not persisted; they're only used during verification
-4. **Guild Verification**: Points are only awarded if the user is actually in the Discord server
+1. **Client Secret**: Never expose your Discord client secret in client-side
+   code
+2. **State Parameter**: The OAuth flow uses the userId as state to prevent CSRF
+   attacks
+3. **Token Storage**: Access tokens are not persisted; they're only used during
+   verification
+4. **Guild Verification**: Points are only awarded if the user is actually in
+   the Discord server
 
 ## Future Enhancements
 
@@ -130,6 +139,7 @@ For real-time verification without OAuth, you can implement Discord webhooks:
 4. Automatically award points
 
 This approach requires:
+
 - Bot token (`DISCORD_BOT_TOKEN`)
 - Guild ID (`DISCORD_GUILD_ID`)
 - A webhook endpoint to receive Discord events
@@ -149,6 +159,7 @@ This approach requires:
 **Cause**: Missing required environment variables
 
 **Solution**: Ensure all required variables are set:
+
 - `DISCORD_CLIENT_ID`
 - `DISCORD_CLIENT_SECRET`
 - `DISCORD_REDIRECT_URI`
@@ -162,15 +173,19 @@ This approach requires:
 
 ### OAuth redirect mismatch
 
-**Cause**: `DISCORD_REDIRECT_URI` doesn't match what's configured in Discord Developer Portal
+**Cause**: `DISCORD_REDIRECT_URI` doesn't match what's configured in Discord
+Developer Portal
 
-**Solution**: Ensure the redirect URI in your environment variables exactly matches what's in Discord Developer Portal (including protocol, domain, and path)
+**Solution**: Ensure the redirect URI in your environment variables exactly
+matches what's in Discord Developer Portal (including protocol, domain, and
+path)
 
 ### "Failed to exchange code for token"
 
 **Cause**: Invalid client credentials or authorization code
 
 **Solution**:
+
 - Verify your `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` are correct
 - Authorization codes expire quickly; ensure the flow completes promptly
 

@@ -11,9 +11,9 @@
   },
   "scripts": {
     "build": "react-router build",
-    "dev": "cross-env NODE_ENV=development MOCKS=true node index.ts",
-    "dev:no-mocks": "cross-env NODE_ENV=development node index.ts",
-    "dev:all-mocks": "cross-env NODE_ENV=development MOCKS=true node index.ts",
+    "dev": "cross-env NODE_ENV=development MOCKS=true node --conditions development index.ts",
+    "dev:no-mocks": "cross-env NODE_ENV=development node --conditions development index.ts",
+    "dev:all-mocks": "cross-env NODE_ENV=development MOCKS=true node --conditions development index.ts",
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:oxc": "oxlint .",
@@ -35,7 +35,8 @@
     "test:e2e:run": "cross-env CI=true playwright test",
     "typecheck": "react-router typegen && tsc",
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
-    "lingui:extract": "lingui extract"
+    "lingui:extract": "lingui extract",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "eslintIgnore": [
     "/node_modules",
@@ -74,10 +75,10 @@
     "@prisma/instrumentation": "^6.18.0",
     "@react-email/components": "0.0.41",
     "@react-email/preview-server": "^5.0.8",
-    "@react-router/express": "^7.10.1",
-    "@react-router/node": "^7.10.1",
-    "@react-router/remix-routes-option-adapter": "^7.10.1",
-    "@remix-run/server-runtime": "^2.16.5",
+    "@react-router/express": "^8.3.0",
+    "@react-router/node": "^8.3.0",
+    "@react-router/remix-routes-option-adapter": "^8.3.0",
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/audit": "*",
     "@repo/background-jobs": "*",
     "@repo/database": "*",
@@ -135,7 +136,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
-    "react-router": "^7.10.1",
+    "react-router": "^8.3.0",
     "react-syntax-highlighter": "^16.1.0",
     "recharts": "^2.15.4",
     "rehype-katex": "^7.0.1",
@@ -146,7 +147,7 @@
     "remix-auth-oauth2": "^3.4.1",
     "remix-utils": "^8.5.0",
     "set-cookie-parser": "^2.7.1",
-    "sharp": "^0.34.2",
+    "sharp": "^0.35.3",
     "sonner": "^2.0.7",
     "source-map-support": "^0.5.21",
     "spin-delay": "^2.0.1",
@@ -167,7 +168,7 @@
     "@lingui/conf": "^5.8.0",
     "@lingui/vite-plugin": "^5.3.2",
     "@playwright/test": "1.57.0",
-    "@react-router/dev": "^7.8.1",
+    "@react-router/dev": "^8.3.0",
     "@repo/config": "*",
     "@sly-cli/sly": "^2.1.1",
     "@testing-library/dom": "^10.4.0",
@@ -210,7 +211,7 @@
     "vite": "^6.3.5",
     "vite-plugin-babel-macros": "^1.0.6",
     "vite-plugin-icons-spritesheet": "^3.0.1",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": "^22.18.0"

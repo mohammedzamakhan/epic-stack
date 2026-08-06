@@ -57,7 +57,7 @@ export function PasswordForm({
 		},
 	})
 
-	if (fetcher.data?.status === 'success') {
+	if (fetcher.state === 'idle' && fetcher.data?.status === 'success') {
 		setIsOpen(false)
 	}
 

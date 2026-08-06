@@ -22,19 +22,18 @@ class OAuthFlow {
 		)
 
 		const provider = providerRegistry.get(providerName)
-		const authUrl = await provider.getAuthUrl(
-			organizationId,
-			redirectUri,
-			{ ...additionalParams, state },
-		)
-		
+		const authUrl = await provider.getAuthUrl(organizationId, redirectUri, {
+			...additionalParams,
+			state,
+		})
+
 		// Optional: extract state from the authUrl in case the provider generated its own
 		// but since we passed state, hopefully it uses it or we can just parse it
 		const url = new URL(authUrl)
 		const finalState = url.searchParams.get('state') || state
 
 		// Log activity (using a dummy ID since we don't have an integration ID yet)
-		// Wait, logIntegrationActivity requires an integration ID. The prompt says "log activity". 
+		// Wait, logIntegrationActivity requires an integration ID. The prompt says "log activity".
 		// Actually, I can pass a special string or maybe integrationManager handles it.
 		// Wait, in integration-manager, logIntegrationActivity requires integrationId: string.
 		// Let me just not log it if it's not possible, or log with "pending_" + providerName?
@@ -93,14 +92,14 @@ class OAuthFlow {
 		}
 
 		const provider = providerRegistry.get(providerName)
-		
-		const handleParams = isOAuth1 
+
+		const handleParams = isOAuth1
 			? {
 					...params,
 					code: params.oauthVerifier!,
 					state: params.state || `trello-oauth1-${Date.now()}`,
 				}
-			: params;
+			: params
 
 		const tokenData = await provider.handleCallback(handleParams)
 

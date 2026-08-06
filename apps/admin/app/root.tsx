@@ -41,7 +41,7 @@ import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
-import tailwindStyleSheetUrl from './styles/tailwind.css?url'
+import './styles/tailwind.css'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 
@@ -61,11 +61,12 @@ export const links: Route.LinksFunction = () => {
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
 		} as const, // necessary to make typescript happy
-		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
+export const meta: Route.MetaFunction = ({
+	loaderData: data,
+}: Route.MetaArgs) => {
 	return [
 		{ title: data ? brand.name : getErrorTitle() },
 		{ name: 'description', content: brand.products.admin.description },

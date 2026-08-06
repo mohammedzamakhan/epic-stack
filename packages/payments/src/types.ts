@@ -146,9 +146,7 @@ export interface PaymentProvider {
 	// Subscriptions
 	retrieveSubscription(subscriptionId: string): Promise<Subscription>
 	listSubscriptions(customerId: string): Promise<Subscription[]>
-	updateSubscription(
-		options: SubscriptionUpdateOptions,
-	): Promise<Subscription>
+	updateSubscription(options: SubscriptionUpdateOptions): Promise<Subscription>
 	cancelSubscription(subscriptionId: string): Promise<Subscription>
 
 	// Customer Portal

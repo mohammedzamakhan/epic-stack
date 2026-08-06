@@ -27,7 +27,7 @@ const test = base.extend<{
 		await use(() => {
 			const onboardingData = {
 				...userData,
-				password: faker.internet.password(),
+				password: faker.internet.password() + 'A1!',
 			}
 			return onboardingData
 		})
@@ -60,7 +60,7 @@ test('onboarding with link', async ({ page, getOnboardingData, navigate }) => {
 	const email = await readEmail(onboardingData.email)
 	invariant(email, 'Email not found')
 	expect(email.to).toBe(onboardingData.email.toLowerCase())
-	expect(email.from).toBe(brand.email)
+	expect(email.from).toBe(brand.supportEmail)
 	expect(email.subject).toMatch(/welcome/i)
 	const onboardingUrl = extractUrl(email.text)
 	invariant(onboardingUrl, 'Onboarding URL not found')
@@ -86,9 +86,9 @@ test('onboarding with link', async ({ page, getOnboardingData, navigate }) => {
 
 	await page.waitForLoadState('networkidle') // ensure js is fully loaded.
 
-	await page.getByLabel(/terms/i).check()
+	await page.getByRole('checkbox', { name: /terms/i }).check()
 
-	await page.getByLabel(/remember me/i).check()
+	await page.getByRole('checkbox', { name: /remember me/i }).check()
 
 	await page.getByRole('button', { name: /Create account/i }).click()
 
@@ -118,7 +118,7 @@ test('onboarding with a short code', async ({
 	const email = await readEmail(onboardingData.email)
 	invariant(email, 'Email not found')
 	expect(email.to).toBe(onboardingData.email.toLowerCase())
-	expect(email.from).toBe(brand.email)
+	expect(email.from).toBe(brand.supportEmail)
 	expect(email.subject).toMatch(/welcome/i)
 	const codeMatch = email.text.match(CODE_REGEX)
 	const code = codeMatch?.groups?.code
@@ -180,7 +180,9 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 
 	await page.waitForLoadState('networkidle') // ensure js is fully loaded.
 	await page
-		.getByLabel(/i agree to the terms of service and privacy policy/i)
+		.getByRole('checkbox', {
+			name: /i agree to the terms of service and privacy policy/i,
+		})
 		.check()
 	await createAccountButton.click()
 
@@ -324,7 +326,9 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 
 	await page.waitForLoadState('networkidle') // ensure js is fully loaded.
 	await page
-		.getByLabel(/i agree to the terms of service and privacy policy/i)
+		.getByRole('checkbox', {
+			name: /i agree to the terms of service and privacy policy/i,
+		})
 		.check()
 	await createAccountButton.click()
 	await expect(createAccountButton.getByText('error')).not.toBeAttached()
@@ -334,7 +338,7 @@ test('shows help texts on entering invalid details on onboarding page after GitH
 })
 
 test('login as existing user', async ({ page, insertNewUser, navigate }) => {
-	const password = faker.internet.password()
+	const password = faker.internet.password() + 'A1!'
 	const user = await insertNewUser({ password })
 	invariant(user.name, 'User name not found')
 	await navigate('/login')
@@ -388,7 +392,7 @@ test('reset password with a link', async ({
 	insertNewUser,
 	navigate,
 }) => {
-	const originalPassword = faker.internet.password()
+	const originalPassword = faker.internet.password() + 'A1!'
 	const user = await insertNewUser({ password: originalPassword })
 	invariant(user.name, 'User name not found')
 
@@ -416,7 +420,7 @@ test('reset password with a link', async ({
 	invariant(email, 'Email not found')
 	expect(email.subject).toMatch(/password reset/i)
 	expect(email.to).toBe(user.email.toLowerCase())
-	expect(email.from).toBe(brand.email)
+	expect(email.from).toBe(brand.supportEmail)
 	const resetPasswordUrl = extractUrl(email.text)
 	invariant(resetPasswordUrl, 'Reset password URL not found')
 	await navigate(resetPasswordUrl)
@@ -507,7 +511,7 @@ test('reset password with a short code', async ({
 	invariant(email, 'Email not found')
 	expect(email.subject).toMatch(/password reset/i)
 	expect(email.to).toBe(user.email)
-	expect(email.from).toBe(brand.email)
+	expect(email.from).toBe(brand.supportEmail)
 	const codeMatch = email.text.match(CODE_REGEX)
 	const code = codeMatch?.groups?.code
 	invariant(code, 'Reset Password code not found')

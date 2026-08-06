@@ -70,12 +70,12 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 	const newConfig = {
 		name: cookieConfig.name,
 		value: cookieConfig.value,
-		path: cookieConfig.path,
-		domain: 'localhost',
 		expires: cookieConfig.expires?.getTime(),
 		sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
 	}
-	await page.context().addCookies([newConfig])
+	const baseUrl =
+		process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3001'
+	await page.context().addCookies([{ ...newConfig, url: baseUrl }])
 }
 
 type Navigate = (
@@ -94,7 +94,7 @@ export const test = base.extend<{
 		await setCookieConsent(page)
 		await use(page)
 	},
-	insertNewUser: async (_: any, use) => {
+	insertNewUser: async ({}, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)
@@ -122,12 +122,14 @@ export const test = base.extend<{
 				await authSessionStorage.commitSession(authSession),
 			)
 			const newConfig = {
-				...cookieConfig,
-				domain: 'localhost',
+				name: cookieConfig.name,
+				value: cookieConfig.value,
 				expires: cookieConfig.expires?.getTime(),
 				sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
 			}
-			await page.context().addCookies([newConfig])
+			const baseUrl =
+				process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3001'
+			await page.context().addCookies([{ ...newConfig, url: baseUrl }])
 			await setCookieConsent(page)
 			return user
 		})

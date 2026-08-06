@@ -12,7 +12,6 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
 ---
 
 {isMobile ? (
-  <!-- Mobile Accordion Style -->
   <div class="mobile-mega-menu">
     <button
       id={`${uniqueId}-trigger`}
@@ -81,7 +80,6 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
     </div>
   </div>
 ) : (
-  <!-- Desktop Dropdown Style -->
   <div class="relative group mega-menu-container">
     <button
       id={`${uniqueId}-desktop-trigger`}
@@ -105,7 +103,6 @@ const uniqueId = `mega-menu-${Math.random().toString(36).substr(2, 9)}`
       </svg>
     </button>
 
-    <!-- Mega Menu Panel -->
     <div
       class="mega-menu-panel absolute top-full left-0 mt-2 bg-background border rounded-lg shadow-xl opacity-0 invisible transition-all duration-200 z-50 min-w-max"
       aria-labelledby={`${uniqueId}-desktop-trigger`}

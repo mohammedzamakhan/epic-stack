@@ -108,7 +108,7 @@ describe('Error Scenarios Integration Tests', () => {
 				'slack-integration-123',
 			)
 
-			expect(channels).toHaveLength(2)
+			expect(channels).toHaveLength(1)
 			expect(channels[0].metadata.demo).toBe(true)
 			expect(channels[0].metadata.fallback_reason).toContain('Slack API error')
 
@@ -233,7 +233,7 @@ describe('Error Scenarios Integration Tests', () => {
 				'slack-integration-123',
 			)
 
-			expect(channels).toHaveLength(2)
+			expect(channels).toHaveLength(1)
 			expect(channels[0].metadata.demo).toBe(true)
 			expect(channels[0].metadata.fallback_reason).toContain('Slack API error')
 

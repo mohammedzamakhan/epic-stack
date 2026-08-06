@@ -17,7 +17,7 @@ export interface RateLimitKey {
 
 // Rate limit configurations
 // Development mode: much higher limits for testing
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV === 'development'
 
 export const RATE_LIMITS = {
 	authorization: {

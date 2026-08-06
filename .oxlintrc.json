@@ -1,12 +1,13 @@
 {
 	"$schema": "https://oxc.rs/schema/oxlintrc.json",
 	"rules": {
-		"no-unused-vars": ["warn", { "varsIgnorePattern": "^(_|ignored)", "argsIgnorePattern": "^(_|ignored)" }],
-		"react": "warn",
-		"typescript": "warn",
-		"import": "warn",
-		"jsx-a11y": "warn",
-		"unicorn": "warn"
+		"no-unused-vars": [
+			"warn",
+			{
+				"varsIgnorePattern": "^(_|ignored)",
+				"argsIgnorePattern": "^(_|ignored)"
+			}
+		]
 	},
 	"env": {
 		"browser": true,
@@ -20,6 +21,7 @@
 		"**/*.test.ts",
 		"**/*.test.tsx",
 		"**/*.spec.ts",
-		"**/*.spec.tsx"
+		"**/*.spec.tsx",
+		"**/next-env.d.ts"
 	]
 }

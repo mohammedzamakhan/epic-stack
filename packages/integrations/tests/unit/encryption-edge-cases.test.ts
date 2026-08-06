@@ -403,10 +403,14 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 		})
 
 		it('should handle state at exact maxAge boundary', async () => {
+			vi.useFakeTimers()
+			const now = Date.now()
+			vi.setSystemTime(now)
+
 			const stateData = {
 				organizationId: 'org-123',
 				providerName: 'slack',
-				timestamp: Date.now() - 100,
+				timestamp: now - 100,
 				nonce: crypto.randomUUID(),
 			}
 			const state = Buffer.from(JSON.stringify(stateData)).toString('base64url')
@@ -417,6 +421,8 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 
 			const validated = encryptionService.validateOAuthState(state, 101)
 			expect(validated.organizationId).toBe('org-123')
+
+			vi.useRealTimers()
 		})
 	})
 
@@ -561,9 +567,8 @@ describe('IntegrationEncryptionService Edge Cases', () => {
 		})
 
 		it('should be the same instance across imports', async () => {
-			const { integrationEncryption: imported } = await import(
-				'../../src/encryption'
-			)
+			const { integrationEncryption: imported } =
+				await import('../../src/encryption')
 			expect(integrationEncryption).toBe(imported)
 		})
 	})

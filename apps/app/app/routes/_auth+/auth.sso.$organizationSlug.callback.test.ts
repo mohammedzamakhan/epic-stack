@@ -6,7 +6,8 @@ import {
 	sessionKey,
 } from '@repo/auth'
 import { prisma } from '@repo/database'
-import { type AppLoadContext } from 'react-router'
+import { RouterContextProvider } from 'react-router'
+import { serverBuildContext } from '#app/server-context.ts'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso/configuration.server.ts'
@@ -16,9 +17,11 @@ import { BASE_URL, convertSetCookieToCookie } from '#tests/utils.ts'
 import { loader } from './auth.sso.$organizationSlug.callback.ts'
 
 // Mock context helper for tests
-const createMockContext = (): AppLoadContext => ({
-	serverBuild: {} as any,
-})
+const createMockContext = () => {
+	const ctx = new RouterContextProvider()
+	ctx.set(serverBuildContext, {} as any)
+	return ctx
+}
 
 // Generate unique slug per test run to avoid conflicts with parallel tests
 const TEST_ORG_SLUG = `test-org-callback-${Date.now()}-${Math.random().toString(36).substring(7)}`
@@ -127,8 +130,9 @@ test('successful SSO authentication creates session for existing user', async ()
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -188,8 +192,9 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/')
 	await expect(response).toSendToast(
@@ -219,8 +224,9 @@ test('handles organization not found', async () => {
 		request,
 		params: { organizationSlug: 'non-existent-org' },
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -240,8 +246,9 @@ test('handles SSO not configured for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -264,8 +271,9 @@ test('handles SSO disabled for organization', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -289,8 +297,9 @@ test('handles OAuth callback failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -326,8 +335,9 @@ test('handles user provisioning failure', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	}).catch((e) => e)
+		url: request.url,
+		pattern: '*',
+	} as any).catch((e) => e)
 
 	invariant(response instanceof Response, 'response should be a Response')
 	expect(response).toHaveRedirect('/login')
@@ -360,8 +370,9 @@ test('handles user already logged in', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/settings/profile')
 	await expect(response).toSendToast(
@@ -397,8 +408,9 @@ test('handles banned user login attempt', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug/callback',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response).toHaveRedirect('/login?banned=true')
 })

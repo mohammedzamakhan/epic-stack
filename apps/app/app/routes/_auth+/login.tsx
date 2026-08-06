@@ -129,7 +129,11 @@ export async function action({ request }: Route.ActionArgs) {
 	})
 
 	// Arcjet security protection for login (skip in test environment)
-	if (process.env.ARCJET_KEY && process.env.NODE_ENV !== 'test') {
+	if (
+		process.env.ARCJET_KEY &&
+		process.env.NODE_ENV !== 'test' &&
+		process['env'].MOCKS !== 'true'
+	) {
 		try {
 			const decision = await aj.protect({ request, context: {} })
 
@@ -258,6 +262,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	const { session, remember, redirectTo } = submission.value
 
+	console.log('LOGIN SUCCESS! REDIRECT TO:', redirectTo)
 	return handleNewSession({
 		request,
 		session,

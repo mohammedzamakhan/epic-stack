@@ -133,10 +133,7 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 			state,
 		}
 
-		const integration = await oauthFlow.complete(
-			'slack',
-			callbackParams,
-		)
+		const integration = await oauthFlow.complete('slack', callbackParams)
 
 		// Verify integration was created
 		expect(integration).toBeDefined()
@@ -183,9 +180,9 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 			state: 'invalid-state',
 		}
 
-		await expect(
-			oauthFlow.complete('slack', callbackParams),
-		).rejects.toThrow('Invalid OAuth state')
+		await expect(oauthFlow.complete('slack', callbackParams)).rejects.toThrow(
+			'Invalid OAuth state',
+		)
 	})
 
 	it('should prevent provider name mismatch in OAuth state', async () => {
@@ -214,8 +211,8 @@ describe('OAuth Flow Integration Tests (Simplified)', () => {
 			state,
 		}
 
-		await expect(
-			oauthFlow.complete('jira', callbackParams),
-		).rejects.toThrow('Provider name mismatch in OAuth state')
+		await expect(oauthFlow.complete('jira', callbackParams)).rejects.toThrow(
+			'Provider name mismatch in OAuth state',
+		)
 	})
 })

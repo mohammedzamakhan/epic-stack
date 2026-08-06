@@ -99,7 +99,7 @@ export class AuditLogQuery {
 		])
 
 		return {
-			logs: logs.map((log) => ({
+			logs: logs.map((log: any) => ({
 				...log,
 				metadata: log.metadata ? (JSON.parse(log.metadata) as any) : null,
 			})),
@@ -128,7 +128,7 @@ export class AuditLogQuery {
 			'User Agent',
 		]
 
-		const rows = logs.map((log) => [
+		const rows = logs.map((log: any) => [
 			log.createdAt.toISOString(),
 			log.id,
 			log.action,
@@ -145,7 +145,7 @@ export class AuditLogQuery {
 			this.escapeCsvValue(log.userAgent || ''),
 		])
 
-		return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+		return [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n')
 	}
 
 	async exportJSON(filter: AuditQueryFilter): Promise<string> {
@@ -202,14 +202,14 @@ export class AuditLogQuery {
 			totalEvents: totalLogs,
 			totalLogs,
 			severityBreakdown: Object.fromEntries(
-				severityCounts.map((s) => [s.severity, s._count]),
+				severityCounts.map((s: any) => [s.severity, s._count]),
 			),
-			topActions: actionCounts.map((a) => ({
+			topActions: actionCounts.map((a: any) => ({
 				action: a.action,
 				count: a._count,
 				_count: a._count,
 			})),
-			topUserIds: topUsers.map((u) => ({
+			topUserIds: topUsers.map((u: any) => ({
 				userId: u.userId,
 				count: u._count,
 				_count: u._count,

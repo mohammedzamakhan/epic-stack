@@ -33,7 +33,7 @@ export async function sendEmail({
 	| { html: string; text: string; react?: never }
 	| { react: ReactElement; html?: never; text?: never }
 )) {
-	const from = brand.email
+	const from = brand.supportEmail
 
 	const email = {
 		from,

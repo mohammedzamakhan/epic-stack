@@ -22,7 +22,9 @@ const GDPR_DELETION_GRACE_PERIOD_DAYS = 7
 async function processDueErasureRequests() {
 	const now = new Date()
 
-	console.log(`[GDPR] Starting erasure request processing at ${now.toISOString()}`)
+	console.log(
+		`[GDPR] Starting erasure request processing at ${now.toISOString()}`,
+	)
 
 	const dueRequests = await prisma.dataSubjectRequest.findMany({
 		where: {
@@ -89,9 +91,12 @@ async function processDueErasureRequests() {
 			console.log(`[GDPR] Successfully deleted user ${dsr.userId}`)
 			results.processed++
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+			const errorMessage =
+				error instanceof Error ? error.message : 'Unknown error'
 
-			console.error(`[GDPR] Failed to delete user ${dsr.userId}: ${errorMessage}`)
+			console.error(
+				`[GDPR] Failed to delete user ${dsr.userId}: ${errorMessage}`,
+			)
 
 			await prisma.dataSubjectRequest.update({
 				where: { id: dsr.id },
@@ -116,11 +121,17 @@ async function processDueErasureRequests() {
 			})
 
 			results.failed++
-			results.errors.push({ requestId: dsr.id, userId: dsr.userId, error: errorMessage })
+			results.errors.push({
+				requestId: dsr.id,
+				userId: dsr.userId,
+				error: errorMessage,
+			})
 		}
 	}
 
-	console.log(`[GDPR] Processing complete. Processed: ${results.processed}, Failed: ${results.failed}`)
+	console.log(
+		`[GDPR] Processing complete. Processed: ${results.processed}, Failed: ${results.failed}`,
+	)
 
 	return results
 }
@@ -132,7 +143,9 @@ async function main() {
 		if (results.errors.length > 0) {
 			console.error('[GDPR] Errors occurred during processing:')
 			for (const err of results.errors) {
-				console.error(`  - Request ${err.requestId} (User ${err.userId}): ${err.error}`)
+				console.error(
+					`  - Request ${err.requestId} (User ${err.userId}): ${err.error}`,
+				)
 			}
 			process.exit(1)
 		}

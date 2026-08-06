@@ -20,11 +20,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "git clean -xdf .cache .nx dist node_modules",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@coji/remix-auth-google": "^3.0.2",
@@ -33,6 +34,7 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@playwright/test": "1.57.0",
     "@react-email/preview-server": "^5.0.8",
+    "@remix-run/server-runtime": "^2.17.5",
     "@repo/cache": "*",
     "@repo/common": "*",
     "@repo/database": "*",
@@ -40,7 +42,7 @@
     "ai": "5.0.108",
     "bcryptjs": "^3.0.2",
     "litefs-js": "2.0.2",
-    "react-router": "^7.10.1",
+    "react-router": "^8.3.0",
     "remix-auth-github": "^3.0.2",
     "remix-utils": "^8.5.0",
     "zod": "^3.25.76"
@@ -50,6 +52,6 @@
     "@types/node": "^22.19.6",
     "@vitest/coverage-v8": "^4.0.1",
     "typescript": "^5.8.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.10"
   }
 }

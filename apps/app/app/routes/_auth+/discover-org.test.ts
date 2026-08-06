@@ -20,12 +20,10 @@ vi.mock('#app/utils/sso/configuration.server.ts', () => ({
 	},
 }))
 
-const { discoverOrganizationFromEmail } = await import(
-	'#app/utils/organization/organizations.server.ts'
-)
-const { ssoConfigurationService } = await import(
-	'#app/utils/sso/configuration.server.ts'
-)
+const { discoverOrganizationFromEmail } =
+	await import('#app/utils/organization/organizations.server.ts')
+const { ssoConfigurationService } =
+	await import('#app/utils/sso/configuration.server.ts')
 
 describe('discover-org route', () => {
 	beforeEach(() => {

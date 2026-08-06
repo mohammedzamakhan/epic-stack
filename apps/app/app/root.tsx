@@ -18,11 +18,7 @@ import { brand, getErrorTitle } from '@repo/config/brand'
 import { prisma } from '@repo/database'
 import { getDirection } from '@repo/i18n'
 import { honeypot } from '@repo/security'
-import {
-	generateSeoMeta,
-	generateOrganizationSchema,
-	structuredDataScriptTag,
-} from '@repo/seo'
+import { generateSeoMeta, generateOrganizationSchema } from '@repo/seo'
 import { DirectionProvider } from '@repo/ui'
 import { ClientHintCheck, getHints } from '@repo/ui/client-hints'
 import { EpicToaster } from '@repo/ui/sonner'
@@ -49,7 +45,7 @@ import { useToast } from './components/toaster.tsx'
 import iconsHref from './components/ui/icons/sprite.svg?url'
 import { linguiServer, localeCookie } from './modules/lingui/lingui.server.ts'
 import { useOptionalTheme } from './routes/resources+/theme-switch.tsx'
-import tailwindStyleSheetUrl from './styles/tailwind.css?url'
+import './styles/tailwind.css'
 import { getLaunchStatus } from './utils/env.server.ts'
 import { seoConfig } from './utils/seo.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
@@ -63,7 +59,6 @@ export const links: Route.LinksFunction = () => {
 
 		// Preload critical assets
 		{ rel: 'preload', href: iconsHref, as: 'image' },
-		{ rel: 'preload', href: tailwindStyleSheetUrl, as: 'style' },
 
 		// Favicons
 		{
@@ -78,13 +73,10 @@ export const links: Route.LinksFunction = () => {
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
 		} as const,
-
-		// Stylesheet
-		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data, location }) => {
+export const meta: Route.MetaFunction = ({ loaderData: data, location }) => {
 	// If there's an error, return minimal meta tags
 	if (!data) {
 		return [
@@ -125,18 +117,7 @@ export const meta: Route.MetaFunction = ({ data, location }) => {
 		},
 	})
 
-	// Generate Organization structured data for better SEO
-	const organizationSchema = generateOrganizationSchema({
-		name: brand.companyName,
-		url: brand.url,
-		description: brand.description,
-		email: brand.supportEmail,
-		sameAs: brand.twitterHandle
-			? [`https://twitter.com/${brand.twitterHandle.replace('@', '')}`]
-			: [],
-	})
-
-	return [...seoMeta, structuredDataScriptTag(organizationSchema)]
+	return seoMeta
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -290,6 +271,17 @@ function Document({
 	const { locale } = useLoaderData<typeof loader>()
 	const direction = getDirection(locale)
 
+	// Generate Organization structured data for better SEO
+	const organizationSchema = generateOrganizationSchema({
+		name: brand.companyName,
+		url: brand.url,
+		description: brand.description,
+		email: brand.supportEmail,
+		sameAs: brand.twitterHandle
+			? [`https://twitter.com/${brand.twitterHandle.replace('@', '')}`]
+			: [],
+	})
+
 	return (
 		<html
 			lang={locale ?? 'en'}
@@ -304,6 +296,12 @@ function Document({
 				{allowIndexing ? null : (
 					<meta name="robots" content="noindex, nofollow" />
 				)}
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(organizationSchema),
+					}}
+				/>
 				<Links />
 			</head>
 			<body className="bg-background text-foreground">

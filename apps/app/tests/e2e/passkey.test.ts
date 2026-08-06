@@ -18,12 +18,12 @@ async function setupWebAuthn(page: any) {
 	return { client, authenticatorId: result.authenticatorId }
 }
 
-test.skip('Users can register and use passkeys', async ({
+test('Users can register and use passkeys', async ({
 	page,
 	login,
 	navigate,
 }) => {
-	const ignored_user = await login()
+	const user = await login()
 
 	const { client, authenticatorId } = await setupWebAuthn(page)
 
@@ -35,7 +35,9 @@ test.skip('Users can register and use passkeys', async ({
 		'No credentials should exist initially',
 	).toHaveLength(0)
 
-	await navigate('/settings')
+	await navigate('/security')
+	await page.waitForLoadState('networkidle')
+	await page.getByRole('button', { name: /manage passkeys/i }).click()
 
 	const passkeyRegisteredPromise = new Promise<void>((resolve) => {
 		client.once('WebAuthn.credentialAdded', () => resolve())
@@ -47,6 +49,9 @@ test.skip('Users can register and use passkeys', async ({
 	await expect(page.getByRole('list', { name: /passkeys/i })).toBeVisible()
 	await expect(page.getByText(/registered .* ago/i)).toBeVisible()
 
+	await page.keyboard.press('Escape')
+	await expect(page.getByRole('dialog')).toBeHidden()
+
 	const afterRegistrationCredentials = await client.send(
 		'WebAuthn.getCredentials',
 		{ authenticatorId },
@@ -57,9 +62,14 @@ test.skip('Users can register and use passkeys', async ({
 	).toHaveLength(1)
 
 	// Logout
-	await page.getByRole('link', { name: /dashboard/i }).click()
-	await page.getByRole('menuitem', { name: /logout/i }).click()
-	await expect(page).toHaveURL(`/`)
+	await page
+		.getByRole('button', { name: user.name ?? user.username })
+		.first()
+		.click()
+	await page
+		.getByRole('menuitem', { name: /(log out|logout)/i })
+		.click({ force: true })
+	await page.waitForURL(/\/login|\/signup/)
 
 	// Try logging in with passkey
 	await navigate('/login')
@@ -80,7 +90,7 @@ test.skip('Users can register and use passkeys', async ({
 	await Promise.race([passkeyAssertedPromise, errorPromise])
 
 	// Verify successful login
-	await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible()
+	await page.waitForURL(/\/organizations\/create/)
 
 	// Verify the sign count increased
 	const afterLoginCredentials = await client.send('WebAuthn.getCredentials', {
@@ -92,11 +102,16 @@ test.skip('Users can register and use passkeys', async ({
 	)
 
 	// Go to passkeys page and delete the passkey
-	await navigate('/settings')
+	await navigate('/security')
+	await page.waitForLoadState('networkidle')
+	await page.getByRole('button', { name: /manage passkeys/i }).click()
 	await page.getByRole('button', { name: /delete/i }).click()
 
 	// Verify the passkey is no longer listed on the page
 	await expect(page.getByText(/no passkeys registered/i)).toBeVisible()
+
+	await page.keyboard.press('Escape')
+	await expect(page.getByRole('dialog')).toBeHidden()
 
 	// But verify it still exists in the authenticator
 	const afterDeletionCredentials = await client.send(
@@ -106,9 +121,14 @@ test.skip('Users can register and use passkeys', async ({
 	expect(afterDeletionCredentials.credentials).toHaveLength(1)
 
 	// Logout again to test deleted passkey
-	await page.getByRole('link', { name: /dashboard/i }).click()
-	await page.getByRole('menuitem', { name: /logout/i }).click()
-	await expect(page).toHaveURL(`/`)
+	await page
+		.getByRole('button', { name: user.name ?? user.username })
+		.first()
+		.click()
+	await page
+		.getByRole('menuitem', { name: /(log out|logout)/i })
+		.click({ force: true })
+	await page.waitForURL(/\/login|\/signup/)
 
 	// Try logging in with the deleted passkey
 	await navigate('/login')
@@ -127,7 +147,7 @@ test.skip('Users can register and use passkeys', async ({
 	await expect(page).toHaveURL(`/login`)
 })
 
-test.skip('Failed passkey verification shows error', async ({
+test('Failed passkey verification shows error', async ({
 	page,
 	login,
 	navigate,
@@ -135,7 +155,9 @@ test.skip('Failed passkey verification shows error', async ({
 	const password = faker.internet.password()
 	await login({ password })
 	const { client, authenticatorId } = await setupWebAuthn(page)
-	await navigate('/settings')
+	await navigate('/security')
+	await page.waitForLoadState('networkidle')
+	await page.getByRole('button', { name: /manage passkeys/i }).click()
 
 	// Try to register with failed verification
 	await client.send('WebAuthn.setUserVerified', {
@@ -151,7 +173,11 @@ test.skip('Failed passkey verification shows error', async ({
 	await page.getByRole('button', { name: /register new passkey/i }).click()
 
 	// Wait for error message
-	await expect(page.getByText(/failed to create passkey/i)).toBeVisible()
+	await expect(
+		page.getByText(
+			/failed to create passkey|passkey registration was cancelled/i,
+		),
+	).toBeVisible()
 
 	// Verify no passkey was registered
 	const credentials = await client.send('WebAuthn.getCredentials', {

@@ -30,6 +30,7 @@ import {
 	useFetcher,
 	useRouteLoaderData,
 	useSearchParams,
+	useSubmit,
 } from 'react-router'
 
 import { type loader } from '#app/root.tsx'
@@ -53,6 +54,7 @@ export function NavUser({
 	const iconRefs = useRef<{ [key: string]: any }>({})
 	const themeFetcher = useFetcher()
 	const requestInfo = useOptionalRequestInfo()
+	const submit = useSubmit()
 
 	// Check if user has admin role
 	const isAdmin = user.roles?.some((role) => role.name === 'admin') ?? false
@@ -288,25 +290,23 @@ export function NavUser({
 							</DropdownMenuSubContent>
 						</DropdownMenuSub>
 						<DropdownMenuSeparator />
-						<Form action="/logout" method="POST">
-							<DropdownMenuItem
-								className="gap-2"
-								onMouseEnter={() => handleMenuItemMouseEnter('logout')}
-								onMouseLeave={() => handleMenuItemMouseLeave('logout')}
-								render={
-									<button
-										type="submit"
-										className="w-full ltr:text-left rtl:text-right"
-									>
-										<LogoutIcon
-											ref={(ref: any) => (iconRefs.current['logout'] = ref)}
-											size={16}
-										/>
-										<Trans>Log out</Trans>
-									</button>
-								}
-							></DropdownMenuItem>
-						</Form>
+						<DropdownMenuItem
+							className="gap-2"
+							onMouseEnter={() => handleMenuItemMouseEnter('logout')}
+							onMouseLeave={() => handleMenuItemMouseLeave('logout')}
+							onClick={() =>
+								submit(new FormData(), { method: 'POST', action: '/logout' })
+							}
+							render={
+								<button className="w-full ltr:text-left rtl:text-right">
+									<LogoutIcon
+										ref={(ref: any) => (iconRefs.current['logout'] = ref)}
+										size={16}
+									/>
+									<Trans>Log out</Trans>
+								</button>
+							}
+						></DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>

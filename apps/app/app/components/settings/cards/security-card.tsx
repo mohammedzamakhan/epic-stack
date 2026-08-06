@@ -86,8 +86,8 @@ export function SecurityCard({
 			<CardContent>
 				<div className="flex flex-col space-y-6">
 					{/* Password Section */}
-					<div className="flex items-center justify-between">
-						<div>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="min-w-0 flex-1">
 							<h3 className="font-semibold">
 								{hasPassword ? (
 									<Trans>Change Password</Trans>
@@ -95,7 +95,7 @@ export function SecurityCard({
 									<Trans>Create Password</Trans>
 								)}
 							</h3>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground text-sm text-pretty">
 								{ssoEnforcement?.enforced ? (
 									<span className="text-amber-600 dark:text-amber-500">
 										<Trans>
@@ -120,6 +120,7 @@ export function SecurityCard({
 									<Button
 										variant="outline"
 										disabled={ssoEnforcement?.enforced}
+										className="shrink-0 self-start"
 										title={
 											ssoEnforcement?.enforced
 												? `SSO login required by ${ssoEnforcement.organizationName}`
@@ -153,12 +154,12 @@ export function SecurityCard({
 					</div>
 
 					{/* 2FA Section */}
-					<div className="flex items-center justify-between">
-						<div>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="min-w-0 flex-1">
 							<h3 className="font-semibold">
 								<Trans>Multi-factor authentication</Trans>
 							</h3>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground text-sm text-pretty">
 								{isTwoFactorEnabled ? (
 									<Trans>
 										Your account is secured with two-factor authentication
@@ -178,6 +179,7 @@ export function SecurityCard({
 								render={
 									<Button
 										variant={isTwoFactorEnabled ? 'destructive' : 'outline'}
+										className="shrink-0 self-start"
 									>
 										{isTwoFactorEnabled ? (
 											<Trans>Disable 2FA</Trans>
@@ -209,12 +211,12 @@ export function SecurityCard({
 					)}
 
 					{/* Passkeys Section */}
-					<div className="flex items-center justify-between">
-						<div>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="min-w-0 flex-1">
 							<h3 className="font-semibold">
 								<Trans>Passkeys</Trans>
 							</h3>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground text-sm text-pretty">
 								{passkeys?.length > 0 ? (
 									<Trans>
 										You're signed in on{' '}
@@ -236,7 +238,7 @@ export function SecurityCard({
 						>
 							<DialogTrigger
 								render={
-									<Button variant="outline">
+									<Button variant="outline" className="shrink-0 self-start">
 										<Trans>Manage Passkeys</Trans>
 									</Button>
 								}

@@ -5,24 +5,24 @@ a fast, accessible experience for all users.
 
 ## Performance Requirements
 
-| Metric           | Minimum Score |
-| ---------------- | ------------- |
-| Performance      | 98            |
-| Accessibility    | 98            |
-| Best Practices   | 98            |
-| SEO              | 98            |
+| Metric         | Minimum Score |
+| -------------- | ------------- |
+| Performance    | 98            |
+| Accessibility  | 98            |
+| Best Practices | 98            |
+| SEO            | 98            |
 
 ## Core Web Vitals Targets
 
-| Metric | Target    | Description                        |
-| ------ | --------- | ---------------------------------- |
-| LCP    | ≤ 2.5s    | Largest Contentful Paint           |
-| FID    | ≤ 100ms   | First Input Delay                  |
-| CLS    | ≤ 0.1     | Cumulative Layout Shift            |
-| FCP    | ≤ 1.5s    | First Contentful Paint             |
-| TTFB   | ≤ 600ms   | Time to First Byte                 |
-| TBT    | ≤ 200ms   | Total Blocking Time                |
-| SI     | ≤ 3s      | Speed Index                         |
+| Metric | Target  | Description              |
+| ------ | ------- | ------------------------ |
+| LCP    | ≤ 2.5s  | Largest Contentful Paint |
+| FID    | ≤ 100ms | First Input Delay        |
+| CLS    | ≤ 0.1   | Cumulative Layout Shift  |
+| FCP    | ≤ 1.5s  | First Contentful Paint   |
+| TTFB   | ≤ 600ms | Time to First Byte       |
+| TBT    | ≤ 200ms | Total Blocking Time      |
+| SI     | ≤ 3s    | Speed Index              |
 
 ## How It Works
 
@@ -62,11 +62,11 @@ Pass/Fail check
 
 ## Required GitHub Secrets
 
-| Secret                    | Description                          |
-| ------------------------- | ------------------------------------ |
-| `CLOUDFLARE_API_TOKEN`    | Cloudflare API token                 |
-| `CLOUDFLARE_ACCOUNT_ID`   | Cloudflare account ID                |
-| `LHCI_GITHUB_APP_TOKEN`   | (Optional) For Lighthouse GitHub App |
+| Secret                  | Description                          |
+| ----------------------- | ------------------------------------ |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token                 |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID                |
+| `LHCI_GITHUB_APP_TOKEN` | (Optional) For Lighthouse GitHub App |
 
 ## Running Lighthouse Locally
 
@@ -122,19 +122,19 @@ import heroImage from '../assets/hero.jpg';
 ---
 
 <!-- Optimized image with automatic format conversion -->
-<Image 
-  src={heroImage} 
-  alt="Hero" 
-  width={1200} 
+<Image
+  src={heroImage}
+  alt="Hero"
+  width={1200}
   height={600}
   loading="eager"
   fetchpriority="high"
 />
 
 <!-- Lazy load below-the-fold images -->
-<Image 
-  src={otherImage} 
-  alt="Other" 
+<Image
+  src={otherImage}
+  alt="Other"
   loading="lazy"
 />
 ```

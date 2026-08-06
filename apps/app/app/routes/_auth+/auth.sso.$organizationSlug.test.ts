@@ -1,14 +1,17 @@
 import { prisma } from '@repo/database'
-import { type AppLoadContext } from 'react-router'
+import { RouterContextProvider } from 'react-router'
+import { serverBuildContext } from '#app/server-context.ts'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
 import { BASE_URL } from '#tests/utils.ts'
 import { action } from './auth.sso.$organizationSlug.ts'
 
 // Mock context helper for tests
-const createMockContext = (): AppLoadContext => ({
-	serverBuild: {} as any,
-})
+const createMockContext = () => {
+	const ctx = new RouterContextProvider()
+	ctx.set(serverBuildContext, {} as any)
+	return ctx
+}
 
 // Generate unique slug per test run to avoid conflicts with parallel tests
 const TEST_ORG_SLUG = `test-org-sso-${Date.now()}-${Math.random().toString(36).substring(7)}`
@@ -71,8 +74,9 @@ test('successful SSO initiation redirects to identity provider', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	expect(response.status).toBe(302)
 	expect(response.headers.get('Location')).toContain(
@@ -95,8 +99,9 @@ test('handles organization not found', async () => {
 			request,
 			params: { organizationSlug: 'non-existent-org' },
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -112,8 +117,9 @@ test('handles missing organization slug', async () => {
 			request,
 			params: { organizationSlug: '' },
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -134,8 +140,9 @@ test('handles SSO not configured for organization', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Response)
@@ -161,8 +168,9 @@ test('handles SSO authentication service error', async () => {
 			request,
 			params: PARAMS,
 			context: createMockContext(),
-			unstable_pattern: '/auth/sso/:organizationSlug',
-		})
+			url: request.url,
+			pattern: '*',
+		} as any)
 		expect.fail('Should have thrown an error')
 	} catch (error) {
 		expect(error).toBeInstanceOf(Error)
@@ -191,8 +199,9 @@ test('preserves redirect URL in cookie', async () => {
 		request,
 		params: PARAMS,
 		context: createMockContext(),
-		unstable_pattern: '/auth/sso/:organizationSlug',
-	})
+		url: request.url,
+		pattern: '*',
+	} as any)
 
 	// Check that redirect cookie was set
 	const setCookieHeader = response.headers.get('set-cookie')

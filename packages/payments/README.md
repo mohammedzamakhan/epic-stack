@@ -1,10 +1,12 @@
 # @repo/payments
 
-Centralized payment provider package for handling subscriptions, checkouts, and billing across multiple payment providers.
+Centralized payment provider package for handling subscriptions, checkouts, and
+billing across multiple payment providers.
 
 ## Features
 
-- 🔌 **Provider Abstraction**: Easy switching between payment providers (Stripe, Polar, Lemon Squeezy)
+- 🔌 **Provider Abstraction**: Easy switching between payment providers (Stripe,
+  Polar, Lemon Squeezy)
 - 🛡️ **Type-Safe**: Full TypeScript support with comprehensive type definitions
 - 🔄 **Consistent API**: Same interface regardless of payment provider
 - 🧪 **Test Helpers**: Built-in test helpers for development
@@ -12,15 +14,16 @@ Centralized payment provider package for handling subscriptions, checkouts, and 
 
 ## Installation
 
-This package is part of the monorepo and is already available as `@repo/payments`.
+This package is part of the monorepo and is already available as
+`@repo/payments`.
 
 Add it to your app's package.json:
 
 ```json
 {
-  "dependencies": {
-    "@repo/payments": "*"
-  }
+	"dependencies": {
+		"@repo/payments": "*"
+	}
 }
 ```
 
@@ -33,9 +36,9 @@ import { createPaymentProvider } from '@repo/payments'
 
 // Create provider instance
 const paymentProvider = createPaymentProvider({
-  provider: 'stripe',
-  apiKey: process.env.STRIPE_SECRET_KEY!,
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+	provider: 'stripe',
+	apiKey: process.env.STRIPE_SECRET_KEY!,
+	webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 })
 ```
 
@@ -56,13 +59,13 @@ const plansAndPrices = await paymentProvider.getPlansAndPrices()
 
 ```typescript
 const session = await paymentProvider.createCheckoutSession({
-  priceId: 'price_xxx',
-  quantity: 1,
-  successUrl: 'https://example.com/success',
-  cancelUrl: 'https://example.com/cancel',
-  customerId: 'cus_xxx', // optional
-  trialPeriodDays: 14, // optional
-  allowPromotionCodes: true,
+	priceId: 'price_xxx',
+	quantity: 1,
+	successUrl: 'https://example.com/success',
+	cancelUrl: 'https://example.com/cancel',
+	customerId: 'cus_xxx', // optional
+	trialPeriodDays: 14, // optional
+	allowPromotionCodes: true,
 })
 
 // Redirect user to checkout
@@ -77,10 +80,10 @@ const subscription = await paymentProvider.retrieveSubscription('sub_xxx')
 
 // Update subscription (upgrade/downgrade)
 const updated = await paymentProvider.updateSubscription({
-  subscriptionId: 'sub_xxx',
-  priceId: 'price_yyy',
-  quantity: 5,
-  preserveTrialEnd: true,
+	subscriptionId: 'sub_xxx',
+	priceId: 'price_yyy',
+	quantity: 5,
+	preserveTrialEnd: true,
 })
 
 // Cancel subscription
@@ -94,9 +97,9 @@ const subscriptions = await paymentProvider.listSubscriptions('cus_xxx')
 
 ```typescript
 const portalSession = await paymentProvider.createCustomerPortalSession({
-  customerId: 'cus_xxx',
-  returnUrl: 'https://example.com/settings',
-  productId: 'prod_xxx', // optional, needed for configuration
+	customerId: 'cus_xxx',
+	returnUrl: 'https://example.com/settings',
+	productId: 'prod_xxx', // optional, needed for configuration
 })
 
 redirect(portalSession.url)
@@ -112,35 +115,36 @@ const invoices = await paymentProvider.listInvoices('cus_xxx', 20)
 
 ```typescript
 const event = await paymentProvider.constructWebhookEvent(
-  payload,
-  signature,
-  webhookSecret,
+	payload,
+	signature,
+	webhookSecret,
 )
 
 switch (event.type) {
-  case 'customer.subscription.created':
-    // Handle subscription created
-    break
-  case 'customer.subscription.updated':
-    // Handle subscription updated
-    break
-  // ... other events
+	case 'customer.subscription.created':
+		// Handle subscription created
+		break
+	case 'customer.subscription.updated':
+		// Handle subscription updated
+		break
+	// ... other events
 }
 ```
 
 ### Trial Configuration
 
 ```typescript
-import { getTrialConfig, calculateManualTrialDaysRemaining } from '@repo/payments'
+import {
+	getTrialConfig,
+	calculateManualTrialDaysRemaining,
+} from '@repo/payments'
 
 // Get trial configuration from environment
 const config = getTrialConfig()
 // { trialDays: 14, creditCardRequired: 'manual' }
 
 // Calculate days remaining for manual trials
-const daysRemaining = calculateManualTrialDaysRemaining(
-  organization.createdAt
-)
+const daysRemaining = calculateManualTrialDaysRemaining(organization.createdAt)
 ```
 
 ## Environment Variables
@@ -175,20 +179,20 @@ To switch from Stripe to another provider, simply change the configuration:
 ```typescript
 // Before: Stripe
 const provider = createPaymentProvider({
-  provider: 'stripe',
-  apiKey: process.env.STRIPE_SECRET_KEY!,
+	provider: 'stripe',
+	apiKey: process.env.STRIPE_SECRET_KEY!,
 })
 
 // After: Polar
 const provider = createPaymentProvider({
-  provider: 'polar',
-  apiKey: process.env.POLAR_ACCESS_TOKEN!,
+	provider: 'polar',
+	apiKey: process.env.POLAR_ACCESS_TOKEN!,
 })
 
 // After: Lemon Squeezy (when available)
 const provider = createPaymentProvider({
-  provider: 'lemon-squeezy',
-  apiKey: process.env.LEMON_SQUEEZY_API_KEY!,
+	provider: 'lemon-squeezy',
+	apiKey: process.env.LEMON_SQUEEZY_API_KEY!,
 })
 ```
 
@@ -198,14 +202,15 @@ The rest of your code remains unchanged! 🎉
 
 ### Direct Provider Client Access
 
-If you need provider-specific functionality, you can access the underlying client:
+If you need provider-specific functionality, you can access the underlying
+client:
 
 ```typescript
 // Stripe
 import { StripeProvider } from '@repo/payments'
 
 const stripeProvider = new StripeProvider({
-  apiKey: process.env.STRIPE_SECRET_KEY!,
+	apiKey: process.env.STRIPE_SECRET_KEY!,
 })
 
 // Access Stripe client for advanced features
@@ -216,7 +221,7 @@ const charge = await stripeClient.charges.retrieve('ch_xxx')
 import { PolarProvider } from '@repo/payments'
 
 const polarProvider = new PolarProvider({
-  apiKey: process.env.POLAR_ACCESS_TOKEN!,
+	apiKey: process.env.POLAR_ACCESS_TOKEN!,
 })
 
 // Access Polar client for advanced features
@@ -230,12 +235,12 @@ All types are exported for your convenience:
 
 ```typescript
 import type {
-  PaymentProvider,
-  Product,
-  Price,
-  Subscription,
-  CheckoutSession,
-  Invoice,
+	PaymentProvider,
+	Product,
+	Price,
+	Subscription,
+	CheckoutSession,
+	Invoice,
 } from '@repo/payments'
 ```
 
@@ -272,10 +277,16 @@ const customer = await provider.createTestCustomer?.(testClock.id)
 
 The Polar SDK is more limited compared to Stripe. Some methods have limitations:
 
-- **Organization ID Required**: Most Polar operations require an `organizationId`. Set it when creating the provider or use `setOrganizationId()`.
-- **No Direct Subscription Management**: The Polar SDK doesn't support retrieving, updating, or canceling individual subscriptions through the standard API. Use the Polar client directly for these operations.
-- **No Customer Portal**: Polar doesn't have a customer portal session API like Stripe. You'll need to implement your own billing management page.
-- **Webhook Validation**: Webhook signature verification is not fully implemented. Add proper validation for production use.
+- **Organization ID Required**: Most Polar operations require an
+  `organizationId`. Set it when creating the provider or use
+  `setOrganizationId()`.
+- **No Direct Subscription Management**: The Polar SDK doesn't support
+  retrieving, updating, or canceling individual subscriptions through the
+  standard API. Use the Polar client directly for these operations.
+- **No Customer Portal**: Polar doesn't have a customer portal session API like
+  Stripe. You'll need to implement your own billing management page.
+- **Webhook Validation**: Webhook signature verification is not fully
+  implemented. Add proper validation for production use.
 
 Example usage with Polar:
 
@@ -283,8 +294,8 @@ Example usage with Polar:
 import { createPolarProvider } from '@repo/payments'
 
 const provider = createPolarProvider(
-  process.env.POLAR_ACCESS_TOKEN!,
-  process.env.POLAR_ORGANIZATION_ID! // Required for most operations
+	process.env.POLAR_ACCESS_TOKEN!,
+	process.env.POLAR_ORGANIZATION_ID!, // Required for most operations
 )
 
 // Or set it later
@@ -296,10 +307,10 @@ const prices = await provider.getPrices()
 
 // Create checkout sessions
 const session = await provider.createCheckoutSession({
-  priceId: 'price_xxx',
-  quantity: 1,
-  successUrl: 'https://example.com/success',
-  cancelUrl: 'https://example.com/cancel',
+	priceId: 'price_xxx',
+	quantity: 1,
+	successUrl: 'https://example.com/success',
+	cancelUrl: 'https://example.com/cancel',
 })
 ```
 

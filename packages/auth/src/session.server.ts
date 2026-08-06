@@ -26,7 +26,14 @@ export const authSessionStorage = createCookieSessionStorage({
 		sameSite: 'lax', // CSRF protection is advised if changing to 'none'
 		path: '/',
 		httpOnly: true,
-		domain: process.env.ROOT_APP ? `.${process.env.ROOT_APP}` : undefined,
+		domain:
+			process.env.NODE_ENV === 'production'
+				? process.env.ROOT_APP
+					? `.${process.env.ROOT_APP}`
+					: undefined
+				: process.env.ROOT_APP === 'localhost'
+					? '.localhost'
+					: undefined,
 		secrets: sessionSecrets,
 		secure: process.env.NODE_ENV === 'production',
 	},

@@ -21,18 +21,19 @@ const hash = await bcrypt.hash(password, 12)
 ```
 
 <Warning>
-  Never reduce the bcrypt cost factor below 10. The default of 12 is recommended by OWASP.
+	Never reduce the bcrypt cost factor below 10. The default of 12 is recommended
+	by OWASP.
 </Warning>
 
 ### Password Requirements
 
 Passwords must meet these requirements:
 
-| Requirement | Value | Reason |
-|-------------|-------|--------|
-| Minimum length | 6 characters | Basic security |
-| Maximum length | 72 bytes | bcrypt limitation |
-| Complexity | Not required | Length is more important |
+| Requirement    | Value        | Reason                   |
+| -------------- | ------------ | ------------------------ |
+| Minimum length | 6 characters | Basic security           |
+| Maximum length | 72 bytes     | bcrypt limitation        |
+| Complexity     | Not required | Length is more important |
 
 ### Compromised Password Check
 
@@ -43,7 +44,7 @@ import { checkIsCommonPassword } from '#app/utils/auth.server'
 
 const isCompromised = await checkIsCommonPassword(password)
 if (isCompromised) {
-  return { error: 'This password has been exposed in data breaches' }
+	return { error: 'This password has been exposed in data breaches' }
 }
 ```
 
@@ -58,9 +59,9 @@ import { generateTOTP, verifyTOTP } from '@epic-web/totp'
 
 // Generate secret for user
 const { secret, otp } = await generateTOTP({
-  algorithm: 'SHA-256',
-  digits: 6,
-  period: 30,
+	algorithm: 'SHA-256',
+	digits: 6,
+	period: 30,
 })
 
 // Verify code from user
@@ -83,23 +84,23 @@ Sessions are configured with security best practices:
 
 ```typescript
 const sessionStorage = createCookieSessionStorage({
-  cookie: {
-    name: 'en_session',
-    sameSite: 'lax',     // CSRF protection
-    path: '/',
-    httpOnly: true,      // No JavaScript access
-    secure: true,        // HTTPS only in production
-    secrets: sessionSecrets,
-  },
+	cookie: {
+		name: 'en_session',
+		sameSite: 'lax', // CSRF protection
+		path: '/',
+		httpOnly: true, // No JavaScript access
+		secure: true, // HTTPS only in production
+		secrets: sessionSecrets,
+	},
 })
 ```
 
 ### Session Expiration
 
-| Session Type | Duration | Use Case |
-|-------------|----------|----------|
-| Default | 24 hours | Normal login |
-| Remember Me | 30 days | "Stay logged in" option |
+| Session Type | Duration | Use Case                |
+| ------------ | -------- | ----------------------- |
+| Default      | 24 hours | Normal login            |
+| Remember Me  | 30 days  | "Stay logged in" option |
 
 ### Session Tracking
 
@@ -118,18 +119,18 @@ Administrators can ban users with automatic session invalidation:
 ```typescript
 // Ban enforcement happens on every authenticated request
 if (session.user.isBanned) {
-  // Check if ban has expired
-  if (session.user.banExpiresAt && new Date(session.user.banExpiresAt) <= now) {
-    // Auto-lift expired ban
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isBanned: false, banReason: null, banExpiresAt: null },
-    })
-  } else {
-    // Destroy all sessions and redirect to login
-    await prisma.session.deleteMany({ where: { userId } })
-    throw redirect('/login?banned=true')
-  }
+	// Check if ban has expired
+	if (session.user.banExpiresAt && new Date(session.user.banExpiresAt) <= now) {
+		// Auto-lift expired ban
+		await prisma.user.update({
+			where: { id: userId },
+			data: { isBanned: false, banReason: null, banExpiresAt: null },
+		})
+	} else {
+		// Destroy all sessions and redirect to login
+		await prisma.session.deleteMany({ where: { userId } })
+		throw redirect('/login?banned=true')
+	}
 }
 ```
 
@@ -137,12 +138,12 @@ if (session.user.isBanned) {
 
 Authentication endpoints are protected with strict rate limits:
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| /login | 10 requests | 1 minute |
-| /signup | 10 requests | 1 minute |
-| /forgot-password | 3 requests | 1 hour |
-| /verify | 10 requests | 1 minute |
+| Endpoint         | Limit       | Window   |
+| ---------------- | ----------- | -------- |
+| /login           | 10 requests | 1 minute |
+| /signup          | 10 requests | 1 minute |
+| /forgot-password | 3 requests  | 1 hour   |
+| /verify          | 10 requests | 1 minute |
 
 ## SSO (Single Sign-On)
 
@@ -167,27 +168,30 @@ All SSO events are logged for security monitoring:
 
 ```typescript
 await ssoAuditLogger.logAuthenticationEvent(
-  SSOAuditEventType.AUTH_SUCCESS,
-  organizationId,
-  'SSO authentication successful',
-  userId,
-  sessionId,
+	SSOAuditEventType.AUTH_SUCCESS,
+	organizationId,
+	'SSO authentication successful',
+	userId,
+	sessionId,
 )
 ```
 
 ## Security Recommendations
 
 <AccordionGroup>
-  <Accordion title="Enable MFA for All Users">
-    Encourage or require all users to enable two-factor authentication. Consider making it mandatory for admin accounts.
-  </Accordion>
-  <Accordion title="Use Passkeys When Possible">
-    Passkeys provide the strongest protection against phishing and credential theft.
-  </Accordion>
-  <Accordion title="Monitor Failed Login Attempts">
-    Set up alerts for unusual patterns of failed authentication attempts.
-  </Accordion>
-  <Accordion title="Regular Session Audit">
-    Encourage users to review their active sessions and revoke any they don't recognize.
-  </Accordion>
+	<Accordion title="Enable MFA for All Users">
+		Encourage or require all users to enable two-factor authentication. Consider
+		making it mandatory for admin accounts.
+	</Accordion>
+	<Accordion title="Use Passkeys When Possible">
+		Passkeys provide the strongest protection against phishing and credential
+		theft.
+	</Accordion>
+	<Accordion title="Monitor Failed Login Attempts">
+		Set up alerts for unusual patterns of failed authentication attempts.
+	</Accordion>
+	<Accordion title="Regular Session Audit">
+		Encourage users to review their active sessions and revoke any they don't
+		recognize.
+	</Accordion>
 </AccordionGroup>

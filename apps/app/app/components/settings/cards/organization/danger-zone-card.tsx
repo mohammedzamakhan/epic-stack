@@ -56,12 +56,12 @@ export default function DangerZoneCard({
 				</FrameDescription>
 			</FrameHeader>
 			<FramePanel className="space-y-4">
-				<div className="flex justify-between">
-					<div>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+					<div className="min-w-0 flex-1">
 						<h3 className="text-foreground mb-2 font-medium">
 							<Trans>Delete organization</Trans>
 						</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-muted-foreground text-sm text-pretty">
 							<Trans>
 								By deleting your organization you and your team will lose access
 								and all data will be lost. This is a permanent action and cannot
@@ -72,7 +72,7 @@ export default function DangerZoneCard({
 					<Dialog open={isOpen} onOpenChange={setIsOpen}>
 						<DialogTrigger
 							render={
-								<Button variant="destructive">
+								<Button variant="destructive" className="shrink-0 self-start">
 									<Icon name="trash-2" />
 									<Trans>Delete organization</Trans>
 								</Button>

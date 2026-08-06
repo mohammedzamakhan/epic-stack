@@ -104,7 +104,6 @@ const renderLexicalContent = (content: any) => {
 ---
 
 {richText && (
-	<!-- New design with richText field -->
 	<section class="w-full py-16 md:py-24 relative" aria-labelledby={subtitle ? "content-section-title" : undefined}>
 		<GridDesign />
 		<div class="container relative mx-auto px-4 md:px-6">
@@ -137,7 +136,6 @@ const renderLexicalContent = (content: any) => {
 )} 
 
 {columns && columns.length > 0 && (
-	<!-- Legacy column-based design -->
 	<section class="py-16 relative">
     <GridDesign />
 		<div class="container mx-auto px-4 md:px-6">

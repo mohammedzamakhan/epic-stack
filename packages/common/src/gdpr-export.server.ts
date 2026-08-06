@@ -157,13 +157,13 @@ export async function gatherUserDataForExport(
 
 	const noteImages: Array<{ noteId: string; objectKey: string; url: string }> =
 		[]
-	const notesWithUrls = notes.map((note) => ({
+	const notesWithUrls = notes.map((note: any) => ({
 		id: note.id,
 		title: note.title,
 		content: note.content,
 		createdAt: note.createdAt,
 		updatedAt: note.updatedAt,
-		images: note.images.map((image) => {
+		images: note.images.map((image: any) => {
 			const url = domain + getNoteImgSrc(image.objectKey)
 			noteImages.push({ noteId: note.id, objectKey: image.objectKey, url })
 			return {
@@ -189,25 +189,25 @@ export async function gatherUserDataForExport(
 		},
 		relations: {
 			notes: notesWithUrls,
-			connections: connections.map((c) => ({
+			connections: connections.map((c: any) => ({
 				id: c.id,
 				providerName: c.providerName,
 				createdAt: c.createdAt,
 			})),
-			organizations: organizations.map((org) => ({
+			organizations: organizations.map((org: any) => ({
 				organizationId: org.organizationId,
 				organizationName: org.organization.name,
 				role: org.organizationRole.name,
 				joinedAt: org.createdAt,
 			})),
-			sessions: sessions.map((s) => ({
+			sessions: sessions.map((s: any) => ({
 				id: s.id,
 				createdAt: s.createdAt,
 				expirationDate: s.expirationDate,
 				ipAddress: s.ipAddress,
 				userAgent: s.userAgent,
 			})),
-			feedback: feedback.map((f) => ({
+			feedback: feedback.map((f: any) => ({
 				id: f.id,
 				type: f.type,
 				message: f.message,

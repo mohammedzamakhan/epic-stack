@@ -1,5 +1,12 @@
 import { Badge } from '@repo/ui/badge'
-import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardAction,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 
 export function SectionCards() {

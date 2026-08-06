@@ -5,4 +5,3 @@ export { default as arcjet } from './src/arcjet.server.js'
 export * from './src/honeypot.server.js'
 export * from './src/ip-address.server.js'
 export * from './src/ssrf.js'
-

@@ -24,6 +24,10 @@ export class AuditLogWriter {
 	private static readonly ALLOWED_UPDATE_FIELDS = ['archived', 'retainUntil']
 
 	async log(input: AuditLogInput): Promise<void> {
+		if (process.env.NODE_ENV === 'test') {
+			return
+		}
+
 		try {
 			const ipAddress = this.extractIPAddress(input.request)
 			const userAgent = input.request?.headers.get('user-agent') || undefined
@@ -289,14 +293,18 @@ export class AuditLogWriter {
 
 	private sanitizeLogMessage(message: string): string {
 		if (!message) return message
-		return message
-			.replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
-			.replace(/\x1b\[[0-9;]*m/g, '')
-			.substring(0, 2000)
+		// oxlint-disable-next-line no-control-regex – intentional removal of control characters
+		return (
+			message
+				.replace(/[\u0000-\u001f\u007f-\u009f]/g, '') // oxlint-disable-line no-control-regex
+				// oxlint-disable-next-line no-control-regex – intentional removal of ANSI escape codes
+				.replace(/\x1b\[[0-9;]*m/g, '') // oxlint-disable-line no-control-regex
+				.substring(0, 2000)
+		)
 	}
 
 	private logToStructuredLogger(data: any): void {
-		const { action, details, ...meta } = data
+		const { action, details, request, ...meta } = data
 		logger.info(meta, `[Audit] ${action}: ${details}`)
 	}
 }

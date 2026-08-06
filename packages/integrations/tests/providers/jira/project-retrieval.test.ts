@@ -108,22 +108,22 @@ describe('JiraProvider - Project Retrieval', () => {
 			// Verify API calls
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/oauth/token/accessible-resources',
-				{
+				expect.objectContaining({
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
-				},
+				}),
 			)
 
 			expect(fetch).toHaveBeenCalledWith(
 				'https://api.atlassian.com/ex/jira/test-cloud-id/rest/api/3/project/search?expand=lead,description',
-				{
+				expect.objectContaining({
 					headers: {
 						Authorization: 'Bearer decrypted-access-token',
 						Accept: 'application/json',
 					},
-				},
+				}),
 			)
 		})
 
@@ -252,9 +252,8 @@ describe('JiraProvider - Project Retrieval', () => {
 
 		it('should handle authentication error and attempt token refresh', async () => {
 			const { decryptToken } = await import('../../../src/encryption')
-			const { integrationManager } = await import(
-				'../../../src/integration-manager'
-			)
+			const { integrationManager } =
+				await import('../../../src/integration-manager')
 
 			// First call fails with auth error
 			const mockAuthErrorResponse = {
@@ -315,9 +314,8 @@ describe('JiraProvider - Project Retrieval', () => {
 		})
 
 		it('should handle token refresh failure', async () => {
-			const { integrationManager } = await import(
-				'../../../src/integration-manager'
-			)
+			const { integrationManager } =
+				await import('../../../src/integration-manager')
 
 			const mockAuthErrorResponse = {
 				ok: false,

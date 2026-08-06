@@ -1,10 +1,12 @@
 # Waitlist Referral System E2E Tests
 
-This test suite verifies the complete functionality of the waitlist referral ranking system.
+This test suite verifies the complete functionality of the waitlist referral
+ranking system.
 
 ## Running the Tests
 
-The waitlist referral tests require `LAUNCH_STATUS=CLOSED_BETA` to be set, as the waitlist is only active in closed beta mode.
+The waitlist referral tests require `LAUNCH_STATUS=CLOSED_BETA` to be set, as
+the waitlist is only active in closed beta mode.
 
 ### Run all waitlist referral tests:
 
@@ -69,7 +71,8 @@ The test suite covers:
 
 ## Environment Variables
 
-The tests automatically set `LAUNCH_STATUS=CLOSED_BETA` at the module level, but it's recommended to set it explicitly when running:
+The tests automatically set `LAUNCH_STATUS=CLOSED_BETA` at the module level, but
+it's recommended to set it explicitly when running:
 
 ```bash
 # In apps/app directory
@@ -79,6 +82,7 @@ LAUNCH_STATUS=CLOSED_BETA npm run test:e2e:run -- waitlist-referral
 ## Database State
 
 These tests:
+
 - Create temporary users and waitlist entries
 - Clean up after themselves using Playwright fixtures
 - Can be run in parallel with other tests (when properly isolated)
@@ -87,7 +91,8 @@ These tests:
 
 1. **Visual debugging**: Use `--ui` flag to step through tests visually
 2. **Headed mode**: Use `--headed` to see the browser actions
-3. **Trace viewer**: Failed tests automatically generate traces in `playwright-report/`
+3. **Trace viewer**: Failed tests automatically generate traces in
+   `playwright-report/`
 4. **Console logs**: Check test output for database verification results
 
 ## Common Issues
@@ -102,7 +107,9 @@ These tests:
 
 ### Issue: Rank calculation failures
 
-**Solution**: Tests may interfere with each other. Run specific test in isolation:
+**Solution**: Tests may interfere with each other. Run specific test in
+isolation:
+
 ```bash
 LAUNCH_STATUS=CLOSED_BETA npx playwright test -g "rank calculation" --workers=1
 ```
