@@ -1,8 +1,11 @@
-import { getDomainUrl } from '@repo/common'
 import { logMCPRateLimitExceeded, logMCPToolInvoked } from '@repo/audit'
+import { getDomainUrl } from '@repo/common'
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { validateAccessToken } from '#app/utils/mcp/oauth.server.ts'
+import {
+	validateAccessToken,
+	validateApiKey,
+} from '#app/utils/mcp/oauth.server.ts'
 import {
 	getToolDefinitions,
 	handleMCPRequest,
@@ -115,8 +118,12 @@ async function handleDelete(request: Request): Promise<Response> {
 
 	const accessToken = authHeader.slice(7)
 
-	// Validate access token
-	const tokenData = await validateAccessToken(accessToken)
+	// Validate access token or API key
+	let tokenData = await validateAccessToken(accessToken)
+	if (!tokenData) {
+		tokenData = await validateApiKey(accessToken)
+	}
+
 	if (!tokenData) {
 		return Response.json(
 			{
@@ -185,8 +192,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const accessToken = authHeader.slice(7) // Remove "Bearer " prefix
 
-	// Validate access token
-	const tokenData = await validateAccessToken(accessToken)
+	// Validate access token or API key
+	let tokenData = await validateAccessToken(accessToken)
+	if (!tokenData) {
+		tokenData = await validateApiKey(accessToken)
+	}
+
 	if (!tokenData) {
 		return Response.json(
 			{
@@ -314,8 +325,6 @@ export async function action({ request }: ActionFunctionArgs) {
 				const headers = new Headers({ 'Content-Type': 'application/json' })
 				if (originResult.origin) {
 					headers.set('Access-Control-Allow-Origin', originResult.origin)
-				} else {
-					headers.set('Access-Control-Allow-Origin', '*')
 				}
 				return headers
 			}
@@ -568,8 +577,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	const accessToken = authHeader.slice(7)
 
-	// Validate access token
-	const tokenData = await validateAccessToken(accessToken)
+	// Validate access token or API key
+	let tokenData = await validateAccessToken(accessToken)
+	if (!tokenData) {
+		tokenData = await validateApiKey(accessToken)
+	}
+
 	if (!tokenData) {
 		return Response.json(
 			{
@@ -711,9 +724,6 @@ function createLegacySseResponse(request: Request, origin?: string): Response {
 	if (origin) {
 		headers.set('Access-Control-Allow-Origin', origin)
 		headers.set('Vary', 'Origin')
-	} else {
-		// For legacy clients, allow more permissive CORS
-		headers.set('Access-Control-Allow-Origin', '*')
 	}
 
 	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+
   // Add CORS headers for media file requests (needed for WebGL textures)
   if (request.nextUrl.pathname.startsWith('/api/media/')) {
     // Handle preflight OPTIONS request
@@ -15,16 +17,32 @@ export function middleware(request: NextRequest) {
         },
       })
     }
-
-    // For actual requests, clone the response and add CORS headers
-    const response = NextResponse.next()
     response.headers.set('Access-Control-Allow-Origin', '*')
-    return response
   }
 
-  return NextResponse.next()
+  // Content Security Policy
+  const csp = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data:;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  `
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  response.headers.set('Content-Security-Policy', csp)
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-Frame-Options', 'DENY')
+
+  return response
 }
 
 export const config = {
-  matcher: '/api/media/:path*',
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
 }

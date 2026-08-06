@@ -6,6 +6,8 @@ const CACHE_CONTROL_NO_CACHE = 'no-store, no-cache, must-revalidate'
 const securityHeaders = {
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',
+	'Content-Security-Policy':
+		"default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
 }
 
 function shouldSkipCache(pathname: string): boolean {

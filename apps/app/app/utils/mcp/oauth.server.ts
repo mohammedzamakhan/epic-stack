@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { auditService, AuditAction } from '@repo/audit'
 import { prisma } from '@repo/database'
 
 // Token expiration constants
@@ -294,6 +295,48 @@ export async function validateAccessToken(accessToken: string) {
 		user: accessTokenRecord.authorization.user,
 		organization: accessTokenRecord.authorization.organization,
 		authorizationId: accessTokenRecord.authorization.id,
+	}
+}
+
+// Validate API key
+export async function validateApiKey(apiKey: string) {
+	const keyHash = hashToken(apiKey)
+
+	const apiKeyRecord = await prisma.apiKey.findUnique({
+		where: { keyHash },
+		include: {
+			user: true,
+			organization: true,
+		},
+	})
+
+	if (!apiKeyRecord) {
+		return null
+	}
+
+	if (apiKeyRecord.expiresAt && apiKeyRecord.expiresAt < new Date()) {
+		return null
+	}
+
+	// Update lastUsedAt and log audit action
+	await prisma.apiKey.update({
+		where: { id: apiKeyRecord.id },
+		data: { lastUsedAt: new Date() },
+	})
+
+	await auditService.log({
+		action: AuditAction.API_KEY_USED,
+		userId: apiKeyRecord.userId,
+		organizationId: apiKeyRecord.organizationId,
+		metadata: { apiKeyId: apiKeyRecord.id },
+		details: 'API Key Used for MCP Request',
+	})
+
+	return {
+		user: apiKeyRecord.user,
+		organization: apiKeyRecord.organization,
+		// Provide a prefixed ID so audit logging and rate limiting still work
+		authorizationId: `apikey_${apiKeyRecord.id}`,
 	}
 }
 

@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'
 import { useState, useCallback } from 'react'
 import { oauthService, type OAuthResult } from '../oauth-service'
 import { useAuth } from './use-auth'
@@ -38,8 +39,8 @@ export function useOAuth(options: UseOAuthOptions = {}): UseOAuthReturn {
 			setError(null)
 
 			try {
-				// Generate state parameter for CSRF protection
-				const state = Math.random().toString(36).substring(2, 15)
+				// Generate state parameter for CSRF protection using crypto
+				const state = Crypto.randomUUID()
 
 				// Start OAuth flow
 				const result = await oauthService.authenticate(provider, state)

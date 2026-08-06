@@ -1,6 +1,7 @@
 import { promises as fs, constants } from 'node:fs'
 import { invariantResponse } from '@epic-web/invariant'
 import { getDomainUrl } from '@repo/common'
+import { validateInstanceUrl } from '@repo/security'
 import { getImgResponse } from 'openimg/node'
 import { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'
 import { type Route } from './+types/images'
@@ -75,6 +76,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 			invariantResponse(src, 'src query parameter is required', { status: 400 })
 
 			if (URL.canParse(src)) {
+				const validation = validateInstanceUrl(src)
+				if (!validation.valid) {
+					throw new Error(`Invalid image URL: ${validation.reason}`)
+				}
 				// Fetch image from external URL; will be matched against allowlist
 				return {
 					type: 'fetch',
