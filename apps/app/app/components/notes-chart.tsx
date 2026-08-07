@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -37,7 +38,7 @@ interface NotesChartProps {
 	trend: number
 }
 
-export function NotesChart({
+export const NotesChart = memo(function NotesChart({
 	data,
 	daysShown,
 	totalNotes,
@@ -129,4 +130,4 @@ export function NotesChart({
 			</CardFooter>
 		</Card>
 	)
-}
+})
