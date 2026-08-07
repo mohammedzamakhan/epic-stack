@@ -132,7 +132,15 @@ export default async function handleRequest(...args: DocRequestArgs) {
 						crossOriginEmbedderPolicy: false,
 						contentSecurityPolicy: {
 							directives: {
+								document: {
+									'base-uri': ["'self'"],
+								},
+								navigation: {
+									'form-action': ["'self'"],
+								},
 								fetch: {
+									'default-src': ["'self'"],
+									'object-src': ["'none'"],
 									'connect-src': [
 										MODE === 'development' ? 'ws:' : undefined,
 										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,

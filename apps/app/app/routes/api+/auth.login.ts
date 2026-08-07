@@ -1,7 +1,8 @@
+import { detectBot, slidingWindow } from '@arcjet/remix'
 import { parseWithZod } from '@conform-to/zod'
 import { auditService, AuditAction } from '@repo/audit'
 import { prisma } from '@repo/database'
-import { checkHoneypot } from '@repo/security'
+import { arcjet, checkHoneypot } from '@repo/security'
 import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
@@ -24,7 +25,50 @@ const LoginFormSchema = z.object({
 		}),
 })
 
+// Add rules to the base Arcjet instance for login protection
+const aj = arcjet
+	.withRule(
+		detectBot({
+			// Will block requests. Use "DRY_RUN" to log only.
+			mode: 'LIVE',
+			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
+			// Blocks all bots except monitoring services.
+			allow: ['CATEGORY:MONITOR'],
+		}),
+	)
+	.withRule(
+		// Chain bot protection with rate limiting.
+		// A login API shouldn't be submitted more than a few times a minute to prevent brute force.
+		slidingWindow({
+			mode: 'LIVE',
+			max: 10, // 10 requests per window.
+			interval: '60s', // 60 second sliding window.
+		}),
+	)
+
 export async function action({ request }: Route.ActionArgs) {
+	// Apply Arcjet protection before processing the request
+	const decision = await aj.protect({ request, context: {} })
+
+	if (decision.isDenied()) {
+		let errorMessage = 'Access denied'
+
+		if (decision.reason.isBot()) {
+			errorMessage = 'Forbidden'
+		} else if (decision.reason.isRateLimit()) {
+			errorMessage = 'Too many login attempts - try again shortly'
+		}
+
+		return data(
+			{
+				success: false,
+				error: 'access_denied',
+				message: errorMessage,
+			},
+			{ status: 403, statusText: errorMessage },
+		)
+	}
+
 	const formData = await request.formData()
 	await checkHoneypot(formData)
 

@@ -64,7 +64,10 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
-	if (request.url.includes('/novu') || request.url.includes('builder.my')) {
+	if (
+		MODE === 'development' &&
+		(request.url.includes('/novu') || request.url.includes('builder.my'))
+	) {
 		return new Promise((resolve, reject) => {
 			let didError = false
 			// NOTE: this timing will only include things that are rendered in the shell
@@ -108,6 +111,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 			setTimeout(abort, streamTimeout + 5000)
 		})
 	}
+
 	return new Promise((resolve, reject) => {
 		let didError = false
 		// NOTE: this timing will only include things that are rendered in the shell
@@ -134,7 +138,15 @@ export default async function handleRequest(...args: DocRequestArgs) {
 						crossOriginEmbedderPolicy: false,
 						contentSecurityPolicy: {
 							directives: {
+								document: {
+									'base-uri': ["'self'"],
+								},
+								navigation: {
+									'form-action': ["'self'"],
+								},
 								fetch: {
+									'default-src': ["'self'"],
+									'object-src': ["'none'"],
 									'connect-src': [
 										MODE === 'development' ? 'ws:' : undefined,
 										ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
