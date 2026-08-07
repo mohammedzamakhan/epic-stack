@@ -8,6 +8,6 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*", "public/**/*", "env.d.ts"],
+	"include": ["src/**/*", "public/**/*", "env.d.ts", "src/app.d.ts"],
 	"exclude": ["dist", "node_modules"]
 }
