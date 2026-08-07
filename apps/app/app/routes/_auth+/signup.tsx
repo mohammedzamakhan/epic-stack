@@ -157,6 +157,7 @@ export async function action(args: Route.ActionArgs) {
 		response = await sendEmail({
 			to: email,
 			subject: brand.email.welcome,
+			html: '<p>You recently attempted to sign up for an account with this email address, but an account already exists. Please log in instead.</p>',
 			text: 'You recently attempted to sign up for an account with this email address, but an account already exists. Please log in instead.',
 		})
 	} else {

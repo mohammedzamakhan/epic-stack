@@ -123,8 +123,8 @@ export async function rotateRefreshToken(
 ): Promise<{ token: string; expiresAt: Date } | null> {
 	// Parse the token ID and the actual token value
 	const parts = oldTokenString.split('.')
-	if (parts.length !== 2) return null
 	const [tokenId, oldToken] = parts
+	if (!tokenId || !oldToken) return null
 
 	// Find the specific token
 	const row = await prisma.refreshToken.findUnique({
@@ -154,8 +154,8 @@ export async function rotateRefreshToken(
  */
 export async function revokeRefreshToken(tokenString: string): Promise<boolean> {
 	const parts = tokenString.split('.')
-	if (parts.length !== 2) return false
 	const [tokenId, token] = parts
+	if (!tokenId || !token) return false
 
 	const row = await prisma.refreshToken.findUnique({
 		where: { id: tokenId, revoked: false },
