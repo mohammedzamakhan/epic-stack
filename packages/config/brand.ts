@@ -48,6 +48,10 @@ export const brand = {
 			name: 'Epic Startup CMS',
 			description: 'Content management system for Epic Startup',
 		},
+		sites: {
+			name: 'Epic Startup Sites',
+			description: 'Public organization websites',
+		},
 	},
 
 	// Email subjects

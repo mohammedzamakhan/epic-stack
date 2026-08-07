@@ -1,0 +1,44 @@
+{
+  "name": "sites",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Epic Stack organization Sites built with Astro",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_OPTIONS=\"--use-system-ca\" astro dev --port 3008",
+    "start": "astro dev --port 3008",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.1.7",
+    "@tailwindcss/vite": "^4.1.5",
+    "@varlock/astro-integration": "^0.1.0",
+    "astro": "^7.1.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fontless": "^0.1.0",
+    "shadcn": "^3.6.0",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss": "^4.1.8",
+    "tw-animate-css": "^1.2.9"
+  },
+  "peerDependencies": {
+    "varlock": "^0.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@repo/config": "*",
+    "@types/node": "^22.19.6",
+    "eslint": "^9.26.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.118.0"
+  },
+  "engines": {
+    "node": ">=18.20.8"
+  }
+}
