@@ -1,0 +1,186 @@
+[
+  {
+    "verdict": "confirmed",
+    "title": "Cross-Origin Resource Sharing (CORS) Misconfiguration in MCP Endpoint",
+    "description": "The MCP endpoint `apps/app/app/routes/mcp+/_index.ts` creates CORS preflight headers based on `validateOrigin` which returns `{}` if the `Origin` header is absent. However, when `originResult.origin` is `undefined`, `createPreflightHeaders` does not set `Access-Control-Allow-Origin`, but `handlePreflight` returns 204. For actual requests (POST/GET), the `origin` variable controls `Access-Control-Allow-Origin`, but if absent it does not set the header.",
+    "root_cause": "validateOrigin in apps/app/app/utils/mcp/streamable-http.server.ts does not reject missing Origin headers for browser clients, allowing potential CSRF or cross-origin access.",
+    "intended_behavior": "The MCP endpoint should enforce a strict CORS policy for all cross-origin requests, including preflight and actual requests, by requiring and validating the Origin header.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/app/app/utils/mcp/streamable-http.server.ts",
+        "line": 97,
+        "scope": "validateOrigin",
+        "description": "Checks if Origin header exists. If not, returns empty object."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/app/app/routes/mcp+/_index.ts",
+        "line": 73,
+        "scope": "handlePreflight",
+        "description": "Calls validateOrigin and uses the result to set CORS headers, or not set them."
+      }
+    ],
+    "conditions": [],
+    "execution": {
+      "attacker_perspective": "An attacker could perform CSRF attacks if they can trick a user into visiting a malicious site.",
+      "payloads": [
+        "curl -X OPTIONS http://localhost:3000/mcp"
+      ],
+      "instructions": [
+        "1. Send an OPTIONS request to the MCP endpoint without an Origin header.",
+        "2. Observe that the server returns a 204 No Content response, allowing the request."
+      ],
+      "expected_result": "The server returns a 204 response without CORS headers, potentially allowing unauthorized cross-origin access depending on browser behavior."
+    },
+    "remediation": {
+      "strategy": "Require and validate the Origin header for all CORS preflight requests.",
+      "code_changes": [
+        {
+          "file_name": "apps/app/app/utils/mcp/streamable-http.server.ts",
+          "fixed_code": "export function validateOrigin(request: Request): { origin?: string } | Response {\n\tconst origin = request.headers.get('Origin')\n\n\tif (!origin) {\n\t\treturn Response.json({ jsonrpc: '2.0', error: { code: -32600, message: 'Missing Origin header' } }, { status: 403 })\n\t}\n\n\tconst allowedOrigins = getAllowedOrigins()\n\n\t// Check if origin is in allowlist\n\tif (allowedOrigins.includes(origin)) {\n\t\treturn { origin }\n\t}\n\n\t// Check for wildcard patterns\n\tfor (const allowed of allowedOrigins) {\n\t\tif (allowed.startsWith('*.')) {\n\t\t\tconst domain = allowed.slice(2)\n\t\t\ttry {\n\t\t\t\tconst originUrl = new URL(origin)\n\t\t\t\tif (originUrl.hostname === domain || originUrl.hostname.endsWith('.' + domain)) {\n\t\t\t\t\treturn { origin }\n\t\t\t\t}\n\t\t\t} catch {}\n\t\t}\n\t}\n\n\treturn Response.json({ jsonrpc: '2.0', error: { code: -32600, message: 'Origin not allowed' } }, { status: 403 })\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires a browser that does not send an Origin header for cross-origin requests, which is rare."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Potential CSRF vulnerability."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "medium",
+      "reason": "Code analysis shows the missing Origin header is allowed, but exploitability depends on browser behavior."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "title": "Missing algorithm specification in JWT verification",
+    "description": "The `verifyAccessToken` function in `apps/app/app/utils/jwt.server.ts` does not specify an algorithm array when calling `jwt.verify()`. Without pinning the allowed algorithm, `jsonwebtoken` may be vulnerable to algorithm confusion attacks if an attacker supplies a token with `alg: none` or an asymmetric algorithm using the HMAC secret as a public key.",
+    "root_cause": "verifyAccessToken in apps/app/app/utils/jwt.server.ts does not specify the allowed 'algorithms' array in the jwt.verify options, allowing potential algorithm confusion attacks.",
+    "intended_behavior": "The JWT verification should strictly limit the accepted algorithms to only the one used for signing (e.g., HS256) by passing an 'algorithms' array to jwt.verify.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/app/app/utils/jwt.server.ts",
+        "line": 49,
+        "scope": "verifyAccessToken",
+        "description": "Function receives the untrusted JWT token string."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/app/app/utils/jwt.server.ts",
+        "line": 51,
+        "scope": "verifyAccessToken",
+        "description": "Calls jwt.verify without an 'algorithms' option, trusting the algorithm specified in the token header."
+      }
+    ],
+    "conditions": [],
+    "execution": {
+      "attacker_perspective": "An attacker who can intercept a token or wishes to forge one can attempt to bypass signature verification.",
+      "payloads": [
+        "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ."
+      ],
+      "instructions": [
+        "1. Create a forged JWT token with 'alg: none' and arbitrary claims.",
+        "2. Send the token in the Authorization header to an API endpoint protected by requireAuth.",
+        "3. Observe if the server accepts the token as valid."
+      ],
+      "expected_result": "Depending on the exact version of jsonwebtoken, the server might accept a token with alg: none or an unexpected algorithm, bypassing authentication."
+    },
+    "remediation": {
+      "strategy": "Pin the expected algorithm in the jwt.verify call.",
+      "code_changes": [
+        {
+          "file_name": "apps/app/app/utils/jwt.server.ts",
+          "fixed_code": "export function verifyAccessToken(token: string): JWTPayload | null {\n\ttry {\n\t\tconst decoded = jwt.verify(token, JWT_SECRET, {\n\t\t\tissuer: 'your-app-name',\n\t\t\taudience: 'mobile-app',\n\t\t\talgorithms: ['HS256'],\n\t\t}) as JWTPayload\n\t\treturn decoded\n\t} catch {\n\t\treturn null\n\t}\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Modern versions of jsonwebtoken mitigate the 'alg: none' attack by default, but relying on defaults rather than explicit configuration is risky."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "If successful, allows complete authentication bypass and account takeover."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The code clearly lacks the 'algorithms' option in the jwt.verify call."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "title": "Missing secure attribute for cookies in specific environments",
+    "description": "The authentication and session cookies might not have the `Secure` attribute properly enforced in production-like environments where `process.env.NODE_ENV` is not strictly set to 'production' or where TLS termination happens at a proxy. Several cookie configurations check `process.env.NODE_ENV === 'production'` which can be unsafe if not strictly managed.",
+    "root_cause": "Cookie configuration in packages/auth/src/session.server.ts and similar files rely solely on NODE_ENV === 'production' for the Secure flag, potentially transmitting sensitive cookies over plaintext if misconfigured.",
+    "intended_behavior": "Sensitive cookies like session tokens should always have the Secure attribute set in any environment that uses HTTPS, ideally enforcing it unconditionally or detecting HTTPS via X-Forwarded-Proto when behind a proxy.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "packages/auth/src/session.server.ts",
+        "line": 38,
+        "scope": "authSessionStorage",
+        "description": "Cookie options are defined with secure: process.env.NODE_ENV === 'production'."
+      },
+      {
+        "kind": "sink",
+        "file": "packages/auth/src/session.server.ts",
+        "line": 43,
+        "scope": "commitSession",
+        "description": "The session cookie is set on the response based on these options."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "system_configuration",
+        "description": "NODE_ENV is not 'production' but the app is exposed to the internet, or the load balancer strips the secure flag due to missing trust."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker on the same network could intercept plaintext HTTP traffic to steal session cookies if the Secure flag is missing.",
+      "payloads": [
+        "Network sniffing tools like Wireshark or tcpdump."
+      ],
+      "instructions": [
+        "1. Deploy the application with NODE_ENV set to something other than 'production' (e.g., 'staging' or 'test').",
+        "2. Access the application over HTTP or intercept traffic before TLS termination.",
+        "3. Capture the 'en_session' cookie from the network traffic."
+      ],
+      "expected_result": "The session cookie is transmitted without the Secure flag and can be stolen by an eavesdropper."
+    },
+    "remediation": {
+      "strategy": "Ensure the Secure attribute is set correctly, possibly by checking request protocol or enforcing it via proxy configuration.",
+      "code_changes": [
+        {
+          "file_name": "packages/auth/src/session.server.ts",
+          "fixed_code": "// Enforce secure cookies in non-development environments\nsecure: process.env.NODE_ENV !== 'development',"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Requires a specific misconfiguration (NODE_ENV != production in a deployed environment) and network interception capabilities."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Session hijacking allows complete account takeover."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "medium",
+      "reason": "Standard practice is to check NODE_ENV === 'production', but it is a known pitfall if staging environments use different values."
+    }
+  }
+]
