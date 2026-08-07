@@ -32,25 +32,25 @@ function validateAuth(headers: Headers) {
 	return false
 }
 
-function assertKey(key: any): asserts key is Array<string> {
+function assertKey(key: any): asserts key is string {
 	invariantResponse(
-		Array.isArray(key) && key.length && key.every((k) => typeof k === 'string'),
-		'Key must contain a directory',
+		typeof key === 'string' && key.length > 0,
+		'Key must be a non-empty string',
 	)
 }
 
 export const handlers = [
 	http.put(
-		`${STORAGE_ENDPOINT}/${STORAGE_BUCKET}/:key*`,
+		`${STORAGE_ENDPOINT}/${STORAGE_BUCKET}/*`,
 		async ({ request, params }) => {
 			if (!validateAuth(request.headers)) {
 				return new HttpResponse('Unauthorized', { status: 401 })
 			}
-			const { key } = params
+			const key = params['0'] || params['*']
 
 			assertKey(key)
 
-			const filePath = path.join(MOCK_STORAGE_DIR, ...key)
+			const filePath = path.join(MOCK_STORAGE_DIR, ...key.split('/'))
 			const parentDir = path.dirname(filePath)
 			await fs.mkdir(parentDir, { recursive: true })
 
@@ -61,36 +61,34 @@ export const handlers = [
 		},
 	),
 
-	http.get(
-		`${STORAGE_ENDPOINT}/${STORAGE_BUCKET}/:key*`,
-		async ({ params }) => {
-			const { key } = params
-			assertKey(key)
+	http.get(`${STORAGE_ENDPOINT}/${STORAGE_BUCKET}/*`, async ({ params }) => {
+		const key = params['0'] || params['*']
+		assertKey(key)
 
-			const filePath = path.join(MOCK_STORAGE_DIR, ...key)
+		const keyParts = key.split('/')
+		const filePath = path.join(MOCK_STORAGE_DIR, ...keyParts)
+		try {
+			// Check tests/fixtures/images directory first
+			const testFixturesPath = path.join(FIXTURES_IMAGES_DIR, ...keyParts)
+			let file: Buffer
 			try {
-				// Check tests/fixtures/images directory first
-				const testFixturesPath = path.join(FIXTURES_IMAGES_DIR, ...key)
-				let file: Buffer
-				try {
-					file = await fs.readFile(testFixturesPath)
-				} catch {
-					// If not found in test fixtures, try original path
-					file = await fs.readFile(filePath)
-				}
-
-				const contentType =
-					getMimeType(key.at(-1) || '') || 'application/octet-stream'
-				return new HttpResponse(file, {
-					headers: {
-						'Content-Type': contentType,
-						'Content-Length': file.length.toString(),
-						'Cache-Control': 'public, max-age=31536000, immutable',
-					},
-				})
+				file = await fs.readFile(testFixturesPath)
 			} catch {
-				return new HttpResponse('Not found', { status: 404 })
+				// If not found in test fixtures, try original path
+				file = await fs.readFile(filePath)
 			}
-		},
-	),
+
+			const contentType =
+				getMimeType(keyParts.at(-1) || '') || 'application/octet-stream'
+			return new HttpResponse(file, {
+				headers: {
+					'Content-Type': contentType,
+					'Content-Length': file.length.toString(),
+					'Cache-Control': 'public, max-age=31536000, immutable',
+				},
+			})
+		} catch {
+			return new HttpResponse('Not found', { status: 404 })
+		}
+	}),
 ]

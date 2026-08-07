@@ -76,7 +76,12 @@ export async function uploadOrganizationImage(
 	organizationId: string,
 	file: File | FileUpload,
 ) {
-	return _uploadOrganizationImage(organizationId, file, createUploadOptions())
+	const defaultOptions = createUploadOptions()
+	return _uploadOrganizationImage(organizationId, file, {
+		...defaultOptions,
+		// Force organization logos to be stored in the platform's default bucket
+		getConfig: () => defaultOptions.getConfig(undefined),
+	})
 }
 
 export async function uploadNoteImage(

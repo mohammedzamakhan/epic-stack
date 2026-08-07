@@ -162,7 +162,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 
 			try {
-				const objectKey = await uploadOrganizationImage(userId, photoFile)
+				const objectKey = await uploadOrganizationImage(
+					organization.id,
+					photoFile,
+				)
 
 				await prisma.$transaction(async ($prisma) => {
 					await $prisma.organizationImage.deleteMany({
@@ -177,7 +180,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				await invalidateUserOrganizationsCache(userId)
 
 				return Response.json({ status: 'success' })
-			} catch {
+			} catch (error) {
 				return Response.json(
 					{ error: 'Failed to upload organization logo' },
 					{ status: 500 },
