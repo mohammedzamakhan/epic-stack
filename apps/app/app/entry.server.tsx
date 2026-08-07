@@ -62,7 +62,10 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
-	if (request.url.includes('/novu') || request.url.includes('builder.my')) {
+	if (
+		MODE === 'development' &&
+		(request.url.includes('/novu') || request.url.includes('builder.my'))
+	) {
 		return new Promise((resolve, reject) => {
 			let didError = false
 			// NOTE: this timing will only include things that are rendered in the shell
@@ -84,6 +87,41 @@ export default async function handleRequest(...args: DocRequestArgs) {
 						const body = new PassThrough()
 						responseHeaders.set('Content-Type', 'text/html')
 						responseHeaders.append('Server-Timing', timings.toString())
+
+						contentSecurity(responseHeaders, {
+							crossOriginEmbedderPolicy: false,
+							contentSecurityPolicy: {
+								directives: {
+									document: {
+										'base-uri': ["'self'"],
+									},
+									navigation: {
+										'form-action': ["'self'"],
+										'frame-ancestors': ["'self'"],
+									},
+									fetch: {
+										'default-src': ["'self'"],
+										'object-src': ["'none'"],
+										'connect-src': [
+											MODE === 'development' ? 'ws:' : undefined,
+											process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+											"'self'",
+										],
+										'font-src': ["'self'"],
+										'frame-src': ["'self'", 'builder.io'],
+										'img-src': ["'self'", 'data:'],
+										'script-src': [
+											"'unsafe-inline'",
+											"'unsafe-eval'",
+											"'self'",
+											`'nonce-${nonce}'`,
+											'https://cdn.builder.io'
+										],
+										'script-src-attr': [`'nonce-${nonce}'`, "'unsafe-inline'"],
+									},
+								},
+							},
+						})
 
 						resolve(
 							new Response(createReadableStreamFromReadable(body), {
@@ -137,6 +175,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 								},
 								navigation: {
 									'form-action': ["'self'"],
+									'frame-ancestors': ["'self'"],
 								},
 								fetch: {
 									'default-src': ["'self'"],

@@ -7,7 +7,7 @@ import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { login } from '#app/utils/auth.server.ts'
-import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
+import { createAuthenticatedSessionResponse, create2FAToken } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.login.ts'
 
 const LoginFormSchema = z.object({
@@ -117,12 +117,14 @@ export async function action({ request }: Route.ActionArgs) {
 	})
 
 	if (twoFactorVerification) {
+		const loginToken = create2FAToken(session.userId, session.id)
 		return data(
 			{
 				success: false,
 				error: 'two_factor_required',
 				message: 'Two-factor authentication required',
 				userId: session.userId,
+				loginToken,
 			},
 			{ status: 400 },
 		)

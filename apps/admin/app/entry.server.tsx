@@ -143,6 +143,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 								},
 								navigation: {
 									'form-action': ["'self'"],
+									'frame-ancestors': ["'self'"],
 								},
 								fetch: {
 									'default-src': ["'self'"],

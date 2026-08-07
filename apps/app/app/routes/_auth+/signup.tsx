@@ -92,18 +92,7 @@ export async function action(args: Route.ActionArgs) {
 
 	const submission = await parseWithZod(formData, {
 		schema: SignupSchema.superRefine(async (data, ctx) => {
-			const existingUser = await prisma.user.findUnique({
-				where: { email: data.email },
-				select: { id: true },
-			})
-			if (existingUser) {
-				ctx.addIssue({
-					path: ['email'],
-					code: z.ZodIssueCode.custom,
-					message: t`A user already exists with this email`,
-				})
-				return
-			}
+			// existingUser check moved to action to prevent email enumeration
 			// Arcjet security protection (skip in test environment)
 			if (
 				ENV.ARCJET_KEY &&
@@ -150,6 +139,11 @@ export async function action(args: Route.ActionArgs) {
 		)
 	}
 	const { email } = submission.value
+	const existingUser = await prisma.user.findUnique({
+		where: { email },
+		select: { id: true },
+	})
+
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
 		period: 10 * 60,
 		request: args.request,
@@ -157,11 +151,22 @@ export async function action(args: Route.ActionArgs) {
 		target: email,
 	})
 
-	const response = await sendEmail({
-		to: email,
-		subject: brand.email.welcome,
-		react: <SignupEmail onboardingUrl={verifyUrl.toString()} otp={otp} />,
-	})
+	let response
+	if (existingUser) {
+		// Send a generic email indicating the account already exists
+		response = await sendEmail({
+			to: email,
+			subject: brand.email.welcome,
+			html: '<p>You recently attempted to sign up for an account with this email address, but an account already exists. Please log in instead.</p>',
+			text: 'You recently attempted to sign up for an account with this email address, but an account already exists. Please log in instead.',
+		})
+	} else {
+		response = await sendEmail({
+			to: email,
+			subject: brand.email.welcome,
+			react: <SignupEmail onboardingUrl={verifyUrl.toString()} otp={otp} />,
+		})
+	}
 
 	if (response.status === 'success') {
 		return redirect(redirectTo.toString())

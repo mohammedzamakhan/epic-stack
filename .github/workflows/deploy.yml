@@ -16,7 +16,6 @@ permissions:
   contents: read
 
 env:
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
   HUSKY: 0
   PUPPETEER_SKIP_DOWNLOAD: 'true'
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -186,11 +185,8 @@ jobs:
     name: 🌐 Deploy Web App
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, affected]
-    # only deploy web app on pushes or merged PRs to main/dev AND if web app was affected
-    if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      needs.affected.outputs.web == 'true' }}
+    # only deploy web app on pushes to main/dev AND if web app was affected
+    if: ${{ github.event_name == 'push' && needs.affected.outputs.web == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -213,10 +209,7 @@ jobs:
           npm run build
 
       - name: 🚀 Deploy to Cloudflare Pages (Production)
-        if:
-          ${{ github.ref == 'refs/heads/main' || (github.event_name ==
-          'pull_request' && github.event.pull_request.base.ref == 'main' &&
-          github.event.pull_request.merged == true) }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -226,10 +219,7 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🚀 Deploy to Cloudflare Pages (Staging)
-        if:
-          ${{ github.ref == 'refs/heads/dev' || (github.event_name ==
-          'pull_request' && github.event.pull_request.base.ref == 'dev' &&
-          github.event.pull_request.merged == true) }}
+        if: ${{ github.ref == 'refs/heads/dev' }}
         uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -242,11 +232,8 @@ jobs:
     name: 📦 Prepare App Container
     runs-on: ubuntu-24.04
     needs: [affected]
-    # only prepare container on pushes or merged PRs AND if app was affected
-    if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      needs.affected.outputs.app == 'true' }}
+    # only prepare container on pushes AND if app was affected
+    if: ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -296,11 +283,8 @@ jobs:
     name: 📦 Prepare Admin Container
     runs-on: ubuntu-24.04
     needs: [affected]
-    # only prepare container on pushes or merged PRs AND if admin was affected
-    if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      needs.affected.outputs.admin == 'true' }}
+    # only prepare container on pushes AND if admin was affected
+    if: ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -350,12 +334,10 @@ jobs:
     name: 📦 Prepare CMS Container
     runs-on: ubuntu-24.04
     needs: [affected]
-    # only prepare container on pushes or merged PRs AND if cms was affected
+    # only prepare container on pushes AND if cms was affected
     if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin ==
-      'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true' || 
+      needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -404,11 +386,8 @@ jobs:
     name: 🚀 Deploy App
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-app, affected]
-    # only deploy on pushes or merged PRs AND if app was affected
-    if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      needs.affected.outputs.app == 'true' }}
+    # only deploy on pushes AND if app was affected
+    if: ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -449,11 +428,8 @@ jobs:
     name: 🚀 Deploy Admin
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-admin, affected]
-    # only deploy on pushes or merged PRs AND if admin was affected
-    if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      needs.affected.outputs.admin == 'true' }}
+    # only deploy on pushes AND if admin was affected
+    if: ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -494,12 +470,10 @@ jobs:
     name: 🚀 Deploy CMS
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, container-cms, affected]
-    # only deploy on pushes or merged PRs AND if cms was affected
+    # only deploy on pushes AND if cms was affected
     if:
-      ${{ (github.event_name == 'push' || (github.event_name == 'pull_request'
-      && github.event.pull_request.merged == true)) &&
-      (needs.affected.outputs.app == 'true' || needs.affected.outputs.admin ==
-      'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true' || 
+      needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4

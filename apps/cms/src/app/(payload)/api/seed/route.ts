@@ -11,6 +11,16 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
     )
   }
 
+  const authHeader = _request.headers.get('authorization')
+  const seedSecret = process.env.CMS_SEED_SECRET
+
+  if (!seedSecret || authHeader !== `Bearer ${seedSecret}`) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized to seed database' },
+      { status: 401 },
+    )
+  }
+
   try {
     const payload = await getPayload({ config })
 

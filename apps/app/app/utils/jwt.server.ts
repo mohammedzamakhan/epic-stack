@@ -14,6 +14,8 @@ const JWT_SECRET = process.env.JWT_SECRET
 const ACCESS_TOKEN_EXPIRES_IN = '15m' // 15 minutes
 const REFRESH_TOKEN_BYTES = 48
 const REFRESH_TOKEN_EXPIRES_DAYS = 30
+const JWT_ISSUER = process.env.APP_URL || 'epic-stack'
+const JWT_AUDIENCE = process.env.APP_URL || 'epic-stack-client'
 
 export interface JWTPayload {
 	sub: string // user ID
@@ -38,8 +40,8 @@ export function createAccessToken(
 ): string {
 	return jwt.sign(payload, JWT_SECRET, {
 		expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-		issuer: 'your-app-name',
-		audience: 'mobile-app',
+		issuer: JWT_ISSUER,
+		audience: JWT_AUDIENCE,
 	})
 }
 
@@ -49,10 +51,36 @@ export function createAccessToken(
 export function verifyAccessToken(token: string): JWTPayload | null {
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET, {
-			issuer: 'your-app-name',
-			audience: 'mobile-app',
+			issuer: JWT_ISSUER,
+			audience: JWT_AUDIENCE,
 		}) as JWTPayload
 		return decoded
+	} catch {
+		return null
+	}
+}
+
+/**
+ * Create a short-lived intermediate token for 2FA login
+ */
+export function create2FAToken(userId: string, sessionId: string): string {
+	return jwt.sign({ sub: userId, sid: sessionId }, JWT_SECRET, {
+		expiresIn: '5m',
+		issuer: JWT_ISSUER,
+		audience: 'api-2fa',
+	})
+}
+
+/**
+ * Verify a short-lived intermediate token for 2FA login
+ */
+export function verify2FAToken(token: string): { userId: string, sessionId: string } | null {
+	try {
+		const decoded = jwt.verify(token, JWT_SECRET, {
+			issuer: JWT_ISSUER,
+			audience: 'api-2fa',
+		}) as { sub: string, sid: string }
+		return { userId: decoded.sub, sessionId: decoded.sid }
 	} catch {
 		return null
 	}
@@ -72,7 +100,7 @@ export async function createRefreshToken(
 	)
 
 	// Store hashed refresh token in database
-	await prisma.refreshToken.create({
+	const refreshToken = await prisma.refreshToken.create({
 		data: {
 			userId,
 			tokenHash,
@@ -82,40 +110,40 @@ export async function createRefreshToken(
 		},
 	})
 
-	return { token, expiresAt }
+	return { token: `${refreshToken.id}.${token}`, expiresAt }
 }
 
 /**
- * Rotate refresh token (invalidate old, create new)
+ * Rotate a refresh token (used when getting a new access token)
  */
 export async function rotateRefreshToken(
-	oldToken: string,
+	oldTokenString: string,
 	userId: string,
 	meta: { userAgent?: string; ip?: string },
 ): Promise<{ token: string; expiresAt: Date } | null> {
-	// Find all non-revoked tokens for this user
-	const tokens = await prisma.refreshToken.findMany({
-		where: {
-			userId,
-			revoked: false,
-			expiresAt: { gt: new Date() },
-		},
+	// Parse the token ID and the actual token value
+	const parts = oldTokenString.split('.')
+	const [tokenId, oldToken] = parts
+	if (!tokenId || !oldToken) return null
+
+	// Find the specific token
+	const row = await prisma.refreshToken.findUnique({
+		where: { id: tokenId, userId, revoked: false },
 	})
+	
+	if (!row || row.expiresAt < new Date()) return null
 
-	// Find the matching token by comparing hashes
-	for (const row of tokens) {
-		const isMatch = await bcrypt.compare(oldToken, row.tokenHash)
-		if (isMatch) {
-			// Revoke the old token
-			await prisma.refreshToken.update({
-				where: { id: row.id },
-				data: { revoked: true },
-			})
+	const isMatch = (await bcrypt.compare(oldToken, row.tokenHash)) === true
+	if (isMatch) {
+		// Revoke the old token
+		await prisma.refreshToken.update({
+			where: { id: row.id },
+			data: { revoked: true },
+		})
 
-			// Create new token
-			const { token, expiresAt } = await createRefreshToken(userId, meta)
-			return { token, expiresAt }
-		}
+		// Create new token
+		const { token, expiresAt } = await createRefreshToken(userId, meta)
+		return { token, expiresAt }
 	}
 
 	return null
@@ -124,23 +152,24 @@ export async function rotateRefreshToken(
 /**
  * Revoke a refresh token
  */
-export async function revokeRefreshToken(token: string): Promise<boolean> {
-	const tokens = await prisma.refreshToken.findMany({
-		where: {
-			revoked: false,
-			expiresAt: { gt: new Date() },
-		},
-	})
+export async function revokeRefreshToken(tokenString: string): Promise<boolean> {
+	const parts = tokenString.split('.')
+	const [tokenId, token] = parts
+	if (!tokenId || !token) return false
 
-	for (const row of tokens) {
-		const isMatch = await bcrypt.compare(token, row.tokenHash)
-		if (isMatch) {
-			await prisma.refreshToken.update({
-				where: { id: row.id },
-				data: { revoked: true },
-			})
-			return true
-		}
+	const row = await prisma.refreshToken.findUnique({
+		where: { id: tokenId, revoked: false },
+	})
+	
+	if (!row || row.expiresAt < new Date()) return false
+
+	const isMatch = (await bcrypt.compare(token, row.tokenHash)) === true
+	if (isMatch) {
+		await prisma.refreshToken.update({
+			where: { id: row.id },
+			data: { revoked: true },
+		})
+		return true
 	}
 
 	return false

@@ -16,7 +16,7 @@ vi.hoisted(() => {
 import { action } from './auth.login.2fa.ts'
 import { prisma } from '@repo/database'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
+import { createAuthenticatedSessionResponse, verify2FAToken } from '#app/utils/jwt.server.ts'
 
 vi.mock('@repo/database', () => ({
 	prisma: {
@@ -56,6 +56,7 @@ vi.mock('#app/routes/_auth+/verify.server.tsx', () => ({
 
 vi.mock('#app/utils/jwt.server.ts', () => ({
 	createAuthenticatedSessionResponse: vi.fn(),
+	verify2FAToken: vi.fn(),
 }))
 
 describe('auth.login.2fa API action (WO-82)', () => {
@@ -70,11 +71,14 @@ describe('auth.login.2fa API action (WO-82)', () => {
 	})
 
 	it('returns error when 2FA code is invalid or expired (400)', async () => {
+		const mockVerify2FAToken = vi.mocked(verify2FAToken)
+		mockVerify2FAToken.mockReturnValue({ userId: 'user-123', sessionId: 'session-123' })
 		mockIsCodeValid.mockResolvedValue(false)
 
 		const formData = new FormData()
 		formData.append('userId', 'user-123')
 		formData.append('code', '999999')
+		formData.append('loginToken', 'valid-login-token')
 
 		const request = new Request('http://localhost:3000/api/auth/login/2fa', {
 			method: 'POST',
@@ -98,6 +102,8 @@ describe('auth.login.2fa API action (WO-82)', () => {
 	})
 
 	it('completes 2FA login and returns session tokens when code is valid (200)', async () => {
+		const mockVerify2FAToken = vi.mocked(verify2FAToken)
+		mockVerify2FAToken.mockReturnValue({ userId: 'user-123', sessionId: 'session-123' })
 		mockIsCodeValid.mockResolvedValue(true)
 		mockCreateSession.mockResolvedValue({
 			success: true,
@@ -111,6 +117,7 @@ describe('auth.login.2fa API action (WO-82)', () => {
 		const formData = new FormData()
 		formData.append('userId', 'user-123')
 		formData.append('code', '123456')
+		formData.append('loginToken', 'valid-login-token')
 
 		const request = new Request('http://localhost:3000/api/auth/login/2fa', {
 			method: 'POST',

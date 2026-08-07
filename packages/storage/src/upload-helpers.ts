@@ -41,7 +41,6 @@ function sanitizeAndExtractExtension(filename: string): string {
 		'png',
 		'gif',
 		'webp',
-		'svg',
 		'mp4',
 		'webm',
 		'mov',
