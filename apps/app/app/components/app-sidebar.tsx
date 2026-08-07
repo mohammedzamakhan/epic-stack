@@ -27,7 +27,6 @@ import { UserRoundPlusIcon } from '@repo/ui/user-round-plus'
 import { motion } from 'motion/react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useRouteLoaderData, Link } from 'react-router'
-import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 import { NavMain } from '#app/components/nav-main.tsx'
 import { NavUser } from '#app/components/nav-user.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
@@ -106,7 +105,6 @@ function AccountSidebar({
 	const { _ } = useLingui()
 	const isProfileRoute = location.pathname === '/profile'
 	const isSecurityRoute = location.pathname === '/security'
-	const isNotificationsRoute = location.pathname === '/notifications'
 	const isOrganizationsRoute = location.pathname === '/organizations'
 
 	const navMain = [
@@ -127,12 +125,6 @@ function AccountSidebar({
 			url: '/security',
 			isActive: isSecurityRoute,
 			icon: LockOpenIcon,
-		},
-		{
-			title: _(msg`Notifications`),
-			url: '/notifications',
-			isActive: isNotificationsRoute,
-			icon: BellIcon,
 		},
 		{
 			title: _(msg`Organizations`),
@@ -268,6 +260,11 @@ function OrganizationSidebar({
 					url: `/${orgSlug}/settings/integrations`,
 					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
 				},
+				{
+					title: _(msg`Notifications`),
+					url: `/${orgSlug}/settings/notifications`,
+					isActive: location.pathname === `/${orgSlug}/settings/notifications`,
+				},
 				// Hide billing for PUBLIC_BETA and CLOSED_BETA
 				...(rootData?.launchStatus !== 'PUBLIC_BETA' &&
 				rootData?.launchStatus !== 'CLOSED_BETA'
@@ -399,13 +396,9 @@ export function AppSidebar({
 	// Check if we're on profile or organizations routes
 	const isProfileRoute = location.pathname === '/profile'
 	const isSecurityRoute = location.pathname === '/security'
-	const isNotificationsRoute = location.pathname === '/notifications'
 	const isOrganizationsRoute = location.pathname === '/organizations'
 	const isAccountRoute =
-		isProfileRoute ||
-		isSecurityRoute ||
-		isNotificationsRoute ||
-		isOrganizationsRoute
+		isProfileRoute || isSecurityRoute || isOrganizationsRoute
 
 	const userData = rootData?.user
 		? {
