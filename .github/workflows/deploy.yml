@@ -102,7 +102,7 @@ jobs:
         run: npm rebuild sharp
 
       - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
+        run: echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >> apps/cms/.env
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -147,7 +147,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> apps/cms/.env
+        run: echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >> apps/cms/.env
 
       - name: ⎔ Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
