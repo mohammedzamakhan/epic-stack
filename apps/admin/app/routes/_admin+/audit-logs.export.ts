@@ -7,7 +7,7 @@ import { type Route } from './+types/audit-logs.export.ts'
  * GET /audit-logs/export?format=csv&organizationId=xxx&startDate=xxx&endDate=xxx
  */
 export async function loader({ request }: Route.LoaderArgs) {
-	await requireUserWithRole(request, 'admin')
+	const adminUserId = await requireUserWithRole(request, 'admin')
 
 	const url = new URL(request.url)
 	const format = url.searchParams.get('format') || 'csv'
@@ -49,13 +49,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 		filename = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
 	}
 
-	// Log the export action
-	const adminUserId = await requireUserWithRole(request, 'admin').then(
-		() => request.headers.get('x-user-id') || undefined,
-	)
 	await auditService.logAdminOperation(
 		AuditAction.AUDIT_LOG_EXPORTED,
-		adminUserId || 'system',
+		adminUserId,
 		`Audit logs exported in ${format} format`,
 		{
 			format,

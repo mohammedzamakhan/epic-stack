@@ -127,7 +127,7 @@ export async function action({ request }: Route.ActionArgs) {
 			period: 10 * 60,
 			request,
 			type: 'reset-password',
-			target: user.id,
+			target: usernameOrEmail,
 		})
 
 		const response = await sendEmail({
@@ -140,10 +140,23 @@ export async function action({ request }: Route.ActionArgs) {
 
 		if (response.status === 'success') {
 			return redirect(redirectTo.toString())
+		} else {
+			return data(
+				{ result: submission.reply({ formErrors: [response.error.message] }) },
+				{ status: 500 },
+			)
 		}
 	}
 
-	return redirect('/forgot-password/sent')
+	// Just generate a fake redirect to not leak the account's existence
+	const { redirectTo } = await prepareVerification({
+		period: 10 * 60,
+		request,
+		type: 'reset-password',
+		target: usernameOrEmail,
+	})
+
+	return redirect(redirectTo.toString())
 }
 
 export const meta: Route.MetaFunction = () => {

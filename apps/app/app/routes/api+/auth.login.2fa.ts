@@ -6,10 +6,11 @@ import { arcjet, checkHoneypot } from '@repo/security'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
+import { createAuthenticatedSessionResponse, verify2FAToken } from '#app/utils/jwt.server.ts'
 
 const Login2FASchema = z.object({
 	userId: z.string(),
+	loginToken: z.string().min(1, 'loginToken is required'),
 	code: z.string().min(1, '2FA code is required'),
 })
 
@@ -87,7 +88,20 @@ export async function action({ request }: ActionFunctionArgs) {
 			)
 		}
 
-		const { userId, code } = submission.value
+		const { userId, code, loginToken } = submission.value
+
+		// Verify the login token matches the user ID
+		const decoded = verify2FAToken(loginToken)
+		if (!decoded || decoded.userId !== userId) {
+			return data(
+				{
+					success: false,
+					error: 'access_denied',
+					message: 'Invalid or expired login session',
+				},
+				{ status: 403 },
+			)
+		}
 
 		const user = await prisma.user.findUnique({
 			where: { id: userId },

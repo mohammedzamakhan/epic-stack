@@ -9,7 +9,7 @@ import {
 	deleteBackupCodes,
 } from '@repo/auth'
 import { prisma } from '@repo/database'
-import { PasswordAndConfirmPasswordSchema } from '@repo/validation'
+import { PasswordAndConfirmPasswordSchema, PasswordSchema } from '@repo/validation'
 import { z } from 'zod'
 
 import {
@@ -21,7 +21,7 @@ import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 export const ChangePasswordSchema = z
 	.object({
 		currentPassword: z.string().min(1, 'Current password is required'),
-		newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+		newPassword: PasswordSchema,
 		confirmNewPassword: z.string().min(1, 'Confirm your new password'),
 	})
 	.refine((data) => data.newPassword === data.confirmNewPassword, {

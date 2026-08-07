@@ -7,7 +7,7 @@ const securityHeaders = {
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',
 	'Content-Security-Policy':
-		"default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
+		"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self';",
 }
 
 function shouldSkipCache(pathname: string): boolean {

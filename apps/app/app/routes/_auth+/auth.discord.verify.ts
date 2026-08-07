@@ -1,4 +1,4 @@
-import { requireUserId } from '@repo/auth'
+import { requireUserId, authSessionStorage } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
 import { redirect } from 'react-router'
 import { awardDiscordPoints } from '#app/utils/waitlist.server.ts'
@@ -44,6 +44,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 		})
 	}
 
+	const state = url.searchParams.get('state')
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+
 	// If no code, redirect to initiate OAuth flow
 	if (!code) {
 		const clientId = process.env.DISCORD_CLIENT_ID
@@ -64,10 +69,31 @@ export async function loader({ request }: Route.LoaderArgs) {
 		discordAuthUrl.searchParams.set('redirect_uri', redirectUri)
 		discordAuthUrl.searchParams.set('response_type', 'code')
 		discordAuthUrl.searchParams.set('scope', 'identify guilds')
-		discordAuthUrl.searchParams.set('state', userId) // Store userId in state for verification
+		
+		const newState = crypto.randomUUID()
+		discordAuthUrl.searchParams.set('state', newState)
+		
+		authSession.set('discord_oauth_state', newState)
 
-		return redirect(discordAuthUrl.toString())
+		return redirect(discordAuthUrl.toString(), {
+			headers: {
+				'set-cookie': await authSessionStorage.commitSession(authSession),
+			},
+		})
 	}
+
+	const savedState = authSession.get('discord_oauth_state')
+	if (!state || state !== savedState) {
+		console.error('Discord OAuth state mismatch')
+		return redirectWithToast('/waitlist', {
+			type: 'error',
+			title: 'Discord Verification Failed',
+			description: 'Invalid request state. Please try again.',
+		})
+	}
+	
+	// Unset state after use
+	authSession.unset('discord_oauth_state')
 
 	// Exchange code for access token
 	try {
@@ -122,31 +148,55 @@ export async function loader({ request }: Route.LoaderArgs) {
 		const isInGuild = guilds.some((guild) => guild.id === guildId)
 
 		if (!isInGuild) {
-			return redirectWithToast('/waitlist', {
-				type: 'error',
-				title: 'Not in Discord Server',
-				description:
-					'Please join our Discord server first, then verify your membership.',
-			})
+			return redirectWithToast(
+				'/waitlist',
+				{
+					type: 'error',
+					title: 'Not in Discord Server',
+					description:
+						'Please join our Discord server first, then verify your membership.',
+				},
+				{
+					headers: {
+						'set-cookie': await authSessionStorage.commitSession(authSession),
+					},
+				},
+			)
 		}
 
 		// Award points for Discord verification
 		await awardDiscordPoints(userId)
 
-		return redirectWithToast('/waitlist', {
-			type: 'success',
-			title: 'Discord Verified!',
-			description: 'You have earned 2 points for joining our Discord server!',
-		})
+		return redirectWithToast(
+			'/waitlist',
+			{
+				type: 'success',
+				title: 'Discord Verified!',
+				description: 'You have earned 2 points for joining our Discord server!',
+			},
+			{
+				headers: {
+					'set-cookie': await authSessionStorage.commitSession(authSession),
+				},
+			},
+		)
 	} catch (error) {
 		console.error('Discord verification error:', error)
-		return redirectWithToast('/waitlist', {
-			type: 'error',
-			title: 'Verification Failed',
-			description:
-				error instanceof Error
-					? error.message
-					: 'Failed to verify Discord membership. Please try again.',
-		})
+		return redirectWithToast(
+			'/waitlist',
+			{
+				type: 'error',
+				title: 'Verification Failed',
+				description:
+					error instanceof Error
+						? error.message
+						: 'Failed to verify Discord membership. Please try again.',
+			},
+			{
+				headers: {
+					'set-cookie': await authSessionStorage.commitSession(authSession),
+				},
+			},
+		)
 	}
 }
