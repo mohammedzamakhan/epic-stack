@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo } from 'react'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -33,70 +33,58 @@ interface NotesChartProps {
 		notes: number
 	}>
 	daysShown: number
+	totalNotes: number
+	avgPerDay: number
+	trend: number
 }
 
 export const NotesChart = memo(function NotesChart({
 	data,
 	daysShown,
+	totalNotes,
+	avgPerDay,
+	trend,
 }: NotesChartProps) {
 	const { _: ignored_ } = useLingui()
-
-	const { totalNotes, avgNotesPerDay, trendPercentage, absTrendPercentage } =
-		useMemo(() => {
-			const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)
-			const avgNotesPerDay = Math.round((totalNotes / data.length) * 10) / 10
-
-			// Calculate trend (comparing last half vs first half)
-			const halfPoint = Math.floor(data.length / 2)
-			const lastHalf = data.slice(halfPoint)
-			const firstHalf = data.slice(0, halfPoint)
-			const lastHalfTotal = lastHalf.reduce((sum, item) => sum + item.notes, 0)
-			const firstHalfTotal = firstHalf.reduce(
-				(sum, item) => sum + item.notes,
-				0,
-			)
-
-			const trendPercentage =
-				firstHalfTotal === 0
-					? lastHalfTotal > 0
-						? 100
-						: 0
-					: Math.round(
-							((lastHalfTotal - firstHalfTotal) / firstHalfTotal) * 100,
-						)
-
-			const absTrendPercentage = Math.abs(trendPercentage)
-			return { totalNotes, avgNotesPerDay, trendPercentage, absTrendPercentage }
-		}, [data])
-	const daysShownValue = daysShown
-	const totalNotesValue = totalNotes
-	const avgNotesPerDayValue = avgNotesPerDay
+	const absTrend = Math.abs(trend)
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>
-					<Trans>Daily Notes Created</Trans>
-				</CardTitle>
-				<CardDescription>
-					<Trans>
-						Notes created by your organization over the last {daysShownValue}{' '}
-						days
-					</Trans>
-				</CardDescription>
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle>
+							<Trans>Daily Notes Created</Trans>
+						</CardTitle>
+						<CardDescription>
+							<Trans>Last {daysShown} days</Trans>
+						</CardDescription>
+					</div>
+					<div className="flex items-center gap-4 text-sm">
+						<div className="text-right">
+							<div className="text-muted-foreground text-xs">
+								<Trans>Total</Trans>
+							</div>
+							<div className="font-semibold tabular-nums">{totalNotes}</div>
+						</div>
+						<div className="text-right">
+							<div className="text-muted-foreground text-xs">
+								<Trans>Avg/day</Trans>
+							</div>
+							<div className="font-semibold tabular-nums">{avgPerDay}</div>
+						</div>
+					</div>
+				</div>
 			</CardHeader>
 			<CardContent>
 				<ChartContainer
 					config={chartConfig}
-					className="aspect-auto h-[250px] w-full"
+					className="aspect-auto h-80 w-full"
 				>
 					<AreaChart
 						accessibilityLayer
 						data={data}
-						margin={{
-							left: 12,
-							right: 12,
-						}}
+						margin={{ left: 12, right: 12 }}
 					>
 						<CartesianGrid vertical={false} />
 						<XAxis
@@ -121,30 +109,24 @@ export const NotesChart = memo(function NotesChart({
 					</AreaChart>
 				</ChartContainer>
 			</CardContent>
-			<CardFooter>
-				<div className="flex w-full items-start gap-2 text-sm">
-					<div className="grid gap-2">
-						<div className="flex items-center gap-2 leading-none font-medium">
-							{trendPercentage >= 0 ? (
-								<>
-									<Trans>Trending up by {trendPercentage}% this period</Trans>{' '}
-									<Icon name="trending-up" className="h-4 w-4" />
-								</>
-							) : (
-								<>
-									<Trans>Down by {absTrendPercentage} % this period</Trans>{' '}
-									<Icon name="trending-up" className="h-4 w-4 rotate-180" />
-								</>
-							)}
-						</div>
-						<div className="text-muted-foreground flex items-center gap-2 leading-none">
-							<Trans>
-								{totalNotesValue} total notes • {avgNotesPerDayValue} avg per
-								day
-							</Trans>
-						</div>
-					</div>
-				</div>
+			<CardFooter className="text-muted-foreground text-sm">
+				{trend >= 0 ? (
+					<span className="flex items-center gap-2">
+						<Trans>Trending up by {trend}% this period</Trans>
+						<Icon
+							name="trending-up"
+							className="h-4 w-4 text-green-600 dark:text-green-400"
+						/>
+					</span>
+				) : (
+					<span className="flex items-center gap-2">
+						<Trans>Down by {absTrend}% this period</Trans>
+						<Icon
+							name="trending-up"
+							className="h-4 w-4 rotate-180 text-red-600 dark:text-red-400"
+						/>
+					</span>
+				)}
 			</CardFooter>
 		</Card>
 	)

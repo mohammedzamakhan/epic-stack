@@ -12,7 +12,7 @@ import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,7 +20,6 @@ import {
 	DropdownMenuTrigger,
 } from '@repo/ui/dropdown-menu'
 import { Icon } from '@repo/ui/icon'
-import { Input } from '@repo/ui/input'
 import {
 	InputGroup,
 	InputGroupAddon,
@@ -151,79 +150,98 @@ export function OrganizationInvitations({
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-lg">
-						<Trans>Your personal invite link</Trans>
+						<Trans>Personal invite link</Trans>
 					</CardTitle>
-					<p className="text-muted-foreground text-sm">
+					<CardDescription>
 						<Trans>
-							Anyone with this link can join your organization and will know you
-							invited them. By default, they will have the Member role.
+							Share this link to let people join your organization as a Member.
+							They'll see you invited them.
 						</Trans>
-					</p>
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="flex gap-2">
-						<Input
-							value={inviteUrl || _(msg`No active invite link`)}
-							readOnly
-							onClick={inviteUrl ? copyInviteLink : undefined}
-							className={`flex-1 ${inviteUrl ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-						/>
-						{inviteUrl && (
-							<Button
-								variant="outline"
-								onClick={copyInviteLink}
-								className="shrink-0"
-							>
-								{linkCopied ? (
-									<>
-										<Icon name="check" className="h-4 w-4" />
-										<Trans>Copied</Trans>
-									</>
-								) : (
-									<>
-										<Icon name="copy" className="h-4 w-4" />
-										<Trans>Copy</Trans>
-									</>
-								)}
-							</Button>
-						)}
-					</div>
-					<div className="flex gap-2">
-						{!inviteLink?.isActive ? (
-							<Form method="POST">
+						<InputGroup className="flex-1">
+							<InputGroupAddon align="inline-start" className="pl-2.5">
+								<Icon
+									name="link-2"
+									className="text-muted-foreground h-4 w-4 shrink-0"
+								/>
+							</InputGroupAddon>
+							<InputGroupInput
+								value={
+									inviteLink?.isActive
+										? inviteUrl
+										: _(msg`No active invite link`)
+								}
+								readOnly
+								onClick={inviteLink?.isActive ? copyInviteLink : undefined}
+								className={
+									inviteLink?.isActive
+										? 'cursor-pointer'
+										: 'cursor-not-allowed'
+								}
+							/>
+							{inviteLink?.isActive && (
+								<InputGroupAddon align="inline-end" className="pr-1.5">
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onClick={copyInviteLink}
+										className="h-7 px-2.5 text-xs"
+									>
+										{linkCopied ? (
+											<>
+												<Icon name="check" className="h-3.5 w-3.5" />
+												<Trans>Copied</Trans>
+											</>
+										) : (
+											<>
+												<Icon name="copy" className="h-3.5 w-3.5" />
+												<Trans>Copy</Trans>
+											</>
+										)}
+									</Button>
+								</InputGroupAddon>
+							)}
+						</InputGroup>
+						{!inviteLink?.isActive && (
+							<Form method="POST" className="shrink-0">
 								<input type="hidden" name="intent" value="create-invite-link" />
-								<Button type="submit" variant="outline">
+								<Button type="submit" size="sm">
 									<Icon name="plus" className="h-4 w-4" />
 									<Trans>Create Link</Trans>
 								</Button>
 							</Form>
-						) : (
-							<>
-								<Form method="POST">
-									<input
-										type="hidden"
-										name="intent"
-										value="reset-invite-link"
-									/>
-									<Button type="submit" variant="outline">
-										<Icon name="undo-2" className="h-4 w-4" />
-										<Trans>Reset</Trans>
-									</Button>
-								</Form>
-								<Form method="POST">
-									<input
-										type="hidden"
-										name="intent"
-										value="deactivate-invite-link"
-									/>
-									<Button type="submit" variant="outline">
-										<Icon name="x" className="h-4 w-4" />
-										<Trans>Disable</Trans>
-									</Button>
-								</Form>
-							</>
 						)}
 					</div>
+					{inviteLink?.isActive && (
+						<div className="flex gap-2">
+							<Form method="POST">
+								<input
+									type="hidden"
+									name="intent"
+									value="reset-invite-link"
+								/>
+								<Button type="submit" variant="outline" size="sm">
+									<Icon name="undo-2" className="h-4 w-4" />
+									<Trans>Reset</Trans>
+								</Button>
+							</Form>
+							<Form method="POST">
+								<input
+									type="hidden"
+									name="intent"
+									value="deactivate-invite-link"
+								/>
+								<Button type="submit" variant="outline" size="sm">
+									<Icon name="ban" className="h-4 w-4" />
+									<Trans>Disable</Trans>
+								</Button>
+							</Form>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 

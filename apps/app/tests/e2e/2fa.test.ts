@@ -10,6 +10,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 	const password = faker.internet.password()
 	const user = await login({ password })
 	await navigate('/security')
+	await page.waitForLoadState('networkidle')
 
 	await expect(
 		page.getByRole('heading', { name: /Security Settings/i }),

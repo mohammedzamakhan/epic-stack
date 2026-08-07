@@ -225,8 +225,7 @@ test.describe('Dashboard', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Verify statistics are displayed - use more specific selectors
-		await expect(page.getByText(/3 members/i)).toBeVisible()
-		await expect(page.getByText(/5 notes/i)).toBeVisible()
+		await expect(page.getByText(/5 total notes/i)).toBeVisible()
 	})
 
 	test('Dashboard allows quick note creation', async ({

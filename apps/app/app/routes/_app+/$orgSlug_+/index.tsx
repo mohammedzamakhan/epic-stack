@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 
-import { t } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Novu } from '@novu/api'
 import { requireUserId } from '@repo/auth'
@@ -293,49 +293,93 @@ export default function OrganizationDashboard() {
 
 	const userName = user?.name || 'User'
 
+	const totalNotes = chartData.reduce((sum, d) => sum + d.notes, 0)
+	const avgPerDay =
+		Math.round((totalNotes / Math.max(1, chartData.length)) * 10) / 10
+	const halfPoint = Math.floor(chartData.length / 2)
+	const firstHalf = chartData
+		.slice(0, halfPoint)
+		.reduce((s, d) => s + d.notes, 0)
+	const lastHalf = chartData.slice(halfPoint).reduce((s, d) => s + d.notes, 0)
+	const trend =
+		firstHalf === 0
+			? lastHalf > 0
+				? 100
+				: 0
+			: Math.round(((lastHalf - firstHalf) / firstHalf) * 100)
+
+	const showOnboarding =
+		onboardingProgress &&
+		!onboardingProgress.isCompleted &&
+		onboardingProgress.isVisible
+
 	return (
-		<div className="py-8 md:p-8">
+		<div className="flex flex-col gap-8 py-6 md:p-8">
 			<PageTitle
 				title={_(t`Welcome ${userName}!`)}
-				description={_(
-					t`Welcome to your organization dashboard. Here you can manage your organization's settings and view analytics.`,
-				)}
+				description={_(t`Your organization dashboard`)}
 			/>
 
-			<div className="flex flex-wrap gap-8 md:flex-nowrap">
-				{/* Onboarding Checklist */}
-				{onboardingProgress &&
-				!onboardingProgress.isCompleted &&
-				onboardingProgress.isVisible ? (
-					<div className="mt-8 md:w-1/2">
-						<OnboardingChecklist
-							progress={onboardingProgress}
-							orgSlug={orgSlug}
-							organizationId={
-								rootData?.userOrganizations?.currentOrganization?.organization
-									.id || ''
-							}
-							variant="dashboard"
-						/>
-					</div>
-				) : (
-					<LeadershipCard className="order-2 mt-8 md:w-1/2" leaders={leaders} />
-				)}
-
-				<div className="mt-8 w-full lg:w-1/2">
-					<Suspense
-						fallback={
-							<div className="bg-muted/50 h-64 animate-pulse rounded-lg" />
-						}
-					>
-						<NotesChart data={chartData} daysShown={daysToShow} />
-					</Suspense>
-					{onboardingProgress &&
-						!onboardingProgress.isCompleted &&
-						onboardingProgress.isVisible && (
-							<LeadershipCard className="mt-4" leaders={leaders} />
-						)}
+			<div className="flex flex-wrap items-center gap-3 text-sm">
+				<div className="text-muted-foreground">
+					<Trans>{totalNotes} total notes</Trans>
 				</div>
+				<div className="bg-border h-4 w-px" />
+				<div className="text-muted-foreground">
+					<Trans>{avgPerDay} avg per day</Trans>
+				</div>
+				<div className="bg-border h-4 w-px" />
+				<div className="flex items-center gap-1">
+					{trend >= 0 ? (
+						<>
+							<span className="font-medium text-green-600 dark:text-green-400">
+								<Trans>+{trend}%</Trans>
+							</span>
+							<span className="text-muted-foreground">
+								<Trans>trending</Trans>
+							</span>
+						</>
+					) : (
+						<>
+							<span className="font-medium text-red-600 dark:text-red-400">
+								<Trans>{trend}%</Trans>
+							</span>
+							<span className="text-muted-foreground">
+								<Trans>trending</Trans>
+							</span>
+						</>
+					)}
+				</div>
+			</div>
+
+			<Suspense
+				fallback={<div className="bg-muted/50 h-80 animate-pulse rounded-lg" />}
+			>
+				<NotesChart
+					data={chartData}
+					daysShown={daysToShow}
+					totalNotes={totalNotes}
+					avgPerDay={avgPerDay}
+					trend={trend}
+				/>
+			</Suspense>
+
+			<div className="grid gap-6 lg:grid-cols-2">
+				{showOnboarding ? (
+					<OnboardingChecklist
+						progress={onboardingProgress}
+						orgSlug={orgSlug}
+						organizationId={
+							rootData?.userOrganizations?.currentOrganization?.organization
+								.id || ''
+						}
+						variant="dashboard"
+					/>
+				) : null}
+				<LeadershipCard
+					className={showOnboarding ? '' : 'lg:col-span-2 lg:max-w-2xl'}
+					leaders={leaders}
+				/>
 			</div>
 		</div>
 	)
