@@ -50,9 +50,15 @@ const getAvatarColor = (index: number) => {
 	return colors[index % colors.length]
 }
 
+const rankStyles: Record<number, string> = {
+	1: 'bg-amber-500 text-white',
+	2: 'bg-slate-400 text-white',
+	3: 'bg-amber-700 text-white',
+}
+
 export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 	return (
-		<Card className={cn('w-full', className)}>
+		<Card className={cn('flex h-full flex-col', className)}>
 			<CardHeader>
 				<CardTitle>
 					<Trans>Top Contributors</Trans>
@@ -61,61 +67,69 @@ export function LeadershipCard({ leaders, className }: LeadershipCardProps) {
 					<Trans>Team members who have created the most notes</Trans>
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="h-full">
-				<div className="space-y-1">
-					<div className="text-muted-foreground grid grid-cols-2 gap-4 border-b pb-2 text-sm font-medium">
-						<div>
-							<Trans>Rank</Trans>
-						</div>
-						<div>
-							<Trans>Team member</Trans>
-						</div>
+			<CardContent className="min-h-0 flex-1">
+				{leaders.length === 0 ? (
+					<div className="text-muted-foreground flex flex-col items-center gap-2 py-10 text-center">
+						<Icon name="users" className="h-8 w-8 opacity-30" />
+						<Trans>No notes created yet</Trans>
 					</div>
-					{leaders.length === 0 ? (
-						<div className="text-muted-foreground py-8 text-center">
-							<Trans>No notes created yet</Trans>
-						</div>
-					) : (
-						leaders.map((leader, index) => (
+				) : (
+					<div className="divide-y">
+						{leaders.map((leader, index) => (
 							<div
 								key={leader.id}
-								className="grid grid-cols-2 items-center gap-4 border-b py-1 last:border-b-0"
+								className={cn(
+									'flex items-center gap-3 px-0.5 py-3 first:pt-1 last:pb-1',
+								)}
 							>
-								<div className="flex items-center gap-2">
-									<span className="text-md font-semibold">{leader.rank}</span>
-									{getRankIcon(leader.rank) && (
-										<Icon
-											name={getRankIcon(leader.rank)!}
-											className="text-md text-foreground"
-										/>
+								<div
+									className={cn(
+										'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums',
+										rankStyles[leader.rank] ?? 'bg-muted text-muted-foreground',
 									)}
+								>
+									{leader.rank}
 								</div>
-								<div className="flex items-center gap-3">
-									<Avatar className="h-8 w-8">
-										<AvatarImage
-											src={getUserImgSrc(leader.image?.objectKey)}
-											alt={leader.name}
-										/>
-										<AvatarFallback className={getAvatarColor(index)}>
-											{leader.name.charAt(0).toUpperCase()}
-										</AvatarFallback>
-									</Avatar>
-									<div className="flex-1">
-										<div className="text-sm font-medium">{leader.name}</div>
-										<div className="text-muted-foreground text-xs">
-											{leader.notesCount}{' '}
-											{leader.notesCount !== 1 ? (
-												<Trans>notes</Trans>
-											) : (
-												<Trans>note</Trans>
-											)}
-										</div>
+
+								<Avatar className="h-8 w-8 shrink-0">
+									<AvatarImage
+										src={getUserImgSrc(leader.image?.objectKey)}
+										alt={leader.name}
+									/>
+									<AvatarFallback className={getAvatarColor(index)}>
+										{leader.name.charAt(0).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+
+								<div className="min-w-0 flex-1">
+									<div className="truncate text-sm font-medium">
+										{leader.name}
 									</div>
 								</div>
+
+								<div className="flex shrink-0 items-center gap-1.5">
+									<span className="text-sm font-semibold tabular-nums">
+										{leader.notesCount}
+									</span>
+									<span className="text-muted-foreground text-xs">
+										{leader.notesCount !== 1 ? (
+											<Trans>notes</Trans>
+										) : (
+											<Trans>note</Trans>
+										)}
+									</span>
+								</div>
+
+								{getRankIcon(leader.rank) && (
+									<Icon
+										name={getRankIcon(leader.rank)!}
+										className="h-4 w-4 shrink-0 text-amber-500"
+									/>
+								)}
 							</div>
-						))
-					)}
-				</div>
+						))}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	)
