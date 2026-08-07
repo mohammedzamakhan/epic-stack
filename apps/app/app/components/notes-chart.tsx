@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import { Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
@@ -34,26 +35,41 @@ interface NotesChartProps {
 	daysShown: number
 }
 
-export function NotesChart({ data, daysShown }: NotesChartProps) {
+export const NotesChart = memo(function NotesChart({
+	// ⚡ Bolt: Memoize component to prevent unnecessary re-renders when parent updates
+	data,
+	daysShown,
+}: NotesChartProps) {
 	const { _: ignored_ } = useLingui()
-	const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)
-	const avgNotesPerDay = Math.round((totalNotes / data.length) * 10) / 10
 
-	// Calculate trend (comparing last half vs first half)
-	const halfPoint = Math.floor(data.length / 2)
-	const lastHalf = data.slice(halfPoint)
-	const firstHalf = data.slice(0, halfPoint)
-	const lastHalfTotal = lastHalf.reduce((sum, item) => sum + item.notes, 0)
-	const firstHalfTotal = firstHalf.reduce((sum, item) => sum + item.notes, 0)
+	// ⚡ Bolt: Memoize derived statistics to avoid recalculation on every render
+	const { totalNotes, avgNotesPerDay, trendPercentage, absTrendPercentage } =
+		useMemo(() => {
+			const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)
+			const avgNotesPerDay = Math.round((totalNotes / data.length) * 10) / 10
 
-	const trendPercentage =
-		firstHalfTotal === 0
-			? lastHalfTotal > 0
-				? 100
-				: 0
-			: Math.round(((lastHalfTotal - firstHalfTotal) / firstHalfTotal) * 100)
+			// Calculate trend (comparing last half vs first half)
+			const halfPoint = Math.floor(data.length / 2)
+			const lastHalf = data.slice(halfPoint)
+			const firstHalf = data.slice(0, halfPoint)
+			const lastHalfTotal = lastHalf.reduce((sum, item) => sum + item.notes, 0)
+			const firstHalfTotal = firstHalf.reduce(
+				(sum, item) => sum + item.notes,
+				0,
+			)
 
-	const absTrendPercentage = Math.abs(trendPercentage)
+			const trendPercentage =
+				firstHalfTotal === 0
+					? lastHalfTotal > 0
+						? 100
+						: 0
+					: Math.round(
+							((lastHalfTotal - firstHalfTotal) / firstHalfTotal) * 100,
+						)
+
+			const absTrendPercentage = Math.abs(trendPercentage)
+			return { totalNotes, avgNotesPerDay, trendPercentage, absTrendPercentage }
+		}, [data])
 	const daysShownValue = daysShown
 	const totalNotesValue = totalNotes
 	const avgNotesPerDayValue = avgNotesPerDay
@@ -134,4 +150,4 @@ export function NotesChart({ data, daysShown }: NotesChartProps) {
 			</CardFooter>
 		</Card>
 	)
-}
+})
