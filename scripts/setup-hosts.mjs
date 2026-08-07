@@ -2,16 +2,38 @@
 /**
  * Hosts file setup script
  * Adds local development domains to /etc/hosts based on brand configuration
+ * and active organization slugs from the database (for Sites subdomains).
  */
 
 import { existsSync, readFileSync } from 'fs'
 import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
+import { PrismaClient } from '@prisma/client'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const rootDir = resolve(__dirname, '..')
+
+// Must stay in sync with reserved labels in dev-proxy.js and apps/sites middleware
+const RESERVED_SUBDOMAINS = new Set([
+	'app',
+	'admin',
+	'cms',
+	'docs',
+	'studio',
+	'api',
+	'www',
+	'mail',
+	'ftp',
+	'sites',
+	'status',
+	'cdn',
+	'static',
+	'assets',
+])
+
+const PRODUCT_SUBDOMAINS = ['', 'app.', 'admin.', 'studio.', 'docs.', 'cms.', 'api.']
 
 // ANSI color codes for terminal output
 const colors = {
@@ -55,15 +77,85 @@ function getBrandDomain() {
 	}
 }
 
-function getHostsEntries(domain) {
-	const ip = '127.0.0.1'
-	const subdomains = ['', 'app.', 'admin.', 'studio.', 'docs.', 'cms.', 'api.']
+function getDefaultDatabaseUrl() {
+	const dbPath = join(rootDir, 'packages/database/db/data.db')
+	return `file:${dbPath}?connection_limit=1`
+}
 
-	return subdomains.map((subdomain) => ({
-		ip,
-		hostname: `${subdomain}${domain}`,
-		entry: `${ip} ${subdomain}${domain}`,
-	}))
+/**
+ * Load published organization slugs for Sites subdomain hosts entries.
+ * Skips reserved product subdomains. Returns [] if the DB is unavailable.
+ */
+async function getOrganizationSlugs() {
+	const databaseUrl = process.env.DATABASE_URL || getDefaultDatabaseUrl()
+	const prisma = new PrismaClient({
+		datasources: {
+			db: { url: databaseUrl },
+		},
+	})
+
+	try {
+		const organizations = await prisma.organization.findMany({
+			where: {
+				active: true,
+				sitePublished: true,
+			},
+			select: { slug: true },
+			orderBy: { slug: 'asc' },
+		})
+
+		return organizations
+			.map((org) => org.slug)
+			.filter(
+				(slug) =>
+					typeof slug === 'string' &&
+					slug.length > 0 &&
+					!RESERVED_SUBDOMAINS.has(slug),
+			)
+	} catch (error) {
+		log(
+			`⚠️  Could not load organization slugs from the database: ${error.message}`,
+			'yellow',
+		)
+		log(
+			'   Product app hosts will still be added. Re-run after migrate/seed.',
+			'gray',
+		)
+		return []
+	} finally {
+		await prisma.$disconnect()
+	}
+}
+
+async function getHostsEntries(domain) {
+	const ip = '127.0.0.1'
+	const orgSlugs = await getOrganizationSlugs()
+
+	if (orgSlugs.length > 0) {
+		log(
+			`Found ${orgSlugs.length} published organization site(s) for hosts`,
+			'blue',
+		)
+	} else {
+		log(
+			'No published organization sites found (publish from org settings, then re-run)',
+			'yellow',
+		)
+	}
+
+	const subdomains = [
+		...PRODUCT_SUBDOMAINS,
+		...orgSlugs.map((slug) => `${slug}.`),
+	]
+
+	return {
+		orgSlugs,
+		entries: subdomains.map((subdomain) => ({
+			ip,
+			hostname: `${subdomain}${domain}`,
+			entry: `${ip} ${subdomain}${domain}`,
+		})),
+	}
 }
 
 function checkHostsEntry(entry) {
@@ -96,7 +188,7 @@ async function main() {
 	const domain = getBrandDomain()
 	log(`Using domain: ${domain}`, 'blue')
 
-	const entries = getHostsEntries(domain)
+	const { orgSlugs, entries } = await getHostsEntries(domain)
 
 	log(
 		'\nThis script will add entries to your /etc/hosts file for local development.',
@@ -126,7 +218,7 @@ async function main() {
 	log(`  Added: ${addedCount} entries`, 'gray')
 	log(`  Existing: ${existingCount} entries`, 'gray')
 
-	if (addedCount > 0) {
+	if (addedCount > 0 || existingCount > 0) {
 		log(`\n💡 You can now access your apps at:`, 'blue')
 		log(`  Main site: https://${domain}:2999`, 'gray')
 		log(`  App: https://app.${domain}:2999`, 'gray')
@@ -134,6 +226,22 @@ async function main() {
 		log(`  Studio: https://studio.${domain}:2999`, 'gray')
 		log(`  Docs: https://docs.${domain}:2999`, 'gray')
 		log(`  CMS: https://cms.${domain}:2999`, 'gray')
+
+		if (orgSlugs.length > 0) {
+			log(`\n  Organization Sites:`, 'blue')
+			for (const slug of orgSlugs) {
+				log(`  https://${slug}.${domain}:2999`, 'gray')
+			}
+		}
+
+		log(
+			`\n  Tip: Re-run npm run setup:hosts after publishing organization sites.`,
+			'gray',
+		)
+		log(
+			`  For full *.${domain} local DNS, use dnsmasq (hosts cannot wildcard).`,
+			'gray',
+		)
 	}
 }
 

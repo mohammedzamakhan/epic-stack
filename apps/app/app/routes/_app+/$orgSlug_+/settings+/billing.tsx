@@ -122,6 +122,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			planName: true,
 			subscriptionStatus: true,
 			verifiedDomain: true,
+			sitePublished: true,
 		},
 	})
 

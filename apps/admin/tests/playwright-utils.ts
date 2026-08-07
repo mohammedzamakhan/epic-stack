@@ -94,7 +94,8 @@ export const test = base.extend<{
 		await setCookieConsent(page)
 		await use(page)
 	},
-	insertNewUser: async (_, use) => {
+	// oxlint-disable-next-line no-empty-pattern
+	insertNewUser: async ({}, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)

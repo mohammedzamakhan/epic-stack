@@ -1,0 +1,24 @@
+---
+import '../styles/tailwind.css'
+import { brand } from '@repo/config/brand'
+
+interface Props {
+	title?: string
+}
+
+const { title = brand.name } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<slot name="head" />
+	</head>
+	<body class="min-h-dvh antialiased">
+		<slot />
+	</body>
+</html>
