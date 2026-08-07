@@ -469,7 +469,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Open command menu (modal dialog)
 		const searchButton = page.getByRole('button', { name: /search notes/i })
@@ -490,7 +490,11 @@ test.describe('Accessibility', () => {
 		await expect(dialog.locator('input').first()).toBeFocused()
 
 		// Test focus trap - focus should stay within dialog
+		// Tab past the search input; Base UI's FloatingFocusManager uses FocusGuard
+		// spans (siblings of the dialog) that redirect focus back via requestAnimationFrame.
+		// Wait briefly for the async redirect to complete before checking.
 		await page.keyboard.press('Tab')
+		await page.waitForTimeout(100)
 		// eslint-disable-next-line playwright/no-raw-locators -- *:focus is a CSS pseudo-selector with no semantic equivalent
 		const focusedElement = page.locator('*:focus')
 
