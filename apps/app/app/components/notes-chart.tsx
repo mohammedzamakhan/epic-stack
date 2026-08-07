@@ -36,13 +36,11 @@ interface NotesChartProps {
 }
 
 export const NotesChart = memo(function NotesChart({
-	// ⚡ Bolt: Memoize component to prevent unnecessary re-renders when parent updates
 	data,
 	daysShown,
 }: NotesChartProps) {
 	const { _: ignored_ } = useLingui()
 
-	// ⚡ Bolt: Memoize derived statistics to avoid recalculation on every render
 	const { totalNotes, avgNotesPerDay, trendPercentage, absTrendPercentage } =
 		useMemo(() => {
 			const totalNotes = data.reduce((sum, item) => sum + item.notes, 0)

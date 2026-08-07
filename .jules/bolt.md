@@ -1,3 +1,0 @@
-## 2025-08-07 - [React Component Optimization in Dashboard]
-**Learning:** In the dashboard chart component (`apps/app/app/components/notes-chart.tsx`), heavy derived state (averages, trends, array iterations) was being recalculated on every render, even when parent components caused updates without changing the underlying `data` prop.
-**Action:** Always wrap heavy calculation logic in `useMemo` when working with array data or iterations within components, and consider wrapping the whole component in `React.memo` if its props are simple or memoized, specifically in dashboard/reporting views where parents re-render often.
