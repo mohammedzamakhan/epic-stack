@@ -236,6 +236,7 @@ model Organization {
   subscriptionStatus     String?
   size                   String?
   verifiedDomain         String?
+  sitePublished          Boolean                  @default(false)
   integrations           Integration[]
   onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]

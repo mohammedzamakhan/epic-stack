@@ -26,6 +26,11 @@ import {
 	S3StorageSchema,
 	s3StorageActionIntent,
 } from '#app/components/settings/cards/organization/s3-storage-card.tsx'
+import {
+	SiteCard,
+	SitePublishSchema,
+	sitePublishActionIntent,
+} from '#app/components/settings/cards/organization/site-card.tsx'
 import TeamSizeCard, {
 	TeamSizeSchema,
 } from '#app/components/settings/cards/organization/team-size-card.tsx'
@@ -52,6 +57,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		slug: true,
 		size: true,
 		verifiedDomain: true,
+		sitePublished: true,
 		stripeSubscriptionId: true,
 		s3Config: {
 			select: {
@@ -251,6 +257,38 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					formErrors: ['Failed to update team size. Please try again.'],
 				}),
 			})
+		}
+	}
+
+	if (intent === sitePublishActionIntent) {
+		const submission = parseWithZod(formData, {
+			schema: SitePublishSchema,
+		})
+
+		if (submission.status !== 'success') {
+			return Response.json({ result: submission.reply() })
+		}
+
+		const { sitePublished } = submission.value
+		const published = sitePublished === 'true'
+
+		try {
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: { sitePublished: published },
+			})
+
+			await invalidateUserOrganizationsCache(userId)
+
+			return Response.json({
+				status: 'success',
+				sitePublished: published,
+			})
+		} catch {
+			return Response.json(
+				{ error: 'Failed to update site publish settings' },
+				{ status: 500 },
+			)
 		}
 	}
 
@@ -563,6 +601,11 @@ export default function GeneralSettings() {
 					organization={organization}
 					actionData={actionData}
 				/>
+			</AnnotatedSection>
+
+			{/* Public site */}
+			<AnnotatedSection>
+				<SiteCard organization={organization} />
 			</AnnotatedSection>
 
 			{/* Infrastructure */}

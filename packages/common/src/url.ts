@@ -48,3 +48,31 @@ export function getCrossAppUrl(
 	// Fallback
 	return fallbackUrl ?? `http://${targetSubdomain}.epic-startup.me:2999${path}`
 }
+
+/**
+ * Generate the public Sites URL for an organization slug.
+ * Uses the org slug as a subdomain of the brand base domain
+ * (e.g. acme.epic-startup.me).
+ *
+ * @param orgSlug - Organization slug (subdomain label)
+ * @param fallbackUrl - Optional fallback when window is unavailable
+ */
+export function getOrgSiteUrl(orgSlug: string, fallbackUrl?: string): string {
+	if (typeof window === 'undefined') {
+		return fallbackUrl ?? `https://${orgSlug}.epic-startup.me:2999`
+	}
+
+	const currentHost = window.location.host
+	const hostParts = currentHost.split(':')
+	const hostWithoutPort = hostParts[0] ?? currentHost
+	const port = hostParts[1] ? `:${hostParts[1]}` : ''
+	const domainParts = hostWithoutPort.split('.')
+
+	if (domainParts.length >= 2) {
+		const baseDomain = domainParts.slice(-2).join('.')
+		const protocol = window.location.protocol
+		return `${protocol}//${orgSlug}.${baseDomain}${port}`
+	}
+
+	return fallbackUrl ?? `https://${orgSlug}.epic-startup.me:2999`
+}

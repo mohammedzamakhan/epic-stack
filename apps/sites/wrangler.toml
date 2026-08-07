@@ -1,0 +1,9 @@
+name = "epic-startup-sites"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "epic-startup-sites"
+
+[env.preview]
+name = "epic-startup-sites-preview"

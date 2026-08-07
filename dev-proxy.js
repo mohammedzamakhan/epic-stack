@@ -41,6 +41,26 @@ function getBrandDomain() {
 
 const domain = getBrandDomain()
 
+// Reserved product subdomains — everything else under *.{domain} is Sites
+const RESERVED_SUBDOMAINS = new Set([
+	'app',
+	'admin',
+	'cms',
+	'docs',
+	'studio',
+	'api',
+	'www',
+	'mail',
+	'ftp',
+	'sites',
+	'status',
+	'cdn',
+	'static',
+	'assets',
+])
+
+const SITES_TARGET = 'http://localhost:3008'
+
 // Target mappings
 const targets = {
 	[`${domain}:${port}`]: 'http://localhost:3002',
@@ -52,7 +72,30 @@ const targets = {
 	[`api.${domain}:${port}`]: 'http://localhost:3007',
 }
 
-console.table(targets)
+/**
+ * Resolve proxy target: exact product apps first, then org Sites catch-all.
+ */
+function resolveTarget(host) {
+	if (!host) return null
+	if (targets[host]) return targets[host]
+
+	const hostWithoutPort = host.split(':')[0] || ''
+	const suffix = `.${domain}`
+	if (!hostWithoutPort.endsWith(suffix)) return null
+
+	const subdomain = hostWithoutPort.slice(0, -suffix.length)
+	if (
+		!subdomain ||
+		subdomain.includes('.') ||
+		RESERVED_SUBDOMAINS.has(subdomain)
+	) {
+		return null
+	}
+
+	return SITES_TARGET
+}
+
+console.table({ ...targets, [`*.${domain}:${port}`]: SITES_TARGET })
 
 const proxy = httpProxy.createProxyServer({
 	ws: true,
@@ -101,7 +144,7 @@ proxy.on('error', (err, req, res) => {
 // Request handler
 function requestHandler(req, res) {
 	const host = req.headers.host
-	const target = targets[host]
+	const target = resolveTarget(host)
 
 	if (target) {
 		req.headers['x-forwarded-proto'] = protocol
@@ -151,7 +194,7 @@ function requestHandler(req, res) {
 // WebSocket upgrade handler
 function upgradeHandler(req, socket, head) {
 	const host = req.headers.host
-	const target = targets[host]
+	const target = resolveTarget(host)
 	if (target) {
 		proxy.ws(req, socket, head, { target })
 	} else {
