@@ -7,7 +7,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
       { success: false, error: 'Database seeding is not allowed in production' },
-      { status: 403 }
+      { status: 403 },
     )
   }
 

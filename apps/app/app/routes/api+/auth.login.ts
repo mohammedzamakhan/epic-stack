@@ -65,7 +65,7 @@ export async function action({ request }: Route.ActionArgs) {
 				error: 'access_denied',
 				message: errorMessage,
 			},
-			{ status: 403, statusText: errorMessage }
+			{ status: 403, statusText: errorMessage },
 		)
 	}
 

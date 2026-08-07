@@ -54,7 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					error: 'access_denied',
 					message: errorMessage,
 				},
-				{ status: 403, statusText: errorMessage }
+				{ status: 403, statusText: errorMessage },
 			)
 		}
 
