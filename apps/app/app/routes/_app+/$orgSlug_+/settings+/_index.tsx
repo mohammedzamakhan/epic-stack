@@ -29,7 +29,11 @@ import {
 import {
 	SiteCard,
 	SitePublishSchema,
+	CustomDomainSchema,
 	sitePublishActionIntent,
+	addCustomDomainActionIntent,
+	removeCustomDomainActionIntent,
+	refreshCustomDomainActionIntent,
 } from '#app/components/settings/cards/organization/site-card.tsx'
 import TeamSizeCard, {
 	TeamSizeSchema,
@@ -43,6 +47,15 @@ import {
 	updateSeatQuantity,
 	deleteSubscription,
 } from '#app/utils/payments.server.ts'
+import {
+	createCustomHostname,
+	deleteCustomHostname,
+	getCustomHostname,
+	getCustomHostnameCnameTarget,
+	isCloudflareCustomHostnamesConfigured,
+	isValidCustomDomain,
+	normalizeCustomDomain,
+} from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
 import {
 	uploadOrganizationImage,
 	testS3Connection,
@@ -58,6 +71,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		size: true,
 		verifiedDomain: true,
 		sitePublished: true,
+		customDomain: true,
+		customDomainStatus: true,
+		cloudflareHostnameId: true,
 		stripeSubscriptionId: true,
 		s3Config: {
 			select: {
@@ -79,7 +95,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		},
 	})
 
-	return { organization }
+	return {
+		organization,
+		cnameTarget: getCustomHostnameCnameTarget(),
+		cloudflareConfigured: isCloudflareCustomHostnamesConfigured(),
+	}
 }
 
 const SettingsSchema = z.object({
@@ -96,6 +116,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			slug: true,
 			size: true,
 			verifiedDomain: true,
+			sitePublished: true,
+			customDomain: true,
+			customDomainStatus: true,
+			cloudflareHostnameId: true,
 			stripeSubscriptionId: true,
 			s3Config: {
 				select: {
@@ -287,6 +311,138 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		} catch {
 			return Response.json(
 				{ error: 'Failed to update site publish settings' },
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === addCustomDomainActionIntent) {
+		const submission = parseWithZod(formData, {
+			schema: CustomDomainSchema.superRefine((data, ctx) => {
+				const normalized = normalizeCustomDomain(data.customDomain)
+				if (!isValidCustomDomain(normalized)) {
+					ctx.addIssue({
+						path: ['customDomain'],
+						code: z.ZodIssueCode.custom,
+						message: 'Enter a valid domain like www.example.com',
+					})
+				}
+			}),
+		})
+
+		if (submission.status !== 'success') {
+			return Response.json({ result: submission.reply() })
+		}
+
+		const customDomain = normalizeCustomDomain(submission.value.customDomain)
+
+		const existing = await prisma.organization.findFirst({
+			where: {
+				customDomain,
+				NOT: { id: organization.id },
+			},
+			select: { id: true },
+		})
+		if (existing) {
+			return Response.json({
+				result: submission.reply({
+					fieldErrors: {
+						customDomain: [
+							'This domain is already connected to another organization.',
+						],
+					},
+				}),
+			})
+		}
+
+		try {
+			const hostname = await createCustomHostname(customDomain)
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					customDomain,
+					customDomainStatus: hostname.status,
+					cloudflareHostnameId: hostname.id,
+					sitePublished: true,
+				},
+			})
+
+			await invalidateUserOrganizationsCache(userId)
+
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Custom domain added',
+				description: `Point ${customDomain} to ${getCustomHostnameCnameTarget()} via CNAME.`,
+				type: 'success',
+			})
+		} catch (error) {
+			return Response.json({
+				result: submission.reply({
+					formErrors: [
+						error instanceof Error
+							? error.message
+							: 'Failed to connect custom domain. Please try again.',
+					],
+				}),
+			})
+		}
+	}
+
+	if (intent === removeCustomDomainActionIntent) {
+		try {
+			if (organization.cloudflareHostnameId) {
+				await deleteCustomHostname(organization.cloudflareHostnameId)
+			}
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					customDomain: null,
+					customDomainStatus: null,
+					cloudflareHostnameId: null,
+				},
+			})
+			await invalidateUserOrganizationsCache(userId)
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Custom domain removed',
+				description: 'Your custom domain has been disconnected.',
+				type: 'success',
+			})
+		} catch {
+			return Response.json(
+				{ error: 'Failed to remove custom domain' },
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === refreshCustomDomainActionIntent) {
+		try {
+			if (!organization.cloudflareHostnameId || !organization.customDomain) {
+				return Response.json(
+					{ error: 'No custom domain configured' },
+					{ status: 400 },
+				)
+			}
+
+			const hostname = await getCustomHostname(
+				organization.cloudflareHostnameId,
+			)
+			const status =
+				hostname?.status || organization.customDomainStatus || 'pending'
+
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: { customDomainStatus: status },
+			})
+			await invalidateUserOrganizationsCache(userId)
+
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Domain status updated',
+				description: `Status is now “${status}”.`,
+				type: 'success',
+			})
+		} catch {
+			return Response.json(
+				{ error: 'Failed to refresh custom domain status' },
 				{ status: 500 },
 			)
 		}
@@ -582,7 +738,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function GeneralSettings() {
-	const { organization } = useLoaderData<typeof loader>()
+	const { organization, cnameTarget, cloudflareConfigured } =
+		useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (
@@ -605,7 +762,12 @@ export default function GeneralSettings() {
 
 			{/* Public site */}
 			<AnnotatedSection>
-				<SiteCard organization={organization} />
+				<SiteCard
+					organization={organization}
+					cnameTarget={cnameTarget}
+					cloudflareConfigured={cloudflareConfigured}
+					actionData={actionData}
+				/>
 			</AnnotatedSection>
 
 			{/* Infrastructure */}
