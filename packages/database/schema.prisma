@@ -237,6 +237,11 @@ model Organization {
   size                   String?
   verifiedDomain         String?
   sitePublished          Boolean                  @default(false)
+  /// Customer vanity domain for Sites (e.g. www.acme.com). Distinct from verifiedDomain (email/SSO).
+  customDomain           String?                  @unique
+  /// pending | active | error | removed (synced from Cloudflare when configured)
+  customDomainStatus     String?
+  cloudflareHostnameId   String?
   integrations           Integration[]
   onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]

@@ -73,7 +73,8 @@ const targets = {
 }
 
 /**
- * Resolve proxy target: exact product apps first, then org Sites catch-all.
+ * Resolve proxy target: exact product apps first, then org Sites catch-all
+ * (brand subdomains + arbitrary custom domains for local Sites testing).
  */
 function resolveTarget(host) {
 	if (!host) return null
@@ -81,21 +82,36 @@ function resolveTarget(host) {
 
 	const hostWithoutPort = host.split(':')[0] || ''
 	const suffix = `.${domain}`
-	if (!hostWithoutPort.endsWith(suffix)) return null
 
-	const subdomain = hostWithoutPort.slice(0, -suffix.length)
-	if (
-		!subdomain ||
-		subdomain.includes('.') ||
-		RESERVED_SUBDOMAINS.has(subdomain)
-	) {
-		return null
+	if (hostWithoutPort.endsWith(suffix)) {
+		const subdomain = hostWithoutPort.slice(0, -suffix.length)
+		if (
+			!subdomain ||
+			subdomain.includes('.') ||
+			RESERVED_SUBDOMAINS.has(subdomain)
+		) {
+			return null
+		}
+		return SITES_TARGET
 	}
 
-	return SITES_TARGET
+	// Local custom domains (e.g. www.acme.test:2999) → Sites
+	if (
+		hostWithoutPort &&
+		hostWithoutPort !== 'localhost' &&
+		!hostWithoutPort.startsWith('127.')
+	) {
+		return SITES_TARGET
+	}
+
+	return null
 }
 
-console.table({ ...targets, [`*.${domain}:${port}`]: SITES_TARGET })
+console.table({
+	...targets,
+	[`*.${domain}:${port}`]: SITES_TARGET,
+	[`<custom-domain>:${port}`]: SITES_TARGET,
+})
 
 const proxy = httpProxy.createProxyServer({
 	ws: true,

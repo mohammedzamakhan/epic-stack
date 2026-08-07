@@ -3,5 +3,6 @@
 declare namespace App {
 	interface Locals {
 		orgSlug: string | null
+		customHost: string | null
 	}
 }

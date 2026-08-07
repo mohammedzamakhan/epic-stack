@@ -49,38 +49,57 @@ const securityHeaders = {
 	'Content-Security-Policy': contentSecurityPolicy,
 }
 
+export type HostResolution =
+	| { kind: 'slug'; orgSlug: string }
+	| { kind: 'custom'; host: string }
+	| { kind: 'none' }
+
 /**
- * Extract org slug from Host / X-Forwarded-Host.
- * Expects `{slug}.{brandDomain}` (e.g. acme.epic-startup.me).
+ * Resolve Host / X-Forwarded-Host to either an org slug subdomain or a custom domain.
  */
+export function resolveHost(hostHeader: string | null): HostResolution {
+	if (!hostHeader) return { kind: 'none' }
+
+	const hostWithoutPort = hostHeader.split(':')[0]?.toLowerCase() ?? ''
+	if (!hostWithoutPort) return { kind: 'none' }
+
+	const suffix = `.${brandDomain}`
+
+	if (hostWithoutPort === brandDomain) {
+		return { kind: 'none' }
+	}
+
+	if (hostWithoutPort.endsWith(suffix)) {
+		const subdomain = hostWithoutPort.slice(0, -suffix.length)
+		if (
+			!subdomain ||
+			subdomain.includes('.') ||
+			RESERVED_SUBDOMAINS.has(subdomain)
+		) {
+			return { kind: 'none' }
+		}
+		return { kind: 'slug', orgSlug: subdomain }
+	}
+
+	// Anything else is treated as a potential customer custom domain
+	return { kind: 'custom', host: hostWithoutPort }
+}
+
+/** @deprecated Prefer resolveHost */
 export function resolveOrgSlugFromHost(
 	hostHeader: string | null,
 ): string | null {
-	if (!hostHeader) return null
-
-	const hostWithoutPort = hostHeader.split(':')[0]?.toLowerCase() ?? ''
-	const suffix = `.${brandDomain}`
-
-	if (!hostWithoutPort.endsWith(suffix)) {
-		return null
-	}
-
-	const subdomain = hostWithoutPort.slice(0, -suffix.length)
-	if (
-		!subdomain ||
-		subdomain.includes('.') ||
-		RESERVED_SUBDOMAINS.has(subdomain)
-	) {
-		return null
-	}
-
-	return subdomain
+	const resolved = resolveHost(hostHeader)
+	return resolved.kind === 'slug' ? resolved.orgSlug : null
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
 	const forwardedHost = context.request.headers.get('x-forwarded-host')
 	const host = forwardedHost || context.request.headers.get('host')
-	context.locals.orgSlug = resolveOrgSlugFromHost(host)
+	const resolved = resolveHost(host)
+
+	context.locals.orgSlug = resolved.kind === 'slug' ? resolved.orgSlug : null
+	context.locals.customHost = resolved.kind === 'custom' ? resolved.host : null
 
 	const response = await next()
 	const newHeaders = new Headers(response.headers)

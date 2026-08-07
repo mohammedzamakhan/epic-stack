@@ -123,6 +123,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			subscriptionStatus: true,
 			verifiedDomain: true,
 			sitePublished: true,
+			customDomain: true,
+			customDomainStatus: true,
+			cloudflareHostnameId: true,
 		},
 	})
 

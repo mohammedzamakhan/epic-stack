@@ -1,15 +1,21 @@
 ---
 import { getPageTitle } from '@repo/config/brand'
 import SiteLayout from '~/layouts/SiteLayout.astro'
-import { fetchPublishedOrganization } from '~/lib/org'
+import {
+	fetchPublishedOrganization,
+	fetchPublishedOrganizationByHost,
+} from '~/lib/org'
 
 const orgSlug = Astro.locals.orgSlug
+const customHost = Astro.locals.customHost
 
-if (!orgSlug) {
+if (!orgSlug && !customHost) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 
-const organization = await fetchPublishedOrganization(orgSlug)
+const organization = orgSlug
+	? await fetchPublishedOrganization(orgSlug)
+	: await fetchPublishedOrganizationByHost(customHost!)
 
 if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
@@ -25,6 +31,11 @@ if (!organization) {
 			<h1 class="font-title text-foreground text-4xl tracking-tight sm:text-5xl">
 				{organization.name}
 			</h1>
+			{organization.customDomain ? (
+				<p class="text-muted-foreground mt-4 text-sm">
+					{organization.customDomain}
+				</p>
+			) : null}
 		</div>
 	</main>
 </SiteLayout>

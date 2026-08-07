@@ -83,10 +83,9 @@ function getDefaultDatabaseUrl() {
 }
 
 /**
- * Load published organization slugs for Sites subdomain hosts entries.
- * Skips reserved product subdomains. Returns [] if the DB is unavailable.
+ * Load published org Sites hostnames: slug subdomains + custom domains.
  */
-async function getOrganizationSlugs() {
+async function getOrganizationSiteHosts() {
 	const databaseUrl = process.env.DATABASE_URL || getDefaultDatabaseUrl()
 	const prisma = new PrismaClient({
 		datasources: {
@@ -100,11 +99,11 @@ async function getOrganizationSlugs() {
 				active: true,
 				sitePublished: true,
 			},
-			select: { slug: true },
+			select: { slug: true, customDomain: true },
 			orderBy: { slug: 'asc' },
 		})
 
-		return organizations
+		const orgSlugs = organizations
 			.map((org) => org.slug)
 			.filter(
 				(slug) =>
@@ -112,16 +111,22 @@ async function getOrganizationSlugs() {
 					slug.length > 0 &&
 					!RESERVED_SUBDOMAINS.has(slug),
 			)
+
+		const customDomains = organizations
+			.map((org) => org.customDomain)
+			.filter((value) => typeof value === 'string' && value.length > 0)
+
+		return { orgSlugs, customDomains }
 	} catch (error) {
 		log(
-			`⚠️  Could not load organization slugs from the database: ${error.message}`,
+			`⚠️  Could not load organization sites from the database: ${error.message}`,
 			'yellow',
 		)
 		log(
 			'   Product app hosts will still be added. Re-run after migrate/seed.',
 			'gray',
 		)
-		return []
+		return { orgSlugs: [], customDomains: [] }
 	} finally {
 		await prisma.$disconnect()
 	}
@@ -129,7 +134,7 @@ async function getOrganizationSlugs() {
 
 async function getHostsEntries(domain) {
 	const ip = '127.0.0.1'
-	const orgSlugs = await getOrganizationSlugs()
+	const { orgSlugs, customDomains } = await getOrganizationSiteHosts()
 
 	if (orgSlugs.length > 0) {
 		log(
@@ -143,17 +148,27 @@ async function getHostsEntries(domain) {
 		)
 	}
 
-	const subdomains = [
-		...PRODUCT_SUBDOMAINS,
-		...orgSlugs.map((slug) => `${slug}.`),
+	if (customDomains.length > 0) {
+		log(
+			`Found ${customDomains.length} custom domain(s) for hosts`,
+			'blue',
+		)
+	}
+
+	const brandHostnames = [
+		...PRODUCT_SUBDOMAINS.map((subdomain) => `${subdomain}${domain}`),
+		...orgSlugs.map((slug) => `${slug}.${domain}`),
 	]
+
+	const allHostnames = [...brandHostnames, ...customDomains]
 
 	return {
 		orgSlugs,
-		entries: subdomains.map((subdomain) => ({
+		customDomains,
+		entries: allHostnames.map((hostname) => ({
 			ip,
-			hostname: `${subdomain}${domain}`,
-			entry: `${ip} ${subdomain}${domain}`,
+			hostname,
+			entry: `${ip} ${hostname}`,
 		})),
 	}
 }
@@ -188,7 +203,7 @@ async function main() {
 	const domain = getBrandDomain()
 	log(`Using domain: ${domain}`, 'blue')
 
-	const { orgSlugs, entries } = await getHostsEntries(domain)
+	const { orgSlugs, customDomains, entries } = await getHostsEntries(domain)
 
 	log(
 		'\nThis script will add entries to your /etc/hosts file for local development.',
@@ -234,8 +249,15 @@ async function main() {
 			}
 		}
 
+		if (customDomains.length > 0) {
+			log(`\n  Custom domains:`, 'blue')
+			for (const customDomain of customDomains) {
+				log(`  https://${customDomain}:2999`, 'gray')
+			}
+		}
+
 		log(
-			`\n  Tip: Re-run npm run setup:hosts after publishing organization sites.`,
+			`\n  Tip: Re-run npm run setup:hosts after publishing sites or connecting domains.`,
 			'gray',
 		)
 		log(
