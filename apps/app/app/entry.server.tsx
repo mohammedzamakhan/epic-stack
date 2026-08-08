@@ -115,7 +115,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 											"'unsafe-eval'",
 											"'self'",
 											`'nonce-${nonce}'`,
-											'https://cdn.builder.io'
+											'https://cdn.builder.io',
 										],
 										'script-src-attr': [`'nonce-${nonce}'`, "'unsafe-inline'"],
 									},

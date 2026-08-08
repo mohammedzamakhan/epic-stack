@@ -12,7 +12,13 @@ import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -177,9 +183,7 @@ export function OrganizationInvitations({
 								readOnly
 								onClick={inviteLink?.isActive ? copyInviteLink : undefined}
 								className={
-									inviteLink?.isActive
-										? 'cursor-pointer'
-										: 'cursor-not-allowed'
+									inviteLink?.isActive ? 'cursor-pointer' : 'cursor-not-allowed'
 								}
 							/>
 							{inviteLink?.isActive && (
@@ -219,11 +223,7 @@ export function OrganizationInvitations({
 					{inviteLink?.isActive && (
 						<div className="flex gap-2">
 							<Form method="POST">
-								<input
-									type="hidden"
-									name="intent"
-									value="reset-invite-link"
-								/>
+								<input type="hidden" name="intent" value="reset-invite-link" />
 								<Button type="submit" variant="outline" size="sm">
 									<Icon name="undo-2" className="h-4 w-4" />
 									<Trans>Reset</Trans>

@@ -101,7 +101,9 @@ jobs:
         run: npm rebuild sharp
 
       - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >> apps/cms/.env
+        run:
+          echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >>
+          apps/cms/.env
 
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
@@ -146,7 +148,9 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: 🔑 Inject CMS DATABASE_URI
-        run: echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >> apps/cms/.env
+        run:
+          echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >>
+          apps/cms/.env
 
       - name: ⎔ Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -186,7 +190,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, affected]
     # only deploy web app on pushes to main/dev AND if web app was affected
-    if: ${{ github.event_name == 'push' && needs.affected.outputs.web == 'true' }}
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.web == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -233,7 +238,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [affected]
     # only prepare container on pushes AND if app was affected
-    if: ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -284,7 +290,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [affected]
     # only prepare container on pushes AND if admin was affected
-    if: ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
+      }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -336,8 +344,9 @@ jobs:
     needs: [affected]
     # only prepare container on pushes AND if cms was affected
     if:
-      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true' || 
-      needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true'
+      || needs.affected.outputs.admin == 'true' ||
+      contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -387,7 +396,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-app, affected]
     # only deploy on pushes AND if app was affected
-    if: ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.app == 'true' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -429,7 +439,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container-admin, affected]
     # only deploy on pushes AND if admin was affected
-    if: ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true' }}
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.admin == 'true'
+      }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -472,8 +484,9 @@ jobs:
     needs: [lint, typecheck, vitest, container-cms, affected]
     # only deploy on pushes AND if cms was affected
     if:
-      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true' || 
-      needs.affected.outputs.admin == 'true' || contains(github.event.head_commit.modified, 'apps/cms/')) }}
+      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true'
+      || needs.affected.outputs.admin == 'true' ||
+      contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4

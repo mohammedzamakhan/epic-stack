@@ -74,12 +74,14 @@ export function create2FAToken(userId: string, sessionId: string): string {
 /**
  * Verify a short-lived intermediate token for 2FA login
  */
-export function verify2FAToken(token: string): { userId: string, sessionId: string } | null {
+export function verify2FAToken(
+	token: string,
+): { userId: string; sessionId: string } | null {
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET, {
 			issuer: JWT_ISSUER,
 			audience: 'api-2fa',
-		}) as { sub: string, sid: string }
+		}) as { sub: string; sid: string }
 		return { userId: decoded.sub, sessionId: decoded.sid }
 	} catch {
 		return null
@@ -130,7 +132,7 @@ export async function rotateRefreshToken(
 	const row = await prisma.refreshToken.findUnique({
 		where: { id: tokenId, userId, revoked: false },
 	})
-	
+
 	if (!row || row.expiresAt < new Date()) return null
 
 	const isMatch = (await bcrypt.compare(oldToken, row.tokenHash)) === true
@@ -152,7 +154,9 @@ export async function rotateRefreshToken(
 /**
  * Revoke a refresh token
  */
-export async function revokeRefreshToken(tokenString: string): Promise<boolean> {
+export async function revokeRefreshToken(
+	tokenString: string,
+): Promise<boolean> {
 	const parts = tokenString.split('.')
 	const [tokenId, token] = parts
 	if (!tokenId || !token) return false
@@ -160,7 +164,7 @@ export async function revokeRefreshToken(tokenString: string): Promise<boolean> 
 	const row = await prisma.refreshToken.findUnique({
 		where: { id: tokenId, revoked: false },
 	})
-	
+
 	if (!row || row.expiresAt < new Date()) return false
 
 	const isMatch = (await bcrypt.compare(token, row.tokenHash)) === true

@@ -4,24 +4,26 @@ import { prisma } from '@repo/database'
  * Shared user select structure for security-related queries
  * Used across security and profile routes
  */
-export const userSecuritySelect = {
-	id: true,
-	name: true,
-	username: true,
-	email: true,
-	image: {
-		select: { objectKey: true },
-	},
-	_count: {
-		select: {
-			sessions: {
-				where: {
-					expirationDate: { gt: new Date() },
+export function getUserSecuritySelect() {
+	return {
+		id: true,
+		name: true,
+		username: true,
+		email: true,
+		image: {
+			select: { objectKey: true },
+		},
+		_count: {
+			select: {
+				sessions: {
+					where: {
+						expirationDate: { gt: new Date() },
+					},
 				},
 			},
 		},
-	},
-} as const
+	} as const
+}
 
 /**
  * Get user security data including user info, 2FA status, and password status
@@ -34,7 +36,7 @@ export async function getUserSecurityData(
 ) {
 	const user = await prisma.user.findUniqueOrThrow({
 		where: { id: userId },
-		select: userSecuritySelect,
+		select: getUserSecuritySelect(),
 	})
 
 	const twoFactorVerification = await prisma.verification.findUnique({

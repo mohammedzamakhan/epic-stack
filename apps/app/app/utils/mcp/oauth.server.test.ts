@@ -206,6 +206,7 @@ describe('MCP OAuth Service', () => {
 						try {
 							// Create authorization code
 							const code = await createAuthorizationCode({
+								clientId: 'test-client-id',
 								userId: user.id,
 								organizationId: organization.id,
 								clientName,
@@ -218,6 +219,7 @@ describe('MCP OAuth Service', () => {
 							const result = await exchangeAuthorizationCode(
 								code,
 								'https://example.com/callback',
+								'test-client-id',
 							)
 
 							// Property: Both tokens should be issued
@@ -519,18 +521,21 @@ describe('MCP OAuth Service', () => {
 							// Generate multiple authorization codes
 							const codes = await Promise.all([
 								createAuthorizationCode({
+									clientId: 'test-client-id',
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
 									redirectUri: 'https://example.com/callback',
 								}),
 								createAuthorizationCode({
+									clientId: 'test-client-id',
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
 									redirectUri: 'https://example.com/callback',
 								}),
 								createAuthorizationCode({
+									clientId: 'test-client-id',
 									userId: user.id,
 									organizationId: organization.id,
 									clientName,
@@ -603,6 +608,7 @@ describe('MCP OAuth Service', () => {
 						try {
 							// Create authorization code
 							const code = await createAuthorizationCode({
+								clientId: 'test-client-id',
 								userId: user.id,
 								organizationId: organization.id,
 								clientName,
@@ -613,6 +619,7 @@ describe('MCP OAuth Service', () => {
 							const firstExchange = await exchangeAuthorizationCode(
 								code,
 								'https://example.com/callback',
+								'test-client-id',
 							)
 							expect(firstExchange).not.toBeNull()
 
@@ -620,6 +627,7 @@ describe('MCP OAuth Service', () => {
 							const secondExchange = await exchangeAuthorizationCode(
 								code,
 								'https://example.com/callback',
+								'test-client-id',
 							)
 							expect(secondExchange).toBeNull()
 						} finally {
@@ -1030,6 +1038,7 @@ describe('MCP OAuth Service', () => {
 
 				try {
 					const code = await createAuthorizationCode({
+						clientId: 'test-client-id',
 						userId: user.id,
 						organizationId: organization.id,
 						clientName: 'Test Client',
@@ -1041,6 +1050,7 @@ describe('MCP OAuth Service', () => {
 					const result = await exchangeAuthorizationCode(
 						code,
 						'https://example.com/callback',
+						'test-client-id',
 					)
 					expect(result).not.toBeNull()
 					expect(result?.access_token).toBeTruthy()
@@ -1091,6 +1101,7 @@ describe('MCP OAuth Service', () => {
 
 				try {
 					const ignoredCode = await createAuthorizationCode({
+						clientId: 'test-client-id',
 						userId: user.id,
 						organizationId: organization.id,
 						clientName: 'Test Client',
@@ -1103,6 +1114,7 @@ describe('MCP OAuth Service', () => {
 					const result = await exchangeAuthorizationCode(
 						invalidCode,
 						'https://example.com/callback',
+						'test-client-id',
 					)
 					expect(result).toBeNull()
 				} finally {
@@ -1135,6 +1147,7 @@ describe('MCP OAuth Service', () => {
 
 				try {
 					const code = await createAuthorizationCode({
+						clientId: 'test-client-id',
 						userId: user.id,
 						organizationId: organization.id,
 						clientName: 'Test Client',
@@ -1144,6 +1157,7 @@ describe('MCP OAuth Service', () => {
 					const result = await exchangeAuthorizationCode(
 						code,
 						'https://evil.com/callback',
+						'test-client-id',
 					)
 					expect(result).toBeNull()
 				} finally {

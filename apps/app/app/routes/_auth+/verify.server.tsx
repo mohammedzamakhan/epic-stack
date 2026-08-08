@@ -177,7 +177,7 @@ export async function prepareVerification({
 	return { otp, redirectTo, verifyUrl }
 }
 
-export async function isCodeValid({
+export async function checkCodeValidity({
 	code,
 	type,
 	target,
@@ -185,28 +185,45 @@ export async function isCodeValid({
 	code: string
 	type: VerificationTypes | typeof twoFAVerifyVerificationType
 	target: string
-}) {
+}): Promise<'valid' | 'expired' | 'invalid'> {
 	const verification = await prisma.verification.findUnique({
 		where: {
 			target_type: { target, type },
-			OR: [{ expiresAt: { gt: new Date() } }, { expiresAt: null }],
 		},
-		select: { algorithm: true, secret: true, period: true, charSet: true },
+		select: { algorithm: true, secret: true, period: true, charSet: true, expiresAt: true },
 	})
-	if (!verification) return false
+	if (!verification) return 'invalid'
 	const result = await verifyTOTP({
 		otp: code,
 		...verification,
 	})
-	if (result) return true
+	if (result) {
+		if (verification.expiresAt && verification.expiresAt < new Date()) {
+			return 'expired'
+		}
+		return 'valid'
+	}
 
 	// For 2FA verification, also try backup codes as fallback
 	if (type === twoFAVerificationType) {
 		const backupCodeValid = await validateAndConsumeBackupCode(target, code)
-		if (backupCodeValid) return true
+		if (backupCodeValid) return 'valid'
 	}
 
-	return false
+	if (verification.expiresAt && verification.expiresAt < new Date()) {
+		return 'expired'
+	}
+
+	return 'invalid'
+}
+
+export async function isCodeValid(args: {
+	code: string
+	type: VerificationTypes | typeof twoFAVerifyVerificationType
+	target: string
+}) {
+	const status = await checkCodeValidity(args)
+	return status === 'valid'
 }
 
 export async function validateRequest(
@@ -215,16 +232,19 @@ export async function validateRequest(
 ) {
 	const submission = await parseWithZod(body, {
 		schema: VerifySchema.superRefine(async (data, ctx) => {
-			const codeIsValid = await isCodeValid({
+			const status = await checkCodeValidity({
 				code: data[codeQueryParam],
 				type: data[typeQueryParam],
 				target: data[targetQueryParam],
 			})
-			if (!codeIsValid) {
+			if (status !== 'valid') {
 				ctx.addIssue({
 					path: ['code'],
 					code: z.ZodIssueCode.custom,
-					message: `Invalid code`,
+					message:
+						status === 'expired'
+							? 'This code has expired. Please request a new one.'
+							: 'Invalid code',
 				})
 				return
 			}

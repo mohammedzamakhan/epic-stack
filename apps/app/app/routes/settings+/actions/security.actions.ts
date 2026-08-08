@@ -9,7 +9,10 @@ import {
 	deleteBackupCodes,
 } from '@repo/auth'
 import { prisma } from '@repo/database'
-import { PasswordAndConfirmPasswordSchema, PasswordSchema } from '@repo/validation'
+import {
+	PasswordAndConfirmPasswordSchema,
+	PasswordSchema,
+} from '@repo/validation'
 import { z } from 'zod'
 
 import {
@@ -225,7 +228,40 @@ export async function enable2FAAction({
 	return Response.json({ status: 'success' })
 }
 
-export async function disable2FAAction({ userId }: SecurityActionArgs) {
+export const Disable2FASchema = z.object({
+	code: z.string().min(1, 'Code is required'),
+})
+
+export async function disable2FAAction({
+	formData,
+	userId,
+}: SecurityActionArgs) {
+	const submission = await parseWithZod(formData, {
+		schema: Disable2FASchema.superRefine(async (data, ctx) => {
+			const codeIsValid = await isCodeValid({
+				code: data.code,
+				type: twoFAVerificationType,
+				target: userId,
+			})
+			if (!codeIsValid) {
+				ctx.addIssue({
+					path: ['code'],
+					code: z.ZodIssueCode.custom,
+					message: `Invalid code`,
+				})
+				return z.NEVER
+			}
+		}),
+		async: true,
+	})
+
+	if (submission.status !== 'success') {
+		return Response.json(
+			{ result: submission.reply(), status: 'error' },
+			{ status: 400 },
+		)
+	}
+
 	// Delete 2FA verification
 	await prisma.verification.delete({
 		where: {

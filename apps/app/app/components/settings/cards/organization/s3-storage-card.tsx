@@ -106,7 +106,7 @@ function Switch({
 				{...props}
 				name={name}
 				checked={control.value === 'on' ? true : false}
-				onCheckedChange={(checked) => control.change(checked ? 'on' : 'off')}
+				onCheckedChange={(checked) => control.change(checked ? 'on' : '')}
 				onBlur={() => control.blur()}
 			/>
 		</>
@@ -130,7 +130,7 @@ export function S3StorageCard({
 			return parseWithZod(formData, { schema: S3StorageSchema })
 		},
 		defaultValue: {
-			s3Enabled: organization.s3Config?.isEnabled || 'on',
+			s3Enabled: organization.s3Config?.isEnabled ? 'on' : '',
 			s3Endpoint: organization.s3Config?.endpoint || '',
 			s3BucketName: organization.s3Config?.bucketName || '',
 			s3AccessKeyId: organization.s3Config?.accessKeyId || '',

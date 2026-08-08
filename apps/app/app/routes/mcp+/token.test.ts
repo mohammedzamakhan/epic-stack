@@ -76,6 +76,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -86,6 +87,7 @@ describe('OAuth Token Endpoint', () => {
 						const tokenResponse = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 
 						// Verify response structure
@@ -125,6 +127,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -134,6 +137,7 @@ describe('OAuth Token Endpoint', () => {
 						const initialTokens = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 						expect(initialTokens).toBeDefined()
 
@@ -182,6 +186,7 @@ describe('OAuth Token Endpoint', () => {
 						for (const clientName of clientNames) {
 							const redirectUri = 'http://localhost:3000/callback'
 							const code = await createAuthorizationCode({
+								clientId: 'test-client-id',
 								userId: user.id,
 								organizationId: org.id,
 								clientName,
@@ -191,6 +196,7 @@ describe('OAuth Token Endpoint', () => {
 							const tokenResponse = await exchangeAuthorizationCode(
 								code,
 								redirectUri,
+								'test-client-id',
 							)
 
 							// Verify all required fields are present
@@ -224,6 +230,7 @@ describe('OAuth Token Endpoint', () => {
 						const tokenResponse = await exchangeAuthorizationCode(
 							invalidCode,
 							'http://localhost:3000/callback',
+							'test-client-id',
 						)
 
 						// Should return null for invalid code
@@ -244,6 +251,7 @@ describe('OAuth Token Endpoint', () => {
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -302,6 +310,7 @@ describe('OAuth Token Endpoint', () => {
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -332,6 +341,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -342,6 +352,7 @@ describe('OAuth Token Endpoint', () => {
 						const tokenResponse = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 
 						expect(tokenResponse).toBeDefined()
@@ -369,6 +380,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -378,6 +390,7 @@ describe('OAuth Token Endpoint', () => {
 						const initialTokens = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 						expect(initialTokens).toBeDefined()
 
@@ -413,6 +426,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -423,6 +437,7 @@ describe('OAuth Token Endpoint', () => {
 						const firstExchange = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 						expect(firstExchange).toBeDefined()
 
@@ -430,6 +445,7 @@ describe('OAuth Token Endpoint', () => {
 						const secondExchange = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 
 						// Second exchange should fail
@@ -451,6 +467,7 @@ describe('OAuth Token Endpoint', () => {
 						// Create authorization code and exchange for tokens
 						const redirectUri = 'http://localhost:3000/callback'
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -460,6 +477,7 @@ describe('OAuth Token Endpoint', () => {
 						const tokenResponse = await exchangeAuthorizationCode(
 							code,
 							redirectUri,
+							'test-client-id',
 						)
 
 						// Verify expiration times

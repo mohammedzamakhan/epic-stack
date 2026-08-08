@@ -140,6 +140,7 @@ describe('OAuth Authorization Endpoint', () => {
 						const codes = await Promise.all(
 							approvals.map((approval) =>
 								createAuthorizationCode({
+									clientId: 'test-client-id',
 									userId: user.id,
 									organizationId: org.id,
 									clientName: approval.clientName,
@@ -173,6 +174,7 @@ describe('OAuth Authorization Endpoint', () => {
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
@@ -244,6 +246,7 @@ describe('OAuth Authorization Endpoint', () => {
 						const codes = await Promise.all(
 							clientNames.map((name) =>
 								createAuthorizationCode({
+									clientId: 'test-client-id',
 									userId: user.id,
 									organizationId: org.id,
 									clientName: name,
@@ -276,6 +279,7 @@ describe('OAuth Authorization Endpoint', () => {
 
 						// Create authorization code
 						const code = await createAuthorizationCode({
+							clientId: 'test-client-id',
 							userId: user.id,
 							organizationId: org.id,
 							clientName,

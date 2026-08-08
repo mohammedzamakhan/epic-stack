@@ -319,9 +319,14 @@ export async function handleTrialEnd(subscription: {
 	const customerId = subscription.customer
 
 	const organization = await getOrganizationByStripeCustomerId(customerId)
+
+	if (!organization) {
+		return
+	}
+
 	const admins = await prisma.userOrganization.findMany({
 		where: {
-			organizationId: organization?.id,
+			organizationId: organization.id,
 			organizationRole: {
 				name: 'admin',
 			},

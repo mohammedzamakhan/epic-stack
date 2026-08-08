@@ -82,18 +82,7 @@ export const handleDeepLink = (url: string): void => {
 	}
 }
 
-/**
- * Navigate to the appropriate screen after successful authentication
- */
-export const navigateAfterAuth = (redirectTo?: string): void => {
-	if (redirectTo) {
-		// If there's a specific redirect URL, navigate there
-		router.replace(redirectTo as Href)
-	} else {
-		// Default to the main app screen (dashboard)
-		router.replace('/(dashboard)')
-	}
-}
+export { navigateAfterAuth } from './utils'
 
 /**
  * Navigate to sign in screen

@@ -33,7 +33,15 @@ const RESERVED_SUBDOMAINS = new Set([
 	'assets',
 ])
 
-const PRODUCT_SUBDOMAINS = ['', 'app.', 'admin.', 'studio.', 'docs.', 'cms.', 'api.']
+const PRODUCT_SUBDOMAINS = [
+	'',
+	'app.',
+	'admin.',
+	'studio.',
+	'docs.',
+	'cms.',
+	'api.',
+]
 
 // ANSI color codes for terminal output
 const colors = {
@@ -149,10 +157,7 @@ async function getHostsEntries(domain) {
 	}
 
 	if (customDomains.length > 0) {
-		log(
-			`Found ${customDomains.length} custom domain(s) for hosts`,
-			'blue',
-		)
+		log(`Found ${customDomains.length} custom domain(s) for hosts`, 'blue')
 	}
 
 	const brandHostnames = [

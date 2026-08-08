@@ -166,17 +166,17 @@ export const NoteCard = ({
 				action: `/${loaderData?.organization.slug}/notes/${note.id}/edit`,
 			})
 		}
+	}, [fetcher, note.id, editTitle, editContent, loaderData?.organization.slug])
+
+	// Close editing only on successful save
+	if (
+		fetcher.state === 'idle' &&
+		(fetcher.data as any)?.result?.status === 'success'
+	) {
 		if (setEditingNote) {
 			setEditingNote(null)
 		}
-	}, [
-		fetcher,
-		note.id,
-		editTitle,
-		editContent,
-		loaderData?.organization.slug,
-		setEditingNote,
-	])
+	}
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
@@ -436,6 +436,13 @@ export const NoteCard = ({
 								className="max-h-20 min-h-16 resize-none text-sm"
 								rows={2}
 							/>
+							{(fetcher.data as any)?.result?.error && (
+								<p className="text-destructive mt-1 text-sm font-medium">
+									{_(t`Failed to save:`)}{' '}
+									{(fetcher.data as any).result.error.message ||
+										_(t`Unknown error`)}
+								</p>
+							)}
 						</div>
 					) : (
 						<div className={cn('px-2', isKanbanView && 'pt-1')}>

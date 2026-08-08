@@ -82,17 +82,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			status: 400,
 		})
 
+		const integration = await integrationManager.getIntegration(integrationId)
+
+		invariantResponse(integration, 'Integration not found', { status: 404 })
+
+		invariantResponse(
+			integration.organizationId === organization.id,
+			'Unauthorized',
+			{ status: 403 },
+		)
+
 		try {
-			const integration = await integrationManager.getIntegration(integrationId)
-
-			invariantResponse(integration, 'Integration not found', { status: 404 })
-
-			invariantResponse(
-				integration.organizationId === organization.id,
-				'Unauthorized',
-				{ status: 403 },
-			)
-
 			await integrationManager.disconnectIntegration(integrationId)
 			return Response.json({ success: true })
 		} catch {

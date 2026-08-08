@@ -18,6 +18,7 @@ export interface OAuthResult {
 	success: boolean
 	code?: string
 	state?: string
+	codeVerifier?: string
 	error?: string
 	errorDescription?: string
 }
@@ -100,6 +101,7 @@ export class OAuthService {
 				responseType: AuthSession.ResponseType.Code,
 				state: state || this.generateState(),
 				extraParams: provider.additionalParameters,
+				usePKCE: true,
 			})
 
 			// Start the authentication session
@@ -110,6 +112,7 @@ export class OAuthService {
 					success: true,
 					code: result.params.code,
 					state: result.params.state,
+					codeVerifier: request.codeVerifier,
 				}
 			} else if (result.type === 'error') {
 				return {

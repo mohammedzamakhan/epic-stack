@@ -77,6 +77,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const redirectUri = body.redirect_uri
 	const refreshToken = body.refresh_token
 	const codeVerifier = body.code_verifier
+	const clientId = body.client_id
 
 	// Validate grant_type parameter
 	if (!grantType) {
@@ -114,10 +115,22 @@ export async function action({ request }: ActionFunctionArgs) {
 			)
 		}
 
+		if (!clientId) {
+			return Response.json(
+				{
+					error: 'invalid_request',
+					error_description:
+						'client_id parameter is required for authorization_code grant',
+				},
+				{ status: 400 },
+			)
+		}
+
 		// Exchange authorization code for tokens (with PKCE verification if code_verifier provided)
 		const tokenResponse = await exchangeAuthorizationCode(
 			code,
 			redirectUri,
+			clientId,
 			codeVerifier,
 		)
 

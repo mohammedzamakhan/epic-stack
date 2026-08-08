@@ -9,6 +9,11 @@ const config: LinguiConfig = {
 		{
 			path: '<rootDir>/app/locales/{locale}',
 			include: ['app', '../../packages/ai'],
+			exclude: [
+				'**/node_modules/**',
+				'../../packages/**/node_modules/**',
+				'../../node_modules/**',
+			],
 		},
 	],
 }

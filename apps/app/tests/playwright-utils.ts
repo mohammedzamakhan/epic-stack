@@ -70,12 +70,12 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 	const newConfig = {
 		name: cookieConfig.name,
 		value: cookieConfig.value,
+		domain: 'localhost',
+		path: cookieConfig.path,
 		expires: cookieConfig.expires?.getTime(),
 		sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
 	}
-	const baseUrl =
-		process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3001'
-	await page.context().addCookies([{ ...newConfig, url: baseUrl }])
+	await page.context().addCookies([newConfig])
 }
 
 type Navigate = (
@@ -125,12 +125,12 @@ export const test = base.extend<{
 			const newConfig = {
 				name: cookieConfig.name,
 				value: cookieConfig.value,
+				domain: 'localhost',
+				path: cookieConfig.path,
 				expires: cookieConfig.expires?.getTime(),
 				sameSite: cookieConfig.sameSite as 'Strict' | 'Lax' | 'None',
 			}
-			const baseUrl =
-				process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3001'
-			await page.context().addCookies([{ ...newConfig, url: baseUrl }])
+			await page.context().addCookies([newConfig])
 			await setCookieConsent(page)
 			return user
 		})

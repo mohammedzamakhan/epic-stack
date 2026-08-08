@@ -69,10 +69,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		discordAuthUrl.searchParams.set('redirect_uri', redirectUri)
 		discordAuthUrl.searchParams.set('response_type', 'code')
 		discordAuthUrl.searchParams.set('scope', 'identify guilds')
-		
+
 		const newState = crypto.randomUUID()
 		discordAuthUrl.searchParams.set('state', newState)
-		
+
 		authSession.set('discord_oauth_state', newState)
 
 		return redirect(discordAuthUrl.toString(), {
@@ -91,7 +91,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			description: 'Invalid request state. Please try again.',
 		})
 	}
-	
+
 	// Unset state after use
 	authSession.unset('discord_oauth_state')
 

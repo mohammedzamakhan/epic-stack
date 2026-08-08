@@ -7,7 +7,10 @@ import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { login } from '#app/utils/auth.server.ts'
-import { createAuthenticatedSessionResponse, create2FAToken } from '#app/utils/jwt.server.ts'
+import {
+	createAuthenticatedSessionResponse,
+	create2FAToken,
+} from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/auth.login.ts'
 
 const LoginFormSchema = z.object({

@@ -9,7 +9,7 @@ import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	ssoCache,
 	ssoConnectionPool,
-	discoverOIDCEndpoints,
+	resolveEndpoints as resolveOIDCEndpoints,
 	type EndpointConfiguration,
 	validateIDToken,
 	type IDTokenClaims,
@@ -706,32 +706,35 @@ export class SSOAuthService {
 		return userInfoResult.result as OIDCUserInfo
 	}
 
-	/**
-	 * Resolve OAuth2 endpoints for a configuration
-	 */
 	private async resolveEndpoints(
 		config: SSOConfiguration,
 	): Promise<EndpointConfiguration> {
-		if (config.autoDiscovery) {
-			const discoveryResult = await ssoRetryManager.retryOIDCDiscovery(
-				() => discoverOIDCEndpoints(config.issuerUrl),
-				config.issuerUrl,
-			)
+		const manualEndpoints = config.autoDiscovery
+			? undefined
+			: {
+					authorizationUrl: config.authorizationUrl ?? undefined,
+					tokenUrl: config.tokenUrl ?? undefined,
+					userinfoUrl: config.userinfoUrl ?? undefined,
+					revocationUrl: config.revocationUrl ?? undefined,
+				}
 
-			if (!discoveryResult.success || !discoveryResult.result?.endpoints) {
-				throw new Error(
-					`OIDC discovery failed: ${discoveryResult.error?.message || 'Unknown error'}`,
-				)
-			}
-			return discoveryResult.result.endpoints
-		} else {
-			return {
-				authorizationUrl: config.authorizationUrl!,
-				tokenUrl: config.tokenUrl!,
-				userinfoUrl: config.userinfoUrl ?? undefined,
-				revocationUrl: config.revocationUrl ?? undefined,
-			}
+		const discoveryResult = await ssoRetryManager.retryOIDCDiscovery(
+			() =>
+				resolveOIDCEndpoints(
+					config.issuerUrl,
+					manualEndpoints,
+					config.autoDiscovery,
+				),
+			config.issuerUrl,
+		)
+
+		if (!discoveryResult.success || !discoveryResult.result?.endpoints) {
+			throw new Error(
+				`OIDC discovery failed: ${discoveryResult.result?.error || discoveryResult.error?.message || 'Unknown error'}`,
+			)
 		}
+
+		return discoveryResult.result.endpoints
 	}
 
 	/**
