@@ -213,16 +213,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		},
 		sidebarState,
 	}
-	const { toast, headers: toastHeaders } = await getToast(request)
 
-	// Handle UTM parameters if present in the URL
-	const utmResponse = await storeUtmParams(request)
+	// Fetch request-specific data in parallel
+	const [
+		{ toast, headers: toastHeaders },
+		utmResponse,
+		impersonationInfo,
+		cookieConsent
+	] = await Promise.all([
+		getToast(request),
+		storeUtmParams(request),
+		getImpersonationInfo(request),
+		getCookieConsentState(request)
+	])
+
 	const utmHeaders = utmResponse?.headers || {}
-
-	// Get impersonation info if user is an admin
-	const impersonationInfo = await getImpersonationInfo(request)
-
-	const cookieConsent = await getCookieConsentState(request)
 
 	return data(
 		{

@@ -1,0 +1,3 @@
+## 2024-05-14 - Security Checks vs Performance
+**Learning:** In Remix/React Router loaders (e.g., `apps/admin/app/routes/_admin+/audit-logs.tsx`), security checks like `await requireUserWithRole` MUST remain sequential and block subsequent code to prevent security vulnerabilities. Only data fetching operations (like DB queries or external API calls) should be grouped in `Promise.all` after the security layer is passed.
+**Action:** Always inspect the purpose of `await` calls before parallelizing. If an `await` function validates authorization, authentication, or redirects on failure, leave it sequential at the top of the function.

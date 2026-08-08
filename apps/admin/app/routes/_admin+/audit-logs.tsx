@@ -49,16 +49,19 @@ export async function loader({ request }: { request: Request }) {
 	const startDate = startDateStr ? new Date(startDateStr) : undefined
 	const endDate = endDateStr ? new Date(endDateStr) : undefined
 
-	// Query audit logs
-	const result = await auditService.query({
-		organizationId,
-		userId,
-		search,
-		startDate,
-		endDate,
-		limit,
-		offset,
-	})
+	// Query audit logs and statistics in parallel
+	const [result, statistics] = await Promise.all([
+		auditService.query({
+			organizationId,
+			userId,
+			search,
+			startDate,
+			endDate,
+			limit,
+			offset,
+		}),
+		auditService.getStatistics(organizationId)
+	])
 
 	// Metadata is already parsed by the auditService, but we ensure it's a valid object
 	const logsWithParsedMetadata = result.logs.map((log) => ({
@@ -70,8 +73,6 @@ export async function loader({ request }: { request: Request }) {
 			: {},
 	}))
 
-	// Get statistics
-	const statistics = await auditService.getStatistics(organizationId)
 	const totalPages = Math.ceil(result.totalCount / limit)
 
 	return {
