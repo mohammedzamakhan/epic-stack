@@ -1,0 +1,3 @@
+## 2024-05-30 - Added default aria-hidden to Icon component
+**Learning:** The Icon component previously lacked default accessibility attributes. Icons without a `title` (or `aria-label`) should generally be treated as decorative and hidden from screen readers to reduce noise.
+**Action:** Implemented a change in `packages/ui/components/icon.tsx` where `aria-hidden="true"` and `focusable="false"` are added by default if no accessible name (`title`, `aria-label`, `aria-labelledby`) is provided. This ensures decorative icons are correctly ignored by assistive technologies out-of-the-box, whilst preserving custom overrides when passed in.
