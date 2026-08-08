@@ -10,6 +10,7 @@ import { SSOConfigurationForm } from '#app/components/sso-configuration-form.tsx
 import { SSOConfigurationOverview } from '#app/components/sso-configuration-overview.tsx'
 import { auditLogService } from '#app/utils/audit-log.server.ts'
 import { ssoConfigurationService } from '#app/utils/sso-configuration.server.ts'
+import { validateEndpointUrl, validateOIDCIssuerUrl } from '@repo/validation'
 import { type Route } from './+types/$organizationId.sso.ts'
 
 const SSOConfigurationActionSchema = z.object({
@@ -17,7 +18,16 @@ const SSOConfigurationActionSchema = z.object({
 	organizationId: z.string(),
 	configId: z.string().optional(),
 	providerName: z.string().min(1).optional(),
-	issuerUrl: z.string().url().optional(),
+	issuerUrl: z
+		.string()
+		.optional()
+		.refine(
+			(url) => {
+				if (!url) return true
+				return validateOIDCIssuerUrl(url).valid
+			},
+			{ message: 'Invalid issuer URL or prohibited IP' },
+		),
 	clientId: z.string().min(1).optional(),
 	clientSecret: z.string().min(1).optional(),
 	scopes: z.string().default('openid email profile').optional(),
@@ -39,10 +49,46 @@ const SSOConfigurationActionSchema = z.object({
 		.optional(),
 	defaultRole: z.string().default('member').optional(),
 	attributeMapping: z.string().optional(),
-	authorizationUrl: z.string().url().optional(),
-	tokenUrl: z.string().url().optional(),
-	userinfoUrl: z.string().url().optional(),
-	revocationUrl: z.string().url().optional(),
+	authorizationUrl: z
+		.string()
+		.optional()
+		.refine(
+			(url) => {
+				if (!url) return true
+				return validateEndpointUrl(url).valid
+			},
+			{ message: 'Invalid authorization URL or prohibited IP' },
+		),
+	tokenUrl: z
+		.string()
+		.optional()
+		.refine(
+			(url) => {
+				if (!url) return true
+				return validateEndpointUrl(url).valid
+			},
+			{ message: 'Invalid token URL or prohibited IP' },
+		),
+	userinfoUrl: z
+		.string()
+		.optional()
+		.refine(
+			(url) => {
+				if (!url) return true
+				return validateEndpointUrl(url).valid
+			},
+			{ message: 'Invalid userinfo URL or prohibited IP' },
+		),
+	revocationUrl: z
+		.string()
+		.optional()
+		.refine(
+			(url) => {
+				if (!url) return true
+				return validateEndpointUrl(url).valid
+			},
+			{ message: 'Invalid revocation URL or prohibited IP' },
+		),
 })
 
 /**
@@ -63,6 +109,10 @@ function buildSSOConfigData(configData: any) {
 		attributeMapping: configData.attributeMapping
 			? (JSON.parse(configData.attributeMapping) as Record<string, string>)
 			: undefined,
+		authorizationUrl: configData.authorizationUrl || null,
+		tokenUrl: configData.tokenUrl || null,
+		userinfoUrl: configData.userinfoUrl || null,
+		revocationUrl: configData.revocationUrl || null,
 	}
 }
 

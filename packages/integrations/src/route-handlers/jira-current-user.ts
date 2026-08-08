@@ -7,6 +7,11 @@ export interface JiraCurrentUserDependencies {
 	getUserDefaultOrganization: (
 		userId: string,
 	) => Promise<{ organization: { id: string } } | null>
+	requireOrgPermission?: (
+		request: Request,
+		organizationId: string,
+		permission: `${string}:${string}:${string}`,
+	) => Promise<void>
 }
 
 /**
@@ -31,6 +36,23 @@ export async function handleJiraCurrentUser(
 			{ error: 'No organization found for user' },
 			{ status: 403 },
 		)
+	}
+
+	if (deps.requireOrgPermission) {
+		try {
+			await deps.requireOrgPermission(
+				request,
+				defaultOrg.organization.id,
+				'update:settings:any',
+			)
+		} catch {
+			return Response.json(
+				{
+					error: 'Insufficient permissions to access Jira user details',
+				},
+				{ status: 403 },
+			)
+		}
 	}
 
 	const integrationId = params.integrationId

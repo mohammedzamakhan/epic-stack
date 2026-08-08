@@ -160,6 +160,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	invariantResponse(intent, 'intent is required')
 	invariantResponse(organizationId, 'organizationId is required')
+	invariantResponse(clientId, 'clientId is required')
 	invariantResponse(clientName, 'clientName is required')
 	invariantResponse(redirectUri, 'redirectUri is required')
 
@@ -187,6 +188,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			userId,
 			organizationId: organizationId as string,
 			clientName: clientName as string,
+			clientId: clientId as string,
 			redirectUri: redirectUri as string,
 			codeChallenge: codeChallenge as string | undefined,
 			codeChallengeMethod: codeChallengeMethod as string | undefined,
@@ -414,9 +416,11 @@ export default function AuthorizePage() {
 								name="organizationId"
 								value={selectedOrgId}
 							/>
-							{clientId && (
-								<input type="hidden" name="clientId" value={clientId} />
-							)}
+							<input
+								type="hidden"
+								name="clientId"
+								value={clientId || 'missing_client_id'}
+							/>
 							<input type="hidden" name="clientName" value={clientName} />
 							<input type="hidden" name="redirectUri" value={redirectUri} />
 							{state && <input type="hidden" name="state" value={state} />}
@@ -451,9 +455,11 @@ export default function AuthorizePage() {
 								name="organizationId"
 								value={selectedOrgId}
 							/>
-							{clientId && (
-								<input type="hidden" name="clientId" value={clientId} />
-							)}
+							<input
+								type="hidden"
+								name="clientId"
+								value={clientId || 'missing_client_id'}
+							/>
 							<input type="hidden" name="clientName" value={clientName} />
 							<input type="hidden" name="redirectUri" value={redirectUri} />
 							{state && <input type="hidden" name="state" value={state} />}

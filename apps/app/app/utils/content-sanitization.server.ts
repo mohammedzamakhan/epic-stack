@@ -1,5 +1,16 @@
 import DOMPurify from 'isomorphic-dompurify'
 
+// Enforce rel="noopener noreferrer" for all target="_blank" links
+DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+	if (data.attrName === 'target' && data.attrValue === '_blank') {
+		const rel = node.getAttribute('rel') || ''
+		const relValues = rel.split(/\s+/).filter(Boolean)
+		if (!relValues.includes('noopener')) relValues.push('noopener')
+		if (!relValues.includes('noreferrer')) relValues.push('noreferrer')
+		node.setAttribute('rel', relValues.join(' '))
+	}
+})
+
 /**
  * Sanitize comment content to prevent XSS attacks while allowing safe HTML formatting
  * This handles user-generated content like comments that may contain:

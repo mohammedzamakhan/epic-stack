@@ -11,6 +11,17 @@ import { useMemo, useState } from 'react'
 
 import CommentInput, { type MentionUser } from './comment-input'
 
+// Enforce rel="noopener noreferrer" for all target="_blank" links
+DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+	if (data.attrName === 'target' && data.attrValue === '_blank') {
+		const rel = node.getAttribute('rel') || ''
+		const relValues = rel.split(/\s+/).filter(Boolean)
+		if (!relValues.includes('noopener')) relValues.push('noopener')
+		if (!relValues.includes('noreferrer')) relValues.push('noreferrer')
+		node.setAttribute('rel', relValues.join(' '))
+	}
+})
+
 interface CommentUser {
 	id: string
 	name: string | null

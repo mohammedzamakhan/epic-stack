@@ -128,6 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			code?: string,
 			state?: string,
 			_redirectTo?: string,
+			codeVerifier?: string,
 		) => {
 			try {
 				dispatch({ type: 'AUTH_START' })
@@ -138,6 +139,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 						provider,
 						code,
 						state,
+						codeVerifier,
 					)
 
 					if (

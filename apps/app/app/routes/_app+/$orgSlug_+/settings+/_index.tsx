@@ -44,6 +44,10 @@ import VerifiedDomainCard, {
 
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
+	requireUserWithOrganizationPermission,
+	ORG_PERMISSIONS,
+} from '#app/utils/organization/permissions.server.ts'
+import {
 	updateSeatQuantity,
 	deleteSubscription,
 } from '#app/utils/payments.server.ts'
@@ -144,6 +148,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
+	const adminOnlyIntents = [
+		uploadOrgPhotoActionIntent,
+		deleteOrgPhotoActionIntent,
+		'update-settings',
+		'update-team-size',
+		sitePublishActionIntent,
+		addCustomDomainActionIntent,
+		removeCustomDomainActionIntent,
+		refreshCustomDomainActionIntent,
+		'verified-domain',
+		'toggle-verified-domain',
+		'delete-organization',
+		s3StorageActionIntent,
+		'test-s3-connection',
+	]
+
 	// Handle file uploads for organization logo
 	const contentType = request.headers.get('content-type')
 	if (contentType?.includes('multipart/form-data')) {
@@ -151,6 +171,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			maxFileSize: 1024 * 1024 * 3,
 		})
 		const intent = formData.get('intent')
+
+		if (adminOnlyIntents.includes(intent as string)) {
+			await requireUserWithOrganizationPermission(
+				request,
+				organization.id,
+				ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+			)
+		}
 
 		if (intent === uploadOrgPhotoActionIntent) {
 			const photoFile = formData.get('photoFile') as File
@@ -204,6 +232,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	// For non-multipart requests
 	const formData = await request.formData()
 	const intent = formData.get('intent')
+
+	if (adminOnlyIntents.includes(intent as string)) {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+		)
+	}
 
 	if (intent === 'update-settings') {
 		const submission = parseWithZod(formData, {

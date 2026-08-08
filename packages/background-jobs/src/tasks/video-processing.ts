@@ -452,6 +452,8 @@ export const videoProcessingTask = task({
 			} catch {
 				// Ignore cleanup errors
 			}
+
+			throw error
 		}
 	},
 })

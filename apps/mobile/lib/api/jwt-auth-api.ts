@@ -287,11 +287,15 @@ export class JWTAuthApi {
 		provider: string,
 		code: string,
 		state?: string,
+		codeVerifier?: string,
 	): Promise<JWTOAuthCallbackApiResponse> {
 		try {
 			const params = new URLSearchParams({ code })
 			if (state) {
 				params.append('state', state)
+			}
+			if (codeVerifier) {
+				params.append('code_verifier', codeVerifier)
 			}
 
 			const callbackUrl = `/api/auth/${provider}/callback?${params.toString()}`

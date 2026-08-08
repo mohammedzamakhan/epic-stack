@@ -52,6 +52,7 @@ export function useOAuth(options: UseOAuthOptions = {}): UseOAuthReturn {
 						result.code,
 						result.state,
 						options.redirectTo,
+						result.codeVerifier,
 					)
 					options.onSuccess?.(result)
 				} else {

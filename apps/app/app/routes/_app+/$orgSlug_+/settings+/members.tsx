@@ -295,7 +295,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		})
 		if (
 			memberToUpdate &&
-			memberToUpdate.organizationRole.name === 'admin' &&
+			memberToUpdate.organizationRole.name.toLowerCase() === 'admin' &&
 			memberToUpdate.active &&
 			newRole === 'member'
 		) {

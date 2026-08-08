@@ -195,6 +195,7 @@ const authorizationCodeCache = new Map<
 		userId: string
 		organizationId: string
 		clientName: string
+		clientId: string
 		redirectUri: string
 		expiresAt: number
 		codeChallenge?: string
@@ -365,6 +366,7 @@ export async function createAuthorizationCode({
 	userId,
 	organizationId,
 	clientName,
+	clientId,
 	redirectUri,
 	codeChallenge,
 	codeChallengeMethod,
@@ -372,6 +374,7 @@ export async function createAuthorizationCode({
 	userId: string
 	organizationId: string
 	clientName: string
+	clientId: string
 	redirectUri: string
 	codeChallenge?: string
 	codeChallengeMethod?: string
@@ -384,6 +387,7 @@ export async function createAuthorizationCode({
 		userId,
 		organizationId,
 		clientName,
+		clientId,
 		redirectUri,
 		expiresAt: Date.now() + AUTHORIZATION_CODE_EXPIRATION,
 		codeChallenge,
@@ -417,12 +421,21 @@ function normalizeRedirectUri(uri: string): string {
 export async function exchangeAuthorizationCode(
 	code: string,
 	redirectUri: string,
+	clientId: string,
 	codeVerifier?: string,
 ) {
 	const codeHash = hashToken(code)
 	const authData = authorizationCodeCache.get(codeHash)
 
+	// Delete code immediately to prevent reuse (even on failed validation)
+	authorizationCodeCache.delete(codeHash)
+
 	if (!authData || authData.expiresAt < Date.now()) {
+		return null
+	}
+
+	// Verify client ID matches the one that initiated the authorization
+	if (authData.clientId !== clientId) {
 		return null
 	}
 
@@ -461,9 +474,6 @@ export async function exchangeAuthorizationCode(
 			return null // Unsupported code_challenge_method
 		}
 	}
-
-	// Delete code to prevent reuse
-	authorizationCodeCache.delete(codeHash)
 
 	// Create authorization record
 	const authorization = await prisma.mCPAuthorization.create({

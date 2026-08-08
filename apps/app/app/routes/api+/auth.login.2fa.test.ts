@@ -16,7 +16,10 @@ vi.hoisted(() => {
 import { action } from './auth.login.2fa.ts'
 import { prisma } from '@repo/database'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import { createAuthenticatedSessionResponse, verify2FAToken } from '#app/utils/jwt.server.ts'
+import {
+	createAuthenticatedSessionResponse,
+	verify2FAToken,
+} from '#app/utils/jwt.server.ts'
 
 vi.mock('@repo/database', () => ({
 	prisma: {
@@ -72,7 +75,10 @@ describe('auth.login.2fa API action (WO-82)', () => {
 
 	it('returns error when 2FA code is invalid or expired (400)', async () => {
 		const mockVerify2FAToken = vi.mocked(verify2FAToken)
-		mockVerify2FAToken.mockReturnValue({ userId: 'user-123', sessionId: 'session-123' })
+		mockVerify2FAToken.mockReturnValue({
+			userId: 'user-123',
+			sessionId: 'session-123',
+		})
 		mockIsCodeValid.mockResolvedValue(false)
 
 		const formData = new FormData()
@@ -103,7 +109,10 @@ describe('auth.login.2fa API action (WO-82)', () => {
 
 	it('completes 2FA login and returns session tokens when code is valid (200)', async () => {
 		const mockVerify2FAToken = vi.mocked(verify2FAToken)
-		mockVerify2FAToken.mockReturnValue({ userId: 'user-123', sessionId: 'session-123' })
+		mockVerify2FAToken.mockReturnValue({
+			userId: 'user-123',
+			sessionId: 'session-123',
+		})
 		mockIsCodeValid.mockResolvedValue(true)
 		mockCreateSession.mockResolvedValue({
 			success: true,

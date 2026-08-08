@@ -56,6 +56,7 @@ import {
 import {
 	createOrganization,
 	setUserDefaultOrganization,
+	userHasOrgAccess,
 } from '#app/utils/organization/organizations.server.ts'
 import {
 	getTrialConfig,
@@ -245,6 +246,8 @@ export async function action({ request }: ActionFunctionArgs) {
 		if (submission.status !== 'success') {
 			return Response.json({ result: submission.reply() }, { status: 400 })
 		}
+
+		await userHasOrgAccess(request, orgId)
 
 		const { invites } = submission.value
 

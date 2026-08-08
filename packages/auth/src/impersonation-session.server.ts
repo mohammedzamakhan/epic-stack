@@ -44,21 +44,7 @@ export function getImpersonationExpirationDate(): Date {
 	return new Date(Date.now() + IMPERSONATION_SESSION_TTL)
 }
 
-export function getClientIp(request: Request): string {
-	const cfConnectingIp = request.headers.get('cf-connecting-ip')
-	if (cfConnectingIp) return cfConnectingIp.trim()
-
-	const xForwardedFor = request.headers.get('x-forwarded-for')
-	if (xForwardedFor) {
-		const firstIp = xForwardedFor.split(',')[0]
-		if (firstIp) return firstIp.trim()
-	}
-
-	const xRealIp = request.headers.get('x-real-ip')
-	if (xRealIp) return xRealIp.trim()
-
-	return 'unknown'
-}
+export { getClientIp } from '@repo/security/ip-address.server'
 
 export function hashIp(ip: string): string {
 	const secret = getImpersonationSecret().split(',')[0] || ''

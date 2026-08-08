@@ -10,7 +10,7 @@ export interface UpdateConfigDependencies {
 	requireOrgPermission?: (
 		request: Request,
 		organizationId: string,
-		permission: string,
+		permission: `${string}:${string}:${string}`,
 	) => Promise<void>
 }
 

@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware'
+import { ENV } from './env'
 
 const CACHE_CONTROL_STATIC = 's-maxage=3600, stale-while-revalidate=86400'
 const CACHE_CONTROL_NO_CACHE = 'no-store, no-cache, must-revalidate'
@@ -13,6 +14,7 @@ const securityHeaders = {
 function shouldSkipCache(pathname: string): boolean {
 	return (
 		pathname.startsWith('/api/') ||
+		pathname === '/preview' ||
 		pathname.startsWith('/preview/') ||
 		pathname.includes('/_')
 	)
@@ -23,8 +25,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	const { pathname } = context.url
 
 	const newHeaders = new Headers(response.headers)
+	const isPreview = pathname === '/preview' || pathname.startsWith('/preview/')
 
 	for (const [key, value] of Object.entries(securityHeaders)) {
+		if (isPreview && key === 'X-Frame-Options') {
+			continue
+		}
+
+		if (isPreview && key === 'Content-Security-Policy') {
+			newHeaders.set(
+				key,
+				`${value} frame-ancestors 'self' ${ENV.PUBLIC_CMS_URL};`,
+			)
+			continue
+		}
+
 		newHeaders.set(key, value)
 	}
 

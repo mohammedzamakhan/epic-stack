@@ -56,6 +56,7 @@ export interface AuthContextType {
 		code?: string,
 		state?: string,
 		redirectTo?: string,
+		codeVerifier?: string,
 	) => Promise<void>
 	logout: () => Promise<void>
 	refreshTokens: () => Promise<void>

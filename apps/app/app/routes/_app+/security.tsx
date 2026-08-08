@@ -30,7 +30,7 @@ import {
 } from '#app/utils/gdpr.server.ts'
 import { checkSSOEnforcementByUserId } from '#app/utils/sso/enforcement.server.ts'
 import { parseUserAgent } from '#app/utils/user-agent.server.ts'
-import { userSecuritySelect } from '#app/utils/user-security.server.ts'
+import { getUserSecuritySelect } from '#app/utils/user-security.server.ts'
 import { signOutOfSessionsAction } from '../settings+/actions/account.actions'
 import { disconnectProviderAction } from '../settings+/actions/connections.actions'
 import {
@@ -66,7 +66,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			getFreshValue: () =>
 				prisma.user.findUniqueOrThrow({
 					where: { id: userId },
-					select: userSecuritySelect,
+					select: getUserSecuritySelect(),
 				}),
 		}),
 		prisma.verification.findUnique({

@@ -49,9 +49,7 @@ export default defineConfig({
 				transform(code, id) {
 					if (id.includes('varlock/dist/')) {
 						const polyfill = `if (!globalThis.__name) { globalThis.__name = (target, value) => Object.defineProperty(target, "name", { value, configurable: true }); }\n`
-						return (
-							polyfill + code.replace(/\b__name\(/g, 'globalThis.__name(')
-						)
+						return polyfill + code.replace(/\b__name\(/g, 'globalThis.__name(')
 					}
 				},
 			},

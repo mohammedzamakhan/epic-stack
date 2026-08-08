@@ -6,7 +6,10 @@ import { arcjet, checkHoneypot } from '@repo/security'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import { createAuthenticatedSessionResponse, verify2FAToken } from '#app/utils/jwt.server.ts'
+import {
+	createAuthenticatedSessionResponse,
+	verify2FAToken,
+} from '#app/utils/jwt.server.ts'
 
 const Login2FASchema = z.object({
 	userId: z.string(),

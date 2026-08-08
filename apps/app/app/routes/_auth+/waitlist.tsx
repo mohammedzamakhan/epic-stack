@@ -161,7 +161,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 							</p>
 							<p className="text-3xl font-bold">#{rank}</p>
 							<p className="text-muted-foreground text-xs">
-								<Trans>of ${totalUsers} people</Trans>
+								<Trans>of {totalUsers} people</Trans>
 							</p>
 						</div>
 					</div>
@@ -281,7 +281,7 @@ export default function WaitlistPage({ loaderData }: Route.ComponentProps) {
 				<p className="text-muted-foreground text-sm">
 					<Trans>
 						We'll send you an email at{' '}
-						<span className="font-semibold">${userEmail}</span> when we're ready
+						<span className="font-semibold">{userEmail}</span> when we're ready
 						to welcome you.
 					</Trans>
 				</p>

@@ -59,7 +59,7 @@ export default function ForgotPasswordEmail({
 							</Section>
 
 							<Text className="mb-[16px] text-[16px] leading-[24px] text-[#020304]">
-								For security reasons, this link will expire in 24 hours. If you
+								For security reasons, this link will expire in 10 minutes. If you
 								need help, our support team is here to assist you.
 							</Text>
 
