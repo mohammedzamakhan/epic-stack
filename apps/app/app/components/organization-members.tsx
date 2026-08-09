@@ -59,7 +59,8 @@ function OrganizationMemberRoleEditor({
 }) {
 	const currentMember = members.find((m) => m.userId === currentUserId)
 	const isAdmin =
-		currentMember?.organizationRole.name.toLowerCase() === 'admin' && currentMember.active
+		currentMember?.organizationRole.name.toLowerCase() === 'admin' &&
+		currentMember.active
 	const isSelf = member.userId === currentUserId
 	const [role, setRole] = useState(member.organizationRole.name)
 
@@ -67,7 +68,9 @@ function OrganizationMemberRoleEditor({
 		return (
 			<Badge
 				variant={
-					member.organizationRole.name.toLowerCase() === 'admin' ? 'default' : 'secondary'
+					member.organizationRole.name.toLowerCase() === 'admin'
+						? 'default'
+						: 'secondary'
 				}
 				className="text-xs"
 			>
