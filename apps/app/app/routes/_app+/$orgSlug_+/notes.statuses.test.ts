@@ -14,15 +14,15 @@ vi.hoisted(() => {
 })
 
 import { prisma } from '@repo/database'
-import { action as createStatusAction } from './notes.statuses.tsx'
-import { action as reorderNotesAction } from './notes.reorder.tsx'
-import { action as statusIdAction } from './notes.status.$statusId.tsx'
-import { action as reorderStatusesAction } from './notes.statuses.reorder.tsx'
+import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
-import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import { action as reorderNotesAction } from './notes.reorder.tsx'
+import { action as statusIdAction } from './notes.status.$statusId.tsx'
+import { action as reorderStatusesAction } from './notes.statuses.reorder.tsx'
+import { action as createStatusAction } from './notes.statuses.tsx'
 
 vi.mock(
 	'#app/utils/organization/permissions.server.ts',

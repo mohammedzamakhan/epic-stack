@@ -174,7 +174,7 @@ export default function VerifyRoute({ actionData }: Route.ComponentProps) {
 						{type === 'reset-password' && (
 							<Link
 								to="/forgot-password"
-								className="text-muted-foreground text-sm underline-offset-4 hover:underline text-center"
+								className="text-muted-foreground text-center text-sm underline-offset-4 hover:underline"
 							>
 								<Trans>Need a new code? Request one here.</Trans>
 							</Link>

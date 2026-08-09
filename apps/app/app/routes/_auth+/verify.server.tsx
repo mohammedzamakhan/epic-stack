@@ -190,7 +190,13 @@ export async function checkCodeValidity({
 		where: {
 			target_type: { target, type },
 		},
-		select: { algorithm: true, secret: true, period: true, charSet: true, expiresAt: true },
+		select: {
+			algorithm: true,
+			secret: true,
+			period: true,
+			charSet: true,
+			expiresAt: true,
+		},
 	})
 	if (!verification) return 'invalid'
 	const result = await verifyTOTP({

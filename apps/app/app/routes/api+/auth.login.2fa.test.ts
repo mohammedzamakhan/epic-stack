@@ -13,13 +13,13 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-import { action } from './auth.login.2fa.ts'
 import { prisma } from '@repo/database'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 import {
 	createAuthenticatedSessionResponse,
 	verify2FAToken,
 } from '#app/utils/jwt.server.ts'
+import { action } from './auth.login.2fa.ts'
 
 vi.mock('@repo/database', () => ({
 	prisma: {

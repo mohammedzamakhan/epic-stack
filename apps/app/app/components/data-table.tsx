@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { cn, useIsMobile } from '@repo/ui'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -37,7 +38,6 @@ import {
 	type ChartConfig,
 } from '@repo/ui/chart'
 import { Checkbox } from '@repo/ui/checkbox'
-import { cn, useIsMobile } from '@repo/ui'
 import {
 	Drawer,
 	DrawerClose,
@@ -726,228 +726,240 @@ const chartConfig = {
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 	const isMobile = useIsMobile()
+	const [hasOpened, setHasOpened] = React.useState(false)
 
 	return (
-		<Drawer direction={isMobile ? 'bottom' : 'right'}>
+		<Drawer
+			direction={isMobile ? 'bottom' : 'right'}
+			onOpenChange={(open) => {
+				if (open) setHasOpened(true)
+			}}
+		>
 			<DrawerTrigger>
 				<Button variant="link" className="text-foreground w-fit px-0 text-left">
 					{item.header}
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent>
-				<DrawerHeader className="gap-1">
-					<DrawerTitle>{item.header}</DrawerTitle>
-					<DrawerDescription>
-						<Trans>Showing total visitors for the last 6 months</Trans>
-					</DrawerDescription>
-				</DrawerHeader>
-				<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-					{!isMobile && (
-						<>
-							<ChartContainer config={chartConfig}>
-								<AreaChart
-									accessibilityLayer
-									data={chartData}
-									margin={{
-										left: 0,
-										right: 10,
-									}}
-								>
-									<CartesianGrid vertical={false} />
-									<XAxis
-										dataKey="month"
-										tickLine={false}
-										axisLine={false}
-										tickMargin={8}
-										tickFormatter={(value) => value.slice(0, 3)}
-										hide
-									/>
-									<ChartTooltip
-										cursor={false}
-										content={<ChartTooltipContent indicator="dot" />}
-									/>
-									<Area
-										dataKey="mobile"
-										type="natural"
-										fill="var(--color-mobile)"
-										fillOpacity={0.6}
-										stroke="var(--color-mobile)"
-										stackId="a"
-									/>
-									<Area
-										dataKey="desktop"
-										type="natural"
-										fill="var(--color-desktop)"
-										fillOpacity={0.4}
-										stroke="var(--color-desktop)"
-										stackId="a"
-									/>
-								</AreaChart>
-							</ChartContainer>
-							<Separator />
-							<div className="grid gap-2">
-								<div className="flex gap-2 leading-none font-medium">
-									Trending up by 5.2% this month{' '}
-									<Icon name="trending-up" className="size-4" />
-								</div>
-								<div className="text-muted-foreground">
-									Showing total visitors for the last 6 months. This is just
-									some random text to test the layout. It spans multiple lines
-									and should wrap around.
-								</div>
-							</div>
-							<Separator />
-						</>
-					)}
-					<form className="flex flex-col gap-4">
-						<div className="flex flex-col gap-3">
-							<Label htmlFor="header">
-								<Trans>Header</Trans>
-							</Label>
-							<Input id="header" defaultValue={item.header} />
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="type">
-									<Trans>Type</Trans>
-								</Label>
-								<Select defaultValue={item.type}>
-									<SelectTrigger id="type" className="w-full">
-										Select a type
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Table of Contents">
-											Table of Contents
-										</SelectItem>
-										<SelectItem value="Executive Summary">
-											Executive Summary
-										</SelectItem>
-										<SelectItem value="Technical Approach">
-											Technical Approach
-										</SelectItem>
-										<SelectItem value="Design">Design</SelectItem>
-										<SelectItem value="Capabilities">Capabilities</SelectItem>
-										<SelectItem value="Focus Documents">
-											Focus Documents
-										</SelectItem>
-										<SelectItem value="Narrative">Narrative</SelectItem>
-										<SelectItem value="Cover Page">Cover Page</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="status">
-									<Trans>Status</Trans>
-								</Label>
-								<Select defaultValue={item.status}>
-									<SelectTrigger id="status" className="w-full">
-										{useLingui()._(msg`Select a status`)}
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Done">Done</SelectItem>
-										<SelectItem value="In Progress">In Progress</SelectItem>
-										<SelectItem value="Not Started">Not Started</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="target">
-									<Trans>Target</Trans>
-								</Label>
-								<Input id="target" defaultValue={item.target} />
-							</div>
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="limit">
-									<Trans>Limit</Trans>
-								</Label>
-								<Input id="limit" defaultValue={item.limit} />
-							</div>
-						</div>
-						<div className="flex flex-col gap-3">
-							<Label>
-								<Trans>Reviewers</Trans>
-							</Label>
-							<div className="flex flex-wrap gap-2">
-								{/* Current reviewers */}
-								{item.reviewers.map((reviewer) => (
-									<div
-										key={reviewer}
-										className="bg-primary/10 text-primary flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
-									>
-										<Avatar className="size-5">
-											<AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
-												{getInitials(reviewer)}
-											</AvatarFallback>
-										</Avatar>
-										<span>{reviewer}</span>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											className="hover:bg-primary/20 ml-1 size-4 rounded-full"
-											onClick={() => {
-												// Remove reviewer functionality would go here
-												toast.success(`Removed ${reviewer}`)
+				{hasOpened ? (
+					<>
+						<DrawerHeader className="gap-1">
+							<DrawerTitle>{item.header}</DrawerTitle>
+							<DrawerDescription>
+								<Trans>Showing total visitors for the last 6 months</Trans>
+							</DrawerDescription>
+						</DrawerHeader>
+						<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
+							{!isMobile && (
+								<>
+									<ChartContainer config={chartConfig}>
+										<AreaChart
+											accessibilityLayer
+											data={chartData}
+											margin={{
+												left: 0,
+												right: 10,
 											}}
 										>
-											<Icon name="x" className="size-3" />
-											<span className="sr-only">Remove {reviewer}</span>
-										</Button>
+											<CartesianGrid vertical={false} />
+											<XAxis
+												dataKey="month"
+												tickLine={false}
+												axisLine={false}
+												tickMargin={8}
+												tickFormatter={(value) => value.slice(0, 3)}
+												hide
+											/>
+											<ChartTooltip
+												cursor={false}
+												content={<ChartTooltipContent indicator="dot" />}
+											/>
+											<Area
+												dataKey="mobile"
+												type="natural"
+												fill="var(--color-mobile)"
+												fillOpacity={0.6}
+												stroke="var(--color-mobile)"
+												stackId="a"
+											/>
+											<Area
+												dataKey="desktop"
+												type="natural"
+												fill="var(--color-desktop)"
+												fillOpacity={0.4}
+												stroke="var(--color-desktop)"
+												stackId="a"
+											/>
+										</AreaChart>
+									</ChartContainer>
+									<Separator />
+									<div className="grid gap-2">
+										<div className="flex gap-2 leading-none font-medium">
+											Trending up by 5.2% this month{' '}
+											<Icon name="trending-up" className="size-4" />
+										</div>
+										<div className="text-muted-foreground">
+											Showing total visitors for the last 6 months. This is just
+											some random text to test the layout. It spans multiple
+											lines and should wrap around.
+										</div>
 									</div>
-								))}
-
-								{/* Add reviewer button */}
-								<DropdownMenu>
-									<DropdownMenuTrigger>
-										<Button
-											type="button"
-											variant="outline"
-											size="sm"
-											className="text-muted-foreground hover:text-primary border-dashed"
-										>
-											<Icon name="plus" className="mr-1 size-4" />
-											Add Reviewer
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="start" className="w-52">
-										{AVAILABLE_REVIEWERS.filter(
-											(reviewer) => !item.reviewers.includes(reviewer),
-										).map((reviewer) => (
-											<DropdownMenuItem
+									<Separator />
+								</>
+							)}
+							<form className="flex flex-col gap-4">
+								<div className="flex flex-col gap-3">
+									<Label htmlFor="header">
+										<Trans>Header</Trans>
+									</Label>
+									<Input id="header" defaultValue={item.header} />
+								</div>
+								<div className="grid grid-cols-2 gap-4">
+									<div className="flex flex-col gap-3">
+										<Label htmlFor="type">
+											<Trans>Type</Trans>
+										</Label>
+										<Select defaultValue={item.type}>
+											<SelectTrigger id="type" className="w-full">
+												Select a type
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="Table of Contents">
+													Table of Contents
+												</SelectItem>
+												<SelectItem value="Executive Summary">
+													Executive Summary
+												</SelectItem>
+												<SelectItem value="Technical Approach">
+													Technical Approach
+												</SelectItem>
+												<SelectItem value="Design">Design</SelectItem>
+												<SelectItem value="Capabilities">
+													Capabilities
+												</SelectItem>
+												<SelectItem value="Focus Documents">
+													Focus Documents
+												</SelectItem>
+												<SelectItem value="Narrative">Narrative</SelectItem>
+												<SelectItem value="Cover Page">Cover Page</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="flex flex-col gap-3">
+										<Label htmlFor="status">
+											<Trans>Status</Trans>
+										</Label>
+										<Select defaultValue={item.status}>
+											<SelectTrigger id="status" className="w-full">
+												{useLingui()._(msg`Select a status`)}
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="Done">Done</SelectItem>
+												<SelectItem value="In Progress">In Progress</SelectItem>
+												<SelectItem value="Not Started">Not Started</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
+								<div className="grid grid-cols-2 gap-4">
+									<div className="flex flex-col gap-3">
+										<Label htmlFor="target">
+											<Trans>Target</Trans>
+										</Label>
+										<Input id="target" defaultValue={item.target} />
+									</div>
+									<div className="flex flex-col gap-3">
+										<Label htmlFor="limit">
+											<Trans>Limit</Trans>
+										</Label>
+										<Input id="limit" defaultValue={item.limit} />
+									</div>
+								</div>
+								<div className="flex flex-col gap-3">
+									<Label>
+										<Trans>Reviewers</Trans>
+									</Label>
+									<div className="flex flex-wrap gap-2">
+										{/* Current reviewers */}
+										{item.reviewers.map((reviewer) => (
+											<div
 												key={reviewer}
-												onSelect={() => {
-													// Add reviewer functionality would go here
-													toast.success(`Added ${reviewer}`)
-												}}
+												className="bg-primary/10 text-primary flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
 											>
-												<div className="flex items-center gap-2">
-													<Avatar className="size-6">
-														<AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-															{getInitials(reviewer)}
-														</AvatarFallback>
-													</Avatar>
-													{reviewer}
-												</div>
-											</DropdownMenuItem>
+												<Avatar className="size-5">
+													<AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
+														{getInitials(reviewer)}
+													</AvatarFallback>
+												</Avatar>
+												<span>{reviewer}</span>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="hover:bg-primary/20 ml-1 size-4 rounded-full"
+													onClick={() => {
+														// Remove reviewer functionality would go here
+														toast.success(`Removed ${reviewer}`)
+													}}
+												>
+													<Icon name="x" className="size-3" />
+													<span className="sr-only">Remove {reviewer}</span>
+												</Button>
+											</div>
 										))}
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
+
+										{/* Add reviewer button */}
+										<DropdownMenu>
+											<DropdownMenuTrigger>
+												<Button
+													type="button"
+													variant="outline"
+													size="sm"
+													className="text-muted-foreground hover:text-primary border-dashed"
+												>
+													<Icon name="plus" className="mr-1 size-4" />
+													Add Reviewer
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="start" className="w-52">
+												{AVAILABLE_REVIEWERS.filter(
+													(reviewer) => !item.reviewers.includes(reviewer),
+												).map((reviewer) => (
+													<DropdownMenuItem
+														key={reviewer}
+														onSelect={() => {
+															// Add reviewer functionality would go here
+															toast.success(`Added ${reviewer}`)
+														}}
+													>
+														<div className="flex items-center gap-2">
+															<Avatar className="size-6">
+																<AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+																	{getInitials(reviewer)}
+																</AvatarFallback>
+															</Avatar>
+															{reviewer}
+														</div>
+													</DropdownMenuItem>
+												))}
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</div>
+							</form>
 						</div>
-					</form>
-				</div>
-				<DrawerFooter>
-					<Button>
-						<Trans>Submit</Trans>
-					</Button>
-					<DrawerClose>
-						<Button variant="outline">
-							<Trans>Done</Trans>
-						</Button>
-					</DrawerClose>
-				</DrawerFooter>
+						<DrawerFooter>
+							<Button>
+								<Trans>Submit</Trans>
+							</Button>
+							<DrawerClose>
+								<Button variant="outline">
+									<Trans>Done</Trans>
+								</Button>
+							</DrawerClose>
+						</DrawerFooter>
+					</>
+				) : null}
 			</DrawerContent>
 		</Drawer>
 	)

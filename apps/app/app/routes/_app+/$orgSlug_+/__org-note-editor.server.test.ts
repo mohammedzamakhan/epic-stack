@@ -14,12 +14,12 @@ vi.hoisted(() => {
 })
 
 import { prisma } from '@repo/database'
-import { action } from './__org-note-editor.server.tsx'
-import { requireUserId } from '@repo/auth'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
+import { action } from './__org-note-editor.server.tsx'
+import { requireUserId } from '@repo/auth'
 
 vi.mock('@repo/auth', () => ({
 	requireUserId: vi.fn(),

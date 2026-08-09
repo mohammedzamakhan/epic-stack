@@ -1,0 +1,33 @@
+--- apps/app/app/components/data-table.tsx
++++ apps/app/app/components/data-table.tsx
+@@ -726,9 +726,13 @@
+
+ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+	const isMobile = useIsMobile()
++	const [hasOpened, setHasOpened] = React.useState(false)
+
+	return (
+-		<Drawer direction={isMobile ? 'bottom' : 'right'}>
++		<Drawer direction={isMobile ? 'bottom' : 'right'} onOpenChange={(open) => {
++			if (open) setHasOpened(true)
++		}}>
+			<DrawerTrigger>
+				<Button variant="link" className="text-foreground w-fit px-0 text-left">
+					{item.header}
+@@ -736,6 +740,8 @@
+			</DrawerTrigger>
+			<DrawerContent>
++				{hasOpened ? (
++					<>
+				<DrawerHeader className="gap-1">
+					<DrawerTitle>{item.header}</DrawerTitle>
+					<DrawerDescription>
+@@ -948,6 +954,8 @@
+						</Button>
+					</DrawerClose>
+				</DrawerFooter>
++					</>
++				) : null}
+			</DrawerContent>
+		</Drawer>
+	)
