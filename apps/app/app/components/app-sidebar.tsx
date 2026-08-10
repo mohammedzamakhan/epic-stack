@@ -65,7 +65,7 @@ function UpgradeAccountCard({
 				<CardDescription className="text-sidebar-foreground">
 					<Trans>
 						There are{' '}
-						<span className="font-bold text-red-400">{daysRemaining} days</span>{' '}
+						<span className="text-destructive dark:text-red-400 font-bold">{daysRemaining} days</span>{' '}
 						left in your trial. Get in touch with questions or feedback.
 					</Trans>
 				</CardDescription>

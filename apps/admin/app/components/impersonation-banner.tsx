@@ -29,13 +29,13 @@ export function ImpersonationBanner({
 						<span className="font-medium text-yellow-900">
 							<Trans>Admin Impersonation Active</Trans>
 						</span>
-						<span className="ml-2 text-yellow-700">
+						<span className="ml-2 text-yellow-800">
 							<Trans>
 								You are impersonating <strong>{targetName}</strong>
 							</Trans>
 						</span>
 						{remainingMinutes !== null && (
-							<span className="ml-2 text-yellow-600">
+							<span className="ml-2 text-yellow-800 opacity-90">
 								(
 								<Plural
 									value={remainingMinutes}
@@ -51,10 +51,9 @@ export function ImpersonationBanner({
 					<Button
 						type="submit"
 						variant="outline"
-						size="sm"
-						className="border-yellow-300 bg-white text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50"
+						className="min-h-[44px] border-yellow-400 bg-white text-yellow-900 hover:bg-yellow-50 focus-visible:ring-yellow-500"
 					>
-						<Icon name="x" className="mr-1 h-4 w-4" />
+						<Icon name="x" className="mr-2 h-4 w-4" />
 						<Trans>Stop Impersonation</Trans>
 					</Button>
 				</Form>

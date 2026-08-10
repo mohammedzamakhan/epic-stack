@@ -1,0 +1,3 @@
+## 2024-03-24 - [ImpersonationBanner Custom Alert Contrast & Touch Targets]
+**Learning:** Custom alert banners often suffer from poor hardcoded contrast values (like `text-yellow-600` on `bg-yellow-50`) which fail WCAG AA contrast ratio requirements. Interactive actions inside these custom banners sometimes use reduced touch targets (like 28px tall `size="sm"` buttons) that fail mobile accessibility guidelines.
+**Action:** When auditing or implementing custom alert banners, strictly check color contrast for text/borders (e.g. use deeper text colors like `text-yellow-800` on light yellow backgrounds), and ensure interactive buttons have a minimum touch target size of 44px (e.g., `min-h-[44px]`).
