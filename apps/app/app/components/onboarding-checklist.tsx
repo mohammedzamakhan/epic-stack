@@ -11,7 +11,6 @@ import {
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
 import { Progress } from '@repo/ui/progress'
@@ -123,9 +122,12 @@ export function OnboardingChecklist({
 		<Card className={cn('h-full gap-0 pb-0', className)}>
 			<CardHeader className="gap-4 border-b pb-0 sm:flex sm:items-start sm:justify-between">
 				<div className="min-w-0 space-y-1">
-					<CardTitle>
+					<h3
+						data-slot="card-title"
+						className="text-base leading-snug font-medium"
+					>
 						<Trans>Get Started</Trans>
-					</CardTitle>
+					</h3>
 					<CardDescription>
 						<Trans>
 							Complete these steps to get the most from your workspace.
