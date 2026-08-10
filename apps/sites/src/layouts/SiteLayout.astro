@@ -1,22 +1,48 @@
 ---
 import '../styles/tailwind.css'
 import { brand } from '@repo/config/brand'
+import type { PublicSiteTheme } from '~/lib/org'
 
 interface Props {
 	title?: string
+	theme?: PublicSiteTheme
 }
 
-const { title = brand.name } = Astro.props
+const { title = brand.name, theme } = Astro.props
+const themeMode = theme?.mode ?? 'system'
+const themeCss = theme?.css ?? ''
+const htmlClass =
+	themeMode === 'dark' ? 'dark' : themeMode === 'light' ? '' : undefined
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class={htmlClass} data-site-theme={theme?.theme} data-site-base={theme?.baseColor}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		{
+			themeMode === 'system' ? (
+				<script is:inline>
+					;(function () {
+						try {
+							const prefersDark = window.matchMedia(
+								'(prefers-color-scheme: dark)',
+							).matches
+							document.documentElement.classList.toggle('dark', prefersDark)
+						} catch {
+							/* ignore */
+						}
+					})()
+				</script>
+			) : null
+		}
 		<slot name="head" />
+		{/* Inject after bundled CSS so org theme tokens win over any leftover defaults. */}
+		{themeCss ? (
+			<style is:inline set:html={themeCss} id="org-site-theme" />
+		) : null}
 	</head>
 	<body class="min-h-dvh antialiased">
 		<slot />

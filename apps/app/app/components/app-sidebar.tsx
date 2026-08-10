@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import { CircleHelpIcon } from '@repo/ui/circle-help'
 import { FoldersIcon } from '@repo/ui/folders-icon'
 import { HomeIcon } from '@repo/ui/home-icon'
+import { LaptopMinimalCheckIcon } from '@repo/ui/laptop-minimal-check-icon'
 import { LockOpenIcon } from '@repo/ui/lock-open-icon'
 import { Logo } from '@repo/ui/logo'
 
@@ -240,6 +241,19 @@ function OrganizationSidebar({
 			icon: McpIcon,
 		},
 		{
+			title: _(msg`Website`),
+			url: `/${orgSlug}/website`,
+			isActive: location.pathname.includes(`/${orgSlug}/website`),
+			icon: LaptopMinimalCheckIcon,
+			items: [
+				{
+					title: _(msg`General Settings`),
+					url: `/${orgSlug}/website`,
+					isActive: location.pathname === `/${orgSlug}/website`,
+				},
+			],
+		},
+		{
 			title: _(msg`Settings`),
 			url: `/${orgSlug}/settings`,
 			isActive: location.pathname.includes(`/${orgSlug}/settings`),
@@ -327,14 +341,12 @@ function OrganizationSidebar({
 					onboardingProgress.isVisible &&
 					orgSlug &&
 					organizationId && (
-						<Link to={`/${orgSlug}`}>
-							<OnboardingChecklist
-								progress={onboardingProgress}
-								orgSlug={orgSlug}
-								organizationId={organizationId}
-								variant="sidebar"
-							/>
-						</Link>
+						<OnboardingChecklist
+							progress={onboardingProgress}
+							orgSlug={orgSlug}
+							organizationId={organizationId}
+							variant="sidebar"
+						/>
 					)}
 
 				<NavMain items={navMain} />

@@ -1,9 +1,18 @@
 import { ENV } from 'varlock/env'
 
+export type PublicSiteTheme = {
+	baseColor: string
+	theme: string
+	radius: string
+	mode: 'light' | 'dark' | 'system'
+	css: string
+}
+
 export type PublicOrganization = {
 	name: string
 	slug: string
 	customDomain?: string | null
+	theme?: PublicSiteTheme
 }
 
 function getAppUrl(): string {

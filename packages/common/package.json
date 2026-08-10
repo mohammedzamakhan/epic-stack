@@ -67,6 +67,11 @@
       "import": "./src/onboarding.ts",
       "default": "./src/onboarding.ts"
     },
+    "./site-theme": {
+      "types": "./src/site-theme.ts",
+      "import": "./src/site-theme.ts",
+      "default": "./src/site-theme.ts"
+    },
     "./gdpr-export": {
       "types": "./src/gdpr-export.server.ts",
       "import": "./src/gdpr-export.server.ts",

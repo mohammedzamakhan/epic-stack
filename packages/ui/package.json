@@ -55,6 +55,7 @@
     "./home-icon": "./components/animated-icons/home-icon.tsx",
     "./list-todo": "./components/animated-icons/list-todo.tsx",
     "./languages-icon": "./components/animated-icons/languages-icon.tsx",
+    "./laptop-minimal-check-icon": "./components/animated-icons/laptop-minimal-check-icon.tsx",
     "./lock-open-icon": "./components/animated-icons/lock-open-icon.tsx",
     "./logout-icon": "./components/animated-icons/logout-icon.tsx",
     "./mcp-icon": "./components/animated-icons/mcp-icon.tsx",

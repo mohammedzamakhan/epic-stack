@@ -1,11 +1,21 @@
 import { Trans, t } from '@lingui/macro'
-import { type OnboardingProgressData } from '@repo/common/onboarding'
+import {
+	type OnboardingProgressData,
+	type OnboardingStepWithProgress,
+} from '@repo/common/onboarding'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
-import { Card, CardHeader, CardAction, CardContent } from '@repo/ui/card'
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
-import { ListTodoIcon } from '@repo/ui/list-todo'
 import { Progress } from '@repo/ui/progress'
-import React, { useRef } from 'react'
+import React from 'react'
 import { Link, useFetcher } from 'react-router'
 
 interface OnboardingChecklistProps {
@@ -24,7 +34,6 @@ export function OnboardingChecklist({
 	className = '',
 }: OnboardingChecklistProps) {
 	const fetcher = useFetcher()
-	const listTodoIconRef = useRef<any>(null)
 
 	// Don't show if completed and not visible
 	if (progress.isCompleted && !progress.isVisible) {
@@ -32,13 +41,15 @@ export function OnboardingChecklist({
 	}
 
 	const progressPercentage =
-		(progress.completedCount / progress.totalSteps) * 100
+		progress.totalSteps > 0
+			? (progress.completedCount / progress.totalSteps) * 100
+			: 0
 
-	const percentage = Math.round(progressPercentage)
 	const completedCount = progress.completedCount
 	const totalSteps = progress.totalSteps
+	const isHiding = fetcher.state !== 'idle'
 
-	const handleStepAction = (step: any) => {
+	const handleStepAction = (step: OnboardingStepWithProgress) => {
 		if (!step.actionConfig) return
 
 		switch (step.actionConfig.type) {
@@ -72,65 +83,59 @@ export function OnboardingChecklist({
 	}
 
 	if (variant === 'sidebar') {
-		return (
-			<div
-				className={`group bg-background relative mx-2 mt-2 overflow-hidden rounded-lg border px-4 py-3 backdrop-blur-sm transition-all duration-300 group-data-[collapsible=icon]:hidden ${className}`}
-				onMouseEnter={() => listTodoIconRef.current?.startAnimation()}
-				onMouseLeave={() => listTodoIconRef.current?.stopAnimation()}
-			>
-				<div className="relative z-10">
-					<div className="mb-3 flex w-full items-center justify-between">
-						<div className="flex items-center gap-2">
-							<ListTodoIcon
-								ref={listTodoIconRef}
-								size={16}
-								className="text-primary"
-							/>
-							<span className="text-sm font-semibold">
-								<Trans>Get Started</Trans>
-							</span>
-						</div>
-						<div className="flex items-center gap-1">
-							<span className="bg-muted rounded border px-1.5 py-0.5 text-xs font-medium">
-								{progress.completedCount}/{progress.totalSteps}
-							</span>
-						</div>
-					</div>
+		const nextStep = progress.steps.find((step) => !step.isCompleted)
 
-					<div className="space-y-2">
-						<Progress value={progressPercentage} />
-						<div className="flex items-center justify-between">
-							<span className="text-xs font-medium">
-								<Trans>{percentage}% complete</Trans>
-							</span>
-							{progressPercentage === 100 && (
-								<div className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
-									<Icon name="check" className="h-3 w-3" />
-									<Trans>Done!</Trans>
-								</div>
-							)}
-						</div>
-					</div>
+		return (
+			<Link
+				to={`/${orgSlug}`}
+				aria-label={t`Get started: ${completedCount} of ${totalSteps} steps complete`}
+				className={`group/onboarding border-sidebar-border hover:bg-sidebar-accent/60 focus-visible:ring-sidebar-ring bg-background mx-2 mt-2 block rounded-md border px-3 py-2.5 transition-colors duration-150 ease-out group-data-[collapsible=icon]:hidden focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none ${className}`}
+			>
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-sidebar-foreground/60 text-xs font-medium">
+						<Trans>Get Started</Trans>
+					</span>
+					<span className="text-sidebar-foreground/60 text-xs tabular-nums">
+						{completedCount}/{totalSteps}
+					</span>
 				</div>
-			</div>
+
+				<div className="mt-1 flex items-center gap-1.5">
+					<span className="text-sidebar-foreground min-w-0 flex-1 truncate text-sm font-medium">
+						{nextStep ? nextStep.title : <Trans>All steps complete</Trans>}
+					</span>
+					<Icon
+						name={nextStep ? 'chevron-right' : 'check'}
+						className="text-sidebar-foreground/40 size-3.5 shrink-0 transition-transform duration-150 ease-out motion-reduce:transition-none ltr:group-hover/onboarding:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover/onboarding:-translate-x-0.5"
+					/>
+				</div>
+
+				<Progress
+					value={progressPercentage}
+					aria-label={t`Onboarding progress`}
+					className="**:data-[slot=progress-track]:bg-sidebar-accent mt-2.5"
+				/>
+			</Link>
 		)
 	}
 
 	return (
-		<Card className={className}>
-			<CardHeader className="grid grid-cols-[1fr_auto] items-start">
-				<h3 className="text-lg font-semibold">
-					<Trans>Get Started</Trans>
-				</h3>
-				<p className="text-muted-foreground text-sm">
-					<Trans>
-						{completedCount} of {totalSteps} completed
-					</Trans>
-				</p>
+		<Card className={cn('h-full gap-0 pb-0', className)}>
+			<CardHeader className="gap-4 border-b pb-0 sm:flex sm:items-start sm:justify-between">
+				<div className="min-w-0 space-y-1">
+					<CardTitle>
+						<Trans>Get Started</Trans>
+					</CardTitle>
+					<CardDescription>
+						<Trans>
+							Complete these steps to get the most from your workspace.
+						</Trans>
+					</CardDescription>
+				</div>
 
 				<CardAction className="flex items-center gap-3">
 					<div className="text-right">
-						<div className="text-sm font-medium">
+						<div className="text-lg font-semibold tracking-tight tabular-nums">
 							{Math.round(progressPercentage)}%
 						</div>
 						<div className="text-muted-foreground text-xs">
@@ -139,70 +144,92 @@ export function OnboardingChecklist({
 					</div>
 					<Button
 						variant="ghost"
-						size="sm"
+						size="icon-sm"
 						onClick={handleHide}
-						className="h-8 w-8 shrink-0 p-0"
+						disabled={isHiding}
 						aria-label={t`Close`}
+						aria-busy={isHiding}
 					>
-						<Icon name="x" className="h-4 w-4" />
+						<Icon
+							name={isHiding ? 'loader' : 'x'}
+							className={cn('size-4', isHiding && 'animate-spin')}
+						/>
 					</Button>
 				</CardAction>
 			</CardHeader>
 
-			<CardContent className="space-y-6 p-0">
-				<div>
-					{progress.steps.map((step, index) => (
+			<div className="bg-muted/30 border-border border-b px-2 py-4">
+				<div className="flex items-center justify-between gap-3 text-xs">
+					<span className="font-medium">
+						<Trans>Your setup progress</Trans>
+					</span>
+					<span className="text-muted-foreground tabular-nums">
+						{completedCount}/{totalSteps}
+					</span>
+				</div>
+				<Progress
+					value={progressPercentage}
+					aria-label={t`Onboarding progress`}
+					className="mt-2"
+				/>
+			</div>
+
+			<CardContent className="p-0">
+				<div className="divide-y">
+					{progress.steps.map((step) => (
 						<div
 							key={step.id}
-							className={`group hover:bg-muted/50 flex items-center gap-4 p-2 px-4 motion-safe:transition-colors ${
-								index > 0 ? 'border-border border-t border-dashed' : ''
-							}`}
+							className="group hover:bg-muted/40 flex flex-wrap items-start gap-x-3 gap-y-3 px-4 py-4 transition-colors motion-reduce:transition-none sm:flex-nowrap sm:items-center"
 						>
-							<div className="shrink-0">
-								{step.isCompleted ? (
-									<div className="flex h-8 w-8 items-center justify-center rounded-full bg-black ring-2 ring-black/10">
-										<Icon name="check" className="h-4 w-4 text-white" />
-									</div>
-								) : (
-									<div className="border-muted-foreground/30 bg-background flex h-8 w-8 items-center justify-center rounded-full border-2">
-										<Icon
-											name={(step.icon as any) || 'check-circle'}
-											className="text-muted-foreground h-4 w-4"
-										/>
-									</div>
+							<div
+								className={cn(
+									'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full sm:mt-0',
+									step.isCompleted
+										? 'bg-primary text-primary-foreground ring-primary/10 ring-4'
+										: 'border-primary/25 bg-primary/5 text-primary border-2',
 								)}
+							>
+								<Icon
+									name={
+										step.isCompleted
+											? 'check'
+											: (step.icon as any) || 'check-circle'
+									}
+									className="size-4"
+								/>
 							</div>
 
 							<div className="min-w-0 flex-1">
 								<h4
-									className={`text-sm font-medium ${
+									className={cn(
+										'text-sm font-medium',
 										step.isCompleted
-											? 'text-muted-foreground line-through'
-											: 'text-foreground'
-									}`}
+											? 'text-muted-foreground decoration-muted-foreground/50 line-through'
+											: 'text-foreground',
+									)}
 								>
 									{step.title}
 								</h4>
-								<p className="text-muted-foreground mt-0.5 text-sm leading-relaxed">
+								<p className="text-muted-foreground mt-1 text-sm leading-relaxed">
 									{step.description}
 								</p>
 							</div>
 
-							<div className="shrink-0">
+							<div className="w-full shrink-0 sm:w-auto">
 								{step.isCompleted ? (
-									<span className="text-muted-foreground text-sm font-medium">
+									<span className="text-muted-foreground flex justify-end text-sm font-medium">
 										{step.actionConfig?.completedLabel || (
 											<Trans>Completed</Trans>
 										)}
 									</span>
 								) : (
 									step.actionConfig && (
-										<div>
+										<div className="flex sm:justify-end">
 											{step.actionConfig.type === 'navigate' ? (
 												<Button
 													variant="outline"
 													size="sm"
-													className="shadow-sm"
+													className="w-full shadow-sm sm:w-auto"
 													render={
 														<Link
 															to={`/${orgSlug}${step.actionConfig.target}`}
@@ -211,16 +238,22 @@ export function OnboardingChecklist({
 													}
 												>
 													{step.actionConfig.label}
-													<Icon name="arrow-right" className="ml-2 h-3 w-3" />
+													<Icon
+														name="arrow-right"
+														className="size-3.5 ltr:ml-1 rtl:-scale-x-100"
+													/>
 												</Button>
 											) : (
 												<Button
 													size="sm"
-													className="bg-black text-white shadow-sm hover:bg-black/90"
+													className="w-full shadow-sm sm:w-auto"
 													onClick={() => handleStepAction(step)}
 												>
 													{step.actionConfig.label}
-													<Icon name="arrow-right" className="ml-2 h-3 w-3" />
+													<Icon
+														name="arrow-right"
+														className="size-3.5 ltr:ml-1 rtl:-scale-x-100"
+													/>
 												</Button>
 											)}
 										</div>

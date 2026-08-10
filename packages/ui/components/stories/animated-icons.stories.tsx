@@ -7,6 +7,7 @@ import { FileTextIcon } from '../animated-icons/file-text-icon'
 import { FoldersIcon } from '../animated-icons/folders-icon'
 import { GlobeIcon } from '../animated-icons/globe-icon'
 import { HomeIcon, type HomeIconHandle } from '../animated-icons/home-icon'
+import { LaptopMinimalCheckIcon } from '../animated-icons/laptop-minimal-check-icon'
 import { ListTodoIcon } from '../animated-icons/list-todo'
 import { LockOpenIcon } from '../animated-icons/lock-open-icon'
 import { LogoutIcon } from '../animated-icons/logout-icon'
@@ -216,6 +217,7 @@ export const InteractiveShowcase: Story = {
 			{ name: 'Folders', component: FoldersIcon },
 			{ name: 'Globe', component: GlobeIcon },
 			{ name: 'Home', component: HomeIcon },
+			{ name: 'Laptop Minimal Check', component: LaptopMinimalCheckIcon },
 			{ name: 'List Todo', component: ListTodoIcon },
 			{ name: 'Lock Open', component: LockOpenIcon },
 			{ name: 'Logout', component: LogoutIcon },
