@@ -126,6 +126,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			customDomain: true,
 			customDomainStatus: true,
 			cloudflareHostnameId: true,
+			siteTheme: true,
 		},
 	})
 

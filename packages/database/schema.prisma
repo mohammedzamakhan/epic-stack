@@ -242,6 +242,8 @@ model Organization {
   /// pending | active | error | removed (synced from Cloudflare when configured)
   customDomainStatus     String?
   cloudflareHostnameId   String?
+  /// JSON: { theme, radius, mode } — shadcn-style presets for the public org site
+  siteTheme              String?
   integrations           Integration[]
   onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]

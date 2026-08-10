@@ -38,7 +38,7 @@ Production custom domains use
    - `CLOUDFLARE_API_TOKEN` (SSL and Certificates Write)
    - `CLOUDFLARE_ZONE_ID`
    - `CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET` (e.g. `sites.epic-startup.me`)
-4. In org settings → Organization site → Connect domain
+4. In Website → General Settings → Connect domain
 5. Customer CNAMEs their hostname to the CNAME target; SSL validates via HTTP
    DCV
 

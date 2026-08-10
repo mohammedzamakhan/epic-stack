@@ -1,6 +1,8 @@
 'use client'
 
-import { Trans } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
+import { cn } from '@repo/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 
 import {
@@ -9,7 +11,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 	DropdownMenuGroup,
 } from '@repo/ui/dropdown-menu'
@@ -20,11 +21,46 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '@repo/ui/sidebar'
-import * as React from 'react'
+import { useCallback, useMemo } from 'react'
 import { Link, useSubmit } from 'react-router'
+import { useHotkeys } from '#app/hooks/use-hotkeys.ts'
 import { useUserOrganizations } from '#app/utils/organization/organizations.ts'
 
+// Chrome and Firefox reserve Cmd/Ctrl+1-9 for tab switching and pages cannot
+// override it, so organization switching uses Alt instead.
+const SHORTCUT_MODIFIER = 'alt'
+const MAX_SHORTCUTS = 9
+
+type OrganizationSummary = {
+	name: string
+	image?: { objectKey: string; altText?: string | null } | null
+}
+
+function OrganizationAvatar({
+	organization,
+	className,
+}: {
+	organization: OrganizationSummary
+	className?: string
+}) {
+	return (
+		<Avatar className={cn('size-7 rounded-md after:rounded-md', className)}>
+			{organization.image?.objectKey ? (
+				<AvatarImage
+					src={`/resources/images?objectKey=${organization.image.objectKey}`}
+					alt={organization.image.altText || `${organization.name} logo`}
+					className="rounded-md object-cover"
+				/>
+			) : null}
+			<AvatarFallback className="bg-sidebar-accent text-sidebar-foreground rounded-md text-xs font-medium">
+				{organization.name.slice(0, 2).toUpperCase()}
+			</AvatarFallback>
+		</Avatar>
+	)
+}
+
 export function TeamSwitcher() {
+	const { _ } = useLingui()
 	const submit = useSubmit()
 	const { isMobile, toggleSidebar } = useSidebar()
 
@@ -37,19 +73,36 @@ export function TeamSwitcher() {
 
 	const activeTeam = currentOrganization?.organization
 
-	function handleOrganizationSelect(organizationId: string) {
-		void submit(
-			{ organizationId },
-			{
-				method: 'post',
-				action: '/organizations/set-default',
-			},
-		)
-	}
+	const handleOrganizationSelect = useCallback(
+		(organizationId: string) => {
+			void submit(
+				{ organizationId },
+				{
+					method: 'post',
+					action: '/organizations/set-default',
+				},
+			)
+		},
+		[submit],
+	)
+
+	// Alt+1..9 jumps straight to an organization without opening the menu.
+	const switchShortcuts = useMemo(
+		() =>
+			organizations.slice(0, MAX_SHORTCUTS).map((userOrg, index) => ({
+				key: `${SHORTCUT_MODIFIER}+${index + 1}`,
+				action: () => handleOrganizationSelect(userOrg.organization.id),
+				description: `Switch to ${userOrg.organization.name}`,
+			})),
+		[organizations, handleOrganizationSelect],
+	)
+	useHotkeys(switchShortcuts)
 
 	if (!activeTeam) {
 		return null
 	}
+
+	const memberCount = activeTeam.userCount ?? 0
 
 	return (
 		<SidebarMenu>
@@ -58,138 +111,110 @@ export function TeamSwitcher() {
 					<DropdownMenuTrigger
 						render={
 							<SidebarMenuButton
-								render={
-									<button className="relative flex w-full items-center gap-3">
-										{/* Enhanced Avatar Container */}
-										<div className="relative">
-											<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 relative flex size-8 items-center justify-center rounded-sm bg-gradient-to-br ring-1">
-												<Avatar className="size-8 rounded-sm after:rounded-sm">
-													{activeTeam.image?.objectKey ? (
-														<AvatarImage
-															src={`/resources/images?objectKey=${activeTeam.image.objectKey}`}
-															alt={
-																activeTeam.image?.altText ||
-																`${activeTeam.name} logo`
-															}
-															className="rounded-sm object-cover ring-2"
-														/>
-													) : null}
-													<AvatarFallback className="text-sidebar-primary-foreground rounded-sm border-0 bg-transparent text-sm font-semibold ring-0">
-														{activeTeam.name.slice(0, 2).toUpperCase()}
-													</AvatarFallback>
-												</Avatar>
-											</div>
-										</div>
-
-										{/* Enhanced Text Content */}
-										<div className="min-w-0 flex-1 ltr:text-left rtl:text-right">
-											<div className="flex items-center gap-2">
-												<span className="text-sidebar-foreground truncate text-sm font-semibold">
-													{activeTeam.name}
-												</span>
-											</div>
-											{activeTeam.userCount && (
-												<span className="text-sidebar-foreground/60 text-xs">
-													{activeTeam.userCount}{' '}
-													{activeTeam.userCount === 1 ? (
-														<Trans>member</Trans>
-													) : (
-														<Trans>members</Trans>
-													)}
-												</span>
-											)}
-										</div>
-
-										{/* Enhanced Chevron */}
-										<div className="bg-sidebar-accent/30 group-hover:bg-sidebar-accent/50 flex size-6 items-center justify-center rounded-md transition-colors">
-											<Icon
-												name="chevron-down"
-												className="text-sidebar-foreground/70 size-3 transition-transform duration-200 group-data-[state=open]:rotate-180"
-											/>
-										</div>
-									</button>
-								}
 								size="lg"
-								className="group bg-background relative h-14 border px-3 py-2 transition-all duration-200"
-							></SidebarMenuButton>
+								tooltip={activeTeam.name}
+								className="group/org ml-1 h-12 gap-2.5 px-2 transition-colors duration-150 ease-out motion-reduce:transition-none"
+							>
+								<OrganizationAvatar organization={activeTeam} />
+								<div className="grid min-w-0 flex-1 leading-tight ltr:text-left rtl:text-right">
+									<span className="text-sidebar-foreground truncate text-sm font-medium">
+										{activeTeam.name}
+									</span>
+									{memberCount > 0 ? (
+										<span className="text-sidebar-foreground/60 truncate text-xs">
+											{memberCount}{' '}
+											{memberCount === 1 ? (
+												<Trans>member</Trans>
+											) : (
+												<Trans>members</Trans>
+											)}
+										</span>
+									) : null}
+								</div>
+								<Icon
+									name="chevron-down"
+									className="text-sidebar-foreground/50 size-4 shrink-0 transition-transform duration-200 ease-out group-data-popup-open/org:rotate-180 motion-reduce:transition-none"
+								/>
+							</SidebarMenuButton>
 						}
-						className="ring-sidebar-ring active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground peer/menu-button group/menu-button hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group bg-background relative flex h-14 w-full items-center gap-2 overflow-hidden rounded-lg border p-2 px-3 py-2 text-left text-sm outline-hidden transition-all duration-200 group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate"
 					></DropdownMenuTrigger>
 					<DropdownMenuContent
-						className="w-full min-w-40 rounded-lg"
+						className="w-full min-w-56 rounded-lg"
 						align="start"
 						side="bottom"
 						sideOffset={4}
 						style={{ width: 'var(--anchor-width)' }}
 					>
 						<DropdownMenuGroup>
-							<DropdownMenuLabel className="text-muted-foreground text-xs">
+							<DropdownMenuLabel>
 								<Trans>Organizations</Trans>
 							</DropdownMenuLabel>
-							{organizations.map((userOrg, index) => (
-								<DropdownMenuItem
-									key={userOrg.organization.id}
-									onClick={() => {
-										handleOrganizationSelect(userOrg.organization.id)
-										if (isMobile) toggleSidebar()
-									}}
-									className="group/item gap-2 p-2"
-								>
-									<div className="relative">
-										<div className="from-sidebar-primary/20 to-sidebar-primary/40 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 absolute inset-0 rounded bg-gradient-to-br transition-colors" />
-										<div className="from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground ring-sidebar-primary/20 group-hover/item:from-sidebar-primary-foreground group-hover/item:to-sidebar-primary-foreground/80 group-hover/item:text-sidebar-primary group-hover/item:ring-sidebar-primary relative flex size-6 items-center justify-center rounded-sm bg-gradient-to-br ring-1 transition-colors">
-											<Avatar className="size-6 rounded-sm after:rounded-sm">
-												{userOrg.organization.image?.objectKey ? (
-													<AvatarImage
-														src={`/resources/images?objectKey=${userOrg.organization.image.objectKey}`}
-														alt={
-															userOrg.organization.image?.altText ||
-															`${userOrg.organization.name} logo`
-														}
-														className="rounded-sm object-cover"
-													/>
-												) : null}
-												<AvatarFallback className="text-sidebar-primary-foreground group-hover/item:text-sidebar-primary rounded-sm bg-transparent text-xs font-semibold transition-colors">
-													{userOrg.organization.name.slice(0, 2).toUpperCase()}
-												</AvatarFallback>
-											</Avatar>
-										</div>
-									</div>
-									{userOrg.organization.name}
-									<DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-								</DropdownMenuItem>
-							))}
+							{organizations.map((userOrg, index) => {
+								const isCurrent = userOrg.organization.id === activeTeam.id
+								return (
+									<DropdownMenuItem
+										key={userOrg.organization.id}
+										onClick={() => {
+											handleOrganizationSelect(userOrg.organization.id)
+											if (isMobile) toggleSidebar()
+										}}
+										className="gap-2 px-1.5 py-1.5"
+									>
+										<OrganizationAvatar
+											organization={userOrg.organization}
+											className="size-6"
+										/>
+										<span className="min-w-0 flex-1 truncate">
+											{userOrg.organization.name}
+										</span>
+										{isCurrent ? (
+											<Icon
+												name="check"
+												className="text-primary size-4 shrink-0"
+												title={_(msg`Current organization`)}
+											/>
+										) : null}
+										{index < MAX_SHORTCUTS ? (
+											<span className="text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground shrink-0 text-xs tabular-nums">
+												⌥{index + 1}
+											</span>
+										) : null}
+									</DropdownMenuItem>
+								)
+							})}
 							<DropdownMenuItem
-								className="gap-2 p-2"
+								className="gap-2 px-1.5 py-1.5"
 								onClick={() => isMobile && toggleSidebar()}
 								render={
 									<Link
 										to={`/${activeTeam.slug}/settings/members`}
 										className="flex items-center gap-2"
 									>
-										<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-											<Icon name="user-plus" className="size-4" />
-										</div>
-										<div>
-											<Trans>Invite members</Trans>
-										</div>
+										<span className="flex size-6 shrink-0 items-center justify-center">
+											<Icon
+												name="user-plus"
+												className="text-muted-foreground size-4"
+											/>
+										</span>
+										<Trans>Invite members</Trans>
 									</Link>
 								}
 							></DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
-								className="gap-2 p-2"
+								className="gap-2 px-1.5 py-1.5"
 								render={
 									<Link
 										to="/organizations/create"
 										className="flex items-center gap-2"
 									>
-										<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-											<Icon name="plus" className="size-4" />
-										</div>
-										<div>
-											<Trans>Add organization</Trans>
-										</div>
+										<span className="flex size-6 shrink-0 items-center justify-center">
+											<Icon
+												name="plus"
+												className="text-muted-foreground size-4"
+											/>
+										</span>
+										<Trans>Add organization</Trans>
 									</Link>
 								}
 							></DropdownMenuItem>

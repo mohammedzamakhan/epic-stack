@@ -4,7 +4,10 @@ import {
 	checkRateLimit,
 	createRateLimitResponse,
 } from '#app/utils/rate-limit.server.ts'
-import { findPublishedSiteOrganization } from '#app/utils/sites/public-org.server.ts'
+import {
+	findPublishedSiteOrganization,
+	toPublicSitePayload,
+} from '#app/utils/sites/public-org.server.ts'
 
 const PUBLIC_SITE_RATE_LIMIT = {
 	maxRequests: process.env.NODE_ENV === 'development' ? 1000 : 100,
@@ -42,16 +45,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	return Response.json(
-		{
-			name: organization.name,
-			slug: organization.slug,
-			customDomain: organization.customDomain,
+	return Response.json(toPublicSitePayload(organization), {
+		headers: {
+			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
 		},
-		{
-			headers: {
-				'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
-			},
-		},
-	)
+	})
 }

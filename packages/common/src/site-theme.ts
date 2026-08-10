@@ -1,0 +1,296 @@
+/**
+ * Org site themes sourced from shadcn ui create presets
+ * (apps/v4/registry/themes.ts) with the same base+theme merge as
+ * ui.shadcn.com/create.
+ */
+
+import shadcnThemes from './shadcn-themes.json' with { type: 'json' }
+
+export const SITE_BASE_COLORS = [
+	'neutral',
+	'stone',
+	'zinc',
+	'mauve',
+	'olive',
+	'mist',
+	'taupe',
+] as const
+
+export const SITE_THEME_COLORS = [
+	'neutral',
+	'stone',
+	'zinc',
+	'mauve',
+	'olive',
+	'mist',
+	'taupe',
+	'amber',
+	'blue',
+	'cyan',
+	'emerald',
+	'fuchsia',
+	'green',
+	'indigo',
+	'lime',
+	'orange',
+	'pink',
+	'purple',
+	'red',
+	'rose',
+	'sky',
+	'teal',
+	'violet',
+	'yellow',
+] as const
+
+/** Matches shadcn create RADII names → rem values. */
+export const SITE_THEME_RADII = [
+	'default',
+	'none',
+	'small',
+	'medium',
+	'large',
+] as const
+
+export const SITE_THEME_RADIUS_VALUES: Record<SiteThemeRadius, string> = {
+	default: '0.625rem',
+	none: '0',
+	small: '0.45rem',
+	medium: '0.625rem',
+	large: '0.875rem',
+}
+
+export const SITE_THEME_MODES = ['light', 'dark', 'system'] as const
+
+export type SiteBaseColor = (typeof SITE_BASE_COLORS)[number]
+export type SiteThemeColor = (typeof SITE_THEME_COLORS)[number]
+export type SiteThemeRadius = (typeof SITE_THEME_RADII)[number]
+export type SiteThemeMode = (typeof SITE_THEME_MODES)[number]
+
+export type SiteThemeConfig = {
+	baseColor: SiteBaseColor
+	theme: SiteThemeColor
+	radius: SiteThemeRadius
+	mode: SiteThemeMode
+}
+
+export const DEFAULT_SITE_THEME: SiteThemeConfig = {
+	baseColor: 'neutral',
+	theme: 'neutral',
+	radius: 'default',
+	mode: 'system',
+}
+
+type ThemeTokens = Record<string, string>
+
+type ShadcnTheme = {
+	name: string
+	title: string
+	cssVars: {
+		light: ThemeTokens
+		dark: ThemeTokens
+	}
+}
+
+const THEMES = shadcnThemes as ShadcnTheme[]
+
+const THEME_BY_NAME = Object.fromEntries(
+	THEMES.map((theme) => [theme.name, theme]),
+) as Record<string, ShadcnTheme>
+
+function toCssVarMap(tokens: ThemeTokens): ThemeTokens {
+	const result: ThemeTokens = {}
+	for (const [key, value] of Object.entries(tokens)) {
+		result[key.startsWith('--') ? key : `--${key}`] = value
+	}
+	return result
+}
+
+export function getBaseColorMeta(baseColor: SiteBaseColor): {
+	label: string
+	swatch: string
+} {
+	const theme = THEME_BY_NAME[baseColor]
+	return {
+		label: theme?.title ?? baseColor,
+		swatch:
+			theme?.cssVars.dark['muted-foreground'] ??
+			theme?.cssVars.dark.primary ??
+			'oklch(0.5 0 0)',
+	}
+}
+
+export function getThemeColorMeta(themeName: SiteThemeColor): {
+	label: string
+	swatch: string
+} {
+	const theme = THEME_BY_NAME[themeName]
+	const isBase = (SITE_BASE_COLORS as readonly string[]).includes(themeName)
+	return {
+		label: theme?.title ?? themeName,
+		swatch: isBase
+			? (theme?.cssVars.dark['muted-foreground'] ??
+				theme?.cssVars.dark.primary ??
+				'oklch(0.5 0 0)')
+			: (theme?.cssVars.dark.primary ?? 'oklch(0.5 0 0)'),
+	}
+}
+
+export function isSiteBaseColor(value: unknown): value is SiteBaseColor {
+	return (
+		typeof value === 'string' &&
+		(SITE_BASE_COLORS as readonly string[]).includes(value)
+	)
+}
+
+export function isSiteThemeColor(value: unknown): value is SiteThemeColor {
+	return (
+		typeof value === 'string' &&
+		(SITE_THEME_COLORS as readonly string[]).includes(value)
+	)
+}
+
+/** @deprecated Prefer isSiteThemeColor */
+export const isSiteThemeId = isSiteThemeColor
+
+export function isSiteThemeRadius(value: unknown): value is SiteThemeRadius {
+	return (
+		typeof value === 'string' &&
+		(SITE_THEME_RADII as readonly string[]).includes(value)
+	)
+}
+
+export function isSiteThemeMode(value: unknown): value is SiteThemeMode {
+	return (
+		typeof value === 'string' &&
+		(SITE_THEME_MODES as readonly string[]).includes(value)
+	)
+}
+
+function migrateLegacyRadius(value: unknown): SiteThemeRadius {
+	if (isSiteThemeRadius(value)) return value
+	if (typeof value !== 'string') return DEFAULT_SITE_THEME.radius
+
+	switch (value) {
+		case '0':
+			return 'none'
+		case '0.3':
+		case '0.45':
+			return 'small'
+		case '0.5':
+		case '0.625':
+			return 'default'
+		case '0.75':
+		case '0.875':
+			return 'large'
+		case '1.0':
+		case '1':
+			return 'large'
+		default:
+			return DEFAULT_SITE_THEME.radius
+	}
+}
+
+/**
+ * Migrate legacy configs and parse stored JSON.
+ */
+export function parseSiteThemeConfig(
+	raw: string | null | undefined,
+): SiteThemeConfig {
+	if (!raw) return { ...DEFAULT_SITE_THEME }
+
+	try {
+		const parsed = JSON.parse(raw) as Record<string, unknown>
+		const legacyTheme =
+			typeof parsed.theme === 'string' ? parsed.theme : undefined
+
+		let baseColor = isSiteBaseColor(parsed.baseColor)
+			? parsed.baseColor
+			: DEFAULT_SITE_THEME.baseColor
+		let theme = isSiteThemeColor(parsed.theme)
+			? parsed.theme
+			: DEFAULT_SITE_THEME.theme
+
+		// Legacy single-theme configs / removed "gray" base.
+		if (!isSiteBaseColor(parsed.baseColor) && legacyTheme) {
+			if (legacyTheme === 'slate' || legacyTheme === 'gray') {
+				baseColor = 'zinc'
+				theme = 'zinc'
+			} else if (isSiteBaseColor(legacyTheme)) {
+				baseColor = legacyTheme
+				theme = legacyTheme
+			} else if (isSiteThemeColor(legacyTheme)) {
+				baseColor = 'neutral'
+				theme = legacyTheme
+			}
+		} else if (
+			typeof parsed.baseColor === 'string' &&
+			parsed.baseColor === 'gray'
+		) {
+			baseColor = 'zinc'
+			if (
+				typeof parsed.theme === 'string' &&
+				(parsed.theme === 'gray' || !isSiteThemeColor(parsed.theme))
+			) {
+				theme = 'zinc'
+			}
+		}
+
+		return {
+			baseColor,
+			theme,
+			radius: migrateLegacyRadius(parsed.radius),
+			mode: isSiteThemeMode(parsed.mode)
+				? parsed.mode
+				: DEFAULT_SITE_THEME.mode,
+		}
+	} catch {
+		return { ...DEFAULT_SITE_THEME }
+	}
+}
+
+export function serializeSiteThemeConfig(config: SiteThemeConfig): string {
+	return JSON.stringify(config)
+}
+
+/**
+ * Same merge as shadcn create: base color tokens, then theme overrides.
+ */
+export function resolveSiteThemeTokens(config: SiteThemeConfig): {
+	light: ThemeTokens
+	dark: ThemeTokens
+} {
+	const base = THEME_BY_NAME[config.baseColor] ?? THEME_BY_NAME.neutral!
+	const theme = THEME_BY_NAME[config.theme] ?? THEME_BY_NAME.neutral!
+	const radius = SITE_THEME_RADIUS_VALUES[config.radius]
+
+	const light = toCssVarMap({
+		...base.cssVars.light,
+		...theme.cssVars.light,
+		radius,
+	})
+	const dark = toCssVarMap({
+		...base.cssVars.dark,
+		...theme.cssVars.dark,
+		radius,
+	})
+
+	return { light, dark }
+}
+
+function tokensToCss(selector: string, tokens: ThemeTokens): string {
+	const body = Object.entries(tokens)
+		.map(([key, value]) => `\t${key}: ${value};`)
+		.join('\n')
+	return `${selector} {\n${body}\n}`
+}
+
+/**
+ * Build CSS variable overrides for a site theme (injected into public sites).
+ */
+export function buildSiteThemeCss(config: SiteThemeConfig): string {
+	const { light, dark } = resolveSiteThemeTokens(config)
+	return [tokensToCss('html', light), tokensToCss('html.dark', dark)].join(
+		'\n\n',
+	)
+}

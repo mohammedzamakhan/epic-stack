@@ -132,7 +132,7 @@ export function NavUser({
 						render={
 							<SidebarMenuButton
 								size="lg"
-								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
+								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-background rounded-full border"
 							>
 								<UserAvatar
 									user={{
