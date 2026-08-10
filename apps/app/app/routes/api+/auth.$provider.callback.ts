@@ -30,20 +30,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	const codeVerifier = url.searchParams.get('code_verifier')
 	const state = url.searchParams.get('state')
 
-	// If a mobile request sends a code_verifier, bypass cookie state validation 
+	// If a mobile request sends a code_verifier, bypass cookie state validation
 	// by simulating the state cookie that remix-auth-oauth2 expects.
 	if (codeVerifier && state) {
 		const store = new URLSearchParams()
 		store.set('state', state)
 		store.set(state, codeVerifier)
-		
+
 		const fakeCookie = `oauth2:mobile=${store.toString()}`
-		
+
 		authRequest = new Request(request.url, {
 			method: request.method,
 			headers: new Headers(request.headers),
 		})
-		
+
 		const existingCookie = authRequest.headers.get('Cookie')
 		authRequest.headers.set(
 			'Cookie',

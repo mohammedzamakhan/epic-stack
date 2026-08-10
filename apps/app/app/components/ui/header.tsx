@@ -73,10 +73,12 @@ export const HeroHeader = () => {
 								<ul className="flex gap-1">
 									{menuItems.map((item, index) => (
 										<li key={index}>
-											<Button variant="ghost" size="sm">
-												<Link to={item.href} className="text-base">
-													<span>{item.name}</span>
-												</Link>
+											<Button
+												variant="ghost"
+												size="sm"
+												render={<Link to={item.href} className="text-base" />}
+											>
+												<span>{item.name}</span>
 											</Button>
 										</li>
 									))}
@@ -106,27 +108,27 @@ export const HeroHeader = () => {
 											variant="ghost"
 											size="sm"
 											className={cn(isScrolled && 'lg:hidden')}
+											render={<Link to="/login" />}
 										>
-											<Link to="/login">
-												<span>Login</span>
-											</Link>
+											<span>Login</span>
 										</Button>
-										<Button size="sm" className={cn(isScrolled && 'lg:hidden')}>
-											<Link to="/signup">
-												<span>
-													<Trans>Sign Up</Trans>
-												</span>
-											</Link>
+										<Button
+											size="sm"
+											className={cn(isScrolled && 'lg:hidden')}
+											render={<Link to="/signup" />}
+										>
+											<span>
+												<Trans>Sign Up</Trans>
+											</span>
 										</Button>
 										<Button
 											size="sm"
 											className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}
+											render={<Link to="/signup" />}
 										>
-											<Link to="/signup">
-												<span>
-													<Trans>Get Started</Trans>
-												</span>
-											</Link>
+											<span>
+												<Trans>Get Started</Trans>
+											</span>
 										</Button>
 									</>
 								) : (
@@ -143,16 +145,19 @@ export const HeroHeader = () => {
 												</span>
 											</Button>
 										</Form>
-										<Button size="sm">
-											<Link
-												to={
-													currentOrganization
-														? `/${currentOrganization.organization.slug}`
-														: '/app'
-												}
-											>
-												<span>Dashboard</span>
-											</Link>
+										<Button
+											size="sm"
+											render={
+												<Link
+													to={
+														currentOrganization
+															? `/${currentOrganization.organization.slug}`
+															: '/app'
+													}
+												/>
+											}
+										>
+											<span>Dashboard</span>
 										</Button>
 									</>
 								)}
