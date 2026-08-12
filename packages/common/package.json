@@ -72,6 +72,11 @@
       "import": "./src/site-theme.ts",
       "default": "./src/site-theme.ts"
     },
+    "./site-locales": {
+      "types": "./src/site-locales.ts",
+      "import": "./src/site-locales.ts",
+      "default": "./src/site-locales.ts"
+    },
     "./gdpr-export": {
       "types": "./src/gdpr-export.server.ts",
       "import": "./src/gdpr-export.server.ts",

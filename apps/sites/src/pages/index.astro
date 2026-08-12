@@ -1,5 +1,11 @@
 ---
+import { ENV } from 'varlock/env'
 import { getPageTitle } from '@repo/config/brand'
+import {
+	getSiteLocaleDirection,
+	getSiteLocaleLabel,
+} from '@repo/common/site-locales'
+import AnnouncementBanners from '~/components/AnnouncementBanners.astro'
 import SiteLayout from '~/layouts/SiteLayout.astro'
 import {
 	fetchPublishedOrganization,
@@ -8,30 +14,87 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
+const requestedLocale = Astro.url.searchParams.get('lng')
 
 if (!orgSlug && !customHost) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 
 const organization = orgSlug
-	? await fetchPublishedOrganization(orgSlug)
-	: await fetchPublishedOrganizationByHost(customHost!)
+	? await fetchPublishedOrganization(orgSlug, requestedLocale)
+	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 
+const siteIcon = organization.siteIcon
 const theme = organization.theme
+const announcements = organization.announcements ?? []
+const locales = organization.locales ?? ['en']
+const activeLocale = organization.locale ?? organization.defaultLocale ?? 'en'
+const localeDirection = getSiteLocaleDirection(activeLocale)
+const showLanguageSwitcher = locales.length > 1
 const baseLabel = theme?.baseColor ?? 'neutral'
 const themeLabel = theme?.theme ?? 'neutral'
 const radiusLabel = theme?.radius ?? 'default'
 const modeLabel = theme?.mode ?? 'system'
+
+function localeHref(locale: string) {
+	const url = new URL(Astro.url)
+	url.searchParams.set('lng', locale)
+	return `${url.pathname}${url.search}`
+}
 ---
 
-<SiteLayout title={getPageTitle(organization.name)} theme={organization.theme}>
+<SiteLayout
+	title={getPageTitle(organization.name)}
+	theme={organization.theme}
+	lang={activeLocale}
+	dir={localeDirection}
+	siteIcon={organization.siteIcon ?? null}
+>
 	<main class="bg-background text-foreground flex min-h-dvh flex-col">
+		<AnnouncementBanners announcements={announcements} />
+		{
+			showLanguageSwitcher ? (
+				<div class="border-border bg-background/80 border-b px-4 py-2 backdrop-blur">
+					<div class="mx-auto flex max-w-5xl flex-wrap items-center justify-end gap-2">
+						<span class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+							Language
+						</span>
+						{locales.map((locale) => {
+							const isActive = locale === activeLocale
+							return (
+								<a
+									href={localeHref(locale)}
+									hreflang={locale}
+									aria-current={isActive ? 'true' : undefined}
+									class={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+										isActive
+											? 'bg-primary text-primary-foreground'
+											: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+									}`}
+								>
+									{getSiteLocaleLabel(locale)}
+								</a>
+							)
+						})}
+					</div>
+				</div>
+			) : null
+		}
 		<section class="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-10 px-6 py-16">
 			<div class="text-center">
+				{
+					siteIcon ? (
+						<img
+							src={`${ENV.PUBLIC_APP_URL}${siteIcon.original}`}
+							alt={`${organization.name} logo`}
+							class="mx-auto mb-4 size-20 rounded-lg object-contain"
+						/>
+					) : null
+				}
 				<p class="text-muted-foreground mb-3 text-sm font-medium tracking-wide uppercase">
 					{organization.slug}
 				</p>

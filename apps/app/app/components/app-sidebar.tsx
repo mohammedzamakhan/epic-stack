@@ -251,6 +251,13 @@ function OrganizationSidebar({
 					url: `/${orgSlug}/website`,
 					isActive: location.pathname === `/${orgSlug}/website`,
 				},
+				{
+					title: _(msg`Announcements`),
+					url: `/${orgSlug}/website/announcements`,
+					isActive: location.pathname.includes(
+						`/${orgSlug}/website/announcements`,
+					),
+				},
 			],
 		},
 		{

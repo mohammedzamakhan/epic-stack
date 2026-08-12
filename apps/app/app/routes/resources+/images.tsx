@@ -37,6 +37,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const headers = new Headers()
 	headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+	headers.set('Access-Control-Allow-Origin', '*')
+	headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
 
 	const objectKey = searchParams.get('objectKey')
 	const organizationId = searchParams.get('organizationId')

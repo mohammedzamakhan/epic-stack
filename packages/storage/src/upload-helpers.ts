@@ -47,6 +47,7 @@ function sanitizeAndExtractExtension(filename: string): string {
 		'avi',
 		'pdf',
 		'txt',
+		'avif',
 	]
 
 	if (!allowedExtensions.includes(extension)) {
@@ -185,4 +186,20 @@ export async function uploadVideoThumbnail(
 
 	const config = await options.getConfig(organizationId)
 	return uploadToStorage(thumbnailFile, key, config)
+}
+
+/**
+ * Upload a site icon image for an organization
+ */
+export async function uploadSiteIcon(
+	organizationId: string,
+	file: File | FileUpload,
+	options: UploadOptions,
+) {
+	const fileId = createId()
+	const fileExtension = sanitizeAndExtractExtension(file.name)
+	const timestamp = Date.now()
+	const key = `org/${organizationId}/site-icon/original/${timestamp}-${fileId}.${fileExtension}`
+	const config = await options.getConfig(organizationId)
+	return uploadToStorage(file, key, config)
 }

@@ -9,6 +9,7 @@ import {
 	uploadCommentImage as _uploadCommentImage,
 	uploadNoteVideo as _uploadNoteVideo,
 	uploadVideoThumbnail as _uploadVideoThumbnail,
+	uploadSiteIcon as _uploadSiteIcon,
 	getSignedGetRequestInfo as _getSignedGetRequestInfo,
 	testS3Connection as _testS3Connection,
 	type StorageConfig,
@@ -144,6 +145,18 @@ export async function uploadVideoThumbnail(
 		createUploadOptions(),
 		organizationId,
 	)
+}
+
+export async function uploadSiteIcon(
+	organizationId: string,
+	file: File | FileUpload,
+) {
+	const defaultOptions = createUploadOptions()
+	return _uploadSiteIcon(organizationId, file, {
+		...defaultOptions,
+		// Force site icons to be stored in the platform's default bucket
+		getConfig: () => defaultOptions.getConfig(undefined),
+	})
 }
 
 // Export client functions

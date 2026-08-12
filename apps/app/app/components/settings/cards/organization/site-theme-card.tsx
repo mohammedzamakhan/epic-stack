@@ -16,6 +16,7 @@ import {
 	type SiteThemeMode,
 	type SiteThemeRadius,
 } from '@repo/common/site-theme'
+import { getOrgSiteUrl } from '@repo/common/url'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import {
@@ -27,6 +28,8 @@ import {
 	CardTitle,
 } from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
+import { Img } from 'openimg/react'
 import { useEffect, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
@@ -70,23 +73,29 @@ function ColorSwatch({
 	onSelect: () => void
 }) {
 	return (
-		<button
-			type="button"
-			disabled={disabled}
-			onClick={onSelect}
-			title={label}
-			aria-label={label}
-			aria-pressed={selected}
-			className={cn(
-				'size-6 rounded-full transition-[box-shadow,transform] duration-150 ease-out',
-				'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-				'disabled:pointer-events-none disabled:opacity-50',
-				selected
-					? 'ring-foreground ring-offset-background scale-105 ring-2 ring-offset-2'
-					: 'hover:ring-foreground/30 hover:ring-offset-background hover:ring-2 hover:ring-offset-2',
-			)}
-			style={{ backgroundColor: swatch }}
-		/>
+		<Tooltip>
+			<TooltipTrigger
+				render={
+					<button
+						type="button"
+						disabled={disabled}
+						onClick={onSelect}
+						aria-label={label}
+						aria-pressed={selected}
+						className={cn(
+							'size-6 rounded-full transition-[box-shadow,transform] duration-150 ease-out',
+							'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+							'disabled:pointer-events-none disabled:opacity-50',
+							selected
+								? 'ring-foreground ring-offset-background scale-105 ring-2 ring-offset-2'
+								: 'hover:ring-foreground/30 hover:ring-offset-background hover:ring-2 hover:ring-offset-2',
+						)}
+						style={{ backgroundColor: swatch }}
+					/>
+				}
+			/>
+			<TooltipContent>{label}</TooltipContent>
+		</Tooltip>
 	)
 }
 
@@ -129,7 +138,13 @@ export function SiteThemeCard({
 	organization,
 	themeConfig,
 }: {
-	organization: { id: string }
+	organization: {
+		id: string
+		name: string
+		slug: string
+		customDomain: string | null
+		siteIconKey: string | null
+	}
 	themeConfig: SiteThemeConfig
 	actionData?: { result?: unknown }
 }) {
@@ -151,6 +166,9 @@ export function SiteThemeCard({
 		themeConfig.mode || DEFAULT_SITE_THEME.mode,
 	)
 	const [systemPrefersDark, setSystemPrefersDark] = useState(false)
+	const [previewHost, setPreviewHost] = useState(
+		organization.customDomain || `${organization.slug}.epic-startup.me`,
+	)
 
 	useEffect(() => {
 		const media = window.matchMedia('(prefers-color-scheme: dark)')
@@ -159,6 +177,18 @@ export function SiteThemeCard({
 		media.addEventListener('change', sync)
 		return () => media.removeEventListener('change', sync)
 	}, [])
+
+	useEffect(() => {
+		if (organization.customDomain) {
+			setPreviewHost(organization.customDomain)
+			return
+		}
+		try {
+			setPreviewHost(new URL(getOrgSiteUrl(organization.slug)).host)
+		} catch {
+			setPreviewHost(`${organization.slug}.epic-startup.me`)
+		}
+	}, [organization.customDomain, organization.slug])
 
 	const modeLabels: Record<SiteThemeMode, string> = {
 		light: _(msg`Light`),
@@ -178,6 +208,7 @@ export function SiteThemeCard({
 		small: _(msg`Small`),
 		medium: _(msg`Medium`),
 		large: _(msg`Large`),
+		full: _(msg`Full`),
 	}
 
 	/** Prefer Radix-like order: None → Small → Medium → Large (skip duplicate default). */
@@ -197,6 +228,10 @@ export function SiteThemeCard({
 	const baseMeta = getBaseColorMeta(selectedBase)
 	const themeMeta = getThemeColorMeta(selectedTheme)
 	const previewRadius = SITE_THEME_RADIUS_VALUES[selectedRadius]
+	const siteIconSrc = organization.siteIconKey
+		? `/resources/images?objectKey=${encodeURIComponent(organization.siteIconKey)}`
+		: null
+	const orgInitials = organization.name.slice(0, 2).toUpperCase()
 
 	return (
 		<Card>
@@ -217,36 +252,36 @@ export function SiteThemeCard({
 				<input type="hidden" name="radius" value={selectedRadius} />
 				<input type="hidden" name="mode" value={selectedMode} />
 
-				<CardContent className="px-5 pt-2 pb-6 sm:px-6">
+				<CardContent className="px-5 pt-4 pb-6 sm:px-6">
 					<div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-12">
 						{/* Preview in browser chrome */}
 						<div className="lg:sticky lg:top-6">
 							<div className="border-border bg-muted/50 overflow-hidden rounded-2xl border shadow-sm">
 								{/* Browser chrome */}
-								<div className="grid grid-cols-[1fr_minmax(0,11rem)_1fr] items-center gap-2 px-3 py-2.5 sm:grid-cols-[1fr_minmax(0,14rem)_1fr]">
+								<div className="bg-muted/30 grid grid-cols-[1fr_minmax(0,11rem)_1fr] items-center gap-2 border-b px-3 py-2 sm:grid-cols-[1fr_minmax(0,14rem)_1fr]">
 									<div className="flex items-center gap-1.5" aria-hidden>
 										<span className="size-2.5 rounded-full bg-[#ff5f57]" />
 										<span className="size-2.5 rounded-full bg-[#febc2e]" />
 										<span className="size-2.5 rounded-full bg-[#28c840]" />
 									</div>
-									<div className="flex min-w-0 items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[11px]">
-										<Icon name="lock" className="size-3 shrink-0 opacity-70" />
-										<span className="truncate font-medium tracking-tight">
-											acme.example.com
+									<div className="bg-muted/50 flex min-w-0 items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[11px]">
+										<Icon name="lock" className="size-3 shrink-0 opacity-60" />
+										<span className="text-muted-foreground truncate font-medium tracking-tight">
+											{previewHost}
 										</span>
 									</div>
 									<div
-										className="text-muted-foreground flex items-center justify-end gap-2.5"
+										className="text-muted-foreground flex items-center justify-end gap-2.5 opacity-50"
 										aria-hidden
 									>
-										<Icon name="share-2" className="size-3.5 opacity-70" />
-										<Icon name="plus" className="size-3.5 opacity-70" />
-										<Icon name="copy" className="size-3.5 opacity-70" />
+										<Icon name="share-2" className="size-3" />
+										<Icon name="plus" className="size-3" />
+										<Icon name="copy" className="size-3" />
 									</div>
 								</div>
 
 								{/* Inset site viewport */}
-								<div className="px-2 pb-2">
+								<div className="p-1.5">
 									<div
 										className="overflow-hidden rounded-xl transition-[background-color,color] duration-200 ease-out"
 										style={{
@@ -255,22 +290,41 @@ export function SiteThemeCard({
 										}}
 									>
 										<div
-											className="flex items-center gap-2.5 border-b px-5 py-3.5"
+											className="flex items-center gap-2.5 border-b px-4 py-3"
 											style={{ borderColor: previewTokens['--border'] }}
 										>
-											<span
-												className="size-7 shrink-0"
-												style={{
-													backgroundColor: previewTokens['--primary'],
-													borderRadius: previewRadius,
-												}}
-											/>
+											{siteIconSrc ? (
+												<span
+													className="flex size-6 shrink-0 items-center justify-center overflow-hidden"
+													style={{ borderRadius: previewRadius }}
+												>
+													<Img
+														src={siteIconSrc}
+														alt=""
+														width={48}
+														height={48}
+														className="size-full object-contain"
+													/>
+												</span>
+											) : (
+												<span
+													className="flex size-6 shrink-0 items-center justify-center text-[9px] font-semibold"
+													style={{
+														backgroundColor: previewTokens['--primary'],
+														color: previewTokens['--primary-foreground'],
+														borderRadius: previewRadius,
+													}}
+													aria-hidden
+												>
+													{orgInitials}
+												</span>
+											)}
 											<div className="min-w-0">
-												<p className="truncate text-sm font-medium tracking-tight">
-													{_(msg`Acme Site`)}
+												<p className="truncate text-sm font-semibold tracking-tight">
+													{organization.name}
 												</p>
 												<p
-													className="truncate text-xs"
+													className="truncate text-[11px]"
 													style={{
 														color: previewTokens['--muted-foreground'],
 													}}
@@ -280,9 +334,9 @@ export function SiteThemeCard({
 											</div>
 										</div>
 
-										<div className="space-y-6 px-5 py-7 sm:px-6 sm:py-8">
-											<div className="space-y-2.5">
-												<p className="text-2xl leading-tight font-semibold tracking-tight">
+										<div className="space-y-5 px-4 py-6">
+											<div className="space-y-2">
+												<p className="text-xl leading-tight font-semibold tracking-tight">
 													{_(msg`Welcome to your site`)}
 												</p>
 												<p
@@ -297,9 +351,9 @@ export function SiteThemeCard({
 												</p>
 											</div>
 
-											<div className="flex flex-wrap items-center gap-2.5">
+											<div className="flex flex-wrap items-center gap-2">
 												<span
-													className="inline-flex items-center px-3.5 py-2 text-sm font-medium"
+													className="inline-flex items-center px-3 py-1.5 text-xs font-semibold"
 													style={{
 														backgroundColor: previewTokens['--primary'],
 														color: previewTokens['--primary-foreground'],
@@ -309,7 +363,7 @@ export function SiteThemeCard({
 													{_(msg`Get started`)}
 												</span>
 												<span
-													className="inline-flex items-center border px-3.5 py-2 text-sm"
+													className="inline-flex items-center border px-3 py-1.5 text-xs"
 													style={{
 														backgroundColor: previewTokens['--secondary'],
 														color: previewTokens['--secondary-foreground'],
@@ -322,7 +376,7 @@ export function SiteThemeCard({
 											</div>
 
 											<div
-												className="space-y-3.5 border p-4 sm:p-5"
+												className="space-y-3 border p-3.5"
 												style={{
 													borderColor: previewTokens['--border'],
 													backgroundColor: previewTokens['--card'],
@@ -330,11 +384,11 @@ export function SiteThemeCard({
 													borderRadius: previewRadius,
 												}}
 											>
-												<p className="text-sm font-medium tracking-tight">
+												<p className="text-sm font-semibold tracking-tight">
 													{_(msg`Featured`)}
 												</p>
 												<p
-													className="text-sm leading-relaxed"
+													className="text-xs leading-relaxed"
 													style={{
 														color: previewTokens['--muted-foreground'],
 													}}
@@ -343,7 +397,7 @@ export function SiteThemeCard({
 														msg`Cards, borders, and text follow your palette choices.`,
 													)}
 												</p>
-												<div className="flex gap-1.5 pt-1">
+												<div className="flex gap-1">
 													{[1, 2, 3, 4, 5].map((n) => (
 														<span
 															key={n}
@@ -362,47 +416,30 @@ export function SiteThemeCard({
 							</div>
 						</div>
 
-						{/* Controls — compact Radix-style */}
-						<div className="flex flex-col gap-5">
+						{/* Controls */}
+						<div className="flex flex-col gap-6">
 							<section>
 								<FieldLabel>{_(msg`Accent color`)}</FieldLabel>
-								<div className="space-y-2">
-									<div className="flex flex-wrap gap-2">
-										{ACCENT_NEUTRALS.map((themeColor) => {
-											const meta = getThemeColorMeta(themeColor)
-											return (
-												<ColorSwatch
-													key={themeColor}
-													label={meta.label}
-													swatch={meta.swatch}
-													selected={selectedTheme === themeColor}
-													disabled={busy}
-													onSelect={() => setSelectedTheme(themeColor)}
-												/>
-											)
-										})}
-									</div>
-									<div className="flex flex-wrap gap-2">
-										{ACCENT_COLORS.map((themeColor) => {
-											const meta = getThemeColorMeta(themeColor)
-											return (
-												<ColorSwatch
-													key={themeColor}
-													label={meta.label}
-													swatch={meta.swatch}
-													selected={selectedTheme === themeColor}
-													disabled={busy}
-													onSelect={() => setSelectedTheme(themeColor)}
-												/>
-											)
-										})}
-									</div>
+								<div className="flex flex-wrap gap-2.5">
+									{[...ACCENT_NEUTRALS, ...ACCENT_COLORS].map((themeColor) => {
+										const meta = getThemeColorMeta(themeColor)
+										return (
+											<ColorSwatch
+												key={themeColor}
+												label={meta.label}
+												swatch={meta.swatch}
+												selected={selectedTheme === themeColor}
+												disabled={busy}
+												onSelect={() => setSelectedTheme(themeColor)}
+											/>
+										)
+									})}
 								</div>
 							</section>
 
 							<section>
 								<FieldLabel>{_(msg`Gray color`)}</FieldLabel>
-								<div className="flex flex-wrap gap-2">
+								<div className="flex flex-wrap gap-2.5">
 									{SITE_BASE_COLORS.map((baseColor) => {
 										const meta = getBaseColorMeta(baseColor)
 										return (
@@ -421,7 +458,7 @@ export function SiteThemeCard({
 
 							<section>
 								<FieldLabel>{_(msg`Appearance`)}</FieldLabel>
-								<div className="grid grid-cols-3 gap-1.5">
+								<div className="grid grid-cols-3 gap-2.5">
 									{SITE_THEME_MODES.map((mode) => {
 										const isSelected = selectedMode === mode
 										return (
@@ -452,7 +489,7 @@ export function SiteThemeCard({
 
 							<section>
 								<FieldLabel>{_(msg`Radius`)}</FieldLabel>
-								<div className="grid grid-cols-4 gap-1.5">
+								<div className="grid grid-cols-4 gap-2.5">
 									{radiusOptions.map((radius) => {
 										const isSelected =
 											selectedRadius === radius ||

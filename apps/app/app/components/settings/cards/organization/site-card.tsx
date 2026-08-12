@@ -2,9 +2,11 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans } from '@lingui/macro'
 import { getOrgSiteUrl } from '@repo/common/url'
+import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
+	CardAction,
 	CardContent,
 	CardDescription,
 	CardHeader,
@@ -88,172 +90,211 @@ export function SiteCard({
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					<CardTitle className="flex items-center gap-2">
-						<Switch
-							checked={isPublished}
-							onCheckedChange={handleSwitchChange}
-							disabled={busy}
-						/>
-						<span>
-							<Trans>Organization site</Trans>
-						</span>
-					</CardTitle>
-				</div>
+				<CardTitle>
+					<Trans>Organization site</Trans>
+				</CardTitle>
 				<CardDescription>
 					<Trans>
 						Publish a public website for your organization. Visitors can reach
 						it at your org subdomain, or a custom domain you connect.
 					</Trans>
 				</CardDescription>
+				<CardAction>
+					<Switch
+						checked={isPublished}
+						onCheckedChange={handleSwitchChange}
+						disabled={busy}
+					/>
+				</CardAction>
 			</CardHeader>
 
-			{isPublished ? (
-				<CardContent className="flex flex-col gap-6">
-					<div className="bg-muted flex items-start gap-2 rounded-md p-3 text-sm">
-						<Icon
-							name="link-2"
-							className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0"
-						/>
-						<div className="min-w-0">
-							<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
-								<Trans>Subdomain URL</Trans>
-							</p>
-							<a
-								href={siteUrl}
-								target="_blank"
-								rel="noreferrer"
-								className="text-primary break-all underline-offset-2 hover:underline"
-							>
-								{siteUrl}
-							</a>
-						</div>
-					</div>
-
-					<div className="border-border space-y-4 border-t pt-6">
-						<div className="space-y-1">
-							<p className="text-sm font-medium">
-								<Trans>Custom domain</Trans>
-							</p>
-							<p className="text-muted-foreground text-sm">
-								<Trans>
-									Point your own domain at Sites with a CNAME record. SSL is
-									provisioned automatically when Cloudflare for SaaS is
-									configured.
-								</Trans>
-							</p>
-						</div>
-
-						{customDomain ? (
-							<div className="space-y-4">
-								<div className="bg-muted space-y-2 rounded-md p-3 text-sm">
-									<p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-										<Trans>Connected domain</Trans>
-									</p>
-									<a
-										href={`https://${customDomain}`}
-										target="_blank"
-										rel="noreferrer"
-										className="text-primary block break-all underline-offset-2 hover:underline"
-									>
-										{customDomain}
-									</a>
-									<p className="text-muted-foreground text-xs">
-										<Trans>Status</Trans>: {domainStatus || 'pending'}
-									</p>
-								</div>
-
-								<div className="space-y-2 rounded-md border p-3 text-sm">
-									<p className="font-medium">
-										<Trans>DNS setup</Trans>
-									</p>
-									<p className="text-muted-foreground text-xs">
-										<Trans>
-											Add a CNAME record for your domain (or subdomain) pointing
-											to:
-										</Trans>
-									</p>
-									<code className="bg-muted block rounded-md px-2.5 py-2 font-mono text-xs break-all">
-										{cnameTarget}
-									</code>
-									{!cloudflareConfigured ? (
-										<p className="text-muted-foreground text-xs">
-											<Trans>
-												Cloudflare is not configured in this environment. Domain
-												is stored for local testing; SSL automation requires
-												CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID.
-											</Trans>
-										</p>
-									) : null}
-								</div>
-
-								<div className="flex flex-wrap gap-2">
-									<DomainForm method="POST">
-										<input
-											type="hidden"
-											name="intent"
-											value={refreshCustomDomainActionIntent}
-										/>
-										<input
-											type="hidden"
-											name="organizationId"
-											value={organization.id}
-										/>
-										<Button type="submit" variant="outline" disabled={busy}>
-											<Trans>Refresh status</Trans>
-										</Button>
-									</DomainForm>
-									<DomainForm method="POST">
-										<input
-											type="hidden"
-											name="intent"
-											value={removeCustomDomainActionIntent}
-										/>
-										<input
-											type="hidden"
-											name="organizationId"
-											value={organization.id}
-										/>
-										<Button type="submit" variant="destructive" disabled={busy}>
-											<Trans>Remove domain</Trans>
-										</Button>
-									</DomainForm>
-								</div>
+			<CardContent
+				className={cn(
+					'grid transition-all duration-200 ease-out',
+					isPublished
+						? 'grid-rows-[1fr] opacity-100'
+						: 'grid-rows-[0fr] opacity-0',
+				)}
+			>
+				<div className="overflow-hidden">
+					<div className="flex flex-col gap-6 pt-2 pb-4">
+						<div className="bg-muted flex items-start gap-3 rounded-xl p-4">
+							<div className="bg-background text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg border shadow-xs">
+								<Icon name="link-2" className="size-4" />
 							</div>
-						) : (
-							<Form method="POST" {...getFormProps(form)} className="space-y-4">
-								<input
-									type="hidden"
-									name="intent"
-									value={addCustomDomainActionIntent}
-								/>
-								<input
-									{...getInputProps(fields.organizationId, { type: 'hidden' })}
-								/>
-								<FieldGroup>
-									<Field
-										labelProps={{
-											children: <Trans>Domain</Trans>,
-										}}
-										inputProps={{
-											...getInputProps(fields.customDomain, { type: 'text' }),
-											placeholder: 'www.example.com',
-										}}
-										className="w-full"
-										errors={fields.customDomain.errors}
-									/>
-								</FieldGroup>
-								<ErrorList id={form.errorId} errors={form.errors} />
-								<div className="flex justify-end">
-									<Button type="submit" disabled={busy}>
-										<Trans>Connect domain</Trans>
-									</Button>
+							<div className="min-w-0">
+								<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
+									<Trans>Subdomain URL</Trans>
+								</p>
+								<a
+									href={siteUrl}
+									target="_blank"
+									rel="noreferrer"
+									className="text-primary text-sm font-medium break-all underline-offset-2 hover:underline"
+								>
+									{siteUrl}
+								</a>
+							</div>
+						</div>
+
+						<div className="space-y-5">
+							<div>
+								<p className="text-sm font-medium">
+									<Trans>Custom domain</Trans>
+								</p>
+								<p className="text-muted-foreground mt-1 text-sm">
+									<Trans>
+										Point your own domain at Sites with a CNAME record. SSL is
+										provisioned automatically when Cloudflare for SaaS is
+										configured.
+									</Trans>
+								</p>
+							</div>
+
+							{customDomain ? (
+								<div className="space-y-4">
+									<div className="bg-muted grid gap-2 rounded-xl p-4">
+										<div className="flex items-center justify-between gap-4">
+											<div className="min-w-0">
+												<p className="text-muted-foreground mb-0.5 text-xs font-medium tracking-wide uppercase">
+													<Trans>Connected domain</Trans>
+												</p>
+												<a
+													href={`https://${customDomain}`}
+													target="_blank"
+													rel="noreferrer"
+													className="text-primary block text-sm font-medium break-all underline-offset-2 hover:underline"
+												>
+													{customDomain}
+												</a>
+											</div>
+											<span
+												className={cn(
+													'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+													domainStatus === 'active'
+														? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
+														: 'bg-muted-foreground/10 text-muted-foreground',
+												)}
+											>
+												{domainStatus || 'pending'}
+											</span>
+										</div>
+									</div>
+
+									<div className="space-y-3 rounded-xl border p-4">
+										<div className="flex items-start gap-3">
+											<Icon
+												name="external-link"
+												className="text-muted-foreground mt-0.5 size-4 shrink-0"
+											/>
+											<div className="min-w-0 space-y-2">
+												<p className="text-sm font-medium">
+													<Trans>DNS setup</Trans>
+												</p>
+												<p className="text-muted-foreground text-xs">
+													<Trans>
+														Add a CNAME record for your domain (or subdomain)
+														pointing to:
+													</Trans>
+												</p>
+												<code className="bg-muted block rounded-md px-3 py-2.5 font-mono text-xs break-all">
+													{cnameTarget}
+												</code>
+												{!cloudflareConfigured ? (
+													<p className="text-muted-foreground pt-1 text-xs">
+														<Trans>
+															Cloudflare is not configured in this environment.
+															Domain is stored for local testing; SSL automation
+															requires CLOUDFLARE_API_TOKEN and
+															CLOUDFLARE_ZONE_ID.
+														</Trans>
+													</p>
+												) : null}
+											</div>
+										</div>
+									</div>
+
+									<div className="flex flex-wrap gap-2">
+										<DomainForm method="POST">
+											<input
+												type="hidden"
+												name="intent"
+												value={refreshCustomDomainActionIntent}
+											/>
+											<input
+												type="hidden"
+												name="organizationId"
+												value={organization.id}
+											/>
+											<Button type="submit" variant="outline" disabled={busy}>
+												<Icon name="refresh-cw" className="mr-1.5 size-3.5" />
+												<Trans>Refresh status</Trans>
+											</Button>
+										</DomainForm>
+										<DomainForm method="POST">
+											<input
+												type="hidden"
+												name="intent"
+												value={removeCustomDomainActionIntent}
+											/>
+											<input
+												type="hidden"
+												name="organizationId"
+												value={organization.id}
+											/>
+											<Button
+												type="submit"
+												variant="destructive"
+												disabled={busy}
+											>
+												<Trans>Remove domain</Trans>
+											</Button>
+										</DomainForm>
+									</div>
 								</div>
-							</Form>
-						)}
+							) : (
+								<Form
+									method="POST"
+									{...getFormProps(form)}
+									className="space-y-4"
+								>
+									<input
+										type="hidden"
+										name="intent"
+										value={addCustomDomainActionIntent}
+									/>
+									<input
+										{...getInputProps(fields.organizationId, {
+											type: 'hidden',
+										})}
+									/>
+									<FieldGroup>
+										<Field
+											labelProps={{
+												children: <Trans>Domain</Trans>,
+											}}
+											inputProps={{
+												...getInputProps(fields.customDomain, {
+													type: 'text',
+												}),
+												placeholder: 'www.example.com',
+											}}
+											className="w-full"
+											errors={fields.customDomain.errors}
+										/>
+									</FieldGroup>
+									<ErrorList id={form.errorId} errors={form.errors} />
+									<div className="flex justify-end">
+										<Button type="submit" disabled={busy}>
+											<Trans>Connect domain</Trans>
+										</Button>
+									</div>
+								</Form>
+							)}
+						</div>
 					</div>
-				</CardContent>
-			) : null}
+				</div>
+			</CardContent>
 		</Card>
 	)
 }

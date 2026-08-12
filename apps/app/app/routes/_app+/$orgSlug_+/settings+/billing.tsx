@@ -127,6 +127,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			customDomainStatus: true,
 			cloudflareHostnameId: true,
 			siteTheme: true,
+			siteLocales: true,
+			siteDefaultLocale: true,
+			siteIconKey: true,
 		},
 	})
 
