@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.7",
+    "@repo/common": "*",
     "@tailwindcss/vite": "^4.1.5",
     "@varlock/astro-integration": "^0.1.0",
     "astro": "^7.1.6",

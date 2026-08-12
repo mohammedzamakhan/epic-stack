@@ -1,0 +1,260 @@
+---
+import type { PublicSiteAnnouncement } from '~/lib/org'
+
+interface Props {
+	announcements?: PublicSiteAnnouncement[]
+}
+
+const { announcements = [] } = Astro.props
+
+type BannerType = 'info' | 'warning' | 'error' | 'success'
+type AriaRole = 'alert' | 'status'
+
+const bgColors: Record<BannerType, string> = {
+	info: 'bg-primary',
+	warning: 'bg-accent',
+	error: 'bg-destructive',
+	success: 'bg-primary',
+}
+
+const ariaRoles: Record<BannerType, AriaRole> = {
+	info: 'status',
+	warning: 'alert',
+	error: 'alert',
+	success: 'status',
+}
+
+const textColors: Record<BannerType, string> = {
+	info: 'text-primary-foreground',
+	warning: 'text-accent-foreground',
+	error: 'text-white',
+	success: 'text-primary-foreground',
+}
+
+const showNav = announcements.length > 1
+---
+
+{
+	announcements.length > 0 ? (
+		<div
+			class="sticky top-0 z-40"
+			role="region"
+			aria-label="Announcements"
+			data-announcement-carousel
+			data-count={announcements.length}
+		>
+			{
+				announcements.map((announcement, index) => {
+					const type = announcement.type
+					const role = ariaRoles[type]
+					const bg = bgColors[type]
+					const text = textColors[type]
+					const isFirst = index === 0
+
+					return (
+						<div
+							role={role}
+							class={`announcement-slide ${bg} ${text} px-4 py-3 ${isFirst ? '' : 'hidden'}`}
+							data-announcement-slide
+							data-index={index}
+							hidden={!isFirst}
+							aria-hidden={isFirst ? 'false' : 'true'}
+						>
+							<div class="mx-auto grid max-w-5xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-sm font-medium">
+								{showNav ? (
+									<button
+										type="button"
+										class="announcement-nav inline-flex size-8 shrink-0 items-center justify-center rounded-md opacity-80 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current focus-visible:outline-none"
+										data-announcement-prev
+										aria-label="Previous announcement"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="1em"
+											height="1em"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+										>
+											<path
+												fill="none"
+												stroke="currentColor"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="m15 18l-6-6l6-6"
+											/>
+										</svg>
+									</button>
+								) : (
+									<span class="size-8" aria-hidden="true" />
+								)}
+
+								<div class="announcement-body flex min-w-0 flex-wrap items-center justify-center gap-2 text-center">
+									<span class="whitespace-pre-wrap">{announcement.content}</span>
+									{announcement.linkUrl ? (
+										<>
+											<span class="opacity-70" aria-hidden="true">
+												—
+											</span>
+											<a
+												href={announcement.linkUrl}
+												target={announcement.linkNewTab ? '_blank' : undefined}
+												rel={
+													announcement.linkNewTab
+														? 'noopener noreferrer'
+														: undefined
+												}
+												class="inline-flex items-center gap-1 underline-offset-2 hover:underline"
+											>
+												{announcement.linkLabel || 'Learn more'}
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="1em"
+													height="1em"
+													viewBox="0 0 24 24"
+													aria-hidden="true"
+												>
+													<path
+														fill="none"
+														stroke="currentColor"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M13 5h6v6m0-6L5 19"
+													/>
+												</svg>
+											</a>
+										</>
+									) : null}
+								</div>
+
+								{showNav ? (
+									<div class="flex items-center gap-1 justify-self-end">
+										<span
+											class="text-xs tabular-nums opacity-80"
+											data-announcement-position
+											aria-live="polite"
+										>
+											{index + 1}/{announcements.length}
+										</span>
+										<button
+											type="button"
+											class="announcement-nav inline-flex size-8 shrink-0 items-center justify-center rounded-md opacity-80 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current focus-visible:outline-none"
+											data-announcement-next
+											aria-label="Next announcement"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="1em"
+												height="1em"
+												viewBox="0 0 24 24"
+												aria-hidden="true"
+											>
+												<path
+													fill="none"
+													stroke="currentColor"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="m9 18l6-6l-6-6"
+												/>
+											</svg>
+										</button>
+									</div>
+								) : (
+									<span class="size-8" aria-hidden="true" />
+								)}
+							</div>
+						</div>
+					)
+				})
+			}
+		</div>
+	) : null
+}
+
+{
+	showNav ? (
+		<script>
+			function initAnnouncementCarousel() {
+				const root = document.querySelector('[data-announcement-carousel]')
+				if (!(root instanceof HTMLElement)) return
+				if (root.dataset.carouselReady === 'true') return
+				root.dataset.carouselReady = 'true'
+
+				const slides = Array.from(
+					root.querySelectorAll('[data-announcement-slide]'),
+				)
+				const count = slides.length
+				if (count < 2) return
+
+				let index = 0
+				const reduceMotion = window.matchMedia(
+					'(prefers-reduced-motion: reduce)',
+				).matches
+
+				function show(nextIndex: number) {
+					index = ((nextIndex % count) + count) % count
+
+					slides.forEach((slide, slideIndex) => {
+						const active = slideIndex === index
+						slide.classList.toggle('hidden', !active)
+						slide.toggleAttribute('hidden', !active)
+						slide.setAttribute('aria-hidden', active ? 'false' : 'true')
+
+						const position = slide.querySelector('[data-announcement-position]')
+						if (position) {
+							position.textContent = `${index + 1}/${count}`
+						}
+
+						if (active && !reduceMotion) {
+							slide.classList.remove('announcement-enter')
+							void (slide as HTMLElement).offsetWidth
+							slide.classList.add('announcement-enter')
+						}
+					})
+				}
+
+				root.addEventListener('click', (event) => {
+					const target = event.target
+					if (!(target instanceof Element)) return
+
+					if (target.closest('[data-announcement-prev]')) {
+						event.preventDefault()
+						show(index - 1)
+						return
+					}
+
+					if (target.closest('[data-announcement-next]')) {
+						event.preventDefault()
+						show(index + 1)
+					}
+				})
+			}
+
+			initAnnouncementCarousel()
+			document.addEventListener('astro:page-load', initAnnouncementCarousel)
+		</script>
+
+		<style>
+			.announcement-enter .announcement-body {
+				animation: announcement-fade 180ms ease-out;
+			}
+
+			@keyframes announcement-fade {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.announcement-enter .announcement-body {
+					animation: none;
+				}
+			}
+		</style>
+	) : null
+}

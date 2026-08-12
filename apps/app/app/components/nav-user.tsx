@@ -34,7 +34,6 @@ import {
 
 import { type loader } from '#app/root.tsx'
 import { useOptimisticThemeMode } from '#app/routes/resources+/theme-switch.tsx'
-import { useOptionalRequestInfo } from '#app/utils/request-info.ts'
 import { UserAvatar } from './user-avatar'
 
 export function NavUser({
@@ -52,7 +51,6 @@ export function NavUser({
 	const { isMobile, toggleSidebar } = useSidebar()
 	const iconRefs = useRef<{ [key: string]: any }>({})
 	const themeFetcher = useFetcher()
-	const requestInfo = useOptionalRequestInfo()
 	const submit = useSubmit()
 
 	// Check if user has admin role
@@ -230,9 +228,6 @@ export function NavUser({
 											e.preventDefault()
 											const formData = new FormData()
 											formData.append('theme', option.value)
-											if (requestInfo?.path) {
-												formData.append('redirectTo', requestInfo.path)
-											}
 											void themeFetcher.submit(formData, {
 												method: 'POST',
 												action: '/resources/theme-switch',

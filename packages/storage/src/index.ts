@@ -24,4 +24,5 @@ export {
 	uploadCommentImage,
 	uploadNoteVideo,
 	uploadVideoThumbnail,
+	uploadSiteIcon,
 } from './upload-helpers'

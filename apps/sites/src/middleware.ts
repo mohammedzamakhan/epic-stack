@@ -1,4 +1,5 @@
 import { brand } from '@repo/config/brand'
+import { ENV } from 'varlock/env'
 import { defineMiddleware } from 'astro:middleware'
 
 const RESERVED_SUBDOMAINS = new Set([
@@ -20,6 +21,12 @@ const RESERVED_SUBDOMAINS = new Set([
 
 const brandDomain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
+const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
+	/\/$/,
+	'',
+)
+const imgSrc = `img-src 'self' data: ${appUrl}`
+
 // Vite/Astro inject CSS as inline <style> in dev; allow that without opening the app up.
 const isDev = import.meta.env.DEV
 const contentSecurityPolicy = isDev
@@ -28,7 +35,7 @@ const contentSecurityPolicy = isDev
 			"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
 			"style-src 'self' 'unsafe-inline'",
 			"font-src 'self' data:",
-			"img-src 'self' data:",
+			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
@@ -37,7 +44,7 @@ const contentSecurityPolicy = isDev
 			"default-src 'self'",
 			"style-src 'self' 'unsafe-inline'",
 			"font-src 'self' data:",
-			"img-src 'self' data:",
+			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",

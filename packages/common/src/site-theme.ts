@@ -50,6 +50,7 @@ export const SITE_THEME_RADII = [
 	'small',
 	'medium',
 	'large',
+	'full',
 ] as const
 
 export const SITE_THEME_RADIUS_VALUES: Record<SiteThemeRadius, string> = {
@@ -58,6 +59,7 @@ export const SITE_THEME_RADIUS_VALUES: Record<SiteThemeRadius, string> = {
 	small: '0.45rem',
 	medium: '0.625rem',
 	large: '0.875rem',
+	full: '1.2rem',
 }
 
 export const SITE_THEME_MODES = ['light', 'dark', 'system'] as const
@@ -186,6 +188,8 @@ function migrateLegacyRadius(value: unknown): SiteThemeRadius {
 		case '1.0':
 		case '1':
 			return 'large'
+		case '1.2':
+			return 'full'
 		default:
 			return DEFAULT_SITE_THEME.radius
 	}

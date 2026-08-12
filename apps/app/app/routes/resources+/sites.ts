@@ -1,3 +1,4 @@
+import { getClientLocales } from '@repo/i18n/server'
 import { getClientIp } from '@repo/security'
 import { type LoaderFunctionArgs } from 'react-router'
 import {
@@ -19,11 +20,13 @@ const PUBLIC_SITE_RATE_LIMIT = {
  * Returns only non-sensitive fields for published, active organizations.
  *
  * Query: ?slug=acme  OR  ?host=www.acme.com
+ * Optional: ?lng=ar
  */
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
 	const slug = url.searchParams.get('slug')
 	const host = url.searchParams.get('host')
+	const lng = url.searchParams.get('lng')
 
 	if (!slug && !host) {
 		throw new Response('Not Found', { status: 404 })
@@ -45,9 +48,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	return Response.json(toPublicSitePayload(organization), {
+	const acceptLocales = getClientLocales(request)
+	const preferredLocale = lng
+		? [
+				lng,
+				...(Array.isArray(acceptLocales)
+					? acceptLocales
+					: acceptLocales
+						? [acceptLocales]
+						: []),
+			]
+		: acceptLocales
+
+	return Response.json(toPublicSitePayload(organization, { preferredLocale }), {
 		headers: {
 			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+			Vary: 'Accept-Language',
 		},
 	})
 }

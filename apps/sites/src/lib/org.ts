@@ -8,11 +8,30 @@ export type PublicSiteTheme = {
 	css: string
 }
 
+export type PublicSiteAnnouncement = {
+	id: string
+	content: string
+	type: 'info' | 'warning' | 'error' | 'success'
+	linkUrl: string | null
+	linkLabel: string | null
+	linkNewTab: boolean
+}
+
 export type PublicOrganization = {
 	name: string
 	slug: string
 	customDomain?: string | null
 	theme?: PublicSiteTheme
+	locales?: string[]
+	defaultLocale?: string
+	locale?: string
+	siteIcon?: {
+		original: string
+		favicon32: string
+		favicon16: string
+		appleTouchIcon: string
+	} | null
+	announcements?: PublicSiteAnnouncement[]
 }
 
 function getAppUrl(): string {
@@ -51,8 +70,11 @@ async function fetchPublicOrganization(
  */
 export async function fetchPublishedOrganization(
 	slug: string,
+	locale?: string | null,
 ): Promise<PublicOrganization | null> {
-	return fetchPublicOrganization(new URLSearchParams({ slug }))
+	const params = new URLSearchParams({ slug })
+	if (locale) params.set('lng', locale)
+	return fetchPublicOrganization(params)
 }
 
 /**
@@ -60,6 +82,9 @@ export async function fetchPublishedOrganization(
  */
 export async function fetchPublishedOrganizationByHost(
 	host: string,
+	locale?: string | null,
 ): Promise<PublicOrganization | null> {
-	return fetchPublicOrganization(new URLSearchParams({ host }))
+	const params = new URLSearchParams({ host })
+	if (locale) params.set('lng', locale)
+	return fetchPublicOrganization(params)
 }

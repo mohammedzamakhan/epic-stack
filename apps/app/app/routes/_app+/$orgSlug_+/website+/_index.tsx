@@ -1,6 +1,12 @@
 import { parseWithZod } from '@conform-to/zod'
+import { parseFormData } from '@mjackson/form-data-parser'
 import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
+import {
+	parseSiteLocalesConfig,
+	serializeSiteLocales,
+	type SiteContentLocale,
+} from '@repo/common/site-locales'
 import {
 	parseSiteThemeConfig,
 	serializeSiteThemeConfig,
@@ -26,6 +32,16 @@ import {
 	refreshCustomDomainActionIntent,
 } from '#app/components/settings/cards/organization/site-card.tsx'
 import {
+	SiteIconCard,
+	uploadSiteIconActionIntent,
+	deleteSiteIconActionIntent,
+} from '#app/components/settings/cards/organization/site-icon-card.tsx'
+import {
+	SiteLocalesCard,
+	SiteLocalesSchema,
+	siteLocalesActionIntent,
+} from '#app/components/settings/cards/organization/site-locales-card.tsx'
+import {
 	SiteThemeCard,
 	SiteThemeSchema,
 	siteThemeActionIntent,
@@ -44,23 +60,38 @@ import {
 	isValidCustomDomain,
 	normalizeCustomDomain,
 } from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
+import {
+	getSignedGetRequestInfoAsync,
+	uploadSiteIcon,
+} from '#app/utils/storage.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)
 
 	const organization = await requireUserOrganization(request, params.orgSlug, {
 		id: true,
+		name: true,
 		slug: true,
 		sitePublished: true,
 		customDomain: true,
 		customDomainStatus: true,
 		cloudflareHostnameId: true,
 		siteTheme: true,
+		siteLocales: true,
+		siteDefaultLocale: true,
+		siteIconKey: true,
+		siteIconAssets: {
+			select: { type: true, status: true },
+		},
 	})
 
 	return {
 		organization,
 		themeConfig: parseSiteThemeConfig(organization.siteTheme),
+		localesConfig: parseSiteLocalesConfig(
+			organization.siteLocales,
+			organization.siteDefaultLocale,
+		),
 		cnameTarget: getCustomHostnameCnameTarget(),
 		cloudflareConfigured: isCloudflareCustomHostnamesConfigured(),
 	}
@@ -74,6 +105,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		customDomain: true,
 		customDomainStatus: true,
 		cloudflareHostnameId: true,
+		siteIconKey: true,
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -81,6 +113,51 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		organization.id,
 		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
 	)
+
+	const contentType = request.headers.get('content-type')
+
+	if (contentType?.includes('multipart/form-data')) {
+		const formData = await parseFormData(request, {
+			maxFileSize: 1024 * 1024 * 5, // 5MB
+		})
+		const intent = formData.get('intent')
+
+		if (intent === uploadSiteIconActionIntent) {
+			const iconFile = formData.get('iconFile') as File | null
+
+			if (!iconFile || !(iconFile instanceof File) || iconFile.size <= 0) {
+				return Response.json({ error: 'No file provided' }, { status: 400 })
+			}
+
+			try {
+				const siteIconKey = await uploadSiteIcon(organization.id, iconFile)
+
+				await prisma.organization.update({
+					where: { id: organization.id },
+					data: { siteIconKey },
+				})
+
+				await invalidateUserOrganizationsCache(userId)
+
+				return Response.json({ status: 'success' })
+			} catch (error) {
+				return Response.json(
+					{
+						error:
+							error instanceof Error
+								? error.message
+								: 'Failed to upload site icon',
+					},
+					{ status: 500 },
+				)
+			}
+		}
+
+		return Response.json(
+			{ error: `Invalid multipart intent: ${intent}` },
+			{ status: 400 },
+		)
+	}
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
@@ -289,12 +366,80 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === siteLocalesActionIntent) {
+		const submission = parseWithZod(formData, {
+			schema: SiteLocalesSchema,
+		})
+
+		if (submission.status !== 'success') {
+			return Response.json({ result: submission.reply() })
+		}
+
+		const { locales, defaultLocale } = submission.value
+
+		try {
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					siteLocales: serializeSiteLocales(locales as SiteContentLocale[]),
+					siteDefaultLocale: defaultLocale,
+				},
+			})
+
+			await invalidateUserOrganizationsCache(userId)
+
+			return redirectWithToast(`/${organization.slug}/website`, {
+				title: 'Languages updated',
+				description: 'Your website languages have been saved.',
+				type: 'success',
+			})
+		} catch {
+			return Response.json({
+				result: submission.reply({
+					formErrors: ['Failed to update languages. Please try again.'],
+				}),
+			})
+		}
+	}
+
+	if (intent === deleteSiteIconActionIntent) {
+		const orgId = formData.get('organizationId')
+
+		if (orgId !== organization.id) {
+			return Response.json({ error: 'Organization mismatch' }, { status: 400 })
+		}
+
+		try {
+			await prisma.organizationSiteAsset.deleteMany({
+				where: { organizationId: organization.id },
+			})
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: { siteIconKey: null },
+			})
+
+			await invalidateUserOrganizationsCache(userId)
+
+			return Response.json({ status: 'success' })
+		} catch {
+			return Response.json(
+				{ error: 'Failed to delete site icon' },
+				{ status: 500 },
+			)
+		}
+	}
+
 	return Response.json({ error: `Invalid intent: ${intent}` }, { status: 400 })
 }
 
 export default function WebsiteGeneralSettings() {
-	const { organization, themeConfig, cnameTarget, cloudflareConfigured } =
-		useLoaderData<typeof loader>()
+	const {
+		organization,
+		themeConfig,
+		localesConfig,
+		cnameTarget,
+		cloudflareConfigured,
+	} = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (
@@ -304,6 +449,18 @@ export default function WebsiteGeneralSettings() {
 					organization={organization}
 					cnameTarget={cnameTarget}
 					cloudflareConfigured={cloudflareConfigured}
+					actionData={actionData}
+				/>
+			</AnnotatedSection>
+
+			<AnnotatedSection>
+				<SiteIconCard organization={organization} />
+			</AnnotatedSection>
+
+			<AnnotatedSection>
+				<SiteLocalesCard
+					organization={organization}
+					localesConfig={localesConfig}
 					actionData={actionData}
 				/>
 			</AnnotatedSection>

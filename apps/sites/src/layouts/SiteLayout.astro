@@ -6,9 +6,22 @@ import type { PublicSiteTheme } from '~/lib/org'
 interface Props {
 	title?: string
 	theme?: PublicSiteTheme
+	lang?: string
+	dir?: 'ltr' | 'rtl'
+	siteIcon?: {
+		favicon32: string
+		favicon16: string
+		appleTouchIcon: string
+	} | null
 }
 
-const { title = brand.name, theme } = Astro.props
+const {
+	title = brand.name,
+	theme,
+	lang = 'en',
+	dir = 'ltr',
+	siteIcon,
+} = Astro.props
 const themeMode = theme?.mode ?? 'system'
 const themeCss = theme?.css ?? ''
 const htmlClass =
@@ -16,12 +29,27 @@ const htmlClass =
 ---
 
 <!doctype html>
-<html lang="en" class={htmlClass} data-site-theme={theme?.theme} data-site-base={theme?.baseColor}>
+<html
+	lang={lang}
+	dir={dir}
+	class={htmlClass}
+	data-site-theme={theme?.theme}
+	data-site-base={theme?.baseColor}
+>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		{
+			siteIcon ? (
+				<>
+					<link rel="icon" type="image/png" sizes="32x32" href={siteIcon.favicon32} />
+					<link rel="icon" type="image/png" sizes="16x16" href={siteIcon.favicon16} />
+					<link rel="apple-touch-icon" sizes="180x180" href={siteIcon.appleTouchIcon} />
+				</>
+			) : null
+		}
 		{
 			themeMode === 'system' ? (
 				<script is:inline>

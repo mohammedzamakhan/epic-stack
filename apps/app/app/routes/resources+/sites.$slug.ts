@@ -1,3 +1,4 @@
+import { getClientLocales } from '@repo/i18n/server'
 import { getClientIp } from '@repo/security'
 import { type LoaderFunctionArgs } from 'react-router'
 import {
@@ -24,6 +25,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
+	const url = new URL(request.url)
+	const lng = url.searchParams.get('lng')
+
 	const clientIp = getClientIp(request)
 	const rateLimitCheck = await checkRateLimit(
 		{ type: 'ip', value: clientIp },
@@ -40,9 +44,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	return Response.json(toPublicSitePayload(organization), {
+	const acceptLocales = getClientLocales(request)
+	const preferredLocale = lng
+		? [
+				lng,
+				...(Array.isArray(acceptLocales)
+					? acceptLocales
+					: acceptLocales
+						? [acceptLocales]
+						: []),
+			]
+		: acceptLocales
+
+	return Response.json(toPublicSitePayload(organization, { preferredLocale }), {
 		headers: {
 			'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+			Vary: 'Accept-Language',
 		},
 	})
 }

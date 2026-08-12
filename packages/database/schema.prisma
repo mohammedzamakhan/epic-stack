@@ -244,6 +244,13 @@ model Organization {
   cloudflareHostnameId   String?
   /// JSON: { theme, radius, mode } — shadcn-style presets for the public org site
   siteTheme              String?
+  /// JSON string array of BCP-47 codes the public site supports, e.g. ["en","ar"]
+  siteLocales            String?
+  /// Default public site locale (must be included in siteLocales)
+  siteDefaultLocale      String?                  @default("en")
+  /// S3 object key of the uploaded site icon PNG (original, before favicon generation)
+  siteIconKey            String?
+  siteIconAssets         OrganizationSiteAsset[]
   integrations           Integration[]
   onboardingProgress     OnboardingProgress[]
   onboardingStepProgress OnboardingStepProgress[]
@@ -252,6 +259,7 @@ model Organization {
   inviteLinks            OrganizationInviteLink[]
   notes                  OrganizationNote[]
   noteStatuses           OrganizationNoteStatus[]
+  announcements          OrganizationAnnouncement[]
   users                  UserOrganization[]
   s3Config               OrganizationS3Config?
   ssoConfiguration       SSOConfiguration?
@@ -261,6 +269,48 @@ model Organization {
   apiKeys                ApiKey[]
   configFlags            ConfigFlag[]
   mcpAuthorizations      MCPAuthorization[]
+}
+
+/// Public site announcement banners (shown on the org Sites app when enabled)
+model OrganizationAnnouncement {
+  id             String       @id @default(cuid())
+  organizationId String
+  /// JSON LocalizedString map, e.g. {"en":"Hello","ar":"مرحبا"} (legacy plain strings still accepted)
+  content        String
+  /// info | warning | error | success
+  type           String       @default("info")
+  isEnabled      Boolean      @default(true)
+  linkUrl        String?
+  /// JSON LocalizedString map for link label (optional)
+  linkLabel      String?
+  linkNewTab     Boolean      @default(true)
+  /// Lower values appear first on the public site
+  position       Float?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, isEnabled, position])
+}
+
+/// Generated favicon/site icon variants for the public org site
+model OrganizationSiteAsset {
+  id             String       @id @default(cuid())
+  organizationId String
+  type           String       // favicon-ico | favicon-32 | favicon-16 | apple-touch-icon | android-chrome-192 | android-chrome-512
+  objectKey      String
+  width          Int?
+  height         Int?
+  mimeType       String?
+  status         String       @default("processing") // processing | completed | failed
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, type])
+  @@unique([organizationId, type])
 }
 
 model OrganizationRole {
