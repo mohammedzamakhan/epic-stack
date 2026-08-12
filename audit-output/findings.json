@@ -1,0 +1,140 @@
+[
+  {
+    "verdict": "confirmed",
+    "title": "Server-Side Request Forgery (SSRF) via Host header in Healthcheck endpoints",
+    "description": "The healthcheck endpoints (`apps/admin/app/routes/resources+/healthcheck.tsx` and `apps/app/app/routes/resources+/healthcheck.tsx`) use `getValidatedHost` from `@repo/common/headers` to validate the `Host` or `X-Forwarded-Host` header, and then perform a `fetch` to that host. `getValidatedHost` returns the raw, unvalidated `host` when the candidate host does not match the allowed list (localhost or baseUrl). This allows an attacker to inject an arbitrary Host header, bypassing the intended validation, and causing the server to fetch an attacker-controlled URL.",
+    "root_cause": "`getValidatedHost` in `packages/common/src/headers.server.ts` does not correctly reject invalid hosts, allowing an attacker to inject an arbitrary Host header that is subsequently used in a `fetch` call in the healthcheck endpoints.",
+    "intended_behavior": "The `getValidatedHost` function should return `null` if the candidate host does not match the allowed list (localhost, 127.0.0.1, ::1, or the configured `baseUrl`). It should not return the raw, unvalidated `host` as a fallback.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/admin/app/routes/resources+/healthcheck.tsx",
+        "line": 7,
+        "scope": "loader",
+        "description": "The loader receives an HTTP request and calls `getValidatedHost` with the request."
+      },
+      {
+        "kind": "propagation",
+        "file": "packages/common/src/headers.server.ts",
+        "line": 154,
+        "scope": "getValidatedHost",
+        "description": "The function falls back to returning the unvalidated `host` if the `candidateHost` (which could be `X-Forwarded-Host` or `host`) does not match the allowed list."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/admin/app/routes/resources+/healthcheck.tsx",
+        "line": 19,
+        "scope": "loader",
+        "description": "The unvalidated host is used to construct a URL and a `fetch` request is made to it."
+      }
+    ],
+    "conditions": [],
+    "execution": {
+      "attacker_perspective": "Unauthenticated external attacker.",
+      "payloads": [
+        "Host: attacker-controlled-domain.com"
+      ],
+      "instructions": [
+        "Send a GET request to the `/resources/healthcheck` endpoint.",
+        "Include a `Host` header set to an attacker-controlled domain (e.g., `attacker-controlled-domain.com`)."
+      ],
+      "expected_result": "The server makes a HEAD request to `http://attacker-controlled-domain.com/resources/healthcheck` or `https://attacker-controlled-domain.com/resources/healthcheck`."
+    },
+    "remediation": {
+      "strategy": "Modify `getValidatedHost` to return `null` when the host is invalid, instead of returning the raw `host`.",
+      "code_changes": [
+        {
+          "file_name": "packages/common/src/headers.server.ts",
+          "fixed_code": "\nexport function getValidatedHost(\n\trequest: Request,\n\tbaseUrl: string,\n): string | null {\n\tconst forwardedHost = request.headers.get('X-Forwarded-Host')\n\tconst host = request.headers.get('host')\n\tconst candidateHost = forwardedHost ?? host\n\n\tif (!candidateHost) {\n\t\treturn null\n\t}\n\n\tconst hostWithoutPort = candidateHost.split(':')[0]?.toLowerCase()\n\n\tif (!hostWithoutPort) {\n\t\treturn null\n\t}\n\n\tif (\n\t\thostWithoutPort === 'localhost' ||\n\t\thostWithoutPort === '127.0.0.1' ||\n\t\thostWithoutPort === '::1'\n\t) {\n\t\treturn candidateHost\n\t}\n\n\tconst baseUrlHost = new URL(baseUrl).hostname.toLowerCase()\n\tif (\n\t\thostWithoutPort === baseUrlHost ||\n\t\thostWithoutPort.endsWith(`.${baseUrlHost}`)\n\t) {\n\t\treturn candidateHost\n\t}\n\n\treturn null\n}\n"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "The vulnerability is exploitable by any unauthenticated attacker who can send a request to the healthcheck endpoint."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "The impact is limited to SSRF (Server-Side Request Forgery) using a HEAD request, which could potentially be used for internal port scanning or interacting with internal services that accept HEAD requests."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The code clearly shows the fallback to the unvalidated `host` and its subsequent use in a `fetch` call."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "title": "Path Traversal in local image serving endpoint",
+    "description": "The `resources/images` endpoint (`apps/admin/app/routes/resources+/images.tsx` and `apps/app/app/routes/resources+/images.tsx`) handles serving images either by external URL, from an S3 bucket via objectKey, or by reading a local file based on the `src` parameter. When handling local files (where `URL.canParse(src)` is false), the code falls back to returning an `fs` object from `openimg` with the path defined as `./public` + src. Since `src` is completely attacker-controlled and unvalidated (it only checks if it starts with `/assets` for vite files), an attacker can inject path traversal payloads such as `/../../etc/passwd` to read arbitrary files off the local filesystem.",
+    "root_cause": "`loader` in `apps/admin/app/routes/resources+/images.tsx` does not validate or sanitize the `src` search parameter for path traversal sequences before concatenating it with `./public` or `.` and passing it to the file system as an `fs` source type.",
+    "intended_behavior": "The application should safely serve files from the public or asset directory by ensuring the normalized path of the requested file remains strictly within the intended base directory. It should block any input containing path traversal sequences (e.g., `../`).",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "apps/admin/app/routes/resources+/images.tsx",
+        "line": 40,
+        "scope": "loader",
+        "description": "The endpoint retrieves the `src` search parameter from the request URL."
+      },
+      {
+        "kind": "propagation",
+        "file": "apps/admin/app/routes/resources+/images.tsx",
+        "line": 64,
+        "scope": "loader",
+        "description": "The code checks if the `src` can be parsed as a URL. Path traversal payloads starting with `/` fail `URL.canParse(src)`."
+      },
+      {
+        "kind": "propagation",
+        "file": "apps/admin/app/routes/resources+/images.tsx",
+        "line": 80,
+        "scope": "loader",
+        "description": "If `src` starts with `/assets`, it concatenates `.` with `src`. If not, it falls back to concatenating `./public` with `src` without validation."
+      },
+      {
+        "kind": "sink",
+        "file": "apps/admin/app/routes/resources+/images.tsx",
+        "line": 86,
+        "scope": "loader",
+        "description": "The concatenated string containing path traversal characters is returned in the `fs` source object to `openimg`, which uses it to read the local file."
+      }
+    ],
+    "conditions": [],
+    "execution": {
+      "attacker_perspective": "Unauthenticated external attacker.",
+      "payloads": [
+        "src=/../../../../../etc/passwd"
+      ],
+      "instructions": [
+        "Send a GET request to `/resources/images?src=/../../../../../etc/passwd`."
+      ],
+      "expected_result": "The server responds with the contents of the `/etc/passwd` file, potentially processed as an image or throwing an error that confirms file reading based on `openimg`'s behavior. An attacker could use this to read secrets such as `.env` by requesting `/../../.env`."
+    },
+    "remediation": {
+      "strategy": "Sanitize the `src` parameter and ensure that the resolved path is confined to the intended directory (e.g., using `path.resolve` and checking if the resulting path starts with the allowed base path).",
+      "code_changes": [
+        {
+          "file_name": "apps/admin/app/routes/resources+/images.tsx",
+          "fixed_code": "import { promises as fs, constants } from 'node:fs'\nimport path from 'node:path'\nimport { invariantResponse } from '@epic-web/invariant'\nimport { getDomainUrl } from '@repo/common'\nimport { validateInstanceUrl } from '@repo/security'\nimport { getImgResponse } from 'openimg/node'\nimport { ENV } from 'varlock/env'\nimport { getSignedGetRequestInfoAsync } from '#app/utils/storage.server.ts'\nimport { type Route } from './+types/images'\n\nlet cacheDir: string | 'no_cache' | null = null\n\nasync function getCacheDir() {\n\tif (cacheDir) return cacheDir\n\n\tlet dir: string | 'no_cache' = './tests/fixtures/openimg'\n\tif (ENV.NODE_ENV === 'production') {\n\t\tconst isAccessible = await fs\n\t\t\t.access('/data', constants.W_OK)\n\t\t\t.then(() => true)\n\t\t\t.catch(() => false)\n\n\t\tif (isAccessible) {\n\t\t\tdir = '/data/images'\n\t\t} else {\n\t\t\tconsole.warn(\n\t\t\t\t'Production cache directory /data is not writable, disabling image cache',\n\t\t\t)\n\t\t\tdir = 'no_cache'\n\t\t}\n\t}\n\n\treturn (cacheDir = dir)\n}\n\nexport async function loader({ request }: Route.LoaderArgs) {\n\tconst url = new URL(request.url)\n\tconst searchParams = url.searchParams\n\n\tconst headers = new Headers()\n\theaders.set('Cache-Control', 'public, max-age=31536000, immutable')\n\n\tconst objectKey = searchParams.get('objectKey')\n\tconst organizationId = searchParams.get('organizationId')\n\n\treturn getImgResponse(request, {\n\t\theaders,\n\t\tallowlistedOrigins: [getDomainUrl(request), ENV.AWS_ENDPOINT_URL_S3].filter(\n\t\t\tBoolean,\n\t\t),\n\t\tcacheFolder: await getCacheDir(),\n\t\tgetImgSource: async () => {\n\t\t\tif (objectKey) {\n\t\t\t\tconst { url: signedUrl, headers: signedHeaders } =\n\t\t\t\t\tawait getSignedGetRequestInfoAsync(objectKey, organizationId!)\n\t\t\t\treturn {\n\t\t\t\t\ttype: 'fetch',\n\t\t\t\t\turl: signedUrl,\n\t\t\t\t\theaders: signedHeaders,\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tconst src = searchParams.get('src')\n\t\t\tinvariantResponse(src, 'src query parameter is required', { status: 400 })\n\n\t\t\tif (URL.canParse(src)) {\n\t\t\t\tconst validation = validateInstanceUrl(src)\n\t\t\t\tif (!validation.valid) {\n\t\t\t\t\tthrow new Error(`Invalid image URL: ${validation.reason}`)\n\t\t\t\t}\n\t\t\t\t// Fetch image from external URL; will be matched against allowlist\n\t\t\t\treturn {\n\t\t\t\t\ttype: 'fetch',\n\t\t\t\t\turl: src,\n\t\t\t\t}\n\t\t\t}\n            \n            // Prevent path traversal\n            if (src.includes('..')) {\n                throw new Error('Invalid image path')\n            }\n\n\t\t\t// Retrieve image from filesystem (public folder)\n\t\t\tif (src.startsWith('/assets')) {\n\t\t\t\t// Files managed by Vite\n\t\t\t\treturn {\n\t\t\t\t\ttype: 'fs',\n\t\t\t\t\tpath: '.' + src,\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Fallback to files in public folder\n\t\t\treturn {\n\t\t\t\ttype: 'fs',\n\t\t\t\tpath: './public' + src,\n\t\t\t}\n\t\t},\n\t})\n}\n"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "The vulnerability is easily exploitable via a simple GET request by an unauthenticated user."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Allows an attacker to read arbitrary files from the server's filesystem, leading to the disclosure of sensitive data, such as environment variables (.env), source code, or system files."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "The vulnerability is clearly visible in the code, which concatenates an unvalidated search parameter into a file path and passes it to the `fs` driver."
+    }
+  }
+]
