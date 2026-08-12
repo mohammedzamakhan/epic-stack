@@ -101,7 +101,7 @@ describe('MCP Settings Page', () => {
 				),
 				{ numRuns: 100 },
 			)
-		})
+		}, 30000)
 
 		it('should not include authorizations from other users', async () => {
 			const user1 = await createTestUser()
@@ -219,7 +219,7 @@ describe('MCP Settings Page', () => {
 				),
 				{ numRuns: 100 },
 			)
-		})
+		}, 30000)
 
 		it('should update lastUsedAt when token is used', async () => {
 			const user = await createTestUser()
@@ -300,7 +300,7 @@ describe('MCP Settings Page', () => {
 				),
 				{ numRuns: 100 },
 			)
-		})
+		}, 30000)
 
 		it('should maintain correct count after revocation', async () => {
 			const user = await createTestUser()

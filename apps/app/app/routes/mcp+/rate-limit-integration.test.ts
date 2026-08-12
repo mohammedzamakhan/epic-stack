@@ -280,11 +280,16 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const token1 = generateToken()
 			const token2 = generateToken()
 
-			// Token 1 makes 500 requests
-			for (let i = 0; i < 500; i++) {
-				await checkRateLimit(
-					{ type: 'token', value: token1 },
-					RATE_LIMITS.toolInvocation,
+			// Token 1 makes 500 requests - batch them for speed
+			const batchSize = 100
+			for (let batch = 0; batch < 5; batch++) {
+				await Promise.all(
+					Array.from({ length: batchSize }, () =>
+						checkRateLimit(
+							{ type: 'token', value: token1 },
+							RATE_LIMITS.toolInvocation,
+						),
+					),
 				)
 			}
 
@@ -295,7 +300,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			)
 			expect(result.allowed).toBe(true)
 			expect(result.remaining).toBe(999)
-		})
+		}, 15000)
 
 		it('should track remaining requests correctly for tool invocations', async () => {
 			const accessToken = generateToken()

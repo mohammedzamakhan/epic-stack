@@ -204,11 +204,15 @@ export function SiteIconCard({
 								<Trans>Favicon and app icon variants generated.</Trans>
 							</p>
 							<div className="flex gap-2">
-								<Button asChild variant="outline" size="sm" disabled={busy}>
-									<label htmlFor={fileInputId}>
-										<Icon name="image" className="mr-1.5 size-3.5" />
-										<Trans>Change</Trans>
-									</label>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									disabled={busy}
+									onClick={() => fileInputRef.current?.click()}
+								>
+									<Icon name="image" className="mr-1.5 size-3.5" />
+									<Trans>Change</Trans>
 								</Button>
 								<Button
 									type="button"
@@ -244,7 +248,7 @@ export function SiteIconCard({
 				{hasProcessingAssets ? (
 					<div className="bg-muted flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm">
 						<Icon
-							name="loader-circle"
+							name="loader"
 							className="text-muted-foreground size-4 shrink-0 animate-spin"
 						/>
 						<p className="text-muted-foreground text-xs">

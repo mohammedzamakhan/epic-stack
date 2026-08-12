@@ -123,11 +123,13 @@ export function SiteLocalesCard({
 			(locale) => SITE_CONTENT_LOCALE_LABELS[locale],
 		)
 
-		if (labels.length <= 2) {
+		const first = labels[0]
+		const second = labels[1]
+		if (!first || !second || labels.length <= 2) {
 			return labels.join(', ')
 		}
 
-		return _(msg`${labels[0]}, ${labels[1]}, +${labels.length - 2} more`)
+		return _(msg`${first}, ${second}, +${labels.length - 2} more`)
 	}, [_, selectedLocales])
 
 	const toggleLocale = (locale: SiteContentLocale, checked: boolean) => {

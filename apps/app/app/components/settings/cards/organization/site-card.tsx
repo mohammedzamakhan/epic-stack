@@ -184,7 +184,7 @@ export function SiteCard({
 									<div className="space-y-3 rounded-xl border p-4">
 										<div className="flex items-start gap-3">
 											<Icon
-												name="globe"
+												name="external-link"
 												className="text-muted-foreground mt-0.5 size-4 shrink-0"
 											/>
 											<div className="min-w-0 space-y-2">
