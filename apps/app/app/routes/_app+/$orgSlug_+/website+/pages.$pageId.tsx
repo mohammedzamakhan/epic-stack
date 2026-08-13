@@ -139,7 +139,7 @@ function extensionForImageMime(mimeType: string): string {
 	}
 }
 
-function sanitizeImageUrl(value: string): string | null {
+function sanitizeHtmlImageUrl(value: string): string | null {
 	const trimmed = value.trim()
 	if (!trimmed) return null
 	if (trimmed.startsWith('/')) return trimmed
@@ -220,7 +220,7 @@ const UpdatePageSettingsSchema = z.object({
 		.string()
 		.max(2000)
 		.refine(
-			(value) => value === '' || sanitizeImageUrl(value) !== null,
+			(value) => value === '' || sanitizeHtmlImageUrl(value) !== null,
 			'Image URL must use http, https, or a relative path',
 		)
 		.optional(),
@@ -1571,7 +1571,7 @@ function PageSettingsPanel({
 			? '/'
 			: `/${previewSlug}`
 	const hostLabel = previewHost.split('/')[0] || 'yoursite.com'
-	const safeSeoImageUrl = sanitizeImageUrl(seoImageUrl)
+	const safeSeoImageUrl = sanitizeHtmlImageUrl(seoImageUrl)
 	const hasImage = Boolean(safeSeoImageUrl)
 	const localSlugError = page.isHomePage
 		? slug && !PAGE_SLUG_PATTERN.test(finalizePageSlug(slug))
