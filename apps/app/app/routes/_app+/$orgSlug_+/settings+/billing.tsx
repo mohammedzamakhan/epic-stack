@@ -130,6 +130,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			siteLocales: true,
 			siteDefaultLocale: true,
 			siteIconKey: true,
+			siteHeaderConfig: true,
+			siteFooterConfig: true,
 		},
 	})
 

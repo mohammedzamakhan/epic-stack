@@ -66,8 +66,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		})
 		orgId = org?.id
 		defaultLocale = org?.siteDefaultLocale ?? 'en'
-		headerConfig = org?.siteHeaderConfig
-		footerConfig = org?.siteFooterConfig
+		headerConfig = org?.siteHeaderConfig ?? null
+		footerConfig = org?.siteFooterConfig ?? null
 	} else if (host) {
 		const org = await prisma.organization.findFirst({
 			where: {
@@ -85,8 +85,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		})
 		orgId = org?.id
 		defaultLocale = org?.siteDefaultLocale ?? 'en'
-		headerConfig = org?.siteHeaderConfig
-		footerConfig = org?.siteFooterConfig
+		headerConfig = org?.siteHeaderConfig ?? null
+		footerConfig = org?.siteFooterConfig ?? null
 	}
 
 	if (!orgId) {

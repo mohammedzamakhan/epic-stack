@@ -139,6 +139,19 @@ function extensionForImageMime(mimeType: string): string {
 	}
 }
 
+function isSafeImageUrl(value: string): boolean {
+	const trimmed = value.trim()
+	if (!trimmed) return false
+	if (trimmed.startsWith('/')) return true
+	if (trimmed.startsWith('data:image/')) return true
+	try {
+		const url = new URL(trimmed)
+		return url.protocol === 'https:' || url.protocol === 'http:'
+	} catch {
+		return false
+	}
+}
+
 function guessImageMimeType(filename: string): string {
 	const extension = filename.split('.').pop()?.toLowerCase()
 	switch (extension) {
@@ -202,7 +215,14 @@ const UpdatePageSettingsSchema = z.object({
 		.optional(),
 	seoTitle: z.string().max(400).optional(),
 	seoDescription: z.string().max(2000).optional(),
-	seoImageUrl: z.string().max(2000).optional(),
+	seoImageUrl: z
+		.string()
+		.max(2000)
+		.refine(
+			(value) => value === '' || isSafeImageUrl(value),
+			'Image URL must use http, https, or a relative path',
+		)
+		.optional(),
 	seoNoIndex: z
 		.union([z.boolean(), z.literal('true'), z.literal('false')])
 		.transform((value) => value === true || value === 'true'),
@@ -1757,11 +1777,13 @@ function PageSettingsPanel({
 
 						{hasImage ? (
 							<div className="border-border space-y-2 overflow-hidden rounded-xl border">
-								<img
-									src={seoImageUrl.trim()}
-									alt=""
-									className="bg-muted aspect-[1.91/1] w-full object-cover"
-								/>
+								{isSafeImageUrl(seoImageUrl) ? (
+									<img
+										src={seoImageUrl.trim()}
+										alt=""
+										className="bg-muted aspect-[1.91/1] w-full object-cover"
+									/>
+								) : null}
 								<div className="flex flex-wrap gap-2 px-2 pb-2">
 									<Button
 										variant="outline"
