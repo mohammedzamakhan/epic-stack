@@ -139,16 +139,17 @@ function extensionForImageMime(mimeType: string): string {
 	}
 }
 
-function isSafeImageUrl(value: string): boolean {
+function sanitizeImageUrl(value: string): string | null {
 	const trimmed = value.trim()
-	if (!trimmed) return false
-	if (trimmed.startsWith('/')) return true
-	if (trimmed.startsWith('data:image/')) return true
+	if (!trimmed) return null
+	if (trimmed.startsWith('/')) return trimmed
+	if (trimmed.startsWith('data:image/')) return trimmed
 	try {
 		const url = new URL(trimmed)
-		return url.protocol === 'https:' || url.protocol === 'http:'
+		if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
+		return url.toString()
 	} catch {
-		return false
+		return null
 	}
 }
 
@@ -219,7 +220,7 @@ const UpdatePageSettingsSchema = z.object({
 		.string()
 		.max(2000)
 		.refine(
-			(value) => value === '' || isSafeImageUrl(value),
+			(value) => value === '' || sanitizeImageUrl(value) !== null,
 			'Image URL must use http, https, or a relative path',
 		)
 		.optional(),
@@ -1570,7 +1571,8 @@ function PageSettingsPanel({
 			? '/'
 			: `/${previewSlug}`
 	const hostLabel = previewHost.split('/')[0] || 'yoursite.com'
-	const hasImage = Boolean(seoImageUrl.trim())
+	const safeSeoImageUrl = sanitizeImageUrl(seoImageUrl)
+	const hasImage = Boolean(safeSeoImageUrl)
 	const localSlugError = page.isHomePage
 		? slug && !PAGE_SLUG_PATTERN.test(finalizePageSlug(slug))
 			? 'URL must contain only lowercase letters, numbers, and hyphens'
@@ -1777,9 +1779,9 @@ function PageSettingsPanel({
 
 						{hasImage ? (
 							<div className="border-border space-y-2 overflow-hidden rounded-xl border">
-								{isSafeImageUrl(seoImageUrl) ? (
+								{safeSeoImageUrl ? (
 									<img
-										src={seoImageUrl.trim()}
+										src={safeSeoImageUrl}
 										alt=""
 										className="bg-muted aspect-[1.91/1] w-full object-cover"
 									/>
