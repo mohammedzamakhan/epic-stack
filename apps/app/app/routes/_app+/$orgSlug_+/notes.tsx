@@ -66,8 +66,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			}
 		: {}
 
+	// ⚡ Bolt: Execute independent queries in parallel to avoid SSR waterfall
 	// Get organization notes with access control and search
-	const notes = await prisma.organizationNote.findMany({
+	const notesPromise = prisma.organizationNote.findMany({
 		select: {
 			id: true,
 			title: true,
@@ -124,6 +125,21 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		orderBy: [{ statusId: 'asc' }, { position: 'asc' }, { createdAt: 'desc' }],
 	})
 
+	const statusesPromise = prisma.organizationNoteStatus.findMany({
+		where: { organizationId: organization.id },
+		orderBy: { position: 'asc' },
+		select: { id: true, name: true, color: true, position: true },
+	})
+
+	// Get the current view mode from cookie
+	const viewModePromise = getNotesViewMode(request)
+
+	const [notes, statuses, viewMode] = await Promise.all([
+		notesPromise,
+		statusesPromise,
+		viewModePromise,
+	])
+
 	const formattedNotes = notes.map((note) => ({
 		...note,
 		createdByName:
@@ -137,15 +153,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			status: upload.status ?? 'pending',
 		})),
 	}))
-
-	const statuses = await prisma.organizationNoteStatus.findMany({
-		where: { organizationId: organization.id },
-		orderBy: { position: 'asc' },
-		select: { id: true, name: true, color: true, position: true },
-	})
-
-	// Get the current view mode from cookie
-	const viewMode = await getNotesViewMode(request)
 
 	return {
 		organization,
