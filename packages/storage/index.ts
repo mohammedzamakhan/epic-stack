@@ -23,4 +23,6 @@ export {
 	uploadNoteVideo,
 	uploadVideoThumbnail,
 	uploadSiteIcon,
+	uploadWebsiteSeoImage,
+	uploadWebsiteAsset,
 } from './src/upload-helpers'

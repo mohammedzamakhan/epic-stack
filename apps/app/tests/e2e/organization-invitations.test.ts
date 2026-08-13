@@ -29,6 +29,7 @@ test.describe('Organization Invitations', () => {
 
 		// Select role via the visual dropdown - scope to invite form to avoid the org switcher button
 		// (the org switcher has "1 member" which would match generic role patterns)
+		// eslint-disable-next-line playwright/no-raw-locators -- form has no semantic role without an accessible name
 		await page
 			.locator('#invite-form')
 			.getByRole('button', { name: 'Admin', exact: true })
@@ -294,7 +295,7 @@ test.describe('Organization Invitations', () => {
 		const pendingSection = page.getByRole('region', {
 			name: /pending invitations/i,
 		})
-		const invitationRow = pendingSection.getByText(invitationEmail)
+		await pendingSection.getByText(invitationEmail).isVisible()
 		// Use aria-label to find the delete button associated with this invitation row
 		// The button is in ItemActions (sibling to ItemContent), so parent traversal from the text span
 		// would not reach it. Instead, find the delete button within the region scope.

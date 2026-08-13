@@ -218,6 +218,60 @@ export function pickLocalized(
 }
 
 /**
+ * Read a locale value for form editing without trimming.
+ * Preserves leading/trailing spaces while the user is typing.
+ */
+export function getLocalizedEditableValue(
+	map: LocalizedString | string | null | undefined,
+	locale: string | null | undefined,
+	defaultLocale: string,
+): string {
+	if (map == null) return ''
+
+	let normalized: LocalizedString = {}
+
+	if (typeof map === 'string') {
+		const trimmed = map.trim()
+		if (!trimmed) return map
+		if (!trimmed.startsWith('{')) return map
+
+		try {
+			const parsed: unknown = JSON.parse(trimmed)
+			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+				return map
+			}
+			for (const [key, value] of Object.entries(parsed)) {
+				if (typeof value === 'string') {
+					normalized[key] = value
+				}
+			}
+		} catch {
+			return map
+		}
+	} else {
+		normalized = map
+	}
+
+	const candidates = [
+		locale,
+		locale?.split('-')[0],
+		defaultLocale,
+		defaultLocale.split('-')[0],
+	].filter(Boolean) as string[]
+
+	for (const candidate of candidates) {
+		const value = normalized[candidate]
+		if (typeof value === 'string') return value
+	}
+
+	for (const value of Object.values(normalized)) {
+		if (typeof value === 'string') return value
+	}
+
+	return ''
+}
+
+/**
  * Pick the best supported locale from an Accept-Language / preference list.
  */
 export function negotiateSiteLocale(

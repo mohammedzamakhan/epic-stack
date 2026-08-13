@@ -203,3 +203,37 @@ export async function uploadSiteIcon(
 	const config = await options.getConfig(organizationId)
 	return uploadToStorage(file, key, config)
 }
+
+/**
+ * Upload an Open Graph / SEO social image for a website page
+ */
+export async function uploadWebsiteSeoImage(
+	organizationId: string,
+	pageId: string,
+	file: File | FileUpload,
+	options: UploadOptions,
+) {
+	const fileId = createId()
+	const fileExtension = sanitizeAndExtractExtension(file.name)
+	const timestamp = Date.now()
+	const key = `org/${organizationId}/website/${pageId}/seo/${timestamp}-${fileId}.${fileExtension}`
+	const config = await options.getConfig(organizationId)
+	return uploadToStorage(file, key, config)
+}
+
+/**
+ * Upload an asset for a website page block (image or video)
+ */
+export async function uploadWebsiteAsset(
+	organizationId: string,
+	pageId: string,
+	file: File | FileUpload,
+	options: UploadOptions,
+) {
+	const fileId = createId()
+	const fileExtension = sanitizeAndExtractExtension(file.name)
+	const timestamp = Date.now()
+	const key = `org/${organizationId}/website/${pageId}/assets/${timestamp}-${fileId}.${fileExtension}`
+	const config = await options.getConfig(organizationId)
+	return uploadToStorage(file, key, config)
+}

@@ -1,0 +1,106 @@
+---
+import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
+
+interface Props {
+	config: {
+		heading?: string
+		description?: string
+		variant?: 'overlay' | 'solid'
+		imageUrl?: string
+		cardPosition?: 'left' | 'center' | 'right'
+		primaryLabel?: string
+		primaryUrl?: string
+		secondaryLabel?: string
+		secondaryUrl?: string
+	}
+}
+
+const { config } = Astro.props
+const imageSrc = resolveMediaUrl(config.imageUrl)
+const variant = config.variant || (imageSrc ? 'overlay' : 'solid')
+const position = config.cardPosition || 'left'
+const positionClass =
+	position === 'center'
+		? 'items-center justify-center text-center'
+		: position === 'right'
+			? 'items-end justify-center text-left'
+			: 'items-start justify-center text-left'
+---
+
+<section class={siteSection}>
+	<div class={siteContainer}>
+		{variant === 'overlay' && imageSrc ? (
+			<div class="relative overflow-hidden rounded-[calc(var(--radius)+12px)]">
+				<img
+					src={imageSrc}
+					alt=""
+					class="aspect-[16/7] min-h-[22rem] w-full object-cover sm:min-h-[28rem]"
+				/>
+				<div class:list={['absolute inset-0 flex p-5 sm:p-10', positionClass]}>
+					<div class="w-full max-w-md rounded-[calc(var(--radius)+8px)] bg-background/90 p-6 shadow-[0_16px_40px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md sm:p-8">
+						{config.heading ? (
+							<h2 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+								{config.heading}
+							</h2>
+						) : null}
+						{config.description ? (
+							<p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+								{config.description}
+							</p>
+						) : null}
+						{(config.primaryLabel || config.secondaryLabel) ? (
+							<div
+								class:list={[
+									'mt-6 flex flex-wrap gap-3',
+									position === 'center' && 'justify-center',
+								]}
+							>
+								{config.primaryLabel ? (
+									<a href={config.primaryUrl || '#'} class={siteBtnPrimary}>
+										{config.primaryLabel}
+									</a>
+								) : null}
+								{config.secondaryLabel ? (
+									<a href={config.secondaryUrl || '#'} class={siteBtnGhost}>
+										{config.secondaryLabel}
+									</a>
+								) : null}
+							</div>
+						) : null}
+					</div>
+				</div>
+			</div>
+		) : (
+			<div class="rounded-[calc(var(--radius)+12px)] bg-primary px-6 py-16 text-center text-primary-foreground sm:px-12">
+				{config.heading ? (
+					<h2 class="text-3xl font-bold tracking-tight sm:text-4xl">{config.heading}</h2>
+				) : null}
+				{config.description ? (
+					<p class="mx-auto mt-4 max-w-2xl text-lg text-primary-foreground/80">
+						{config.description}
+					</p>
+				) : null}
+				{(config.primaryLabel || config.secondaryLabel) ? (
+					<div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+						{config.primaryLabel ? (
+							<a
+								href={config.primaryUrl || '#'}
+								class="inline-flex items-center justify-center rounded-[var(--radius)] bg-background px-5 py-2.5 text-sm font-semibold text-primary shadow-sm transition-opacity hover:opacity-90"
+							>
+								{config.primaryLabel}
+							</a>
+						) : null}
+						{config.secondaryLabel ? (
+							<a
+								href={config.secondaryUrl || '#'}
+								class="inline-flex items-center justify-center rounded-[var(--radius)] border border-primary-foreground/40 px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10"
+							>
+								{config.secondaryLabel}
+							</a>
+						) : null}
+					</div>
+				) : null}
+			</div>
+		)}
+	</div>
+</section>

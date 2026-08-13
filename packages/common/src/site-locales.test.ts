@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
 	negotiateSiteLocale,
+	getLocalizedEditableValue,
 	parseLocalizedString,
 	parseSiteLocalesConfig,
 	pickLocalized,
@@ -33,6 +34,16 @@ describe('site-locales', () => {
 		expect(pickLocalized(map, 'ar', 'en')).toBe('مرحبا')
 		expect(pickLocalized(map, 'fr', 'en')).toBe('Hello')
 		expect(pickLocalized(map, 'fr-FR', 'de')).toBe('Hello')
+	})
+
+	it('preserves spaces for editable localized values', () => {
+		expect(getLocalizedEditableValue('{"en":"Hello "}', 'en', 'en')).toBe(
+			'Hello ',
+		)
+		expect(getLocalizedEditableValue('{"en":" "}', 'en', 'en')).toBe(' ')
+		expect(getLocalizedEditableValue('Plain text ', 'en', 'en')).toBe(
+			'Plain text ',
+		)
 	})
 
 	it('serializes localized strings without empty values', () => {

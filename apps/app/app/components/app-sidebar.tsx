@@ -252,6 +252,11 @@ function OrganizationSidebar({
 					isActive: location.pathname === `/${orgSlug}/website`,
 				},
 				{
+					title: _(msg`Pages`),
+					url: `/${orgSlug}/website/pages`,
+					isActive: location.pathname.includes(`/${orgSlug}/website/pages`),
+				},
+				{
 					title: _(msg`Announcements`),
 					url: `/${orgSlug}/website/announcements`,
 					isActive: location.pathname.includes(

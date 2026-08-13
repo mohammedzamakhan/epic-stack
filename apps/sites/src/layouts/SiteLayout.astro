@@ -5,6 +5,10 @@ import type { PublicSiteTheme } from '~/lib/org'
 
 interface Props {
 	title?: string
+	description?: string
+	imageUrl?: string | null
+	canonicalUrl?: string
+	noIndex?: boolean
 	theme?: PublicSiteTheme
 	lang?: string
 	dir?: 'ltr' | 'rtl'
@@ -17,6 +21,10 @@ interface Props {
 
 const {
 	title = brand.name,
+	description,
+	imageUrl,
+	canonicalUrl,
+	noIndex = false,
 	theme,
 	lang = 'en',
 	dir = 'ltr',
@@ -41,6 +49,18 @@ const htmlClass =
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		{description ? <meta name="description" content={description} /> : null}
+		{noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
+		{canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		{description ? <meta property="og:description" content={description} /> : null}
+		{imageUrl ? <meta property="og:image" content={imageUrl} /> : null}
+		{canonicalUrl ? <meta property="og:url" content={canonicalUrl} /> : null}
+		<meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
+		<meta name="twitter:title" content={title} />
+		{description ? <meta name="twitter:description" content={description} /> : null}
+		{imageUrl ? <meta name="twitter:image" content={imageUrl} /> : null}
 		{
 			siteIcon ? (
 				<>

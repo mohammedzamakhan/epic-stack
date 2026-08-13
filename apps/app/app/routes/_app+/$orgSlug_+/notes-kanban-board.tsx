@@ -178,29 +178,42 @@ export function NotesKanbanBoard({
 		)
 
 	// Pending status creates / renames / deletes
-	const renameMap: Record<string, string> = {}
-	fetchers
-		.filter((f) => f.formData?.get('intent') === 'rename-status')
-		.forEach((f) => {
-			renameMap[String(f.formData!.get('statusId'))] = String(
-				f.formData!.get('name'),
-			)
-		})
+	const renameMap = useMemo(() => {
+		const map: Record<string, string> = {}
+		fetchers
+			.filter((f) => f.formData?.get('intent') === 'rename-status')
+			.forEach((f) => {
+				map[String(f.formData!.get('statusId'))] = String(
+					f.formData!.get('name'),
+				)
+			})
+		return map
+	}, [fetchers])
 
-	const pendingCreatesStatus = fetchers
-		.filter((f) => f.formData?.get('intent') === 'create-status')
-		.map((f) => {
-			const name = String(f.formData!.get('name'))
-			return { id: name, name }
-		})
+	const pendingCreatesStatus = useMemo(
+		() =>
+			fetchers
+				.filter((f) => f.formData?.get('intent') === 'create-status')
+				.map((f) => {
+					const name = String(f.formData!.get('name'))
+					return { id: name, name }
+				}),
+		[fetchers],
+	)
 
-	const pendingDeletes = new Set<string>()
-	for (const f of fetchers) {
-		if (f.formMethod === 'DELETE' && f.formAction?.includes('/notes/status/')) {
-			const statusId = f.formAction.split('/').pop()
-			if (statusId) pendingDeletes.add(statusId)
+	const pendingDeletes = useMemo(() => {
+		const set = new Set<string>()
+		for (const f of fetchers) {
+			if (
+				f.formMethod === 'DELETE' &&
+				f.formAction?.includes('/notes/status/')
+			) {
+				const statusId = f.formAction.split('/').pop()
+				if (statusId) set.add(statusId)
+			}
 		}
-	}
+		return set
+	}, [fetchers])
 
 	// Build columns - memoized to avoid recreation on every render
 	const columns = useMemo<Column[]>(() => {

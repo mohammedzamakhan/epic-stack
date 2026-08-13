@@ -6,6 +6,12 @@ import tsparser from '@typescript-eslint/parser'
 export default [
 	...defaultConfig,
 	{
+		files: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
+		rules: {
+			'epic-web/prefer-dispose-in-tests': 'off',
+		},
+	},
+	{
 		ignores: ['uniwind.d.ts', 'locales/*.js'],
 	},
 	{

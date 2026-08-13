@@ -1,0 +1,141 @@
+---
+import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary } from '~/lib/media'
+
+interface Link {
+	url?: string
+	link?: { label?: string }
+}
+
+interface Props {
+	config: {
+		heading?: string
+		subheading?: string
+		links?: Link[]
+		assetType?: 'none' | 'image' | 'video'
+		assetPosition?: string
+		textPosition?: 'left' | 'center'
+		overlay?: 'none' | 'dark' | 'gradient'
+		minHeight?: number
+		imageUrl?: string
+		media?: { url?: string; alt?: string }
+		videoSrc?: string
+		videoAutoPlay?: boolean
+		videoLoop?: boolean
+		videoMuted?: boolean
+		videoControls?: boolean
+	}
+}
+
+const { config } = Astro.props
+const {
+	heading,
+	subheading,
+	links = [],
+	assetType = 'image',
+	textPosition = 'left',
+	overlay = 'dark',
+	minHeight = 560,
+	imageUrl,
+	media,
+	videoSrc,
+	videoAutoPlay = true,
+	videoLoop = true,
+	videoMuted = true,
+	videoControls = false,
+} = config
+
+const imageSrc = resolveMediaUrl(media?.url ?? imageUrl)
+const videoUrl = resolveMediaUrl(videoSrc)
+const hasMedia =
+	(assetType === 'image' && Boolean(imageSrc)) ||
+	(assetType === 'video' && Boolean(videoUrl))
+const isCentered = textPosition === 'center'
+const primary = links[0]
+const secondary = links[1]
+---
+
+<section
+	class="relative isolate flex w-full overflow-hidden"
+	style={`min-height: ${Math.max(minHeight, 320)}px;`}
+>
+	{hasMedia && assetType === 'image' && imageSrc ? (
+		<img
+			src={imageSrc}
+			alt={media?.alt || heading || ''}
+			class="absolute inset-0 size-full object-cover"
+			loading="eager"
+		/>
+	) : null}
+
+	{hasMedia && assetType === 'video' && videoUrl ? (
+		<video
+			class="absolute inset-0 size-full object-cover"
+			src={videoUrl}
+			autoplay={videoAutoPlay}
+			loop={videoLoop}
+			muted={videoMuted}
+			controls={videoControls}
+			playsinline
+		/>
+	) : null}
+
+	{!hasMedia ? (
+		<div class="absolute inset-0 bg-primary" aria-hidden="true"></div>
+	) : null}
+
+	{overlay === 'dark' ? (
+		<div class="absolute inset-0 bg-black/45" aria-hidden="true"></div>
+	) : overlay === 'gradient' ? (
+		<div
+			class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15"
+			aria-hidden="true"
+		></div>
+	) : null}
+
+	<div
+		class:list={[
+			'relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-16 sm:px-8 sm:py-24',
+			isCentered ? 'items-center justify-center text-center' : 'items-start justify-end',
+		]}
+	>
+		{subheading ? (
+			<p
+				class:list={[
+					'mb-3 max-w-xl text-sm font-medium tracking-wide sm:text-base',
+					hasMedia || overlay !== 'none' ? 'text-white/85' : 'text-primary-foreground/85',
+				]}
+			>
+				{subheading}
+			</p>
+		) : null}
+		{heading ? (
+			<h1
+				class:list={[
+					'max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-6xl',
+					hasMedia || overlay !== 'none' ? 'text-white' : 'text-primary-foreground',
+				]}
+			>
+				{heading}
+			</h1>
+		) : null}
+		{(primary?.link?.label || secondary?.link?.label) ? (
+			<div
+				class:list={[
+					'mt-8 flex flex-wrap gap-3',
+					isCentered && 'justify-center',
+				]}
+			>
+				{primary?.link?.label ? (
+					<a href={primary.url || '#'} class={siteBtnPrimary}>
+						{primary.link.label}
+					</a>
+				) : null}
+				{secondary?.link?.label ? (
+					<a href={secondary.url || '#'} class={siteBtnGhost}>
+						{secondary.link.label}
+					</a>
+				) : null}
+			</div>
+		) : null}
+	</div>
+</section>

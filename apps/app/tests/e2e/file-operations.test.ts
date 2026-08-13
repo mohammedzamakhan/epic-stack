@@ -33,7 +33,7 @@ test.describe('File Operations', () => {
 			const hasDialog = await dialogHeading.isVisible()
 
 			if (hasDialog) {
-				const cropArea = page.locator('.ReactCrop')
+				const cropArea = page.locator('[class*="ReactCrop"]') // eslint-disable-line playwright/no-raw-locators
 				if (await cropArea.isVisible().catch(() => false)) {
 					// Click in the center to ensure crop is active
 					await cropArea.click({ position: { x: 100, y: 100 } })
@@ -98,7 +98,7 @@ test.describe('File Operations', () => {
 
 			if (hasDialog) {
 				await page.waitForTimeout(2000)
-				const cropArea = page.locator('.ReactCrop')
+				const cropArea = page.locator('[class*="ReactCrop"]') // eslint-disable-line playwright/no-raw-locators
 				if (await cropArea.isVisible().catch(() => false)) {
 					// Click in the center to ensure crop is active
 					await cropArea.click({ position: { x: 100, y: 100 } })
@@ -311,7 +311,7 @@ test.describe('File Operations', () => {
 
 			if (hasDialog) {
 				await page.waitForTimeout(2000)
-				const cropArea = page.locator('.ReactCrop')
+				const cropArea = page.locator('[class*="ReactCrop"]') // eslint-disable-line playwright/no-raw-locators
 				if (await cropArea.isVisible().catch(() => false)) {
 					await cropArea.click({ position: { x: 100, y: 100 } })
 					await page.waitForTimeout(1000)
@@ -408,7 +408,7 @@ test.describe('File Operations', () => {
 
 			if (hasDialog) {
 				await page.waitForTimeout(2000)
-				const cropArea = page.locator('.ReactCrop')
+				const cropArea = page.locator('[class*="ReactCrop"]') // eslint-disable-line playwright/no-raw-locators
 				if (await cropArea.isVisible().catch(() => false)) {
 					await cropArea.click({ position: { x: 100, y: 100 } })
 					await page.waitForTimeout(1000)

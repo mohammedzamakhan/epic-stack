@@ -57,6 +57,7 @@ model User {
   dataSubjectRequests           DataSubjectRequest[]
   impersonationSessionsAsAdmin  ImpersonationSession[]     @relation("ImpersonationAdmin")
   impersonationSessionsAsTarget ImpersonationSession[]     @relation("ImpersonationTarget")
+  createdWebsitePages           WebsitePage[]              @relation("WebsitePageCreatedBy")
 }
 
 model Note {
@@ -250,6 +251,10 @@ model Organization {
   siteDefaultLocale      String?                  @default("en")
   /// S3 object key of the uploaded site icon PNG (original, before favicon generation)
   siteIconKey            String?
+  /// JSON config for the site-wide header (shared by every page)
+  siteHeaderConfig       String?
+  /// JSON config for the site-wide footer (shared by every page)
+  siteFooterConfig       String?
   siteIconAssets         OrganizationSiteAsset[]
   integrations           Integration[]
   onboardingProgress     OnboardingProgress[]
@@ -269,6 +274,7 @@ model Organization {
   apiKeys                ApiKey[]
   configFlags            ConfigFlag[]
   mcpAuthorizations      MCPAuthorization[]
+  websitePages           WebsitePage[]
 }
 
 /// Public site announcement banners (shown on the org Sites app when enabled)
@@ -311,6 +317,52 @@ model OrganizationSiteAsset {
   @@index([organizationId])
   @@index([organizationId, type])
   @@unique([organizationId, type])
+}
+
+/// A single page in an org's public website, composed of sections
+model WebsitePage {
+  id             String               @id @default(cuid())
+  organizationId String
+  title          String
+  slug           String               // URL path segment, e.g. "about-us"
+  status         String               @default("draft") // "draft" | "published"
+  publishedData  String?              // JSON snapshot of sections when published
+  /// Localized SEO title (JSON map). Falls back to `title` when empty.
+  seoTitle       String?
+  /// Localized meta description (JSON map)
+  seoDescription String?
+  /// Social / Open Graph image URL
+  seoImageUrl    String?
+  /// When true, emit noindex so search engines skip this page
+  seoNoIndex     Boolean              @default(false)
+  template       String               @default("blank") // "blank" | "article" | "showcase"
+  isHomePage     Boolean              @default(false)
+  position       Float?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  createdById    String
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User                 @relation("WebsitePageCreatedBy", fields: [createdById], references: [id])
+  sections       WebsitePageSection[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([organizationId, status])
+}
+
+/// A reusable section/block within a website page — config is a JSON blob whose shape varies by type
+model WebsitePageSection {
+  id        String      @id @default(cuid())
+  pageId    String
+  type      String      // "hero" | "content" | "gallery" | "testimonials" | "faq" | "cta" | "features" | "cards" | "video" (header/footer live on Organization)
+  config    String      @default("{}") // JSON blob for block-specific settings
+  position  Float       @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  page      WebsitePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@index([pageId, position])
 }
 
 model OrganizationRole {

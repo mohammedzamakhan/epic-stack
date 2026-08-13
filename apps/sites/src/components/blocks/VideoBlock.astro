@@ -1,0 +1,40 @@
+---
+import { resolveMediaUrl, siteContainer, siteSection } from '~/lib/media'
+
+interface Props {
+	config: {
+		title?: string
+		videoUrl?: string
+		autoplay?: boolean
+	}
+}
+
+const { config } = Astro.props
+const src = resolveMediaUrl(config.videoUrl)
+---
+
+<section class={siteSection}>
+	<div class={siteContainer}>
+		{config.title ? (
+			<h2 class="mb-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+				{config.title}
+			</h2>
+		) : null}
+
+		<div class="aspect-video overflow-hidden rounded-[calc(var(--radius)+12px)] bg-muted">
+			{src ? (
+				<iframe
+					src={src}
+					title={config.title || 'Video player'}
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+					allowfullscreen
+					class="size-full border-0"
+				></iframe>
+			) : (
+				<div class="flex size-full items-center justify-center text-sm text-muted-foreground">
+					No video source provided
+				</div>
+			)}
+		</div>
+	</div>
+</section>

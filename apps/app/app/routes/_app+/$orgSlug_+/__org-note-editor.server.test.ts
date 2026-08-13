@@ -1,4 +1,10 @@
+import { requireUserId } from '@repo/auth'
+import { prisma } from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
+import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
+import { action } from './__org-note-editor.server.tsx'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
@@ -13,14 +19,6 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-import { prisma } from '@repo/database'
-import { action } from './__org-note-editor.server.tsx'
-import { requireUserId } from '@repo/auth'
-import {
-	requireUserWithOrganizationPermission,
-	ORG_PERMISSIONS,
-} from '#app/utils/organization/permissions.server.ts'
-
 vi.mock('@repo/auth', () => ({
 	requireUserId: vi.fn(),
 }))
@@ -28,10 +26,7 @@ vi.mock('@repo/auth', () => ({
 vi.mock(
 	'#app/utils/organization/permissions.server.ts',
 	async (importOriginal) => {
-		const actual =
-			await importOriginal<
-				typeof import('#app/utils/organization/permissions.server.ts')
-			>()
+		const actual = await importOriginal<typeof PermissionsModule>()
 		return {
 			...actual,
 			ORG_PERMISSIONS: actual.ORG_PERMISSIONS ?? {

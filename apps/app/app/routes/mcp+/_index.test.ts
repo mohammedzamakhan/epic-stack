@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import fc from 'fast-check'
 import { RouterContextProvider } from 'react-router'
-import { serverBuildContext } from '#app/server-context.ts'
 import { describe, it, expect, afterEach } from 'vitest'
+import { serverBuildContext } from '#app/server-context.ts'
 import {
 	validateAccessToken,
 	createAuthorizationWithTokens,

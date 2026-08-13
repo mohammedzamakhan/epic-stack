@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 import { cn } from '@repo/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
 
 export type UserAvatarUser = {
 	name?: string | null

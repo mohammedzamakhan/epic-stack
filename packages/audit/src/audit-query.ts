@@ -1,5 +1,5 @@
 import { prisma } from '@repo/database'
-import { AuditAction } from './actions.ts'
+import { type AuditAction } from './actions.ts'
 
 export interface AuditQueryFilter {
 	organizationId?: string

@@ -1,10 +1,10 @@
+import { prisma } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { action } from './auth.signup.ts'
 
 process.env.SESSION_SECRET = 'test-session-secret'
 process.env.DATABASE_URL = 'file:./data.db'
-
-import { action } from './auth.signup.ts'
-import { prisma } from '@repo/database'
 
 vi.mock('@repo/database', () => ({
 	prisma: {

@@ -1,7 +1,7 @@
+import { type AuditAction } from './actions.ts'
 import { auditQuery, type AuditQueryFilter } from './audit-query.ts'
 import { auditWriter, type AuditLogInput } from './audit-writer.ts'
 import { auditRetentionManager, AuditRetentionManager } from './retention.ts'
-import { AuditAction } from './actions.ts'
 
 export type { AuditLogInput }
 export type { AuditQueryFilter }

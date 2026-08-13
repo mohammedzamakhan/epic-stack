@@ -1,4 +1,8 @@
+import type * as AuthModule from '@repo/auth'
+import { verifySessionStorage } from '@repo/auth'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { action } from './auth.onboarding.ts'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
@@ -13,11 +17,8 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-import { action } from './auth.onboarding.ts'
-import { verifySessionStorage } from '@repo/auth'
-
 vi.mock('@repo/auth', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/auth')>()
+	const actual = await importOriginal<typeof AuthModule>()
 	return {
 		...actual,
 		verifySessionStorage: {

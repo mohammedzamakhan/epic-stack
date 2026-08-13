@@ -1,3 +1,4 @@
+import { prisma } from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 vi.hoisted(() => {
@@ -13,24 +14,18 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-import { prisma } from '@repo/database'
-import { action as createStatusAction } from './notes.statuses.tsx'
+import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
+import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import { action as reorderNotesAction } from './notes.reorder.tsx'
 import { action as statusIdAction } from './notes.status.$statusId.tsx'
 import { action as reorderStatusesAction } from './notes.statuses.reorder.tsx'
-import {
-	requireUserWithOrganizationPermission,
-	ORG_PERMISSIONS,
-} from '#app/utils/organization/permissions.server.ts'
-import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import { action as createStatusAction } from './notes.statuses.tsx'
 
 vi.mock(
 	'#app/utils/organization/permissions.server.ts',
 	async (importOriginal) => {
-		const actual =
-			await importOriginal<
-				typeof import('#app/utils/organization/permissions.server.ts')
-			>()
+		const actual = await importOriginal<typeof PermissionsModule>()
 		return {
 			...actual,
 			ORG_PERMISSIONS: actual.ORG_PERMISSIONS ?? {

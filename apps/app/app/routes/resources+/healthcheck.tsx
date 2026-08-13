@@ -1,9 +1,9 @@
 // learn more: https://fly.io/docs/reference/configuration/#services-http_checks
+import { securityAlertService } from '@repo/audit'
 import { getValidatedHost } from '@repo/common/headers'
 import { prisma } from '@repo/database'
 import { ENV } from 'varlock/env'
 import { type Route } from './+types/healthcheck.ts'
-import { securityAlertService } from '@repo/audit'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const host = getValidatedHost(request, ENV.BASE_URL)

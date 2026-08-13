@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import {
 	createSession,
 	deleteSession,
@@ -16,12 +16,6 @@ describe('deleteSession', () => {
 		user: user1,
 		organization: org1,
 		authorizationId: 'auth-1',
-	}
-
-	const tokenData2 = {
-		user: user2,
-		organization: org2,
-		authorizationId: 'auth-2',
 	}
 
 	test('should delete session when ownership matches', () => {

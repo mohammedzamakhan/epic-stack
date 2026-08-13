@@ -10,6 +10,8 @@ import {
 	uploadNoteVideo as _uploadNoteVideo,
 	uploadVideoThumbnail as _uploadVideoThumbnail,
 	uploadSiteIcon as _uploadSiteIcon,
+	uploadWebsiteSeoImage as _uploadWebsiteSeoImage,
+	uploadWebsiteAsset as _uploadWebsiteAsset,
 	getSignedGetRequestInfo as _getSignedGetRequestInfo,
 	testS3Connection as _testS3Connection,
 	type StorageConfig,
@@ -155,6 +157,32 @@ export async function uploadSiteIcon(
 	return _uploadSiteIcon(organizationId, file, {
 		...defaultOptions,
 		// Force site icons to be stored in the platform's default bucket
+		getConfig: () => defaultOptions.getConfig(undefined),
+	})
+}
+
+export async function uploadWebsiteSeoImage(
+	organizationId: string,
+	pageId: string,
+	file: File | FileUpload,
+) {
+	const defaultOptions = createUploadOptions()
+	return _uploadWebsiteSeoImage(organizationId, pageId, file, {
+		...defaultOptions,
+		// Force SEO images to be stored in the platform's default bucket
+		getConfig: () => defaultOptions.getConfig(undefined),
+	})
+}
+
+export async function uploadWebsiteAsset(
+	organizationId: string,
+	pageId: string,
+	file: File | FileUpload,
+) {
+	const defaultOptions = createUploadOptions()
+	return _uploadWebsiteAsset(organizationId, pageId, file, {
+		...defaultOptions,
+		// Force assets to be stored in the platform's default bucket
 		getConfig: () => defaultOptions.getConfig(undefined),
 	})
 }

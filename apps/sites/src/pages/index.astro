@@ -1,15 +1,12 @@
 ---
 import { ENV } from 'varlock/env'
 import { getPageTitle } from '@repo/config/brand'
-import {
-	getSiteLocaleDirection,
-	getSiteLocaleLabel,
-} from '@repo/common/site-locales'
-import AnnouncementBanners from '~/components/AnnouncementBanners.astro'
-import SiteLayout from '~/layouts/SiteLayout.astro'
+import SitePage from '~/components/SitePage.astro'
+import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
 import {
 	fetchPublishedOrganization,
 	fetchPublishedOrganizationByHost,
+	fetchPublishedSitePage,
 } from '~/lib/org'
 
 const orgSlug = Astro.locals.orgSlug
@@ -28,148 +25,54 @@ if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 
-const siteIcon = organization.siteIcon
-const theme = organization.theme
-const announcements = organization.announcements ?? []
-const locales = organization.locales ?? ['en']
-const activeLocale = organization.locale ?? organization.defaultLocale ?? 'en'
-const localeDirection = getSiteLocaleDirection(activeLocale)
-const showLanguageSwitcher = locales.length > 1
-const baseLabel = theme?.baseColor ?? 'neutral'
-const themeLabel = theme?.theme ?? 'neutral'
-const radiusLabel = theme?.radius ?? 'default'
-const modeLabel = theme?.mode ?? 'system'
+const page = await fetchPublishedSitePage({
+	slug: orgSlug,
+	host: customHost,
+	home: true,
+	preview: Astro.url.searchParams.get('preview') === 'true',
+	lng: requestedLocale,
+})
 
-function localeHref(locale: string) {
-	const url = new URL(Astro.url)
-	url.searchParams.set('lng', locale)
-	return `${url.pathname}${url.search}`
-}
+const seoTitle = page?.seo?.title || page?.title
+const pageTitle = seoTitle
+	? getPageTitle(`${seoTitle} - ${organization.name}`)
+	: getPageTitle(organization.name)
+const seoDescription = page?.seo?.description || undefined
+const appOrigin = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
+	/\/$/,
+	'',
+)
+const rawSeoImage = page?.seo?.imageUrl || null
+const seoImageUrl = rawSeoImage
+	? rawSeoImage.startsWith('http')
+		? rawSeoImage
+		: `${appOrigin}${rawSeoImage}`
+	: null
+const seoNoIndex = page?.seo?.noIndex ?? false
+const canonicalUrl = Astro.url.origin + Astro.url.pathname
 ---
 
-<SiteLayout
-	title={getPageTitle(organization.name)}
-	theme={organization.theme}
-	lang={activeLocale}
-	dir={localeDirection}
-	siteIcon={organization.siteIcon ?? null}
+<SitePage
+	organization={organization}
+	page={page}
+	title={pageTitle}
+	description={seoDescription}
+	imageUrl={seoImageUrl}
+	canonicalUrl={canonicalUrl}
+	noIndex={seoNoIndex}
 >
-	<main class="bg-background text-foreground flex min-h-dvh flex-col">
-		<AnnouncementBanners announcements={announcements} />
-		{
-			showLanguageSwitcher ? (
-				<div class="border-border bg-background/80 border-b px-4 py-2 backdrop-blur">
-					<div class="mx-auto flex max-w-5xl flex-wrap items-center justify-end gap-2">
-						<span class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-							Language
-						</span>
-						{locales.map((locale) => {
-							const isActive = locale === activeLocale
-							return (
-								<a
-									href={localeHref(locale)}
-									hreflang={locale}
-									aria-current={isActive ? 'true' : undefined}
-									class={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-										isActive
-											? 'bg-primary text-primary-foreground'
-											: 'text-muted-foreground hover:bg-muted hover:text-foreground'
-									}`}
-								>
-									{getSiteLocaleLabel(locale)}
-								</a>
-							)
-						})}
-					</div>
-				</div>
-			) : null
-		}
-		<section class="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-10 px-6 py-16">
-			<div class="text-center">
-				{
-					siteIcon ? (
-						<img
-							src={`${ENV.PUBLIC_APP_URL}${siteIcon.original}`}
-							alt={`${organization.name} logo`}
-							class="mx-auto mb-4 size-20 rounded-lg object-contain"
-						/>
-					) : null
-				}
-				<p class="text-muted-foreground mb-3 text-sm font-medium tracking-wide uppercase">
+	{
+		page ? (
+			<RenderBlocks sections={page.sections} />
+		) : (
+			<section class="mx-auto flex min-h-[50vh] w-full max-w-3xl flex-col justify-center px-6 py-24">
+				<p class="text-muted-foreground text-sm font-medium">
 					{organization.slug}
 				</p>
-				<h1 class="font-title text-foreground text-4xl tracking-tight sm:text-5xl">
+				<h1 class="text-foreground mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
 					{organization.name}
 				</h1>
-				{organization.customDomain ? (
-					<p class="text-muted-foreground mt-4 text-sm">
-						{organization.customDomain}
-					</p>
-				) : null}
-			</div>
-
-			<div class="border-border bg-card text-card-foreground space-y-6 rounded-[var(--radius)] border p-6 shadow-sm">
-				<div class="flex flex-wrap items-center justify-between gap-3">
-					<div>
-						<p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-							Active theme
-						</p>
-						<p class="mt-1 text-sm font-medium capitalize">
-							Base {baseLabel} · Theme {themeLabel}
-						</p>
-					</div>
-					<p class="text-muted-foreground text-xs capitalize">
-						Radius {radiusLabel} · {modeLabel}
-					</p>
-				</div>
-
-				<div class="flex flex-wrap gap-2">
-					<span class="bg-primary text-primary-foreground inline-flex items-center rounded-[var(--radius)] px-4 py-2 text-sm font-medium">
-						Primary
-					</span>
-					<span class="bg-secondary text-secondary-foreground border-border inline-flex items-center rounded-[var(--radius)] border px-4 py-2 text-sm">
-						Secondary
-					</span>
-					<span class="bg-muted text-muted-foreground inline-flex items-center rounded-[var(--radius)] px-4 py-2 text-sm">
-						Muted
-					</span>
-					<span class="bg-accent text-accent-foreground inline-flex items-center rounded-[var(--radius)] px-4 py-2 text-sm">
-						Accent
-					</span>
-					<span class="bg-destructive text-white inline-flex items-center rounded-[var(--radius)] px-4 py-2 text-sm">
-						Destructive
-					</span>
-				</div>
-
-				<div class="space-y-2">
-					<p class="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-						Chart colors
-					</p>
-					<div class="flex flex-wrap gap-2">
-						<span class="bg-chart-1 size-8 rounded-[calc(var(--radius)*0.6)]" title="chart-1"></span>
-						<span class="bg-chart-2 size-8 rounded-[calc(var(--radius)*0.6)]" title="chart-2"></span>
-						<span class="bg-chart-3 size-8 rounded-[calc(var(--radius)*0.6)]" title="chart-3"></span>
-						<span class="bg-chart-4 size-8 rounded-[calc(var(--radius)*0.6)]" title="chart-4"></span>
-						<span class="bg-chart-5 size-8 rounded-[calc(var(--radius)*0.6)]" title="chart-5"></span>
-					</div>
-				</div>
-
-				<div class="border-border bg-background rounded-[var(--radius)] border p-4">
-					<p class="text-foreground text-sm font-medium">Surface preview</p>
-					<p class="text-muted-foreground mt-1 text-sm">
-						Background, card, border, and radius tokens from your Website theme
-						settings.
-					</p>
-					<div class="mt-4">
-						<button
-							type="button"
-							class="bg-primary text-primary-foreground hover:opacity-90 rounded-[var(--radius)] px-4 py-2 text-sm font-medium transition-opacity"
-						>
-							Call to action
-						</button>
-					</div>
-				</div>
-			</div>
-		</section>
-	</main>
-</SiteLayout>
+			</section>
+		)
+	}
+</SitePage>

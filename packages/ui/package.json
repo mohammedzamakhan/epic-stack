@@ -80,7 +80,11 @@
     "./client-hints": "./utils/client-hints.tsx",
     "./use-mobile": "./utils/use-mobile.ts",
     "./logo": "./components/logo.tsx",
-    "./frame": "./components/frame.tsx"
+    "./frame": "./components/frame.tsx",
+    "./alert-dialog": "./components/ui/alert-dialog.tsx",
+    "./radio-group": "./components/ui/radio-group.tsx",
+    "./spinner": "./components/ui/spinner.tsx",
+    "./resizable": "./components/ui/resizable.tsx"
   },
   "files": [
     "dist/**"
