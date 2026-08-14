@@ -1,0 +1,48 @@
+---
+import type { PublicWebsitePageSection } from '~/lib/org'
+import HeroBlock from './HeroBlock.astro'
+import ContentBlock from './ContentBlock.astro'
+import FaqBlock from './FaqBlock.astro'
+import FeaturesBlock from './FeaturesBlock.astro'
+import GalleryBlock from './GalleryBlock.astro'
+import CardsBlock from './CardsBlock.astro'
+import VideoBlock from './VideoBlock.astro'
+import CtaBlock from './CtaBlock.astro'
+import TestimonialsBlock from './TestimonialsBlock.astro'
+
+interface Props {
+	sections: PublicWebsitePageSection[]
+}
+
+const { sections } = Astro.props
+const bodySections = sections.filter(
+	(section) => section.type !== 'header' && section.type !== 'footer',
+)
+---
+
+<div class="flex flex-col">
+	{bodySections.map((section) => {
+		switch (section.type) {
+			case 'hero':
+				return <HeroBlock config={section.config} />
+			case 'content':
+				return <ContentBlock config={section.config} />
+			case 'faq':
+				return <FaqBlock config={section.config} />
+			case 'features':
+				return <FeaturesBlock config={section.config} />
+			case 'gallery':
+				return <GalleryBlock config={section.config} />
+			case 'cards':
+				return <CardsBlock config={section.config} />
+			case 'testimonials':
+				return <TestimonialsBlock config={section.config} />
+			case 'video':
+				return <VideoBlock config={section.config} />
+			case 'cta':
+				return <CtaBlock config={section.config} />
+			default:
+				return null
+		}
+	})}
+</div>

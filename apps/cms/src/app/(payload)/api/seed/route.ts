@@ -1,4 +1,5 @@
 import { getPayload } from 'payload'
+import type { PayloadRequest } from 'payload'
 import { NextRequest, NextResponse } from 'next/server'
 import config from '@payload-config'
 import { seed } from '@/endpoints/seed'
@@ -31,7 +32,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
         user: null,
         headers: new Headers(),
         context: {},
-      } as unknown as any,
+      } as PayloadRequest,
     })
 
     return NextResponse.json({

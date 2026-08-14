@@ -117,7 +117,7 @@ function NotificationPreferencesCardComponent() {
 	// Load preferences once when component mounts
 	useEffect(() => {
 		void handleRefetch()
-	}, [])
+	}, [handleRefetch])
 
 	const isLoadingState = isLoading || isRefetching
 

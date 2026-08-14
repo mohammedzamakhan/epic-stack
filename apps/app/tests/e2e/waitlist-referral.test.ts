@@ -316,8 +316,7 @@ test.describe('Waitlist Referral System', () => {
 			},
 		})
 
-		const { ENV, __setMockLaunchStatus } =
-			await import('#app/utils/env.server.ts')
+		const { __setMockLaunchStatus } = await import('#app/utils/env.server.ts')
 		__setMockLaunchStatus('CLOSED_BETA')
 		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')
 		const onWaitlist = await shouldBeOnWaitlist(user.id)
@@ -340,8 +339,7 @@ test.describe('Waitlist Referral System', () => {
 			},
 		})
 
-		const { ENV, __setMockLaunchStatus } =
-			await import('#app/utils/env.server.ts')
+		const { __setMockLaunchStatus } = await import('#app/utils/env.server.ts')
 		__setMockLaunchStatus('CLOSED_BETA')
 		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')
 		const onWaitlist = await shouldBeOnWaitlist(user.id)
@@ -365,8 +363,7 @@ test.describe('Waitlist Referral System', () => {
 		})
 
 		// Temporarily change LAUNCH_STATUS
-		const { ENV, __setMockLaunchStatus } =
-			await import('#app/utils/env.server.ts')
+		const { __setMockLaunchStatus } = await import('#app/utils/env.server.ts')
 		__setMockLaunchStatus('PUBLIC_BETA')
 
 		const { shouldBeOnWaitlist } = await import('#app/utils/waitlist.server.ts')

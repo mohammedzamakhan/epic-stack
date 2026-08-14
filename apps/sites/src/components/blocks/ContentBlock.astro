@@ -1,0 +1,131 @@
+---
+import { resolveMediaUrl, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
+
+interface Props {
+	config: {
+		title?: string
+		subtitle?: string
+		body?: string
+		layout?: 'text' | 'split' | 'brand'
+		imageUrl?: string
+		imageAlt?: string
+		imagePosition?: 'left' | 'right'
+		imageShape?: 'rounded' | 'circle' | 'square'
+		background?: 'none' | 'muted' | 'inverted'
+		ctaLabel?: string
+		ctaUrl?: string
+	}
+}
+
+const { config } = Astro.props
+const layout = config.layout || (config.imageUrl ? 'split' : 'text')
+const imageSrc = resolveMediaUrl(config.imageUrl)
+const imageOnRight = config.imagePosition === 'right'
+const shapeClass =
+	config.imageShape === 'circle'
+		? 'rounded-full aspect-square'
+		: config.imageShape === 'square'
+			? 'rounded-none aspect-square'
+			: 'rounded-[calc(var(--radius)+8px)] aspect-square'
+const background =
+	config.background === 'muted'
+		? 'bg-muted/50'
+		: config.background === 'inverted'
+			? 'bg-foreground text-background'
+			: ''
+const titleClass = config.background === 'inverted' ? 'text-background' : 'text-foreground'
+const bodyClass =
+	config.background === 'inverted' ? 'text-background/75' : 'text-muted-foreground'
+---
+
+<section class:list={[siteSection, background]}>
+	<div class={siteContainer}>
+		{layout === 'text' || (layout !== 'brand' && !imageSrc) ? (
+			<div class="mx-auto max-w-3xl">
+				{config.subtitle ? (
+					<p class:list={['mb-3 text-sm font-medium', bodyClass]}>{config.subtitle}</p>
+				) : null}
+				{config.title ? (
+					<h2 class:list={['text-3xl font-bold tracking-tight text-balance sm:text-4xl', titleClass]}>
+						{config.title}
+					</h2>
+				) : null}
+				{config.body ? (
+					<div
+						class:list={['mt-5 max-w-prose text-base leading-relaxed whitespace-pre-wrap', bodyClass]}
+						set:html={config.body}
+					/>
+				) : null}
+				{config.ctaLabel ? (
+					<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+						{config.ctaLabel}
+					</a>
+				) : null}
+			</div>
+		) : layout === 'brand' ? (
+			<div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+				<div class:list={['flex aspect-square items-center justify-center rounded-[calc(var(--radius)+8px)] bg-primary p-10', imageOnRight && 'lg:order-2']}>
+					{imageSrc ? (
+						<img
+							src={imageSrc}
+							alt={config.imageAlt || config.title || ''}
+							class="max-h-full max-w-[70%] object-contain"
+						/>
+					) : null}
+				</div>
+				<div>
+					{config.subtitle ? (
+						<p class:list={['mb-3 text-sm font-medium', bodyClass]}>{config.subtitle}</p>
+					) : null}
+					{config.title ? (
+						<h2 class:list={['text-3xl font-bold tracking-tight text-balance sm:text-4xl', titleClass]}>
+							{config.title}
+						</h2>
+					) : null}
+					{config.body ? (
+						<div
+							class:list={['mt-5 max-w-prose text-base leading-relaxed whitespace-pre-wrap', bodyClass]}
+							set:html={config.body}
+						/>
+					) : null}
+					{config.ctaLabel ? (
+						<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+							{config.ctaLabel}
+						</a>
+					) : null}
+				</div>
+			</div>
+		) : (
+			<div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+				<div class:list={['overflow-hidden bg-muted', shapeClass, imageOnRight && 'lg:order-2']}>
+					<img
+						src={imageSrc}
+						alt={config.imageAlt || config.title || ''}
+						class="size-full object-cover"
+					/>
+				</div>
+				<div>
+					{config.subtitle ? (
+						<p class:list={['mb-3 text-sm font-medium', bodyClass]}>{config.subtitle}</p>
+					) : null}
+					{config.title ? (
+						<h2 class:list={['text-3xl font-bold tracking-tight text-balance sm:text-4xl', titleClass]}>
+							{config.title}
+						</h2>
+					) : null}
+					{config.body ? (
+						<div
+							class:list={['mt-5 max-w-prose text-base leading-relaxed whitespace-pre-wrap', bodyClass]}
+							set:html={config.body}
+						/>
+					) : null}
+					{config.ctaLabel ? (
+						<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+							{config.ctaLabel}
+						</a>
+					) : null}
+				</div>
+			</div>
+		)}
+	</div>
+</section>

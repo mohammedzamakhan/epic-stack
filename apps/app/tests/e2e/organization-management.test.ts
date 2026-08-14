@@ -287,17 +287,16 @@ test.describe('Organization Management', () => {
 
 		// Find and click remove button for the member
 		// Look for the form with remove-member intent
+		// eslint-disable-next-line playwright/no-raw-locators -- form has no accessible name
 		const removeForm = page
 			.locator('form')
 			.filter({
 				has: page.getByRole('button', { name: /remove/i }),
 			})
-			/* eslint-disable playwright/no-raw-locators -- hidden input value filter needed to target specific member form */
 			.filter({
 				has: page.locator(`input[value="${member.id}"]`),
 			})
-		await removeForm.locator('button[type="submit"]').click()
-		/* eslint-enable playwright/no-raw-locators */
+		await removeForm.getByRole('button', { name: /remove/i }).click()
 
 		// Wait for the removal to complete (no confirmation dialog needed)
 		await page.waitForLoadState('networkidle')
@@ -362,6 +361,7 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(currentUserName).first()).toBeVisible()
 
 		// Check the actual behavior - there seems to be 1 remove button visible
+		// eslint-disable-next-line playwright/no-raw-locators -- form has no accessible name
 		const removeButtons = page.locator('form').filter({
 			has: page.getByRole('button', { name: /remove/i }),
 		})

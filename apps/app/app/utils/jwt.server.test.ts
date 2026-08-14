@@ -1,13 +1,13 @@
+import { canUserLogin } from '@repo/auth'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { requireAuth, createAccessToken } from './jwt.server.ts'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
 })
-
-import { requireAuth, createAccessToken } from './jwt.server.ts'
-import { canUserLogin } from '@repo/auth'
 
 vi.mock('@repo/auth', () => ({
 	canUserLogin: vi.fn(),

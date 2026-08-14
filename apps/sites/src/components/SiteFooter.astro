@@ -1,0 +1,115 @@
+---
+import {
+	resolveMediaUrl,
+	siteBtnPrimary,
+	type SiteOrgChrome,
+} from '~/lib/media'
+
+interface FooterLink {
+	label?: string
+	url?: string
+}
+
+interface FooterColumn {
+	title?: string
+	links?: FooterLink[]
+}
+
+interface SocialLink {
+	platform?: string
+	url?: string
+}
+
+interface Props {
+	config?: {
+		columns?: FooterColumn[]
+		ctaLabel?: string
+		ctaUrl?: string
+		showCta?: boolean
+		socials?: SocialLink[]
+		copyright?: string
+	}
+	organization: SiteOrgChrome
+}
+
+const { config = {}, organization } = Astro.props
+const columns = Array.isArray(config.columns) ? config.columns : []
+const socials = Array.isArray(config.socials)
+	? config.socials.filter((item) => item.url && item.platform)
+	: []
+const showCta = config.showCta !== false && Boolean(config.ctaLabel)
+const logoSrc = resolveMediaUrl(organization.siteIcon?.original)
+const year = new Date().getFullYear()
+const copyright = config.copyright?.trim() || `© ${year} ${organization.name}`
+---
+
+<footer class="mt-auto border-t border-border bg-muted/40">
+	<div class="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+		<div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+			<div class="flex max-w-xs items-center gap-3">
+				{logoSrc ? (
+					<img
+						src={logoSrc}
+						alt=""
+						class="size-10 rounded-[calc(var(--radius)*0.7)] object-contain"
+					/>
+				) : null}
+				<p class="text-lg font-semibold tracking-tight text-foreground">
+					{organization.name}
+				</p>
+			</div>
+
+			<div class="grid flex-1 grid-cols-2 gap-8 sm:grid-cols-3 lg:max-w-xl">
+				{columns.map((column) => (
+					<div>
+						{column.title ? (
+							<p class="mb-3 text-sm font-semibold text-foreground">{column.title}</p>
+						) : null}
+						<ul class="space-y-2">
+							{(column.links ?? []).map((link) =>
+								link.label ? (
+									<li>
+										<a
+											href={link.url || '#'}
+											class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+										>
+											{link.label}
+										</a>
+									</li>
+								) : null,
+							)}
+						</ul>
+					</div>
+				))}
+			</div>
+
+			{showCta ? (
+				<a href={config.ctaUrl || '#'} class={siteBtnPrimary}>
+					{config.ctaLabel}
+				</a>
+			) : null}
+		</div>
+	</div>
+
+	<div class="border-t border-border/80">
+		<div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+			<p class="text-xs text-muted-foreground">{copyright}</p>
+			{socials.length > 0 ? (
+				<ul class="flex items-center gap-4">
+					{socials.map((social) => (
+						<li>
+							<a
+								href={social.url}
+								class="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								{social.platform}
+							</a>
+						</li>
+					))}
+				</ul>
+			) : null}
+		</div>
+	</div>
+</footer>

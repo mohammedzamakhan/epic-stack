@@ -1,0 +1,72 @@
+---
+import { ENV } from 'varlock/env'
+import { getPageTitle } from '@repo/config/brand'
+import SitePage from '~/components/SitePage.astro'
+import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
+import {
+	fetchPublishedOrganization,
+	fetchPublishedOrganizationByHost,
+	fetchPublishedSitePage,
+} from '~/lib/org'
+
+const orgSlug = Astro.locals.orgSlug
+const customHost = Astro.locals.customHost
+const requestedLocale = Astro.url.searchParams.get('lng')
+const slug = Astro.params.slug?.replace(/^\/+|\/+$/g, '') ?? ''
+
+if (!orgSlug && !customHost) {
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
+}
+
+if (!slug) {
+	return Astro.rewrite('/')
+}
+
+const organization = orgSlug
+	? await fetchPublishedOrganization(orgSlug, requestedLocale)
+	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
+
+if (!organization) {
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
+}
+
+const page = await fetchPublishedSitePage({
+	slug: orgSlug,
+	host: customHost,
+	pageSlug: slug,
+	preview: Astro.url.searchParams.get('preview') === 'true',
+	lng: requestedLocale,
+})
+
+if (!page) {
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
+}
+
+const seoTitle = page.seo?.title || page.title
+const pageTitle = getPageTitle(`${seoTitle} - ${organization.name}`)
+const seoDescription = page.seo?.description || undefined
+const appOrigin = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
+	/\/$/,
+	'',
+)
+const rawSeoImage = page.seo?.imageUrl || null
+const seoImageUrl = rawSeoImage
+	? rawSeoImage.startsWith('http')
+		? rawSeoImage
+		: `${appOrigin}${rawSeoImage}`
+	: null
+const seoNoIndex = page.seo?.noIndex ?? false
+const canonicalUrl = Astro.url.origin + Astro.url.pathname
+---
+
+<SitePage
+	organization={organization}
+	page={page}
+	title={pageTitle}
+	description={seoDescription}
+	imageUrl={seoImageUrl}
+	canonicalUrl={canonicalUrl}
+	noIndex={seoNoIndex}
+>
+	<RenderBlocks sections={page.sections} />
+</SitePage>

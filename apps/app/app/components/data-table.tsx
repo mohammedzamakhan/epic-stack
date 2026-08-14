@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Trans, msg, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
+import { cn, useIsMobile } from '@repo/ui'
 import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -37,7 +38,6 @@ import {
 	type ChartConfig,
 } from '@repo/ui/chart'
 import { Checkbox } from '@repo/ui/checkbox'
-import { cn, useIsMobile } from '@repo/ui'
 import {
 	Drawer,
 	DrawerClose,

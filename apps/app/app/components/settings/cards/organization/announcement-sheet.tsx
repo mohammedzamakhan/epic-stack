@@ -375,7 +375,9 @@ export function AnnouncementSheet({
 								disabled={isSubmitting}
 							>
 								<SelectTrigger id={fields.type.id} className="w-full">
-									<SelectValue placeholder={_(msg`Select type`)} />
+									<SelectValue placeholder={_(msg`Select type`)}>
+										{typeLabels[type]}
+									</SelectValue>
 								</SelectTrigger>
 								<SelectContent>
 									{ANNOUNCEMENT_TYPES.map((announcementType) => (

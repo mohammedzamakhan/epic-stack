@@ -60,10 +60,7 @@ import {
 	isValidCustomDomain,
 	normalizeCustomDomain,
 } from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
-import {
-	getSignedGetRequestInfoAsync,
-	uploadSiteIcon,
-} from '#app/utils/storage.server.ts'
+import { uploadSiteIcon } from '#app/utils/storage.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)

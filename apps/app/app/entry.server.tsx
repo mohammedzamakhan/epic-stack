@@ -108,7 +108,13 @@ export default async function handleRequest(...args: DocRequestArgs) {
 											"'self'",
 										],
 										'font-src': ["'self'"],
-										'frame-src': ["'self'", 'builder.io'],
+										'frame-src': [
+											"'self'",
+											'builder.io',
+											'*.epic-startup.me:*',
+											'*.epic-startup.me',
+											'localhost:*',
+										],
 										'img-src': ["'self'", 'data:'],
 										'script-src': [
 											"'unsafe-inline'",
@@ -186,7 +192,13 @@ export default async function handleRequest(...args: DocRequestArgs) {
 										"'self'",
 									],
 									'font-src': ["'self'"],
-									'frame-src': ["'self'", 'builder.io'],
+									'frame-src': [
+										"'self'",
+										'builder.io',
+										'*.epic-startup.me:*',
+										'*.epic-startup.me',
+										'localhost:*',
+									],
 									'img-src': ["'self'", 'data:'],
 									'script-src': [
 										"'strict-dynamic'",

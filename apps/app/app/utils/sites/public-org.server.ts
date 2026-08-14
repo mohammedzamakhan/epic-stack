@@ -12,6 +12,10 @@ import {
 	type SiteThemeConfig,
 } from '@repo/common/site-theme'
 import { prisma } from '@repo/database'
+import {
+	composePageSectionsWithChrome,
+	getDefaultConfig,
+} from '#app/utils/website/block-types.ts'
 
 export type PublicSiteAnnouncement = {
 	id: string
@@ -194,4 +198,206 @@ export async function findPublishedSiteOrganization(options: {
 		},
 		select,
 	})
+}
+
+export type PublicSitePageSection = {
+	id: string
+	type: string
+	position: number
+	config: string
+}
+
+export type PublicSitePage = {
+	id: string
+	title: string
+	slug: string
+	isHomePage: boolean
+	publishedData: string | null
+	seoTitle: string | null
+	seoDescription: string | null
+	seoImageUrl: string | null
+	seoNoIndex: boolean
+	sections: PublicSitePageSection[]
+}
+
+/**
+ * Recursively walk a parsed config value and resolve every localized JSON
+ * string `{"en":"…","fr":"…"}` to the appropriate locale string.
+ */
+function deepLocalize(
+	value: unknown,
+	locale: string,
+	defaultLocale: string,
+): unknown {
+	if (typeof value === 'string') {
+		// Only attempt to resolve strings that look like JSON objects
+		if (value.startsWith('{')) {
+			const resolved = pickLocalized(value, locale, defaultLocale)
+			// If resolution produced a non-empty result, return it.
+			// Otherwise fall back to the original string so callers can handle it.
+			return resolved !== '' ? resolved : value
+		}
+		return value
+	}
+
+	if (Array.isArray(value)) {
+		return value.map((item) => deepLocalize(item, locale, defaultLocale))
+	}
+
+	if (typeof value === 'object' && value !== null) {
+		const obj = value as Record<string, unknown>
+		// Check if this object looks like a localized map (keys are locale codes)
+		// A localized map has only string values and at least one locale-like key.
+		const keys = Object.keys(obj)
+		const looksLikeLocalizedMap =
+			keys.length > 0 &&
+			keys.every((k) => /^[a-z]{2}(-[A-Z]{2})?$/.test(k)) &&
+			Object.values(obj).every((v) => typeof v === 'string')
+		if (looksLikeLocalizedMap) {
+			const map = obj as Record<string, string>
+			const localeBase = locale?.split('-')[0] ?? ''
+			const defaultLocaleBase = defaultLocale.split('-')[0] ?? defaultLocale
+			return (
+				(locale ? map[locale] : undefined) ??
+				(localeBase ? map[localeBase] : undefined) ??
+				map[defaultLocale] ??
+				map[defaultLocaleBase] ??
+				Object.values(map)[0] ??
+				''
+			)
+		}
+
+		// Regular nested object — recurse into each key
+		const result: Record<string, unknown> = {}
+		for (const key of keys) {
+			result[key] = deepLocalize(obj[key], locale, defaultLocale)
+		}
+		return result
+	}
+
+	return value
+}
+
+export function toPublicPagePayload(
+	page: PublicSitePage,
+	requestedLocale: string = 'en',
+	defaultLocale: string = 'en',
+	chrome?: {
+		headerConfig?: string | null
+		footerConfig?: string | null
+	},
+) {
+	const title =
+		pickLocalized(page.title, requestedLocale, defaultLocale) || page.title
+	const seoTitle =
+		pickLocalized(page.seoTitle, requestedLocale, defaultLocale) || title
+	const seoDescription =
+		pickLocalized(page.seoDescription, requestedLocale, defaultLocale) || ''
+
+	const sections = composePageSectionsWithChrome(
+		page.sections,
+		chrome?.headerConfig ?? JSON.stringify(getDefaultConfig('header')),
+		chrome?.footerConfig ?? JSON.stringify(getDefaultConfig('footer')),
+	)
+
+	return {
+		id: page.id,
+		title,
+		slug: page.slug,
+		isHomePage: page.isHomePage,
+		seo: {
+			title: seoTitle,
+			description: seoDescription,
+			imageUrl: page.seoImageUrl?.trim() || null,
+			noIndex: page.seoNoIndex,
+		},
+		sections: sections.map((sec) => {
+			let config: any = {}
+			try {
+				const parsed = JSON.parse(sec.config)
+				config = deepLocalize(parsed, requestedLocale, defaultLocale)
+			} catch {}
+			return {
+				id: sec.id,
+				type: sec.type,
+				position: sec.position,
+				config,
+			}
+		}),
+	}
+}
+
+const publishedPageSelect = {
+	id: true,
+	title: true,
+	slug: true,
+	isHomePage: true,
+	publishedData: true,
+	seoTitle: true,
+	seoDescription: true,
+	seoImageUrl: true,
+	seoNoIndex: true,
+	sections: {
+		orderBy: { position: 'asc' as const },
+		select: {
+			id: true,
+			type: true,
+			position: true,
+			config: true,
+		},
+	},
+}
+
+function withPublishedSections(
+	page: PublicSitePage | null,
+	preview?: boolean,
+): PublicSitePage | null {
+	if (page && !preview && page.publishedData) {
+		try {
+			page.sections = JSON.parse(page.publishedData) as PublicSitePageSection[]
+		} catch {}
+	}
+	return page
+}
+
+export async function findPublishedSitePage(
+	organizationId: string,
+	pageSlug: string | null,
+	options?: { preview?: boolean; home?: boolean },
+): Promise<PublicSitePage | null> {
+	const visibility = options?.preview ? {} : { status: 'published' as const }
+
+	if (options?.home) {
+		const homePage =
+			(await prisma.websitePage.findFirst({
+				where: {
+					organizationId,
+					isHomePage: true,
+					...visibility,
+				},
+				select: publishedPageSelect,
+			})) ??
+			(await prisma.websitePage.findFirst({
+				where: {
+					organizationId,
+					slug: { in: ['', 'home'] },
+					...visibility,
+				},
+				orderBy: { slug: 'asc' },
+				select: publishedPageSelect,
+			}))
+		return withPublishedSections(homePage, options.preview)
+	}
+
+	if (!pageSlug) return null
+
+	const page = await prisma.websitePage.findFirst({
+		where: {
+			organizationId,
+			slug: pageSlug,
+			...visibility,
+		},
+		select: publishedPageSelect,
+	})
+	return withPublishedSections(page, options?.preview)
 }

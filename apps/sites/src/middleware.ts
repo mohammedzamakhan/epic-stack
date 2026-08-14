@@ -1,6 +1,6 @@
 import { brand } from '@repo/config/brand'
-import { ENV } from 'varlock/env'
 import { defineMiddleware } from 'astro:middleware'
+import { ENV } from 'varlock/env'
 
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
@@ -39,6 +39,7 @@ const contentSecurityPolicy = isDev
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
+			"frame-ancestors 'self' *.epic-startup.me:* *.epic-startup.me localhost:*",
 		].join('; ')
 	: [
 			"default-src 'self'",
@@ -48,11 +49,11 @@ const contentSecurityPolicy = isDev
 			"object-src 'none'",
 			"base-uri 'self'",
 			"form-action 'self'",
+			"frame-ancestors 'self' *.epic-startup.me:* *.epic-startup.me localhost:*",
 		].join('; ')
 
 const securityHeaders = {
 	'X-Content-Type-Options': 'nosniff',
-	'X-Frame-Options': 'DENY',
 	'Content-Security-Policy': contentSecurityPolicy,
 }
 

@@ -340,6 +340,8 @@ export default function GDPRRequestsPage() {
 
 	const showing = requests.length
 	const totalRequests = pagination.totalCount.toLocaleString()
+	const page = pagination.page
+	const totalPages = pagination.totalPages
 
 	return (
 		<div className="space-y-6">
@@ -532,108 +534,118 @@ export default function GDPRRequestsPage() {
 				<CardContent>
 					{requests.length > 0 ? (
 						<ItemGroup>
-							{requests.map((req) => (
-								<Item key={req.id} variant="outline">
-									<ItemContent>
-										<ItemHeader>
-											<div className="flex items-center gap-2">
-												<Badge variant={getTypeBadgeVariant(req.type)}>
-													{req.type === 'export' ? (
-														<Trans>Export</Trans>
-													) : (
-														<Trans>Erasure</Trans>
-													)}
-												</Badge>
-												<Badge variant={getStatusBadgeVariant(req.status)}>
-													{req.status}
-												</Badge>
-											</div>
-											<div className="text-muted-foreground text-sm">
-												{formatDate(req.requestedAt)}
-											</div>
-										</ItemHeader>
-										<ItemTitle>{req.user?.email || req.userId}</ItemTitle>
-										<ItemDescription className="flex flex-wrap gap-4">
-											{req.user?.name && <span>{req.user.name}</span>}
-											{req.user?.username && (
-												<span className="text-muted-foreground">
-													@{req.user.username}
-												</span>
-											)}
-											{req.scheduledFor && (
-												<span className="text-destructive">
-													<Icon name="clock" className="mr-1 inline h-3 w-3" />
-													<Trans>
-														Scheduled: {formatDate(req.scheduledFor)}
-													</Trans>
-												</span>
-											)}
-											{req.completedAt && (
-												<span className="text-green-600">
-													<Icon name="check" className="mr-1 inline h-3 w-3" />
-													<Trans>
-														Completed: {formatDate(req.completedAt)}
-													</Trans>
-												</span>
-											)}
-											{req.failureReason && (
-												<span className="text-destructive">
-													<Icon
-														name="alert-triangle"
-														className="mr-1 inline h-3 w-3"
-													/>
-													{req.failureReason}
-												</span>
-											)}
-										</ItemDescription>
-										{(req.status === 'scheduled' ||
-											req.status === 'failed') && (
-											<div className="mt-3 flex gap-2">
-												{req.status === 'scheduled' && (
-													<>
-														<fetcher.Form method="POST">
-															<input
-																type="hidden"
-																name="requestId"
-																value={req.id}
-															/>
-															<Button
-																type="submit"
-																name="intent"
-																value="cancel"
-																variant="outline"
-																size="sm"
-																disabled={fetcher.state !== 'idle'}
-															>
-																<Icon name="x" className="mr-1 h-3 w-3" />
-																<Trans>Cancel</Trans>
-															</Button>
-														</fetcher.Form>
-														<fetcher.Form method="POST">
-															<input
-																type="hidden"
-																name="requestId"
-																value={req.id}
-															/>
-															<Button
-																type="submit"
-																name="intent"
-																value="expedite"
-																variant="destructive"
-																size="sm"
-																disabled={fetcher.state !== 'idle'}
-															>
-																<Icon name="play" className="mr-1 h-3 w-3" />
-																<Trans>Expedite Now</Trans>
-															</Button>
-														</fetcher.Form>
-													</>
+							{requests.map((req) => {
+								const scheduledFor = req.scheduledFor
+									? formatDate(req.scheduledFor)
+									: null
+								const completedAt = req.completedAt
+									? formatDate(req.completedAt)
+									: null
+								return (
+									<Item key={req.id} variant="outline">
+										<ItemContent>
+											<ItemHeader>
+												<div className="flex items-center gap-2">
+													<Badge variant={getTypeBadgeVariant(req.type)}>
+														{req.type === 'export' ? (
+															<Trans>Export</Trans>
+														) : (
+															<Trans>Erasure</Trans>
+														)}
+													</Badge>
+													<Badge variant={getStatusBadgeVariant(req.status)}>
+														{req.status}
+													</Badge>
+												</div>
+												<div className="text-muted-foreground text-sm">
+													{formatDate(req.requestedAt)}
+												</div>
+											</ItemHeader>
+											<ItemTitle>{req.user?.email || req.userId}</ItemTitle>
+											<ItemDescription className="flex flex-wrap gap-4">
+												{req.user?.name && <span>{req.user.name}</span>}
+												{req.user?.username && (
+													<span className="text-muted-foreground">
+														@{req.user.username}
+													</span>
 												)}
-											</div>
-										)}
-									</ItemContent>
-								</Item>
-							))}
+												{scheduledFor && (
+													<span className="text-destructive">
+														<Icon
+															name="clock"
+															className="mr-1 inline h-3 w-3"
+														/>
+														{_(msg`Scheduled: ${scheduledFor}`)}
+													</span>
+												)}
+												{completedAt && (
+													<span className="text-green-600">
+														<Icon
+															name="check"
+															className="mr-1 inline h-3 w-3"
+														/>
+														{_(msg`Completed: ${completedAt}`)}
+													</span>
+												)}
+												{req.failureReason && (
+													<span className="text-destructive">
+														<Icon
+															name="alert-triangle"
+															className="mr-1 inline h-3 w-3"
+														/>
+														{req.failureReason}
+													</span>
+												)}
+											</ItemDescription>
+											{(req.status === 'scheduled' ||
+												req.status === 'failed') && (
+												<div className="mt-3 flex gap-2">
+													{req.status === 'scheduled' && (
+														<>
+															<fetcher.Form method="POST">
+																<input
+																	type="hidden"
+																	name="requestId"
+																	value={req.id}
+																/>
+																<Button
+																	type="submit"
+																	name="intent"
+																	value="cancel"
+																	variant="outline"
+																	size="sm"
+																	disabled={fetcher.state !== 'idle'}
+																>
+																	<Icon name="x" className="mr-1 h-3 w-3" />
+																	<Trans>Cancel</Trans>
+																</Button>
+															</fetcher.Form>
+															<fetcher.Form method="POST">
+																<input
+																	type="hidden"
+																	name="requestId"
+																	value={req.id}
+																/>
+																<Button
+																	type="submit"
+																	name="intent"
+																	value="expedite"
+																	variant="destructive"
+																	size="sm"
+																	disabled={fetcher.state !== 'idle'}
+																>
+																	<Icon name="play" className="mr-1 h-3 w-3" />
+																	<Trans>Expedite Now</Trans>
+																</Button>
+															</fetcher.Form>
+														</>
+													)}
+												</div>
+											)}
+										</ItemContent>
+									</Item>
+								)
+							})}
 						</ItemGroup>
 					) : (
 						<div className="py-12 text-center">
@@ -650,9 +662,7 @@ export default function GDPRRequestsPage() {
 					{pagination.totalPages > 1 && (
 						<div className="mt-6 flex items-center justify-between">
 							<p className="text-muted-foreground text-sm">
-								<Trans>
-									Page {pagination.page} of {pagination.totalPages}
-								</Trans>
+								{_(msg`Page ${page} of ${totalPages}`)}
 							</p>
 							<div className="flex gap-2">
 								<Button

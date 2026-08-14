@@ -152,6 +152,7 @@ test.describe('Accessibility', () => {
 		await page.waitForLoadState('domcontentloaded')
 
 		// Check all images have alt attributes
+		// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
 		const images = page.locator('img')
 		const imageCount = await images.count()
 
@@ -168,6 +169,7 @@ test.describe('Accessibility', () => {
 			await navigate('/profile')
 			await page.waitForLoadState('domcontentloaded')
 
+			// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
 			const profileImages = page.locator('img')
 			const profileImageCount = await profileImages.count()
 
@@ -183,6 +185,7 @@ test.describe('Accessibility', () => {
 				await page.reload()
 				await page.waitForLoadState('domcontentloaded')
 				// Retry the test after reload
+				// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
 				const profileImages = page.locator('img')
 				const profileImageCount = await profileImages.count()
 
@@ -452,7 +455,6 @@ test.describe('Accessibility', () => {
 					// Check if field has aria-describedby pointing to error message
 					const describedBy = await field.getAttribute('aria-describedby')
 					if (describedBy) {
-						// eslint-disable-next-line playwright/no-raw-locators -- dynamic ID selector required for aria-describedby lookup
 						const errorElement = page.locator(`#${describedBy}`)
 						await expect(errorElement).toBeVisible()
 					}
@@ -487,6 +489,7 @@ test.describe('Accessibility', () => {
 
 		// Wait for the dialog animation to complete and the input to gain focus
 		// Radix UI delays autofocus until the open animation finishes
+		// eslint-disable-next-line playwright/no-raw-locators -- command menu input has no semantic textbox role
 		await expect(dialog.locator('input').first()).toBeFocused()
 
 		// Test focus trap - focus should stay within dialog

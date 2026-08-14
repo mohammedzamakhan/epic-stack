@@ -1,4 +1,12 @@
+import { prisma } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
+import {
+	createAuthenticatedSessionResponse,
+	verify2FAToken,
+} from '#app/utils/jwt.server.ts'
+import { action } from './auth.login.2fa.ts'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
@@ -12,14 +20,6 @@ vi.hoisted(() => {
 	process.env.S3_BUCKET_NAME = 'test'
 	process.env.BUCKET_NAME = 'test'
 })
-
-import { action } from './auth.login.2fa.ts'
-import { prisma } from '@repo/database'
-import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
-import {
-	createAuthenticatedSessionResponse,
-	verify2FAToken,
-} from '#app/utils/jwt.server.ts'
 
 vi.mock('@repo/database', () => ({
 	prisma: {

@@ -1,9 +1,4 @@
 import {
-	uploadNoteImage,
-	uploadNoteVideo,
-	getSignedGetRequestInfo,
-} from '#app/utils/storage.server.ts'
-import {
 	triggerVideoProcessing,
 	triggerImageProcessing,
 } from '@repo/background-jobs'
@@ -12,6 +7,11 @@ import {
 	type ImageFieldset,
 	type MediaFieldset,
 } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
+import {
+	uploadNoteImage,
+	uploadNoteVideo,
+	getSignedGetRequestInfo,
+} from '#app/utils/storage.server.ts'
 
 type UploadFieldset = (ImageFieldset | MediaFieldset) & { type?: string }
 

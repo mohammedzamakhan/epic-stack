@@ -129,7 +129,8 @@ export function SiteLocalesCard({
 			return labels.join(', ')
 		}
 
-		return _(msg`${first}, ${second}, +${labels.length - 2} more`)
+		const remainingCount = labels.length - 2
+		return _(msg`${first}, ${second}, +${remainingCount} more`)
 	}, [_, selectedLocales])
 
 	const toggleLocale = (locale: SiteContentLocale, checked: boolean) => {
@@ -255,14 +256,41 @@ export function SiteLocalesCard({
 							>
 								<SelectTrigger
 									id={fields.defaultLocale.id}
-									className="w-full sm:max-w-xs"
+									className="border-input w-full font-normal sm:max-w-xs"
 								>
-									<SelectValue placeholder={_(msg`Select default language`)} />
+									<SelectValue placeholder={_(msg`Select default language`)}>
+										{({ value }) => {
+											const locale = isSiteContentLocale(value)
+												? value
+												: defaultLocale
+											return (
+												<span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+													<span className="truncate">
+														{SITE_CONTENT_LOCALE_LABELS[locale]}
+													</span>
+													<span className="text-xs tracking-wide uppercase">
+														{locale}
+													</span>
+												</span>
+											)
+										}}
+									</SelectValue>
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="rounded-xl p-1.5">
 									{availableDefaults.map((locale) => (
-										<SelectItem key={locale} value={locale}>
-											{SITE_CONTENT_LOCALE_LABELS[locale]}
+										<SelectItem
+											key={locale}
+											value={locale}
+											className="group data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-primary data-selected:text-primary-foreground rounded-lg px-2 py-1.5 pr-8"
+										>
+											<span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+												<span className="truncate">
+													{SITE_CONTENT_LOCALE_LABELS[locale]}
+												</span>
+												<span className="group-data-highlighted:text-accent-foreground text-xs tracking-wide uppercase">
+													{locale}
+												</span>
+											</span>
 										</SelectItem>
 									))}
 								</SelectContent>

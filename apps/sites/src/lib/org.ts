@@ -88,3 +88,53 @@ export async function fetchPublishedOrganizationByHost(
 	if (locale) params.set('lng', locale)
 	return fetchPublicOrganization(params)
 }
+
+export type PublicWebsitePageSection = {
+	id: string
+	type: string
+	position: number
+	config: any
+}
+
+export type PublicWebsitePage = {
+	id: string
+	title: string
+	slug: string
+	isHomePage: boolean
+	seo?: {
+		title: string
+		description: string
+		imageUrl: string | null
+		noIndex: boolean
+	}
+	sections: PublicWebsitePageSection[]
+}
+
+export async function fetchPublishedSitePage(options: {
+	slug?: string | null
+	host?: string | null
+	pageSlug?: string
+	home?: boolean
+	preview?: boolean
+	lng?: string | null
+}): Promise<PublicWebsitePage | null> {
+	const params = new URLSearchParams()
+	if (options.slug) params.set('slug', options.slug)
+	if (options.host) params.set('host', options.host)
+	if (options.home) params.set('home', 'true')
+	if (options.pageSlug) params.set('page', options.pageSlug)
+	if (options.preview) params.set('preview', 'true')
+	if (options.lng) params.set('lng', options.lng)
+
+	const url = `${getAppUrl()}/resources/sites/page?${params.toString()}`
+
+	try {
+		const response = await fetch(url, {
+			headers: { Accept: 'application/json' },
+		})
+		if (!response.ok) return null
+		return (await response.json()) as PublicWebsitePage
+	} catch {
+		return null
+	}
+}
