@@ -287,8 +287,9 @@ test.describe('Organization Management', () => {
 
 		// Find and click remove button for the member
 		// Look for the form with remove-member intent
+		// eslint-disable-next-line playwright/no-raw-locators -- form has no accessible name
 		const removeForm = page
-			.getByRole('form')
+			.locator('form')
 			.filter({
 				has: page.getByRole('button', { name: /remove/i }),
 			})
@@ -360,7 +361,8 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(currentUserName).first()).toBeVisible()
 
 		// Check the actual behavior - there seems to be 1 remove button visible
-		const removeButtons = page.getByRole('form').filter({
+		// eslint-disable-next-line playwright/no-raw-locators -- form has no accessible name
+		const removeButtons = page.locator('form').filter({
 			has: page.getByRole('button', { name: /remove/i }),
 		})
 
