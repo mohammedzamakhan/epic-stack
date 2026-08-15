@@ -5,6 +5,40 @@
  */
 
 import shadcnThemes from './shadcn-themes.json' with { type: 'json' }
+import {
+	CUSTOM_SITE_FONT_ID,
+	parseSiteCustomFont,
+	parseSiteFontSelection,
+	type SiteCustomFont,
+	type SiteFontSelection,
+} from './site-fonts.ts'
+
+export {
+	CUSTOM_BODY_FONT_FAMILY,
+	CUSTOM_HEADING_FONT_FAMILY,
+	CUSTOM_SITE_FONT_ID,
+	SITE_FONT_FORMATS,
+	SITE_FONT_IDS,
+	SITE_FONTS,
+	buildCustomSiteFontFaceCss,
+	buildSiteFontCatalogCss,
+	getSiteFont,
+	isSiteFontId,
+	isSiteFontSelection,
+	parseSiteCustomFont,
+	parseSiteFontSelection,
+	siteFontCssValue,
+	siteFontDisplayName,
+	siteFontExtension,
+	siteFontFormatFromExtension,
+	sniffSiteFontFormat,
+	type SiteCustomFont,
+	type SiteFont,
+	type SiteFontFallback,
+	type SiteFontFormat,
+	type SiteFontId,
+	type SiteFontSelection,
+} from './site-fonts.ts'
 
 export const SITE_BASE_COLORS = [
 	'neutral',
@@ -74,6 +108,10 @@ export type SiteThemeConfig = {
 	theme: SiteThemeColor
 	radius: SiteThemeRadius
 	mode: SiteThemeMode
+	headingFont: SiteFontSelection
+	bodyFont: SiteFontSelection
+	headingCustomFont: SiteCustomFont | null
+	bodyCustomFont: SiteCustomFont | null
 }
 
 export const DEFAULT_SITE_THEME: SiteThemeConfig = {
@@ -81,6 +119,10 @@ export const DEFAULT_SITE_THEME: SiteThemeConfig = {
 	theme: 'neutral',
 	radius: 'default',
 	mode: 'system',
+	headingFont: 'inter',
+	bodyFont: 'inter',
+	headingCustomFont: null,
+	bodyCustomFont: null,
 }
 
 type ThemeTokens = Record<string, string>
@@ -240,6 +282,11 @@ export function parseSiteThemeConfig(
 			}
 		}
 
+		const headingCustomFont = parseSiteCustomFont(parsed.headingCustomFont)
+		const bodyCustomFont = parseSiteCustomFont(parsed.bodyCustomFont)
+		const headingFont = parseSiteFontSelection(parsed.headingFont, 'inter')
+		const bodyFont = parseSiteFontSelection(parsed.bodyFont, 'inter')
+
 		return {
 			baseColor,
 			theme,
@@ -247,6 +294,16 @@ export function parseSiteThemeConfig(
 			mode: isSiteThemeMode(parsed.mode)
 				? parsed.mode
 				: DEFAULT_SITE_THEME.mode,
+			headingFont:
+				headingFont === CUSTOM_SITE_FONT_ID && !headingCustomFont
+					? DEFAULT_SITE_THEME.headingFont
+					: headingFont,
+			bodyFont:
+				bodyFont === CUSTOM_SITE_FONT_ID && !bodyCustomFont
+					? DEFAULT_SITE_THEME.bodyFont
+					: bodyFont,
+			headingCustomFont,
+			bodyCustomFont,
 		}
 	} catch {
 		return { ...DEFAULT_SITE_THEME }

@@ -1,37 +1,38 @@
-import { msg } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
-	DEFAULT_SITE_THEME,
+	CUSTOM_SITE_FONT_ID,
 	SITE_BASE_COLORS,
+	SITE_FONT_IDS,
+	SITE_FONTS,
 	SITE_THEME_COLORS,
 	SITE_THEME_MODES,
 	SITE_THEME_RADII,
 	SITE_THEME_RADIUS_VALUES,
 	getBaseColorMeta,
+	getSiteFont,
 	getThemeColorMeta,
-	resolveSiteThemeTokens,
-	type SiteBaseColor,
-	type SiteThemeColor,
+	siteFontDisplayName,
+	siteFontFormatFromExtension,
+	type SiteFontSelection,
 	type SiteThemeConfig,
 	type SiteThemeMode,
 	type SiteThemeRadius,
 } from '@repo/common/site-theme'
-import { getOrgSiteUrl } from '@repo/common/url'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@repo/ui/card'
 import { Icon } from '@repo/ui/icon'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
-import { Img } from 'openimg/react'
-import { useEffect, useState } from 'react'
-import { useFetcher } from 'react-router'
+import { type ChangeEvent, useRef } from 'react'
 import { z } from 'zod'
 
 export const SiteThemeSchema = z.object({
@@ -39,10 +40,17 @@ export const SiteThemeSchema = z.object({
 	theme: z.enum(SITE_THEME_COLORS),
 	radius: z.enum(SITE_THEME_RADII),
 	mode: z.enum(SITE_THEME_MODES),
+	headingFont: z.union([z.enum(SITE_FONT_IDS), z.literal(CUSTOM_SITE_FONT_ID)]),
+	bodyFont: z.union([z.enum(SITE_FONT_IDS), z.literal(CUSTOM_SITE_FONT_ID)]),
 	organizationId: z.string(),
 })
 
 export const siteThemeActionIntent = 'update-site-theme'
+export const uploadSiteFontActionIntent = 'upload-site-font'
+export const deleteSiteFontActionIntent = 'delete-site-font'
+
+const MAX_FONT_SIZE = 1024 * 1024 * 2
+const FONT_ACCEPT = '.woff2,.woff,.ttf,.otf'
 
 const ACCENT_NEUTRALS = SITE_THEME_COLORS.filter((c) =>
 	(SITE_BASE_COLORS as readonly string[]).includes(c),
@@ -52,11 +60,7 @@ const ACCENT_COLORS = SITE_THEME_COLORS.filter(
 )
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-	return (
-		<p className="text-foreground mb-2 text-sm font-medium tracking-tight">
-			{children}
-		</p>
-	)
+	return <p className="text-muted-foreground text-xs font-medium">{children}</p>
 }
 
 function ColorSwatch({
@@ -110,7 +114,7 @@ function RadiusGlyph({
 	return (
 		<span
 			className={cn(
-				'relative size-8 overflow-hidden border',
+				'relative size-7 overflow-hidden border',
 				selected
 					? 'border-foreground/25 bg-muted/40'
 					: 'border-border bg-muted/20',
@@ -134,61 +138,206 @@ function RadiusGlyph({
 	)
 }
 
-export function SiteThemeCard({
-	organization,
-	themeConfig,
+function FontSelect({
+	id,
+	value,
+	customLabel,
+	disabled,
+	onChange,
 }: {
-	organization: {
-		id: string
-		name: string
-		slug: string
-		customDomain: string | null
-		siteIconKey: string | null
-	}
-	themeConfig: SiteThemeConfig
-	actionData?: { result?: unknown }
+	id: string
+	value: SiteFontSelection
+	customLabel?: string | null
+	disabled?: boolean
+	onChange: (next: SiteFontSelection) => void
 }) {
-	const { _ } = useLingui()
-	const themeFetcher = useFetcher()
-	const ThemeForm = themeFetcher.Form
-	const busy = themeFetcher.state !== 'idle'
+	const selected =
+		value === CUSTOM_SITE_FONT_ID
+			? {
+					family: customLabel || 'Custom',
+					fallback: 'sans-serif' as const,
+				}
+			: getSiteFont(value)
+	const sansFonts = SITE_FONTS.filter((font) => font.fallback === 'sans-serif')
+	const serifFonts = SITE_FONTS.filter((font) => font.fallback === 'serif')
+	const monoFonts = SITE_FONTS.filter((font) => font.fallback === 'monospace')
 
-	const [selectedBase, setSelectedBase] = useState<SiteBaseColor>(
-		themeConfig.baseColor || DEFAULT_SITE_THEME.baseColor,
+	return (
+		<Select
+			value={value}
+			onValueChange={(next) => {
+				if (next) onChange(next as SiteFontSelection)
+			}}
+			disabled={disabled}
+		>
+			<SelectTrigger id={id} className="w-full">
+				<SelectValue>
+					<span
+						style={{ fontFamily: `"${selected.family}", ${selected.fallback}` }}
+					>
+						{selected.family}
+					</span>
+				</SelectValue>
+			</SelectTrigger>
+			<SelectContent align="start" alignItemWithTrigger={false}>
+				{customLabel ? (
+					<SelectGroup>
+						<SelectLabel>
+							<Trans>Uploaded</Trans>
+						</SelectLabel>
+						<SelectItem value={CUSTOM_SITE_FONT_ID}>{customLabel}</SelectItem>
+					</SelectGroup>
+				) : null}
+				<SelectGroup>
+					<SelectLabel>
+						<Trans>Sans</Trans>
+					</SelectLabel>
+					{sansFonts.map((font) => (
+						<SelectItem key={font.id} value={font.id}>
+							<span
+								style={{ fontFamily: `"${font.family}", ${font.fallback}` }}
+							>
+								{font.family}
+							</span>
+						</SelectItem>
+					))}
+				</SelectGroup>
+				<SelectGroup>
+					<SelectLabel>
+						<Trans>Serif</Trans>
+					</SelectLabel>
+					{serifFonts.map((font) => (
+						<SelectItem key={font.id} value={font.id}>
+							<span
+								style={{ fontFamily: `"${font.family}", ${font.fallback}` }}
+							>
+								{font.family}
+							</span>
+						</SelectItem>
+					))}
+				</SelectGroup>
+				<SelectGroup>
+					<SelectLabel>
+						<Trans>Mono</Trans>
+					</SelectLabel>
+					{monoFonts.map((font) => (
+						<SelectItem key={font.id} value={font.id}>
+							<span
+								style={{ fontFamily: `"${font.family}", ${font.fallback}` }}
+							>
+								{font.family}
+							</span>
+						</SelectItem>
+					))}
+				</SelectGroup>
+			</SelectContent>
+		</Select>
 	)
-	const [selectedTheme, setSelectedTheme] = useState<SiteThemeColor>(
-		themeConfig.theme || DEFAULT_SITE_THEME.theme,
-	)
-	const [selectedRadius, setSelectedRadius] = useState<SiteThemeRadius>(
-		themeConfig.radius || DEFAULT_SITE_THEME.radius,
-	)
-	const [selectedMode, setSelectedMode] = useState<SiteThemeMode>(
-		themeConfig.mode || DEFAULT_SITE_THEME.mode,
-	)
-	const [systemPrefersDark, setSystemPrefersDark] = useState(false)
-	const [previewHost, setPreviewHost] = useState(
-		organization.customDomain || `${organization.slug}.epic-startup.me`,
-	)
+}
 
-	useEffect(() => {
-		const media = window.matchMedia('(prefers-color-scheme: dark)')
-		const sync = () => setSystemPrefersDark(media.matches)
-		sync()
-		media.addEventListener('change', sync)
-		return () => media.removeEventListener('change', sync)
-	}, [])
+function FontFileField({
+	role,
+	filename,
+	disabled,
+	onUpload,
+	onRemove,
+	onError,
+}: {
+	role: 'heading' | 'body'
+	filename: string | null
+	disabled?: boolean
+	onUpload: (role: 'heading' | 'body', file: File) => void
+	onRemove: (role: 'heading' | 'body') => void
+	onError: (message: string) => void
+}) {
+	const inputRef = useRef<HTMLInputElement>(null)
 
-	useEffect(() => {
-		if (organization.customDomain) {
-			setPreviewHost(organization.customDomain)
+	const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const file = event.currentTarget.files?.[0]
+		event.currentTarget.value = ''
+		if (!file) return
+		if (!siteFontFormatFromExtension(file.name)) {
+			onError('Use a WOFF2, WOFF, TTF, or OTF file')
 			return
 		}
-		try {
-			setPreviewHost(new URL(getOrgSiteUrl(organization.slug)).host)
-		} catch {
-			setPreviewHost(`${organization.slug}.epic-startup.me`)
+		if (file.size > MAX_FONT_SIZE) {
+			onError('Font size must be less than 2MB')
+			return
 		}
-	}, [organization.customDomain, organization.slug])
+		onUpload(role, file)
+	}
+
+	return (
+		<div>
+			<input
+				ref={inputRef}
+				type="file"
+				accept={FONT_ACCEPT}
+				className="sr-only"
+				disabled={disabled}
+				onChange={handleChange}
+			/>
+			{filename ? (
+				<div className="flex flex-wrap items-center gap-1.5">
+					<p className="text-muted-foreground min-w-0 flex-1 truncate text-[11px]">
+						{filename}
+					</p>
+					<Button
+						type="button"
+						variant="outline"
+						size="xs"
+						disabled={disabled}
+						onClick={() => inputRef.current?.click()}
+					>
+						<Trans>Replace</Trans>
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size="xs"
+						className="text-destructive hover:text-destructive"
+						disabled={disabled}
+						onClick={() => onRemove(role)}
+					>
+						<Trans>Remove</Trans>
+					</Button>
+				</div>
+			) : (
+				<button
+					type="button"
+					disabled={disabled}
+					onClick={() => inputRef.current?.click()}
+					className={cn(
+						'text-muted-foreground hover:text-foreground text-[11px] underline-offset-2 hover:underline',
+						'focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none',
+						'disabled:pointer-events-none disabled:opacity-50',
+					)}
+				>
+					<Trans>Upload a font</Trans>
+				</button>
+			)}
+		</div>
+	)
+}
+
+export function SiteThemeFields({
+	value,
+	disabled,
+	onChange,
+	onUploadFont,
+	onRemoveFont,
+	onFontError,
+	uploadingRole,
+}: {
+	value: SiteThemeConfig
+	disabled?: boolean
+	onChange: (next: SiteThemeConfig) => void
+	onUploadFont?: (role: 'heading' | 'body', file: File) => void
+	onRemoveFont?: (role: 'heading' | 'body') => void
+	onFontError?: (message: string) => void
+	uploadingRole?: 'heading' | 'body' | null
+}) {
+	const { _ } = useLingui()
 
 	const modeLabels: Record<SiteThemeMode, string> = {
 		light: _(msg`Light`),
@@ -214,332 +363,168 @@ export function SiteThemeCard({
 	/** Prefer Radix-like order: None → Small → Medium → Large (skip duplicate default). */
 	const radiusOptions = SITE_THEME_RADII.filter((r) => r !== 'default')
 
-	const previewIsDark =
-		selectedMode === 'dark' || (selectedMode === 'system' && systemPrefersDark)
-
-	const resolved = resolveSiteThemeTokens({
-		baseColor: selectedBase,
-		theme: selectedTheme,
-		radius: selectedRadius,
-		mode: selectedMode,
-	})
-	const previewTokens = previewIsDark ? resolved.dark : resolved.light
-
-	const baseMeta = getBaseColorMeta(selectedBase)
-	const themeMeta = getThemeColorMeta(selectedTheme)
-	const previewRadius = SITE_THEME_RADIUS_VALUES[selectedRadius]
-	const siteIconSrc = organization.siteIconKey
-		? `/resources/images?objectKey=${encodeURIComponent(organization.siteIconKey)}`
-		: null
-	const orgInitials = organization.name.slice(0, 2).toUpperCase()
-
 	return (
-		<Card>
-			<CardHeader className="border-border gap-2 border-b px-5 pb-5 sm:px-6">
-				<CardTitle>{_(msg`Branding`)}</CardTitle>
-				<CardDescription>
-					{_(
-						msg`Set the look of your public website. Save when you’re happy with the preview.`,
-					)}
-				</CardDescription>
-			</CardHeader>
+		<div className="flex flex-col gap-5">
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Headings`)}</FieldLabel>
+				<FontSelect
+					id="site-heading-font"
+					value={value.headingFont}
+					customLabel={
+						value.headingCustomFont
+							? siteFontDisplayName(value.headingCustomFont.filename)
+							: null
+					}
+					disabled={disabled}
+					onChange={(headingFont) => onChange({ ...value, headingFont })}
+				/>
+				{onUploadFont && onRemoveFont ? (
+					<FontFileField
+						role="heading"
+						filename={value.headingCustomFont?.filename ?? null}
+						disabled={disabled || uploadingRole === 'heading'}
+						onUpload={onUploadFont}
+						onRemove={onRemoveFont}
+						onError={(message) => onFontError?.(message)}
+					/>
+				) : null}
+				<p className="text-muted-foreground text-[11px] leading-relaxed">
+					{_(msg`Titles and section headings.`)}
+				</p>
+			</section>
 
-			<ThemeForm method="POST">
-				<input type="hidden" name="intent" value={siteThemeActionIntent} />
-				<input type="hidden" name="organizationId" value={organization.id} />
-				<input type="hidden" name="baseColor" value={selectedBase} />
-				<input type="hidden" name="theme" value={selectedTheme} />
-				<input type="hidden" name="radius" value={selectedRadius} />
-				<input type="hidden" name="mode" value={selectedMode} />
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Body`)}</FieldLabel>
+				<FontSelect
+					id="site-body-font"
+					value={value.bodyFont}
+					customLabel={
+						value.bodyCustomFont
+							? siteFontDisplayName(value.bodyCustomFont.filename)
+							: null
+					}
+					disabled={disabled}
+					onChange={(bodyFont) => onChange({ ...value, bodyFont })}
+				/>
+				{onUploadFont && onRemoveFont ? (
+					<FontFileField
+						role="body"
+						filename={value.bodyCustomFont?.filename ?? null}
+						disabled={disabled || uploadingRole === 'body'}
+						onUpload={onUploadFont}
+						onRemove={onRemoveFont}
+						onError={(message) => onFontError?.(message)}
+					/>
+				) : null}
+				<p className="text-muted-foreground text-[11px] leading-relaxed">
+					{_(msg`Paragraphs, navigation, and other text.`)}
+				</p>
+			</section>
 
-				<CardContent className="px-5 pt-4 pb-6 sm:px-6">
-					<div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-12">
-						{/* Preview in browser chrome */}
-						<div className="lg:sticky lg:top-6">
-							<div className="border-border bg-muted/50 overflow-hidden rounded-2xl border shadow-sm">
-								{/* Browser chrome */}
-								<div className="bg-muted/30 grid grid-cols-[1fr_minmax(0,11rem)_1fr] items-center gap-2 border-b px-3 py-2 sm:grid-cols-[1fr_minmax(0,14rem)_1fr]">
-									<div className="flex items-center gap-1.5" aria-hidden>
-										<span className="size-2.5 rounded-full bg-[#ff5f57]" />
-										<span className="size-2.5 rounded-full bg-[#febc2e]" />
-										<span className="size-2.5 rounded-full bg-[#28c840]" />
-									</div>
-									<div className="bg-muted/50 flex min-w-0 items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[11px]">
-										<Icon name="lock" className="size-3 shrink-0 opacity-60" />
-										<span className="text-muted-foreground truncate font-medium tracking-tight">
-											{previewHost}
-										</span>
-									</div>
-									<div
-										className="text-muted-foreground flex items-center justify-end gap-2.5 opacity-50"
-										aria-hidden
-									>
-										<Icon name="share-2" className="size-3" />
-										<Icon name="plus" className="size-3" />
-										<Icon name="copy" className="size-3" />
-									</div>
-								</div>
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Accent color`)}</FieldLabel>
+				<div className="flex flex-wrap gap-2">
+					{[...ACCENT_NEUTRALS, ...ACCENT_COLORS].map((themeColor) => {
+						const meta = getThemeColorMeta(themeColor)
+						return (
+							<ColorSwatch
+								key={themeColor}
+								label={meta.label}
+								swatch={meta.swatch}
+								selected={value.theme === themeColor}
+								disabled={disabled}
+								onSelect={() => onChange({ ...value, theme: themeColor })}
+							/>
+						)
+					})}
+				</div>
+			</section>
 
-								{/* Inset site viewport */}
-								<div className="p-1.5">
-									<div
-										className="overflow-hidden rounded-xl transition-[background-color,color] duration-200 ease-out"
-										style={{
-											backgroundColor: previewTokens['--background'],
-											color: previewTokens['--foreground'],
-										}}
-									>
-										<div
-											className="flex items-center gap-2.5 border-b px-4 py-3"
-											style={{ borderColor: previewTokens['--border'] }}
-										>
-											{siteIconSrc ? (
-												<span
-													className="flex size-6 shrink-0 items-center justify-center overflow-hidden"
-													style={{ borderRadius: previewRadius }}
-												>
-													<Img
-														src={siteIconSrc}
-														alt=""
-														width={48}
-														height={48}
-														className="size-full object-contain"
-													/>
-												</span>
-											) : (
-												<span
-													className="flex size-6 shrink-0 items-center justify-center text-[9px] font-semibold"
-													style={{
-														backgroundColor: previewTokens['--primary'],
-														color: previewTokens['--primary-foreground'],
-														borderRadius: previewRadius,
-													}}
-													aria-hidden
-												>
-													{orgInitials}
-												</span>
-											)}
-											<div className="min-w-0">
-												<p className="truncate text-sm font-semibold tracking-tight">
-													{organization.name}
-												</p>
-												<p
-													className="truncate text-[11px]"
-													style={{
-														color: previewTokens['--muted-foreground'],
-													}}
-												>
-													{baseMeta.label} · {themeMeta.label}
-												</p>
-											</div>
-										</div>
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Gray color`)}</FieldLabel>
+				<div className="flex flex-wrap gap-2">
+					{SITE_BASE_COLORS.map((baseColor) => {
+						const meta = getBaseColorMeta(baseColor)
+						return (
+							<ColorSwatch
+								key={baseColor}
+								label={meta.label}
+								swatch={meta.swatch}
+								selected={value.baseColor === baseColor}
+								disabled={disabled}
+								onSelect={() => onChange({ ...value, baseColor })}
+							/>
+						)
+					})}
+				</div>
+			</section>
 
-										<div className="space-y-5 px-4 py-6">
-											<div className="space-y-2">
-												<p className="text-xl leading-tight font-semibold tracking-tight">
-													{_(msg`Welcome to your site`)}
-												</p>
-												<p
-													className="max-w-[28ch] text-sm leading-relaxed"
-													style={{
-														color: previewTokens['--muted-foreground'],
-													}}
-												>
-													{_(
-														msg`This is how visitors experience your brand online.`,
-													)}
-												</p>
-											</div>
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Appearance`)}</FieldLabel>
+				<div className="grid grid-cols-3 gap-1.5">
+					{SITE_THEME_MODES.map((mode) => {
+						const isSelected = value.mode === mode
+						return (
+							<button
+								key={mode}
+								type="button"
+								disabled={disabled}
+								onClick={() => onChange({ ...value, mode })}
+								aria-pressed={isSelected}
+								className={cn(
+									'border-border flex items-center justify-center gap-1.5 rounded-md border px-1.5 py-2 text-xs font-medium transition-colors',
+									'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+									'disabled:pointer-events-none disabled:opacity-50',
+									isSelected
+										? 'border-foreground bg-background ring-foreground/10 ring-1'
+										: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+								)}
+							>
+								<Icon name={modeIcons[mode]} className="size-3.5 shrink-0" />
+								{modeLabels[mode]}
+							</button>
+						)
+					})}
+				</div>
+			</section>
 
-											<div className="flex flex-wrap items-center gap-2">
-												<span
-													className="inline-flex items-center px-3 py-1.5 text-xs font-semibold"
-													style={{
-														backgroundColor: previewTokens['--primary'],
-														color: previewTokens['--primary-foreground'],
-														borderRadius: previewRadius,
-													}}
-												>
-													{_(msg`Get started`)}
-												</span>
-												<span
-													className="inline-flex items-center border px-3 py-1.5 text-xs"
-													style={{
-														backgroundColor: previewTokens['--secondary'],
-														color: previewTokens['--secondary-foreground'],
-														borderColor: previewTokens['--border'],
-														borderRadius: previewRadius,
-													}}
-												>
-													{_(msg`Learn more`)}
-												</span>
-											</div>
-
-											<div
-												className="space-y-3 border p-3.5"
-												style={{
-													borderColor: previewTokens['--border'],
-													backgroundColor: previewTokens['--card'],
-													color: previewTokens['--card-foreground'],
-													borderRadius: previewRadius,
-												}}
-											>
-												<p className="text-sm font-semibold tracking-tight">
-													{_(msg`Featured`)}
-												</p>
-												<p
-													className="text-xs leading-relaxed"
-													style={{
-														color: previewTokens['--muted-foreground'],
-													}}
-												>
-													{_(
-														msg`Cards, borders, and text follow your palette choices.`,
-													)}
-												</p>
-												<div className="flex gap-1">
-													{[1, 2, 3, 4, 5].map((n) => (
-														<span
-															key={n}
-															className="h-1.5 flex-1"
-															style={{
-																backgroundColor: previewTokens[`--chart-${n}`],
-																borderRadius: `max(2px, calc(${previewRadius} * 0.5))`,
-															}}
-														/>
-													))}
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						{/* Controls */}
-						<div className="flex flex-col gap-6">
-							<section>
-								<FieldLabel>{_(msg`Accent color`)}</FieldLabel>
-								<div className="flex flex-wrap gap-2.5">
-									{[...ACCENT_NEUTRALS, ...ACCENT_COLORS].map((themeColor) => {
-										const meta = getThemeColorMeta(themeColor)
-										return (
-											<ColorSwatch
-												key={themeColor}
-												label={meta.label}
-												swatch={meta.swatch}
-												selected={selectedTheme === themeColor}
-												disabled={busy}
-												onSelect={() => setSelectedTheme(themeColor)}
-											/>
-										)
-									})}
-								</div>
-							</section>
-
-							<section>
-								<FieldLabel>{_(msg`Gray color`)}</FieldLabel>
-								<div className="flex flex-wrap gap-2.5">
-									{SITE_BASE_COLORS.map((baseColor) => {
-										const meta = getBaseColorMeta(baseColor)
-										return (
-											<ColorSwatch
-												key={baseColor}
-												label={meta.label}
-												swatch={meta.swatch}
-												selected={selectedBase === baseColor}
-												disabled={busy}
-												onSelect={() => setSelectedBase(baseColor)}
-											/>
-										)
-									})}
-								</div>
-							</section>
-
-							<section>
-								<FieldLabel>{_(msg`Appearance`)}</FieldLabel>
-								<div className="grid grid-cols-3 gap-2.5">
-									{SITE_THEME_MODES.map((mode) => {
-										const isSelected = selectedMode === mode
-										return (
-											<button
-												key={mode}
-												type="button"
-												disabled={busy}
-												onClick={() => setSelectedMode(mode)}
-												aria-pressed={isSelected}
-												className={cn(
-													'border-border flex items-center justify-center gap-1.5 rounded-md border px-2 py-2 text-xs font-medium transition-colors',
-													'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-													isSelected
-														? 'border-foreground bg-background ring-foreground/10 ring-1'
-														: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-												)}
-											>
-												<Icon
-													name={modeIcons[mode]}
-													className="size-3.5 shrink-0"
-												/>
-												{modeLabels[mode]}
-											</button>
-										)
-									})}
-								</div>
-							</section>
-
-							<section>
-								<FieldLabel>{_(msg`Radius`)}</FieldLabel>
-								<div className="grid grid-cols-4 gap-2.5">
-									{radiusOptions.map((radius) => {
-										const isSelected =
-											selectedRadius === radius ||
-											(radius === 'medium' && selectedRadius === 'default')
-										return (
-											<button
-												key={radius}
-												type="button"
-												disabled={busy}
-												onClick={() => setSelectedRadius(radius)}
-												aria-pressed={isSelected}
-												className={cn(
-													'border-border flex flex-col items-center gap-1.5 rounded-md border px-1.5 py-2 transition-colors',
-													'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-													isSelected
-														? 'border-foreground bg-background ring-foreground/10 ring-1'
-														: 'hover:bg-muted/50',
-												)}
-											>
-												<RadiusGlyph radius={radius} selected={isSelected} />
-												<span
-													className={cn(
-														'text-[10px] font-medium',
-														isSelected
-															? 'text-foreground'
-															: 'text-muted-foreground',
-													)}
-												>
-													{radiusLabels[radius]}
-												</span>
-											</button>
-										)
-									})}
-								</div>
-							</section>
-						</div>
-					</div>
-				</CardContent>
-
-				<CardFooter className="justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5">
-					<p className="text-muted-foreground max-w-sm text-xs leading-relaxed">
-						{_(
-							msg`Preview updates as you choose. Nothing publishes until you save.`,
-						)}
-					</p>
-					<Button type="submit" disabled={busy}>
-						{_(msg`Save branding`)}
-					</Button>
-				</CardFooter>
-			</ThemeForm>
-		</Card>
+			<section className="space-y-2">
+				<FieldLabel>{_(msg`Corners`)}</FieldLabel>
+				<div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+					{radiusOptions.map((radius) => {
+						const isSelected =
+							value.radius === radius ||
+							(radius === 'medium' && value.radius === 'default')
+						return (
+							<button
+								key={radius}
+								type="button"
+								disabled={disabled}
+								onClick={() => onChange({ ...value, radius })}
+								aria-pressed={isSelected}
+								className={cn(
+									'border-border flex flex-col items-center gap-1 rounded-md border px-1 py-1.5 transition-colors',
+									'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+									'disabled:pointer-events-none disabled:opacity-50',
+									isSelected
+										? 'border-foreground bg-background ring-foreground/10 ring-1'
+										: 'hover:bg-muted/50',
+								)}
+							>
+								<RadiusGlyph radius={radius} selected={isSelected} />
+								<span
+									className={cn(
+										'text-[10px] font-medium',
+										isSelected ? 'text-foreground' : 'text-muted-foreground',
+									)}
+								>
+									{radiusLabels[radius]}
+								</span>
+							</button>
+						)
+					})}
+				</div>
+			</section>
+		</div>
 	)
 }

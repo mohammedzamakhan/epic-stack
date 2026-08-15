@@ -1,7 +1,10 @@
 ---
 import '../styles/tailwind.css'
+import '../styles/site-fonts.css'
+import { buildCustomSiteFontFaceCss } from '@repo/common/site-fonts'
 import { brand } from '@repo/config/brand'
-import type { PublicSiteTheme } from '~/lib/org'
+import { resolveMediaUrl } from '~/lib/media'
+import { type PublicSiteTheme } from '~/lib/org'
 
 interface Props {
 	title?: string
@@ -32,6 +35,26 @@ const {
 } = Astro.props
 const themeMode = theme?.mode ?? 'system'
 const themeCss = theme?.css ?? ''
+const headingCustomUrl = resolveMediaUrl(theme?.headingCustomFont?.url)
+const bodyCustomUrl = resolveMediaUrl(theme?.bodyCustomFont?.url)
+const customFontCss = buildCustomSiteFontFaceCss({
+	headingUrl: headingCustomUrl,
+	headingFormat: theme?.headingCustomFont?.format,
+	bodyUrl: bodyCustomUrl,
+	bodyFormat: theme?.bodyCustomFont?.format,
+})
+const headingFont =
+	theme?.headingFont === 'custom' && headingCustomUrl
+		? 'custom'
+		: theme?.headingFont === 'custom'
+			? 'inter'
+			: (theme?.headingFont ?? 'inter')
+const bodyFont =
+	theme?.bodyFont === 'custom' && bodyCustomUrl
+		? 'custom'
+		: theme?.bodyFont === 'custom'
+			? 'inter'
+			: (theme?.bodyFont ?? 'inter')
 const htmlClass =
 	themeMode === 'dark' ? 'dark' : themeMode === 'light' ? '' : undefined
 ---
@@ -43,6 +66,8 @@ const htmlClass =
 	class={htmlClass}
 	data-site-theme={theme?.theme}
 	data-site-base={theme?.baseColor}
+	data-heading-font={headingFont}
+	data-body-font={bodyFont}
 >
 	<head>
 		<meta charset="utf-8" />
@@ -90,6 +115,9 @@ const htmlClass =
 		{/* Inject after bundled CSS so org theme tokens win over any leftover defaults. */}
 		{themeCss ? (
 			<style is:inline set:html={themeCss} id="org-site-theme" />
+		) : null}
+		{customFontCss ? (
+			<style is:inline set:html={customFontCss} id="org-site-fonts" />
 		) : null}
 	</head>
 	<body class="min-h-dvh antialiased">

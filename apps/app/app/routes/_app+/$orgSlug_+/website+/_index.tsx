@@ -1,5 +1,4 @@
 import { parseWithZod } from '@conform-to/zod'
-import { parseFormData } from '@mjackson/form-data-parser'
 import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
 import {
@@ -7,10 +6,6 @@ import {
 	serializeSiteLocales,
 	type SiteContentLocale,
 } from '@repo/common/site-locales'
-import {
-	parseSiteThemeConfig,
-	serializeSiteThemeConfig,
-} from '@repo/common/site-theme'
 import { redirectWithToast } from '@repo/common/toast'
 import { prisma } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
@@ -32,20 +27,10 @@ import {
 	refreshCustomDomainActionIntent,
 } from '#app/components/settings/cards/organization/site-card.tsx'
 import {
-	SiteIconCard,
-	uploadSiteIconActionIntent,
-	deleteSiteIconActionIntent,
-} from '#app/components/settings/cards/organization/site-icon-card.tsx'
-import {
 	SiteLocalesCard,
 	SiteLocalesSchema,
 	siteLocalesActionIntent,
 } from '#app/components/settings/cards/organization/site-locales-card.tsx'
-import {
-	SiteThemeCard,
-	SiteThemeSchema,
-	siteThemeActionIntent,
-} from '#app/components/settings/cards/organization/site-theme-card.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
@@ -60,7 +45,6 @@ import {
 	isValidCustomDomain,
 	normalizeCustomDomain,
 } from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
-import { uploadSiteIcon } from '#app/utils/storage.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)
@@ -73,18 +57,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		customDomain: true,
 		customDomainStatus: true,
 		cloudflareHostnameId: true,
-		siteTheme: true,
 		siteLocales: true,
 		siteDefaultLocale: true,
-		siteIconKey: true,
-		siteIconAssets: {
-			select: { type: true, status: true },
-		},
 	})
 
 	return {
 		organization,
-		themeConfig: parseSiteThemeConfig(organization.siteTheme),
 		localesConfig: parseSiteLocalesConfig(
 			organization.siteLocales,
 			organization.siteDefaultLocale,
@@ -102,7 +80,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		customDomain: true,
 		customDomainStatus: true,
 		cloudflareHostnameId: true,
-		siteIconKey: true,
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -110,51 +87,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		organization.id,
 		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
 	)
-
-	const contentType = request.headers.get('content-type')
-
-	if (contentType?.includes('multipart/form-data')) {
-		const formData = await parseFormData(request, {
-			maxFileSize: 1024 * 1024 * 5, // 5MB
-		})
-		const intent = formData.get('intent')
-
-		if (intent === uploadSiteIconActionIntent) {
-			const iconFile = formData.get('iconFile') as File | null
-
-			if (!iconFile || !(iconFile instanceof File) || iconFile.size <= 0) {
-				return Response.json({ error: 'No file provided' }, { status: 400 })
-			}
-
-			try {
-				const siteIconKey = await uploadSiteIcon(organization.id, iconFile)
-
-				await prisma.organization.update({
-					where: { id: organization.id },
-					data: { siteIconKey },
-				})
-
-				await invalidateUserOrganizationsCache(userId)
-
-				return Response.json({ status: 'success' })
-			} catch (error) {
-				return Response.json(
-					{
-						error:
-							error instanceof Error
-								? error.message
-								: 'Failed to upload site icon',
-					},
-					{ status: 500 },
-				)
-			}
-		}
-
-		return Response.json(
-			{ error: `Invalid multipart intent: ${intent}` },
-			{ status: 400 },
-		)
-	}
 
 	const formData = await request.formData()
 	const intent = formData.get('intent')
@@ -323,46 +255,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
-	if (intent === siteThemeActionIntent) {
-		const submission = parseWithZod(formData, {
-			schema: SiteThemeSchema,
-		})
-
-		if (submission.status !== 'success') {
-			return Response.json({ result: submission.reply() })
-		}
-
-		const { baseColor, theme, radius, mode } = submission.value
-
-		try {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
-					siteTheme: serializeSiteThemeConfig({
-						baseColor,
-						theme,
-						radius,
-						mode,
-					}),
-				},
-			})
-
-			await invalidateUserOrganizationsCache(userId)
-
-			return redirectWithToast(`/${organization.slug}/website`, {
-				title: 'Branding updated',
-				description: 'Your website look has been saved.',
-				type: 'success',
-			})
-		} catch {
-			return Response.json({
-				result: submission.reply({
-					formErrors: ['Failed to update theme. Please try again.'],
-				}),
-			})
-		}
-	}
-
 	if (intent === siteLocalesActionIntent) {
 		const submission = parseWithZod(formData, {
 			schema: SiteLocalesSchema,
@@ -399,44 +291,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
-	if (intent === deleteSiteIconActionIntent) {
-		const orgId = formData.get('organizationId')
-
-		if (orgId !== organization.id) {
-			return Response.json({ error: 'Organization mismatch' }, { status: 400 })
-		}
-
-		try {
-			await prisma.organizationSiteAsset.deleteMany({
-				where: { organizationId: organization.id },
-			})
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { siteIconKey: null },
-			})
-
-			await invalidateUserOrganizationsCache(userId)
-
-			return Response.json({ status: 'success' })
-		} catch {
-			return Response.json(
-				{ error: 'Failed to delete site icon' },
-				{ status: 500 },
-			)
-		}
-	}
-
 	return Response.json({ error: `Invalid intent: ${intent}` }, { status: 400 })
 }
 
 export default function WebsiteGeneralSettings() {
-	const {
-		organization,
-		themeConfig,
-		localesConfig,
-		cnameTarget,
-		cloudflareConfigured,
-	} = useLoaderData<typeof loader>()
+	const { organization, localesConfig, cnameTarget, cloudflareConfigured } =
+		useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (
@@ -451,21 +311,9 @@ export default function WebsiteGeneralSettings() {
 			</AnnotatedSection>
 
 			<AnnotatedSection>
-				<SiteIconCard organization={organization} />
-			</AnnotatedSection>
-
-			<AnnotatedSection>
 				<SiteLocalesCard
 					organization={organization}
 					localesConfig={localesConfig}
-					actionData={actionData}
-				/>
-			</AnnotatedSection>
-
-			<AnnotatedSection>
-				<SiteThemeCard
-					organization={organization}
-					themeConfig={themeConfig}
 					actionData={actionData}
 				/>
 			</AnnotatedSection>

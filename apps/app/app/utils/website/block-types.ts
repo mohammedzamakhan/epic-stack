@@ -56,7 +56,7 @@ export function composePageSectionsWithChrome<
 
 export const BLOCK_TYPES = {
 	header: {
-		label: 'Header',
+		label: 'Global Header',
 		icon: 'menu' as IconName,
 		description: 'Logo, navigation, and call to action',
 		locked: true,

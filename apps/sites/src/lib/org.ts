@@ -1,10 +1,20 @@
+import { type SiteFontSelection } from '@repo/common/site-fonts'
 import { ENV } from 'varlock/env'
+
+export type PublicSiteCustomFont = {
+	url: string
+	format: 'woff2' | 'woff' | 'truetype' | 'opentype'
+}
 
 export type PublicSiteTheme = {
 	baseColor: string
 	theme: string
 	radius: string
 	mode: 'light' | 'dark' | 'system'
+	headingFont?: SiteFontSelection
+	bodyFont?: SiteFontSelection
+	headingCustomFont?: PublicSiteCustomFont | null
+	bodyCustomFont?: PublicSiteCustomFont | null
 	css: string
 }
 
