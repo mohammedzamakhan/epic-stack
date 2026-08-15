@@ -65,63 +65,71 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			}
 		: {}
 
-	// Get organization notes with access control and search
-	const notes = await prisma.organizationNote.findMany({
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			priority: true,
-			tags: true,
-			createdAt: true,
-			updatedAt: true,
-			isPublic: true,
-			createdById: true,
-			statusId: true,
-			status: { select: { id: true, name: true, color: true } },
-			position: true,
-			uploads: {
-				select: {
-					id: true,
-					type: true,
-					altText: true,
-					objectKey: true,
-					thumbnailKey: true,
-					status: true,
+	// Fetch notes, statuses, and viewMode in parallel
+	const [notes, statuses, viewMode] = await Promise.all([
+		prisma.organizationNote.findMany({
+			select: {
+				id: true,
+				title: true,
+				content: true,
+				priority: true,
+				tags: true,
+				createdAt: true,
+				updatedAt: true,
+				isPublic: true,
+				createdById: true,
+				statusId: true,
+				status: { select: { id: true, name: true, color: true } },
+				position: true,
+				uploads: {
+					select: {
+						id: true,
+						type: true,
+						altText: true,
+						objectKey: true,
+						thumbnailKey: true,
+						status: true,
+					},
 				},
-			},
-			createdBy: {
-				select: {
-					name: true,
-					username: true,
-					image: {
-						select: {
-							objectKey: true,
+				createdBy: {
+					select: {
+						name: true,
+						username: true,
+						image: {
+							select: {
+								objectKey: true,
+							},
 						},
 					},
 				},
-			},
-			noteAccess: {
-				select: {
-					userId: true,
+				noteAccess: {
+					select: {
+						userId: true,
+					},
 				},
 			},
-		},
-		where: {
-			organizationId: organization.id,
-			AND: [
-				{
-					OR: [
-						{ isPublic: true },
-						{ createdById: userId },
-						{ noteAccess: { some: { userId } } },
-					],
-				},
-				searchConditions,
-			],
-		},
-		orderBy: [{ statusId: 'asc' }, { position: 'asc' }, { createdAt: 'desc' }],
-	})
+			where: {
+				organizationId: organization.id,
+				AND: [
+					{
+						OR: [
+							{ isPublic: true },
+							{ createdById: userId },
+							{ noteAccess: { some: { userId } } },
+						],
+					},
+					searchConditions,
+				],
+			},
+			orderBy: [{ statusId: 'asc' }, { position: 'asc' }, { createdAt: 'desc' }],
+		}),
+		prisma.organizationNoteStatus.findMany({
+			where: { organizationId: organization.id },
+			orderBy: { position: 'asc' },
+			select: { id: true, name: true, color: true, position: true },
+		}),
+		getNotesViewMode(request),
+	])
 
 	const formattedNotes = notes.map((note) => ({
 		...note,
@@ -136,15 +144,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			status: upload.status ?? 'pending',
 		})),
 	}))
-
-	const statuses = await prisma.organizationNoteStatus.findMany({
-		where: { organizationId: organization.id },
-		orderBy: { position: 'asc' },
-		select: { id: true, name: true, color: true, position: true },
-	})
-
-	// Get the current view mode from cookie
-	const viewMode = await getNotesViewMode(request)
 
 	return {
 		organization,
