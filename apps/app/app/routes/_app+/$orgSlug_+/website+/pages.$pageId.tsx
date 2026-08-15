@@ -1322,8 +1322,7 @@ function SectionPreviewCard({
 						name={(blockDef?.icon ?? 'blocks') as IconName}
 						className={cn(
 							'size-3.5 transition-opacity duration-150',
-							!blockDef?.locked &&
-								'group-hover:opacity-0 peer-focus-visible:opacity-0',
+							!locked && 'group-hover:opacity-0 peer-focus-visible:opacity-0',
 							isDragging && 'opacity-0',
 						)}
 					/>
