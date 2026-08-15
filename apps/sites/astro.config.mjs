@@ -1,4 +1,5 @@
 import cloudflare from '@astrojs/cloudflare'
+import { SITE_FONTS } from '@repo/common/site-fonts'
 import { brand } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
@@ -61,6 +62,13 @@ export default defineConfig({
 						weights: ['400'],
 						src: [{ url: '/fonts/GeistPixel-Square.woff2', format: 'woff2' }],
 					},
+					{ name: 'SiteHeading', provider: 'none' },
+					{ name: 'SiteBody', provider: 'none' },
+					...SITE_FONTS.map((font) => ({
+						name: font.family,
+						provider: 'google',
+						weights: ['400', '500', '600', '700'],
+					})),
 				],
 			}),
 		],

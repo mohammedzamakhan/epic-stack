@@ -26,6 +26,7 @@ const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
 	'',
 )
 const imgSrc = `img-src 'self' data: ${appUrl}`
+const fontSrc = `font-src 'self' data: ${appUrl}`
 
 // Vite/Astro inject CSS as inline <style> in dev; allow that without opening the app up.
 const isDev = import.meta.env.DEV
@@ -34,7 +35,7 @@ const contentSecurityPolicy = isDev
 			"default-src 'self'",
 			"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
 			"style-src 'self' 'unsafe-inline'",
-			"font-src 'self' data:",
+			fontSrc,
 			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",
@@ -44,7 +45,7 @@ const contentSecurityPolicy = isDev
 	: [
 			"default-src 'self'",
 			"style-src 'self' 'unsafe-inline'",
-			"font-src 'self' data:",
+			fontSrc,
 			imgSrc,
 			"object-src 'none'",
 			"base-uri 'self'",

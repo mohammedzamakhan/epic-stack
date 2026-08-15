@@ -19,6 +19,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { Trans } from '@lingui/macro'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { requireUserId } from '@repo/auth'
+import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { useDebounce } from '@repo/common'
 import {
 	getSiteLocaleLabel,
@@ -26,6 +27,13 @@ import {
 	parseSiteLocalesConfig,
 	pickLocalized,
 } from '@repo/common/site-locales'
+import {
+	CUSTOM_SITE_FONT_ID,
+	parseSiteThemeConfig,
+	serializeSiteThemeConfig,
+	siteFontExtension,
+	sniffSiteFontFormat,
+} from '@repo/common/site-theme'
 import { prisma } from '@repo/database'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
@@ -87,14 +95,27 @@ import {
 	useParams,
 } from 'react-router'
 import { z } from 'zod'
+import {
+	deleteSiteIconActionIntent,
+	uploadSiteIconActionIntent,
+} from '#app/components/settings/cards/organization/site-icon-card.tsx'
+import {
+	SiteThemeSchema,
+	deleteSiteFontActionIntent,
+	siteThemeActionIntent,
+	uploadSiteFontActionIntent,
+} from '#app/components/settings/cards/organization/site-theme-card.tsx'
+import { BrandingPanel } from '#app/components/website/branding-panel.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
 } from '#app/utils/organization/permissions.server.ts'
 import {
-	uploadWebsiteSeoImage,
+	uploadSiteFont,
+	uploadSiteIcon,
 	uploadWebsiteAsset,
+	uploadWebsiteSeoImage,
 } from '#app/utils/storage.server.ts'
 import {
 	ADDABLE_BLOCK_TYPES,
@@ -267,6 +288,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		customDomain: true,
 		siteLocales: true,
 		siteDefaultLocale: true,
+		siteTheme: true,
+		siteIconKey: true,
+		siteIconAssets: {
+			select: { type: true, status: true },
+		},
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -321,6 +347,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	return {
 		organization,
+		themeConfig: parseSiteThemeConfig(organization.siteTheme),
 		page: {
 			...page,
 			sections: composePageSectionsWithChrome(
@@ -334,7 +361,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 // --- Action ---
 export async function action({ request, params }: ActionFunctionArgs) {
-	await requireUserId(request)
+	const userId = await requireUserId(request)
 	const organization = await requireUserOrganization(request, params.orgSlug, {
 		id: true,
 	})
@@ -482,6 +509,129 @@ export async function action({ request, params }: ActionFunctionArgs) {
 						status: 'error',
 						error:
 							error instanceof Error ? error.message : 'Failed to upload asset',
+					},
+					{ status: 500 },
+				)
+			}
+		}
+
+		if (intent === uploadSiteIconActionIntent) {
+			const iconFile = formData.get('iconFile') as File | null
+			if (!iconFile || !(iconFile instanceof File) || iconFile.size <= 0) {
+				return Response.json(
+					{ status: 'error', error: 'No file provided' },
+					{ status: 400 },
+				)
+			}
+			if (iconFile.type !== 'image/png') {
+				return Response.json(
+					{ status: 'error', error: 'Only PNG images are accepted' },
+					{ status: 400 },
+				)
+			}
+			if (iconFile.size > 1024 * 1024 * 5) {
+				return Response.json(
+					{ status: 'error', error: 'Image size must be less than 5MB' },
+					{ status: 400 },
+				)
+			}
+
+			try {
+				const siteIconKey = await uploadSiteIcon(organization.id, iconFile)
+				await prisma.organization.update({
+					where: { id: organization.id },
+					data: { siteIconKey },
+				})
+				await invalidateUserOrganizationsCache(userId)
+				return Response.json({ status: 'success' })
+			} catch (error) {
+				return Response.json(
+					{
+						status: 'error',
+						error:
+							error instanceof Error
+								? error.message
+								: 'Failed to upload site icon',
+					},
+					{ status: 500 },
+				)
+			}
+		}
+
+		if (intent === uploadSiteFontActionIntent) {
+			const role = formData.get('role')
+			if (role !== 'heading' && role !== 'body') {
+				return Response.json(
+					{ status: 'error', error: 'Invalid font role' },
+					{ status: 400 },
+				)
+			}
+			const fontFile = formData.get('fontFile') as File | null
+			if (!fontFile || !(fontFile instanceof File) || fontFile.size <= 0) {
+				return Response.json(
+					{ status: 'error', error: 'No file provided' },
+					{ status: 400 },
+				)
+			}
+			if (fontFile.size > 1024 * 1024 * 2) {
+				return Response.json(
+					{ status: 'error', error: 'Font size must be less than 2MB' },
+					{ status: 400 },
+				)
+			}
+
+			try {
+				const bytes = new Uint8Array(await fontFile.arrayBuffer())
+				const format = sniffSiteFontFormat(bytes)
+				if (!format) {
+					return Response.json(
+						{
+							status: 'error',
+							error: 'Use a WOFF2, WOFF, TTF, or OTF file',
+						},
+						{ status: 400 },
+					)
+				}
+				const safeFile = new File(
+					[bytes],
+					`${role}.${siteFontExtension(format)}`,
+					{ type: fontFile.type, lastModified: Date.now() },
+				)
+				const objectKey = await uploadSiteFont(organization.id, role, safeFile)
+				const org = await prisma.organization.findUnique({
+					where: { id: organization.id },
+					select: { siteTheme: true },
+				})
+				const current = parseSiteThemeConfig(org?.siteTheme)
+				const customFont = {
+					objectKey,
+					filename: fontFile.name.replace(/^.*[\\/]/, '').slice(0, 180),
+					format,
+				}
+				await prisma.organization.update({
+					where: { id: organization.id },
+					data: {
+						siteTheme: serializeSiteThemeConfig({
+							...current,
+							headingFont:
+								role === 'heading' ? CUSTOM_SITE_FONT_ID : current.headingFont,
+							bodyFont:
+								role === 'body' ? CUSTOM_SITE_FONT_ID : current.bodyFont,
+							headingCustomFont:
+								role === 'heading' ? customFont : current.headingCustomFont,
+							bodyCustomFont:
+								role === 'body' ? customFont : current.bodyCustomFont,
+						}),
+					},
+				})
+				await invalidateUserOrganizationsCache(userId)
+				return Response.json({ status: 'success' })
+			} catch (error) {
+				return Response.json(
+					{
+						status: 'error',
+						error:
+							error instanceof Error ? error.message : 'Failed to upload font',
 					},
 					{ status: 500 },
 				)
@@ -857,6 +1007,124 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		return Response.json({ status: 'success' })
 	}
 
+	if (intent === siteThemeActionIntent) {
+		const submission = parseWithZod(formData, { schema: SiteThemeSchema })
+		if (submission.status !== 'success') {
+			return Response.json({ status: 'error', result: submission.reply() })
+		}
+
+		const { baseColor, theme, radius, mode, headingFont, bodyFont } =
+			submission.value
+
+		try {
+			const org = await prisma.organization.findUnique({
+				where: { id: organization.id },
+				select: { siteTheme: true },
+			})
+			const current = parseSiteThemeConfig(org?.siteTheme)
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					siteTheme: serializeSiteThemeConfig({
+						baseColor,
+						theme,
+						radius,
+						mode,
+						headingFont:
+							headingFont === CUSTOM_SITE_FONT_ID && !current.headingCustomFont
+								? current.headingFont
+								: headingFont,
+						bodyFont:
+							bodyFont === CUSTOM_SITE_FONT_ID && !current.bodyCustomFont
+								? current.bodyFont
+								: bodyFont,
+						headingCustomFont: current.headingCustomFont,
+						bodyCustomFont: current.bodyCustomFont,
+					}),
+				},
+			})
+			await invalidateUserOrganizationsCache(userId)
+			return Response.json({ status: 'success' })
+		} catch {
+			return Response.json(
+				{ status: 'error', error: 'Failed to update theme' },
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === deleteSiteIconActionIntent) {
+		const orgId = formData.get('organizationId')
+		if (orgId !== organization.id) {
+			return Response.json(
+				{ status: 'error', error: 'Organization mismatch' },
+				{ status: 400 },
+			)
+		}
+
+		try {
+			await prisma.organizationSiteAsset.deleteMany({
+				where: { organizationId: organization.id },
+			})
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: { siteIconKey: null },
+			})
+			await invalidateUserOrganizationsCache(userId)
+			return Response.json({ status: 'success' })
+		} catch {
+			return Response.json(
+				{ status: 'error', error: 'Failed to delete site icon' },
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === deleteSiteFontActionIntent) {
+		const orgId = formData.get('organizationId')
+		const role = formData.get('role')
+		if (orgId !== organization.id) {
+			return Response.json(
+				{ status: 'error', error: 'Organization mismatch' },
+				{ status: 400 },
+			)
+		}
+		if (role !== 'heading' && role !== 'body') {
+			return Response.json(
+				{ status: 'error', error: 'Invalid font role' },
+				{ status: 400 },
+			)
+		}
+
+		try {
+			const org = await prisma.organization.findUnique({
+				where: { id: organization.id },
+				select: { siteTheme: true },
+			})
+			const current = parseSiteThemeConfig(org?.siteTheme)
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					siteTheme: serializeSiteThemeConfig({
+						...current,
+						headingFont: role === 'heading' ? 'inter' : current.headingFont,
+						bodyFont: role === 'body' ? 'inter' : current.bodyFont,
+						headingCustomFont:
+							role === 'heading' ? null : current.headingCustomFont,
+						bodyCustomFont: role === 'body' ? null : current.bodyCustomFont,
+					}),
+				},
+			})
+			await invalidateUserOrganizationsCache(userId)
+			return Response.json({ status: 'success' })
+		} catch {
+			return Response.json(
+				{ status: 'error', error: 'Failed to delete font' },
+				{ status: 500 },
+			)
+		}
+	}
+
 	return Response.json(
 		{ status: 'error', error: 'Invalid intent' },
 		{ status: 400 },
@@ -1053,7 +1321,8 @@ function SectionPreviewCard({
 					<Icon
 						name={(blockDef?.icon ?? 'blocks') as IconName}
 						className={cn(
-							'size-3.5 transition-opacity duration-150 group-hover:opacity-0 peer-focus-visible:opacity-0',
+							'size-3.5 transition-opacity duration-150',
+							!locked && 'group-hover:opacity-0 peer-focus-visible:opacity-0',
 							isDragging && 'opacity-0',
 						)}
 					/>
@@ -1226,7 +1495,7 @@ function SectionsList({
 	}
 
 	return (
-		<div className="px-2 pb-2">
+		<div className="mt-2 px-2 pb-2">
 			<DndContext
 				id={dndId}
 				sensors={sensors}
@@ -1348,6 +1617,8 @@ function SectionEditorPanel({
 	isUploadingAsset,
 	uploadedAssetUrl,
 	uploadError,
+	onOpenBranding,
+	siteIconKey,
 }: {
 	section: { id: string; type: string; config: string }
 	onBack: () => void
@@ -1356,6 +1627,8 @@ function SectionEditorPanel({
 	isUploadingAsset?: boolean
 	uploadedAssetUrl?: string | null
 	uploadError?: string | null
+	onOpenBranding?: () => void
+	siteIconKey?: string | null
 }) {
 	const blockDef = BLOCK_TYPES[section.type as BlockType]
 	const [config, setConfig] = useState(() => parseBlockConfig(section.config))
@@ -1410,6 +1683,8 @@ function SectionEditorPanel({
 						isUploadingAsset,
 						uploadedAssetUrl,
 						uploadError,
+						onOpenBranding,
+						siteIconKey,
 					})}
 				</div>
 			</ScrollArea>
@@ -1423,7 +1698,6 @@ const META_DESCRIPTION_SOFT_LIMIT = 160
 function PageSettingsPanel({
 	page,
 	previewHost,
-	onBack,
 	onSave,
 	onUploadImage,
 	isUploadingImage,
@@ -1441,7 +1715,6 @@ function PageSettingsPanel({
 		seoNoIndex: boolean
 	}
 	previewHost: string
-	onBack: () => void
 	onSave: (settings: {
 		slug: string
 		seoTitle: string
@@ -1588,16 +1861,8 @@ function PageSettingsPanel({
 	return (
 		<div className="flex h-full min-h-0 flex-col">
 			<div className="border-border flex items-center gap-2 border-b px-3 py-2.5">
-				<Button
-					variant="ghost"
-					size="icon-xs"
-					onClick={onBack}
-					aria-label="Back to sections"
-				>
-					<Icon name="chevron-left" className="size-4" />
-				</Button>
 				<span className="bg-muted text-muted-foreground flex size-6 items-center justify-center rounded-md">
-					<Icon name="cog" className="size-3.5" />
+					<Icon name="file-text" className="size-3.5" />
 				</span>
 				<span className="min-w-0 flex-1 truncate text-sm font-medium">
 					<Trans>Page Settings</Trans>
@@ -1923,8 +2188,18 @@ function renderBlockEditor(props: {
 	isUploadingAsset?: boolean
 	uploadedAssetUrl?: string | null
 	uploadError?: string | null
+	onOpenBranding?: () => void
+	siteIconKey?: string | null
 }) {
-	const { type, config, updateField, listKey, ...editorProps } = props
+	const {
+		type,
+		config,
+		updateField,
+		listKey,
+		onOpenBranding,
+		siteIconKey,
+		...editorProps
+	} = props
 	switch (type) {
 		case 'header':
 			return (
@@ -1932,6 +2207,8 @@ function renderBlockEditor(props: {
 					config={config}
 					updateField={updateField}
 					listKey={listKey}
+					onOpenBranding={onOpenBranding}
+					siteIconKey={siteIconKey}
 				/>
 			)
 		case 'hero':
@@ -2310,19 +2587,59 @@ function SortableAccordionRow<T>({
 	)
 }
 
-function HeaderEditor({ config, updateField, listKey }: ListEditorProps) {
+function HeaderEditor({
+	config,
+	updateField,
+	listKey,
+	onOpenBranding,
+	siteIconKey,
+}: ListEditorProps & {
+	onOpenBranding?: () => void
+	siteIconKey?: string | null
+}) {
 	const { activeLocale, defaultLocale } = useContext(LocaleContext)
 	const navLinks =
 		(config.navLinks as Array<{ label: string; url: string }>) ?? []
+	const logoSrc = siteIconKey
+		? `/resources/images?objectKey=${encodeURIComponent(siteIconKey)}`
+		: null
 
 	return (
 		<div className="space-y-5">
-			<p className="text-muted-foreground text-xs leading-relaxed">
-				<Trans>
-					The header is shared across every page. The logo comes from your site
-					icon in Website settings.
-				</Trans>
-			</p>
+			{onOpenBranding ? (
+				<button
+					type="button"
+					onClick={onOpenBranding}
+					className="border-border hover:bg-muted/50 focus-visible:ring-ring flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+				>
+					<span className="border-border bg-muted flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border">
+						{logoSrc ? (
+							<img src={logoSrc} alt="" className="size-full object-contain" />
+						) : (
+							<Icon
+								name="paintbrush"
+								className="text-muted-foreground size-4"
+							/>
+						)}
+					</span>
+					<span className="min-w-0 flex-1">
+						<span className="block text-sm font-medium">
+							<Trans>Logo & colors</Trans>
+						</span>
+						<span className="text-muted-foreground mt-0.5 block text-[11px] leading-relaxed">
+							<Trans>Shared across every page</Trans>
+						</span>
+					</span>
+					<Icon
+						name="chevron-right"
+						className="text-muted-foreground size-4 shrink-0"
+					/>
+				</button>
+			) : (
+				<p className="text-muted-foreground text-xs leading-relaxed">
+					<Trans>The header is shared across every page.</Trans>
+				</p>
+			)}
 			<FieldSwitch
 				label="Show organization name"
 				checked={(config.showName as boolean) ?? true}
@@ -4288,11 +4605,85 @@ function FieldAssetUpload({
 	)
 }
 
+type InspectorId = 'sections' | 'branding' | 'page'
+
+function InspectorNav({
+	value,
+	onChange,
+}: {
+	value: InspectorId
+	onChange: (next: InspectorId) => void
+}) {
+	const items = [
+		{
+			id: 'sections' as const,
+			icon: 'blocks' as const,
+			label: <Trans>Sections</Trans>,
+			ariaLabel: 'Sections',
+		},
+		{
+			id: 'branding' as const,
+			icon: 'paintbrush' as const,
+			label: <Trans>Branding</Trans>,
+			ariaLabel: 'Branding',
+		},
+		{
+			id: 'page' as const,
+			icon: 'file-text' as const,
+			label: <Trans>Page Settings</Trans>,
+			ariaLabel: 'Page Settings',
+		},
+	]
+
+	return (
+		<nav
+			aria-label="Builder panels"
+			className="border-border bg-muted/40 flex h-full w-12 shrink-0 flex-col items-center border-r py-2"
+		>
+			<div
+				role="tablist"
+				aria-orientation="vertical"
+				className="flex flex-col items-center gap-1"
+			>
+				{items.map((item) => {
+					const selected = value === item.id
+					return (
+						<Tooltip key={item.id}>
+							<TooltipTrigger
+								render={
+									<Button
+										variant="ghost"
+										size="icon"
+										role="tab"
+										aria-selected={selected}
+										aria-label={item.ariaLabel}
+										className={cn(
+											'text-muted-foreground rounded-md transition-colors duration-150 ease-out',
+											'hover:text-foreground hover:bg-muted',
+											'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+											selected &&
+												'bg-muted text-foreground hover:bg-muted hover:text-foreground',
+										)}
+										onClick={() => onChange(item.id)}
+									>
+										<Icon name={item.icon} className="size-4" />
+									</Button>
+								}
+							/>
+							<TooltipContent side="right">{item.label}</TooltipContent>
+						</Tooltip>
+					)
+				})}
+			</div>
+		</nav>
+	)
+}
+
 // ==============================================
 // Main Builder Component
 // ==============================================
 export default function PageBuilderRoute() {
-	const { organization, page } = useLoaderData<typeof loader>()
+	const { organization, page, themeConfig } = useLoaderData<typeof loader>()
 	const params = useParams()
 	const titleFetcher = useFetcher()
 	const sectionFetcher = useFetcher()
@@ -4412,7 +4803,10 @@ export default function PageBuilderRoute() {
 	const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
 		null,
 	)
-	const [editingPageSettings, setEditingPageSettings] = useState(false)
+	const [inspector, setInspector] = useState<InspectorId>('sections')
+	const handlePreviewRefresh = useCallback(() => {
+		setIframeKey(Date.now())
+	}, [])
 	const [editingTitle, setEditingTitle] = useState(false)
 	const [titleValue, setTitleValue] = useState(page.title)
 
@@ -4597,116 +4991,116 @@ export default function PageBuilderRoute() {
 	const isSplitLayout = mode === 'build' && isLg
 
 	const sectionsSidebar = (
-		<aside className="border-border bg-background flex h-full flex-col">
-			{editingPageSettings ? (
-				<PageSettingsPanel
-					page={page}
-					previewHost={previewHost || `${organization.slug}.site`}
-					onBack={() => setEditingPageSettings(false)}
-					onSave={handleUpdatePageSettings}
-					onUploadImage={handleUploadPageImage}
-					isUploadingImage={pageImageFetcher.state !== 'idle'}
-					uploadedImageUrl={
-						pageImageFetcher.data?.status === 'success'
-							? pageImageFetcher.data.seoImageUrl
-							: null
-					}
-					uploadError={
-						pageImageFetcher.data?.status === 'error'
-							? pageImageFetcher.data.error
-							: null
-					}
-					slugError={
-						pageSettingsFetcher.data?.status === 'error'
-							? (pageSettingsFetcher.data.result?.error?.slug?.[0] ?? null)
-							: null
-					}
-				/>
-			) : selectedSection ? (
-				<SectionEditorPanel
-					section={selectedSection}
-					onBack={() => setSelectedSectionId(null)}
-					onSave={handleUpdateSection}
-					onUploadAsset={handleUploadBlockAsset}
-					isUploadingAsset={blockAssetFetcher.state !== 'idle'}
-					uploadedAssetUrl={
-						blockAssetFetcher.data?.status === 'success'
-							? blockAssetFetcher.data.assetUrl
-							: null
-					}
-					uploadError={
-						blockAssetFetcher.data?.status === 'error'
-							? blockAssetFetcher.data.error
-							: null
-					}
-				/>
-			) : (
-				<>
-					<div className="flex items-center justify-between gap-2 px-3 pt-3 pb-1">
-						<div className="flex min-w-0 items-baseline gap-2">
-							<h2 className="text-sm font-medium">
+		<aside className="border-border bg-background flex h-full min-w-0">
+			<InspectorNav value={inspector} onChange={setInspector} />
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col">
+				{inspector === 'page' ? (
+					<PageSettingsPanel
+						page={page}
+						previewHost={previewHost || `${organization.slug}.site`}
+						onSave={handleUpdatePageSettings}
+						onUploadImage={handleUploadPageImage}
+						isUploadingImage={pageImageFetcher.state !== 'idle'}
+						uploadedImageUrl={
+							pageImageFetcher.data?.status === 'success'
+								? pageImageFetcher.data.seoImageUrl
+								: null
+						}
+						uploadError={
+							pageImageFetcher.data?.status === 'error'
+								? pageImageFetcher.data.error
+								: null
+						}
+						slugError={
+							pageSettingsFetcher.data?.status === 'error'
+								? (pageSettingsFetcher.data.result?.error?.slug?.[0] ?? null)
+								: null
+						}
+					/>
+				) : inspector === 'branding' ? (
+					<BrandingPanel
+						organization={organization}
+						themeConfig={themeConfig}
+						onPreviewRefresh={handlePreviewRefresh}
+					/>
+				) : selectedSection ? (
+					<SectionEditorPanel
+						section={selectedSection}
+						onBack={() => setSelectedSectionId(null)}
+						onSave={handleUpdateSection}
+						onUploadAsset={handleUploadBlockAsset}
+						isUploadingAsset={blockAssetFetcher.state !== 'idle'}
+						uploadedAssetUrl={
+							blockAssetFetcher.data?.status === 'success'
+								? blockAssetFetcher.data.assetUrl
+								: null
+						}
+						uploadError={
+							blockAssetFetcher.data?.status === 'error'
+								? blockAssetFetcher.data.error
+								: null
+						}
+						onOpenBranding={() => setInspector('branding')}
+						siteIconKey={organization.siteIconKey}
+					/>
+				) : (
+					<>
+						<div className="border-border flex items-center gap-2 border-b px-3 py-2.5">
+							<span className="bg-muted text-muted-foreground flex size-6 items-center justify-center rounded-md">
+								<Icon name="blocks" className="size-3.5" />
+							</span>
+							<span className="min-w-0 flex-1 truncate text-sm font-medium">
 								<Trans>Sections</Trans>
-							</h2>
+							</span>
 							<span className="text-muted-foreground text-xs tabular-nums">
 								{page.sections.length}
 							</span>
 						</div>
-						<Button
-							variant="link"
-							size="xs"
-							onClick={() => {
-								setSelectedSectionId(null)
-								setEditingPageSettings(true)
-							}}
-						>
-							<Icon name="cog" className="size-3.5" />
-							<Trans>Page Settings</Trans>
-						</Button>
-					</div>
 
-					<ScrollArea className="min-h-0 flex-1">
-						{page.sections.length === 0 ? (
-							<div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-								<div className="bg-muted text-muted-foreground mb-3 flex size-10 items-center justify-center rounded-lg">
-									<Icon name="blocks" className="size-5" />
+						<ScrollArea className="min-h-0 flex-1">
+							{page.sections.length === 0 ? (
+								<div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+									<div className="bg-muted text-muted-foreground mb-3 flex size-10 items-center justify-center rounded-lg">
+										<Icon name="blocks" className="size-5" />
+									</div>
+									<p className="text-sm font-medium">
+										<Trans>No sections yet</Trans>
+									</p>
+									<p className="text-muted-foreground mt-1 mb-4 max-w-[16rem] text-xs leading-relaxed">
+										<Trans>
+											Add a hero, gallery, or any block between the header and
+											footer.
+										</Trans>
+									</p>
+									<AddSectionDialog position={0} onAdd={handleAddSection} />
 								</div>
-								<p className="text-sm font-medium">
-									<Trans>No sections yet</Trans>
-								</p>
-								<p className="text-muted-foreground mt-1 mb-4 max-w-[16rem] text-xs leading-relaxed">
-									<Trans>
-										Add a hero, gallery, or any block between the header and
-										footer.
-									</Trans>
-								</p>
-								<AddSectionDialog position={0} onAdd={handleAddSection} />
-							</div>
-						) : (
-							<SectionsList
-								sections={page.sections}
-								selectedSectionId={selectedSectionId}
-								onSelect={(sectionId) => {
-									setEditingPageSettings(false)
-									setSelectedSectionId(sectionId)
-								}}
-								onRemove={handleRemoveSection}
-								onReorder={handleReorderSections}
-								onAdd={handleAddSection}
-							/>
-						)}
-					</ScrollArea>
+							) : (
+								<SectionsList
+									sections={page.sections}
+									selectedSectionId={selectedSectionId}
+									onSelect={(sectionId) => {
+										setInspector('sections')
+										setSelectedSectionId(sectionId)
+									}}
+									onRemove={handleRemoveSection}
+									onReorder={handleReorderSections}
+									onAdd={handleAddSection}
+								/>
+							)}
+						</ScrollArea>
 
-					{page.sections.length > 0 ? (
-						<div className="border-border border-t p-3">
-							<AddSectionDialog
-								position={nextSectionPosition}
-								onAdd={handleAddSection}
-								trigger="footer"
-							/>
-						</div>
-					) : null}
-				</>
-			)}
+						{page.sections.length > 0 ? (
+							<div className="border-border border-t p-3">
+								<AddSectionDialog
+									position={nextSectionPosition}
+									onAdd={handleAddSection}
+									trigger="footer"
+								/>
+							</div>
+						) : null}
+					</>
+				)}
+			</div>
 		</aside>
 	)
 

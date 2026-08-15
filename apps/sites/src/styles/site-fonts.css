@@ -1,0 +1,205 @@
+/* Generated from packages/common/src/site-fonts.ts. Literal font-family names so Fontless can emit @font-face. */
+
+html[data-body-font='geist'],
+html[data-body-font='geist'] body {
+	font-family: 'Geist', sans-serif;
+}
+html[data-heading-font='geist'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Geist', sans-serif;
+}
+
+html[data-body-font='inter'],
+html[data-body-font='inter'] body {
+	font-family: 'Inter', sans-serif;
+}
+html[data-heading-font='inter'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Inter', sans-serif;
+}
+
+html[data-body-font='noto-sans'],
+html[data-body-font='noto-sans'] body {
+	font-family: 'Noto Sans', sans-serif;
+}
+html[data-heading-font='noto-sans'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Noto Sans', sans-serif;
+}
+
+html[data-body-font='nunito-sans'],
+html[data-body-font='nunito-sans'] body {
+	font-family: 'Nunito Sans', sans-serif;
+}
+html[data-heading-font='nunito-sans']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Nunito Sans', sans-serif;
+}
+
+html[data-body-font='figtree'],
+html[data-body-font='figtree'] body {
+	font-family: 'Figtree', sans-serif;
+}
+html[data-heading-font='figtree'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Figtree', sans-serif;
+}
+
+html[data-body-font='roboto'],
+html[data-body-font='roboto'] body {
+	font-family: 'Roboto', sans-serif;
+}
+html[data-heading-font='roboto'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Roboto', sans-serif;
+}
+
+html[data-body-font='raleway'],
+html[data-body-font='raleway'] body {
+	font-family: 'Raleway', sans-serif;
+}
+html[data-heading-font='raleway'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Raleway', sans-serif;
+}
+
+html[data-body-font='dm-sans'],
+html[data-body-font='dm-sans'] body {
+	font-family: 'DM Sans', sans-serif;
+}
+html[data-heading-font='dm-sans'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'DM Sans', sans-serif;
+}
+
+html[data-body-font='public-sans'],
+html[data-body-font='public-sans'] body {
+	font-family: 'Public Sans', sans-serif;
+}
+html[data-heading-font='public-sans']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Public Sans', sans-serif;
+}
+
+html[data-body-font='outfit'],
+html[data-body-font='outfit'] body {
+	font-family: 'Outfit', sans-serif;
+}
+html[data-heading-font='outfit'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Outfit', sans-serif;
+}
+
+html[data-body-font='oxanium'],
+html[data-body-font='oxanium'] body {
+	font-family: 'Oxanium', sans-serif;
+}
+html[data-heading-font='oxanium'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Oxanium', sans-serif;
+}
+
+html[data-body-font='manrope'],
+html[data-body-font='manrope'] body {
+	font-family: 'Manrope', sans-serif;
+}
+html[data-heading-font='manrope'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Manrope', sans-serif;
+}
+
+html[data-body-font='space-grotesk'],
+html[data-body-font='space-grotesk'] body {
+	font-family: 'Space Grotesk', sans-serif;
+}
+html[data-heading-font='space-grotesk']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Space Grotesk', sans-serif;
+}
+
+html[data-body-font='montserrat'],
+html[data-body-font='montserrat'] body {
+	font-family: 'Montserrat', sans-serif;
+}
+html[data-heading-font='montserrat']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Montserrat', sans-serif;
+}
+
+html[data-body-font='ibm-plex-sans'],
+html[data-body-font='ibm-plex-sans'] body {
+	font-family: 'IBM Plex Sans', sans-serif;
+}
+html[data-heading-font='ibm-plex-sans']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'IBM Plex Sans', sans-serif;
+}
+
+html[data-body-font='source-sans-3'],
+html[data-body-font='source-sans-3'] body {
+	font-family: 'Source Sans 3', sans-serif;
+}
+html[data-heading-font='source-sans-3']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Source Sans 3', sans-serif;
+}
+
+html[data-body-font='instrument-sans'],
+html[data-body-font='instrument-sans'] body {
+	font-family: 'Instrument Sans', sans-serif;
+}
+html[data-heading-font='instrument-sans']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Instrument Sans', sans-serif;
+}
+
+html[data-body-font='noto-serif'],
+html[data-body-font='noto-serif'] body {
+	font-family: 'Noto Serif', serif;
+}
+html[data-heading-font='noto-serif']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Noto Serif', serif;
+}
+
+html[data-body-font='roboto-slab'],
+html[data-body-font='roboto-slab'] body {
+	font-family: 'Roboto Slab', serif;
+}
+html[data-heading-font='roboto-slab']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Roboto Slab', serif;
+}
+
+html[data-body-font='merriweather'],
+html[data-body-font='merriweather'] body {
+	font-family: 'Merriweather', serif;
+}
+html[data-heading-font='merriweather']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Merriweather', serif;
+}
+
+html[data-body-font='lora'],
+html[data-body-font='lora'] body {
+	font-family: 'Lora', serif;
+}
+html[data-heading-font='lora'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Lora', serif;
+}
+
+html[data-body-font='jetbrains-mono'],
+html[data-body-font='jetbrains-mono'] body {
+	font-family: 'JetBrains Mono', monospace;
+}
+html[data-heading-font='jetbrains-mono']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'JetBrains Mono', monospace;
+}
+
+html[data-body-font='geist-mono'],
+html[data-body-font='geist-mono'] body {
+	font-family: 'Geist Mono', monospace;
+}
+html[data-heading-font='geist-mono']
+	:is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: 'Geist Mono', monospace;
+}
+
+html[data-body-font='custom'],
+html[data-body-font='custom'] body {
+	font-family: SiteBody, sans-serif;
+}
+html[data-heading-font='custom'] :is(h1, h2, h3, h4, h5, h6, .font-heading) {
+	font-family: SiteHeading, sans-serif;
+}

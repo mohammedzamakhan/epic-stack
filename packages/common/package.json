@@ -72,6 +72,11 @@
       "import": "./src/site-theme.ts",
       "default": "./src/site-theme.ts"
     },
+    "./site-fonts": {
+      "types": "./src/site-fonts.ts",
+      "import": "./src/site-fonts.ts",
+      "default": "./src/site-fonts.ts"
+    },
     "./site-locales": {
       "types": "./src/site-locales.ts",
       "import": "./src/site-locales.ts",

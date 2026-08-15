@@ -9,6 +9,7 @@ import {
 import {
 	buildSiteThemeCss,
 	parseSiteThemeConfig,
+	type SiteFontFormat,
 	type SiteThemeConfig,
 } from '@repo/common/site-theme'
 import { prisma } from '@repo/database'
@@ -48,7 +49,11 @@ export type PublicSitePayload = {
 	name: string
 	slug: string
 	customDomain: string | null
-	theme: SiteThemeConfig & { css: string }
+	theme: Omit<SiteThemeConfig, 'headingCustomFont' | 'bodyCustomFont'> & {
+		css: string
+		headingCustomFont: { url: string; format: SiteFontFormat } | null
+		bodyCustomFont: { url: string; format: SiteFontFormat } | null
+	}
 	locales: SiteContentLocale[]
 	defaultLocale: SiteContentLocale
 	locale: SiteContentLocale
@@ -117,12 +122,27 @@ export function toPublicSitePayload(
 		localesConfig.defaultLocale,
 	)
 
+	function publicCustomFont(
+		font: SiteThemeConfig['headingCustomFont'],
+	): {
+		url: string
+		format: NonNullable<SiteThemeConfig['headingCustomFont']>['format']
+	} | null {
+		if (!font) return null
+		return {
+			url: `/resources/fonts?objectKey=${encodeURIComponent(font.objectKey)}`,
+			format: font.format,
+		}
+	}
+
 	return {
 		name: organization.name,
 		slug: organization.slug,
 		customDomain: organization.customDomain,
 		theme: {
 			...theme,
+			headingCustomFont: publicCustomFont(theme.headingCustomFont),
+			bodyCustomFont: publicCustomFont(theme.bodyCustomFont),
 			css: buildSiteThemeCss(theme),
 		},
 		locales: localesConfig.locales,

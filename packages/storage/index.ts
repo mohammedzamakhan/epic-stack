@@ -25,4 +25,5 @@ export {
 	uploadSiteIcon,
 	uploadWebsiteSeoImage,
 	uploadWebsiteAsset,
+	uploadSiteFont,
 } from './src/upload-helpers'

@@ -12,6 +12,7 @@ import {
 	uploadSiteIcon as _uploadSiteIcon,
 	uploadWebsiteSeoImage as _uploadWebsiteSeoImage,
 	uploadWebsiteAsset as _uploadWebsiteAsset,
+	uploadSiteFont as _uploadSiteFont,
 	getSignedGetRequestInfo as _getSignedGetRequestInfo,
 	testS3Connection as _testS3Connection,
 	type StorageConfig,
@@ -183,6 +184,18 @@ export async function uploadWebsiteAsset(
 	return _uploadWebsiteAsset(organizationId, pageId, file, {
 		...defaultOptions,
 		// Force assets to be stored in the platform's default bucket
+		getConfig: () => defaultOptions.getConfig(undefined),
+	})
+}
+
+export async function uploadSiteFont(
+	organizationId: string,
+	role: 'heading' | 'body',
+	file: File | FileUpload,
+) {
+	const defaultOptions = createUploadOptions()
+	return _uploadSiteFont(organizationId, role, file, {
+		...defaultOptions,
 		getConfig: () => defaultOptions.getConfig(undefined),
 	})
 }
