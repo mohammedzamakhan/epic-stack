@@ -92,6 +92,10 @@ export const test = base.extend<{
 	page: async ({ page }, use) => {
 		// Set cookie consent for all tests to prevent the banner from blocking interactions
 		await setCookieConsent(page)
+		// Abort SSE stream to prevent networkidle from hanging globally in all E2E tests
+		await page.route('**/api/notifications/stream*', (route) =>
+			route.abort().catch(() => {}),
+		)
 		await use(page)
 	},
 	// oxlint-disable-next-line no-empty-pattern
