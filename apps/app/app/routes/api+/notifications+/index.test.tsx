@@ -1,7 +1,7 @@
+import { requireUserId } from '@repo/auth'
+import { prisma } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { action, loader } from './index.tsx'
-import { prisma } from '@repo/database'
-import { requireUserId } from '@repo/auth'
 
 vi.mock('@repo/auth', () => ({
 	requireUserId: vi.fn().mockResolvedValue('user1'),

@@ -69,10 +69,7 @@ function NotificationItem({
 	onMarkRead,
 }: {
 	notification: Notification
-	onMarkRead: (
-		id: string,
-		formRef?: React.RefObject<HTMLFormElement | null> | null,
-	) => void
+	onMarkRead: (id: string) => void
 }) {
 	const { _ } = useLingui()
 	const [isHovered, setIsHovered] = useState(false)
@@ -307,10 +304,7 @@ export default function NotificationBell() {
 		}
 	}, [newNotification])
 
-	const handleMarkRead = (
-		id: string,
-		formRef?: React.RefObject<HTMLFormElement | null> | null,
-	) => {
+	const handleMarkRead = (id: string) => {
 		setNotifications((prev) =>
 			prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
 		)

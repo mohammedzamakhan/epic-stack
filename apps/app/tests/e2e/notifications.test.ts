@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker'
 import { prisma } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'

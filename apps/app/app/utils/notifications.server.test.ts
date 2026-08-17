@@ -1,10 +1,10 @@
+import { prisma } from '@repo/database'
+import { sendEmail } from '@repo/email'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
 	notifyCommentMentions,
 	notifyNoteOwner,
 } from './notifications.server.ts'
-import { prisma } from '@repo/database'
-import { sendEmail } from '@repo/email'
 
 vi.hoisted(() => {
 	process.env.APP_URL = 'http://localhost:3000'

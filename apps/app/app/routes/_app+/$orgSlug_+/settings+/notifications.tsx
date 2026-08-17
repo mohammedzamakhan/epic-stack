@@ -1,8 +1,8 @@
 import { requireUserId } from '@repo/auth'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
-import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
