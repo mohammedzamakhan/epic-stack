@@ -111,13 +111,11 @@ function WorkflowPreferenceRow({
 	organizationId,
 	workflow,
 	serverPref,
-	index,
 	isLast,
 }: {
 	organizationId: string
 	workflow: (typeof workflows)[0]
 	serverPref: Preference
-	index: number
 	isLast: boolean
 }) {
 	const { _ } = useLingui()
@@ -225,7 +223,6 @@ export function NotificationPreferencesCard({
 							organizationId={organizationId}
 							workflow={workflow}
 							serverPref={serverPref}
-							index={index}
 							isLast={index === workflows.length - 1}
 						/>
 					)

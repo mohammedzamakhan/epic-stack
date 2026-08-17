@@ -12,7 +12,6 @@ import { PageTitle } from '@repo/ui/page-title'
 import confetti from 'canvas-confetti'
 import { useEffect, useRef, lazy, Suspense } from 'react'
 import {
-	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	useLoaderData,
 	useRouteLoaderData,
