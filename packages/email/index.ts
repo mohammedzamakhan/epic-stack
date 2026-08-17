@@ -8,6 +8,8 @@ export { default as EmailChangeEmail } from './src/templates/email-change.tsx'
 export { default as EmailChangeNoticeEmail } from './src/templates/email-change-notice.tsx'
 export { default as TrialEndingEmail } from './src/templates/trial-ending.tsx'
 export { default as NewDeviceSigninEmail } from './src/templates/new-device-signin.tsx'
+export { default as MentionEmail } from './src/templates/mention-email.tsx'
+export { default as CommentEmail } from './src/templates/comment-email.tsx'
 
 // Export types
 export type { OrganizationInviteEmailProps } from './src/templates/organization-invite.tsx'
@@ -19,5 +21,7 @@ export type { EmailChangeEmailProps } from './src/templates/email-change.tsx'
 export type { EmailChangeNoticeEmailProps } from './src/templates/email-change-notice.tsx'
 export type { TrialEndingEmailProps } from './src/templates/trial-ending.tsx'
 export type { NewDeviceSigninEmailProps } from './src/templates/new-device-signin.tsx'
+export type { MentionEmailProps } from './src/templates/mention-email.tsx'
+export type { CommentEmailProps } from './src/templates/comment-email.tsx'
 
 export { sendEmail } from './src/send-email'

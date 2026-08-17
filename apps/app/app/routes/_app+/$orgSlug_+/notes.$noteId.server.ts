@@ -689,10 +689,11 @@ export async function handleAddCommentIntent({
 			const noteTitle = noteWithTitle.title || 'Untitled Note'
 
 			await notifyCommentMentions({
-				commentContent: content,
+				commentContent: sanitizedContent,
 				commentId: comment.id,
 				noteId,
 				noteTitle,
+				noteOwnerId: noteWithTitle.createdById,
 				commenterUserId: userId,
 				commenterName,
 				organizationId: note.organizationId,
@@ -706,7 +707,7 @@ export async function handleAddCommentIntent({
 				commentId: comment.id,
 				commenterUserId: userId,
 				commenterName,
-				commentContent: content,
+				commentContent: sanitizedContent,
 				organizationId: note.organizationId,
 				organizationSlug: organization.slug,
 			})

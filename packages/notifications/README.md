@@ -1,6 +1,6 @@
 # Notifications Package
 
-This package contains Novu workflow definitions and utilities for handling
+This package contains workflow definitions and utilities for handling
 notifications in the application.
 
 ## Workflows
@@ -51,15 +51,6 @@ notes. The system:
 2. Resolves mentions to actual user IDs
 3. Sends notifications to mentioned users (excluding the commenter)
 4. Sends notification to note owner if someone else commented
-
-## Environment Variables
-
-Make sure these are set in your `.env` file:
-
-```
-NOVU_SECRET_KEY="your-novu-secret-key"
-BASE_URL="http://localhost:3000"  # or your production URL
-```
 
 ## Mention Formats Supported
 

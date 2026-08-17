@@ -2,7 +2,6 @@ import { invariant } from '@epic-web/invariant'
 
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { Novu } from '@novu/api'
 import { requireUserId } from '@repo/auth'
 import {
 	getOnboardingProgress,
@@ -20,7 +19,6 @@ import {
 	useSearchParams,
 	useNavigate,
 } from 'react-router'
-import { ENV } from 'varlock/env'
 import { LeadershipCard } from '#app/components/leadership-card.tsx'
 import { OnboardingChecklist } from '#app/components/onboarding-checklist.tsx'
 
@@ -34,10 +32,6 @@ import { type loader as rootLoader } from '#app/root.tsx'
 import { setUserDefaultOrganization } from '#app/utils/organization/organizations.server.ts'
 // import { DataTable } from '#app/components/data-table.tsx'
 // import data from '#app/dashboard/data.json'
-
-const novu = new Novu({
-	secretKey: ENV.NOVU_SECRET_KEY,
-})
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -171,48 +165,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		onboardingProgress,
 		leaders,
 	})
-}
-
-export async function action({ request, params }: ActionFunctionArgs) {
-	const userId = await requireUserId(request)
-	const orgSlug = params.orgSlug
-	invariant(orgSlug, 'orgSlug is required')
-
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: orgSlug,
-			active: true,
-			users: { some: { userId: userId, active: true } },
-		},
-		select: { id: true },
-	})
-
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { id: true, email: true },
-	})
-
-	invariant(user, 'User is not found')
-
-	invariant(organization, 'organization is required')
-
-	//subscriber id = org id + customner id
-	const subscriberId = `${organization.id}_${userId}`
-
-	try {
-		await novu.trigger({
-			workflowId: 'test-workflow',
-			to: {
-				subscriberId: subscriberId,
-				email: user.email,
-			},
-			payload: {},
-		})
-	} catch {
-		// Error triggering workflow
-	}
-
-	return null
 }
 
 export default function OrganizationDashboard() {

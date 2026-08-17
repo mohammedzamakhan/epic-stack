@@ -28,17 +28,13 @@ const app = express()
 // ✅ EARLY CORS + LOGGING MIDDLEWARE
 app.use((req, res, next) => {
 	const origin = req.get('Origin')
-	const allowedOrigins = [
-		'https://dashboard-v0.novu.co',
-		// Allow localhost origins for development (mobile app)
-		...(IS_DEV
-			? [
-					'http://localhost:8081',
-					'http://localhost:8082',
-					'http://localhost:19006', // Default Expo web port
-				]
-			: []),
-	]
+	const allowedOrigins = IS_DEV
+		? [
+				'http://localhost:8081',
+				'http://localhost:8082',
+				'http://localhost:19006', // Default Expo web port
+			]
+		: []
 
 	// Only set CORS headers if origin is explicitly allowed
 	if (origin && allowedOrigins.includes(origin)) {
@@ -128,10 +124,7 @@ app.disable('x-powered-by')
 
 // Then continue with general middleware handling
 app.use((req, res, next) => {
-	// Apply Helmet for non-Novu routes
-	if (!req.url.includes('/novu')) {
-		helmet(res, { general: { referrerPolicy: false } })
-	}
+	helmet(res, { general: { referrerPolicy: false } })
 	next()
 })
 

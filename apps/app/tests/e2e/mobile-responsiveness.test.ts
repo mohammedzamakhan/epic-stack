@@ -435,6 +435,11 @@ test.describe('Mobile Responsiveness', () => {
 			setTimeout(() => route.continue(), 100) // Add 100ms delay
 		})
 
+		// Re-abort SSE stream since the catch-all route above overrides the global mock
+		await page.route('**/api/notifications/stream*', (route) =>
+			route.abort().catch(() => {}),
+		)
+
 		await navigate('/:slug', { slug: org.slug })
 
 		// Look for loading indicators
