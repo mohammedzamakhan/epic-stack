@@ -16,7 +16,7 @@ test.describe('Accessibility', () => {
 		// Test dashboard page
 		try {
 			await navigate('/:slug', { slug: org.slug })
-			await page.waitForLoadState('domcontentloaded')
+			await page.waitForLoadState('networkidle')
 
 			// Verify h1 exists and is unique
 			const h1Elements = page.getByRole('heading', { level: 1 })
@@ -26,7 +26,7 @@ test.describe('Accessibility', () => {
 			console.log('Dashboard page failed, trying to reload:', error.message)
 			// Try reloading the page
 			await page.reload()
-			await page.waitForLoadState('domcontentloaded')
+			await page.waitForLoadState('networkidle')
 
 			const h1Elements = page.getByRole('heading', { level: 1 })
 			await expect(h1Elements).toHaveCount(1)
@@ -35,7 +35,7 @@ test.describe('Accessibility', () => {
 
 		// Test notes page
 		await navigate('/:slug/notes', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Verify proper heading hierarchy
 		const headings = page.getByRole('heading')
@@ -44,7 +44,7 @@ test.describe('Accessibility', () => {
 
 		// Test settings page
 		await navigate('/:slug/settings', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Verify h1 exists
 		await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
@@ -62,7 +62,7 @@ test.describe('Accessibility', () => {
 
 		// Test note creation form
 		await navigate('/:slug/notes/new', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Verify form inputs have labels
 		const titleInput = page.getByRole('textbox', { name: /title/i })
@@ -83,7 +83,7 @@ test.describe('Accessibility', () => {
 
 		// Test profile settings form
 		await navigate('/profile')
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Verify profile form inputs have proper labels
 		const nameInput = page.getByRole('textbox', { name: 'Name', exact: true })
@@ -106,7 +106,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Test keyboard navigation through interactive elements
 		await page.keyboard.press('Tab')
@@ -149,7 +149,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Check all images have alt attributes
 		// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
@@ -167,7 +167,7 @@ test.describe('Accessibility', () => {
 		// Test profile page images
 		try {
 			await navigate('/profile')
-			await page.waitForLoadState('domcontentloaded')
+			await page.waitForLoadState('networkidle')
 
 			// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
 			const profileImages = page.locator('img')
@@ -183,7 +183,7 @@ test.describe('Accessibility', () => {
 			if (error instanceof Error && error.message.includes('crashed')) {
 				console.log('Page crashed during profile navigation, reloading...')
 				await page.reload()
-				await page.waitForLoadState('domcontentloaded')
+				await page.waitForLoadState('networkidle')
 				// Retry the test after reload
 				// eslint-disable-next-line playwright/no-raw-locators -- getByRole('img') also matches SVG icons, which have no alt attribute
 				const profileImages = page.locator('img')
@@ -213,7 +213,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Test both light and dark themes
 		const themes = ['light', 'dark']
@@ -256,12 +256,12 @@ test.describe('Accessibility', () => {
 		// Navigate to organization page
 		try {
 			await navigate('/:slug', { slug: org.slug })
-			await page.waitForLoadState('domcontentloaded')
+			await page.waitForLoadState('networkidle')
 		} catch (error: unknown) {
 			if (error instanceof Error && error.message.includes('crashed')) {
 				console.log('Page crashed during organization navigation, reloading...')
 				await page.reload()
-				await page.waitForLoadState('domcontentloaded')
+				await page.waitForLoadState('networkidle')
 			} else {
 				throw error
 			}
@@ -334,7 +334,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Check for main landmark
 		await expect(page.getByRole('main')).toBeVisible()
@@ -370,7 +370,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Check for ARIA live regions
 		const liveRegions = page.getByRole('status').or(page.getByRole('alert'))
@@ -405,7 +405,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to organization page
 		await navigate('/:slug', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Tab to first element to reveal skip links
 		await page.keyboard.press('Tab')
@@ -432,7 +432,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to login page to test form validation
 		await navigate('/login')
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Submit form without filling required fields
 		const submitButton = page.getByRole('button', { name: /sign in/i })
@@ -539,7 +539,7 @@ test.describe('Accessibility', () => {
 
 		// Navigate to notes page (likely has a table)
 		await navigate('/:slug/notes', { slug: org.slug })
-		await page.waitForLoadState('domcontentloaded')
+		await page.waitForLoadState('networkidle')
 
 		// Check for tables
 		const tables = page.getByRole('table')
