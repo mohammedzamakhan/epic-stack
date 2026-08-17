@@ -1,16 +1,19 @@
-import { Novu } from '@novu/api'
+import { invariant } from '@epic-web/invariant'
 import { prisma } from '@repo/database'
+import { sendEmail, MentionEmail, CommentEmail } from '@repo/email'
 import { extractMentions, resolveMentionsToUserIds } from '@repo/notifications'
 
-const novu = new Novu({
-	secretKey: process.env.NOVU_SECRET_KEY,
-})
+import { sanitizeTextContent } from '#app/utils/content-sanitization.server.ts'
+
+const appUrl = process.env.APP_URL || process.env.BASE_URL
+invariant(appUrl, 'APP_URL or BASE_URL is required')
 
 interface NotifyCommentMentionsParams {
 	commentContent: string
 	commentId: string
 	noteId: string
 	noteTitle: string
+	noteOwnerId: string
 	commenterUserId: string
 	commenterName: string
 	organizationId: string
@@ -37,6 +40,7 @@ export async function notifyCommentMentions({
 	commentId,
 	noteId,
 	noteTitle,
+	noteOwnerId,
 	commenterUserId,
 	commenterName,
 	organizationId,
@@ -75,17 +79,17 @@ export async function notifyCommentMentions({
 			organizationMembers,
 		)
 
-		// Filter out the commenter (don't notify yourself)
+		// Filter out the commenter (don't notify yourself) and note owner
 		const filteredUserIds = mentionedUserIds.filter(
-			(id) => id !== commenterUserId,
+			(id) => id !== commenterUserId && id !== noteOwnerId,
 		)
 
 		if (filteredUserIds.length === 0) {
 			return
 		}
 
-		// Send notifications to mentioned users
-		const noteUrl = `/${organizationSlug}/notes/${noteId}`
+		const safeCommenterName = sanitizeTextContent(commenterName)
+		const noteUrl = `${appUrl}/${organizationSlug}/notes/${noteId}`
 
 		for (const userId of filteredUserIds) {
 			const user = organizationMembers.find(
@@ -93,26 +97,74 @@ export async function notifyCommentMentions({
 			)?.user
 			if (!user) continue
 
-			const subscriberId = `${organizationId}_${userId}`
-
 			const payload = {
 				noteId,
 				commentId,
 				noteTitle,
-				commenterName,
+				commenterName: safeCommenterName,
 				commentContent,
 				organizationSlug,
 				noteUrl,
 			}
 
-			await novu.trigger({
-				workflowId: 'comment-mention-workflow',
-				to: {
-					subscriberId,
-					email: user.email,
+			// Check preferences
+			const preference = await prisma.notificationPreference.findUnique({
+				where: {
+					userId_organizationId_workflow: {
+						userId,
+						organizationId,
+						workflow: 'comment-mention-workflow',
+					},
 				},
-				payload,
 			})
+
+			const inAppEnabled = preference?.inApp ?? true
+			const emailEnabled = preference?.email ?? true
+
+			if (inAppEnabled) {
+				// 1. Save notification to DB using upsert to enforce uniqueness
+				await prisma.notification.upsert({
+					where: {
+						userId_organizationId_type_entityId: {
+							userId,
+							organizationId,
+							type: 'mention',
+							entityId: commentId,
+						},
+					},
+					update: {
+						payload: JSON.stringify(payload),
+						isRead: false,
+						isSeen: false,
+						updatedAt: new Date(),
+					},
+					create: {
+						userId,
+						organizationId,
+						type: 'mention',
+						entityId: commentId,
+						payload: JSON.stringify(payload),
+					},
+				})
+
+				// Broadcast event logic moved to database polling in stream.tsx
+			}
+
+			if (emailEnabled) {
+				// 2. Send email reliably
+				try {
+					const res = await sendEmail({
+						to: user.email,
+						subject: `${safeCommenterName} mentioned you in a comment`,
+						react: MentionEmail(payload),
+					})
+					if (res.status === 'error') {
+						console.error('Failed to send mention email:', res.error)
+					}
+				} catch (err) {
+					console.error('Failed to send mention email:', err)
+				}
+			}
 		}
 	} catch (error) {
 		console.error('Error sending mention notifications:', error)
@@ -150,25 +202,77 @@ export async function notifyNoteOwner({
 			return
 		}
 
-		const subscriberId = `${organizationId}_${noteOwnerId}`
-		const noteUrl = `/${organizationSlug}/notes/${noteId}`
+		const safeCommenterName = sanitizeTextContent(commenterName)
+		const noteUrl = `${appUrl}/${organizationSlug}/notes/${noteId}`
 
-		await novu.trigger({
-			workflowId: 'note-comment-workflow',
-			to: {
-				subscriberId: subscriberId,
-				email: noteOwner.email,
-			},
-			payload: {
-				noteId,
-				commentId,
-				noteTitle,
-				commenterName,
-				commentContent,
-				organizationSlug,
-				noteUrl,
+		const payload = {
+			noteId,
+			commentId,
+			noteTitle,
+			commenterName: safeCommenterName,
+			commentContent,
+			organizationSlug,
+			noteUrl,
+		}
+
+		// Check preferences
+		const preference = await prisma.notificationPreference.findUnique({
+			where: {
+				userId_organizationId_workflow: {
+					userId: noteOwnerId,
+					organizationId,
+					workflow: 'note-comment-workflow',
+				},
 			},
 		})
+
+		const inAppEnabled = preference?.inApp ?? true
+		const emailEnabled = preference?.email ?? true
+
+		if (inAppEnabled) {
+			// 1. Save notification to DB using upsert to enforce uniqueness
+			await prisma.notification.upsert({
+				where: {
+					userId_organizationId_type_entityId: {
+						userId: noteOwnerId,
+						organizationId,
+						type: 'comment',
+						entityId: commentId,
+					},
+				},
+				update: {
+					payload: JSON.stringify(payload),
+					isRead: false,
+					isSeen: false,
+					updatedAt: new Date(),
+				},
+				create: {
+					userId: noteOwnerId,
+					organizationId,
+					type: 'comment',
+					entityId: commentId,
+					payload: JSON.stringify(payload),
+				},
+			})
+
+			// Broadcast event logic moved to database polling in stream.tsx
+		}
+
+		if (emailEnabled) {
+			// 2. Send email reliably
+			try {
+				const res = await sendEmail({
+					to: noteOwner.email,
+					subject: `New comment on your note: ${noteTitle}`,
+					react: CommentEmail(payload),
+				})
+				if (res.status === 'error') {
+					console.error('Failed to send comment email:', res.error)
+				}
+			} catch (err) {
+				console.error('Failed to send comment email:', err)
+			}
+		}
 	} catch (error) {
 		console.error('Error sending note owner notification:', error)
 	}

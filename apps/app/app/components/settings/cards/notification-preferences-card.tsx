@@ -1,8 +1,6 @@
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { usePreferences, type Preference } from '@novu/react'
 import { Badge } from '@repo/ui/badge'
-import { Button } from '@repo/ui/button'
 import {
 	Card,
 	CardContent,
@@ -13,35 +11,28 @@ import {
 import { Icon, type IconName } from '@repo/ui/icon'
 import { Separator } from '@repo/ui/separator'
 import { Switch } from '@repo/ui/switch'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useEffect, useRef } from 'react'
+import { useFetcher } from 'react-router'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
 
 const channelIcons: Record<string, IconName> = {
 	email: 'mail',
-	sms: 'message-square',
-	in_app: 'bell',
-	push: 'bell',
-	chat: 'message-circle',
+	inApp: 'bell',
 }
 
-// Channel labels function that uses lingui
 function getChannelLabel(channel: string, _: (msg: any) => string): string {
 	const labels: Record<string, any> = {
 		email: msg`Email`,
-		sms: msg`SMS`,
-		in_app: msg`In-App`,
-		push: msg`Push`,
-		chat: msg`Chat`,
+		inApp: msg`In-App`,
 	}
 	return _(labels[channel]) || channel
 }
 
-// Workflow labels function that uses lingui
 function getWorkflowLabel(
 	workflowName: string,
 	_: (msg: any) => string,
 ): string {
 	const labels: Record<string, any> = {
-		'test-workflow': msg`Testing notifications`,
 		'comment-mention-workflow': msg`Notifications when you are mentioned in a comment`,
 		'note-comment-workflow': msg`Notifications when someone comments on your notes`,
 	}
@@ -52,10 +43,30 @@ function getChannelIcon(channel: string): IconName {
 	return channelIcons[channel] ?? 'bell'
 }
 
+type Preference = {
+	workflow: string
+	email: boolean
+	inApp: boolean
+}
+
+// Workflows configuration
+const workflows = [
+	{
+		id: 'comment-mention-workflow',
+		name: 'comment-mention-workflow',
+		critical: false,
+	},
+	{
+		id: 'note-comment-workflow',
+		name: 'note-comment-workflow',
+		critical: false,
+	},
+]
+
 interface ChannelSwitchListProps {
 	preference: Preference
 	isUpdating: boolean
-	onUpdate: (preference: Preference, channel: string, enabled: boolean) => void
+	onUpdate: (workflow: string, channel: string, enabled: boolean) => void
 	disabled: boolean
 }
 
@@ -66,9 +77,10 @@ function ChannelSwitchList({
 	disabled,
 }: ChannelSwitchListProps) {
 	const { _ } = useLingui()
+	const channels = ['email', 'inApp'] as const
 	return (
 		<div className="grid gap-1 sm:pl-4">
-			{Object.entries(preference.channels).map(([channel, enabled]) => (
+			{channels.map((channel) => (
 				<div
 					key={channel}
 					className="flex items-center justify-between gap-3 py-2"
@@ -83,9 +95,9 @@ function ChannelSwitchList({
 						</span>
 					</div>
 					<Switch
-						checked={enabled}
+						checked={preference[channel]}
 						onCheckedChange={(checked) =>
-							onUpdate(preference, channel, checked)
+							onUpdate(preference.workflow, channel, checked)
 						}
 						disabled={disabled || isUpdating}
 					/>
@@ -95,180 +107,100 @@ function ChannelSwitchList({
 	)
 }
 
-function NotificationPreferencesCardComponent() {
+function WorkflowPreferenceRow({
+	organizationId,
+	workflow,
+	serverPref,
+	index,
+	isLast,
+}: {
+	organizationId: string
+	workflow: (typeof workflows)[0]
+	serverPref: Preference
+	index: number
+	isLast: boolean
+}) {
 	const { _ } = useLingui()
-	const { preferences, isLoading, error, refetch } = usePreferences()
-	const [updatingPreferences, setUpdatingPreferences] = useState<Set<string>>(
-		new Set(),
-	)
-	const [isRefetching, setIsRefetching] = useState(false)
+	const fetcher = useFetcher()
+	const formRef = useRef<HTMLFormElement>(null)
 
-	const handleRefetch = useCallback(async () => {
-		setIsRefetching(true)
-		try {
-			await refetch()
-		} catch (err) {
-			console.error('Failed to refetch preferences:', err)
-		} finally {
-			setIsRefetching(false)
+	const isUpdating = fetcher.state !== 'idle'
+
+	// Optimistic UI updates
+	const pref = { ...serverPref }
+	if (isUpdating && fetcher.formData) {
+		const formChannel = fetcher.formData.get('channel') as 'email' | 'inApp'
+		const formEnabled = fetcher.formData.get('enabled') === 'true'
+		if (formChannel) {
+			pref[formChannel] = formEnabled
 		}
-	}, [refetch])
+	}
 
-	// Load preferences once when component mounts
-	useEffect(() => {
-		void handleRefetch()
-	}, [handleRefetch])
-
-	const isLoadingState = isLoading || isRefetching
-
-	const updatePreference = async (
-		preference: Preference,
-		channelType: string,
+	const updatePreference = (
+		workflowId: string,
+		channel: string,
 		enabled: boolean,
 	) => {
-		const preferenceId = preference.workflow?.id || 'global'
-		setUpdatingPreferences((prev) => new Set(prev).add(preferenceId))
+		const formData = new FormData(formRef.current!)
+		formData.set('organizationId', organizationId)
+		formData.set('workflow', workflowId)
+		formData.set('channel', channel)
+		formData.set('enabled', String(enabled))
 
-		try {
-			await preference.update({
-				channels: {
-					[channelType]: enabled,
-				},
-			})
-			// Note: Removed automatic refetch after update to prevent re-rendering issues.
-			// The Novu SDK should handle state updates internally.
-		} catch (error) {
-			console.error('Failed to update preference:', error)
-		} finally {
-			setUpdatingPreferences((prev) => {
-				const newSet = new Set(prev)
-				newSet.delete(preferenceId)
-				return newSet
-			})
-		}
+		void fetcher.submit(formData, {
+			method: 'POST',
+			action: '/api/notifications/preferences',
+		})
 	}
 
-	if (isLoadingState) {
-		return (
-			<Card className="w-full">
-				<CardHeader>
-					<CardTitle>
-						<Trans>Notification Preferences</Trans>
-					</CardTitle>
-					<CardDescription>
-						<Trans>
-							Manage your notification settings for different channels and
-							workflows.
-						</Trans>
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex items-center justify-center py-8">
-						<div className="flex items-center gap-2">
-							<Icon
-								name="loader"
-								className="h-4 w-4 motion-safe:animate-spin"
-							/>
-							<span className="text-muted-foreground text-sm">
-								<Trans>Loading preferences...</Trans>
-							</span>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-		)
-	}
-
-	if (error) {
-		const errorMessage = error.message
-		return (
-			<Card className="w-full">
-				<CardHeader>
-					<CardTitle>
-						<Trans>Notification Preferences</Trans>
-					</CardTitle>
-					<CardDescription>
-						<Trans>
-							Manage your notification settings for different channels and
-							workflows.
-						</Trans>
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
-						<Icon name="octagon-alert" className="h-4 w-4 text-red-600" />
-						<p className="text-sm text-red-800">
-							<Trans>
-								Failed to load notification preferences: {errorMessage}
-							</Trans>
-						</p>
-					</div>
-					<Button
-						variant="outline"
-						onClick={handleRefetch}
-						disabled={isRefetching}
-						className="mt-4"
-					>
-						<Icon
-							name="refresh-cw"
-							className={`mr-2 h-4 w-4 ${isRefetching ? 'motion-safe:animate-spin' : ''}`}
-						/>
-						{isRefetching ? <Trans>Retrying...</Trans> : <Trans>Retry</Trans>}
-					</Button>
-				</CardContent>
-			</Card>
-		)
-	}
-
-	if (!preferences || preferences.length === 0) {
-		return (
-			<Card className="w-full">
-				<CardHeader>
-					<CardTitle>
-						<Trans>Notification Preferences</Trans>
-					</CardTitle>
-					<CardDescription>
-						<Trans>
-							Manage your notification settings for different channels and
-							workflows.
-						</Trans>
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex flex-col items-center justify-center py-8 text-center">
-						<Icon
-							name="bell"
-							className="text-muted-foreground mb-4 h-12 w-12"
-						/>
-						<h3 className="mb-2 text-lg font-medium">
-							<Trans>No preferences found</Trans>
-						</h3>
-						<p className="text-muted-foreground mb-4 text-sm">
-							<Trans>No notification preferences are configured yet.</Trans>
-						</p>
-						<Button
-							variant="outline"
-							onClick={handleRefetch}
-							disabled={isRefetching}
-							className="mt-2"
-						>
-							<Icon
-								name="refresh-cw"
-								className={`mr-2 h-4 w-4 ${isRefetching ? 'motion-safe:animate-spin' : ''}`}
-							/>
-							{isRefetching ? 'Refreshing...' : 'Refresh'}
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
-		)
-	}
-
-	// Group preferences by channel type for better organization
-	const channels = ['email', 'sms', 'in_app', 'push', 'chat']
-	const availableChannels = channels.filter((channel) =>
-		preferences.some((pref) => channel in pref.channels),
+	return (
+		<div className="space-y-2">
+			<form ref={formRef} className="hidden">
+				<HoneypotInputs />
+			</form>
+			<div className="flex flex-wrap items-center gap-2">
+				<Icon name="cog" className="h-4 w-4 shrink-0" />
+				<h3 className="text-base font-medium">
+					{getWorkflowLabel(workflow.name, _)}
+				</h3>
+				{workflow.critical && (
+					<Badge variant="destructive" className="text-xs">
+						<Trans>Critical</Trans>
+					</Badge>
+				)}
+			</div>
+			<ChannelSwitchList
+				preference={pref}
+				isUpdating={isUpdating}
+				onUpdate={updatePreference}
+				disabled={workflow.critical}
+			/>
+			{!isLast && <Separator />}
+		</div>
 	)
+}
+
+export function NotificationPreferencesCard({
+	organizationId,
+}: {
+	organizationId: string
+}) {
+	const fetcher = useFetcher<{ preferences: Preference[] }>()
+
+	useEffect(() => {
+		if (fetcher.state === 'idle' && !fetcher.data) {
+			void fetcher.load(
+				`/api/notifications/preferences?organizationId=${organizationId}`,
+			)
+		}
+	}, [fetcher, organizationId])
+
+	const preferences = fetcher.data?.preferences || []
+
+	const getPreference = (workflowId: string): Preference => {
+		const pref = preferences.find((p) => p.workflow === workflowId)
+		return pref || { workflow: workflowId, email: true, inApp: true }
+	}
 
 	return (
 		<Card className="w-full">
@@ -279,182 +211,26 @@ function NotificationPreferencesCardComponent() {
 				<CardDescription>
 					<Trans>
 						Manage your notification settings for different channels and
-						workflows. Critical notifications cannot be disabled.
+						workflows.
 					</Trans>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
-				{/* Global Preferences */}
-				{preferences
-					.filter((pref) => !pref.workflow)
-					.map((preference) => {
-						const preferenceId = 'global'
-						const isUpdating = updatingPreferences.has(preferenceId)
+				{workflows.map((workflow, index) => {
+					const serverPref = getPreference(workflow.id)
 
-						return (
-							<div key={preferenceId} className="space-y-2">
-								<div className="flex items-center gap-2">
-									<Icon name="settings" className="h-4 w-4 shrink-0" />
-									<h3 className="text-base font-medium">
-										<Trans>Global Preferences</Trans>
-									</h3>
-								</div>
-								<ChannelSwitchList
-									preference={preference}
-									isUpdating={isUpdating}
-									onUpdate={updatePreference}
-									disabled={false}
-								/>
-								<Separator />
-							</div>
-						)
-					})}
-
-				{/* Workflow-specific Preferences */}
-				{preferences
-					.filter((pref) => pref.workflow)
-					.map((preference) => {
-						const preferenceId = preference.workflow?.id || 'unknown'
-						const isUpdating = updatingPreferences.has(preferenceId)
-
-						return (
-							<div key={preferenceId} className="space-y-2">
-								<div className="flex flex-wrap items-center gap-2">
-									<Icon name="cog" className="h-4 w-4 shrink-0" />
-									<h3 className="text-base font-medium">
-										{preference.workflow?.name
-											? getWorkflowLabel(preference.workflow?.name, _)
-											: preference.workflow?.name}
-									</h3>
-									{preference.workflow?.critical && (
-										<Badge variant="destructive" className="text-xs">
-											<Trans>Critical</Trans>
-										</Badge>
-									)}
-								</div>
-								<ChannelSwitchList
-									preference={preference}
-									isUpdating={isUpdating}
-									onUpdate={updatePreference}
-									disabled={preference.workflow?.critical || false}
-								/>
-								{preference !== preferences[preferences.length - 1] && (
-									<Separator />
-								)}
-							</div>
-						)
-					})}
-
-				{/* Channel Overview — summary strip, not nested cards */}
-				{availableChannels.length > 0 && (
-					<div className="border-border space-y-3 border-t pt-6">
-						<h3 className="text-base font-medium">
-							<Trans>Channel Overview</Trans>
-						</h3>
-						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-							{availableChannels.map((channel) => {
-								const enabledCount = preferences.filter(
-									(pref) =>
-										pref.channels[channel as keyof typeof pref.channels],
-								).length
-								const totalCount = preferences.filter(
-									(pref) => channel in pref.channels,
-								).length
-
-								return (
-									<div
-										key={channel}
-										className="bg-muted/40 flex flex-col gap-1 rounded-lg px-3 py-2.5"
-									>
-										<div className="flex items-center gap-2">
-											<Icon
-												name={getChannelIcon(channel)}
-												className="text-muted-foreground h-4 w-4 shrink-0"
-											/>
-											<span className="text-sm font-medium">
-												{getChannelLabel(channel, _)}
-											</span>
-										</div>
-										<p className="text-muted-foreground text-xs">
-											<Trans>
-												{enabledCount} of {totalCount} notifications enabled
-											</Trans>
-										</p>
-									</div>
-								)
-							})}
-						</div>
-					</div>
-				)}
+					return (
+						<WorkflowPreferenceRow
+							key={workflow.id}
+							organizationId={organizationId}
+							workflow={workflow}
+							serverPref={serverPref}
+							index={index}
+							isLast={index === workflows.length - 1}
+						/>
+					)
+				})}
 			</CardContent>
 		</Card>
-	)
-}
-
-// Error boundary wrapper to handle cases where NovuProvider is not available
-class NotificationPreferencesErrorBoundary extends React.Component<
-	{ children: React.ReactNode },
-	{ hasError: boolean }
-> {
-	constructor(props: { children: React.ReactNode }) {
-		super(props)
-		this.state = { hasError: false }
-	}
-
-	static getDerivedStateFromError() {
-		return { hasError: true }
-	}
-
-	componentDidCatch(error: Error) {
-		// Only suppress the Novu provider errors
-		if (
-			!error.message.includes('useNovu must be used within a') &&
-			!error.message.includes('usePreferences')
-		) {
-			console.error('NotificationPreferencesCard error:', error)
-		}
-	}
-
-	render() {
-		if (this.state.hasError) {
-			// Show a fallback UI when Novu is not available
-			return (
-				<Card className="w-full">
-					<CardHeader>
-						<CardTitle>
-							<Trans>Notification Preferences</Trans>
-						</CardTitle>
-						<CardDescription>
-							<Trans>
-								Notification preferences are not available at this time.
-							</Trans>
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="flex flex-col items-center justify-center py-8 text-center">
-							<Icon
-								name="bell"
-								className="text-muted-foreground mb-4 h-12 w-12"
-							/>
-							<p className="text-muted-foreground text-sm">
-								<Trans>
-									Please ensure you have an active organization to manage
-									notification preferences.
-								</Trans>
-							</p>
-						</div>
-					</CardContent>
-				</Card>
-			)
-		}
-		return this.props.children
-	}
-}
-
-export function NotificationPreferencesCard() {
-	return (
-		<NotificationPreferencesErrorBoundary>
-			<NotificationPreferencesCardComponent />
-		</NotificationPreferencesErrorBoundary>
 	)
 }

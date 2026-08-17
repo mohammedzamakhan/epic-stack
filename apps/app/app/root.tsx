@@ -1,4 +1,3 @@
-import { NovuProvider } from '@novu/react/hooks'
 import { storeUtmParams } from '@repo/analytics'
 import { getImpersonationInfo, getUserId, logout } from '@repo/auth'
 import { cache, cachified } from '@repo/cache'
@@ -53,9 +52,6 @@ import { type Theme, getTheme } from './utils/theme.server.ts'
 export const links: Route.LinksFunction = () => {
 	return [
 		// Preconnect to external services for faster resource loading
-		{ rel: 'preconnect', href: 'https://api.novu.co' },
-		{ rel: 'preconnect', href: 'https://ws.novu.co' },
-		{ rel: 'dns-prefetch', href: 'https://api.novu.co' },
 
 		// Preload critical assets
 		{ rel: 'preload', href: iconsHref, as: 'image' },
@@ -219,12 +215,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		{ toast, headers: toastHeaders },
 		utmResponse,
 		impersonationInfo,
-		cookieConsent
+		cookieConsent,
 	] = await Promise.all([
 		getToast(request),
 		storeUtmParams(request),
 		getImpersonationInfo(request),
-		getCookieConsentState(request)
+		getCookieConsentState(request),
 	])
 
 	const utmHeaders = utmResponse?.headers || {}
@@ -348,44 +344,20 @@ function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	useToast(data.toast)
 
-	// Only load NovuProvider if user is logged in and has an organization
-	const shouldLoadNovu =
-		data.user &&
-		data.userOrganizations?.currentOrganization?.organization?.id &&
-		ENV.NOVU_APPLICATION_IDENTIFIER
-
 	return (
 		<HoneypotProvider {...data.honeyProps}>
 			<OpenImgContextProvider
 				optimizerEndpoint="/resources/images"
 				getSrc={getImgSrc}
 			>
-				{shouldLoadNovu ? (
-					<NovuProvider
-						subscriberId={`${data.userOrganizations?.currentOrganization?.organization.id}_${data.user?.id}`}
-						applicationIdentifier={ENV.NOVU_APPLICATION_IDENTIFIER!}
-					>
-						{data.impersonationInfo && (
-							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-						)}
-						<TooltipProvider>
-							<Outlet />
-						</TooltipProvider>
-						<EpicToaster />
-						<CookieConsentBanner consent={data.cookieConsent} />
-					</NovuProvider>
-				) : (
-					<>
-						{data.impersonationInfo && (
-							<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
-						)}
-						<TooltipProvider>
-							<Outlet />
-						</TooltipProvider>
-						<EpicToaster />
-						<CookieConsentBanner consent={data.cookieConsent} />
-					</>
+				{data.impersonationInfo && (
+					<ImpersonationBanner impersonationInfo={data.impersonationInfo} />
 				)}
+				<TooltipProvider>
+					<Outlet />
+				</TooltipProvider>
+				<EpicToaster />
+				<CookieConsentBanner consent={data.cookieConsent} />
 			</OpenImgContextProvider>
 		</HoneypotProvider>
 	)

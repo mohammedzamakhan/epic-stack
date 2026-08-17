@@ -8,6 +8,8 @@ export { default as EmailChangeEmail } from './templates/email-change'
 export { default as EmailChangeNoticeEmail } from './templates/email-change-notice'
 export { default as TrialEndingEmail } from './templates/trial-ending'
 export { default as NewDeviceSigninEmail } from './templates/new-device-signin'
+export { default as MentionEmail } from './templates/mention-email'
+export { default as CommentEmail } from './templates/comment-email'
 
 // Export types
 export type { OrganizationInviteEmailProps } from './templates/organization-invite'
@@ -19,6 +21,8 @@ export type { EmailChangeEmailProps } from './templates/email-change'
 export type { EmailChangeNoticeEmailProps } from './templates/email-change-notice'
 export type { TrialEndingEmailProps } from './templates/trial-ending'
 export type { NewDeviceSigninEmailProps } from './templates/new-device-signin'
+export type { MentionEmailProps } from './templates/mention-email'
+export type { CommentEmailProps } from './templates/comment-email'
 
 // Export sendEmail function
 export { sendEmail } from './send-email'

@@ -22,7 +22,7 @@ Once you've completed the initial setup, you can develop completely offline:
 
 - **Email Previews**: Resend API (can be mocked)
 - **Background Jobs**: Trigger.dev (can be skipped in dev)
-- **Notifications**: Novu (can be mocked)
+- **Notifications**: Local DB polling (fully offline)
 - **AI Features**: Google AI, OpenAI (can be mocked)
 
 ## Initial Setup (Requires Internet)
@@ -226,7 +226,6 @@ This is expected and doesn't impact local development experience.
 We're continuously improving offline capabilities:
 
 - [ ] Local email preview without Resend
-- [ ] Mock notification service
 - [ ] Offline AI model support
 - [ ] Local background job processing
 

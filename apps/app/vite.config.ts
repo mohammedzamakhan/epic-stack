@@ -101,9 +101,6 @@ export default defineConfig((config) => ({
 						if (id.includes('recharts') || id.includes('d3-')) {
 							return 'vendor-charts'
 						}
-						if (id.includes('@novu')) {
-							return 'vendor-novu'
-						}
 						if (id.includes('react-router') || id.includes('@react-router')) {
 							return 'vendor-router'
 						}

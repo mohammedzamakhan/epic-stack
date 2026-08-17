@@ -1,9 +1,6 @@
-import { t, Trans, msg } from '@lingui/macro'
+import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { type Notification } from '@novu/js'
-import { useNotifications, useNovu } from '@novu/react/hooks'
-
-import { Avatar, AvatarImage, AvatarFallback } from '@repo/ui/avatar'
+import { Avatar, AvatarFallback } from '@repo/ui/avatar'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader } from '@repo/ui/card'
@@ -23,20 +20,20 @@ import {
 	TooltipTrigger,
 } from '@repo/ui/tooltip'
 import { motion, AnimatePresence } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Markdown from 'react-markdown'
-import { useNavigate } from 'react-router'
+import { useNavigate, useFetcher, useParams } from 'react-router'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { useEventSource } from 'remix-utils/sse/react'
 import { BellIcon } from '#app/components/icons/bell-icon.tsx'
 
-interface Action {
-	label: string
-	isCompleted: boolean
-	redirect?: Redirect
-}
-
-interface Redirect {
-	url: string
-	target?: '_self' | '_blank' | '_parent' | '_top' | '_unfencedTop'
+interface Notification {
+	id: string
+	type: string
+	payload: string
+	isRead: boolean
+	isSeen: boolean
+	createdAt: string
 }
 
 function formatRelativeTime(
@@ -53,89 +50,64 @@ function formatRelativeTime(
 	}
 	if (diffInSeconds < 3600) {
 		const minutes = Math.floor(diffInSeconds / 60)
-		return _(
-			msg`${minutes}m ago` as {
-				id: string
-				message: string
-			},
-		)
+		return _(msg`${minutes}m ago` as { id: string; message: string })
 	}
 	if (diffInSeconds < 86400) {
 		const hours = Math.floor(diffInSeconds / 3600)
-		return _(
-			msg`${hours}h ago` as {
-				id: string
-				message: string
-			},
-		)
+		return _(msg`${hours}h ago` as { id: string; message: string })
 	}
 	if (diffInSeconds < 604800) {
 		const days = Math.floor(diffInSeconds / 86400)
-		return _(
-			msg`${days}d ago` as {
-				id: string
-				message: string
-			},
-		)
+		return _(msg`${days}d ago` as { id: string; message: string })
 	}
 
 	return date.toLocaleDateString()
 }
 
-function NotificationItem({ notification }: { notification: Notification }) {
+function NotificationItem({
+	notification,
+	onMarkRead,
+}: {
+	notification: Notification
+	onMarkRead: (
+		id: string,
+		formRef?: React.RefObject<HTMLFormElement | null> | null,
+	) => void
+}) {
 	const { _ } = useLingui()
 	const [isHovered, setIsHovered] = useState(false)
 	const navigate = useNavigate()
 
-	const handleRedirect = (redirect?: Redirect) => {
-		if (redirect?.url) {
-			if (redirect.target === '_blank') {
-				window.open(redirect.url, '_blank')
-			} else {
-				void navigate(redirect.url)
-			}
-		}
+	let payload: any = {}
+	try {
+		payload =
+			typeof notification.payload === 'string'
+				? JSON.parse(notification.payload)
+				: notification.payload
+	} catch (e) {
+		console.error('Failed to parse notification payload', e)
 	}
 
-	const handlePress = async () => {
+	const subject =
+		notification.type === 'mention'
+			? `**${payload?.commenterName || 'Someone'}** mentioned you`
+			: `**${payload?.commenterName || 'Someone'}** commented on your note`
+	const body = payload?.commentContent || ''
+
+	const handlePress = () => {
 		if (!notification.isRead) {
-			try {
-				// Implement read functionality here
-				await notification.read()
-			} catch (error) {
-				console.error('Error marking notification as read:', error)
-			}
+			onMarkRead(notification.id)
 		}
-		handleRedirect(notification.redirect)
+		if (payload.noteUrl) {
+			void navigate(payload.noteUrl)
+		}
 	}
 
-	const handleMarkAsReadUnread = async (e: React.MouseEvent) => {
+	const handleMarkAsReadUnread = (e: React.MouseEvent) => {
 		e.stopPropagation()
-		try {
-			if (notification.isRead) {
-				await notification.unread()
-			} else {
-				await notification.read()
-			}
-		} catch (error) {
-			console.error('Error toggling read status:', error)
+		if (!notification.isRead) {
+			onMarkRead(notification.id)
 		}
-	}
-
-	const renderAction = (action: Action, isPrimary: boolean) => {
-		const isDisabled = action.isCompleted
-		return (
-			<Button
-				variant={isPrimary ? 'default' : 'outline'}
-				size="sm"
-				className={`${isDisabled ? 'cursor-not-allowed opacity-50' : ''} ${action.isCompleted ? 'bg-primary hover:bg-primary/90' : ''}`}
-				onClick={() => handleRedirect(action.redirect)}
-				disabled={isDisabled}
-			>
-				{action.label}
-				{action.isCompleted && <Icon name="check" className="ml-2 h-4 w-4" />}
-			</Button>
-		)
 	}
 
 	return (
@@ -155,26 +127,20 @@ function NotificationItem({ notification }: { notification: Notification }) {
 		>
 			<div className="flex items-start border-b border-dashed p-2">
 				<Avatar className="mr-2 h-8 w-8">
-					<AvatarImage src={notification.avatar} alt={_(t`Avatar`)} />
-					<AvatarFallback>{notification.subject?.[0] || 'N'}</AvatarFallback>
+					<AvatarFallback>{payload.commenterName?.[0] || 'N'}</AvatarFallback>
 				</Avatar>
 				<div className="flex-1">
 					<div className="mb-1 flex items-start justify-between">
 						<h3 className="mr-2 text-sm [&_strong]:font-semibold">
-							<Markdown>{notification.subject}</Markdown>
+							<Markdown>{subject}</Markdown>
 						</h3>
 					</div>
 					<div>
 						<p className="text-muted-foreground mb-2 text-sm">
-							<Markdown>{notification.body}</Markdown>
+							<Markdown>{body}</Markdown>
 						</p>
 						<div className="flex justify-between space-x-2">
-							<div>
-								{notification.primaryAction &&
-									renderAction(notification.primaryAction, true)}
-								{notification.secondaryAction &&
-									renderAction(notification.secondaryAction, false)}
-							</div>
+							<div />
 							<div className="flex shrink-0 items-center space-x-2">
 								{!isHovered ? (
 									<p className="text-muted-foreground text-xs whitespace-nowrap">
@@ -188,6 +154,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 													variant="ghost"
 													size="sm"
 													onClick={handleMarkAsReadUnread}
+													disabled={notification.isRead}
 												>
 													{notification.isRead ? (
 														<Icon name="bell" className="h-3 w-3" />
@@ -199,7 +166,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
 											<TooltipContent>
 												<p>
 													{notification.isRead ? (
-														<Trans>Mark as unread</Trans>
+														<Trans>Already read</Trans>
 													) : (
 														<Trans>Mark as read</Trans>
 													)}
@@ -268,70 +235,114 @@ function EmptyState() {
 	)
 }
 
-function useOptionalNovu() {
-	try {
-		return useNovu()
-	} catch {
-		return null
-	}
-}
-
-function useOptionalNotifications(filter?: { read?: boolean }) {
-	try {
-		return useNotifications(filter)
-	} catch {
-		return null
-	}
-}
-
-function NotificationBellComponent() {
-	const [filter, setFilter] = useState<'all' | 'unread'>('all')
-	const { notifications, isLoading, fetchMore, hasMore, readAll, refetch } =
-		useOptionalNotifications(filter === 'unread' ? { read: false } : {}) || {}
-	const novu = useOptionalNovu()
+export default function NotificationBell() {
+	const { _ } = useLingui()
 	const [isOpen, setIsOpen] = useState(false)
+	const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
-	const unreadCount = notifications?.filter((n) => !n.isRead).length || 0
+	const fetcher = useFetcher<any>()
+	const actionFetcher = useFetcher<any>()
+
+	const [notifications, setNotifications] = useState<Notification[]>([])
+	const [unreadCount, setUnreadCount] = useState(0)
+
+	const [hasLoaded, setHasLoaded] = useState(false)
+	const markReadFormRef = useRef<HTMLFormElement>(null)
+	const markAllReadFormRef = useRef<HTMLFormElement>(null)
+
+	const { orgSlug } = useParams()
 
 	useEffect(() => {
-		if (!novu || !refetch) return
+		setHasLoaded(false)
+		setNotifications([])
+		setUnreadCount(0)
+	}, [orgSlug])
 
-		const listener = () => {
-			void refetch()
+	// Fetch initial notifications
+	useEffect(() => {
+		if (!hasLoaded && fetcher.state === 'idle') {
+			setHasLoaded(true)
+			const query = orgSlug ? `?orgSlug=${orgSlug}` : ''
+			void fetcher.load(`/api/notifications${query}`)
 		}
+	}, [fetcher.state, hasLoaded, fetcher, orgSlug])
 
-		novu.on('notifications.notification_received', listener)
-		novu.on('notifications.unread_count_changed', listener)
-
-		return () => {
-			novu.off('notifications.notification_received', listener)
-			novu.off('notifications.unread_count_changed', listener)
+	useEffect(() => {
+		if (fetcher.data) {
+			setNotifications(fetcher.data.notifications || [])
+			setUnreadCount(fetcher.data.unreadCount || 0)
 		}
-	}, [novu, refetch])
+	}, [fetcher.data])
 
-	const handleLoadMore = () => {
-		if (hasMore && fetchMore) {
-			void fetchMore()
+	// Listen to real-time updates
+	const streamQuery = orgSlug ? `?orgSlug=${orgSlug}` : ''
+	const newNotification = useEventSource(
+		`/api/notifications/stream${streamQuery}`,
+		{
+			event: 'notification',
+		},
+	)
+
+	useEffect(() => {
+		if (newNotification) {
+			try {
+				const notification = JSON.parse(newNotification) as Notification
+				setNotifications((prev) => {
+					const exists = prev.find((n) => n.id === notification.id)
+					if (exists) {
+						return prev
+							.map((n) => (n.id === notification.id ? notification : n))
+							.sort(
+								(a, b) =>
+									new Date(b.createdAt).getTime() -
+									new Date(a.createdAt).getTime(),
+							)
+					}
+					return [notification, ...prev]
+				})
+				setUnreadCount((prev) => prev + 1)
+			} catch (e) {
+				console.error('Failed to parse SSE notification', e)
+			}
 		}
+	}, [newNotification])
+
+	const handleMarkRead = (
+		id: string,
+		formRef?: React.RefObject<HTMLFormElement | null> | null,
+	) => {
+		setNotifications((prev) =>
+			prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+		)
+		setUnreadCount((prev) => Math.max(0, prev - 1))
+
+		const formData = new FormData(markReadFormRef.current!)
+		formData.set('notificationId', id)
+
+		void actionFetcher.submit(formData, {
+			method: 'post',
+			action: '/api/notifications',
+		})
 	}
 
-	const handleReadAll = async () => {
-		if (!readAll) return
-		try {
-			await readAll()
-		} catch (error) {
-			console.error('Error marking all notifications as read:', error)
-		}
+	const handleReadAll = () => {
+		setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+		setUnreadCount(0)
+
+		const formData = new FormData(markAllReadFormRef.current!)
+		void actionFetcher.submit(formData, {
+			method: 'post',
+			action: '/api/notifications',
+		})
 	}
 
 	const handleFilterChange = (value: 'all' | 'unread') => {
 		setFilter(value)
 	}
 
-	const { _ } = useLingui()
-
-	if (!novu) return null
-	if (!notifications) return null
+	const filteredNotifications = notifications.filter((n) =>
+		filter === 'unread' ? !n.isRead : true,
+	)
 
 	const filterTitles = {
 		all: _(msg`All Notifications`),
@@ -358,38 +369,50 @@ function NotificationBellComponent() {
 
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<PopoverTrigger
-				render={
-					<motion.button
-						className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-					>
-						<BellIcon size={16} />
-						<AnimatePresence>
-							{unreadCount > 0 && (
-								<motion.div
-									initial={{ scale: 0 }}
-									animate={{ scale: 1 }}
-									exit={{ scale: 0 }}
-									className="absolute -top-2 -right-3"
+			<PopoverTrigger>
+				<motion.button
+					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+				>
+					<BellIcon size={16} />
+					<AnimatePresence>
+						{unreadCount > 0 && (
+							<motion.div
+								initial={{ scale: 0 }}
+								animate={{ scale: 1 }}
+								exit={{ scale: 0 }}
+								className="absolute -top-2 -right-3"
+							>
+								<Badge
+									variant="destructive"
+									data-testid="unread-count"
+									className="rounded-full px-1 py-0 text-xs"
 								>
-									<Badge
-										variant="destructive"
-										className="rounded-full px-1 py-0 text-xs"
-									>
-										{unreadCount}
-									</Badge>
-								</motion.div>
-							)}
-						</AnimatePresence>
-						<span className="sr-only">
-							<Trans>Toggle notifications</Trans>
-						</span>
-					</motion.button>
-				}
-			></PopoverTrigger>
+									{unreadCount}
+								</Badge>
+							</motion.div>
+						)}
+					</AnimatePresence>
+					<span className="sr-only">
+						<Trans>Toggle notifications</Trans>
+					</span>
+				</motion.button>
+			</PopoverTrigger>
 			<PopoverContent className="w-[400px] rounded-2xl p-0" align="end">
+				{/* Hidden forms for CSRF Honeypot submission */}
+				<form ref={markReadFormRef} className="hidden">
+					<HoneypotInputs />
+					<input type="hidden" name="intent" value="markAsRead" />
+					<input type="hidden" name="notificationId" value="" />
+					{orgSlug && <input type="hidden" name="orgSlug" value={orgSlug} />}
+				</form>
+				<form ref={markAllReadFormRef} className="hidden">
+					<HoneypotInputs />
+					<input type="hidden" name="intent" value="markAllAsRead" />
+					{orgSlug && <input type="hidden" name="orgSlug" value={orgSlug} />}
+				</form>
+
 				<motion.div
 					initial="hidden"
 					animate="visible"
@@ -449,7 +472,7 @@ function NotificationBellComponent() {
 							</div>
 						</CardHeader>
 						<CardContent className="p-0">
-							{isLoading ? (
+							{fetcher.state === 'loading' && notifications.length === 0 ? (
 								<div className="flex h-[calc(100vh-200px)] max-h-[500px] items-center justify-center">
 									<motion.div
 										animate={{ rotate: 360 }}
@@ -464,28 +487,21 @@ function NotificationBellComponent() {
 								</div>
 							) : (
 								<ScrollArea className="h-[calc(100vh-200px)] max-h-[500px]">
-									{notifications?.length === 0 ? (
+									{filteredNotifications.length === 0 ? (
 										<EmptyState />
 									) : (
 										<div className="flex flex-col">
-											{notifications?.map((notification: Notification) => (
+											{filteredNotifications.map((notification) => (
 												<motion.div
 													key={notification.id}
 													variants={itemVariants}
 												>
-													<NotificationItem notification={notification} />
+													<NotificationItem
+														notification={notification}
+														onMarkRead={handleMarkRead}
+													/>
 												</motion.div>
 											))}
-											{hasMore && (
-												<Button
-													variant="ghost"
-													className="mt-4 w-full"
-													onClick={handleLoadMore}
-												>
-													<Trans>Load More</Trans>{' '}
-													<Icon name="chevron-down" className="ml-2 h-4 w-4" />
-												</Button>
-											)}
 										</div>
 									)}
 								</ScrollArea>
@@ -495,42 +511,5 @@ function NotificationBellComponent() {
 				</motion.div>
 			</PopoverContent>
 		</Popover>
-	)
-}
-
-// Error boundary wrapper to handle cases where NovuProvider is not available
-class NotificationBellErrorBoundary extends React.Component<
-	{ children: React.ReactNode },
-	{ hasError: boolean }
-> {
-	constructor(props: { children: React.ReactNode }) {
-		super(props)
-		this.state = { hasError: false }
-	}
-
-	static getDerivedStateFromError() {
-		return { hasError: true }
-	}
-
-	componentDidCatch(error: Error) {
-		// Only suppress the "useNovu must be used within a <NovuProvider />" error
-		if (!error.message.includes('useNovu must be used within a')) {
-			console.error('NotificationBell error:', error)
-		}
-	}
-
-	render() {
-		if (this.state.hasError) {
-			return null
-		}
-		return this.props.children
-	}
-}
-
-export default function NotificationBell() {
-	return (
-		<NotificationBellErrorBoundary>
-			<NotificationBellComponent />
-		</NotificationBellErrorBoundary>
 	)
 }

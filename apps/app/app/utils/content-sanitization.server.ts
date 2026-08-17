@@ -48,6 +48,8 @@ export function sanitizeCommentContent(content: string): string {
 			'rel',
 			'class', // For styling mentions
 			'data-mention-id', // For @mentions
+			'data-id', // For TipTap mentions
+			'data-type', // For TipTap mentions
 		],
 		// Additional security configurations
 		ALLOW_DATA_ATTR: false, // Only allow specific data attributes
@@ -102,7 +104,15 @@ export function sanitizeNoteContent(content: string): string {
 			'pre',
 			'div',
 		],
-		ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'data-mention-id'],
+		ALLOWED_ATTR: [
+			'href',
+			'target',
+			'rel',
+			'class',
+			'data-mention-id',
+			'data-id',
+			'data-type',
+		],
 		ALLOW_DATA_ATTR: false,
 		ALLOW_UNKNOWN_PROTOCOLS: false,
 		ALLOWED_URI_REGEXP:

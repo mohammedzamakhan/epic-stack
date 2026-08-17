@@ -17,8 +17,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@novu/framework": "^2.9.0",
-    "@novu/react": "^3.12.0",
     "@remix-run/server-runtime": "^2.17.5",
     "react-router": "^8.3.0",
     "zod": "^3.25.76"

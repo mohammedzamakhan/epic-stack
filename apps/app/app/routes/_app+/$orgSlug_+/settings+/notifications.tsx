@@ -1,23 +1,29 @@
 import { requireUserId } from '@repo/auth'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
-import { type LoaderFunctionArgs } from 'react-router'
+import { useLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { NotificationPreferencesCard } from '#app/components/settings/cards/notification-preferences-card.tsx'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)
-	await requireUserOrganization(request, params.orgSlug, {
+	const org = await requireUserOrganization(request, params.orgSlug, {
 		id: true,
 	})
-	return {}
+	return { organizationId: org.id }
 }
 
 export default function NotificationSettings() {
+	const { organizationId } = useLoaderData<typeof loader>()
 	return (
 		<AnnotatedLayout>
 			<AnnotatedSection>
-				<NotificationPreferencesCard />
+				<NotificationPreferencesCard organizationId={organizationId} />
 			</AnnotatedSection>
 		</AnnotatedLayout>
 	)
+}
+
+export function ErrorBoundary() {
+	return <GeneralErrorBoundary />
 }

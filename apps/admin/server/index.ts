@@ -25,32 +25,6 @@ if (SENTRY_ENABLED) {
 
 const app = express()
 
-// ✅ EARLY CORS + LOGGING MIDDLEWARE
-app.use((req, res, next) => {
-	const origin = req.get('Origin')
-	const allowedOrigins = ['https://dashboard-v0.novu.co']
-
-	// Only set CORS headers if origin is explicitly allowed
-	if (origin && allowedOrigins.includes(origin)) {
-		res.header('Access-Control-Allow-Origin', origin)
-		res.header(
-			'Access-Control-Allow-Methods',
-			'GET, POST, PUT, DELETE, OPTIONS',
-		)
-		res.header(
-			'Access-Control-Allow-Headers',
-			'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, bypass-tunnel-reminder, baggage, sentry-trace',
-		)
-		res.header('Access-Control-Allow-Credentials', 'true')
-	}
-
-	if (req.method === 'OPTIONS') {
-		return res.sendStatus(204)
-	}
-
-	next()
-})
-
 const getHost = (req: { get: (key: string) => string | undefined }) =>
 	req.get('X-Forwarded-Host') ?? req.get('host') ?? ''
 
@@ -118,10 +92,7 @@ app.disable('x-powered-by')
 
 // Then continue with general middleware handling
 app.use((req, res, next) => {
-	// Apply Helmet for non-Novu routes
-	if (!req.url.includes('/novu')) {
-		helmet(res, { general: { referrerPolicy: false } })
-	}
+	helmet(res, { general: { referrerPolicy: false } })
 	next()
 })
 
