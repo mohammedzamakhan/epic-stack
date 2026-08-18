@@ -29,6 +29,8 @@ export function getRegionalTenantApiUrl(dataRegion: string | null | undefined) {
 async function callTenantCommand(options: {
 	orgId: string
 	dataRegion: string | null | undefined
+	slug?: string
+	customDomain?: string | null
 	path: '/api/provision' | '/api/deprovision'
 }) {
 	const tenantApiUrl = getRegionalTenantApiUrl(options.dataRegion)
@@ -46,7 +48,12 @@ async function callTenantCommand(options: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`,
 		},
-		body: JSON.stringify({ orgId: options.orgId }),
+		body: JSON.stringify({
+			orgId: options.orgId,
+			slug: options.slug,
+			customDomain: options.customDomain ?? null,
+			dataRegion: expectedRegion,
+		}),
 	})
 
 	const payload = (await response.json().catch(() => ({}))) as {
@@ -75,6 +82,8 @@ async function callTenantCommand(options: {
 export async function provisionTenantDatabase(options: {
 	orgId: string
 	dataRegion: string | null | undefined
+	slug?: string
+	customDomain?: string | null
 }) {
 	return callTenantCommand({ ...options, path: '/api/provision' })
 }
@@ -82,6 +91,8 @@ export async function provisionTenantDatabase(options: {
 export async function deprovisionTenantDatabase(options: {
 	orgId: string
 	dataRegion: string | null | undefined
+	slug?: string
+	customDomain?: string | null
 }) {
 	return callTenantCommand({ ...options, path: '/api/deprovision' })
 }

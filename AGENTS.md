@@ -467,8 +467,8 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 2. Build + TypeCheck
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
-5. Docker build
-6. Deploy to Fly.io
+5. Docker build (app, admin, cms, **tenant-api US + KSA**)
+6. Deploy to Fly.io; Sites and marketing web to Cloudflare Pages
 
 **Zero-Downtime Deployments**:
 

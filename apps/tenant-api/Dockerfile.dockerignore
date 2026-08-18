@@ -1,0 +1,17 @@
+/node_modules
+*.log
+.DS_Store
+.env
+/.cache
+/build
+/apps/app
+/apps/admin
+/apps/web
+/apps/cms
+/apps/docs
+/apps/mobile
+/apps/studio
+/apps/background-jobs
+/apps/chrome-extension
+/apps/email
+/apps/notifications

@@ -119,6 +119,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				await provisionTenantDatabase({
 					orgId: organization.id,
 					dataRegion: organization.dataRegion,
+					slug: organization.slug,
+					customDomain: organization.customDomain,
 				})
 			}
 
@@ -320,6 +322,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				await deprovisionTenantDatabase({
 					orgId: organization.id,
 					dataRegion: currentRegion,
+					slug: organization.slug,
+					customDomain: organization.customDomain,
 				})
 			}
 
@@ -335,6 +339,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				await provisionTenantDatabase({
 					orgId: organization.id,
 					dataRegion,
+					slug: organization.slug,
+					customDomain: organization.customDomain,
 				})
 				await prisma.organization.update({
 					where: { id: organization.id },

@@ -6,7 +6,10 @@ import {
 	provisionTenantDb,
 	TENANT_ORG_ID_PATTERN,
 } from '@repo/tenant-db'
-import { findActiveOrganizationById } from '../lib/origin.ts'
+import {
+	findActiveOrganizationById,
+	organizationFromProvisionPayload,
+} from '../lib/origin.ts'
 import { getNodeRegion, orgMatchesNodeRegion } from '../lib/region.ts'
 import { getBearerToken, timingSafeEqualString } from '../lib/secrets.ts'
 
@@ -17,6 +20,9 @@ const orgIdSchema = z.object({
 		.string()
 		.min(1, 'orgId is required')
 		.regex(TENANT_ORG_ID_PATTERN, 'Invalid orgId format'),
+	slug: z.string().min(1).optional(),
+	customDomain: z.string().nullable().optional(),
+	dataRegion: z.enum(['us', 'ksa']).optional(),
 })
 
 function unauthorized(c: Context) {
@@ -52,7 +58,9 @@ async function runTenantDbCommand(
 
 	const { orgId } = parsed.data
 	const nodeRegion = getNodeRegion()
-	const organization = await findActiveOrganizationById(orgId)
+	const organization =
+		(await findActiveOrganizationById(orgId)) ||
+		organizationFromProvisionPayload(parsed.data)
 
 	if (!organization) {
 		return c.json({ error: 'Organization not found' }, 404)

@@ -160,7 +160,9 @@ Full architecture, local two-node setup, and SMS rules:
 
 ### Create regional apps and volumes
 
-Use distinct Fly apps and volumes. Example names; match your `fly.toml`.
+Use distinct Fly apps and volumes. Configs live in `apps/tenant-api/fly.toml`
+(US, `sjc`) and `apps/tenant-api/fly.ksa.toml` (KSA, `jed`). GitHub Actions
+builds and deploys both on push to `main`/`dev` when `tenant-api` is affected.
 
 ```sh
 # US data plane (can share the App region, e.g. sjc)
@@ -190,17 +192,17 @@ HMAC_US="$(openssl rand -hex 32)"
 HMAC_KSA="$(openssl rand -hex 32)"
 
 fly secrets set \
-  DATA_REGION=us \
   JWT_SECRET="$JWT_US" \
   AUTH_HMAC_SECRET="$HMAC_US" \
   INTERNAL_COMMAND_TOKEN="$PROVISION_TOKEN" \
+  APP_URL=https://epic-startup.me \
   --app epic-startup-tenant-us
 
 fly secrets set \
-  DATA_REGION=ksa \
   JWT_SECRET="$JWT_KSA" \
   AUTH_HMAC_SECRET="$HMAC_KSA" \
   INTERNAL_COMMAND_TOKEN="$PROVISION_TOKEN" \
+  APP_URL=https://epic-startup.me \
   --app epic-startup-tenant-ksa
 
 fly secrets set \

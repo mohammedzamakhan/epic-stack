@@ -9,6 +9,7 @@ import { z } from 'zod'
 import {
 	findActiveOrganizationById,
 	resolveOrganizationForBrowserAuth,
+	resolvePublishedOrganization,
 	type PublishedOrganization,
 } from '../lib/origin.ts'
 import {
@@ -16,7 +17,7 @@ import {
 	rateLimit,
 	rateLimitByKey,
 } from '../lib/rate-limit.ts'
-import { orgMatchesNodeRegion } from '../lib/region.ts'
+import { orgMatchesNodeRegion, getNodeRegion } from '../lib/region.ts'
 import { getBearerToken, hmacHash } from '../lib/secrets.ts'
 
 export const authRoutes = new Hono()
@@ -204,9 +205,31 @@ async function authenticateCustomer(c: Context) {
 		throw c.json({ error: 'Invalid token payload' }, 401)
 	}
 
-	const organization = await findActiveOrganizationById(orgId)
+	let organization = await findActiveOrganizationById(orgId)
+	if (!organization && typeof decoded.orgSlug === 'string' && decoded.orgSlug) {
+		organization = await resolvePublishedOrganization({ slug: decoded.orgSlug })
+		if (organization && organization.id !== orgId) {
+			organization = null
+		}
+	}
 
 	if (!organization || !orgMatchesNodeRegion(organization.dataRegion)) {
+		const db = await openTenantDb(orgId)
+		if (db && typeof decoded.orgSlug === 'string' && decoded.orgSlug) {
+			return {
+				decoded,
+				db,
+				customerId,
+				orgId,
+				organization: {
+					id: orgId,
+					slug: decoded.orgSlug,
+					customDomain: decoded.customDomain ?? null,
+					hasProvisionedDb: true,
+					dataRegion: getNodeRegion(),
+				},
+			}
+		}
 		throw c.json({ error: 'Organization is no longer active' }, 403)
 	}
 

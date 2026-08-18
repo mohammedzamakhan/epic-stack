@@ -144,8 +144,8 @@ node’s `DATA_REGION` (slug subdomain or published custom domain).
 | POST   | `/auth/logout`     | Browser  | Clears refresh hash.                                                                               |
 | GET    | `/auth/me`         | Browser  | Bearer access token.                                                                               |
 | POST   | `/auth/profile`    | Browser  | Update name/email.                                                                                 |
-| POST   | `/api/provision`   | App only | `{ orgId }`. Bearer `INTERNAL_COMMAND_TOKEN`.                                                      |
-| POST   | `/api/deprovision` | App only | Deletes that org’s SQLite on this node.                                                            |
+| POST   | `/api/provision`   | App only | `{ orgId, slug, dataRegion }`. Bearer `INTERNAL_COMMAND_TOKEN`.                                    |
+| POST   | `/api/deprovision` | App only | Same payload. Deletes that org’s SQLite on this node.                                              |
 
 Access tokens last 15 minutes. Refresh tokens last 30 days (stored hashed with
 `AUTH_HMAC_SECRET`).
@@ -217,21 +217,25 @@ startup in production.
 ## Production / Fly.io
 
 Deploy **separate** tenant-api apps (and volumes) per region. App stays in the
-US and only sends `{ orgId }` to the matching regional provision URL.
+US and only sends `{ orgId, slug, dataRegion }` to the matching regional
+provision URL.
 
-See [Deployment](./deployment.md#regional-tenant-data-plane) and the
+Configs: `apps/tenant-api/fly.toml` (US) and `apps/tenant-api/fly.ksa.toml`
+(KSA). GitHub Actions deploys both, plus Sites to Cloudflare Pages. See
+[Deployment](./deployment.md#regional-tenant-data-plane) and the
 [deployment checklist](./deployment-checklist.md).
 
 ### Required secrets (per regional tenant-api)
 
-| Secret                   | Notes                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `DATA_REGION`            | `us` or `ksa`. Startup fails otherwise.                                               |
-| `JWT_SECRET`             | Signs customer access tokens. No default in production. Unique per region.            |
-| `AUTH_HMAC_SECRET`       | OTP and refresh hashes. Different from `INTERNAL_COMMAND_TOKEN`.                      |
-| `INTERNAL_COMMAND_TOKEN` | Same value as US App. ≥16 chars. Empty token is rejected.                             |
-| `DATABASE_URL`           | Central Prisma for **org flags only** (slug, active, `dataRegion`). Not customer PII. |
-| `ROOT_APP`               | Brand domain used to map `{slug}.{ROOT_APP}` origins for CORS.                        |
+| Secret                   | Notes                                                                      |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `DATA_REGION`            | `us` or `ksa`. Startup fails otherwise.                                    |
+| `JWT_SECRET`             | Signs customer access tokens. No default in production. Unique per region. |
+| `AUTH_HMAC_SECRET`       | OTP and refresh hashes. Different from `INTERNAL_COMMAND_TOKEN`.           |
+| `INTERNAL_COMMAND_TOKEN` | Same value as US App. ≥16 chars. Empty token is rejected.                  |
+| `APP_URL`                | US App origin. Used when this node cannot read Prisma org flags (KSA).     |
+| `DATABASE_URL`           | Central Prisma for **org flags only** when available. Not customer PII.    |
+| `ROOT_APP`               | Brand domain used to map `{slug}.{ROOT_APP}` origins for CORS.             |
 
 ### App (US)
 

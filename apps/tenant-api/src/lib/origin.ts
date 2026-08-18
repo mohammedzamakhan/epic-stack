@@ -41,6 +41,84 @@ const corsCache = new LRUCache<string, boolean>({
 	ttl: 30_000,
 })
 
+function appBaseUrl() {
+	return (process.env.APP_URL || process.env.BASE_URL || '').replace(/\/$/, '')
+}
+
+async function lookupOrganizationFromPrisma(where: {
+	id?: string
+	slug?: string
+	host?: string
+}): Promise<PublishedOrganization | null> {
+	try {
+		if (where.id) {
+			return await prisma.organization.findFirst({
+				where: { id: where.id, active: true },
+				select: publishedOrgSelect,
+			})
+		}
+		if (where.slug) {
+			return await prisma.organization.findFirst({
+				where: {
+					slug: where.slug.toLowerCase(),
+					active: true,
+					sitePublished: true,
+				},
+				select: publishedOrgSelect,
+			})
+		}
+		if (where.host) {
+			return await prisma.organization.findFirst({
+				where: {
+					customDomain: where.host.toLowerCase(),
+					active: true,
+					sitePublished: true,
+				},
+				select: publishedOrgSelect,
+			})
+		}
+	} catch (error) {
+		console.warn('Prisma org lookup failed; trying APP_URL', error)
+	}
+	return null
+}
+
+async function lookupOrganizationFromApp(query: {
+	slug?: string
+	host?: string
+}): Promise<PublishedOrganization | null> {
+	const appUrl = appBaseUrl()
+	if (!appUrl || (!query.slug && !query.host)) return null
+
+	const params = new URLSearchParams()
+	if (query.slug) params.set('slug', query.slug)
+	if (query.host) params.set('host', query.host)
+
+	try {
+		const response = await fetch(`${appUrl}/resources/sites?${params}`, {
+			headers: { Accept: 'application/json' },
+		})
+		if (!response.ok) return null
+		const data = (await response.json()) as {
+			id?: string
+			slug?: string
+			customDomain?: string | null
+			dataRegion?: string | null
+		}
+		if (!data.id || !data.slug) return null
+		return {
+			id: data.id,
+			slug: data.slug,
+			customDomain: data.customDomain ?? null,
+			hasProvisionedDb: true,
+			dataRegion: data.dataRegion || 'us',
+		}
+	} catch (error) {
+		console.warn('APP_URL org lookup failed', error)
+		return null
+	}
+}
+
 function brandDomain() {
 	return (process.env.ROOT_APP || 'epic-startup.me').toLowerCase()
 }
@@ -107,25 +185,17 @@ export async function resolvePublishedOrganization(data: {
 	host?: string
 }) {
 	if (data.slug) {
-		return prisma.organization.findFirst({
-			where: {
-				slug: data.slug.toLowerCase(),
-				active: true,
-				sitePublished: true,
-			},
-			select: publishedOrgSelect,
-		})
+		return (
+			(await lookupOrganizationFromPrisma({ slug: data.slug })) ||
+			lookupOrganizationFromApp({ slug: data.slug })
+		)
 	}
 
 	if (data.host) {
-		return prisma.organization.findFirst({
-			where: {
-				customDomain: data.host.toLowerCase(),
-				active: true,
-				sitePublished: true,
-			},
-			select: publishedOrgSelect,
-		})
+		return (
+			(await lookupOrganizationFromPrisma({ host: data.host })) ||
+			lookupOrganizationFromApp({ host: data.host })
+		)
 	}
 
 	return null
@@ -136,10 +206,23 @@ export async function findActiveOrganizationById(orgId: string) {
 		return null
 	}
 
-	return prisma.organization.findFirst({
-		where: { id: orgId, active: true },
-		select: publishedOrgSelect,
-	})
+	return lookupOrganizationFromPrisma({ id: orgId })
+}
+
+export function organizationFromProvisionPayload(data: {
+	orgId: string
+	slug?: string
+	customDomain?: string | null
+	dataRegion?: string
+}): PublishedOrganization | null {
+	if (!data.slug || !data.dataRegion) return null
+	return {
+		id: data.orgId,
+		slug: data.slug,
+		customDomain: data.customDomain ?? null,
+		hasProvisionedDb: true,
+		dataRegion: data.dataRegion,
+	}
 }
 
 export async function resolveOrganizationFromBinding(binding: OriginBinding) {

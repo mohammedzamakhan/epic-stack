@@ -1,0 +1,24 @@
+# Per-region cluster. US and KSA must use different consul keys and volumes.
+fuse:
+  dir: '${LITEFS_DIR}'
+
+data:
+  dir: '/data/litefs'
+
+proxy:
+  addr: ':${INTERNAL_PORT}'
+  target: 'localhost:${PORT}'
+  db: '${DATABASE_FILENAME}'
+
+lease:
+  type: 'consul'
+  candidate: ${FLY_REGION == PRIMARY_REGION}
+  promote: true
+  advertise-url: 'http://${HOSTNAME}.vm.${FLY_APP_NAME}.internal:20202'
+
+  consul:
+    url: '${FLY_CONSUL_URL}'
+    key: '${LITEFS_CONSUL_KEY}'
+
+exec:
+  - cmd: cd /myapp/apps/tenant-api && npm start

@@ -270,11 +270,14 @@ same LiteFS/Consul cluster.
 
 - [ ] **5.4a** Create apps and volumes (see
       [deployment.md](./deployment.md#regional-tenant-data-plane))
-- [ ] **5.4b** Set US tenant-api secrets (`DATA_REGION=us`). Reuse App's
-      `INTERNAL_COMMAND_TOKEN`. Generate a unique `JWT_SECRET` and
-      `AUTH_HMAC_SECRET` for this region. Do not copy `JWT_SECRET` to Sites.
-- [ ] **5.4c** Set KSA tenant-api secrets (`DATA_REGION=ksa`) the same way with
-      **different** JWT/HMAC values. Do not configure Twilio on the KSA app.
+- [ ] **5.4b** Set US tenant-api secrets (`JWT_SECRET`, `AUTH_HMAC_SECRET`,
+      `INTERNAL_COMMAND_TOKEN`, `APP_URL`). `DATA_REGION=us` is in
+      `apps/tenant-api/fly.toml`. Reuse App's command token. Do not copy
+      `JWT_SECRET` to Sites.
+- [ ] **5.4c** Set KSA tenant-api secrets the same way with **different**
+      JWT/HMAC values (`fly.ksa.toml` sets `DATA_REGION=ksa`). Set `APP_URL` to
+      the US App so org flags can be resolved without sharing LiteFS. Do not
+      configure Twilio on the KSA app.
 
 ### CMS App Environment Variables
 
@@ -334,6 +337,8 @@ same LiteFS/Consul cluster.
   - Go to GitHub → Repository → Settings → Secrets and variables → Actions
   - [ ] Add `FLY_API_TOKEN` (from step 6.1)
   - [ ] Add `SENTRY_AUTH_TOKEN` (optional, for error tracking)
+  - [ ] Optional repository **variables** for Sites builds: `PUBLIC_APP_URL`,
+        `PUBLIC_TENANT_API_URL`, `PUBLIC_TENANT_API_URL_KSA`
 
 ### Verify GitHub Actions Configuration
 
@@ -341,10 +346,14 @@ same LiteFS/Consul cluster.
   - [ ] `container-app` job exists
   - [ ] `container-admin` job exists
   - [ ] `container-cms` job exists
+  - [ ] `container-tenant-api` job exists (US + KSA)
   - [ ] `deploy-app` job exists
   - [ ] `deploy-admin` job exists
   - [ ] `deploy-cms` job exists
-  - [ ] `affected` job detects changes for all apps
+  - [ ] `deploy-tenant-api` job exists
+  - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
+  - [ ] `affected` job detects changes for app, admin, web, cms, sites, and
+        tenant-api
 
 ---
 
