@@ -3,6 +3,12 @@ import { auditService, AuditAction } from '@repo/audit'
 import { getUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
+import { getDefaultConfig } from '#app/utils/website/block-types.ts'
+import {
+	getDefaultHomePageSections,
+	HOME_PAGE_SLUG,
+	HOME_PAGE_TITLE,
+} from '#app/utils/website/home-page.ts'
 
 export type OrganizationWithImage = {
 	id: string
@@ -270,6 +276,8 @@ export async function createOrganization({
 				name,
 				slug,
 				description,
+				siteHeaderConfig: JSON.stringify(getDefaultConfig('header')),
+				siteFooterConfig: JSON.stringify(getDefaultConfig('footer')),
 				users: {
 					create: {
 						userId,
@@ -297,6 +305,31 @@ export async function createOrganization({
 						id: true,
 						objectKey: true,
 					},
+				},
+			},
+		})
+
+		const homePageSections = getDefaultHomePageSections({
+			organizationName: name,
+			description,
+		})
+
+		await tx.websitePage.create({
+			data: {
+				organizationId: organization.id,
+				title: HOME_PAGE_TITLE,
+				slug: HOME_PAGE_SLUG,
+				status: 'published',
+				template: 'blank',
+				isHomePage: true,
+				position: 0,
+				createdById: userId,
+				sections: {
+					create: homePageSections.map((section) => ({
+						type: section.type,
+						position: section.position,
+						config: JSON.stringify(section.config),
+					})),
 				},
 			},
 		})

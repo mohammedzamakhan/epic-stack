@@ -78,6 +78,13 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 	await page.context().addCookies([newConfig])
 }
 
+async function deleteTestUser(userId: string | undefined) {
+	if (!userId) return
+
+	await prisma.websitePage.deleteMany({ where: { createdById: userId } })
+	await prisma.user.deleteMany({ where: { id: userId } })
+}
+
 type Navigate = (
 	route: string,
 	params?: Record<string, string | number>,
@@ -106,7 +113,7 @@ export const test = base.extend<{
 			userId = user.id
 			return user
 		})
-		await prisma.user.delete({ where: { id: userId } }).catch(() => {})
+		await deleteTestUser(userId).catch(() => {})
 	},
 	login: async ({ page }, use) => {
 		let userId: string | undefined = undefined
@@ -138,7 +145,7 @@ export const test = base.extend<{
 			await setCookieConsent(page)
 			return user
 		})
-		await prisma.user.deleteMany({ where: { id: userId } })
+		await deleteTestUser(userId)
 	},
 	prepareGitHubUser: async ({ page }, use, testInfo) => {
 		await page.route(/\/auth\/github(?!\/callback)/, async (route, request) => {
@@ -161,8 +168,7 @@ export const test = base.extend<{
 			where: { email: normalizeEmail(ghUser!.primaryEmail) },
 		})
 		if (user) {
-			await prisma.user.delete({ where: { id: user.id } })
-			await prisma.session.deleteMany({ where: { userId: user.id } })
+			await deleteTestUser(user.id)
 		}
 		await deleteGitHubUser(ghUser!.primaryEmail)
 	},

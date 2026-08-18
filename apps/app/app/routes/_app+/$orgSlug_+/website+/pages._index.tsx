@@ -69,6 +69,7 @@ import {
 	type BlockType,
 	type PageTemplate,
 } from '#app/utils/website/block-types.ts'
+import { HOME_PAGE_SLUG } from '#app/utils/website/home-page.ts'
 import { ensureSiteChrome } from '#app/utils/website/locked-chrome.server.ts'
 
 // --- Action Intents ---
@@ -195,21 +196,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		})
 
 		if (existing) {
-			if (existing.isHomePage && existing.slug === 'home' && slug === 'home') {
-				await prisma.websitePage.update({
-					where: { id: existing.id },
-					data: { slug: '' },
-				})
-			} else {
-				return Response.json({
-					status: 'error' as const,
-					result: submission.reply({
-						fieldErrors: {
-							slug: ['Page URL already exists in this organization'],
-						},
-					}),
-				})
-			}
+			return Response.json({
+				status: 'error' as const,
+				result: submission.reply({
+					fieldErrors: {
+						slug: ['Page URL already exists in this organization'],
+					},
+				}),
+			})
 		}
 
 		// Get the last position
@@ -267,7 +261,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const page = await prisma.websitePage.findFirst({
 			where: { id: pageId, organizationId: organization.id },
-			select: { id: true, isHomePage: true },
+			select: { id: true, isHomePage: true, slug: true },
 		})
 
 		if (!page) {
@@ -286,7 +280,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (intent === unpublishPageIntent) {
-			if (page.isHomePage) {
+			if (page.isHomePage || page.slug === HOME_PAGE_SLUG) {
 				return Response.json({
 					status: 'error' as const,
 					error: 'Cannot unpublish the home page',
@@ -300,7 +294,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (intent === deletePageIntent) {
-			if (page.isHomePage) {
+			if (page.isHomePage || page.slug === HOME_PAGE_SLUG) {
 				return Response.json({
 					status: 'error' as const,
 					error: 'Cannot delete the home page',

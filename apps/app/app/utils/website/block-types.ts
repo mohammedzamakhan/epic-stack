@@ -61,12 +61,9 @@ export const BLOCK_TYPES = {
 		description: 'Logo, navigation, and call to action',
 		locked: true,
 		defaultConfig: {
-			navLinks: [
-				{ label: 'About', url: '/about' },
-				{ label: 'Contact', url: '/contact' },
-			],
-			ctaLabel: 'Get in touch',
-			ctaUrl: '/contact',
+			navLinks: [],
+			ctaLabel: 'Get started',
+			ctaUrl: '/login',
 			showCta: true,
 			showName: true,
 			sticky: true,
@@ -229,19 +226,13 @@ export const BLOCK_TYPES = {
 			columns: [
 				{
 					title: 'Explore',
-					links: [
-						{ label: 'About', url: '/about' },
-						{ label: 'FAQ', url: '/faq' },
-					],
+					links: [{ label: 'Home', url: '/' }],
 				},
 			],
-			ctaLabel: 'Get in touch',
-			ctaUrl: '/contact',
+			ctaLabel: 'Get started',
+			ctaUrl: '/login',
 			showCta: true,
-			socials: [
-				{ platform: 'Instagram', url: '' },
-				{ platform: 'Facebook', url: '' },
-			],
+			socials: [],
 			copyright: '',
 		},
 	},
