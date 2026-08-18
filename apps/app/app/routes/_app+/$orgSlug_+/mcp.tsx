@@ -112,30 +112,30 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const { orgSlug } = params
 	const { organization, user } = await getOrgAndUser(request, orgSlug!)
 
-	// Get existing API keys for this user and organization
-	const apiKeys = await prisma.apiKey.findMany({
-		where: {
-			userId: user.id,
-			organizationId: organization.id,
-		},
-		orderBy: { createdAt: 'desc' },
-	})
-
-	// Get MCP authorizations for this user and organization
-	const mcpAuthorizations = await prisma.mCPAuthorization.findMany({
-		where: {
-			userId: user.id,
-			organizationId: organization.id,
-		},
-		select: {
-			id: true,
-			clientName: true,
-			createdAt: true,
-			lastUsedAt: true,
-			isActive: true,
-		},
-		orderBy: { createdAt: 'desc' },
-	})
+	// ⚡ Bolt: Parallelize independent DB queries to reduce total loader execution time
+	const [apiKeys, mcpAuthorizations] = await Promise.all([
+		prisma.apiKey.findMany({
+			where: {
+				userId: user.id,
+				organizationId: organization.id,
+			},
+			orderBy: { createdAt: 'desc' },
+		}),
+		prisma.mCPAuthorization.findMany({
+			where: {
+				userId: user.id,
+				organizationId: organization.id,
+			},
+			select: {
+				id: true,
+				clientName: true,
+				createdAt: true,
+				lastUsedAt: true,
+				isActive: true,
+			},
+			orderBy: { createdAt: 'desc' },
+		}),
+	])
 
 	return {
 		user,
