@@ -188,48 +188,121 @@ async function seedWebsitePages() {
 								position: 0,
 								config: JSON.stringify({
 									heading: `Welcome to ${org.name}`,
-									subheading: 'A place built around the details that matter',
-									links: [{ url: '/about', link: { label: 'Learn More' } }],
-									assetType: 'image',
+									subheading: `Discover a better way to connect, decide, and get started with ${org.name}.`,
+									links: [{ url: '/login', link: { label: 'Get started' } }],
+									assetType: 'none',
 									assetPosition: 'background',
-									textPosition: 'left',
-									overlay: 'dark',
-									minHeight: 560,
+									textPosition: 'center',
+									overlay: 'none',
+									minHeight: 640,
 									imageUrl: '',
+									videoSrc: '',
+									videoAutoPlay: true,
+									videoLoop: true,
+									videoMuted: true,
+									videoControls: false,
+								}),
+							},
+							{
+								type: 'features',
+								position: 1,
+								config: JSON.stringify({
+									title:
+										'Everything visitors need to choose you with confidence',
+									subtitle:
+										'Highlight the outcomes, trust signals, and simple next steps that turn first-time visitors into loyal customers.',
+									items: [
+										{
+											title: 'A clear promise',
+											description:
+												'Tell people what you do, who you help, and why it matters in seconds.',
+										},
+										{
+											title: 'Friction-free next steps',
+											description:
+												'Guide visitors toward booking, signing in, or reaching out without making them search.',
+										},
+										{
+											title: 'Built-in credibility',
+											description:
+												'Use proof points, answers, and testimonials to make every decision feel easy.',
+										},
+									],
 								}),
 							},
 							{
 								type: 'content',
-								position: 1,
+								position: 2,
 								config: JSON.stringify({
-									title: 'Why Choose Us',
-									body: 'Our experienced team delivers exceptional results with a focus on quality, care, and consistency.',
-									layout: 'split',
+									title: `Why ${org.name} stands out`,
+									subtitle: 'Designed around your customers',
+									body: `${org.name} brings helpful information, practical guidance, and a smooth digital experience together in one place. Visitors can understand what makes your work valuable, feel confident about what to expect, and take the next step without friction.\n\nEvery detail is designed to make the path from interest to action feel clear, trustworthy, and easy.`,
+									layout: 'text',
+									imageUrl: '',
+									imageAlt: '',
 									imagePosition: 'left',
 									imageShape: 'rounded',
-									background: 'none',
-									ctaLabel: 'Our story',
-									ctaUrl: '/about',
+									background: 'muted',
+									ctaLabel: 'Get started',
+									ctaUrl: '/login',
+								}),
+							},
+							{
+								type: 'cards',
+								position: 3,
+								config: JSON.stringify({
+									title: 'How it works',
+									items: [
+										{
+											title: 'Explore what matters',
+											description:
+												'Introduce your services, offers, or resources in a way visitors can understand quickly.',
+											imageUrl: '',
+											linkUrl: '',
+											ctaLabel: 'Step 1',
+										},
+										{
+											title: 'Choose the right path',
+											description:
+												'Help people compare options, answer common questions, and feel ready to move forward.',
+											imageUrl: '',
+											linkUrl: '',
+											ctaLabel: 'Step 2',
+										},
+										{
+											title: 'Take action with ease',
+											description:
+												'Send visitors to the next step with a focused call to action and a reassuring experience.',
+											imageUrl: '',
+											linkUrl: '/login',
+											ctaLabel: 'Get started',
+										},
+									],
 								}),
 							},
 							{
 								type: 'testimonials',
-								position: 2,
+								position: 4,
 								config: JSON.stringify({
-									title: 'What people say',
+									title: 'Customers feel the difference',
+									subtitle:
+										'Use social proof to reinforce the promise you make at the top of the page.',
 									items: [
 										{
-											quote: 'An outstanding experience from start to finish.',
+											quote:
+												'The experience was clear, thoughtful, and easy from the first click.',
 											name: 'Alex Rivera',
 											rating: 5,
 										},
 										{
-											quote: 'Warm, thoughtful, and consistently excellent.',
+											quote:
+												'We understood our options quickly and knew exactly what to do next.',
 											name: 'Jordan Lee',
 											rating: 5,
 										},
 										{
-											quote: 'We keep coming back — it never misses.',
+											quote:
+												'Professional, approachable, and refreshingly simple to work with.',
 											name: 'Sam Patel',
 											rating: 5,
 										},
@@ -237,15 +310,45 @@ async function seedWebsitePages() {
 								}),
 							},
 							{
-								type: 'cta',
-								position: 3,
+								type: 'faq',
+								position: 5,
 								config: JSON.stringify({
-									heading: 'Ready to get started?',
-									description: 'Join thousands of satisfied customers today.',
+									title: 'Questions before you begin?',
+									subtitle:
+										'Answer the concerns that usually slow people down right before they take action.',
+									items: [
+										{
+											question: 'What can I do on this site?',
+											answer:
+												'You can learn what the organization offers, understand the next steps, and access your customer account when you are ready.',
+										},
+										{
+											question: 'How do I get started?',
+											answer:
+												'Use the call to action on this page to sign in or continue with the next step provided by the organization.',
+										},
+										{
+											question: 'What happens after I get started?',
+											answer:
+												'You will be guided through the next step with the information and support you need to continue confidently.',
+										},
+									],
+								}),
+							},
+							{
+								type: 'cta',
+								position: 6,
+								config: JSON.stringify({
+									heading: `Ready to experience ${org.name}?`,
+									description:
+										'Make the next step obvious, reassuring, and easy for every visitor who reaches the end of the page.',
 									variant: 'solid',
-									cardPosition: 'left',
-									primaryLabel: 'Get Started',
-									primaryUrl: '/about',
+									imageUrl: '',
+									cardPosition: 'center',
+									primaryLabel: 'Get started',
+									primaryUrl: '/login',
+									secondaryLabel: '',
+									secondaryUrl: '',
 								}),
 							},
 						],

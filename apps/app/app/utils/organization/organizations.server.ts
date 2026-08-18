@@ -3,8 +3,8 @@ import { auditService, AuditAction } from '@repo/audit'
 import { getUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
-import { getDefaultConfig } from '#app/utils/website/block-types.ts'
 import {
+	getDefaultHomePageSections,
 	HOME_PAGE_SLUG,
 	HOME_PAGE_TITLE,
 } from '#app/utils/website/home-page.ts'
@@ -306,11 +306,10 @@ export async function createOrganization({
 			},
 		})
 
-		const heroConfig = {
-			...getDefaultConfig('hero'),
-			heading: `Welcome to ${name}`,
-			subheading: description?.trim() || 'A brief description of what we do',
-		}
+		const homePageSections = getDefaultHomePageSections({
+			organizationName: name,
+			description,
+		})
 
 		await tx.websitePage.create({
 			data: {
@@ -323,13 +322,11 @@ export async function createOrganization({
 				position: 0,
 				createdById: userId,
 				sections: {
-					create: [
-						{
-							type: 'hero',
-							position: 0,
-							config: JSON.stringify(heroConfig),
-						},
-					],
+					create: homePageSections.map((section) => ({
+						type: section.type,
+						position: section.position,
+						config: JSON.stringify(section.config),
+					})),
 				},
 			},
 		})

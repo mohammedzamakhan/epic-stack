@@ -82,8 +82,19 @@ describe('createOrganization', () => {
 			}),
 		})
 
-		const pageCreate = vi.mocked(prisma.websitePage.create).mock.calls[0]?.[0]
-		const heroSection = pageCreate?.data.sections.create[0]
+		const pageCreate = vi.mocked(prisma.websitePage.create).mock.calls[0]![0]
+		const sections = pageCreate.data.sections.create
+		expect(sections.map((section: any) => section.type)).toEqual([
+			'hero',
+			'features',
+			'content',
+			'cards',
+			'testimonials',
+			'faq',
+			'cta',
+		])
+
+		const heroSection = sections[0]
 		expect(heroSection).toEqual(
 			expect.objectContaining({
 				type: 'hero',
@@ -93,7 +104,17 @@ describe('createOrganization', () => {
 		expect(JSON.parse(heroSection.config)).toEqual(
 			expect.objectContaining({
 				heading: 'Welcome to Acme',
-				subheading: 'Custom storefronts',
+				subheading:
+					'Custom storefronts. Discover a better way to connect, decide, and get started with Acme.',
+			}),
+		)
+
+		const ctaSection = sections[6]
+		expect(JSON.parse(ctaSection.config)).toEqual(
+			expect.objectContaining({
+				heading: 'Ready to experience Acme?',
+				primaryLabel: 'Get started',
+				primaryUrl: '/login',
 			}),
 		)
 	})
