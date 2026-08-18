@@ -237,6 +237,8 @@ export function LinkInspector({
 	showText = false,
 	TextInput = PlainTextInput,
 	textPlaceholder,
+	buttonStyle,
+	onButtonStyleChange,
 }: {
 	value: SiteLinkInput
 	onChange: (link: SiteLink) => void
@@ -245,6 +247,8 @@ export function LinkInspector({
 	showText?: boolean
 	TextInput?: ComponentType<TextInputProps>
 	textPlaceholder?: string
+	buttonStyle?: 'primary' | 'secondary'
+	onButtonStyleChange?: (style: 'primary' | 'secondary') => void
 }) {
 	const { _ } = useLingui()
 	const builder = useContext(SiteLinkBuilderContext)
@@ -252,6 +256,7 @@ export function LinkInspector({
 	const link = normalizeSiteLink(value, pages)
 	const typeId = useId()
 	const openInLabelId = useId()
+	const styleLabelId = useId()
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const pendingUploadRef = useRef(false)
 	const pendingFileRef = useRef<Omit<SiteLinkFile, 'url'> | null>(null)
@@ -371,6 +376,27 @@ export function LinkInspector({
 					</SelectContent>
 				</Select>
 			</InspectorRow>
+
+			{onButtonStyleChange ? (
+				<InspectorRow label={_(t`Style`)}>
+					<span id={styleLabelId} className="sr-only">
+						<Trans>Style</Trans>
+					</span>
+					<SegmentedControl
+						labelledBy={styleLabelId}
+						value={buttonStyle ?? 'primary'}
+						onChange={(next) =>
+							onButtonStyleChange(
+								next === 'secondary' ? 'secondary' : 'primary',
+							)
+						}
+						options={[
+							{ value: 'primary', label: <Trans>Primary</Trans> },
+							{ value: 'secondary', label: <Trans>Secondary</Trans> },
+						]}
+					/>
+				</InspectorRow>
+			) : null}
 
 			<div
 				key={link.type}

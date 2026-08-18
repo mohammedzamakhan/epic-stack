@@ -1,5 +1,13 @@
 ---
-import { siteContainer, siteSection } from '~/lib/media'
+import {
+	siteContainer,
+	siteSection,
+	siteSectionBackground,
+	siteSectionBodyClass,
+	siteSectionBorderClass,
+	siteSectionDividerClass,
+	siteSectionHeadingClass,
+} from '~/lib/media'
 
 interface FaqItem {
 	question?: string
@@ -10,36 +18,42 @@ interface Props {
 	config: {
 		title?: string
 		subtitle?: string
+		background?: 'none' | 'muted' | 'inverted'
 		items?: FaqItem[]
 	}
 }
 
 const { config } = Astro.props
 const items = Array.isArray(config.items) ? config.items : []
+const background = siteSectionBackground(config.background)
+const headingClass = siteSectionHeadingClass(config.background)
+const bodyClass = siteSectionBodyClass(config.background)
+const borderClass = siteSectionBorderClass(config.background)
+const dividerClass = siteSectionDividerClass(config.background)
 ---
 
-<section class={siteSection}>
+<section class:list={[siteSection, background]}>
 	<div class:list={[siteContainer, 'max-w-3xl']}>
 		{(config.title || config.subtitle) ? (
 			<div class="mb-10 text-center">
 				{config.title ? (
-					<h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+					<h2 class:list={['text-3xl font-bold tracking-tight sm:text-4xl', headingClass]}>
 						{config.title}
 					</h2>
 				) : null}
 				{config.subtitle ? (
-					<p class="mt-3 text-base text-muted-foreground">{config.subtitle}</p>
+					<p class:list={['mt-3 text-base', bodyClass]}>{config.subtitle}</p>
 				) : null}
 			</div>
 		) : null}
 
-		<div class="divide-y divide-border border-y border-border">
+		<div class:list={['divide-y border-y', dividerClass, borderClass]}>
 			{items.map((item) => (
 				<details class="group py-1">
-					<summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-base font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
+					<summary class:list={['flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-base font-medium marker:content-none [&::-webkit-details-marker]:hidden', headingClass]}>
 						<span>{item.question}</span>
 						<svg
-							class="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-45"
+							class:list={['size-4 shrink-0 transition-transform group-open:rotate-45', bodyClass]}
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
 							fill="none"
@@ -53,7 +67,7 @@ const items = Array.isArray(config.items) ? config.items : []
 							<line x1="5" x2="19" y1="12" y2="12"></line>
 						</svg>
 					</summary>
-					<div class="pb-5 pr-8 text-sm leading-relaxed text-muted-foreground">
+					<div class:list={['pb-5 pr-8 text-sm leading-relaxed', bodyClass]}>
 						<p>{item.answer}</p>
 					</div>
 				</details>

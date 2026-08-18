@@ -1,10 +1,11 @@
 ---
 import SiteAnchor from '~/components/SiteAnchor.astro'
-import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary } from '~/lib/media'
+import { resolveMediaUrl, siteButtonClass } from '~/lib/media'
 
 interface Link {
 	url?: unknown
 	link?: { label?: string }
+	variant?: 'primary' | 'secondary'
 }
 
 interface Props {
@@ -127,12 +128,18 @@ const secondary = links[1]
 				]}
 			>
 				{primary?.link?.label ? (
-					<SiteAnchor link={primary.url} class={siteBtnPrimary}>
+					<SiteAnchor
+						link={primary.url}
+						class={siteButtonClass(primary.variant, 'primary')}
+					>
 						{primary.link.label}
 					</SiteAnchor>
 				) : null}
 				{secondary?.link?.label ? (
-					<SiteAnchor link={secondary.url} class={siteBtnGhost}>
+					<SiteAnchor
+						link={secondary.url}
+						class={siteButtonClass(secondary.variant, 'secondary')}
+					>
 						{secondary.link.label}
 					</SiteAnchor>
 				) : null}

@@ -1,22 +1,31 @@
 ---
-import { resolveMediaUrl, siteContainer, siteSection } from '~/lib/media'
+import {
+	resolveMediaUrl,
+	siteContainer,
+	siteSection,
+	siteSectionBackground,
+	siteSectionHeadingClass,
+} from '~/lib/media'
 
 interface Props {
 	config: {
 		title?: string
 		videoUrl?: string
 		autoplay?: boolean
+		background?: 'none' | 'muted' | 'inverted'
 	}
 }
 
 const { config } = Astro.props
 const src = resolveMediaUrl(config.videoUrl)
+const background = siteSectionBackground(config.background)
+const headingClass = siteSectionHeadingClass(config.background)
 ---
 
-<section class={siteSection}>
+<section class:list={[siteSection, background]}>
 	<div class={siteContainer}>
 		{config.title ? (
-			<h2 class="mb-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+			<h2 class:list={['mb-8 text-3xl font-bold tracking-tight sm:text-4xl', headingClass]}>
 				{config.title}
 			</h2>
 		) : null}

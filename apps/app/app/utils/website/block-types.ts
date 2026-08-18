@@ -76,7 +76,7 @@ export const BLOCK_TYPES = {
 		defaultConfig: {
 			heading: 'Welcome to our site',
 			subheading: 'A brief description of what we do',
-			links: [{ url: '#', link: { label: 'Get Started' } }],
+			links: [{ url: '#', link: { label: 'Get Started' }, variant: 'primary' }],
 			assetType: 'image',
 			assetPosition: 'background',
 			textPosition: 'left',
@@ -118,6 +118,7 @@ export const BLOCK_TYPES = {
 			columns: 3,
 			imageShape: 'rounded',
 			gap: 'md',
+			background: 'none',
 			images: [{ url: '', alt: '', caption: '', type: 'image' }],
 		},
 	},
@@ -128,6 +129,7 @@ export const BLOCK_TYPES = {
 		defaultConfig: {
 			title: 'What people say',
 			subtitle: '',
+			background: 'muted',
 			items: [
 				{
 					quote: 'An outstanding experience from start to finish.',
@@ -154,6 +156,7 @@ export const BLOCK_TYPES = {
 		defaultConfig: {
 			title: 'Frequently Asked Questions',
 			subtitle: '',
+			background: 'none',
 			items: [
 				{ question: 'Question 1?', answer: 'Answer 1.' },
 				{ question: 'Question 2?', answer: 'Answer 2.' },
@@ -170,6 +173,7 @@ export const BLOCK_TYPES = {
 			variant: 'overlay',
 			imageUrl: '',
 			cardPosition: 'left',
+			background: 'none',
 			primaryLabel: 'Get Started',
 			primaryUrl: '#',
 			secondaryLabel: '',
@@ -183,6 +187,7 @@ export const BLOCK_TYPES = {
 		defaultConfig: {
 			title: 'Features',
 			subtitle: '',
+			background: 'none',
 			items: [
 				{ title: 'Feature 1', description: 'Description of feature 1' },
 				{ title: 'Feature 2', description: 'Description of feature 2' },
@@ -196,6 +201,7 @@ export const BLOCK_TYPES = {
 		description: 'Linked cards with images',
 		defaultConfig: {
 			title: '',
+			background: 'none',
 			items: [
 				{
 					title: 'Card 1',
@@ -215,6 +221,7 @@ export const BLOCK_TYPES = {
 			title: '',
 			videoUrl: '',
 			autoplay: false,
+			background: 'none',
 		},
 	},
 	footer: {
