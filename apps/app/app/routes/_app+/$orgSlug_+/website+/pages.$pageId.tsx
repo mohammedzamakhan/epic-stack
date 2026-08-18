@@ -130,6 +130,7 @@ import {
 	SITE_HEADER_ID,
 	type BlockType,
 } from '#app/utils/website/block-types.ts'
+import { HOME_PAGE_SLUG } from '#app/utils/website/home-page.ts'
 import { ensureSiteChrome } from '#app/utils/website/locked-chrome.server.ts'
 
 // --- Action Intents ---
@@ -671,10 +672,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			submission.value
 
 		let nextSlug: string | undefined
-		if (slug !== undefined) {
-			const requestedSlug = page.isHomePage && slug === '' ? '' : slug
+		if (page.isHomePage) {
+			if (slug !== undefined) {
+				const requestedSlug = slug === '' ? HOME_PAGE_SLUG : slug
 
-			if (!page.isHomePage && requestedSlug === '') {
+				if (requestedSlug !== HOME_PAGE_SLUG) {
+					return Response.json({
+						status: 'error',
+						result: submission.reply({
+							fieldErrors: {
+								slug: ['The home page URL cannot be changed'],
+							},
+						}),
+					})
+				}
+			}
+
+			if (page.slug !== HOME_PAGE_SLUG) {
+				nextSlug = HOME_PAGE_SLUG
+			}
+		} else if (slug !== undefined) {
+			const requestedSlug = slug
+
+			if (requestedSlug === '') {
 				return Response.json({
 					status: 'error',
 					result: submission.reply({
@@ -696,25 +716,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					select: { id: true, isHomePage: true, slug: true },
 				})
 				if (existing && existing.id !== page.id) {
-					if (
-						existing.isHomePage &&
-						existing.slug === 'home' &&
-						requestedSlug === 'home'
-					) {
-						await prisma.websitePage.update({
-							where: { id: existing.id },
-							data: { slug: '' },
-						})
-					} else {
-						return Response.json({
-							status: 'error',
-							result: submission.reply({
-								fieldErrors: {
-									slug: ['Page URL already exists in this organization'],
-								},
-							}),
-						})
-					}
+					return Response.json({
+						status: 'error',
+						result: submission.reply({
+							fieldErrors: {
+								slug: ['Page URL already exists in this organization'],
+							},
+						}),
+					})
 				}
 				nextSlug = requestedSlug
 			}

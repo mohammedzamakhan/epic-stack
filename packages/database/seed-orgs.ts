@@ -175,7 +175,7 @@ async function seedWebsitePages() {
 				data: {
 					organizationId: org.id,
 					title: 'Home',
-					slug: '',
+					slug: 'home',
 					status: 'published',
 					template: 'showcase',
 					isHomePage: true,

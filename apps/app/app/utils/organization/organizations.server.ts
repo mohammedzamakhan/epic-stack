@@ -3,6 +3,11 @@ import { auditService, AuditAction } from '@repo/audit'
 import { getUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
+import { getDefaultConfig } from '#app/utils/website/block-types.ts'
+import {
+	HOME_PAGE_SLUG,
+	HOME_PAGE_TITLE,
+} from '#app/utils/website/home-page.ts'
 
 export type OrganizationWithImage = {
 	id: string
@@ -297,6 +302,34 @@ export async function createOrganization({
 						id: true,
 						objectKey: true,
 					},
+				},
+			},
+		})
+
+		const heroConfig = {
+			...getDefaultConfig('hero'),
+			heading: `Welcome to ${name}`,
+			subheading: description?.trim() || 'A brief description of what we do',
+		}
+
+		await tx.websitePage.create({
+			data: {
+				organizationId: organization.id,
+				title: HOME_PAGE_TITLE,
+				slug: HOME_PAGE_SLUG,
+				status: 'published',
+				template: 'blank',
+				isHomePage: true,
+				position: 0,
+				createdById: userId,
+				sections: {
+					create: [
+						{
+							type: 'hero',
+							position: 0,
+							config: JSON.stringify(heroConfig),
+						},
+					],
 				},
 			},
 		})
