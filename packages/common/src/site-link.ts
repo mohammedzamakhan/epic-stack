@@ -91,13 +91,31 @@ export function isSiteLinkPreload(value: unknown): value is SiteLinkPreload {
 	)
 }
 
+const SLASH = 47 // '/'
+
+function trimChar(
+	path: string,
+	charCode: number,
+	edges: 'start' | 'end' | 'both',
+) {
+	let start = 0
+	let end = path.length
+	if (edges !== 'end') {
+		while (start < end && path.charCodeAt(start) === charCode) start += 1
+	}
+	if (edges !== 'start') {
+		while (end > start && path.charCodeAt(end - 1) === charCode) end -= 1
+	}
+	return start === 0 && end === path.length ? path : path.slice(start, end)
+}
+
 export function getSitePageHref(page: SitePageRef): string {
 	if (page.isHomePage || page.slug === '' || page.slug === 'home') return '/'
-	return `/${page.slug.replace(/^\/+/u, '')}`
+	return `/${trimChar(page.slug, SLASH, 'start')}`
 }
 
 function trimSlash(path: string) {
-	return path.replace(/^\/+|\/+$/gu, '')
+	return trimChar(path, SLASH, 'both')
 }
 
 export function matchSitePage(
@@ -111,7 +129,7 @@ export function matchSitePage(
 
 	let path = raw
 	try {
-		if (/^https?:\/\//iu.test(raw)) {
+		if (raw.startsWith('https://') || raw.startsWith('http://')) {
 			path = new URL(raw).pathname
 		}
 	} catch {

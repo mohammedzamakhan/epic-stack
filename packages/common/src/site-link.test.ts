@@ -44,6 +44,7 @@ describe('site-link', () => {
 
 	it('resolves page links against the org page list', () => {
 		expect(matchSitePage('/about', pages)?.id).toBe('about')
+		expect(matchSitePage('///about///', pages)?.id).toBe('about')
 		expect(matchSitePage('/', pages)?.id).toBe('home')
 		expect(matchSitePage('/login', pages)).toBeUndefined()
 
