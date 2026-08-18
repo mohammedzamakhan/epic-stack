@@ -7,6 +7,12 @@ import {
 } from '#app/utils/website/home-page.ts'
 import { createOrganization } from './organizations.server.ts'
 
+type CreatedHomePageSection = {
+	type: string
+	position: number
+	config: string
+}
+
 vi.mock('@repo/audit', () => ({
 	AuditAction: {
 		ORG_CREATED: 'ORG_CREATED',
@@ -71,14 +77,18 @@ describe('createOrganization', () => {
 
 		const organizationCreate = vi.mocked(prisma.organization.create).mock
 			.calls[0]![0]
-		expect(JSON.parse(organizationCreate.data.siteHeaderConfig)).toEqual(
+		const organizationData = organizationCreate.data as {
+			siteHeaderConfig: string
+			siteFooterConfig: string
+		}
+		expect(JSON.parse(organizationData.siteHeaderConfig)).toEqual(
 			expect.objectContaining({
 				navLinks: [],
 				ctaLabel: 'Get started',
 				ctaUrl: '/login',
 			}),
 		)
-		expect(JSON.parse(organizationCreate.data.siteFooterConfig)).toEqual(
+		expect(JSON.parse(organizationData.siteFooterConfig)).toEqual(
 			expect.objectContaining({
 				columns: [
 					{
@@ -105,8 +115,11 @@ describe('createOrganization', () => {
 		})
 
 		const pageCreate = vi.mocked(prisma.websitePage.create).mock.calls[0]![0]
-		const sections = pageCreate.data.sections.create
-		expect(sections.map((section: any) => section.type)).toEqual([
+		const pageData = pageCreate.data as {
+			sections: { create: CreatedHomePageSection[] }
+		}
+		const sections = pageData.sections.create
+		expect(sections.map((section) => section.type)).toEqual([
 			'hero',
 			'features',
 			'content',
@@ -116,7 +129,7 @@ describe('createOrganization', () => {
 			'cta',
 		])
 
-		const heroSection = sections[0]
+		const heroSection = sections[0]!
 		expect(heroSection).toEqual(
 			expect.objectContaining({
 				type: 'hero',
@@ -131,7 +144,7 @@ describe('createOrganization', () => {
 			}),
 		)
 
-		const ctaSection = sections[6]
+		const ctaSection = sections[6]!
 		expect(JSON.parse(ctaSection.config)).toEqual(
 			expect.objectContaining({
 				heading: 'Ready to experience Acme?',
