@@ -82,6 +82,11 @@
       "import": "./src/site-locales.ts",
       "default": "./src/site-locales.ts"
     },
+    "./site-link": {
+      "types": "./src/site-link.ts",
+      "import": "./src/site-link.ts",
+      "default": "./src/site-link.ts"
+    },
     "./gdpr-export": {
       "types": "./src/gdpr-export.server.ts",
       "import": "./src/gdpr-export.server.ts",

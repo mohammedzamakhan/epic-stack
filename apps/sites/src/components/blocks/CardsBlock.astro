@@ -1,11 +1,12 @@
 ---
+import { resolveSiteLink, siteLinkHasDestination } from '@repo/common/site-link'
 import { resolveMediaUrl, siteContainer, siteSection } from '~/lib/media'
 
 interface CardItem {
 	title?: string
 	description?: string
 	imageUrl?: string
-	linkUrl?: string
+	linkUrl?: unknown
 	ctaLabel?: string
 }
 
@@ -31,6 +32,8 @@ const items = Array.isArray(config.items) ? config.items : []
 		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			{items.map((item) => {
 				const src = resolveMediaUrl(item.imageUrl)
+				const linked = siteLinkHasDestination(item.linkUrl)
+				const resolved = resolveSiteLink(item.linkUrl)
 				const inner = (
 					<>
 						{src ? (
@@ -61,8 +64,13 @@ const items = Array.isArray(config.items) ? config.items : []
 					</>
 				)
 
-				return item.linkUrl ? (
-					<a href={item.linkUrl} class="group block overflow-hidden no-underline">
+				return linked ? (
+					<a
+						href={resolved.href}
+						class="group block overflow-hidden no-underline"
+						target={resolved.target}
+						rel={resolved.rel}
+					>
 						{inner}
 					</a>
 				) : (

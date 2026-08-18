@@ -1,5 +1,6 @@
 ---
 import { getSiteLocaleLabel } from '@repo/common/site-locales'
+import SiteAnchor from '~/components/SiteAnchor.astro'
 import {
 	resolveMediaUrl,
 	siteBtnPrimary,
@@ -9,14 +10,14 @@ import {
 
 interface NavLink {
 	label?: string
-	url?: string
+	url?: unknown
 }
 
 interface Props {
 	config?: {
 		navLinks?: NavLink[]
 		ctaLabel?: string
-		ctaUrl?: string
+		ctaUrl?: unknown
 		showCta?: boolean
 		showName?: boolean
 		sticky?: boolean
@@ -60,12 +61,12 @@ const showLocales = locales.length > 1
 
 		<nav class="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex" aria-label="Primary">
 			{navLinks.map((link) => (
-				<a
-					href={link.url || '#'}
+				<SiteAnchor
+					link={link.url}
 					class="rounded-[var(--radius)] px-3 py-1.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
 				>
 					{link.label}
-				</a>
+				</SiteAnchor>
 			))}
 		</nav>
 
@@ -112,9 +113,9 @@ const showLocales = locales.length > 1
 							>
 								Sign in
 							</a>
-							<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary]}>
+							<SiteAnchor link={config.ctaUrl} class={siteBtnPrimary}>
 								{config.ctaLabel}
-							</a>
+							</SiteAnchor>
 						</>
 					) : (
 						<a href="/login" class:list={[siteBtnPrimary]}>
@@ -138,12 +139,12 @@ const showLocales = locales.length > 1
 				<div class="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-[var(--radius)] border border-border bg-background p-3 shadow-lg">
 					<nav class="flex flex-col gap-1" aria-label="Mobile">
 						{navLinks.map((link) => (
-							<a
-								href={link.url || '#'}
+							<SiteAnchor
+								link={link.url}
 								class="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
 							>
 								{link.label}
-							</a>
+							</SiteAnchor>
 						))}
 					</nav>
 					{showLocales ? (
@@ -177,9 +178,12 @@ const showLocales = locales.length > 1
 									>
 										Sign in
 									</a>
-									<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'w-full']}>
+									<SiteAnchor
+										link={config.ctaUrl}
+										class={`${siteBtnPrimary} w-full`}
+									>
 										{config.ctaLabel}
-									</a>
+									</SiteAnchor>
 								</>
 							) : (
 								<a href="/login" class:list={[siteBtnPrimary, 'w-full']}>
