@@ -53,6 +53,11 @@ set SKIP_SETUP=true && set SKIP_FORMAT=true && set SKIP_DEPLOYMENT=true && npx e
 
 This starts your app in development mode, rebuilding assets on file changes.
 
+`npm run dev` also starts two tenant-api nodes (US on 3007, KSA on 3009) used by
+tenant Sites phone login. New orgs default to US customer data. To try KSA, set
+**Customer data region** on Website settings (switching after customers exist
+deletes them). See [Tenant data residency](./tenant-data-residency.md).
+
 The database seed script creates a new user with some data you can use to get
 started:
 

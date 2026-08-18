@@ -15,6 +15,10 @@ in the coming weeks. Stay tuned!
 - [Deployment](./deployment.md) - If you skip the deployment step when starting
   your app, these are the manual steps you can follow to get things up and
   running.
+- [Authentication](./authentication.md) - Operator login (App) vs customer phone
+  OTP on tenant Sites.
+- [Tenant data residency](./tenant-data-residency.md) - Regional tenant-api,
+  browser-direct customer auth, wipe-on-region-change, and KSA PII isolation.
 - [Decisions](./decisions/README.md) - The reasoning behind various decisions
   made for the Epic Stack. A good historical record.
 - [Guiding Principles](./guiding-principles.md) - The guiding principles behind

@@ -28,9 +28,11 @@ export type PublicSiteAnnouncement = {
 }
 
 export type PublicOrganization = {
+	id: string
 	name: string
 	slug: string
 	customDomain?: string | null
+	dataRegion?: string | null
 	theme?: PublicSiteTheme
 	locales?: string[]
 	defaultLocale?: string

@@ -20,8 +20,10 @@ import { z } from 'zod'
 import {
 	SiteCard,
 	SitePublishSchema,
+	SiteDataRegionSchema,
 	CustomDomainSchema,
 	sitePublishActionIntent,
+	siteDataRegionActionIntent,
 	addCustomDomainActionIntent,
 	removeCustomDomainActionIntent,
 	refreshCustomDomainActionIntent,
@@ -45,6 +47,10 @@ import {
 	isValidCustomDomain,
 	normalizeCustomDomain,
 } from '#app/utils/sites/cloudflare-custom-hostnames.server.ts'
+import {
+	deprovisionTenantDatabase,
+	provisionTenantDatabase,
+} from '#app/utils/sites/tenant-api.server.ts'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)
@@ -59,6 +65,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		cloudflareHostnameId: true,
 		siteLocales: true,
 		siteDefaultLocale: true,
+		dataRegion: true,
+		hasProvisionedDb: true,
 	})
 
 	return {
@@ -80,6 +88,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		customDomain: true,
 		customDomainStatus: true,
 		cloudflareHostnameId: true,
+		dataRegion: true,
+		hasProvisionedDb: true,
+		sitePublished: true,
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -104,9 +115,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const published = sitePublished === 'true'
 
 		try {
+			if (published) {
+				await provisionTenantDatabase({
+					orgId: organization.id,
+					dataRegion: organization.dataRegion,
+				})
+			}
+
 			await prisma.organization.update({
 				where: { id: organization.id },
-				data: { sitePublished: published },
+				data: {
+					sitePublished: published,
+					...(published ? { hasProvisionedDb: true } : {}),
+				},
 			})
 
 			await invalidateUserOrganizationsCache(userId)
@@ -115,9 +136,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				status: 'success',
 				sitePublished: published,
 			})
-		} catch {
+		} catch (error) {
+			console.error('Failed to update site publish settings:', error)
 			return Response.json(
-				{ error: 'Failed to update site publish settings' },
+				{
+					error:
+						error instanceof Error
+							? error.message
+							: 'Failed to update site publish settings',
+				},
 				{ status: 500 },
 			)
 		}
@@ -250,6 +277,93 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		} catch {
 			return Response.json(
 				{ error: 'Failed to refresh custom domain status' },
+				{ status: 500 },
+			)
+		}
+	}
+
+	if (intent === siteDataRegionActionIntent) {
+		const submission = parseWithZod(formData, {
+			schema: SiteDataRegionSchema,
+		})
+
+		if (submission.status !== 'success') {
+			return Response.json({ result: submission.reply() })
+		}
+
+		const { dataRegion } = submission.value
+		const currentRegion = organization.dataRegion === 'ksa' ? 'ksa' : 'us'
+
+		if (dataRegion === currentRegion) {
+			return redirectWithToast(`/${organization.slug}/website`, {
+				title: 'Data region unchanged',
+				description: 'Customer data is already stored in this region.',
+				type: 'message',
+			})
+		}
+
+		if (
+			organization.hasProvisionedDb &&
+			submission.value.confirmWipe !== 'true'
+		) {
+			return Response.json(
+				{
+					error:
+						'Changing region deletes existing customer data. Confirm the wipe and try again.',
+				},
+				{ status: 400 },
+			)
+		}
+
+		try {
+			if (organization.hasProvisionedDb) {
+				await deprovisionTenantDatabase({
+					orgId: organization.id,
+					dataRegion: currentRegion,
+				})
+			}
+
+			await prisma.organization.update({
+				where: { id: organization.id },
+				data: {
+					dataRegion,
+					hasProvisionedDb: false,
+				},
+			})
+
+			if (organization.sitePublished) {
+				await provisionTenantDatabase({
+					orgId: organization.id,
+					dataRegion,
+				})
+				await prisma.organization.update({
+					where: { id: organization.id },
+					data: { hasProvisionedDb: true },
+				})
+			}
+
+			await invalidateUserOrganizationsCache(userId)
+
+			return redirectWithToast(`/${organization.slug}/website`, {
+				title: 'Data region updated',
+				description: organization.hasProvisionedDb
+					? dataRegion === 'ksa'
+						? 'Previous customer data was deleted. New sign-ins will stay in Saudi Arabia.'
+						: 'Previous customer data was deleted. New sign-ins will be stored in the US.'
+					: dataRegion === 'ksa'
+						? 'Customer data will stay in Saudi Arabia when you publish.'
+						: 'Customer data will be stored in the US region when you publish.',
+				type: 'success',
+			})
+		} catch (error) {
+			console.error('Failed to update data region:', error)
+			return Response.json(
+				{
+					error:
+						error instanceof Error
+							? error.message
+							: 'Failed to update data region',
+				},
 				{ status: 500 },
 			)
 		}

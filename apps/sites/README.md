@@ -44,3 +44,16 @@ Production custom domains use
 
 Without Cloudflare credentials (local), domains are still stored so you can test
 host resolution via `/etc/hosts` + the dev proxy.
+
+## Customer auth (do not add a BFF)
+
+Sites SSR serves CMS HTML only. Customer phone OTP is **not** App operator auth
+and must not go through a Sites `/api/auth` proxy.
+
+The layout injects `data-tenant-api-url` (US `:3007` or KSA `:3009` from the
+org’s `dataRegion`). Page JS in `src/lib/client-auth.ts` calls that API directly
+and stores JWTs in `localStorage`. Login asks for **phone only**; name is
+collected after OTP if that number is new.
+
+Full rules:
+[docs/tenant-data-residency.md](../../docs/tenant-data-residency.md).

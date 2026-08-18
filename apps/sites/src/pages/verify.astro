@@ -1,0 +1,134 @@
+---
+import SitePage from '~/components/SitePage.astro'
+import {
+	fetchPublishedOrganization,
+	fetchPublishedOrganizationByHost,
+} from '~/lib/org'
+
+const orgSlug = Astro.locals.orgSlug
+const customHost = Astro.locals.customHost
+const requestedLocale = Astro.url.searchParams.get('lng')
+
+const organization = orgSlug
+	? await fetchPublishedOrganization(orgSlug, requestedLocale)
+	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
+
+if (!organization) {
+	return new Response('Not Found', { status: 404 })
+}
+---
+
+<SitePage
+	organization={organization}
+	page={{ id: 'verify', title: 'Verify Phone', slug: 'verify', isHomePage: false, sections: [] }}
+	title={`Verify Phone - ${organization.name}`}
+>
+	<div id="verify-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4">
+		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+			<div class="mb-6 flex flex-col space-y-2 text-center">
+				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
+					Check your phone
+				</h1>
+				<p class="text-sm text-muted-foreground">
+					We've sent a 6-digit code to <strong id="display-phone" class="text-foreground"></strong>
+				</p>
+			</div>
+
+			<form id="verify-form" class="space-y-4">
+				<input type="hidden" name="phone" id="phone-input" />
+				<div class="space-y-2">
+					<label for="code" class="text-sm font-medium leading-none text-foreground">
+						Verification Code
+					</label>
+					<input
+						type="text"
+						id="code"
+						name="code"
+						placeholder="123456"
+						required
+						maxlength="6"
+						minlength="6"
+						class="flex h-10 w-full text-center tracking-widest rounded-md border border-input bg-background px-3 py-2 text-lg text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					/>
+				</div>
+
+				<div id="error-message" class="hidden text-sm font-medium text-destructive"></div>
+
+				<button
+					type="submit"
+					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+				>
+					Verify
+				</button>
+			</form>
+		</div>
+	</div>
+</SitePage>
+
+<script>
+	import {
+		getOrgBinding,
+		redirectHomeIfSignedIn,
+		setSessionTokens,
+		tenantErrorMessage,
+		tenantJson,
+	} from '~/lib/client-auth'
+
+	redirectHomeIfSignedIn()
+
+	const form = document.getElementById('verify-form') as HTMLFormElement
+	const errorMessage = document.getElementById('error-message')!
+	const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
+	const displayPhone = document.getElementById('display-phone')!
+	const phoneInput = document.getElementById('phone-input') as HTMLInputElement
+
+	const phone = sessionStorage.getItem('pending_phone')
+
+	if (!phone) {
+		window.location.href = '/login'
+	} else {
+		displayPhone.textContent = phone
+		phoneInput.value = phone
+	}
+
+	form.addEventListener('submit', async (e) => {
+		e.preventDefault()
+		errorMessage.classList.add('hidden')
+		submitButton.disabled = true
+		submitButton.textContent = 'Verifying...'
+
+		const formData = new FormData(form)
+		const payload = {
+			...Object.fromEntries(formData.entries()),
+			...getOrgBinding(),
+		}
+
+		try {
+			const { ok, data } = await tenantJson('/auth/verify', payload)
+
+			if (ok && data.success && typeof data.accessToken === 'string') {
+				setSessionTokens({
+					accessToken: data.accessToken,
+					refreshToken:
+						typeof data.refreshToken === 'string'
+							? data.refreshToken
+							: undefined,
+				})
+				sessionStorage.removeItem('pending_phone')
+				window.location.href = data.needsName === true ? '/complete-name' : '/'
+			} else {
+				errorMessage.textContent = tenantErrorMessage(
+					data,
+					'Invalid verification code.',
+				)
+				errorMessage.classList.remove('hidden')
+			}
+		} catch {
+			errorMessage.textContent = 'Network error. Please try again.'
+			errorMessage.classList.remove('hidden')
+		} finally {
+			submitButton.disabled = false
+			submitButton.textContent = 'Verify'
+		}
+	})
+</script>

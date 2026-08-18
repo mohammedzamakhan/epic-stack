@@ -7,19 +7,33 @@ Epic Startup monorepo.
 
 **Epic Startup** is a production-ready, full-stack SaaS template built as a
 Turborepo-based monorepo with npm workspaces. It includes multiple apps (main
-app, marketing site, admin dashboard, mobile app, CMS, background jobs, email
-templates, notifications) and shared packages (UI, auth, AI, payments, storage,
-security, i18n, etc.).
+app, marketing site, admin dashboard, tenant sites, regional tenant-api, mobile
+app, CMS, background jobs, email templates, notifications) and shared packages
+(UI, auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind
-CSS 4, TypeScript, Expo (mobile), Astro (marketing), deployed on Fly.io with
-LiteFS for distributed SQLite.
+CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites), deployed on
+Fly.io with LiteFS for distributed SQLite.
 
 **Monorepo Structure**:
 
-- `/apps/*` - Applications (app, web, admin, mobile, cms, etc.)
-- `/packages/*` - Shared packages (ui, auth, prisma, config, ai, payments, etc.)
-- `/docs/*` - Comprehensive documentation (84 markdown files)
+- `/apps/*` - Applications (app, web, admin, sites, tenant-api, cms, etc.)
+- `/packages/*` - Shared packages (ui, auth, database, tenant-db, sms, etc.)
+- `/docs/*` - Comprehensive documentation
+
+**Tenant Sites vs App auth (read this before touching login, cookies, or PII):**
+
+- **App / Admin** authenticate operators. Sessions live in US Prisma.
+- **Sites** (`apps/sites`) authenticate **customers** with phone OTP. Customer
+  PII lives in **regional** per-org SQLite (`packages/tenant-db`) behind
+  `apps/tenant-api`, not in Prisma.
+- The **browser** calls tenant-api directly. Sites SSR (often US) must not proxy
+  phone/name/email — a Sites BFF would transit KSA PII through the US. Tokens
+  stay in `localStorage`, not Sites cookies.
+- Changing **Customer data region** wipes the old tenant DB. Do not add
+  cross-region PII migration.
+- Canonical doc: `docs/tenant-data-residency.md`. ADR:
+  `docs/decisions/045-tenant-data-residency.md`.
 
 ## Setup Commands
 
@@ -51,9 +65,14 @@ npm run dev:services:stop   # Stop Docker services
 npm run dev:services:logs   # View Docker logs
 
 # Start specific apps
-npm run dev:app        # Main React Router app (port 3001)
-npm run dev:web        # Astro marketing site (port 3002)
-npm run dev:mobile     # Expo mobile app
+npm run dev:app             # Main React Router app (port 3001)
+npm run dev:web             # Astro marketing site (port 3002)
+npm run dev:sites           # Tenant public sites (port 3008)
+npm run dev:tenant-api      # US tenant-api (port 3007, DATA_REGION=us)
+npm run dev:tenant-api:ksa  # KSA tenant-api (port 3009, DATA_REGION=ksa)
+npm run dev:mobile          # Expo mobile app
+
+# `npm run dev` already starts both tenant-api nodes (3007 + 3009).
 
 # Database management
 npm run db:studio      # Prisma Studio UI (port 5555)
@@ -344,8 +363,12 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - Arcjet WAF protection
 - Helmet.js security headers
 - CSRF protection with honeypots
-- HttpOnly, Secure, SameSite cookies
+- HttpOnly, Secure, SameSite cookies (App/Admin operator sessions)
 - Comprehensive audit logging
+- Tenant customer tokens are **not** HttpOnly cookies: they live in
+  `localStorage` so US Sites never receives KSA PII. Do not "fix" this by adding
+  a Sites auth BFF or Sites-hosted session cookies. See
+  `docs/tenant-data-residency.md`.
 
 **Environment Variables**:
 
@@ -358,6 +381,13 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations
 - `USE_S3_STORAGE` - Set to `true` to use S3 in CMS (default: local in dev)
+- `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
+- `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
+  HTML for browser-direct auth (not a server proxy)
+- `INTERNAL_COMMAND_TOKEN` - Shared by App and every tenant-api (≥16 chars)
+- `DATA_REGION` - Tenant-api only: `us` or `ksa`
+- `JWT_SECRET` / `AUTH_HMAC_SECRET` - Tenant-api only (customer tokens / OTP
+  hashes). Sites must not have these.
 
 **CMS Storage**:
 
@@ -414,6 +444,16 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 - Database at `/litefs/data/sqlite.db` in production
 - Local: `./packages/database/data.db`
 - Use "widen then narrow" migration strategy for zero-downtime
+- App/Admin LiteFS is the **US control plane**. Customer PII uses a **separate**
+  tenant-api + volume per `dataRegion` (`us` | `ksa`). Never scale one LiteFS
+  cluster across US and KSA.
+
+**Tenant SQLite (Drizzle, not Prisma):**
+
+- Schema: `packages/tenant-db/src/schema.ts`
+- Migrations: `packages/tenant-db/drizzle/`
+- Provisioned lazily on site publish; destroyed on region switch
+- Prisma `Organization.dataRegion` and `hasProvisionedDb` are flags only
 
 ## Deployment
 
@@ -459,11 +499,19 @@ npm install --prefix packages/<name>                   # Install deps in package
 **Key Packages**:
 
 - `@repo/ui` - Shared components (Radix UI + Tailwind)
-- `@repo/auth` - Authentication & RBAC
-- `@repo/database` - Database schema & client
+- `@repo/auth` - Operator authentication & RBAC (App/Admin, not Sites customers)
+- `@repo/database` - Prisma schema & client (control plane; no customer PII)
+- `@repo/tenant-db` - Per-org customer SQLite (Drizzle)
+- `@repo/sms` - OTP SMS (`packages/sms`; Twilio blocked for KSA production)
 - `@repo/config` - Shared configs (ESLint, TypeScript, Prettier)
 - `@repo/ai` - AI/ML integrations (Vercel AI SDK, Google AI)
 - `@repo/security` - Security utilities (encryption, rate limiting)
+
+**Key Apps (tenant data plane):**
+
+- `apps/app` - Operators; publishes sites; routes provision by `dataRegion`
+- `apps/sites` - Public CMS HTML; injects tenant-api URL; no PII proxy
+- `apps/tenant-api` - Regional customer auth + SQLite (US :3007, KSA :3009)
 
 ## Additional Resources
 
@@ -471,4 +519,5 @@ npm install --prefix packages/<name>                   # Install deps in package
 - **Contributing**: See `CONTRIBUTING.md`
 - **Security**: See `SECURITY_AUDIT_REPORT.md`
 - **Getting Started**: See `docs/getting-started.md`
+- **Tenant data residency**: See `docs/tenant-data-residency.md`
 - **Testing Guide**: See `docs/testing.md`

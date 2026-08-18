@@ -11,6 +11,9 @@ const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 export default defineConfig({
 	output: 'server',
 	site: `https://${domain}`,
+	security: {
+		checkOrigin: false,
+	},
 	integrations: [
 		varlockAstroIntegration(),
 		{

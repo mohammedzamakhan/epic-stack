@@ -1,8 +1,18 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { getOrgSiteUrl } from '@repo/common/url'
 import { cn } from '@repo/ui'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@repo/ui/alert-dialog'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -14,6 +24,13 @@ import {
 } from '@repo/ui/card'
 import { FieldGroup } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@repo/ui/select'
 import { Switch } from '@repo/ui/switch'
 import { useState } from 'react'
 import { Form, useFetcher } from 'react-router'
@@ -25,12 +42,19 @@ export const SitePublishSchema = z.object({
 	organizationId: z.string(),
 })
 
+export const SiteDataRegionSchema = z.object({
+	dataRegion: z.enum(['us', 'ksa']),
+	organizationId: z.string(),
+	confirmWipe: z.enum(['true']).optional(),
+})
+
 export const CustomDomainSchema = z.object({
 	customDomain: z.string().min(1, 'Domain is required'),
 	organizationId: z.string(),
 })
 
 export const sitePublishActionIntent = 'update-site-publish'
+export const siteDataRegionActionIntent = 'update-site-data-region'
 export const addCustomDomainActionIntent = 'add-custom-domain'
 export const removeCustomDomainActionIntent = 'remove-custom-domain'
 export const refreshCustomDomainActionIntent = 'refresh-custom-domain'
@@ -47,6 +71,8 @@ export function SiteCard({
 		sitePublished: boolean
 		customDomain: string | null
 		customDomainStatus: string | null
+		dataRegion?: string | null
+		hasProvisionedDb?: boolean
 	}
 	cnameTarget: string
 	cloudflareConfigured: boolean
@@ -59,6 +85,32 @@ export function SiteCard({
 	const siteUrl = getOrgSiteUrl(organization.slug)
 	const customDomain = organization.customDomain
 	const domainStatus = organization.customDomainStatus
+	const dataRegion = organization.dataRegion === 'ksa' ? 'ksa' : 'us'
+	const [pendingRegion, setPendingRegion] = useState<'us' | 'ksa' | null>(null)
+	const hasCustomerData = Boolean(organization.hasProvisionedDb)
+	const regionFetcher = useFetcher<{ error?: string }>()
+	const regionOptions = [
+		{ value: 'us', label: t`United States` },
+		{ value: 'ksa', label: t`Saudi Arabia (KSA)` },
+	]
+	const pendingRegionLabel = regionOptions.find(
+		(option) => option.value === pendingRegion,
+	)?.label
+	const currentRegionLabel = regionOptions.find(
+		(option) => option.value === dataRegion,
+	)?.label
+
+	const submitDataRegion = (nextRegion: 'us' | 'ksa', confirmWipe = false) => {
+		void regionFetcher.submit(
+			{
+				intent: siteDataRegionActionIntent,
+				organizationId: organization.id,
+				dataRegion: nextRegion,
+				...(confirmWipe ? { confirmWipe: 'true' } : {}),
+			},
+			{ method: 'POST' },
+		)
+	}
 
 	const [form, fields] = useForm({
 		id: 'custom-domain',
@@ -85,7 +137,10 @@ export function SiteCard({
 		)
 	}
 
-	const busy = publishFetcher.state !== 'idle' || domainFetcher.state !== 'idle'
+	const busy =
+		publishFetcher.state !== 'idle' ||
+		domainFetcher.state !== 'idle' ||
+		regionFetcher.state !== 'idle'
 
 	return (
 		<Card>
@@ -107,6 +162,99 @@ export function SiteCard({
 					/>
 				</CardAction>
 			</CardHeader>
+
+			<CardContent className="pt-2 pb-4">
+				<div className="space-y-3">
+					<div>
+						<label htmlFor="site-data-region" className="text-sm font-medium">
+							<Trans>Customer data region</Trans>
+						</label>
+						<p className="text-muted-foreground mt-1 text-sm">
+							<Trans>
+								Visitor names, phone numbers, and emails are stored in this
+								region. Changing it after customers have signed in permanently
+								deletes that data — it is not moved.
+							</Trans>
+						</p>
+					</div>
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+						<Select
+							value={pendingRegion ?? dataRegion}
+							disabled={regionFetcher.state !== 'idle'}
+							items={regionOptions}
+							onValueChange={(value) => {
+								if (
+									(value !== 'us' && value !== 'ksa') ||
+									value === dataRegion
+								) {
+									return
+								}
+								if (hasCustomerData) {
+									setPendingRegion(value)
+									return
+								}
+								submitDataRegion(value)
+							}}
+						>
+							<SelectTrigger id="site-data-region" className="w-full sm:w-72">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent align="start" alignItemWithTrigger={false}>
+								{regionOptions.map((option) => (
+									<SelectItem key={option.value} value={option.value}>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+					{regionFetcher.data?.error ? (
+						<p className="text-destructive text-sm">
+							{regionFetcher.data.error}
+						</p>
+					) : null}
+
+					<AlertDialog
+						open={pendingRegion !== null}
+						onOpenChange={(open) => {
+							if (!open) setPendingRegion(null)
+						}}
+					>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>
+									<Trans>Delete customer data and switch region?</Trans>
+								</AlertDialogTitle>
+								<AlertDialogDescription>
+									<Trans>
+										Switching from {currentRegionLabel} to {pendingRegionLabel}{' '}
+										permanently deletes every visitor account in the current
+										region — names, phone numbers, emails, and login sessions.
+										This cannot be undone. New sign-ins will start from an empty
+										database in the new region.
+									</Trans>
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>
+									<Trans>Keep current region</Trans>
+								</AlertDialogCancel>
+								<AlertDialogAction
+									variant="destructive"
+									onClick={() => {
+										if (!pendingRegion) return
+										const nextRegion = pendingRegion
+										setPendingRegion(null)
+										submitDataRegion(nextRegion, true)
+									}}
+								>
+									<Trans>Delete data and switch</Trans>
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</div>
+			</CardContent>
 
 			<CardContent
 				className={cn(

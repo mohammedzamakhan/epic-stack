@@ -19,3 +19,24 @@ components that manage the connection with their associated backend code.
 
 So, yes, you can absolutely use the Epic Stack to build APIs for consumption by
 third party clients.
+
+## Tenant API (customer auth)
+
+`apps/tenant-api` is a separate Hono service (not a Remix resource route).
+Browsers on tenant Sites call it **directly** for phone OTP. App calls only
+`/api/provision` and `/api/deprovision` with `{ orgId }` — never customer PII.
+
+| Method | Path               | Caller                         |
+| ------ | ------------------ | ------------------------------ |
+| GET    | `/health`          | Ops / local checks             |
+| POST   | `/auth/send-code`  | Browser                        |
+| POST   | `/auth/verify`     | Browser                        |
+| POST   | `/auth/refresh`    | Browser                        |
+| POST   | `/auth/logout`     | Browser                        |
+| GET    | `/auth/me`         | Browser (Bearer)               |
+| POST   | `/auth/profile`    | Browser (Bearer)               |
+| POST   | `/api/provision`   | App (`INTERNAL_COMMAND_TOKEN`) |
+| POST   | `/api/deprovision` | App (`INTERNAL_COMMAND_TOKEN`) |
+
+Local US node is port 3007; KSA is 3009. Full rules:
+[Tenant data residency](./tenant-data-residency.md#tenant-api-surface).

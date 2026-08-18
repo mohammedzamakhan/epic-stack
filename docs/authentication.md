@@ -158,3 +158,28 @@ their 2FA code within 2 hours of performing destructive actions like changing
 their email or disabling 2FA. This time is controlled by the
 `shouldRequestTwoFA` utility in the `login` full stack component in the resource
 routes.
+
+## Tenant Sites phone authentication
+
+This is a **separate** system from operator login above. Organization public
+sites (Astro `apps/sites`) authenticate **customers**, not App users.
+
+- **Method:** phone OTP. Name is collected only after the code is verified, and
+  only if that phone does not already have a customer name.
+- **Storage:** per-org SQLite on the regional tenant-api (`packages/tenant-db`),
+  not US Prisma.
+- **Client:** page JavaScript calls tenant-api directly. Access and refresh
+  tokens live in `localStorage`. They are not Sites cookies.
+- **Why not a Sites BFF / HttpOnly cookie on Sites:** Sites often runs in the
+  US. Proxying or cookie-scoping customer sessions there would transit KSA
+  phone/name/email through US servers.
+
+Local development runs **two** tenant-api nodes (US on 3007, KSA on 3009).
+`npm run dev` starts both.
+
+Operators pick **Customer data region** on Website settings. Switching region
+after customers exist **deletes** the old tenant database; PII is not migrated.
+
+Full architecture, APIs, env vars, and what not to change:
+[Tenant data residency](./tenant-data-residency.md). Decision record:
+[ADR 045](./decisions/045-tenant-data-residency.md).

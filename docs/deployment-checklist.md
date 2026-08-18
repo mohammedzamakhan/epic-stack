@@ -8,7 +8,7 @@ checklist-based guide.
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Website       │    │   Main App      │    │   Admin App     │    │   CMS App       │
-│ (Cloudflare     │    │ (Fly.io)        │    │ (Fly.io)        │    │ (Fly.io)        │
+│ (Cloudflare     │    │ (Fly.io US)     │    │ (Fly.io US)     │    │ (Fly.io)        │
 │  Pages)         │    │                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │                       │
@@ -17,18 +17,35 @@ checklist-based guide.
          └───────────────────────────────┼───────────────────────────────────────┘
                                          │
                          ┌─────────────────┐              ┌─────────────────┐
-                         │ SQLite Database │              │    MongoDB      │
-                         │ (Fly.io LiteFS) │              │    (Atlas)      │
-                         │ Main/Admin Apps │              │   CMS Data      │
+                         │ SQLite (LiteFS) │              │    MongoDB      │
+                         │ App/Admin US    │              │    (Atlas)      │
+                         │ org/CMS only    │              │   CMS Data      │
                          └─────────────────┘              └─────────────────┘
+                                         │
+                    provision orgId only │
+                                         ▼
+              ┌──────────────────────────────────────────────────┐
+              │  Tenant API + tenant SQLite  (US)                │
+              │  Tenant API + tenant SQLite  (KSA, separate app) │
+              │  Browser calls tenant-api; Sites must not proxy  │
+              │  customer PII                                    │
+              └──────────────────────────────────────────────────┘
 ```
+
+Customer phone/name/email never go in the US App/Admin database. See
+[Tenant data residency](./tenant-data-residency.md).
 
 **Applications to Deploy:**
 
 - **Website**: Cloudflare Pages (Astro) - Already configured ✅
-- **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS
-- **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite
+- **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS (US)
+- **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite (US)
 - **CMS App**: Fly.io (`epic-startup-cms`) - MongoDB Atlas
+- **Tenant API (US)**: Fly.io regional data plane — customer PII for
+  `dataRegion=us`
+- **Tenant API (KSA)**: Separate Fly app + volume in `jed` — customer PII for
+  `dataRegion=ksa`
+- **Sites**: CMS SSR; injects regional tenant-api URLs for browser auth
 
 ---
 
@@ -178,6 +195,7 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
 #### Production Main App
 
 - [ ] **5.1** Set main app production secrets
+
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(openssl rand -hex 32)" \
@@ -187,8 +205,13 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    TENANT_API_URL="https://epic-startup-tenant-us.fly.dev" \
+    TENANT_API_URL_KSA="https://epic-startup-tenant-ksa.fly.dev" \
     --app epic-startup
   ```
+
+  Save `INTERNAL_COMMAND_TOKEN` — the same value must be set on **every**
+  regional tenant-api. See [tenant data residency](./tenant-data-residency.md).
 
 #### Staging Main App
 
@@ -202,6 +225,8 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    TENANT_API_URL="https://epic-startup-tenant-us-staging.fly.dev" \
+    TENANT_API_URL_KSA="https://epic-startup-tenant-ksa-staging.fly.dev" \
     --app epic-startup-staging
   ```
 
@@ -237,6 +262,19 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
     --app epic-startup-admin-staging
   ```
+
+### Tenant API Environment Variables
+
+Use **separate** Fly apps and volumes for US and KSA. Never attach both to the
+same LiteFS/Consul cluster.
+
+- [ ] **5.4a** Create apps and volumes (see
+      [deployment.md](./deployment.md#regional-tenant-data-plane))
+- [ ] **5.4b** Set US tenant-api secrets (`DATA_REGION=us`). Reuse App's
+      `INTERNAL_COMMAND_TOKEN`. Generate a unique `JWT_SECRET` and
+      `AUTH_HMAC_SECRET` for this region. Do not copy `JWT_SECRET` to Sites.
+- [ ] **5.4c** Set KSA tenant-api secrets (`DATA_REGION=ksa`) the same way with
+      **different** JWT/HMAC values. Do not configure Twilio on the KSA app.
 
 ### CMS App Environment Variables
 

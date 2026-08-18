@@ -40,6 +40,24 @@ fly scale count 2 --region sjc
 fly scale count 1 --region ams
 ```
 
+That pattern is for **App/Admin replicas of the US control-plane database**. Do
+not scale a single tenant-api LiteFS cluster into KSA.
+
+## Tenant customer SQLite
+
+Customer phone, name, and email are **not** in Prisma. Each published org gets a
+file `tenant_{orgId}.db` on the tenant-api node whose `DATA_REGION` matches
+`Organization.dataRegion`.
+
+- Schema and migrations: `packages/tenant-db` (Drizzle, not Prisma)
+- Prisma only stores flags: `Organization.dataRegion` (`us` | `ksa`) and
+  `Organization.hasProvisionedDb`
+- Changing region **deletes** the old file and provisions an empty database in
+  the new region if the site is published
+- Never put customer PII columns on `User` or `Organization`
+
+See [tenant data residency](./tenant-data-residency.md).
+
 ## Connecting to your production database
 
 The location of the sqlite database is kinda funny. The real location is in

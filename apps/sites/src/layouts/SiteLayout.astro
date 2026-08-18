@@ -20,6 +20,9 @@ interface Props {
 		favicon16: string
 		appleTouchIcon: string
 	} | null
+	tenantApiUrl?: string
+	orgSlug?: string | null
+	customHost?: string | null
 }
 
 const {
@@ -32,6 +35,9 @@ const {
 	lang = 'en',
 	dir = 'ltr',
 	siteIcon,
+	tenantApiUrl,
+	orgSlug,
+	customHost,
 } = Astro.props
 const themeMode = theme?.mode ?? 'system'
 const themeCss = theme?.css ?? ''
@@ -68,6 +74,9 @@ const htmlClass =
 	data-site-base={theme?.baseColor}
 	data-heading-font={headingFont}
 	data-body-font={bodyFont}
+	data-tenant-api-url={tenantApiUrl}
+	data-org-slug={orgSlug || undefined}
+	data-custom-host={customHost || undefined}
 >
 	<head>
 		<meta charset="utf-8" />
@@ -111,6 +120,25 @@ const htmlClass =
 				</script>
 			) : null
 		}
+		<script is:inline>
+			;(function () {
+				try {
+					if (localStorage.getItem('tenant_access_token')) {
+						document.documentElement.dataset.customerSession = '1'
+					}
+				} catch {
+					/* ignore */
+				}
+			})()
+		</script>
+		<style is:inline>
+			html[data-customer-session] [data-auth='signed-out'] {
+				display: none !important;
+			}
+			html:not([data-customer-session]) [data-auth='signed-in'] {
+				display: none !important;
+			}
+		</style>
 		<slot name="head" />
 		{/* Inject after bundled CSS so org theme tokens win over any leftover defaults. */}
 		{themeCss ? (

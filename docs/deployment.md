@@ -149,6 +149,79 @@ If you'd like to deploy locally, just run fly's deploy command:
 fly deploy
 ```
 
+## Regional tenant data plane
+
+App and Admin stay in the US. Customer PII for tenant Sites lives on **regional
+tenant-api** nodes (US and KSA). Do not put KSA customer data on the US Prisma
+volume or a shared LiteFS cluster.
+
+Full architecture, local two-node setup, and SMS rules:
+[Tenant data residency](./tenant-data-residency.md).
+
+### Create regional apps and volumes
+
+Use distinct Fly apps and volumes. Example names; match your `fly.toml`.
+
+```sh
+# US data plane (can share the App region, e.g. sjc)
+fly apps create epic-startup-tenant-us
+fly volumes create data --region sjc --size 1 --app epic-startup-tenant-us
+fly consul attach --app epic-startup-tenant-us
+
+# KSA data plane (jeddah)
+fly apps create epic-startup-tenant-ksa
+fly volumes create data --region jed --size 1 --app epic-startup-tenant-ksa
+fly consul attach --app epic-startup-tenant-ksa
+```
+
+Sites can stay in the US for CMS HTML. Customer login/profile must **not** go
+through a Sites `/api/auth/*` BFF — that would transit KSA PII through the US.
+The page JS calls the regional tenant-api directly.
+
+### Secrets
+
+Generate once and reuse the provision token on App **and** every tenant-api:
+
+```sh
+PROVISION_TOKEN="$(openssl rand -hex 32)"
+JWT_US="$(openssl rand -hex 32)"
+JWT_KSA="$(openssl rand -hex 32)"
+HMAC_US="$(openssl rand -hex 32)"
+HMAC_KSA="$(openssl rand -hex 32)"
+
+fly secrets set \
+  DATA_REGION=us \
+  JWT_SECRET="$JWT_US" \
+  AUTH_HMAC_SECRET="$HMAC_US" \
+  INTERNAL_COMMAND_TOKEN="$PROVISION_TOKEN" \
+  --app epic-startup-tenant-us
+
+fly secrets set \
+  DATA_REGION=ksa \
+  JWT_SECRET="$JWT_KSA" \
+  AUTH_HMAC_SECRET="$HMAC_KSA" \
+  INTERNAL_COMMAND_TOKEN="$PROVISION_TOKEN" \
+  --app epic-startup-tenant-ksa
+
+fly secrets set \
+  TENANT_API_URL=https://epic-startup-tenant-us.fly.dev \
+  TENANT_API_URL_KSA=https://epic-startup-tenant-ksa.fly.dev \
+  INTERNAL_COMMAND_TOKEN="$PROVISION_TOKEN" \
+  --app [YOUR_APP_NAME]
+
+# Sites (CMS SSR; browsers call tenant-api directly)
+fly secrets set \
+  PUBLIC_TENANT_API_URL=https://epic-startup-tenant-us.fly.dev \
+  PUBLIC_TENANT_API_URL_KSA=https://epic-startup-tenant-ksa.fly.dev \
+  --app [YOUR_SITES_APP]
+```
+
+Production startup refuses empty or development-default `JWT_SECRET`,
+`AUTH_HMAC_SECRET`, and `INTERNAL_COMMAND_TOKEN`. KSA production SMS via Twilio
+is rejected; configure an in-kingdom provider first.
+
+Do **not** point both regional tenant-api apps at the same LiteFS volume.
+
 ## Deploying locally using docker/podman
 
 If you'd like to deploy locally by building a docker container image, you
