@@ -1,4 +1,5 @@
 ---
+import SiteAnchor from '~/components/SiteAnchor.astro'
 import { resolveMediaUrl, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 		imageShape?: 'rounded' | 'circle' | 'square'
 		background?: 'none' | 'muted' | 'inverted'
 		ctaLabel?: string
-		ctaUrl?: string
+		ctaUrl?: unknown
 	}
 }
 
@@ -57,9 +58,9 @@ const bodyClass =
 					/>
 				) : null}
 				{config.ctaLabel ? (
-					<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+					<SiteAnchor link={config.ctaUrl} class={`${siteBtnPrimary} mt-8`}>
 						{config.ctaLabel}
-					</a>
+					</SiteAnchor>
 				) : null}
 			</div>
 		) : layout === 'brand' ? (
@@ -89,9 +90,9 @@ const bodyClass =
 						/>
 					) : null}
 					{config.ctaLabel ? (
-						<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+						<SiteAnchor link={config.ctaUrl} class={`${siteBtnPrimary} mt-8`}>
 							{config.ctaLabel}
-						</a>
+						</SiteAnchor>
 					) : null}
 				</div>
 			</div>
@@ -120,9 +121,9 @@ const bodyClass =
 						/>
 					) : null}
 					{config.ctaLabel ? (
-						<a href={config.ctaUrl || '#'} class:list={[siteBtnPrimary, 'mt-8']}>
+						<SiteAnchor link={config.ctaUrl} class={`${siteBtnPrimary} mt-8`}>
 							{config.ctaLabel}
-						</a>
+						</SiteAnchor>
 					) : null}
 				</div>
 			</div>

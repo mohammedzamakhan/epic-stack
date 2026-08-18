@@ -1,4 +1,6 @@
 ---
+import { resolveSiteLink, siteLinkHasDestination } from '@repo/common/site-link'
+import SiteAnchor from '~/components/SiteAnchor.astro'
 import {
 	resolveMediaUrl,
 	siteBtnPrimary,
@@ -7,7 +9,7 @@ import {
 
 interface FooterLink {
 	label?: string
-	url?: string
+	url?: unknown
 }
 
 interface FooterColumn {
@@ -17,14 +19,14 @@ interface FooterColumn {
 
 interface SocialLink {
 	platform?: string
-	url?: string
+	url?: unknown
 }
 
 interface Props {
 	config?: {
 		columns?: FooterColumn[]
 		ctaLabel?: string
-		ctaUrl?: string
+		ctaUrl?: unknown
 		showCta?: boolean
 		socials?: SocialLink[]
 		copyright?: string
@@ -35,7 +37,7 @@ interface Props {
 const { config = {}, organization } = Astro.props
 const columns = Array.isArray(config.columns) ? config.columns : []
 const socials = Array.isArray(config.socials)
-	? config.socials.filter((item) => item.url && item.platform)
+	? config.socials.filter((item) => item.platform && siteLinkHasDestination(item.url))
 	: []
 const showCta = config.showCta !== false && Boolean(config.ctaLabel)
 const logoSrc = resolveMediaUrl(organization.siteIcon?.original)
@@ -69,12 +71,12 @@ const copyright = config.copyright?.trim() || `© ${year} ${organization.name}`
 							{(column.links ?? []).map((link) =>
 								link.label ? (
 									<li>
-										<a
-											href={link.url || '#'}
+										<SiteAnchor
+											link={link.url}
 											class="text-sm text-muted-foreground transition-colors hover:text-foreground"
 										>
 											{link.label}
-										</a>
+										</SiteAnchor>
 									</li>
 								) : null,
 							)}
@@ -84,9 +86,9 @@ const copyright = config.copyright?.trim() || `© ${year} ${organization.name}`
 			</div>
 
 			{showCta ? (
-				<a href={config.ctaUrl || '#'} class={siteBtnPrimary}>
+				<SiteAnchor link={config.ctaUrl} class={siteBtnPrimary}>
 					{config.ctaLabel}
-				</a>
+				</SiteAnchor>
 			) : null}
 		</div>
 	</div>
@@ -96,18 +98,22 @@ const copyright = config.copyright?.trim() || `© ${year} ${organization.name}`
 			<p class="text-xs text-muted-foreground">{copyright}</p>
 			{socials.length > 0 ? (
 				<ul class="flex items-center gap-4">
-					{socials.map((social) => (
-						<li>
-							<a
-								href={social.url}
-								class="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-								rel="noopener noreferrer"
-								target="_blank"
-							>
-								{social.platform}
-							</a>
-						</li>
-					))}
+					{socials.map((social) => {
+						const resolved = resolveSiteLink(social.url)
+						const isLegacy = typeof social.url === 'string'
+						return (
+							<li>
+								<a
+									href={resolved.href}
+									class="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+									rel={isLegacy ? 'noopener noreferrer' : resolved.rel}
+									target={isLegacy ? '_blank' : resolved.target}
+								>
+									{social.platform}
+								</a>
+							</li>
+						)
+					})}
 				</ul>
 			) : null}
 		</div>

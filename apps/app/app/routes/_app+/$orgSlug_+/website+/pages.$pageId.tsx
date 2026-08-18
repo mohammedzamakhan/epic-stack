@@ -106,6 +106,10 @@ import {
 	uploadSiteFontActionIntent,
 } from '#app/components/settings/cards/organization/site-theme-card.tsx'
 import { BrandingPanel } from '#app/components/website/branding-panel.tsx'
+import {
+	LinkInspector,
+	SiteLinkBuilderContext,
+} from '#app/components/website/link-inspector.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
@@ -184,12 +188,154 @@ function guessImageMimeType(filename: string): string {
 			return 'image/webp'
 		case 'gif':
 			return 'image/gif'
+		case 'svg':
+			return 'image/svg+xml'
 		case 'jpg':
 		case 'jpeg':
 			return 'image/jpeg'
 		default:
 			return ''
 	}
+}
+
+const BLOCK_ASSET_MIME_TYPES = new Set([
+	'image/jpeg',
+	'image/jpg',
+	'image/png',
+	'image/webp',
+	'image/gif',
+	'image/svg+xml',
+	'video/mp4',
+	'video/webm',
+	'video/quicktime',
+	'application/pdf',
+	'application/zip',
+	'application/json',
+	'text/plain',
+	'text/csv',
+	'application/msword',
+	'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'application/vnd.ms-excel',
+	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+	'application/vnd.ms-powerpoint',
+	'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+])
+
+const BLOCK_ASSET_EXTENSIONS = new Set([
+	'jpg',
+	'jpeg',
+	'png',
+	'webp',
+	'gif',
+	'svg',
+	'mp4',
+	'webm',
+	'mov',
+	'pdf',
+	'zip',
+	'json',
+	'txt',
+	'csv',
+	'doc',
+	'docx',
+	'xls',
+	'xlsx',
+	'ppt',
+	'pptx',
+])
+
+function guessAssetMimeType(filename: string, mimeType?: string): string {
+	if (mimeType && mimeType !== 'application/octet-stream') return mimeType
+	const extension = filename.split('.').pop()?.toLowerCase()
+	switch (extension) {
+		case 'svg':
+			return 'image/svg+xml'
+		case 'pdf':
+			return 'application/pdf'
+		case 'zip':
+			return 'application/zip'
+		case 'json':
+			return 'application/json'
+		case 'txt':
+			return 'text/plain'
+		case 'csv':
+			return 'text/csv'
+		case 'doc':
+			return 'application/msword'
+		case 'docx':
+			return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+		case 'xls':
+			return 'application/vnd.ms-excel'
+		case 'xlsx':
+			return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+		case 'ppt':
+			return 'application/vnd.ms-powerpoint'
+		case 'pptx':
+			return 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+		case 'mp4':
+			return 'video/mp4'
+		case 'webm':
+			return 'video/webm'
+		case 'mov':
+			return 'video/quicktime'
+		default:
+			return guessImageMimeType(filename)
+	}
+}
+
+function extensionForAsset(mimeType: string, filename: string): string {
+	switch (mimeType) {
+		case 'image/png':
+			return 'png'
+		case 'image/webp':
+			return 'webp'
+		case 'image/gif':
+			return 'gif'
+		case 'image/svg+xml':
+			return 'svg'
+		case 'video/mp4':
+			return 'mp4'
+		case 'video/webm':
+			return 'webm'
+		case 'video/quicktime':
+			return 'mov'
+		case 'application/pdf':
+			return 'pdf'
+		case 'application/zip':
+			return 'zip'
+		case 'application/json':
+			return 'json'
+		case 'text/plain':
+			return 'txt'
+		case 'text/csv':
+			return 'csv'
+		case 'application/msword':
+			return 'doc'
+		case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+			return 'docx'
+		case 'application/vnd.ms-excel':
+			return 'xls'
+		case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+			return 'xlsx'
+		case 'application/vnd.ms-powerpoint':
+			return 'ppt'
+		case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+			return 'pptx'
+		case 'image/jpeg':
+		case 'image/jpg':
+			return 'jpg'
+		default: {
+			const fromName = filename.split('.').pop()?.toLowerCase()
+			if (fromName && BLOCK_ASSET_EXTENSIONS.has(fromName)) return fromName
+			return 'bin'
+		}
+	}
+}
+
+function isAllowedBlockAsset(filename: string, mimeType: string): boolean {
+	if (BLOCK_ASSET_MIME_TYPES.has(mimeType)) return true
+	const extension = filename.split('.').pop()?.toLowerCase()
+	return Boolean(extension && BLOCK_ASSET_EXTENSIONS.has(extension))
 }
 
 const PAGE_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -304,7 +450,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	await ensureSiteChrome(organization.id)
 
-	const [chrome, page] = await Promise.all([
+	const [chrome, page, sitePages] = await Promise.all([
 		prisma.organization.findUnique({
 			where: { id: organization.id },
 			select: { siteHeaderConfig: true, siteFooterConfig: true },
@@ -335,6 +481,20 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				},
 			},
 		}),
+		prisma.websitePage.findMany({
+			where: { organizationId: organization.id },
+			select: {
+				id: true,
+				title: true,
+				slug: true,
+				isHomePage: true,
+			},
+			orderBy: [
+				{ isHomePage: 'desc' },
+				{ position: 'asc' },
+				{ createdAt: 'asc' },
+			],
+		}),
 	])
 
 	if (!page) {
@@ -349,6 +509,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	return {
 		organization,
 		themeConfig: parseSiteThemeConfig(organization.siteTheme),
+		sitePages,
 		page: {
 			...page,
 			sections: composePageSectionsWithChrome(
@@ -459,39 +620,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				)
 			}
 
-			const allowedTypes = [
-				'image/jpeg',
-				'image/jpg',
-				'image/png',
-				'image/webp',
-				'image/gif',
-				'video/mp4',
-				'video/webm',
-				'video/quicktime',
-			]
-			let mimeType = assetFile.type
-			if (!mimeType && assetFile.name.endsWith('.mp4')) mimeType = 'video/mp4'
-			if (!mimeType) mimeType = guessImageMimeType(assetFile.name)
+			const mimeType = guessAssetMimeType(assetFile.name, assetFile.type)
 
-			if (!allowedTypes.includes(mimeType)) {
+			if (!isAllowedBlockAsset(assetFile.name, mimeType)) {
 				return Response.json(
 					{
 						status: 'error',
 						error:
-							'Unsupported file type. Use JPG, PNG, WebP, GIF, MP4, WEBM, or MOV',
+							'Unsupported file type. Use an image, video, PDF, SVG, or common document.',
 					},
 					{ status: 400 },
 				)
 			}
 
 			try {
-				let ext = extensionForImageMime(mimeType)
-				if (mimeType === 'video/mp4') ext = 'mp4'
-				if (mimeType === 'video/webm') ext = 'webm'
-				if (mimeType === 'video/quicktime') ext = 'mov'
+				const ext = extensionForAsset(mimeType, assetFile.name)
 
 				const safeFile = new File([assetFile], `asset.${ext}`, {
-					type: mimeType,
+					type: mimeType || 'application/octet-stream',
 					lastModified: Date.now(),
 				})
 				const objectKey = await uploadWebsiteAsset(
@@ -2608,7 +2754,7 @@ function HeaderEditor({
 }) {
 	const { activeLocale, defaultLocale } = useContext(LocaleContext)
 	const navLinks =
-		(config.navLinks as Array<{ label: string; url: string }>) ?? []
+		(config.navLinks as Array<{ label: string; url: unknown }>) ?? []
 	const logoSrc = siteIconKey
 		? `/resources/images?objectKey=${encodeURIComponent(siteIconKey)}`
 		: null
@@ -2675,28 +2821,15 @@ function HeaderEditor({
 					addLabel={<Trans>Add link</Trans>}
 					deleteLabel={<Trans>Delete link</Trans>}
 					renderFields={(item, _index, update) => (
-						<>
-							<div className="space-y-1.5">
-								<Label className="text-muted-foreground text-xs font-medium">
-									<Trans>Label</Trans>
-								</Label>
-								<LocalizedInput
-									value={item.label}
-									onChange={(val) => update({ label: val })}
-									placeholder="About"
-								/>
-							</div>
-							<div className="space-y-1.5">
-								<Label className="text-muted-foreground text-xs font-medium">
-									<Trans>URL</Trans>
-								</Label>
-								<LocalizedInput
-									value={item.url}
-									onChange={(val) => update({ url: val })}
-									placeholder="/about"
-								/>
-							</div>
-						</>
+						<LinkInspector
+							value={item.url}
+							text={item.label}
+							onChange={(link) => update({ url: link })}
+							onTextChange={(label) => update({ label })}
+							showText
+							TextInput={LocalizedInput}
+							textPlaceholder="About"
+						/>
 					)}
 				/>
 			</div>
@@ -2705,17 +2838,14 @@ function HeaderEditor({
 				checked={(config.showCta as boolean) ?? true}
 				onChange={(v) => updateField('showCta', v)}
 			/>
-			<FieldInput
-				label="Button label"
-				value={(config.ctaLabel as string) ?? ''}
-				onChange={(v) => updateField('ctaLabel', v)}
-				placeholder="Get in touch"
-			/>
-			<FieldInput
-				label="Button URL"
-				value={(config.ctaUrl as string) ?? ''}
-				onChange={(v) => updateField('ctaUrl', v)}
-				placeholder="/contact"
+			<LinkInspector
+				value={config.ctaUrl}
+				text={(config.ctaLabel as string) ?? ''}
+				onChange={(link) => updateField('ctaUrl', link)}
+				onTextChange={(v) => updateField('ctaLabel', v)}
+				showText
+				TextInput={LocalizedInput}
+				textPlaceholder="Get in touch"
 			/>
 		</div>
 	)
@@ -2724,17 +2854,23 @@ function HeaderEditor({
 function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 	const assetType = (config.assetType as string) ?? 'none'
 	const links =
-		(config.links as Array<{ url: string; link: { label: string } }>) ?? []
+		(config.links as Array<{
+			url: unknown
+			link: { label: string }
+		}>) ?? []
 
-	const updateLink = (index: number, field: 'url' | 'label', value: string) => {
+	const updateHeroLink = (
+		index: number,
+		patch: { url?: unknown; label?: string },
+	) => {
 		const next = [...links]
-		if (!next[index]) {
-			next[index] = { url: '', link: { label: '' } }
-		}
-		if (field === 'url') {
-			next[index] = { ...next[index]!, url: value }
-		} else {
-			next[index] = { ...next[index]!, link: { label: value } }
+		const current = next[index] ?? { url: '', link: { label: '' } }
+		next[index] = {
+			url: patch.url !== undefined ? patch.url : current.url,
+			link: {
+				label:
+					patch.label !== undefined ? patch.label : (current.link?.label ?? ''),
+			},
 		}
 		updateField('links', next)
 	}
@@ -2763,34 +2899,28 @@ function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 					<p className="text-muted-foreground text-xs font-medium">
 						<Trans>Primary button</Trans>
 					</p>
-					<FieldInput
-						label="Label"
-						value={links[0]?.link?.label ?? ''}
-						onChange={(v) => updateLink(0, 'label', v)}
-						placeholder="Get Started"
-					/>
-					<FieldInput
-						label="URL"
-						value={links[0]?.url ?? ''}
-						onChange={(v) => updateLink(0, 'url', v)}
-						placeholder="https://…"
+					<LinkInspector
+						value={links[0]?.url}
+						text={links[0]?.link?.label ?? ''}
+						onChange={(link) => updateHeroLink(0, { url: link })}
+						onTextChange={(label) => updateHeroLink(0, { label })}
+						showText
+						TextInput={LocalizedInput}
+						textPlaceholder="Get Started"
 					/>
 				</div>
 				<div className="space-y-2">
 					<p className="text-muted-foreground text-xs font-medium">
 						<Trans>Secondary button</Trans>
 					</p>
-					<FieldInput
-						label="Label"
-						value={links[1]?.link?.label ?? ''}
-						onChange={(v) => updateLink(1, 'label', v)}
-						placeholder="Learn more (optional)"
-					/>
-					<FieldInput
-						label="URL"
-						value={links[1]?.url ?? ''}
-						onChange={(v) => updateLink(1, 'url', v)}
-						placeholder="https://…"
+					<LinkInspector
+						value={links[1]?.url}
+						text={links[1]?.link?.label ?? ''}
+						onChange={(link) => updateHeroLink(1, { url: link })}
+						onTextChange={(label) => updateHeroLink(1, { label })}
+						showText
+						TextInput={LocalizedInput}
+						textPlaceholder="Learn more (optional)"
 					/>
 				</div>
 			</EditorSection>
@@ -3070,15 +3200,13 @@ function ContentEditor({ config, updateField, ...editorProps }: EditorProps) {
 			) : null}
 
 			<EditorSection title={<Trans>Button</Trans>}>
-				<FieldInput
-					label="Button label"
-					value={(config.ctaLabel as string) ?? ''}
-					onChange={(v) => updateField('ctaLabel', v)}
-				/>
-				<FieldInput
-					label="Button URL"
-					value={(config.ctaUrl as string) ?? ''}
-					onChange={(v) => updateField('ctaUrl', v)}
+				<LinkInspector
+					value={config.ctaUrl}
+					text={(config.ctaLabel as string) ?? ''}
+					onChange={(link) => updateField('ctaUrl', link)}
+					onTextChange={(v) => updateField('ctaLabel', v)}
+					showText
+					TextInput={LocalizedInput}
 				/>
 			</EditorSection>
 		</div>
@@ -3449,7 +3577,8 @@ function CardsEditor({ config, updateField, listKey }: ListEditorProps) {
 			title: string
 			description: string
 			imageUrl: string
-			linkUrl: string
+			linkUrl: unknown
+			ctaLabel?: string
 		}>) ?? []
 
 	return (
@@ -3512,16 +3641,15 @@ function CardsEditor({ config, updateField, listKey }: ListEditorProps) {
 									placeholder="Image URL"
 								/>
 							</div>
-							<div className="space-y-1.5">
-								<Label className="text-muted-foreground text-xs font-medium">
-									<Trans>Link URL</Trans>
-								</Label>
-								<LocalizedInput
-									value={item.linkUrl}
-									onChange={(val) => update({ linkUrl: val })}
-									placeholder="Link URL"
-								/>
-							</div>
+							<LinkInspector
+								value={item.linkUrl}
+								text={item.ctaLabel ?? ''}
+								onChange={(link) => update({ linkUrl: link })}
+								onTextChange={(ctaLabel) => update({ ctaLabel })}
+								showText
+								TextInput={LocalizedInput}
+								textPlaceholder="Learn more"
+							/>
 						</>
 					)}
 				/>
@@ -3637,26 +3765,32 @@ function CtaEditor({ config, updateField, ...editorProps }: EditorProps) {
 			</EditorSection>
 
 			<EditorSection title={<Trans>Buttons</Trans>}>
-				<FieldInput
-					label="Primary button label"
-					value={(config.primaryLabel as string) ?? ''}
-					onChange={(v) => updateField('primaryLabel', v)}
-				/>
-				<FieldInput
-					label="Primary button URL"
-					value={(config.primaryUrl as string) ?? ''}
-					onChange={(v) => updateField('primaryUrl', v)}
-				/>
-				<FieldInput
-					label="Secondary button label"
-					value={(config.secondaryLabel as string) ?? ''}
-					onChange={(v) => updateField('secondaryLabel', v)}
-				/>
-				<FieldInput
-					label="Secondary button URL"
-					value={(config.secondaryUrl as string) ?? ''}
-					onChange={(v) => updateField('secondaryUrl', v)}
-				/>
+				<div className="space-y-2">
+					<p className="text-muted-foreground text-xs font-medium">
+						<Trans>Primary button</Trans>
+					</p>
+					<LinkInspector
+						value={config.primaryUrl}
+						text={(config.primaryLabel as string) ?? ''}
+						onChange={(link) => updateField('primaryUrl', link)}
+						onTextChange={(v) => updateField('primaryLabel', v)}
+						showText
+						TextInput={LocalizedInput}
+					/>
+				</div>
+				<div className="space-y-2">
+					<p className="text-muted-foreground text-xs font-medium">
+						<Trans>Secondary button</Trans>
+					</p>
+					<LinkInspector
+						value={config.secondaryUrl}
+						text={(config.secondaryLabel as string) ?? ''}
+						onChange={(link) => updateField('secondaryUrl', link)}
+						onTextChange={(v) => updateField('secondaryLabel', v)}
+						showText
+						TextInput={LocalizedInput}
+					/>
+				</div>
 			</EditorSection>
 		</div>
 	)
@@ -3737,10 +3871,10 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 	const columns =
 		(config.columns as Array<{
 			title: string
-			links: Array<{ label: string; url: string }>
+			links: Array<{ label: string; url: unknown }>
 		}>) ?? []
 	const socials =
-		(config.socials as Array<{ platform: string; url: string }>) ?? []
+		(config.socials as Array<{ platform: string; url: unknown }>) ?? []
 
 	return (
 		<div className="space-y-5">
@@ -3785,23 +3919,24 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 									key={linkIndex}
 									className="border-border space-y-2 rounded-md border p-2"
 								>
-									<LocalizedInput
-										value={link.label}
-										onChange={(val) => {
+									<LinkInspector
+										value={link.url}
+										text={link.label}
+										onChange={(nextLink) => {
+											const next = [...(item.links ?? [])]
+											next[linkIndex] = {
+												...next[linkIndex]!,
+												url: nextLink,
+											}
+											update({ links: next })
+										}}
+										onTextChange={(val) => {
 											const next = [...(item.links ?? [])]
 											next[linkIndex] = { ...next[linkIndex]!, label: val }
 											update({ links: next })
 										}}
-										placeholder="Link label"
-									/>
-									<LocalizedInput
-										value={link.url}
-										onChange={(val) => {
-											const next = [...(item.links ?? [])]
-											next[linkIndex] = { ...next[linkIndex]!, url: val }
-											update({ links: next })
-										}}
-										placeholder="/about"
+										showText
+										TextInput={LocalizedInput}
 									/>
 									<Button
 										variant="ghost"
@@ -3840,15 +3975,13 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 				checked={(config.showCta as boolean) ?? true}
 				onChange={(v) => updateField('showCta', v)}
 			/>
-			<FieldInput
-				label="Button label"
-				value={(config.ctaLabel as string) ?? ''}
-				onChange={(v) => updateField('ctaLabel', v)}
-			/>
-			<FieldInput
-				label="Button URL"
-				value={(config.ctaUrl as string) ?? ''}
-				onChange={(v) => updateField('ctaUrl', v)}
+			<LinkInspector
+				value={config.ctaUrl}
+				text={(config.ctaLabel as string) ?? ''}
+				onChange={(link) => updateField('ctaUrl', link)}
+				onTextChange={(v) => updateField('ctaLabel', v)}
+				showText
+				TextInput={LocalizedInput}
 			/>
 			<div className="space-y-2">
 				<Label className="text-muted-foreground text-xs font-medium">
@@ -3858,8 +3991,11 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 					listKey={`${listKey}:socials`}
 					items={socials}
 					onChange={(next) => updateField('socials', next)}
-					createItem={() => ({ platform: '', url: '' })}
-					getTitle={(item) => item.platform || item.url}
+					createItem={() => ({
+						platform: '',
+						url: { type: 'url', url: '', openIn: 'blank' },
+					})}
+					getTitle={(item) => item.platform}
 					emptyTitle="Untitled profile"
 					addLabel={<Trans>Add social link</Trans>}
 					deleteLabel={<Trans>Delete social link</Trans>}
@@ -3875,16 +4011,10 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 									placeholder="Instagram"
 								/>
 							</div>
-							<div className="space-y-1.5">
-								<Label className="text-muted-foreground text-xs font-medium">
-									<Trans>URL</Trans>
-								</Label>
-								<Input
-									value={item.url}
-									onChange={(e) => update({ url: e.target.value })}
-									placeholder="https://…"
-								/>
-							</div>
+							<LinkInspector
+								value={item.url}
+								onChange={(link) => update({ url: link })}
+							/>
 						</>
 					)}
 				/>
@@ -4692,7 +4822,8 @@ function InspectorNav({
 // Main Builder Component
 // ==============================================
 export default function PageBuilderRoute() {
-	const { organization, page, themeConfig } = useLoaderData<typeof loader>()
+	const { organization, page, themeConfig, sitePages } =
+		useLoaderData<typeof loader>()
 	const params = useParams()
 	const titleFetcher = useFetcher()
 	const sectionFetcher = useFetcher()
@@ -4719,6 +4850,19 @@ export default function PageBuilderRoute() {
 	)
 	const defaultLocale = organization.siteDefaultLocale ?? 'en'
 	const [activeLocale, setActiveLocale] = useState<string>(defaultLocale)
+	const linkPages = useMemo(
+		() =>
+			sitePages.map((item) => ({
+				id: item.id,
+				slug: item.slug,
+				isHomePage: item.isHomePage,
+				title:
+					pickLocalized(item.title, activeLocale, defaultLocale) ||
+					item.slug ||
+					'Untitled page',
+			})),
+		[sitePages, activeLocale, defaultLocale],
+	)
 
 	const [previewUrl, setPreviewUrl] = useState('')
 	const [iframeKey, setIframeKey] = useState(Date.now())
@@ -4886,14 +5030,11 @@ export default function PageBuilderRoute() {
 
 	const handleUploadBlockAsset = useCallback(
 		(file: File) => {
-			const mimeType = file.type || guessImageMimeType(file.name)
-			let ext = extensionForImageMime(mimeType || 'image/jpeg')
-			if (mimeType === 'video/mp4') ext = 'mp4'
-			if (mimeType === 'video/webm') ext = 'webm'
-			if (mimeType === 'video/quicktime') ext = 'mov'
+			const mimeType = guessAssetMimeType(file.name, file.type)
+			const ext = extensionForAsset(mimeType, file.name)
 
 			const safeFile = new File([file], `asset.${ext}`, {
-				type: mimeType || 'image/jpeg',
+				type: mimeType || 'application/octet-stream',
 				lastModified: Date.now(),
 			})
 			const formData = new FormData()
@@ -5252,198 +5393,214 @@ export default function PageBuilderRoute() {
 		<LocaleContext.Provider
 			value={{ activeLocale, defaultLocale, locales, setActiveLocale }}
 		>
-			<div className="bg-background fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
-				<header className="border-border flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
-					<div className="flex min-w-0 items-center gap-1.5">
-						<Button
-							variant="ghost"
-							size="icon-xs"
-							render={<Link to={`/${params.orgSlug}/website/pages`} />}
-							aria-label="Back to pages"
-						>
-							<Icon name="arrow-left" className="size-4" />
-						</Button>
-
-						{editingTitle ? (
-							<LocalizedInput
-								value={titleValue}
-								onChange={(val) => setTitleValue(val)}
-								onBlur={handleSaveTitle}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter') handleSaveTitle()
-									if (e.key === 'Escape') {
-										setTitleValue(page.title)
-										setEditingTitle(false)
-									}
-								}}
-								className="h-7 max-w-56 text-sm font-medium"
-								autoFocus
-							/>
-						) : (
-							<button
-								type="button"
-								className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-								onClick={() => setEditingTitle(true)}
-								title={displayTitle}
-							>
-								{displayTitle}
-							</button>
-						)}
-
-						{page.isHomePage ? (
-							<Badge variant="outline" className="hidden sm:inline-flex">
-								<Trans>Home</Trans>
-							</Badge>
-						) : null}
-					</div>
-
-					<div className="flex shrink-0 items-center gap-2">
-						<div className="bg-muted flex rounded-lg p-0.5">
+			<SiteLinkBuilderContext.Provider
+				value={{
+					pages: linkPages,
+					onUploadAsset: handleUploadBlockAsset,
+					isUploadingAsset: blockAssetFetcher.state !== 'idle',
+					uploadedAssetUrl:
+						blockAssetFetcher.data?.status === 'success'
+							? blockAssetFetcher.data.assetUrl
+							: null,
+					uploadError:
+						blockAssetFetcher.data?.status === 'error'
+							? blockAssetFetcher.data.error
+							: null,
+				}}
+			>
+				<div className="bg-background fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
+					<header className="border-border flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
+						<div className="flex min-w-0 items-center gap-1.5">
 							<Button
 								variant="ghost"
-								size="sm"
-								className={cn(
-									'rounded-md px-2.5',
-									mode === 'build' &&
-										'bg-background text-foreground hover:bg-background shadow-sm',
-								)}
-								onClick={() => setMode('build')}
+								size="icon-xs"
+								render={<Link to={`/${params.orgSlug}/website/pages`} />}
+								aria-label="Back to pages"
 							>
-								<Icon name="blocks" className="size-3.5" />
-								<span className="hidden sm:inline">
-									<Trans>Build</Trans>
-								</span>
+								<Icon name="arrow-left" className="size-4" />
 							</Button>
-							<Button
-								variant="ghost"
-								size="sm"
-								className={cn(
-									'rounded-md px-2.5',
-									mode === 'preview' &&
-										'bg-background text-foreground hover:bg-background shadow-sm',
-								)}
-								onClick={() => setMode('preview')}
-							>
-								<Icon name="laptop" className="size-3.5" />
-								<span className="hidden sm:inline">
-									<Trans>Preview</Trans>
-								</span>
-							</Button>
-						</div>
 
-						<div className="text-muted-foreground hidden items-center gap-1.5 text-xs sm:flex">
-							<span
-								className={cn(
-									'size-1.5 rounded-full',
-									optimisticStatus === 'published'
-										? 'bg-emerald-500'
-										: 'bg-muted-foreground/40',
-								)}
-							/>
-							{optimisticStatus === 'published' ? (
-								<Trans>Published</Trans>
-							) : (
-								<Trans>Draft</Trans>
-							)}
-						</div>
-
-						<Button
-							size="sm"
-							onClick={handlePublish}
-							disabled={publishFetcher.state !== 'idle'}
-						>
-							{publishFetcher.state !== 'idle' ? (
-								<Spinner />
-							) : optimisticStatus === 'draft' ? (
-								<Trans>Publish</Trans>
-							) : (
-								<Trans>Publish updates</Trans>
-							)}
-						</Button>
-
-						<DropdownMenu>
-							<DropdownMenuTrigger
-								render={
-									<Button
-										variant="ghost"
-										size="icon-xs"
-										aria-label="More actions"
-									>
-										<Icon name="ellipsis" className="size-4" />
-									</Button>
-								}
-							/>
-							<DropdownMenuContent align="end" className="min-w-44">
-								<DropdownMenuItem
-									onClick={() => {
-										if (previewUrl) window.open(previewUrl, '_blank')
+							{editingTitle ? (
+								<LocalizedInput
+									value={titleValue}
+									onChange={(val) => setTitleValue(val)}
+									onBlur={handleSaveTitle}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') handleSaveTitle()
+										if (e.key === 'Escape') {
+											setTitleValue(page.title)
+											setEditingTitle(false)
+										}
 									}}
+									className="h-7 max-w-56 text-sm font-medium"
+									autoFocus
+								/>
+							) : (
+								<button
+									type="button"
+									className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+									onClick={() => setEditingTitle(true)}
+									title={displayTitle}
 								>
-									<Icon name="external-link" className="size-4" />
-									<Trans>Open preview</Trans>
-								</DropdownMenuItem>
+									{displayTitle}
+								</button>
+							)}
+
+							{page.isHomePage ? (
+								<Badge variant="outline" className="hidden sm:inline-flex">
+									<Trans>Home</Trans>
+								</Badge>
+							) : null}
+						</div>
+
+						<div className="flex shrink-0 items-center gap-2">
+							<div className="bg-muted flex rounded-lg p-0.5">
+								<Button
+									variant="ghost"
+									size="sm"
+									className={cn(
+										'rounded-md px-2.5',
+										mode === 'build' &&
+											'bg-background text-foreground hover:bg-background shadow-sm',
+									)}
+									onClick={() => setMode('build')}
+								>
+									<Icon name="blocks" className="size-3.5" />
+									<span className="hidden sm:inline">
+										<Trans>Build</Trans>
+									</span>
+								</Button>
+								<Button
+									variant="ghost"
+									size="sm"
+									className={cn(
+										'rounded-md px-2.5',
+										mode === 'preview' &&
+											'bg-background text-foreground hover:bg-background shadow-sm',
+									)}
+									onClick={() => setMode('preview')}
+								>
+									<Icon name="laptop" className="size-3.5" />
+									<span className="hidden sm:inline">
+										<Trans>Preview</Trans>
+									</span>
+								</Button>
+							</div>
+
+							<div className="text-muted-foreground hidden items-center gap-1.5 text-xs sm:flex">
+								<span
+									className={cn(
+										'size-1.5 rounded-full',
+										optimisticStatus === 'published'
+											? 'bg-emerald-500'
+											: 'bg-muted-foreground/40',
+									)}
+								/>
 								{optimisticStatus === 'published' ? (
+									<Trans>Published</Trans>
+								) : (
+									<Trans>Draft</Trans>
+								)}
+							</div>
+
+							<Button
+								size="sm"
+								onClick={handlePublish}
+								disabled={publishFetcher.state !== 'idle'}
+							>
+								{publishFetcher.state !== 'idle' ? (
+									<Spinner />
+								) : optimisticStatus === 'draft' ? (
+									<Trans>Publish</Trans>
+								) : (
+									<Trans>Publish updates</Trans>
+								)}
+							</Button>
+
+							<DropdownMenu>
+								<DropdownMenuTrigger
+									render={
+										<Button
+											variant="ghost"
+											size="icon-xs"
+											aria-label="More actions"
+										>
+											<Icon name="ellipsis" className="size-4" />
+										</Button>
+									}
+								/>
+								<DropdownMenuContent align="end" className="min-w-44">
 									<DropdownMenuItem
 										onClick={() => {
-											if (liveUrl) window.open(liveUrl, '_blank')
+											if (previewUrl) window.open(previewUrl, '_blank')
 										}}
 									>
-										<Icon name="laptop" className="size-4" />
-										<Trans>View live site</Trans>
+										<Icon name="external-link" className="size-4" />
+										<Trans>Open preview</Trans>
 									</DropdownMenuItem>
-								) : null}
-								{!page.isHomePage && optimisticStatus === 'published' ? (
-									<>
-										<DropdownMenuSeparator />
+									{optimisticStatus === 'published' ? (
 										<DropdownMenuItem
-											variant="destructive"
-											onClick={handleUnpublish}
-											disabled={publishFetcher.state !== 'idle'}
+											onClick={() => {
+												if (liveUrl) window.open(liveUrl, '_blank')
+											}}
 										>
-											<Trans>Unpublish</Trans>
+											<Icon name="laptop" className="size-4" />
+											<Trans>View live site</Trans>
 										</DropdownMenuItem>
-									</>
-								) : null}
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				</header>
-
-				<div className="flex min-h-0 flex-1">
-					{isSplitLayout ? (
-						<ResizablePanelGroup
-							direction="horizontal"
-							autoSaveId="website-page-builder"
-							className="min-h-0 flex-1"
-						>
-							<ResizablePanel
-								id="sections"
-								order={1}
-								defaultSize={22}
-								minSize={15}
-								maxSize={40}
-								className="min-w-0"
-							>
-								{sectionsSidebar}
-							</ResizablePanel>
-							<ResizableHandle withHandle />
-							<ResizablePanel
-								id="preview"
-								order={2}
-								defaultSize={78}
-								minSize={40}
-								className="min-w-0"
-							>
-								{previewMain}
-							</ResizablePanel>
-						</ResizablePanelGroup>
-					) : (
-						<div className="min-h-0 flex-1">
-							{mode === 'build' ? sectionsSidebar : previewMain}
+									) : null}
+									{!page.isHomePage && optimisticStatus === 'published' ? (
+										<>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												variant="destructive"
+												onClick={handleUnpublish}
+												disabled={publishFetcher.state !== 'idle'}
+											>
+												<Trans>Unpublish</Trans>
+											</DropdownMenuItem>
+										</>
+									) : null}
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</div>
-					)}
+					</header>
+
+					<div className="flex min-h-0 flex-1">
+						{isSplitLayout ? (
+							<ResizablePanelGroup
+								direction="horizontal"
+								autoSaveId="website-page-builder"
+								className="min-h-0 flex-1"
+							>
+								<ResizablePanel
+									id="sections"
+									order={1}
+									defaultSize={22}
+									minSize={15}
+									maxSize={40}
+									className="min-w-0"
+								>
+									{sectionsSidebar}
+								</ResizablePanel>
+								<ResizableHandle withHandle />
+								<ResizablePanel
+									id="preview"
+									order={2}
+									defaultSize={78}
+									minSize={40}
+									className="min-w-0"
+								>
+									{previewMain}
+								</ResizablePanel>
+							</ResizablePanelGroup>
+						) : (
+							<div className="min-h-0 flex-1">
+								{mode === 'build' ? sectionsSidebar : previewMain}
+							</div>
+						)}
+					</div>
 				</div>
-			</div>
+			</SiteLinkBuilderContext.Provider>
 		</LocaleContext.Provider>
 	)
 }

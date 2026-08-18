@@ -1,8 +1,9 @@
 ---
+import SiteAnchor from '~/components/SiteAnchor.astro'
 import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary } from '~/lib/media'
 
 interface Link {
-	url?: string
+	url?: unknown
 	link?: { label?: string }
 }
 
@@ -126,14 +127,14 @@ const secondary = links[1]
 				]}
 			>
 				{primary?.link?.label ? (
-					<a href={primary.url || '#'} class={siteBtnPrimary}>
+					<SiteAnchor link={primary.url} class={siteBtnPrimary}>
 						{primary.link.label}
-					</a>
+					</SiteAnchor>
 				) : null}
 				{secondary?.link?.label ? (
-					<a href={secondary.url || '#'} class={siteBtnGhost}>
+					<SiteAnchor link={secondary.url} class={siteBtnGhost}>
 						{secondary.link.label}
-					</a>
+					</SiteAnchor>
 				) : null}
 			</div>
 		) : null}

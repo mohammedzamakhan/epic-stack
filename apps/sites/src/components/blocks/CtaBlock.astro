@@ -1,4 +1,5 @@
 ---
+import SiteAnchor from '~/components/SiteAnchor.astro'
 import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
 
 interface Props {
@@ -9,9 +10,9 @@ interface Props {
 		imageUrl?: string
 		cardPosition?: 'left' | 'center' | 'right'
 		primaryLabel?: string
-		primaryUrl?: string
+		primaryUrl?: unknown
 		secondaryLabel?: string
-		secondaryUrl?: string
+		secondaryUrl?: unknown
 	}
 }
 
@@ -56,14 +57,14 @@ const positionClass =
 								]}
 							>
 								{config.primaryLabel ? (
-									<a href={config.primaryUrl || '#'} class={siteBtnPrimary}>
+									<SiteAnchor link={config.primaryUrl} class={siteBtnPrimary}>
 										{config.primaryLabel}
-									</a>
+									</SiteAnchor>
 								) : null}
 								{config.secondaryLabel ? (
-									<a href={config.secondaryUrl || '#'} class={siteBtnGhost}>
+									<SiteAnchor link={config.secondaryUrl} class={siteBtnGhost}>
 										{config.secondaryLabel}
-									</a>
+									</SiteAnchor>
 								) : null}
 							</div>
 						) : null}
@@ -83,20 +84,20 @@ const positionClass =
 				{(config.primaryLabel || config.secondaryLabel) ? (
 					<div class="mt-8 flex flex-wrap items-center justify-center gap-3">
 						{config.primaryLabel ? (
-							<a
-								href={config.primaryUrl || '#'}
+							<SiteAnchor
+								link={config.primaryUrl}
 								class="inline-flex items-center justify-center rounded-[var(--radius)] bg-background px-5 py-2.5 text-sm font-semibold text-primary shadow-sm transition-opacity hover:opacity-90"
 							>
 								{config.primaryLabel}
-							</a>
+							</SiteAnchor>
 						) : null}
 						{config.secondaryLabel ? (
-							<a
-								href={config.secondaryUrl || '#'}
+							<SiteAnchor
+								link={config.secondaryUrl}
 								class="inline-flex items-center justify-center rounded-[var(--radius)] border border-primary-foreground/40 px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10"
 							>
 								{config.secondaryLabel}
-							</a>
+							</SiteAnchor>
 						) : null}
 					</div>
 				) : null}

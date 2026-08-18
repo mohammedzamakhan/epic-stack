@@ -1,0 +1,20 @@
+---
+import { resolveSiteLink, type SiteLinkInput } from '@repo/common/site-link'
+
+interface Props {
+	link: SiteLinkInput
+	class?: string
+}
+
+const { link, class: className } = Astro.props
+const resolved = resolveSiteLink(link)
+---
+
+<a
+	href={resolved.href}
+	class={className}
+	target={resolved.target}
+	rel={resolved.rel}
+>
+	<slot />
+</a>
