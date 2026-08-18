@@ -12,8 +12,9 @@ app, CMS, background jobs, email templates, notifications) and shared packages
 (UI, auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind
-CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites), deployed on
-Fly.io with LiteFS for distributed SQLite.
+CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites). App/Admin
+deploy on Fly.io with LiteFS. Regional tenant-api deploys on OCI Ampere
+(Riyadh + Ashburn) with per-org SQLite on a block volume.
 
 **Monorepo Structure**:
 
@@ -386,6 +387,8 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
   HTML for browser-direct auth (not a server proxy)
 - `INTERNAL_COMMAND_TOKEN` - Shared by App and every tenant-api (≥16 chars)
 - `DATA_REGION` - Tenant-api only: `us` or `ksa`
+- `TENANT_DB_DIR` - Tenant-api only: directory for `tenant_{orgId}.db` (OCI:
+  `/data/tenants`)
 - `JWT_SECRET` / `AUTH_HMAC_SECRET` - Tenant-api only (customer tokens / OTP
   hashes). Sites must not have these.
 
@@ -445,19 +448,21 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 - Local: `./packages/database/data.db`
 - Use "widen then narrow" migration strategy for zero-downtime
 - App/Admin LiteFS is the **US control plane**. Customer PII uses a **separate**
-  tenant-api + volume per `dataRegion` (`us` | `ksa`). Never scale one LiteFS
-  cluster across US and KSA.
+  OCI VM + block volume per `dataRegion` (`us` | `ksa`). Never put KSA SQLite on
+  the US App LiteFS cluster.
 
 **Tenant SQLite (Drizzle, not Prisma):**
 
 - Schema: `packages/tenant-db/src/schema.ts`
 - Migrations: `packages/tenant-db/drizzle/`
+- Production path: `TENANT_DB_DIR` on an OCI block volume (`/data/tenants`)
 - Provisioned lazily on site publish; destroyed on region switch
 - Prisma `Organization.dataRegion` and `hasProvisionedDb` are flags only
 
 ## Deployment
 
-**Platform**: Fly.io with Docker containers
+**Platform**: Fly.io (App/Admin/CMS) + OCI Ampere (tenant-api) + Cloudflare
+Pages (Sites / marketing web)
 
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
@@ -467,14 +472,16 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 2. Build + TypeCheck
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
-5. Docker build (app, admin, cms, **tenant-api US + KSA**)
-6. Deploy to Fly.io; Sites and marketing web to Cloudflare Pages
+5. Docker build (app, admin, cms on Fly)
+6. Deploy App/Admin/CMS to Fly.io; Sites and marketing web to Cloudflare Pages
+7. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
 
 **Zero-Downtime Deployments**:
 
-- Multiple instances run simultaneously
-- LiteFS handles database replication
-- Health checks: `/resources/healthcheck`, `/litefs/health`
+- Multiple App/Admin instances run simultaneously
+- LiteFS handles control-plane SQLite replication (US only)
+- Health checks: `/resources/healthcheck`, `/litefs/health` (App/Admin);
+  tenant-api `/health`
 
 ## Internationalization
 
@@ -511,7 +518,8 @@ npm install --prefix packages/<name>                   # Install deps in package
 
 - `apps/app` - Operators; publishes sites; routes provision by `dataRegion`
 - `apps/sites` - Public CMS HTML; injects tenant-api URL; no PII proxy
-- `apps/tenant-api` - Regional customer auth + SQLite (US :3007, KSA :3009)
+- `apps/tenant-api` - Regional customer auth + SQLite (local US :3007, KSA
+  :3009; production OCI Ashburn + Riyadh)
 
 ## Additional Resources
 

@@ -35,7 +35,7 @@ browser therefore calls **that org’s regional tenant-api directly**.
 ```
 US (control plane)                         Regional data plane (US and/or KSA)
 ─────────────────                          ──────────────────────────────────
-App, Admin                                 Tenant API  (one Fly app per region)
+App, Admin                                 Tenant API  (one OCI VM per region)
 Central Prisma                             Per-org SQLite  tenant_{orgId}.db
   org flags, CMS, billing                  customers (name, email, phone, hashes)
 Sites SSR (CMS HTML only)  ─browser JS──►  In-region tenant-api (auth + PII)
@@ -48,8 +48,8 @@ Sites SSR (CMS HTML only)  ─browser JS──►  In-region tenant-api (auth + 
 | Sites       | Often US (CMS SSR) | Public org JSON and HTML. Injects the regional API URL. **Must not** proxy customer PII. |
 | Tenant API  | **Per region**     | Customer PII and auth. Rejects orgs whose `dataRegion` does not match `DATA_REGION`.     |
 
-Never share one LiteFS cluster (or one SQLite volume) across US and KSA. LiteFS
-write-forwarding would replay KSA writes to a US primary.
+Never share one SQLite volume across US and KSA. Each region is its own OCI VM
+and block volume.
 
 ## What lives where
 
@@ -214,15 +214,35 @@ Shared local secrets (not for production) live in `.env.schema`:
 Local schema values contain `do-not-use-in-prod` and are rejected at tenant-api
 startup in production.
 
-## Production / Fly.io
+## Production / OCI
 
-Deploy **separate** tenant-api apps (and volumes) per region. App stays in the
-US and only sends `{ orgId, slug, dataRegion }` to the matching regional
-provision URL.
+App and Admin stay on Fly in the US. **Tenant-api** runs on **Oracle Cloud**:
+one Ampere A1 VM and one block volume per `dataRegion`, so customer SQLite never
+shares App’s LiteFS volume.
 
-Configs: `apps/tenant-api/fly.toml` (US) and `apps/tenant-api/fly.ksa.toml`
-(KSA). GitHub Actions deploys both, plus Sites to Cloudflare Pages. See
-[Deployment](./deployment.md#regional-tenant-data-plane) and the
+| Logical `dataRegion` | Where to run tenant-api                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `us`                 | OCI US East (Ashburn) `us-ashburn-1` (paid A1)                                          |
+| `ksa`                | OCI Saudi Arabia Central (Riyadh) `me-riyadh-1` (Always Free A1 in the **home** region) |
+
+Set home region to Riyadh when you create the tenancy. Always Free resources
+cannot be created in Ashburn if Riyadh is home. AWS still has no generally
+available Kingdom region; do not use Bahrain, UAE, or Fly as a KSA stand-in.
+
+Same Docker image (`apps/tenant-api/Dockerfile`, `linux/arm64`) for both. SQLite
+files live on the attached volume at `TENANT_DB_DIR=/data/tenants`. Run a
+**single writer** per region (`docker compose` on the VM). Leave LiteFS unset.
+
+App stays in the US and only sends `{ orgId, slug, dataRegion }` to the matching
+regional URL. Set `APP_URL` on each tenant-api so it can resolve org flags
+without the Prisma volume.
+
+GitHub Actions builds the ARM image and pushes it to GHCR
+(`ghcr.io/<owner>/<repo>/tenant-api:<sha>`). Optional SSH deploy uses
+`OCI_TENANT_US_HOST` / `OCI_TENANT_KSA_HOST`. Sites still deploy to Cloudflare
+Pages.
+
+See [Deployment](./deployment.md#regional-tenant-data-plane) and the
 [deployment checklist](./deployment-checklist.md).
 
 ### Required secrets (per regional tenant-api)
@@ -235,6 +255,7 @@ Configs: `apps/tenant-api/fly.toml` (US) and `apps/tenant-api/fly.ksa.toml`
 | `INTERNAL_COMMAND_TOKEN` | Same value as US App. ≥16 chars. Empty token is rejected.                  |
 | `APP_URL`                | US App origin. Used when this node cannot read Prisma org flags (KSA).     |
 | `DATABASE_URL`           | Central Prisma for **org flags only** when available. Not customer PII.    |
+| `TENANT_DB_DIR`          | Volume mount for `tenant_{orgId}.db` (production: `/data/tenants`).        |
 | `ROOT_APP`               | Brand domain used to map `{slug}.{ROOT_APP}` origins for CORS.             |
 
 ### App (US)

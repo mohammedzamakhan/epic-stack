@@ -175,7 +175,8 @@ sites (Astro `apps/sites`) authenticate **customers**, not App users.
   phone/name/email through US servers.
 
 Local development runs **two** tenant-api nodes (US on 3007, KSA on 3009).
-`npm run dev` starts both.
+`npm run dev` starts both. Production runs the same processes on OCI Ampere
+(Ashburn for `us`, Riyadh for `ksa`).
 
 Operators pick **Customer data region** on Website settings. Switching region
 after customers exist **deletes** the old tenant database; PII is not migrated.

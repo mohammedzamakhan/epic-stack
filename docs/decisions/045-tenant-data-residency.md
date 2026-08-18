@@ -28,7 +28,8 @@ phone/name/email there would mix control-plane data with regional PII.
   profile, and logout. Sites SSR may run in the US; it must not proxy PII.
 - Customer tokens live in `localStorage` on the tenant origin, not in Sites
   cookies.
-- Use separate LiteFS (or disk) clusters per region.
+- Use a **separate SQLite volume** (OCI block volume) per region. Do not share
+  App/Admin LiteFS with customer databases.
 - Do not send KSA OTP traffic through Twilio in production.
 
 ## Rejected alternatives
@@ -46,9 +47,11 @@ phone/name/email there would mix control-plane data with regional PII.
 ## Consequences
 
 Local development uses two tenant-api processes (US on 3007, KSA on 3009).
-Production needs two tenant-api apps and in-kingdom SMS before KSA launch.
-Customer tokens are XSS-readable on the tenant origin. Org metadata (slug,
-`dataRegion`, `hasProvisionedDb`) still lives in US Prisma; that is not customer
-PII.
+Production tenant-api runs on **Oracle Cloud**: Always Free Ampere A1 in Riyadh
+(`me-riyadh-1`, tenancy home region) for `ksa`, and a paid A1 in US East Ashburn
+(`us-ashburn-1`) for `us`. AWS still has no generally available Kingdom region.
+Bahrain and UAE are not KSA. Customer tokens are XSS-readable on the tenant
+origin. Org metadata (slug, `dataRegion`, `hasProvisionedDb`) still lives in US
+Prisma; that is not customer PII.
 
 How to operate this: [tenant data residency](../tenant-data-residency.md).

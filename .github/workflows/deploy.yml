@@ -14,6 +14,7 @@ concurrency:
 permissions:
   actions: write
   contents: read
+  packages: write
 
 env:
   HUSKY: 0
@@ -263,8 +264,8 @@ jobs:
           npm run build
         env:
           PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
-          PUBLIC_TENANT_API_URL: ${{ vars.PUBLIC_TENANT_API_URL || 'https://epic-startup-tenant-us.fly.dev' }}
-          PUBLIC_TENANT_API_URL_KSA: ${{ vars.PUBLIC_TENANT_API_URL_KSA || 'https://epic-startup-tenant-ksa.fly.dev' }}
+          PUBLIC_TENANT_API_URL: ${{ vars.PUBLIC_TENANT_API_URL || 'https://tenant-us.example.com' }}
+          PUBLIC_TENANT_API_URL_KSA: ${{ vars.PUBLIC_TENANT_API_URL_KSA || 'https://tenant-ksa.example.com' }}
 
       - name: 🚀 Deploy Sites to Cloudflare Pages (Production)
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -445,90 +446,54 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   container-tenant-api:
-    name: 📦 Prepare Tenant API Containers
+    name: 📦 Build Tenant API Image
     runs-on: ubuntu-24.04
     needs: [affected]
     if:
       ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
       'true' }}
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: 👀 Read US tenant-api name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: tenant_us
+      - name: 🏷️ Image name
+        id: meta
+        run: |
+          repo="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          echo "image=ghcr.io/${repo}/tenant-api" >> "$GITHUB_OUTPUT"
+
+      - name: 🐳 Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🔐 Log in to GHCR
+        uses: docker/login-action@v4
         with:
-          file: 'apps/tenant-api/fly.toml'
-          field: 'app'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 👀 Read KSA tenant-api name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: tenant_ksa
+      - name: 📦 Build and push linux/arm64 (OCI Ampere)
+        uses: docker/build-push-action@v7
         with:
-          file: 'apps/tenant-api/fly.ksa.toml'
-          field: 'app'
-
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 📦 Build Tenant API US Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/tenant-api/fly.toml \
-            --dockerfile apps/tenant-api/Dockerfile \
-            --app ${{ steps.tenant_us.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build Tenant API KSA Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/tenant-api/fly.ksa.toml \
-            --dockerfile apps/tenant-api/Dockerfile \
-            --app ${{ steps.tenant_ksa.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build Tenant API US Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/tenant-api/fly.toml \
-            --dockerfile apps/tenant-api/Dockerfile \
-            --app ${{ steps.tenant_us.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build Tenant API KSA Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/tenant-api/fly.ksa.toml \
-            --dockerfile apps/tenant-api/Dockerfile \
-            --app ${{ steps.tenant_ksa.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          context: .
+          file: apps/tenant-api/Dockerfile
+          platforms: linux/arm64
+          push: true
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
 
   deploy-app:
     name: 🚀 Deploy App
@@ -663,71 +628,51 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   deploy-tenant-api:
-    name: 🚀 Deploy Tenant API
+    name: 🚀 Deploy Tenant API (OCI)
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, container-tenant-api, affected]
     if:
       ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
       'true' }}
     steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: 👀 Read US tenant-api name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: tenant_us
-        with:
-          file: 'apps/tenant-api/fly.toml'
-          field: 'app'
-
-      - name: 👀 Read KSA tenant-api name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: tenant_ksa
-        with:
-          file: 'apps/tenant-api/fly.ksa.toml'
-          field: 'app'
-
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 🚀 Deploy Tenant API US Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.tenant_us.outputs.value }}-staging:${{ github.sha }}" \
-            --config apps/tenant-api/fly.toml \
-            --app ${{ steps.tenant_us.outputs.value }}-staging
+      - name: 🚀 Deploy US (Ashburn)
+        if: ${{ vars.OCI_TENANT_US_HOST != '' }}
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 🚀 Deploy Tenant API KSA Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
+          HOST: ${{ vars.OCI_TENANT_US_HOST }}
+          SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
+          SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
+          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
         run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.tenant_ksa.outputs.value }}-staging:${{ github.sha }}" \
-            --config apps/tenant-api/fly.ksa.toml \
-            --app ${{ steps.tenant_ksa.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          set -euo pipefail
+          install -m 600 /dev/null /tmp/oci_key
+          printf '%s\n' "$SSH_KEY" > /tmp/oci_key
+          ssh -i /tmp/oci_key -o StrictHostKeyChecking=accept-new \
+            "${SSH_USER}@${HOST}" \
+            "set -euo pipefail
+             echo '${PULL_TOKEN}' | docker login ghcr.io -u '${GHCR_USER}' --password-stdin
+             cd /opt/tenant-api
+             TENANT_API_IMAGE='${IMAGE}' docker compose pull
+             TENANT_API_IMAGE='${IMAGE}' docker compose up -d"
 
-      - name: 🚀 Deploy Tenant API US Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.tenant_us.outputs.value }}:${{ github.sha }}" \
-            --config apps/tenant-api/fly.toml \
-            --app ${{ steps.tenant_us.outputs.value }}
+      - name: 🚀 Deploy KSA (Riyadh)
+        if: ${{ vars.OCI_TENANT_KSA_HOST != '' }}
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 🚀 Deploy Tenant API KSA Production
-        if: ${{ github.ref == 'refs/heads/main' }}
+          HOST: ${{ vars.OCI_TENANT_KSA_HOST }}
+          SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
+          SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
+          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
         run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.tenant_ksa.outputs.value }}:${{ github.sha }}" \
-            --config apps/tenant-api/fly.ksa.toml \
-            --app ${{ steps.tenant_ksa.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          set -euo pipefail
+          install -m 600 /dev/null /tmp/oci_key
+          printf '%s\n' "$SSH_KEY" > /tmp/oci_key
+          ssh -i /tmp/oci_key -o StrictHostKeyChecking=accept-new \
+            "${SSH_USER}@${HOST}" \
+            "set -euo pipefail
+             echo '${PULL_TOKEN}' | docker login ghcr.io -u '${GHCR_USER}' --password-stdin
+             cd /opt/tenant-api
+             TENANT_API_IMAGE='${IMAGE}' docker compose pull
+             TENANT_API_IMAGE='${IMAGE}' docker compose up -d"

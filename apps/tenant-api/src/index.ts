@@ -2,7 +2,6 @@ import 'varlock/auto-load'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
-import { getInstanceInfo } from 'litefs-js'
 import { ENV } from 'varlock/env'
 import { isAllowedBrowserOrigin } from './lib/origin.ts'
 import { assertDataRegion, getNodeRegion } from './lib/region.ts'
@@ -16,31 +15,6 @@ assertDataRegion()
 const app = new Hono()
 
 app.use('*', logger())
-
-// LiteFS write forwarding is per regional cluster. Never share one LiteFS
-// primary across US and KSA — KSA writes would replay to a US primary.
-app.use('*', async (c, next) => {
-	if (process.env.LITEFS_DIR) {
-		const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
-
-		if (
-			c.req.method !== 'GET' &&
-			c.req.method !== 'OPTIONS' &&
-			c.req.method !== 'HEAD'
-		) {
-			if (!currentIsPrimary && primaryInstance) {
-				console.log(
-					`Replaying write request to primary node: ${primaryInstance}`,
-				)
-				return c.text('Replay to primary', 409, {
-					'fly-replay': `instance=${primaryInstance}`,
-				})
-			}
-		}
-	}
-
-	await next()
-})
 
 // Browser-facing auth: Sites may run in another region, so the page JS calls
 // this API directly. Allow only origins that resolve to an org in THIS region.

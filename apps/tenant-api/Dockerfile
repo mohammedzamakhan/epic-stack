@@ -1,11 +1,12 @@
 # Build from the monorepo root:
-#   flyctl deploy --config apps/tenant-api/fly.toml --dockerfile apps/tenant-api/Dockerfile
+#   docker build -f apps/tenant-api/Dockerfile -t tenant-api .
+# Production is linux/arm64 (OCI Ampere A1). Leave LITEFS_DIR unset.
 
 FROM node:22-bookworm-slim AS base
 
 ENV NODE_ENV=production
 
-RUN apt-get update && apt-get install -y fuse3 openssl sqlite3 ca-certificates \
+RUN apt-get update && apt-get install -y openssl sqlite3 ca-certificates \
 	&& rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
@@ -29,18 +30,10 @@ RUN cd packages/database && npx prisma generate
 
 FROM base
 
-ENV FLY="true"
-ENV LITEFS_DIR="/litefs/data"
-ENV DATABASE_FILENAME="sqlite.db"
-ENV DATABASE_PATH="$LITEFS_DIR/$DATABASE_FILENAME"
-ENV DATABASE_URL="file:$DATABASE_PATH"
-ENV INTERNAL_PORT="8080"
-ENV PORT="8081"
+ENV PORT="8080"
+ENV TENANT_DB_DIR="/data/tenants"
 ENV NODE_ENV="production"
 ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK="1"
-
-RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli \
-	&& chmod +x /usr/local/bin/database-cli
 
 WORKDIR /myapp
 
@@ -49,10 +42,15 @@ COPY --from=build /myapp/packages /myapp/packages
 COPY --from=build /myapp/apps/tenant-api /myapp/apps/tenant-api
 COPY --from=build /myapp/package.json /myapp/package.json
 
-COPY --from=flyio/litefs:0.5.11 /usr/local/bin/litefs /usr/local/bin/litefs
-ADD apps/tenant-api/litefs.yml /etc/litefs.yml
-RUN mkdir -p /data ${LITEFS_DIR}
+RUN mkdir -p /data/tenants \
+	&& echo "#!/bin/sh\nset -x\nsqlite3 \"\$1\"" > /usr/local/bin/tenant-db-cli \
+	&& chmod +x /usr/local/bin/tenant-db-cli
 
 WORKDIR /myapp/apps/tenant-api
 
-CMD ["litefs", "mount"]
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+	CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["npm", "start"]

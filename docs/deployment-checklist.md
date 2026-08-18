@@ -25,8 +25,8 @@ checklist-based guide.
                     provision orgId only │
                                          ▼
               ┌──────────────────────────────────────────────────┐
-              │  Tenant API + tenant SQLite  (US)                │
-              │  Tenant API + tenant SQLite  (KSA, separate app) │
+              │  Tenant API + tenant SQLite  (OCI Ashburn)       │
+              │  Tenant API + tenant SQLite  (OCI Riyadh)        │
               │  Browser calls tenant-api; Sites must not proxy  │
               │  customer PII                                    │
               └──────────────────────────────────────────────────┘
@@ -41,10 +41,10 @@ Customer phone/name/email never go in the US App/Admin database. See
 - **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS (US)
 - **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite (US)
 - **CMS App**: Fly.io (`epic-startup-cms`) - MongoDB Atlas
-- **Tenant API (US)**: Fly.io regional data plane — customer PII for
+- **Tenant API (US)**: OCI Ashburn (`us-ashburn-1`) — customer PII for
   `dataRegion=us`
-- **Tenant API (KSA)**: Separate Fly app + volume in `jed` — customer PII for
-  `dataRegion=ksa`
+- **Tenant API (KSA)**: OCI Riyadh (`me-riyadh-1`) — customer PII for
+  `dataRegion=ksa`. Not Fly, not Bahrain, not UAE.
 - **Sites**: CMS SSR; injects regional tenant-api URLs for browser auth
 
 ---
@@ -61,6 +61,8 @@ Customer phone/name/email never go in the US App/Admin database. See
 
 ### Required Accounts
 
+- [ ] **OCI tenancy** with **home region Riyadh** (`me-riyadh-1`) and Ashburn
+      subscribed
 - [ ] **Fly.io account** with organization set up
 - [ ] **MongoDB Atlas account** created
 - [ ] **GitHub Actions** access to repository
@@ -205,8 +207,8 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
-    TENANT_API_URL="https://epic-startup-tenant-us.fly.dev" \
-    TENANT_API_URL_KSA="https://epic-startup-tenant-ksa.fly.dev" \
+    TENANT_API_URL="https://tenant-us.example.com" \
+    TENANT_API_URL_KSA="https://tenant-ksa.example.com" \
     --app epic-startup
   ```
 
@@ -225,8 +227,8 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
-    TENANT_API_URL="https://epic-startup-tenant-us-staging.fly.dev" \
-    TENANT_API_URL_KSA="https://epic-startup-tenant-ksa-staging.fly.dev" \
+    TENANT_API_URL="https://tenant-us-staging.example.com" \
+    TENANT_API_URL_KSA="https://tenant-ksa-staging.example.com" \
     --app epic-startup-staging
   ```
 
@@ -265,19 +267,19 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
 
 ### Tenant API Environment Variables
 
-Use **separate** Fly apps and volumes for US and KSA. Never attach both to the
-same LiteFS/Consul cluster.
+Run on **OCI** (see
+[deployment.md](./deployment.md#regional-tenant-data-plane)). One Ampere A1 VM +
+block volume per region. Home region = Riyadh.
 
-- [ ] **5.4a** Create apps and volumes (see
-      [deployment.md](./deployment.md#regional-tenant-data-plane))
-- [ ] **5.4b** Set US tenant-api secrets (`JWT_SECRET`, `AUTH_HMAC_SECRET`,
-      `INTERNAL_COMMAND_TOKEN`, `APP_URL`). `DATA_REGION=us` is in
-      `apps/tenant-api/fly.toml`. Reuse App's command token. Do not copy
-      `JWT_SECRET` to Sites.
-- [ ] **5.4c** Set KSA tenant-api secrets the same way with **different**
-      JWT/HMAC values (`fly.ksa.toml` sets `DATA_REGION=ksa`). Set `APP_URL` to
-      the US App so org flags can be resolved without sharing LiteFS. Do not
-      configure Twilio on the KSA app.
+- [ ] **5.4a** Create the Riyadh Always Free A1 VM (`DATA_REGION=ksa`) with a
+      volume mounted at `/data/tenants`. Copy `docker-compose.yml` to
+      `/opt/tenant-api`.
+- [ ] **5.4b** Create the Ashburn paid A1 VM (`DATA_REGION=us`) the same way.
+- [ ] **5.4c** Set per-region `.env`: `JWT_SECRET`, `AUTH_HMAC_SECRET`,
+      `INTERNAL_COMMAND_TOKEN` (same as App), `APP_URL`, `TENANT_DB_DIR`. Do not
+      copy `JWT_SECRET` to Sites. Do not configure Twilio on the KSA VM.
+- [ ] **5.4d** Put Cloudflare (or a Tunnel) in front of port 8080. Skip OCI load
+      balancers and NAT.
 
 ### CMS App Environment Variables
 
@@ -339,18 +341,18 @@ same LiteFS/Consul cluster.
   - [ ] Add `SENTRY_AUTH_TOKEN` (optional, for error tracking)
   - [ ] Optional repository **variables** for Sites builds: `PUBLIC_APP_URL`,
         `PUBLIC_TENANT_API_URL`, `PUBLIC_TENANT_API_URL_KSA`
+  - [ ] Optional OCI deploy: variables `OCI_TENANT_US_HOST`,
+        `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_USER`; secrets
+        `OCI_TENANT_SSH_KEY`, `GHCR_PULL_TOKEN`
 
 ### Verify GitHub Actions Configuration
 
 - [ ] **6.3** Check `.github/workflows/deploy.yml` includes all apps
-  - [ ] `container-app` job exists
-  - [ ] `container-admin` job exists
-  - [ ] `container-cms` job exists
-  - [ ] `container-tenant-api` job exists (US + KSA)
-  - [ ] `deploy-app` job exists
-  - [ ] `deploy-admin` job exists
-  - [ ] `deploy-cms` job exists
-  - [ ] `deploy-tenant-api` job exists
+  - [ ] `container-app` / `deploy-app` jobs exist
+  - [ ] `container-admin` / `deploy-admin` jobs exist
+  - [ ] `container-cms` / `deploy-cms` jobs exist
+  - [ ] `container-tenant-api` builds `linux/arm64` and pushes to GHCR
+  - [ ] `deploy-tenant-api` SSHs to OCI VMs when `OCI_TENANT_*_HOST` is set
   - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
   - [ ] `affected` job detects changes for app, admin, web, cms, sites, and
         tenant-api
@@ -567,12 +569,13 @@ same LiteFS/Consul cluster.
 
 ## 💰 Cost Breakdown
 
-| Service              | Monthly Cost | Notes                  |
-| -------------------- | ------------ | ---------------------- |
-| **Fly.io Apps**      | $15-30       | 6 small instances      |
-| **MongoDB Atlas**    | $0           | M0 Sandbox (free tier) |
-| **Cloudflare Pages** | $0           | Free tier              |
-| **Total**            | **$15-30**   | Very cost effective    |
+| Service              | Monthly Cost | Notes                            |
+| -------------------- | ------------ | -------------------------------- |
+| **Fly.io Apps**      | $15-30       | App / Admin / CMS                |
+| **OCI tenant-api**   | $0-20        | Free Riyadh A1 + paid Ashburn A1 |
+| **MongoDB Atlas**    | $0           | M0 Sandbox (free tier)           |
+| **Cloudflare Pages** | $0           | Free tier                        |
+| **Total**            | **$15-50**   | Skip OCI LB / NAT                |
 
 ---
 

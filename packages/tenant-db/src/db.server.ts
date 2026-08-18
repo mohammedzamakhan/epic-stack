@@ -41,9 +41,8 @@ const pendingConnections = new Map<
 >()
 
 function getTenantDbDirectory() {
-	const isProd = process.env.NODE_ENV === 'production'
-	if (isProd && process.env.LITEFS_DIR) {
-		return process.env.LITEFS_DIR
+	if (process.env.TENANT_DB_DIR) {
+		return path.resolve(process.env.TENANT_DB_DIR)
 	}
 	if (process.env.DATABASE_PATH) {
 		return path.dirname(path.resolve(process.cwd(), process.env.DATABASE_PATH))
@@ -60,7 +59,7 @@ function getTenantDbFilePath(orgId: string) {
 
 /**
  * Returns an asynchronous Drizzle database instance for the specified tenant using @libsql/client.
- * The PRAGMA journal_mode = DELETE is awaited during connection setup to prevent race conditions.
+ * WAL journal mode is set during connection setup (single-writer VM, not LiteFS).
  * @param orgId The organization ID
  * @param options.createIfMissing If true, creates the database file if it doesn't exist
  */
@@ -101,10 +100,9 @@ export async function getTenantDb(
 		const client = createClient({ url: `file:${dbPath}` })
 		const db = drizzle(client, { schema })
 
-		// Await PRAGMA to ensure DELETE journal mode is set before any real queries.
-		// This is required for LiteFS compatibility and prevents race conditions
-		// where a concurrent write could execute before the PRAGMA completes.
-		await db.run(sql`PRAGMA journal_mode = DELETE;`)
+		// WAL is the default for a single-writer VM. DELETE is only needed when
+		// a FUSE replicator (LiteFS) is in front of the file.
+		await db.run(sql`PRAGMA journal_mode = WAL;`)
 
 		dbCache.set(orgId, { db, client })
 

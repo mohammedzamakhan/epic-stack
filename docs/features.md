@@ -16,7 +16,8 @@ Here are a few things you get today:
 - Email/Password Authentication with
   [cookie-based sessions](https://remix.run/utils/sessions#md-createcookiesessionstorage)
 - Tenant Sites phone OTP auth: browser calls a **regional** tenant-api; customer
-  PII is per-org SQLite, not Prisma. Changing data region wipes customers (see
+  PII stays in per-org SQLite on OCI (Ashburn / Riyadh), not in US Prisma.
+  Changing data region wipes customers (see
   [tenant data residency](./tenant-data-residency.md))
 - Two-Factor Authentication (2fa) with support for authenticator apps
 - Transactional email with [Resend](https://resend.com/) and forgot

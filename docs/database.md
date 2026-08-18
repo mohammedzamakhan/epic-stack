@@ -41,13 +41,14 @@ fly scale count 1 --region ams
 ```
 
 That pattern is for **App/Admin replicas of the US control-plane database**. Do
-not scale a single tenant-api LiteFS cluster into KSA.
+not put KSA customer SQLite on that LiteFS cluster or on the US OCI volume.
 
 ## Tenant customer SQLite
 
 Customer phone, name, and email are **not** in Prisma. Each published org gets a
 file `tenant_{orgId}.db` on the tenant-api node whose `DATA_REGION` matches
-`Organization.dataRegion`.
+`Organization.dataRegion`. Production files live on an OCI block volume
+(`TENANT_DB_DIR=/data/tenants`), not on App/Admin LiteFS.
 
 - Schema and migrations: `packages/tenant-db` (Drizzle, not Prisma)
 - Prisma only stores flags: `Organization.dataRegion` (`us` | `ksa`) and
@@ -55,6 +56,8 @@ file `tenant_{orgId}.db` on the tenant-api node whose `DATA_REGION` matches
 - Changing region **deletes** the old file and provisions an empty database in
   the new region if the site is published
 - Never put customer PII columns on `User` or `Organization`
+- US tenant-api: OCI Ashburn. KSA tenant-api: OCI Riyadh. Never one volume for
+  both regions.
 
 See [tenant data residency](./tenant-data-residency.md).
 

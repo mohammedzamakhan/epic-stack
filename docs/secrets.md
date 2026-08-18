@@ -33,6 +33,9 @@ Sites only needs public API **URLs** (`PUBLIC_TENANT_API_URL`,
 contain `do-not-use-in-prod` and are rejected at tenant-api startup in
 production. Full list: [tenant data residency](./tenant-data-residency.md).
 
+App/Admin production secrets use `fly secrets set`. Tenant-api production
+secrets live in `/opt/tenant-api/.env` on each OCI VM.
+
 You can also put the real value of the secret in `.env` which is `.gitignore`d
 so you can interact with the real service if you need to during development.
 
