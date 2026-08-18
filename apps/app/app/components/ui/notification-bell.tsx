@@ -365,7 +365,7 @@ export default function NotificationBell() {
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger>
 				<motion.button
-					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5"
+					className="relative flex h-8 w-8 items-center justify-center rounded-full border p-0.5 after:absolute after:-inset-2 md:after:hidden"
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 				>
