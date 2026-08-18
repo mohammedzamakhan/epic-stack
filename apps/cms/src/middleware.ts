@@ -23,22 +23,23 @@ export function middleware(request: NextRequest) {
   // Content Security Policy
   const csp = `
     default-src 'self';
-    script-src 'self';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data:;
-    font-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    style-src 'self' 'unsafe-inline' https:;
+    img-src 'self' blob: data: https:;
+    font-src 'self' data: https:;
+    connect-src 'self' blob: data: https: ws: wss:;
+    frame-src 'self' https: http: blob:;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
+    frame-ancestors 'self';
   `
     .replace(/\s{2,}/g, ' ')
     .trim()
 
   response.headers.set('Content-Security-Policy', csp)
   response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
 
   return response
 }

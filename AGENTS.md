@@ -13,8 +13,9 @@ app, CMS, background jobs, email templates, notifications) and shared packages
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind
 CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites). App/Admin
-deploy on Fly.io with LiteFS. Regional tenant-api deploys on OCI Ampere
-(Riyadh + Ashburn) with per-org SQLite on a block volume.
+deploy on Fly.io with LiteFS. CMS deploys on Cloudflare Workers with D1
+(SQLite) + R2. Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn) with
+per-org SQLite on a block volume.
 
 **Monorepo Structure**:
 
@@ -51,23 +52,17 @@ npm run test:e2e:install
 **Requirements**:
 
 - Node.js 22.15.0, npm 10.9.0 (pinned with Volta)
-- Docker Desktop (for local MongoDB used by CMS)
 
 ## Development
 
 ```bash
-# Start all apps in parallel (includes Docker services)
+# Start all apps in parallel
 npm run dev
-
-# Docker services are started automatically with npm run dev
-# Manual control if needed:
-npm run dev:services        # Start Docker services (MongoDB)
-npm run dev:services:stop   # Stop Docker services
-npm run dev:services:logs   # View Docker logs
 
 # Start specific apps
 npm run dev:app             # Main React Router app (port 3001)
 npm run dev:web             # Astro marketing site (port 3002)
+npm run dev:cms             # Payload CMS (port 3006)
 npm run dev:sites           # Tenant public sites (port 3008)
 npm run dev:tenant-api      # US tenant-api (port 3007, DATA_REGION=us)
 npm run dev:tenant-api:ksa  # KSA tenant-api (port 3009, DATA_REGION=ksa)
@@ -81,10 +76,6 @@ npm run db:migrate     # Run Prisma migrations
 npm run db:seed        # Seed database with test data
 npm run db:reset       # Reset database (destructive)
 ```
-
-**Docker Services**: MongoDB runs automatically via Docker Compose when you run
-`npm run dev`. Docker Desktop must be installed and running. See
-`docs/docker-services.md` for troubleshooting.
 
 ## Build & Test
 
@@ -461,8 +452,8 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
 
 ## Deployment
 
-**Platform**: Fly.io (App/Admin/CMS) + OCI Ampere (tenant-api) + Cloudflare
-Pages (Sites / marketing web)
+**Platform**: Fly.io (App/Admin) + Cloudflare Workers (CMS) + OCI Ampere
+(tenant-api) + Cloudflare Pages (Sites / marketing web)
 
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
@@ -472,8 +463,9 @@ Pages (Sites / marketing web)
 2. Build + TypeCheck
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
-5. Docker build (app, admin, cms on Fly)
-6. Deploy App/Admin/CMS to Fly.io; Sites and marketing web to Cloudflare Pages
+5. Docker build (app, admin on Fly)
+6. Deploy App/Admin to Fly.io; CMS to Cloudflare Workers; Sites and marketing
+   web to Cloudflare Pages
 7. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
 
 **Zero-Downtime Deployments**:

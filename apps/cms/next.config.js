@@ -1,13 +1,18 @@
 import { withPayload } from '@payloadcms/next/withPayload'
-import { varlockNextConfigPlugin } from '@varlock/nextjs-integration/plugin'
 
-const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : process.env.__NEXT_PRIVATE_ORIGIN || 'http://localhost:3006'
+const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3006'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  allowedDevOrigins: [
+    'cms.epic-startup.me',
+    'cms.epic-startup.me:2999',
+    'epic-startup.me',
+    'epic-startup.me:2999',
+    'localhost:3006',
+    'localhost:2999',
+    '127.0.0.1:2999',
+  ],
   images: {
     remotePatterns: [NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
       const url = new URL(item)
@@ -39,6 +44,6 @@ const nextConfig = {
   },
 }
 
-export default withPayload(varlockNextConfigPlugin()(nextConfig), {
+export default withPayload(nextConfig, {
   devBundleServerPackages: false,
 })

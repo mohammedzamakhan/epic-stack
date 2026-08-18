@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    passWithNoTests: true,
   },
   optimizeDeps: {
     exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
