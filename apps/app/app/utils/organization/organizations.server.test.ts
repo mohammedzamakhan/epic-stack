@@ -69,6 +69,28 @@ describe('createOrganization', () => {
 			userId: 'user-1',
 		})
 
+		const organizationCreate = vi.mocked(prisma.organization.create).mock
+			.calls[0]![0]
+		expect(JSON.parse(organizationCreate.data.siteHeaderConfig)).toEqual(
+			expect.objectContaining({
+				navLinks: [],
+				ctaLabel: 'Get started',
+				ctaUrl: '/login',
+			}),
+		)
+		expect(JSON.parse(organizationCreate.data.siteFooterConfig)).toEqual(
+			expect.objectContaining({
+				columns: [
+					{
+						title: 'Explore',
+						links: [{ label: 'Home', url: '/' }],
+					},
+				],
+				ctaLabel: 'Get started',
+				ctaUrl: '/login',
+			}),
+		)
+
 		expect(prisma.websitePage.create).toHaveBeenCalledWith({
 			data: expect.objectContaining({
 				organizationId: 'org-1',

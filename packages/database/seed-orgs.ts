@@ -138,12 +138,9 @@ async function seedWebsitePages() {
 
 		try {
 			const siteHeaderConfig = JSON.stringify({
-				navLinks: [
-					{ label: 'About', url: '/about' },
-					{ label: 'FAQ', url: '/faq' },
-				],
-				ctaLabel: 'Get in touch',
-				ctaUrl: '/about',
+				navLinks: [],
+				ctaLabel: 'Get started',
+				ctaUrl: '/login',
 				showCta: true,
 				showName: true,
 				sticky: true,
@@ -152,14 +149,11 @@ async function seedWebsitePages() {
 				columns: [
 					{
 						title: 'Explore',
-						links: [
-							{ label: 'About', url: '/about' },
-							{ label: 'FAQ', url: '/faq' },
-						],
+						links: [{ label: 'Home', url: '/' }],
 					},
 				],
-				ctaLabel: 'Get in touch',
-				ctaUrl: '/about',
+				ctaLabel: 'Get started',
+				ctaUrl: '/login',
 				showCta: true,
 				socials: [],
 				copyright: '',

@@ -3,6 +3,7 @@ import { auditService, AuditAction } from '@repo/audit'
 import { getUserId } from '@repo/auth'
 import { prisma } from '@repo/database'
 import { data } from 'react-router'
+import { getDefaultConfig } from '#app/utils/website/block-types.ts'
 import {
 	getDefaultHomePageSections,
 	HOME_PAGE_SLUG,
@@ -275,6 +276,8 @@ export async function createOrganization({
 				name,
 				slug,
 				description,
+				siteHeaderConfig: JSON.stringify(getDefaultConfig('header')),
+				siteFooterConfig: JSON.stringify(getDefaultConfig('footer')),
 				users: {
 					create: {
 						userId,
