@@ -15,6 +15,10 @@ Here are a few things you get today:
   on merge for both production and staging environments
 - Email/Password Authentication with
   [cookie-based sessions](https://remix.run/utils/sessions#md-createcookiesessionstorage)
+- Tenant Sites phone OTP auth: browser calls a **regional** tenant-api; customer
+  PII stays in per-org SQLite on OCI (Ashburn / Riyadh), not in US Prisma.
+  Changing data region wipes customers (see
+  [tenant data residency](./tenant-data-residency.md))
 - Two-Factor Authentication (2fa) with support for authenticator apps
 - Transactional email with [Resend](https://resend.com/) and forgot
   password/password reset support

@@ -25,37 +25,36 @@ const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
 	/\/$/,
 	'',
 )
+const tenantApiUrl = (
+	ENV.PUBLIC_TENANT_API_URL || 'http://localhost:3007'
+).replace(/\/$/, '')
+const tenantApiUrlKsa = (
+	process.env.PUBLIC_TENANT_API_URL_KSA ||
+	ENV.PUBLIC_TENANT_API_URL_KSA ||
+	''
+).replace(/\/$/, '')
 const imgSrc = `img-src 'self' data: ${appUrl}`
 const fontSrc = `font-src 'self' data: ${appUrl}`
+const connectSrc = ["connect-src 'self'", appUrl, tenantApiUrl, tenantApiUrlKsa]
+	.filter(Boolean)
+	.join(' ')
 
-// Vite/Astro inject CSS as inline <style> in dev; allow that without opening the app up.
 const isDev = import.meta.env.DEV
-const contentSecurityPolicy = isDev
-	? [
-			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-			"style-src 'self' 'unsafe-inline'",
-			fontSrc,
-			imgSrc,
-			"object-src 'none'",
-			"base-uri 'self'",
-			"form-action 'self'",
-			"frame-ancestors 'self' *.epic-startup.me:* *.epic-startup.me localhost:*",
-		].join('; ')
-	: [
-			"default-src 'self'",
-			"style-src 'self' 'unsafe-inline'",
-			fontSrc,
-			imgSrc,
-			"object-src 'none'",
-			"base-uri 'self'",
-			"form-action 'self'",
-			"frame-ancestors 'self' *.epic-startup.me:* *.epic-startup.me localhost:*",
-		].join('; ')
 
 const securityHeaders = {
 	'X-Content-Type-Options': 'nosniff',
-	'Content-Security-Policy': contentSecurityPolicy,
+	'Content-Security-Policy': [
+		"default-src 'self'",
+		connectSrc,
+		...(isDev ? ["script-src 'self' 'unsafe-inline' 'unsafe-eval'"] : []),
+		"style-src 'self' 'unsafe-inline'",
+		fontSrc,
+		imgSrc,
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+		`frame-ancestors 'self' *.${brandDomain}:* *.${brandDomain} localhost:*`,
+	].join('; '),
 }
 
 export type HostResolution =

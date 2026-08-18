@@ -83,3 +83,13 @@ default it uses [`express-rate-limit`](https://npm.im/express-rate-limit) with
 the in-memory store. There are trade-offs with this simpler approach, but it
 should be relatively simple to externalize the store into Redis as that's a
 built-in feature to express-rate-limit.
+
+## Tenant customer PII (Sites)
+
+Customer phone OTP on tenant sites is **not** the same as App operator sessions.
+Customer PII stays on the regional tenant-api. Sites must not proxy it. Customer
+JWTs live in `localStorage` (XSS-readable on the tenant origin) so US Sites
+never sees those tokens as cookies.
+
+Do not add a Sites `/api/auth` BFF or Sites-hosted HttpOnly cookies for
+customers. See [tenant data residency](./tenant-data-residency.md).

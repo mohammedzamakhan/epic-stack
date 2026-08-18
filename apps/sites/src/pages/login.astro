@@ -1,0 +1,114 @@
+---
+import SitePage from '~/components/SitePage.astro'
+import {
+	fetchPublishedOrganization,
+	fetchPublishedOrganizationByHost,
+} from '~/lib/org'
+
+const orgSlug = Astro.locals.orgSlug
+const customHost = Astro.locals.customHost
+const requestedLocale = Astro.url.searchParams.get('lng')
+
+const organization = orgSlug
+	? await fetchPublishedOrganization(orgSlug, requestedLocale)
+	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
+
+if (!organization) {
+	return new Response('Not Found', { status: 404 })
+}
+---
+
+<SitePage
+	organization={organization}
+	page={{ id: 'login', title: 'Sign In', slug: 'login', isHomePage: false, sections: [] }}
+	title={`Sign In - ${organization.name}`}
+>
+	<div id="login-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4">
+		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+			<div class="mb-6 flex flex-col space-y-2 text-center">
+				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
+					Sign in
+				</h1>
+				<p class="text-sm text-muted-foreground">
+					Enter your phone number. We'll send a verification code.
+				</p>
+			</div>
+
+			<form id="login-form" class="space-y-4">
+				<div class="space-y-2">
+					<label for="phone" class="text-sm font-medium leading-none text-foreground">
+						Phone Number
+					</label>
+					<input
+						type="tel"
+						id="phone"
+						name="phone"
+						placeholder="+1 (555) 000-0000"
+						required
+						autocomplete="tel"
+						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					/>
+				</div>
+
+				<div id="error-message" class="hidden text-sm font-medium text-destructive"></div>
+
+				<button
+					type="submit"
+					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+				>
+					Send Code
+				</button>
+			</form>
+		</div>
+	</div>
+</SitePage>
+
+<script>
+	import {
+		getOrgBinding,
+		redirectHomeIfSignedIn,
+		tenantErrorMessage,
+		tenantJson,
+	} from '~/lib/client-auth'
+
+	redirectHomeIfSignedIn()
+
+	const form = document.getElementById('login-form') as HTMLFormElement
+	const errorMessage = document.getElementById('error-message')!
+	const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
+
+	form.addEventListener('submit', async (e) => {
+		e.preventDefault()
+		errorMessage.classList.add('hidden')
+		submitButton.disabled = true
+		submitButton.textContent = 'Sending...'
+
+		const formData = new FormData(form)
+		const payload = {
+			...Object.fromEntries(formData.entries()),
+			...getOrgBinding(),
+		}
+
+		try {
+			const { ok, data } = await tenantJson('/auth/send-code', payload)
+
+			if (ok) {
+				const phone = formData.get('phone') as string
+				sessionStorage.setItem('pending_phone', phone)
+				window.location.href = '/verify'
+			} else {
+				errorMessage.textContent = tenantErrorMessage(
+					data,
+					'Something went wrong.',
+				)
+				errorMessage.classList.remove('hidden')
+			}
+		} catch {
+			errorMessage.textContent = 'Network error. Please try again.'
+			errorMessage.classList.remove('hidden')
+		} finally {
+			submitButton.disabled = false
+			submitButton.textContent = 'Send Code'
+		}
+	})
+</script>

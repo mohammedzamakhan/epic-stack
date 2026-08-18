@@ -1,0 +1,31 @@
+{
+  "name": "tenant-api",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Regional Tenant Data Node for multi-region isolated customer auth and DB storage",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:ksa": "DATA_REGION=ksa PORT=3009 tsx watch src/index.ts",
+    "start": "node --import=tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.0",
+    "@repo/database": "^0.0.0",
+    "@repo/sms": "*",
+    "@repo/tenant-db": "*",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.0",
+    "jose": "^6.2.9",
+    "lru-cache": "^11.5.2",
+    "tsx": "^4.19.3",
+    "varlock": "^0.1.6",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.6",
+    "typescript": "^5.8.3"
+  }
+}

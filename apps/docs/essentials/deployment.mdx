@@ -9,13 +9,16 @@ Epic Stack is designed to be deployed to various platforms with minimal configur
 
 ## Fly.io Deployment
 
-By default, Epic Stack is configured for deployment to Fly.io:
+App, Admin, and CMS deploy to Fly.io:
 
 - Docker-based deployment
 - Automatic scaling
-- Global CDN
-- Built-in database scaling
-- LiteFS for database replication
+- LiteFS for control-plane SQLite replication (US only)
+
+Regional **tenant-api** (customer PII, per-org SQLite) deploys to **Oracle Cloud
+Ampere** in Ashburn and Riyadh. See the repo docs:
+[Deployment](/docs/deployment.md) and
+[Tenant data residency](/docs/tenant-data-residency.md).
 
 ## Server Requirements
 

@@ -28,9 +28,11 @@ export type PublicSiteAnnouncement = {
 }
 
 export type PublicSiteOrganization = {
+	id: string
 	name: string
 	slug: string
 	customDomain: string | null
+	dataRegion: string
 	siteTheme: string | null
 	siteLocales: string | null
 	siteDefaultLocale: string | null
@@ -46,9 +48,11 @@ export type PublicSiteOrganization = {
 }
 
 export type PublicSitePayload = {
+	id: string
 	name: string
 	slug: string
 	customDomain: string | null
+	dataRegion: string
 	theme: Omit<SiteThemeConfig, 'headingCustomFont' | 'bodyCustomFont'> & {
 		css: string
 		headingCustomFont: { url: string; format: SiteFontFormat } | null
@@ -122,9 +126,7 @@ export function toPublicSitePayload(
 		localesConfig.defaultLocale,
 	)
 
-	function publicCustomFont(
-		font: SiteThemeConfig['headingCustomFont'],
-	): {
+	function publicCustomFont(font: SiteThemeConfig['headingCustomFont']): {
 		url: string
 		format: NonNullable<SiteThemeConfig['headingCustomFont']>['format']
 	} | null {
@@ -136,9 +138,11 @@ export function toPublicSitePayload(
 	}
 
 	return {
+		id: organization.id,
 		name: organization.name,
 		slug: organization.slug,
 		customDomain: organization.customDomain,
+		dataRegion: organization.dataRegion || 'us',
 		theme: {
 			...theme,
 			headingCustomFont: publicCustomFont(theme.headingCustomFont),
@@ -177,9 +181,11 @@ export async function findPublishedSiteOrganization(options: {
 	if (!slug && !host) return null
 
 	const select = {
+		id: true,
 		name: true,
 		slug: true,
 		customDomain: true,
+		dataRegion: true,
 		siteTheme: true,
 		siteLocales: true,
 		siteDefaultLocale: true,

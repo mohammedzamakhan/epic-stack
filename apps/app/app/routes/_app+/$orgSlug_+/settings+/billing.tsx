@@ -132,6 +132,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			siteIconKey: true,
 			siteHeaderConfig: true,
 			siteFooterConfig: true,
+			hasProvisionedDb: true,
+			dataRegion: true,
 		},
 	})
 

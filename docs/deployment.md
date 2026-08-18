@@ -149,6 +149,95 @@ If you'd like to deploy locally, just run fly's deploy command:
 fly deploy
 ```
 
+## Regional tenant data plane
+
+App and Admin stay on Fly in the US. Customer PII for tenant Sites lives on
+**regional tenant-api** nodes on **Oracle Cloud Infrastructure**:
+
+| Logical `dataRegion` | OCI region                                  | Shape                                 |
+| -------------------- | ------------------------------------------- | ------------------------------------- |
+| `us`                 | US East (Ashburn) `us-ashburn-1`            | Ampere A1 VM + block volume           |
+| `ksa`                | Saudi Arabia Central (Riyadh) `me-riyadh-1` | Always Free A1 in the **home** region |
+
+Set the tenancy **home region to Riyadh** at signup. Always Free compute, 200 GB
+block volume, and 10 TB egress apply only in the home region. The Ashburn VM is
+paid (~1 OCPU / 4 GB). Do not put KSA customer data on Fly, on the US Prisma
+volume, or in Bahrain/UAE.
+
+Full architecture, local two-node setup, and SMS rules:
+[Tenant data residency](./tenant-data-residency.md).
+
+### OCI shape
+
+Use the same image (`apps/tenant-api/Dockerfile`, `linux/arm64`) twice. One VM
+and one block volume per region. **Do not use LiteFS** — that is Fly-only and
+would require a sticky multi-machine cluster. Mount the volume at
+`/data/tenants` (`TENANT_DB_DIR`).
+
+1. **US (Ashburn)** — paid Ampere A1. `DATA_REGION=us`. Public URL in App
+   `TENANT_API_URL` and Sites `PUBLIC_TENANT_API_URL`.
+2. **KSA (Riyadh)** — home-region Always Free A1. `DATA_REGION=ksa`. Public URL
+   in `TENANT_API_URL_KSA` / `PUBLIC_TENANT_API_URL_KSA`.
+
+Skip an OCI load balancer and NAT gateway. Put Cloudflare (or a Cloudflare
+Tunnel) in front of port 8080. Set `APP_URL` to the US App so org flags do not
+require a shared Prisma volume.
+
+On each VM, copy `apps/tenant-api/docker-compose.yml` and
+`apps/tenant-api/.env.example` to `/opt/tenant-api`, attach the volume at
+`/data/tenants`, then:
+
+```sh
+export TENANT_API_IMAGE=ghcr.io/<owner>/epic-startup/tenant-api:<sha>
+docker compose up -d
+```
+
+Secrets (on the VM `.env`, not `fly secrets`):
+
+```sh
+# Per regional tenant-api
+DATA_REGION=us   # or ksa
+TENANT_DB_DIR=/data/tenants
+JWT_SECRET=...   # unique per region
+AUTH_HMAC_SECRET=...
+INTERNAL_COMMAND_TOKEN=...   # same value as US App
+APP_URL=https://epic-startup.me
+ROOT_APP=epic-startup.me
+```
+
+On US App:
+
+```
+TENANT_API_URL=https://tenant-us.example.com
+TENANT_API_URL_KSA=https://tenant-ksa.example.com
+INTERNAL_COMMAND_TOKEN=<same as tenant-api>
+```
+
+On Sites (Cloudflare env / GitHub Actions variables):
+
+```
+PUBLIC_TENANT_API_URL=https://tenant-us.example.com
+PUBLIC_TENANT_API_URL_KSA=https://tenant-ksa.example.com
+```
+
+GitHub Actions builds `linux/arm64` and pushes to GHCR. If `OCI_TENANT_US_HOST`
+/ `OCI_TENANT_KSA_HOST` (variables) and `OCI_TENANT_SSH_KEY` (secret) are set,
+it SSHs to `/opt/tenant-api` and runs `docker compose pull && up`. Add
+`GHCR_PULL_TOKEN` (packages:read PAT) so the VMs can pull a private image.
+
+Riyadh has a single availability domain. Back up `tenant_*.db` with volume
+backups or `sqlite3 .backup` to Object Storage. Always Free A1 instances can be
+reclaimed if they stay idle (CPU, RAM, and network all under 20% for a week);
+Pay as You Go plus a live API is the usual mitigation.
+
+Sites can stay in the US for CMS HTML. Customer login/profile must **not** go
+through a Sites `/api/auth/*` BFF. The page JS calls the regional tenant-api
+directly.
+
+Production startup refuses empty or development-default `JWT_SECRET`,
+`AUTH_HMAC_SECRET`, and `INTERNAL_COMMAND_TOKEN`. KSA production SMS via Twilio
+is rejected; configure an in-kingdom provider first.
+
 ## Deploying locally using docker/podman
 
 If you'd like to deploy locally by building a docker container image, you

@@ -20,6 +20,22 @@ of "Offline Development," you should also strive make it so whatever service
 you're interacting with can be mocked out using MSW in the `test/mocks`
 directory.
 
+Tenant Sites phone auth adds secrets that **do not belong on Sites**:
+
+| Secret                   | Where                  | Purpose                                              |
+| ------------------------ | ---------------------- | ---------------------------------------------------- |
+| `JWT_SECRET`             | Each tenant-api        | Sign customer access tokens. Unique per region.      |
+| `AUTH_HMAC_SECRET`       | Each tenant-api        | Hash OTP codes and refresh tokens.                   |
+| `INTERNAL_COMMAND_TOKEN` | App + every tenant-api | Provision/deprovision only (`{ orgId }`). ≥16 chars. |
+
+Sites only needs public API **URLs** (`PUBLIC_TENANT_API_URL`,
+`PUBLIC_TENANT_API_URL_KSA`) injected into HTML. Local `.env.schema` values
+contain `do-not-use-in-prod` and are rejected at tenant-api startup in
+production. Full list: [tenant data residency](./tenant-data-residency.md).
+
+App/Admin production secrets use `fly secrets set`. Tenant-api production
+secrets live in `/opt/tenant-api/.env` on each OCI VM.
+
 You can also put the real value of the secret in `.env` which is `.gitignore`d
 so you can interact with the real service if you need to during development.
 

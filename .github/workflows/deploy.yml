@@ -14,6 +14,7 @@ concurrency:
 permissions:
   actions: write
   contents: read
+  packages: write
 
 env:
   HUSKY: 0
@@ -29,6 +30,8 @@ jobs:
       admin: ${{ steps.affected.outputs.admin }}
       web: ${{ steps.affected.outputs.web }}
       cms: ${{ steps.affected.outputs.cms }}
+      sites: ${{ steps.affected.outputs.sites }}
+      tenant_api: ${{ steps.affected.outputs.tenant_api }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -59,6 +62,8 @@ jobs:
           echo "admin=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*admin\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "web=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*web\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "cms=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*cms\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "sites=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*sites\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "tenant_api=$(npx turbo ls --filter="...[$BASE_REF]" | grep -qE '^\s*tenant-api\s+' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
   lint:
     name: 🔬 Lint
     runs-on: ubuntu-22.04
@@ -233,6 +238,55 @@ jobs:
           directory: apps/web/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
+  deploy-sites:
+    name: 🌐 Deploy Sites
+    runs-on: ubuntu-24.04
+    needs: [lint, typecheck, vitest, affected]
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.sites == 'true'
+      }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
+
+      - name: 🏗 Build Sites
+        run: |
+          cd apps/sites
+          npm run build
+        env:
+          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
+          PUBLIC_TENANT_API_URL: ${{ vars.PUBLIC_TENANT_API_URL || 'https://tenant-us.example.com' }}
+          PUBLIC_TENANT_API_URL_KSA: ${{ vars.PUBLIC_TENANT_API_URL_KSA || 'https://tenant-ksa.example.com' }}
+
+      - name: 🚀 Deploy Sites to Cloudflare Pages (Production)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: epic-startup-sites
+          directory: apps/sites/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Deploy Sites to Cloudflare Pages (Staging)
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        uses: cloudflare/pages-action@f0a1cd58cd66095dee69bfa18fa5efd1dde93bca # v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: epic-startup-sites-staging
+          directory: apps/sites/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
   container-app:
     name: 📦 Prepare App Container
     runs-on: ubuntu-24.04
@@ -391,6 +445,56 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
+  container-tenant-api:
+    name: 📦 Build Tenant API Image
+    runs-on: ubuntu-24.04
+    needs: [affected]
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
+      'true' }}
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏷️ Image name
+        id: meta
+        run: |
+          repo="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          echo "image=ghcr.io/${repo}/tenant-api" >> "$GITHUB_OUTPUT"
+
+      - name: 🐳 Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🔐 Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Build and push linux/arm64 (OCI Ampere)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/tenant-api/Dockerfile
+          platforms: linux/arm64
+          push: true
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
+
   deploy-app:
     name: 🚀 Deploy App
     runs-on: ubuntu-24.04
@@ -522,3 +626,53 @@ jobs:
             --app ${{ steps.cms_app_name.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-tenant-api:
+    name: 🚀 Deploy Tenant API (OCI)
+    runs-on: ubuntu-24.04
+    needs: [lint, typecheck, vitest, container-tenant-api, affected]
+    if:
+      ${{ github.event_name == 'push' && needs.affected.outputs.tenant_api ==
+      'true' }}
+    steps:
+      - name: 🚀 Deploy US (Ashburn)
+        if: ${{ vars.OCI_TENANT_US_HOST != '' }}
+        env:
+          HOST: ${{ vars.OCI_TENANT_US_HOST }}
+          SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
+          SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
+          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null /tmp/oci_key
+          printf '%s\n' "$SSH_KEY" > /tmp/oci_key
+          ssh -i /tmp/oci_key -o StrictHostKeyChecking=accept-new \
+            "${SSH_USER}@${HOST}" \
+            "set -euo pipefail
+             echo '${PULL_TOKEN}' | docker login ghcr.io -u '${GHCR_USER}' --password-stdin
+             cd /opt/tenant-api
+             TENANT_API_IMAGE='${IMAGE}' docker compose pull
+             TENANT_API_IMAGE='${IMAGE}' docker compose up -d"
+
+      - name: 🚀 Deploy KSA (Riyadh)
+        if: ${{ vars.OCI_TENANT_KSA_HOST != '' }}
+        env:
+          HOST: ${{ vars.OCI_TENANT_KSA_HOST }}
+          SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
+          SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
+          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null /tmp/oci_key
+          printf '%s\n' "$SSH_KEY" > /tmp/oci_key
+          ssh -i /tmp/oci_key -o StrictHostKeyChecking=accept-new \
+            "${SSH_USER}@${HOST}" \
+            "set -euo pipefail
+             echo '${PULL_TOKEN}' | docker login ghcr.io -u '${GHCR_USER}' --password-stdin
+             cd /opt/tenant-api
+             TENANT_API_IMAGE='${IMAGE}' docker compose pull
+             TENANT_API_IMAGE='${IMAGE}' docker compose up -d"

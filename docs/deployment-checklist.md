@@ -8,7 +8,7 @@ checklist-based guide.
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Website       │    │   Main App      │    │   Admin App     │    │   CMS App       │
-│ (Cloudflare     │    │ (Fly.io)        │    │ (Fly.io)        │    │ (Fly.io)        │
+│ (Cloudflare     │    │ (Fly.io US)     │    │ (Fly.io US)     │    │ (Fly.io)        │
 │  Pages)         │    │                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │                       │
@@ -17,18 +17,35 @@ checklist-based guide.
          └───────────────────────────────┼───────────────────────────────────────┘
                                          │
                          ┌─────────────────┐              ┌─────────────────┐
-                         │ SQLite Database │              │    MongoDB      │
-                         │ (Fly.io LiteFS) │              │    (Atlas)      │
-                         │ Main/Admin Apps │              │   CMS Data      │
+                         │ SQLite (LiteFS) │              │    MongoDB      │
+                         │ App/Admin US    │              │    (Atlas)      │
+                         │ org/CMS only    │              │   CMS Data      │
                          └─────────────────┘              └─────────────────┘
+                                         │
+                    provision orgId only │
+                                         ▼
+              ┌──────────────────────────────────────────────────┐
+              │  Tenant API + tenant SQLite  (OCI Ashburn)       │
+              │  Tenant API + tenant SQLite  (OCI Riyadh)        │
+              │  Browser calls tenant-api; Sites must not proxy  │
+              │  customer PII                                    │
+              └──────────────────────────────────────────────────┘
 ```
+
+Customer phone/name/email never go in the US App/Admin database. See
+[Tenant data residency](./tenant-data-residency.md).
 
 **Applications to Deploy:**
 
 - **Website**: Cloudflare Pages (Astro) - Already configured ✅
-- **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS
-- **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite
+- **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS (US)
+- **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite (US)
 - **CMS App**: Fly.io (`epic-startup-cms`) - MongoDB Atlas
+- **Tenant API (US)**: OCI Ashburn (`us-ashburn-1`) — customer PII for
+  `dataRegion=us`
+- **Tenant API (KSA)**: OCI Riyadh (`me-riyadh-1`) — customer PII for
+  `dataRegion=ksa`. Not Fly, not Bahrain, not UAE.
+- **Sites**: CMS SSR; injects regional tenant-api URLs for browser auth
 
 ---
 
@@ -44,6 +61,8 @@ checklist-based guide.
 
 ### Required Accounts
 
+- [ ] **OCI tenancy** with **home region Riyadh** (`me-riyadh-1`) and Ashburn
+      subscribed
 - [ ] **Fly.io account** with organization set up
 - [ ] **MongoDB Atlas account** created
 - [ ] **GitHub Actions** access to repository
@@ -178,6 +197,7 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
 #### Production Main App
 
 - [ ] **5.1** Set main app production secrets
+
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(openssl rand -hex 32)" \
@@ -187,8 +207,13 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    TENANT_API_URL="https://tenant-us.example.com" \
+    TENANT_API_URL_KSA="https://tenant-ksa.example.com" \
     --app epic-startup
   ```
+
+  Save `INTERNAL_COMMAND_TOKEN` — the same value must be set on **every**
+  regional tenant-api. See [tenant data residency](./tenant-data-residency.md).
 
 #### Staging Main App
 
@@ -202,6 +227,8 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    TENANT_API_URL="https://tenant-us-staging.example.com" \
+    TENANT_API_URL_KSA="https://tenant-ksa-staging.example.com" \
     --app epic-startup-staging
   ```
 
@@ -237,6 +264,22 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
     --app epic-startup-admin-staging
   ```
+
+### Tenant API Environment Variables
+
+Run on **OCI** (see
+[deployment.md](./deployment.md#regional-tenant-data-plane)). One Ampere A1 VM +
+block volume per region. Home region = Riyadh.
+
+- [ ] **5.4a** Create the Riyadh Always Free A1 VM (`DATA_REGION=ksa`) with a
+      volume mounted at `/data/tenants`. Copy `docker-compose.yml` to
+      `/opt/tenant-api`.
+- [ ] **5.4b** Create the Ashburn paid A1 VM (`DATA_REGION=us`) the same way.
+- [ ] **5.4c** Set per-region `.env`: `JWT_SECRET`, `AUTH_HMAC_SECRET`,
+      `INTERNAL_COMMAND_TOKEN` (same as App), `APP_URL`, `TENANT_DB_DIR`. Do not
+      copy `JWT_SECRET` to Sites. Do not configure Twilio on the KSA VM.
+- [ ] **5.4d** Put Cloudflare (or a Tunnel) in front of port 8080. Skip OCI load
+      balancers and NAT.
 
 ### CMS App Environment Variables
 
@@ -296,17 +339,23 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
   - Go to GitHub → Repository → Settings → Secrets and variables → Actions
   - [ ] Add `FLY_API_TOKEN` (from step 6.1)
   - [ ] Add `SENTRY_AUTH_TOKEN` (optional, for error tracking)
+  - [ ] Optional repository **variables** for Sites builds: `PUBLIC_APP_URL`,
+        `PUBLIC_TENANT_API_URL`, `PUBLIC_TENANT_API_URL_KSA`
+  - [ ] Optional OCI deploy: variables `OCI_TENANT_US_HOST`,
+        `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_USER`; secrets
+        `OCI_TENANT_SSH_KEY`, `GHCR_PULL_TOKEN`
 
 ### Verify GitHub Actions Configuration
 
 - [ ] **6.3** Check `.github/workflows/deploy.yml` includes all apps
-  - [ ] `container-app` job exists
-  - [ ] `container-admin` job exists
-  - [ ] `container-cms` job exists
-  - [ ] `deploy-app` job exists
-  - [ ] `deploy-admin` job exists
-  - [ ] `deploy-cms` job exists
-  - [ ] `affected` job detects changes for all apps
+  - [ ] `container-app` / `deploy-app` jobs exist
+  - [ ] `container-admin` / `deploy-admin` jobs exist
+  - [ ] `container-cms` / `deploy-cms` jobs exist
+  - [ ] `container-tenant-api` builds `linux/arm64` and pushes to GHCR
+  - [ ] `deploy-tenant-api` SSHs to OCI VMs when `OCI_TENANT_*_HOST` is set
+  - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
+  - [ ] `affected` job detects changes for app, admin, web, cms, sites, and
+        tenant-api
 
 ---
 
@@ -520,12 +569,13 @@ CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
 
 ## 💰 Cost Breakdown
 
-| Service              | Monthly Cost | Notes                  |
-| -------------------- | ------------ | ---------------------- |
-| **Fly.io Apps**      | $15-30       | 6 small instances      |
-| **MongoDB Atlas**    | $0           | M0 Sandbox (free tier) |
-| **Cloudflare Pages** | $0           | Free tier              |
-| **Total**            | **$15-30**   | Very cost effective    |
+| Service              | Monthly Cost | Notes                            |
+| -------------------- | ------------ | -------------------------------- |
+| **Fly.io Apps**      | $15-30       | App / Admin / CMS                |
+| **OCI tenant-api**   | $0-20        | Free Riyadh A1 + paid Ashburn A1 |
+| **MongoDB Atlas**    | $0           | M0 Sandbox (free tier)           |
+| **Cloudflare Pages** | $0           | Free tier                        |
+| **Total**            | **$15-50**   | Skip OCI LB / NAT                |
 
 ---
 

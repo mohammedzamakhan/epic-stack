@@ -39,6 +39,7 @@ build
 storybook-static
 
 data.db
+packages/database/db/
 
 reference-saas-app/
 
