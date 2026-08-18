@@ -2857,11 +2857,16 @@ function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 		(config.links as Array<{
 			url: unknown
 			link: { label: string }
+			variant?: 'primary' | 'secondary'
 		}>) ?? []
 
 	const updateHeroLink = (
 		index: number,
-		patch: { url?: unknown; label?: string },
+		patch: {
+			url?: unknown
+			label?: string
+			variant?: 'primary' | 'secondary'
+		},
 	) => {
 		const next = [...links]
 		const current = next[index] ?? { url: '', link: { label: '' } }
@@ -2871,6 +2876,10 @@ function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 				label:
 					patch.label !== undefined ? patch.label : (current.link?.label ?? ''),
 			},
+			variant:
+				patch.variant ??
+				current.variant ??
+				(index === 0 ? 'primary' : 'secondary'),
 		}
 		updateField('links', next)
 	}
@@ -2907,6 +2916,8 @@ function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 						showText
 						TextInput={LocalizedInput}
 						textPlaceholder="Get Started"
+						buttonStyle={links[0]?.variant ?? 'primary'}
+						onButtonStyleChange={(variant) => updateHeroLink(0, { variant })}
 					/>
 				</div>
 				<div className="space-y-2">
@@ -2921,6 +2932,8 @@ function HeroEditor({ config, updateField, ...editorProps }: EditorProps) {
 						showText
 						TextInput={LocalizedInput}
 						textPlaceholder="Learn more (optional)"
+						buttonStyle={links[1]?.variant ?? 'secondary'}
+						onButtonStyleChange={(variant) => updateHeroLink(1, { variant })}
 					/>
 				</div>
 			</EditorSection>
@@ -3107,27 +3120,9 @@ function ContentEditor({ config, updateField, ...editorProps }: EditorProps) {
 						},
 					]}
 				/>
-				<FieldChoice
-					label={<Trans>Background</Trans>}
+				<SectionBackgroundField
 					value={(config.background as string) ?? 'none'}
 					onChange={(v) => updateField('background', v)}
-					options={[
-						{
-							value: 'none',
-							label: <Trans>Plain</Trans>,
-							preview: <SurfaceSketch surface="none" />,
-						},
-						{
-							value: 'muted',
-							label: <Trans>Muted</Trans>,
-							preview: <SurfaceSketch surface="muted" />,
-						},
-						{
-							value: 'inverted',
-							label: <Trans>Inverted</Trans>,
-							preview: <SurfaceSketch surface="inverted" />,
-						},
-					]}
 				/>
 			</EditorSection>
 
@@ -3230,6 +3225,12 @@ function FaqEditor({ config, updateField, listKey }: ListEditorProps) {
 				value={(config.subtitle as string) ?? ''}
 				onChange={(v) => updateField('subtitle', v)}
 			/>
+			<EditorSection title={<Trans>Style</Trans>}>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
+				/>
+			</EditorSection>
 			<div className="space-y-2">
 				<Label className="text-muted-foreground text-xs font-medium">
 					<Trans>Questions</Trans>
@@ -3293,6 +3294,12 @@ function FeaturesEditor({ config, updateField, listKey }: ListEditorProps) {
 				value={(config.subtitle as string) ?? ''}
 				onChange={(v) => updateField('subtitle', v)}
 			/>
+			<EditorSection title={<Trans>Style</Trans>}>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
+				/>
+			</EditorSection>
 			<div className="space-y-2">
 				<Label className="text-muted-foreground text-xs font-medium">
 					<Trans>Features</Trans>
@@ -3451,6 +3458,10 @@ function GalleryEditor({
 						},
 					]}
 				/>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
+				/>
 			</EditorSection>
 
 			<EditorSection title={<Trans>Photos and videos</Trans>}>
@@ -3588,6 +3599,12 @@ function CardsEditor({ config, updateField, listKey }: ListEditorProps) {
 				value={(config.title as string) ?? ''}
 				onChange={(v) => updateField('title', v)}
 			/>
+			<EditorSection title={<Trans>Style</Trans>}>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
+				/>
+			</EditorSection>
 			<div className="space-y-2">
 				<Label className="text-muted-foreground text-xs font-medium">
 					<Trans>Cards</Trans>
@@ -3671,6 +3688,12 @@ function VideoEditor({ config, updateField }: EditorProps) {
 				value={(config.videoUrl as string) ?? ''}
 				onChange={(v) => updateField('videoUrl', v)}
 			/>
+			<EditorSection title={<Trans>Style</Trans>}>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
+				/>
+			</EditorSection>
 			<div className="border-border flex items-center justify-between rounded-lg border px-3 py-2.5">
 				<Label htmlFor="autoplay" className="cursor-pointer text-sm">
 					<Trans>Autoplay</Trans>
@@ -3721,6 +3744,10 @@ function CtaEditor({ config, updateField, ...editorProps }: EditorProps) {
 							preview: <CtaStyleSketch variant="solid" />,
 						},
 					]}
+				/>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'none'}
+					onChange={(v) => updateField('background', v)}
 				/>
 				{variant === 'overlay' ? (
 					<>
@@ -3814,6 +3841,12 @@ function TestimonialsEditor({ config, updateField, listKey }: ListEditorProps) {
 				value={(config.subtitle as string) ?? ''}
 				onChange={(v) => updateField('subtitle', v)}
 			/>
+			<EditorSection title={<Trans>Style</Trans>}>
+				<SectionBackgroundField
+					value={(config.background as string) ?? 'muted'}
+					onChange={(v) => updateField('background', v)}
+				/>
+			</EditorSection>
 			<div className="space-y-2">
 				<Label className="text-muted-foreground text-xs font-medium">
 					<Trans>Reviews</Trans>
@@ -4481,6 +4514,39 @@ function SurfaceSketch({
 				)}
 			/>
 		</span>
+	)
+}
+
+function SectionBackgroundField({
+	value,
+	onChange,
+}: {
+	value: string
+	onChange: (value: string) => void
+}) {
+	return (
+		<FieldChoice
+			label={<Trans>Background</Trans>}
+			value={value}
+			onChange={onChange}
+			options={[
+				{
+					value: 'none',
+					label: <Trans>Plain</Trans>,
+					preview: <SurfaceSketch surface="none" />,
+				},
+				{
+					value: 'muted',
+					label: <Trans>Muted</Trans>,
+					preview: <SurfaceSketch surface="muted" />,
+				},
+				{
+					value: 'inverted',
+					label: <Trans>Inverted</Trans>,
+					preview: <SurfaceSketch surface="inverted" />,
+				},
+			]}
+		/>
 	)
 }
 

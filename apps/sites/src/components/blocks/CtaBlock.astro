@@ -1,6 +1,13 @@
 ---
 import SiteAnchor from '~/components/SiteAnchor.astro'
-import { resolveMediaUrl, siteBtnGhost, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
+import {
+	resolveMediaUrl,
+	siteBtnGhost,
+	siteBtnPrimary,
+	siteContainer,
+	siteSection,
+	siteSectionBackground,
+} from '~/lib/media'
 
 interface Props {
 	config: {
@@ -9,6 +16,7 @@ interface Props {
 		variant?: 'overlay' | 'solid'
 		imageUrl?: string
 		cardPosition?: 'left' | 'center' | 'right'
+		background?: 'none' | 'muted' | 'inverted'
 		primaryLabel?: string
 		primaryUrl?: unknown
 		secondaryLabel?: string
@@ -26,9 +34,10 @@ const positionClass =
 		: position === 'right'
 			? 'items-end justify-center text-left'
 			: 'items-start justify-center text-left'
+const background = siteSectionBackground(config.background)
 ---
 
-<section class={siteSection}>
+<section class:list={[siteSection, background]}>
 	<div class={siteContainer}>
 		{variant === 'overlay' && imageSrc ? (
 			<div class="relative overflow-hidden rounded-[calc(var(--radius)+12px)]">

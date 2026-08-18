@@ -39,6 +39,7 @@ const localeDirection = getSiteLocaleDirection(activeLocale)
 const sections = page?.sections ?? []
 const header = sections.find((section) => section.type === 'header')
 const footer = sections.find((section) => section.type === 'footer')
+const isPreview = Astro.url.searchParams.get('preview') === 'true'
 
 function localeHref(locale: string) {
 	const url = new URL(Astro.url)
@@ -81,5 +82,26 @@ const localeLinks: SiteLocaleLink[] = locales.map((locale) => ({
 			</slot>
 		</main>
 		<SiteFooter config={footer?.config} organization={organization} />
+		{isPreview ? (
+			<script is:inline>
+				;(function () {
+					const storageKey = 'site-preview-scroll'
+					const restoreScroll = () => {
+						const saved = window.sessionStorage.getItem(storageKey)
+						if (!saved) return
+						window.scrollTo({ top: Number(saved) || 0 })
+					}
+					const saveScroll = () => {
+						window.sessionStorage.setItem(storageKey, String(window.scrollY))
+					}
+					if ('scrollRestoration' in history) {
+						history.scrollRestoration = 'manual'
+					}
+					restoreScroll()
+					window.addEventListener('scroll', saveScroll, { passive: true })
+					window.addEventListener('beforeunload', saveScroll)
+				})()
+			</script>
+		) : null}
 	</div>
 </SiteLayout>

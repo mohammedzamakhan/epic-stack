@@ -1,6 +1,14 @@
 ---
 import SiteAnchor from '~/components/SiteAnchor.astro'
-import { resolveMediaUrl, siteBtnPrimary, siteContainer, siteSection } from '~/lib/media'
+import {
+	resolveMediaUrl,
+	siteBtnPrimary,
+	siteContainer,
+	siteSection,
+	siteSectionBackground,
+	siteSectionBodyClass,
+	siteSectionHeadingClass,
+} from '~/lib/media'
 
 interface Props {
 	config: {
@@ -28,15 +36,9 @@ const shapeClass =
 		: config.imageShape === 'square'
 			? 'rounded-none aspect-square'
 			: 'rounded-[calc(var(--radius)+8px)] aspect-square'
-const background =
-	config.background === 'muted'
-		? 'bg-muted/50'
-		: config.background === 'inverted'
-			? 'bg-foreground text-background'
-			: ''
-const titleClass = config.background === 'inverted' ? 'text-background' : 'text-foreground'
-const bodyClass =
-	config.background === 'inverted' ? 'text-background/75' : 'text-muted-foreground'
+const background = siteSectionBackground(config.background)
+const titleClass = siteSectionHeadingClass(config.background)
+const bodyClass = siteSectionBodyClass(config.background)
 ---
 
 <section class:list={[siteSection, background]}>

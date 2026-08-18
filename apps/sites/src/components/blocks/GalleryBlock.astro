@@ -1,5 +1,13 @@
 ---
-import { isVideoMediaUrl, resolveMediaUrl, siteContainer, siteSection } from '~/lib/media'
+import {
+	isVideoMediaUrl,
+	resolveMediaUrl,
+	siteContainer,
+	siteSection,
+	siteSectionBackground,
+	siteSectionBodyClass,
+	siteSectionHeadingClass,
+} from '~/lib/media'
 
 interface GalleryItem {
 	url?: string
@@ -15,12 +23,16 @@ interface Props {
 		columns?: number
 		imageShape?: 'rounded' | 'circle' | 'square'
 		gap?: 'none' | 'sm' | 'md' | 'lg'
+		background?: 'none' | 'muted' | 'inverted'
 		images?: GalleryItem[]
 	}
 }
 
 const { config } = Astro.props
 const images = Array.isArray(config.images) ? config.images : []
+const background = siteSectionBackground(config.background)
+const headingClass = siteSectionHeadingClass(config.background)
+const bodyClass = siteSectionBodyClass(config.background)
 const columns = Math.min(Math.max(Number(config.columns) || 3, 2), 4)
 const gapClass =
 	config.gap === 'none'
@@ -44,17 +56,17 @@ const shapeClass =
 			: 'rounded-[calc(var(--radius)+4px)]'
 ---
 
-<section class={siteSection}>
+<section class:list={[siteSection, background]}>
 	<div class={siteContainer}>
 		{(config.title || config.subtitle) ? (
 			<div class="mb-10 max-w-2xl">
 				{config.title ? (
-					<h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+					<h2 class:list={['text-3xl font-bold tracking-tight sm:text-4xl', headingClass]}>
 						{config.title}
 					</h2>
 				) : null}
 				{config.subtitle ? (
-					<p class="mt-3 text-base text-muted-foreground">{config.subtitle}</p>
+					<p class:list={['mt-3 text-base', bodyClass]}>{config.subtitle}</p>
 				) : null}
 			</div>
 		) : null}
@@ -90,7 +102,7 @@ const shapeClass =
 							)}
 						</div>
 						{item.caption ? (
-							<figcaption class="mt-3 text-center text-sm font-medium text-foreground">
+							<figcaption class:list={['mt-3 text-center text-sm font-medium', headingClass]}>
 								{item.caption}
 							</figcaption>
 						) : null}
