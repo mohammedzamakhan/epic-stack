@@ -1,4 +1,6 @@
+import { fileURLToPath } from 'node:url'
 import cloudflare from '@astrojs/cloudflare'
+import { lingui } from '@lingui/vite-plugin'
 import { SITE_FONTS } from '@repo/common/site-fonts'
 import { brand } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
@@ -58,6 +60,7 @@ export default defineConfig({
 				},
 			},
 			tailwindcss(),
+			lingui(),
 			fontless({
 				families: [
 					{
@@ -80,10 +83,19 @@ export default defineConfig({
 			allowedHosts: [`.${domain}`, domain, 'localhost'],
 		},
 		optimizeDeps: {
-			exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+			exclude: [
+				'@sentry/profiling-node',
+				'@sentry-internal/node-cpu-profiler',
+				'@lingui/core/macro',
+			],
 		},
 		resolve: {
 			alias: {
+				// Astro frontmatter cannot compile Babel macros; keep `msg\`...\``
+				// in source for Lingui extract, resolve to a runtime descriptor.
+				'@lingui/core/macro': fileURLToPath(
+					new URL('./src/lib/lingui-macro-runtime.ts', import.meta.url),
+				),
 				zlib: 'node:zlib',
 				http: 'node:http',
 				https: 'node:https',
@@ -99,6 +111,7 @@ export default defineConfig({
 			},
 		},
 		ssr: {
+			noExternal: ['@lingui/core', '@lingui/message-utils'],
 			external: [
 				'node:zlib',
 				'node:http',

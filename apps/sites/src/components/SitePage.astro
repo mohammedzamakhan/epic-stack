@@ -1,5 +1,6 @@
 ---
 import {
+	getLocaleHref,
 	getSiteLocaleDirection,
 	getSiteLocaleLabel,
 } from '@repo/common/site-locales'
@@ -34,32 +35,54 @@ const {
 
 const announcements = organization.announcements ?? []
 const locales = organization.locales ?? ['en']
-const activeLocale = organization.locale ?? organization.defaultLocale ?? 'en'
+const activeLocale =
+	Astro.locals.requestedLocale ||
+	organization.locale ||
+	organization.defaultLocale ||
+	'en'
 const localeDirection = getSiteLocaleDirection(activeLocale)
 const sections = page?.sections ?? []
 const header = sections.find((section) => section.type === 'header')
 const footer = sections.find((section) => section.type === 'footer')
 const isPreview = Astro.url.searchParams.get('preview') === 'true'
-
-function localeHref(locale: string) {
-	const url = new URL(Astro.url)
-	url.searchParams.set('lng', locale)
-	return `${url.pathname}${url.search}`
-}
-
+const defaultLocale =
+	organization.defaultLocale ?? Astro.locals.defaultLocale ?? 'en'
 const localeLinks: SiteLocaleLink[] = locales.map((locale) => ({
 	code: locale,
 	label: getSiteLocaleLabel(locale),
-	href: localeHref(locale),
+	href: getLocaleHref(
+		Astro.url.pathname,
+		locale,
+		Astro.locals.requestedLocale,
+		defaultLocale,
+	),
 	active: locale === activeLocale,
 }))
+const canonicalPath = getLocaleHref(
+	Astro.url.pathname,
+	activeLocale,
+	Astro.locals.requestedLocale,
+	defaultLocale,
+)
+const resolvedCanonical = canonicalUrl || `${Astro.url.origin}${canonicalPath}`
+const alternateLinks = [
+	...locales.map((locale) => ({
+		hrefLang: locale,
+		href: `${Astro.url.origin}${getLocaleHref(Astro.url.pathname, locale, Astro.locals.requestedLocale, defaultLocale)}`,
+	})),
+	{
+		hrefLang: 'x-default',
+		href: `${Astro.url.origin}${getLocaleHref(Astro.url.pathname, defaultLocale, Astro.locals.requestedLocale, defaultLocale)}`,
+	},
+]
 ---
 
 <SiteLayout
 	title={title}
 	description={description}
 	imageUrl={imageUrl}
-	canonicalUrl={canonicalUrl}
+	canonicalUrl={resolvedCanonical}
+	alternateLinks={isPreview ? [] : alternateLinks}
 	noIndex={noIndex}
 	theme={organization.theme}
 	lang={activeLocale}
@@ -68,6 +91,7 @@ const localeLinks: SiteLocaleLink[] = locales.map((locale) => ({
 	tenantApiUrl={getTenantApiUrl(organization.dataRegion)}
 	orgSlug={Astro.locals.orgSlug || organization.slug}
 	customHost={Astro.locals.customHost}
+	defaultLocale={defaultLocale}
 >
 	<div class="bg-background text-foreground flex min-h-dvh flex-col">
 		<AnnouncementBanners announcements={announcements} />

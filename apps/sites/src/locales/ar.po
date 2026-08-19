@@ -1,0 +1,146 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-08-19 11:11-0500\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: ar\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/verify.astro.ts:3
+msgid "Check your phone"
+msgstr "تحقق من هاتفك"
+
+#: src/pages/complete-name.astro.ts:3
+msgid "Continue"
+msgstr "متابعة"
+
+#: src/pages/profile.astro.ts:3
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: src/pages/login.astro.ts:3
+msgid "Enter your phone number. We'll send a verification code."
+msgstr "أدخل رقم هاتفك. سنرسل رمز تحقق."
+
+#: src/pages/complete-name.astro.ts:3
+msgid "Full name"
+msgstr "الاسم الكامل"
+
+#: src/pages/verify.astro.ts:3
+msgid "Invalid verification code."
+msgstr "رمز التحقق غير صالح."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Language"
+msgstr "اللغة"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Mobile"
+msgstr "الجوال"
+
+#: src/pages/profile.astro.ts:3
+msgid "Name"
+msgstr "الاسم"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+#: src/pages/verify.astro.ts:3
+msgid "Network error. Please try again."
+msgstr "خطأ في الشبكة. حاول مرة أخرى."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Open menu"
+msgstr "فتح القائمة"
+
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Phone Number"
+msgstr "رقم الهاتف"
+
+#: src/pages/profile.astro.ts:3
+msgid "Phone number cannot be changed at this time."
+msgstr "لا يمكن تغيير رقم الهاتف حالياً."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Primary"
+msgstr "الرئيسي"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+#: src/pages/profile.astro.ts:3
+msgid "Profile updated successfully!"
+msgstr "تم تحديث الملف الشخصي بنجاح."
+
+#: src/pages/profile.astro.ts:3
+msgid "Save Changes"
+msgstr "حفظ التغييرات"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Saving..."
+msgstr "جارٍ الحفظ..."
+
+#: src/pages/login.astro.ts:3
+msgid "Send Code"
+msgstr "إرسال الرمز"
+
+#: src/pages/login.astro.ts:3
+msgid "Sending..."
+msgstr "جارٍ الإرسال..."
+
+#: src/components/SiteHeader.astro.ts:3
+#: src/pages/login.astro.ts:3
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Something went wrong."
+msgstr "حدث خطأ ما."
+
+#: src/pages/profile.astro.ts:3
+msgid "Update your basic details below."
+msgstr "حدّث بياناتك الأساسية أدناه."
+
+#: src/pages/verify.astro.ts:3
+msgid "Verification Code"
+msgstr "رمز التحقق"
+
+#: src/pages/verify.astro.ts:3
+msgid "Verify"
+msgstr "تحقق"
+
+#: src/pages/verify.astro.ts:3
+msgid "Verifying..."
+msgstr "جارٍ التحقق..."
+
+#: src/pages/complete-name.astro.ts:3
+msgid "We'll use this on your profile. You can change it later."
+msgstr "سنستخدمه في ملفك الشخصي. يمكنك تغييره لاحقاً."
+
+#: src/pages/verify.astro.ts:3
+msgid "We've sent a 6-digit code to"
+msgstr "أرسلنا رمزاً من 6 أرقام إلى"
+
+#: src/pages/complete-name.astro.ts:3
+msgid "What's your name?"
+msgstr "ما اسمك؟"
+
+#: src/pages/profile.astro.ts:3
+msgid "Your Profile"
+msgstr "ملفك الشخصي"

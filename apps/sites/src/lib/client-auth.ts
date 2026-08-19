@@ -1,3 +1,5 @@
+import { browserLocaleHref } from '~/lib/locale'
+
 const ACCESS_TOKEN_KEY = 'tenant_access_token'
 const REFRESH_TOKEN_KEY = 'tenant_refresh_token'
 
@@ -144,7 +146,7 @@ export function tenantErrorMessage(
 
 export function redirectHomeIfSignedIn() {
 	if (getAccessToken()) {
-		window.location.replace('/')
+		window.location.replace(browserLocaleHref('/'))
 	}
 }
 

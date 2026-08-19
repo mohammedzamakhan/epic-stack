@@ -1,4 +1,5 @@
 ---
+import { msg } from '@lingui/core/macro'
 import SitePage from '~/components/SitePage.astro'
 import {
 	fetchPublishedOrganization,
@@ -7,38 +8,53 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
-const requestedLocale = Astro.url.searchParams.get('lng')
+const requestedLocale = Astro.locals.requestedLocale
+const i18n = Astro.locals.i18n
+const checkYourPhone = i18n._(msg`Check your phone`)
+const codeSentPrefix = i18n._(msg`We've sent a 6-digit code to`)
+const verificationCode = i18n._(msg`Verification Code`)
+const verify = i18n._(msg`Verify`)
+const verifying = i18n._(msg`Verifying...`)
+const invalidCode = i18n._(msg`Invalid verification code.`)
+const networkError = i18n._(msg`Network error. Please try again.`)
 
 const organization = orgSlug
 	? await fetchPublishedOrganization(orgSlug, requestedLocale)
 	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
-	return new Response('Not Found', { status: 404 })
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 ---
 
 <SitePage
 	organization={organization}
-	page={{ id: 'verify', title: 'Verify Phone', slug: 'verify', isHomePage: false, sections: [] }}
-	title={`Verify Phone - ${organization.name}`}
+	page={{ id: 'verify', title: checkYourPhone, slug: 'verify', isHomePage: false, sections: [] }}
+	title={`${checkYourPhone} - ${organization.name}`}
 >
 	<div id="verify-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4">
 		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
 			<div class="mb-6 flex flex-col space-y-2 text-center">
 				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
-					Check your phone
+					{checkYourPhone}
 				</h1>
 				<p class="text-sm text-muted-foreground">
-					We've sent a 6-digit code to <strong id="display-phone" class="text-foreground"></strong>
+					{codeSentPrefix} <strong id="display-phone" class="text-foreground"></strong>
 				</p>
 			</div>
 
-			<form id="verify-form" class="space-y-4">
+			<form
+				id="verify-form"
+				class="space-y-4"
+				data-verify={verify}
+				data-verifying={verifying}
+				data-invalid={invalidCode}
+				data-network={networkError}
+			>
 				<input type="hidden" name="phone" id="phone-input" />
 				<div class="space-y-2">
 					<label for="code" class="text-sm font-medium leading-none text-foreground">
-						Verification Code
+						{verificationCode}
 					</label>
 					<input
 						type="text"
@@ -58,7 +74,7 @@ if (!organization) {
 					type="submit"
 					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 				>
-					Verify
+					{verify}
 				</button>
 			</form>
 		</div>
@@ -73,6 +89,7 @@ if (!organization) {
 		tenantErrorMessage,
 		tenantJson,
 	} from '~/lib/client-auth'
+	import { browserLocaleHref } from '~/lib/locale'
 
 	redirectHomeIfSignedIn()
 
@@ -81,11 +98,15 @@ if (!organization) {
 	const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
 	const displayPhone = document.getElementById('display-phone')!
 	const phoneInput = document.getElementById('phone-input') as HTMLInputElement
+	const verifyLabel = form.dataset.verify || 'Verify'
+	const verifyingLabel = form.dataset.verifying || 'Verifying...'
+	const invalidLabel = form.dataset.invalid || 'Invalid verification code.'
+	const networkLabel = form.dataset.network || 'Network error. Please try again.'
 
 	const phone = sessionStorage.getItem('pending_phone')
 
 	if (!phone) {
-		window.location.href = '/login'
+		window.location.href = browserLocaleHref('/login')
 	} else {
 		displayPhone.textContent = phone
 		phoneInput.value = phone
@@ -95,7 +116,7 @@ if (!organization) {
 		e.preventDefault()
 		errorMessage.classList.add('hidden')
 		submitButton.disabled = true
-		submitButton.textContent = 'Verifying...'
+		submitButton.textContent = verifyingLabel
 
 		const formData = new FormData(form)
 		const payload = {
@@ -115,20 +136,20 @@ if (!organization) {
 							: undefined,
 				})
 				sessionStorage.removeItem('pending_phone')
-				window.location.href = data.needsName === true ? '/complete-name' : '/'
+				window.location.href =
+					data.needsName === true
+						? browserLocaleHref('/complete-name')
+						: browserLocaleHref('/')
 			} else {
-				errorMessage.textContent = tenantErrorMessage(
-					data,
-					'Invalid verification code.',
-				)
+				errorMessage.textContent = tenantErrorMessage(data, invalidLabel)
 				errorMessage.classList.remove('hidden')
 			}
 		} catch {
-			errorMessage.textContent = 'Network error. Please try again.'
+			errorMessage.textContent = networkLabel
 			errorMessage.classList.remove('hidden')
 		} finally {
 			submitButton.disabled = false
-			submitButton.textContent = 'Verify'
+			submitButton.textContent = verifyLabel
 		}
 	})
 </script>

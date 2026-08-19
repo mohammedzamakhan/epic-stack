@@ -11,6 +11,7 @@ interface Props {
 	description?: string
 	imageUrl?: string | null
 	canonicalUrl?: string
+	alternateLinks?: Array<{ hrefLang: string; href: string }>
 	noIndex?: boolean
 	theme?: PublicSiteTheme
 	lang?: string
@@ -23,6 +24,7 @@ interface Props {
 	tenantApiUrl?: string
 	orgSlug?: string | null
 	customHost?: string | null
+	defaultLocale?: string
 }
 
 const {
@@ -38,6 +40,8 @@ const {
 	tenantApiUrl,
 	orgSlug,
 	customHost,
+	defaultLocale = 'en',
+	alternateLinks = [],
 } = Astro.props
 const themeMode = theme?.mode ?? 'system'
 const themeCss = theme?.css ?? ''
@@ -77,6 +81,7 @@ const htmlClass =
 	data-tenant-api-url={tenantApiUrl}
 	data-org-slug={orgSlug || undefined}
 	data-custom-host={customHost || undefined}
+	data-default-locale={defaultLocale}
 >
 	<head>
 		<meta charset="utf-8" />
@@ -86,6 +91,9 @@ const htmlClass =
 		{description ? <meta name="description" content={description} /> : null}
 		{noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
 		{canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
+		{alternateLinks.map((link) => (
+			<link rel="alternate" hreflang={link.hrefLang} href={link.href} />
+		))}
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={title} />
 		{description ? <meta property="og:description" content={description} /> : null}

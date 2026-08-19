@@ -298,3 +298,138 @@ export function negotiateSiteLocale(
 		? defaultLocale
 		: (supported[0] ?? 'en')
 }
+
+/** Page slugs that collide with locale prefixes, e.g. `ar`, `id`, `it`. */
+export function isReservedSiteLocaleSlug(slug: string): boolean {
+	return isSiteContentLocale(slug.trim().toLowerCase())
+}
+
+function splitPathAndSuffix(path: string): {
+	pathname: string
+	suffix: string
+} {
+	const queryIndex = path.indexOf('?')
+	const hashIndex = path.indexOf('#')
+	const cutCandidates = [queryIndex, hashIndex].filter((index) => index >= 0)
+	const cut = cutCandidates.length > 0 ? Math.min(...cutCandidates) : -1
+	if (cut < 0) return { pathname: path, suffix: '' }
+	return { pathname: path.slice(0, cut), suffix: path.slice(cut) }
+}
+
+function stripLocalePrefix(pathname: string, locale: string): string {
+	if (pathname === `/${locale}`) return '/'
+	const prefix = `/${locale}/`
+	if (pathname.startsWith(prefix)) {
+		return `/${pathname.slice(prefix.length)}`
+	}
+	return pathname
+}
+
+function stripKnownLocalePrefix(pathname: string): string {
+	const first = pathname.split('/').filter(Boolean)[0]
+	if (first && isSiteContentLocale(first)) {
+		return stripLocalePrefix(pathname, first)
+	}
+	return pathname
+}
+
+function normalizePathname(pathname: string): string {
+	if (!pathname || pathname === '/') return '/'
+	return pathname.length > 1 && pathname.endsWith('/')
+		? pathname.slice(0, -1)
+		: pathname
+}
+
+/**
+ * Build a locale-aware internal href.
+ * Default locale is unprefixed. Any catalog locale prefix on `path` is stripped first
+ * so `/ar/about` + English default becomes `/about`, never `/ar/ar/about`.
+ */
+export function getLocaleHref(
+	path: string,
+	targetLocale?: string | null,
+	_currentLocale?: string | null,
+	defaultLocale: string = 'en',
+): string {
+	if (!path.startsWith('/') || path.startsWith('//')) return path
+
+	const { pathname: rawPathname, suffix } = splitPathAndSuffix(path)
+	const pathname = normalizePathname(stripKnownLocalePrefix(rawPathname))
+	const locale = targetLocale || defaultLocale
+
+	if (!locale || locale === defaultLocale) {
+		return `${pathname}${suffix}`
+	}
+
+	const base = pathname === '/' ? '' : pathname
+	return `/${locale}${base}${suffix}`
+}
+
+function searchParamsFrom(search: string): URLSearchParams {
+	const raw = search.startsWith('?') ? search.slice(1) : search
+	const params = new URLSearchParams(raw)
+	params.delete('lng')
+	return params
+}
+
+function withSearch(pathname: string, params: URLSearchParams): string {
+	const qs = params.toString()
+	return qs ? `${pathname}?${qs}` : pathname
+}
+
+export type SiteLocaleRequestResult =
+	| { kind: 'redirect'; location: string }
+	| { kind: 'rewrite'; pathname: string; search: string; locale: string }
+	| { kind: 'ok'; locale: string }
+	| { kind: 'not_found' }
+
+/**
+ * Decide how a public Sites request should handle locale.
+ * Path prefix is canonical. `?lng=` 301s onto the prefix form.
+ */
+export function resolveSiteLocaleRequest(input: {
+	pathname: string
+	search?: string
+	enabledLocales: string[]
+	defaultLocale: string
+}): SiteLocaleRequestResult {
+	const { pathname, enabledLocales, defaultLocale } = input
+	const params = searchParamsFrom(input.search ?? '')
+	const enabled = new Set(enabledLocales)
+	const segments = pathname.split('/').filter(Boolean)
+	const first = segments[0]
+	const rest = segments.length > 1 ? `/${segments.slice(1).join('/')}` : '/'
+	const restPath = normalizePathname(rest)
+
+	if (first && isSiteContentLocale(first)) {
+		if (!enabled.has(first)) {
+			return { kind: 'not_found' }
+		}
+		if (first === defaultLocale) {
+			return { kind: 'redirect', location: withSearch(restPath, params) }
+		}
+		return {
+			kind: 'rewrite',
+			pathname: restPath,
+			search: params.toString() ? `?${params.toString()}` : '',
+			locale: first,
+		}
+	}
+
+	const lngParam = new URLSearchParams(
+		(input.search ?? '').startsWith('?')
+			? (input.search ?? '').slice(1)
+			: (input.search ?? ''),
+	).get('lng')
+
+	if (lngParam && isSiteContentLocale(lngParam) && enabled.has(lngParam)) {
+		const target = getLocaleHref(pathname, lngParam, null, defaultLocale)
+		const location = withSearch(target, params)
+		const current = withSearch(pathname, searchParamsFrom(input.search ?? ''))
+		if (location !== current) {
+			return { kind: 'redirect', location }
+		}
+	}
+
+	return { kind: 'ok', locale: defaultLocale }
+}

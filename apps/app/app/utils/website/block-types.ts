@@ -364,3 +364,34 @@ export const PAGE_TEMPLATES = {
 } as const
 
 export type PageTemplate = keyof typeof PAGE_TEMPLATES
+
+export const LOCALIZED_FIELDS: Record<string, string[]> = {
+	header: ['ctaLabel', 'navLinks.[].label'],
+	hero: ['heading', 'subheading', 'links.[].link.label'],
+	content: ['title', 'subtitle', 'body', 'ctaLabel', 'imageAlt'],
+	gallery: ['title', 'subtitle', 'images.[].alt', 'images.[].caption'],
+	testimonials: [
+		'title',
+		'subtitle',
+		'items.[].quote',
+		'items.[].name',
+		'items.[].role',
+	],
+	faq: ['title', 'subtitle', 'items.[].question', 'items.[].answer'],
+	cta: ['heading', 'description', 'primaryLabel', 'secondaryLabel'],
+	features: ['title', 'subtitle', 'items.[].title', 'items.[].description'],
+	cards: [
+		'title',
+		'subtitle',
+		'items.[].title',
+		'items.[].description',
+		'items.[].ctaLabel',
+	],
+	video: ['title', 'subtitle'],
+	footer: [
+		'copyright',
+		'ctaLabel',
+		'columns.[].title',
+		'columns.[].links.[].label',
+	],
+}

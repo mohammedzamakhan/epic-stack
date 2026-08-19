@@ -1,6 +1,12 @@
+import { resolveSiteLocaleRequest } from '@repo/common/site-locales'
 import { brand } from '@repo/config/brand'
 import { defineMiddleware } from 'astro:middleware'
 import { ENV } from 'varlock/env'
+import { createSiteI18n } from '~/lib/i18n'
+import {
+	fetchPublishedOrganization,
+	fetchPublishedOrganizationByHost,
+} from '~/lib/org'
 
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
@@ -89,7 +95,6 @@ export function resolveHost(hostHeader: string | null): HostResolution {
 		return { kind: 'slug', orgSlug: subdomain }
 	}
 
-	// Anything else is treated as a potential customer custom domain
 	return { kind: 'custom', host: hostWithoutPort }
 }
 
@@ -101,22 +106,25 @@ export function resolveOrgSlugFromHost(
 	return resolved.kind === 'slug' ? resolved.orgSlug : null
 }
 
-export const onRequest = defineMiddleware(async (context, next) => {
-	const forwardedHost = context.request.headers.get('x-forwarded-host')
-	const host = forwardedHost || context.request.headers.get('host')
-	const resolved = resolveHost(host)
+function isStaticPath(pathname: string) {
+	return (
+		pathname.startsWith('/_astro') ||
+		pathname.startsWith('/fonts') ||
+		pathname.startsWith('/api/') ||
+		/\.(?:css|js|mjs|map|png|jpe?g|gif|svg|ico|webp|woff2?|ttf)$/i.test(
+			pathname,
+		)
+	)
+}
 
-	context.locals.orgSlug = resolved.kind === 'slug' ? resolved.orgSlug : null
-	context.locals.customHost = resolved.kind === 'custom' ? resolved.host : null
-
-	const response = await next()
+function withSecurityHeaders(response: Response, pathname: string) {
 	const newHeaders = new Headers(response.headers)
 
 	for (const [key, value] of Object.entries(securityHeaders)) {
 		newHeaders.set(key, value)
 	}
 
-	if (context.url.pathname.startsWith('/api/')) {
+	if (pathname.startsWith('/api/')) {
 		newHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
 	}
 
@@ -125,4 +133,69 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		statusText: response.statusText,
 		headers: newHeaders,
 	})
+}
+
+export const onRequest = defineMiddleware(async (context, next) => {
+	const forwardedHost = context.request.headers.get('x-forwarded-host')
+	const host = forwardedHost || context.request.headers.get('host')
+	const resolved = resolveHost(host)
+
+	context.locals.orgSlug = resolved.kind === 'slug' ? resolved.orgSlug : null
+	context.locals.customHost = resolved.kind === 'custom' ? resolved.host : null
+	context.locals.requestedLocale ??= 'en'
+	context.locals.defaultLocale ??= 'en'
+	context.locals.i18n ??= createSiteI18n(context.locals.requestedLocale)
+
+	const url = new URL(context.request.url)
+
+	if (isStaticPath(url.pathname)) {
+		return withSecurityHeaders(await next(), url.pathname)
+	}
+
+	const organization =
+		resolved.kind === 'slug'
+			? await fetchPublishedOrganization(resolved.orgSlug)
+			: resolved.kind === 'custom'
+				? await fetchPublishedOrganizationByHost(resolved.host)
+				: null
+
+	const enabledLocales = organization?.locales ?? ['en']
+	const defaultLocale = organization?.defaultLocale ?? 'en'
+	context.locals.defaultLocale = defaultLocale
+
+	const localeResult = resolveSiteLocaleRequest({
+		pathname: url.pathname,
+		search: url.search,
+		enabledLocales,
+		defaultLocale,
+	})
+
+	if (localeResult.kind === 'not_found') {
+		return withSecurityHeaders(
+			new Response('Not Found', { status: 404, statusText: 'Not Found' }),
+			url.pathname,
+		)
+	}
+
+	if (localeResult.kind === 'redirect') {
+		return withSecurityHeaders(
+			new Response(null, {
+				status: 301,
+				headers: { Location: localeResult.location },
+			}),
+			url.pathname,
+		)
+	}
+
+	context.locals.requestedLocale = localeResult.locale
+	context.locals.i18n = createSiteI18n(localeResult.locale)
+
+	// `next(path)` rewrites without re-running this middleware. `context.rewrite()`
+	// would start a new render, reset locals, and serve the default locale.
+	const response =
+		localeResult.kind === 'rewrite'
+			? await next(`${localeResult.pathname}${localeResult.search}`)
+			: await next()
+
+	return withSecurityHeaders(response, url.pathname)
 })

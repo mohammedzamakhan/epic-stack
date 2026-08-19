@@ -43,6 +43,11 @@ import {
 	type AnnouncementRecord,
 	type AnnouncementType,
 } from '#app/components/settings/cards/organization/announcement-sheet.tsx'
+import {
+	LocaleContext,
+	LocaleSwitcher,
+} from '#app/components/website/locale-fields.tsx'
+import { TranslateProvider } from '#app/components/website/translate-provider.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	ORG_PERMISSIONS,
@@ -95,7 +100,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.READ_SETTINGS_ANY,
+		ORG_PERMISSIONS.READ_WEBSITE_ANY,
 	)
 
 	const localesConfig = parseSiteLocalesConfig(
@@ -129,7 +134,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+		ORG_PERMISSIONS.UPDATE_WEBSITE_ANY,
 	)
 
 	const localesConfig = parseSiteLocalesConfig(
@@ -306,10 +311,12 @@ function TypeBadge({ type }: { type: AnnouncementType }) {
 
 function AnnouncementRow({
 	announcement,
+	activeLocale,
 	defaultLocale,
 	onEdit,
 }: {
 	announcement: AnnouncementRecord
+	activeLocale: string
 	defaultLocale: string
 	onEdit: (announcement: AnnouncementRecord) => void
 }) {
@@ -321,9 +328,13 @@ function AnnouncementRow({
 		toggleFetcher.formData?.get('isEnabled') !== undefined
 			? toggleFetcher.formData.get('isEnabled') === 'true'
 			: announcement.isEnabled
-	const preview = getAnnouncementPreviewText(announcement, defaultLocale)
+	const preview = getAnnouncementPreviewText(
+		announcement,
+		activeLocale,
+		defaultLocale,
+	)
 	const linkLabel =
-		pickLocalized(announcement.linkLabel, defaultLocale, defaultLocale) ||
+		pickLocalized(announcement.linkLabel, activeLocale, defaultLocale) ||
 		announcement.linkUrl
 
 	return (
@@ -410,6 +421,9 @@ export default function WebsiteAnnouncementsRoute() {
 	const revalidator = useRevalidator()
 	const [sheetOpen, setSheetOpen] = useState(false)
 	const [editing, setEditing] = useState<AnnouncementRecord | null>(null)
+	const [activeLocale, setActiveLocale] = useState<string>(
+		localesConfig.defaultLocale,
+	)
 
 	const handleOpenChange = useCallback(
 		(open: boolean) => {
@@ -428,89 +442,104 @@ export default function WebsiteAnnouncementsRoute() {
 	}, [])
 
 	return (
-		<>
-			<div className="space-y-6">
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-					<div className="space-y-1">
-						<h2 className="text-base font-semibold">
-							<Trans>Announcements</Trans>
-						</h2>
-						<p className="text-muted-foreground text-sm">
-							<Trans>
-								Create banner announcements for your public organization site.
-								Enabled banners appear at the top of the site for visitors.
-							</Trans>
-						</p>
+		<LocaleContext.Provider
+			value={{
+				activeLocale,
+				defaultLocale: localesConfig.defaultLocale,
+				locales: localesConfig.locales,
+				setActiveLocale,
+			}}
+		>
+			<TranslateProvider
+				activeLocale={activeLocale}
+				defaultLocale={localesConfig.defaultLocale}
+			>
+				<div className="space-y-6">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+						<div className="space-y-1">
+							<h2 className="text-base font-semibold">
+								<Trans>Announcements</Trans>
+							</h2>
+							<p className="text-muted-foreground text-sm">
+								<Trans>
+									Create banner announcements for your public organization site.
+									Enabled banners appear at the top of the site for visitors.
+								</Trans>
+							</p>
+						</div>
+						<div className="flex shrink-0 items-center gap-2">
+							<LocaleSwitcher className="max-w-none" />
+							<Button
+								type="button"
+								size="sm"
+								onClick={() => {
+									setEditing(null)
+									setSheetOpen(true)
+								}}
+							>
+								<Icon name="plus" className="size-4" />
+								<Trans>Add announcement</Trans>
+							</Button>
+						</div>
 					</div>
-					<Button
-						type="button"
-						size="sm"
-						className="shrink-0"
-						onClick={() => {
-							setEditing(null)
-							setSheetOpen(true)
-						}}
-					>
-						<Icon name="plus" className="size-4" />
-						<Trans>Add announcement</Trans>
-					</Button>
+
+					{announcements.length === 0 ? (
+						<EmptyState
+							title={t`No announcements yet`}
+							description={t`Add an announcement to share updates, maintenance notices, or promotions on your public site.`}
+							icons={['bell']}
+						/>
+					) : (
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead className="w-18">
+											<Trans>Live</Trans>
+										</TableHead>
+										<TableHead>
+											<Trans>Content</Trans>
+										</TableHead>
+										<TableHead>
+											<Trans>Type</Trans>
+										</TableHead>
+										<TableHead className="hidden sm:table-cell">
+											<Trans>Link</Trans>
+										</TableHead>
+										<TableHead className="hidden md:table-cell">
+											<Trans>Updated</Trans>
+										</TableHead>
+										<TableHead className="w-22">
+											<span className="sr-only">
+												<Trans>Actions</Trans>
+											</span>
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{announcements.map((announcement) => (
+										<AnnouncementRow
+											key={announcement.id}
+											announcement={announcement}
+											activeLocale={activeLocale}
+											defaultLocale={localesConfig.defaultLocale}
+											onEdit={handleEdit}
+										/>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+					)}
 				</div>
 
-				{announcements.length === 0 ? (
-					<EmptyState
-						title={t`No announcements yet`}
-						description={t`Add an announcement to share updates, maintenance notices, or promotions on your public site.`}
-						icons={['bell']}
-					/>
-				) : (
-					<div className="overflow-x-auto">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead className="w-18">
-										<Trans>Live</Trans>
-									</TableHead>
-									<TableHead>
-										<Trans>Content</Trans>
-									</TableHead>
-									<TableHead>
-										<Trans>Type</Trans>
-									</TableHead>
-									<TableHead className="hidden sm:table-cell">
-										<Trans>Link</Trans>
-									</TableHead>
-									<TableHead className="hidden md:table-cell">
-										<Trans>Updated</Trans>
-									</TableHead>
-									<TableHead className="w-22">
-										<span className="sr-only">
-											<Trans>Actions</Trans>
-										</span>
-									</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{announcements.map((announcement) => (
-									<AnnouncementRow
-										key={announcement.id}
-										announcement={announcement}
-										defaultLocale={localesConfig.defaultLocale}
-										onEdit={handleEdit}
-									/>
-								))}
-							</TableBody>
-						</Table>
-					</div>
-				)}
-			</div>
-
-			<AnnouncementSheet
-				open={sheetOpen}
-				onOpenChange={handleOpenChange}
-				organizationId={organization.id}
-				localesConfig={localesConfig}
-				announcement={editing}
-			/>
-		</>
+				<AnnouncementSheet
+					open={sheetOpen}
+					onOpenChange={handleOpenChange}
+					organizationId={organization.id}
+					localesConfig={localesConfig}
+					announcement={editing}
+				/>
+			</TranslateProvider>
+		</LocaleContext.Provider>
 	)
 }

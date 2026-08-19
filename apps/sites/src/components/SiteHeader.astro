@@ -1,5 +1,6 @@
 ---
-import { getSiteLocaleLabel } from '@repo/common/site-locales'
+import { msg } from '@lingui/core/macro'
+import { getLocaleHref, getSiteLocaleLabel } from '@repo/common/site-locales'
 import SiteAnchor from '~/components/SiteAnchor.astro'
 import {
 	resolveMediaUrl,
@@ -33,6 +34,19 @@ const showName = config.showName !== false
 const sticky = config.sticky !== false
 const logoSrc = resolveMediaUrl(organization.siteIcon?.original)
 const showLocales = locales.length > 1
+const requestedLocale = Astro.locals.requestedLocale
+const defaultLocale = Astro.locals.defaultLocale
+const i18n = Astro.locals.i18n
+const homeHref = getLocaleHref('/', requestedLocale, requestedLocale, defaultLocale)
+const loginHref = getLocaleHref('/login', requestedLocale, requestedLocale, defaultLocale)
+const profileHref = getLocaleHref('/profile', requestedLocale, requestedLocale, defaultLocale)
+const signIn = i18n._(msg`Sign in`)
+const profile = i18n._(msg`Profile`)
+const logout = i18n._(msg`Logout`)
+const openMenu = i18n._(msg`Open menu`)
+const language = i18n._(msg`Language`)
+const primaryNav = i18n._(msg`Primary`)
+const mobileNav = i18n._(msg`Mobile`)
 ---
 
 <header
@@ -42,7 +56,7 @@ const showLocales = locales.length > 1
 	]}
 >
 	<div class="mx-auto flex h-[4.25rem] w-full max-w-6xl items-center gap-4 px-5 sm:px-8">
-		<a href="/" class="flex min-w-0 items-center gap-2.5 no-underline">
+		<a href={homeHref} class="flex min-w-0 items-center gap-2.5 no-underline">
 			{logoSrc ? (
 				<img
 					src={logoSrc}
@@ -59,7 +73,7 @@ const showLocales = locales.length > 1
 			)}
 		</a>
 
-		<nav class="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex" aria-label="Primary">
+		<nav class="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex" aria-label={primaryNav}>
 			{navLinks.map((link) => (
 				<SiteAnchor
 					link={link.url}
@@ -72,7 +86,7 @@ const showLocales = locales.length > 1
 
 		<div class="ml-auto flex items-center gap-2 lg:ml-0">
 			{showLocales ? (
-				<div class="hidden items-center gap-1 sm:flex" aria-label="Language">
+				<div class="hidden items-center gap-1 sm:flex" aria-label={language}>
 					{locales.map((locale) => (
 						<a
 							href={locale.href}
@@ -94,12 +108,12 @@ const showLocales = locales.length > 1
 			<div data-auth="signed-in">
 				<details class="group relative hidden sm:block">
 					<summary class:list={[siteBtnPrimary, "cursor-pointer list-none appearance-none marker:content-none [&::-webkit-details-marker]:hidden"]}>
-						<span class="js-auth-name">Profile</span>
+						<span class="js-auth-name">{profile}</span>
 						<svg class="ml-2 size-4 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
 					</summary>
 					<div class="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-48 rounded-[var(--radius)] border border-border bg-background p-2 shadow-lg">
-						<a href="/profile" class="block rounded-[calc(var(--radius)*0.7)] px-3 py-2 text-sm font-medium hover:bg-muted text-foreground">Profile</a>
-						<button type="button" class="logout-button block w-full rounded-[calc(var(--radius)*0.7)] px-3 py-2 text-left text-sm font-medium hover:bg-muted text-foreground">Logout</button>
+						<a href={profileHref} class="block rounded-[calc(var(--radius)*0.7)] px-3 py-2 text-sm font-medium hover:bg-muted text-foreground">{profile}</a>
+						<button type="button" class="logout-button block w-full rounded-[calc(var(--radius)*0.7)] px-3 py-2 text-left text-sm font-medium hover:bg-muted text-foreground">{logout}</button>
 					</div>
 				</details>
 			</div>
@@ -108,18 +122,18 @@ const showLocales = locales.length > 1
 					{showCta ? (
 						<>
 							<a
-								href="/login"
+								href={loginHref}
 								class="rounded-[var(--radius)] px-3 py-1.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
 							>
-								Sign in
+								{signIn}
 							</a>
 							<SiteAnchor link={config.ctaUrl} class={siteBtnPrimary}>
 								{config.ctaLabel}
 							</SiteAnchor>
 						</>
 					) : (
-						<a href="/login" class:list={[siteBtnPrimary]}>
-							Sign in
+						<a href={loginHref} class:list={[siteBtnPrimary]}>
+							{signIn}
 						</a>
 					)}
 				</div>
@@ -128,7 +142,7 @@ const showLocales = locales.length > 1
 			<details class="relative lg:hidden">
 				<summary
 					class="flex size-10 cursor-pointer list-none items-center justify-center rounded-[var(--radius)] text-foreground marker:content-none [&::-webkit-details-marker]:hidden"
-					aria-label="Open menu"
+					aria-label={openMenu}
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<line x1="4" x2="20" y1="6" y2="6"></line>
@@ -137,7 +151,7 @@ const showLocales = locales.length > 1
 					</svg>
 				</summary>
 				<div class="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-[var(--radius)] border border-border bg-background p-3 shadow-lg">
-					<nav class="flex flex-col gap-1" aria-label="Mobile">
+					<nav class="flex flex-col gap-1" aria-label={mobileNav}>
 						{navLinks.map((link) => (
 							<SiteAnchor
 								link={link.url}
@@ -166,31 +180,31 @@ const showLocales = locales.length > 1
 						</div>
 					) : null}
 					<div data-auth="signed-in" class="mt-3 flex flex-col gap-1 border-t border-border pt-3">
-						<a href="/profile" class="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">Profile</a>
-						<button type="button" class="logout-button rounded-[var(--radius)] px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-muted">Logout</button>
+						<a href={profileHref} class="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">{profile}</a>
+						<button type="button" class="logout-button rounded-[var(--radius)] px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-muted">{logout}</button>
 					</div>
 					<div data-auth="signed-out" class="mt-3 flex flex-col gap-2 border-t border-border pt-3">
 							{showCta ? (
 								<>
 									<a
-										href="/login"
+										href={loginHref}
 										class="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
 									>
-										Sign in
+										{signIn}
 									</a>
 									<SiteAnchor
 										link={config.ctaUrl}
-										class={`${siteBtnPrimary} w-full`}
+										class:list={[siteBtnPrimary, 'w-full']}
 									>
 										{config.ctaLabel}
 									</SiteAnchor>
 								</>
 							) : (
-								<a href="/login" class:list={[siteBtnPrimary, 'w-full']}>
-									Sign in
+								<a href={loginHref} class:list={[siteBtnPrimary, 'w-full']}>
+									{signIn}
 								</a>
 							)}
-						</div>
+					</div>
 				</div>
 			</details>
 		</div>
@@ -203,6 +217,7 @@ const showLocales = locales.length > 1
 		getAccessTokenClaims,
 		logoutTenantSession,
 	} from '~/lib/client-auth'
+	import { browserLocaleHref } from '~/lib/locale'
 
 	if (getAccessToken()) {
 		document.documentElement.dataset.customerSession = '1'
@@ -227,7 +242,7 @@ const showLocales = locales.length > 1
 
 		if (target?.closest('.logout-button')) {
 			void logoutTenantSession().finally(() => {
-				window.location.href = '/'
+				window.location.href = browserLocaleHref('/')
 			})
 		}
 	})

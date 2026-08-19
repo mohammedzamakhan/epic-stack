@@ -11,7 +11,7 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
-const requestedLocale = Astro.url.searchParams.get('lng')
+const requestedLocale = Astro.locals.requestedLocale
 const slug = Astro.params.slug?.replace(/^\/+|\/+$/g, '') ?? ''
 
 if (!orgSlug && !customHost) {
@@ -56,7 +56,6 @@ const seoImageUrl = rawSeoImage
 		: `${appOrigin}${rawSeoImage}`
 	: null
 const seoNoIndex = page.seo?.noIndex ?? false
-const canonicalUrl = Astro.url.origin + Astro.url.pathname
 ---
 
 <SitePage
@@ -65,7 +64,6 @@ const canonicalUrl = Astro.url.origin + Astro.url.pathname
 	title={pageTitle}
 	description={seoDescription}
 	imageUrl={seoImageUrl}
-	canonicalUrl={canonicalUrl}
 	noIndex={seoNoIndex}
 >
 	<RenderBlocks sections={page.sections} />

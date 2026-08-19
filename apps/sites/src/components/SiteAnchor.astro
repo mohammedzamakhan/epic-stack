@@ -1,5 +1,6 @@
 ---
 import { resolveSiteLink, type SiteLinkInput } from '@repo/common/site-link'
+import { getLocaleHref } from '@repo/common/site-locales'
 
 interface Props {
 	link: SiteLinkInput
@@ -8,6 +9,12 @@ interface Props {
 
 const { link, class: className } = Astro.props
 const resolved = resolveSiteLink(link)
+resolved.href = getLocaleHref(
+	resolved.href,
+	Astro.locals.requestedLocale,
+	Astro.locals.requestedLocale,
+	Astro.locals.defaultLocale,
+)
 ---
 
 <a

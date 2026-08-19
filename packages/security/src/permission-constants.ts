@@ -24,6 +24,10 @@ export const PERMISSIONS = {
 	READ_SETTINGS_ANY: 'read:settings:any',
 	UPDATE_SETTINGS_ANY: 'update:settings:any',
 
+	// Website permissions
+	READ_WEBSITE_ANY: 'read:website:any',
+	UPDATE_WEBSITE_ANY: 'update:website:any',
+
 	// Analytics permissions
 	READ_ANALYTICS_ANY: 'read:analytics:any',
 } as const

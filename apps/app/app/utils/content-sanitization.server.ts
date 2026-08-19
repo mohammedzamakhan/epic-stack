@@ -74,6 +74,46 @@ export function sanitizeTextContent(content: string): string {
 }
 
 /**
+ * Sanitize website content that came from machine translation.
+ *
+ * Body fields allow a safe HTML subset because `ContentBlock.astro` renders
+ * them with `set:html`. Every other website field is plain text and must have
+ * all markup stripped even when a malicious or malformed translation echoes
+ * tags back from the source text.
+ */
+export function sanitizeWebsiteContent(
+	content: string,
+	allowHtml: boolean,
+): string {
+	if (!content || typeof content !== 'string') return ''
+
+	return DOMPurify.sanitize(content, {
+		ALLOWED_TAGS: allowHtml
+			? [
+					'p',
+					'br',
+					'strong',
+					'b',
+					'em',
+					'i',
+					'a',
+					'ul',
+					'ol',
+					'li',
+					'code',
+					'pre',
+				]
+			: [],
+		ALLOWED_ATTR: allowHtml ? ['href', 'target', 'rel'] : [],
+		KEEP_CONTENT: true,
+		ALLOW_DATA_ATTR: false,
+		ALLOW_UNKNOWN_PROTOCOLS: false,
+		ALLOWED_URI_REGEXP:
+			/^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+	})
+}
+
+/**
  * Sanitize note content (richer formatting allowed)
  */
 export function sanitizeNoteContent(content: string): string {

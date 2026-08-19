@@ -4,3 +4,5 @@ node_modules/
 .env
 .wrangler/
 _fonts
+src/locales/*.js
+src/locales/*.d.ts

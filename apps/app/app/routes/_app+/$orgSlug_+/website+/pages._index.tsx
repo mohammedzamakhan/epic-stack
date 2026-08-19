@@ -2,7 +2,10 @@ import { parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
-import { pickLocalized } from '@repo/common/site-locales'
+import {
+	isReservedSiteLocaleSlug,
+	pickLocalized,
+} from '@repo/common/site-locales'
 import { prisma } from '@repo/database'
 import { cn } from '@repo/ui'
 import {
@@ -90,7 +93,10 @@ const CreatePageSchema = z.object({
 		.regex(
 			/^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 			'URL must contain only lowercase letters, numbers, and hyphens',
-		),
+		)
+		.refine((val) => !isReservedSiteLocaleSlug(val), {
+			message: 'URL slug cannot be a language code (e.g. en, ar, id)',
+		}),
 })
 
 const PageActionSchema = z.object({
@@ -110,7 +116,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.READ_SETTINGS_ANY,
+		ORG_PERMISSIONS.READ_WEBSITE_ANY,
 	)
 
 	const defaultLocale = organization.siteDefaultLocale ?? 'en'
@@ -166,7 +172,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+		ORG_PERMISSIONS.UPDATE_WEBSITE_ANY,
 	)
 
 	const formData = await request.formData()

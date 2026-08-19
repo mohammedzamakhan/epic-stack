@@ -1,4 +1,5 @@
 ---
+import { msg } from '@lingui/core/macro'
 import SitePage from '~/components/SitePage.astro'
 import {
 	fetchPublishedOrganization,
@@ -7,37 +8,54 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
-const requestedLocale = Astro.url.searchParams.get('lng')
+const requestedLocale = Astro.locals.requestedLocale
+const i18n = Astro.locals.i18n
+const signIn = i18n._(msg`Sign in`)
+const signInDescription = i18n._(
+	msg`Enter your phone number. We'll send a verification code.`,
+)
+const phoneNumber = i18n._(msg`Phone Number`)
+const sendCode = i18n._(msg`Send Code`)
+const sending = i18n._(msg`Sending...`)
+const networkError = i18n._(msg`Network error. Please try again.`)
+const somethingWentWrong = i18n._(msg`Something went wrong.`)
 
 const organization = orgSlug
 	? await fetchPublishedOrganization(orgSlug, requestedLocale)
 	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
-	return new Response('Not Found', { status: 404 })
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 ---
 
 <SitePage
 	organization={organization}
-	page={{ id: 'login', title: 'Sign In', slug: 'login', isHomePage: false, sections: [] }}
-	title={`Sign In - ${organization.name}`}
+	page={{ id: 'login', title: signIn, slug: 'login', isHomePage: false, sections: [] }}
+	title={`${signIn} - ${organization.name}`}
 >
 	<div id="login-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4">
 		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
 			<div class="mb-6 flex flex-col space-y-2 text-center">
 				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
-					Sign in
+					{signIn}
 				</h1>
 				<p class="text-sm text-muted-foreground">
-					Enter your phone number. We'll send a verification code.
+					{signInDescription}
 				</p>
 			</div>
 
-			<form id="login-form" class="space-y-4">
+			<form
+				id="login-form"
+				class="space-y-4"
+				data-send-code={sendCode}
+				data-sending={sending}
+				data-network={networkError}
+				data-error={somethingWentWrong}
+			>
 				<div class="space-y-2">
 					<label for="phone" class="text-sm font-medium leading-none text-foreground">
-						Phone Number
+						{phoneNumber}
 					</label>
 					<input
 						type="tel"
@@ -56,7 +74,7 @@ if (!organization) {
 					type="submit"
 					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 				>
-					Send Code
+					{sendCode}
 				</button>
 			</form>
 		</div>
@@ -70,18 +88,23 @@ if (!organization) {
 		tenantErrorMessage,
 		tenantJson,
 	} from '~/lib/client-auth'
+	import { browserLocaleHref } from '~/lib/locale'
 
 	redirectHomeIfSignedIn()
 
 	const form = document.getElementById('login-form') as HTMLFormElement
 	const errorMessage = document.getElementById('error-message')!
 	const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
+	const sendLabel = form.dataset.sendCode || 'Send Code'
+	const sendingLabel = form.dataset.sending || 'Sending...'
+	const networkLabel = form.dataset.network || 'Network error. Please try again.'
+	const errorLabel = form.dataset.error || 'Something went wrong.'
 
 	form.addEventListener('submit', async (e) => {
 		e.preventDefault()
 		errorMessage.classList.add('hidden')
 		submitButton.disabled = true
-		submitButton.textContent = 'Sending...'
+		submitButton.textContent = sendingLabel
 
 		const formData = new FormData(form)
 		const payload = {
@@ -95,20 +118,17 @@ if (!organization) {
 			if (ok) {
 				const phone = formData.get('phone') as string
 				sessionStorage.setItem('pending_phone', phone)
-				window.location.href = '/verify'
+				window.location.href = browserLocaleHref('/verify')
 			} else {
-				errorMessage.textContent = tenantErrorMessage(
-					data,
-					'Something went wrong.',
-				)
+				errorMessage.textContent = tenantErrorMessage(data, errorLabel)
 				errorMessage.classList.remove('hidden')
 			}
 		} catch {
-			errorMessage.textContent = 'Network error. Please try again.'
+			errorMessage.textContent = networkLabel
 			errorMessage.classList.remove('hidden')
 		} finally {
 			submitButton.disabled = false
-			submitButton.textContent = 'Send Code'
+			submitButton.textContent = sendLabel
 		}
 	})
 </script>

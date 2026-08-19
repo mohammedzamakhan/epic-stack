@@ -1,4 +1,5 @@
 ---
+import { msg } from '@lingui/core/macro'
 import SitePage from '~/components/SitePage.astro'
 import {
 	fetchPublishedOrganization,
@@ -7,37 +8,56 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
-const requestedLocale = Astro.url.searchParams.get('lng')
+const requestedLocale = Astro.locals.requestedLocale
+const i18n = Astro.locals.i18n
+const yourProfile = i18n._(msg`Your Profile`)
+const updateDetails = i18n._(msg`Update your basic details below.`)
+const nameLabel = i18n._(msg`Name`)
+const emailLabel = i18n._(msg`Email`)
+const phoneNumber = i18n._(msg`Phone Number`)
+const phoneCannotChange = i18n._(msg`Phone number cannot be changed at this time.`)
+const saveChanges = i18n._(msg`Save Changes`)
+const saving = i18n._(msg`Saving...`)
+const profileUpdated = i18n._(msg`Profile updated successfully!`)
+const somethingWentWrong = i18n._(msg`Something went wrong.`)
+const networkError = i18n._(msg`Network error. Please try again.`)
 
 const organization = orgSlug
 	? await fetchPublishedOrganization(orgSlug, requestedLocale)
 	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
-	return new Response('Not Found', { status: 404 })
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 ---
 
 <SitePage
 	organization={organization}
-	page={{ id: 'profile', title: 'Profile', slug: 'profile', isHomePage: false, sections: [] }}
-	title={`Your Profile - ${organization.name}`}
+	page={{ id: 'profile', title: yourProfile, slug: 'profile', isHomePage: false, sections: [] }}
+	title={`${yourProfile} - ${organization.name}`}
 >
 	<div id="profile-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4 py-12">
 		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
 			<div class="mb-6 flex flex-col space-y-2 text-center">
 				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
-					Your Profile
+					{yourProfile}
 				</h1>
 				<p class="text-sm text-muted-foreground">
-					Update your basic details below.
+					{updateDetails}
 				</p>
 			</div>
 
-			<form id="profile-form" class="space-y-4">
+			<form
+				id="profile-form"
+				class="space-y-4"
+				data-save={saveChanges}
+				data-saving={saving}
+				data-error={somethingWentWrong}
+				data-network={networkError}
+			>
 				<div class="space-y-2">
 					<label for="name" class="text-sm font-medium leading-none text-foreground">
-						Name
+						{nameLabel}
 					</label>
 					<input
 						type="text"
@@ -51,7 +71,7 @@ if (!organization) {
 
 				<div class="space-y-2">
 					<label for="email" class="text-sm font-medium leading-none text-foreground">
-						Email
+						{emailLabel}
 					</label>
 					<input
 						type="email"
@@ -64,7 +84,7 @@ if (!organization) {
 
 				<div class="space-y-2">
 					<label for="phone" class="text-sm font-medium leading-none text-foreground">
-						Phone Number
+						{phoneNumber}
 					</label>
 					<input
 						type="tel"
@@ -77,19 +97,19 @@ if (!organization) {
 						class="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground ring-offset-background cursor-not-allowed opacity-75"
 					/>
 					<p class="text-xs text-muted-foreground">
-						Phone number cannot be changed at this time.
+						{phoneCannotChange}
 					</p>
 				</div>
 
 				<div id="error-message" class="hidden text-sm font-medium text-destructive"></div>
-				<div id="success-message" class="hidden text-sm font-medium text-green-500">Profile updated successfully!</div>
+				<div id="success-message" class="hidden text-sm font-medium text-green-500">{profileUpdated}</div>
 
 				<button
 					type="submit"
 					id="submit-button"
 					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 				>
-					Save Changes
+					{saveChanges}
 				</button>
 			</form>
 		</div>
@@ -97,6 +117,7 @@ if (!organization) {
 
 	<script>
 		import { tenantFetch, setSessionTokens } from '~/lib/client-auth'
+		import { browserLocaleHref } from '~/lib/locale'
 
 		const form = document.getElementById('profile-form') as HTMLFormElement
 		const errorMessage = document.getElementById('error-message')!
@@ -105,12 +126,16 @@ if (!organization) {
 		const nameInput = document.getElementById('name') as HTMLInputElement
 		const emailInput = document.getElementById('email') as HTMLInputElement
 		const phoneInput = document.getElementById('phone') as HTMLInputElement
+		const saveLabel = form.dataset.save || 'Save Changes'
+		const savingLabel = form.dataset.saving || 'Saving...'
+		const errorLabel = form.dataset.error || 'Something went wrong.'
+		const networkLabel = form.dataset.network || 'Network error. Please try again.'
 
 		async function loadProfile() {
 			try {
 				const res = await tenantFetch('/auth/me')
 				if (res.status === 401) {
-					window.location.replace('/login')
+					window.location.replace(browserLocaleHref('/login'))
 					return
 				}
 				if (res.ok) {
@@ -139,7 +164,7 @@ if (!organization) {
 			successMessage.classList.add('hidden')
 
 			submitButton.disabled = true
-			submitButton.textContent = 'Saving...'
+			submitButton.textContent = savingLabel
 
 			try {
 				const res = await tenantFetch('/auth/profile', {
@@ -147,7 +172,7 @@ if (!organization) {
 					body: JSON.stringify({ name, email }),
 				})
 				if (res.status === 401) {
-					window.location.replace('/login')
+					window.location.replace(browserLocaleHref('/login'))
 					return
 				}
 				const data = await res.json()
@@ -163,15 +188,15 @@ if (!organization) {
 					})
 					successMessage.classList.remove('hidden')
 				} else {
-					errorMessage.textContent = data.error || 'Something went wrong.'
+					errorMessage.textContent = data.error || errorLabel
 					errorMessage.classList.remove('hidden')
 				}
 			} catch {
-				errorMessage.textContent = 'Network error. Please try again.'
+				errorMessage.textContent = networkLabel
 				errorMessage.classList.remove('hidden')
 			} finally {
 				submitButton.disabled = false
-				submitButton.textContent = 'Save Changes'
+				submitButton.textContent = saveLabel
 			}
 		})
 	</script>
