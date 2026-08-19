@@ -1,10 +1,10 @@
 // storage-adapter-import-placeholder
-import { s3Storage } from '@payloadcms/storage-s3'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 import crypto from 'node:crypto'
-import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import fs from 'node:fs'
+import path from 'node:path'
+import { buildConfig, type PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -21,6 +21,17 @@ import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const getDatabaseUrl = () => {
+  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:.')) {
+    return process.env.DATABASE_URL
+  }
+  const dataDir = path.resolve(dirname, '../data')
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true })
+  }
+  return `file:${path.resolve(dataDir, 'cms.db')}`
+}
 
 export default buildConfig({
   admin: {
@@ -53,41 +64,40 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+  db: sqliteAdapter({
+    client: {
+      url: getDatabaseUrl(),
+    },
   }),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [
     getServerSideURL(),
+    'https://cms.epic-startup.me:2999',
+    'https://epic-startup.me:2999',
+    'https://*.epic-startup.me:2999',
+    'http://localhost:3000',
+    'http://localhost:3001',
     'http://localhost:3002',
+    'http://localhost:3006',
+    'http://localhost:2999',
     'https://*.vercel.app',
     'https://glorious-space-spork-jr6jrp7r4p3p7pj-3000.app.github.dev',
+  ].filter(Boolean),
+  csrf: [
+    getServerSideURL(),
+    'https://cms.epic-startup.me:2999',
+    'https://epic-startup.me:2999',
+    'https://*.epic-startup.me:2999',
+    'http://localhost:3006',
+    'http://localhost:2999',
   ].filter(Boolean),
   globals: [Header, Footer, Banner],
   plugins: [
     ...plugins,
-    // storage-adapter-placeholder
-    // Use S3 storage only in production or when explicitly enabled
+    // R2 storage for media in production
     // In development, Payload uses default local storage (public/media directory)
-    ...(process.env.NODE_ENV === 'production' || process.env.USE_S3_STORAGE === 'true'
-      ? [
-          s3Storage({
-            collections: {
-              media: true,
-            },
-            bucket: process.env.BUCKET_NAME || '',
-            config: {
-              credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-              },
-              region: process.env.AWS_REGION || 'auto',
-              endpoint: process.env.AWS_ENDPOINT_URL_S3,
-              forcePathStyle: true,
-            },
-          }),
-        ]
-      : []),
+    // The R2 bucket binding is provided by the Cloudflare Workers runtime
+    // via wrangler.jsonc d1_databases / r2_buckets config
   ],
   secret: process.env.PAYLOAD_SECRET,
   typescript: {

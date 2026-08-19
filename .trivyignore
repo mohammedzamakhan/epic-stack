@@ -1,0 +1,4 @@
+# image-size: Denial of Service via crafted image buffer with zero-valued size field
+CVE-2025-71329
+# image-size: Denial of Service via crafted ICNS image buffer
+CVE-2025-71330

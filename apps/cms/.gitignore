@@ -5,6 +5,10 @@ node_modules
 .env
 .next
 .vercel
+.open-next
+.wrangler
+data/*
+!data/.gitkeep
 
 # Payload default media upload directory
 public/media/

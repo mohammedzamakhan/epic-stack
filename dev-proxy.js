@@ -212,7 +212,9 @@ function upgradeHandler(req, socket, head) {
 	const host = req.headers.host
 	const target = resolveTarget(host)
 	if (target) {
-		proxy.ws(req, socket, head, { target })
+		req.headers['x-forwarded-proto'] = protocol
+		req.headers['x-forwarded-host'] = host
+		proxy.ws(req, socket, head, { target, changeOrigin: true })
 	} else {
 		socket.destroy()
 	}

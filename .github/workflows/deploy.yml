@@ -105,11 +105,6 @@ jobs:
       - name: 🔧 Rebuild native dependencies
         run: npm rebuild sharp
 
-      - name: 🔑 Inject CMS DATABASE_URI
-        run:
-          echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >>
-          apps/cms/.env
-
       - name: 🛠 Setup Database
         run: npm run db:migrate:deploy && npm run db:generate
 
@@ -151,11 +146,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
-      - name: 🔑 Inject CMS DATABASE_URI
-        run:
-          echo "DATABASE_URI=mongodb://127.0.0.1:27017/payload-test" >>
-          apps/cms/.env
 
       - name: ⎔ Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -263,9 +253,13 @@ jobs:
           cd apps/sites
           npm run build
         env:
-          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
-          PUBLIC_TENANT_API_URL: ${{ vars.PUBLIC_TENANT_API_URL || 'https://tenant-us.example.com' }}
-          PUBLIC_TENANT_API_URL_KSA: ${{ vars.PUBLIC_TENANT_API_URL_KSA || 'https://tenant-ksa.example.com' }}
+          PUBLIC_APP_URL:
+            ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
+          PUBLIC_TENANT_API_URL:
+            ${{ vars.PUBLIC_TENANT_API_URL || 'https://tenant-us.example.com' }}
+          PUBLIC_TENANT_API_URL_KSA:
+            ${{ vars.PUBLIC_TENANT_API_URL_KSA ||
+            'https://tenant-ksa.example.com' }}
 
       - name: 🚀 Deploy Sites to Cloudflare Pages (Production)
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -392,58 +386,7 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-  container-cms:
-    name: 📦 Prepare CMS Container
-    runs-on: ubuntu-24.04
-    needs: [affected]
-    # only prepare container on pushes AND if cms was affected
-    if:
-      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true'
-      || needs.affected.outputs.admin == 'true' ||
-      contains(github.event.head_commit.modified, 'apps/cms/')) }}
-    steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-
-      - name: 👀 Read CMS app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: cms_app_name
-        with:
-          file: 'apps/cms/fly.toml'
-          field: 'app'
-
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
-
-      - name: 📦 Build CMS Staging Container
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/cms/fly.toml \
-            --dockerfile apps/cms/Dockerfile \
-            --app ${{ steps.cms_app_name.outputs.value }}-staging
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: 📦 Build CMS Production Container
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --build-only \
-            --push \
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --config apps/cms/fly.toml \
-            --dockerfile apps/cms/Dockerfile \
-            --app ${{ steps.cms_app_name.outputs.value }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  # CMS is deployed to Cloudflare Workers (no container needed)
 
   container-tenant-api:
     name: 📦 Build Tenant API Image
@@ -583,49 +526,51 @@ jobs:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   deploy-cms:
-    name: 🚀 Deploy CMS
+    name: 🚀 Deploy CMS (Cloudflare Workers)
     runs-on: ubuntu-24.04
-    needs: [lint, typecheck, vitest, container-cms, affected]
+    needs: [lint, typecheck, vitest, affected]
     # only deploy on pushes AND if cms was affected
     if:
-      ${{ github.event_name == 'push' && (needs.affected.outputs.app == 'true'
-      || needs.affected.outputs.admin == 'true' ||
-      contains(github.event.head_commit.modified, 'apps/cms/')) }}
+      ${{ github.event_name == 'push' && (needs.affected.outputs.cms == 'true'
+      || contains(github.event.head_commit.modified, 'apps/cms/')) }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: 👀 Read CMS app name
-        uses: SebRollen/toml-action@b1b3628f55fc3a28208d4203ada8b737e9687876 # v1.2.0
-        id: cms_app_name
+      - name: ⎔ Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          file: 'apps/cms/fly.toml'
-          field: 'app'
+          node-version: 22
+          cache: 'npm'
 
-      - name: 🎈 Setup Fly
-        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
+      - name: 📥 Download deps
+        run: npm ci --ignore-scripts
 
-      - name: 🚀 Deploy CMS Staging
-        if: ${{ github.ref == 'refs/heads/dev' }}
+      - name: 🏗 Build Payload
+        working-directory: apps/cms
+        run: npm run build
+
+      - name: 📦 Build for Cloudflare Workers
+        working-directory: apps/cms
+        run: npx opennextjs-cloudflare build
+
+      - name: 🗄️ Run D1 Migrations
+        working-directory: apps/cms
         run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.cms_app_name.outputs.value }}-staging:${{ github.sha }}" \
-            --config apps/cms/fly.toml \
-            --app ${{ steps.cms_app_name.outputs.value }}-staging
+          cross-env NODE_ENV=production PAYLOAD_SECRET=ignore npx payload migrate
+          npx wrangler d1 execute D1 --command 'PRAGMA optimize' --remote
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: 🚀 Deploy CMS Production
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          flyctl deploy \
-            --image "registry.fly.io/${{ steps.cms_app_name.outputs.value }}:${{ github.sha }}" \
-            --config apps/cms/fly.toml \
-            --app ${{ steps.cms_app_name.outputs.value }}
+      - name: 🚀 Deploy CMS to Cloudflare Workers
+        working-directory: apps/cms
+        run: npx opennextjs-cloudflare deploy
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-tenant-api:
     name: 🚀 Deploy Tenant API (OCI)
@@ -641,7 +586,8 @@ jobs:
           HOST: ${{ vars.OCI_TENANT_US_HOST }}
           SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
           SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
-          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          IMAGE:
+            ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
           PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
         run: |
@@ -662,7 +608,8 @@ jobs:
           HOST: ${{ vars.OCI_TENANT_KSA_HOST }}
           SSH_USER: ${{ vars.OCI_TENANT_SSH_USER || 'ubuntu' }}
           SSH_KEY: ${{ secrets.OCI_TENANT_SSH_KEY }}
-          IMAGE: ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
+          IMAGE:
+            ${{ needs.container-tenant-api.outputs.image }}:${{ github.sha }}
           PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
         run: |
