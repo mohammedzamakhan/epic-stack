@@ -16,7 +16,7 @@ These applications are deployed to production and serve end users:
 The primary user-facing application built with React Router and Remix.
 
 - **Tech Stack**: React 19, React Router v7, TypeScript
-- **Port**: 3000 (development)
+- **Port**: 3001 (development)
 - **Purpose**: Core application functionality for end users
 - **Key Features**:
   - Full-stack authentication (OAuth, WebAuthn, TOTP)
@@ -43,7 +43,8 @@ npm run test:e2e:dev     # Run E2E tests in UI mode
 Super admin dashboard for managing the platform.
 
 - **Tech Stack**: React 19, React Router v7, TypeScript
-- **Port**: 3001 (development)
+- **Port**: No fixed port — picks a free port near 3005 automatically
+  (`get-port`); see the terminal output for the actual port
 - **Purpose**: Administrative interface for platform management
 - **Key Features**:
   - Similar tech stack to the main app
@@ -85,8 +86,10 @@ npm run preview          # Preview production build
 Headless CMS powered by Payload CMS for managing content consumed by the
 marketing website (`apps/web`). Deploys to Cloudflare Workers, not Fly.io.
 
-- **Tech Stack**: Payload CMS 3.x, Next.js, Cloudflare D1 (SQLite) + R2,
-  deployed with OpenNext
+- **Tech Stack**: Payload CMS 3.x, Next.js, local SQLite (`@payloadcms/db-sqlite`),
+  deployed with OpenNext. Cloudflare D1 and R2 bindings are declared in
+  `wrangler.jsonc` but not yet wired into Payload (see
+  [CMS storage](/docs/cms-storage.md))
 - **Port**: 3006 (development)
 - **Purpose**: Content management for the marketing website
 - **Key Features**:
@@ -95,8 +98,8 @@ marketing website (`apps/web`). Deploys to Cloudflare Workers, not Fly.io.
   - Form builder plugin
   - Nested documents support
   - Search functionality
-  - Local file storage in development, Cloudflare R2 in production (see
-    [CMS storage](/docs/cms-storage.md))
+  - Local file storage today, in every environment — an R2 binding is
+    declared but not yet wired in (see [CMS storage](/docs/cms-storage.md))
   - Redirects management
 
 **Development Commands**:
@@ -299,13 +302,16 @@ To work on any application:
 
 Default development ports for each application:
 
-| Application     | Port | URL                   |
-| --------------- | ---- | --------------------- |
-| Main App        | 3000 | http://localhost:3000 |
-| Admin           | 3001 | http://localhost:3001 |
-| Web (Marketing) | 3002 | http://localhost:3002 |
-| Prisma Studio   | 3003 | http://localhost:3003 |
-| CMS             | 3006 | http://localhost:3006 |
+| Application      | Port                            | URL                   |
+| ---------------- | ------------------------------- | --------------------- |
+| Main App         | 3001                            | http://localhost:3001 |
+| Admin            | dynamic (near 3005, `get-port`) | see terminal output   |
+| Web (Marketing)  | 3002                            | http://localhost:3002 |
+| CMS              | 3006                            | http://localhost:3006 |
+| Sites            | 3008                            | http://localhost:3008 |
+| Tenant API (US)  | 3007                            | http://localhost:3007 |
+| Tenant API (KSA) | 3009                            | http://localhost:3009 |
+| Prisma Studio    | 5555                            | http://localhost:5555 |
 
 <Note>
 	Ports may vary if the default port is already in use. Check the terminal

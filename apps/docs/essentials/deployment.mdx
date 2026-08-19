@@ -17,10 +17,12 @@ App and Admin deploy to Fly.io:
 
 ## Cloudflare Deployment
 
-The **CMS** deploys to **Cloudflare Workers** (via OpenNext), backed by
-Cloudflare **D1** (SQLite) and **R2** (media storage) — not Fly.io, and not
-MongoDB. See [CMS storage](/docs/cms-storage.md). The marketing **Website**
-and **Sites** deploy to Cloudflare Pages.
+The **CMS** deploys to **Cloudflare Workers** (via OpenNext) — not Fly.io, and
+not MongoDB. `wrangler.jsonc` declares Cloudflare **D1** (SQLite) and **R2**
+(media storage) bindings for it, but Payload isn't wired to use either yet;
+it currently runs on local SQLite and local file storage in every
+environment. See [CMS storage](/docs/cms-storage.md). The marketing
+**Website** and **Sites** deploy to Cloudflare Pages.
 
 Regional **tenant-api** (customer PII, per-org SQLite) deploys to **Oracle Cloud
 Ampere** in Ashburn and Riyadh. See the repo docs:

@@ -386,10 +386,12 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 
 **CMS Storage**:
 
-- **Development**: Uses local file storage (`apps/cms/public/media/`)
-- **Production**: Uses Cloudflare R2 via the `R2_BUCKET` binding in
-  `apps/cms/wrangler.jsonc` (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
-  `R2_BUCKET_NAME`, `CLOUDFLARE_ACCOUNT_ID` in `apps/cms/.env.schema`)
+- Payload is currently configured for **local file storage only**
+  (`apps/cms/public/media/`), in every environment — `Media.ts`'s `staticDir` is
+  unconditional, and no `@payloadcms/storage-r2` plugin is registered
+- `apps/cms/wrangler.jsonc` declares an `R2_BUCKET` binding and
+  `apps/cms/.env.schema` documents R2 credentials, but that binding is not yet
+  wired into Payload, so production does not actually use R2 today
 - No `USE_S3_STORAGE` toggle for CMS — that variable only applies to the
   unrelated App/Admin Tigris storage
 - See `docs/cms-storage.md` for details

@@ -27,33 +27,28 @@ Core features:
 
 ## Storage Configuration
 
-This CMS uses **different storage strategies** for development and production:
+Today this app uses **local file storage in every environment**:
 
-### Development (Default)
-
-- **Local file storage** in `public/media/` directory
-- No cloud storage required
-- Works completely offline
-- Files served directly by Next.js
-
-### Production
-
-- **Cloudflare R2** via the `R2_BUCKET` binding in
-  [`wrangler.jsonc`](./wrangler.jsonc)
+- Files are stored in the `public/media/` directory and served directly by
+  Next.js
+- No cloud storage credentials are required to run it
+- [`wrangler.jsonc`](./wrangler.jsonc) declares an `R2_BUCKET` binding, and
+  `@payloadcms/storage-r2` is a listed dependency, but no R2 plugin is
+  registered in `payload.config.ts` yet — production does not actually use R2
 - No `USE_S3_STORAGE` toggle here — that variable only applies to the
-  unrelated App/Admin Tigris storage. CMS storage is selected automatically
-  by environment (local dev vs. deployed Worker).
+  unrelated App/Admin Tigris storage
 
-See [CMS Storage Documentation](../../docs/cms-storage.md) for complete
-details.
+See [CMS Storage Documentation](../../docs/cms-storage.md) for the full
+picture, including what it would take to wire R2 in.
 
 ## Database
 
-Payload uses [`@payloadcms/db-sqlite`](https://payloadcms.com/docs/database/sqlite):
-a local SQLite file (`apps/cms/data/cms.db`) in development, and
-[Cloudflare D1](https://developers.cloudflare.com/d1/) (via the `D1` binding
-in `wrangler.jsonc`) in production. There is no Postgres or MongoDB adapter
-in this app.
+Payload uses [`@payloadcms/db-sqlite`](https://payloadcms.com/docs/database/sqlite)
+pointed at a local SQLite file (`apps/cms/data/cms.db`) — in every
+environment, including the deployed Worker, since the `D1` binding declared
+in `wrangler.jsonc` is not yet wired into the adapter. There is no Postgres
+or MongoDB adapter in this app. See
+[CMS storage](../../docs/cms-storage.md) for details.
 
 ## Quick Start
 
@@ -108,8 +103,8 @@ docs for details on how to extend this functionality.
 - #### Media
 
   This is the uploads-enabled collection used by pages and posts to contain
-  media like images and other assets. Storage is local in development and R2
-  in production — see [Storage Configuration](#storage-configuration).
+  media like images and other assets. Currently stored locally in every
+  environment — see [Storage Configuration](#storage-configuration).
 
 - #### Categories
 
@@ -227,14 +222,17 @@ or Fly.io. Relevant `apps/cms/package.json` scripts:
 ```bash
 npm run build          # next build
 npm run build:worker    # opennextjs-cloudflare build
-npm run deploy:database # run Payload migrations against D1
+npm run deploy:database # run Payload migrations (against the local SQLite
+                         # file baked into the build — not D1, see below)
 npm run deploy:app      # build + deploy the Worker
 npm run deploy          # deploy:database + deploy:app
 ```
 
-See [Deployment checklist](../../docs/deployment-checklist.md) and
-[CMS storage](../../docs/cms-storage.md) for the full setup (D1 database,
-R2 bucket, Worker secrets, and the `deploy-cms` GitHub Actions job).
+See [Deployment checklist](../../docs/deployment-checklist.md) for the
+provisioning steps in place today (D1 database, R2 bucket, Worker secrets,
+and the `deploy-cms` GitHub Actions job), and
+[CMS storage](../../docs/cms-storage.md) for why the D1/R2 bindings aren't
+actually used by Payload yet.
 
 ## Questions
 
