@@ -71,10 +71,11 @@ npm run dev:mobile          # Expo mobile app
 # `npm run dev` already starts both tenant-api nodes (3007 + 3009).
 
 # Database management
-npm run db:studio      # Prisma Studio UI (port 5555)
-npm run db:migrate     # Run Prisma migrations
-npm run db:seed        # Seed database with test data
-npm run db:reset       # Reset database (destructive)
+cd apps/studio && npm run dev   # Prisma Studio UI (port 3003) - no root script
+npm run db:migrate:dev          # Create + apply a dev migration
+npm run db:migrate:deploy       # Apply pending migrations (used in CI)
+npm run db:seed                 # Seed database with test data
+cd packages/database && npm run db:reset  # Reset database (destructive) - no root script
 ```
 
 ## Build & Test
@@ -433,9 +434,11 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 cd packages/database
 npx prisma migrate dev --name your_migration_name
 npx prisma generate  # Regenerate Prisma Client
+```
 
-# View data
-npm run db:studio    # Opens Prisma Studio on localhost:5555
+```bash
+# View data (from the repo root)
+cd apps/studio && npm run dev    # Opens Prisma Studio on localhost:3003
 ```
 
 **LiteFS Notes**:

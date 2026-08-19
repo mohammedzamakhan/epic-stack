@@ -161,7 +161,8 @@ These applications support the development workflow and are not deployed to prod
 Technical documentation site built with Mintlify.
 
 - **Tech Stack**: Mintlify, MDX
-- **Port**: 3001 (default)
+- **Port**: 3004 (`apps/docs/package.json`'s `dev` script pins
+  `npx mint dev --port 3004`)
 - **Purpose**: Developer documentation and guides
 - **Features**:
   - MDX support for rich documentation
@@ -172,8 +173,8 @@ Technical documentation site built with Mintlify.
 **Development Commands**:
 
 ```bash
-mintlify dev             # Start documentation server
-mintlify broken-links    # Validate all links
+npm run dev              # npx mint dev --port 3004
+npm run lint             # npx mintlify broken-links
 ```
 
 ### Email Preview (`apps/email`)
@@ -181,7 +182,9 @@ mintlify broken-links    # Validate all links
 Development server for previewing email templates.
 
 - **Tech Stack**: React Email
-- **Port**: 3002 (development)
+- **Port**: 3007 (`apps/email/package.json`'s `dev` script pins
+  `email dev --port 3007`). This collides with the US tenant-api's port
+  (see [Port Reference](#port-reference)) — don't run both at once.
 - **Purpose**: Preview and develop email templates
 - **Features**:
   - Live preview of email templates
@@ -191,43 +194,29 @@ Development server for previewing email templates.
 **Development Commands**:
 
 ```bash
-npm run dev              # Start email preview server
+npm run dev              # email dev --port 3007
 npm run export           # Export email templates
 ```
 
-### Notifications (`apps/notifications`)
+### Background Jobs (`packages/background-jobs`)
 
-Development server for Novu notification workflows.
-
-- **Tech Stack**: Novu
-- **Port**: 3001 (development)
-- **Purpose**: Develop and test notification workflows
-- **Features**:
-  - Visual workflow builder
-  - Multi-channel notifications
-  - Template management
-
-**Development Commands**:
-
-```bash
-npm run dev              # Start Novu dev server
-```
-
-### Background Jobs (`apps/background-jobs`)
-
-Background job processing with Trigger.dev.
+Background job processing with Trigger.dev, for video-processing tasks. This
+is a shared package (no dev-tool app directory), consumed by `apps/app`.
 
 - **Tech Stack**: Trigger.dev
-- **Purpose**: Development environment for background jobs and scheduled tasks
+- **Purpose**: Video processing (thumbnail generation, status updates) in the
+  background
 - **Features**:
-  - Job scheduling and management
-  - Local development and testing
-  - Job monitoring and debugging
+  - Fetches videos, generates thumbnails with FFmpeg, uploads them, and
+    updates database records
 
 **Development Commands**:
 
 ```bash
-npm run dev              # Start Trigger.dev dev server
+npm run dev:trigger      # from repo root: turbo run dev --filter=background-jobs
+                         # (type-checks the package in watch mode)
+npx trigger.dev@latest dev  # from packages/background-jobs: actual Trigger.dev
+                             # dev server (see packages/background-jobs/README.md)
 ```
 
 ### Prisma Studio (`apps/studio`)
@@ -302,18 +291,21 @@ To work on any application:
 
 Default development ports for each application:
 
-| Application      | Port                            | URL                   |
-| ---------------- | ------------------------------- | --------------------- |
-| Main App         | 3001                            | http://localhost:3001 |
-| Admin            | dynamic (near 3005, `get-port`) | see terminal output   |
-| Web (Marketing)  | 3002                            | http://localhost:3002 |
-| CMS              | 3006                            | http://localhost:3006 |
-| Sites            | 3008                            | http://localhost:3008 |
-| Tenant API (US)  | 3007                            | http://localhost:3007 |
-| Tenant API (KSA) | 3009                            | http://localhost:3009 |
-| Prisma Studio    | 5555                            | http://localhost:5555 |
+| Application      | Port                                  | URL                   |
+| ---------------- | ------------------------------------- | --------------------- |
+| Main App         | 3001                                  | http://localhost:3001 |
+| Admin            | dynamic (near 3005, `get-port`)       | see terminal output   |
+| Web (Marketing)  | 3002                                  | http://localhost:3002 |
+| CMS              | 3006                                  | http://localhost:3006 |
+| Tenant API (US)  | 3007 ⚠️ collides with Email Preview   | http://localhost:3007 |
+| Sites            | 3008                                  | http://localhost:3008 |
+| Tenant API (KSA) | 3009                                  | http://localhost:3009 |
+| Docs (this site) | 3004                                  | http://localhost:3004 |
+| Email Preview    | 3007 ⚠️ collides with Tenant API (US) | http://localhost:3007 |
+| Prisma Studio    | 3003                                  | http://localhost:3003 |
 
 <Note>
 	Ports may vary if the default port is already in use. Check the terminal
-	output for the actual port being used.
+	output for the actual port being used. Email Preview and the US tenant-api
+	both default to port 3007 — running both at once requires overriding one.
 </Note>
