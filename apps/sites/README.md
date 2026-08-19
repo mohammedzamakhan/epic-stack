@@ -78,9 +78,10 @@ of the App/Admin operator Lingui locales:
 
 ## Page builder (website editor)
 
-Org website pages/posts are built from typed sections (hero, features, content,
-cards, testimonials, FAQ, CTA, header, footer, and more), edited in `apps/app`
-and rendered here:
+Org website pages are built from typed sections (hero, features, content, cards,
+testimonials, FAQ, CTA, header, footer, and more), edited in `apps/app` and
+rendered here. There is no separate organization "post" model — only
+`WebsitePage` / `WebsitePageSection` (see `packages/database/schema.prisma`).
 
 - Section/link types and defaults: `apps/app/app/utils/website/block-types.ts`
 - Default seeded home page sections: `apps/app/app/utils/website/home-page.ts`

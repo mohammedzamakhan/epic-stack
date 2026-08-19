@@ -32,6 +32,10 @@ checklist-based guide.
               └──────────────────────────────────────────────────┘
 ```
 
+The CMS's "D1 + R2" box above is the declared target in `wrangler.jsonc`; as
+shipped, Payload still uses a local SQLite file and local disk storage instead —
+see [CMS storage](./cms-storage.md).
+
 Customer phone/name/email never go in the US App/Admin database. See
 [Tenant data residency](./tenant-data-residency.md).
 
@@ -40,8 +44,9 @@ Customer phone/name/email never go in the US App/Admin database. See
 - **Website**: Cloudflare Pages (Astro) - Already configured ✅
 - **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS (US)
 - **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite (US)
-- **CMS App**: Cloudflare Workers (`epic-startup-cms`) - D1 (SQLite) + R2
-  storage. See [CMS storage](./cms-storage.md).
+- **CMS App**: Cloudflare Workers (`epic-startup-cms`). `wrangler.jsonc`
+  declares D1 (SQLite) + R2 bindings, but Payload isn't wired to use either yet
+  — see [CMS storage](./cms-storage.md).
 - **Tenant API (US)**: OCI Ashburn (`us-ashburn-1`) — customer PII for
   `dataRegion=us`
 - **Tenant API (KSA)**: OCI Riyadh (`me-riyadh-1`) — customer PII for
@@ -75,9 +80,11 @@ Customer phone/name/email never go in the US App/Admin database. See
 
 ### Cloudflare D1 + R2 Setup (for CMS)
 
-CMS data lives in a Cloudflare D1 (SQLite) database; CMS media lives in an R2
-bucket. Both are bound to the Worker in `apps/cms/wrangler.jsonc`. See
-[CMS storage](./cms-storage.md) for the local-vs-production storage split.
+`apps/cms/wrangler.jsonc` binds a D1 (SQLite) database and an R2 bucket to the
+Worker for future use, but Payload doesn't route through either binding yet (it
+always uses a local SQLite file and local `public/media/` storage) — see
+[CMS storage](./cms-storage.md) for what's still outstanding to actually wire
+them in. Creating them now is still useful groundwork:
 
 - [ ] **1.1** Create the D1 database
   ```bash
@@ -153,8 +160,8 @@ Only main and admin need Fly apps.
 
 ### Note: CMS Doesn't Need a Fly Volume
 
-CMS runs on Cloudflare Workers with D1 + R2 (see Step 1), so it has no Fly app
-and no Fly volume.
+CMS runs on Cloudflare Workers (see Step 1), so it has no Fly app and no Fly
+volume regardless of whether D1/R2 are wired in.
 
 ---
 
@@ -333,7 +340,9 @@ via Wrangler, not `flyctl secrets`:
   - [ ] `container-app` / `deploy-app` jobs exist
   - [ ] `container-admin` / `deploy-admin` jobs exist
   - [ ] `deploy-cms` job exists (builds with OpenNext, runs `payload migrate`
-        against D1, then `wrangler deploy` — no container step)
+        against the local SQLite file baked into the build — not D1, see
+        [CMS storage](./cms-storage.md) — then `wrangler deploy`, no container
+        step)
   - [ ] `container-tenant-api` builds `linux/arm64` and pushes to GHCR
   - [ ] `deploy-tenant-api` SSHs to OCI VMs when `OCI_TENANT_*_HOST` is set
   - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
@@ -367,8 +376,10 @@ via Wrangler, not `flyctl secrets`:
   flyctl logs --app epic-startup-staging
   flyctl logs --app epic-startup-admin-staging
   ```
-  CMS has no separate staging Worker; it redeploys on every push to `dev` or
-  `main`. Tail it with `npx wrangler tail` from `apps/cms`.
+  CMS has no separate staging Worker; the `deploy-cms` job redeploys it on
+  pushes to `dev` or `main` that affect `apps/cms` (per the `affected` check or
+  a modified path under `apps/cms/`), not on every push. Tail it with
+  `npx wrangler tail` from `apps/cms`.
 
 ### Verify Staging Apps
 
@@ -541,21 +552,23 @@ CMS has one Worker environment (the `NEXT_PUBLIC_SERVER_URL` var in
 
 ### Applications Deployed
 
-✅ **Website**: Cloudflare Pages (Astro)  
-✅ **Main App**: `epic-startup` + `epic-startup-staging` (Fly.io)  
-✅ **Admin App**: `epic-startup-admin` + `epic-startup-admin-staging` (Fly.io)  
-✅ **CMS App**: `epic-startup-cms` (Cloudflare Workers, single environment)
+- ✅ **Website**: Cloudflare Pages (Astro)
+- ✅ **Main App**: `epic-startup` + `epic-startup-staging` (Fly.io)
+- ✅ **Admin App**: `epic-startup-admin` + `epic-startup-admin-staging` (Fly.io)
+- ✅ **CMS App**: `epic-startup-cms` (Cloudflare Workers, single environment)
 
 ### Database Architecture
 
-✅ **Main/Admin Apps**: Shared SQLite with LiteFS replication  
-✅ **CMS App**: Cloudflare D1 (SQLite) + R2 for media (separate from App/Admin
-LiteFS; see [CMS storage](./cms-storage.md))
+- ✅ **Main/Admin Apps**: Shared SQLite with LiteFS replication
+- ⚠️ **CMS App**: local SQLite file today (D1 binding declared but not wired in
+  — see [CMS storage](./cms-storage.md))
 
 ### Deployment Pipeline
 
-✅ **Staging**: Automatic deployment on push to `dev` branch  
-✅ **Production**: Automatic deployment on push to `main` branch
+- ✅ **Staging**: Automatic deployment on push to `dev` branch (for apps
+  affected by the push)
+- ✅ **Production**: Automatic deployment on push to `main` branch (for apps
+  affected by the push)
 
 ---
 
@@ -588,10 +601,12 @@ LiteFS; see [CMS storage](./cms-storage.md))
 - [ ] Monitor LiteFS logs for coordination issues
 - [ ] Verify volumes are properly mounted
 
-### If CMS Won't Deploy or Connect to D1/R2
+### If the CMS Worker Won't Deploy
 
 - [ ] Verify `apps/cms/wrangler.jsonc` has a real `database_id` (not the
-      placeholder `DATABASE_ID`) from `wrangler d1 create`
+      placeholder `DATABASE_ID`) from `wrangler d1 create` — required for the
+      binding to exist, even though Payload doesn't use it yet (see
+      [CMS storage](./cms-storage.md))
 - [ ] Check Worker secrets are set: `npx wrangler secret list` (from `apps/cms`)
 - [ ] Tail Worker logs: `npx wrangler tail` (from `apps/cms`)
 - [ ] Confirm the R2 bucket exists: `npx wrangler r2 bucket list`
@@ -612,10 +627,11 @@ LiteFS; see [CMS storage](./cms-storage.md))
 **Congratulations!** You've successfully deployed your complete Epic Stack to
 production:
 
-🌐 **Website**: Fast static site on Cloudflare's global CDN  
-⚡ **Main App**: Scalable React Router app with SQLite  
-🔧 **Admin App**: Powerful admin interface sharing the same data  
-📝 **CMS**: Flexible content management on Cloudflare Workers with D1 + R2
+- 🌐 **Website**: Fast static site on Cloudflare's global CDN
+- ⚡ **Main App**: Scalable React Router app with SQLite
+- 🔧 **Admin App**: Powerful admin interface sharing the same data
+- 📝 **CMS**: Content management on Cloudflare Workers (local SQLite storage
+  today; see [CMS storage](./cms-storage.md) for the D1/R2 wiring gap)
 
 Your applications are now running in production with:
 

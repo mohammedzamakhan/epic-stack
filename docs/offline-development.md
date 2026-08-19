@@ -67,9 +67,10 @@ Mock OAuth providers are automatically used when prefixed with `MOCK_`.
 
 ### Object Storage (Tigris / R2)
 
-**CMS (Payload)**: Automatically uses local file storage in development. Files
-are stored in `apps/cms/public/media/` and served directly by Next.js. In
-production it uses Cloudflare R2 — there is no local-dev toggle for the CMS. See
+**CMS (Payload)**: Uses local file storage in every environment today. Files are
+stored in `apps/cms/public/media/` and served directly by Next.js. An R2 binding
+is declared in `apps/cms/wrangler.jsonc` but is not yet wired into Payload, so
+there is no local-dev/production storage difference to toggle. See
 [CMS storage](./cms-storage.md).
 
 **Main App**: Uses custom S3 client with mock credentials (Tigris in
