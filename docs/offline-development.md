@@ -11,8 +11,9 @@ Once you've completed the initial setup, you can develop completely offline:
 
 - **Main App**: SQLite database with LiteFS
 - **Admin Dashboard**: Shares SQLite database
-- **CMS (Payload)**: MongoDB via Docker (local) + Local file storage
-- **CMS Media**: Stored in `public/media/` directory (no S3 needed)
+- **CMS (Payload)**: Local SQLite file (`@payloadcms/db-sqlite`) + local file
+  storage — no Docker, no cloud database
+- **CMS Media**: Stored in `apps/cms/public/media/` directory (no R2 needed)
 - **Mobile App**: Expo with local development server
 - **UI Development**: All components and packages
 - **Testing**: Unit tests and E2E tests
@@ -30,8 +31,7 @@ Once you've completed the initial setup, you can develop completely offline:
 The first-time setup requires internet for:
 
 1. Installing npm packages
-2. Pulling Docker images (~400MB for MongoDB)
-3. Setting up SSL certificates
+2. Setting up SSL certificates
 
 ```bash
 # One-time setup
@@ -39,48 +39,8 @@ npm install
 npm run setup
 ```
 
-## Docker Services for Offline Development
-
-The CMS uses MongoDB, which runs locally via Docker Compose. This ensures you
-don't need a cloud MongoDB instance for development.
-
-### Automatic Startup
-
-Docker services start automatically with:
-
-```bash
-npm run dev
-```
-
-### Prerequisites
-
-**Docker Desktop must be installed and running**:
-
-- macOS: https://docs.docker.com/desktop/install/mac-install/
-- Windows: https://docs.docker.com/desktop/install/windows-install/
-- Linux: https://docs.docker.com/desktop/install/linux-install/
-
-### How It Works
-
-1. `npm run dev` checks if Docker is installed and running
-2. Starts MongoDB container in the background
-3. Waits for MongoDB to be healthy
-4. Starts all application services
-
-### Manual Control
-
-```bash
-# Start Docker services only
-npm run dev:services
-
-# Stop Docker services
-npm run dev:services:stop
-
-# View Docker logs
-npm run dev:services:logs
-```
-
-See [Docker Services Guide](./docker-services.md) for detailed documentation.
+There are no Docker services to start for local development — the CMS uses a
+local SQLite file, not a containerized database.
 
 ## Mocking External Services
 
@@ -105,19 +65,16 @@ GITHUB_CLIENT_SECRET = 'MOCK_GITHUB_CLIENT_SECRET'
 
 Mock OAuth providers are automatically used when prefixed with `MOCK_`.
 
-### Object Storage (S3/Tigris)
+### Object Storage (Tigris / R2)
 
 **CMS (Payload)**: Automatically uses local file storage in development. Files
-are stored in `apps/cms/public/media/` and served directly by Next.js.
+are stored in `apps/cms/public/media/` and served directly by Next.js. In
+production it uses Cloudflare R2 — there is no local-dev toggle for the CMS. See
+[CMS storage](./cms-storage.md).
 
-To force S3 usage in development:
-
-```bash
-# .env
-USE_S3_STORAGE=true
-```
-
-**Main App**: Uses custom S3 client with mock credentials:
+**Main App**: Uses custom S3 client with mock credentials (Tigris in
+production). `USE_S3_STORAGE=true` forces this mock-S3 path in development; it
+has no effect on the CMS.
 
 ```bash
 # .env
@@ -130,45 +87,24 @@ BUCKET_NAME="mock-bucket"
 
 After initial setup, to work offline:
 
-1. **Start Docker Desktop** (one-time per session)
-2. **Run development**:
+1. **Run development**:
 
    ```bash
    npm run dev
    ```
 
-3. **All services run locally**:
+2. **All services run locally**:
    - Main app: http://localhost:3001
-   - Marketing site: http://localhost:3002
-   - CMS: http://localhost:3003
-   - Admin: http://localhost:3004
+   - Marketing site (web): http://localhost:3002
+   - CMS: http://localhost:3006
+   - Sites (tenant sites): http://localhost:3008
+   - Tenant API (US): http://localhost:3007
+   - Tenant API (KSA): http://localhost:3009
+   - Admin: picks a free port near 3005 automatically (`get-port`); see the
+     terminal output for the actual port
    - Prisma Studio: http://localhost:5555
 
 ## Troubleshooting Offline Development
-
-### Docker Not Running
-
-```
-❌ Docker is not running.
-   Please start Docker Desktop and try again.
-```
-
-**Solution**: Open Docker Desktop and wait for it to start.
-
-### MongoDB Connection Failed
-
-If CMS can't connect to MongoDB:
-
-```bash
-# Check Docker status
-docker compose ps
-
-# Restart MongoDB
-docker compose restart mongodb
-
-# View logs
-npm run dev:services:logs
-```
 
 ### Port Conflicts
 
@@ -177,8 +113,8 @@ If ports are already in use:
 1. Check what's using the port:
 
    ```bash
-   lsof -i :27017  # MongoDB
    lsof -i :3001   # Main app
+   lsof -i :3006   # CMS
    ```
 
 2. Stop conflicting services or change ports in app configs
@@ -187,19 +123,18 @@ If ports are already in use:
 
 All data is stored locally and persists between sessions:
 
-- **SQLite**: `packages/database/data.db`
-- **MongoDB**: Docker volume `mongo-data`
+- **SQLite (App/Admin)**: `packages/database/data.db`
+- **SQLite (CMS)**: `apps/cms/data/cms.db`
 - **Cache**: `other/cache.db`
 
 To reset data:
 
 ```bash
-# Reset SQLite
+# Reset App/Admin SQLite
 npm run db:reset
 
-# Reset MongoDB
-docker compose down -v
-npm run dev:services
+# Reset CMS SQLite: just delete the local file
+rm apps/cms/data/cms.db
 ```
 
 ## CI/CD Considerations
@@ -208,8 +143,9 @@ While local development is offline-first, CI/CD pipelines require internet for:
 
 - Installing dependencies
 - Running tests
-- Building Docker images
-- Deploying to Fly.io
+- Building Docker images (App, Admin) and the CMS Worker bundle
+- Deploying App/Admin to Fly.io, CMS to Cloudflare Workers, and Sites/Web to
+  Cloudflare Pages
 
 This is expected and doesn't impact local development experience.
 

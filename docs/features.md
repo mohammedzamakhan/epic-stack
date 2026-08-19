@@ -19,6 +19,9 @@ Here are a few things you get today:
   PII stays in per-org SQLite on OCI (Ashburn / Riyadh), not in US Prisma.
   Changing data region wipes customers (see
   [tenant data residency](./tenant-data-residency.md))
+- Tenant Sites locale-prefixed internationalization (e.g. `/ar/about`) for
+  published organization websites, independent of the App/Admin Lingui locales
+  (see `apps/sites/src/middleware.ts` and `packages/common/src/site-locales.ts`)
 - Two-Factor Authentication (2fa) with support for authenticator apps
 - Transactional email with [Resend](https://resend.com/) and forgot
   password/password reset support
@@ -51,7 +54,6 @@ docs examples) in the future:
 - Logging
 - Ecommerce support with [Stripe](https://stripe.com/)
 - Ethical site analytics with [fathom](https://usefathom.com/)
-- Internationalization
 - Image optimization route and component
 - Feature flags
 - Documentation on production data seeding process

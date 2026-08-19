@@ -8,8 +8,8 @@ checklist-based guide.
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Website       │    │   Main App      │    │   Admin App     │    │   CMS App       │
-│ (Cloudflare     │    │ (Fly.io US)     │    │ (Fly.io US)     │    │ (Fly.io)        │
-│  Pages)         │    │                 │    │                 │    │                 │
+│ (Cloudflare     │    │ (Fly.io US)     │    │ (Fly.io US)     │    │ (Cloudflare     │
+│  Pages)         │    │                 │    │                 │    │  Workers)       │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │                       │
          │                       └───────┬───────────────┘                       │
@@ -17,9 +17,9 @@ checklist-based guide.
          └───────────────────────────────┼───────────────────────────────────────┘
                                          │
                          ┌─────────────────┐              ┌─────────────────┐
-                         │ SQLite (LiteFS) │              │    MongoDB      │
-                         │ App/Admin US    │              │    (Atlas)      │
-                         │ org/CMS only    │              │   CMS Data      │
+                         │ SQLite (LiteFS) │              │   D1 + R2       │
+                         │ App/Admin US    │              │  (Cloudflare)   │
+                         │ org data only   │              │  CMS content    │
                          └─────────────────┘              └─────────────────┘
                                          │
                     provision orgId only │
@@ -40,7 +40,8 @@ Customer phone/name/email never go in the US App/Admin database. See
 - **Website**: Cloudflare Pages (Astro) - Already configured ✅
 - **Main App**: Fly.io (`epic-startup`) - SQLite + LiteFS (US)
 - **Admin App**: Fly.io (`epic-startup-admin`) - Shared SQLite (US)
-- **CMS App**: Fly.io (`epic-startup-cms`) - MongoDB Atlas
+- **CMS App**: Cloudflare Workers (`epic-startup-cms`) - D1 (SQLite) + R2
+  storage. See [CMS storage](./cms-storage.md).
 - **Tenant API (US)**: OCI Ashburn (`us-ashburn-1`) — customer PII for
   `dataRegion=us`
 - **Tenant API (KSA)**: OCI Riyadh (`me-riyadh-1`) — customer PII for
@@ -55,48 +56,52 @@ Customer phone/name/email never go in the US App/Admin database. See
 
 - [ ] **Fly.io CLI** installed and authenticated (`flyctl auth login`)
 - [ ] **GitHub repository** with monorepo structure
-- [ ] **MongoDB Atlas account** (free tier available)
-- [ ] **Cloudflare account** (for website deployment)
+- [ ] **Cloudflare account** with Wrangler CLI installed and authenticated
+      (`npx wrangler login`), for the website, Sites, and CMS Worker
 - [ ] **Node.js 22+** installed locally
 
 ### Required Accounts
 
 - [ ] **OCI tenancy** with **home region Riyadh** (`me-riyadh-1`) and Ashburn
       subscribed
-- [ ] **Fly.io account** with organization set up
-- [ ] **MongoDB Atlas account** created
+- [ ] **Fly.io account** with organization set up (App + Admin only)
 - [ ] **GitHub Actions** access to repository
-- [ ] **Cloudflare Pages** connected to repository
+- [ ] **Cloudflare account** connected to the repository for Pages (website,
+      Sites) and for the CMS Worker (Workers, D1, R2)
 
 ---
 
 ## 🗄️ Step 1: Database Setup
 
-### MongoDB Atlas Setup (for CMS)
+### Cloudflare D1 + R2 Setup (for CMS)
 
-- [ ] **1.1** Log in to [MongoDB Atlas](https://www.mongodb.com/atlas)
-- [ ] **1.2** Create new project: "Epic Startup CMS"
-- [ ] **1.3** Create M0 Sandbox cluster (free tier)
-  - [ ] Choose region closest to your Fly.io region
-  - [ ] Name: `epic-startup-cms`
-- [ ] **1.4** Create database user
-  - [ ] Username: `cms-user`
-  - [ ] Generate secure password (save it!)
-  - [ ] Privileges: "Read and write to any database"
-- [ ] **1.5** Configure network access
-  - [ ] Add IP: `0.0.0.0/0` (allow from anywhere)
-- [ ] **1.6** Get connection string
-  - [ ] Go to Clusters → Connect → Connect your application
-  - [ ] Copy connection string
-  - [ ] Replace `<password>` with actual password
-  - [ ] Save for later:
-        `mongodb+srv://cms-user:PASSWORD@epic-startup-cms.xxxxx.mongodb.net/?retryWrites=true&w=majority`
+CMS data lives in a Cloudflare D1 (SQLite) database; CMS media lives in an R2
+bucket. Both are bound to the Worker in `apps/cms/wrangler.jsonc`. See
+[CMS storage](./cms-storage.md) for the local-vs-production storage split.
+
+- [ ] **1.1** Create the D1 database
+  ```bash
+  cd apps/cms
+  npx wrangler d1 create epic-startup-cms
+  ```
+  Copy the returned `database_id` into the `d1_databases` entry in
+  `apps/cms/wrangler.jsonc` (it ships with the placeholder `DATABASE_ID`).
+- [ ] **1.2** Create the R2 bucket for media
+  ```bash
+  npx wrangler r2 bucket create epic-startup-cms-media
+  ```
+- [ ] **1.3** Run Payload's migrations against the new D1 database as part of
+      first deploy (see Step 5 for secrets and Step 9 for the deploy job that
+      runs `payload migrate`).
 
 ---
 
 ## 🚀 Step 2: Create Fly.io Applications
 
 ### Create All Applications
+
+CMS is not a Fly app — it deploys to Cloudflare Workers (see Step 1 and Step 5).
+Only main and admin need Fly apps.
 
 - [ ] **2.1** Create main app (production)
   ```bash
@@ -114,22 +119,14 @@ Customer phone/name/email never go in the US App/Admin database. See
   ```bash
   flyctl apps create epic-startup-admin-staging --org your-org-name
   ```
-- [ ] **2.5** Create CMS app (production)
-  ```bash
-  flyctl apps create epic-startup-cms --org your-org-name
-  ```
-- [ ] **2.6** Create CMS app (staging)
-  ```bash
-  flyctl apps create epic-startup-cms-staging --org your-org-name
-  ```
 
 ### Verify Applications Created
 
-- [ ] **2.7** List all apps to verify
+- [ ] **2.5** List all apps to verify
   ```bash
   flyctl apps list
   ```
-  Should show 6 apps: main, admin, cms (each with production + staging)
+  Should show 4 apps: main, admin (each with production + staging)
 
 ---
 
@@ -154,9 +151,10 @@ Customer phone/name/email never go in the US App/Admin database. See
   flyctl volumes create data --region sjc --size 3 --app epic-startup-admin-staging
   ```
 
-### Note: CMS Apps Don't Need Volumes
+### Note: CMS Doesn't Need a Fly Volume
 
-CMS apps use MongoDB Atlas (cloud database), so no local volumes needed.
+CMS runs on Cloudflare Workers with D1 + R2 (see Step 1), so it has no Fly app
+and no Fly volume.
 
 ---
 
@@ -281,40 +279,24 @@ block volume per region. Home region = Riyadh.
 - [ ] **5.4d** Put Cloudflare (or a Tunnel) in front of port 8080. Skip OCI load
       balancers and NAT.
 
-### CMS App Environment Variables
+### CMS Worker Secrets (Cloudflare, not Fly)
 
-#### Production CMS App
+CMS has a single Worker (no separate staging app). Secrets are set on Cloudflare
+via Wrangler, not `flyctl secrets`:
 
-- [ ] **5.5** Set CMS production secrets (use MongoDB connection string from
-      Step 1.6)
+- [ ] **5.5** Set the CMS Worker secrets
   ```bash
-  flyctl secrets set \
-    DATABASE_URI="mongodb+srv://cms-user:YOUR_PASSWORD@epic-startup-cms.xxxxx.mongodb.net/epic-cms-prod?retryWrites=true&w=majority" \
-    PAYLOAD_SECRET="$(openssl rand -hex 32)" \
-    NEXT_PUBLIC_SERVER_URL="https://epic-startup-cms.fly.dev" \
-    CRON_SECRET="$(openssl rand -hex 32)" \
-    PREVIEW_SECRET="$(openssl rand -hex 32)" \
-    WEB_APP_URL="https://epic-startup.me" \
-    NEXT_PUBLIC_WEB_APP_URL="https://epic-startup.me" \
-    USE_S3_STORAGE="false" \
-    --app epic-startup-cms
+  cd apps/cms
+  npx wrangler secret put PAYLOAD_SECRET
+  npx wrangler secret put CRON_SECRET
+  npx wrangler secret put PREVIEW_SECRET
   ```
-
-#### Staging CMS App
-
-- [ ] **5.6** Set CMS staging secrets
-  ```bash
-  flyctl secrets set \
-    DATABASE_URI="mongodb+srv://cms-user:YOUR_PASSWORD@epic-startup-cms.xxxxx.mongodb.net/epic-cms-staging?retryWrites=true&w=majority" \
-    PAYLOAD_SECRET="$(openssl rand -hex 32)" \
-    NEXT_PUBLIC_SERVER_URL="https://epic-startup-cms-staging.fly.dev" \
-    CRON_SECRET="$(openssl rand -hex 32)" \
-    PREVIEW_SECRET="$(openssl rand -hex 32)" \
-    WEB_APP_URL="https://epic-startup-staging.fly.dev" \
-    NEXT_PUBLIC_WEB_APP_URL="https://epic-startup-staging.fly.dev" \
-    USE_S3_STORAGE="false" \
-    --app epic-startup-cms-staging
-  ```
+  `NEXT_PUBLIC_SERVER_URL` is a plaintext var already set in
+  `apps/cms/wrangler.jsonc`; update it to your real `workers.dev` (or custom)
+  domain there instead of as a secret.
+- [ ] **5.6** Set the GitHub Actions secrets the `deploy-cms` job needs:
+      `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (shared with the
+      website/Sites Cloudflare Pages jobs).
 
 ### Verify Environment Variables
 
@@ -322,7 +304,7 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl secrets list --app epic-startup
   flyctl secrets list --app epic-startup-admin
-  flyctl secrets list --app epic-startup-cms
+  (cd apps/cms && npx wrangler secret list)
   ```
 
 ---
@@ -350,7 +332,8 @@ block volume per region. Home region = Riyadh.
 - [ ] **6.3** Check `.github/workflows/deploy.yml` includes all apps
   - [ ] `container-app` / `deploy-app` jobs exist
   - [ ] `container-admin` / `deploy-admin` jobs exist
-  - [ ] `container-cms` / `deploy-cms` jobs exist
+  - [ ] `deploy-cms` job exists (builds with OpenNext, runs `payload migrate`
+        against D1, then `wrangler deploy` — no container step)
   - [ ] `container-tenant-api` builds `linux/arm64` and pushes to GHCR
   - [ ] `deploy-tenant-api` SSHs to OCI VMs when `OCI_TENANT_*_HOST` is set
   - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
@@ -383,8 +366,9 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl logs --app epic-startup-staging
   flyctl logs --app epic-startup-admin-staging
-  flyctl logs --app epic-startup-cms-staging
   ```
+  CMS has no separate staging Worker; it redeploys on every push to `dev` or
+  `main`. Tail it with `npx wrangler tail` from `apps/cms`.
 
 ### Verify Staging Apps
 
@@ -392,13 +376,11 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl status --app epic-startup-staging
   flyctl status --app epic-startup-admin-staging
-  flyctl status --app epic-startup-cms-staging
   ```
 - [ ] **7.6** Get staging URLs
   ```bash
   flyctl info --app epic-startup-staging
   flyctl info --app epic-startup-admin-staging
-  flyctl info --app epic-startup-cms-staging
   ```
 
 ---
@@ -421,11 +403,15 @@ block volume per region. Home region = Riyadh.
 
 ### Test CMS App
 
-- [ ] **8.9** Visit CMS admin: `https://epic-startup-cms-staging.fly.dev/admin`
+CMS has one Worker environment (the `NEXT_PUBLIC_SERVER_URL` var in
+`apps/cms/wrangler.jsonc`), not a separate staging app.
+
+- [ ] **8.9** Visit CMS admin:
+      `https://epic-startup-cms.<your-subdomain>.workers.dev/admin`
 - [ ] **8.10** Complete CMS setup wizard
 - [ ] **8.11** Create test content (posts, pages)
 - [ ] **8.12** Test API endpoints:
-      `https://epic-startup-cms-staging.fly.dev/api/posts`
+      `https://epic-startup-cms.<your-subdomain>.workers.dev/api/posts`
 
 ### Test Database Sharing (Main/Admin)
 
@@ -463,7 +449,7 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl logs --app epic-startup
   flyctl logs --app epic-startup-admin
-  flyctl logs --app epic-startup-cms
+  (cd apps/cms && npx wrangler tail)
   ```
 
 ### Verify Production Apps
@@ -472,14 +458,16 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl status --app epic-startup
   flyctl status --app epic-startup-admin
-  flyctl status --app epic-startup-cms
   ```
+  Check CMS in the Cloudflare dashboard (Workers & Pages) or
+  `npx wrangler deployments list` from `apps/cms`.
 - [ ] **9.5** Get production URLs
   ```bash
   flyctl info --app epic-startup
   flyctl info --app epic-startup-admin
-  flyctl info --app epic-startup-cms
   ```
+  CMS URL is the `NEXT_PUBLIC_SERVER_URL` value in `apps/cms/wrangler.jsonc` (or
+  your custom domain).
 
 ---
 
@@ -501,8 +489,9 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl metrics --app epic-startup
   flyctl metrics --app epic-startup-admin
-  flyctl metrics --app epic-startup-cms
   ```
+  CMS metrics (requests, CPU time, errors) are in the Cloudflare dashboard under
+  Workers & Pages, not `flyctl metrics`.
 
 ### Security Verification
 
@@ -524,10 +513,10 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl certs create admin.yourdomain.com --app epic-startup-admin
   ```
-- [ ] **11.3** Add custom domain to CMS app
-  ```bash
-  flyctl certs create cms.yourdomain.com --app epic-startup-cms
-  ```
+- [ ] **11.3** Add a custom domain to the CMS Worker via the Cloudflare
+      dashboard (Workers & Pages → your Worker → Settings → Domains & Routes),
+      or a `routes` entry in `apps/cms/wrangler.jsonc`. `flyctl certs` does not
+      apply to CMS.
 
 ### Scaling (Optional)
 
@@ -535,7 +524,9 @@ block volume per region. Home region = Riyadh.
   ```bash
   flyctl scale count 2 --app epic-startup
   ```
-- [ ] **11.5** Keep admin and CMS on single instances (typically sufficient)
+- [ ] **11.5** Keep admin on a single instance (typically sufficient). CMS
+      scales automatically as a Cloudflare Worker; there is nothing to
+      configure.
 
 ### Monitoring Setup (Optional)
 
@@ -551,14 +542,15 @@ block volume per region. Home region = Riyadh.
 ### Applications Deployed
 
 ✅ **Website**: Cloudflare Pages (Astro)  
-✅ **Main App**: `epic-startup` + `epic-startup-staging`  
-✅ **Admin App**: `epic-startup-admin` + `epic-startup-admin-staging`  
-✅ **CMS App**: `epic-startup-cms` + `epic-startup-cms-staging`
+✅ **Main App**: `epic-startup` + `epic-startup-staging` (Fly.io)  
+✅ **Admin App**: `epic-startup-admin` + `epic-startup-admin-staging` (Fly.io)  
+✅ **CMS App**: `epic-startup-cms` (Cloudflare Workers, single environment)
 
 ### Database Architecture
 
 ✅ **Main/Admin Apps**: Shared SQLite with LiteFS replication  
-✅ **CMS App**: MongoDB Atlas (separate database)
+✅ **CMS App**: Cloudflare D1 (SQLite) + R2 for media (separate from App/Admin
+LiteFS; see [CMS storage](./cms-storage.md))
 
 ### Deployment Pipeline
 
@@ -569,13 +561,14 @@ block volume per region. Home region = Riyadh.
 
 ## 💰 Cost Breakdown
 
-| Service              | Monthly Cost | Notes                            |
-| -------------------- | ------------ | -------------------------------- |
-| **Fly.io Apps**      | $15-30       | App / Admin / CMS                |
-| **OCI tenant-api**   | $0-20        | Free Riyadh A1 + paid Ashburn A1 |
-| **MongoDB Atlas**    | $0           | M0 Sandbox (free tier)           |
-| **Cloudflare Pages** | $0           | Free tier                        |
-| **Total**            | **$15-50**   | Skip OCI LB / NAT                |
+| Service                | Monthly Cost | Notes                                    |
+| ---------------------- | ------------ | ---------------------------------------- |
+| **Fly.io Apps**        | $10-20       | App / Admin only                         |
+| **OCI tenant-api**     | $0-20        | Free Riyadh A1 + paid Ashburn A1         |
+| **Cloudflare Workers** | $0           | CMS Worker, free tier covers low traffic |
+| **Cloudflare D1 + R2** | $0           | Free tier; pay-as-you-go beyond limits   |
+| **Cloudflare Pages**   | $0           | Website + Sites, free tier               |
+| **Total**              | **$10-40**   | Skip OCI LB / NAT                        |
 
 ---
 
@@ -595,12 +588,15 @@ block volume per region. Home region = Riyadh.
 - [ ] Monitor LiteFS logs for coordination issues
 - [ ] Verify volumes are properly mounted
 
-### If CMS Won't Connect to MongoDB
+### If CMS Won't Deploy or Connect to D1/R2
 
-- [ ] Test MongoDB connection string locally
-- [ ] Verify MongoDB Atlas network access settings
-- [ ] Check DATABASE_URI environment variable
-- [ ] Verify MongoDB user permissions
+- [ ] Verify `apps/cms/wrangler.jsonc` has a real `database_id` (not the
+      placeholder `DATABASE_ID`) from `wrangler d1 create`
+- [ ] Check Worker secrets are set: `npx wrangler secret list` (from `apps/cms`)
+- [ ] Tail Worker logs: `npx wrangler tail` (from `apps/cms`)
+- [ ] Confirm the R2 bucket exists: `npx wrangler r2 bucket list`
+- [ ] Confirm `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` are set as GitHub
+      Actions secrets for the `deploy-cms` job
 
 ### If Deployments Fail
 
@@ -619,7 +615,7 @@ production:
 🌐 **Website**: Fast static site on Cloudflare's global CDN  
 ⚡ **Main App**: Scalable React Router app with SQLite  
 🔧 **Admin App**: Powerful admin interface sharing the same data  
-📝 **CMS**: Flexible content management with MongoDB
+📝 **CMS**: Flexible content management on Cloudflare Workers with D1 + R2
 
 Your applications are now running in production with:
 
