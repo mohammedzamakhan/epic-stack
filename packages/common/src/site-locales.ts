@@ -5,32 +5,10 @@
 export const SITE_CONTENT_LOCALES = [
 	'en',
 	'ar',
-	'zh',
 	'es',
 	'fr',
 	'de',
-	'hi',
-	'pt',
-	'ja',
-	'ko',
-	'it',
-	'nl',
-	'pl',
-	'ru',
-	'tr',
-	'he',
-	'fa',
-	'ur',
-	'id',
-	'vi',
-	'th',
-	'sv',
-	'da',
-	'fi',
-	'no',
-	'cs',
-	'ro',
-	'uk',
+	'zh',
 ] as const
 
 export type SiteContentLocale = (typeof SITE_CONTENT_LOCALES)[number]
@@ -38,40 +16,13 @@ export type SiteContentLocale = (typeof SITE_CONTENT_LOCALES)[number]
 export const SITE_CONTENT_LOCALE_LABELS: Record<SiteContentLocale, string> = {
 	en: 'English',
 	ar: 'Arabic',
-	zh: 'Chinese',
 	es: 'Spanish',
 	fr: 'French',
 	de: 'German',
-	hi: 'Hindi',
-	pt: 'Portuguese',
-	ja: 'Japanese',
-	ko: 'Korean',
-	it: 'Italian',
-	nl: 'Dutch',
-	pl: 'Polish',
-	ru: 'Russian',
-	tr: 'Turkish',
-	he: 'Hebrew',
-	fa: 'Persian',
-	ur: 'Urdu',
-	id: 'Indonesian',
-	vi: 'Vietnamese',
-	th: 'Thai',
-	sv: 'Swedish',
-	da: 'Danish',
-	fi: 'Finnish',
-	no: 'Norwegian',
-	cs: 'Czech',
-	ro: 'Romanian',
-	uk: 'Ukrainian',
+	zh: 'Chinese',
 }
 
-export const RTL_SITE_LOCALES = new Set<SiteContentLocale>([
-	'ar',
-	'he',
-	'fa',
-	'ur',
-])
+export const RTL_SITE_LOCALES = new Set<SiteContentLocale>(['ar'])
 
 export type SiteLocalesConfig = {
 	locales: SiteContentLocale[]
@@ -299,7 +250,7 @@ export function negotiateSiteLocale(
 		: (supported[0] ?? 'en')
 }
 
-/** Page slugs that collide with locale prefixes, e.g. `ar`, `id`, `it`. */
+/** Page slugs that collide with locale prefixes, e.g. `ar`, `zh`. */
 export function isReservedSiteLocaleSlug(slug: string): boolean {
 	return isSiteContentLocale(slug.trim().toLowerCase())
 }

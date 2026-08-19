@@ -2,7 +2,7 @@ import { extractor as babelExtractor } from '@lingui/cli/api'
 import { type LinguiConfig } from '@lingui/conf'
 import { astroExtractor } from './src/i18n/astro-extractor.ts'
 
-/** Chrome catalogs. Other site content locales fall back to English at runtime. */
+/** Chrome catalogs. Matches `SITE_CONTENT_LOCALES`; unknown langs fall back to English. */
 export const SITE_CHROME_LOCALES = ['en', 'ar', 'es', 'fr', 'de', 'zh'] as const
 
 const config: LinguiConfig = {

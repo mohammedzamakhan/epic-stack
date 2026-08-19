@@ -63,7 +63,8 @@ describe('site-locales', () => {
 
 	it('reserves catalog locale codes as page slugs', () => {
 		expect(isReservedSiteLocaleSlug('ar')).toBe(true)
-		expect(isReservedSiteLocaleSlug('id')).toBe(true)
+		expect(isReservedSiteLocaleSlug('zh')).toBe(true)
+		expect(isReservedSiteLocaleSlug('id')).toBe(false)
 		expect(isReservedSiteLocaleSlug('about')).toBe(false)
 		expect(isReservedSiteLocaleSlug('en-us')).toBe(false)
 	})
