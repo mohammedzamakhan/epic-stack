@@ -372,7 +372,8 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `ENCRYPTION_KEY` - 32 characters for general encryption
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations
-- `USE_S3_STORAGE` - Set to `true` to use S3 in CMS (default: local in dev)
+- `USE_S3_STORAGE` - App/Admin only: set to `true` to force Tigris/S3 in dev
+  (default: mocked locally). Not read by the CMS.
 - `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
 - `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
   HTML for browser-direct auth (not a server proxy)
@@ -386,8 +387,11 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 **CMS Storage**:
 
 - **Development**: Uses local file storage (`apps/cms/public/media/`)
-- **Production**: Uses S3-compatible storage (Tigris, AWS S3)
-- Toggle with `USE_S3_STORAGE` environment variable
+- **Production**: Uses Cloudflare R2 via the `R2_BUCKET` binding in
+  `apps/cms/wrangler.jsonc` (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
+  `R2_BUCKET_NAME`, `CLOUDFLARE_ACCOUNT_ID` in `apps/cms/.env.schema`)
+- No `USE_S3_STORAGE` toggle for CMS — that variable only applies to the
+  unrelated App/Admin Tigris storage
 - See `docs/cms-storage.md` for details
 
 ## PR & Commit Guidelines

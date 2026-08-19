@@ -9,15 +9,23 @@ Epic Stack is designed to be deployed to various platforms with minimal configur
 
 ## Fly.io Deployment
 
-App, Admin, and CMS deploy to Fly.io:
+App and Admin deploy to Fly.io:
 
 - Docker-based deployment
 - Automatic scaling
 - LiteFS for control-plane SQLite replication (US only)
 
+## Cloudflare Deployment
+
+The **CMS** deploys to **Cloudflare Workers** (via OpenNext), backed by
+Cloudflare **D1** (SQLite) and **R2** (media storage) — not Fly.io, and not
+MongoDB. See [CMS storage](/docs/cms-storage.md). The marketing **Website**
+and **Sites** deploy to Cloudflare Pages.
+
 Regional **tenant-api** (customer PII, per-org SQLite) deploys to **Oracle Cloud
 Ampere** in Ashburn and Riyadh. See the repo docs:
-[Deployment](/docs/deployment.md) and
+[Deployment](/docs/deployment.md),
+[Deployment checklist](/docs/deployment-checklist.md), and
 [Tenant data residency](/docs/tenant-data-residency.md).
 
 ## Server Requirements

@@ -57,3 +57,36 @@ collected after OTP if that number is new.
 
 Full rules:
 [docs/tenant-data-residency.md](../../docs/tenant-data-residency.md).
+
+## Locale-prefixed internationalization
+
+Published org sites support locale-prefixed URLs (e.g. `/ar/about`), independent
+of the App/Admin operator Lingui locales:
+
+- Supported content locales and RTL flags are defined in
+  [`packages/common/src/site-locales.ts`](../../packages/common/src/site-locales.ts)
+  (`SITE_CONTENT_LOCALES`, `RTL_SITE_LOCALES`)
+- `src/middleware.ts` resolves each request's locale from the path prefix
+  (falling back to `?lng=`, then the org's default locale) via
+  `resolveSiteLocaleRequest`, and 301s or rewrites accordingly. The default
+  locale is unprefixed; a request for the default locale's own prefix (e.g.
+  `/en/...` when `en` is default) redirects to the unprefixed path
+- `src/lib/i18n.ts` (`createSiteI18n`) builds the request-scoped i18n context
+  consumed by page/layout components
+- Organizations choose their enabled locales and default locale from the website
+  editor in `apps/app`; unsupported locale prefixes 404
+
+## Page builder (website editor)
+
+Org website pages/posts are built from typed sections (hero, features, content,
+cards, testimonials, FAQ, CTA, header, footer, and more), edited in `apps/app`
+and rendered here:
+
+- Section/link types and defaults: `apps/app/app/utils/website/block-types.ts`
+- Default seeded home page sections: `apps/app/app/utils/website/home-page.ts`
+- Shared link model (URL / page / email / phone / file link types) used by both
+  the editor and Sites rendering:
+  [`packages/common/src/site-link.ts`](../../packages/common/src/site-link.ts)
+- Every org gets a protected `home` page (see `HOME_PAGE_SLUG` in
+  `apps/app/app/utils/website/home-page.ts`) that cannot be deleted from the
+  editor

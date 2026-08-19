@@ -82,9 +82,11 @@ npm run preview          # Preview production build
 
 ### CMS (`apps/cms`)
 
-Headless CMS powered by Payload CMS for managing marketing website content.
+Headless CMS powered by Payload CMS for managing content consumed by the
+marketing website (`apps/web`). Deploys to Cloudflare Workers, not Fly.io.
 
-- **Tech Stack**: Payload CMS 3.x, Next.js 15, MongoDB
+- **Tech Stack**: Payload CMS 3.x, Next.js, Cloudflare D1 (SQLite) + R2,
+  deployed with OpenNext
 - **Port**: 3006 (development)
 - **Purpose**: Content management for the marketing website
 - **Key Features**:
@@ -93,7 +95,8 @@ Headless CMS powered by Payload CMS for managing marketing website content.
   - Form builder plugin
   - Nested documents support
   - Search functionality
-  - S3 storage integration
+  - Local file storage in development, Cloudflare R2 in production (see
+    [CMS storage](/docs/cms-storage.md))
   - Redirects management
 
 **Development Commands**:
