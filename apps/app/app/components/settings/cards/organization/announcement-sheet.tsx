@@ -3,12 +3,11 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import {
-	getSiteLocaleLabel,
+	getLocalizedEditableValue,
 	parseLocalizedString,
 	pickLocalized,
 	serializeLocalizedString,
 	type LocalizedString,
-	type SiteContentLocale,
 	type SiteLocalesConfig,
 } from '@repo/common/site-locales'
 import { Badge } from '@repo/ui/badge'
@@ -31,16 +30,31 @@ import {
 	SheetTitle,
 } from '@repo/ui/sheet'
 import { Switch } from '@repo/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/tabs'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from 'react'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import {
 	ErrorList,
 	Field as FormField,
-	TextareaField,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
+import {
+	LocaleContext,
+	LocaleSwitcher,
+	LocalizedInput,
+	LocalizedTextarea,
+	updateLocalizedValue,
+} from '#app/components/website/locale-fields.tsx'
+import { TranslateItemsButton } from '#app/components/website/translate-provider.tsx'
+import { toTranslateItem } from '#app/utils/website/translation.ts'
 
 export const ANNOUNCEMENT_TYPES = [
 	'info',
@@ -154,10 +168,11 @@ export type AnnouncementRecord = {
 
 export function getAnnouncementPreviewText(
 	announcement: Pick<AnnouncementRecord, 'content'>,
-	defaultLocale: string,
+	locale: string,
+	defaultLocale: string = locale,
 ): string {
 	return (
-		pickLocalized(announcement.content, defaultLocale, defaultLocale) ||
+		pickLocalized(announcement.content, locale, defaultLocale) ||
 		'Untitled announcement'
 	)
 }
@@ -168,10 +183,6 @@ type AnnouncementSheetProps = {
 	organizationId: string
 	localesConfig: SiteLocalesConfig
 	announcement?: AnnouncementRecord | null
-}
-
-function emptyLocaleMap(locales: SiteContentLocale[]): LocalizedString {
-	return Object.fromEntries(locales.map((locale) => [locale, '']))
 }
 
 export function AnnouncementSheet({
@@ -193,8 +204,8 @@ export function AnnouncementSheet({
 	const prevFetcherState = useRef(fetcher.state)
 	const [formInstance, setFormInstance] = useState(0)
 
-	const locales = localesConfig.locales
 	const defaultLocale = localesConfig.defaultLocale
+	const { activeLocale } = useContext(LocaleContext)
 
 	const [isEnabled, setIsEnabled] = useState(announcement?.isEnabled ?? true)
 	const [type, setType] = useState<AnnouncementType>(
@@ -202,12 +213,11 @@ export function AnnouncementSheet({
 	)
 	const [addLink, setAddLink] = useState(Boolean(announcement?.linkUrl))
 	const [linkNewTab, setLinkNewTab] = useState(announcement?.linkNewTab ?? true)
-	const [activeLocale, setActiveLocale] = useState<string>(defaultLocale)
-	const [contentByLocale, setContentByLocale] = useState<LocalizedString>(() =>
-		emptyLocaleMap(locales),
+	const [contentJson, setContentJson] = useState(() =>
+		serializeLocalizedString(announcement?.content ?? {}),
 	)
-	const [linkLabelByLocale, setLinkLabelByLocale] = useState<LocalizedString>(
-		() => emptyLocaleMap(locales),
+	const [linkLabelJson, setLinkLabelJson] = useState(() =>
+		serializeLocalizedString(announcement?.linkLabel ?? {}),
 	)
 
 	useEffect(() => {
@@ -217,31 +227,9 @@ export function AnnouncementSheet({
 		setType(announcement?.type ?? 'info')
 		setAddLink(Boolean(announcement?.linkUrl))
 		setLinkNewTab(announcement?.linkNewTab ?? true)
-		setActiveLocale(defaultLocale)
-
-		const nextContent = emptyLocaleMap(locales)
-		const existingContent = announcement?.content ?? {}
-		for (const locale of locales) {
-			nextContent[locale] = existingContent[locale] ?? ''
-		}
-		setContentByLocale(nextContent)
-
-		const nextLabels = emptyLocaleMap(locales)
-		const existingLabels = announcement?.linkLabel ?? {}
-		for (const locale of locales) {
-			nextLabels[locale] = existingLabels[locale] ?? ''
-		}
-		setLinkLabelByLocale(nextLabels)
-	}, [open, announcement, locales, defaultLocale])
-
-	const contentJson = useMemo(
-		() => serializeLocalizedString(contentByLocale),
-		[contentByLocale],
-	)
-	const linkLabelJson = useMemo(
-		() => serializeLocalizedString(linkLabelByLocale),
-		[linkLabelByLocale],
-	)
+		setContentJson(serializeLocalizedString(announcement?.content ?? {}))
+		setLinkLabelJson(serializeLocalizedString(announcement?.linkLabel ?? {}))
+	}, [open, announcement])
 
 	const [form, fields] = useForm({
 		id: `${formId}-${sheetKey}-${formInstance}`,
@@ -284,7 +272,46 @@ export function AnnouncementSheet({
 		success: _(msg`Success`),
 	}
 
-	const missingDefaultContent = !(contentByLocale[defaultLocale]?.trim() ?? '')
+	const missingDefaultContent = !getLocalizedEditableValue(
+		contentJson,
+		defaultLocale,
+		defaultLocale,
+	).trim()
+
+	const translateItems = useMemo(() => {
+		const items = [
+			toTranslateItem('content', contentJson, defaultLocale, activeLocale),
+		]
+		if (addLink) {
+			items.push(
+				toTranslateItem(
+					'linkLabel',
+					linkLabelJson,
+					defaultLocale,
+					activeLocale,
+				),
+			)
+		}
+		return items.filter((item) => item != null)
+	}, [activeLocale, addLink, contentJson, defaultLocale, linkLabelJson])
+
+	const handleTranslateAll = useCallback(
+		(translations: Array<{ id: string; text: string }>) => {
+			for (const { id, text } of translations) {
+				if (id === 'content') {
+					setContentJson((prev) =>
+						updateLocalizedValue(prev, text, activeLocale, defaultLocale),
+					)
+				}
+				if (id === 'linkLabel') {
+					setLinkLabelJson((prev) =>
+						updateLocalizedValue(prev, text, activeLocale, defaultLocale),
+					)
+				}
+			}
+		},
+		[activeLocale, defaultLocale],
+	)
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
@@ -302,8 +329,8 @@ export function AnnouncementSheet({
 					</SheetTitle>
 					<SheetDescription>
 						<Trans>
-							Write announcement copy for each website language. The default
-							language is required; other languages are optional.
+							Write the banner in the default language, then switch locales to
+							translate. Enabled banners appear at the top of your public site.
 						</Trans>
 					</SheetDescription>
 				</SheetHeader>
@@ -392,155 +419,38 @@ export function AnnouncementSheet({
 							/>
 						</Field>
 
-						<div className="space-y-3">
+						<Field data-invalid={Boolean(fields.contentJson.errors?.length)}>
 							<div className="flex items-center justify-between gap-2">
-								<p className="text-sm font-medium">
-									<Trans>Translations</Trans>
-								</p>
-								{missingDefaultContent ? (
-									<Badge variant="secondary">
-										<Trans>Default language required</Trans>
-									</Badge>
-								) : null}
-							</div>
-
-							{locales.length > 1 ? (
-								<Tabs
-									value={activeLocale}
-									onValueChange={(value) => {
-										if (value) setActiveLocale(value)
-									}}
-								>
-									<TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
-										{locales.map((locale) => {
-											const hasCopy = Boolean(contentByLocale[locale]?.trim())
-											return (
-												<TabsTrigger
-													key={locale}
-													value={locale}
-													className="gap-1.5"
-												>
-													{getSiteLocaleLabel(locale)}
-													{locale === defaultLocale ? (
-														<span className="text-[10px] uppercase opacity-70">
-															<Trans>Default</Trans>
-														</span>
-													) : hasCopy ? (
-														<span
-															className="bg-primary size-1.5 rounded-full"
-															aria-hidden="true"
-														/>
-													) : null}
-												</TabsTrigger>
-											)
-										})}
-									</TabsList>
-
-									{locales.map((locale) => (
-										<TabsContent
-											key={locale}
-											value={locale}
-											className="mt-3 space-y-4"
-										>
-											<TextareaField
-												labelProps={{
-													children: `${_(msg`Content`)} (${getSiteLocaleLabel(locale)})`,
-												}}
-												textareaProps={{
-													name: `content-${locale}`,
-													value: contentByLocale[locale] ?? '',
-													onChange: (event) => {
-														const value = event.currentTarget.value
-														setContentByLocale((current) => ({
-															...current,
-															[locale]: value,
-														}))
-													},
-													rows: 4,
-													placeholder: _(
-														msg`Share an update, maintenance notice, or promotion…`,
-													),
-													disabled: isSubmitting,
-												}}
-												errors={
-													locale === defaultLocale
-														? fields.contentJson.errors
-														: undefined
-												}
-											/>
-
-											{addLink ? (
-												<FormField
-													labelProps={{
-														children: `${_(msg`Link label`)} (${getSiteLocaleLabel(locale)})`,
-													}}
-													inputProps={{
-														name: `linkLabel-${locale}`,
-														value: linkLabelByLocale[locale] ?? '',
-														onChange: (event) => {
-															const value = event.currentTarget.value
-															setLinkLabelByLocale((current) => ({
-																...current,
-																[locale]: value,
-															}))
-														},
-														placeholder: _(msg`Learn more`),
-														disabled: isSubmitting,
-													}}
-													errors={
-														locale === defaultLocale
-															? fields.linkLabelJson.errors
-															: undefined
-													}
-												/>
-											) : null}
-										</TabsContent>
-									))}
-								</Tabs>
-							) : (
-								<>
-									<TextareaField
-										labelProps={{ children: _(msg`Content`) }}
-										textareaProps={{
-											name: `content-${defaultLocale}`,
-											value: contentByLocale[defaultLocale] ?? '',
-											onChange: (event) => {
-												const value = event.currentTarget.value
-												setContentByLocale((current) => ({
-													...current,
-													[defaultLocale]: value,
-												}))
-											},
-											rows: 4,
-											placeholder: _(
-												msg`Share an update, maintenance notice, or promotion…`,
-											),
-											disabled: isSubmitting,
-										}}
-										errors={fields.contentJson.errors}
-									/>
-									{addLink ? (
-										<FormField
-											labelProps={{ children: _(msg`Link label`) }}
-											inputProps={{
-												name: `linkLabel-${defaultLocale}`,
-												value: linkLabelByLocale[defaultLocale] ?? '',
-												onChange: (event) => {
-													const value = event.currentTarget.value
-													setLinkLabelByLocale((current) => ({
-														...current,
-														[defaultLocale]: value,
-													}))
-												},
-												placeholder: _(msg`Learn more`),
-												disabled: isSubmitting,
-											}}
-											errors={fields.linkLabelJson.errors}
-										/>
+								<FieldLabel htmlFor={`${form.id}-content`}>
+									<Trans>Content</Trans>
+								</FieldLabel>
+								<div className="flex items-center gap-1">
+									{missingDefaultContent ? (
+										<Badge variant="secondary">
+											<Trans>Default language required</Trans>
+										</Badge>
 									) : null}
-								</>
-							)}
-						</div>
+									<TranslateItemsButton
+										items={translateItems}
+										onApply={handleTranslateAll}
+									/>
+									<LocaleSwitcher className="max-w-none" />
+								</div>
+							</div>
+							<LocalizedTextarea
+								id={`${form.id}-content`}
+								value={contentJson}
+								onChange={setContentJson}
+								rows={4}
+								placeholder={_(
+									msg`Share an update, maintenance notice, or promotion…`,
+								)}
+								disabled={isSubmitting}
+							/>
+							<FieldError
+								errors={convertErrorsToFieldFormat(fields.contentJson.errors)}
+							/>
+						</Field>
 
 						<FieldGroup>
 							<label className="flex items-center gap-2 text-sm">
@@ -563,6 +473,25 @@ export function AnnouncementSheet({
 										}}
 										errors={fields.linkUrl.errors}
 									/>
+									<Field
+										data-invalid={Boolean(fields.linkLabelJson.errors?.length)}
+									>
+										<FieldLabel htmlFor={`${form.id}-link-label`}>
+											<Trans>Link label</Trans>
+										</FieldLabel>
+										<LocalizedInput
+											id={`${form.id}-link-label`}
+											value={linkLabelJson}
+											onChange={setLinkLabelJson}
+											placeholder={_(msg`Learn more`)}
+											disabled={isSubmitting}
+										/>
+										<FieldError
+											errors={convertErrorsToFieldFormat(
+												fields.linkLabelJson.errors,
+											)}
+										/>
+									</Field>
 									<label className="flex items-center gap-2 text-sm">
 										<Checkbox
 											checked={linkNewTab}
@@ -573,14 +502,6 @@ export function AnnouncementSheet({
 										/>
 										<Trans>Open in new tab</Trans>
 									</label>
-									{locales.length > 1 ? (
-										<p className="text-muted-foreground text-xs">
-											<Trans>
-												Link labels can be translated in each language tab
-												above. The URL is shared across languages.
-											</Trans>
-										</p>
-									) : null}
 								</div>
 							) : null}
 						</FieldGroup>

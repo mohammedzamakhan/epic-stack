@@ -1,5 +1,6 @@
 ---
 import { resolveSiteLink, siteLinkHasDestination } from '@repo/common/site-link'
+import { getLocaleHref } from '@repo/common/site-locales'
 import {
 	resolveMediaUrl,
 	siteContainer,
@@ -45,6 +46,12 @@ const bodyClass = siteSectionBodyClass(config.background)
 				const src = resolveMediaUrl(item.imageUrl)
 				const linked = siteLinkHasDestination(item.linkUrl)
 				const resolved = resolveSiteLink(item.linkUrl)
+				resolved.href = getLocaleHref(
+					resolved.href,
+					Astro.locals.requestedLocale,
+					Astro.locals.requestedLocale,
+					Astro.locals.defaultLocale,
+				)
 				const inner = (
 					<>
 						{src ? (

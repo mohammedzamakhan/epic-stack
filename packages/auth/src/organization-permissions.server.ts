@@ -155,6 +155,10 @@ export const ORG_PERMISSIONS = {
 	READ_SETTINGS_ANY: 'read:settings:any' as const,
 	UPDATE_SETTINGS_ANY: 'update:settings:any' as const,
 
+	// Website permissions
+	READ_WEBSITE_ANY: 'read:website:any' as const,
+	UPDATE_WEBSITE_ANY: 'update:website:any' as const,
+
 	// Analytics permissions
 	READ_ANALYTICS_ANY: 'read:analytics:any' as const,
 } as const

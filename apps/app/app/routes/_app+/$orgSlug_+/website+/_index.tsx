@@ -69,6 +69,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		hasProvisionedDb: true,
 	})
 
+	await requireUserWithOrganizationPermission(
+		request,
+		organization.id,
+		ORG_PERMISSIONS.READ_WEBSITE_ANY,
+	)
+
 	return {
 		organization,
 		localesConfig: parseSiteLocalesConfig(
@@ -93,16 +99,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		sitePublished: true,
 	})
 
-	await requireUserWithOrganizationPermission(
-		request,
-		organization.id,
-		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
-	)
-
 	const formData = await request.formData()
 	const intent = formData.get('intent')
 
+	const requirePermission = async (
+		permission: Parameters<typeof requireUserWithOrganizationPermission>[2],
+	) => {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			permission,
+		)
+	}
+
 	if (intent === sitePublishActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_WEBSITE_ANY)
+
 		const submission = parseWithZod(formData, {
 			schema: SitePublishSchema,
 		})
@@ -153,6 +165,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === addCustomDomainActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_SETTINGS_ANY)
+
 		const submission = parseWithZod(formData, {
 			schema: CustomDomainSchema.superRefine((data, ctx) => {
 				const normalized = normalizeCustomDomain(data.customDomain)
@@ -224,6 +238,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === removeCustomDomainActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_SETTINGS_ANY)
+
 		try {
 			if (organization.cloudflareHostnameId) {
 				await deleteCustomHostname(organization.cloudflareHostnameId)
@@ -251,6 +267,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === refreshCustomDomainActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_SETTINGS_ANY)
+
 		try {
 			if (!organization.cloudflareHostnameId || !organization.customDomain) {
 				return Response.json(
@@ -285,6 +303,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === siteDataRegionActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_SETTINGS_ANY)
+
 		const submission = parseWithZod(formData, {
 			schema: SiteDataRegionSchema,
 		})
@@ -376,6 +396,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === siteLocalesActionIntent) {
+		await requirePermission(ORG_PERMISSIONS.UPDATE_WEBSITE_ANY)
+
 		const submission = parseWithZod(formData, {
 			schema: SiteLocalesSchema,
 		})

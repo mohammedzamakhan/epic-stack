@@ -4,5 +4,8 @@ declare namespace App {
 	interface Locals {
 		orgSlug: string | null
 		customHost: string | null
+		requestedLocale: string
+		defaultLocale: string
+		i18n: import('@lingui/core').I18n
 	}
 }

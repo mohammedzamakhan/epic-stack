@@ -576,6 +576,11 @@ describe('Organization Permissions', () => {
 			expect(ORG_PERMISSIONS.UPDATE_SETTINGS_ANY).toBe('update:settings:any')
 		})
 
+		it('should have website permissions', () => {
+			expect(ORG_PERMISSIONS.READ_WEBSITE_ANY).toBe('read:website:any')
+			expect(ORG_PERMISSIONS.UPDATE_WEBSITE_ANY).toBe('update:website:any')
+		})
+
 		it('should have analytics permissions', () => {
 			expect(ORG_PERMISSIONS.READ_ANALYTICS_ANY).toBe('read:analytics:any')
 		})

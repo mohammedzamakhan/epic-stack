@@ -1,4 +1,5 @@
 ---
+import { msg } from '@lingui/core/macro'
 import SitePage from '~/components/SitePage.astro'
 import {
 	fetchPublishedOrganization,
@@ -7,37 +8,52 @@ import {
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
-const requestedLocale = Astro.url.searchParams.get('lng')
+const requestedLocale = Astro.locals.requestedLocale
+const i18n = Astro.locals.i18n
+const whatsYourName = i18n._(msg`What's your name?`)
+const nameHint = i18n._(msg`We'll use this on your profile. You can change it later.`)
+const fullName = i18n._(msg`Full name`)
+const continueLabel = i18n._(msg`Continue`)
+const saving = i18n._(msg`Saving...`)
+const somethingWentWrong = i18n._(msg`Something went wrong.`)
+const networkError = i18n._(msg`Network error. Please try again.`)
 
 const organization = orgSlug
 	? await fetchPublishedOrganization(orgSlug, requestedLocale)
 	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
-	return new Response('Not Found', { status: 404 })
+	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 ---
 
 <SitePage
 	organization={organization}
-	page={{ id: 'complete-name', title: 'Your name', slug: 'complete-name', isHomePage: false, sections: [] }}
-	title={`Your name - ${organization.name}`}
+	page={{ id: 'complete-name', title: whatsYourName, slug: 'complete-name', isHomePage: false, sections: [] }}
+	title={`${whatsYourName} - ${organization.name}`}
 >
 	<div id="complete-name-container" class="mx-auto flex min-h-[60vh] w-full max-w-sm flex-col items-center justify-center px-4">
 		<div class="w-full rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
 			<div class="mb-6 flex flex-col space-y-2 text-center">
 				<h1 class="font-heading text-2xl font-semibold tracking-tight text-foreground">
-					What's your name?
+					{whatsYourName}
 				</h1>
 				<p class="text-sm text-muted-foreground">
-					We'll use this on your profile. You can change it later.
+					{nameHint}
 				</p>
 			</div>
 
-			<form id="complete-name-form" class="space-y-4">
+			<form
+				id="complete-name-form"
+				class="space-y-4"
+				data-continue={continueLabel}
+				data-saving={saving}
+				data-error={somethingWentWrong}
+				data-network={networkError}
+			>
 				<div class="space-y-2">
 					<label for="name" class="text-sm font-medium leading-none text-foreground">
-						Full name
+						{fullName}
 					</label>
 					<input
 						type="text"
@@ -57,7 +73,7 @@ if (!organization) {
 					type="submit"
 					class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 				>
-					Continue
+					{continueLabel}
 				</button>
 			</form>
 		</div>
@@ -71,20 +87,25 @@ if (!organization) {
 		tenantErrorMessage,
 		tenantFetch,
 	} from '~/lib/client-auth'
+	import { browserLocaleHref } from '~/lib/locale'
 
 	if (!getAccessToken()) {
-		window.location.replace('/login')
+		window.location.replace(browserLocaleHref('/login'))
 	}
 
 	const form = document.getElementById('complete-name-form') as HTMLFormElement
 	const errorMessage = document.getElementById('error-message')!
 	const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
+	const continueLabel = form.dataset.continue || 'Continue'
+	const savingLabel = form.dataset.saving || 'Saving...'
+	const errorLabel = form.dataset.error || 'Something went wrong.'
+	const networkLabel = form.dataset.network || 'Network error. Please try again.'
 
 	async function skipIfNamed() {
 		try {
 			const res = await tenantFetch('/auth/me')
 			if (res.status === 401) {
-				window.location.replace('/login')
+				window.location.replace(browserLocaleHref('/login'))
 				return
 			}
 			if (!res.ok) return
@@ -92,7 +113,7 @@ if (!organization) {
 				customer?: { needsName?: boolean; name?: string }
 			}
 			if (data.customer && data.customer.needsName !== true) {
-				window.location.replace('/')
+				window.location.replace(browserLocaleHref('/'))
 			}
 		} catch {
 			// Stay on the form if profile cannot be loaded
@@ -105,7 +126,7 @@ if (!organization) {
 		e.preventDefault()
 		errorMessage.classList.add('hidden')
 		submitButton.disabled = true
-		submitButton.textContent = 'Saving...'
+		submitButton.textContent = savingLabel
 
 		const name = new FormData(form).get('name')?.toString().trim() || ''
 
@@ -115,7 +136,7 @@ if (!organization) {
 				body: JSON.stringify({ name }),
 			})
 			if (res.status === 401) {
-				window.location.replace('/login')
+				window.location.replace(browserLocaleHref('/login'))
 				return
 			}
 			const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
@@ -126,17 +147,17 @@ if (!organization) {
 					refreshToken:
 						typeof data.refreshToken === 'string' ? data.refreshToken : undefined,
 				})
-				window.location.href = '/'
+				window.location.href = browserLocaleHref('/')
 			} else {
-				errorMessage.textContent = tenantErrorMessage(data, 'Something went wrong.')
+				errorMessage.textContent = tenantErrorMessage(data, errorLabel)
 				errorMessage.classList.remove('hidden')
 			}
 		} catch {
-			errorMessage.textContent = 'Network error. Please try again.'
+			errorMessage.textContent = networkLabel
 			errorMessage.classList.remove('hidden')
 		} finally {
 			submitButton.disabled = false
-			submitButton.textContent = 'Continue'
+			submitButton.textContent = continueLabel
 		}
 	})
 </script>

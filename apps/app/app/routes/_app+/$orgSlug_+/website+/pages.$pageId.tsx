@@ -22,8 +22,9 @@ import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { useDebounce } from '@repo/common'
 import {
-	getSiteLocaleLabel,
+	getLocaleHref,
 	getLocalizedEditableValue,
+	isReservedSiteLocaleSlug,
 	parseSiteLocalesConfig,
 	pickLocalized,
 } from '@repo/common/site-locales'
@@ -71,12 +72,9 @@ import {
 import { ScrollArea } from '@repo/ui/scroll-area'
 import { Spinner } from '@repo/ui/spinner'
 import { Switch } from '@repo/ui/switch'
-import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
 import {
-	type ComponentProps,
 	type ReactNode,
-	createContext,
 	useCallback,
 	useContext,
 	useEffect,
@@ -110,6 +108,17 @@ import {
 	LinkInspector,
 	SiteLinkBuilderContext,
 } from '#app/components/website/link-inspector.tsx'
+import {
+	LocaleContext,
+	LocaleSwitcher,
+	LocalizedInput,
+	LocalizedTextarea,
+} from '#app/components/website/locale-fields.tsx'
+import {
+	TranslateAllButton,
+	TranslateProvider,
+	useSectionTranslator,
+} from '#app/components/website/translate-provider.tsx'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
 import {
 	requireUserWithOrganizationPermission,
@@ -136,6 +145,7 @@ import {
 } from '#app/utils/website/block-types.ts'
 import { HOME_PAGE_SLUG } from '#app/utils/website/home-page.ts'
 import { ensureSiteChrome } from '#app/utils/website/locked-chrome.server.ts'
+import { BULK_UPDATE_SECTIONS_INTENT } from '#app/utils/website/translation.ts'
 
 // --- Action Intents ---
 const updateTitleIntent = 'update-title'
@@ -144,6 +154,7 @@ const uploadPageImageIntent = 'upload-page-image'
 const uploadBlockAssetIntent = 'upload-block-asset'
 const addSectionIntent = 'add-section'
 const updateSectionIntent = 'update-section'
+const bulkUpdateSectionsIntent = BULK_UPDATE_SECTIONS_INTENT
 const removeSectionIntent = 'remove-section'
 const moveSectionIntent = 'move-section'
 const reorderSectionsIntent = 'reorder-sections'
@@ -358,7 +369,7 @@ function isRootPageSlug(value: string) {
 
 function isValidPageSlug(value: string, { allowEmpty = false } = {}) {
 	if (value === '') return allowEmpty
-	return PAGE_SLUG_PATTERN.test(value)
+	return PAGE_SLUG_PATTERN.test(value) && !isReservedSiteLocaleSlug(value)
 }
 
 function displayPageSlug(page: { slug: string; isHomePage: boolean }) {
@@ -380,6 +391,10 @@ const UpdatePageSettingsSchema = z.object({
 		.refine(
 			(value) => value === '' || PAGE_SLUG_PATTERN.test(value),
 			'URL must contain only lowercase letters, numbers, and hyphens',
+		)
+		.refine(
+			(value) => value === '' || !isReservedSiteLocaleSlug(value),
+			'URL slug cannot be a language code (e.g. en, ar, id)',
 		)
 		.optional(),
 	seoTitle: z.string().max(400).optional(),
@@ -407,6 +422,11 @@ const UpdateSectionSchema = z.object({
 	intent: z.literal(updateSectionIntent),
 	sectionId: z.string().min(1),
 	config: z.string().min(1),
+})
+
+const BulkUpdateSectionsSchema = z.object({
+	intent: z.literal(bulkUpdateSectionsIntent),
+	sections: z.string().min(1),
 })
 
 const RemoveSectionSchema = z.object({
@@ -445,7 +465,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.READ_SETTINGS_ANY,
+		ORG_PERMISSIONS.READ_WEBSITE_ANY,
 	)
 
 	await ensureSiteChrome(organization.id)
@@ -531,7 +551,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	await requireUserWithOrganizationPermission(
 		request,
 		organization.id,
-		ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+		ORG_PERMISSIONS.UPDATE_WEBSITE_ANY,
 	)
 
 	const page = await prisma.websitePage.findFirst({
@@ -971,6 +991,63 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			data: { config },
 		})
 		return Response.json({ status: 'success' })
+	}
+
+	if (intent === bulkUpdateSectionsIntent) {
+		const submission = parseWithZod(formData, {
+			schema: BulkUpdateSectionsSchema,
+		})
+		if (submission.status !== 'success') {
+			return Response.json({ status: 'error', result: submission.reply() })
+		}
+
+		try {
+			const parsedUpdates = z
+				.array(
+					z.object({
+						id: z.string().min(1).max(200),
+						config: z.string().min(2).max(500_000),
+					}),
+				)
+				.max(80)
+				.safeParse(JSON.parse(submission.value.sections))
+
+			if (!parsedUpdates.success) {
+				return Response.json(
+					{ status: 'error', error: 'Invalid section updates' },
+					{ status: 400 },
+				)
+			}
+
+			await prisma.$transaction(async (tx) => {
+				for (const update of parsedUpdates.data) {
+					JSON.parse(update.config)
+
+					if (update.id === SITE_HEADER_ID) {
+						await tx.organization.update({
+							where: { id: organization.id },
+							data: { siteHeaderConfig: update.config },
+						})
+					} else if (update.id === SITE_FOOTER_ID) {
+						await tx.organization.update({
+							where: { id: organization.id },
+							data: { siteFooterConfig: update.config },
+						})
+					} else {
+						await tx.websitePageSection.updateMany({
+							where: { id: update.id, pageId: page.id },
+							data: { config: update.config },
+						})
+					}
+				}
+			})
+			return Response.json({ status: 'success' })
+		} catch {
+			return Response.json(
+				{ status: 'error', error: 'Invalid JSON config or update failed' },
+				{ status: 400 },
+			)
+		}
 	}
 
 	if (intent === removeSectionIntent) {
@@ -1805,6 +1882,9 @@ function SectionEditorPanel({
 		[section.id, onSave],
 	)
 
+	const { activeLocale, defaultLocale } = useContext(LocaleContext)
+	const { requestTranslate, isTranslating } = useSectionTranslator()
+
 	return (
 		<div className="flex h-full min-h-0 flex-col">
 			<div className="border-border flex items-center gap-2 border-b px-3 py-2.5">
@@ -1825,6 +1905,25 @@ function SectionEditorPanel({
 				<span className="min-w-0 flex-1 truncate text-sm font-medium">
 					{blockDef?.label ?? section.type}
 				</span>
+				{activeLocale !== defaultLocale && (
+					<Button
+						variant="ghost"
+						size="xs"
+						className="text-brand hover:bg-brand/10 hover:text-brand"
+						onClick={() =>
+							requestTranslate([{ id: section.id, type: section.type, config }])
+						}
+						disabled={isTranslating}
+						title={`Translate section to ${activeLocale}`}
+					>
+						{isTranslating ? (
+							<Spinner className="mr-1 size-3.5" />
+						) : (
+							<Icon name="languages" className="mr-1 size-3.5" />
+						)}
+						<Trans>Translate</Trans>
+					</Button>
+				)}
 				<LocaleSwitcher />
 			</div>
 			<ScrollArea className="min-h-0 flex-1">
@@ -3094,6 +3193,7 @@ function ContentEditor({ config, updateField, ...editorProps }: EditorProps) {
 					value={(config.body as string) ?? ''}
 					onChange={(v) => updateField('body', v)}
 					rows={8}
+					allowHtml
 				/>
 			</EditorSection>
 
@@ -4062,178 +4162,6 @@ function FooterEditor({ config, updateField, listKey }: ListEditorProps) {
 	)
 }
 
-const LocaleContext = createContext<{
-	activeLocale: string
-	defaultLocale: string
-	locales: string[]
-	setActiveLocale: (locale: string) => void
-}>({
-	activeLocale: 'en',
-	defaultLocale: 'en',
-	locales: ['en'],
-	setActiveLocale: () => {},
-})
-
-function LocaleSwitcher({ className }: { className?: string }) {
-	const { activeLocale, locales, setActiveLocale } = useContext(LocaleContext)
-	const codesRef = useRef<HTMLDivElement>(null)
-
-	if (locales.length < 2) return null
-
-	const focusLocale = (locale: string) => {
-		codesRef.current
-			?.querySelector<HTMLButtonElement>(`[data-locale="${locale}"]`)
-			?.focus()
-	}
-
-	return (
-		<div
-			role="radiogroup"
-			aria-label="Content language"
-			className={cn('flex max-w-[45%] min-w-0 items-center gap-1', className)}
-			onKeyDown={(event) => {
-				if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-				event.preventDefault()
-				const index = locales.indexOf(activeLocale)
-				const delta = event.key === 'ArrowRight' ? 1 : -1
-				const next = locales[(index + delta + locales.length) % locales.length]
-				if (!next) return
-				setActiveLocale(next)
-				focusLocale(next)
-			}}
-		>
-			<Icon
-				name="languages"
-				className="text-muted-foreground size-3.5 shrink-0"
-				aria-hidden="true"
-			/>
-			<div
-				ref={codesRef}
-				className="flex min-w-0 scrollbar-none items-center overflow-x-auto [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-			>
-				{locales.map((locale) => {
-					const selected = locale === activeLocale
-					const label = getSiteLocaleLabel(locale)
-					return (
-						<Tooltip key={locale}>
-							<TooltipTrigger
-								render={
-									<button
-										type="button"
-										role="radio"
-										data-locale={locale}
-										tabIndex={selected ? 0 : -1}
-										aria-checked={selected}
-										aria-label={label}
-										onClick={() => setActiveLocale(locale)}
-										className={cn(
-											'h-6 min-w-6 shrink-0 rounded-md px-1.5 text-[11px] font-semibold tracking-wide uppercase transition-colors duration-150',
-											'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-											selected
-												? 'bg-muted text-foreground'
-												: 'text-muted-foreground hover:text-foreground',
-										)}
-									>
-										{locale}
-									</button>
-								}
-							/>
-							<TooltipContent>{label}</TooltipContent>
-						</Tooltip>
-					)
-				})}
-			</div>
-		</div>
-	)
-}
-
-function updateLocalizedValue(
-	prevValue: string | undefined,
-	newValue: string,
-	activeLocale: string,
-	defaultLocale: string,
-): string {
-	const currentStr = prevValue ?? ''
-	let map: Record<string, string> = {}
-	if (currentStr && currentStr.startsWith('{')) {
-		try {
-			map = JSON.parse(currentStr) as Record<string, string>
-		} catch {
-			map = { [defaultLocale]: currentStr }
-		}
-	} else if (currentStr) {
-		map = { [defaultLocale]: currentStr }
-	}
-	map[activeLocale] = newValue
-	return JSON.stringify(map)
-}
-
-function LocalizedInput({
-	value,
-	onChange,
-	...props
-}: Omit<ComponentProps<typeof Input>, 'value' | 'onChange'> & {
-	value: string
-	onChange: (value: string) => void
-}) {
-	const { activeLocale, defaultLocale } = useContext(LocaleContext)
-	const displayValue = getLocalizedEditableValue(
-		value,
-		activeLocale,
-		defaultLocale,
-	)
-
-	return (
-		<Input
-			{...props}
-			value={displayValue}
-			onChange={(e) =>
-				onChange(
-					updateLocalizedValue(
-						value,
-						e.target.value,
-						activeLocale,
-						defaultLocale,
-					),
-				)
-			}
-		/>
-	)
-}
-
-function LocalizedTextarea({
-	value,
-	onChange,
-	...props
-}: Omit<ComponentProps<typeof Textarea>, 'value' | 'onChange'> & {
-	value: string
-	onChange: (value: string) => void
-}) {
-	const { activeLocale, defaultLocale } = useContext(LocaleContext)
-	const displayValue = getLocalizedEditableValue(
-		value,
-		activeLocale,
-		defaultLocale,
-	)
-
-	return (
-		<Textarea
-			{...props}
-			value={displayValue}
-			onChange={(e) =>
-				onChange(
-					updateLocalizedValue(
-						value,
-						e.target.value,
-						activeLocale,
-						defaultLocale,
-					),
-				)
-			}
-		/>
-	)
-}
-
 // --- Shared Field Components ---
 function FieldInput({
 	label,
@@ -4266,12 +4194,14 @@ function FieldTextarea({
 	onChange,
 	placeholder,
 	rows = 3,
+	allowHtml = false,
 }: {
 	label: string
 	value: string
 	onChange: (value: string) => void
 	placeholder?: string
 	rows?: number
+	allowHtml?: boolean
 }) {
 	return (
 		<div className="space-y-1.5">
@@ -4283,6 +4213,7 @@ function FieldTextarea({
 				onChange={onChange}
 				placeholder={placeholder}
 				rows={rows}
+				allowHtml={allowHtml}
 			/>
 		</div>
 	)
@@ -4916,6 +4847,7 @@ export default function PageBuilderRoute() {
 	)
 	const defaultLocale = organization.siteDefaultLocale ?? 'en'
 	const [activeLocale, setActiveLocale] = useState<string>(defaultLocale)
+
 	const linkPages = useMemo(
 		() =>
 			sitePages.map((item) => ({
@@ -4950,14 +4882,26 @@ export default function PageBuilderRoute() {
 				siteOrigin = origin.replace('app.', `${organization.slug}.`)
 			}
 			setPreviewUrl(
-				`${siteOrigin}/${page.isHomePage || page.slug === '' ? '' : page.slug}?preview=true`,
+				`${siteOrigin}${getLocaleHref(
+					page.isHomePage || page.slug === '' ? '/' : `/${page.slug}`,
+					activeLocale,
+					activeLocale,
+					defaultLocale,
+				)}?preview=true`,
 			)
 		}
-	}, [organization.customDomain, organization.slug, page.isHomePage, page.slug])
+	}, [
+		organization.customDomain,
+		organization.slug,
+		page.isHomePage,
+		page.slug,
+		activeLocale,
+		defaultLocale,
+	])
 
 	useEffect(() => {
 		updateIframeKey()
-	}, [page.sections, updateIframeKey])
+	}, [page.sections, updateIframeKey, previewUrl])
 
 	const [mode, setMode] = useState<'build' | 'preview'>('build')
 	// Page builder split is desktop-first (matches `lg:` preview visibility).
@@ -5265,12 +5209,15 @@ export default function PageBuilderRoute() {
 							<span className="bg-muted text-muted-foreground flex size-6 items-center justify-center rounded-md">
 								<Icon name="blocks" className="size-3.5" />
 							</span>
-							<span className="min-w-0 flex-1 truncate text-sm font-medium">
+							<span className="min-w-0 truncate text-sm font-medium">
 								<Trans>Sections</Trans>
 							</span>
 							<span className="text-muted-foreground text-xs tabular-nums">
 								{page.sections.length}
 							</span>
+							<div className="flex-1" />
+							<TranslateAllButton sections={page.sections} />
+							<LocaleSwitcher />
 						</div>
 
 						<ScrollArea className="min-h-0 flex-1">
@@ -5459,214 +5406,219 @@ export default function PageBuilderRoute() {
 		<LocaleContext.Provider
 			value={{ activeLocale, defaultLocale, locales, setActiveLocale }}
 		>
-			<SiteLinkBuilderContext.Provider
-				value={{
-					pages: linkPages,
-					onUploadAsset: handleUploadBlockAsset,
-					isUploadingAsset: blockAssetFetcher.state !== 'idle',
-					uploadedAssetUrl:
-						blockAssetFetcher.data?.status === 'success'
-							? blockAssetFetcher.data.assetUrl
-							: null,
-					uploadError:
-						blockAssetFetcher.data?.status === 'error'
-							? blockAssetFetcher.data.error
-							: null,
-				}}
+			<TranslateProvider
+				activeLocale={activeLocale}
+				defaultLocale={defaultLocale}
 			>
-				<div className="bg-background fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
-					<header className="border-border flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
-						<div className="flex min-w-0 items-center gap-1.5">
-							<Button
-								variant="ghost"
-								size="icon-xs"
-								render={<Link to={`/${params.orgSlug}/website/pages`} />}
-								aria-label="Back to pages"
-							>
-								<Icon name="arrow-left" className="size-4" />
-							</Button>
-
-							{editingTitle ? (
-								<LocalizedInput
-									value={titleValue}
-									onChange={(val) => setTitleValue(val)}
-									onBlur={handleSaveTitle}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter') handleSaveTitle()
-										if (e.key === 'Escape') {
-											setTitleValue(page.title)
-											setEditingTitle(false)
-										}
-									}}
-									className="h-7 max-w-56 text-sm font-medium"
-									autoFocus
-								/>
-							) : (
-								<button
-									type="button"
-									className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-									onClick={() => setEditingTitle(true)}
-									title={displayTitle}
-								>
-									{displayTitle}
-								</button>
-							)}
-
-							{page.isHomePage ? (
-								<Badge variant="outline" className="hidden sm:inline-flex">
-									<Trans>Home</Trans>
-								</Badge>
-							) : null}
-						</div>
-
-						<div className="flex shrink-0 items-center gap-2">
-							<div className="bg-muted flex rounded-lg p-0.5">
+				<SiteLinkBuilderContext.Provider
+					value={{
+						pages: linkPages,
+						onUploadAsset: handleUploadBlockAsset,
+						isUploadingAsset: blockAssetFetcher.state !== 'idle',
+						uploadedAssetUrl:
+							blockAssetFetcher.data?.status === 'success'
+								? blockAssetFetcher.data.assetUrl
+								: null,
+						uploadError:
+							blockAssetFetcher.data?.status === 'error'
+								? blockAssetFetcher.data.error
+								: null,
+					}}
+				>
+					<div className="bg-background fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden">
+						<header className="border-border flex h-12 shrink-0 items-center justify-between gap-3 border-b px-3">
+							<div className="flex min-w-0 items-center gap-1.5">
 								<Button
 									variant="ghost"
-									size="sm"
-									className={cn(
-										'rounded-md px-2.5',
-										mode === 'build' &&
-											'bg-background text-foreground hover:bg-background shadow-sm',
-									)}
-									onClick={() => setMode('build')}
+									size="icon-xs"
+									render={<Link to={`/${params.orgSlug}/website/pages`} />}
+									aria-label="Back to pages"
 								>
-									<Icon name="blocks" className="size-3.5" />
-									<span className="hidden sm:inline">
-										<Trans>Build</Trans>
-									</span>
+									<Icon name="arrow-left" className="size-4" />
 								</Button>
-								<Button
-									variant="ghost"
-									size="sm"
-									className={cn(
-										'rounded-md px-2.5',
-										mode === 'preview' &&
-											'bg-background text-foreground hover:bg-background shadow-sm',
-									)}
-									onClick={() => setMode('preview')}
-								>
-									<Icon name="laptop" className="size-3.5" />
-									<span className="hidden sm:inline">
-										<Trans>Preview</Trans>
-									</span>
-								</Button>
-							</div>
 
-							<div className="text-muted-foreground hidden items-center gap-1.5 text-xs sm:flex">
-								<span
-									className={cn(
-										'size-1.5 rounded-full',
-										optimisticStatus === 'published'
-											? 'bg-emerald-500'
-											: 'bg-muted-foreground/40',
-									)}
-								/>
-								{optimisticStatus === 'published' ? (
-									<Trans>Published</Trans>
-								) : (
-									<Trans>Draft</Trans>
-								)}
-							</div>
-
-							<Button
-								size="sm"
-								onClick={handlePublish}
-								disabled={publishFetcher.state !== 'idle'}
-							>
-								{publishFetcher.state !== 'idle' ? (
-									<Spinner />
-								) : optimisticStatus === 'draft' ? (
-									<Trans>Publish</Trans>
-								) : (
-									<Trans>Publish updates</Trans>
-								)}
-							</Button>
-
-							<DropdownMenu>
-								<DropdownMenuTrigger
-									render={
-										<Button
-											variant="ghost"
-											size="icon-xs"
-											aria-label="More actions"
-										>
-											<Icon name="ellipsis" className="size-4" />
-										</Button>
-									}
-								/>
-								<DropdownMenuContent align="end" className="min-w-44">
-									<DropdownMenuItem
-										onClick={() => {
-											if (previewUrl) window.open(previewUrl, '_blank')
+								{editingTitle ? (
+									<LocalizedInput
+										value={titleValue}
+										onChange={(val) => setTitleValue(val)}
+										onBlur={handleSaveTitle}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter') handleSaveTitle()
+											if (e.key === 'Escape') {
+												setTitleValue(page.title)
+												setEditingTitle(false)
+											}
 										}}
+										className="h-7 max-w-56 text-sm font-medium"
+										autoFocus
+									/>
+								) : (
+									<button
+										type="button"
+										className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+										onClick={() => setEditingTitle(true)}
+										title={displayTitle}
 									>
-										<Icon name="external-link" className="size-4" />
-										<Trans>Open preview</Trans>
-									</DropdownMenuItem>
+										{displayTitle}
+									</button>
+								)}
+
+								{page.isHomePage ? (
+									<Badge variant="outline" className="hidden sm:inline-flex">
+										<Trans>Home</Trans>
+									</Badge>
+								) : null}
+							</div>
+
+							<div className="flex shrink-0 items-center gap-2">
+								<div className="bg-muted flex rounded-lg p-0.5">
+									<Button
+										variant="ghost"
+										size="sm"
+										className={cn(
+											'rounded-md px-2.5',
+											mode === 'build' &&
+												'bg-background text-foreground hover:bg-background shadow-sm',
+										)}
+										onClick={() => setMode('build')}
+									>
+										<Icon name="blocks" className="size-3.5" />
+										<span className="hidden sm:inline">
+											<Trans>Build</Trans>
+										</span>
+									</Button>
+									<Button
+										variant="ghost"
+										size="sm"
+										className={cn(
+											'rounded-md px-2.5',
+											mode === 'preview' &&
+												'bg-background text-foreground hover:bg-background shadow-sm',
+										)}
+										onClick={() => setMode('preview')}
+									>
+										<Icon name="laptop" className="size-3.5" />
+										<span className="hidden sm:inline">
+											<Trans>Preview</Trans>
+										</span>
+									</Button>
+								</div>
+
+								<div className="text-muted-foreground hidden items-center gap-1.5 text-xs sm:flex">
+									<span
+										className={cn(
+											'size-1.5 rounded-full',
+											optimisticStatus === 'published'
+												? 'bg-emerald-500'
+												: 'bg-muted-foreground/40',
+										)}
+									/>
 									{optimisticStatus === 'published' ? (
+										<Trans>Published</Trans>
+									) : (
+										<Trans>Draft</Trans>
+									)}
+								</div>
+
+								<Button
+									size="sm"
+									onClick={handlePublish}
+									disabled={publishFetcher.state !== 'idle'}
+								>
+									{publishFetcher.state !== 'idle' ? (
+										<Spinner />
+									) : optimisticStatus === 'draft' ? (
+										<Trans>Publish</Trans>
+									) : (
+										<Trans>Publish updates</Trans>
+									)}
+								</Button>
+
+								<DropdownMenu>
+									<DropdownMenuTrigger
+										render={
+											<Button
+												variant="ghost"
+												size="icon-xs"
+												aria-label="More actions"
+											>
+												<Icon name="ellipsis" className="size-4" />
+											</Button>
+										}
+									/>
+									<DropdownMenuContent align="end" className="min-w-44">
 										<DropdownMenuItem
 											onClick={() => {
-												if (liveUrl) window.open(liveUrl, '_blank')
+												if (previewUrl) window.open(previewUrl, '_blank')
 											}}
 										>
-											<Icon name="laptop" className="size-4" />
-											<Trans>View live site</Trans>
+											<Icon name="external-link" className="size-4" />
+											<Trans>Open preview</Trans>
 										</DropdownMenuItem>
-									) : null}
-									{!page.isHomePage && optimisticStatus === 'published' ? (
-										<>
-											<DropdownMenuSeparator />
+										{optimisticStatus === 'published' ? (
 											<DropdownMenuItem
-												variant="destructive"
-												onClick={handleUnpublish}
-												disabled={publishFetcher.state !== 'idle'}
+												onClick={() => {
+													if (liveUrl) window.open(liveUrl, '_blank')
+												}}
 											>
-												<Trans>Unpublish</Trans>
+												<Icon name="laptop" className="size-4" />
+												<Trans>View live site</Trans>
 											</DropdownMenuItem>
-										</>
-									) : null}
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</div>
-					</header>
-
-					<div className="flex min-h-0 flex-1">
-						{isSplitLayout ? (
-							<ResizablePanelGroup
-								direction="horizontal"
-								autoSaveId="website-page-builder"
-								className="min-h-0 flex-1"
-							>
-								<ResizablePanel
-									id="sections"
-									order={1}
-									defaultSize={22}
-									minSize={15}
-									maxSize={40}
-									className="min-w-0"
-								>
-									{sectionsSidebar}
-								</ResizablePanel>
-								<ResizableHandle withHandle />
-								<ResizablePanel
-									id="preview"
-									order={2}
-									defaultSize={78}
-									minSize={40}
-									className="min-w-0"
-								>
-									{previewMain}
-								</ResizablePanel>
-							</ResizablePanelGroup>
-						) : (
-							<div className="min-h-0 flex-1">
-								{mode === 'build' ? sectionsSidebar : previewMain}
+										) : null}
+										{!page.isHomePage && optimisticStatus === 'published' ? (
+											<>
+												<DropdownMenuSeparator />
+												<DropdownMenuItem
+													variant="destructive"
+													onClick={handleUnpublish}
+													disabled={publishFetcher.state !== 'idle'}
+												>
+													<Trans>Unpublish</Trans>
+												</DropdownMenuItem>
+											</>
+										) : null}
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
-						)}
+						</header>
+
+						<div className="flex min-h-0 flex-1">
+							{isSplitLayout ? (
+								<ResizablePanelGroup
+									direction="horizontal"
+									autoSaveId="website-page-builder"
+									className="min-h-0 flex-1"
+								>
+									<ResizablePanel
+										id="sections"
+										order={1}
+										defaultSize={22}
+										minSize={15}
+										maxSize={40}
+										className="min-w-0"
+									>
+										{sectionsSidebar}
+									</ResizablePanel>
+									<ResizableHandle withHandle />
+									<ResizablePanel
+										id="preview"
+										order={2}
+										defaultSize={78}
+										minSize={40}
+										className="min-w-0"
+									>
+										{previewMain}
+									</ResizablePanel>
+								</ResizablePanelGroup>
+							) : (
+								<div className="min-h-0 flex-1">
+									{mode === 'build' ? sectionsSidebar : previewMain}
+								</div>
+							)}
+						</div>
 					</div>
-				</div>
-			</SiteLinkBuilderContext.Provider>
+				</SiteLinkBuilderContext.Provider>
+			</TranslateProvider>
 		</LocaleContext.Provider>
 	)
 }

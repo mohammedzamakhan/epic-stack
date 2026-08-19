@@ -1,0 +1,146 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-08-19 11:11-0500\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: fr\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/verify.astro.ts:3
+msgid "Check your phone"
+msgstr "Vérifiez votre téléphone"
+
+#: src/pages/complete-name.astro.ts:3
+msgid "Continue"
+msgstr "Continuer"
+
+#: src/pages/profile.astro.ts:3
+msgid "Email"
+msgstr "E-mail"
+
+#: src/pages/login.astro.ts:3
+msgid "Enter your phone number. We'll send a verification code."
+msgstr "Saisissez votre numéro de téléphone. Nous enverrons un code."
+
+#: src/pages/complete-name.astro.ts:3
+msgid "Full name"
+msgstr "Nom complet"
+
+#: src/pages/verify.astro.ts:3
+msgid "Invalid verification code."
+msgstr "Code de vérification invalide."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Language"
+msgstr "Langue"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Mobile"
+msgstr "Mobile"
+
+#: src/pages/profile.astro.ts:3
+msgid "Name"
+msgstr "Nom"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+#: src/pages/verify.astro.ts:3
+msgid "Network error. Please try again."
+msgstr "Erreur réseau. Veuillez réessayer."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Open menu"
+msgstr "Ouvrir le menu"
+
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Phone Number"
+msgstr "Numéro de téléphone"
+
+#: src/pages/profile.astro.ts:3
+msgid "Phone number cannot be changed at this time."
+msgstr "Le numéro de téléphone ne peut pas être modifié pour le moment."
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Primary"
+msgstr "Principal"
+
+#: src/components/SiteHeader.astro.ts:3
+msgid "Profile"
+msgstr "Profil"
+
+#: src/pages/profile.astro.ts:3
+msgid "Profile updated successfully!"
+msgstr "Profil mis à jour."
+
+#: src/pages/profile.astro.ts:3
+msgid "Save Changes"
+msgstr "Enregistrer"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Saving..."
+msgstr "Enregistrement..."
+
+#: src/pages/login.astro.ts:3
+msgid "Send Code"
+msgstr "Envoyer le code"
+
+#: src/pages/login.astro.ts:3
+msgid "Sending..."
+msgstr "Envoi..."
+
+#: src/components/SiteHeader.astro.ts:3
+#: src/pages/login.astro.ts:3
+msgid "Sign in"
+msgstr "Connexion"
+
+#: src/pages/complete-name.astro.ts:3
+#: src/pages/login.astro.ts:3
+#: src/pages/profile.astro.ts:3
+msgid "Something went wrong."
+msgstr "Une erreur s’est produite."
+
+#: src/pages/profile.astro.ts:3
+msgid "Update your basic details below."
+msgstr "Mettez à jour vos informations ci-dessous."
+
+#: src/pages/verify.astro.ts:3
+msgid "Verification Code"
+msgstr "Code de vérification"
+
+#: src/pages/verify.astro.ts:3
+msgid "Verify"
+msgstr "Vérifier"
+
+#: src/pages/verify.astro.ts:3
+msgid "Verifying..."
+msgstr "Vérification..."
+
+#: src/pages/complete-name.astro.ts:3
+msgid "We'll use this on your profile. You can change it later."
+msgstr "Nous l’utiliserons sur votre profil. Vous pourrez le modifier plus tard."
+
+#: src/pages/verify.astro.ts:3
+msgid "We've sent a 6-digit code to"
+msgstr "Nous avons envoyé un code à 6 chiffres à"
+
+#: src/pages/complete-name.astro.ts:3
+msgid "What's your name?"
+msgstr "Comment vous appelez-vous ?"
+
+#: src/pages/profile.astro.ts:3
+msgid "Your Profile"
+msgstr "Votre profil"

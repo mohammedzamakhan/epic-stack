@@ -8,6 +8,13 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*", "public/**/*", "env.d.ts", "src/app.d.ts"],
+	"include": [
+		"src/**/*",
+		"public/**/*",
+		"env.d.ts",
+		"src/app.d.ts",
+		"src/types/**/*.d.ts",
+		"lingui.config.ts"
+	],
 	"exclude": ["dist", "node_modules"]
 }
