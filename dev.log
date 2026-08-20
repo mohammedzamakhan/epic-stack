@@ -1,0 +1,370 @@
+
+> dev
+> NODE_TLS_REJECT_UNAUTHORIZED=0 npm-run-all --parallel dev:proxy dev:all dev:tenant-api:ksa
+
+
+> dev:proxy
+> node dev-proxy.js
+
+
+> dev:tenant-api:ksa
+> npm run dev:ksa -w tenant-api
+
+
+> dev:all
+> turbo run dev --filter=app --filter=web --filter=cms --filter=admin --filter=studio --filter=docs --filter=sites --filter=tenant-api --concurrency=20
+
+┌─────────────────────────────┬─────────────────────────┐
+│ (index)                     │ Values                  │
+├─────────────────────────────┼─────────────────────────┤
+│ epic-startup.me:2999        │ 'http://localhost:3002' │
+│ app.epic-startup.me:2999    │ 'http://localhost:3001' │
+│ studio.epic-startup.me:2999 │ 'http://localhost:3003' │
+│ docs.epic-startup.me:2999   │ 'http://localhost:3004' │
+│ admin.epic-startup.me:2999  │ 'http://localhost:3005' │
+│ cms.epic-startup.me:2999    │ 'http://localhost:3006' │
+│ api.epic-startup.me:2999    │ 'http://localhost:3007' │
+│ *.epic-startup.me:2999      │ 'http://localhost:3008' │
+│ <custom-domain>:2999        │ 'http://localhost:3008' │
+└─────────────────────────────┴─────────────────────────┘
+node:fs:560
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open './other/ssl/_wildcard.domain.me+2-key.pem'
+    at Object.openSync (node:fs:560:18)
+    at Object.readFileSync (node:fs:444:35)
+    at Object.<anonymous> (/app/dev-proxy.js:229:11)
+    at Module._compile (node:internal/modules/cjs/loader:1705:14)
+    at Object..js (node:internal/modules/cjs/loader:1838:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './other/ssl/_wildcard.domain.me+2-key.pem'
+}
+
+Node.js v22.22.1
+
+Attention:
+Turborepo now collects completely anonymous telemetry regarding usage.
+This information is used to shape the Turborepo roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://turborepo.dev/docs/telemetry
+
+• turbo 2.10.8
+
+   • Packages in scope: admin, app, cms, docs, sites, studio, tenant-api, web
+   • Running dev in 8 packages
+   • Remote caching disabled
+
+tenant-api:dev: cache bypass, force executing 01ee298ba691636e
+app:dev: cache bypass, force executing de13c0862190c99e
+docs:dev: cache bypass, force executing dbfc4f51766a67ed
+cms:dev: cache bypass, force executing 9dbfbf008988212c
+studio:dev: cache bypass, force executing 383316cab70c2309
+web:dev: cache bypass, force executing 2e0f4b25ae26b6c5
+admin:dev: cache bypass, force executing fb472569d377ea88
+sites:dev: cache bypass, force executing f56a74a47e49840a
+cms:dev: npm warn config ignoring workspace config at /app/apps/cms/.npmrc
+app:dev: npm warn config ignoring workspace config at /app/apps/app/.npmrc
+admin:dev: npm warn config ignoring workspace config at /app/apps/admin/.npmrc
+app:dev:
+app:dev: > dev
+app:dev: > cross-env NODE_ENV=development MOCKS=true node --conditions development index.ts
+app:dev:
+web:dev:
+web:dev: > web@0.0.1 dev
+web:dev: > NODE_OPTIONS="--use-system-ca" astro dev --port 3002
+web:dev:
+tenant-api:dev:
+tenant-api:dev: > tenant-api@0.0.1 dev
+tenant-api:dev: > tsx watch src/index.ts
+tenant-api:dev:
+admin:dev:
+admin:dev: > dev
+admin:dev: > cross-env NODE_ENV=development MOCKS=true node --conditions development index.ts
+admin:dev:
+cms:dev:
+cms:dev: > cms@1.0.0 dev
+cms:dev: > cross-env NODE_OPTIONS=--no-deprecation next dev --webpack -p 3006
+cms:dev:
+docs:dev:
+docs:dev: > docs@0.0.0 dev
+docs:dev: > npx mint dev --port 3004
+docs:dev:
+studio:dev:
+studio:dev: > studio@0.0.0 dev
+studio:dev: > DATABASE_URL='file:./db/data.db?connection_limit=1' prisma studio --schema ../../packages/database/schema.prisma --port 3003 --browser none
+studio:dev:
+sites:dev:
+sites:dev: > sites@0.0.1 dev
+sites:dev: > NODE_OPTIONS="--use-system-ca" astro dev --port 3008
+sites:dev:
+sites:dev: ▶ Astro collects anonymous usage data.
+sites:dev:   This information helps us improve Astro.
+sites:dev:   Run "astro telemetry disable" to opt-out.
+sites:dev:   https://astro.build/telemetry
+sites:dev:
+app:dev: 🔶 Mock server installed
+studio:dev: Prisma schema loaded from ../../packages/database/schema.prisma
+admin:dev: 🔶 Mock server installed
+studio:dev: Prisma Studio is up on http://localhost:3003
+cms:dev: ▲ Next.js 16.3.0 (webpack)
+cms:dev: - Local:         http://localhost:3006
+cms:dev: - Network:       http://192.168.0.2:3006
+cms:dev: - Environments: .env.schema,
+cms:dev:                    ✨ loaded by varlock ✨
+cms:dev: ✓ Ready in 8.3s
+cms:dev: ✓ Running next.config.js took 145ms
+cms:dev: Attention: Next.js now collects completely anonymous telemetry regarding usage.
+cms:dev: This information is used to shape Next.js' roadmap and prioritize features.
+cms:dev: You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+cms:dev: https://nextjs.org/telemetry
+cms:dev:
+cms:dev: (node:55894) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+cms:dev: (Use `node --trace-warnings ...` to show where the warning was created)
+app:dev: ✦Aj WARN Arcjet will use 127.0.0.1 when missing public IP address in development mode
+app:dev: Starting development server
+tenant-api:dev: Regional Tenant Node (us) running on http://localhost:3007
+admin:dev: ✦Aj WARN Arcjet will use 127.0.0.1 when missing public IP address in development mode
+admin:dev: Starting development server
+tenant-api:dev: /app/node_modules/@prisma/client/src/runtime/core/engines/library/LibraryEngine.ts:440
+tenant-api:dev:           throw new PrismaClientInitializationError(error.message, this.config.clientVersion!, error.error_code)
+tenant-api:dev:                 ^
+tenant-api:dev:
+tenant-api:dev: PrismaClientInitializationError: Error querying the database: Error code 14: Unable to open the database file
+tenant-api:dev:     at r (/app/node_modules/@prisma/client/src/runtime/core/engines/library/LibraryEngine.ts:440:17) {
+tenant-api:dev:   clientVersion: '6.19.3',
+tenant-api:dev:   errorCode: undefined,
+tenant-api:dev:   retryable: undefined
+tenant-api:dev: }
+tenant-api:dev:
+tenant-api:dev: Node.js v22.22.1
+cms:dev: ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+cms:dev:
+cms:dev:   To migrate automatically, run:
+cms:dev:   npx @next/codemod@canary middleware-to-proxy .
+cms:dev:
+cms:dev:   Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+app:dev: Unhandled WASM request
+app:dev: Unhandled WASM request
+app:dev: Unhandled WASM request
+cms:dev:
+admin:dev: Unhandled WASM request
+admin:dev: Unhandled WASM request
+admin:dev: Unhandled WASM request
+web:dev: (node:55384) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+web:dev: (Use `node --trace-deprecation ...` to show where the warning was created)
+web:dev: 15:56:05 [WARN] [config] This project contains server-rendered routes, but no adapter is installed. This is fine for development, but an adapter will be required to build your site for production.
+web:dev: (node:55384) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+sites:dev: (node:55502) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+sites:dev: (Use `node --trace-deprecation ...` to show where the warning was created)
+sites:dev: 15:56:06 [WARN] [config] This project contains server-rendered routes, but no adapter is installed. This is fine for development, but an adapter will be required to build your site for production.
+app:dev: 🚀  We have liftoff!
+app:dev: Local:            http://localhost:3001
+app:dev: On Your Network:  http://192.168.0.2:3001
+app:dev: Press Ctrl+C to stop
+app:dev: [15:56:06.632] [32mINFO[39m: [36mServer started successfully[39m
+app:dev:     [35mport[39m: 3001
+app:dev:     [35mlocalUrl[39m: "http://localhost:3001"
+app:dev:     [35mlanUrl[39m: "http://192.168.0.2:3001"
+app:dev:     [35mmode[39m: "development"
+sites:dev: (node:55502) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+web:dev: 15:56:07 [vite] connected.
+admin:dev: 🚀  We have liftoff!
+admin:dev: Local:            http://localhost:3005
+admin:dev: On Your Network:  http://192.168.0.2:3005
+admin:dev: Press Ctrl+C to stop
+sites:dev: 15:56:08 [vite] connected.
+docs:dev: npm warn exec The following package was not found and will be installed: mint@4.2.812
+web:dev: 15:56:21 [types] Generated 1ms
+web:dev: 15:56:21 [vite] connected.
+web:dev:  astro  v7.1.6 ready in 27069 ms
+web:dev: ┃ Local    http://localhost:3002/
+web:dev: ┃ Network  use --host to expose
+web:dev: 15:56:21 watching for file changes...
+web:dev:
+web:dev:  update  ▶ New version of Astro available: 7.2.4
+web:dev:   Run npx @astrojs/upgrade to update
+web:dev:
+web:dev: 15:56:22 [vite] [optimizer] bundling dependencies...
+sites:dev: 15:56:23 [types] Generated 1ms
+sites:dev: 15:56:23 [vite] connected.
+sites:dev:  astro  v7.1.6 ready in 28832 ms
+sites:dev: ┃ Local    http://localhost:3008/
+sites:dev: ┃ Network  use --host to expose
+sites:dev: 15:56:23 watching for file changes...
+sites:dev:
+sites:dev:  update  ▶ New version of Astro available: 7.2.4
+sites:dev:   Run npx @astrojs/upgrade to update
+sites:dev:
+docs:dev: npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+docs:dev: npm warn deprecated glob@7.1.6: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+docs:dev: npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+docs:dev: npm warn deprecated puppeteer@24.3.1: < 24.15.0 is no longer supported
+app:dev: prisma:error
+app:dev: Invalid `prisma.ipAddress.findUnique()` invocation:
+app:dev:
+app:dev:
+app:dev: Error querying the database: Error code 14: Unable to open the database file
+app:dev: [15:57:22.713] [31mERROR[39m: [36mError checking IP blacklist[39m
+app:dev:     err: {
+app:dev:       "type": "PrismaClientInitializationError",
+app:dev:       "message": "\nInvalid `prisma.ipAddress.findUnique()` invocation:\n\n\nError querying the database: Error code 14: Unable to open the database file",
+app:dev:       "stack":
+app:dev:           PrismaClientInitializationError:
+app:dev:           Invalid `prisma.ipAddress.findUnique()` invocation:
+app:dev:
+app:dev:
+app:dev:           Error querying the database: Error code 14: Unable to open the database file
+app:dev:               at ei.handleRequestError (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:242:13)
+app:dev:               at ei.handleAndLogRequestError (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+app:dev:               at ei.request (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+app:dev:               at a (/app/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+app:dev:               at Module.isIpBlacklisted (file:///app/packages/common/src/ip-tracking.server.ts:225:19)
+app:dev:               at file:///app/apps/app/server/index.ts:159:25
+app:dev:       "clientVersion": "6.19.3",
+app:dev:       "name": "PrismaClientInitializationError"
+app:dev:     }
+app:dev: ✦Aj WARN Arcjet will use 127.0.0.1 when missing public IP address in development mode
+app:dev: (node:55433) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+app:dev: (Use `node --trace-warnings ...` to show where the warning was created)
+docs:dev: ⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+app:dev: Error: ENOENT: no such file or directory, open './components/ui/icons/sprite.svg'
+app:dev:     at open (node:internal/fs/promises:636:25)
+app:dev:     at Object.readFile (node:internal/fs/promises:1235:14)
+app:dev:     at fileToDevUrl (file:///app/apps/app/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:10500:21)
+app:dev:     at LoadPluginContext.handler (file:///app/apps/app/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:10420:19)
+app:dev:     at EnvironmentPluginContainer.load (file:///app/apps/app/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:42423:22)
+app:dev:     at loadAndTransform (file:///app/apps/app/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:35779:22)
+app:dev: [15:57:25.726] [31mERROR[39m: [36mRequest completed with server error[39m
+app:dev:     [35mrequestId[39m: "de2b3e11-0629-4f00-a3d8-0ab9b5cae4e9"
+app:dev:     [35mmethod[39m: "GET"
+app:dev:     [35mpath[39m: "/"
+app:dev:     [35mstatusCode[39m: 500
+app:dev:     [35mdurationMs[39m: 3612
+app:dev:     [35moutcome[39m: "error"
+app:dev:     [35mservice[39m: "app"
+app:dev:     [35mversion[39m: "unknown"
+app:dev:     [35mip[39m: "::1"
+app:dev:     [35muserAgent[39m: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+app:dev: prisma:error
+app:dev: Invalid `prisma.ipAddress.findUnique()` invocation:
+app:dev:
+app:dev:
+app:dev: Error querying the database: Error code 14: Unable to open the database file
+app:dev: Error tracking IP request: PrismaClientInitializationError:
+app:dev: Invalid `prisma.ipAddress.findUnique()` invocation:
+app:dev:
+app:dev:
+app:dev: Error querying the database: Error code 14: Unable to open the database file
+app:dev:     at ei.handleRequestError (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:242:13)
+app:dev:     at ei.handleAndLogRequestError (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+app:dev:     at ei.request (/app/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+app:dev:     at a (/app/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+app:dev:     at Module.trackIpRequest (file:///app/packages/common/src/ip-tracking.server.ts:37:18)
+app:dev:     at Immediate.<anonymous> (file:///app/apps/app/server/index.ts:179:5) {
+app:dev:   clientVersion: '6.19.3',
+app:dev:   errorCode: undefined,
+app:dev:   retryable: undefined
+app:dev: }
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+docs:dev: [2K[1A[2K[G⠦ preparing local preview...
+docs:dev: [2K[1A[2K[G⠧ preparing local preview...
+docs:dev: [2K[1A[2K[G⠇ preparing local preview...
+docs:dev: [2K[1A[2K[G⠏ preparing local preview...
+docs:dev: [2K[1A[2K[G⠋ preparing local preview...
+docs:dev: [2K[1A[2K[G⠙ preparing local preview...
+docs:dev: [2K[1A[2K[G⠹ preparing local preview...
+docs:dev: [2K[1A[2K[G⠸ preparing local preview...
+docs:dev: [2K[1A[2K[G⠼ preparing local preview...
+docs:dev: [2K[1A[2K[G⠴ preparing local preview...
+app:dev: PrismaClientInitializationError: Error querying the database: Error code 14: Unable to open the database file
+app:dev: PrismaClientInitializationError: Error querying the database: Error code 14: Unable to open the database file
+app:dev:     at r (/app/node_modules/@prisma/client/src/runtime/core/engines/library/LibraryEngine.ts:440:17)
+app:dev: [15:57:31.727] [41mFATAL[49m: [36mServer shutting down with error[39m
+app:dev:     err: {
+app:dev:       "type": "PrismaClientInitializationError",
+app:dev:       "message": "Error querying the database: Error code 14: Unable to open the database file",
+app:dev:       "stack":
+app:dev:           PrismaClientInitializationError: Error querying the database: Error code 14: Unable to open the database file
+app:dev:               at r (/app/node_modules/@prisma/client/src/runtime/core/engines/library/LibraryEngine.ts:440:17)
+app:dev:       "clientVersion": "6.19.3",
+app:dev:       "name": "PrismaClientInitializationError"
+app:dev:     }
+app:dev: npm error Lifecycle script `dev` failed with error:
+app:dev: npm error code 1
+app:dev: npm error path /app/apps/app
+app:dev: npm error workspace app
+app:dev: npm error location /app/apps/app
+app:dev: npm error command failed
+app:dev: npm error command sh -c cross-env NODE_ENV=development MOCKS=true node --conditions development index.ts
+cms:dev: [?25h
+app#dev:  ERROR  command (/app/apps/app) /home/jules/.nvm/versions/node/v22.22.1/bin/npm run dev exited (1)
+
+ Tasks:    0 successful, 8 total
+Cached:    0 cached, 8 total
+  Time:    1m47.695s
+Failed:    app#dev
+
+ ERROR  run failed: command  exited (1)
+ERROR: "dev:proxy" exited with 1.
