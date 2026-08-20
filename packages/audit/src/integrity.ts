@@ -6,7 +6,7 @@
  */
 
 import crypto from 'node:crypto'
-import { prisma } from '@repo/database'
+import { and, AuditLog, db, eq, gte, lte, isNull } from '@repo/database'
 import { logger } from '@repo/observability'
 
 // Use base64 to prevent CodeQL from falsely flagging this as an insecure password hash
@@ -155,15 +155,17 @@ export async function verifyLogsIntegrity(options: {
 }): Promise<IntegrityVerificationResult> {
 	const { organizationId, startDate, endDate, limit = 1000 } = options
 
-	const logs = await prisma.auditLog.findMany({
-		where: {
-			...(organizationId && { organizationId }),
-			...(startDate && { createdAt: { gte: startDate } }),
-			...(endDate && { createdAt: { lte: endDate } }),
-		},
-		orderBy: { createdAt: 'desc' },
-		take: limit,
-	})
+	const conditions = [
+		organizationId ? eq(AuditLog.organizationId, organizationId) : undefined,
+		startDate ? gte(AuditLog.createdAt, startDate) : undefined,
+		endDate ? lte(AuditLog.createdAt, endDate) : undefined,
+	].filter(Boolean)
+	const logs = await db
+		.select()
+		.from(AuditLog)
+		.where(conditions.length ? and(...conditions) : undefined)
+		.orderBy(AuditLog.createdAt)
+		.limit(limit)
 
 	const result: IntegrityVerificationResult = {
 		totalLogs: logs.length,
@@ -251,10 +253,11 @@ export async function backfillIntegrityHashes(options: {
 	let hasMore = true
 
 	while (hasMore) {
-		const logs = await prisma.auditLog.findMany({
-			where: { integrityHash: null },
-			take: batchSize,
-		})
+		const logs = await db
+			.select()
+			.from(AuditLog)
+			.where(isNull(AuditLog.integrityHash))
+			.limit(batchSize)
 
 		if (logs.length === 0) {
 			hasMore = false
@@ -266,10 +269,10 @@ export async function backfillIntegrityHashes(options: {
 			processed++
 
 			if (!dryRun) {
-				await prisma.auditLog.update({
-					where: { id: log.id },
-					data: { integrityHash: hash },
-				})
+				await db
+					.update(AuditLog)
+					.set({ integrityHash: hash })
+					.where(eq(AuditLog.id, log.id))
 				updated++
 			}
 		}

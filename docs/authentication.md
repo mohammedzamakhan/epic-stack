@@ -147,11 +147,12 @@ Passwords) utility.
 
 You can read more about the decision to use TOTP in
 [the totp decision document](./decisions/014-totp.md). The secret and other
-pertinent information is stored in a `verification` model (check the Prisma
-schema). This verification model is used as the basis for all TOTP secrets. This
-is used for non-expiring Two-Factor Authentication secrets as well as temporary
-TOTP codes which are emailed to verify a user's ownership of an email/account.
-So it's used for onboarding, forgot password, and change email flows.
+pertinent information is stored in a `verification` table (see
+`packages/database/src/schema.ts`). This verification table is used as the basis
+for all TOTP secrets. This is used for non-expiring Two-Factor Authentication
+secrets as well as temporary TOTP codes which are emailed to verify a user's
+ownership of an email/account. So it's used for onboarding, forgot password, and
+change email flows.
 
 When a user has 2FA enabled on their account, they also are required to enter
 their 2FA code within 2 hours of performing destructive actions like changing
@@ -167,7 +168,7 @@ sites (Astro `apps/sites`) authenticate **customers**, not App users.
 - **Method:** phone OTP. Name is collected only after the code is verified, and
   only if that phone does not already have a customer name.
 - **Storage:** per-org SQLite on the regional tenant-api (`packages/tenant-db`),
-  not US Prisma.
+  not the US control-plane database.
 - **Client:** page JavaScript calls tenant-api directly. Access and refresh
   tokens live in `localStorage`. They are not Sites cookies.
 - **Why not a Sites BFF / HttpOnly cookie on Sites:** Sites often runs in the

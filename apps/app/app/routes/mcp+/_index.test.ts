@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import fc from 'fast-check'
 import { RouterContextProvider } from 'react-router'
 import { describe, it, expect, afterEach } from 'vitest'
@@ -68,7 +68,7 @@ async function initializeSession(
 
 // Helper to create test user
 async function createTestUser(createdUserIds: string[]) {
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: {
 			email: faker.internet.email(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
@@ -83,11 +83,11 @@ async function createTestUser(createdUserIds: string[]) {
 // Helper to create test organization
 async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 	// Ensure admin role exists
-	let adminRole = await prisma.organizationRole.findUnique({
+	let adminRole = await db.organizationRole.findUnique({
 		where: { name: 'admin' },
 	})
 	if (!adminRole) {
-		adminRole = await prisma.organizationRole.create({
+		adminRole = await db.organizationRole.create({
 			data: {
 				name: 'admin',
 				description: 'Administrator role',
@@ -96,7 +96,7 @@ async function createTestOrganization(userId: string, createdOrgIds: string[]) {
 		})
 	}
 
-	const org = await prisma.organization.create({
+	const org = await db.organization.create({
 		data: {
 			name: faker.company.name(),
 			slug: `org-${faker.string.uuid().slice(0, 8)}`,
@@ -121,7 +121,7 @@ describe('MCP SSE Endpoint', () => {
 		// Clean up only the resources created in this test
 		// Delete in correct order to respect foreign key constraints
 		if (createdUserIds.length > 0 || createdOrgIds.length > 0) {
-			await prisma.mCPRefreshToken.deleteMany({
+			await db.mCPRefreshToken.deleteMany({
 				where: {
 					authorization: {
 						OR: [
@@ -131,7 +131,7 @@ describe('MCP SSE Endpoint', () => {
 					},
 				},
 			})
-			await prisma.mCPAccessToken.deleteMany({
+			await db.mCPAccessToken.deleteMany({
 				where: {
 					authorization: {
 						OR: [
@@ -141,7 +141,7 @@ describe('MCP SSE Endpoint', () => {
 					},
 				},
 			})
-			await prisma.mCPAuthorization.deleteMany({
+			await db.mCPAuthorization.deleteMany({
 				where: {
 					OR: [
 						{ userId: { in: createdUserIds } },
@@ -149,7 +149,7 @@ describe('MCP SSE Endpoint', () => {
 					],
 				},
 			})
-			await prisma.userOrganization.deleteMany({
+			await db.userOrganization.deleteMany({
 				where: {
 					OR: [
 						{ userId: { in: createdUserIds } },
@@ -157,10 +157,10 @@ describe('MCP SSE Endpoint', () => {
 					],
 				},
 			})
-			await prisma.organization.deleteMany({
+			await db.organization.deleteMany({
 				where: { id: { in: createdOrgIds } },
 			})
-			await prisma.user.deleteMany({
+			await db.user.deleteMany({
 				where: { id: { in: createdUserIds } },
 			})
 
@@ -232,7 +232,7 @@ describe('MCP SSE Endpoint', () => {
 				.update(accessToken)
 				.digest('hex')
 
-			await prisma.mCPAccessToken.update({
+			await db.mCPAccessToken.update({
 				where: { tokenHash },
 				data: {
 					expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
@@ -330,7 +330,7 @@ describe('MCP SSE Endpoint', () => {
 			expect(tokenData).toBeDefined()
 
 			// Simulate connection close by revoking authorization
-			await prisma.mCPAuthorization.update({
+			await db.mCPAuthorization.update({
 				where: { id: tokenData!.authorizationId },
 				data: { isActive: false },
 			})
@@ -374,7 +374,7 @@ describe('MCP SSE Endpoint', () => {
 						})
 
 						// Revoke all authorizations
-						await prisma.mCPAuthorization.updateMany({
+						await db.mCPAuthorization.updateMany({
 							where: { userId: user.id },
 							data: { isActive: false },
 						})

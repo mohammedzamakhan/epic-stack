@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -94,7 +94,7 @@ test.describe('Notifications', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test notification for this user
-		await prisma.notification.create({
+		await db.notification.create({
 			data: {
 				userId: user.id,
 				organizationId: org.id,

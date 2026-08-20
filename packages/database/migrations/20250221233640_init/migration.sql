@@ -187,55 +187,10 @@ CREATE UNIQUE INDEX "_RoleToUser_AB_unique" ON "_RoleToUser"("A", "B");
 CREATE INDEX "_RoleToUser_B_index" ON "_RoleToUser"("B");
 
 --------------------------------- Manual Seeding --------------------------
--- Hey there, Kent here! This is how you can reliably seed your database with
--- some data. You edit the migration.sql file and that will handle it for you.
-
--- The user Roles and Permissions are seeded here.
--- If you'd like to customise roles and permissions, you can edit and add the code below to your `prisma/seed.ts` file.
--- Seed your development database with `npx prisma db seed`
--- Create a sql dump of your database with `sqlite3 prisma/data.db .dump > seed.sql`
--- Replace the SQL below with your new Roles & Permissions related SQL from `seed.sql`
-
--- console.time('🔑 Created permissions...')
--- const entities = ['user', 'note']
--- const actions = ['create', 'read', 'update', 'delete']
--- const accesses = ['own', 'any'] as const
-
--- let permissionsToCreate = []
--- for (const entity of entities) {
--- 	for (const action of actions) {
--- 		for (const access of accesses) {
--- 			permissionsToCreate.push({ entity, action, access })
--- 		}
--- 	}
--- }
--- await prisma.permission.createMany({ data: permissionsToCreate })
--- console.timeEnd('🔑 Created permissions...')
-
--- console.time('👑 Created roles...')
--- await prisma.role.create({
--- 	data: {
--- 		name: 'admin',
--- 		permissions: {
--- 			connect: await prisma.permission.findMany({
--- 				select: { id: true },
--- 				where: { access: 'any' },
--- 			}),
--- 		},
--- 	},
--- })
--- await prisma.role.create({
--- 	data: {
--- 		name: 'user',
--- 		permissions: {
--- 			connect: await prisma.permission.findMany({
--- 				select: { id: true },
--- 				where: { access: 'own' },
--- 			}),
--- 		},
--- 	},
--- })
--- console.timeEnd('👑 Created roles...')
+-- Roles and permissions are seeded here. To customise them, dump SQL from
+-- the control-plane database (`sqlite3 packages/database/db/data.db .dump`)
+-- and replace the INSERT statements below. Development seed data also lives
+-- in packages/database/seed.ts (`npm run db:seed`).
 
 INSERT INTO Permission VALUES('clnf2zvli0000pcou3zzzzome','create','user','own','',1696625465526,1696625465526);
 INSERT INTO Permission VALUES('clnf2zvll0001pcouly1310ku','create','user','any','',1696625465529,1696625465529);

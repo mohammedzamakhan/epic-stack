@@ -1,5 +1,5 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { action, loader } from './index.tsx'
 
@@ -8,7 +8,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		notification: {
 			findMany: vi.fn().mockResolvedValue([]),
 			count: vi.fn().mockResolvedValue(0),
@@ -36,7 +36,7 @@ describe('Notifications API Routes', () => {
 				unreadCount: 0,
 			})
 			expect(requireUserId).toHaveBeenCalledWith(request)
-			expect(prisma.notification.findMany).toHaveBeenCalledWith(
+			expect(db.notification.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						userId: 'user1',
@@ -51,11 +51,11 @@ describe('Notifications API Routes', () => {
 			)
 			await loader({ request, params: {} } as any)
 
-			expect(prisma.organization.findUnique).toHaveBeenCalledWith({
+			expect(db.organization.findUnique).toHaveBeenCalledWith({
 				where: { slug: 'acme' },
 				select: { id: true },
 			})
-			expect(prisma.notification.findMany).toHaveBeenCalledWith(
+			expect(db.notification.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						userId: 'user1',
@@ -79,7 +79,7 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(prisma.notification.updateMany).toHaveBeenCalledWith(
+			expect(db.notification.updateMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						userId: 'user1',
@@ -103,11 +103,11 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(prisma.organization.findUnique).toHaveBeenCalledWith({
+			expect(db.organization.findUnique).toHaveBeenCalledWith({
 				where: { slug: 'acme' },
 				select: { id: true },
 			})
-			expect(prisma.notification.updateMany).toHaveBeenCalledWith(
+			expect(db.notification.updateMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						userId: 'user1',
@@ -132,7 +132,7 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(prisma.notification.updateMany).toHaveBeenCalledWith(
+			expect(db.notification.updateMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						userId: 'user1',

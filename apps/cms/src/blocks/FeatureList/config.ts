@@ -129,7 +129,7 @@ export const FeatureList: Block = {
         {
           title: 'Database & API',
           description:
-            'Production-ready setup with TypeScript, Prisma ORM, and RESTful APIs with comprehensive documentation.',
+            'Production-ready setup with TypeScript, Drizzle, and RESTful APIs with comprehensive documentation.',
           testimonial: {
             logoAlt: 'Microsoft',
             text: 'Robust database architecture that scales with your business',

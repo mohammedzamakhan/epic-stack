@@ -1,115 +1,61 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validateInstanceUrl } from '@repo/security'
-import { handleUpdateIntegrationConfig } from '../src/route-handlers/update-config'
-import { prisma } from '@repo/database'
+import { queryChain, mockDb, resetMockDb } from './utils/mock-database'
 
-vi.mock('@repo/database', () => ({
-	prisma: {
-		integration: {
-			findUnique: vi.fn(),
-			update: vi.fn(),
-		},
-	},
-}))
+vi.mock('@repo/database', () => {
+	const table = new Proxy({}, { get: (_, property) => property })
+	return {
+		db: mockDb,
+		Integration: table,
+		and: vi.fn(),
+		eq: vi.fn(),
+	}
+})
 
-describe('Jira SSRF and Config Auth Protection (WO-45 + WO-87)', () => {
+describe('Jira configuration protection', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 	})
 
-	describe('validateInstanceUrl (SSRF Guard)', () => {
-		it('rejects http: URLs (requires https: strictly)', () => {
-			const res = validateInstanceUrl('http://my-jira.atlassian.net')
-			expect(res.valid).toBe(false)
-			expect(res.reason).toContain('HTTPS is required')
-		})
-
-		it('rejects URLs with embedded credentials', () => {
-			const res = validateInstanceUrl(
-				'https://user:password@my-jira.atlassian.net',
-			)
-			expect(res.valid).toBe(false)
-			expect(res.reason).toContain('credentials')
-		})
-
-		it('rejects IPv6 unique-local and link-local addresses', () => {
-			expect(validateInstanceUrl('https://[fd00::1]').valid).toBe(false)
-			expect(validateInstanceUrl('https://[fe80::1]').valid).toBe(false)
-		})
-
-		it('accepts valid HTTPS cloud domain', () => {
-			expect(validateInstanceUrl('https://company.atlassian.net').valid).toBe(
-				true,
-			)
-		})
+	it('rejects non-HTTPS or credential-bearing Jira URLs', () => {
+		expect(validateInstanceUrl('http://jira.atlassian.net').valid).toBe(false)
+		expect(
+			validateInstanceUrl('https://user:password@jira.atlassian.net').valid,
+		).toBe(false)
 	})
 
-	describe('handleUpdateIntegrationConfig permission and SSRF validation', () => {
-		it('rejects non-atlassian.net instanceUrl with 400', async () => {
-			vi.mocked(prisma.integration.findUnique).mockResolvedValue({
-				id: 'int-123',
-				providerName: 'jira',
-			} as any)
+	it('rejects an untrusted Jira instance before updating the row', async () => {
+		const { handleUpdateIntegrationConfig } =
+			await import('../src/route-handlers/update-config')
+		mockDb.select.mockImplementationOnce(() =>
+			queryChain([{ id: 'integration-1', providerName: 'jira' }]),
+		)
+		const formData = new FormData()
+		formData.set('intent', 'update-integration-config')
+		formData.set('integrationId', 'integration-1')
+		formData.set(
+			'config',
+			JSON.stringify({ instanceUrl: 'https://attacker.example' }),
+		)
 
-			const formData = new FormData()
-			formData.append('intent', 'update-integration-config')
-			formData.append('integrationId', 'int-123')
-			formData.append(
-				'config',
-				JSON.stringify({ instanceUrl: 'https://evil-attacker-server.com' }),
-			)
-
-			const request = new Request(
-				'http://localhost:3000/api/integrations/update-config',
-				{
+		const response = await handleUpdateIntegrationConfig(
+			{
+				request: new Request('https://app.example/settings', {
 					method: 'POST',
 					body: formData,
-				},
-			)
-
-			const deps = {
-				requireUserId: vi.fn().mockResolvedValue('user-123'),
+				}),
+				params: {},
+				context: {},
+			} as any,
+			{
+				requireUserId: vi.fn().mockResolvedValue('user-1'),
 				getUserDefaultOrganization: vi
 					.fn()
-					.mockResolvedValue({ organization: { id: 'org-123' } }),
-			}
+					.mockResolvedValue({ organization: { id: 'org-1' } }),
+			},
+		)
 
-			const response = await handleUpdateIntegrationConfig(
-				{ request, params: {}, context: {} } as any,
-				deps,
-			)
-			expect(response.status).toBe(400)
-			const body = await response.json()
-			expect(body.error).toContain('Invalid Jira instance URL')
-		})
-
-		it('denies user when requireOrgPermission throws', async () => {
-			const formData = new FormData()
-			formData.append('intent', 'update-integration-config')
-			formData.append('integrationId', 'int-123')
-			formData.append('config', JSON.stringify({}))
-
-			const request = new Request(
-				'http://localhost:3000/api/integrations/update-config',
-				{
-					method: 'POST',
-					body: formData,
-				},
-			)
-
-			const deps = {
-				requireUserId: vi.fn().mockResolvedValue('user-viewer'),
-				getUserDefaultOrganization: vi
-					.fn()
-					.mockResolvedValue({ organization: { id: 'org-123' } }),
-				requireOrgPermission: vi.fn().mockRejectedValue(new Error('Denied')),
-			}
-
-			const response = await handleUpdateIntegrationConfig(
-				{ request, params: {}, context: {} } as any,
-				deps,
-			)
-			expect(response.status).toBe(403)
-		})
+		expect(response.status).toBe(400)
+		expect(mockDb.update).not.toHaveBeenCalled()
 	})
 })

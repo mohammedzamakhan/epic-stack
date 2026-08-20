@@ -1,9 +1,26 @@
 // learn more: https://fly.io/docs/reference/configuration/#services-http_checks
 import { securityAlertService } from '@repo/audit'
 import { getValidatedHost } from '@repo/common/headers'
-import { prisma } from '@repo/database'
+import { countUsers } from '@repo/database'
 import { ENV } from 'varlock/env'
 import { type Route } from './+types/healthcheck.ts'
+
+async function assertSelfReachable(request: Request, host: string) {
+	const hostname = host.split(':')[0]?.toLowerCase() ?? ''
+	const isLoopback =
+		hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1'
+	// Node listens on HTTP locally; TLS is terminated at the dev proxy.
+	const protocol = isLoopback ? 'http:' : new URL(request.url).protocol
+	const response = await fetch(`${protocol}//${host}`, {
+		method: 'HEAD',
+		headers: { 'X-Healthcheck': 'true' },
+		redirect: 'manual',
+	})
+	// `/` often 302s to login. Any non-5xx means the HTTP server is up.
+	if (response.status >= 500) {
+		throw new Error(`Self-check failed with ${response.status}`)
+	}
+}
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const host = getValidatedHost(request, ENV.BASE_URL)
@@ -13,21 +30,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 	}
 
 	try {
-		// if we can connect to the database and make a simple query
-		// and make a HEAD request to ourselves, then we're good.
 		await Promise.all([
-			prisma.user.count(),
-			fetch(`https://${host}`, {
-				method: 'HEAD',
-				headers: { 'X-Healthcheck': 'true' },
-			}).then((r) => {
-				if (!r.ok) return Promise.reject(r)
-			}),
-			// Verify security monitoring is operational (SOC 2 CC7.2)
+			countUsers(),
+			assertSelfReachable(request, host),
 			securityAlertService.getSecurityMetrics({ windowMinutes: 1 }),
 		])
 		return new Response('OK')
-	} catch {
+	} catch (error) {
+		console.error('healthcheck ❌', error)
 		return new Response('ERROR', { status: 500 })
 	}
 }

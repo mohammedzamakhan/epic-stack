@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { prisma } from '@repo/database'
+import { AuditLog, db } from '@repo/database'
 import { logger } from '@repo/observability'
 import { getClientIp } from '@repo/security'
 import { AuditAction } from './actions.ts'
@@ -69,24 +69,22 @@ export class AuditLogWriter {
 				createdAt,
 			})
 
-			await prisma.auditLog.create({
-				data: {
-					id: logId,
-					action: input.action,
-					userId: input.userId || null,
-					organizationId: input.organizationId || null,
-					details: sanitizedDetails,
-					metadata: metadataStr,
-					ipAddress,
-					userAgent,
-					resourceType: input.resourceType || null,
-					resourceId: input.resourceId || null,
-					targetUserId: input.targetUserId || null,
-					severity: input.severity || 'info',
-					retainUntil,
-					integrityHash,
-					createdAt,
-				},
+			await db.insert(AuditLog).values({
+				id: logId,
+				action: input.action,
+				userId: input.userId || null,
+				organizationId: input.organizationId || null,
+				details: sanitizedDetails,
+				metadata: metadataStr,
+				ipAddress,
+				userAgent,
+				resourceType: input.resourceType || null,
+				resourceId: input.resourceId || null,
+				targetUserId: input.targetUserId || null,
+				severity: input.severity || 'info',
+				retainUntil,
+				integrityHash,
+				createdAt,
 			})
 
 			void securityAlertService

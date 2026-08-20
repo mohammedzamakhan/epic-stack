@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
-// Removed prisma import - using test utilities instead
+import { db } from '@repo/database'
+// Removed db import - using test utilities instead
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
@@ -48,7 +48,7 @@ test.describe('Organization Invitations', () => {
 		await expect(page.getByPlaceholder('Enter email address')).toHaveValue('')
 
 		// Verify invitation exists in database
-		const invitation = await prisma.organizationInvitation.findFirst({
+		const invitation = await db.organizationInvitation.findFirst({
 			where: {
 				organizationId: org.id,
 				email: inviteEmail,
@@ -77,7 +77,7 @@ test.describe('Organization Invitations', () => {
 		const invitedUser = await login()
 
 		// Create organization owner
-		const owner = await prisma.user.create({
+		const owner = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -87,7 +87,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an organization
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -102,7 +102,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an invitation for the logged-in user
-		const invitation = await prisma.organizationInvitation.create({
+		const invitation = await db.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,
@@ -140,7 +140,7 @@ test.describe('Organization Invitations', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Verify user is now a member in database
-		const membership = await prisma.organization.findFirst({
+		const membership = await db.organization.findFirst({
 			where: {
 				id: org.id,
 				users: {
@@ -164,7 +164,7 @@ test.describe('Organization Invitations', () => {
 		expect(membership?.users[0]?.organizationRoleId).toBe('org_role_member')
 
 		// Verify invitation is deleted after acceptance (correct behavior)
-		const updatedInvitation = await prisma.organizationInvitation.findUnique({
+		const updatedInvitation = await db.organizationInvitation.findUnique({
 			where: { id: invitation.id },
 		})
 		expect(updatedInvitation).toBeNull()
@@ -178,7 +178,7 @@ test.describe('Organization Invitations', () => {
 		const invitedUser = await login()
 
 		// Create organization owner
-		const owner = await prisma.user.create({
+		const owner = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -188,7 +188,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an organization
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -203,7 +203,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an invitation for the logged-in user
-		const invitation = await prisma.organizationInvitation.create({
+		const invitation = await db.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,
@@ -234,7 +234,7 @@ test.describe('Organization Invitations', () => {
 		await expect(page.getByText(org.name)).not.toBeVisible()
 
 		// Verify user is not a member in database
-		const membership = await prisma.organization.findFirst({
+		const membership = await db.organization.findFirst({
 			where: {
 				id: org.id,
 				users: {
@@ -247,7 +247,7 @@ test.describe('Organization Invitations', () => {
 		expect(membership).toBeNull()
 
 		// Verify invitation is deleted after declining (correct behavior)
-		const updatedInvitation = await prisma.organizationInvitation.findUnique({
+		const updatedInvitation = await db.organizationInvitation.findUnique({
 			where: { id: invitation.id },
 		})
 		expect(updatedInvitation).toBeNull()
@@ -264,7 +264,7 @@ test.describe('Organization Invitations', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a pending invitation
-		const invitation = await prisma.organizationInvitation.create({
+		const invitation = await db.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: faker.internet.email(),
@@ -282,7 +282,7 @@ test.describe('Organization Invitations', () => {
 		// Find and revoke the invitation (look for the trash button in pending invitations)
 		const invitationEmail = faker.internet.email()
 		// Update the invitation to use a known email
-		await prisma.organizationInvitation.update({
+		await db.organizationInvitation.update({
 			where: { id: invitation.id },
 			data: { email: invitationEmail },
 		})
@@ -307,7 +307,7 @@ test.describe('Organization Invitations', () => {
 		await expect(pendingSection.getByText(invitationEmail)).not.toBeVisible()
 
 		// Verify invitation is deleted from database
-		const deletedInvitation = await prisma.organizationInvitation.findUnique({
+		const deletedInvitation = await db.organizationInvitation.findUnique({
 			where: { id: invitation.id },
 		})
 		expect(deletedInvitation).toBeNull()
@@ -321,7 +321,7 @@ test.describe('Organization Invitations', () => {
 		const invitedUser = await login()
 
 		// Create organization owner
-		const owner = await prisma.user.create({
+		const owner = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -331,7 +331,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create multiple organizations with invitations
-		const org1 = await prisma.organization.create({
+		const org1 = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -345,7 +345,7 @@ test.describe('Organization Invitations', () => {
 			},
 		})
 
-		const org2 = await prisma.organization.create({
+		const org2 = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -360,7 +360,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create invitations for both organizations
-		await prisma.organizationInvitation.createMany({
+		await db.organizationInvitation.createMany({
 			data: [
 				{
 					organizationId: org1.id,
@@ -406,7 +406,7 @@ test.describe('Organization Invitations', () => {
 		const invitedUser = await login()
 
 		// Create organization owner
-		const owner = await prisma.user.create({
+		const owner = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -416,7 +416,7 @@ test.describe('Organization Invitations', () => {
 		})
 
 		// Create an organization
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -434,7 +434,7 @@ test.describe('Organization Invitations', () => {
 		const expiredDate = new Date()
 		expiredDate.setDate(expiredDate.getDate() - 8)
 
-		const ignored_invitation = await prisma.organizationInvitation.create({
+		const ignored_invitation = await db.organizationInvitation.create({
 			data: {
 				organizationId: org.id,
 				email: invitedUser.email,

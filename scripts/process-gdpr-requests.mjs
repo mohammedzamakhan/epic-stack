@@ -13,9 +13,15 @@
  *   DATABASE_URL - SQLite database connection string
  */
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import {
+	and,
+	AuditLog,
+	DataSubjectRequest,
+	db,
+	eq,
+	lte,
+	User,
+} from '@repo/database'
 
 const GDPR_DELETION_GRACE_PERIOD_DAYS = 7
 
@@ -26,18 +32,16 @@ async function processDueErasureRequests() {
 		`[GDPR] Starting erasure request processing at ${now.toISOString()}`,
 	)
 
-	const dueRequests = await prisma.dataSubjectRequest.findMany({
-		where: {
-			type: 'erasure',
-			status: 'scheduled',
-			scheduledFor: { lte: now },
-		},
-		include: {
-			user: {
-				select: { id: true, email: true, username: true },
-			},
-		},
-	})
+	const dueRequests = await db
+		.select()
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.type, 'erasure'),
+				eq(DataSubjectRequest.status, 'scheduled'),
+				lte(DataSubjectRequest.scheduledFor, now),
+			),
+		)
 
 	console.log(`[GDPR] Found ${dueRequests.length} due erasure request(s)`)
 
@@ -51,41 +55,37 @@ async function processDueErasureRequests() {
 		console.log(`[GDPR] Processing request ${dsr.id} for user ${dsr.userId}`)
 
 		try {
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'processing',
 					processedAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
-			await prisma.user.delete({
-				where: { id: dsr.userId },
-			})
+			await db.delete(User).where(eq(User.id, dsr.userId))
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'completed',
 					completedAt: new Date(),
 					executedAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
-			await prisma.auditLog.create({
-				data: {
-					action: 'data_deletion_completed',
-					details: `User account deleted (GDPR Article 17). User ID: ${dsr.userId}`,
-					severity: 'warning',
-					resourceType: 'data_subject_request',
-					resourceId: dsr.id,
-					metadata: JSON.stringify({
-						userId: dsr.userId,
-						requestedAt: dsr.requestedAt.toISOString(),
-						scheduledFor: dsr.scheduledFor?.toISOString(),
-						gracePeriodDays: GDPR_DELETION_GRACE_PERIOD_DAYS,
-					}),
-				},
+			await db.insert(AuditLog).values({
+				action: 'data_deletion_completed',
+				details: `User account deleted (GDPR Article 17). User ID: ${dsr.userId}`,
+				severity: 'warning',
+				resourceType: 'data_subject_request',
+				resourceId: dsr.id,
+				metadata: JSON.stringify({
+					userId: dsr.userId,
+					requestedAt: dsr.requestedAt.toISOString(),
+					scheduledFor: dsr.scheduledFor?.toISOString(),
+					gracePeriodDays: GDPR_DELETION_GRACE_PERIOD_DAYS,
+				}),
 			})
 
 			console.log(`[GDPR] Successfully deleted user ${dsr.userId}`)
@@ -98,26 +98,24 @@ async function processDueErasureRequests() {
 				`[GDPR] Failed to delete user ${dsr.userId}: ${errorMessage}`,
 			)
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'failed',
 					failureReason: errorMessage,
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
-			await prisma.auditLog.create({
-				data: {
-					action: 'data_deletion_failed',
-					details: `Failed to delete user account: ${errorMessage}`,
-					severity: 'error',
-					resourceType: 'data_subject_request',
-					resourceId: dsr.id,
-					metadata: JSON.stringify({
-						userId: dsr.userId,
-						error: errorMessage,
-					}),
-				},
+			await db.insert(AuditLog).values({
+				action: 'data_deletion_failed',
+				details: `Failed to delete user account: ${errorMessage}`,
+				severity: 'error',
+				resourceType: 'data_subject_request',
+				resourceId: dsr.id,
+				metadata: JSON.stringify({
+					userId: dsr.userId,
+					error: errorMessage,
+				}),
 			})
 
 			results.failed++
@@ -154,8 +152,6 @@ async function main() {
 	} catch (error) {
 		console.error('[GDPR] Fatal error during processing:', error)
 		process.exit(1)
-	} finally {
-		await prisma.$disconnect()
 	}
 }
 

@@ -5,7 +5,7 @@
  * to meet SOC 2 CC7.2 compliance requirements.
  */
 
-import { prisma } from '@repo/database'
+import { and, AuditLog, count, db, eq, gte, inArray } from '@repo/database'
 import { logger } from '@repo/observability'
 import { AuditAction } from './actions.ts'
 
@@ -183,17 +183,18 @@ export class SecurityAlertService {
 		const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000)
 
 		// Count similar events in the time window
-		const count = await prisma.auditLog.count({
-			where: {
-				action: event.action,
-				createdAt: { gte: windowStart },
-				// Group by IP or user if available
-				...(event.ipAddress && { ipAddress: event.ipAddress }),
-				...(event.userId && { userId: event.userId }),
-			},
-		})
+		const conditions = [
+			eq(AuditLog.action, event.action),
+			gte(AuditLog.createdAt, windowStart),
+			event.ipAddress ? eq(AuditLog.ipAddress, event.ipAddress) : undefined,
+			event.userId ? eq(AuditLog.userId, event.userId) : undefined,
+		].filter(Boolean)
+		const [row] = await db
+			.select({ value: count() })
+			.from(AuditLog)
+			.where(and(...conditions))
 
-		return count >= threshold
+		return (row?.value ?? 0) >= threshold
 	}
 
 	/**
@@ -284,44 +285,30 @@ export class SecurityAlertService {
 		// Get counts of security-relevant events
 		const [failedLogins, suspiciousActivities, securityViolations] =
 			await Promise.all([
-				prisma.auditLog.count({
-					where: {
-						action: AuditAction.USER_LOGIN_FAILED,
-						createdAt: { gte: windowStart },
-					},
-				}),
-				prisma.auditLog.count({
-					where: {
-						action: AuditAction.SUSPICIOUS_ACTIVITY_DETECTED,
-						createdAt: { gte: windowStart },
-					},
-				}),
-				prisma.auditLog.count({
-					where: {
-						action: AuditAction.SECURITY_VIOLATION,
-						createdAt: { gte: windowStart },
-					},
-				}),
+				this.countEvents(AuditAction.USER_LOGIN_FAILED, windowStart),
+				this.countEvents(AuditAction.SUSPICIOUS_ACTIVITY_DETECTED, windowStart),
+				this.countEvents(AuditAction.SECURITY_VIOLATION, windowStart),
 			])
 
 		// Get breakdown by action
-		const alertActions = await prisma.auditLog.groupBy({
-			by: ['action'],
-			_count: true,
-			where: {
-				action: {
-					in: [
+		const actionCounts = count()
+		const alertActions = await db
+			.select({ action: AuditLog.action, count: actionCounts })
+			.from(AuditLog)
+			.where(
+				and(
+					inArray(AuditLog.action, [
 						AuditAction.USER_LOGIN_FAILED,
 						AuditAction.SUSPICIOUS_ACTIVITY_DETECTED,
 						AuditAction.SECURITY_VIOLATION,
 						AuditAction.RATE_LIMIT_EXCEEDED,
 						AuditAction.SSO_LOGIN_FAILED,
-					],
-				},
-				createdAt: { gte: windowStart },
-			},
-			orderBy: { _count: { action: 'desc' } },
-		})
+					]),
+					gte(AuditLog.createdAt, windowStart),
+				),
+			)
+			.groupBy(AuditLog.action)
+			.orderBy(actionCounts)
 
 		return {
 			totalAlerts: failedLogins + suspiciousActivities + securityViolations,
@@ -329,11 +316,21 @@ export class SecurityAlertService {
 			highAlerts: suspiciousActivities,
 			failedLogins,
 			suspiciousActivities,
-			recentAlertActions: alertActions.map((a: any) => ({
+			recentAlertActions: alertActions.map((a) => ({
 				action: a.action,
-				count: a._count,
+				count: a.count,
 			})),
 		}
+	}
+
+	private async countEvents(action: AuditAction, windowStart: Date) {
+		const [row] = await db
+			.select({ value: count() })
+			.from(AuditLog)
+			.where(
+				and(eq(AuditLog.action, action), gte(AuditLog.createdAt, windowStart)),
+			)
+		return row?.value ?? 0
 	}
 }
 

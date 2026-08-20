@@ -69,7 +69,8 @@ export const Featured: Block = {
         },
         {
           title: 'Infrastructure',
-          description: 'Production-ready setup with TypeScript, Remix, Prisma, and modern tooling.',
+          description:
+            'Production-ready setup with TypeScript, Remix, Drizzle, and modern tooling.',
         },
       ],
     },

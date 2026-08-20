@@ -61,15 +61,11 @@ R2_BUCKET_NAME=epic-startup-cms-media
 CLOUDFLARE_ACCOUNT_ID=
 ```
 
-There is no `USE_S3_STORAGE` toggle for the CMS — that variable only applies to
-the unrelated App/Admin Tigris storage described in
-[Image storage](./image-storage.md).
-
 ## Database
 
 CMS content (pages, posts, media metadata) is intended to live in Cloudflare
-**D1** in production, separate from the App/Admin Prisma database — but per
-above, the code currently always uses a local SQLite file via
+**D1** in production, separate from the App/Admin control-plane SQLite database
+— but per above, the code currently always uses a local SQLite file via
 `@payloadcms/db-sqlite`, including in the `deploy-cms` GitHub Actions job (which
 runs `payload migrate` against that local file, not the `D1` binding). See
 [Deployment checklist](./deployment-checklist.md) for the D1/R2 provisioning

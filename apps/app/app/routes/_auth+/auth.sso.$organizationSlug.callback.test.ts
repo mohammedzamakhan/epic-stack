@@ -5,7 +5,7 @@ import {
 	getSessionExpirationDate,
 	sessionKey,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { RouterContextProvider } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
@@ -48,7 +48,7 @@ let testSSOConfig: any
 
 beforeEach(async () => {
 	// Create test organization with unique slug
-	testOrganization = await prisma.organization.create({
+	testOrganization = await db.organization.create({
 		data: {
 			name: 'Test Organization',
 			slug: TEST_ORG_SLUG,
@@ -80,7 +80,7 @@ beforeEach(async () => {
 afterEach(async () => {
 	// Clean up test data by specific ID to avoid affecting parallel tests
 	if (testOrganization?.id) {
-		await prisma.organization.deleteMany({
+		await db.organization.deleteMany({
 			where: { id: testOrganization.id },
 		})
 	}
@@ -89,17 +89,17 @@ afterEach(async () => {
 
 test('successful SSO authentication creates session for existing user', async () => {
 	const userData = createUser()
-	const existingUser = await prisma.user.create({
+	const existingUser = await db.user.create({
 		data: userData,
 	})
 
 	// Add user to organization
-	const memberRole = await prisma.organizationRole.findFirst({
+	const memberRole = await db.organizationRole.findFirst({
 		where: { name: 'member' },
 	})
 	invariant(memberRole, 'Member role should exist')
 
-	await prisma.userOrganization.create({
+	await db.userOrganization.create({
 		data: {
 			userId: existingUser.id,
 			organizationId: testOrganization.id,
@@ -160,7 +160,7 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 		name: faker.person.fullName(),
 	}
 
-	const createdUser = await prisma.user.create({
+	const createdUser = await db.user.create({
 		data: {
 			...createUser(),
 			email: newUserData.email,
@@ -385,7 +385,7 @@ test('handles user already logged in', async () => {
 
 test('handles banned user login attempt', async () => {
 	const userData = createUser()
-	const bannedUser = await prisma.user.create({
+	const bannedUser = await db.user.create({
 		data: {
 			...userData,
 			isBanned: true,
@@ -441,7 +441,7 @@ async function setupRequest({
 }
 
 async function setupUser(userData = createUser()) {
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			user: {

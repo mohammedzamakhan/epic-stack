@@ -3,8 +3,15 @@
  * of OAuth tokens for third-party integrations
  */
 
-import { type Integration } from './prisma-types'
-import { prisma } from '@repo/database'
+import { type Integration } from './database-types'
+import {
+	Integration as IntegrationTable,
+	IntegrationLog as IntegrationLogTable,
+	and,
+	db,
+	eq,
+	isNotNull,
+} from '@repo/database'
 import {
 	integrationEncryption,
 	type EncryptedTokenData,
@@ -156,16 +163,16 @@ export class TokenManager {
 			const encryptedData =
 				await integrationEncryption.encryptTokenData(tokenData)
 
-			await prisma.integration.update({
-				where: { id: integrationId },
-				data: {
+			await db
+				.update(IntegrationTable)
+				.set({
 					accessToken: encryptedData.encryptedAccessToken,
 					refreshToken: encryptedData.encryptedRefreshToken,
 					tokenExpiresAt: encryptedData.expiresAt,
 					lastSyncAt: new Date(),
 					isActive: true,
-				},
-			})
+				})
+				.where(eq(IntegrationTable.id, integrationId))
 
 			return { success: true }
 		} catch (error) {
@@ -183,25 +190,30 @@ export class TokenManager {
 	 */
 	async getTokenData(integrationId: string): Promise<TokenData | null> {
 		try {
-			const integration = await prisma.integration.findUnique({
-				where: { id: integrationId },
-				select: {
-					accessToken: true,
-					refreshToken: true,
-					tokenExpiresAt: true,
-					config: true,
-				},
-			})
+			const [integration] = await db
+				.select({
+					accessToken: IntegrationTable.accessToken,
+					refreshToken: IntegrationTable.refreshToken,
+					tokenExpiresAt: IntegrationTable.tokenExpiresAt,
+					config: IntegrationTable.config,
+				})
+				.from(IntegrationTable)
+				.where(eq(IntegrationTable.id, integrationId))
+				.limit(1)
 
 			if (!integration?.accessToken) {
 				return null
 			}
 
+			const config =
+				typeof integration.config === 'string'
+					? this.parseConfig(integration.config)
+					: integration.config
 			const encryptedData: EncryptedTokenData = {
 				encryptedAccessToken: integration.accessToken,
 				encryptedRefreshToken: integration.refreshToken || undefined,
 				expiresAt: integration.tokenExpiresAt || undefined,
-				scope: (integration.config as any)?.scope,
+				scope: config?.scope,
 				iv: '',
 			}
 
@@ -255,11 +267,12 @@ export class TokenManager {
 				providerName ||
 				provider?.name ||
 				(
-					await prisma.integration.findUnique({
-						where: { id: integrationId },
-						select: { providerName: true },
-					})
-				)?.providerName
+					await db
+						.select({ providerName: IntegrationTable.providerName })
+						.from(IntegrationTable)
+						.where(eq(IntegrationTable.id, integrationId))
+						.limit(1)
+				)[0]?.providerName
 
 			if (!effectiveProviderName) {
 				return null
@@ -378,19 +391,19 @@ export class TokenManager {
 	 */
 	async checkTokensNeedingRefresh(organizationId: string): Promise<string[]> {
 		try {
-			const integrations = await prisma.integration.findMany({
-				where: {
-					organizationId,
-					isActive: true,
-					tokenExpiresAt: {
-						not: null,
-					},
-				},
-				select: {
-					id: true,
-					tokenExpiresAt: true,
-				},
-			})
+			const integrations = await db
+				.select({
+					id: IntegrationTable.id,
+					tokenExpiresAt: IntegrationTable.tokenExpiresAt,
+				})
+				.from(IntegrationTable)
+				.where(
+					and(
+						eq(IntegrationTable.organizationId, organizationId),
+						eq(IntegrationTable.isActive, true),
+						isNotNull(IntegrationTable.tokenExpiresAt),
+					),
+				)
 
 			const needingRefresh: string[] = []
 			const now = new Date()
@@ -435,15 +448,15 @@ export class TokenManager {
 				}
 			}
 
-			await prisma.integration.update({
-				where: { id: integrationId },
-				data: {
+			await db
+				.update(IntegrationTable)
+				.set({
 					accessToken: null,
 					refreshToken: null,
 					tokenExpiresAt: null,
 					isActive: false,
-				},
-			})
+				})
+				.where(eq(IntegrationTable.id, integrationId))
 
 			await this.logTokenOperation(integrationId, 'token_revoke', 'success')
 			return true
@@ -469,15 +482,13 @@ export class TokenManager {
 		errorMessage?: string,
 	): Promise<void> {
 		try {
-			await prisma.integrationLog.create({
-				data: {
-					integrationId,
-					action,
-					status,
-					errorMessage,
-					requestData: null,
-					responseData: null,
-				},
+			await db.insert(IntegrationLogTable).values({
+				integrationId,
+				action,
+				status,
+				errorMessage,
+				requestData: null,
+				responseData: null,
 			})
 		} catch (error) {
 			console.error('Failed to log token operation:', error)
@@ -508,6 +519,14 @@ export class TokenManager {
 			reauthPatterns.some((pattern) => errorMessage.includes(pattern)) ||
 			reauthCodes.includes(errorCode)
 		)
+	}
+
+	private parseConfig(config: string): Record<string, any> {
+		try {
+			return JSON.parse(config) as Record<string, any>
+		} catch {
+			return {}
+		}
 	}
 }
 

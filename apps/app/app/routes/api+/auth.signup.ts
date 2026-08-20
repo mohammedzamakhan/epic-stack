@@ -1,5 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 import { EmailSchema } from '@repo/validation'
 import { data } from 'react-router'
@@ -31,10 +31,11 @@ export async function action({ request }: Route.ActionArgs) {
 
 		const submission = await parseWithZod(formData, {
 			schema: SignupFormSchema.superRefine(async (data, ctx) => {
-				const existingUser = await prisma.user.findUnique({
-					where: { email: data.email },
-					select: { id: true },
-				})
+				const [existingUser] = await db
+					.select({ id: User.id })
+					.from(User)
+					.where(eq(User.email, data.email))
+					.limit(1)
 				if (existingUser) {
 					ctx.addIssue({
 						path: ['email'],

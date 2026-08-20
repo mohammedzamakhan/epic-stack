@@ -35,8 +35,6 @@ Today this app uses **local file storage in every environment**:
 - [`wrangler.jsonc`](./wrangler.jsonc) declares an `R2_BUCKET` binding, and
   `@payloadcms/storage-r2` is a listed dependency, but no R2 plugin is
   registered in `payload.config.ts` yet — production does not actually use R2
-- No `USE_S3_STORAGE` toggle here — that variable only applies to the
-  unrelated App/Admin Tigris storage
 
 See [CMS Storage Documentation](../../docs/cms-storage.md) for the full
 picture, including what it would take to wire R2 in.

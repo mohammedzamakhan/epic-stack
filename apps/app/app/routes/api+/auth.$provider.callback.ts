@@ -4,7 +4,7 @@ import {
 	canUserLogin,
 	ProviderNameSchema,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { and, db, eq, Connection, User } from '@repo/database'
 import { data } from 'react-router'
 import { authenticator } from '#app/utils/auth.server.ts'
 import { createAuthenticatedSessionResponse } from '#app/utils/jwt.server.ts'
@@ -74,15 +74,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		const profile = authResult.data
 
 		// Check if connection already exists
-		const existingConnection = await prisma.connection.findUnique({
-			select: { userId: true },
-			where: {
-				providerName_providerId: {
-					providerName,
-					providerId: String(profile.id),
-				},
-			},
-		})
+		const [existingConnection] = await db
+			.select({ userId: Connection.userId })
+			.from(Connection)
+			.where(
+				and(
+					eq(Connection.providerName, providerName),
+					eq(Connection.providerId, String(profile.id)),
+				),
+			)
+			.limit(1)
 
 		if (existingConnection) {
 			// Check if user can login (not banned)
@@ -112,10 +113,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		}
 
 		// Check if user exists with same email
-		const existingUser = await prisma.user.findUnique({
-			select: { id: true },
-			where: { email: normalizeEmail(profile.email) },
-		})
+		const [existingUser] = await db
+			.select({ id: User.id })
+			.from(User)
+			.where(eq(User.email, normalizeEmail(profile.email)))
+			.limit(1)
 
 		if (existingUser) {
 			// Check if user can login (not banned)
@@ -132,12 +134,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			}
 
 			// Connect provider to existing user
-			await prisma.connection.create({
-				data: {
-					providerName,
-					providerId: String(profile.id),
-					userId: existingUser.id,
-				},
+			await db.insert(Connection).values({
+				providerName,
+				providerId: String(profile.id),
+				userId: existingUser.id,
 			})
 
 			// Use shared helper to create authenticated session response
@@ -165,7 +165,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		let uniqueUsername = username
 		let counter = 1
 		while (
-			await prisma.user.findUnique({ where: { username: uniqueUsername } })
+			(
+				await db
+					.select({ id: User.id })
+					.from(User)
+					.where(eq(User.username, uniqueUsername))
+					.limit(1)
+			)[0]
 		) {
 			uniqueUsername = `${username}${counter}`
 			counter++

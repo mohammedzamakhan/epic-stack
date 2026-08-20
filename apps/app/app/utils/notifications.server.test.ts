@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { sendEmail } from '@repo/email'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
@@ -11,7 +11,7 @@ vi.hoisted(() => {
 })
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		user: {
 			findUnique: vi.fn(),
 			findMany: vi.fn(),
@@ -52,11 +52,11 @@ describe('Notifications Server Utils', () => {
 				organizationId: 'org1',
 				organizationSlug: 'acme',
 			})
-			expect(prisma.userOrganization.findMany).not.toHaveBeenCalled()
+			expect(db.userOrganization.findMany).not.toHaveBeenCalled()
 		})
 
 		it('should notify mentioned users if preferences allow', async () => {
-			vi.mocked(prisma.userOrganization.findMany).mockResolvedValue([
+			vi.mocked(db.userOrganization.findMany).mockResolvedValue([
 				{
 					user: {
 						id: 'user2',
@@ -65,9 +65,7 @@ describe('Notifications Server Utils', () => {
 					},
 				},
 			] as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue(
-				null,
-			) // Defaults to true
+			vi.mocked(db.notificationPreference.findUnique).mockResolvedValue(null) // Defaults to true
 
 			await notifyCommentMentions({
 				noteId: 'note1',
@@ -81,7 +79,7 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.userOrganization.findMany).toHaveBeenCalledWith(
+			expect(db.userOrganization.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						organizationId: 'org1',
@@ -89,7 +87,7 @@ describe('Notifications Server Utils', () => {
 				}),
 			)
 
-			expect(prisma.notification.upsert).toHaveBeenCalledWith(
+			expect(db.notification.upsert).toHaveBeenCalledWith(
 				expect.objectContaining({
 					create: expect.objectContaining({
 						type: 'mention',
@@ -106,7 +104,7 @@ describe('Notifications Server Utils', () => {
 		})
 
 		it('should respect false preferences', async () => {
-			vi.mocked(prisma.userOrganization.findMany).mockResolvedValue([
+			vi.mocked(db.userOrganization.findMany).mockResolvedValue([
 				{
 					user: {
 						id: 'user2',
@@ -115,7 +113,7 @@ describe('Notifications Server Utils', () => {
 					},
 				},
 			] as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue({
+			vi.mocked(db.notificationPreference.findUnique).mockResolvedValue({
 				inApp: false,
 				email: false,
 			} as any)
@@ -132,7 +130,7 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.notification.upsert).not.toHaveBeenCalled()
+			expect(db.notification.upsert).not.toHaveBeenCalled()
 			expect(sendEmail).not.toHaveBeenCalled()
 		})
 	})
@@ -150,17 +148,15 @@ describe('Notifications Server Utils', () => {
 				organizationId: 'org1',
 				organizationSlug: 'acme',
 			})
-			expect(prisma.user.findUnique).not.toHaveBeenCalled()
+			expect(db.user.findUnique).not.toHaveBeenCalled()
 		})
 
 		it('should create notification and send email if preferences allow', async () => {
-			vi.mocked(prisma.user.findUnique).mockResolvedValue({
+			vi.mocked(db.user.findUnique).mockResolvedValue({
 				id: 'owner1',
 				email: 'owner@example.com',
 			} as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue(
-				null,
-			)
+			vi.mocked(db.notificationPreference.findUnique).mockResolvedValue(null)
 
 			await notifyNoteOwner({
 				noteId: 'note1',
@@ -174,7 +170,7 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.notification.upsert).toHaveBeenCalledWith(
+			expect(db.notification.upsert).toHaveBeenCalledWith(
 				expect.objectContaining({
 					create: expect.objectContaining({
 						type: 'comment',

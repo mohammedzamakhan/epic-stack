@@ -1,4 +1,13 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	OrganizationRole,
+	Permission,
+	UserOrganization,
+	_OrganizationPermissionToRole,
+} from '@repo/database'
 import {
 	parsePermissionString,
 	createForbiddenResponse,
@@ -15,6 +24,43 @@ export function parseOrganizationPermissionString(
 	return parsePermissionString(permissionString)
 }
 
+async function loadOrgRolePermissions(
+	userId: string,
+	organizationId: string,
+	extraFilters: ReturnType<typeof eq>[] = [],
+) {
+	return db
+		.select({
+			id: Permission.id,
+			action: Permission.action,
+			entity: Permission.entity,
+			access: Permission.access,
+			description: Permission.description,
+			roleId: OrganizationRole.id,
+			roleName: OrganizationRole.name,
+			roleLevel: OrganizationRole.level,
+			active: UserOrganization.active,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			OrganizationRole,
+			eq(OrganizationRole.id, UserOrganization.organizationRoleId),
+		)
+		.innerJoin(
+			_OrganizationPermissionToRole,
+			eq(_OrganizationPermissionToRole.A, OrganizationRole.id),
+		)
+		.innerJoin(Permission, eq(Permission.id, _OrganizationPermissionToRole.B))
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.organizationId, organizationId),
+				eq(Permission.context, 'organization'),
+				...extraFilters,
+			),
+		)
+}
+
 /**
  * Check if user has organization permission
  */
@@ -26,30 +72,15 @@ export async function userHasOrganizationPermission(
 	const { action, entity, access } =
 		parseOrganizationPermissionString(permission)
 
-	const userOrg = await prisma.userOrganization.findFirst({
-		where: {
-			userId,
-			organizationId,
-			active: true,
-		},
-		include: {
-			organizationRole: {
-				include: {
-					permissions: {
-						where: {
-							action,
-							entity,
-							context: 'organization',
-							access: access ? { in: access } : undefined,
-						},
-					},
-				},
-			},
-		},
-	})
+	const extra = [
+		eq(UserOrganization.active, true),
+		eq(Permission.action, action),
+		eq(Permission.entity, entity),
+	]
+	if (access?.length) extra.push(inArray(Permission.access, access))
 
-	if (!userOrg) return false
-	return userOrg.organizationRole.permissions.length > 0
+	const rows = await loadOrgRolePermissions(userId, organizationId, extra)
+	return rows.length > 0
 }
 
 /**
@@ -85,32 +116,15 @@ export async function getUserOrganizationPermissions(
 	userId: string,
 	organizationId: string,
 ) {
-	const userOrg = await prisma.userOrganization.findFirst({
-		where: {
-			userId,
-			organizationId,
-			active: true,
-		},
-		include: {
-			organizationRole: {
-				include: {
-					permissions: {
-						where: {
-							context: 'organization',
-						},
-						select: {
-							action: true,
-							entity: true,
-							access: true,
-							description: true,
-						},
-					},
-				},
-			},
-		},
-	})
-
-	return userOrg?.organizationRole.permissions || []
+	const rows = await loadOrgRolePermissions(userId, organizationId, [
+		eq(UserOrganization.active, true),
+	])
+	return rows.map(({ action, entity, access, description }) => ({
+		action,
+		entity,
+		access,
+		description,
+	}))
 }
 
 /**
@@ -186,45 +200,55 @@ export async function getUserOrganizationPermissionsForClient(
 		}>
 	}
 } | null> {
-	const userOrg = await prisma.userOrganization.findUnique({
-		where: {
-			userId_organizationId: {
-				userId,
-				organizationId,
-			},
-		},
-		include: {
-			organizationRole: {
-				include: {
-					permissions: {
-						where: {
-							context: 'organization',
-						},
-						select: {
-							id: true,
-							action: true,
-							entity: true,
-							access: true,
-							description: true,
-						},
-					},
-				},
-			},
-		},
-	})
+	const [membership] = await db
+		.select({
+			active: UserOrganization.active,
+			roleId: OrganizationRole.id,
+			roleName: OrganizationRole.name,
+			roleLevel: OrganizationRole.level,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			OrganizationRole,
+			eq(OrganizationRole.id, UserOrganization.organizationRoleId),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.organizationId, organizationId),
+			),
+		)
+		.limit(1)
 
-	if (!userOrg || !userOrg.active) {
+	if (!membership || !membership.active) {
 		return null
 	}
+
+	const permissions = await db
+		.select({
+			id: Permission.id,
+			action: Permission.action,
+			entity: Permission.entity,
+			access: Permission.access,
+			description: Permission.description,
+		})
+		.from(_OrganizationPermissionToRole)
+		.innerJoin(Permission, eq(Permission.id, _OrganizationPermissionToRole.B))
+		.where(
+			and(
+				eq(_OrganizationPermissionToRole.A, membership.roleId),
+				eq(Permission.context, 'organization'),
+			),
+		)
 
 	return {
 		userId,
 		organizationId,
 		organizationRole: {
-			id: userOrg.organizationRole.id,
-			name: userOrg.organizationRole.name,
-			level: userOrg.organizationRole.level,
-			permissions: userOrg.organizationRole.permissions,
+			id: membership.roleId,
+			name: membership.roleName,
+			level: membership.roleLevel,
+			permissions,
 		},
 	}
 }

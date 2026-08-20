@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
 import { getUsersByIpAddress } from '@repo/common/ip-tracking'
-import { prisma } from '@repo/database'
+import { IpAddress, db, eq } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -24,17 +24,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	}
 
 	// Get IP address details
-	const ipAddress = await prisma.ipAddress.findUnique({
-		where: { ip },
-		include: {
-			blacklistedBy: {
-				select: {
-					name: true,
-					username: true,
-				},
-			},
-		},
+	const result = await db.query.IpAddress.findFirst({
+		where: eq(IpAddress.ip, ip),
+		with: { user: true },
 	})
+	const ipAddress = result ? { ...result, blacklistedBy: result.user } : null
 
 	if (!ipAddress) {
 		throw new Response('IP address not found', { status: 404 })

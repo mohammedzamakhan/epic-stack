@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { SlackProvider } from '../../../src/providers/slack/provider'
 import { server } from '../../setup'
 import { http, HttpResponse } from 'msw'
-import type { Integration } from '@prisma/client'
+import type { Integration } from '@repo/database/types'
 
 describe('SlackProvider - Channel Retrieval', () => {
 	let provider: SlackProvider

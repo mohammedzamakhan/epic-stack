@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { test } from '#tests/playwright-utils.ts'
 
 test.describe('Admin Impersonation', () => {
@@ -10,7 +10,7 @@ test.describe('Admin Impersonation', () => {
 	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
-		await prisma.user.update({
+		await db.user.update({
 			where: { id: adminUser.id },
 			data: {
 				roles: {
@@ -89,7 +89,7 @@ test.describe('Admin Impersonation', () => {
 	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
-		await prisma.user.update({
+		await db.user.update({
 			where: { id: adminUser.id },
 			data: {
 				roles: {
@@ -100,7 +100,7 @@ test.describe('Admin Impersonation', () => {
 
 		// Create a banned user
 		const bannedUser = await insertNewUser({ username: 'banned-user' })
-		await prisma.user.update({
+		await db.user.update({
 			where: { id: bannedUser.id },
 			data: {
 				isBanned: true,

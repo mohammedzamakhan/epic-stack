@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database'
-// Removed prisma import - using test utilities instead
+import { db } from '@repo/database'
+// Removed db import - using test utilities instead
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -159,7 +159,7 @@ test.describe('Mobile Responsiveness', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create multiple notes to populate table
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: Array.from({ length: 5 }, (_, i) => ({
 				title: `Note ${i + 1}`,
 				content: `Content for note ${i + 1}`,

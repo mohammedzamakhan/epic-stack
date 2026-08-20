@@ -1,4 +1,13 @@
-import { prisma } from '@repo/database'
+import {
+	Integration as IntegrationTable,
+	IntegrationLog as IntegrationLogTable,
+	NoteIntegrationConnection as ConnectionTable,
+	OrganizationNote as NoteTable,
+	User as UserTable,
+	and,
+	db,
+	eq,
+} from '@repo/database'
 import { formatNoteMessage } from './message-formatting'
 import { providerRegistry } from './provider'
 
@@ -40,10 +49,25 @@ export class NoteNotifier {
 		deletedNoteSnapshot?: any,
 	): Promise<NoteEventResult> {
 		try {
-			const connections = await prisma.noteIntegrationConnection.findMany({
-				where: { noteId, isActive: true },
-				include: { integration: true },
-			})
+			const connectionRows = await db
+				.select()
+				.from(ConnectionTable)
+				.where(
+					and(
+						eq(ConnectionTable.noteId, noteId),
+						eq(ConnectionTable.isActive, true),
+					),
+				)
+			const connections = await Promise.all(
+				connectionRows.map(async (connection) => {
+					const [integration] = await db
+						.select()
+						.from(IntegrationTable)
+						.where(eq(IntegrationTable.id, connection.integrationId))
+						.limit(1)
+					return { ...connection, integration }
+				}),
+			)
 
 			if (connections.length === 0) {
 				return { success: true, connectionsNotified: 0, errors: [] }
@@ -53,9 +77,12 @@ export class NoteNotifier {
 			if (changeType === 'deleted' && deletedNoteSnapshot) {
 				note = deletedNoteSnapshot
 			} else {
-				note = await prisma.organizationNote.findUnique({
-					where: { id: noteId },
-				})
+				const [noteRow] = await db
+					.select()
+					.from(NoteTable)
+					.where(eq(NoteTable.id, noteId))
+					.limit(1)
+				note = noteRow
 			}
 
 			if (!note) {
@@ -66,9 +93,11 @@ export class NoteNotifier {
 				}
 			}
 
-			const user = await prisma.user.findUnique({
-				where: { id: userId },
-			})
+			const [user] = await db
+				.select()
+				.from(UserTable)
+				.where(eq(UserTable.id, userId))
+				.limit(1)
 
 			if (!user) {
 				return {
@@ -97,37 +126,33 @@ export class NoteNotifier {
 
 						await provider.postMessage(connection, message)
 
-						await prisma.noteIntegrationConnection.update({
-							where: { id: connection.id },
-							data: { lastPostedAt: new Date() },
-						})
+						await db
+							.update(ConnectionTable)
+							.set({ lastPostedAt: new Date() })
+							.where(eq(ConnectionTable.id, connection.id))
 
-						await prisma.integrationLog.create({
-							data: {
-								integrationId: connection.integrationId,
-								action: 'post_message',
-								status: 'success',
-								requestData: JSON.stringify({
-									noteId: connection.noteId,
-									channelId: connection.externalId,
-									changeType: message.changeType,
-								}),
-							},
+						await db.insert(IntegrationLogTable).values({
+							integrationId: connection.integrationId,
+							action: 'post_message',
+							status: 'success',
+							requestData: JSON.stringify({
+								noteId: connection.noteId,
+								channelId: connection.externalId,
+								changeType: message.changeType,
+							}),
 						})
 					} catch (error) {
-						await prisma.integrationLog.create({
-							data: {
-								integrationId: connection.integrationId,
-								action: 'post_message',
-								status: 'error',
-								requestData: JSON.stringify({
-									noteId: connection.noteId,
-									channelId: connection.externalId,
-									changeType: message.changeType,
-								}),
-								errorMessage:
-									error instanceof Error ? error.message : 'Unknown error',
-							},
+						await db.insert(IntegrationLogTable).values({
+							integrationId: connection.integrationId,
+							action: 'post_message',
+							status: 'error',
+							requestData: JSON.stringify({
+								noteId: connection.noteId,
+								channelId: connection.externalId,
+								changeType: message.changeType,
+							}),
+							errorMessage:
+								error instanceof Error ? error.message : 'Unknown error',
 						})
 						throw error
 					}

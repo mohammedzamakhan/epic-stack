@@ -2,7 +2,16 @@ import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	ApiKey,
+	MCPAuthorization,
+	Organization,
+	User,
+} from '@repo/database'
 import { generateApiKey } from '@repo/security'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
@@ -88,10 +97,15 @@ type MCPAuthorizationData = {
 async function getOrgAndUser(request: Request, orgSlug: string) {
 	invariantResponse(orgSlug, 'Organization slug is required')
 
-	const organization = await prisma.organization.findFirst({
-		select: { id: true, name: true, slug: true },
-		where: { slug: orgSlug },
-	})
+	const [organization] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+		})
+		.from(Organization)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
 
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
@@ -99,10 +113,11 @@ async function getOrgAndUser(request: Request, orgSlug: string) {
 	const userId = await requireUserId(request)
 	await userHasOrgAccess(request, organization.id)
 
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { id: true, name: true, username: true },
-	})
+	const [user] = await db
+		.select({ id: User.id, name: User.name, username: User.username })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 	invariantResponse(user, 'User not found')
 
 	return { organization, user }
@@ -114,27 +129,32 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	// ⚡ Bolt: Parallelize independent DB queries to reduce total loader execution time
 	const [apiKeys, mcpAuthorizations] = await Promise.all([
-		prisma.apiKey.findMany({
-			where: {
-				userId: user.id,
-				organizationId: organization.id,
-			},
-			orderBy: { createdAt: 'desc' },
-		}),
-		prisma.mCPAuthorization.findMany({
-			where: {
-				userId: user.id,
-				organizationId: organization.id,
-			},
-			select: {
-				id: true,
-				clientName: true,
-				createdAt: true,
-				lastUsedAt: true,
-				isActive: true,
-			},
-			orderBy: { createdAt: 'desc' },
-		}),
+		db
+			.select()
+			.from(ApiKey)
+			.where(
+				and(
+					eq(ApiKey.userId, user.id),
+					eq(ApiKey.organizationId, organization.id),
+				),
+			)
+			.orderBy(desc(ApiKey.createdAt)),
+		db
+			.select({
+				id: MCPAuthorization.id,
+				clientName: MCPAuthorization.clientName,
+				createdAt: MCPAuthorization.createdAt,
+				lastUsedAt: MCPAuthorization.lastUsedAt,
+				isActive: MCPAuthorization.isActive,
+			})
+			.from(MCPAuthorization)
+			.where(
+				and(
+					eq(MCPAuthorization.userId, user.id),
+					eq(MCPAuthorization.organizationId, organization.id),
+				),
+			)
+			.orderBy(desc(MCPAuthorization.createdAt)),
 	])
 
 	return {
@@ -169,8 +189,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const keyHash = crypto.createHash(SHA256_ALGO).update(key).digest('hex')
 		const keyPrefix = key.substring(0, 8)
 
-		const createdKey = await prisma.apiKey.create({
-			data: {
+		const [createdKey] = await db
+			.insert(ApiKey)
+			.values({
 				keyHash,
 				keyPrefix,
 				name,
@@ -180,8 +201,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					expiresAt && typeof expiresAt === 'string'
 						? new Date(expiresAt)
 						: null,
-			},
-		})
+			})
+			.returning()
+		if (!createdKey) throw new Error('Failed to create API key')
 
 		return {
 			success: true,
@@ -194,13 +216,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const keyId = formData.get('keyId')
 		invariantResponse(typeof keyId === 'string', 'Key ID is required')
 
-		await prisma.apiKey.delete({
-			where: {
-				id: keyId,
-				userId: user.id,
-				organizationId: organization.id,
-			},
-		})
+		await db
+			.delete(ApiKey)
+			.where(
+				and(
+					eq(ApiKey.id, keyId),
+					eq(ApiKey.userId, user.id),
+					eq(ApiKey.organizationId, organization.id),
+				),
+			)
 
 		return { success: true, message: 'API key deleted successfully' }
 	}
@@ -213,13 +237,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		)
 
 		// Verify the authorization belongs to this user and organization
-		const authorization = await prisma.mCPAuthorization.findFirst({
-			where: {
-				id: authorizationId,
-				userId: user.id,
-				organizationId: organization.id,
-			},
-		})
+		const [authorization] = await db
+			.select({ id: MCPAuthorization.id })
+			.from(MCPAuthorization)
+			.where(
+				and(
+					eq(MCPAuthorization.id, authorizationId),
+					eq(MCPAuthorization.userId, user.id),
+					eq(MCPAuthorization.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		invariantResponse(authorization, 'Authorization not found', { status: 404 })
 

@@ -1,28 +1,26 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db, eq, Organization, UserOrganization } from '@repo/database'
 
 export async function createTestOrganization(
 	userId: string,
 	role: 'admin' | 'member' | 'viewer' | 'guest' = 'admin',
 ) {
-	const roleId = `org_role_${role}`
-	// Generate unique slug by adding timestamp and random string
-	const baseName = faker.company.name()
-	const uniqueSlug = `${faker.helpers.slugify(baseName).toLowerCase()}-${Date.now()}-${faker.string.alphanumeric(4)}`
-
-	return await prisma.organization.create({
-		data: {
-			name: baseName,
-			slug: uniqueSlug,
+	const name = faker.company.name()
+	const [organization] = await db
+		.insert(Organization)
+		.values({
+			name,
+			slug: `${faker.helpers.slugify(name).toLowerCase()}-${Date.now()}-${faker.string.alphanumeric(4)}`,
 			description: faker.company.catchPhrase(),
-			users: {
-				create: {
-					userId,
-					organizationRoleId: roleId,
-				},
-			},
-		},
+		})
+		.returning()
+	if (!organization) throw new Error('Failed to create test organization')
+	await db.insert(UserOrganization).values({
+		userId,
+		organizationId: organization.id,
+		organizationRoleId: `org_role_${role}`,
 	})
+	return organization
 }
 
 export async function createTestOrganizationWithMultipleUsers(
@@ -31,17 +29,18 @@ export async function createTestOrganizationWithMultipleUsers(
 		role?: 'admin' | 'member' | 'viewer' | 'guest'
 	}>,
 ) {
-	return await prisma.organization.create({
-		data: {
-			name: faker.company.name(),
-			slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${Date.now()}-${faker.string.alphanumeric(4)}`,
-			description: faker.company.catchPhrase(),
-			users: {
-				create: users.map((user) => ({
-					userId: user.userId,
-					organizationRoleId: `org_role_${user.role || 'member'}`,
-				})),
-			},
-		},
-	})
+	const organization = await createTestOrganization(
+		users[0]?.userId ?? '',
+		users[0]?.role ?? 'member',
+	)
+	if (users.length > 1) {
+		await db.insert(UserOrganization).values(
+			users.slice(1).map((user) => ({
+				userId: user.userId,
+				organizationId: organization.id,
+				organizationRoleId: `org_role_${user.role || 'member'}`,
+			})),
+		)
+	}
+	return organization
 }

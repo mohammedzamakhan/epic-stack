@@ -43,7 +43,7 @@ Ensure the following packages are installed:
 {
 	"remix-auth": "^3.6.0",
 	"remix-auth-oauth2": "^1.11.1",
-	"@prisma/client": "^5.0.0",
+	"drizzle-orm": "latest",
 	"crypto": "built-in"
 }
 ```
@@ -140,14 +140,14 @@ Run the database migrations to create SSO tables:
 # Install dependencies
 npm install
 
-# Generate Prisma client
-npx prisma generate
+# Generate the Drizzle migration
+npx drizzle-kit generate
 
 # Run migrations
-npx prisma migrate deploy
+npm run db:migrate:deploy
 
 # Verify migration
-npx prisma db pull
+npm run db:studio
 ```
 
 ### Database Indexes
@@ -176,14 +176,9 @@ CREATE INDEX IF NOT EXISTS "AuditLog_createdAt_idx" ON "AuditLog"("createdAt");
 Configure connection pooling for production:
 
 ```javascript
-// prisma/schema.prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // Connection pool settings
-  connectionLimit = 20
-  poolTimeout     = 60
-}
+// packages/database/src/schema.ts
+// Configure the SQLite connection in the Drizzle database client.
+// Connection pool settings belong in the deployment environment.
 ```
 
 ### Database Backup

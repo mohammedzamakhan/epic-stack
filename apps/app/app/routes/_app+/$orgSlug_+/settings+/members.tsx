@@ -1,6 +1,15 @@
 import { parseWithZod } from '@conform-to/zod'
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	eq,
+	desc,
+	User,
+	UserOrganization,
+	OrganizationRole,
+} from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
@@ -54,36 +63,28 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		userPermissions,
 	] = await Promise.all([
 		getOrganizationInvitations(organization.id),
-		prisma.userOrganization.findMany({
-			where: {
-				organizationId: organization.id,
+		db.query.UserOrganization.findMany({
+			columns: {
+				userId: true,
+				organizationId: true,
 				active: true,
+				createdAt: true,
 			},
-			include: {
+			with: {
 				user: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-						image: {
-							select: {
-								id: true,
-								altText: true,
-							},
-						},
-					},
+					columns: { id: true, name: true, email: true },
+					with: { image: { columns: { id: true, altText: true } } },
 				},
 				organizationRole: {
-					select: {
-						id: true,
-						name: true,
-						level: true,
-					},
+					columns: { id: true, name: true, level: true },
 				},
 			},
-			orderBy: {
-				createdAt: 'asc',
-			},
+			where: (membership, { and, eq }) =>
+				and(
+					eq(membership.organizationId, organization.id),
+					eq(membership.active, true),
+				),
+			orderBy: (membership, { asc }) => [asc(membership.createdAt)],
 		}),
 		getOrganizationInviteLink(organization.id, userId),
 		getAvailableRoles(),
@@ -103,10 +104,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 // Get available roles from the database
 async function getAvailableRoles() {
-	const roles = await prisma.organizationRole.findMany({
-		select: { name: true },
-		orderBy: { level: 'desc' },
-	})
+	const roles = await db
+		.select({ name: OrganizationRole.name })
+		.from(OrganizationRole)
+		.orderBy(desc(OrganizationRole.level))
 	return roles.map((r) => r.name) as OrganizationRoleName[]
 }
 
@@ -149,10 +150,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { invites } = submission.value
 
 		try {
-			const currentUser = await prisma.user.findUnique({
-				where: { id: userId },
-				select: { name: true, email: true },
-			})
+			const [currentUser] = await db
+				.select({ name: User.name, email: User.email })
+				.from(User)
+				.where(eq(User.id, userId))
+				.limit(1)
 
 			await Promise.all(
 				invites.map(async (invite) => {
@@ -225,17 +227,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		try {
-			await prisma.userOrganization.update({
-				where: {
-					userId_organizationId: {
-						userId: memberUserId,
-						organizationId: organization.id,
-					},
-				},
-				data: {
+			await db
+				.update(UserOrganization)
+				.set({
 					active: false,
-				},
-			})
+				})
+				.where(
+					and(
+						eq(UserOrganization.userId, memberUserId),
+						eq(UserOrganization.organizationId, organization.id),
+					),
+				)
 
 			// Update seat quantity for billing
 			try {
@@ -280,18 +282,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		// Prevent demoting the last admin
-		const memberToUpdate = await prisma.userOrganization.findUnique({
-			where: {
-				userId_organizationId: {
-					userId: memberUserId,
-					organizationId: organization.id,
-				},
-			},
-			include: {
-				organizationRole: {
-					select: { name: true },
-				},
-			},
+		const memberToUpdate = await db.query.UserOrganization.findFirst({
+			columns: { active: true },
+			with: { organizationRole: { columns: { name: true } } },
+			where: (membership, { and, eq }) =>
+				and(
+					eq(membership.userId, memberUserId),
+					eq(membership.organizationId, organization.id),
+				),
 		})
 		if (
 			memberToUpdate &&
@@ -299,16 +297,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			memberToUpdate.active &&
 			newRole === 'member'
 		) {
-			const activeAdminCount = await prisma.userOrganization.count({
-				where: {
-					organizationId: organization.id,
-					organizationRole: {
-						name: 'admin',
-					},
-					active: true,
-				},
-			})
-			if (activeAdminCount === 1) {
+			const [activeAdminCount] = await db
+				.select({ value: count() })
+				.from(UserOrganization)
+				.innerJoin(
+					OrganizationRole,
+					eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+				)
+				.where(
+					and(
+						eq(UserOrganization.organizationId, organization.id),
+						eq(UserOrganization.active, true),
+						eq(OrganizationRole.name, 'admin'),
+					),
+				)
+			if ((activeAdminCount?.value ?? 0) === 1) {
 				return Response.json(
 					{ error: 'Cannot demote the last admin of the organization' },
 					{ status: 400 },
@@ -317,27 +320,28 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		// Get the organization role ID for the new role name
-		const organizationRole = await prisma.organizationRole.findUnique({
-			where: { name: newRole },
-			select: { id: true },
-		})
+		const [organizationRole] = await db
+			.select({ id: OrganizationRole.id })
+			.from(OrganizationRole)
+			.where(eq(OrganizationRole.name, newRole))
+			.limit(1)
 
 		if (!organizationRole) {
 			return Response.json({ error: 'Role not found' }, { status: 400 })
 		}
 
 		try {
-			await prisma.userOrganization.update({
-				where: {
-					userId_organizationId: {
-						userId: memberUserId,
-						organizationId: organization.id,
-					},
-				},
-				data: {
+			await db
+				.update(UserOrganization)
+				.set({
 					organizationRoleId: organizationRole.id,
-				},
-			})
+				})
+				.where(
+					and(
+						eq(UserOrganization.userId, memberUserId),
+						eq(UserOrganization.organizationId, organization.id),
+					),
+				)
 			return Response.json({ success: true })
 		} catch (error) {
 			console.error('Error updating member role:', error)

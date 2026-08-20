@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
@@ -17,9 +17,9 @@ import {
 describe('MCP OAuth Service', () => {
 	// Clean up test data before each test
 	beforeEach(async () => {
-		await prisma.mCPAccessToken.deleteMany()
-		await prisma.mCPRefreshToken.deleteMany()
-		await prisma.mCPAuthorization.deleteMany()
+		await db.mCPAccessToken.deleteMany()
+		await db.mCPRefreshToken.deleteMany()
+		await db.mCPAuthorization.deleteMany()
 	})
 
 	describe('Token Generation', () => {
@@ -58,7 +58,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
 						// Create a test user and organization first
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -67,7 +67,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -89,7 +89,7 @@ describe('MCP OAuth Service', () => {
 							expect(refreshToken).toBeTruthy()
 
 							// Retrieve stored tokens from database
-							const storedAccessTokens = await prisma.mCPAccessToken.findMany({
+							const storedAccessTokens = await db.mCPAccessToken.findMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -98,16 +98,14 @@ describe('MCP OAuth Service', () => {
 								},
 							})
 
-							const storedRefreshTokens = await prisma.mCPRefreshToken.findMany(
-								{
-									where: {
-										authorization: {
-											userId: user.id,
-											organizationId: organization.id,
-										},
+							const storedRefreshTokens = await db.mCPRefreshToken.findMany({
+								where: {
+									authorization: {
+										userId: user.id,
+										organizationId: organization.id,
 									},
 								},
-							)
+							})
 
 							// Property: Tokens should be stored as hashes
 							expect(storedAccessTokens.length).toBeGreaterThan(0)
@@ -139,7 +137,7 @@ describe('MCP OAuth Service', () => {
 							expect(invalidValidation).toBeNull()
 						} finally {
 							// Clean up
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -147,7 +145,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -155,13 +153,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -186,7 +184,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -195,7 +193,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -232,14 +230,13 @@ describe('MCP OAuth Service', () => {
 							expect(result?.expires_in).toBe(ACCESS_TOKEN_EXPIRATION / 1000)
 
 							// Verify tokens are stored with correct expiration
-							const accessTokenRecord = await prisma.mCPAccessToken.findUnique({
+							const accessTokenRecord = await db.mCPAccessToken.findUnique({
 								where: { tokenHash: hashToken(result!.access_token) },
 							})
 
-							const refreshTokenRecord =
-								await prisma.mCPRefreshToken.findUnique({
-									where: { tokenHash: hashToken(result!.refresh_token) },
-								})
+							const refreshTokenRecord = await db.mCPRefreshToken.findUnique({
+								where: { tokenHash: hashToken(result!.refresh_token) },
+							})
 
 							expect(accessTokenRecord).not.toBeNull()
 							expect(refreshTokenRecord).not.toBeNull()
@@ -263,7 +260,7 @@ describe('MCP OAuth Service', () => {
 								REFRESH_TOKEN_EXPIRATION + 5000,
 							)
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -271,7 +268,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -279,13 +276,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -310,7 +307,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -319,7 +316,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -359,7 +356,7 @@ describe('MCP OAuth Service', () => {
 								originalValidation?.authorizationId,
 							)
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -367,7 +364,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -375,13 +372,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -405,7 +402,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -414,7 +411,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -443,10 +440,9 @@ describe('MCP OAuth Service', () => {
 							expect(afterRevoke).toBeNull()
 
 							// Property: Refresh token should be marked as revoked
-							const revokedRefreshToken =
-								await prisma.mCPRefreshToken.findUnique({
-									where: { tokenHash: hashToken(refreshToken) },
-								})
+							const revokedRefreshToken = await db.mCPRefreshToken.findUnique({
+								where: { tokenHash: hashToken(refreshToken) },
+							})
 							expect(revokedRefreshToken?.revoked).toBe(true)
 							expect(revokedRefreshToken?.revokedAt).not.toBeNull()
 
@@ -454,7 +450,7 @@ describe('MCP OAuth Service', () => {
 							const refreshResult = await refreshAccessToken(refreshToken)
 							expect(refreshResult).toBeNull()
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -462,7 +458,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -470,13 +466,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -500,7 +496,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -509,7 +505,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -555,13 +551,13 @@ describe('MCP OAuth Service', () => {
 								expect(/^[A-Za-z0-9_-]+$/.test(code)).toBe(true)
 							})
 						} finally {
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -588,7 +584,7 @@ describe('MCP OAuth Service', () => {
 						// Generate unique username to avoid conflicts
 						const uniqueUsername = `user-${userId}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -597,7 +593,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -631,7 +627,7 @@ describe('MCP OAuth Service', () => {
 							)
 							expect(secondExchange).toBeNull()
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -639,7 +635,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -647,13 +643,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -677,7 +673,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -686,7 +682,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -719,12 +715,12 @@ describe('MCP OAuth Service', () => {
 							expect(refreshResult).toBeNull()
 
 							// Verify the refresh token is marked as revoked
-							const revokedToken = await prisma.mCPRefreshToken.findUnique({
+							const revokedToken = await db.mCPRefreshToken.findUnique({
 								where: { tokenHash: hashToken(refreshToken) },
 							})
 							expect(revokedToken?.revoked).toBe(true)
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -732,7 +728,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -740,13 +736,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -770,7 +766,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -779,7 +775,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -797,7 +793,7 @@ describe('MCP OAuth Service', () => {
 								})
 
 							// Retrieve the stored tokens
-							const accessTokenRecord = await prisma.mCPAccessToken.findUnique({
+							const accessTokenRecord = await db.mCPAccessToken.findUnique({
 								where: { tokenHash: hashToken(accessToken) },
 								include: {
 									authorization: {
@@ -806,15 +802,14 @@ describe('MCP OAuth Service', () => {
 								},
 							})
 
-							const refreshTokenRecord =
-								await prisma.mCPRefreshToken.findUnique({
-									where: { tokenHash: hashToken(refreshToken) },
-									include: {
-										authorization: {
-											select: { organizationId: true },
-										},
+							const refreshTokenRecord = await db.mCPRefreshToken.findUnique({
+								where: { tokenHash: hashToken(refreshToken) },
+								include: {
+									authorization: {
+										select: { organizationId: true },
 									},
-								})
+								},
+							})
 
 							// Property: Both tokens should be associated with the correct organization
 							expect(accessTokenRecord).not.toBeNull()
@@ -831,7 +826,7 @@ describe('MCP OAuth Service', () => {
 							expect(validation).not.toBeNull()
 							expect(validation?.organization.id).toBe(organization.id)
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -839,7 +834,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -847,13 +842,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -877,7 +872,7 @@ describe('MCP OAuth Service', () => {
 					fc.string({ minLength: 10, maxLength: 30 }),
 					fc.string({ minLength: 1, maxLength: 50 }),
 					async (userId, organizationId, clientName) => {
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								id: userId,
 								email: `test-${userId}@example.com`,
@@ -886,7 +881,7 @@ describe('MCP OAuth Service', () => {
 							},
 						})
 
-						const organization = await prisma.organization.create({
+						const organization = await db.organization.create({
 							data: {
 								id: organizationId,
 								name: `Test Org ${organizationId}`,
@@ -915,7 +910,7 @@ describe('MCP OAuth Service', () => {
 							expect(validation2).not.toBeNull()
 
 							// Simulate user losing access to organization by revoking all authorizations
-							const authorizations = await prisma.mCPAuthorization.findMany({
+							const authorizations = await db.mCPAuthorization.findMany({
 								where: {
 									userId: user.id,
 									organizationId: organization.id,
@@ -934,7 +929,7 @@ describe('MCP OAuth Service', () => {
 							expect(afterRevoke2).toBeNull()
 
 							// Property: All refresh tokens should be marked as revoked
-							const revokedTokens = await prisma.mCPRefreshToken.findMany({
+							const revokedTokens = await db.mCPRefreshToken.findMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -948,7 +943,7 @@ describe('MCP OAuth Service', () => {
 								expect(token.revokedAt).not.toBeNull()
 							})
 						} finally {
-							await prisma.mCPAccessToken.deleteMany({
+							await db.mCPAccessToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -956,7 +951,7 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPRefreshToken.deleteMany({
+							await db.mCPRefreshToken.deleteMany({
 								where: {
 									authorization: {
 										userId: user.id,
@@ -964,13 +959,13 @@ describe('MCP OAuth Service', () => {
 									},
 								},
 							})
-							await prisma.mCPAuthorization.deleteMany({
+							await db.mCPAuthorization.deleteMany({
 								where: { userId: user.id, organizationId: organization.id },
 							})
-							await prisma.organization.delete({
+							await db.organization.delete({
 								where: { id: organization.id },
 							})
-							await prisma.user.delete({ where: { id: user.id } })
+							await db.user.delete({ where: { id: user.id } })
 						}
 					},
 				),
@@ -1020,7 +1015,7 @@ describe('MCP OAuth Service', () => {
 
 		describe('Authorization code lifecycle', () => {
 			it('should create and exchange authorization code', async () => {
-				const user = await prisma.user.create({
+				const user = await db.user.create({
 					data: {
 						id: 'test-user-lifecycle',
 						email: 'test-lifecycle@example.com',
@@ -1028,7 +1023,7 @@ describe('MCP OAuth Service', () => {
 					},
 				})
 
-				const organization = await prisma.organization.create({
+				const organization = await db.organization.create({
 					data: {
 						id: 'test-org-lifecycle',
 						name: 'Test Org Lifecycle',
@@ -1056,7 +1051,7 @@ describe('MCP OAuth Service', () => {
 					expect(result?.access_token).toBeTruthy()
 					expect(result?.refresh_token).toBeTruthy()
 				} finally {
-					await prisma.mCPAccessToken.deleteMany({
+					await db.mCPAccessToken.deleteMany({
 						where: {
 							authorization: {
 								userId: user.id,
@@ -1064,7 +1059,7 @@ describe('MCP OAuth Service', () => {
 							},
 						},
 					})
-					await prisma.mCPRefreshToken.deleteMany({
+					await db.mCPRefreshToken.deleteMany({
 						where: {
 							authorization: {
 								userId: user.id,
@@ -1072,18 +1067,18 @@ describe('MCP OAuth Service', () => {
 							},
 						},
 					})
-					await prisma.mCPAuthorization.deleteMany({
+					await db.mCPAuthorization.deleteMany({
 						where: { userId: user.id, organizationId: organization.id },
 					})
-					await prisma.organization.delete({
+					await db.organization.delete({
 						where: { id: organization.id },
 					})
-					await prisma.user.delete({ where: { id: user.id } })
+					await db.user.delete({ where: { id: user.id } })
 				}
 			})
 
 			it('should reject expired authorization codes', async () => {
-				const user = await prisma.user.create({
+				const user = await db.user.create({
 					data: {
 						id: 'test-user-expired',
 						email: 'test-expired@example.com',
@@ -1091,7 +1086,7 @@ describe('MCP OAuth Service', () => {
 					},
 				})
 
-				const organization = await prisma.organization.create({
+				const organization = await db.organization.create({
 					data: {
 						id: 'test-org-expired',
 						name: 'Test Org Expired',
@@ -1118,18 +1113,18 @@ describe('MCP OAuth Service', () => {
 					)
 					expect(result).toBeNull()
 				} finally {
-					await prisma.mCPAuthorization.deleteMany({
+					await db.mCPAuthorization.deleteMany({
 						where: { userId: user.id, organizationId: organization.id },
 					})
-					await prisma.organization.delete({
+					await db.organization.delete({
 						where: { id: organization.id },
 					})
-					await prisma.user.delete({ where: { id: user.id } })
+					await db.user.delete({ where: { id: user.id } })
 				}
 			})
 
 			it('should fail if redirectUri does not match', async () => {
-				const user = await prisma.user.create({
+				const user = await db.user.create({
 					data: {
 						id: 'test-user-mismatch',
 						email: 'test-mismatch@example.com',
@@ -1137,7 +1132,7 @@ describe('MCP OAuth Service', () => {
 					},
 				})
 
-				const organization = await prisma.organization.create({
+				const organization = await db.organization.create({
 					data: {
 						id: 'test-org-mismatch',
 						name: 'Test Org Mismatch',
@@ -1161,13 +1156,13 @@ describe('MCP OAuth Service', () => {
 					)
 					expect(result).toBeNull()
 				} finally {
-					await prisma.mCPAuthorization.deleteMany({
+					await db.mCPAuthorization.deleteMany({
 						where: { userId: user.id, organizationId: organization.id },
 					})
-					await prisma.organization.delete({
+					await db.organization.delete({
 						where: { id: organization.id },
 					})
-					await prisma.user.delete({ where: { id: user.id } })
+					await db.user.delete({ where: { id: user.id } })
 				}
 			})
 		})
@@ -1188,7 +1183,7 @@ describe('MCP OAuth Service', () => {
 			it('should reject revoked authorizations', async () => {
 				// Use unique IDs to avoid conflicts with parallel tests
 				const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(7)}`
-				const user = await prisma.user.create({
+				const user = await db.user.create({
 					data: {
 						id: `test-user-revoke-${uniqueId}`,
 						email: `test-revoke-${uniqueId}@example.com`,
@@ -1196,7 +1191,7 @@ describe('MCP OAuth Service', () => {
 					},
 				})
 
-				const organization = await prisma.organization.create({
+				const organization = await db.organization.create({
 					data: {
 						id: `test-org-revoke-${uniqueId}`,
 						name: `Test Org Revoke ${uniqueId}`,
@@ -1251,7 +1246,7 @@ describe('MCP OAuth Service', () => {
 				} finally {
 					// Use deleteMany with try-catch to safely clean up
 					try {
-						await prisma.mCPAccessToken.deleteMany({
+						await db.mCPAccessToken.deleteMany({
 							where: {
 								authorization: {
 									userId: user.id,
@@ -1259,7 +1254,7 @@ describe('MCP OAuth Service', () => {
 								},
 							},
 						})
-						await prisma.mCPRefreshToken.deleteMany({
+						await db.mCPRefreshToken.deleteMany({
 							where: {
 								authorization: {
 									userId: user.id,
@@ -1267,13 +1262,13 @@ describe('MCP OAuth Service', () => {
 								},
 							},
 						})
-						await prisma.mCPAuthorization.deleteMany({
+						await db.mCPAuthorization.deleteMany({
 							where: { userId: user.id, organizationId: organization.id },
 						})
-						await prisma.organization.deleteMany({
+						await db.organization.deleteMany({
 							where: { id: organization.id },
 						})
-						await prisma.user.deleteMany({ where: { id: user.id } })
+						await db.user.deleteMany({ where: { id: user.id } })
 					} catch {
 						// Ignore cleanup errors - data may have been cleaned up by other tests
 					}

@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { createAuthorizationWithTokens } from '#app/utils/mcp/oauth.server.ts'
 
 // Helper to create test user
 async function createTestUser() {
-	return await prisma.user.create({
+	return await db.user.create({
 		data: {
 			email: faker.internet.email(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
@@ -18,7 +18,7 @@ async function createTestUser() {
 
 // Helper to create test organization
 async function createTestOrganization(userId: string) {
-	return await prisma.organization.create({
+	return await db.organization.create({
 		data: {
 			name: faker.company.name(),
 			slug: `org-${faker.string.uuid().slice(0, 8)}`,
@@ -35,22 +35,22 @@ async function createTestOrganization(userId: string) {
 describe('MCP Settings Page', () => {
 	beforeEach(async () => {
 		// Clean up test data before each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.userOrganization.deleteMany({})
+		await db.organization.deleteMany({})
+		await db.user.deleteMany({})
 	})
 
 	afterEach(async () => {
 		// Clean up test data after each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.userOrganization.deleteMany({})
+		await db.organization.deleteMany({})
+		await db.user.deleteMany({})
 	})
 
 	describe('Property 12: Authorization list completeness', () => {
@@ -77,7 +77,7 @@ describe('MCP Settings Page', () => {
 						)
 
 						// Fetch authorizations for this user and organization
-						const authorizations = await prisma.mCPAuthorization.findMany({
+						const authorizations = await db.mCPAuthorization.findMany({
 							where: {
 								userId: user.id,
 								organizationId: org.id,
@@ -109,7 +109,7 @@ describe('MCP Settings Page', () => {
 			const org = await createTestOrganization(user1.id)
 
 			// Add user2 to the organization
-			await prisma.userOrganization.create({
+			await db.userOrganization.create({
 				data: {
 					userId: user2.id,
 					organizationId: org.id,
@@ -132,7 +132,7 @@ describe('MCP Settings Page', () => {
 			})
 
 			// Fetch authorizations for user1
-			const user1Auths = await prisma.mCPAuthorization.findMany({
+			const user1Auths = await db.mCPAuthorization.findMany({
 				where: {
 					userId: user1.id,
 					organizationId: org.id,
@@ -164,7 +164,7 @@ describe('MCP Settings Page', () => {
 			})
 
 			// Fetch authorizations for org1
-			const org1Auths = await prisma.mCPAuthorization.findMany({
+			const org1Auths = await db.mCPAuthorization.findMany({
 				where: {
 					userId: user.id,
 					organizationId: org1.id,
@@ -194,7 +194,7 @@ describe('MCP Settings Page', () => {
 						})
 
 						// Fetch authorization
-						const authorization = await prisma.mCPAuthorization.findFirst({
+						const authorization = await db.mCPAuthorization.findFirst({
 							where: {
 								userId: user.id,
 								organizationId: org.id,
@@ -234,7 +234,7 @@ describe('MCP Settings Page', () => {
 				})
 
 			// Get initial authorization
-			let authorization = await prisma.mCPAuthorization.findFirst({
+			let authorization = await db.mCPAuthorization.findFirst({
 				where: {
 					userId: user.id,
 					organizationId: org.id,
@@ -244,13 +244,13 @@ describe('MCP Settings Page', () => {
 			expect(authorization?.lastUsedAt).toBeNull()
 
 			// Simulate token usage by updating lastUsedAt
-			await prisma.mCPAuthorization.update({
+			await db.mCPAuthorization.update({
 				where: { id: authorization!.id },
 				data: { lastUsedAt: new Date() },
 			})
 
 			// Get updated authorization
-			authorization = await prisma.mCPAuthorization.findFirst({
+			authorization = await db.mCPAuthorization.findFirst({
 				where: {
 					userId: user.id,
 					organizationId: org.id,
@@ -287,7 +287,7 @@ describe('MCP Settings Page', () => {
 							currentCount++
 
 							// Verify count increased by exactly 1
-							const authorizations = await prisma.mCPAuthorization.findMany({
+							const authorizations = await db.mCPAuthorization.findMany({
 								where: {
 									userId: user.id,
 									organizationId: org.id,
@@ -326,7 +326,7 @@ describe('MCP Settings Page', () => {
 			])
 
 			// Verify initial count
-			let authorizations = await prisma.mCPAuthorization.findMany({
+			let authorizations = await db.mCPAuthorization.findMany({
 				where: {
 					userId: user.id,
 					organizationId: org.id,
@@ -335,13 +335,13 @@ describe('MCP Settings Page', () => {
 			expect(authorizations).toHaveLength(3)
 
 			// Revoke one authorization
-			await prisma.mCPAuthorization.update({
+			await db.mCPAuthorization.update({
 				where: { id: auths[0].authorization.id },
 				data: { isActive: false },
 			})
 
 			// Verify count decreased by 1 (when filtering for active)
-			authorizations = await prisma.mCPAuthorization.findMany({
+			authorizations = await db.mCPAuthorization.findMany({
 				where: {
 					userId: user.id,
 					organizationId: org.id,

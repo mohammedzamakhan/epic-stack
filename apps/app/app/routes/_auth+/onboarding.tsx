@@ -11,7 +11,16 @@ import {
 import { useIsPending } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	isNull,
+	Organization,
+	OrganizationRole,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 import {
 	Card,
@@ -98,10 +107,11 @@ export async function action({ request }: Route.ActionArgs) {
 	const submission = await parseWithZod(formData, {
 		schema: (intent) =>
 			SignupFormSchema.superRefine(async (data, ctx) => {
-				const existingUser = await prisma.user.findUnique({
-					where: { username: data.username },
-					select: { id: true },
-				})
+				const [existingUser] = await db
+					.select({ id: User.id })
+					.from(User)
+					.where(eq(User.username, data.username))
+					.limit(1)
 				if (existingUser) {
 					ctx.addIssue({
 						path: ['username'],
@@ -161,6 +171,7 @@ export async function action({ request }: Route.ActionArgs) {
 				await import('#app/utils/organization/invitation.server.ts')
 			// Create a pending invitation for this user
 			const invitation = await createInvitationFromLink(inviteToken, email)
+			if (!invitation) throw new Error('Invitation could not be created')
 
 			const inviterName =
 				invitation.inviter?.name || invitation.inviter?.email || 'Someone'
@@ -217,37 +228,44 @@ export async function action({ request }: Route.ActionArgs) {
 		const emailDomain = email.split('@')[1]
 		if (emailDomain) {
 			const [organizationsWithMatchingDomain, memberRole] = await Promise.all([
-				prisma.organization.findMany({
-					where: {
-						verifiedDomain: emailDomain,
-						users: {
-							none: {
-								userId: session.userId,
-							},
-						},
-					},
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
-				}),
+				db
+					.select({
+						id: Organization.id,
+						name: Organization.name,
+						slug: Organization.slug,
+					})
+					.from(Organization)
+					.leftJoin(
+						UserOrganization,
+						and(
+							eq(UserOrganization.organizationId, Organization.id),
+							eq(UserOrganization.userId, session.userId),
+						),
+					)
+					.where(
+						and(
+							eq(Organization.verifiedDomain, emailDomain),
+							isNull(UserOrganization.userId),
+						),
+					),
 				// Get the default member role
-				prisma.organizationRole.findUnique({
-					where: { name: 'member' },
-					select: { id: true },
-				}),
+				db
+					.select({ id: OrganizationRole.id })
+					.from(OrganizationRole)
+					.where(eq(OrganizationRole.name, 'member'))
+					.limit(1),
 			])
 
-			if (organizationsWithMatchingDomain.length > 0 && memberRole) {
+			const memberRoleId = memberRole[0]?.id
+			if (organizationsWithMatchingDomain.length > 0 && memberRoleId) {
 				// Auto-add user to organizations with matching verified domains
-				await prisma.userOrganization.createMany({
-					data: organizationsWithMatchingDomain.map((org) => ({
+				await db.insert(UserOrganization).values(
+					organizationsWithMatchingDomain.map((org) => ({
 						userId: session.userId,
 						organizationId: org.id,
-						organizationRoleId: memberRole.id, // Use proper organization role
+						organizationRoleId: memberRoleId, // Use proper organization role
 					})),
-				})
+				)
 
 				// Update seat quantity for billing for each organization
 				for (const org of organizationsWithMatchingDomain) {

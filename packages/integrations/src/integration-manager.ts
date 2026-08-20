@@ -11,12 +11,24 @@
  */
 
 import {
+	Integration as IntegrationTable,
+	IntegrationLog as IntegrationLogTable,
+	NoteIntegrationConnection as ConnectionTable,
+	Organization as OrganizationTable,
+	OrganizationNote as NoteTable,
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	gte,
+} from '@repo/database'
+import {
 	type Integration,
 	type NoteIntegrationConnection,
 	type OrganizationNote,
 	type Organization,
-} from './prisma-types'
-import { prisma } from '@repo/database'
+} from './database-types'
 import { type IntegrationProvider, providerRegistry } from './provider'
 import {
 	type TokenData,
@@ -196,8 +208,9 @@ export class IntegrationManager {
 			: null
 
 		// Create integration record
-		const integration = await prisma.integration.create({
-			data: {
+		const [integration] = await db
+			.insert(IntegrationTable)
+			.values({
 				organizationId,
 				providerName,
 				providerType: provider.type,
@@ -211,9 +224,12 @@ export class IntegrationManager {
 				}),
 				isActive: true,
 				lastSyncAt: new Date(),
-			},
-		})
+			})
+			.returning()
 
+		if (!integration) {
+			throw new Error('Failed to create integration')
+		}
 		return integration
 	}
 
@@ -225,17 +241,13 @@ export class IntegrationManager {
 	async getIntegration(
 		integrationId: string,
 	): Promise<IntegrationWithRelations | null> {
-		return prisma.integration.findUnique({
-			where: { id: integrationId },
-			include: {
-				organization: true,
-				connections: {
-					include: {
-						note: true,
-					},
-				},
-			},
-		})
+		const [integration] = await db
+			.select()
+			.from(IntegrationTable)
+			.where(eq(IntegrationTable.id, integrationId))
+			.limit(1)
+
+		return integration ? this.hydrateIntegration(integration) : null
 	}
 
 	/**
@@ -248,29 +260,21 @@ export class IntegrationManager {
 		organizationId: string,
 		type?: ProviderType,
 	): Promise<IntegrationWithRelations[]> {
-		return prisma.integration.findMany({
-			where: {
-				organizationId,
-				...(type && { providerType: type }),
-				isActive: true,
-			},
-			include: {
-				organization: true,
-				connections: {
-					include: {
-						note: true,
-					},
-				},
-				_count: {
-					select: {
-						connections: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		})
+		const conditions = [
+			eq(IntegrationTable.organizationId, organizationId),
+			eq(IntegrationTable.isActive, true),
+		]
+		if (type) conditions.push(eq(IntegrationTable.providerType, type))
+
+		const integrations = await db
+			.select()
+			.from(IntegrationTable)
+			.where(and(...conditions))
+			.orderBy(desc(IntegrationTable.createdAt))
+
+		return Promise.all(
+			integrations.map((integration) => this.hydrateIntegration(integration)),
+		)
 	}
 
 	/**
@@ -283,10 +287,11 @@ export class IntegrationManager {
 		integrationId: string,
 		config: Record<string, any>,
 	): Promise<Integration> {
-		const existing = await prisma.integration.findUnique({
-			where: { id: integrationId },
-			select: { providerName: true },
-		})
+		const [existing] = await db
+			.select({ providerName: IntegrationTable.providerName })
+			.from(IntegrationTable)
+			.where(eq(IntegrationTable.id, integrationId))
+			.limit(1)
 
 		if (existing?.providerName === 'jira') {
 			const instanceUrl = config.instanceUrl ?? config.siteUrl
@@ -303,14 +308,18 @@ export class IntegrationManager {
 			}
 		}
 
-		const integration = await prisma.integration.update({
-			where: { id: integrationId },
-			data: {
+		const [integration] = await db
+			.update(IntegrationTable)
+			.set({
 				config: JSON.stringify(config),
 				updatedAt: new Date(),
-			},
-		})
+			})
+			.where(eq(IntegrationTable.id, integrationId))
+			.returning()
 
+		if (!integration) {
+			throw new Error('Integration not found')
+		}
 		await this.logIntegrationActivity(
 			integrationId,
 			'config_update',
@@ -333,19 +342,19 @@ export class IntegrationManager {
 		}
 
 		// Delete all connections first
-		await prisma.noteIntegrationConnection.deleteMany({
-			where: { integrationId },
-		})
+		await db
+			.delete(ConnectionTable)
+			.where(eq(ConnectionTable.integrationId, integrationId))
 
 		// Delete integration logs
-		await prisma.integrationLog.deleteMany({
-			where: { integrationId },
-		})
+		await db
+			.delete(IntegrationLogTable)
+			.where(eq(IntegrationLogTable.integrationId, integrationId))
 
 		// Delete the integration
-		await prisma.integration.delete({
-			where: { id: integrationId },
-		})
+		await db
+			.delete(IntegrationTable)
+			.where(eq(IntegrationTable.id, integrationId))
 
 		// Log disconnection
 		await this.logIntegrationActivity(integrationId, 'disconnect', 'success', {
@@ -373,10 +382,11 @@ export class IntegrationManager {
 		}
 
 		// Validate note exists and belongs to same organization
-		const note = await prisma.organizationNote.findUnique({
-			where: { id: noteId },
-			include: { organization: true },
-		})
+		const [note] = await db
+			.select()
+			.from(NoteTable)
+			.where(eq(NoteTable.id, noteId))
+			.limit(1)
 
 		if (!note) {
 			throw new Error('Note not found')
@@ -398,8 +408,9 @@ export class IntegrationManager {
 		}
 
 		// Create connection
-		const connection = await prisma.noteIntegrationConnection.create({
-			data: {
+		const [connection] = await db
+			.insert(ConnectionTable)
+			.values({
 				noteId,
 				integrationId,
 				externalId,
@@ -410,9 +421,12 @@ export class IntegrationManager {
 					channelMetadata: channel.metadata || {},
 				}),
 				isActive: true,
-			},
-		})
+			})
+			.returning()
 
+		if (!connection) {
+			throw new Error('Failed to create connection')
+		}
 		// Log connection creation
 		await this.logIntegrationActivity(
 			integrationId,
@@ -433,19 +447,18 @@ export class IntegrationManager {
 	 * @param connectionId - Connection ID to remove
 	 */
 	async disconnectNoteFromChannel(connectionId: string): Promise<void> {
-		const connection = await prisma.noteIntegrationConnection.findUnique({
-			where: { id: connectionId },
-			include: { integration: true, note: true },
-		})
+		const [connection] = await db
+			.select()
+			.from(ConnectionTable)
+			.where(eq(ConnectionTable.id, connectionId))
+			.limit(1)
 
 		if (!connection) {
 			throw new Error('Connection not found')
 		}
 
 		// Delete the connection
-		await prisma.noteIntegrationConnection.delete({
-			where: { id: connectionId },
-		})
+		await db.delete(ConnectionTable).where(eq(ConnectionTable.id, connectionId))
 
 		// Log disconnection
 		await this.logIntegrationActivity(
@@ -465,19 +478,20 @@ export class IntegrationManager {
 	 * @returns List of connections with integration details
 	 */
 	async getNoteConnections(noteId: string): Promise<ConnectionWithRelations[]> {
-		return prisma.noteIntegrationConnection.findMany({
-			where: {
-				noteId,
-				isActive: true,
-			},
-			include: {
-				integration: true,
-				note: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		})
+		const connections = await db
+			.select()
+			.from(ConnectionTable)
+			.where(
+				and(
+					eq(ConnectionTable.noteId, noteId),
+					eq(ConnectionTable.isActive, true),
+				),
+			)
+			.orderBy(desc(ConnectionTable.createdAt))
+
+		return Promise.all(
+			connections.map((connection) => this.hydrateConnection(connection)),
+		)
 	}
 
 	/**
@@ -488,19 +502,20 @@ export class IntegrationManager {
 	async getIntegrationConnections(
 		integrationId: string,
 	): Promise<ConnectionWithRelations[]> {
-		return prisma.noteIntegrationConnection.findMany({
-			where: {
-				integrationId,
-				isActive: true,
-			},
-			include: {
-				integration: true,
-				note: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		})
+		const connections = await db
+			.select()
+			.from(ConnectionTable)
+			.where(
+				and(
+					eq(ConnectionTable.integrationId, integrationId),
+					eq(ConnectionTable.isActive, true),
+				),
+			)
+			.orderBy(desc(ConnectionTable.createdAt))
+
+		return Promise.all(
+			connections.map((connection) => this.hydrateConnection(connection)),
+		)
 	}
 
 	// Channel and Provider Operations
@@ -662,17 +677,21 @@ export class IntegrationManager {
 		}
 
 		// Get recent error logs
-		const recentErrors = await prisma.integrationLog.findMany({
-			where: {
-				integrationId,
-				status: 'error',
-				createdAt: {
-					gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
-				},
-			},
-			orderBy: { createdAt: 'desc' },
-			take: 10,
-		})
+		const recentErrors = await db
+			.select()
+			.from(IntegrationLogTable)
+			.where(
+				and(
+					eq(IntegrationLogTable.integrationId, integrationId),
+					eq(IntegrationLogTable.status, 'error'),
+					gte(
+						IntegrationLogTable.createdAt,
+						new Date(Date.now() - 24 * 60 * 60 * 1000),
+					),
+				),
+			)
+			.orderBy(desc(IntegrationLogTable.createdAt))
+			.limit(10)
 
 		// Determine status
 		let status: IntegrationStatus = 'active'
@@ -717,39 +736,48 @@ export class IntegrationManager {
 		const activeConnections = connections.filter((c) => c.isActive).length
 
 		// Get recent activity (last 7 days)
-		const recentActivity = await prisma.integrationLog.count({
-			where: {
-				integrationId,
-				createdAt: {
-					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-				},
-			},
-		})
+		const [recentActivityResult] = await db
+			.select({ value: count() })
+			.from(IntegrationLogTable)
+			.where(
+				and(
+					eq(IntegrationLogTable.integrationId, integrationId),
+					gte(
+						IntegrationLogTable.createdAt,
+						new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+					),
+				),
+			)
 
 		// Get error count (last 24 hours)
-		const errorCount = await prisma.integrationLog.count({
-			where: {
-				integrationId,
-				status: 'error',
-				createdAt: {
-					gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-				},
-			},
-		})
+		const [errorCountResult] = await db
+			.select({ value: count() })
+			.from(IntegrationLogTable)
+			.where(
+				and(
+					eq(IntegrationLogTable.integrationId, integrationId),
+					eq(IntegrationLogTable.status, 'error'),
+					gte(
+						IntegrationLogTable.createdAt,
+						new Date(Date.now() - 24 * 60 * 60 * 1000),
+					),
+				),
+			)
 
 		// Get last activity
-		const lastActivity = await prisma.integrationLog.findFirst({
-			where: { integrationId },
-			orderBy: { createdAt: 'desc' },
-			select: { createdAt: true },
-		})
+		const [lastActivity] = await db
+			.select({ createdAt: IntegrationLogTable.createdAt })
+			.from(IntegrationLogTable)
+			.where(eq(IntegrationLogTable.integrationId, integrationId))
+			.orderBy(desc(IntegrationLogTable.createdAt))
+			.limit(1)
 
 		return {
 			totalConnections: connections.length,
 			activeConnections,
-			recentActivity,
+			recentActivity: recentActivityResult?.value ?? 0,
 			lastActivity: lastActivity?.createdAt,
-			errorCount,
+			errorCount: errorCountResult?.value ?? 0,
 		}
 	}
 
@@ -771,15 +799,13 @@ export class IntegrationManager {
 		error?: string,
 	): Promise<void> {
 		try {
-			await prisma.integrationLog.create({
-				data: {
-					integrationId,
-					action,
-					status,
-					requestData: data ? JSON.stringify(data) : null,
-					errorMessage: error,
-					createdAt: new Date(),
-				},
+			await db.insert(IntegrationLogTable).values({
+				integrationId,
+				action,
+				status,
+				requestData: data ? JSON.stringify(data) : null,
+				errorMessage: error,
+				createdAt: new Date(),
 			})
 		} catch (logError) {
 			// Don't throw on logging errors to avoid breaking main functionality
@@ -830,6 +856,59 @@ export class IntegrationManager {
 		} catch {
 			return undefined
 		}
+	}
+
+	private async hydrateIntegration(
+		integration: Integration,
+	): Promise<IntegrationWithRelations> {
+		const [organization] = await db
+			.select()
+			.from(OrganizationTable)
+			.where(eq(OrganizationTable.id, integration.organizationId))
+			.limit(1)
+		const connections = await db
+			.select()
+			.from(ConnectionTable)
+			.where(eq(ConnectionTable.integrationId, integration.id))
+			.orderBy(desc(ConnectionTable.createdAt))
+
+		return {
+			...integration,
+			organization,
+			connections: await Promise.all(
+				connections.map(async (connection) => {
+					const [note] = await db
+						.select()
+						.from(NoteTable)
+						.where(eq(NoteTable.id, connection.noteId))
+						.limit(1)
+					return { ...connection, note }
+				}),
+			),
+		}
+	}
+
+	private async hydrateConnection(
+		connection: NoteIntegrationConnection,
+	): Promise<ConnectionWithRelations> {
+		const [[integration], [note]] = await Promise.all([
+			db
+				.select()
+				.from(IntegrationTable)
+				.where(eq(IntegrationTable.id, connection.integrationId))
+				.limit(1),
+			db
+				.select()
+				.from(NoteTable)
+				.where(eq(NoteTable.id, connection.noteId))
+				.limit(1),
+		])
+
+		if (!integration) {
+			throw new Error('Integration not found for connection')
+		}
+
+		return { ...connection, integration, note }
 	}
 }
 

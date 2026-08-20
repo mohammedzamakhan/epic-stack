@@ -70,7 +70,6 @@
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@prisma/instrumentation": "^6.18.0",
     "@react-email/components": "0.0.41",
     "@react-email/preview-server": "^5.0.8",
     "@react-router/express": "^8.3.0",

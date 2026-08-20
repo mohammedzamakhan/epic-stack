@@ -8,7 +8,6 @@ vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -29,7 +28,7 @@ vi.mock('@repo/auth', async (importOriginal) => {
 })
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		user: {
 			findUnique: vi.fn().mockResolvedValue(null),
 		},

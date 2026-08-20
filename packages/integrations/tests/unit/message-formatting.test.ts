@@ -4,7 +4,7 @@ import {
 	truncateContent,
 	generateNoteUrl,
 } from '../../src/message-formatting'
-import { type OrganizationNote } from '../../src/prisma-types'
+import { type OrganizationNote } from '../../src/database-types'
 
 describe('Message Formatting', () => {
 	describe('truncateContent', () => {

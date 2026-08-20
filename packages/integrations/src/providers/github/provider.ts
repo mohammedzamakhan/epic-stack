@@ -5,7 +5,7 @@
 import {
 	type Integration,
 	type NoteIntegrationConnection,
-} from '../../prisma-types'
+} from '../../database-types'
 import { BaseIntegrationProvider } from '../../provider'
 import {
 	type TokenData,

@@ -1,6 +1,6 @@
 import { verifySessionStorage, requireUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { and, db, eq, User, UserOrganization } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import { onboardingInviteTokenSessionKey } from '#app/routes/_auth+/onboarding.tsx'
 import {
@@ -18,10 +18,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		const userId = await requireUserId(request)
 
 		// Get user's email
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: { email: true },
-		})
+		const [user] = await db
+			.select({ email: User.email })
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
 		if (!user) {
 			throw new Error('User not found')
@@ -31,14 +32,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		const inviteLink = await validateInviteLink(token)
 
 		// Check if user is already a member
-		const existingMember = await prisma.userOrganization.findUnique({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId: inviteLink.organizationId,
-				},
-			},
-		})
+		const [existingMember] = await db
+			.select({ userId: UserOrganization.userId })
+			.from(UserOrganization)
+			.where(
+				and(
+					eq(UserOrganization.userId, userId),
+					eq(UserOrganization.organizationId, inviteLink.organizationId),
+				),
+			)
+			.limit(1)
 
 		if (existingMember) {
 			return redirectWithToast(`/${inviteLink.organization.slug}`, {

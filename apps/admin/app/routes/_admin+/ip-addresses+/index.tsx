@@ -2,7 +2,16 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { getUserId, requireUserWithRole } from '@repo/auth'
 import { blacklistIp, unblacklistIp } from '@repo/common/ip-tracking'
-import { prisma } from '@repo/database'
+import {
+	IpAddress,
+	IpAddressUser,
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	gt,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -40,63 +49,43 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const page = parseInt(url.searchParams.get('page') || '1', 10)
 	const pageSize = 20
 
-	// Get IP addresses with request counts and associated users
-	const ipAddresses = await prisma.ipAddress.findMany({
-		select: {
-			id: true,
-			ip: true,
-			country: true,
-			region: true,
-			city: true,
-			isBlacklisted: true,
-			blacklistReason: true,
-			blacklistedAt: true,
-			createdAt: true,
-			requestCount: true,
-			lastRequestAt: true,
-			lastUserAgent: true,
-			suspiciousScore: true,
-			blacklistedBy: {
-				select: {
-					name: true,
-					username: true,
-				},
-			},
+	const results = await db.query.IpAddress.findMany({
+		with: {
+			user: true,
 			ipAddressUsers: {
-				select: {
-					user: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							email: true,
-						},
-					},
-					firstSeenAt: true,
-					lastSeenAt: true,
-					requestCount: true,
-				},
-				orderBy: {
-					lastSeenAt: 'desc',
-				},
-				take: 5, // Limit to 5 most recent users per IP
+				with: { user: true },
+				orderBy: desc(IpAddressUser.lastSeenAt),
+				limit: 5,
 			},
 		},
-		orderBy: { createdAt: 'desc' },
-		skip: (page - 1) * pageSize,
-		take: pageSize,
+		orderBy: desc(IpAddress.createdAt),
+		offset: (page - 1) * pageSize,
+		limit: pageSize,
 	})
+	const ipAddresses = results.map((result) => ({
+		...result,
+		blacklistedBy: result.user,
+	}))
 
-	const totalCount = await prisma.ipAddress.count()
-	const blacklistedCount = await prisma.ipAddress.count({
-		where: { isBlacklisted: true },
-	})
-	const suspiciousCount = await prisma.ipAddress.count({
-		where: {
-			suspiciousScore: { gt: 0 },
-			isBlacklisted: false,
-		},
-	})
+	const [total, blacklisted, suspicious] = await Promise.all([
+		db.select({ count: count() }).from(IpAddress),
+		db
+			.select({ count: count() })
+			.from(IpAddress)
+			.where(eq(IpAddress.isBlacklisted, true)),
+		db
+			.select({ count: count() })
+			.from(IpAddress)
+			.where(
+				and(
+					gt(IpAddress.suspiciousScore, 0),
+					eq(IpAddress.isBlacklisted, false),
+				),
+			),
+	])
+	const totalCount = total[0]?.count ?? 0
+	const blacklistedCount = blacklisted[0]?.count ?? 0
+	const suspiciousCount = suspicious[0]?.count ?? 0
 
 	return {
 		ipAddresses,

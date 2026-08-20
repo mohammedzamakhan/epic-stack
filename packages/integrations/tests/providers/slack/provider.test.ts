@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { SlackProvider } from '../../../src/providers/slack/provider'
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
+import type {
+	Integration,
+	NoteIntegrationConnection,
+} from '@repo/database/types'
 
 describe('SlackProvider - General Provider Tests', () => {
 	let provider: SlackProvider

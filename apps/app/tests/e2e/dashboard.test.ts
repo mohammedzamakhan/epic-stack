@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+// Removed db import - using test utilities instead
 import { initializeOnboardingSteps } from '../../../../packages/database/setup-onboarding.ts'
 
 // Ensure onboarding steps are seeded before tests
 async function ensureOnboardingStepsExist() {
-	const existingSteps = await prisma.onboardingStep.count()
+	const existingSteps = await db.onboardingStep.count()
 	if (existingSteps === 0) {
 		console.log('Seeding onboarding steps for tests...')
 		await initializeOnboardingSteps()
@@ -54,7 +54,7 @@ test.describe('Dashboard', () => {
 		const twoDaysAgo = new Date(today)
 		twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
 
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: 'Today Note 1',
@@ -105,7 +105,7 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create a new organization with minimal data to avoid auto-completion
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: '', // Empty name to avoid hasCompletedProfile auto-detection
 				slug: `test-org-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -140,7 +140,7 @@ test.describe('Dashboard', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create some recent notes
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: 'Recent Note 1',
@@ -175,7 +175,7 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create additional users
-		const member1 = await prisma.user.create({
+		const member1 = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -184,7 +184,7 @@ test.describe('Dashboard', () => {
 			},
 		})
 
-		const member2 = await prisma.user.create({
+		const member2 = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -194,7 +194,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Create an organization with multiple members
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
@@ -210,7 +210,7 @@ test.describe('Dashboard', () => {
 		})
 
 		// Create multiple notes
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: Array.from({ length: 5 }, (_, i) => ({
 				title: `Note ${i + 1}`,
 				content: `Content ${i + 1}`,
@@ -266,7 +266,7 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create a new organization with minimal data to avoid auto-completion
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: '', // Empty name to avoid hasCompletedProfile auto-detection
 				slug: `test-org-${Date.now()}-${Math.random().toString(36).substring(7)}`,

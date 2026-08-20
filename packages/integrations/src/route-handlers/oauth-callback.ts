@@ -1,5 +1,5 @@
 import { invariant } from '@epic-web/invariant'
-import { prisma } from '@repo/database'
+import { db, eq, Organization as OrganizationTable } from '@repo/database'
 import { oauthFlow } from '../oauth-flow'
 import { type LoaderFunctionArgs } from 'react-router'
 
@@ -75,10 +75,11 @@ export async function handleOAuthCallback(
 			oauthVerifier: oauthVerifier || undefined,
 		})
 
-		const organization = await prisma.organization.findUnique({
-			where: { id: integration.organizationId },
-			select: { slug: true },
-		})
+		const [organization] = await db
+			.select({ slug: OrganizationTable.slug })
+			.from(OrganizationTable)
+			.where(eq(OrganizationTable.id, integration.organizationId))
+			.limit(1)
 
 		invariant(organization, 'Organization not found')
 

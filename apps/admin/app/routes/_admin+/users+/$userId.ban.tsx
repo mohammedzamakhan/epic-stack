@@ -2,7 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { auditService, AuditAction } from '@repo/audit'
 import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { Session, User, db, eq } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { revokeAllRefreshTokens } from '#app/utils/jwt.server.ts'
 
@@ -25,10 +25,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		)
 
 		// Check if user exists and is not already banned
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: { id: true, isBanned: true, name: true, username: true },
-		})
+		const [user] = await db
+			.select({
+				id: User.id,
+				isBanned: User.isBanned,
+				name: User.name,
+				username: User.username,
+			})
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
 		invariantResponse(user, 'User not found', { status: 404 })
 
@@ -56,21 +62,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		// Ban the user
-		await prisma.user.update({
-			where: { id: userId },
-			data: {
+		await db
+			.update(User)
+			.set({
 				isBanned: true,
 				banReason: reason.trim(),
 				banExpiresAt,
 				bannedAt: new Date(),
 				bannedById: adminUserId,
-			},
-		})
+			})
+			.where(eq(User.id, userId))
 
 		// Invalidate all user sessions to force logout
-		await prisma.session.deleteMany({
-			where: { userId },
-		})
+		await db.delete(Session).where(eq(Session.userId, userId))
 
 		// Revoke all mobile refresh tokens
 		await revokeAllRefreshTokens(userId)
@@ -99,10 +103,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	if (intent === 'lift-ban') {
 		// Check if user exists and is banned
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: { id: true, isBanned: true, name: true, username: true },
-		})
+		const [user] = await db
+			.select({
+				id: User.id,
+				isBanned: User.isBanned,
+				name: User.name,
+				username: User.username,
+			})
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
 		invariantResponse(user, 'User not found', { status: 404 })
 
@@ -115,16 +125,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		// Lift the ban
-		await prisma.user.update({
-			where: { id: userId },
-			data: {
+		await db
+			.update(User)
+			.set({
 				isBanned: false,
 				banReason: null,
 				banExpiresAt: null,
 				bannedAt: null,
 				bannedById: null,
-			},
-		})
+			})
+			.where(eq(User.id, userId))
 
 		// Log the unban action
 		await auditService.logUserManagement(

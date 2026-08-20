@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import {
 	createTestOrganization,
 	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+// Removed db import - using test utilities instead
 
 test.describe('Search Functionality', () => {
 	test('Users can search for notes by title', async ({
@@ -22,7 +22,7 @@ test.describe('Search Functionality', () => {
 		const searchableTitle = 'Important Project Meeting'
 		const otherTitle = 'Random Daily Notes'
 
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: searchableTitle,
@@ -81,7 +81,7 @@ test.describe('Search Functionality', () => {
 			'This note contains specific keywords about React development'
 		const otherContent = 'This is about Vue.js and Angular frameworks'
 
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: 'Frontend Development',
@@ -128,7 +128,7 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note
-		await prisma.organizationNote.create({
+		await db.organizationNote.create({
 			data: {
 				title: 'Sample Note',
 				content: 'Some basic content',
@@ -162,7 +162,7 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note with mixed case
-		await prisma.organizationNote.create({
+		await db.organizationNote.create({
 			data: {
 				title: 'JavaScript Development Guide',
 				content: 'This guide covers JavaScript fundamentals',
@@ -196,7 +196,7 @@ test.describe('Search Functionality', () => {
 		const user = await login()
 
 		// Create another user
-		const otherUser = await prisma.user.create({
+		const otherUser = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -212,7 +212,7 @@ test.describe('Search Functionality', () => {
 		])
 
 		// Create notes with different visibility
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: 'Public Searchable Note',
@@ -259,7 +259,7 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note
-		await prisma.organizationNote.create({
+		await db.organizationNote.create({
 			data: {
 				title: 'Test Note for Search',
 				content: 'Content for testing search functionality',
@@ -297,7 +297,7 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create multiple test notes
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					title: 'Searchable Note',
@@ -355,7 +355,7 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note with special characters
-		await prisma.organizationNote.create({
+		await db.organizationNote.create({
 			data: {
 				title: 'C++ Programming & Development',
 				content: 'Notes about C++ and object-oriented programming',

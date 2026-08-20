@@ -1,5 +1,5 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
@@ -10,7 +10,6 @@ vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -41,7 +40,7 @@ vi.mock(
 )
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		organization: {
 			findFirst: vi.fn(),
 		},
@@ -87,14 +86,14 @@ vi.mock('@repo/integrations', () => ({
 describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 	const mockRequireUserId = vi.mocked(requireUserId)
 	const mockRequirePermission = vi.mocked(requireUserWithOrganizationPermission)
-	const mockPrismaOrg = vi.mocked(prisma.organization.findFirst)
-	const mockPrismaNoteFindFirst = vi.mocked(prisma.organizationNote.findFirst)
-	const mockPrismaNoteUpsert = vi.mocked(prisma.organizationNote.upsert)
+	const mockDbOrg = vi.mocked(db.organization.findFirst)
+	const mockDbNoteFindFirst = vi.mocked(db.organizationNote.findFirst)
+	const mockDbNoteUpsert = vi.mocked(db.organizationNote.upsert)
 
 	beforeEach(() => {
 		vi.clearAllMocks()
 		mockRequireUserId.mockResolvedValue('user-123')
-		mockPrismaOrg.mockResolvedValue({ id: 'org-123' } as any)
+		mockDbOrg.mockResolvedValue({ id: 'org-123' } as any)
 	})
 
 	it('denies note creation when member lacks CREATE_NOTE_OWN', async () => {
@@ -120,11 +119,11 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'create:note:own',
 		)
-		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
+		expect(mockDbNoteUpsert).not.toHaveBeenCalled()
 	})
 
 	it('denies update and prevents blind-overwrite when note is owned by another user and member lacks UPDATE_NOTE_ANY', async () => {
-		mockPrismaNoteFindFirst.mockResolvedValue({
+		mockDbNoteFindFirst.mockResolvedValue({
 			id: 'note-456',
 			createdById: 'user-other',
 		} as any)
@@ -155,11 +154,11 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'update:note:org',
 		)
-		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
+		expect(mockDbNoteUpsert).not.toHaveBeenCalled()
 	})
 
 	it('throws 404 when target note id does not exist in organization', async () => {
-		mockPrismaNoteFindFirst.mockResolvedValue(null)
+		mockDbNoteFindFirst.mockResolvedValue(null)
 
 		const formData = new FormData()
 		formData.append('id', 'non-existent-note')

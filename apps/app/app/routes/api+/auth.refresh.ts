@@ -1,5 +1,5 @@
 import { getClientIp } from '@repo/common/ip-tracking'
-import { prisma } from '@repo/database'
+import { db, eq, User, UserImage } from '@repo/database'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { canUserLogin } from '#app/utils/auth.server.ts'
@@ -30,18 +30,23 @@ export async function action({ request }: Route.ActionArgs) {
 		const { refreshToken, userId } = result.data
 
 		// Verify user exists
-		const user = await prisma.user.findUnique({
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				name: true,
-				image: { select: { id: true } },
-				createdAt: true,
-				updatedAt: true,
-			},
-			where: { id: userId },
-		})
+		const [user] = await db
+			.select({
+				id: User.id,
+				email: User.email,
+				username: User.username,
+				name: User.name,
+				createdAt: User.createdAt,
+				updatedAt: User.updatedAt,
+			})
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
+		const [image] = await db
+			.select({ id: UserImage.id })
+			.from(UserImage)
+			.where(eq(UserImage.userId, userId))
+			.limit(1)
 
 		if (!user) {
 			return data(
@@ -102,7 +107,7 @@ export async function action({ request }: Route.ActionArgs) {
 					email: user.email,
 					username: user.username,
 					name: user.name,
-					image: user.image?.id,
+					image: image?.id,
 					createdAt: user.createdAt.toISOString(),
 					updatedAt: user.updatedAt.toISOString(),
 				},

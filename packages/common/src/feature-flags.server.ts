@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { and, ConfigFlag, db, eq } from '@repo/database'
 
 async function getFlag(
 	key: string,
@@ -6,11 +6,18 @@ async function getFlag(
 	organizationId?: string,
 	userId?: string,
 ) {
-	const where: any = { key, level }
-	if (level === 'organization') where.organizationId = organizationId
-	if (level === 'user') where.userId = userId
-
-	const flag = await prisma.configFlag.findFirst({ where })
+	const conditions = [
+		eq(ConfigFlag.key, key),
+		eq(ConfigFlag.level, level),
+		level === 'organization'
+			? eq(ConfigFlag.organizationId, organizationId!)
+			: undefined,
+		level === 'user' ? eq(ConfigFlag.userId, userId!) : undefined,
+	].filter(Boolean)
+	const [flag] = await db
+		.select({ value: ConfigFlag.value })
+		.from(ConfigFlag)
+		.where(and(...conditions))
 	if (!flag) return null
 
 	return flag.value

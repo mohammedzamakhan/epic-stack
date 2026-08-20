@@ -1,5 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
-import { prisma } from '@repo/database'
+import { db, eq, User, UserImage } from '@repo/database'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { data } from 'react-router'
 import { z } from 'zod'
@@ -16,10 +16,11 @@ export async function action({ request }: Route.ActionArgs) {
 		const payload = await requireAuth(request)
 		const userId = payload.sub
 
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: { id: true },
-		})
+		const [user] = await db
+			.select({ id: User.id })
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
 		if (!user) {
 			return data(
@@ -49,10 +50,11 @@ export async function action({ request }: Route.ActionArgs) {
 		const submission = await parseWithZod(formData, {
 			async: true,
 			schema: ProfileFormSchema.superRefine(async ({ username }, ctx) => {
-				const existingUsername = await prisma.user.findUnique({
-					where: { username },
-					select: { id: true },
-				})
+				const [existingUsername] = await db
+					.select({ id: User.id })
+					.from(User)
+					.where(eq(User.username, username))
+					.limit(1)
 				if (existingUsername && existingUsername.id !== userId) {
 					ctx.addIssue({
 						path: ['username'],
@@ -77,19 +79,24 @@ export async function action({ request }: Route.ActionArgs) {
 
 		const { username, name } = submission.value
 
-		const updatedUser = await prisma.user.update({
-			where: { id: userId },
-			data: { name, username },
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				name: true,
-				createdAt: true,
-				updatedAt: true,
-				image: { select: { objectKey: true } },
-			},
-		})
+		const [updatedUser] = await db
+			.update(User)
+			.set({ name, username })
+			.where(eq(User.id, userId))
+			.returning({
+				id: User.id,
+				email: User.email,
+				username: User.username,
+				name: User.name,
+				createdAt: User.createdAt,
+				updatedAt: User.updatedAt,
+			})
+		if (!updatedUser) throw new Error('User not found')
+		const [image] = await db
+			.select({ objectKey: UserImage.objectKey })
+			.from(UserImage)
+			.where(eq(UserImage.userId, userId))
+			.limit(1)
 
 		return data({
 			success: true,
@@ -99,7 +106,7 @@ export async function action({ request }: Route.ActionArgs) {
 					email: updatedUser.email,
 					username: updatedUser.username,
 					name: updatedUser.name,
-					image: updatedUser.image?.objectKey,
+					image: image?.objectKey,
 					createdAt: updatedUser.createdAt.toISOString(),
 					updatedAt: updatedUser.updatedAt.toISOString(),
 				},

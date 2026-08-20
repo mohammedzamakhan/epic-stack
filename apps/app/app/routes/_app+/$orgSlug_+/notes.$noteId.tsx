@@ -4,7 +4,7 @@ import { Trans } from '@lingui/macro'
 import { getNoteActivityLogs } from '@repo/audit'
 import { requireUserId } from '@repo/auth'
 import { getNoteImgSrc, getUserImgSrc, useIsPending } from '@repo/common'
-import { prisma } from '@repo/database'
+import { and, db, eq, OrganizationNoteFavorite } from '@repo/database'
 import { integrationManager } from '@repo/integrations'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -89,7 +89,7 @@ DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
 	}
 })
 
-// Define comment types based on Prisma query structure
+// Comment shapes returned by the note loader query
 type CommentWithUser = {
 	id: string
 	content: string
@@ -122,10 +122,10 @@ type SerializedComment = Omit<CommentWithReplies, 'createdAt' | 'replies'> & {
 export async function loader({ params, request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 	const noteId = params.noteId
+	invariantResponse(noteId, 'Note ID is required', { status: 400 })
 
-	const note = await prisma.organizationNote.findUnique({
-		where: { id: noteId },
-		select: {
+	const noteRow = await db.query.OrganizationNote.findFirst({
+		columns: {
 			id: true,
 			title: true,
 			content: true,
@@ -133,8 +133,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			organizationId: true,
 			updatedAt: true,
 			isPublic: true,
-			uploads: {
-				select: {
+		},
+		with: {
+			organizationNoteUploads: {
+				columns: {
 					type: true,
 					altText: true,
 					objectKey: true,
@@ -142,26 +144,17 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 					status: true,
 				},
 			},
-			organization: {
-				select: {
-					slug: true,
-					id: true,
-				},
-			},
+			organization: { columns: { slug: true, id: true } },
 			noteAccess: {
-				select: {
-					id: true,
-					user: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-						},
-					},
-				},
+				columns: { id: true },
+				with: { user: { columns: { id: true, name: true, username: true } } },
 			},
 		},
+		where: (note, { eq }) => eq(note.id, noteId),
 	})
+	const note = noteRow
+		? { ...noteRow, uploads: noteRow.organizationNoteUploads }
+		: null
 
 	invariantResponse(note, 'Not found', { status: 404 })
 
@@ -201,21 +194,14 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const timeAgo = formatDistanceToNow(date)
 
 	// Get organization members for sharing
-	const organizationMembers = await prisma.userOrganization.findMany({
-		where: {
-			organizationId: note.organizationId,
-			active: true,
-		},
-		select: {
-			userId: true,
-			user: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			},
-		},
+	const organizationMembers = await db.query.UserOrganization.findMany({
+		columns: { userId: true },
+		with: { user: { columns: { id: true, name: true, username: true } } },
+		where: (membership, { and, eq }) =>
+			and(
+				eq(membership.organizationId, note.organizationId),
+				eq(membership.active, true),
+			),
 	})
 
 	// Get integration data for this note
@@ -223,27 +209,17 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		integrationManager.getNoteConnections(note.id),
 		integrationManager.getOrganizationIntegrations(note.organizationId),
 		// Get comments for this note (limited to 50 for initial load, implement load more in UI)
-		prisma.noteComment.findMany({
-			where: { noteId: note.id },
-			include: {
+		db.query.NoteComment.findMany({
+			with: {
 				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-						image: { select: { objectKey: true } },
-					},
+					columns: { id: true, name: true, username: true },
+					with: { image: { columns: { objectKey: true } } },
 				},
-				images: {
-					select: {
-						id: true,
-						altText: true,
-						objectKey: true,
-					},
-				},
+				images: { columns: { id: true, altText: true, objectKey: true } },
 			},
-			orderBy: { createdAt: 'desc' },
-			take: 50, // Limit initial load for performance
+			where: (comment, { eq }) => eq(comment.noteId, note.id),
+			orderBy: (comment, { desc }) => [desc(comment.createdAt)],
+			limit: 50,
 		}),
 	])
 
@@ -295,12 +271,16 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	}))
 
 	// Check if current user has favorited this note
-	const isFavorited = await prisma.organizationNoteFavorite.findFirst({
-		where: {
-			userId,
-			noteId: note.id,
-		},
-	})
+	const [isFavorited] = await db
+		.select({ id: OrganizationNoteFavorite.id })
+		.from(OrganizationNoteFavorite)
+		.where(
+			and(
+				eq(OrganizationNoteFavorite.userId, userId),
+				eq(OrganizationNoteFavorite.noteId, note.id),
+			),
+		)
+		.limit(1)
 
 	// Get user permissions for client-side permission checks
 	const userPermissions = await getUserOrganizationPermissionsForClient(

@@ -1,4 +1,12 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	ne,
+	Organization,
+	OrganizationNote,
+	OrganizationNoteStatus,
+} from '@repo/database'
 import { type ActionFunction } from 'react-router'
 import {
 	requireUserWithOrganizationPermission,
@@ -10,10 +18,11 @@ export const action: ActionFunction = async ({ request, params }) => {
 	const statusId = params.statusId
 	if (!orgSlug || !statusId)
 		return new Response('Missing params', { status: 400 })
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
 	if (!organization)
 		return new Response('Organization not found', { status: 404 })
 	await requireUserWithOrganizationPermission(
@@ -29,31 +38,59 @@ export const action: ActionFunction = async ({ request, params }) => {
 		if (!name) return new Response('Missing name', { status: 400 })
 
 		// Check for duplicate name
-		const existing = await prisma.organizationNoteStatus.findFirst({
-			where: { organizationId: organization.id, name, id: { not: statusId } },
-		})
+		const [existing] = await db
+			.select({ id: OrganizationNoteStatus.id })
+			.from(OrganizationNoteStatus)
+			.where(
+				and(
+					eq(OrganizationNoteStatus.organizationId, organization.id),
+					eq(OrganizationNoteStatus.name, name),
+					ne(OrganizationNoteStatus.id, statusId),
+				),
+			)
+			.limit(1)
 		if (existing) return new Response('Name already exists', { status: 409 })
 
 		const updateData: { name: string; color?: string } = { name }
 		if (color) updateData.color = color
 
-		const updated = await prisma.organizationNoteStatus.update({
-			where: { id: statusId, organizationId: organization.id },
-			data: updateData,
-			select: { id: true, name: true, color: true, position: true },
-		})
+		const [updated] = await db
+			.update(OrganizationNoteStatus)
+			.set(updateData)
+			.where(
+				and(
+					eq(OrganizationNoteStatus.id, statusId),
+					eq(OrganizationNoteStatus.organizationId, organization.id),
+				),
+			)
+			.returning({
+				id: OrganizationNoteStatus.id,
+				name: OrganizationNoteStatus.name,
+				color: OrganizationNoteStatus.color,
+				position: OrganizationNoteStatus.position,
+			})
 
 		return Response.json(updated)
 	} else if (request.method === 'DELETE') {
-		await prisma.$transaction([
-			prisma.organizationNote.updateMany({
-				where: { statusId: statusId, organizationId: organization.id },
-				data: { statusId: null },
-			}),
-			prisma.organizationNoteStatus.delete({
-				where: { id: statusId, organizationId: organization.id },
-			}),
-		])
+		await db.transaction(async (tx) => {
+			await tx
+				.update(OrganizationNote)
+				.set({ statusId: null })
+				.where(
+					and(
+						eq(OrganizationNote.statusId, statusId),
+						eq(OrganizationNote.organizationId, organization.id),
+					),
+				)
+			await tx
+				.delete(OrganizationNoteStatus)
+				.where(
+					and(
+						eq(OrganizationNoteStatus.id, statusId),
+						eq(OrganizationNoteStatus.organizationId, organization.id),
+					),
+				)
+		})
 		return new Response('OK', { status: 200 })
 	}
 

@@ -1,11 +1,15 @@
+import {
+	countSsoConfigurations,
+	countSsoSessions,
+	pingControlPlane,
+} from '@repo/database'
 import { type SSOConfiguration } from '@repo/database/types'
+import { ssoCache } from './cache.server.ts'
+import { ssoConnectionPool } from './connection-pool.server.ts'
 import {
 	discoverOIDCEndpoints,
 	testEndpointConnectivity,
 } from './oidc-discovery.server.ts'
-import { ssoCache } from './cache.server.ts'
-import { ssoConnectionPool } from './connection-pool.server.ts'
-import { prisma } from '@repo/database'
 
 export interface SSOHealthStatus {
 	overall: 'healthy' | 'degraded' | 'unhealthy'
@@ -143,11 +147,12 @@ export class SSOHealthChecker {
 
 		try {
 			// Test basic database connectivity
-			await prisma.$queryRaw`SELECT 1`
+			await pingControlPlane()
 
-			// Test SSO-specific tables
-			const configCount = await prisma.sSOConfiguration.count()
-			const sessionCount = await prisma.sSOSession.count()
+			const [configCount, sessionCount] = await Promise.all([
+				countSsoConfigurations(),
+				countSsoSessions(),
+			])
 
 			const duration = Date.now() - startTime
 
@@ -463,11 +468,9 @@ export class SSOHealthChecker {
 		try {
 			const [configCount, enabledConfigCount, sessionCount] = await Promise.all(
 				[
-					prisma.sSOConfiguration.count(),
-					prisma.sSOConfiguration.count({
-						where: { isEnabled: true },
-					}),
-					prisma.sSOSession.count(),
+					countSsoConfigurations(),
+					countSsoConfigurations({ enabled: true }),
+					countSsoSessions(),
 				],
 			)
 

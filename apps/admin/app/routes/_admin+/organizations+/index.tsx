@@ -1,6 +1,16 @@
 import { Trans } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Organization,
+	and,
+	count,
+	db,
+	desc,
+	isNotNull,
+	like,
+	or,
+	eq,
+} from '@repo/database'
 import { useLoaderData } from 'react-router'
 import { AdminOrganizationsTable } from '#app/components/admin-organizations-table.tsx'
 import { type Route } from './+types/index.ts'
@@ -16,84 +26,49 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const page = parseInt(url.searchParams.get('page') || '1', 10)
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '10', 10)
 
-	// Build where clause for filtering
-	const where: any = {}
-
-	if (searchQuery) {
-		where.OR = [
-			{ name: { contains: searchQuery } },
-			{ slug: { contains: searchQuery } },
-			{ description: { contains: searchQuery } },
-		]
-	}
-
-	if (subscriptionStatusFilter) {
-		where.subscriptionStatus = subscriptionStatusFilter
-	}
-
-	if (planFilter) {
-		where.planName = planFilter
-	}
+	const where = and(
+		searchQuery
+			? or(
+					like(Organization.name, `%${searchQuery}%`),
+					like(Organization.slug, `%${searchQuery}%`),
+					like(Organization.description, `%${searchQuery}%`),
+				)
+			: undefined,
+		subscriptionStatusFilter
+			? eq(Organization.subscriptionStatus, subscriptionStatusFilter)
+			: undefined,
+		planFilter ? eq(Organization.planName, planFilter) : undefined,
+	)
 
 	// Get organizations with pagination
 	const [organizations, totalCount, subscriptionStatuses, planNames] =
 		await Promise.all([
-			prisma.organization.findMany({
+			db.query.Organization.findMany({
 				where,
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					description: true,
-					active: true,
-					createdAt: true,
-					updatedAt: true,
-					planName: true,
-					subscriptionStatus: true,
-					size: true,
-					stripeCustomerId: true,
-					stripeSubscriptionId: true,
-					image: {
-						select: {
-							id: true,
-							altText: true,
-						},
-					},
-					_count: {
-						select: {
-							users: true,
-							notes: true,
-							integrations: true,
-						},
-					},
-					users: {
-						select: {
-							active: true,
-						},
-					},
-					integrations: {
-						select: {
-							isActive: true,
-						},
-					},
+				with: {
+					images: { limit: 1 },
+					organizations: true,
+					integrations: true,
 				},
-				orderBy: { createdAt: 'desc' },
-				skip: (page - 1) * pageSize,
-				take: pageSize,
+				orderBy: desc(Organization.createdAt),
+				offset: (page - 1) * pageSize,
+				limit: pageSize,
 			}),
-			prisma.organization.count({ where }),
-			// Get unique subscription statuses
-			prisma.organization.findMany({
-				select: { subscriptionStatus: true },
-				where: { subscriptionStatus: { not: null } },
-				distinct: ['subscriptionStatus'],
-			}),
-			// Get unique plan names
-			prisma.organization.findMany({
-				select: { planName: true },
-				where: { planName: { not: null } },
-				distinct: ['planName'],
-			}),
+			db
+				.select({ count: count() })
+				.from(Organization)
+				.where(where)
+				.then(([row]) => row?.count ?? 0),
+			db
+				.select({ subscriptionStatus: Organization.subscriptionStatus })
+				.from(Organization)
+				.where(isNotNull(Organization.subscriptionStatus))
+				.groupBy(Organization.subscriptionStatus),
+			db
+				.select({ planName: Organization.planName })
+				.from(Organization)
+				.where(isNotNull(Organization.planName))
+				.groupBy(Organization.planName),
 		])
 
 	const totalPages = Math.ceil(totalCount / pageSize)
@@ -101,11 +76,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 	return {
 		organizations: organizations.map((org) => ({
 			...org,
-			memberCount: org.users.filter((u) => u.active).length,
-			totalMembers: org._count.users,
-			noteCount: org._count.notes,
+			image: org.images[0] ?? null,
+			memberCount: org.organizations.filter((u) => u.active).length,
+			totalMembers: org.organizations.length,
+			noteCount: 0,
 			activeIntegrations: org.integrations.filter((i) => i.isActive).length,
-			totalIntegrations: org._count.integrations,
+			totalIntegrations: org.integrations.length,
 		})),
 		pagination: {
 			page,

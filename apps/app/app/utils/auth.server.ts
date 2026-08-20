@@ -1,4 +1,4 @@
-import { type Connection, type User } from '@prisma/client'
+import { type Connection, type User } from '@repo/database/types'
 import { getUtmParams } from '@repo/analytics'
 import {
 	canUserLogin,
@@ -9,7 +9,18 @@ import {
 } from '@repo/auth'
 
 import { downloadFile } from '@repo/common'
-import { prisma } from '@repo/database'
+import {
+	Connection as ConnectionTable,
+	db,
+	eq,
+	Password,
+	Role,
+	Session,
+	User as UserTable,
+	_RoleToUser,
+	UtmSource,
+	UserImage,
+} from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { Authenticator } from 'remix-auth'
 import { ssoAuthService } from './sso/auth.server.ts'
@@ -136,16 +147,20 @@ export async function login({
 
 	const { ipAddress, userAgent } = getSessionMetadata(request)
 
-	const session = await prisma.session.create({
-		select: { id: true, expirationDate: true, userId: true },
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(remember),
 			ipAddress,
 			userAgent,
 			userId: user.id,
-		},
-	})
-	return session
+		})
+		.returning({
+			id: Session.id,
+			expirationDate: Session.expirationDate,
+			userId: Session.userId,
+		})
+	return session!
 }
 
 export async function resetUserPassword({
@@ -156,16 +171,20 @@ export async function resetUserPassword({
 	password: string
 }) {
 	const hashedPassword = await getPasswordHash(password)
-	return prisma.user.update({
-		where: { username },
-		data: {
-			password: {
-				update: {
-					hash: hashedPassword,
-				},
-			},
-		},
-	})
+	const [user] = await db
+		.select({ id: UserTable.id })
+		.from(UserTable)
+		.where(eq(UserTable.username, username))
+		.limit(1)
+	if (!user) throw new Error('User not found')
+	await db
+		.insert(Password)
+		.values({ userId: user.id, hash: hashedPassword })
+		.onConflictDoUpdate({
+			target: Password.userId,
+			set: { hash: hashedPassword },
+		})
+	return user
 }
 
 export async function signup({
@@ -188,39 +207,50 @@ export async function signup({
 
 	const { ipAddress, userAgent } = getSessionMetadata(request)
 
-	const session = await prisma.session.create({
-		data: {
-			expirationDate: getSessionExpirationDate(),
-			ipAddress,
-			userAgent,
-			user: {
-				create: {
-					email: email.toLowerCase(),
-					username: username.toLowerCase(),
-					name,
-					roles: { connect: { name: 'user' } },
-					password: {
-						create: {
-							hash: hashedPassword,
-						},
-					},
-					// Add UTM source if available
-					...(utmParams && {
-						utmSource: {
-							create: {
-								source: utmParams.source,
-								medium: utmParams.medium,
-								campaign: utmParams.campaign,
-								term: utmParams.term,
-								content: utmParams.content,
-								referrer: utmParams.referrer,
-							},
-						},
-					}),
-				},
-			},
-		},
-		select: { id: true, expirationDate: true, userId: true },
+	const session = await db.transaction(async (tx) => {
+		const [user] = await tx
+			.insert(UserTable)
+			.values({
+				email: email.toLowerCase(),
+				username: username.toLowerCase(),
+				name,
+			})
+			.returning({ id: UserTable.id })
+		if (!user) throw new Error('Failed to create user')
+		const [role] = await tx
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (role) {
+			await tx.insert(_RoleToUser).values({ A: role.id, B: user.id })
+		}
+		await tx.insert(Password).values({ userId: user.id, hash: hashedPassword })
+		if (utmParams) {
+			await tx.insert(UtmSource).values({
+				userId: user.id,
+				source: utmParams.source,
+				medium: utmParams.medium,
+				campaign: utmParams.campaign,
+				term: utmParams.term,
+				content: utmParams.content,
+				referrer: utmParams.referrer,
+			})
+		}
+		const [createdSession] = await tx
+			.insert(Session)
+			.values({
+				expirationDate: getSessionExpirationDate(),
+				ipAddress,
+				userAgent,
+				userId: user.id,
+			})
+			.returning({
+				id: Session.id,
+				expirationDate: Session.expirationDate,
+				userId: Session.userId,
+			})
+		return createdSession!
 	})
 
 	return session
@@ -243,45 +273,47 @@ export async function signupWithConnection({
 	imageUrl?: string
 	request?: Request
 }) {
-	const user = await prisma.user.create({
-		data: {
+	const [user] = await db
+		.insert(UserTable)
+		.values({
 			email: email.toLowerCase(),
 			username: username.toLowerCase(),
 			name,
-			roles: { connect: { name: 'user' } },
-			connections: { create: { providerId, providerName } },
-		},
-		select: { id: true },
-	})
+		})
+		.returning({ id: UserTable.id })
+	if (!user) throw new Error('Failed to create user')
+	const [role] = await db
+		.select({ id: Role.id })
+		.from(Role)
+		.where(eq(Role.name, 'user'))
+		.limit(1)
+	if (role) await db.insert(_RoleToUser).values({ A: role.id, B: user.id })
+	await db
+		.insert(ConnectionTable)
+		.values({ userId: user.id, providerId, providerName })
 
 	if (imageUrl) {
 		const imageFile = await downloadFile(imageUrl)
-		await prisma.user.update({
-			where: { id: user.id },
-			data: {
-				image: {
-					create: {
-						objectKey: await uploadProfileImage(user.id, imageFile),
-					},
-				},
-			},
+		await db.insert(UserImage).values({
+			userId: user.id,
+			objectKey: await uploadProfileImage(user.id, imageFile),
 		})
 	}
 
 	// Create and return the session
 	const { ipAddress, userAgent } = getSessionMetadata(request)
 
-	const session = await prisma.session.create({
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
 			ipAddress,
 			userAgent,
-		},
-		select: { id: true, expirationDate: true },
-	})
+		})
+		.returning({ id: Session.id, expirationDate: Session.expirationDate })
 
-	return session
+	return session!
 }
 
 /**
@@ -303,15 +335,19 @@ export async function loginWithSSO({
 
 	const { ipAddress, userAgent } = getSessionMetadata(request)
 
-	const session = await prisma.session.create({
-		select: { id: true, expirationDate: true, userId: true },
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
 			ipAddress,
 			userAgent,
 			userId: user.id,
-		},
-	})
+		})
+		.returning({
+			id: Session.id,
+			expirationDate: Session.expirationDate,
+			userId: Session.userId,
+		})
 
-	return session
+	return session!
 }

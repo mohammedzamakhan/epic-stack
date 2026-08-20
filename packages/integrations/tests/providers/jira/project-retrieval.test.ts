@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { JiraProvider } from '../../../src/providers/jira/provider'
 import { fixtures } from '../../utils/fixtures'
-import type { Integration } from '@prisma/client'
+import type { Integration } from '@repo/database/types'
 
 // Mock the encryption module
 vi.mock('../../../src/encryption', () => ({

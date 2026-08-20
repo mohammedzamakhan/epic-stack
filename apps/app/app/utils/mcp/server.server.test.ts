@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
@@ -23,7 +23,7 @@ describe('MCP Server Service', () => {
 		clearTools()
 
 		// Create test user and organization with unique slug
-		testUser = await prisma.user.create({
+		testUser = await db.user.create({
 			data: {
 				email: `test-${Date.now()}@example.com`,
 				username: `testuser-${Date.now()}`,
@@ -31,7 +31,7 @@ describe('MCP Server Service', () => {
 			},
 		})
 
-		testOrganization = await prisma.organization.create({
+		testOrganization = await db.organization.create({
 			data: {
 				name: 'Test Organization',
 				slug: TEST_ORG_SLUG,
@@ -46,24 +46,24 @@ describe('MCP Server Service', () => {
 
 		// Clean up test data by specific IDs to avoid affecting parallel tests
 		if (testOrganization?.id) {
-			await prisma.mCPAccessToken.deleteMany({
+			await db.mCPAccessToken.deleteMany({
 				where: { authorization: { organizationId: testOrganization.id } },
 			})
-			await prisma.mCPRefreshToken.deleteMany({
+			await db.mCPRefreshToken.deleteMany({
 				where: { authorization: { organizationId: testOrganization.id } },
 			})
-			await prisma.mCPAuthorization.deleteMany({
+			await db.mCPAuthorization.deleteMany({
 				where: { organizationId: testOrganization.id },
 			})
-			await prisma.userOrganization.deleteMany({
+			await db.userOrganization.deleteMany({
 				where: { organizationId: testOrganization.id },
 			})
-			await prisma.organization.deleteMany({
+			await db.organization.deleteMany({
 				where: { id: testOrganization.id },
 			})
 		}
 		if (testUser?.id) {
-			await prisma.user.deleteMany({
+			await db.user.deleteMany({
 				where: { id: testUser.id },
 			})
 		}

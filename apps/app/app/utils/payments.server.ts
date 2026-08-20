@@ -3,9 +3,18 @@
  * Uses @repo/payments for provider abstraction
  */
 
-import { type Organization } from '@prisma/client'
+import { type Organization } from '@repo/database/types'
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	eq,
+	Organization as OrganizationTable,
+	OrganizationRole,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { sendEmail, TrialEndingEmail } from '@repo/email'
 import {
 	createStripeProvider,
@@ -63,11 +72,11 @@ export async function getStripePrices() {
  */
 
 export async function getOrganizationByStripeCustomerId(customerId: string) {
-	const result = await prisma.organization.findFirst({
-		where: {
-			stripeCustomerId: customerId,
-		},
-	})
+	const [result] = await db
+		.select()
+		.from(OrganizationTable)
+		.where(eq(OrganizationTable.stripeCustomerId, customerId))
+		.limit(1)
 	return result || null
 }
 
@@ -80,15 +89,13 @@ export async function updateOrganizationSubscription(
 		subscriptionStatus: string
 	},
 ) {
-	await prisma.organization.update({
-		where: {
-			id: organizationId,
-		},
-		data: {
+	await db
+		.update(OrganizationTable)
+		.set({
 			...subscriptionData,
 			updatedAt: new Date(),
-		},
-	})
+		})
+		.where(eq(OrganizationTable.id, organizationId))
 }
 
 /**
@@ -324,17 +331,20 @@ export async function handleTrialEnd(subscription: {
 		return
 	}
 
-	const admins = await prisma.userOrganization.findMany({
-		where: {
-			organizationId: organization.id,
-			organizationRole: {
-				name: 'admin',
-			},
-		},
-		include: {
-			user: true,
-		},
-	})
+	const admins = await db
+		.select({ user: User })
+		.from(UserOrganization)
+		.innerJoin(
+			OrganizationRole,
+			eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+		)
+		.innerJoin(User, eq(UserOrganization.userId, User.id))
+		.where(
+			and(
+				eq(UserOrganization.organizationId, organization.id),
+				eq(OrganizationRole.name, 'admin'),
+			),
+		)
 
 	// Calculate actual days remaining from trial end date
 	const trialEnd = subscription.trial_end
@@ -366,13 +376,17 @@ export async function handleTrialEnd(subscription: {
 
 export async function getTrialStatus(userId: string, organizationSlug: string) {
 	try {
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-		})
+		const [user] = await db
+			.select()
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
-		const organization = await prisma.organization.findUnique({
-			where: { slug: organizationSlug },
-		})
+		const [organization] = await db
+			.select()
+			.from(OrganizationTable)
+			.where(eq(OrganizationTable.slug, organizationSlug))
+			.limit(1)
 
 		const trialConfig = getTrialConfig()
 
@@ -426,20 +440,24 @@ export async function getTrialStatus(userId: string, organizationSlug: string) {
 }
 
 const getOrganizationSeatQuantity = async (organizationId: string) => {
-	return prisma.userOrganization.count({
-		where: {
-			organizationId,
-			active: true,
-		},
-	})
+	const [row] = await db
+		.select({ value: count() })
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.organizationId, organizationId),
+				eq(UserOrganization.active, true),
+			),
+		)
+	return row?.value ?? 0
 }
 
 export const updateSeatQuantity = async (organizationId: string) => {
-	const organization = await prisma.organization.findUnique({
-		where: {
-			id: organizationId,
-		},
-	})
+	const [organization] = await db
+		.select()
+		.from(OrganizationTable)
+		.where(eq(OrganizationTable.id, organizationId))
+		.limit(1)
 	if (!organization?.stripeSubscriptionId) {
 		// No subscription to update - return early
 		return null

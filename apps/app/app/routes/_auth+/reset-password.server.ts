@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { verifySessionStorage } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, or, User } from '@repo/database'
 import { data, redirect } from 'react-router'
 import { resetPasswordUsernameSessionKey } from './reset-password.tsx'
 import { type VerifyFunctionArgs } from './verify.server.tsx'
@@ -14,10 +14,11 @@ export async function handleVerification({
 		'Submission should be successful by now',
 	)
 	const target = submission.value.target
-	const user = await prisma.user.findFirst({
-		where: { OR: [{ email: target }, { username: target }] },
-		select: { email: true, username: true },
-	})
+	const [user] = await db
+		.select({ email: User.email, username: User.username })
+		.from(User)
+		.where(or(eq(User.email, target), eq(User.username, target)))
+		.limit(1)
 	// we don't want to say the user is not found if the email is not found
 	// because that would allow an attacker to check if an email is registered
 	if (!user) {

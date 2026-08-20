@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
@@ -11,7 +11,7 @@ import {
 
 // Helper to create test user with session
 async function createTestUserWithSession() {
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: {
 			email: faker.internet.email(),
 			username: faker.internet.username(),
@@ -20,7 +20,7 @@ async function createTestUserWithSession() {
 		},
 	})
 
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			userId: user.id,
 			expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -32,7 +32,7 @@ async function createTestUserWithSession() {
 
 // Helper to create test organization
 async function createTestOrganization(userId: string) {
-	return await prisma.organization.create({
+	return await db.organization.create({
 		data: {
 			name: faker.company.name(),
 			slug:
@@ -52,16 +52,16 @@ async function createTestOrganization(userId: string) {
 describe('OAuth Token Endpoint', () => {
 	beforeEach(async () => {
 		// Clean up test data before each test
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
 	})
 
 	afterEach(async () => {
 		// Clean up test data after each test
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
 	})
 
 	describe('Property 24: Token response structure', () => {

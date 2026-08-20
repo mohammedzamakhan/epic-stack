@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handleChat, type ChatDependencies } from './chat'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 
 vi.mock('@repo/database', () => ({
-	prisma: {
-		organizationNote: {
-			findUnique: vi.fn(),
-		},
+	db: {
+		select: vi.fn(),
 	},
+	OrganizationNote: { id: 'id', organizationId: 'organizationId' },
+	NoteAccess: {},
+	NoteComment: {},
+	User: {},
+	eq: vi.fn(),
 }))
 
 describe('handleChat', () => {
@@ -20,13 +23,14 @@ describe('handleChat', () => {
 			},
 		)
 
-		const mockFindUnique = prisma.organizationNote
-			.findUnique as unknown as ReturnType<typeof vi.fn>
+		const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>
 
-		// First call returns noteMeta
-		mockFindUnique.mockResolvedValueOnce({
-			id: 'note-123',
-			organizationId: 'org-456',
+		mockSelect.mockReturnValueOnce({
+			from: vi.fn().mockReturnThis(),
+			where: vi.fn().mockReturnThis(),
+			limit: vi
+				.fn()
+				.mockResolvedValue([{ id: 'note-123', organizationId: 'org-456' }]),
 		})
 
 		const requireOrgMembership = vi.fn().mockImplementation(async () => {
@@ -45,11 +49,7 @@ describe('handleChat', () => {
 			handleChat({ request, params: {} } as any, deps),
 		).rejects.toThrow()
 
-		expect(mockFindUnique).toHaveBeenCalledTimes(1)
-		expect(mockFindUnique).toHaveBeenCalledWith({
-			where: { id: 'note-123' },
-			select: { id: true, organizationId: true },
-		})
+		expect(mockSelect).toHaveBeenCalledTimes(1)
 		expect(requireOrgMembership).toHaveBeenCalledWith(request, 'org-456')
 	})
 })

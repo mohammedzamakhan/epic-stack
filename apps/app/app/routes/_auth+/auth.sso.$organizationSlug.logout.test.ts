@@ -4,7 +4,7 @@ import {
 	getSessionExpirationDate,
 	sessionKey,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { RouterContextProvider } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
@@ -53,7 +53,7 @@ let testSSOConfig: any
 
 beforeEach(async () => {
 	// Create test organization with unique slug
-	testOrganization = await prisma.organization.create({
+	testOrganization = await db.organization.create({
 		data: {
 			name: 'Test Organization',
 			slug: TEST_ORG_SLUG,
@@ -62,7 +62,7 @@ beforeEach(async () => {
 	})
 
 	// Create test SSO configuration in database
-	testSSOConfig = await prisma.sSOConfiguration.create({
+	testSSOConfig = await db.sSOConfiguration.create({
 		data: {
 			organizationId: testOrganization.id,
 			providerName: 'Test OIDC Provider',
@@ -86,13 +86,13 @@ beforeEach(async () => {
 afterEach(async () => {
 	// Clean up test data by specific IDs to avoid affecting parallel tests
 	if (testOrganization?.id) {
-		await prisma.sSOSession.deleteMany({
+		await db.sSOSession.deleteMany({
 			where: { ssoConfig: { organizationId: testOrganization.id } },
 		})
-		await prisma.sSOConfiguration.deleteMany({
+		await db.sSOConfiguration.deleteMany({
 			where: { organizationId: testOrganization.id },
 		})
-		await prisma.organization.deleteMany({
+		await db.organization.deleteMany({
 			where: { id: testOrganization.id },
 		})
 	}
@@ -103,11 +103,11 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 	const { logout } = await import('@repo/auth')
 
 	// Create user and session
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: createUser(),
 	})
 
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
@@ -115,7 +115,7 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 	})
 
 	// Create SSO session
-	const ssoSession = await prisma.sSOSession.create({
+	const ssoSession = await db.sSOSession.create({
 		data: {
 			sessionId: session.id,
 			ssoConfigId: testSSOConfig.id,
@@ -308,11 +308,11 @@ test('handles logout when no SSO session exists', async () => {
 	const { logout } = await import('@repo/auth')
 
 	// Create user and session but no SSO session
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: createUser(),
 	})
 
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
@@ -361,11 +361,11 @@ test('continues logout even if token revocation fails', async () => {
 	const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 	// Create user and session
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: createUser(),
 	})
 
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
@@ -373,7 +373,7 @@ test('continues logout even if token revocation fails', async () => {
 	})
 
 	// Create SSO session
-	const ssoSession = await prisma.sSOSession.create({
+	const ssoSession = await db.sSOSession.create({
 		data: {
 			sessionId: session.id,
 			ssoConfigId: testSSOConfig.id,

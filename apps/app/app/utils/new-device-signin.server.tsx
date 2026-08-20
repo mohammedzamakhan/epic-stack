@@ -1,5 +1,13 @@
 import { getClientIp, trackIpRequest } from '@repo/common/ip-tracking'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	IpAddress,
+	IpAddressUser,
+	RefreshToken,
+	User,
+} from '@repo/database'
 import { NewDeviceSigninEmail, sendEmail } from '@repo/email'
 import { logger } from '@repo/observability'
 import React from 'react'
@@ -38,32 +46,31 @@ export async function checkNewDevice({
 	})
 
 	// Check if we've seen this IP address for this user before
-	const ipAddressRecord = await prisma.ipAddress.findUnique({
-		where: { ip: ipAddress },
-		include: {
-			ipAddressUsers: {
-				where: {
-					userId,
-				},
-			},
-		},
-	})
+	const [ipAddressRecord] = await db
+		.select({ id: IpAddress.id })
+		.from(IpAddress)
+		.innerJoin(IpAddressUser, eq(IpAddressUser.ipAddressId, IpAddress.id))
+		.where(and(eq(IpAddress.ip, ipAddress), eq(IpAddressUser.userId, userId)))
+		.limit(1)
 
 	// If we have no record of this IP for this user, it's a new device
-	const isNewDevice =
-		!ipAddressRecord || ipAddressRecord.ipAddressUsers.length === 0
+	const isNewDevice = !ipAddressRecord
 
 	// Alternative: Check refresh tokens for similar user-agent + IP combination
 	// This provides more granular device tracking
 	if (!isNewDevice && userAgent) {
-		const existingTokenWithSimilarDevice = await prisma.refreshToken.findFirst({
-			where: {
-				userId,
-				userAgent: userAgent,
-				ipAddress: ipAddress,
-				revoked: false,
-			},
-		})
+		const [existingTokenWithSimilarDevice] = await db
+			.select({ id: RefreshToken.id })
+			.from(RefreshToken)
+			.where(
+				and(
+					eq(RefreshToken.userId, userId),
+					eq(RefreshToken.userAgent, userAgent),
+					eq(RefreshToken.ipAddress, ipAddress),
+					eq(RefreshToken.revoked, false),
+				),
+			)
+			.limit(1)
 
 		// If no existing token with this exact combo, consider it new
 		if (!existingTokenWithSimilarDevice) {
@@ -97,13 +104,11 @@ export async function sendNewDeviceSigninEmail({
 	location?: string
 }) {
 	// Get user information
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: {
-			email: true,
-			name: true,
-		},
-	})
+	const [user] = await db
+		.select({ email: User.email, name: User.name })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 
 	if (!user) {
 		logger.error({ userId }, 'User not found for new device signin email')
@@ -184,16 +189,17 @@ export async function handleNewDeviceSignin({
 
 		if (isNewDevice) {
 			// Get location from IP address record if available
-			const ipRecord = await prisma.ipAddress.findUnique({
-				where: { ip: ipAddress },
-				select: {
-					city: true,
-					region: true,
-					country: true,
-				},
-			})
+			const [ipRecord] = await db
+				.select({
+					city: IpAddress.city,
+					region: IpAddress.region,
+					country: IpAddress.country,
+				})
+				.from(IpAddress)
+				.where(eq(IpAddress.ip, ipAddress))
+				.limit(1)
 
-			const location = formatLocation(ipRecord)
+			const location = formatLocation(ipRecord ?? null)
 
 			// Send notification email (async, don't wait)
 			void sendNewDeviceSigninEmail({

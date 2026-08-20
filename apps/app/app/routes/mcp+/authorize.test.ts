@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
@@ -10,7 +10,7 @@ import {
 
 // Helper to create test user with session
 async function createTestUserWithSession() {
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		data: {
 			email: faker.internet.email(),
 			username: faker.internet.username(),
@@ -19,7 +19,7 @@ async function createTestUserWithSession() {
 		},
 	})
 
-	const session = await prisma.session.create({
+	const session = await db.session.create({
 		data: {
 			userId: user.id,
 			expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -31,7 +31,7 @@ async function createTestUserWithSession() {
 
 // Helper to create test organization
 async function createTestOrganization(userId: string) {
-	return await prisma.organization.create({
+	return await db.organization.create({
 		data: {
 			name: faker.company.name(),
 			slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.uuid().slice(0, 8)}`,
@@ -48,16 +48,16 @@ async function createTestOrganization(userId: string) {
 describe('OAuth Authorization Endpoint', () => {
 	beforeEach(async () => {
 		// Clean up test data before each test
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
 	})
 
 	afterEach(async () => {
 		// Clean up test data after each test
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
 	})
 
 	describe('Property 6: Session-based authorization redirect', () => {
@@ -70,14 +70,14 @@ describe('OAuth Authorization Endpoint', () => {
 						const org = await createTestOrganization(user.id)
 
 						// Verify user has session
-						const sessionRecord = await prisma.session.findUnique({
+						const sessionRecord = await db.session.findUnique({
 							where: { id: session.id },
 						})
 						expect(sessionRecord).toBeDefined()
 						expect(sessionRecord?.userId).toBe(user.id)
 
 						// Verify user has organization access
-						const userOrg = await prisma.userOrganization.findUnique({
+						const userOrg = await db.userOrganization.findUnique({
 							where: {
 								userId_organizationId: {
 									userId: user.id,
@@ -99,7 +99,7 @@ describe('OAuth Authorization Endpoint', () => {
 					fc.string({ minLength: 1, maxLength: 100 }),
 					async () => {
 						// Create user without session
-						const user = await prisma.user.create({
+						const user = await db.user.create({
 							data: {
 								email: faker.internet.email(),
 								username: faker.internet.username(),
@@ -109,7 +109,7 @@ describe('OAuth Authorization Endpoint', () => {
 						})
 
 						// Verify no active session exists
-						const sessions = await prisma.session.findMany({
+						const sessions = await db.session.findMany({
 							where: {
 								userId: user.id,
 								expirationDate: { gt: new Date() },
@@ -206,7 +206,7 @@ describe('OAuth Authorization Endpoint', () => {
 						const org = await createTestOrganization(user.id)
 
 						// Simulate denial - no authorization code should be created
-						const authsBefore = await prisma.mCPAuthorization.findMany({
+						const authsBefore = await db.mCPAuthorization.findMany({
 							where: {
 								userId: user.id,
 								organizationId: org.id,
@@ -216,7 +216,7 @@ describe('OAuth Authorization Endpoint', () => {
 						expect(authsBefore).toHaveLength(0)
 
 						// After denial, still no authorization should exist
-						const authsAfter = await prisma.mCPAuthorization.findMany({
+						const authsAfter = await db.mCPAuthorization.findMany({
 							where: {
 								userId: user.id,
 								organizationId: org.id,

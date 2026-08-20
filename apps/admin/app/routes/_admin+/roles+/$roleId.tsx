@@ -4,7 +4,17 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	OrganizationRole,
+	Permission,
+	Role,
+	_PermissionToRole,
+	_OrganizationPermissionToRole,
+	and,
+	asc,
+	db,
+	eq,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Breadcrumb,
@@ -85,18 +95,22 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 	if (isSystemRole) {
 		// Load system role
-		const role = await prisma.role.findUnique({
-			where: { id: params.roleId },
-			include: {
-				permissions: {
-					where: { context: 'system' },
-					orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-				},
-				_count: {
-					select: { users: true },
-				},
+		const result = await db.query.Role.findFirst({
+			where: eq(Role.id, params.roleId),
+			with: {
+				permissionToRoles: { with: { permission: true } },
+				roleToUsers: true,
 			},
 		})
+		const role = result
+			? {
+					...result,
+					permissions: result.permissionToRoles
+						.filter(({ permission }) => permission.context === 'system')
+						.map(({ permission }) => permission),
+					_count: { users: result.roleToUsers.length },
+				}
+			: null
 
 		if (!role) {
 			throw new Response('Role not found', { status: 404 })
@@ -105,25 +119,30 @@ export async function loader({ params }: Route.LoaderArgs) {
 		return {
 			role,
 			roleType: 'system' as const,
-			allPermissions: await prisma.permission.findMany({
-				where: { context: 'system' },
-				orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-			}),
+			allPermissions: await db
+				.select()
+				.from(Permission)
+				.where(eq(Permission.context, 'system'))
+				.orderBy(asc(Permission.entity), asc(Permission.action)),
 		}
 	} else {
 		// Load organization role
-		const role = await prisma.organizationRole.findUnique({
-			where: { id: params.roleId },
-			include: {
-				permissions: {
-					where: { context: 'organization' },
-					orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-				},
-				_count: {
-					select: { users: true },
-				},
+		const result = await db.query.OrganizationRole.findFirst({
+			where: eq(OrganizationRole.id, params.roleId),
+			with: {
+				organizationPermissionToRoles: { with: { permission: true } },
+				organizations: true,
 			},
 		})
+		const role = result
+			? {
+					...result,
+					permissions: result.organizationPermissionToRoles
+						.filter(({ permission }) => permission.context === 'organization')
+						.map(({ permission }) => permission),
+					_count: { users: result.organizations.length },
+				}
+			: null
 
 		if (!role) {
 			throw new Response('Role not found', { status: 404 })
@@ -132,10 +151,11 @@ export async function loader({ params }: Route.LoaderArgs) {
 		return {
 			role,
 			roleType: 'organization' as const,
-			allPermissions: await prisma.permission.findMany({
-				where: { context: 'organization' },
-				orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-			}),
+			allPermissions: await db
+				.select()
+				.from(Permission)
+				.where(eq(Permission.context, 'organization'))
+				.orderBy(asc(Permission.entity), asc(Permission.action)),
 		}
 	}
 }
@@ -174,21 +194,21 @@ export async function action({ request, params }: Route.ActionArgs) {
 		switch (intent) {
 			case 'update-basic': {
 				if (params.roleId.startsWith('sys_')) {
-					await prisma.role.update({
-						where: { id: params.roleId },
-						data: {
+					await db
+						.update(Role)
+						.set({
 							...(name && { name }),
 							...(description && { description }),
-						},
-					})
+						})
+						.where(eq(Role.id, params.roleId))
 				} else {
-					await prisma.organizationRole.update({
-						where: { id: params.roleId },
-						data: {
+					await db
+						.update(OrganizationRole)
+						.set({
 							...(name && { name }),
 							...(description && { description }),
-						},
-					})
+						})
+						.where(eq(OrganizationRole.id, params.roleId))
 				}
 				return { result: submission.reply(), success: true }
 			}
@@ -204,23 +224,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 				}
 
 				if (params.roleId.startsWith('sys_')) {
-					await prisma.role.update({
-						where: { id: params.roleId },
-						data: {
-							permissions: {
-								connect: { id: permissionId },
-							},
-						},
-					})
+					await db
+						.insert(_PermissionToRole)
+						.values({ A: permissionId, B: params.roleId })
 				} else {
-					await prisma.organizationRole.update({
-						where: { id: params.roleId },
-						data: {
-							permissions: {
-								connect: { id: permissionId },
-							},
-						},
-					})
+					await db
+						.insert(_OrganizationPermissionToRole)
+						.values({ A: params.roleId, B: permissionId })
 				}
 				return { result: submission.reply(), success: true }
 			}
@@ -236,36 +246,34 @@ export async function action({ request, params }: Route.ActionArgs) {
 				}
 
 				if (params.roleId.startsWith('sys_')) {
-					await prisma.role.update({
-						where: { id: params.roleId },
-						data: {
-							permissions: {
-								disconnect: { id: permissionId },
-							},
-						},
-					})
+					await db
+						.delete(_PermissionToRole)
+						.where(
+							and(
+								eq(_PermissionToRole.A, permissionId),
+								eq(_PermissionToRole.B, params.roleId),
+							),
+						)
 				} else {
-					await prisma.organizationRole.update({
-						where: { id: params.roleId },
-						data: {
-							permissions: {
-								disconnect: { id: permissionId },
-							},
-						},
-					})
+					await db
+						.delete(_OrganizationPermissionToRole)
+						.where(
+							and(
+								eq(_OrganizationPermissionToRole.A, params.roleId),
+								eq(_OrganizationPermissionToRole.B, permissionId),
+							),
+						)
 				}
 				return { result: submission.reply(), success: true }
 			}
 
 			case 'delete-role': {
 				if (params.roleId.startsWith('sys_')) {
-					await prisma.role.delete({
-						where: { id: params.roleId },
-					})
+					await db.delete(Role).where(eq(Role.id, params.roleId))
 				} else {
-					await prisma.organizationRole.delete({
-						where: { id: params.roleId },
-					})
+					await db
+						.delete(OrganizationRole)
+						.where(eq(OrganizationRole.id, params.roleId))
 				}
 				return redirect('/roles')
 			}
@@ -297,18 +305,20 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 				// Create permissions for this feature
 				const createdPermissions = await Promise.all(
-					basicPermissions.map((perm) =>
-						prisma.permission.create({
-							data: {
+					basicPermissions.map(async (perm) => {
+						const [permission] = await db
+							.insert(Permission)
+							.values({
 								action: perm.action,
 								entity: featureKey!,
 								access: perm.access,
 								context: roleType,
 								description:
 									featureDescription || `${perm.action} ${featureName!}`,
-							},
-						}),
-					),
+							})
+							.returning()
+						return permission
+					}),
 				)
 
 				return { result: submission.reply(), success: true, createdPermissions }
@@ -339,16 +349,18 @@ export async function action({ request, params }: Route.ActionArgs) {
 					: 'organization'
 
 				// Check if permission already exists
-				const existingPermission = await prisma.permission.findUnique({
-					where: {
-						action_entity_access_context: {
-							action: permissionAction!,
-							entity: selectedEntity!,
-							access: permissionAccess!,
-							context: roleType,
-						},
-					},
-				})
+				const [existingPermission] = await db
+					.select()
+					.from(Permission)
+					.where(
+						and(
+							eq(Permission.action, permissionAction!),
+							eq(Permission.entity, selectedEntity!),
+							eq(Permission.access, permissionAccess!),
+							eq(Permission.context, roleType),
+						),
+					)
+					.limit(1)
 
 				if (existingPermission) {
 					return {
@@ -359,8 +371,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 					}
 				}
 
-				const createdPermission = await prisma.permission.create({
-					data: {
+				const [createdPermission] = await db
+					.insert(Permission)
+					.values({
 						action: permissionAction!,
 						entity: selectedEntity!,
 						access: permissionAccess!,
@@ -368,8 +381,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 						description:
 							permissionDescription ||
 							`${permissionAction!} ${selectedEntity!}`,
-					},
-				})
+					})
+					.returning()
+				if (!createdPermission) throw new Error('Could not create permission')
 
 				return { result: submission.reply(), success: true, createdPermission }
 			}

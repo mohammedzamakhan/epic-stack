@@ -1,7 +1,14 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { requireUserWithRole } from '@repo/auth'
 import { getIpAddressesByUser } from '@repo/common/ip-tracking'
-import { prisma } from '@repo/database'
+import {
+	NoteActivityLog,
+	NoteComment,
+	User,
+	db,
+	desc,
+	eq,
+} from '@repo/database'
 import { useLoaderData } from 'react-router'
 import {
 	UserDetailView,
@@ -22,149 +29,53 @@ export async function loader({
 	invariantResponse(userId, 'User ID is required')
 
 	// Get comprehensive user data
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			username: true,
-			createdAt: true,
-			updatedAt: true,
-			isBanned: true,
-			banReason: true,
-			banExpiresAt: true,
-			bannedAt: true,
-			bannedBy: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			},
-			image: {
-				select: {
-					id: true,
-					altText: true,
-				},
-			},
+	const result = await db.query.User.findFirst({
+		where: eq(User.id, userId),
+		with: {
+			user: true,
+			image: true,
 			organizations: {
-				select: {
-					organizationRole: {
-						select: {
-							id: true,
-							name: true,
-							level: true,
-						},
-					},
-					active: true,
-					isDefault: true,
-					createdAt: true,
-					department: true,
-					organization: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-							description: true,
-							active: true,
-							subscriptionStatus: true,
-							planName: true,
-						},
-					},
-				},
-				orderBy: {
-					createdAt: 'desc',
-				},
+				with: { organizationRole: true, organization: true },
+				orderBy: (membership, { desc }) => desc(membership.createdAt),
 			},
 			sessions: {
-				select: {
-					id: true,
-					createdAt: true,
-					expirationDate: true,
-				},
-				orderBy: {
-					createdAt: 'desc',
-				},
-				take: 10,
+				limit: 10,
+				orderBy: (session, { desc }) => desc(session.createdAt),
 			},
 			connections: {
-				select: {
-					id: true,
-					providerName: true,
-					providerId: true,
-					createdAt: true,
-				},
-				orderBy: {
-					createdAt: 'desc',
-				},
+				orderBy: (connection, { desc }) => desc(connection.createdAt),
 			},
-			roles: {
-				select: {
-					id: true,
-					name: true,
-					description: true,
-				},
-			},
+			roleToUsers: { with: { role: true } },
 			notes: {
-				select: {
-					id: true,
-					title: true,
-					createdAt: true,
-					updatedAt: true,
-				},
-				orderBy: {
-					updatedAt: 'desc',
-				},
-				take: 5,
+				limit: 5,
+				orderBy: (note, { desc }) => desc(note.updatedAt),
 			},
-			password: {
-				select: {
-					hash: true,
-				},
-			},
+			password: true,
 		},
 	})
+	const user = result
+		? {
+				...result,
+				bannedBy: result.user,
+				roles: result.roleToUsers.map(({ role }) => role),
+			}
+		: null
 
 	invariantResponse(user, 'User not found', { status: 404 })
 
 	// Get activity data (recent notes, comments, etc.)
 	const [recentNoteComments, recentActivityLogs] = await Promise.all([
-		prisma.noteComment.findMany({
-			where: { userId: user.id },
-			select: {
-				id: true,
-				content: true,
-				createdAt: true,
-				note: {
-					select: {
-						id: true,
-						title: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: 5,
+		db.query.NoteComment.findMany({
+			where: eq(NoteComment.userId, user.id),
+			with: { note: true },
+			orderBy: desc(NoteComment.createdAt),
+			limit: 5,
 		}),
-		prisma.noteActivityLog.findMany({
-			where: { userId: user.id },
-			select: {
-				id: true,
-				action: true,
-				createdAt: true,
-				note: {
-					select: {
-						id: true,
-						title: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: 10,
+		db.query.NoteActivityLog.findMany({
+			where: eq(NoteActivityLog.userId, user.id),
+			with: { note: true },
+			orderBy: desc(NoteActivityLog.createdAt),
+			limit: 10,
 		}),
 	])
 

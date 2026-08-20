@@ -46,36 +46,34 @@ Immediate actions to limit damage:
 **Disable Compromised Accounts**:
 
 ```typescript
-await prisma.user.update({
-	where: { id: compromisedUserId },
-	data: {
+await db
+	.update(User)
+	.set({
 		isBanned: true,
 		banReason: 'Security incident - under investigation',
-	},
-})
+	})
+	.where(eq(User.id, compromisedUserId))
 
 // Invalidate all sessions
-await prisma.session.deleteMany({
-	where: { userId: compromisedUserId },
-})
+await db.delete(Session).where(eq(Session.userId, compromisedUserId))
 ```
 
 **Revoke API Keys**:
 
 ```typescript
-await prisma.apiKey.updateMany({
-	where: { userId: compromisedUserId },
-	data: { revoked: true, revokedAt: new Date() },
-})
+await db
+	.update(ApiKey)
+	.set({ revoked: true, revokedAt: new Date() })
+	.where(eq(ApiKey.userId, compromisedUserId))
 ```
 
 **Disable SSO Configuration**:
 
 ```typescript
-await prisma.sSOConfiguration.update({
-	where: { organizationId },
-	data: { isEnabled: false },
-})
+await db
+	.update(SSOConfiguration)
+	.set({ isEnabled: false })
+	.where(eq(SSOConfiguration.organizationId, organizationId))
 ```
 
 ### 3. Investigation
@@ -118,9 +116,7 @@ const suspiciousActivity = await auditService.query({
 
 ```typescript
 // Force password reset for affected users
-await prisma.password.deleteMany({
-	where: { userId: { in: affectedUserIds } },
-})
+await db.delete(Password).where(inArray(Password.userId, affectedUserIds))
 
 // Notify users
 for (const userId of affectedUserIds) {

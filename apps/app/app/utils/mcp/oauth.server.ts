@@ -1,6 +1,17 @@
 import crypto from 'node:crypto'
 import { auditService, AuditAction } from '@repo/audit'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	MCPAccessToken,
+	MCPAuthorization,
+	MCPClient,
+	MCPRefreshToken,
+	ApiKey,
+	Organization,
+	User,
+} from '@repo/database'
 
 // Token expiration constants
 export const ACCESS_TOKEN_EXPIRATION = 60 * 60 * 1000 // 1 hour
@@ -116,10 +127,11 @@ export async function validateMCPRedirectUri(
 	}
 
 	// Look up the client registration
-	const client = await prisma.mCPClient.findUnique({
-		where: { clientId },
-		select: { redirectUris: true },
-	})
+	const [client] = await db
+		.select({ redirectUris: MCPClient.redirectUris })
+		.from(MCPClient)
+		.where(eq(MCPClient.clientId, clientId))
+		.limit(1)
 
 	if (!client) {
 		return { isValid: false, error: 'Client not registered' }
@@ -243,25 +255,25 @@ export async function createAuthorizationWithTokens({
 	const refreshToken = generateToken()
 
 	// Create authorization record and tokens in a single transaction
-	const authorization = await prisma.mCPAuthorization.create({
-		data: {
+	const [authorization] = await db
+		.insert(MCPAuthorization)
+		.values({
 			userId,
 			organizationId,
 			clientName,
 			clientId: generateToken(),
-			accessTokens: {
-				create: {
-					tokenHash: hashToken(accessToken),
-					expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
-				},
-			},
-			refreshTokens: {
-				create: {
-					tokenHash: hashToken(refreshToken),
-					expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
-				},
-			},
-		},
+		})
+		.returning()
+	if (!authorization) throw new Error('Failed to create authorization')
+	await db.insert(MCPAccessToken).values({
+		authorizationId: authorization.id,
+		tokenHash: hashToken(accessToken),
+		expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
+	})
+	await db.insert(MCPRefreshToken).values({
+		authorizationId: authorization.id,
+		tokenHash: hashToken(refreshToken),
+		expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
 	})
 
 	return {
@@ -275,19 +287,27 @@ export async function createAuthorizationWithTokens({
 export async function validateAccessToken(accessToken: string) {
 	const tokenHash = hashToken(accessToken)
 
-	const accessTokenRecord = await prisma.mCPAccessToken.findUnique({
-		where: { tokenHash },
-		include: {
-			authorization: {
-				include: {
-					user: true,
-					organization: true,
-				},
-			},
-		},
-	})
+	const [accessTokenRecord] = await db
+		.select({
+			token: MCPAccessToken,
+			authorization: MCPAuthorization,
+			user: User,
+			organization: Organization,
+		})
+		.from(MCPAccessToken)
+		.innerJoin(
+			MCPAuthorization,
+			eq(MCPAccessToken.authorizationId, MCPAuthorization.id),
+		)
+		.innerJoin(User, eq(MCPAuthorization.userId, User.id))
+		.innerJoin(
+			Organization,
+			eq(MCPAuthorization.organizationId, Organization.id),
+		)
+		.where(eq(MCPAccessToken.tokenHash, tokenHash))
+		.limit(1)
 
-	if (!accessTokenRecord || accessTokenRecord.expiresAt < new Date()) {
+	if (!accessTokenRecord || accessTokenRecord.token.expiresAt < new Date()) {
 		return null
 	}
 
@@ -296,8 +316,8 @@ export async function validateAccessToken(accessToken: string) {
 	}
 
 	return {
-		user: accessTokenRecord.authorization.user,
-		organization: accessTokenRecord.authorization.organization,
+		user: accessTokenRecord.user,
+		organization: accessTokenRecord.organization,
 		authorizationId: accessTokenRecord.authorization.id,
 	}
 }
@@ -306,33 +326,36 @@ export async function validateAccessToken(accessToken: string) {
 export async function validateApiKey(apiKey: string) {
 	const keyHash = hashToken(apiKey)
 
-	const apiKeyRecord = await prisma.apiKey.findUnique({
-		where: { keyHash },
-		include: {
-			user: true,
-			organization: true,
-		},
-	})
+	const [apiKeyRecord] = await db
+		.select({ apiKey: ApiKey, user: User, organization: Organization })
+		.from(ApiKey)
+		.innerJoin(User, eq(ApiKey.userId, User.id))
+		.innerJoin(Organization, eq(ApiKey.organizationId, Organization.id))
+		.where(eq(ApiKey.keyHash, keyHash))
+		.limit(1)
 
 	if (!apiKeyRecord) {
 		return null
 	}
 
-	if (apiKeyRecord.expiresAt && apiKeyRecord.expiresAt < new Date()) {
+	if (
+		apiKeyRecord.apiKey.expiresAt &&
+		apiKeyRecord.apiKey.expiresAt < new Date()
+	) {
 		return null
 	}
 
 	// Update lastUsedAt and log audit action
-	await prisma.apiKey.update({
-		where: { id: apiKeyRecord.id },
-		data: { lastUsedAt: new Date() },
-	})
+	await db
+		.update(ApiKey)
+		.set({ lastUsedAt: new Date() })
+		.where(eq(ApiKey.id, apiKeyRecord.apiKey.id))
 
 	await auditService.log({
 		action: AuditAction.API_KEY_USED,
-		userId: apiKeyRecord.userId,
-		organizationId: apiKeyRecord.organizationId,
-		metadata: { apiKeyId: apiKeyRecord.id },
+		userId: apiKeyRecord.apiKey.userId,
+		organizationId: apiKeyRecord.apiKey.organizationId,
+		metadata: { apiKeyId: apiKeyRecord.apiKey.id },
 		details: 'API Key Used for MCP Request',
 	})
 
@@ -340,24 +363,22 @@ export async function validateApiKey(apiKey: string) {
 		user: apiKeyRecord.user,
 		organization: apiKeyRecord.organization,
 		// Provide a prefixed ID so audit logging and rate limiting still work
-		authorizationId: `apikey_${apiKeyRecord.id}`,
+		authorizationId: `apikey_${apiKeyRecord.apiKey.id}`,
 	}
 }
 
 // Revoke authorization (invalidates all tokens)
 export async function revokeAuthorization(authorizationId: string) {
 	// Use a transaction to ensure atomicity and reduce risk of database corruption
-	await prisma.$transaction(async (tx) => {
-		await tx.mCPAuthorization.update({
-			where: { id: authorizationId },
-			data: { isActive: false },
-		})
-
-		// Revoke all refresh tokens
-		await tx.mCPRefreshToken.updateMany({
-			where: { authorizationId },
-			data: { revoked: true, revokedAt: new Date() },
-		})
+	await db.transaction(async (tx) => {
+		await tx
+			.update(MCPAuthorization)
+			.set({ isActive: false })
+			.where(eq(MCPAuthorization.id, authorizationId))
+		await tx
+			.update(MCPRefreshToken)
+			.set({ revoked: true, revokedAt: new Date() })
+			.where(eq(MCPRefreshToken.authorizationId, authorizationId))
 	})
 }
 
@@ -476,14 +497,16 @@ export async function exchangeAuthorizationCode(
 	}
 
 	// Create authorization record
-	const authorization = await prisma.mCPAuthorization.create({
-		data: {
+	const [authorization] = await db
+		.insert(MCPAuthorization)
+		.values({
 			userId: authData.userId,
 			organizationId: authData.organizationId,
 			clientName: authData.clientName,
 			clientId: generateToken(),
-		},
-	})
+		})
+		.returning()
+	if (!authorization) throw new Error('Failed to create authorization')
 
 	// Generate tokens
 	const accessToken = generateToken()
@@ -491,19 +514,15 @@ export async function exchangeAuthorizationCode(
 
 	// Store hashed tokens
 	await Promise.all([
-		prisma.mCPAccessToken.create({
-			data: {
-				authorizationId: authorization.id,
-				tokenHash: hashToken(accessToken),
-				expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
-			},
+		db.insert(MCPAccessToken).values({
+			authorizationId: authorization.id,
+			tokenHash: hashToken(accessToken),
+			expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
 		}),
-		prisma.mCPRefreshToken.create({
-			data: {
-				authorizationId: authorization.id,
-				tokenHash: hashToken(refreshToken),
-				expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
-			},
+		db.insert(MCPRefreshToken).values({
+			authorizationId: authorization.id,
+			tokenHash: hashToken(refreshToken),
+			expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
 		}),
 	])
 
@@ -519,15 +538,20 @@ export async function exchangeAuthorizationCode(
 export async function refreshAccessToken(refreshToken: string) {
 	const tokenHash = hashToken(refreshToken)
 
-	const refreshTokenRecord = await prisma.mCPRefreshToken.findUnique({
-		where: { tokenHash },
-		include: { authorization: true },
-	})
+	const [refreshTokenRecord] = await db
+		.select({ token: MCPRefreshToken, authorization: MCPAuthorization })
+		.from(MCPRefreshToken)
+		.innerJoin(
+			MCPAuthorization,
+			eq(MCPRefreshToken.authorizationId, MCPAuthorization.id),
+		)
+		.where(eq(MCPRefreshToken.tokenHash, tokenHash))
+		.limit(1)
 
 	if (
 		!refreshTokenRecord ||
-		refreshTokenRecord.revoked ||
-		refreshTokenRecord.expiresAt < new Date()
+		refreshTokenRecord.token.revoked ||
+		refreshTokenRecord.token.expiresAt < new Date()
 	) {
 		return null
 	}
@@ -535,19 +559,17 @@ export async function refreshAccessToken(refreshToken: string) {
 	// Generate new access token
 	const newAccessToken = generateToken()
 
-	await prisma.mCPAccessToken.create({
-		data: {
-			authorizationId: refreshTokenRecord.authorizationId,
-			tokenHash: hashToken(newAccessToken),
-			expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
-		},
+	await db.insert(MCPAccessToken).values({
+		authorizationId: refreshTokenRecord.token.authorizationId,
+		tokenHash: hashToken(newAccessToken),
+		expiresAt: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
 	})
 
 	// Update last used
-	await prisma.mCPAuthorization.update({
-		where: { id: refreshTokenRecord.authorizationId },
-		data: { lastUsedAt: new Date() },
-	})
+	await db
+		.update(MCPAuthorization)
+		.set({ lastUsedAt: new Date() })
+		.where(eq(MCPAuthorization.id, refreshTokenRecord.token.authorizationId))
 
 	return {
 		access_token: newAccessToken,

@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 
 import { authSessionStorage, sessionKey } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { and, db, eq, ne, Session } from '@repo/database'
 
 type AccountActionArgs = {
 	request: Request
@@ -21,11 +21,8 @@ export async function signOutOfSessionsAction({
 		sessionId,
 		'You must be authenticated to sign out of other sessions',
 	)
-	await prisma.session.deleteMany({
-		where: {
-			userId,
-			id: { not: sessionId },
-		},
-	})
+	await db
+		.delete(Session)
+		.where(and(eq(Session.userId, userId), ne(Session.id, sessionId)))
 	return Response.json({ status: 'success' })
 }

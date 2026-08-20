@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { loader } from './stream.tsx'
 
@@ -7,7 +7,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		organization: {
 			findUnique: vi.fn().mockResolvedValue({ id: 'org1' }),
 		},
@@ -35,7 +35,7 @@ describe('Notifications Stream API', () => {
 		)
 		await loader({ request, params: {} } as any)
 
-		expect(prisma.organization.findUnique).toHaveBeenCalledWith({
+		expect(db.organization.findUnique).toHaveBeenCalledWith({
 			where: { slug: 'acme' },
 			select: { id: true },
 		})

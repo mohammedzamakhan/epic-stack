@@ -1,7 +1,24 @@
 import { Trans } from '@lingui/macro'
-import { type Organization, type User, type UserImage } from '@prisma/client'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Organization as OrganizationTable,
+	Session,
+	User as UserTable,
+	UserOrganization,
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	inArray,
+	like,
+	or,
+} from '@repo/database'
+import {
+	type Organization,
+	type User,
+	type UserImage,
+} from '@repo/database/types'
 import { useLoaderData } from 'react-router'
 import { AdminUsersTable } from '#app/components/admin-users-table.tsx'
 import { type Route } from './+types/index.ts'
@@ -15,80 +32,60 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const page = parseInt(url.searchParams.get('page') || '1', 10)
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '10', 10)
 
-	// Build where clause for filtering
-	const where: any = {}
-
-	if (searchQuery) {
-		where.OR = [
-			{ name: { contains: searchQuery } },
-			{ email: { contains: searchQuery } },
-			{ username: { contains: searchQuery } },
-		]
-	}
-
-	if (organizationFilter) {
-		where.organizations = {
-			some: {
-				organization: {
-					name: { contains: organizationFilter },
-				},
-			},
-		}
-	}
+	const matchingOrganizationUserIds = organizationFilter
+		? await db
+				.select({ userId: UserOrganization.userId })
+				.from(UserOrganization)
+				.innerJoin(
+					OrganizationTable,
+					eq(UserOrganization.organizationId, OrganizationTable.id),
+				)
+				.where(like(OrganizationTable.name, `%${organizationFilter}%`))
+		: []
+	const organizationUserIds = matchingOrganizationUserIds.map(
+		(row) => row.userId,
+	)
+	const where = and(
+		searchQuery
+			? or(
+					like(UserTable.name, `%${searchQuery}%`),
+					like(UserTable.email, `%${searchQuery}%`),
+					like(UserTable.username, `%${searchQuery}%`),
+				)
+			: undefined,
+		organizationFilter ? inArray(UserTable.id, organizationUserIds) : undefined,
+	)
 
 	// Get users with pagination
 	const [users, totalCount, organizations] = await Promise.all([
-		prisma.user.findMany({
+		db.query.User.findMany({
 			where,
-			select: {
-				id: true,
-				name: true,
-				email: true,
-				username: true,
-				createdAt: true,
-				updatedAt: true,
-				isBanned: true,
-				banReason: true,
-				banExpiresAt: true,
-				bannedAt: true,
-				image: {
-					select: {
-						id: true,
-						altText: true,
-					},
-				},
+			with: {
+				image: { columns: { id: true, altText: true } },
 				organizations: {
-					select: {
-						organization: {
-							select: {
-								id: true,
-								name: true,
-							},
-						},
+					with: {
+						organization: { columns: { id: true, name: true } },
 					},
 				},
 				sessions: {
-					select: {
-						createdAt: true,
-					},
-					orderBy: {
-						createdAt: 'desc',
-					},
-					take: 1,
+					columns: { createdAt: true },
+					orderBy: desc(Session.createdAt),
+					limit: 1,
 				},
 			},
-			orderBy: { createdAt: 'desc' },
-			skip: (page - 1) * pageSize,
-			take: pageSize,
+			orderBy: desc(UserTable.createdAt),
+			offset: (page - 1) * pageSize,
+			limit: pageSize,
 		}),
-		prisma.user.count({ where }),
-		prisma.organization.findMany({
-			select: {
-				id: true,
-				name: true,
-			},
-			orderBy: { name: 'asc' },
-		}),
+		db
+			.select({ count: count() })
+			.from(UserTable)
+			.where(where)
+			.then(([row]) => row?.count ?? 0),
+		db
+			.select({ id: OrganizationTable.id, name: OrganizationTable.name })
+			.from(OrganizationTable)
+			.orderBy(OrganizationTable.name),
 	])
 
 	const totalPages = Math.ceil(totalCount / pageSize)

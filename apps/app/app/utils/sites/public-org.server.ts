@@ -12,7 +12,16 @@ import {
 	type SiteFontFormat,
 	type SiteThemeConfig,
 } from '@repo/common/site-theme'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	Organization,
+	OrganizationAnnouncement,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
 import {
 	composePageSectionsWithChrome,
 	getDefaultConfig,
@@ -180,50 +189,42 @@ export async function findPublishedSiteOrganization(options: {
 
 	if (!slug && !host) return null
 
-	const select = {
-		id: true,
-		name: true,
-		slug: true,
-		customDomain: true,
-		dataRegion: true,
-		siteTheme: true,
-		siteLocales: true,
-		siteDefaultLocale: true,
-		siteIconKey: true,
-		announcements: {
-			where: { isEnabled: true },
-			orderBy: [{ position: 'asc' as const }, { createdAt: 'desc' as const }],
-			select: {
-				id: true,
-				content: true,
-				type: true,
-				linkUrl: true,
-				linkLabel: true,
-				linkNewTab: true,
-			},
-		},
-	}
-
-	if (slug) {
-		return prisma.organization.findFirst({
-			where: {
-				slug,
-				active: true,
-				sitePublished: true,
-			},
-			select,
+	const [organization] = await db
+		.select()
+		.from(Organization)
+		.where(
+			slug
+				? and(
+						eq(Organization.slug, slug),
+						eq(Organization.active, true),
+						eq(Organization.sitePublished, true),
+					)
+				: and(
+						eq(Organization.customDomain, host!),
+						eq(Organization.active, true),
+						eq(Organization.sitePublished, true),
+						inArray(Organization.customDomainStatus, ['active', 'pending']),
+					),
+		)
+		.limit(1)
+	if (!organization) return null
+	const announcements = await db
+		.select({
+			id: OrganizationAnnouncement.id,
+			content: OrganizationAnnouncement.content,
+			type: OrganizationAnnouncement.type,
+			linkUrl: OrganizationAnnouncement.linkUrl,
+			linkLabel: OrganizationAnnouncement.linkLabel,
+			linkNewTab: OrganizationAnnouncement.linkNewTab,
 		})
-	}
-
-	return prisma.organization.findFirst({
-		where: {
-			customDomain: host,
-			active: true,
-			sitePublished: true,
-			customDomainStatus: { in: ['active', 'pending'] },
-		},
-		select,
-	})
+		.from(OrganizationAnnouncement)
+		.where(
+			and(
+				eq(OrganizationAnnouncement.organizationId, organization.id),
+				eq(OrganizationAnnouncement.isEnabled, true),
+			),
+		)
+	return { ...organization, announcements }
 }
 
 export type PublicSitePageSection = {
@@ -353,27 +354,6 @@ export function toPublicPagePayload(
 	}
 }
 
-const publishedPageSelect = {
-	id: true,
-	title: true,
-	slug: true,
-	isHomePage: true,
-	publishedData: true,
-	seoTitle: true,
-	seoDescription: true,
-	seoImageUrl: true,
-	seoNoIndex: true,
-	sections: {
-		orderBy: { position: 'asc' as const },
-		select: {
-			id: true,
-			type: true,
-			position: true,
-			config: true,
-		},
-	},
-}
-
 function withPublishedSections(
 	page: PublicSitePage | null,
 	preview?: boolean,
@@ -395,35 +375,85 @@ export async function findPublishedSitePage(
 
 	if (options?.home) {
 		const homePage =
-			(await prisma.websitePage.findFirst({
-				where: {
-					organizationId,
+			(await db.query.WebsitePage.findFirst({
+				where: (page, operators) =>
+					and(
+						eq(page.organizationId, organizationId),
+						eq(page.isHomePage, true),
+						...(options?.preview ? [] : [eq(page.status, 'published')]),
+					),
+				columns: {
+					id: true,
+					title: true,
+					slug: true,
 					isHomePage: true,
-					...visibility,
+					publishedData: true,
+					seoTitle: true,
+					seoDescription: true,
+					seoImageUrl: true,
+					seoNoIndex: true,
 				},
-				select: publishedPageSelect,
+				with: {
+					sections: {
+						columns: { id: true, type: true, position: true, config: true },
+						orderBy: (section, operators) => operators.asc(section.position),
+					},
+				},
 			})) ??
-			(await prisma.websitePage.findFirst({
-				where: {
-					organizationId,
-					slug: { in: ['', 'home'] },
-					...visibility,
+			(await db.query.WebsitePage.findFirst({
+				where: (page, operators) =>
+					and(
+						eq(page.organizationId, organizationId),
+						inArray(page.slug, ['', 'home']),
+						...(options?.preview ? [] : [eq(page.status, 'published')]),
+					),
+				columns: {
+					id: true,
+					title: true,
+					slug: true,
+					isHomePage: true,
+					publishedData: true,
+					seoTitle: true,
+					seoDescription: true,
+					seoImageUrl: true,
+					seoNoIndex: true,
 				},
-				orderBy: { slug: 'asc' },
-				select: publishedPageSelect,
+				with: {
+					sections: {
+						columns: { id: true, type: true, position: true, config: true },
+						orderBy: (section, operators) => operators.asc(section.position),
+					},
+				},
 			}))
-		return withPublishedSections(homePage, options.preview)
+		return withPublishedSections(homePage ?? null, options.preview)
 	}
 
 	if (!pageSlug) return null
 
-	const page = await prisma.websitePage.findFirst({
-		where: {
-			organizationId,
-			slug: pageSlug,
-			...visibility,
+	const page = await db.query.WebsitePage.findFirst({
+		where: (websitePage) =>
+			and(
+				eq(websitePage.organizationId, organizationId),
+				eq(websitePage.slug, pageSlug),
+				...(options?.preview ? [] : [eq(websitePage.status, 'published')]),
+			),
+		columns: {
+			id: true,
+			title: true,
+			slug: true,
+			isHomePage: true,
+			publishedData: true,
+			seoTitle: true,
+			seoDescription: true,
+			seoImageUrl: true,
+			seoNoIndex: true,
 		},
-		select: publishedPageSelect,
+		with: {
+			sections: {
+				columns: { id: true, type: true, position: true, config: true },
+				orderBy: (section, operators) => operators.asc(section.position),
+			},
+		},
 	})
-	return withPublishedSections(page, options?.preview)
+	return withPublishedSections(page ?? null, options?.preview)
 }

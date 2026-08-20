@@ -17,7 +17,7 @@ Once you've completed the initial setup, you can develop completely offline:
 - **Mobile App**: Expo with local development server
 - **UI Development**: All components and packages
 - **Testing**: Unit tests and E2E tests
-- **Database**: Prisma Studio, migrations, seeding
+- **Database**: Drizzle Studio, migrations, seeding
 
 ### ⚠️ Requires Internet (Optional)
 
@@ -74,8 +74,7 @@ there is no local-dev/production storage difference to toggle. See
 [CMS storage](./cms-storage.md).
 
 **Main App**: Uses custom S3 client with mock credentials (Tigris in
-production). `USE_S3_STORAGE=true` forces this mock-S3 path in development; it
-has no effect on the CMS.
+production).
 
 ```bash
 # .env
@@ -103,7 +102,7 @@ After initial setup, to work offline:
    - Tenant API (KSA): http://localhost:3009
    - Admin: picks a free port near 3005 automatically (`get-port`); see the
      terminal output for the actual port
-   - Prisma Studio: http://localhost:5555
+   - Drizzle Studio: http://localhost:5555
 
 ## Troubleshooting Offline Development
 

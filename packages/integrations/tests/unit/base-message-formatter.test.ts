@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { MessageData } from '../../src/types'
-import type { OrganizationNote } from '@prisma/client'
+import type { OrganizationNote } from '@repo/database/types'
 
 vi.mock('../../src/integration-manager', () => ({
 	integrationManager: {},

@@ -1,6 +1,15 @@
 import { requireUserId } from '@repo/auth'
 import { calculateReorderPosition } from '@repo/common'
-import { prisma } from '@repo/database'
+import {
+	and,
+	asc,
+	db,
+	eq,
+	isNull,
+	ne,
+	OrganizationNote,
+	OrganizationNoteStatus,
+} from '@repo/database'
 import { type ActionFunction } from 'react-router'
 import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
 import {
@@ -23,10 +32,19 @@ export const action: ActionFunction = async ({ request, params }) => {
 		return new Response('Invalid position', { status: 400 })
 	}
 
-	const noteToMove = await prisma.organizationNote.findFirst({
-		where: { id: noteId, organizationId: organization.id },
-		select: { id: true, createdById: true },
-	})
+	const [noteToMove] = await db
+		.select({
+			id: OrganizationNote.id,
+			createdById: OrganizationNote.createdById,
+		})
+		.from(OrganizationNote)
+		.where(
+			and(
+				eq(OrganizationNote.id, noteId),
+				eq(OrganizationNote.organizationId, organization.id),
+			),
+		)
+		.limit(1)
 	if (!noteToMove) return new Response('Note not found', { status: 404 })
 
 	if (noteToMove.createdById === userId) {
@@ -45,34 +63,55 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 	// Validate statusId (if provided)
 	if (statusId) {
-		const statusRow = await prisma.organizationNoteStatus.findFirst({
-			where: { id: statusId, organizationId: organization.id },
-		})
+		const [statusRow] = await db
+			.select({ id: OrganizationNoteStatus.id })
+			.from(OrganizationNoteStatus)
+			.where(
+				and(
+					eq(OrganizationNoteStatus.id, statusId),
+					eq(OrganizationNoteStatus.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 		if (!statusRow) return new Response('Invalid statusId', { status: 400 })
 	}
 
 	// Use a transaction to calculate and update position
-	await prisma.$transaction(async (tx) => {
+	await db.transaction(async (tx) => {
 		// Get the note being moved
-		const noteToMove = await tx.organizationNote.findFirst({
-			where: { id: noteId, organizationId: organization.id },
-			select: { id: true, statusId: true, position: true },
-		})
+		const [noteToMove] = await tx
+			.select({
+				id: OrganizationNote.id,
+				statusId: OrganizationNote.statusId,
+				position: OrganizationNote.position,
+			})
+			.from(OrganizationNote)
+			.where(
+				and(
+					eq(OrganizationNote.id, noteId),
+					eq(OrganizationNote.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!noteToMove) {
 			throw new Error('Note not found')
 		}
 
 		// Get all notes in the destination column (excluding the note being moved)
-		const notesInDestColumn = await tx.organizationNote.findMany({
-			where: {
-				organizationId: organization.id,
-				statusId: statusId,
-				id: { not: noteId }, // Exclude the note being moved
-			},
-			select: { id: true, position: true },
-			orderBy: { position: 'asc' },
-		})
+		const notesInDestColumn = await tx
+			.select({ id: OrganizationNote.id, position: OrganizationNote.position })
+			.from(OrganizationNote)
+			.where(
+				and(
+					eq(OrganizationNote.organizationId, organization.id),
+					statusId
+						? eq(OrganizationNote.statusId, statusId)
+						: isNull(OrganizationNote.statusId),
+					ne(OrganizationNote.id, noteId),
+				),
+			)
+			.orderBy(asc(OrganizationNote.position))
 
 		// Calculate the new fractional position using shared utility
 		const newPosition = calculateReorderPosition(
@@ -81,13 +120,13 @@ export const action: ActionFunction = async ({ request, params }) => {
 		)
 
 		// Update the note with new position and status
-		await tx.organizationNote.update({
-			where: { id: noteId },
-			data: {
+		await tx
+			.update(OrganizationNote)
+			.set({
 				position: newPosition,
 				statusId: statusId,
-			},
-		})
+			})
+			.where(eq(OrganizationNote.id, noteId))
 	})
 
 	return new Response(null, { status: 204 })

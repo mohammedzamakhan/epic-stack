@@ -1,10 +1,14 @@
-import { prisma } from '@repo/database'
+import { and, ConfigFlag, db, eq, isNull } from '@repo/database'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { FeatureFlags } from '#app/components/admin/feature-flags.tsx'
 
 export async function loader({ request: _request }: LoaderFunctionArgs) {
-	const flags = await prisma.configFlag.findMany()
+	const flags = (await db.select().from(ConfigFlag)).map((flag) => ({
+		...flag,
+		value: flag.value as any,
+		level: flag.level as 'system' | 'organization' | 'user',
+	}))
 	return { flags }
 }
 
@@ -59,9 +63,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				{ status: 400 },
 			)
 		}
-		await prisma.configFlag.delete({
-			where: { id: result.data.id },
-		})
+		await db.delete(ConfigFlag).where(eq(ConfigFlag.id, result.data.id))
 		return Response.json({ ok: true })
 	}
 
@@ -91,28 +93,34 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	try {
 		if (_action === 'create') {
-			const existing = await prisma.configFlag.findFirst({
-				where: {
-					key: result.data.key,
-					level: result.data.level,
-					organizationId: result.data.organizationId ?? null,
-					userId: result.data.userId ?? null,
-				},
-			})
+			const [existing] = await db
+				.select()
+				.from(ConfigFlag)
+				.where(
+					and(
+						eq(ConfigFlag.key, result.data.key),
+						eq(ConfigFlag.level, result.data.level),
+						result.data.organizationId
+							? eq(ConfigFlag.organizationId, result.data.organizationId)
+							: isNull(ConfigFlag.organizationId),
+						result.data.userId
+							? eq(ConfigFlag.userId, result.data.userId)
+							: isNull(ConfigFlag.userId),
+					),
+				)
+				.limit(1)
 			if (existing) {
 				return Response.json(
 					{ error: 'A flag with this key already exists at this level' },
 					{ status: 400 },
 				)
 			}
-			await prisma.configFlag.create({
-				data: {
-					key: result.data.key,
-					value: value,
-					level: result.data.level,
-					organizationId: result.data.organizationId || undefined,
-					userId: result.data.userId || undefined,
-				},
+			await db.insert(ConfigFlag).values({
+				key: result.data.key,
+				value: value,
+				level: result.data.level,
+				organizationId: result.data.organizationId || null,
+				userId: result.data.userId || null,
 			})
 		}
 
@@ -123,16 +131,16 @@ export async function action({ request }: ActionFunctionArgs) {
 					{ status: 400 },
 				)
 			}
-			await prisma.configFlag.update({
-				where: { id: result.data.id },
-				data: {
+			await db
+				.update(ConfigFlag)
+				.set({
 					key: result.data.key,
 					value: value,
 					level: result.data.level,
-					organizationId: result.data.organizationId,
-					userId: result.data.userId,
-				},
-			})
+					organizationId: result.data.organizationId || null,
+					userId: result.data.userId || null,
+				})
+				.where(eq(ConfigFlag.id, result.data.id))
 		}
 
 		return Response.json({ ok: true })

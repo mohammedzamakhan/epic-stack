@@ -1,271 +1,201 @@
 import { randomInt } from 'node:crypto'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	eq,
+	gt,
+	lt,
+	or,
+	WaitlistEntry,
+	User,
+} from '@repo/database'
 import { getLaunchStatus } from './env.server.ts'
 
 const REFERRAL_POINTS = 5
 const DISCORD_POINTS = 2
 
-/**
- * Generate a unique referral code for a user
- * Format: username-random4digits
- * Uses cryptographically secure random number generation
- */
 export async function generateReferralCode(username: string): Promise<string> {
-	let referralCode = ''
-	let isUnique = false
-
-	while (!isUnique) {
-		// Use crypto.randomInt for cryptographically secure random generation
-		const randomDigits = randomInt(1000, 10000)
-		referralCode = `${username}-${randomDigits}`
-
-		const existing = await prisma.waitlistEntry.findUnique({
-			where: { referralCode },
-		})
-
-		if (!existing) {
-			isUnique = true
-		}
+	while (true) {
+		const referralCode = `${username}-${randomInt(1000, 10000)}`
+		const [existing] = await db
+			.select({ id: WaitlistEntry.id })
+			.from(WaitlistEntry)
+			.where(eq(WaitlistEntry.referralCode, referralCode))
+			.limit(1)
+		if (!existing) return referralCode
 	}
-
-	return referralCode
 }
 
-/**
- * Get or create a waitlist entry for a user
- */
+async function withReferrals(entry: typeof WaitlistEntry.$inferSelect) {
+	const [referredBy] = entry.referredById
+		? await db
+				.select()
+				.from(WaitlistEntry)
+				.where(eq(WaitlistEntry.id, entry.referredById))
+				.limit(1)
+		: []
+	const referrals = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.referredById, entry.id))
+	return { ...entry, referredBy: referredBy ?? null, referrals }
+}
+
 export async function getOrCreateWaitlistEntry(userId: string) {
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { username: true },
-	})
-
-	if (!user) {
-		throw new Error('User not found')
+	const [user] = await db
+		.select({ username: User.username })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
+	if (!user) throw new Error('User not found')
+	let [entry] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, userId))
+		.limit(1)
+	if (!entry) {
+		entry = (
+			await db
+				.insert(WaitlistEntry)
+				.values({
+					userId,
+					referralCode: await generateReferralCode(user.username),
+				})
+				.returning()
+		)[0]
 	}
-
-	let waitlistEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId },
-		include: {
-			referredBy: true,
-			referrals: true,
-		},
-	})
-
-	if (!waitlistEntry) {
-		const referralCode = await generateReferralCode(user.username)
-		waitlistEntry = await prisma.waitlistEntry.create({
-			data: {
-				userId,
-				referralCode,
-			},
-			include: {
-				referredBy: true,
-				referrals: true,
-			},
-		})
-	}
-
-	return waitlistEntry
+	if (!entry) throw new Error('Failed to create waitlist entry')
+	return withReferrals(entry)
 }
 
-/**
- * Calculate the rank of a user on the waitlist
- * Higher points = better rank
- * If points are equal, earlier createdAt = better rank
- */
 export async function calculateUserRank(
 	userId: string,
 ): Promise<{ rank: number; totalUsers: number }> {
-	const waitlistEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId },
-	})
-
-	if (!waitlistEntry) {
-		throw new Error('Waitlist entry not found')
-	}
-
-	// Count users with higher points or same points but earlier createdAt
-	const rank = await prisma.waitlistEntry.count({
-		where: {
-			OR: [
-				{ points: { gt: waitlistEntry.points } },
-				{
-					points: waitlistEntry.points,
-					createdAt: { lt: waitlistEntry.createdAt },
-				},
-			],
-		},
-	})
-
-	const totalUsers = await prisma.waitlistEntry.count()
-
-	return {
-		rank: rank + 1, // +1 because ranks start at 1, not 0
-		totalUsers,
-	}
+	const [entry] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, userId))
+		.limit(1)
+	if (!entry) throw new Error('Waitlist entry not found')
+	const [rankRow] = await db
+		.select({ value: count() })
+		.from(WaitlistEntry)
+		.where(
+			or(
+				gt(WaitlistEntry.points, entry.points),
+				and(
+					eq(WaitlistEntry.points, entry.points),
+					lt(WaitlistEntry.createdAt, entry.createdAt),
+				),
+			),
+		)
+	const [totalRow] = await db.select({ value: count() }).from(WaitlistEntry)
+	return { rank: (rankRow?.value ?? 0) + 1, totalUsers: totalRow?.value ?? 0 }
 }
 
-/**
- * Award points for a referral
- */
 export async function awardReferralPoints(referrerId: string) {
-	const waitlistEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId: referrerId },
-	})
-
-	if (!waitlistEntry) {
-		throw new Error('Referrer waitlist entry not found')
-	}
-
-	await prisma.waitlistEntry.update({
-		where: { userId: referrerId },
-		data: {
-			points: {
-				increment: REFERRAL_POINTS,
-			},
-		},
-	})
+	const [entry] = await db
+		.select({ id: WaitlistEntry.id })
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, referrerId))
+		.limit(1)
+	if (!entry) throw new Error('Referrer waitlist entry not found')
+	const current = await db
+		.select({ points: WaitlistEntry.points })
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.id, entry.id))
+		.limit(1)
+	await db
+		.update(WaitlistEntry)
+		.set({ points: (current[0]?.points ?? 0) + REFERRAL_POINTS })
+		.where(eq(WaitlistEntry.id, entry.id))
 }
 
-/**
- * Award points for joining Discord
- * Uses atomic update to prevent race conditions
- */
 export async function awardDiscordPoints(userId: string) {
-	// Use updateMany with a condition to make this atomic and prevent race conditions
-	// Only updates if hasJoinedDiscord is still false
-	const result = await prisma.waitlistEntry.updateMany({
-		where: {
-			userId,
-			hasJoinedDiscord: false, // Only update if still false
-		},
-		data: {
-			hasJoinedDiscord: true,
-			points: {
-				increment: DISCORD_POINTS,
-			},
-		},
-	})
-
-	// If no rows were updated, either the entry doesn't exist or points were already awarded
-	if (result.count === 0) {
-		const entry = await prisma.waitlistEntry.findUnique({
-			where: { userId },
-		})
-
-		if (!entry) {
-			throw new Error('Waitlist entry not found')
-		}
-
+	const [entry] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(
+			and(
+				eq(WaitlistEntry.userId, userId),
+				eq(WaitlistEntry.hasJoinedDiscord, false),
+			),
+		)
+		.limit(1)
+	if (!entry) {
+		const [existing] = await db
+			.select({ id: WaitlistEntry.id })
+			.from(WaitlistEntry)
+			.where(eq(WaitlistEntry.userId, userId))
+			.limit(1)
+		if (!existing) throw new Error('Waitlist entry not found')
 		throw new Error('Discord points already awarded')
 	}
+	await db
+		.update(WaitlistEntry)
+		.set({ hasJoinedDiscord: true, points: entry.points + DISCORD_POINTS })
+		.where(eq(WaitlistEntry.id, entry.id))
 }
 
-/**
- * Link a user to their referrer by referral code
- * Uses a transaction to ensure atomicity between linking and awarding points
- */
 export async function linkReferral(userId: string, referralCode: string) {
-	const referrerEntry = await prisma.waitlistEntry.findUnique({
-		where: { referralCode },
-	})
-
-	if (!referrerEntry) {
-		return { success: false, message: 'Invalid referral code' }
-	}
-
-	// Check if user is trying to refer themselves
-	if (referrerEntry.userId === userId) {
+	const [referrer] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.referralCode, referralCode))
+		.limit(1)
+	if (!referrer) return { success: false, message: 'Invalid referral code' }
+	if (referrer.userId === userId)
 		return { success: false, message: 'Cannot refer yourself' }
-	}
-
-	// Check if user already has a referrer
-	const userEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId },
-	})
-
-	if (userEntry && userEntry.referredById) {
+	const [entry] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, userId))
+		.limit(1)
+	if (entry?.referredById)
 		return { success: false, message: 'Already referred by someone' }
-	}
-
-	// Link the referral and award points atomically in a transaction
-	// This prevents race conditions where the link succeeds but points fail
-	await prisma.$transaction(async (tx) => {
-		await tx.waitlistEntry.update({
-			where: { userId },
-			data: {
-				referredById: referrerEntry.id,
-			},
-		})
-
-		await tx.waitlistEntry.update({
-			where: { userId: referrerEntry.userId },
-			data: {
-				points: {
-					increment: REFERRAL_POINTS,
-				},
-			},
-		})
+	if (!entry) return { success: false, message: 'Waitlist entry not found' }
+	await db.transaction(async (tx) => {
+		await tx
+			.update(WaitlistEntry)
+			.set({ referredById: referrer.id })
+			.where(eq(WaitlistEntry.id, entry.id))
+		await tx
+			.update(WaitlistEntry)
+			.set({ points: referrer.points + REFERRAL_POINTS })
+			.where(eq(WaitlistEntry.id, referrer.id))
 	})
-
 	return { success: true, message: 'Referral linked successfully' }
 }
 
-/**
- * Check if a user should be restricted to the waitlist
- * Returns true if the user should be redirected to /waitlist
- */
 export async function shouldBeOnWaitlist(userId: string): Promise<boolean> {
-	const launchStatus = getLaunchStatus()
-
-	// If not in closed beta, no one should be on waitlist
-	if (launchStatus !== 'CLOSED_BETA') {
-		return false
-	}
-
-	// Check if user has a waitlist entry and if they have early access
-	const waitlistEntry = await prisma.waitlistEntry.findUnique({
-		where: { userId },
-		select: { hasEarlyAccess: true },
-	})
-
-	// If no waitlist entry exists, user is on waitlist
-	if (!waitlistEntry) {
-		return true
-	}
-
-	// If user has early access, they shouldn't be on waitlist
-	return !waitlistEntry.hasEarlyAccess
+	if (getLaunchStatus() !== 'CLOSED_BETA') return false
+	const [entry] = await db
+		.select({ hasEarlyAccess: WaitlistEntry.hasEarlyAccess })
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, userId))
+		.limit(1)
+	return !entry || !entry.hasEarlyAccess
 }
 
-/**
- * Grant early access to a user on the waitlist
- */
-export async function grantEarlyAccess(
-	userId: string,
-	grantedBy: string,
-): Promise<void> {
-	await prisma.waitlistEntry.update({
-		where: { userId },
-		data: {
+export async function grantEarlyAccess(userId: string, grantedBy: string) {
+	await db
+		.update(WaitlistEntry)
+		.set({
 			hasEarlyAccess: true,
 			grantedAccessAt: new Date(),
 			grantedAccessBy: grantedBy,
-		},
-	})
+		})
+		.where(eq(WaitlistEntry.userId, userId))
 }
 
-/**
- * Revoke early access from a user
- */
-export async function revokeEarlyAccess(userId: string): Promise<void> {
-	await prisma.waitlistEntry.update({
-		where: { userId },
-		data: {
+export async function revokeEarlyAccess(userId: string) {
+	await db
+		.update(WaitlistEntry)
+		.set({
 			hasEarlyAccess: false,
 			grantedAccessAt: null,
 			grantedAccessBy: null,
-		},
-	})
+		})
+		.where(eq(WaitlistEntry.userId, userId))
 }

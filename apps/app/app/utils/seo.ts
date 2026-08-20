@@ -36,7 +36,7 @@ export const seoConfig = createSeoConfig({
 		'typescript',
 		'remix',
 		'react router',
-		'prisma',
+		'database',
 	],
 	author: brand.companyName,
 })

@@ -1,4 +1,25 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	asc,
+	count,
+	db,
+	eq,
+	Integration,
+	inArray,
+	isNotNull,
+	OnboardingProgress,
+	OnboardingStep,
+	OnboardingStepProgress,
+	Organization,
+	OrganizationInvitation,
+	OrganizationNote,
+	UserOrganization,
+} from '@repo/database'
+
+async function countRows(table: any, condition: any): Promise<number> {
+	const [row] = await db.select({ value: count() }).from(table).where(condition)
+	return row?.value ?? 0
+}
 
 export interface OnboardingStepAction {
 	type: 'navigate' | 'modal' | 'external'
@@ -39,18 +60,20 @@ export async function getOnboardingProgress(
 	organizationId: string,
 ): Promise<OnboardingProgressData> {
 	// Get all active onboarding steps
-	const steps = await prisma.onboardingStep.findMany({
-		where: { isActive: true },
-		orderBy: { sortOrder: 'asc' },
-		include: {
-			userProgress: {
-				where: {
-					userId,
-					organizationId,
-				},
-			},
-		},
-	})
+	const steps = await db
+		.select()
+		.from(OnboardingStep)
+		.where(eq(OnboardingStep.isActive, true))
+		.orderBy(asc(OnboardingStep.sortOrder))
+	const progressRows = await db
+		.select()
+		.from(OnboardingStepProgress)
+		.where(
+			and(
+				eq(OnboardingStepProgress.userId, userId),
+				eq(OnboardingStepProgress.organizationId, organizationId),
+			),
+		)
 
 	// If no onboarding steps exist (e.g., database not seeded), return empty progress
 	if (steps.length === 0) {
@@ -66,24 +89,21 @@ export async function getOnboardingProgress(
 	// Get or create overall progress record
 	let progress
 	try {
-		progress = await prisma.onboardingProgress.upsert({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId,
-				},
-			},
-			update: {
-				totalSteps: steps.length,
-			},
-			create: {
+		const [existingProgress] = await db
+			.insert(OnboardingProgress)
+			.values({
 				userId,
 				organizationId,
 				totalSteps: steps.length,
 				completedCount: 0,
 				isCompleted: false,
-			},
-		})
+			})
+			.onConflictDoUpdate({
+				target: [OnboardingProgress.userId, OnboardingProgress.organizationId],
+				set: { totalSteps: steps.length },
+			})
+			.returning()
+		progress = existingProgress
 	} catch (error: any) {
 		// Only log if it's not a P2003 (foreign key constraint) error
 		// P2003 typically means the User or Organization was deleted concurrently during tests
@@ -124,7 +144,9 @@ export async function getOnboardingProgress(
 	// Transform steps with progress data
 	const stepsWithProgress: OnboardingStepWithProgress[] = steps.map(
 		(step: any) => {
-			const userProgress = step.userProgress[0]
+			const userProgress = progressRows.find(
+				(progress) => progress.stepId === step.id,
+			)
 			return {
 				id: step.id,
 				key: step.key,
@@ -152,7 +174,7 @@ export async function getOnboardingProgress(
 		totalSteps: steps.length,
 		completedCount,
 		isCompleted: completedCount === steps.length,
-		isVisible: progress.isVisible,
+		isVisible: progress?.isVisible ?? true,
 		steps: stepsWithProgress,
 	}
 }
@@ -165,75 +187,79 @@ export async function markStepCompleted(
 	metadata?: Record<string, any>,
 ) {
 	try {
-		const step = await prisma.onboardingStep.findUnique({
-			where: { key: stepKey },
-		})
+		const [step] = await db
+			.select()
+			.from(OnboardingStep)
+			.where(eq(OnboardingStep.key, stepKey))
+			.limit(1)
 
 		if (!step) {
 			throw new Error(`Onboarding step '${stepKey}' not found`)
 		}
 
 		// Create or update step progress
-		await prisma.onboardingStepProgress.upsert({
-			where: {
-				userId_organizationId_stepId: {
-					userId,
-					organizationId,
-					stepId: step.id,
-				},
-			},
-			update: {
-				isCompleted: true,
-				completedAt: new Date(),
-				metadata: metadata ? JSON.stringify(metadata) : null,
-			},
-			create: {
+		await db
+			.insert(OnboardingStepProgress)
+			.values({
 				userId,
 				organizationId,
 				stepId: step.id,
 				isCompleted: true,
 				completedAt: new Date(),
 				metadata: metadata ? JSON.stringify(metadata) : null,
-			},
-		})
+			})
+			.onConflictDoUpdate({
+				target: [
+					OnboardingStepProgress.userId,
+					OnboardingStepProgress.organizationId,
+					OnboardingStepProgress.stepId,
+				],
+				set: {
+					isCompleted: true,
+					completedAt: new Date(),
+					metadata: metadata ? JSON.stringify(metadata) : null,
+				},
+			})
 
 		// Update overall progress
-		const completedCount = await prisma.onboardingStepProgress.count({
-			where: {
-				userId,
-				organizationId,
-				isCompleted: true,
-			},
-		})
-
-		const totalSteps = await prisma.onboardingStep.count({
-			where: { isActive: true },
-		})
+		const [completedRow] = await db
+			.select({ value: count() })
+			.from(OnboardingStepProgress)
+			.where(
+				and(
+					eq(OnboardingStepProgress.userId, userId),
+					eq(OnboardingStepProgress.organizationId, organizationId),
+					eq(OnboardingStepProgress.isCompleted, true),
+				),
+			)
+		const [totalRow] = await db
+			.select({ value: count() })
+			.from(OnboardingStep)
+			.where(eq(OnboardingStep.isActive, true))
+		const completedCount = completedRow?.value ?? 0
+		const totalSteps = totalRow?.value ?? 0
 
 		const isCompleted = completedCount === totalSteps
 
-		await prisma.onboardingProgress.upsert({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId,
-				},
-			},
-			update: {
-				completedCount,
-				totalSteps,
-				isCompleted,
-				completedAt: isCompleted ? new Date() : null,
-			},
-			create: {
+		await db
+			.insert(OnboardingProgress)
+			.values({
 				userId,
 				organizationId,
 				completedCount,
 				totalSteps,
 				isCompleted,
 				completedAt: isCompleted ? new Date() : null,
-			},
-		})
+			})
+			.onConflictDoUpdate({
+				target: [OnboardingProgress.userId, OnboardingProgress.organizationId],
+				set: {
+					completedCount,
+					totalSteps,
+					isCompleted,
+					completedAt: isCompleted ? new Date() : null,
+				},
+			})
 	} catch (error: any) {
 		// Log the error but don't throw it to prevent breaking the main flow
 
@@ -266,25 +292,20 @@ export async function markStepCompleted(
 // Hide onboarding for a user
 export async function hideOnboarding(userId: string, organizationId: string) {
 	try {
-		await prisma.onboardingProgress.upsert({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId,
-				},
-			},
-			update: {
-				isVisible: false,
-			},
-			create: {
+		await db
+			.insert(OnboardingProgress)
+			.values({
 				userId,
 				organizationId,
 				isVisible: false,
 				totalSteps: 0,
 				completedCount: 0,
 				isCompleted: false,
-			},
-		})
+			})
+			.onConflictDoUpdate({
+				target: [OnboardingProgress.userId, OnboardingProgress.organizationId],
+				set: { isVisible: false },
+			})
 	} catch (error: any) {
 		// Ignore foreign key constraint errors during test teardowns
 		if (
@@ -305,13 +326,16 @@ export async function autoDetectCompletedSteps(
 ) {
 	try {
 		// Get steps that have auto-detection enabled
-		const stepsWithDetection = await prisma.onboardingStep.findMany({
-			where: {
-				isActive: true,
-				autoDetect: true,
-				detectConfig: { not: null },
-			},
-		})
+		const stepsWithDetection = await db
+			.select()
+			.from(OnboardingStep)
+			.where(
+				and(
+					eq(OnboardingStep.isActive, true),
+					eq(OnboardingStep.autoDetect, true),
+					isNotNull(OnboardingStep.detectConfig),
+				),
+			)
 
 		// If no onboarding steps exist, skip auto-detection
 		if (stepsWithDetection.length === 0) {
@@ -335,16 +359,17 @@ export async function autoDetectCompletedSteps(
 
 				if (isCompleted) {
 					// Check if already marked as completed
-					const existingProgress =
-						await prisma.onboardingStepProgress.findUnique({
-							where: {
-								userId_organizationId_stepId: {
-									userId,
-									organizationId,
-									stepId: step.id,
-								},
-							},
-						})
+					const [existingProgress] = await db
+						.select()
+						.from(OnboardingStepProgress)
+						.where(
+							and(
+								eq(OnboardingStepProgress.userId, userId),
+								eq(OnboardingStepProgress.organizationId, organizationId),
+								eq(OnboardingStepProgress.stepId, step.id),
+							),
+						)
+						.limit(1)
 
 					if (!existingProgress?.isCompleted) {
 						await markStepCompleted(userId, organizationId, step.key, {
@@ -372,59 +397,81 @@ async function getDetectionData(userId: string, organizationId: string) {
 		integrationsCount,
 		invitationsCount,
 	] = await Promise.all([
-		prisma.organizationNote.count({
-			where: {
-				organizationId,
-				createdById: userId,
-			},
-		}),
-		prisma.userOrganization.count({
-			where: {
-				organizationId,
-				active: true,
-			},
-		}),
-		prisma.organization.findUnique({
-			where: { id: organizationId },
-			select: { name: true, slug: true, createdAt: true },
-		}),
-		prisma.integration.count({
-			where: {
-				organizationId,
-				isActive: true,
-			},
-		}),
-		prisma.organizationInvitation.count({
-			where: {
-				organizationId,
-				inviterId: userId,
-			},
-		}),
+		countRows(
+			OrganizationNote,
+			and(
+				eq(OrganizationNote.organizationId, organizationId),
+				eq(OrganizationNote.createdById, userId),
+			),
+		),
+		countRows(
+			UserOrganization,
+			and(
+				eq(UserOrganization.organizationId, organizationId),
+				eq(UserOrganization.active, true),
+			),
+		),
+		db
+			.select({
+				name: Organization.name,
+				slug: Organization.slug,
+				createdAt: Organization.createdAt,
+			})
+			.from(Organization)
+			.where(eq(Organization.id, organizationId))
+			.limit(1)
+			.then(([row]) => row),
+		countRows(
+			Integration,
+			and(
+				eq(Integration.organizationId, organizationId),
+				eq(Integration.isActive, true),
+			),
+		),
+		countRows(
+			OrganizationInvitation,
+			and(
+				eq(OrganizationInvitation.organizationId, organizationId),
+				eq(OrganizationInvitation.inviterId, userId),
+			),
+		),
 	])
 
 	// Check if user has used AI chat by looking at onboarding step completion
-	const aiChatStep = await prisma.onboardingStepProgress.findFirst({
-		where: {
-			userId,
-			organizationId,
-			step: {
-				key: 'try_ai_chat',
-			},
-			isCompleted: true,
-		},
-	})
+	const [aiChatStep] = await db
+		.select({ id: OnboardingStepProgress.id })
+		.from(OnboardingStepProgress)
+		.innerJoin(
+			OnboardingStep,
+			eq(OnboardingStepProgress.stepId, OnboardingStep.id),
+		)
+		.where(
+			and(
+				eq(OnboardingStepProgress.userId, userId),
+				eq(OnboardingStepProgress.organizationId, organizationId),
+				eq(OnboardingStep.key, 'try_ai_chat'),
+				eq(OnboardingStepProgress.isCompleted, true),
+			),
+		)
+		.limit(1)
 
 	// Check if user has used command menu by looking at onboarding step completion
-	const commandMenuStep = await prisma.onboardingStepProgress.findFirst({
-		where: {
-			userId,
-			organizationId,
-			step: {
-				key: 'explore_command_menu',
-			},
-			isCompleted: true,
-		},
-	})
+	const [commandMenuStep] = await db
+		.select({ id: OnboardingStepProgress.id })
+		.from(OnboardingStepProgress)
+		.innerJoin(
+			OnboardingStep,
+			eq(OnboardingStepProgress.stepId, OnboardingStep.id),
+		)
+		.where(
+			and(
+				eq(OnboardingStepProgress.userId, userId),
+				eq(OnboardingStepProgress.organizationId, organizationId),
+				eq(OnboardingStep.key, 'explore_command_menu'),
+				eq(OnboardingStepProgress.isCompleted, true),
+			),
+		)
+		.limit(1)
 
 	return {
 		hasNotes: notesCount > 0,

@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { generateToken } from '#app/utils/mcp/oauth.server.ts'
@@ -19,13 +19,13 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 
 	beforeEach(async () => {
 		// Clean up test data
-		await prisma.rateLimitEntry.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
+		await db.rateLimitEntry.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
 
 		// Create test user and organization
-		const user = await prisma.user.create({
+		const user = await db.user.create({
 			data: {
 				email: `test-${Date.now()}@example.com`,
 				username: `testuser${Date.now()}`,
@@ -34,7 +34,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 		testUserId = user.id
 
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: 'Test Organization',
 				slug: `test-org-${Date.now()}`,
@@ -43,11 +43,11 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		testOrgId = org.id
 
 		// Get or create member role
-		let memberRole = await prisma.organizationRole.findUnique({
+		let memberRole = await db.organizationRole.findUnique({
 			where: { name: 'member' },
 		})
 		if (!memberRole) {
-			memberRole = await prisma.organizationRole.create({
+			memberRole = await db.organizationRole.create({
 				data: {
 					name: 'member',
 					description: 'Member role',
@@ -57,7 +57,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		}
 
 		// Add user to organization
-		await prisma.userOrganization.create({
+		await db.userOrganization.create({
 			data: {
 				userId: testUserId,
 				organizationId: testOrgId,
@@ -67,7 +67,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		// Create a test authorization
-		await prisma.mCPAuthorization.create({
+		await db.mCPAuthorization.create({
 			data: {
 				userId: testUserId,
 				organizationId: testOrgId,
@@ -79,13 +79,13 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 
 	afterEach(async () => {
 		// Clean up test data
-		await prisma.rateLimitEntry.deleteMany({})
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.user.deleteMany({})
-		await prisma.organization.deleteMany({})
+		await db.rateLimitEntry.deleteMany({})
+		await db.mCPRefreshToken.deleteMany({})
+		await db.mCPAccessToken.deleteMany({})
+		await db.mCPAuthorization.deleteMany({})
+		await db.userOrganization.deleteMany({})
+		await db.user.deleteMany({})
+		await db.organization.deleteMany({})
 	})
 
 	describe('Authorization Endpoint Rate Limiting (10 per hour per user)', () => {
@@ -139,7 +139,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		})
 
 		it('should isolate rate limits between different users', async () => {
-			const user2 = await prisma.user.create({
+			const user2 = await db.user.create({
 				data: {
 					email: `test2-${Date.now()}@example.com`,
 					username: `testuser2${Date.now()}`,
@@ -164,7 +164,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			expect(result.remaining).toBe(9)
 
 			// Clean up
-			await prisma.user.delete({ where: { id: user2.id } })
+			await db.user.delete({ where: { id: user2.id } })
 		})
 	})
 
@@ -366,7 +366,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const now = Date.now()
 
 			// Create an entry that's outside the window
-			await prisma.rateLimitEntry.create({
+			await db.rateLimitEntry.create({
 				data: {
 					keyId: `user:${userId}`,
 					keyType: 'user',
@@ -376,7 +376,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			})
 
 			// Verify old entry exists
-			let count = await prisma.rateLimitEntry.count({
+			let count = await db.rateLimitEntry.count({
 				where: { keyId: `user:${userId}` },
 			})
 			expect(count).toBe(1)
@@ -388,7 +388,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			)
 
 			// Old entry should be deleted, only new entry remains
-			count = await prisma.rateLimitEntry.count({
+			count = await db.rateLimitEntry.count({
 				where: { keyId: `user:${userId}` },
 			})
 			expect(count).toBe(1)
@@ -399,7 +399,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const now = Date.now()
 
 			// Create an entry that's within the window
-			await prisma.rateLimitEntry.create({
+			await db.rateLimitEntry.create({
 				data: {
 					keyId: `user:${userId}`,
 					keyType: 'user',
@@ -415,7 +415,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			)
 
 			// Both entries should exist
-			const count = await prisma.rateLimitEntry.count({
+			const count = await db.rateLimitEntry.count({
 				where: { keyId: `user:${userId}` },
 			})
 			expect(count).toBe(2)

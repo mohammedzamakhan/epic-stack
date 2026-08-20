@@ -1,4 +1,15 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	Permission,
+	_PermissionToRole,
+	_RoleToUser,
+	Role,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import {
 	parsePermissionString,
 	type PermissionString,
@@ -10,24 +21,24 @@ export async function checkUserHasPermission(
 	permission: PermissionString,
 ): Promise<string> {
 	const permissionData = parsePermissionString(permission)
-	const user = await prisma.user.findFirst({
-		select: { id: true },
-		where: {
-			id: userId,
-			roles: {
-				some: {
-					permissions: {
-						some: {
-							...permissionData,
-							access: permissionData.access
-								? { in: permissionData.access }
-								: undefined,
-						},
-					},
-				},
-			},
-		},
-	})
+	const filters = [
+		eq(User.id, userId),
+		eq(Permission.action, permissionData.action),
+		eq(Permission.entity, permissionData.entity),
+	]
+	if (permissionData.access?.length) {
+		filters.push(inArray(Permission.access, permissionData.access))
+	}
+
+	const [user] = await db
+		.select({ id: User.id })
+		.from(User)
+		.innerJoin(_RoleToUser, eq(_RoleToUser.B, User.id))
+		.innerJoin(Role, eq(Role.id, _RoleToUser.A))
+		.innerJoin(_PermissionToRole, eq(_PermissionToRole.B, Role.id))
+		.innerJoin(Permission, eq(Permission.id, _PermissionToRole.A))
+		.where(and(...filters))
+		.limit(1)
 	if (!user) {
 		throw new Response(`Unauthorized: required permissions: ${permission}`, {
 			status: 403,
@@ -40,23 +51,32 @@ export async function checkUserHasRole(
 	userId: string,
 	name: string,
 ): Promise<{ id: string; defaultOrganizationId: string | null }> {
-	const user = await prisma.user.findFirst({
-		select: {
-			id: true,
-			organizations: {
-				where: { isDefault: true },
-				select: { organizationId: true },
-			},
-		},
-		where: { id: userId, roles: { some: { name } } },
-	})
+	const [user] = await db
+		.select({ id: User.id })
+		.from(User)
+		.innerJoin(_RoleToUser, eq(_RoleToUser.B, User.id))
+		.innerJoin(Role, eq(Role.id, _RoleToUser.A))
+		.where(and(eq(User.id, userId), eq(Role.name, name)))
+		.limit(1)
 
 	if (!user) {
 		throw new Response(`Unauthorized: required role: ${name}`, { status: 403 })
 	}
+
+	const [membership] = await db
+		.select({ organizationId: UserOrganization.organizationId })
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.isDefault, true),
+			),
+		)
+		.limit(1)
+
 	return {
 		id: user.id,
-		defaultOrganizationId: user.organizations[0]?.organizationId ?? null,
+		defaultOrganizationId: membership?.organizationId ?? null,
 	}
 }
 

@@ -9,6 +9,11 @@
       "import": "./db.server.ts",
       "default": "./db.server.ts"
     },
+    "./schema": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./types": {
       "types": "./types.ts",
       "import": "./types.ts",
@@ -16,23 +21,32 @@
     }
   },
   "scripts": {
-    "db:generate": "npx varlock run -- prisma generate --sql",
-    "db:push": "npx varlock run -- prisma db push --skip-generate",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
     "db:seed": "npx varlock run -- tsx seed.ts",
-    "db:migrate:dev": "npx varlock run -- prisma migrate dev",
-    "db:migrate:deploy": "npx varlock run -- prisma migrate deploy",
-    "db:reset": "npx varlock run -- prisma migrate reset --force",
-    "setup": "npm run db:migrate:deploy && npm run db:generate"
+    "db:migrate:dev": "drizzle-kit generate",
+    "db:migrate:deploy": "node scripts/migrate.mjs",
+    "db:reset": "rm -f db/data.db db/data.db-wal db/data.db-shm && npm run db:migrate:deploy && npm run db:seed",
+    "db:studio": "drizzle-kit studio --port 5555",
+    "db:drizzle:pull": "drizzle-kit pull",
+    "db:drizzle:generate": "drizzle-kit generate",
+    "db:drizzle:check": "drizzle-kit check",
+    "setup": "npm run db:migrate:deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@epic-web/remember": "^1.1.0",
-    "@prisma/client": "^6.19.2",
+    "@libsql/client": "^0.17.4",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@remix-run/server-runtime": "^2.17.5",
+    "drizzle-orm": "^0.45.2",
     "react-router": "^8.3.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.7.0",
-    "prisma": "^6.8.2",
+    "drizzle-kit": "^0.30.4",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "varlock": "^0.1.0",

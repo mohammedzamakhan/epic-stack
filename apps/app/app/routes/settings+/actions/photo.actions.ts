@@ -1,5 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
-import { prisma } from '@repo/database'
+import { db, eq, UserImage } from '@repo/database'
 import { z } from 'zod'
 import { uploadProfileImage } from '#app/utils/storage.server.ts'
 
@@ -58,16 +58,13 @@ export async function photoAction({ formData, userId }: PhotoActionArgs) {
 	}
 
 	if (intent === 'delete-photo') {
-		await prisma.userImage.deleteMany({ where: { userId } })
+		await db.delete(UserImage).where(eq(UserImage.userId, userId))
 		return Response.json({ status: 'success' })
 	}
 
-	await prisma.$transaction(async ($prisma) => {
-		await $prisma.userImage.deleteMany({ where: { userId } })
-		await $prisma.user.update({
-			where: { id: userId },
-			data: { image: { create: image! } },
-		})
+	await db.transaction(async (tx) => {
+		await tx.delete(UserImage).where(eq(UserImage.userId, userId))
+		await tx.insert(UserImage).values({ userId, ...image! })
 	})
 
 	return Response.json({ status: 'success' })

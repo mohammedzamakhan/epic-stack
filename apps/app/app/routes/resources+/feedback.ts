@@ -1,5 +1,5 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { and, db, eq, Feedback, UserOrganization } from '@repo/database'
 import { z } from 'zod'
 
 const FeedbackSchema = z.object({
@@ -21,12 +21,16 @@ export async function action({ request }: { request: Request }) {
 
 	const { message, type } = result.data
 
-	const userOrganization = await prisma.userOrganization.findFirst({
-		where: {
-			userId,
-			isDefault: true,
-		},
-	})
+	const [userOrganization] = await db
+		.select({ organizationId: UserOrganization.organizationId })
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.isDefault, true),
+			),
+		)
+		.limit(1)
 
 	if (!userOrganization) {
 		return Response.json(
@@ -35,13 +39,11 @@ export async function action({ request }: { request: Request }) {
 		)
 	}
 
-	await prisma.feedback.create({
-		data: {
-			message,
-			type: type.toUpperCase(),
-			userId,
-			organizationId: userOrganization.organizationId,
-		},
+	await db.insert(Feedback).values({
+		message,
+		type: type.toUpperCase(),
+		userId,
+		organizationId: userOrganization.organizationId,
 	})
 
 	return Response.json({ status: 'success' })

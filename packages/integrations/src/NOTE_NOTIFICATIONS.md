@@ -82,16 +82,18 @@ Utility class that wraps note operations with automatic hook triggering.
 **Usage:**
 
 ```typescript
+import { db, eq, OrganizationNote } from '@repo/database'
+
 // Wrap note creation
 const result = await NoteOperationWrapper.create(
-  () => prisma.organizationNote.create({...}),
+  () => db.insert(OrganizationNote).values({...}).returning(),
   noteId,
   userId
 )
 
 // Wrap note update with change detection
 const result = await NoteOperationWrapper.update(
-  () => prisma.organizationNote.update({...}),
+  () => db.update(OrganizationNote).set({...}).where(eq(OrganizationNote.id, noteId)).returning(),
   noteId,
   userId,
   true // capture snapshot
@@ -99,7 +101,7 @@ const result = await NoteOperationWrapper.update(
 
 // Wrap note deletion
 const result = await NoteOperationWrapper.delete(
-  () => prisma.organizationNote.delete({...}),
+  () => db.delete(OrganizationNote).where(eq(OrganizationNote.id, noteId)),
   noteId,
   userId
 )
@@ -113,10 +115,15 @@ The system is integrated into the existing note route handlers:
 
 ```typescript
 // Check if this is a new note or an update
-const existingNote = await prisma.organizationNote.findUnique({
-	where: { id: noteId },
-	select: { id: true, title: true, content: true },
-})
+const [existingNote] = await db
+	.select({
+		id: OrganizationNote.id,
+		title: OrganizationNote.title,
+		content: OrganizationNote.content,
+	})
+	.from(OrganizationNote)
+	.where(eq(OrganizationNote.id, noteId))
+	.limit(1)
 
 const isNewNote = !existingNote
 let beforeSnapshot: { title: string; content: string } | undefined
@@ -128,9 +135,14 @@ if (!isNewNote && existingNote) {
 	}
 }
 
-const updatedNote = await prisma.organizationNote.upsert({
-	// ... upsert logic
-})
+const [updatedNote] = await db
+	.insert(OrganizationNote)
+	.values({/* note values */})
+	.onConflictDoUpdate({
+		target: OrganizationNote.id,
+		set: { title: 'Updated title' },
+	})
+	.returning()
 
 // Trigger integration hooks
 if (isNewNote) {
@@ -147,7 +159,7 @@ if (isNewNote) {
 await noteHooks.beforeNoteDeleted(note.id, userId)
 
 // Delete the note
-await prisma.organizationNote.delete({ where: { id: note.id } })
+await db.delete(OrganizationNote).where(eq(OrganizationNote.id, note.id))
 ```
 
 ## Message Format

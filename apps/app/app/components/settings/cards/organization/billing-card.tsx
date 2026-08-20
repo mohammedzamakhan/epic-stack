@@ -1,5 +1,5 @@
 import { Trans, Plural } from '@lingui/macro'
-import { type Organization } from '@prisma/client'
+import { type Organization } from '@repo/database/types'
 
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'

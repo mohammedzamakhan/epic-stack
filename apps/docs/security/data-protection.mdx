@@ -82,15 +82,11 @@ openssl rand -hex 32
 
 ```typescript
 // ✅ Good - Select only required fields
-const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: {
-		id: true,
-		name: true,
-		email: true,
-		// Don't select password, sessions, etc.
-	},
-})
+const [user] = await db
+	.select({ id: User.id, name: User.name, email: User.email })
+	.from(User)
+	.where(eq(User.id, userId))
+	.limit(1) // Don't select password, sessions, etc.
 ```
 
 ### Data Retention
@@ -110,15 +106,11 @@ Users can export all their data:
 
 ```typescript
 // GET /resources/download-user-data
-const userData = await prisma.user.findUnique({
-	where: { id: userId },
-	include: {
-		notes: true,
-		sessions: true,
-		roles: true,
-		// password: false - explicitly excluded
-	},
-})
+const userData = await db
+	.select()
+	.from(User)
+	.where(eq(User.id, userId))
+	.limit(1) // Load related data explicitly and exclude password fields
 ```
 
 ### Account Deletion (GDPR Article 17)
@@ -127,9 +119,7 @@ Users can delete their accounts with full data removal:
 
 ```typescript
 // All related data is cascade deleted
-await prisma.user.delete({
-	where: { id: userId },
-})
+await db.delete(User).where(eq(User.id, userId))
 ```
 
 ### IP Address Anonymization

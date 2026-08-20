@@ -30,7 +30,7 @@ lease:
     key: 'epic-startup-shared-db'
 
 exec:
-  - cmd: cd /myapp/packages/database && npx prisma migrate deploy
+  - cmd: cd /myapp/packages/database && node scripts/migrate.mjs
     if-candidate: true
 
   # Set the journal mode for the database to WAL. This reduces concurrency deadlock issues
@@ -40,8 +40,5 @@ exec:
   # Set the journal mode for the cache to WAL. This reduces concurrency deadlock issues
   - cmd: sqlite3 $CACHE_DATABASE_PATH "PRAGMA journal_mode = WAL;"
     if-candidate: true
-
-  # Generate Typed SQL files
-  - cmd: cd /myapp/packages/database && npx prisma generate --sql
 
   - cmd: cd /myapp/apps/app && npm start

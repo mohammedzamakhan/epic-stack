@@ -1,5 +1,4 @@
 import { test as base } from '@playwright/test'
-import { type User as UserModel } from '@prisma/client'
 import {
 	authSessionStorage,
 	getPasswordHash,
@@ -9,7 +8,16 @@ import {
 	sessionKey,
 } from '@repo/auth'
 import { cookieConsentCookie } from '@repo/common/cookie-consent'
-import { prisma } from '@repo/database'
+import {
+	Password,
+	Role,
+	Session,
+	User as UserTable,
+	_RoleToUser,
+	db,
+	eq,
+} from '@repo/database'
+import { type User as UserModel } from '@repo/database/types'
 import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
 import {
@@ -40,27 +48,48 @@ async function getOrInsertUser({
 	password,
 	email,
 }: GetOrInsertUserOptions = {}): Promise<User> {
-	const select = { id: true, email: true, username: true, name: true }
 	if (id) {
-		return await prisma.user.findUniqueOrThrow({
-			select,
-			where: { id: id },
-		})
+		const [user] = await db
+			.select({
+				id: UserTable.id,
+				email: UserTable.email,
+				username: UserTable.username,
+				name: UserTable.name,
+			})
+			.from(UserTable)
+			.where(eq(UserTable.id, id))
+			.limit(1)
+		if (!user) throw new Error(`User ${id} not found`)
+		return user
 	} else {
 		const userData = createUser()
 		username ??= userData.username
 		password ??= userData.username
 		email ??= userData.email
-		return await prisma.user.create({
-			select,
-			data: {
+		const [user] = await db
+			.insert(UserTable)
+			.values({
 				...userData,
 				email,
 				username,
-				roles: { connect: { name: 'user' } },
-				password: { create: { hash: await getPasswordHash(password) } },
-			},
-		})
+			})
+			.returning({
+				id: UserTable.id,
+				email: UserTable.email,
+				username: UserTable.username,
+				name: UserTable.name,
+			})
+		const [role] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (!user || !role) throw new Error('Could not create test user')
+		await db.insert(_RoleToUser).values({ A: role.id, B: user.id })
+		await db
+			.insert(Password)
+			.values({ userId: user.id, hash: await getPasswordHash(password) })
+		return user
 	}
 }
 
@@ -102,20 +131,26 @@ export const test = base.extend<{
 			userId = user.id
 			return user
 		})
-		await prisma.user.delete({ where: { id: userId } }).catch(() => {})
+		if (userId) {
+			await db
+				.delete(UserTable)
+				.where(eq(UserTable.id, userId))
+				.catch(() => {})
+		}
 	},
 	login: async ({ page }, use) => {
 		let userId: string | undefined = undefined
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)
 			userId = user.id
-			const session = await prisma.session.create({
-				data: {
+			const [session] = await db
+				.insert(Session)
+				.values({
 					expirationDate: getSessionExpirationDate(),
 					userId: user.id,
-				},
-				select: { id: true },
-			})
+				})
+				.returning({ id: Session.id })
+			if (!session) throw new Error('Could not create test session')
 
 			const authSession = await authSessionStorage.getSession()
 			authSession.set(sessionKey, session.id)
@@ -132,7 +167,9 @@ export const test = base.extend<{
 			await setCookieConsent(page)
 			return user
 		})
-		await prisma.user.deleteMany({ where: { id: userId } })
+		if (userId) {
+			await db.delete(UserTable).where(eq(UserTable.id, userId))
+		}
 	},
 	prepareGitHubUser: async ({ page }, use, testInfo) => {
 		await page.route(/\/auth\/github(?!\/callback)/, async (route, request) => {
@@ -150,13 +187,13 @@ export const test = base.extend<{
 			return newGitHubUser
 		})
 
-		const user = await prisma.user.findUnique({
-			select: { id: true, name: true },
-			where: { email: normalizeEmail(ghUser!.primaryEmail) },
-		})
+		const [user] = await db
+			.select({ id: UserTable.id, name: UserTable.name })
+			.from(UserTable)
+			.where(eq(UserTable.email, normalizeEmail(ghUser!.primaryEmail)))
+			.limit(1)
 		if (user) {
-			await prisma.user.delete({ where: { id: user.id } })
-			await prisma.session.deleteMany({ where: { userId: user.id } })
+			await db.delete(UserTable).where(eq(UserTable.id, user.id))
 		}
 		await deleteGitHubUser(ghUser!.primaryEmail)
 	},

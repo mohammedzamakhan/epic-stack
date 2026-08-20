@@ -3,7 +3,22 @@ import { invariant } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import {
+	AuditLog,
+	Organization,
+	OrganizationRole,
+	SSOConfiguration,
+	SSOSession,
+	Session,
+	User,
+	UserImage,
+	UserOrganization,
+	and,
+	db,
+	desc,
+	eq,
+	like,
+} from '@repo/database'
 import { useLoaderData } from 'react-router'
 import { z } from 'zod'
 import { SSOUserManagement } from '#app/components/sso-user-management.tsx'
@@ -22,14 +37,15 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	await requireUserWithRole(request, 'admin')
 
 	async function getOrganizationForSSO(organizationId: string) {
-		const organization = await prisma.organization.findUnique({
-			where: { id: organizationId },
-			select: {
-				id: true,
-				name: true,
-				slug: true,
-			},
-		})
+		const [organization] = await db
+			.select({
+				id: Organization.id,
+				name: Organization.name,
+				slug: Organization.slug,
+			})
+			.from(Organization)
+			.where(eq(Organization.id, organizationId))
+			.limit(1)
 
 		if (!organization) {
 			throw new Response('Organization not found', { status: 404 })
@@ -55,148 +71,109 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	}
 
 	// Get users who have authenticated through SSO
-	const ssoUsers = await prisma.user.findMany({
-		where: {
-			organizations: {
-				some: {
-					organizationId: organization.id,
-				},
+	const ssoRows = await db
+		.select({
+			user: {
+				id: User.id,
+				name: User.name,
+				email: User.email,
+				username: User.username,
 			},
-			sessions: {
-				some: {
-					ssoSession: {
-						ssoConfigId: ssoConfig.id,
-					},
-				},
+			image: { id: UserImage.id, altText: UserImage.altText },
+			organizationRole: {
+				id: OrganizationRole.id,
+				name: OrganizationRole.name,
+				level: OrganizationRole.level,
 			},
-		},
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			username: true,
-			image: {
-				select: {
-					id: true,
-					altText: true,
-				},
+			active: UserOrganization.active,
+			isDefault: UserOrganization.isDefault,
+			department: UserOrganization.department,
+			createdAt: UserOrganization.createdAt,
+			updatedAt: UserOrganization.updatedAt,
+			ssoSession: {
+				id: SSOSession.id,
+				providerUserId: SSOSession.providerUserId,
+				createdAt: SSOSession.createdAt,
+				updatedAt: SSOSession.updatedAt,
 			},
-			organizations: {
-				where: {
-					organizationId: organization.id,
-				},
-				select: {
-					organizationRole: {
-						select: {
-							id: true,
-							name: true,
-							level: true,
-						},
-					},
-					active: true,
-					isDefault: true,
-					department: true,
-					createdAt: true,
-					updatedAt: true,
-				},
-			},
-			sessions: {
-				where: {
-					ssoSession: {
-						ssoConfigId: ssoConfig.id,
-					},
-				},
-				select: {
-					ssoSession: {
-						select: {
-							id: true,
-							providerUserId: true,
-							createdAt: true,
-							updatedAt: true,
-							ssoConfig: {
-								select: {
-									providerName: true,
-								},
-							},
-						},
-					},
-				},
-				orderBy: {
-					updatedAt: 'desc',
-				},
-			},
-		},
-	})
+			providerName: SSOConfiguration.providerName,
+		})
+		.from(User)
+		.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+		.innerJoin(
+			OrganizationRole,
+			eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+		)
+		.leftJoin(UserImage, eq(UserImage.userId, User.id))
+		.innerJoin(Session, eq(Session.userId, User.id))
+		.innerJoin(SSOSession, eq(SSOSession.sessionId, Session.id))
+		.innerJoin(
+			SSOConfiguration,
+			eq(SSOSession.ssoConfigId, SSOConfiguration.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.organizationId, organization.id),
+				eq(SSOSession.ssoConfigId, ssoConfig.id),
+			),
+		)
+		.orderBy(desc(SSOSession.updatedAt))
 
 	// Transform the data to match the expected interface
-	const transformedSSOUsers = ssoUsers.map((user) => {
-		const orgMembership = user.organizations[0] // Should only be one for this organization
-		if (!orgMembership) {
-			throw new Error(`User ${user.id} has no organization membership`)
+	const usersById = new Map<
+		string,
+		(typeof ssoRows)[number] & {
+			ssoSessions: unknown[]
 		}
-		return {
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			username: user.username,
-			image: user.image,
-			organizationRole: orgMembership.organizationRole,
-			active: orgMembership.active,
-			isDefault: orgMembership.isDefault,
-			department: orgMembership.department,
-			createdAt: orgMembership.createdAt,
-			updatedAt: orgMembership.updatedAt,
-			ssoSessions: user.sessions.map((session) => ({
-				id: session.ssoSession!.id,
-				providerUserId: session.ssoSession!.providerUserId,
-				createdAt: session.ssoSession!.createdAt,
-				updatedAt: session.ssoSession!.updatedAt,
-				ssoConfig: {
-					providerName: session.ssoSession!.ssoConfig.providerName,
-				},
-			})),
+	>()
+	for (const row of ssoRows) {
+		const current = usersById.get(row.user.id)
+		if (current) {
+			current.ssoSessions.push({
+				...row.ssoSession,
+				ssoConfig: { providerName: row.providerName },
+			})
+		} else {
+			usersById.set(row.user.id, {
+				...row,
+				ssoSessions: [
+					{ ...row.ssoSession, ssoConfig: { providerName: row.providerName } },
+				],
+			})
 		}
-	})
+	}
+	const transformedSSOUsers = [...usersById.values()]
 
 	// Get available roles
-	const availableRoles = await prisma.organizationRole.findMany({
-		select: {
-			id: true,
-			name: true,
-			level: true,
-		},
-		orderBy: {
-			level: 'desc',
-		},
-	})
+	const availableRoles = await db
+		.select({
+			id: OrganizationRole.id,
+			name: OrganizationRole.name,
+			level: OrganizationRole.level,
+		})
+		.from(OrganizationRole)
+		.orderBy(desc(OrganizationRole.level))
 
 	// Get SSO audit logs
-	const auditLogs = await prisma.auditLog.findMany({
-		where: {
-			organizationId: organization.id,
-			action: {
-				startsWith: 'sso_',
-			},
-		},
-		select: {
-			id: true,
-			action: true,
-			createdAt: true,
-			metadata: true,
-			details: true,
-			user: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			},
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		take: 50, // Limit to recent 50 logs
-	})
+	const auditLogs = await db
+		.select({
+			id: AuditLog.id,
+			action: AuditLog.action,
+			createdAt: AuditLog.createdAt,
+			metadata: AuditLog.metadata,
+			details: AuditLog.details,
+			user: { id: User.id, name: User.name, username: User.username },
+		})
+		.from(AuditLog)
+		.leftJoin(User, eq(AuditLog.userId, User.id))
+		.where(
+			and(
+				eq(AuditLog.organizationId, organization.id),
+				like(AuditLog.action, 'sso_%'),
+			),
+		)
+		.orderBy(desc(AuditLog.createdAt))
+		.limit(50)
 
 	return Response.json({
 		organization,
@@ -243,17 +220,17 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					)
 				}
 
-				await prisma.userOrganization.update({
-					where: {
-						userId_organizationId: {
-							userId,
-							organizationId: params.organizationId,
-						},
-					},
-					data: {
+				await db
+					.update(UserOrganization)
+					.set({
 						organizationRoleId: roleId,
-					},
-				})
+					})
+					.where(
+						and(
+							eq(UserOrganization.userId, userId),
+							eq(UserOrganization.organizationId, params.organizationId),
+						),
+					)
 
 				// Log the role change
 				await auditLogService.logSSOUserManagement(
@@ -286,17 +263,17 @@ export async function action({ request, params }: Route['ActionArgs']) {
 					)
 				}
 
-				await prisma.userOrganization.update({
-					where: {
-						userId_organizationId: {
-							userId,
-							organizationId: params.organizationId,
-						},
-					},
-					data: {
+				await db
+					.update(UserOrganization)
+					.set({
 						active,
-					},
-				})
+					})
+					.where(
+						and(
+							eq(UserOrganization.userId, userId),
+							eq(UserOrganization.organizationId, params.organizationId),
+						),
+					)
 
 				// Log the status change
 				await auditLogService.logSSOUserManagement(

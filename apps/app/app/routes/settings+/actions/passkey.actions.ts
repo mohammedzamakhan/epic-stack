@@ -1,4 +1,12 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	eq,
+	Password,
+	Passkey,
+	Connection,
+} from '@repo/database'
 
 type PasskeyActionArgs = {
 	request?: Request
@@ -19,24 +27,32 @@ export async function registerPasskeyAction(_deps: PasskeyActionArgs) {
  * - More than one passkey
  */
 async function userCanDeletePasskey(userId: string): Promise<boolean> {
-	const user = await prisma.user.findUnique({
-		select: {
-			password: { select: { userId: true } },
-			_count: { select: { passkey: true, connections: true } },
-		},
-		where: { id: userId },
-	})
+	const [password, passkeys, connections] = await Promise.all([
+		db
+			.select({ userId: Password.userId })
+			.from(Password)
+			.where(eq(Password.userId, userId))
+			.limit(1),
+		db
+			.select({ value: count() })
+			.from(Passkey)
+			.where(eq(Passkey.userId, userId)),
+		db
+			.select({ value: count() })
+			.from(Connection)
+			.where(eq(Connection.userId, userId)),
+	])
 
-	if (!user) return false
+	if (!password[0] && !passkeys[0] && !connections[0]) return false
 
 	// Allow deletion if user has a password
-	if (user.password) return true
+	if (password[0]) return true
 
 	// Allow deletion if user has OAuth connections
-	if (user._count.connections > 0) return true
+	if ((connections[0]?.value ?? 0) > 0) return true
 
 	// Allow deletion only if user has more than one passkey
-	return user._count.passkey > 1
+	return (passkeys[0]?.value ?? 0) > 1
 }
 
 export async function deletePasskeyAction({
@@ -64,12 +80,9 @@ export async function deletePasskeyAction({
 		)
 	}
 
-	await prisma.passkey.delete({
-		where: {
-			id: passkeyId,
-			userId, // Ensure the passkey belongs to the user
-		},
-	})
+	await db
+		.delete(Passkey)
+		.where(and(eq(Passkey.id, passkeyId), eq(Passkey.userId, userId)))
 
 	return Response.json({ status: 'success' })
 }

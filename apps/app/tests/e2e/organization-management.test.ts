@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -65,7 +65,7 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(orgName)).toBeVisible()
 
 		// Verify organization exists in database
-		const createdOrg = await prisma.organization.findFirst({
+		const createdOrg = await db.organization.findFirst({
 			where: { slug: orgSlug },
 			include: { users: true },
 		})
@@ -83,7 +83,7 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create two organizations for the user
-		const org1 = await prisma.organization.create({
+		const org1 = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
@@ -97,7 +97,7 @@ test.describe('Organization Management', () => {
 			},
 		})
 
-		const org2 = await prisma.organization.create({
+		const org2 = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
@@ -181,7 +181,7 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(/updated/i).first()).toBeVisible()
 
 		// Verify changes in database
-		const updatedOrg = await prisma.organization.findUnique({
+		const updatedOrg = await db.organization.findUnique({
 			where: { id: org.id },
 		})
 		expect(updatedOrg?.name).toBe(newName)
@@ -195,7 +195,7 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create additional users
-		const member1 = await prisma.user.create({
+		const member1 = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -204,7 +204,7 @@ test.describe('Organization Management', () => {
 			},
 		})
 
-		const member2 = await prisma.user.create({
+		const member2 = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -214,7 +214,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Create an organization with multiple members
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
@@ -257,7 +257,7 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create additional user
-		const member = await prisma.user.create({
+		const member = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -267,7 +267,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Create an organization with the member
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
@@ -307,7 +307,7 @@ test.describe('Organization Management', () => {
 		).not.toBeVisible()
 
 		// Verify member is removed from database
-		const orgMembers = await prisma.organization.findUnique({
+		const orgMembers = await db.organization.findUnique({
 			where: { id: org.id },
 			select: {
 				users: {
@@ -328,7 +328,7 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create another user as owner
-		const owner = await prisma.user.create({
+		const owner = await db.user.create({
 			data: {
 				email: faker.internet.email(),
 				username: faker.internet.username(),
@@ -338,7 +338,7 @@ test.describe('Organization Management', () => {
 		})
 
 		// Create an organization where user is a member
-		const org = await prisma.organization.create({
+		const org = await db.organization.create({
 			data: {
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
@@ -371,7 +371,7 @@ test.describe('Organization Management', () => {
 		await expect(removeButtons).toHaveCount(1)
 
 		// Verify user is still a member in database
-		const membership = await prisma.organization.findFirst({
+		const membership = await db.organization.findFirst({
 			where: { id: org.id, users: { some: { userId: user.id } } },
 		})
 		expect(membership).not.toBeNull()

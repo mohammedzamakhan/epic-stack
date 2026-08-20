@@ -2,7 +2,7 @@ import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { normalizeEmail, normalizeUsername } from '@repo/auth'
 import { brand } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
@@ -31,7 +31,7 @@ const test = base.extend<{
 			}
 			return onboardingData
 		})
-		await prisma.user.deleteMany({ where: { username: userData.username } })
+		await db.user.deleteMany({ where: { username: userData.username } })
 	},
 })
 
@@ -139,7 +139,7 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 
 	// let's verify we do not have user with that email in our system:
 	expect(
-		await prisma.user.findUnique({
+		await db.user.findUnique({
 			where: { email: normalizeEmail(ghUser.primaryEmail) },
 		}),
 	).toBeNull()
@@ -190,7 +190,7 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 	await expect(page.getByText(/thanks for signing up/i)).toBeVisible()
 
 	// internally, a user has been created:
-	await prisma.user.findUniqueOrThrow({
+	await db.user.findUniqueOrThrow({
 		where: { email: normalizeEmail(ghUser.primaryEmail) },
 	})
 })
@@ -204,13 +204,13 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 
 	// let's verify we do not have user with that email in our system ...
 	expect(
-		await prisma.user.findUnique({
+		await db.user.findUnique({
 			where: { email: normalizeEmail(ghUser.primaryEmail) },
 		}),
 	).toBeNull()
 	// ... and create one:
 	const name = faker.person.fullName()
-	const user = await prisma.user.create({
+	const user = await db.user.create({
 		select: { id: true, name: true },
 		data: {
 			email: normalizeEmail(ghUser.primaryEmail),
@@ -221,7 +221,7 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 
 	// let's verify there is no connection between the GitHub user
 	// and out app's user:
-	const connection = await prisma.connection.findFirst({
+	const connection = await db.connection.findFirst({
 		where: { providerName: 'github', userId: user.id },
 	})
 	expect(connection).toBeNull()
@@ -232,7 +232,7 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 	await expect(page).toHaveURL(`/organizations/create`)
 
 	// internally, a connection (rather than a new user) has been created:
-	await prisma.connection.findFirstOrThrow({
+	await db.connection.findFirstOrThrow({
 		where: { providerName: 'github', userId: user.id },
 	})
 })

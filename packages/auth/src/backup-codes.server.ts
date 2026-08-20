@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { prisma } from '@repo/database'
+import { and, BackupCode, count, db, eq, isNull } from '@repo/database'
 import bcrypt from 'bcryptjs'
 
 const BACKUP_CODE_LENGTH = 8
@@ -11,21 +11,17 @@ const BACKUP_CODE_CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // No ambiguous c
  */
 function generateSingleCode(): string {
 	let code = ''
-	// Use rejection sampling to avoid modulo bias
-	// The largest multiple of charset length that fits in a byte (0-255)
 	const charsetLength = BACKUP_CODE_CHARSET.length
 	const maxValid = Math.floor(256 / charsetLength) * charsetLength
 
 	for (let i = 0; i < BACKUP_CODE_LENGTH; i++) {
 		let randomByte: number
-		// Keep generating random bytes until we get one in the unbiased range
 		do {
 			randomByte = crypto.randomBytes(1)[0]!
 		} while (randomByte >= maxValid)
 
 		code += BACKUP_CODE_CHARSET[randomByte % charsetLength]
 	}
-	// Format as XXXX-XXXX for readability
 	return `${code.slice(0, 4)}-${code.slice(4)}`
 }
 
@@ -33,7 +29,6 @@ function generateSingleCode(): string {
  * Hash a backup code using bcrypt
  */
 export async function hashBackupCode(code: string): Promise<string> {
-	// Normalize: remove dashes and convert to uppercase
 	const normalizedCode = code.replace(/-/g, '').toUpperCase()
 	return bcrypt.hash(normalizedCode, 10)
 }
@@ -55,30 +50,24 @@ export async function verifyBackupCode(
  */
 export async function generateBackupCodes(
 	userId: string,
-	count: number = BACKUP_CODE_COUNT,
+	countCodes: number = BACKUP_CODE_COUNT,
 ): Promise<string[]> {
-	// Generate new codes
 	const codes: string[] = []
 	const codeHashes: string[] = []
 
-	for (let i = 0; i < count; i++) {
+	for (let i = 0; i < countCodes; i++) {
 		const code = generateSingleCode()
 		codes.push(code)
 		codeHashes.push(await hashBackupCode(code))
 	}
 
-	// Delete any existing backup codes for this user
-	await prisma.backupCode.deleteMany({
-		where: { userId },
-	})
-
-	// Store new hashed codes
-	await prisma.backupCode.createMany({
-		data: codeHashes.map((codeHash) => ({
+	await db.delete(BackupCode).where(eq(BackupCode.userId, userId))
+	await db.insert(BackupCode).values(
+		codeHashes.map((codeHash) => ({
 			userId,
 			codeHash,
 		})),
-	})
+	)
 
 	return codes
 }
@@ -89,22 +78,22 @@ export async function generateBackupCodes(
 export async function getUnusedBackupCodeCount(
 	userId: string,
 ): Promise<number> {
-	return prisma.backupCode.count({
-		where: {
-			userId,
-			usedAt: null,
-		},
-	})
+	const [row] = await db
+		.select({ value: count() })
+		.from(BackupCode)
+		.where(and(eq(BackupCode.userId, userId), isNull(BackupCode.usedAt)))
+	return row?.value ?? 0
 }
 
 /**
  * Check if a user has any backup codes (used or unused)
  */
 export async function hasBackupCodes(userId: string): Promise<boolean> {
-	const count = await prisma.backupCode.count({
-		where: { userId },
-	})
-	return count > 0
+	const [row] = await db
+		.select({ value: count() })
+		.from(BackupCode)
+		.where(eq(BackupCode.userId, userId))
+	return (row?.value ?? 0) > 0
 }
 
 /**
@@ -115,27 +104,21 @@ export async function validateAndConsumeBackupCode(
 	userId: string,
 	code: string,
 ): Promise<boolean> {
-	// Get all unused backup codes for this user
-	const unusedCodes = await prisma.backupCode.findMany({
-		where: {
-			userId,
-			usedAt: null,
-		},
-		select: {
-			id: true,
-			codeHash: true,
-		},
-	})
+	const unusedCodes = await db
+		.select({
+			id: BackupCode.id,
+			codeHash: BackupCode.codeHash,
+		})
+		.from(BackupCode)
+		.where(and(eq(BackupCode.userId, userId), isNull(BackupCode.usedAt)))
 
-	// Try to match the provided code against any of the hashes
 	for (const backupCode of unusedCodes) {
 		const isValid = await verifyBackupCode(code, backupCode.codeHash)
 		if (isValid) {
-			// Mark as used
-			await prisma.backupCode.update({
-				where: { id: backupCode.id },
-				data: { usedAt: new Date() },
-			})
+			await db
+				.update(BackupCode)
+				.set({ usedAt: new Date() })
+				.where(eq(BackupCode.id, backupCode.id))
 			return true
 		}
 	}
@@ -147,7 +130,5 @@ export async function validateAndConsumeBackupCode(
  * Delete all backup codes for a user (e.g., when disabling 2FA)
  */
 export async function deleteBackupCodes(userId: string): Promise<void> {
-	await prisma.backupCode.deleteMany({
-		where: { userId },
-	})
+	await db.delete(BackupCode).where(eq(BackupCode.userId, userId))
 }

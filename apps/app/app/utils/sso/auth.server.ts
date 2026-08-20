@@ -1,5 +1,17 @@
 import { type ProviderUser } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	OrganizationRole,
+	SSOConfiguration as SSOConfigurationTable,
+	SSOSession as SSOSessionTable,
+	User as UserTable,
+	UserOrganization,
+	Role,
+	_RoleToUser,
+} from '@repo/database'
 import {
 	type User,
 	type SSOConfiguration,
@@ -210,20 +222,24 @@ export class SSOAuthService {
 		this.validateEmailPolicies(email, userInfo, config)
 
 		// Check if user already exists
-		const existingUser = await prisma.user.findUnique({
-			where: { email: email.toLowerCase() },
-		})
+		const [existingUser] = await db
+			.select()
+			.from(UserTable)
+			.where(eq(UserTable.email, email.toLowerCase()))
+			.limit(1)
 
 		if (existingUser) {
 			// For existing users, check if they are already a member of the organization
-			const existingMembership = await prisma.userOrganization.findUnique({
-				where: {
-					userId_organizationId: {
-						userId: existingUser.id,
-						organizationId: config.organizationId,
-					},
-				},
-			})
+			const [existingMembership] = await db
+				.select({ userId: UserOrganization.userId })
+				.from(UserOrganization)
+				.where(
+					and(
+						eq(UserOrganization.userId, existingUser.id),
+						eq(UserOrganization.organizationId, config.organizationId),
+					),
+				)
+				.limit(1)
 
 			// If user exists but is not a member, only add them if autoProvision is enabled
 			if (!existingMembership && !config.autoProvision) {
@@ -246,14 +262,22 @@ export class SSOAuthService {
 		)
 
 		// Create new user
-		const user = await prisma.user.create({
-			data: {
+		const [user] = await db
+			.insert(UserTable)
+			.values({
 				email: email.toLowerCase(),
 				username,
 				name: name || email,
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!user) throw new Error('Failed to provision user')
+		const [userRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (userRole)
+			await db.insert(_RoleToUser).values({ A: userRole.id, B: user.id })
 
 		// Add user to organization
 		await this.ensureOrganizationMembership(
@@ -274,10 +298,11 @@ export class SSOAuthService {
 		const maxAttempts = 100
 
 		while (suffix < maxAttempts) {
-			const existingUser = await prisma.user.findUnique({
-				where: { username },
-				select: { id: true },
-			})
+			const [existingUser] = await db
+				.select({ id: UserTable.id })
+				.from(UserTable)
+				.where(eq(UserTable.username, username))
+				.limit(1)
 
 			if (!existingUser) {
 				return username
@@ -341,13 +366,12 @@ export class SSOAuthService {
 
 		const name = this.extractAttribute(userInfo, attributeMapping.name!)
 
-		const user = await prisma.user.update({
-			where: { id: userId },
-			data: {
-				...(name && { name }),
-				// Update other attributes as needed
-			},
-		})
+		const [user] = await db
+			.update(UserTable)
+			.set(name ? { name } : {})
+			.where(eq(UserTable.id, userId))
+			.returning()
+		if (!user) throw new Error('User not found')
 
 		// Ensure user is member of the organization
 		await this.ensureOrganizationMembership(
@@ -370,8 +394,9 @@ export class SSOAuthService {
 	): Promise<SSOSession> {
 		const masterKey = getSSOMasterKey()
 
-		return prisma.sSOSession.create({
-			data: {
+		const [session] = await db
+			.insert(SSOSessionTable)
+			.values({
 				sessionId,
 				ssoConfigId,
 				providerUserId,
@@ -382,18 +407,28 @@ export class SSOAuthService {
 					? encrypt(tokens.refreshToken, masterKey)
 					: null,
 				tokenExpiresAt: tokens.expiresAt,
-			},
-		})
+			})
+			.returning()
+		if (!session) throw new Error('Failed to create SSO session')
+		return session
 	}
 
 	/**
 	 * Refresh access tokens using refresh token
 	 */
 	async refreshTokens(ssoSessionId: string): Promise<TokenSet> {
-		const ssoSession = await prisma.sSOSession.findUnique({
-			where: { id: ssoSessionId },
-			include: { ssoConfig: true },
-		})
+		const [sessionRow] = await db
+			.select({ session: SSOSessionTable, ssoConfig: SSOConfigurationTable })
+			.from(SSOSessionTable)
+			.innerJoin(
+				SSOConfigurationTable,
+				eq(SSOSessionTable.ssoConfigId, SSOConfigurationTable.id),
+			)
+			.where(eq(SSOSessionTable.id, ssoSessionId))
+			.limit(1)
+		const ssoSession = sessionRow
+			? { ...sessionRow.session, ssoConfig: sessionRow.ssoConfig }
+			: null
 
 		if (!ssoSession || !ssoSession.refreshToken) {
 			throw new Error('SSO session not found or no refresh token available')
@@ -448,16 +483,16 @@ export class SSOAuthService {
 		}
 
 		// Update stored tokens
-		await prisma.sSOSession.update({
-			where: { id: ssoSessionId },
-			data: {
+		await db
+			.update(SSOSessionTable)
+			.set({
 				accessToken: encrypt(newTokenSet.accessToken, masterKey),
 				refreshToken: newTokenSet.refreshToken
 					? encrypt(newTokenSet.refreshToken, masterKey)
 					: null,
 				tokenExpiresAt: newTokenSet.expiresAt,
-			},
-		})
+			})
+			.where(eq(SSOSessionTable.id, ssoSessionId))
 
 		return newTokenSet
 	}
@@ -466,10 +501,18 @@ export class SSOAuthService {
 	 * Revoke tokens at the identity provider
 	 */
 	async revokeTokens(ssoSessionId: string): Promise<void> {
-		const ssoSession = await prisma.sSOSession.findUnique({
-			where: { id: ssoSessionId },
-			include: { ssoConfig: true },
-		})
+		const [sessionRow] = await db
+			.select({ session: SSOSessionTable, ssoConfig: SSOConfigurationTable })
+			.from(SSOSessionTable)
+			.innerJoin(
+				SSOConfigurationTable,
+				eq(SSOSessionTable.ssoConfigId, SSOConfigurationTable.id),
+			)
+			.where(eq(SSOSessionTable.id, ssoSessionId))
+			.limit(1)
+		const ssoSession = sessionRow
+			? { ...sessionRow.session, ssoConfig: sessionRow.ssoConfig }
+			: null
 
 		if (!ssoSession) {
 			return // Session doesn't exist, nothing to revoke
@@ -510,9 +553,7 @@ export class SSOAuthService {
 		}
 
 		// Delete the SSO session
-		await prisma.sSOSession.delete({
-			where: { id: ssoSessionId },
-		})
+		await db.delete(SSOSessionTable).where(eq(SSOSessionTable.id, ssoSessionId))
 	}
 
 	/**
@@ -742,10 +783,11 @@ export class SSOAuthService {
 	 */
 	private async buildRedirectURI(organizationId: string): Promise<string> {
 		// Get organization slug for the redirect URI
-		const organization = await prisma.organization.findUnique({
-			where: { id: organizationId },
-			select: { slug: true },
-		})
+		const [organization] = await db
+			.select({ slug: Organization.slug })
+			.from(Organization)
+			.where(eq(Organization.id, organizationId))
+			.limit(1)
 
 		if (!organization) {
 			throw new Error(`Organization not found: ${organizationId}`)
@@ -794,29 +836,25 @@ export class SSOAuthService {
 		defaultRole: string,
 	): Promise<void> {
 		// Find the organization role by name first
-		const organizationRole = await prisma.organizationRole.findUnique({
-			where: { name: defaultRole },
-		})
+		const [organizationRole] = await db
+			.select()
+			.from(OrganizationRole)
+			.where(eq(OrganizationRole.name, defaultRole))
+			.limit(1)
 
 		if (!organizationRole) {
 			throw new Error(`Organization role '${defaultRole}' not found`)
 		}
 
 		// Use upsert to handle race conditions - if membership exists, do nothing
-		await prisma.userOrganization.upsert({
-			where: {
-				userId_organizationId: {
-					userId,
-					organizationId,
-				},
-			},
-			create: {
+		await db
+			.insert(UserOrganization)
+			.values({
 				userId,
 				organizationId,
 				organizationRoleId: organizationRole.id,
-			},
-			update: {}, // No update needed if already exists
-		})
+			})
+			.onConflictDoNothing()
 	}
 
 	/**

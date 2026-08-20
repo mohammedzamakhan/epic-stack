@@ -1,5 +1,5 @@
 import { auditService, AuditAction } from '@repo/audit'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
 	HOME_PAGE_SLUG,
@@ -27,7 +27,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', () => {
-	const prisma = {
+	const db = {
 		organizationRole: {
 			findUnique: vi.fn(),
 		},
@@ -40,28 +40,28 @@ vi.mock('@repo/database', () => {
 		websitePage: {
 			create: vi.fn(),
 		},
-		$transaction: vi.fn((fn: any) => fn(prisma)),
+		$transaction: vi.fn((fn: any) => fn(db)),
 	}
 
-	return { prisma }
+	return { db }
 })
 
 describe('createOrganization', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-		vi.mocked(prisma.organizationRole.findUnique).mockResolvedValue({
+		vi.mocked(db.organizationRole.findUnique).mockResolvedValue({
 			id: 'role-admin',
 		} as any)
-		vi.mocked(prisma.organization.create).mockResolvedValue({
+		vi.mocked(db.organization.create).mockResolvedValue({
 			id: 'org-1',
 			name: 'Acme',
 			slug: 'acme',
 			image: null,
 		} as any)
-		vi.mocked(prisma.userOrganization.updateMany).mockResolvedValue({
+		vi.mocked(db.userOrganization.updateMany).mockResolvedValue({
 			count: 0,
 		} as any)
-		vi.mocked(prisma.websitePage.create).mockResolvedValue({
+		vi.mocked(db.websitePage.create).mockResolvedValue({
 			id: 'page-1',
 		} as any)
 		vi.mocked(auditService.log).mockResolvedValue(undefined as any)
@@ -75,7 +75,7 @@ describe('createOrganization', () => {
 			userId: 'user-1',
 		})
 
-		const organizationCreate = vi.mocked(prisma.organization.create).mock
+		const organizationCreate = vi.mocked(db.organization.create).mock
 			.calls[0]![0]
 		const organizationData = organizationCreate.data as {
 			siteHeaderConfig: string
@@ -101,7 +101,7 @@ describe('createOrganization', () => {
 			}),
 		)
 
-		expect(prisma.websitePage.create).toHaveBeenCalledWith({
+		expect(db.websitePage.create).toHaveBeenCalledWith({
 			data: expect.objectContaining({
 				organizationId: 'org-1',
 				title: HOME_PAGE_TITLE,
@@ -114,7 +114,7 @@ describe('createOrganization', () => {
 			}),
 		})
 
-		const pageCreate = vi.mocked(prisma.websitePage.create).mock.calls[0]![0]
+		const pageCreate = vi.mocked(db.websitePage.create).mock.calls[0]![0]
 		const pageData = pageCreate.data as {
 			sections: { create: CreatedHomePageSection[] }
 		}
@@ -155,7 +155,7 @@ describe('createOrganization', () => {
 	})
 
 	it('does not create an organization without the admin role', async () => {
-		vi.mocked(prisma.organizationRole.findUnique).mockResolvedValue(null)
+		vi.mocked(db.organizationRole.findUnique).mockResolvedValue(null)
 
 		await expect(
 			createOrganization({
@@ -165,8 +165,8 @@ describe('createOrganization', () => {
 			}),
 		).rejects.toThrow('Admin role not found')
 
-		expect(prisma.organization.create).not.toHaveBeenCalled()
-		expect(prisma.websitePage.create).not.toHaveBeenCalled()
+		expect(db.organization.create).not.toHaveBeenCalled()
+		expect(db.websitePage.create).not.toHaveBeenCalled()
 		expect(auditService.log).not.toHaveBeenCalledWith(
 			expect.objectContaining({ action: AuditAction.ORG_CREATED }),
 		)

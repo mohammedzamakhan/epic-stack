@@ -4,7 +4,20 @@ import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
 import { markStepCompleted } from '@repo/common/onboarding'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	gte,
+	isNull,
+	like,
+	Organization,
+	OrganizationImage,
+	OrganizationRole,
+	OrganizationS3Config,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { encrypt, getSSOMasterKey } from '@repo/security'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
@@ -110,10 +123,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			},
 		}),
 		// Get user email for domain validation
-		prisma.user.findUnique({
-			where: { id: userId },
-			select: { email: true },
-		}),
+		db
+			.select({ email: User.email })
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
+			.then((rows) => rows[0]),
 	])
 
 	if (!organization || !user) {
@@ -163,13 +178,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					photoFile,
 				)
 
-				await prisma.$transaction(async ($prisma) => {
-					await $prisma.organizationImage.deleteMany({
-						where: { organizationId: organization.id },
-					})
-					await $prisma.organization.update({
-						where: { id: organization.id },
-						data: { image: { create: { objectKey } } },
+				await db.transaction(async (tx) => {
+					await tx
+						.delete(OrganizationImage)
+						.where(eq(OrganizationImage.organizationId, organization.id))
+					await tx.insert(OrganizationImage).values({
+						organizationId: organization.id,
+						objectKey,
 					})
 				})
 
@@ -186,9 +201,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (intent === deleteOrgPhotoActionIntent) {
 			try {
-				await prisma.organizationImage.delete({
-					where: { organizationId: organization.id },
-				})
+				await db
+					.delete(OrganizationImage)
+					.where(eq(OrganizationImage.organizationId, organization.id))
 				await invalidateUserOrganizationsCache(userId)
 				return Response.json({ status: 'success' })
 			} catch {
@@ -224,10 +239,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { name, slug } = submission.value
 
 		try {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { name, slug },
-			})
+			await db
+				.update(Organization)
+				.set({ name, slug })
+				.where(eq(Organization.id, organization.id))
 
 			// Track onboarding step completion for completing profile
 			// Check if organization now has both name and description (or just name for basic completion)
@@ -270,10 +285,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { size } = submission.value
 
 		try {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { size },
-			})
+			await db
+				.update(Organization)
+				.set({ size })
+				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
 
@@ -333,51 +348,51 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { verifiedDomain } = submission.value
 
 		try {
-			await prisma.$transaction(async (tx) => {
+			await db.transaction(async (tx) => {
 				// Update the organization with the verified domain
-				await tx.organization.update({
-					where: { id: organization.id },
-					data: { verifiedDomain },
-				})
+				await tx
+					.update(Organization)
+					.set({ verifiedDomain })
+					.where(eq(Organization.id, organization.id))
 
 				// Find all users with emails ending with this domain who are not already members
-				const usersWithMatchingDomain = await tx.user.findMany({
-					where: {
-						email: {
-							endsWith: `@${verifiedDomain}`,
-						},
-						organizations: {
-							none: {
-								organizationId: organization.id,
-							},
-						},
-					},
-					select: {
-						id: true,
-						email: true,
-						name: true,
-					},
-				})
+				const usersWithMatchingDomain = await tx
+					.select({ id: User.id, email: User.email, name: User.name })
+					.from(User)
+					.leftJoin(
+						UserOrganization,
+						and(
+							eq(UserOrganization.userId, User.id),
+							eq(UserOrganization.organizationId, organization.id),
+						),
+					)
+					.where(
+						and(
+							like(User.email, `%@${verifiedDomain}`),
+							isNull(UserOrganization.userId),
+						),
+					)
 
 				// Auto-add these users to the organization
 				if (usersWithMatchingDomain.length > 0) {
 					// Get the member role first
-					const memberRole = await tx.organizationRole.findUnique({
-						where: { name: 'member' },
-						select: { id: true },
-					})
+					const [memberRole] = await tx
+						.select({ id: OrganizationRole.id })
+						.from(OrganizationRole)
+						.where(eq(OrganizationRole.name, 'member'))
+						.limit(1)
 
 					if (!memberRole) {
 						throw new Error('Member role not found')
 					}
 
-					await tx.userOrganization.createMany({
-						data: usersWithMatchingDomain.map((user) => ({
+					await tx.insert(UserOrganization).values(
+						usersWithMatchingDomain.map((user) => ({
 							userId: user.id,
 							organizationId: organization.id,
 							organizationRoleId: memberRole.id,
 						})),
-					})
+					)
 				}
 
 				// Update seat quantity for billing if users were added
@@ -409,10 +424,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	if (intent === 'toggle-verified-domain') {
 		try {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { verifiedDomain: null },
-			})
+			await db
+				.update(Organization)
+				.set({ verifiedDomain: null })
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 			return Response.json({ status: 'success' })
 		} catch {
@@ -435,9 +450,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 
 			// Delete the organization - cascade deletes will handle all related data
-			await prisma.organization.delete({
-				where: { id: organization.id },
-			})
+			await db.delete(Organization).where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
 
@@ -475,18 +488,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		try {
 			if (s3Enabled) {
 				// Get existing config to preserve secret key if not updated
-				const existingConfig = await prisma.organizationS3Config.findUnique({
-					where: { organizationId: organization.id },
-				})
+				const [existingConfig] = await db
+					.select()
+					.from(OrganizationS3Config)
+					.where(eq(OrganizationS3Config.organizationId, organization.id))
+					.limit(1)
 
 				const secretToUse = s3SecretAccessKey
 					? encrypt(s3SecretAccessKey, getSSOMasterKey())
 					: existingConfig?.secretAccessKey || ''
 
 				// Create or update S3 configuration
-				await prisma.organizationS3Config.upsert({
-					where: { organizationId: organization.id },
-					create: {
+				await db
+					.insert(OrganizationS3Config)
+					.values({
 						organizationId: organization.id,
 						isEnabled: true,
 						endpoint: s3Endpoint || '',
@@ -494,21 +509,23 @@ export async function action({ request, params }: ActionFunctionArgs) {
 						accessKeyId: s3AccessKeyId || '',
 						secretAccessKey: secretToUse,
 						region: s3Region || '',
-					},
-					update: {
-						isEnabled: true,
-						endpoint: s3Endpoint || '',
-						bucketName: s3BucketName || '',
-						accessKeyId: s3AccessKeyId || '',
-						secretAccessKey: secretToUse,
-						region: s3Region || '',
-					},
-				})
+					})
+					.onConflictDoUpdate({
+						target: OrganizationS3Config.organizationId,
+						set: {
+							isEnabled: true,
+							endpoint: s3Endpoint || '',
+							bucketName: s3BucketName || '',
+							accessKeyId: s3AccessKeyId || '',
+							secretAccessKey: secretToUse,
+							region: s3Region || '',
+						},
+					})
 			} else {
 				// Disable S3 configuration or delete it
-				await prisma.organizationS3Config.upsert({
-					where: { organizationId: organization.id },
-					create: {
+				await db
+					.insert(OrganizationS3Config)
+					.values({
 						organizationId: organization.id,
 						isEnabled: false,
 						endpoint: '',
@@ -516,11 +533,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 						accessKeyId: '',
 						secretAccessKey: '',
 						region: '',
-					},
-					update: {
-						isEnabled: false,
-					},
-				})
+					})
+					.onConflictDoUpdate({
+						target: OrganizationS3Config.organizationId,
+						set: { isEnabled: false },
+					})
 			}
 
 			await invalidateUserOrganizationsCache(userId)

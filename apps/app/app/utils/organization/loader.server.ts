@@ -1,8 +1,7 @@
 import { invariant } from '@epic-web/invariant'
-import { type Prisma } from '@prisma/client'
-
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { and, db, eq, Organization, UserOrganization } from '@repo/database'
+import { type Organization as OrganizationRow } from '@repo/database/types'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
 /**
@@ -11,38 +10,51 @@ import { userHasOrgAccess } from '#app/utils/organization/organizations.server.t
  *
  * @param request - The request object
  * @param orgSlug - The organization slug from route params
- * @param select - Prisma select object for which organization fields to return
+ * @param columns - Optional organization fields to return
  * @returns The organization with selected fields
  */
-export async function requireUserOrganization<
-	T extends Prisma.OrganizationSelect,
->(
+export function requireUserOrganization(
 	request: Request,
 	orgSlug: string | undefined,
-	select: T,
-): Promise<Prisma.OrganizationGetPayload<{ select: T }>> {
+): Promise<OrganizationRow>
+export function requireUserOrganization<K extends keyof OrganizationRow>(
+	request: Request,
+	orgSlug: string | undefined,
+	columns: Record<K, true>,
+): Promise<Pick<OrganizationRow, K>>
+export async function requireUserOrganization(
+	request: Request,
+	orgSlug: string | undefined,
+	columns?: Partial<Record<keyof OrganizationRow, true>>,
+): Promise<OrganizationRow | Partial<OrganizationRow>> {
 	const userId = await requireUserId(request)
 	invariant(orgSlug, 'orgSlug is required')
 
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: orgSlug,
-			active: true,
-			users: {
-				some: {
-					userId,
-					active: true,
-				},
-			},
-		},
-		select,
-	})
+	const [organization] = await db
+		.select()
+		.from(Organization)
+		.innerJoin(
+			UserOrganization,
+			and(
+				eq(UserOrganization.organizationId, Organization.id),
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.where(and(eq(Organization.slug, orgSlug), eq(Organization.active, true)))
+		.limit(1)
 
 	if (!organization) {
 		throw new Response('Not Found', { status: 404 })
 	}
 
-	return organization
+	const row = organization.Organization
+	if (!columns) return row
+	const selected: Partial<OrganizationRow> = {}
+	for (const key of Object.keys(columns) as Array<keyof OrganizationRow>) {
+		;(selected as Record<string, unknown>)[key as string] = row[key]
+	}
+	return selected
 }
 
 /**
@@ -62,10 +74,11 @@ export async function validateOrgAccess(
 		throw new Response('Missing orgSlug', { status: 400 })
 	}
 
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug, active: true },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(and(eq(Organization.slug, orgSlug), eq(Organization.active, true)))
+		.limit(1)
 
 	if (!organization) {
 		throw new Response('Organization not found', { status: 404 })

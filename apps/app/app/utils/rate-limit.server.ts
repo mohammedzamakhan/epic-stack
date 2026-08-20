@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { and, count, db, eq, lt, gte, RateLimitEntry } from '@repo/database'
 
 /**
  * Rate limiting utility for MCP OAuth endpoints
@@ -59,37 +59,37 @@ export async function checkRateLimit(
 
 	try {
 		// Clean up old entries outside the window
-		await prisma.rateLimitEntry.deleteMany({
-			where: {
-				keyId,
-				createdAt: {
-					lt: windowStart,
-				},
-			},
-		})
+		await db
+			.delete(RateLimitEntry)
+			.where(
+				and(
+					eq(RateLimitEntry.keyId, keyId),
+					lt(RateLimitEntry.createdAt, windowStart),
+				),
+			)
 
 		// Count requests in the current window
-		const count = await prisma.rateLimitEntry.count({
-			where: {
-				keyId,
-				createdAt: {
-					gte: windowStart,
-				},
-			},
-		})
+		const [countRow] = await db
+			.select({ value: count() })
+			.from(RateLimitEntry)
+			.where(
+				and(
+					eq(RateLimitEntry.keyId, keyId),
+					gte(RateLimitEntry.createdAt, windowStart),
+				),
+			)
+		const requestCount = countRow?.value ?? 0
 
-		const allowed = count < config.maxRequests
-		const remaining = Math.max(0, config.maxRequests - count - 1)
+		const allowed = requestCount < config.maxRequests
+		const remaining = Math.max(0, config.maxRequests - requestCount - 1)
 		const resetAt = new Date(windowStart.getTime() + config.windowMs)
 
 		// If allowed, record this request
 		if (allowed) {
-			await prisma.rateLimitEntry.create({
-				data: {
-					keyId,
-					keyType: key.type,
-					keyValue: key.value,
-				},
+			await db.insert(RateLimitEntry).values({
+				keyId,
+				keyType: key.type,
+				keyValue: key.value,
 			})
 		}
 

@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
@@ -6,12 +6,12 @@ import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 describe('Rate Limiting', () => {
 	beforeEach(async () => {
 		// Clean up rate limit entries before each test
-		await prisma.rateLimitEntry.deleteMany({})
+		await db.rateLimitEntry.deleteMany({})
 	})
 
 	afterEach(async () => {
 		// Clean up after each test
-		await prisma.rateLimitEntry.deleteMany({})
+		await db.rateLimitEntry.deleteMany({})
 	})
 
 	describe('Authorization Rate Limit (10 per hour per user)', () => {
@@ -250,7 +250,7 @@ describe('Rate Limiting', () => {
 			const now = Date.now()
 
 			// Create an entry that's outside the window
-			await prisma.rateLimitEntry.create({
+			await db.rateLimitEntry.create({
 				data: {
 					keyId: `user:${userId}`,
 					keyType: 'user',
@@ -260,7 +260,7 @@ describe('Rate Limiting', () => {
 			})
 
 			// Verify old entry exists
-			let count = await prisma.rateLimitEntry.count({
+			let count = await db.rateLimitEntry.count({
 				where: { keyId: `user:${userId}` },
 			})
 			expect(count).toBe(1)
@@ -272,7 +272,7 @@ describe('Rate Limiting', () => {
 			)
 
 			// Old entry should be deleted
-			count = await prisma.rateLimitEntry.count({
+			count = await db.rateLimitEntry.count({
 				where: { keyId: `user:${userId}` },
 			})
 			expect(count).toBe(1) // Only the new entry

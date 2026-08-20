@@ -2,7 +2,18 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { auditService, AuditAction } from '@repo/audit'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	DataSubjectRequest,
+	User,
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	inArray,
+	like,
+	or,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -47,50 +58,78 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const statusFilter = url.searchParams.get('status') || undefined
 	const search = url.searchParams.get('search') || undefined
 
-	const where: Record<string, unknown> = {}
-	if (typeFilter) where.type = typeFilter
-	if (statusFilter) where.status = statusFilter
-	if (search) {
-		where.user = {
-			OR: [
-				{ email: { contains: search } },
-				{ username: { contains: search } },
-				{ name: { contains: search } },
-			],
-		}
-	}
+	const matchingUserIds = search
+		? await db
+				.select({ id: User.id })
+				.from(User)
+				.where(
+					or(
+						like(User.email, `%${search}%`),
+						like(User.username, `%${search}%`),
+						like(User.name, `%${search}%`),
+					),
+				)
+		: []
+	const where = and(
+		typeFilter ? eq(DataSubjectRequest.type, typeFilter) : undefined,
+		statusFilter ? eq(DataSubjectRequest.status, statusFilter) : undefined,
+		search
+			? inArray(
+					DataSubjectRequest.userId,
+					matchingUserIds.map((row) => row.id),
+				)
+			: undefined,
+	)
 
 	const [requests, totalCount, statistics] = await Promise.all([
-		prisma.dataSubjectRequest.findMany({
+		db.query.DataSubjectRequest.findMany({
 			where,
-			include: {
-				user: {
-					select: {
-						id: true,
-						email: true,
-						username: true,
-						name: true,
-					},
-				},
-			},
-			orderBy: { requestedAt: 'desc' },
-			skip: offset,
-			take: limit,
+			with: { user: true },
+			orderBy: desc(DataSubjectRequest.requestedAt),
+			offset,
+			limit,
 		}),
-		prisma.dataSubjectRequest.count({ where }),
+		db
+			.select({ count: count() })
+			.from(DataSubjectRequest)
+			.where(where)
+			.then(([row]) => row?.count ?? 0),
 		Promise.all([
-			prisma.dataSubjectRequest.count({
-				where: { type: 'export', status: 'completed' },
-			}),
-			prisma.dataSubjectRequest.count({
-				where: { type: 'erasure', status: 'scheduled' },
-			}),
-			prisma.dataSubjectRequest.count({
-				where: { type: 'erasure', status: 'completed' },
-			}),
-			prisma.dataSubjectRequest.count({
-				where: { status: 'failed' },
-			}),
+			db
+				.select({ count: count() })
+				.from(DataSubjectRequest)
+				.where(
+					and(
+						eq(DataSubjectRequest.type, 'export'),
+						eq(DataSubjectRequest.status, 'completed'),
+					),
+				)
+				.then(([row]) => row?.count ?? 0),
+			db
+				.select({ count: count() })
+				.from(DataSubjectRequest)
+				.where(
+					and(
+						eq(DataSubjectRequest.type, 'erasure'),
+						eq(DataSubjectRequest.status, 'scheduled'),
+					),
+				)
+				.then(([row]) => row?.count ?? 0),
+			db
+				.select({ count: count() })
+				.from(DataSubjectRequest)
+				.where(
+					and(
+						eq(DataSubjectRequest.type, 'erasure'),
+						eq(DataSubjectRequest.status, 'completed'),
+					),
+				)
+				.then(([row]) => row?.count ?? 0),
+			db
+				.select({ count: count() })
+				.from(DataSubjectRequest)
+				.where(eq(DataSubjectRequest.status, 'failed'))
+				.then(([row]) => row?.count ?? 0),
 		]),
 	])
 
@@ -136,9 +175,9 @@ export async function action({ request }: ActionFunctionArgs) {
 		return Response.json({ error: 'Invalid request ID' }, { status: 400 })
 	}
 
-	const dsr = await prisma.dataSubjectRequest.findUnique({
-		where: { id: requestId },
-		include: { user: { select: { id: true, email: true } } },
+	const dsr = await db.query.DataSubjectRequest.findFirst({
+		where: eq(DataSubjectRequest.id, requestId),
+		with: { user: true },
 	})
 
 	if (!dsr) {
@@ -154,13 +193,13 @@ export async function action({ request }: ActionFunctionArgs) {
 				)
 			}
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: requestId },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'cancelled',
 					cancelledAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, requestId))
 
 			await auditService.log({
 				action: AuditAction.DATA_DELETION_CANCELLED,
@@ -185,27 +224,25 @@ export async function action({ request }: ActionFunctionArgs) {
 				)
 			}
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: requestId },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'processing',
 					processedAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, requestId))
 
 			try {
-				await prisma.user.delete({
-					where: { id: dsr.userId! },
-				})
+				await db.delete(User).where(eq(User.id, dsr.userId!))
 
-				await prisma.dataSubjectRequest.update({
-					where: { id: requestId },
-					data: {
+				await db
+					.update(DataSubjectRequest)
+					.set({
 						status: 'completed',
 						completedAt: new Date(),
 						executedAt: new Date(),
-					},
-				})
+					})
+					.where(eq(DataSubjectRequest.id, requestId))
 
 				await auditService.log({
 					action: AuditAction.DATA_DELETION_COMPLETED,
@@ -227,13 +264,13 @@ export async function action({ request }: ActionFunctionArgs) {
 				const errorMessage =
 					error instanceof Error ? error.message : 'Unknown error'
 
-				await prisma.dataSubjectRequest.update({
-					where: { id: requestId },
-					data: {
+				await db
+					.update(DataSubjectRequest)
+					.set({
 						status: 'failed',
 						failureReason: errorMessage,
-					},
-				})
+					})
+					.where(eq(DataSubjectRequest.id, requestId))
 
 				await auditService.log({
 					action: AuditAction.DATA_DELETION_FAILED,
@@ -253,16 +290,18 @@ export async function action({ request }: ActionFunctionArgs) {
 		case 'export-for-user': {
 			const userId = dsr.userId!
 
-			const newDsr = await prisma.dataSubjectRequest.create({
-				data: {
+			const [newDsr] = await db
+				.insert(DataSubjectRequest)
+				.values({
 					userId,
 					type: 'export',
 					status: 'completed',
 					processedAt: new Date(),
 					completedAt: new Date(),
 					metadata: JSON.stringify({ adminInitiated: true, adminId }),
-				},
-			})
+				})
+				.returning({ id: DataSubjectRequest.id })
+			if (!newDsr) throw new Error('Could not create export request')
 
 			await auditService.log({
 				action: AuditAction.DATA_EXPORT_COMPLETED,

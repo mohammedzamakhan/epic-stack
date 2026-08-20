@@ -1,5 +1,5 @@
 import '#tests/setup/setup-test-env.ts'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { getTool, type MCPContext } from './server.server'
@@ -9,7 +9,7 @@ import './tools.server' // Import to register tools
  * Helper to add a user to an organization
  */
 async function addUserToOrganization(userId: string, organizationId: string) {
-	const memberRole = await prisma.organizationRole.create({
+	const memberRole = await db.organizationRole.create({
 		data: {
 			name: `test_member_${Date.now()}_${Math.random().toString(36).substring(7)}`,
 			description: 'Test Member role',
@@ -18,7 +18,7 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 	})
 
 	// Check if the user-organization relationship already exists
-	const existingRelation = await prisma.userOrganization.findUnique({
+	const existingRelation = await db.userOrganization.findUnique({
 		where: {
 			userId_organizationId: {
 				userId,
@@ -28,7 +28,7 @@ async function addUserToOrganization(userId: string, organizationId: string) {
 	})
 
 	if (!existingRelation) {
-		await prisma.userOrganization.create({
+		await db.userOrganization.create({
 			data: {
 				userId,
 				organizationId,
@@ -53,7 +53,7 @@ describe('MCP Tools Service', () => {
 		testOrgSlug = `test-org-mcp-tools-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
 		// Create test user and organization with unique slug
-		testUser = await prisma.user.create({
+		testUser = await db.user.create({
 			data: {
 				email: `test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
 				username: `testuser-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -61,7 +61,7 @@ describe('MCP Tools Service', () => {
 			},
 		})
 
-		testOrganization = await prisma.organization.create({
+		testOrganization = await db.organization.create({
 			data: {
 				name: 'Test Organization',
 				slug: testOrgSlug,
@@ -78,21 +78,21 @@ describe('MCP Tools Service', () => {
 		// Clean up test data by specific IDs to avoid affecting parallel tests
 		try {
 			if (testOrganization?.id) {
-				await prisma.organizationNote.deleteMany({
+				await db.organizationNote.deleteMany({
 					where: { organizationId: testOrganization.id },
 				})
-				await prisma.noteAccess.deleteMany({
+				await db.noteAccess.deleteMany({
 					where: { note: { organizationId: testOrganization.id } },
 				})
-				await prisma.userOrganization.deleteMany({
+				await db.userOrganization.deleteMany({
 					where: { organizationId: testOrganization.id },
 				})
-				await prisma.organization.deleteMany({
+				await db.organization.deleteMany({
 					where: { id: testOrganization.id },
 				})
 			}
 			if (testUser?.id) {
-				await prisma.user.deleteMany({
+				await db.user.deleteMany({
 					where: { id: testUser.id },
 				})
 			}
@@ -118,7 +118,7 @@ describe('MCP Tools Service', () => {
 
 		it('should find users by name', async () => {
 			// Create additional users in the same organization
-			const user2 = await prisma.user.create({
+			const user2 = await db.user.create({
 				data: {
 					email: 'alice@example.com',
 					username: 'alice',
@@ -137,7 +137,7 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should find users by username', async () => {
-			const user2 = await prisma.user.create({
+			const user2 = await db.user.create({
 				data: {
 					email: 'bob@example.com',
 					username: 'bobsmith',
@@ -175,7 +175,7 @@ describe('MCP Tools Service', () => {
 				// Create 15 users in the organization
 				for (let i = 0; i < 15; i++) {
 					const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}-${i}`
-					const user = await prisma.user.create({
+					const user = await db.user.create({
 						data: {
 							email: `limit-user-${uniqueSuffix}@example.com`,
 							username: `limit-user-${uniqueSuffix}`,
@@ -197,10 +197,10 @@ describe('MCP Tools Service', () => {
 			} finally {
 				// Clean up extra users
 				if (extraUsers.length > 0) {
-					await prisma.userOrganization.deleteMany({
+					await db.userOrganization.deleteMany({
 						where: { userId: { in: extraUsers } },
 					})
-					await prisma.user.deleteMany({
+					await db.user.deleteMany({
 						where: { id: { in: extraUsers } },
 					})
 				}
@@ -242,7 +242,7 @@ describe('MCP Tools Service', () => {
 
 		it('should return notes for user', async () => {
 			// Create a note for the test user
-			const note = await prisma.organizationNote.create({
+			const note = await db.organizationNote.create({
 				data: {
 					title: 'Test Note',
 					content: 'This is a test note',
@@ -253,7 +253,7 @@ describe('MCP Tools Service', () => {
 			})
 
 			// Ensure the note is committed and visible
-			const verifyNote = await prisma.organizationNote.findUnique({
+			const verifyNote = await db.organizationNote.findUnique({
 				where: { id: note.id },
 			})
 			expect(verifyNote).toBeDefined()
@@ -269,12 +269,12 @@ describe('MCP Tools Service', () => {
 			expect(result?.content![0]!.text).toContain('This is a test note')
 
 			// Clean up
-			await prisma.organizationNote.delete({ where: { id: note.id } })
+			await db.organizationNote.delete({ where: { id: note.id } })
 		})
 
 		it('should return no notes message when user has no notes', async () => {
 			// Create another user with no notes
-			const user2 = await prisma.user.create({
+			const user2 = await db.user.create({
 				data: {
 					email: 'notnotes@example.com',
 					username: 'notnotes',
@@ -292,7 +292,7 @@ describe('MCP Tools Service', () => {
 
 		it('should only return public notes or notes shared with user', async () => {
 			// Create another user
-			const user2 = await prisma.user.create({
+			const user2 = await db.user.create({
 				data: {
 					email: 'other@example.com',
 					username: 'other',
@@ -303,7 +303,7 @@ describe('MCP Tools Service', () => {
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
 			// Create a public note
-			await prisma.organizationNote.create({
+			await db.organizationNote.create({
 				data: {
 					title: 'Public Note',
 					content: 'Public content',
@@ -314,7 +314,7 @@ describe('MCP Tools Service', () => {
 			})
 
 			// Create a private note not shared with mockContext.user
-			await prisma.organizationNote.create({
+			await db.organizationNote.create({
 				data: {
 					title: 'Private Note',
 					content: 'Private content',
@@ -349,7 +349,7 @@ describe('MCP Tools Service', () => {
 						.filter((s) => /^[a-z]+$/.test(s)),
 					async (searchQuery) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
+						const otherOrg = await db.organization.create({
 							data: {
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
@@ -357,7 +357,7 @@ describe('MCP Tools Service', () => {
 						})
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
+						const otherUser = await db.user.create({
 							data: {
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
@@ -368,7 +368,7 @@ describe('MCP Tools Service', () => {
 						await addUserToOrganization(otherUser.id, otherOrg.id)
 
 						// Create a user in the test organization
-						const testUser = await prisma.user.create({
+						const testUser = await db.user.create({
 							data: {
 								email: `test-${Date.now()}@example.com`,
 								username: `test-${Date.now()}`,
@@ -401,7 +401,7 @@ describe('MCP Tools Service', () => {
 									const match = userText?.match(/\(([^)]+)\)/)
 									const username = match?.[1]
 									if (username) {
-										const user = await prisma.user.findUnique({
+										const user = await db.user.findUnique({
 											where: { username },
 											include: {
 												organizations: {
@@ -418,15 +418,15 @@ describe('MCP Tools Service', () => {
 							}
 						} finally {
 							// Clean up
-							await prisma.userOrganization.deleteMany({
+							await db.userOrganization.deleteMany({
 								where: { userId: otherUser.id },
 							})
-							await prisma.userOrganization.deleteMany({
+							await db.userOrganization.deleteMany({
 								where: { userId: testUser.id },
 							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.user.delete({ where: { id: testUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db.user.delete({ where: { id: otherUser.id } })
+							await db.user.delete({ where: { id: testUser.id } })
+							await db.organization.delete({ where: { id: otherOrg.id } })
 						}
 					},
 				),
@@ -451,7 +451,7 @@ describe('MCP Tools Service', () => {
 						// Create multiple notes
 						const notes = []
 						for (let i = 0; i < noteCount; i++) {
-							const note = await prisma.organizationNote.create({
+							const note = await db.organizationNote.create({
 								data: {
 									title: `Note ${i}`,
 									content: `Content ${i}`,
@@ -492,7 +492,7 @@ describe('MCP Tools Service', () => {
 							}
 						} finally {
 							// Clean up
-							await prisma.organizationNote.deleteMany({
+							await db.organizationNote.deleteMany({
 								where: {
 									organizationId: mockContext.organization.id,
 									createdById: mockContext.user.id,
@@ -521,7 +521,7 @@ describe('MCP Tools Service', () => {
 					fc.string({ minLength: 1, maxLength: 20 }),
 					async (noteTitle) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
+						const otherOrg = await db.organization.create({
 							data: {
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
@@ -529,7 +529,7 @@ describe('MCP Tools Service', () => {
 						})
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
+						const otherUser = await db.user.create({
 							data: {
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
@@ -540,7 +540,7 @@ describe('MCP Tools Service', () => {
 						await addUserToOrganization(otherUser.id, otherOrg.id)
 
 						// Create a note in the other organization
-						const otherNote = await prisma.organizationNote.create({
+						const otherNote = await db.organizationNote.create({
 							data: {
 								title: noteTitle,
 								content: 'Other org content',
@@ -561,14 +561,14 @@ describe('MCP Tools Service', () => {
 							expect(result?.content![0]!.text).toContain('User not found')
 						} finally {
 							// Clean up
-							await prisma.organizationNote.delete({
+							await db.organizationNote.delete({
 								where: { id: otherNote.id },
 							})
-							await prisma.userOrganization.deleteMany({
+							await db.userOrganization.deleteMany({
 								where: { userId: otherUser.id },
 							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db.user.delete({ where: { id: otherUser.id } })
+							await db.organization.delete({ where: { id: otherOrg.id } })
 						}
 					},
 				),
@@ -592,7 +592,7 @@ describe('MCP Tools Service', () => {
 					fc.string({ minLength: 1, maxLength: 20 }),
 					async (searchQuery) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
+						const otherOrg = await db.organization.create({
 							data: {
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
@@ -600,7 +600,7 @@ describe('MCP Tools Service', () => {
 						})
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
+						const otherUser = await db.user.create({
 							data: {
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
@@ -630,11 +630,11 @@ describe('MCP Tools Service', () => {
 							expect(foundOtherUser).toBe(false)
 						} finally {
 							// Clean up
-							await prisma.userOrganization.deleteMany({
+							await db.userOrganization.deleteMany({
 								where: { userId: otherUser.id },
 							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db.user.delete({ where: { id: otherUser.id } })
+							await db.organization.delete({ where: { id: otherOrg.id } })
 						}
 					},
 				),

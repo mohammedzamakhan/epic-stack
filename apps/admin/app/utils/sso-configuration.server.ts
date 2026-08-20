@@ -1,4 +1,9 @@
-import { prisma } from '@repo/database'
+import {
+	SSOConfiguration as SSOConfigurationTable,
+	db,
+	desc,
+	eq,
+} from '@repo/database'
 import { type SSOConfiguration } from '@repo/database/types'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
@@ -48,8 +53,9 @@ export class SSOConfigurationService {
 		const masterKey = getSSOMasterKey()
 		const encryptedSecret = encrypt(config.clientSecret, masterKey)
 
-		return prisma.sSOConfiguration.create({
-			data: {
+		const [created] = await db
+			.insert(SSOConfigurationTable)
+			.values({
 				organizationId,
 				providerName: config.providerName,
 				issuerUrl: config.issuerUrl,
@@ -64,8 +70,9 @@ export class SSOConfigurationService {
 					? JSON.stringify(config.attributeMapping)
 					: null,
 				createdById,
-			},
-		})
+			})
+			.returning()
+		return created as SSOConfiguration
 	}
 
 	/**
@@ -88,10 +95,12 @@ export class SSOConfigurationService {
 			updateData.attributeMapping = JSON.stringify(config.attributeMapping)
 		}
 
-		return prisma.sSOConfiguration.update({
-			where: { id },
-			data: updateData,
-		})
+		const [updated] = await db
+			.update(SSOConfigurationTable)
+			.set(updateData)
+			.where(eq(SSOConfigurationTable.id, id))
+			.returning()
+		return updated as SSOConfiguration
 	}
 
 	/**
@@ -100,57 +109,45 @@ export class SSOConfigurationService {
 	async getConfiguration(
 		organizationId: string,
 	): Promise<SSOConfiguration | null> {
-		return prisma.sSOConfiguration.findUnique({
-			where: { organizationId },
-			include: {
-				organization: true,
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
+		const result = await db.query.SSOConfiguration.findFirst({
+			where: eq(SSOConfigurationTable.organizationId, organizationId),
+			with: { organization: true, user: true },
 		})
+		return result
+			? ({ ...result, createdBy: result.user } as SSOConfiguration)
+			: null
 	}
 
 	/**
 	 * Get SSO configuration by ID
 	 */
 	async getConfigurationById(id: string): Promise<SSOConfiguration | null> {
-		return prisma.sSOConfiguration.findUnique({
-			where: { id },
-			include: {
-				organization: true,
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
+		const result = await db.query.SSOConfiguration.findFirst({
+			where: eq(SSOConfigurationTable.id, id),
+			with: { organization: true, user: true },
 		})
+		return result
+			? ({ ...result, createdBy: result.user } as SSOConfiguration)
+			: null
 	}
 
 	/**
 	 * Delete an SSO configuration
 	 */
 	async deleteConfiguration(id: string): Promise<void> {
-		await prisma.sSOConfiguration.delete({
-			where: { id },
-		})
+		await db
+			.delete(SSOConfigurationTable)
+			.where(eq(SSOConfigurationTable.id, id))
 	}
 
 	/**
 	 * Enable or disable SSO for an organization
 	 */
 	async toggleConfiguration(id: string, isEnabled: boolean): Promise<void> {
-		await prisma.sSOConfiguration.update({
-			where: { id },
-			data: { isEnabled },
-		})
+		await db
+			.update(SSOConfigurationTable)
+			.set({ isEnabled })
+			.where(eq(SSOConfigurationTable.id, id))
 	}
 
 	/**
@@ -209,10 +206,10 @@ export class SSOConfigurationService {
 			// Update last tested timestamp (only if config exists in database)
 			if (config.id !== 'temp-test-config') {
 				try {
-					await prisma.sSOConfiguration.update({
-						where: { id: config.id },
-						data: { lastTested: new Date() },
-					})
+					await db
+						.update(SSOConfigurationTable)
+						.set({ lastTested: new Date() })
+						.where(eq(SSOConfigurationTable.id, config.id))
 				} catch {
 					// Don't fail the test if we can't update the timestamp
 				}
@@ -278,27 +275,13 @@ export class SSOConfigurationService {
 	 * List all SSO configurations (for admin purposes)
 	 */
 	async listConfigurations(): Promise<SSOConfiguration[]> {
-		return prisma.sSOConfiguration.findMany({
-			include: {
-				organization: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
-				},
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
+		const configs = await db.query.SSOConfiguration.findMany({
+			with: { organization: true, user: true },
+			orderBy: desc(SSOConfigurationTable.createdAt),
 		})
+		return configs.map(
+			(config) => ({ ...config, createdBy: config.user }) as SSOConfiguration,
+		)
 	}
 }
 

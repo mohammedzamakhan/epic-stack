@@ -1,11 +1,10 @@
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -48,7 +47,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', () => ({
-	prisma: {
+	db: {
 		organization: {
 			findFirst: vi.fn(),
 		},
@@ -67,7 +66,7 @@ vi.mock('@repo/database', () => ({
 			updateMany: vi.fn(),
 		},
 		$transaction: vi.fn((fn: any) =>
-			Array.isArray(fn) ? Promise.all(fn) : fn(prisma),
+			Array.isArray(fn) ? Promise.all(fn) : fn(db),
 		),
 		$disconnect: vi.fn(),
 	},
@@ -82,7 +81,7 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 
 	describe('notes.statuses action (Create Status)', () => {
 		it('denies read-only roles lacking UPDATE_SETTINGS_ANY (403)', async () => {
-			vi.mocked(prisma.organization.findFirst).mockResolvedValue({
+			vi.mocked(db.organization.findFirst).mockResolvedValue({
 				id: 'org-123',
 			} as any)
 			mockRequirePermission.mockRejectedValue(
@@ -118,7 +117,7 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 
 	describe('notes.status.$statusId action (Rename / Delete Status)', () => {
 		it('denies read-only roles on PATCH (403)', async () => {
-			vi.mocked(prisma.organization.findFirst).mockResolvedValue({
+			vi.mocked(db.organization.findFirst).mockResolvedValue({
 				id: 'org-123',
 			} as any)
 			mockRequirePermission.mockRejectedValue(
@@ -152,7 +151,7 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 		})
 
 		it('denies read-only roles on DELETE (403)', async () => {
-			vi.mocked(prisma.organization.findFirst).mockResolvedValue({
+			vi.mocked(db.organization.findFirst).mockResolvedValue({
 				id: 'org-123',
 			} as any)
 			mockRequirePermission.mockRejectedValue(
@@ -182,12 +181,12 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 		})
 
 		it('allows permitted role on PATCH rename and returns updated status', async () => {
-			vi.mocked(prisma.organization.findFirst).mockResolvedValue({
+			vi.mocked(db.organization.findFirst).mockResolvedValue({
 				id: 'org-123',
 			} as any)
 			mockRequirePermission.mockResolvedValue('user-123')
-			vi.mocked(prisma.organizationNoteStatus.findFirst).mockResolvedValue(null)
-			vi.mocked(prisma.organizationNoteStatus.update).mockResolvedValue({
+			vi.mocked(db.organizationNoteStatus.findFirst).mockResolvedValue(null)
+			vi.mocked(db.organizationNoteStatus.update).mockResolvedValue({
 				id: 'status-1',
 				name: 'Renamed',
 				color: null,
@@ -221,7 +220,7 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 		})
 
 		it('allows permitted role on DELETE and updates notes statusId to null', async () => {
-			vi.mocked(prisma.organization.findFirst).mockResolvedValue({
+			vi.mocked(db.organization.findFirst).mockResolvedValue({
 				id: 'org-123',
 			} as any)
 			mockRequirePermission.mockResolvedValue('user-123')
@@ -285,11 +284,11 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 		it('allows permitted role on status reorder (204)', async () => {
 			vi.mocked(validateOrgAccess).mockResolvedValue({ id: 'org-123' } as any)
 			mockRequirePermission.mockResolvedValue('user-123')
-			vi.mocked(prisma.organizationNoteStatus.findFirst).mockResolvedValue({
+			vi.mocked(db.organizationNoteStatus.findFirst).mockResolvedValue({
 				id: 'status-1',
 				organizationId: 'org-123',
 			} as any)
-			vi.mocked(prisma.organizationNoteStatus.findMany).mockResolvedValue([
+			vi.mocked(db.organizationNoteStatus.findMany).mockResolvedValue([
 				{ id: 'status-2', position: 100 },
 			] as any)
 
@@ -323,7 +322,7 @@ describe('Kanban Routes Authorization (WO-88)', () => {
 	describe('notes.reorder action (Reorder Notes)', () => {
 		it('denies read-only user updating a note created by another user when lacking UPDATE_NOTE_ANY (403)', async () => {
 			vi.mocked(validateOrgAccess).mockResolvedValue({ id: 'org-123' } as any)
-			vi.mocked(prisma.organizationNote.findFirst).mockResolvedValue({
+			vi.mocked(db.organizationNote.findFirst).mockResolvedValue({
 				id: 'note-456',
 				createdById: 'user-other',
 			} as any)

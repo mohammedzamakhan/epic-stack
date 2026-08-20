@@ -1,4 +1,12 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	Organization,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
 import { getDefaultConfig } from './block-types.ts'
 
 /**
@@ -7,35 +15,48 @@ import { getDefaultConfig } from './block-types.ts'
  * the same header and footer.
  */
 export async function ensureSiteChrome(organizationId: string) {
-	const organization = await prisma.organization.findUnique({
-		where: { id: organizationId },
-		select: { siteHeaderConfig: true, siteFooterConfig: true },
-	})
+	const [organization] = await db
+		.select({
+			siteHeaderConfig: Organization.siteHeaderConfig,
+			siteFooterConfig: Organization.siteFooterConfig,
+		})
+		.from(Organization)
+		.where(eq(Organization.id, organizationId))
+		.limit(1)
 	if (!organization) return
 
 	let headerConfig = organization.siteHeaderConfig
 	let footerConfig = organization.siteFooterConfig
 
 	if (!headerConfig || !footerConfig) {
-		const pages = await prisma.websitePage.findMany({
-			where: { organizationId },
-			orderBy: [{ isHomePage: 'desc' }, { position: 'asc' }],
-			select: {
-				sections: {
-					where: { type: { in: ['header', 'footer'] } },
-					orderBy: { createdAt: 'asc' },
-					select: { type: true, config: true },
-				},
-			},
-		})
-		for (const page of pages) {
-			for (const section of page.sections) {
-				if (section.type === 'header' && !headerConfig) {
-					headerConfig = section.config
-				}
-				if (section.type === 'footer' && !footerConfig) {
-					footerConfig = section.config
-				}
+		const pages = await db
+			.select({ id: WebsitePage.id })
+			.from(WebsitePage)
+			.where(eq(WebsitePage.organizationId, organizationId))
+			.orderBy(WebsitePage.isHomePage, WebsitePage.position)
+		const pageIds = pages.map((page) => page.id)
+		const sections =
+			pageIds.length > 0
+				? await db
+						.select({
+							type: WebsitePageSection.type,
+							config: WebsitePageSection.config,
+						})
+						.from(WebsitePageSection)
+						.where(
+							and(
+								inArray(WebsitePageSection.pageId, pageIds),
+								inArray(WebsitePageSection.type, ['header', 'footer']),
+							),
+						)
+						.orderBy(WebsitePageSection.createdAt)
+				: []
+		for (const section of sections) {
+			if (section.type === 'header' && !headerConfig) {
+				headerConfig = section.config
+			}
+			if (section.type === 'footer' && !footerConfig) {
+				footerConfig = section.config
 			}
 		}
 	}
@@ -47,19 +68,28 @@ export async function ensureSiteChrome(organizationId: string) {
 		organization.siteHeaderConfig !== nextHeader ||
 		organization.siteFooterConfig !== nextFooter
 	) {
-		await prisma.organization.update({
-			where: { id: organizationId },
-			data: {
+		await db
+			.update(Organization)
+			.set({
 				siteHeaderConfig: nextHeader,
 				siteFooterConfig: nextFooter,
-			},
-		})
+			})
+			.where(eq(Organization.id, organizationId))
 	}
 
-	await prisma.websitePageSection.deleteMany({
-		where: {
-			type: { in: ['header', 'footer'] },
-			page: { organizationId },
-		},
-	})
+	const pages = await db
+		.select({ id: WebsitePage.id })
+		.from(WebsitePage)
+		.where(eq(WebsitePage.organizationId, organizationId))
+	const pageIds = pages.map((page) => page.id)
+	if (pageIds.length > 0) {
+		await db
+			.delete(WebsitePageSection)
+			.where(
+				and(
+					inArray(WebsitePageSection.pageId, pageIds),
+					inArray(WebsitePageSection.type, ['header', 'footer']),
+				),
+			)
+	}
 }

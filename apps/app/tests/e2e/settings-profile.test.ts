@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { verifyUserPassword } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, createUser, waitFor } from '#tests/playwright-utils.ts'
 
@@ -177,7 +177,7 @@ test('Users can change their email address', async ({
 	await page.getByRole('button', { name: 'Verify' }).click()
 	await expect(page.getByText(/email changed/i)).toBeVisible()
 
-	const updatedUser = await prisma.user.findUnique({
+	const updatedUser = await db.user.findUnique({
 		where: { id: preUpdateUser.id },
 		select: { email: true },
 	})

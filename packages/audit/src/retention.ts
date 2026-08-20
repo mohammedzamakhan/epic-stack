@@ -1,4 +1,12 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	AuditLog,
+	AuditLogRetentionPolicy,
+	db,
+	eq,
+	isNull,
+	lt,
+} from '@repo/database'
 import { logger } from '@repo/observability'
 
 export class AuditRetentionManager {
@@ -28,10 +36,11 @@ export class AuditRetentionManager {
 		let retentionDays = 365
 
 		if (organizationId) {
-			const policy = await prisma.auditLogRetentionPolicy.findUnique({
-				where: { organizationId },
-				select: { retentionDays: true },
-			})
+			const [policy] = await db
+				.select({ retentionDays: AuditLogRetentionPolicy.retentionDays })
+				.from(AuditLogRetentionPolicy)
+				.where(eq(AuditLogRetentionPolicy.organizationId, organizationId))
+				.limit(1)
 			if (policy) {
 				retentionDays = policy.retentionDays
 			}
@@ -43,9 +52,11 @@ export class AuditRetentionManager {
 	}
 
 	async getRetentionPolicy(organizationId: string) {
-		const policy = await prisma.auditLogRetentionPolicy.findUnique({
-			where: { organizationId },
-		})
+		const [policy] = await db
+			.select()
+			.from(AuditLogRetentionPolicy)
+			.where(eq(AuditLogRetentionPolicy.organizationId, organizationId))
+			.limit(1)
 
 		if (policy) {
 			return {
@@ -76,18 +87,22 @@ export class AuditRetentionManager {
 			complianceType?: string | null
 		},
 	) {
-		return prisma.auditLogRetentionPolicy.upsert({
-			where: { organizationId },
-			create: {
-				organizationId,
-				retentionDays: data.retentionDays ?? 365,
-				hotStorageDays: data.hotStorageDays ?? 90,
-				archiveEnabled: data.archiveEnabled ?? true,
-				exportEnabled: data.exportEnabled ?? true,
-				complianceType: data.complianceType ?? null,
-			},
-			update: data,
-		})
+		const values = {
+			organizationId,
+			retentionDays: data.retentionDays ?? 365,
+			hotStorageDays: data.hotStorageDays ?? 90,
+			archiveEnabled: data.archiveEnabled ?? true,
+			exportEnabled: data.exportEnabled ?? true,
+			complianceType: data.complianceType ?? null,
+		}
+		return db
+			.insert(AuditLogRetentionPolicy)
+			.values(values)
+			.onConflictDoUpdate({
+				target: AuditLogRetentionPolicy.organizationId,
+				set: data,
+			})
+			.returning()
 	}
 
 	/**
@@ -96,14 +111,14 @@ export class AuditRetentionManager {
 	async archiveOldLogs(): Promise<{ archived: number; deleted: number }> {
 		const now = new Date()
 
-		const policiesToProcess = await prisma.auditLogRetentionPolicy.findMany({
-			where: { archiveEnabled: true },
-			select: {
-				organizationId: true,
-				hotStorageDays: true,
-				retentionDays: true,
-			},
-		})
+		const policiesToProcess = await db
+			.select({
+				organizationId: AuditLogRetentionPolicy.organizationId,
+				hotStorageDays: AuditLogRetentionPolicy.hotStorageDays,
+				retentionDays: AuditLogRetentionPolicy.retentionDays,
+			})
+			.from(AuditLogRetentionPolicy)
+			.where(eq(AuditLogRetentionPolicy.archiveEnabled, true))
 
 		let totalArchived = 0
 		let totalDeleted = 0
@@ -114,38 +129,40 @@ export class AuditRetentionManager {
 				archiveThreshold.getDate() - policy.hotStorageDays,
 			)
 
-			const archiveResult = await prisma.auditLog.updateMany({
-				where: {
-					organizationId: policy.organizationId,
-					archived: false,
-					createdAt: { lt: archiveThreshold },
-				},
-				data: { archived: true },
-			})
-			totalArchived += archiveResult.count
+			const archiveResult = await db
+				.update(AuditLog)
+				.set({ archived: true })
+				.where(
+					and(
+						eq(AuditLog.organizationId, policy.organizationId),
+						eq(AuditLog.archived, false),
+						lt(AuditLog.createdAt, archiveThreshold),
+					),
+				)
+			totalArchived += archiveResult.rowsAffected
 		}
 
 		// Handle logs without organization (system logs - 180 day archive threshold)
 		const systemArchiveThreshold = new Date(now)
 		systemArchiveThreshold.setDate(systemArchiveThreshold.getDate() - 180)
 
-		const systemArchiveResult = await prisma.auditLog.updateMany({
-			where: {
-				organizationId: null,
-				archived: false,
-				createdAt: { lt: systemArchiveThreshold },
-			},
-			data: { archived: true },
-		})
-		totalArchived += systemArchiveResult.count
+		const systemArchiveResult = await db
+			.update(AuditLog)
+			.set({ archived: true })
+			.where(
+				and(
+					isNull(AuditLog.organizationId),
+					eq(AuditLog.archived, false),
+					lt(AuditLog.createdAt, systemArchiveThreshold),
+				),
+			)
+		totalArchived += systemArchiveResult.rowsAffected
 
 		// Delete organization and system logs past retention period
-		const deleteResult = await prisma.auditLog.deleteMany({
-			where: {
-				retainUntil: { lt: now },
-			},
-		})
-		totalDeleted += deleteResult.count
+		const deleteResult = await db
+			.delete(AuditLog)
+			.where(lt(AuditLog.retainUntil, now))
+		totalDeleted += deleteResult.rowsAffected
 
 		logger.info(
 			{ archived: totalArchived, deleted: totalDeleted },

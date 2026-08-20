@@ -1,12 +1,9 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "../config/tsconfig.base-package.json",
+	"include": ["db.server.ts", "types.ts", "drizzle.config.ts", "src/**/*.ts"],
+	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "drizzle-introspect"],
 	"compilerOptions": {
-		"target": "ES2022",
-		"module": "ESNext",
-		"moduleResolution": "node",
-		"esModuleInterop": true
-	},
-	"ts-node": {
-		"esm": true
+		"rootDir": ".",
+		"noEmit": true
 	}
 }

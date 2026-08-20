@@ -16,8 +16,8 @@ Here are a few things you get today:
 - Email/Password Authentication with
   [cookie-based sessions](https://remix.run/utils/sessions#md-createcookiesessionstorage)
 - Tenant Sites phone OTP auth: browser calls a **regional** tenant-api; customer
-  PII stays in per-org SQLite on OCI (Ashburn / Riyadh), not in US Prisma.
-  Changing data region wipes customers (see
+  PII stays in per-org SQLite on OCI (Ashburn / Riyadh), not in the US control
+  plane. Changing data region wipes customers (see
   [tenant data residency](./tenant-data-residency.md))
 - Tenant Sites locale-prefixed internationalization (e.g. `/ar/about`) for
   published organization websites, independent of the App/Admin Lingui locales
@@ -27,7 +27,7 @@ Here are a few things you get today:
   password/password reset support
 - Progressively Enhanced and fully type safe forms with
   [Conform](https://conform.guide/)
-- Database ORM with [Prisma](https://prisma.io/)
+- SQLite database access with [Drizzle](https://orm.drizzle.team/)
 - Role-based User Permissions
 - Image storage and serving with [Tigris](https://www.tigrisdata.com/)
 - Caching via [cachified](https://npm.im/@epic-web/cachified): Both in-memory

@@ -1,6 +1,16 @@
 import { invariant } from '@epic-web/invariant'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	NoteActivityLog,
+	Organization,
+	OrganizationInvitation,
+	OrganizationNote,
+	User,
+	UserOrganization,
+	db,
+	desc,
+	eq,
+} from '@repo/database'
 import { useLoaderData } from 'react-router'
 import { AdminOrganizationDetail } from '#app/components/admin-organization-detail.tsx'
 import { type Route } from './+types/$organizationId.ts'
@@ -11,121 +21,26 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	invariant(params.organizationId, 'Organization ID is required')
 
 	// Get organization with detailed information
-	const organization = await prisma.organization.findUnique({
-		where: { id: params.organizationId },
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			description: true,
-			active: true,
-			createdAt: true,
-			updatedAt: true,
-			planName: true,
-			subscriptionStatus: true,
-			size: true,
-			stripeCustomerId: true,
-			stripeSubscriptionId: true,
-			stripeProductId: true,
-			image: {
-				select: {
-					id: true,
-					altText: true,
+	const organization = await db.query.Organization.findFirst({
+		where: eq(Organization.id, params.organizationId),
+		with: {
+			images: { limit: 1 },
+			organizations: {
+				with: {
+					organizationRole: true,
+					user: { with: { image: true } },
 				},
+				orderBy: desc(UserOrganization.createdAt),
 			},
-			users: {
-				select: {
-					organizationId: true,
-					userId: true,
-					organizationRole: {
-						select: {
-							id: true,
-							name: true,
-							level: true,
-						},
-					},
-					active: true,
-					isDefault: true,
-					createdAt: true,
-					updatedAt: true,
-					department: true,
-					user: {
-						select: {
-							id: true,
-							name: true,
-							email: true,
-							username: true,
-							image: {
-								select: {
-									id: true,
-									altText: true,
-								},
-							},
-						},
-					},
-				},
-				orderBy: { createdAt: 'desc' },
+			organizationNotes: {
+				with: { user: true },
+				orderBy: desc(OrganizationNote.updatedAt),
+				limit: 10,
 			},
-			notes: {
-				select: {
-					id: true,
-					title: true,
-					createdAt: true,
-					updatedAt: true,
-					isPublic: true,
-					createdBy: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-						},
-					},
-				},
-				orderBy: { updatedAt: 'desc' },
-				take: 10, // Show recent 10 notes
-			},
-			integrations: {
-				select: {
-					id: true,
-					providerName: true,
-					providerType: true,
-					isActive: true,
-					lastSyncAt: true,
-					createdAt: true,
-					updatedAt: true,
-				},
-				orderBy: { createdAt: 'desc' },
-			},
-			invitations: {
-				select: {
-					id: true,
-					email: true,
-					organizationRole: {
-						select: {
-							id: true,
-							name: true,
-							level: true,
-						},
-					},
-					createdAt: true,
-					expiresAt: true,
-					inviter: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-						},
-					},
-				},
-				orderBy: { createdAt: 'desc' },
-			},
-			_count: {
-				select: {
-					users: true,
-					notes: true,
-					integrations: true,
-					invitations: true,
-				},
+			integrations: true,
+			sentInvitations: {
+				with: { organizationRole: true, user: true },
+				orderBy: desc(OrganizationInvitation.createdAt),
 			},
 		},
 	})
@@ -135,46 +50,55 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	}
 
 	// Get recent activity (last 20 activities)
-	const recentActivity = await prisma.noteActivityLog.findMany({
-		where: {
-			note: {
-				organizationId: params.organizationId,
-			},
-		},
-		select: {
-			id: true,
-			action: true,
-			createdAt: true,
-			metadata: true,
-			user: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			},
-			note: {
-				select: {
-					id: true,
-					title: true,
-				},
-			},
-		},
-		orderBy: { createdAt: 'desc' },
-		take: 20,
-	})
+	const recentActivity = await db
+		.select({
+			id: NoteActivityLog.id,
+			action: NoteActivityLog.action,
+			createdAt: NoteActivityLog.createdAt,
+			metadata: NoteActivityLog.metadata,
+			user: { id: User.id, name: User.name, username: User.username },
+			note: { id: OrganizationNote.id, title: OrganizationNote.title },
+		})
+		.from(NoteActivityLog)
+		.innerJoin(
+			OrganizationNote,
+			eq(NoteActivityLog.noteId, OrganizationNote.id),
+		)
+		.innerJoin(User, eq(NoteActivityLog.userId, User.id))
+		.where(eq(OrganizationNote.organizationId, params.organizationId))
+		.orderBy(desc(NoteActivityLog.createdAt))
+		.limit(20)
 
 	return {
 		organization: {
 			...organization,
-			memberCount: organization.users.filter((u) => u.active).length,
-			totalMembers: organization._count.users,
+			image: organization.images[0] ?? null,
+			users: organization.organizations.map((membership) => ({
+				...membership,
+				user: membership.user,
+			})),
+			notes: organization.organizationNotes.map((note) => ({
+				...note,
+				createdBy: note.user,
+			})),
+			invitations: organization.sentInvitations.map((invitation) => ({
+				...invitation,
+				inviter: invitation.user,
+			})),
+			memberCount: organization.organizations.filter((u) => u.active).length,
+			totalMembers: organization.organizations.length,
 			activeIntegrations: organization.integrations.filter((i) => i.isActive)
 				.length,
-			totalIntegrations: organization._count.integrations,
-			pendingInvitations: organization.invitations.filter(
+			totalIntegrations: organization.integrations.length,
+			pendingInvitations: organization.sentInvitations.filter(
 				(i) => !i.expiresAt || i.expiresAt > new Date(),
 			).length,
+			_count: {
+				users: organization.organizations.length,
+				notes: organization.organizationNotes.length,
+				integrations: organization.integrations.length,
+				invitations: organization.sentInvitations.length,
+			},
 		},
 		recentActivity: recentActivity.map((activity) => ({
 			...activity,

@@ -4,7 +4,15 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Permission,
+	Role,
+	_PermissionToRole,
+	asc,
+	db,
+	eq,
+	and,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Breadcrumb,
@@ -56,18 +64,27 @@ const UpdateSystemRoleSchema = z.object({
 export async function loader({ params }: Route.LoaderArgs) {
 	invariant(params.roleId, 'Role ID is required')
 
-	const role = await prisma.role.findUnique({
-		where: { id: params.roleId },
-		include: {
-			permissions: {
-				where: { context: 'system' },
-				orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-			},
-			_count: {
-				select: { users: true },
-			},
+	const result = await db.query.Role.findFirst({
+		where: eq(Role.id, params.roleId),
+		with: {
+			permissionToRoles: { with: { permission: true } },
+			roleToUsers: true,
 		},
 	})
+	const role = result
+		? {
+				...result,
+				permissions: result.permissionToRoles
+					.filter(({ permission }) => permission.context === 'system')
+					.map(({ permission }) => permission)
+					.sort(
+						(a, b) =>
+							a.entity.localeCompare(b.entity) ||
+							a.action.localeCompare(b.action),
+					),
+				_count: { users: result.roleToUsers.length },
+			}
+		: null
 
 	if (!role) {
 		throw new Response('Role not found', { status: 404 })
@@ -75,10 +92,11 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 	return {
 		role,
-		allPermissions: await prisma.permission.findMany({
-			where: { context: 'system' },
-			orderBy: [{ entity: 'asc' }, { action: 'asc' }],
-		}),
+		allPermissions: await db
+			.select()
+			.from(Permission)
+			.where(eq(Permission.context, 'system'))
+			.orderBy(asc(Permission.entity), asc(Permission.action)),
 	}
 }
 
@@ -98,13 +116,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 	try {
 		switch (intent) {
 			case 'update-basic': {
-				await prisma.role.update({
-					where: { id: params.roleId },
-					data: {
+				await db
+					.update(Role)
+					.set({
 						...(name && { name }),
 						...(description && { description }),
-					},
-				})
+					})
+					.where(eq(Role.id, params.roleId))
 				return { result: submission.reply(), success: true }
 			}
 
@@ -118,14 +136,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 					}
 				}
 
-				await prisma.role.update({
-					where: { id: params.roleId },
-					data: {
-						permissions: {
-							connect: { id: permissionId },
-						},
-					},
-				})
+				await db
+					.insert(_PermissionToRole)
+					.values({ A: permissionId, B: params.roleId })
 				return { result: submission.reply(), success: true }
 			}
 
@@ -139,14 +152,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 					}
 				}
 
-				await prisma.role.update({
-					where: { id: params.roleId },
-					data: {
-						permissions: {
-							disconnect: { id: permissionId },
-						},
-					},
-				})
+				await db
+					.delete(_PermissionToRole)
+					.where(
+						and(
+							eq(_PermissionToRole.A, permissionId),
+							eq(_PermissionToRole.B, params.roleId),
+						),
+					)
 				return { result: submission.reply(), success: true }
 			}
 
@@ -161,9 +174,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 					}
 				}
 
-				await prisma.role.delete({
-					where: { id: params.roleId },
-				})
+				await db.delete(Role).where(eq(Role.id, params.roleId))
 				return Response.redirect('/roles')
 			}
 		}

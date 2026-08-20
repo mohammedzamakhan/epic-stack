@@ -36,28 +36,30 @@ The Epic Stack maintains a hybrid approach to image storage:
 The database schema maintains references to images while the actual binary data
 lives in Tigris:
 
-```prisma
-model UserImage {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  objectKey   String   // Reference to the image in Tigris
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+```typescript
+export const userImage = sqliteTable(
+	'UserImage',
+	{
+		id: text('id').primaryKey(),
+		userId: text('userId').notNull(),
+		objectKey: text('objectKey').notNull(), // Reference to the image in Tigris
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).notNull(),
+	},
+	(table) => [index('UserImage_userId_idx').on(table.userId)],
+)
 
-  @@index([userId])
-}
-
-model NoteImage {
-  id          String   @id @default(cuid())
-  noteId      String
-  note        Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  objectKey   String   // Reference to the image in Tigris
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([noteId])
-}
+export const noteImage = sqliteTable(
+	'NoteImage',
+	{
+		id: text('id').primaryKey(),
+		noteId: text('noteId').notNull(),
+		objectKey: text('objectKey').notNull(), // Reference to the image in Tigris
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).notNull(),
+	},
+	(table) => [index('NoteImage_noteId_idx').on(table.noteId)],
+)
 ```
 
 ### Image Upload Flow

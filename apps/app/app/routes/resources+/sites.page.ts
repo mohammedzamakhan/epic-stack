@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { and, db, eq, inArray, Organization } from '@repo/database'
 import { getClientLocales } from '@repo/i18n/server'
 import { getClientIp } from '@repo/security'
 import { type LoaderFunctionArgs } from 'react-router'
@@ -51,38 +51,47 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	let headerConfig: string | null = null
 	let footerConfig: string | null = null
 	if (slug) {
-		const org = await prisma.organization.findFirst({
-			where: {
-				slug: slug.trim().toLowerCase(),
-				active: true,
-				sitePublished: true,
-			},
-			select: {
-				id: true,
-				siteDefaultLocale: true,
-				siteHeaderConfig: true,
-				siteFooterConfig: true,
-			},
-		})
+		const [org] = await db
+			.select({
+				id: Organization.id,
+				siteDefaultLocale: Organization.siteDefaultLocale,
+				siteHeaderConfig: Organization.siteHeaderConfig,
+				siteFooterConfig: Organization.siteFooterConfig,
+			})
+			.from(Organization)
+			.where(
+				and(
+					eq(Organization.slug, slug.trim().toLowerCase()),
+					eq(Organization.active, true),
+					eq(Organization.sitePublished, true),
+				),
+			)
+			.limit(1)
 		orgId = org?.id
 		defaultLocale = org?.siteDefaultLocale ?? 'en'
 		headerConfig = org?.siteHeaderConfig ?? null
 		footerConfig = org?.siteFooterConfig ?? null
 	} else if (host) {
-		const org = await prisma.organization.findFirst({
-			where: {
-				customDomain: host.trim().toLowerCase().split(':')[0],
-				active: true,
-				sitePublished: true,
-				customDomainStatus: { in: ['active', 'pending'] },
-			},
-			select: {
-				id: true,
-				siteDefaultLocale: true,
-				siteHeaderConfig: true,
-				siteFooterConfig: true,
-			},
-		})
+		const [org] = await db
+			.select({
+				id: Organization.id,
+				siteDefaultLocale: Organization.siteDefaultLocale,
+				siteHeaderConfig: Organization.siteHeaderConfig,
+				siteFooterConfig: Organization.siteFooterConfig,
+			})
+			.from(Organization)
+			.where(
+				and(
+					eq(
+						Organization.customDomain,
+						host.trim().toLowerCase().split(':')[0]!,
+					),
+					eq(Organization.active, true),
+					eq(Organization.sitePublished, true),
+					inArray(Organization.customDomainStatus, ['active', 'pending']),
+				),
+			)
+			.limit(1)
 		orgId = org?.id
 		defaultLocale = org?.siteDefaultLocale ?? 'en'
 		headerConfig = org?.siteHeaderConfig ?? null

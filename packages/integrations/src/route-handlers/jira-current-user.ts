@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { Integration as IntegrationTable, and, db, eq } from '@repo/database'
 import { integrationManager, JiraProvider } from '../index'
 import { type LoaderFunctionArgs } from 'react-router'
 
@@ -65,12 +65,16 @@ export async function handleJiraCurrentUser(
 
 	try {
 		// Verify the integration belongs to this organization
-		const integration = await prisma.integration.findUnique({
-			where: {
-				id: integrationId,
-				organizationId: defaultOrg.organization.id,
-			},
-		})
+		const [integration] = await db
+			.select()
+			.from(IntegrationTable)
+			.where(
+				and(
+					eq(IntegrationTable.id, integrationId),
+					eq(IntegrationTable.organizationId, defaultOrg.organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!integration || integration.providerName !== 'jira') {
 			return Response.json(

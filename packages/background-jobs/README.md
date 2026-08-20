@@ -71,24 +71,27 @@ const handle = await triggerVideoProcessing({
 
 The package expects these database models:
 
-```prisma
-model OrganizationNoteVideo {
-  id           String           @id @default(cuid())
-  altText      String?
-  objectKey    String
-  thumbnailKey String?
-  duration     Int?
-  fileSize     Int?
-  mimeType     String?
-  status       String           @default("processing") // processing, completed, failed
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  noteId       String
-  note         OrganizationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-
-  @@index([noteId])
-  @@index([status])
-}
+```typescript
+export const organizationNoteVideo = sqliteTable(
+	'OrganizationNoteVideo',
+	{
+		id: text('id').primaryKey(),
+		altText: text('altText'),
+		objectKey: text('objectKey').notNull(),
+		thumbnailKey: text('thumbnailKey'),
+		duration: integer('duration'),
+		fileSize: integer('fileSize'),
+		mimeType: text('mimeType'),
+		status: text('status').notNull().default('processing'),
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).notNull(),
+		noteId: text('noteId').notNull(),
+	},
+	(table) => [
+		index('OrganizationNoteVideo_noteId_idx').on(table.noteId),
+		index('OrganizationNoteVideo_status_idx').on(table.status),
+	],
+)
 ```
 
 ## Deployment

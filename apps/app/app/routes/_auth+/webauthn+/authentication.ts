@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db, eq, Passkey, Session } from '@repo/database'
 import {
 	generateAuthenticationOptions,
 	verifyAuthenticationResponse,
@@ -46,11 +46,12 @@ export async function action({ request }: Route.ActionArgs) {
 
 		// Wrap read-verify-update in a transaction to prevent race conditions
 		// that could allow replay attacks with the same counter value
-		const { passkey } = await prisma.$transaction(async (tx) => {
-			const passkey = await tx.passkey.findUnique({
-				where: { id: authResponse.id },
-				include: { user: true },
-			})
+		const { passkey } = await db.transaction(async (tx) => {
+			const [passkey] = await tx
+				.select()
+				.from(Passkey)
+				.where(eq(Passkey.id, authResponse.id))
+				.limit(1)
 			if (!passkey) {
 				throw new Error('Passkey not found')
 			}
@@ -62,7 +63,7 @@ export async function action({ request }: Route.ActionArgs) {
 				expectedRPID: config.rpID,
 				credential: {
 					id: authResponse.id,
-					publicKey: passkey.publicKey,
+					publicKey: Uint8Array.from(passkey.publicKey),
 					counter: Number(passkey.counter),
 				},
 			})
@@ -72,10 +73,10 @@ export async function action({ request }: Route.ActionArgs) {
 			}
 
 			// Update the authenticator's counter in the DB to the newest count
-			await tx.passkey.update({
-				where: { id: passkey.id },
-				data: { counter: BigInt(verification.authenticationInfo.newCounter) },
-			})
+			await tx
+				.update(Passkey)
+				.set({ counter: verification.authenticationInfo.newCounter })
+				.where(eq(Passkey.id, passkey.id))
 
 			return { passkey }
 		})
@@ -99,15 +100,20 @@ export async function action({ request }: Route.ActionArgs) {
 		const ipAddress = getClientIp(request)
 		const userAgent = getUserAgent(request)
 
-		const session = await prisma.session.create({
-			select: { id: true, expirationDate: true, userId: true },
-			data: {
+		const [session] = await db
+			.insert(Session)
+			.values({
 				expirationDate: getSessionExpirationDate(remember),
 				userId: passkey.userId,
 				ipAddress,
 				userAgent,
-			},
-		})
+			})
+			.returning({
+				id: Session.id,
+				expirationDate: Session.expirationDate,
+				userId: Session.userId,
+			})
+		if (!session) throw new Error('Failed to create session')
 
 		const response = await handleNewSession(
 			{

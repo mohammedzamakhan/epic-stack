@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db, eq, Organization, UserOrganization } from '@repo/database'
 import { type LoaderFunctionArgs, redirect } from 'react-router'
 import type Stripe from 'stripe'
 
@@ -69,44 +69,39 @@ export async function handleStripeCheckout(
 			throw new Error("No user ID found in session's client_reference_id.")
 		}
 
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			include: { organizations: { select: { organizationId: true } } },
-		})
+		const organizations = await db
+			.select({ organizationId: UserOrganization.organizationId })
+			.from(UserOrganization)
+			.where(eq(UserOrganization.userId, userId))
 
-		if (!user) {
+		if (organizations.length === 0) {
 			throw new Error('User not found in database.')
-		}
-
-		if (user.organizations.length === 0) {
-			throw new Error('User is not associated with any tenant.')
 		}
 
 		if (!organizationId) {
 			throw new Error('Tenant not found in database.')
 		}
 
-		const isMember = user.organizations.some(
+		const isMember = organizations.some(
 			(org) => org.organizationId === organizationId,
 		)
 		if (!isMember) {
 			throw new Error('User is not authorized to update this organization.')
 		}
 
-		const tenant = await prisma.organization.update({
-			where: { id: organizationId },
-			data: {
+		const [tenant] = await db
+			.update(Organization)
+			.set({
 				stripeCustomerId: customerId,
 				stripeSubscriptionId: subscriptionId,
 				stripeProductId: productId,
 				planName: (plan.product as Stripe.Product).name,
 				subscriptionStatus: subscription.status,
 				updatedAt: new Date(),
-			},
-			select: {
-				slug: true,
-			},
-		})
+			})
+			.where(eq(Organization.id, organizationId))
+			.returning({ slug: Organization.slug })
+		if (!tenant) throw new Error('Tenant not found in database.')
 
 		// Check if this is part of organization creation flow
 		const isCreationFlow = url.searchParams.get('creation') === 'true'

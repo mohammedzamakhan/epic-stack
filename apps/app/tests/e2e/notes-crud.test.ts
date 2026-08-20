@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -67,7 +67,7 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await prisma.organizationNote.create({
+		const note = await db.organizationNote.create({
 			select: { id: true },
 			data: {
 				...createNote(),
@@ -95,7 +95,7 @@ test.describe('Notes CRUD Operations', () => {
 		await expect(page).toHaveURL(`/${org.slug}/notes/${note.id}`)
 
 		await waitFor(async () => {
-			const updatedNoteInDb = await prisma.organizationNote.findUnique({
+			const updatedNoteInDb = await db.organizationNote.findUnique({
 				where: { id: note.id },
 				select: { title: true },
 			})
@@ -110,7 +110,7 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await prisma.organizationNote.create({
+		const note = await db.organizationNote.create({
 			select: { id: true },
 			data: {
 				...createNote(),
@@ -155,7 +155,7 @@ test.describe('Notes CRUD Operations', () => {
 			if (deletionAttempted) {
 				// Verify note is deleted or soft-deleted in database
 				await page.waitForTimeout(1000)
-				const deletedNote = await prisma.organizationNote.findUnique({
+				const deletedNote = await db.organizationNote.findUnique({
 					where: { id: note.id },
 				})
 				// Note should be either null (hard delete) or have a deletedAt field (soft delete)
@@ -166,7 +166,7 @@ test.describe('Notes CRUD Operations', () => {
 		} else {
 			// No delete button found - note might not have delete functionality in current UI
 			// Just verify note exists in database
-			const existingNote = await prisma.organizationNote.findUnique({
+			const existingNote = await db.organizationNote.findUnique({
 				where: { id: note.id },
 			})
 			expect(existingNote).toBeTruthy()
@@ -180,7 +180,7 @@ test.describe('Notes CRUD Operations', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		const noteData = createNote()
-		const note = await prisma.organizationNote.create({
+		const note = await db.organizationNote.create({
 			select: { id: true },
 			data: {
 				...noteData,
@@ -217,7 +217,7 @@ test.describe('Notes CRUD Operations', () => {
 
 		// Create multiple notes
 		const notes = Array.from({ length: 3 }, () => createNote())
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: notes.map((note) => ({
 				...note,
 				organizationId: org.id,
@@ -249,7 +249,7 @@ test.describe('Notes CRUD Operations', () => {
 		const draftNote = createNote()
 		const publishedNote = createNote()
 
-		await prisma.organizationNote.createMany({
+		await db.organizationNote.createMany({
 			data: [
 				{
 					...draftNote,
@@ -298,7 +298,7 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await prisma.organizationNote.create({
+		const note = await db.organizationNote.create({
 			select: { id: true },
 			data: {
 				...createNote(),
@@ -321,7 +321,7 @@ test.describe('Notes CRUD Operations', () => {
 			await page.getByRole('button', { name: /update/i }).click()
 
 			// Verify note is now public
-			const updatedNote = await prisma.organizationNote.findUnique({
+			const updatedNote = await db.organizationNote.findUnique({
 				where: { id: note.id },
 				select: { isPublic: true },
 			})

@@ -1,4 +1,4 @@
-import { type User, type Organization } from '@prisma/client'
+import { type User, type Organization } from '@repo/database/types'
 
 /**
  * MCP Server Service
