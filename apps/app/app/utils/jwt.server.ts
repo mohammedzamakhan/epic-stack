@@ -1,6 +1,16 @@
 import crypto from 'node:crypto'
 import { canUserLogin } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	gt,
+	isNull,
+	lt,
+	or,
+	RefreshToken,
+	User,
+} from '@repo/database'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
@@ -102,17 +112,18 @@ export async function createRefreshToken(
 	)
 
 	// Store hashed refresh token in database
-	const refreshToken = await prisma.refreshToken.create({
-		data: {
+	const [refreshToken] = await db
+		.insert(RefreshToken)
+		.values({
 			userId,
 			tokenHash,
 			userAgent: meta.userAgent,
 			ipAddress: meta.ip,
 			expiresAt,
-		},
-	})
+		})
+		.returning({ id: RefreshToken.id })
 
-	return { token: `${refreshToken.id}.${token}`, expiresAt }
+	return { token: `${refreshToken!.id}.${token}`, expiresAt }
 }
 
 /**
@@ -129,19 +140,27 @@ export async function rotateRefreshToken(
 	if (!tokenId || !oldToken) return null
 
 	// Find the specific token
-	const row = await prisma.refreshToken.findUnique({
-		where: { id: tokenId, userId, revoked: false },
-	})
+	const [row] = await db
+		.select()
+		.from(RefreshToken)
+		.where(
+			and(
+				eq(RefreshToken.id, tokenId),
+				eq(RefreshToken.userId, userId),
+				eq(RefreshToken.revoked, false),
+			),
+		)
+		.limit(1)
 
 	if (!row || row.expiresAt < new Date()) return null
 
 	const isMatch = (await bcrypt.compare(oldToken, row.tokenHash)) === true
 	if (isMatch) {
 		// Revoke the old token
-		await prisma.refreshToken.update({
-			where: { id: row.id },
-			data: { revoked: true },
-		})
+		await db
+			.update(RefreshToken)
+			.set({ revoked: true })
+			.where(eq(RefreshToken.id, row.id))
 
 		// Create new token
 		const { token, expiresAt } = await createRefreshToken(userId, meta)
@@ -161,18 +180,20 @@ export async function revokeRefreshToken(
 	const [tokenId, token] = parts
 	if (!tokenId || !token) return false
 
-	const row = await prisma.refreshToken.findUnique({
-		where: { id: tokenId, revoked: false },
-	})
+	const [row] = await db
+		.select()
+		.from(RefreshToken)
+		.where(and(eq(RefreshToken.id, tokenId), eq(RefreshToken.revoked, false)))
+		.limit(1)
 
 	if (!row || row.expiresAt < new Date()) return false
 
 	const isMatch = (await bcrypt.compare(token, row.tokenHash)) === true
 	if (isMatch) {
-		await prisma.refreshToken.update({
-			where: { id: row.id },
-			data: { revoked: true },
-		})
+		await db
+			.update(RefreshToken)
+			.set({ revoked: true })
+			.where(eq(RefreshToken.id, row.id))
 		return true
 	}
 
@@ -183,21 +204,26 @@ export async function revokeRefreshToken(
  * Revoke all refresh tokens for a user (useful for logout all devices)
  */
 export async function revokeAllRefreshTokens(userId: string): Promise<void> {
-	await prisma.refreshToken.updateMany({
-		where: { userId, revoked: false },
-		data: { revoked: true },
-	})
+	await db
+		.update(RefreshToken)
+		.set({ revoked: true })
+		.where(
+			and(eq(RefreshToken.userId, userId), eq(RefreshToken.revoked, false)),
+		)
 }
 
 /**
  * Clean up expired refresh tokens (should be run periodically)
  */
 export async function cleanupExpiredTokens(): Promise<void> {
-	await prisma.refreshToken.deleteMany({
-		where: {
-			OR: [{ expiresAt: { lt: new Date() } }, { revoked: true }],
-		},
-	})
+	await db
+		.delete(RefreshToken)
+		.where(
+			or(
+				lt(RefreshToken.expiresAt, new Date()),
+				eq(RefreshToken.revoked, true),
+			),
+		)
 }
 
 /**
@@ -293,24 +319,23 @@ export async function createAuthenticatedSessionResponse(
 	request: Request,
 ) {
 	// Import here to avoid circular dependencies
-	const { prisma } = await import('@repo/database')
 	const { handleNewDeviceSignin } =
 		await import('#app/utils/new-device-signin.server.tsx')
 	const { getClientIp } = await import('@repo/common/ip-tracking')
 
 	// Get user data for the response
-	const user = await prisma.user.findUnique({
-		select: {
-			id: true,
-			email: true,
-			username: true,
-			name: true,
-			image: { select: { id: true } },
-			createdAt: true,
-			updatedAt: true,
-		},
-		where: { id: userId },
-	})
+	const [user] = await db
+		.select({
+			id: User.id,
+			email: User.email,
+			username: User.username,
+			name: User.name,
+			createdAt: User.createdAt,
+			updatedAt: User.updatedAt,
+		})
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 
 	if (!user) {
 		return {
@@ -347,7 +372,7 @@ export async function createAuthenticatedSessionResponse(
 				email: user.email,
 				username: user.username,
 				name: user.name,
-				image: user.image?.id,
+				image: undefined,
 				createdAt: user.createdAt.toISOString(),
 				updatedAt: user.updatedAt.toISOString(),
 			},

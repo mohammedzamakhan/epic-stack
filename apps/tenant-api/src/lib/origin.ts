@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache'
-import { prisma } from '@repo/database'
+import { and, db, eq, or, Organization } from '@repo/database'
 import { TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
 import { orgMatchesNodeRegion } from './region.ts'
 
@@ -45,40 +45,44 @@ function appBaseUrl() {
 	return (process.env.APP_URL || process.env.BASE_URL || '').replace(/\/$/, '')
 }
 
-async function lookupOrganizationFromPrisma(where: {
+async function lookupOrganizationFromDatabase(where: {
 	id?: string
 	slug?: string
 	host?: string
 }): Promise<PublishedOrganization | null> {
 	try {
-		if (where.id) {
-			return await prisma.organization.findFirst({
-				where: { id: where.id, active: true },
-				select: publishedOrgSelect,
+		const identity = where.id
+			? eq(Organization.id, where.id)
+			: or(
+					where.slug
+						? eq(Organization.slug, where.slug.toLowerCase())
+						: undefined,
+					where.host
+						? eq(Organization.customDomain, where.host.toLowerCase())
+						: undefined,
+				)
+		if (!identity) return null
+
+		const [organization] = await db
+			.select({
+				id: Organization.id,
+				slug: Organization.slug,
+				customDomain: Organization.customDomain,
+				hasProvisionedDb: Organization.hasProvisionedDb,
+				dataRegion: Organization.dataRegion,
 			})
-		}
-		if (where.slug) {
-			return await prisma.organization.findFirst({
-				where: {
-					slug: where.slug.toLowerCase(),
-					active: true,
-					sitePublished: true,
-				},
-				select: publishedOrgSelect,
-			})
-		}
-		if (where.host) {
-			return await prisma.organization.findFirst({
-				where: {
-					customDomain: where.host.toLowerCase(),
-					active: true,
-					sitePublished: true,
-				},
-				select: publishedOrgSelect,
-			})
-		}
+			.from(Organization)
+			.where(
+				and(
+					eq(Organization.active, true),
+					identity,
+					where.id ? undefined : eq(Organization.sitePublished, true),
+				),
+			)
+			.limit(1)
+		return organization ?? null
 	} catch (error) {
-		console.warn('Prisma org lookup failed; trying APP_URL', error)
+		console.warn('Database org lookup failed; trying APP_URL', error)
 	}
 	return null
 }
@@ -186,14 +190,14 @@ export async function resolvePublishedOrganization(data: {
 }) {
 	if (data.slug) {
 		return (
-			(await lookupOrganizationFromPrisma({ slug: data.slug })) ||
+			(await lookupOrganizationFromDatabase({ slug: data.slug })) ||
 			lookupOrganizationFromApp({ slug: data.slug })
 		)
 	}
 
 	if (data.host) {
 		return (
-			(await lookupOrganizationFromPrisma({ host: data.host })) ||
+			(await lookupOrganizationFromDatabase({ host: data.host })) ||
 			lookupOrganizationFromApp({ host: data.host })
 		)
 	}
@@ -206,7 +210,7 @@ export async function findActiveOrganizationById(orgId: string) {
 		return null
 	}
 
-	return lookupOrganizationFromPrisma({ id: orgId })
+	return lookupOrganizationFromDatabase({ id: orgId })
 }
 
 export function organizationFromProvisionPayload(data: {

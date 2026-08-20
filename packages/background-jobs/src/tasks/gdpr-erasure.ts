@@ -1,5 +1,5 @@
 import { schedules, logger } from '@trigger.dev/sdk/v3'
-import { prisma } from '@repo/database'
+import { and, DataSubjectRequest, db, eq, lte, User } from '@repo/database'
 import { auditService, AuditAction } from '@repo/audit'
 
 export const gdprErasure = schedules.task({
@@ -9,18 +9,16 @@ export const gdprErasure = schedules.task({
 		logger.info('Starting scheduled GDPR erasure job')
 
 		const now = new Date()
-		const dueRequests = await prisma.dataSubjectRequest.findMany({
-			where: {
-				type: 'erasure',
-				status: 'scheduled',
-				scheduledFor: { lte: now },
-			},
-			include: {
-				user: {
-					select: { id: true, email: true },
-				},
-			},
-		})
+		const dueRequests = await db
+			.select()
+			.from(DataSubjectRequest)
+			.where(
+				and(
+					eq(DataSubjectRequest.type, 'erasure'),
+					eq(DataSubjectRequest.status, 'scheduled'),
+					lte(DataSubjectRequest.scheduledFor, now),
+				),
+			)
 
 		const results = {
 			processed: 0,
@@ -30,28 +28,26 @@ export const gdprErasure = schedules.task({
 
 		for (const dsr of dueRequests) {
 			try {
-				await prisma.dataSubjectRequest.update({
-					where: { id: dsr.id },
-					data: {
+				await db
+					.update(DataSubjectRequest)
+					.set({
 						status: 'processing',
 						processedAt: new Date(),
-					},
-				})
+					})
+					.where(eq(DataSubjectRequest.id, dsr.id))
 
 				if (dsr.userId) {
-					await prisma.user.delete({
-						where: { id: dsr.userId },
-					})
+					await db.delete(User).where(eq(User.id, dsr.userId))
 				}
 
-				await prisma.dataSubjectRequest.update({
-					where: { id: dsr.id },
-					data: {
+				await db
+					.update(DataSubjectRequest)
+					.set({
 						status: 'completed',
 						completedAt: new Date(),
 						executedAt: new Date(),
-					},
-				})
+					})
+					.where(eq(DataSubjectRequest.id, dsr.id))
 
 				await auditService.log({
 					action: AuditAction.DATA_DELETION_COMPLETED,
@@ -71,13 +67,13 @@ export const gdprErasure = schedules.task({
 				const errorMessage =
 					error instanceof Error ? error.message : 'Unknown error'
 
-				await prisma.dataSubjectRequest.update({
-					where: { id: dsr.id },
-					data: {
+				await db
+					.update(DataSubjectRequest)
+					.set({
 						status: 'failed',
 						failureReason: errorMessage,
-					},
-				})
+					})
+					.where(eq(DataSubjectRequest.id, dsr.id))
 
 				await auditService.log({
 					action: AuditAction.DATA_DELETION_FAILED,

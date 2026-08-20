@@ -1,4 +1,13 @@
-import { prisma } from '@repo/database'
+import {
+	AuditLog,
+	Organization,
+	User,
+	and,
+	db,
+	desc,
+	eq,
+	inArray,
+} from '@repo/database'
 
 export interface CreateAuditLogInput {
 	organizationId?: string
@@ -13,14 +22,12 @@ export class AuditLogService {
 	 * Create a new audit log entry
 	 */
 	async createLog(input: CreateAuditLogInput): Promise<void> {
-		await prisma.auditLog.create({
-			data: {
-				organizationId: input.organizationId,
-				userId: input.userId,
-				action: input.action,
-				details: input.details,
-				metadata: input.metadata ? JSON.stringify(input.metadata) : null,
-			},
+		await db.insert(AuditLog).values({
+			organizationId: input.organizationId,
+			userId: input.userId,
+			action: input.action,
+			details: input.details,
+			metadata: input.metadata ? JSON.stringify(input.metadata) : null,
 		})
 	}
 
@@ -37,26 +44,29 @@ export class AuditLogService {
 	) {
 		const { limit = 50, offset = 0, actions } = options
 
-		return prisma.auditLog.findMany({
-			where: {
-				organizationId,
-				...(actions && { action: { in: actions } }),
-			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: limit,
-			skip: offset,
-		})
+		const logs = await db
+			.select({
+				id: AuditLog.id,
+				organizationId: AuditLog.organizationId,
+				userId: AuditLog.userId,
+				action: AuditLog.action,
+				details: AuditLog.details,
+				metadata: AuditLog.metadata,
+				createdAt: AuditLog.createdAt,
+				user: { id: User.id, name: User.name, username: User.username },
+			})
+			.from(AuditLog)
+			.leftJoin(User, eq(AuditLog.userId, User.id))
+			.where(
+				and(
+					eq(AuditLog.organizationId, organizationId),
+					actions?.length ? inArray(AuditLog.action, actions) : undefined,
+				),
+			)
+			.orderBy(desc(AuditLog.createdAt))
+			.limit(limit)
+			.offset(offset)
+		return logs
 	}
 
 	/**
@@ -72,26 +82,34 @@ export class AuditLogService {
 	) {
 		const { limit = 50, offset = 0, organizationId } = options
 
-		return prisma.auditLog.findMany({
-			where: {
-				userId,
-				...(organizationId && { organizationId }),
-			},
-			include: {
+		return await db
+			.select({
+				id: AuditLog.id,
+				organizationId: AuditLog.organizationId,
+				userId: AuditLog.userId,
+				action: AuditLog.action,
+				details: AuditLog.details,
+				metadata: AuditLog.metadata,
+				createdAt: AuditLog.createdAt,
 				organization: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
+					id: Organization.id,
+					name: Organization.name,
+					slug: Organization.slug,
 				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: limit,
-			skip: offset,
-		})
+			})
+			.from(AuditLog)
+			.leftJoin(Organization, eq(AuditLog.organizationId, Organization.id))
+			.where(
+				and(
+					eq(AuditLog.userId, userId),
+					organizationId
+						? eq(AuditLog.organizationId, organizationId)
+						: undefined,
+				),
+			)
+			.orderBy(desc(AuditLog.createdAt))
+			.limit(limit)
+			.offset(offset)
 	}
 
 	/**
@@ -107,33 +125,36 @@ export class AuditLogService {
 	) {
 		const { limit = 50, offset = 0, organizationId } = options
 
-		return prisma.auditLog.findMany({
-			where: {
-				action,
-				...(organizationId && { organizationId }),
-			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-					},
-				},
+		return await db
+			.select({
+				id: AuditLog.id,
+				organizationId: AuditLog.organizationId,
+				userId: AuditLog.userId,
+				action: AuditLog.action,
+				details: AuditLog.details,
+				metadata: AuditLog.metadata,
+				createdAt: AuditLog.createdAt,
+				user: { id: User.id, name: User.name, username: User.username },
 				organization: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
+					id: Organization.id,
+					name: Organization.name,
+					slug: Organization.slug,
 				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: limit,
-			skip: offset,
-		})
+			})
+			.from(AuditLog)
+			.leftJoin(User, eq(AuditLog.userId, User.id))
+			.leftJoin(Organization, eq(AuditLog.organizationId, Organization.id))
+			.where(
+				and(
+					eq(AuditLog.action, action),
+					organizationId
+						? eq(AuditLog.organizationId, organizationId)
+						: undefined,
+				),
+			)
+			.orderBy(desc(AuditLog.createdAt))
+			.limit(limit)
+			.offset(offset)
 	}
 
 	/**

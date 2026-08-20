@@ -55,7 +55,7 @@ console.log(result.success ? 'Connected!' : result.message)
 
 ```typescript
 import { createStorageClient } from '@repo/storage'
-import { prisma } from '@repo/database'
+import { db, eq, OrganizationS3Config } from '@repo/database'
 import { decrypt, getSSOMasterKey } from './encryption'
 
 const storageClient = createStorageClient({
@@ -73,9 +73,12 @@ await storageClient.upload(
 	'org-123', // organizationId
 	{
 		getOrganizationConfig: async (orgId) => {
-			return await prisma.organizationS3Config.findUnique({
-				where: { organizationId: orgId },
-			})
+			const [config] = await db
+				.select()
+				.from(OrganizationS3Config)
+				.where(eq(OrganizationS3Config.organizationId, orgId))
+				.limit(1)
+			return config ?? null
 		},
 		decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
 	},

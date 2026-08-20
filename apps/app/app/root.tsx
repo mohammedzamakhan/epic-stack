@@ -14,7 +14,19 @@ import { pipeHeaders } from '@repo/common/headers'
 import { getSidebarState } from '@repo/common/sidebar-cookie'
 import { getToast } from '@repo/common/toast'
 import { brand, getErrorTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import {
+	db,
+	eq,
+	Organization,
+	OrganizationNote,
+	OrganizationNoteFavorite,
+	Permission,
+	Role,
+	User,
+	UserImage,
+	_RoleToUser,
+	_PermissionToRole,
+} from '@repo/database'
 import { getDirection } from '@repo/i18n'
 import { honeypot } from '@repo/security'
 import { generateSeoMeta, generateOrganizationSchema } from '@repo/seo'
@@ -135,24 +147,51 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 						// Reduced TTL for security-sensitive data (roles/permissions)
 						// Cache invalidated on user updates via invalidateUserCache()
 						ttl: 1000 * 60 * 1, // 1 minute
-						getFreshValue: () =>
-							prisma.user.findUnique({
-								select: {
-									id: true,
-									name: true,
-									username: true,
-									image: { select: { objectKey: true } },
-									roles: {
-										select: {
-											name: true,
-											permissions: {
-												select: { entity: true, action: true, access: true },
-											},
-										},
-									},
-								},
-								where: { id: userId },
-							}),
+						getFreshValue: async () => {
+							const [userRow] = await db
+								.select({
+									id: User.id,
+									name: User.name,
+									username: User.username,
+									objectKey: UserImage.objectKey,
+								})
+								.from(User)
+								.leftJoin(UserImage, eq(UserImage.userId, User.id))
+								.where(eq(User.id, userId))
+								.limit(1)
+							if (!userRow) return null
+							const roleRows = await db
+								.select({ id: Role.id, name: Role.name })
+								.from(_RoleToUser)
+								.innerJoin(Role, eq(_RoleToUser.A, Role.id))
+								.where(eq(_RoleToUser.B, userId))
+							const roles = await Promise.all(
+								roleRows.map(async (role) => ({
+									name: role.name,
+									permissions: await db
+										.select({
+											entity: Permission.entity,
+											action: Permission.action,
+											access: Permission.access,
+										})
+										.from(_PermissionToRole)
+										.innerJoin(
+											Permission,
+											eq(_PermissionToRole.A, Permission.id),
+										)
+										.where(eq(_PermissionToRole.B, role.id)),
+								})),
+							)
+							return {
+								id: userRow.id,
+								name: userRow.name,
+								username: userRow.username,
+								image: userRow.objectKey
+									? { objectKey: userRow.objectKey }
+									: null,
+								roles,
+							}
+						},
 					}),
 				{ timings, type: 'find user', desc: 'find user in root' },
 			)
@@ -181,22 +220,37 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 				key: `user-favorites:${user.id}`,
 				cache,
 				ttl: 1000 * 60 * 2, // 2 minutes
-				getFreshValue: () =>
-					prisma.organizationNoteFavorite.findMany({
-						where: { userId: user.id },
-						select: {
-							id: true,
-							noteId: true,
-							note: {
-								select: {
-									id: true,
-									title: true,
-									organizationId: true,
-									organization: { select: { slug: true } },
+				getFreshValue: async () =>
+					db
+						.select({
+							id: OrganizationNoteFavorite.id,
+							noteId: OrganizationNoteFavorite.noteId,
+							noteTitle: OrganizationNote.title,
+							noteOrganizationId: OrganizationNote.organizationId,
+							organizationSlug: Organization.slug,
+						})
+						.from(OrganizationNoteFavorite)
+						.innerJoin(
+							OrganizationNote,
+							eq(OrganizationNoteFavorite.noteId, OrganizationNote.id),
+						)
+						.innerJoin(
+							Organization,
+							eq(OrganizationNote.organizationId, Organization.id),
+						)
+						.where(eq(OrganizationNoteFavorite.userId, user.id))
+						.then((rows) =>
+							rows.map((row) => ({
+								id: row.id,
+								noteId: row.noteId,
+								note: {
+									id: row.noteId,
+									title: row.noteTitle,
+									organizationId: row.noteOrganizationId,
+									organization: { slug: row.organizationSlug },
 								},
-							},
-						},
-					}),
+							})),
+						),
 			})
 		: undefined
 

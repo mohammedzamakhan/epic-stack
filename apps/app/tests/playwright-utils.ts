@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test'
-import { type User as UserModel } from '@prisma/client'
+import { type User as UserModel } from '@repo/database/types'
 import {
 	authSessionStorage,
 	MOCK_CODE_GITHUB_HEADER,
@@ -9,7 +9,18 @@ import {
 	sessionKey,
 } from '@repo/auth'
 import { cookieConsentCookie } from '@repo/common/cookie-consent'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Password,
+	Session,
+	User,
+	UserImage,
+	WebsitePage,
+	Role,
+	_RoleToUser,
+} from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
 import {
@@ -40,27 +51,48 @@ async function getOrInsertUser({
 	password,
 	email,
 }: GetOrInsertUserOptions = {}): Promise<User> {
-	const select = { id: true, email: true, username: true, name: true }
 	if (id) {
-		return await prisma.user.findUniqueOrThrow({
-			select,
-			where: { id: id },
-		})
+		const [user] = await db
+			.select({
+				id: User.id,
+				email: User.email,
+				username: User.username,
+				name: User.name,
+			})
+			.from(User)
+			.where(eq(User.id, id))
+			.limit(1)
+		if (!user) throw new Error('User not found')
+		return user
 	} else {
 		const userData = createUser()
 		username ??= userData.username
 		password ??= userData.username
 		email ??= userData.email
-		return await prisma.user.create({
-			select,
-			data: {
+		const [user] = await db
+			.insert(User)
+			.values({
 				...userData,
 				email,
 				username,
-				roles: { connect: { name: 'user' } },
-				password: { create: { hash: await getPasswordHash(password) } },
-			},
-		})
+			})
+			.returning({
+				id: User.id,
+				email: User.email,
+				username: User.username,
+				name: User.name,
+			})
+		if (!user) throw new Error('Failed to create user')
+		const [role] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (role) await db.insert(_RoleToUser).values({ A: role.id, B: user.id })
+		await db
+			.insert(Password)
+			.values({ userId: user.id, hash: await getPasswordHash(password) })
+		return user
 	}
 }
 
@@ -81,8 +113,8 @@ async function setCookieConsent(page: any, isCollapsed: boolean = true) {
 async function deleteTestUser(userId: string | undefined) {
 	if (!userId) return
 
-	await prisma.websitePage.deleteMany({ where: { createdById: userId } })
-	await prisma.user.deleteMany({ where: { id: userId } })
+	await db.delete(WebsitePage).where(eq(WebsitePage.createdById, userId))
+	await db.delete(User).where(eq(User.id, userId))
 }
 
 type Navigate = (
@@ -120,13 +152,14 @@ export const test = base.extend<{
 		await use(async (options) => {
 			const user = await getOrInsertUser(options)
 			userId = user.id
-			const session = await prisma.session.create({
-				data: {
+			const [session] = await db
+				.insert(Session)
+				.values({
 					expirationDate: getSessionExpirationDate(),
 					userId: user.id,
-				},
-				select: { id: true },
-			})
+				})
+				.returning({ id: Session.id })
+			if (!session) throw new Error('Failed to create test session')
 
 			const authSession = await authSessionStorage.getSession()
 			authSession.set(sessionKey, session.id)
@@ -163,10 +196,11 @@ export const test = base.extend<{
 			return newGitHubUser
 		})
 
-		const user = await prisma.user.findUnique({
-			select: { id: true, name: true },
-			where: { email: normalizeEmail(ghUser!.primaryEmail) },
-		})
+		const [user] = await db
+			.select({ id: User.id, name: User.name })
+			.from(User)
+			.where(eq(User.email, normalizeEmail(ghUser!.primaryEmail)))
+			.limit(1)
 		if (user) {
 			await deleteTestUser(user.id)
 		}

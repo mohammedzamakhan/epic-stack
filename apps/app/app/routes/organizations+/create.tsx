@@ -11,7 +11,14 @@ import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -253,19 +260,21 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		if (invites && invites.length > 0) {
 			try {
-				const organization = await prisma.organization.findUnique({
-					where: { id: orgId },
-					select: { name: true, slug: true },
-				})
+				const [organization] = await db
+					.select({ name: Organization.name, slug: Organization.slug })
+					.from(Organization)
+					.where(eq(Organization.id, orgId))
+					.limit(1)
 
 				if (!organization) {
 					throw new Error('Organization not found')
 				}
 
-				const currentUser = await prisma.user.findUnique({
-					where: { id: userId },
-					select: { name: true, email: true },
-				})
+				const [currentUser] = await db
+					.select({ name: User.name, email: User.email })
+					.from(User)
+					.where(eq(User.id, userId))
+					.limit(1)
 
 				await Promise.all(
 					invites.map(async (invite) => {
@@ -321,9 +330,11 @@ export async function action({ request }: ActionFunctionArgs) {
 		const { priceId } = submission.value
 
 		try {
-			const organization = await prisma.organization.findUnique({
-				where: { id: orgId },
-			})
+			const [organization] = await db
+				.select()
+				.from(Organization)
+				.where(eq(Organization.id, orgId))
+				.limit(1)
 
 			if (!organization) {
 				throw new Error('Organization not found')
@@ -357,26 +368,27 @@ export async function action({ request }: ActionFunctionArgs) {
 
 		try {
 			// Update organization with size and user organization with department
-			await prisma.$transaction([
-				prisma.organization.update({
-					where: { id: orgId },
-					data: { size: organizationSize },
-				}),
-				prisma.userOrganization.update({
-					where: {
-						userId_organizationId: {
-							userId,
-							organizationId: orgId,
-						},
-					},
-					data: { department: userDepartment },
-				}),
-			])
-
-			const organization = await prisma.organization.findUnique({
-				where: { id: orgId },
-				select: { slug: true },
+			await db.transaction(async (tx) => {
+				await tx
+					.update(Organization)
+					.set({ size: organizationSize })
+					.where(eq(Organization.id, orgId))
+				await tx
+					.update(UserOrganization)
+					.set({ department: userDepartment })
+					.where(
+						and(
+							eq(UserOrganization.userId, userId),
+							eq(UserOrganization.organizationId, orgId),
+						),
+					)
 			})
+
+			const [organization] = await db
+				.select({ slug: Organization.slug })
+				.from(Organization)
+				.where(eq(Organization.id, orgId))
+				.limit(1)
 
 			await invalidateUserOrganizationsCache(userId)
 			await setUserDefaultOrganization(userId, orgId)

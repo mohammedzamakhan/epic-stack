@@ -50,22 +50,19 @@ ENCRYPTION_KEY="your-32-character-secret-key-here"
 
 ## Database Schema
 
-The S3 configuration is stored in the `OrganizationS3Config` model:
+The S3 configuration is stored in the `OrganizationS3Config` table:
 
-```prisma
-model OrganizationS3Config {
-  id             String       @id @default(cuid())
-  isEnabled      Boolean      @default(false)
-  endpoint       String
-  bucketName     String
-  accessKeyId    String
-  secretAccessKey String      // Encrypted
-  region         String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  organizationId String       @unique
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-}
+```typescript
+export const organizationS3Config = sqliteTable('OrganizationS3Config', {
+	id: text('id').primaryKey(),
+	isEnabled: integer('isEnabled', { mode: 'boolean' }).notNull().default(false),
+	endpoint: text('endpoint').notNull(),
+	bucketName: text('bucketName').notNull(),
+	accessKeyId: text('accessKeyId').notNull(),
+	secretAccessKey: text('secretAccessKey').notNull(), // Encrypted
+	region: text('region').notNull(),
+	organizationId: text('organizationId').notNull().unique(),
+})
 ```
 
 ## Implementation Details

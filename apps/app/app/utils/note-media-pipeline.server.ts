@@ -2,7 +2,7 @@ import {
 	triggerVideoProcessing,
 	triggerImageProcessing,
 } from '@repo/background-jobs'
-import { prisma } from '@repo/database'
+import { and, db, eq, OrganizationNoteUpload } from '@repo/database'
 import {
 	type ImageFieldset,
 	type MediaFieldset,
@@ -123,14 +123,17 @@ export async function triggerMediaProcessingJobs(
 	const newVideoUploads = newUploads.filter((upload) => upload.type === 'video')
 	for (const video of newVideoUploads) {
 		try {
-			const videoRecord = await prisma.organizationNoteUpload.findFirst({
-				where: {
-					noteId,
-					objectKey: video.objectKey,
-					type: 'video',
-				},
-				select: { id: true },
-			})
+			const [videoRecord] = await db
+				.select({ id: OrganizationNoteUpload.id })
+				.from(OrganizationNoteUpload)
+				.where(
+					and(
+						eq(OrganizationNoteUpload.noteId, noteId),
+						eq(OrganizationNoteUpload.objectKey, video.objectKey),
+						eq(OrganizationNoteUpload.type, 'video'),
+					),
+				)
+				.limit(1)
 
 			if (videoRecord) {
 				const { url: signedVideoUrl, headers: videoHeaders } =
@@ -153,14 +156,17 @@ export async function triggerMediaProcessingJobs(
 	const newImageUploads = newUploads.filter((upload) => upload.type === 'image')
 	for (const image of newImageUploads) {
 		try {
-			const imageRecord = await prisma.organizationNoteUpload.findFirst({
-				where: {
-					noteId,
-					objectKey: image.objectKey,
-					type: 'image',
-				},
-				select: { id: true },
-			})
+			const [imageRecord] = await db
+				.select({ id: OrganizationNoteUpload.id })
+				.from(OrganizationNoteUpload)
+				.where(
+					and(
+						eq(OrganizationNoteUpload.noteId, noteId),
+						eq(OrganizationNoteUpload.objectKey, image.objectKey),
+						eq(OrganizationNoteUpload.type, 'image'),
+					),
+				)
+				.limit(1)
 
 			if (imageRecord) {
 				const { url: signedImageUrl, headers: imageHeaders } =

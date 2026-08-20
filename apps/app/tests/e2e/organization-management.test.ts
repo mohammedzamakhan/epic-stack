@@ -1,5 +1,14 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	Role,
+	User,
+	UserOrganization,
+	_RoleToUser,
+} from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -65,14 +74,21 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(orgName)).toBeVisible()
 
 		// Verify organization exists in database
-		const createdOrg = await prisma.organization.findFirst({
-			where: { slug: orgSlug },
-			include: { users: true },
-		})
+		const [createdOrg] = await db
+			.select()
+			.from(Organization)
+			.where(eq(Organization.slug, orgSlug))
+			.limit(1)
 		expect(createdOrg).toBeTruthy()
 		expect(createdOrg?.name).toBe(orgName)
-		expect(createdOrg?.users).toHaveLength(1)
-		expect(createdOrg?.users[0]?.userId).toBe(user.id)
+		const orgUsers = createdOrg
+			? await db
+					.select()
+					.from(UserOrganization)
+					.where(eq(UserOrganization.organizationId, createdOrg.id))
+			: []
+		expect(orgUsers).toHaveLength(1)
+		expect(orgUsers[0]?.userId).toBe(user.id)
 	})
 
 	test('Users can switch between organizations', async ({
@@ -83,32 +99,34 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create two organizations for the user
-		const org1 = await prisma.organization.create({
-			data: {
+		const [org1] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: user.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
+			})
+			.returning()
+		if (!org1) throw new Error('Failed to create org1')
+		await db.insert(UserOrganization).values({
+			userId: user.id,
+			organizationId: org1.id,
+			organizationRoleId: 'org_role_admin',
 		})
 
-		const org2 = await prisma.organization.create({
-			data: {
+		const [org2] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: user.id,
-						organizationRoleId: 'org_role_member',
-					},
-				},
-			},
+			})
+			.returning()
+		if (!org2) throw new Error('Failed to create org2')
+		await db.insert(UserOrganization).values({
+			userId: user.id,
+			organizationId: org2.id,
+			organizationRoleId: 'org_role_member',
 		})
 
 		// Navigate to first organization
@@ -181,9 +199,11 @@ test.describe('Organization Management', () => {
 		await expect(page.getByText(/updated/i).first()).toBeVisible()
 
 		// Verify changes in database
-		const updatedOrg = await prisma.organization.findUnique({
-			where: { id: org.id },
-		})
+		const [updatedOrg] = await db
+			.select()
+			.from(Organization)
+			.where(eq(Organization.id, org.id))
+			.limit(1)
 		expect(updatedOrg?.name).toBe(newName)
 	})
 
@@ -195,39 +215,64 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create additional users
-		const member1 = await prisma.user.create({
-			data: {
+		const [member1] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!member1) throw new Error('Failed to create member1')
 
-		const member2 = await prisma.user.create({
-			data: {
+		const [member2] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!member2) throw new Error('Failed to create member2')
 
-		// Create an organization with multiple members
-		const org = await prisma.organization.create({
-			data: {
+		const [userRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (userRole) {
+			await db.insert(_RoleToUser).values([
+				{ A: userRole.id, B: member1.id },
+				{ A: userRole.id, B: member2.id },
+			])
+		}
+
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
-				users: {
-					create: [
-						{ userId: user.id, organizationRoleId: 'org_role_admin' },
-						{ userId: member1.id, organizationRoleId: 'org_role_admin' },
-						{ userId: member2.id, organizationRoleId: 'org_role_member' },
-					],
-				},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values([
+			{
+				userId: user.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_admin',
 			},
-		})
+			{
+				userId: member1.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_admin',
+			},
+			{
+				userId: member2.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_member',
+			},
+		])
 
 		// Navigate to organization members page
 		await navigate('/:slug/settings/members', { slug: org.slug })
@@ -257,29 +302,46 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create additional user
-		const member = await prisma.user.create({
-			data: {
+		const [member] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!member) throw new Error('Failed to create member')
 
-		// Create an organization with the member
-		const org = await prisma.organization.create({
-			data: {
+		const [userRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (userRole) {
+			await db.insert(_RoleToUser).values({ A: userRole.id, B: member.id })
+		}
+
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
-				users: {
-					create: [
-						{ userId: user.id, organizationRoleId: 'org_role_admin' },
-						{ userId: member.id, organizationRoleId: 'org_role_member' },
-					],
-				},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values([
+			{
+				userId: user.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_admin',
 			},
-		})
+			{
+				userId: member.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_member',
+			},
+		])
 
 		// Navigate to organization members page
 		await navigate('/:slug/settings/members', { slug: org.slug })
@@ -307,17 +369,17 @@ test.describe('Organization Management', () => {
 		).not.toBeVisible()
 
 		// Verify member is removed from database
-		const orgMembers = await prisma.organization.findUnique({
-			where: { id: org.id },
-			select: {
-				users: {
-					select: { userId: true },
-					where: { active: true },
-				},
-			},
-		})
-		expect(orgMembers?.users).toHaveLength(1)
-		expect(orgMembers?.users[0]?.userId).toBe(user.id)
+		const orgMembers = await db
+			.select({ userId: UserOrganization.userId })
+			.from(UserOrganization)
+			.where(
+				and(
+					eq(UserOrganization.organizationId, org.id),
+					eq(UserOrganization.active, true),
+				),
+			)
+		expect(orgMembers).toHaveLength(1)
+		expect(orgMembers[0]?.userId).toBe(user.id)
 	})
 
 	test('Users cannot leave an organization themselves', async ({
@@ -328,29 +390,46 @@ test.describe('Organization Management', () => {
 		const user = await login()
 
 		// Create another user as owner
-		const owner = await prisma.user.create({
-			data: {
+		const [owner] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!owner) throw new Error('Failed to create owner')
 
-		// Create an organization where user is a member
-		const org = await prisma.organization.create({
-			data: {
+		const [userRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (userRole) {
+			await db.insert(_RoleToUser).values({ A: userRole.id, B: owner.id })
+		}
+
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: `${faker.helpers.slugify(faker.company.name()).toLowerCase()}-${faker.string.alphanumeric(4)}`,
 				description: faker.company.catchPhrase(),
-				users: {
-					create: [
-						{ userId: owner.id, organizationRoleId: 'org_role_admin' },
-						{ userId: user.id, organizationRoleId: 'org_role_member' },
-					],
-				},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values([
+			{
+				userId: owner.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_admin',
 			},
-		})
+			{
+				userId: user.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_member',
+			},
+		])
 
 		// Navigate to organization members page
 		await navigate('/:slug/settings/members', { slug: org.slug })
@@ -371,9 +450,16 @@ test.describe('Organization Management', () => {
 		await expect(removeButtons).toHaveCount(1)
 
 		// Verify user is still a member in database
-		const membership = await prisma.organization.findFirst({
-			where: { id: org.id, users: { some: { userId: user.id } } },
-		})
-		expect(membership).not.toBeNull()
+		const [membership] = await db
+			.select({ organizationId: UserOrganization.organizationId })
+			.from(UserOrganization)
+			.where(
+				and(
+					eq(UserOrganization.organizationId, org.id),
+					eq(UserOrganization.userId, user.id),
+				),
+			)
+			.limit(1)
+		expect(membership).toBeTruthy()
 	})
 })

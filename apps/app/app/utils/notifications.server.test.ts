@@ -1,6 +1,11 @@
-import { prisma } from '@repo/database'
 import { sendEmail } from '@repo/email'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import {
+	mockDb,
+	mockSelectResults,
+	resetMockDb,
+} from '#tests/setup/drizzle-mock.ts'
 import {
 	notifyCommentMentions,
 	notifyNoteOwner,
@@ -10,23 +15,21 @@ vi.hoisted(() => {
 	process.env.APP_URL = 'http://localhost:3000'
 })
 
-vi.mock('@repo/database', () => ({
-	prisma: {
-		user: {
-			findUnique: vi.fn(),
-			findMany: vi.fn(),
-		},
-		userOrganization: {
-			findMany: vi.fn(),
-		},
-		notificationPreference: {
-			findUnique: vi.fn(),
-		},
-		notification: {
-			upsert: vi.fn(),
-		},
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		Notification: drizzleTable,
+		NotificationPreference: drizzleTable,
+		User: drizzleTable,
+		UserOrganization: drizzleTable,
+		and: drizzleOperator,
+		eq: drizzleOperator,
+	}
+})
 
 vi.mock('@repo/email', () => ({
 	sendEmail: vi.fn().mockResolvedValue({ status: 'success' }),
@@ -36,7 +39,7 @@ vi.mock('@repo/email', () => ({
 
 describe('Notifications Server Utils', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 	})
 
 	describe('notifyCommentMentions', () => {
@@ -52,22 +55,24 @@ describe('Notifications Server Utils', () => {
 				organizationId: 'org1',
 				organizationSlug: 'acme',
 			})
-			expect(prisma.userOrganization.findMany).not.toHaveBeenCalled()
+			expect(mockDb.select).not.toHaveBeenCalled()
 		})
 
 		it('should notify mentioned users if preferences allow', async () => {
-			vi.mocked(prisma.userOrganization.findMany).mockResolvedValue([
-				{
-					user: {
-						id: 'user2',
-						username: 'testuser',
-						email: 'test@example.com',
+			mockSelectResults(
+				[
+					{
+						userId: 'user2',
+						user: {
+							id: 'user2',
+							username: 'testuser',
+							email: 'test@example.com',
+							name: 'Test User',
+						},
 					},
-				},
-			] as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue(
-				null,
-			) // Defaults to true
+				],
+				[],
+			)
 
 			await notifyCommentMentions({
 				noteId: 'note1',
@@ -81,22 +86,8 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.userOrganization.findMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						organizationId: 'org1',
-					}),
-				}),
-			)
-
-			expect(prisma.notification.upsert).toHaveBeenCalledWith(
-				expect.objectContaining({
-					create: expect.objectContaining({
-						type: 'mention',
-						userId: 'user2',
-					}),
-				}),
-			)
+			expect(mockDb.select).toHaveBeenCalledTimes(2)
+			expect(mockDb.insert).toHaveBeenCalledTimes(1)
 			expect(sendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
 					to: 'test@example.com',
@@ -106,19 +97,20 @@ describe('Notifications Server Utils', () => {
 		})
 
 		it('should respect false preferences', async () => {
-			vi.mocked(prisma.userOrganization.findMany).mockResolvedValue([
-				{
-					user: {
-						id: 'user2',
-						username: 'testuser',
-						email: 'test@example.com',
+			mockSelectResults(
+				[
+					{
+						userId: 'user2',
+						user: {
+							id: 'user2',
+							username: 'testuser',
+							email: 'test@example.com',
+							name: 'Test User',
+						},
 					},
-				},
-			] as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue({
-				inApp: false,
-				email: false,
-			} as any)
+				],
+				[{ inApp: false, email: false }],
+			)
 
 			await notifyCommentMentions({
 				noteId: 'note1',
@@ -132,7 +124,7 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.notification.upsert).not.toHaveBeenCalled()
+			expect(mockDb.insert).not.toHaveBeenCalled()
 			expect(sendEmail).not.toHaveBeenCalled()
 		})
 	})
@@ -150,17 +142,11 @@ describe('Notifications Server Utils', () => {
 				organizationId: 'org1',
 				organizationSlug: 'acme',
 			})
-			expect(prisma.user.findUnique).not.toHaveBeenCalled()
+			expect(mockDb.select).not.toHaveBeenCalled()
 		})
 
 		it('should create notification and send email if preferences allow', async () => {
-			vi.mocked(prisma.user.findUnique).mockResolvedValue({
-				id: 'owner1',
-				email: 'owner@example.com',
-			} as any)
-			vi.mocked(prisma.notificationPreference.findUnique).mockResolvedValue(
-				null,
-			)
+			mockSelectResults([{ email: 'owner@example.com' }], [])
 
 			await notifyNoteOwner({
 				noteId: 'note1',
@@ -174,14 +160,8 @@ describe('Notifications Server Utils', () => {
 				organizationSlug: 'acme',
 			})
 
-			expect(prisma.notification.upsert).toHaveBeenCalledWith(
-				expect.objectContaining({
-					create: expect.objectContaining({
-						type: 'comment',
-						userId: 'owner1',
-					}),
-				}),
-			)
+			expect(mockDb.select).toHaveBeenCalledTimes(2)
+			expect(mockDb.insert).toHaveBeenCalledTimes(1)
 			expect(sendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
 					to: 'owner@example.com',

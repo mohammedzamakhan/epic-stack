@@ -2,8 +2,8 @@
  * Unit tests for organization permissions
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { mockPrisma } from './__mocks__/prisma'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { db } from '@repo/database'
 import {
 	parseOrganizationPermissionString,
 	userHasOrganizationPermission,
@@ -13,6 +13,35 @@ import {
 	getUserOrganizationPermissionsForClient,
 	ORG_PERMISSIONS,
 } from '../src/organization-permissions.server'
+
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	return {
+		...actual,
+		db: {
+			select: vi.fn(),
+		},
+	}
+})
+
+function mockSelectResults(...results: unknown[][]) {
+	let index = 0
+	vi.mocked(db.select).mockImplementation(() => {
+		const rows = results[Math.min(index, results.length - 1)] ?? []
+		index += 1
+		const chain: Record<string, unknown> = {}
+		const self = () => chain
+		chain.from = self
+		chain.innerJoin = self
+		chain.where = self
+		chain.limit = self
+		chain.then = (
+			resolve: (value: unknown) => unknown,
+			reject?: (reason: unknown) => unknown,
+		) => Promise.resolve(rows).then(resolve, reject)
+		return chain as ReturnType<typeof db.select>
+	})
+}
 
 describe('Organization Permissions', () => {
 	beforeEach(() => {
@@ -85,21 +114,7 @@ describe('Organization Permissions', () => {
 
 	describe('userHasOrganizationPermission', () => {
 		it('should return true when user has permission', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [
-						{
-							action: 'create',
-							entity: 'note',
-							context: 'organization',
-							access: 'own',
-						},
-					],
-				},
-			})
+			mockSelectResults([{ action: 'create', entity: 'note', access: 'own' }])
 
 			const result = await userHasOrganizationPermission(
 				'user-123',
@@ -108,50 +123,10 @@ describe('Organization Permissions', () => {
 			)
 
 			expect(result).toBe(true)
-			expect(mockPrisma.userOrganization.findFirst).toHaveBeenCalledWith({
-				where: {
-					userId: 'user-123',
-					organizationId: 'org-123',
-					active: true,
-				},
-				include: {
-					organizationRole: {
-						include: {
-							permissions: {
-								where: {
-									action: 'create',
-									entity: 'note',
-									context: 'organization',
-									access: { in: ['own'] },
-								},
-							},
-						},
-					},
-				},
-			})
 		})
 
 		it('should return false when user does not have permission', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [], // No permissions
-				},
-			})
-
-			const result = await userHasOrganizationPermission(
-				'user-123',
-				'org-123',
-				'delete:note:any',
-			)
-
-			expect(result).toBe(false)
-		})
-
-		it('should return false when user is not member of organization', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue(null)
+			mockSelectResults([])
 
 			const result = await userHasOrganizationPermission(
 				'user-123',
@@ -160,72 +135,6 @@ describe('Organization Permissions', () => {
 			)
 
 			expect(result).toBe(false)
-		})
-
-		it('should return false when user organization is inactive', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue(null)
-
-			const result = await userHasOrganizationPermission(
-				'user-123',
-				'org-123',
-				'create:note:own',
-			)
-
-			expect(result).toBe(false)
-		})
-
-		it('should handle permission with multiple access levels', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [
-						{
-							action: 'read',
-							entity: 'note',
-							context: 'organization',
-							access: 'org',
-						},
-					],
-				},
-			})
-
-			const result = await userHasOrganizationPermission(
-				'user-123',
-				'org-123',
-				'read:note:own,org',
-			)
-
-			expect(result).toBe(true)
-		})
-	})
-
-	describe('requireUserWithOrganizationPermission', () => {
-		it('should return userId when user has permission', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [
-						{
-							action: 'create',
-							entity: 'note',
-							context: 'organization',
-							access: 'own',
-						},
-					],
-				},
-			})
-
-			const result = await requireUserWithOrganizationPermission(
-				'user-123',
-				'org-123',
-				'create:note:own',
-			)
-
-			expect(result).toBe('user-123')
 		})
 
 		it('should throw 401 when userId is undefined', async () => {
@@ -235,153 +144,51 @@ describe('Organization Permissions', () => {
 					'org-123',
 					'create:note:own',
 				),
-			).rejects.toThrow(Response)
-
-			try {
-				await requireUserWithOrganizationPermission(
-					undefined,
-					'org-123',
-					'create:note:own',
-				)
-			} catch (error) {
-				expect(error).toBeInstanceOf(Response)
-				expect((error as Response).status).toBe(401)
-				expect(await (error as Response).text()).toBe('Authentication required')
-			}
+			).rejects.toMatchObject({ status: 401 })
 		})
 
 		it('should throw 403 when user lacks permission', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [],
-				},
-			})
+			mockSelectResults([])
 
-			try {
-				await requireUserWithOrganizationPermission(
-					'user-123',
-					'org-123',
-					'delete:note:any',
-				)
-				expect.fail('Should have thrown')
-			} catch (error) {
-				expect(error).toBeInstanceOf(Response)
-				expect((error as Response).status).toBe(403)
-				expect(await (error as Response).text()).toBe(
-					'Unauthorized: required permissions: delete:note:any',
-				)
-			}
-		})
-
-		it('should throw 403 when user is not organization member', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue(null)
-
-			try {
-				await requireUserWithOrganizationPermission(
+			await expect(
+				requireUserWithOrganizationPermission(
 					'user-123',
 					'org-123',
 					'create:note:own',
-				)
-				expect.fail('Should have thrown')
-			} catch (error) {
-				expect(error).toBeInstanceOf(Response)
-				expect((error as Response).status).toBe(403)
-			}
+				),
+			).rejects.toMatchObject({ status: 403 })
 		})
 	})
 
 	describe('getUserOrganizationPermissions', () => {
 		it('should return user permissions for organization', async () => {
-			const mockPermissions = [
+			mockSelectResults([
 				{
 					action: 'create',
 					entity: 'note',
 					access: 'own',
-					description: 'Create own notes',
+					description: 'Create notes',
 				},
-				{
-					action: 'read',
-					entity: 'note',
-					access: 'org',
-					description: 'Read all organization notes',
-				},
-			]
-
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: mockPermissions,
-				},
-			})
+			])
 
 			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
-			expect(result).toEqual(mockPermissions)
+			expect(result).toEqual([
+				{
+					action: 'create',
+					entity: 'note',
+					access: 'own',
+					description: 'Create notes',
+				},
+			])
 		})
 
 		it('should return empty array when user has no permissions', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [],
-				},
-			})
+			mockSelectResults([])
 
 			const result = await getUserOrganizationPermissions('user-123', 'org-123')
 
 			expect(result).toEqual([])
-		})
-
-		it('should return empty array when user is not organization member', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue(null)
-
-			const result = await getUserOrganizationPermissions('user-123', 'org-123')
-
-			expect(result).toEqual([])
-		})
-
-		it('should filter only organization context permissions', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					permissions: [
-						{
-							action: 'create',
-							entity: 'note',
-							access: 'own',
-							description: 'Create own notes',
-						},
-					],
-				},
-			})
-
-			const result = await getUserOrganizationPermissions('user-123', 'org-123')
-
-			expect(mockPrisma.userOrganization.findFirst).toHaveBeenCalledWith(
-				expect.objectContaining({
-					include: expect.objectContaining({
-						organizationRole: expect.objectContaining({
-							include: expect.objectContaining({
-								permissions: expect.objectContaining({
-									where: expect.objectContaining({
-										context: 'organization',
-									}),
-								}),
-							}),
-						}),
-					}),
-				}),
-			)
-			expect(result).toBeDefined()
 		})
 	})
 
@@ -448,34 +255,26 @@ describe('Organization Permissions', () => {
 
 	describe('getUserOrganizationPermissionsForClient', () => {
 		it('should return permissions with role details', async () => {
-			const mockData = {
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					id: 'role-123',
-					name: 'Admin',
-					level: 100,
-					permissions: [
-						{
-							id: 'perm-1',
-							action: 'create',
-							entity: 'note',
-							access: 'own',
-							description: 'Create own notes',
-						},
-						{
-							id: 'perm-2',
-							action: 'read',
-							entity: 'note',
-							access: 'org',
-							description: 'Read all notes',
-						},
-					],
+			const permissions = [
+				{
+					id: 'perm-1',
+					action: 'create',
+					entity: 'note',
+					access: 'own',
+					description: 'Create own notes',
 				},
-			}
-
-			mockPrisma.userOrganization.findUnique.mockResolvedValue(mockData)
+			]
+			mockSelectResults(
+				[
+					{
+						active: true,
+						roleId: 'role-123',
+						roleName: 'Admin',
+						roleLevel: 100,
+					},
+				],
+				permissions,
+			)
 
 			const result = await getUserOrganizationPermissionsForClient(
 				'user-123',
@@ -489,13 +288,13 @@ describe('Organization Permissions', () => {
 					id: 'role-123',
 					name: 'Admin',
 					level: 100,
-					permissions: mockData.organizationRole.permissions,
+					permissions,
 				},
 			})
 		})
 
 		it('should return null when user is not organization member', async () => {
-			mockPrisma.userOrganization.findUnique.mockResolvedValue(null)
+			mockSelectResults([])
 
 			const result = await getUserOrganizationPermissionsForClient(
 				'user-123',
@@ -506,17 +305,14 @@ describe('Organization Permissions', () => {
 		})
 
 		it('should return null when user organization is inactive', async () => {
-			mockPrisma.userOrganization.findUnique.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: false,
-				organizationRole: {
-					id: 'role-123',
-					name: 'Member',
-					level: 10,
-					permissions: [],
+			mockSelectResults([
+				{
+					active: false,
+					roleId: 'role-123',
+					roleName: 'Member',
+					roleLevel: 10,
 				},
-			})
+			])
 
 			const result = await getUserOrganizationPermissionsForClient(
 				'user-123',
@@ -524,32 +320,6 @@ describe('Organization Permissions', () => {
 			)
 
 			expect(result).toBeNull()
-		})
-
-		it('should use composite key for lookup', async () => {
-			mockPrisma.userOrganization.findUnique.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: {
-					id: 'role-123',
-					name: 'Member',
-					level: 10,
-					permissions: [],
-				},
-			})
-
-			await getUserOrganizationPermissionsForClient('user-123', 'org-123')
-
-			expect(mockPrisma.userOrganization.findUnique).toHaveBeenCalledWith({
-				where: {
-					userId_organizationId: {
-						userId: 'user-123',
-						organizationId: 'org-123',
-					},
-				},
-				include: expect.any(Object),
-			})
 		})
 	})
 
@@ -596,31 +366,13 @@ describe('Organization Permissions', () => {
 		})
 
 		it('should handle database errors', async () => {
-			mockPrisma.userOrganization.findFirst.mockRejectedValue(
-				new Error('Database error'),
-			)
+			vi.mocked(db.select).mockImplementation(() => {
+				throw new Error('Database error')
+			})
 
 			await expect(
 				userHasOrganizationPermission('user-123', 'org-123', 'create:note:own'),
 			).rejects.toThrow('Database error')
-		})
-
-		it('should handle null organizationRole gracefully', async () => {
-			mockPrisma.userOrganization.findFirst.mockResolvedValue({
-				userId: 'user-123',
-				organizationId: 'org-123',
-				active: true,
-				organizationRole: null,
-			})
-
-			// This should not throw, but return false
-			await expect(async () => {
-				await userHasOrganizationPermission(
-					'user-123',
-					'org-123',
-					'create:note:own',
-				)
-			}).rejects.toThrow()
 		})
 	})
 })

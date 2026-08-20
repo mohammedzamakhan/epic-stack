@@ -8,7 +8,15 @@ import {
 	generateBackupCodes,
 	deleteBackupCodes,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	ne,
+	Password,
+	Session,
+	Verification,
+} from '@repo/database'
 import {
 	PasswordAndConfirmPasswordSchema,
 	PasswordSchema,
@@ -85,18 +93,15 @@ export async function changePasswordAction({
 	}
 
 	const { newPassword } = submission.value
+	const newPasswordHash = await getPasswordHash(newPassword)
 
-	await prisma.user.update({
-		select: { username: true },
-		where: { id: userId },
-		data: {
-			password: {
-				update: {
-					hash: await getPasswordHash(newPassword),
-				},
-			},
-		},
-	})
+	await db
+		.insert(Password)
+		.values({ userId, hash: newPasswordHash })
+		.onConflictDoUpdate({
+			target: Password.userId,
+			set: { hash: newPasswordHash },
+		})
 
 	// Invalidate all other sessions except the current one
 	if (request) {
@@ -105,12 +110,11 @@ export async function changePasswordAction({
 		)
 		const currentSessionId = authSession.get(sessionKey)
 		if (currentSessionId) {
-			await prisma.session.deleteMany({
-				where: {
-					userId,
-					id: { not: currentSessionId },
-				},
-			})
+			await db
+				.delete(Session)
+				.where(
+					and(eq(Session.userId, userId), ne(Session.id, currentSessionId)),
+				)
 		}
 	}
 
@@ -154,16 +158,9 @@ export async function setPasswordAction({
 
 	const { password } = submission.value
 
-	await prisma.user.update({
-		select: { username: true },
-		where: { id: userId },
-		data: {
-			password: {
-				create: {
-					hash: await getPasswordHash(password),
-				},
-			},
-		},
+	await db.insert(Password).values({
+		userId,
+		hash: await getPasswordHash(password),
 	})
 
 	// Invalidate all other sessions except the current one
@@ -173,12 +170,11 @@ export async function setPasswordAction({
 		)
 		const currentSessionId = authSession.get(sessionKey)
 		if (currentSessionId) {
-			await prisma.session.deleteMany({
-				where: {
-					userId,
-					id: { not: currentSessionId },
-				},
-			})
+			await db
+				.delete(Session)
+				.where(
+					and(eq(Session.userId, userId), ne(Session.id, currentSessionId)),
+				)
 		}
 	}
 
@@ -218,12 +214,15 @@ export async function enable2FAAction({
 		)
 	}
 
-	await prisma.verification.update({
-		where: {
-			target_type: { type: twoFAVerifyVerificationType, target: userId },
-		},
-		data: { type: twoFAVerificationType, expiresAt: null },
-	})
+	await db
+		.update(Verification)
+		.set({ type: twoFAVerificationType, expiresAt: null })
+		.where(
+			and(
+				eq(Verification.target, userId),
+				eq(Verification.type, twoFAVerifyVerificationType),
+			),
+		)
 
 	return Response.json({ status: 'success' })
 }
@@ -263,11 +262,14 @@ export async function disable2FAAction({
 	}
 
 	// Delete 2FA verification
-	await prisma.verification.delete({
-		where: {
-			target_type: { target: userId, type: twoFAVerificationType },
-		},
-	})
+	await db
+		.delete(Verification)
+		.where(
+			and(
+				eq(Verification.target, userId),
+				eq(Verification.type, twoFAVerificationType),
+			),
+		)
 
 	// Also delete any backup codes
 	await deleteBackupCodes(userId)
@@ -283,11 +285,16 @@ export async function generateBackupCodesAction({
 	userId,
 }: SecurityActionArgs) {
 	// Verify user has 2FA enabled
-	const verification = await prisma.verification.findUnique({
-		where: {
-			target_type: { target: userId, type: twoFAVerificationType },
-		},
-	})
+	const [verification] = await db
+		.select()
+		.from(Verification)
+		.where(
+			and(
+				eq(Verification.target, userId),
+				eq(Verification.type, twoFAVerificationType),
+			),
+		)
+		.limit(1)
 
 	if (!verification) {
 		return Response.json(

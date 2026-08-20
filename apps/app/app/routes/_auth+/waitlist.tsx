@@ -1,7 +1,7 @@
 import { Trans, Plural, t } from '@lingui/macro'
 import { requireUserId } from '@repo/auth'
 import { getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import {
 	Card,
 	CardContent,
@@ -29,10 +29,11 @@ import { type Route } from './+types/waitlist.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { email: true, name: true },
-	})
+	const [user] = await db
+		.select({ email: User.email, name: User.name })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 
 	if (!user) {
 		throw redirect('/login')

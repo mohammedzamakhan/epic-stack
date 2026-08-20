@@ -32,6 +32,7 @@ import {
 	makeTimings,
 	time,
 } from '#app/utils/timing.server.ts'
+import { db, Note, User, eq } from '@repo/database'
 import { type Route } from './+types/notes.ts'
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -39,17 +40,17 @@ export async function loader({ params }: Route.LoaderArgs) {
 	// 2. Time functions
 	const owner = await time(
 		() =>
-			prisma.user.findUnique({
-				where: {
-					username: params.username,
-				},
-				select: {
-					id: true,
-					username: true,
-					name: true,
-					imageId: true,
-				},
-			}),
+			db
+				.select({
+					id: User.id,
+					username: User.username,
+					name: User.name,
+					imageId: User.imageId,
+				})
+				.from(User)
+				.where(eq(User.username, params.username))
+				.limit(1)
+				.then(([user]) => user),
 		{ timings, type: 'find user' },
 	)
 	if (!owner) {
@@ -58,15 +59,10 @@ export async function loader({ params }: Route.LoaderArgs) {
 	// 2. Time functions
 	const notes = await time(
 		() =>
-			prisma.note.findMany({
-				where: {
-					ownerId: owner.id,
-				},
-				select: {
-					id: true,
-					title: true,
-				},
-			}),
+			db
+				.select({ id: Note.id, title: Note.title })
+				.from(Note)
+				.where(eq(Note.ownerId, owner.id)),
 		{ timings, type: 'find notes' },
 	)
 	return json(

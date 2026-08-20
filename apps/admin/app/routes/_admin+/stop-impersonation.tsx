@@ -5,7 +5,7 @@ import {
 	destroyImpersonationSession,
 } from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { ImpersonationSession, db, eq } from '@repo/database'
 import { data, redirect } from 'react-router'
 
 export async function action({ request }: { request: Request }) {
@@ -30,12 +30,9 @@ export async function action({ request }: { request: Request }) {
 	}
 
 	// Get impersonation session details for audit logging
-	const impersonationSession = await prisma.impersonationSession.findUnique({
-		where: { id: impersonationSessionId },
-		include: {
-			adminUser: { select: { id: true, name: true, username: true } },
-			targetUser: { select: { id: true, name: true, username: true } },
-		},
+	const impersonationSession = await db.query.ImpersonationSession.findFirst({
+		where: eq(ImpersonationSession.id, impersonationSessionId),
+		with: { adminUser: true, targetUser: true },
 	})
 
 	let adminUserId: string
@@ -52,8 +49,9 @@ export async function action({ request }: { request: Request }) {
 		duration = Date.now() - impersonationSession.createdAt.getTime()
 
 		// Delete the impersonation session from database
-		await prisma.impersonationSession
-			.delete({ where: { id: impersonationSessionId } })
+		await db
+			.delete(ImpersonationSession)
+			.where(eq(ImpersonationSession.id, impersonationSessionId))
 			.catch(() => {
 				// Session may already be deleted, ignore errors
 			})

@@ -1,6 +1,6 @@
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+// Removed db import - using test utilities instead
 
 test.describe('Theme Switching', () => {
 	test('Users can switch to dark theme', async ({ page, login, navigate }) => {

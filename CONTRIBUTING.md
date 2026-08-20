@@ -50,10 +50,7 @@ npm install
 npm run build
 
 # setup the database
-npx prisma migrate deploy
-
-# generate the prisma client
-npx prisma generate --sql
+cd packages/database && npm run db:migrate:deploy
 
 # Install playwright browsers
 npm run test:e2e:install

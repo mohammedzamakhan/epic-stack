@@ -25,11 +25,8 @@ This page links to examples of how to implement some things with the Epic Stack.
 - [Epic Stack + OpenAI](https://github.com/kentcdodds/epic-ai): by
   [@kentcdodds](https://github.com/kentcdodds): An example of the Epic Stack
   with OpenAI's GPT API (enhances the notes feature with "generate" buttons).
-- [Prisma Client Extensions](https://github.com/L-Steinmacher/epic-stack-with-prisma-client-extensions)
-  by
-  [@L-Steinmacher](https://github.com/L-Steinmacher/epic-stack-with-prisma-client-extensions):
-  An example of the Epic Stack with Prisma Client extensions activated for enum
-  like behavior in SQLite.
+- [Drizzle query patterns](https://orm.drizzle.team/docs/overview) for extending
+  the Epic Stack with typed SQLite queries and reusable database helpers.
 - [Epic Stack + Storybook](https://github.com/moishinetzer/epic-stack-with-storybook):
   by [@moishinetzer](https://github.com/moishinetzer): An example of the Epic
   Stack with Storybook. It also showcases creating a Remix stub, which is very
@@ -43,9 +40,9 @@ This page links to examples of how to implement some things with the Epic Stack.
 - [Epic Stack + Tailwind CSS Plugin](https://github.com/hakimLyon/epic-stack-with-tailwind-css-plugin)
   by [@hakimLyon](https://github.com/hakimLyon): An example of the Epic Stack
   with Tailwind CSS Plugin.
-- [Epic Stack + MongoDB as the Database](https://github.com/hakimLyon/epic-stack-with-prisma-mongodb)
-  by [@hakimLyon](https://github.com/hakimLyon): An example of the Epic Stack
-  with Prisma using MongoDB as the database.
+- [Epic Stack with an alternate database](https://orm.drizzle.team/docs/get-started)
+  by [@hakimLyon](https://github.com/hakimLyon): An example of adapting the data
+  layer for a different Drizzle-supported database.
 - [Epic Stack Custom Themes](https://github.com/kiliman/epic-stack-theme) by
   [@kiliman](https://github.com/kiliman): An example showing how to create a
   custom theme using the

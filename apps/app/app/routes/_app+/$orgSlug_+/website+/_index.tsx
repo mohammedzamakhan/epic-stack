@@ -7,7 +7,7 @@ import {
 	type SiteContentLocale,
 } from '@repo/common/site-locales'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { and, db, eq, ne, Organization } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
@@ -136,13 +136,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 			}
 
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					sitePublished: published,
 					...(published ? { hasProvisionedDb: true } : {}),
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
 
@@ -186,13 +186,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const customDomain = normalizeCustomDomain(submission.value.customDomain)
 
-		const existing = await prisma.organization.findFirst({
-			where: {
-				customDomain,
-				NOT: { id: organization.id },
-			},
-			select: { id: true },
-		})
+		const [existing] = await db
+			.select({ id: Organization.id })
+			.from(Organization)
+			.where(
+				and(
+					eq(Organization.customDomain, customDomain),
+					ne(Organization.id, organization.id),
+				),
+			)
+			.limit(1)
 		if (existing) {
 			return Response.json({
 				result: submission.reply({
@@ -207,15 +210,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		try {
 			const hostname = await createCustomHostname(customDomain)
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					customDomain,
 					customDomainStatus: hostname.status,
 					cloudflareHostnameId: hostname.id,
 					sitePublished: true,
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
 
@@ -244,14 +247,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			if (organization.cloudflareHostnameId) {
 				await deleteCustomHostname(organization.cloudflareHostnameId)
 			}
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					customDomain: null,
 					customDomainStatus: null,
 					cloudflareHostnameId: null,
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 			return redirectWithToast(`/${organization.slug}/website`, {
 				title: 'Custom domain removed',
@@ -283,10 +286,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			const status =
 				hostname?.status || organization.customDomainStatus || 'pending'
 
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { customDomainStatus: status },
-			})
+			await db
+				.update(Organization)
+				.set({ customDomainStatus: status })
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 
 			return redirectWithToast(`/${organization.slug}/website`, {
@@ -347,13 +350,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				})
 			}
 
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					dataRegion,
 					hasProvisionedDb: false,
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 
 			if (organization.sitePublished) {
 				await provisionTenantDatabase({
@@ -362,10 +365,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					slug: organization.slug,
 					customDomain: organization.customDomain,
 				})
-				await prisma.organization.update({
-					where: { id: organization.id },
-					data: { hasProvisionedDb: true },
-				})
+				await db
+					.update(Organization)
+					.set({ hasProvisionedDb: true })
+					.where(eq(Organization.id, organization.id))
 			}
 
 			await invalidateUserOrganizationsCache(userId)
@@ -409,13 +412,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { locales, defaultLocale } = submission.value
 
 		try {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					siteLocales: serializeSiteLocales(locales as SiteContentLocale[]),
 					siteDefaultLocale: defaultLocale,
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 
 			await invalidateUserOrganizationsCache(userId)
 

@@ -2,7 +2,7 @@ import { providerRegistry } from './provider'
 import { integrationManager } from './integration-manager'
 import { OAuthStateManager } from './oauth-manager'
 import { type OAuthCallbackParams } from './types'
-import { type Integration } from './prisma-types'
+import { type Integration } from './database-types'
 
 class OAuthFlow {
 	/**

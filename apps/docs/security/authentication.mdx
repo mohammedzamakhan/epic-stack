@@ -122,13 +122,13 @@ if (session.user.isBanned) {
 	// Check if ban has expired
 	if (session.user.banExpiresAt && new Date(session.user.banExpiresAt) <= now) {
 		// Auto-lift expired ban
-		await prisma.user.update({
-			where: { id: userId },
-			data: { isBanned: false, banReason: null, banExpiresAt: null },
-		})
+		await db
+			.update(User)
+			.set({ isBanned: false, banReason: null, banExpiresAt: null })
+			.where(eq(User.id, userId))
 	} else {
 		// Destroy all sessions and redirect to login
-		await prisma.session.deleteMany({ where: { userId } })
+		await db.delete(Session).where(eq(Session.userId, userId))
 		throw redirect('/login?banned=true')
 	}
 }

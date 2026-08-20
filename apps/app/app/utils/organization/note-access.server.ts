@@ -1,8 +1,17 @@
 import { userHasOrganizationPermission, ORG_PERMISSIONS } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	inArray,
+	or,
+	OrganizationNote,
+	NoteAccess,
+} from '@repo/database'
 
 /**
- * Build the Prisma where clause for notes that a user can access.
+ * Build the Drizzle condition for notes that a user can access.
  *
  * Access is granted if:
  * 1. The user has organization-wide read permission (READ_NOTE_ANY)
@@ -12,12 +21,12 @@ import { prisma } from '@repo/database'
  *
  * @param userId - The ID of the user requesting access
  * @param organizationId - The organization ID
- * @returns Prisma where condition for note access
+ * @returns Drizzle where condition for note access
  */
 export async function buildNoteAccessCondition(
 	userId: string,
 	organizationId: string,
-): Promise<{ OR: Array<Record<string, unknown>> }> {
+): Promise<ReturnType<typeof or>> {
 	const hasOrgWideReadAccess = await userHasOrganizationPermission(
 		userId,
 		organizationId,
@@ -25,18 +34,18 @@ export async function buildNoteAccessCondition(
 	)
 
 	if (hasOrgWideReadAccess) {
-		return {
-			OR: [{ organizationId }],
-		}
+		return eq(OrganizationNote.organizationId, organizationId)
 	}
 
-	return {
-		OR: [
-			{ isPublic: true },
-			{ createdById: userId },
-			{ noteAccess: { some: { userId } } },
-		],
-	}
+	const accessibleNoteIds = db
+		.select({ noteId: NoteAccess.noteId })
+		.from(NoteAccess)
+		.where(eq(NoteAccess.userId, userId))
+	return or(
+		eq(OrganizationNote.isPublic, true),
+		eq(OrganizationNote.createdById, userId),
+		inArray(OrganizationNote.id, accessibleNoteIds),
+	)
 }
 
 /**
@@ -108,27 +117,28 @@ export async function getAccessibleNotes(
 ) {
 	const { targetUserId, take = 10, orderBy = { createdAt: 'desc' } } = options
 	const accessCondition = await buildNoteAccessCondition(userId, organizationId)
-
-	const where: Record<string, unknown> = {
-		organizationId,
-		...accessCondition,
-	}
-
-	if (targetUserId) {
-		where.createdById = targetUserId
-	}
-
-	return prisma.organizationNote.findMany({
-		where,
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			createdAt: true,
-			isPublic: true,
-			createdById: true,
-		},
-		take,
-		orderBy,
-	})
+	const conditions = [
+		eq(OrganizationNote.organizationId, organizationId),
+		accessCondition,
+	]
+	if (targetUserId)
+		conditions.push(eq(OrganizationNote.createdById, targetUserId))
+	const direction = orderBy.createdAt === 'asc' ? 'asc' : 'desc'
+	return db
+		.select({
+			id: OrganizationNote.id,
+			title: OrganizationNote.title,
+			content: OrganizationNote.content,
+			createdAt: OrganizationNote.createdAt,
+			isPublic: OrganizationNote.isPublic,
+			createdById: OrganizationNote.createdById,
+		})
+		.from(OrganizationNote)
+		.where(and(...conditions))
+		.orderBy(
+			direction === 'asc'
+				? OrganizationNote.createdAt
+				: desc(OrganizationNote.createdAt),
+		)
+		.limit(take)
 }

@@ -13,7 +13,7 @@
  */
 
 import { schedules, logger } from '@trigger.dev/sdk/v3'
-import { prisma } from '@repo/database'
+import { db, lt, MCPAccessToken, MCPRefreshToken } from '@repo/database'
 
 export const mcpTokenCleanup = schedules.task({
 	id: 'mcp-token-cleanup',
@@ -26,47 +26,43 @@ export const mcpTokenCleanup = schedules.task({
 			const now = new Date()
 
 			// Delete expired access tokens
-			const expiredAccessTokens = await prisma.mCPAccessToken.deleteMany({
-				where: {
-					expiresAt: { lt: now },
-				},
-			})
+			const expiredAccessTokens = await db
+				.delete(MCPAccessToken)
+				.where(lt(MCPAccessToken.expiresAt, now))
 
-			if (expiredAccessTokens.count > 0) {
+			if (expiredAccessTokens.rowsAffected > 0) {
 				logger.info('Deleted expired access tokens', {
-					count: expiredAccessTokens.count,
+					count: expiredAccessTokens.rowsAffected,
 					timestamp: now.toISOString(),
 				})
 			}
 
 			// Delete expired refresh tokens
-			const expiredRefreshTokens = await prisma.mCPRefreshToken.deleteMany({
-				where: {
-					expiresAt: { lt: now },
-				},
-			})
+			const expiredRefreshTokens = await db
+				.delete(MCPRefreshToken)
+				.where(lt(MCPRefreshToken.expiresAt, now))
 
-			if (expiredRefreshTokens.count > 0) {
+			if (expiredRefreshTokens.rowsAffected > 0) {
 				logger.info('Deleted expired refresh tokens', {
-					count: expiredRefreshTokens.count,
+					count: expiredRefreshTokens.rowsAffected,
 					timestamp: now.toISOString(),
 				})
 			}
 
 			const totalDeleted =
-				expiredAccessTokens.count + expiredRefreshTokens.count
+				expiredAccessTokens.rowsAffected + expiredRefreshTokens.rowsAffected
 
 			logger.info('MCP token cleanup completed successfully', {
-				accessTokensDeleted: expiredAccessTokens.count,
-				refreshTokensDeleted: expiredRefreshTokens.count,
+				accessTokensDeleted: expiredAccessTokens.rowsAffected,
+				refreshTokensDeleted: expiredRefreshTokens.rowsAffected,
 				totalDeleted,
 				timestamp: now.toISOString(),
 			})
 
 			return {
 				success: true,
-				accessTokensDeleted: expiredAccessTokens.count,
-				refreshTokensDeleted: expiredRefreshTokens.count,
+				accessTokensDeleted: expiredAccessTokens.rowsAffected,
+				refreshTokensDeleted: expiredRefreshTokens.rowsAffected,
 				totalDeleted,
 				timestamp: now.toISOString(),
 			}

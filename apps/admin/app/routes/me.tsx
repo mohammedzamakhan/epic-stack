@@ -1,11 +1,15 @@
 import { requireUserId, logout } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { User, db, eq } from '@repo/database'
 import { redirect } from 'react-router'
 import { type Route } from './+types/me.ts'
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUnique({ where: { id: userId } })
+	const [user] = await db
+		.select()
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 	if (!user) {
 		const requestUrl = new URL(request.url)
 		const loginParams = new URLSearchParams([

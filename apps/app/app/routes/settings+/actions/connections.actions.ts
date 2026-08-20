@@ -1,5 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
-import { prisma } from '@repo/database'
+import { and, count, db, eq, Connection, Password } from '@repo/database'
 
 type ConnectionsActionArgs = {
 	formData: FormData
@@ -7,15 +7,19 @@ type ConnectionsActionArgs = {
 }
 
 async function userCanDeleteConnections(userId: string) {
-	const user = await prisma.user.findUnique({
-		select: {
-			password: { select: { userId: true } },
-			_count: { select: { connections: true } },
-		},
-		where: { id: userId },
-	})
-	if (user?.password) return true
-	return Boolean(user?._count.connections && user?._count.connections > 1)
+	const [password, connections] = await Promise.all([
+		db
+			.select({ userId: Password.userId })
+			.from(Password)
+			.where(eq(Password.userId, userId))
+			.limit(1),
+		db
+			.select({ value: count() })
+			.from(Connection)
+			.where(eq(Connection.userId, userId)),
+	])
+	if (password[0]) return true
+	return (connections[0]?.value ?? 0) > 1
 }
 
 export async function disconnectProviderAction({
@@ -34,9 +38,9 @@ export async function disconnectProviderAction({
 		'You cannot delete your last connection unless you have a password.',
 	)
 
-	await prisma.connection.delete({
-		where: { id: connectionId, userId },
-	})
+	await db
+		.delete(Connection)
+		.where(and(eq(Connection.id, connectionId), eq(Connection.userId, userId)))
 
 	return Response.json({ status: 'success' })
 }

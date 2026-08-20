@@ -97,7 +97,7 @@ describe('discover-org route', () => {
 			)
 
 			vi.mocked(discoverOrganizationFromEmail).mockResolvedValue(
-				mockOrganization,
+				mockOrganization as any,
 			)
 			vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(
 				null,
@@ -169,7 +169,7 @@ describe('discover-org route', () => {
 			)
 
 			vi.mocked(discoverOrganizationFromEmail).mockResolvedValue(
-				mockOrganization,
+				mockOrganization as any,
 			)
 			vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(
 				mockSSOConfig,
@@ -238,7 +238,7 @@ describe('discover-org route', () => {
 			)
 
 			vi.mocked(discoverOrganizationFromEmail).mockResolvedValue(
-				mockOrganization,
+				mockOrganization as any,
 			)
 			vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(
 				mockSSOConfig,
@@ -316,7 +316,7 @@ describe('discover-org route', () => {
 			)
 
 			vi.mocked(discoverOrganizationFromEmail).mockResolvedValue(
-				mockOrganization,
+				mockOrganization as any,
 			)
 			vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(
 				null,

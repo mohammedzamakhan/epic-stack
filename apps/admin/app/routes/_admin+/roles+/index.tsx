@@ -3,7 +3,7 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { OrganizationRole, Role, db, eq } from '@repo/database'
 import { Button } from '@repo/ui/button'
 import {
 	Card,
@@ -65,46 +65,40 @@ export async function loader({ request }: Route.LoaderArgs) {
 	await requireUserWithRole(request, 'admin')
 
 	// Get all organization roles with their permission counts
-	const organizationRoles = await prisma.organizationRole.findMany({
-		include: {
-			permissions: {
-				where: {
-					context: 'organization',
-				},
+	const organizationRoles = await db.query.OrganizationRole.findMany({
+		with: {
+			organizationPermissionToRoles: {
+				with: { permission: true },
 			},
-			_count: {
-				select: {
-					users: true,
-				},
-			},
+			organizations: true,
 		},
-		orderBy: {
-			level: 'desc',
-		},
+		orderBy: (role, { desc }) => desc(role.level),
 	})
 
 	// Get system roles with their permission counts
-	const systemRoles = await prisma.role.findMany({
-		include: {
-			permissions: {
-				where: {
-					context: 'system',
-				},
-			},
-			_count: {
-				select: {
-					users: true,
-				},
-			},
+	const systemRoles = await db.query.Role.findMany({
+		with: {
+			permissionToRoles: { with: { permission: true } },
+			roleToUsers: true,
 		},
-		orderBy: {
-			name: 'asc',
-		},
+		orderBy: (role, { asc }) => asc(role.name),
 	})
 
 	return {
-		organizationRoles,
-		systemRoles,
+		organizationRoles: organizationRoles.map((role) => ({
+			...role,
+			permissions: role.organizationPermissionToRoles
+				.filter(({ permission }) => permission.context === 'organization')
+				.map(({ permission }) => permission),
+			_count: { users: role.organizations.length },
+		})),
+		systemRoles: systemRoles.map((role) => ({
+			...role,
+			permissions: role.permissionToRoles
+				.filter(({ permission }) => permission.context === 'system')
+				.map(({ permission }) => permission),
+			_count: { users: role.roleToUsers.length },
+		})),
 	}
 }
 
@@ -126,10 +120,11 @@ export async function action({ request }: Route.ActionArgs) {
 		try {
 			// Check if role already exists
 			if (type === 'organization') {
-				const existingRole = await prisma.organizationRole.findUnique({
-					where: { name },
-					select: { id: true, name: true },
-				})
+				const [existingRole] = await db
+					.select({ id: OrganizationRole.id, name: OrganizationRole.name })
+					.from(OrganizationRole)
+					.where(eq(OrganizationRole.name, name))
+					.limit(1)
 
 				if (existingRole) {
 					return {
@@ -142,19 +137,22 @@ export async function action({ request }: Route.ActionArgs) {
 					}
 				}
 
-				const role = await prisma.organizationRole.create({
-					data: {
+				const [role] = await db
+					.insert(OrganizationRole)
+					.values({
 						name,
 						description: description || '',
 						level: level || 1,
-					},
-				})
+					})
+					.returning({ id: OrganizationRole.id })
+				if (!role) throw new Error('Failed to create organization role')
 				return redirect(`/roles/${role.id}`)
 			} else {
-				const existingRole = await prisma.role.findUnique({
-					where: { name },
-					select: { id: true, name: true },
-				})
+				const [existingRole] = await db
+					.select({ id: Role.id, name: Role.name })
+					.from(Role)
+					.where(eq(Role.name, name))
+					.limit(1)
 
 				if (existingRole) {
 					return {
@@ -167,18 +165,20 @@ export async function action({ request }: Route.ActionArgs) {
 					}
 				}
 
-				const role = await prisma.role.create({
-					data: {
+				const [role] = await db
+					.insert(Role)
+					.values({
 						name,
 						description: description || '',
-					},
-				})
+					})
+					.returning({ id: Role.id })
+				if (!role) throw new Error('Failed to create system role')
 				return redirect(`/roles/system/${role.id}`)
 			}
 		} catch (error: any) {
 			console.error('Error creating role:', error)
 
-			// Handle specific Prisma unique constraint errors
+			// Handle duplicate role names
 			if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
 				return {
 					result: submission.reply({

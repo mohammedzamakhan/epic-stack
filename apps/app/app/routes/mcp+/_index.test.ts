@@ -1,5 +1,20 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import {
+	MCPAccessToken,
+	MCPAuthorization,
+	MCPRefreshToken,
+	Organization,
+	OrganizationRole,
+	Role,
+	User,
+	UserOrganization,
+	_RoleToUser,
+	and,
+	db,
+	eq,
+	inArray,
+	or,
+} from '@repo/database'
 import fc from 'fast-check'
 import { RouterContextProvider } from 'react-router'
 import { describe, it, expect, afterEach } from 'vitest'
@@ -66,47 +81,64 @@ async function initializeSession(
 	return { sessionId, response }
 }
 
+async function connectUserRole(userId: string, roleName: string) {
+	const [role] = await db
+		.select({ id: Role.id })
+		.from(Role)
+		.where(eq(Role.name, roleName))
+		.limit(1)
+	if (role) {
+		await db.insert(_RoleToUser).values({ A: role.id, B: userId })
+	}
+}
+
 // Helper to create test user
 async function createTestUser(createdUserIds: string[]) {
-	const user = await prisma.user.create({
-		data: {
+	const [user] = await db
+		.insert(User)
+		.values({
 			email: faker.internet.email(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
 			name: faker.person.fullName(),
-			roles: { connect: { name: 'user' } },
-		},
-	})
+		})
+		.returning()
+	if (!user) throw new Error('Failed to insert user')
+	await connectUserRole(user.id, 'user')
 	createdUserIds.push(user.id)
 	return user
 }
 
 // Helper to create test organization
 async function createTestOrganization(userId: string, createdOrgIds: string[]) {
-	// Ensure admin role exists
-	let adminRole = await prisma.organizationRole.findUnique({
-		where: { name: 'admin' },
-	})
+	let [adminRole] = await db
+		.select()
+		.from(OrganizationRole)
+		.where(eq(OrganizationRole.name, 'admin'))
+		.limit(1)
 	if (!adminRole) {
-		adminRole = await prisma.organizationRole.create({
-			data: {
+		;[adminRole] = await db
+			.insert(OrganizationRole)
+			.values({
 				name: 'admin',
 				description: 'Administrator role',
 				level: 4,
-			},
-		})
+			})
+			.returning()
+		if (!adminRole) throw new Error('Admin role not found')
 	}
 
-	const org = await prisma.organization.create({
-		data: {
+	const [org] = await db
+		.insert(Organization)
+		.values({
 			name: faker.company.name(),
 			slug: `org-${faker.string.uuid().slice(0, 8)}`,
-			users: {
-				create: {
-					userId,
-					organizationRoleId: adminRole.id,
-				},
-			},
-		},
+		})
+		.returning()
+	if (!org) throw new Error('Failed to insert organization')
+	await db.insert(UserOrganization).values({
+		userId,
+		organizationId: org.id,
+		organizationRoleId: adminRole.id,
 	})
 	createdOrgIds.push(org.id)
 	return org
@@ -121,48 +153,41 @@ describe('MCP SSE Endpoint', () => {
 		// Clean up only the resources created in this test
 		// Delete in correct order to respect foreign key constraints
 		if (createdUserIds.length > 0 || createdOrgIds.length > 0) {
-			await prisma.mCPRefreshToken.deleteMany({
-				where: {
-					authorization: {
-						OR: [
-							{ userId: { in: createdUserIds } },
-							{ organizationId: { in: createdOrgIds } },
-						],
-					},
-				},
-			})
-			await prisma.mCPAccessToken.deleteMany({
-				where: {
-					authorization: {
-						OR: [
-							{ userId: { in: createdUserIds } },
-							{ organizationId: { in: createdOrgIds } },
-						],
-					},
-				},
-			})
-			await prisma.mCPAuthorization.deleteMany({
-				where: {
-					OR: [
-						{ userId: { in: createdUserIds } },
-						{ organizationId: { in: createdOrgIds } },
-					],
-				},
-			})
-			await prisma.userOrganization.deleteMany({
-				where: {
-					OR: [
-						{ userId: { in: createdUserIds } },
-						{ organizationId: { in: createdOrgIds } },
-					],
-				},
-			})
-			await prisma.organization.deleteMany({
-				where: { id: { in: createdOrgIds } },
-			})
-			await prisma.user.deleteMany({
-				where: { id: { in: createdUserIds } },
-			})
+			const authIds = db
+				.select({ id: MCPAuthorization.id })
+				.from(MCPAuthorization)
+				.where(
+					or(
+						inArray(MCPAuthorization.userId, createdUserIds),
+						inArray(MCPAuthorization.organizationId, createdOrgIds),
+					),
+				)
+			await db
+				.delete(MCPRefreshToken)
+				.where(inArray(MCPRefreshToken.authorizationId, authIds))
+			await db
+				.delete(MCPAccessToken)
+				.where(inArray(MCPAccessToken.authorizationId, authIds))
+			await db
+				.delete(MCPAuthorization)
+				.where(
+					or(
+						inArray(MCPAuthorization.userId, createdUserIds),
+						inArray(MCPAuthorization.organizationId, createdOrgIds),
+					),
+				)
+			await db
+				.delete(UserOrganization)
+				.where(
+					or(
+						inArray(UserOrganization.userId, createdUserIds),
+						inArray(UserOrganization.organizationId, createdOrgIds),
+					),
+				)
+			await db
+				.delete(Organization)
+				.where(inArray(Organization.id, createdOrgIds))
+			await db.delete(User).where(inArray(User.id, createdUserIds))
 
 			// Clear the arrays
 			createdUserIds.length = 0
@@ -232,12 +257,12 @@ describe('MCP SSE Endpoint', () => {
 				.update(accessToken)
 				.digest('hex')
 
-			await prisma.mCPAccessToken.update({
-				where: { tokenHash },
-				data: {
-					expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
-				},
-			})
+			await db
+				.update(MCPAccessToken)
+				.set({
+					expiresAt: new Date(Date.now() - 1000),
+				})
+				.where(eq(MCPAccessToken.tokenHash, tokenHash))
 
 			// Validate expired token
 			const tokenData = await validateAccessToken(accessToken)
@@ -330,10 +355,10 @@ describe('MCP SSE Endpoint', () => {
 			expect(tokenData).toBeDefined()
 
 			// Simulate connection close by revoking authorization
-			await prisma.mCPAuthorization.update({
-				where: { id: tokenData!.authorizationId },
-				data: { isActive: false },
-			})
+			await db
+				.update(MCPAuthorization)
+				.set({ isActive: false })
+				.where(eq(MCPAuthorization.id, tokenData!.authorizationId))
 
 			// Verify token is now invalid (connection cleanup)
 			tokenData = await validateAccessToken(accessToken)
@@ -374,10 +399,10 @@ describe('MCP SSE Endpoint', () => {
 						})
 
 						// Revoke all authorizations
-						await prisma.mCPAuthorization.updateMany({
-							where: { userId: user.id },
-							data: { isActive: false },
-						})
+						await db
+							.update(MCPAuthorization)
+							.set({ isActive: false })
+							.where(eq(MCPAuthorization.userId, user.id))
 
 						// Verify all tokens are now invalid
 						const invalidations = await Promise.all(

@@ -10,7 +10,7 @@ import {
 } from '@repo/auth'
 import { getDomainUrl } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { and, db, eq, User, Verification } from '@repo/database'
 import { EmailChangeNoticeEmail, sendEmail } from '@repo/email'
 import { data } from 'react-router'
 import { z } from 'zod'
@@ -60,15 +60,18 @@ export async function handleChangeEmailVerification({
 			{ status: 400 },
 		)
 	}
-	const preUpdateUser = await prisma.user.findFirstOrThrow({
-		select: { email: true },
-		where: { id: submission.value.target },
-	})
-	const user = await prisma.user.update({
-		where: { id: submission.value.target },
-		select: { id: true, email: true, username: true },
-		data: { email: newEmail },
-	})
+	const [preUpdateUser] = await db
+		.select({ email: User.email })
+		.from(User)
+		.where(eq(User.id, submission.value.target))
+		.limit(1)
+	if (!preUpdateUser) throw new Response('User not found', { status: 404 })
+	const [user] = await db
+		.update(User)
+		.set({ email: newEmail })
+		.where(eq(User.id, submission.value.target))
+		.returning({ id: User.id, email: User.email, username: User.username })
+	if (!user) throw new Response('User not found', { status: 404 })
 
 	void sendEmail({
 		to: preUpdateUser.email,
@@ -165,11 +168,13 @@ export async function prepareVerification({
 		...verificationConfig,
 		expiresAt: new Date(Date.now() + verificationConfig.period * 1000),
 	}
-	await prisma.verification.upsert({
-		where: { target_type: { target, type } },
-		create: verificationData,
-		update: verificationData,
-	})
+	await db
+		.insert(Verification)
+		.values(verificationData)
+		.onConflictDoUpdate({
+			target: [Verification.target, Verification.type],
+			set: verificationData,
+		})
 
 	// add the otp to the url we'll email the user.
 	verifyUrl.searchParams.set(codeQueryParam, otp)
@@ -186,18 +191,17 @@ export async function checkCodeValidity({
 	type: VerificationTypes | typeof twoFAVerifyVerificationType
 	target: string
 }): Promise<'valid' | 'expired' | 'invalid'> {
-	const verification = await prisma.verification.findUnique({
-		where: {
-			target_type: { target, type },
-		},
-		select: {
-			algorithm: true,
-			secret: true,
-			period: true,
-			charSet: true,
-			expiresAt: true,
-		},
-	})
+	const [verification] = await db
+		.select({
+			algorithm: Verification.algorithm,
+			secret: Verification.secret,
+			period: Verification.period,
+			charSet: Verification.charSet,
+			expiresAt: Verification.expiresAt,
+		})
+		.from(Verification)
+		.where(and(eq(Verification.target, target), eq(Verification.type, type)))
+		.limit(1)
 	if (!verification) return 'invalid'
 	const result = await verifyTOTP({
 		otp: code,
@@ -268,14 +272,14 @@ export async function validateRequest(
 	const { value: submissionValue } = submission
 
 	async function deleteVerification() {
-		await prisma.verification.delete({
-			where: {
-				target_type: {
-					type: submissionValue[typeQueryParam],
-					target: submissionValue[targetQueryParam],
-				},
-			},
-		})
+		await db
+			.delete(Verification)
+			.where(
+				and(
+					eq(Verification.target, submissionValue[targetQueryParam]),
+					eq(Verification.type, submissionValue[typeQueryParam]),
+				),
+			)
 	}
 
 	switch (submissionValue[typeQueryParam]) {

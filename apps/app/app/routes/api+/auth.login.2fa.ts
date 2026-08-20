@@ -1,7 +1,7 @@
 import { detectBot, slidingWindow } from '@arcjet/remix'
 import { parseWithZod } from '@conform-to/zod'
 import { auditService, AuditAction } from '@repo/audit'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { arcjet, checkHoneypot } from '@repo/security'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
@@ -106,10 +106,11 @@ export async function action({ request }: ActionFunctionArgs) {
 			)
 		}
 
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: { id: true },
-		})
+		const [user] = await db
+			.select({ id: User.id })
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
 
 		if (!user) {
 			return data(

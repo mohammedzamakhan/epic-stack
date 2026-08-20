@@ -1,6 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
-import { prisma } from '@repo/database'
+import { db, eq, Organization } from '@repo/database'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { requireAuth } from '#app/utils/jwt.server.ts'
@@ -43,10 +43,11 @@ export async function action({ request }: Route.ActionArgs) {
 
 		const submission = await parseWithZod(formData, {
 			schema: CreateOrganizationSchema.superRefine(async ({ slug }, ctx) => {
-				const existingOrg = await prisma.organization.findUnique({
-					where: { slug },
-					select: { id: true },
-				})
+				const [existingOrg] = await db
+					.select({ id: Organization.id })
+					.from(Organization)
+					.where(eq(Organization.slug, slug))
+					.limit(1)
 				if (existingOrg) {
 					ctx.addIssue({
 						path: ['slug'],

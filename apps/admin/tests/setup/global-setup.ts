@@ -7,32 +7,62 @@ import '#app/utils/cache.server.ts'
 
 export const BASE_DATABASE_PATH = path.join(
 	process.cwd(),
-	`./tests/prisma/base.db`,
+	`./tests/database/base.db`,
 )
+
+const CONTROL_PLANE_SCHEMA = path.resolve(
+	process.cwd(),
+	'../../packages/database/src/schema.ts',
+)
+const CONTROL_PLANE_MIGRATIONS = path.resolve(
+	process.cwd(),
+	'../../packages/database/drizzle',
+)
+const CONTROL_PLANE_MIGRATE = path.resolve(
+	process.cwd(),
+	'../../packages/database/src/migrate.ts',
+)
+
+async function latestSourceMtime() {
+	const schemaStat = await fsExtra.stat(CONTROL_PLANE_SCHEMA)
+	let latest = schemaStat.mtimeMs
+	const entries = await fsExtra.readdir(CONTROL_PLANE_MIGRATIONS, {
+		withFileTypes: true,
+	})
+	for (const entry of entries) {
+		if (!entry.isFile() || !entry.name.endsWith('.sql')) continue
+		const stat = await fsExtra.stat(
+			path.join(CONTROL_PLANE_MIGRATIONS, entry.name),
+		)
+		if (stat.mtimeMs > latest) latest = stat.mtimeMs
+	}
+	const metaJournal = path.join(CONTROL_PLANE_MIGRATIONS, 'meta/_journal.json')
+	if (await fsExtra.pathExists(metaJournal)) {
+		const stat = await fsExtra.stat(metaJournal)
+		if (stat.mtimeMs > latest) latest = stat.mtimeMs
+	}
+	return latest
+}
 
 export async function setup() {
 	const databaseExists = await fsExtra.pathExists(BASE_DATABASE_PATH)
 
 	if (databaseExists) {
 		const databaseLastModifiedAt = (await fsExtra.stat(BASE_DATABASE_PATH))
-			.mtime
-		const prismaSchemaLastModifiedAt = (
-			await fsExtra.stat('../../packages/database/schema.prisma')
-		).mtime
-
-		if (prismaSchemaLastModifiedAt < databaseLastModifiedAt) {
+			.mtimeMs
+		if (databaseLastModifiedAt > (await latestSourceMtime())) {
 			return
 		}
+		await fsExtra.remove(BASE_DATABASE_PATH)
+		await fsExtra.remove(`${BASE_DATABASE_PATH}-wal`).catch(() => {})
+		await fsExtra.remove(`${BASE_DATABASE_PATH}-shm`).catch(() => {})
 	}
 
-	await execaCommand(
-		'npx prisma migrate reset --force --skip-seed --skip-generate --schema=../../packages/database/schema.prisma',
-		{
-			stdio: 'inherit',
-			env: {
-				...process.env,
-				DATABASE_URL: `file:${BASE_DATABASE_PATH}`,
-			},
+	await execaCommand(`npx tsx ${CONTROL_PLANE_MIGRATE}`, {
+		stdio: 'inherit',
+		env: {
+			...process.env,
+			DATABASE_URL: `file:${BASE_DATABASE_PATH}`,
 		},
-	)
+	})
 }

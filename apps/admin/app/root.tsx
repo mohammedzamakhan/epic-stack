@@ -13,7 +13,17 @@ import { pipeHeaders } from '@repo/common/headers'
 import { getSidebarState } from '@repo/common/sidebar-cookie'
 import { getToast } from '@repo/common/toast'
 import { brand, getErrorTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import {
+	NoteAccess,
+	OrganizationNote,
+	OrganizationNoteFavorite,
+	User,
+	db,
+	desc,
+	eq,
+	or,
+	and,
+} from '@repo/database'
 import { getDirection } from '@repo/i18n'
 import { honeypot } from '@repo/security'
 import { DirectionProvider } from '@repo/ui'
@@ -84,24 +94,43 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	const user = userId
 		? await time(
-				() =>
-					prisma.user.findUnique({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { objectKey: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
+				async () => {
+					const result = await db.query.User.findFirst({
+						where: eq(User.id, userId),
+						with: {
+							image: true,
+							roleToUsers: {
+								with: {
+									role: {
+										with: {
+											permissionToRoles: {
+												with: { permission: true },
+											},
+										},
 									},
 								},
 							},
 						},
-						where: { id: userId },
-					}),
+					})
+					return result
+						? {
+								id: result.id,
+								name: result.name,
+								username: result.username,
+								image: result.image
+									? { objectKey: result.image.objectKey }
+									: null,
+								roles: result.roleToUsers.map(({ role }) => ({
+									name: role.name,
+									permissions: role.permissionToRoles.map(({ permission }) => ({
+										entity: permission.entity,
+										action: permission.action,
+										access: permission.access,
+									})),
+								})),
+							}
+						: null
+				},
 				{ timings, type: 'find user', desc: 'find user in root' },
 			)
 		: null
@@ -134,32 +163,36 @@ export async function loader({ request }: Route.LoaderArgs) {
 			// Get user's favorite notes for the current organization
 			if (defaultOrg?.organization.id) {
 				favoriteNotes = await time(
-					() =>
-						prisma.organizationNoteFavorite.findMany({
-							where: {
-								userId: user.id,
+					async () =>
+						db
+							.select({
 								note: {
-									organizationId: defaultOrg.organization.id,
-									OR: [
-										{ isPublic: true },
-										{ createdById: user.id },
-										{ noteAccess: { some: { userId: user.id } } },
-									],
+									id: OrganizationNote.id,
+									title: OrganizationNote.title,
 								},
-							},
-							select: {
-								note: {
-									select: {
-										id: true,
-										title: true,
-									},
-								},
-							},
-							orderBy: {
-								createdAt: 'desc',
-							},
-							take: 5, // Limit to 5 most recent favorites
-						}),
+							})
+							.from(OrganizationNoteFavorite)
+							.innerJoin(
+								OrganizationNote,
+								eq(OrganizationNoteFavorite.noteId, OrganizationNote.id),
+							)
+							.leftJoin(NoteAccess, eq(NoteAccess.noteId, OrganizationNote.id))
+							.where(
+								and(
+									eq(OrganizationNoteFavorite.userId, user.id),
+									eq(
+										OrganizationNote.organizationId,
+										defaultOrg.organization.id,
+									),
+									or(
+										eq(OrganizationNote.isPublic, true),
+										eq(OrganizationNote.createdById, user.id),
+										eq(NoteAccess.userId, user.id),
+									),
+								),
+							)
+							.orderBy(desc(OrganizationNoteFavorite.createdAt))
+							.limit(5),
 					{
 						timings,
 						type: 'find favorite notes',

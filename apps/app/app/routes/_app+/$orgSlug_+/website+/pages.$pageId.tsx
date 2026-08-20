@@ -25,6 +25,7 @@ import {
 	getLocaleHref,
 	getLocalizedEditableValue,
 	isReservedSiteLocaleSlug,
+	type LocalizedString,
 	parseSiteLocalesConfig,
 	pickLocalized,
 } from '@repo/common/site-locales'
@@ -35,7 +36,22 @@ import {
 	siteFontExtension,
 	sniffSiteFontFormat,
 } from '@repo/common/site-theme'
-import { prisma } from '@repo/database'
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	gte,
+	inArray,
+	isNull,
+	ne,
+	sql,
+	Organization,
+	OrganizationSiteAsset,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -457,9 +473,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		siteDefaultLocale: true,
 		siteTheme: true,
 		siteIconKey: true,
-		siteIconAssets: {
-			select: { type: true, status: true },
-		},
 	})
 
 	await requireUserWithOrganizationPermission(
@@ -471,16 +484,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	await ensureSiteChrome(organization.id)
 
 	const [chrome, page, sitePages] = await Promise.all([
-		prisma.organization.findUnique({
-			where: { id: organization.id },
-			select: { siteHeaderConfig: true, siteFooterConfig: true },
-		}),
-		prisma.websitePage.findFirst({
-			where: {
-				id: params.pageId,
-				organizationId: organization.id,
-			},
-			select: {
+		db
+			.select({
+				siteHeaderConfig: Organization.siteHeaderConfig,
+				siteFooterConfig: Organization.siteFooterConfig,
+			})
+			.from(Organization)
+			.where(eq(Organization.id, organization.id))
+			.limit(1)
+			.then((rows) => rows[0]),
+		db.query.WebsitePage.findFirst({
+			columns: {
 				id: true,
 				title: true,
 				slug: true,
@@ -490,31 +504,38 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				seoDescription: true,
 				seoImageUrl: true,
 				seoNoIndex: true,
+			},
+			with: {
 				sections: {
-					orderBy: { position: 'asc' },
-					select: {
+					columns: {
 						id: true,
 						type: true,
 						config: true,
 						position: true,
 					},
+					orderBy: (section, { asc }) => [asc(section.position)],
 				},
 			},
+			where: (page, { and, eq }) =>
+				and(
+					eq(page.id, params.pageId!),
+					eq(page.organizationId, organization.id),
+				),
 		}),
-		prisma.websitePage.findMany({
-			where: { organizationId: organization.id },
-			select: {
-				id: true,
-				title: true,
-				slug: true,
-				isHomePage: true,
-			},
-			orderBy: [
-				{ isHomePage: 'desc' },
-				{ position: 'asc' },
-				{ createdAt: 'asc' },
-			],
-		}),
+		db
+			.select({
+				id: WebsitePage.id,
+				title: WebsitePage.title,
+				slug: WebsitePage.slug,
+				isHomePage: WebsitePage.isHomePage,
+			})
+			.from(WebsitePage)
+			.where(eq(WebsitePage.organizationId, organization.id))
+			.orderBy(
+				desc(WebsitePage.isHomePage),
+				asc(WebsitePage.position),
+				asc(WebsitePage.createdAt),
+			),
 	])
 
 	if (!page) {
@@ -554,10 +575,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		ORG_PERMISSIONS.UPDATE_WEBSITE_ANY,
 	)
 
-	const page = await prisma.websitePage.findFirst({
-		where: { id: params.pageId, organizationId: organization.id },
-		select: { id: true, isHomePage: true, slug: true },
-	})
+	const [page] = await db
+		.select({
+			id: WebsitePage.id,
+			isHomePage: WebsitePage.isHomePage,
+			slug: WebsitePage.slug,
+		})
+		.from(WebsitePage)
+		.where(
+			and(
+				eq(WebsitePage.id, params.pageId!),
+				eq(WebsitePage.organizationId, organization.id),
+			),
+		)
+		.limit(1)
 
 	if (!page) {
 		return Response.json(
@@ -614,10 +645,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					safeFile,
 				)
 				const seoImageUrl = `/resources/images?objectKey=${encodeURIComponent(objectKey)}`
-				await prisma.websitePage.update({
-					where: { id: page.id },
-					data: { seoImageUrl },
-				})
+				await db
+					.update(WebsitePage)
+					.set({ seoImageUrl })
+					.where(eq(WebsitePage.id, page.id))
 				return Response.json({ status: 'success', seoImageUrl })
 			} catch (error) {
 				return Response.json(
@@ -705,10 +736,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 			try {
 				const siteIconKey = await uploadSiteIcon(organization.id, iconFile)
-				await prisma.organization.update({
-					where: { id: organization.id },
-					data: { siteIconKey },
-				})
+				await db
+					.update(Organization)
+					.set({ siteIconKey })
+					.where(eq(Organization.id, organization.id))
 				await invalidateUserOrganizationsCache(userId)
 				return Response.json({ status: 'success' })
 			} catch (error) {
@@ -765,19 +796,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					{ type: fontFile.type, lastModified: Date.now() },
 				)
 				const objectKey = await uploadSiteFont(organization.id, role, safeFile)
-				const org = await prisma.organization.findUnique({
-					where: { id: organization.id },
-					select: { siteTheme: true },
-				})
+				const [org] = await db
+					.select({ siteTheme: Organization.siteTheme })
+					.from(Organization)
+					.where(eq(Organization.id, organization.id))
+					.limit(1)
 				const current = parseSiteThemeConfig(org?.siteTheme)
 				const customFont = {
 					objectKey,
 					filename: fontFile.name.replace(/^.*[\\/]/, '').slice(0, 180),
 					format,
 				}
-				await prisma.organization.update({
-					where: { id: organization.id },
-					data: {
+				await db
+					.update(Organization)
+					.set({
 						siteTheme: serializeSiteThemeConfig({
 							...current,
 							headingFont:
@@ -789,8 +821,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 							bodyCustomFont:
 								role === 'body' ? customFont : current.bodyCustomFont,
 						}),
-					},
-				})
+					})
+					.where(eq(Organization.id, organization.id))
 				await invalidateUserOrganizationsCache(userId)
 				return Response.json({ status: 'success' })
 			} catch (error) {
@@ -819,10 +851,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (submission.status !== 'success') {
 			return Response.json({ status: 'error', result: submission.reply() })
 		}
-		await prisma.websitePage.update({
-			where: { id: page.id },
-			data: { title: submission.value.title },
-		})
+		await db
+			.update(WebsitePage)
+			.set({ title: submission.value.title })
+			.where(eq(WebsitePage.id, page.id))
 		return Response.json({ status: 'success' })
 	}
 
@@ -872,15 +904,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 
 			if (requestedSlug !== page.slug) {
-				const existing = await prisma.websitePage.findUnique({
-					where: {
-						organizationId_slug: {
-							organizationId: organization.id,
-							slug: requestedSlug,
-						},
-					},
-					select: { id: true, isHomePage: true, slug: true },
-				})
+				const [existing] = await db
+					.select({
+						id: WebsitePage.id,
+						isHomePage: WebsitePage.isHomePage,
+						slug: WebsitePage.slug,
+					})
+					.from(WebsitePage)
+					.where(
+						and(
+							eq(WebsitePage.organizationId, organization.id),
+							eq(WebsitePage.slug, requestedSlug),
+						),
+					)
+					.limit(1)
 				if (existing && existing.id !== page.id) {
 					return Response.json({
 						status: 'error',
@@ -895,16 +932,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 		}
 
-		await prisma.websitePage.update({
-			where: { id: page.id },
-			data: {
+		await db
+			.update(WebsitePage)
+			.set({
 				...(nextSlug !== undefined ? { slug: nextSlug } : {}),
 				seoTitle: seoTitle?.trim() ? seoTitle : null,
 				seoDescription: seoDescription?.trim() ? seoDescription : null,
 				seoImageUrl: seoImageUrl?.trim() ? seoImageUrl.trim() : null,
 				seoNoIndex,
-			},
-		})
+			})
+			.where(eq(WebsitePage.id, page.id))
 		return Response.json({ status: 'success' })
 	}
 
@@ -929,26 +966,32 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		const existing = await prisma.websitePageSection.findMany({
-			where: { pageId: page.id },
-			orderBy: { position: 'asc' },
-			select: { type: true, position: true },
-		})
+		const existing = await db
+			.select({
+				type: WebsitePageSection.type,
+				position: WebsitePageSection.position,
+			})
+			.from(WebsitePageSection)
+			.where(eq(WebsitePageSection.pageId, page.id))
+			.orderBy(asc(WebsitePageSection.position))
 		const body = existing.filter((section) => !isLockedBlockType(section.type))
 		const bodyPosition = Math.max(0, Math.min(position - 1, body.length))
 
-		await prisma.websitePageSection.updateMany({
-			where: { pageId: page.id, position: { gte: bodyPosition } },
-			data: { position: { increment: 1 } },
-		})
+		await db
+			.update(WebsitePageSection)
+			.set({ position: sql`${WebsitePageSection.position} + 1` })
+			.where(
+				and(
+					eq(WebsitePageSection.pageId, page.id),
+					gte(WebsitePageSection.position, bodyPosition),
+				),
+			)
 
-		await prisma.websitePageSection.create({
-			data: {
-				pageId: page.id,
-				type,
-				position: bodyPosition,
-				config: JSON.stringify(getDefaultConfig(type as BlockType)),
-			},
+		await db.insert(WebsitePageSection).values({
+			pageId: page.id,
+			type,
+			position: bodyPosition,
+			config: JSON.stringify(getDefaultConfig(type as BlockType)),
 		})
 		return Response.json({ status: 'success' })
 	}
@@ -972,24 +1015,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (sectionId === SITE_HEADER_ID) {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { siteHeaderConfig: config },
-			})
+			await db
+				.update(Organization)
+				.set({ siteHeaderConfig: config })
+				.where(eq(Organization.id, organization.id))
 			return Response.json({ status: 'success' })
 		}
 		if (sectionId === SITE_FOOTER_ID) {
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { siteFooterConfig: config },
-			})
+			await db
+				.update(Organization)
+				.set({ siteFooterConfig: config })
+				.where(eq(Organization.id, organization.id))
 			return Response.json({ status: 'success' })
 		}
 
-		await prisma.websitePageSection.updateMany({
-			where: { id: sectionId, pageId: page.id },
-			data: { config },
-		})
+		await db
+			.update(WebsitePageSection)
+			.set({ config })
+			.where(
+				and(
+					eq(WebsitePageSection.id, sectionId),
+					eq(WebsitePageSection.pageId, page.id),
+				),
+			)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1019,25 +1067,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				)
 			}
 
-			await prisma.$transaction(async (tx) => {
+			await db.transaction(async (tx) => {
 				for (const update of parsedUpdates.data) {
 					JSON.parse(update.config)
 
 					if (update.id === SITE_HEADER_ID) {
-						await tx.organization.update({
-							where: { id: organization.id },
-							data: { siteHeaderConfig: update.config },
-						})
+						await tx
+							.update(Organization)
+							.set({ siteHeaderConfig: update.config })
+							.where(eq(Organization.id, organization.id))
 					} else if (update.id === SITE_FOOTER_ID) {
-						await tx.organization.update({
-							where: { id: organization.id },
-							data: { siteFooterConfig: update.config },
-						})
+						await tx
+							.update(Organization)
+							.set({ siteFooterConfig: update.config })
+							.where(eq(Organization.id, organization.id))
 					} else {
-						await tx.websitePageSection.updateMany({
-							where: { id: update.id, pageId: page.id },
-							data: { config: update.config },
-						})
+						await tx
+							.update(WebsitePageSection)
+							.set({ config: update.config })
+							.where(
+								and(
+									eq(WebsitePageSection.id, update.id),
+									eq(WebsitePageSection.pageId, page.id),
+								),
+							)
 					}
 				}
 			})
@@ -1056,10 +1109,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ status: 'error', result: submission.reply() })
 		}
 
-		const target = await prisma.websitePageSection.findFirst({
-			where: { id: submission.value.sectionId, pageId: page.id },
-			select: { type: true },
-		})
+		const [target] = await db
+			.select({ type: WebsitePageSection.type })
+			.from(WebsitePageSection)
+			.where(
+				and(
+					eq(WebsitePageSection.id, submission.value.sectionId),
+					eq(WebsitePageSection.pageId, page.id),
+				),
+			)
+			.limit(1)
 		if (!target) {
 			return Response.json(
 				{ status: 'error', error: 'Section not found' },
@@ -1073,9 +1132,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		await prisma.websitePageSection.deleteMany({
-			where: { id: submission.value.sectionId, pageId: page.id },
-		})
+		await db
+			.delete(WebsitePageSection)
+			.where(
+				and(
+					eq(WebsitePageSection.id, submission.value.sectionId),
+					eq(WebsitePageSection.pageId, page.id),
+				),
+			)
 		return Response.json({ status: 'success' })
 	}
 
@@ -1087,11 +1151,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const { sectionId, direction } = submission.value
 
-		const sections = await prisma.websitePageSection.findMany({
-			where: { pageId: page.id },
-			orderBy: { position: 'asc' },
-			select: { id: true, type: true, position: true },
-		})
+		const sections = await db
+			.select({
+				id: WebsitePageSection.id,
+				type: WebsitePageSection.type,
+				position: WebsitePageSection.position,
+			})
+			.from(WebsitePageSection)
+			.where(eq(WebsitePageSection.pageId, page.id))
+			.orderBy(asc(WebsitePageSection.position))
 
 		const idx = sections.findIndex((s) => s.id === sectionId)
 		if (idx === -1) {
@@ -1118,16 +1186,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (currentSection && swapSection) {
 			// Swap positions
-			await prisma.$transaction([
-				prisma.websitePageSection.update({
-					where: { id: currentSection.id },
-					data: { position: swapSection.position },
-				}),
-				prisma.websitePageSection.update({
-					where: { id: swapSection.id },
-					data: { position: currentSection.position },
-				}),
-			])
+			await db.transaction(async (tx) => {
+				await tx
+					.update(WebsitePageSection)
+					.set({ position: swapSection.position })
+					.where(eq(WebsitePageSection.id, currentSection.id))
+				await tx
+					.update(WebsitePageSection)
+					.set({ position: currentSection.position })
+					.where(eq(WebsitePageSection.id, swapSection.id))
+			})
 		}
 
 		return Response.json({ status: 'success' })
@@ -1161,10 +1229,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		const sections = await prisma.websitePageSection.findMany({
-			where: { pageId: page.id },
-			select: { id: true, type: true },
-		})
+		const sections = await db
+			.select({ id: WebsitePageSection.id, type: WebsitePageSection.type })
+			.from(WebsitePageSection)
+			.where(eq(WebsitePageSection.pageId, page.id))
 		const bodySections = sections.filter(
 			(section) => !isLockedBlockType(section.type),
 		)
@@ -1188,40 +1256,40 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		await prisma.$transaction(
-			bodyIds.map((id, index) =>
-				prisma.websitePageSection.update({
-					where: { id },
-					data: { position: index },
-				}),
-			),
-		)
+		await db.transaction(async (tx) => {
+			for (const [index, id] of bodyIds.entries()) {
+				await tx
+					.update(WebsitePageSection)
+					.set({ position: index })
+					.where(eq(WebsitePageSection.id, id))
+			}
+		})
 
 		return Response.json({ status: 'success' })
 	}
 
 	if (intent === publishIntent) {
-		const sections = await prisma.websitePageSection.findMany({
-			where: { pageId: page.id },
-			orderBy: { position: 'asc' },
-			select: {
-				id: true,
-				type: true,
-				position: true,
-				config: true,
-			},
-		})
+		const sections = await db
+			.select({
+				id: WebsitePageSection.id,
+				type: WebsitePageSection.type,
+				position: WebsitePageSection.position,
+				config: WebsitePageSection.config,
+			})
+			.from(WebsitePageSection)
+			.where(eq(WebsitePageSection.pageId, page.id))
+			.orderBy(asc(WebsitePageSection.position))
 		const publishedSections = sections.filter(
 			(section) => !isLockedBlockType(section.type),
 		)
 
-		await prisma.websitePage.update({
-			where: { id: page.id },
-			data: {
+		await db
+			.update(WebsitePage)
+			.set({
 				status: 'published',
 				publishedData: JSON.stringify(publishedSections),
-			},
-		})
+			})
+			.where(eq(WebsitePage.id, page.id))
 		return Response.json({ status: 'success' })
 	}
 
@@ -1232,10 +1300,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 				error: 'Cannot unpublish the home page',
 			})
 		}
-		await prisma.websitePage.update({
-			where: { id: page.id },
-			data: { status: 'draft' },
-		})
+		await db
+			.update(WebsitePage)
+			.set({ status: 'draft' })
+			.where(eq(WebsitePage.id, page.id))
 		return Response.json({ status: 'success' })
 	}
 
@@ -1249,14 +1317,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			submission.value
 
 		try {
-			const org = await prisma.organization.findUnique({
-				where: { id: organization.id },
-				select: { siteTheme: true },
-			})
+			const [org] = await db
+				.select({ siteTheme: Organization.siteTheme })
+				.from(Organization)
+				.where(eq(Organization.id, organization.id))
+				.limit(1)
 			const current = parseSiteThemeConfig(org?.siteTheme)
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					siteTheme: serializeSiteThemeConfig({
 						baseColor,
 						theme,
@@ -1273,8 +1342,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 						headingCustomFont: current.headingCustomFont,
 						bodyCustomFont: current.bodyCustomFont,
 					}),
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 			return Response.json({ status: 'success' })
 		} catch {
@@ -1295,13 +1364,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		try {
-			await prisma.organizationSiteAsset.deleteMany({
-				where: { organizationId: organization.id },
-			})
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: { siteIconKey: null },
-			})
+			await db
+				.delete(OrganizationSiteAsset)
+				.where(eq(OrganizationSiteAsset.organizationId, organization.id))
+			await db
+				.update(Organization)
+				.set({ siteIconKey: null })
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 			return Response.json({ status: 'success' })
 		} catch {
@@ -1329,14 +1398,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		try {
-			const org = await prisma.organization.findUnique({
-				where: { id: organization.id },
-				select: { siteTheme: true },
-			})
+			const [org] = await db
+				.select({ siteTheme: Organization.siteTheme })
+				.from(Organization)
+				.where(eq(Organization.id, organization.id))
+				.limit(1)
 			const current = parseSiteThemeConfig(org?.siteTheme)
-			await prisma.organization.update({
-				where: { id: organization.id },
-				data: {
+			await db
+				.update(Organization)
+				.set({
 					siteTheme: serializeSiteThemeConfig({
 						...current,
 						headingFont: role === 'heading' ? 'inter' : current.headingFont,
@@ -1345,8 +1415,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 							role === 'heading' ? null : current.headingCustomFont,
 						bodyCustomFont: role === 'body' ? null : current.bodyCustomFont,
 					}),
-				},
-			})
+				})
+				.where(eq(Organization.id, organization.id))
 			await invalidateUserOrganizationsCache(userId)
 			return Response.json({ status: 'success' })
 		} catch {
@@ -4855,7 +4925,11 @@ export default function PageBuilderRoute() {
 				slug: item.slug,
 				isHomePage: item.isHomePage,
 				title:
-					pickLocalized(item.title, activeLocale, defaultLocale) ||
+					pickLocalized(
+						item.title as LocalizedString | string | null,
+						activeLocale,
+						defaultLocale,
+					) ||
 					item.slug ||
 					'Untitled page',
 			})),
@@ -5179,7 +5253,7 @@ export default function PageBuilderRoute() {
 					/>
 				) : inspector === 'branding' ? (
 					<BrandingPanel
-						organization={organization}
+						organization={{ ...organization, siteIconAssets: [] }}
 						themeConfig={themeConfig}
 						onPreviewRefresh={handlePreviewRefresh}
 					/>

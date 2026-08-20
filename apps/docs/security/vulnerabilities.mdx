@@ -28,12 +28,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	)
 
 	// ✅ Resource ownership is verified
-	const note = await prisma.note.findFirst({
-		where: {
-			id: noteId,
-			organizationId: userOrganization.id, // Prevents IDOR
-		},
-	})
+	const [note] = await db
+		.select()
+		.from(Note)
+		.where(
+			and(
+				eq(Note.id, noteId),
+				eq(Note.organizationId, userOrganization.id), // Prevents IDOR
+			),
+		)
+		.limit(1)
 }
 ```
 
@@ -56,10 +60,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 **Epic Stack Prevention**:
 
 ```typescript
-// ✅ Prisma automatically parameterizes queries
-const user = await prisma.user.findUnique({
-  where: { email: userInput }, // Safe from SQL injection
-})
+// ✅ Drizzle parameterizes query values
+const [user] = await db
+  .select()
+  .from(User)
+  .where(eq(User.email, userInput)) // Safe from SQL injection
+  .limit(1)
 
 // ✅ Content is sanitized before rendering
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server'
@@ -173,17 +179,17 @@ cookie: {
 
 ```typescript
 // ❌ Vulnerable - No ownership check
-const invitation = await prisma.organizationInvitation.delete({
-	where: { id: invitationId }, // Any user can delete any invitation!
-})
+await db.delete(OrganizationInvitation).where(eq(OrganizationInvitation.id, invitationId)) // Any user can delete any invitation!
 
 // ✅ Secure - Verify ownership
-const invitation = await prisma.organizationInvitation.delete({
-	where: {
-		id: invitationId,
-		organizationId: userOrganization.id, // Only own org's invitations
-	},
-})
+await db
+	.delete(OrganizationInvitation)
+	.where(
+		and(
+			eq(OrganizationInvitation.id, invitationId),
+			eq(OrganizationInvitation.organizationId, userOrganization.id),
+		),
+	)
 ```
 
 ## Rate Limiting

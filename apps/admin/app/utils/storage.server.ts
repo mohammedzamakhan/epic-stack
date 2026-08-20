@@ -1,5 +1,5 @@
 import { type FileUpload } from '@mjackson/form-data-parser'
-import { prisma } from '@repo/database'
+import { db, eq, OrganizationS3Config } from '@repo/database'
 import { decrypt, getSSOMasterKey } from '@repo/security'
 import {
 	createStorageClient,
@@ -27,9 +27,12 @@ function createUploadOptions(): UploadOptions {
 		getConfig: async (organizationId?: string) => {
 			return await storageClient.getConfig(organizationId, {
 				getOrganizationConfig: async (orgId) => {
-					return await prisma.organizationS3Config.findUnique({
-						where: { organizationId: orgId },
-					})
+					const [config] = await db
+						.select()
+						.from(OrganizationS3Config)
+						.where(eq(OrganizationS3Config.organizationId, orgId))
+						.limit(1)
+					return config ?? null
 				},
 				decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
 			})
@@ -60,9 +63,12 @@ export async function getSignedGetRequestInfoAsync(
 		organizationId,
 		{
 			getOrganizationConfig: async (orgId) => {
-				return await prisma.organizationS3Config.findUnique({
-					where: { organizationId: orgId },
-				})
+				const [config] = await db
+					.select()
+					.from(OrganizationS3Config)
+					.where(eq(OrganizationS3Config.organizationId, orgId))
+					.limit(1)
+				return config ?? null
 			},
 			decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
 		},

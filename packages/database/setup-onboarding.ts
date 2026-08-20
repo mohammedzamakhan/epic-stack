@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db, OnboardingStep } from './db.server'
 
 // Default onboarding steps to seed the database
 export const DEFAULT_ONBOARDING_STEPS = [
@@ -104,31 +104,35 @@ export const DEFAULT_ONBOARDING_STEPS = [
 // Initialize onboarding steps in database
 export async function initializeOnboardingSteps() {
 	for (const step of DEFAULT_ONBOARDING_STEPS) {
-		await prisma.onboardingStep.upsert({
-			where: { key: step.key },
-			update: {
-				title: step.title,
-				description: step.description,
-				actionConfig: JSON.stringify(step.actionConfig),
-				icon: step.icon,
-				autoDetect: step.autoDetect,
-				detectConfig: step.detectConfig
-					? JSON.stringify(step.detectConfig)
-					: null,
-				sortOrder: step.sortOrder,
-			},
-			create: {
-				key: step.key,
-				title: step.title,
-				description: step.description,
-				actionConfig: JSON.stringify(step.actionConfig),
-				icon: step.icon,
-				autoDetect: step.autoDetect,
-				detectConfig: step.detectConfig
-					? JSON.stringify(step.detectConfig)
-					: null,
-				sortOrder: step.sortOrder,
-			},
-		})
+		const values = {
+			key: step.key,
+			title: step.title,
+			description: step.description,
+			actionConfig: JSON.stringify(step.actionConfig),
+			icon: step.icon,
+			autoDetect: step.autoDetect,
+			detectConfig: step.detectConfig
+				? JSON.stringify(step.detectConfig)
+				: null,
+			sortOrder: step.sortOrder,
+		}
+
+		await db
+			.insert(OnboardingStep)
+			.values(values)
+			.onConflictDoUpdate({
+				target: OnboardingStep.key,
+				set: {
+					title: step.title,
+					description: step.description,
+					actionConfig: JSON.stringify(step.actionConfig),
+					icon: step.icon,
+					autoDetect: step.autoDetect,
+					detectConfig: step.detectConfig
+						? JSON.stringify(step.detectConfig)
+						: null,
+					sortOrder: step.sortOrder,
+				},
+			})
 	}
 }

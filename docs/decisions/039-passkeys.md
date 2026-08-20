@@ -87,7 +87,7 @@ robust implementation of the WebAuthn standard. The implementation will:
 1. Allow users to register multiple passkeys for their account
 2. Support both platform authenticators (built into devices) and cross-platform
    authenticators (security keys)
-3. Store passkey data in a dedicated Prisma model that tracks:
+3. Store passkey data in a dedicated `Passkey` table that tracks:
    - Authenticator metadata (AAGUID, device type, transports)
    - Security information (public key, counter)
    - User relationship and timestamps

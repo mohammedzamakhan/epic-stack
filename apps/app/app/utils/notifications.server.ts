@@ -1,5 +1,13 @@
 import { invariant } from '@epic-web/invariant'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Notification,
+	NotificationPreference,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { sendEmail, MentionEmail, CommentEmail } from '@repo/email'
 import { extractMentions, resolveMentionsToUserIds } from '@repo/notifications'
 
@@ -55,23 +63,24 @@ export async function notifyCommentMentions({
 		}
 
 		// Get organization members to resolve mentions
-		const organizationMembers = await prisma.userOrganization.findMany({
-			where: {
-				organizationId,
-				active: true,
-			},
-			select: {
-				userId: true,
+		const organizationMembers = await db
+			.select({
+				userId: UserOrganization.userId,
 				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-						email: true,
-					},
+					id: User.id,
+					name: User.name,
+					username: User.username,
+					email: User.email,
 				},
-			},
-		})
+			})
+			.from(UserOrganization)
+			.innerJoin(User, eq(UserOrganization.userId, User.id))
+			.where(
+				and(
+					eq(UserOrganization.organizationId, organizationId),
+					eq(UserOrganization.active, true),
+				),
+			)
 
 		// Resolve mentions to user IDs
 		const mentionedUserIds = await resolveMentionsToUserIds(
@@ -108,44 +117,46 @@ export async function notifyCommentMentions({
 			}
 
 			// Check preferences
-			const preference = await prisma.notificationPreference.findUnique({
-				where: {
-					userId_organizationId_workflow: {
-						userId,
-						organizationId,
-						workflow: 'comment-mention-workflow',
-					},
-				},
-			})
+			const [preference] = await db
+				.select()
+				.from(NotificationPreference)
+				.where(
+					and(
+						eq(NotificationPreference.userId, userId),
+						eq(NotificationPreference.organizationId, organizationId),
+						eq(NotificationPreference.workflow, 'comment-mention-workflow'),
+					),
+				)
+				.limit(1)
 
 			const inAppEnabled = preference?.inApp ?? true
 			const emailEnabled = preference?.email ?? true
 
 			if (inAppEnabled) {
 				// 1. Save notification to DB using upsert to enforce uniqueness
-				await prisma.notification.upsert({
-					where: {
-						userId_organizationId_type_entityId: {
-							userId,
-							organizationId,
-							type: 'mention',
-							entityId: commentId,
-						},
-					},
-					update: {
-						payload: JSON.stringify(payload),
-						isRead: false,
-						isSeen: false,
-						updatedAt: new Date(),
-					},
-					create: {
+				await db
+					.insert(Notification)
+					.values({
 						userId,
 						organizationId,
 						type: 'mention',
 						entityId: commentId,
 						payload: JSON.stringify(payload),
-					},
-				})
+					})
+					.onConflictDoUpdate({
+						target: [
+							Notification.userId,
+							Notification.organizationId,
+							Notification.type,
+							Notification.entityId,
+						],
+						set: {
+							payload: JSON.stringify(payload),
+							isRead: false,
+							isSeen: false,
+							updatedAt: new Date(),
+						},
+					})
 
 				// Broadcast event logic moved to database polling in stream.tsx
 			}
@@ -192,10 +203,11 @@ export async function notifyNoteOwner({
 		}
 
 		// Get note owner's email
-		const noteOwner = await prisma.user.findUnique({
-			where: { id: noteOwnerId },
-			select: { email: true },
-		})
+		const [noteOwner] = await db
+			.select({ email: User.email })
+			.from(User)
+			.where(eq(User.id, noteOwnerId))
+			.limit(1)
 
 		if (!noteOwner) {
 			console.error('Note owner not found:', noteOwnerId)
@@ -216,44 +228,46 @@ export async function notifyNoteOwner({
 		}
 
 		// Check preferences
-		const preference = await prisma.notificationPreference.findUnique({
-			where: {
-				userId_organizationId_workflow: {
-					userId: noteOwnerId,
-					organizationId,
-					workflow: 'note-comment-workflow',
-				},
-			},
-		})
+		const [preference] = await db
+			.select()
+			.from(NotificationPreference)
+			.where(
+				and(
+					eq(NotificationPreference.userId, noteOwnerId),
+					eq(NotificationPreference.organizationId, organizationId),
+					eq(NotificationPreference.workflow, 'note-comment-workflow'),
+				),
+			)
+			.limit(1)
 
 		const inAppEnabled = preference?.inApp ?? true
 		const emailEnabled = preference?.email ?? true
 
 		if (inAppEnabled) {
 			// 1. Save notification to DB using upsert to enforce uniqueness
-			await prisma.notification.upsert({
-				where: {
-					userId_organizationId_type_entityId: {
-						userId: noteOwnerId,
-						organizationId,
-						type: 'comment',
-						entityId: commentId,
-					},
-				},
-				update: {
-					payload: JSON.stringify(payload),
-					isRead: false,
-					isSeen: false,
-					updatedAt: new Date(),
-				},
-				create: {
+			await db
+				.insert(Notification)
+				.values({
 					userId: noteOwnerId,
 					organizationId,
 					type: 'comment',
 					entityId: commentId,
 					payload: JSON.stringify(payload),
-				},
-			})
+				})
+				.onConflictDoUpdate({
+					target: [
+						Notification.userId,
+						Notification.organizationId,
+						Notification.type,
+						Notification.entityId,
+					],
+					set: {
+						payload: JSON.stringify(payload),
+						isRead: false,
+						isSeen: false,
+						updatedAt: new Date(),
+					},
+				})
 
 			// Broadcast event logic moved to database polling in stream.tsx
 		}

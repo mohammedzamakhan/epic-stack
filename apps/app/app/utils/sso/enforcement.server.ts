@@ -5,7 +5,15 @@
  * When enforced, users cannot use password or social login.
  */
 
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	SSOConfiguration,
+	User,
+	UserOrganization,
+} from '@repo/database'
 
 export interface SSOEnforcementResult {
 	enforced: boolean
@@ -26,30 +34,33 @@ export async function checkSSOEnforcementByEmail(
 ): Promise<SSOEnforcementResult> {
 	try {
 		// Find user by email with their organization memberships
-		const user = await prisma.user.findUnique({
-			where: { email: email.toLowerCase() },
-			include: {
-				organizations: {
-					include: {
-						organization: {
-							include: {
-								ssoConfiguration: true,
-							},
-						},
-					},
-				},
-			},
-		})
+		const organizations = await db
+			.select({
+				id: Organization.id,
+				name: Organization.name,
+				slug: Organization.slug,
+				isEnabled: SSOConfiguration.isEnabled,
+				enforceSSOLogin: SSOConfiguration.enforceSSOLogin,
+			})
+			.from(User)
+			.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+			.innerJoin(
+				Organization,
+				eq(UserOrganization.organizationId, Organization.id),
+			)
+			.leftJoin(
+				SSOConfiguration,
+				eq(SSOConfiguration.organizationId, Organization.id),
+			)
+			.where(
+				and(
+					eq(User.email, email.toLowerCase()),
+					eq(UserOrganization.active, true),
+				),
+			)
 
-		if (!user) {
-			// User doesn't exist, no enforcement
-			return { enforced: false }
-		}
-
-		// Check each organization the user belongs to
-		for (const membership of user.organizations) {
-			const org = membership.organization
-			const ssoConfig = org.ssoConfiguration as any
+		for (const org of organizations) {
+			const ssoConfig = org
 
 			// If org has SSO enabled AND enforced, block non-SSO login
 			if (ssoConfig?.isEnabled && ssoConfig?.enforceSSOLogin) {
@@ -78,28 +89,28 @@ export async function checkSSOEnforcementByUserId(
 	userId: string,
 ): Promise<SSOEnforcementResult> {
 	try {
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			include: {
-				organizations: {
-					include: {
-						organization: {
-							include: {
-								ssoConfiguration: true,
-							},
-						},
-					},
-				},
-			},
-		})
+		const organizations = await db
+			.select({
+				id: Organization.id,
+				name: Organization.name,
+				slug: Organization.slug,
+				isEnabled: SSOConfiguration.isEnabled,
+				enforceSSOLogin: SSOConfiguration.enforceSSOLogin,
+			})
+			.from(UserOrganization)
+			.innerJoin(User, eq(UserOrganization.userId, User.id))
+			.innerJoin(
+				Organization,
+				eq(UserOrganization.organizationId, Organization.id),
+			)
+			.leftJoin(
+				SSOConfiguration,
+				eq(SSOConfiguration.organizationId, Organization.id),
+			)
+			.where(and(eq(User.id, userId), eq(UserOrganization.active, true)))
 
-		if (!user) {
-			return { enforced: false }
-		}
-
-		for (const membership of user.organizations) {
-			const org = membership.organization
-			const ssoConfig = org.ssoConfiguration as any
+		for (const org of organizations) {
+			const ssoConfig = org
 
 			if (ssoConfig?.isEnabled && ssoConfig?.enforceSSOLogin) {
 				return {

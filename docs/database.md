@@ -45,14 +45,14 @@ not put KSA customer SQLite on that LiteFS cluster or on the US OCI volume.
 
 ## Tenant customer SQLite
 
-Customer phone, name, and email are **not** in Prisma. Each published org gets a
-file `tenant_{orgId}.db` on the tenant-api node whose `DATA_REGION` matches
-`Organization.dataRegion`. Production files live on an OCI block volume
-(`TENANT_DB_DIR=/data/tenants`), not on App/Admin LiteFS.
+Customer phone, name, and email are **not** in the control-plane database. Each
+published org gets a file `tenant_{orgId}.db` on the tenant-api node whose
+`DATA_REGION` matches `Organization.dataRegion`. Production files live on an OCI
+block volume (`TENANT_DB_DIR=/data/tenants`), not on App/Admin LiteFS.
 
-- Schema and migrations: `packages/tenant-db` (Drizzle, not Prisma)
-- Prisma only stores flags: `Organization.dataRegion` (`us` | `ksa`) and
-  `Organization.hasProvisionedDb`
+- Schema and migrations: `packages/tenant-db` (Drizzle)
+- The control plane only stores flags: `Organization.dataRegion` (`us` | `ksa`)
+  and `Organization.hasProvisionedDb`
 - Changing region **deletes** the old file and provisions an empty database in
   the new region if the site is published
 - Never put customer PII columns on `User` or `Organization`
@@ -75,21 +75,22 @@ machine. You can do this using `fly ssh console`. The Dockerfile simplifies this
 further by adding a `database-cli` command. You can connect to the live database
 by running `fly ssh console -C database-cli`.
 
-To connect to the deployed database from your local machine using Prisma Studio,
-you can utilize Fly's `ssh` and `proxy` commands.
+To connect to the deployed database from your local machine using Drizzle
+Studio, you can utilize Fly's `ssh` and `proxy` commands.
 
-- Run in one terminal the command to start Prisma Studio on your desired Fly app
+- Run in one terminal the command to start Drizzle Studio on your desired Fly
+  app
   ```sh
-  fly ssh console -C "npx prisma studio" --app [YOUR_APP_NAME]
+  fly ssh console -C "npm run db:studio" --app [YOUR_APP_NAME]
   ```
-- Run in a second terminal the command to proxy your local port 5556 to Prisma
+- Run in a second terminal the command to proxy your local port 5556 to Drizzle
   Studio
   ```sh
   fly proxy 5556:5555 --app [YOUR_APP_NAME]
   ```
 
 If you have multiple instances of your app running, and you'd like to make edits
-to your database, you will need to run `npx prisma studio` on the primary
+to your database, you will need to run `npm run db:studio` on the primary
 instance.
 
 - Get a list of your app instances, the `ROLE` column will show which instance
@@ -99,11 +100,11 @@ instance.
   ```
 - Run the console command with the `-s` select flag
   ```sh
-  fly ssh console -C "npx prisma studio" -s --app [YOUR_APP_NAME]
+  fly ssh console -C "npm run db:studio" -s --app [YOUR_APP_NAME]
   ```
 - Use your arrow keys to select the primary instance
 
-To work with Prisma Studio and your deployed app's database, simply open
+To work with Drizzle Studio and your deployed app's database, simply open
 `http://localhost:5556` in your browser.
 
 > **Note**: You may want to add `--select` to the `fly ssh console` command to
@@ -117,9 +118,9 @@ To work with Prisma Studio and your deployed app's database, simply open
 
 ## Migrations
 
-Thanks to Prisma, we've got a great mechanism for handling database migrations.
-Any migrations necessary are run (by the primary instance only) as part of the
-deploy process. You can find this in the `other/litefs.yml` file.
+Drizzle migrations provide a reproducible mechanism for handling database
+migrations. Any migrations necessary are run (by the primary instance only) as
+part of the deploy process. You can find this in the `other/litefs.yml` file.
 
 We deploy to multiple instances at once and the way we deploy means we don't
 have any downtime during deploys. However, to make this work, you do need to
@@ -155,9 +156,9 @@ to change that to `firstName` and `lastName` instead. Here's how you'd do that
    field should be populated with the `firstName` and `lastName` fields. You can
    do this as part of the migration SQL script that you run. The easiest way to
    do this is to generate the migration script to add the fields using
-   `prisma migrate` and then modify the script to copy the existing data in the
-   `name` field to the `firstName` field (maybe with the help of VSCode Copilot
-   😅).
+   `npx drizzle-kit generate` and then modify the script to copy the existing
+   data in the `name` field to the `firstName` field (maybe with the help of
+   VSCode Copilot 😅).
 3. Narrow app to consume `firstName` and `lastName` by only writing to those
    fields and removing the fallback to the `name` field.
 4. Narrow db to provide `firstName` and `lastName` by removing the `name` field.
@@ -178,15 +179,15 @@ recommended approach to ensure it's reproducible.
 The trick is not all of us are really excited about writing raw SQL (especially
 if what you need to seed is a lot of data), so here's an easy way to help out:
 
-1. Create a script very similar to our `prisma/seed.ts` file which creates all
-   the data you want to seed.
+1. Create a script very similar to our `packages/database/seed.ts` file which
+   creates all the data you want to seed.
    ```sh nonumber
-   cp prisma/seed.ts ./prod-seed.local.ts
+   cp packages/database/seed.ts ./prod-seed.local.ts
    ```
    Then modify that file to create the data you want to seed.
 1. Create a temporary database file to seed the data into.
    ```sh
-   DATABASE_URL=file:./seed.local.db npx prisma migrate reset --skip-seed --force
+   DATABASE_URL=file:./seed.local.db npm run db:migrate:deploy
    ```
 1. Run the custom seed script locally to generate the data you want to seed.
    ```sh
@@ -203,11 +204,11 @@ if what you need to seed is a lot of data), so here's an easy way to help out:
 1. Deploy your app and verify that the data was seeded correctly.
 
 If your app has already applied all migrations, then the changes to the
-`migration.sql` won't be applied (because prisma's already applied it). So then
+`migration.sql` won't be applied if the migration is already recorded. So then
 you can run the following command to apply the migration:
 
 ```sh nonumber
-fly ssh console -C "npx prisma migrate reset --skip-seed --force" --app [YOUR_APP_NAME]
+fly ssh console -C "npm run db:migrate:deploy" --app [YOUR_APP_NAME]
 ```
 
 > **WARNING**: This will reset your database and apply all migrations. Continue
@@ -300,13 +301,13 @@ BACKUP OF THE CURRENT DATABASE BEFORE DOING THIS!!**
 
 ## Troubleshooting
 
-### Faulty Prisma Migration
+### Faulty Drizzle Migration
 
 If you accidentally run a faulty migration on prod DB, and you see this message
 in the logs:
 
 ```sh
-migrate found failed migrations in the target database, new migrations will not be applied. Read more about how to resolve migration issues in a production database: https://pris.ly/d/migrate-resolve
+migrate found failed migrations in the target database, new migrations will not be applied. Inspect the migration history and resolve the failed SQL before deploying again.
 ```
 
 You've got a few options:
@@ -317,8 +318,8 @@ You've got a few options:
    app after deleting/fixing the faulty migration. **(Make sure that the backup
    isn't too old, otherwise you'll lose data)**
    - You can fix a faulty migration by either editing the migration SQL file, or
-     by deleting the particular migration folder from `prisma/migrations` and
-     re-generating the migration after fixing the error.
+     by deleting the particular migration SQL from `packages/database/drizzle`
+     and re-generating the migration after fixing the error.
 3. If you do care about the data and don't have a backup, you can follow these
    steps:
    1. Comment out the
@@ -326,7 +327,7 @@ You've got a few options:
 
    ```yml
    # exec:
-   #   - cmd: npx prisma migrate deploy
+   #   - cmd: npm run db:migrate:deploy
    #     if-candidate: true
 
    #   - cmd: npm start
@@ -334,7 +335,7 @@ You've got a few options:
 
    2. Commit this change and deploy the app to fly.
       - This will make sure that after building the dockerfile and deploying it
-        to the fly machine, `npx prisma migrate deploy` and `npm start` commands
+        to the fly machine, `npm run db:migrate:deploy` and `npm start` commands
         won't be executed.
    3. Now that the main machine is up and running, you can SSH into it by
       running `fly ssh console --app [YOUR_APP_NAME]` in the terminal.
@@ -344,7 +345,7 @@ You've got a few options:
       location (If something were to go wrong, we have a backup of the backup).
    6. Write SQL or use a tool like
       [DB Browser for SQLite](https://sqlitebrowser.org/) to remove the last
-      (failed) entry from `_prisma_migrations` table from the downloaded DB
+      (failed) entry from the migration history table from the downloaded DB
       backup file.
       - If you're using DB Browser for SQLite but your DB isn't selectable when
         selecting a file to open, change DB file extension to `sqlite` from
@@ -357,14 +358,15 @@ You've got a few options:
       migration, it will fail again. So you need to delete/fix the faulty
       migration.
       - You can fix a faulty migration by either editing the migration SQL file,
-        or by deleting the particular migration folder from `prisma/migrations`
-        and re-generating the migration after fixing the error.
+        or by deleting the particular migration SQL from
+        `packages/database/drizzle` and re-generating the migration after fixing
+        the error.
    9. Uncomment the
       [`exec` section from `litefs.yml` file](https://github.com/mohammedzamakhan/epic-startup/blob/main/other/litefs.yml#L31-L37).
 
    ```yml
    exec:
-     - cmd: npx prisma migrate deploy
+     - cmd: npm run db:migrate:deploy
        if-candidate: true
 
      - cmd: npm start
@@ -377,7 +379,7 @@ You've got a few options:
    faulty migration from the DB:
 
    ```sql
-   DELETE FROM _prisma_migrations WHERE name = 'migration_name';
+   -- Remove the failed migration row using your migration history table.
    ```
 
    Make sure to replace `migration_name` with the name of the faulty migration.

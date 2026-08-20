@@ -1,6 +1,6 @@
 import { requireUserId } from '@repo/auth'
 import { getDomainUrl, getErrorMessage } from '@repo/common'
-import { prisma } from '@repo/database'
+import { db, eq, Passkey, User } from '@repo/database'
 import {
 	generateRegistrationOptions,
 	verifyRegistrationResponse,
@@ -16,14 +16,20 @@ import {
 export async function loader({ request }: Route.LoaderArgs) {
 	try {
 		const userId = await requireUserId(request)
-		const passkeys = await prisma.passkey.findMany({
-			where: { userId },
-			select: { id: true },
-		})
-		const user = await prisma.user.findUniqueOrThrow({
-			where: { id: userId },
-			select: { email: true, name: true, username: true },
-		})
+		const passkeys = await db
+			.select({ id: Passkey.id })
+			.from(Passkey)
+			.where(eq(Passkey.userId, userId))
+		const [user] = await db
+			.select({
+				email: User.email,
+				name: User.name,
+				username: User.username,
+			})
+			.from(User)
+			.where(eq(User.id, userId))
+			.limit(1)
+		if (!user) throw new Error('User not found')
 
 		const config = getWebAuthnConfig(request)
 
@@ -110,27 +116,26 @@ export async function action({ request }: Route.ActionArgs) {
 		const { credential, credentialDeviceType, credentialBackedUp, aaguid } =
 			registrationInfo
 
-		const existingPasskey = await prisma.passkey.findUnique({
-			where: { id: credential.id },
-			select: { id: true },
-		})
+		const [existingPasskey] = await db
+			.select({ id: Passkey.id })
+			.from(Passkey)
+			.where(eq(Passkey.id, credential.id))
+			.limit(1)
 
 		if (existingPasskey) {
 			throw new Error('This passkey has already been registered')
 		}
 
-		await prisma.passkey.create({
-			data: {
-				id: credential.id,
-				aaguid,
-				publicKey: Buffer.from(credential.publicKey),
-				userId,
-				webauthnUserId,
-				counter: credential.counter,
-				deviceType: credentialDeviceType,
-				backedUp: credentialBackedUp,
-				transports: credential.transports?.join(','),
-			},
+		await db.insert(Passkey).values({
+			id: credential.id,
+			aaguid,
+			publicKey: Buffer.from(credential.publicKey),
+			userId,
+			webauthnUserId,
+			counter: credential.counter,
+			deviceType: credentialDeviceType,
+			backedUp: credentialBackedUp,
+			transports: credential.transports?.join(','),
 		})
 
 		return Response.json({ status: 'success' } as const, {

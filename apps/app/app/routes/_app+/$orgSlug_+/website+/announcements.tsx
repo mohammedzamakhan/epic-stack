@@ -8,7 +8,14 @@ import {
 	pickLocalized,
 	serializeLocalizedString,
 } from '@repo/common/site-locales'
-import { prisma } from '@repo/database'
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	OrganizationAnnouncement,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -108,10 +115,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		organization.siteDefaultLocale,
 	)
 
-	const announcements = await prisma.organizationAnnouncement.findMany({
-		where: { organizationId: organization.id },
-		orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
-	})
+	const announcements = await db
+		.select()
+		.from(OrganizationAnnouncement)
+		.where(eq(OrganizationAnnouncement.organizationId, organization.id))
+		.orderBy(
+			asc(OrganizationAnnouncement.position),
+			desc(OrganizationAnnouncement.createdAt),
+		)
 
 	return {
 		organization,
@@ -193,19 +204,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (intent === createAnnouncementIntent) {
-			const last = await prisma.organizationAnnouncement.findFirst({
-				where: { organizationId: organization.id },
-				orderBy: { position: 'desc' },
-				select: { position: true },
-			})
+			const [last] = await db
+				.select({ position: OrganizationAnnouncement.position })
+				.from(OrganizationAnnouncement)
+				.where(eq(OrganizationAnnouncement.organizationId, organization.id))
+				.orderBy(desc(OrganizationAnnouncement.position))
+				.limit(1)
 			const nextPosition = (last?.position ?? 0) + 1
 
-			await prisma.organizationAnnouncement.create({
-				data: {
-					organizationId: organization.id,
-					position: nextPosition,
-					...data,
-				},
+			await db.insert(OrganizationAnnouncement).values({
+				organizationId: organization.id,
+				position: nextPosition,
+				...data,
 			})
 
 			return Response.json({ status: 'success' })
@@ -223,10 +233,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		const existing = await prisma.organizationAnnouncement.findFirst({
-			where: { id, organizationId: organization.id },
-			select: { id: true },
-		})
+		const [existing] = await db
+			.select({ id: OrganizationAnnouncement.id })
+			.from(OrganizationAnnouncement)
+			.where(
+				and(
+					eq(OrganizationAnnouncement.id, id),
+					eq(OrganizationAnnouncement.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!existing) {
 			return Response.json(
@@ -240,10 +256,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			)
 		}
 
-		await prisma.organizationAnnouncement.update({
-			where: { id },
-			data,
-		})
+		await db
+			.update(OrganizationAnnouncement)
+			.set(data)
+			.where(eq(OrganizationAnnouncement.id, id))
 
 		return Response.json({ status: 'success' })
 	}
@@ -256,19 +272,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ status: 'error' }, { status: 400 })
 		}
 
-		const existing = await prisma.organizationAnnouncement.findFirst({
-			where: { id, organizationId: organization.id },
-			select: { id: true },
-		})
+		const [existing] = await db
+			.select({ id: OrganizationAnnouncement.id })
+			.from(OrganizationAnnouncement)
+			.where(
+				and(
+					eq(OrganizationAnnouncement.id, id),
+					eq(OrganizationAnnouncement.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!existing) {
 			return Response.json({ status: 'error' }, { status: 404 })
 		}
 
-		await prisma.organizationAnnouncement.update({
-			where: { id },
-			data: { isEnabled },
-		})
+		await db
+			.update(OrganizationAnnouncement)
+			.set({ isEnabled })
+			.where(eq(OrganizationAnnouncement.id, id))
 
 		return Response.json({ status: 'success' })
 	}
@@ -280,9 +302,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			return Response.json({ status: 'error' }, { status: 400 })
 		}
 
-		await prisma.organizationAnnouncement.deleteMany({
-			where: { id, organizationId: organization.id },
-		})
+		await db
+			.delete(OrganizationAnnouncement)
+			.where(
+				and(
+					eq(OrganizationAnnouncement.id, id),
+					eq(OrganizationAnnouncement.organizationId, organization.id),
+				),
+			)
 
 		return Response.json({ status: 'success' })
 	}

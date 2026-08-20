@@ -3,7 +3,7 @@ import { useLingui } from '@lingui/react'
 import { auditService, AuditAction, AuditService } from '@repo/audit'
 import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { AuditLog, Organization, count, db, asc, and, eq } from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -34,14 +34,15 @@ export async function loader({
 }) {
 	await requireUserWithRole(request, 'admin')
 
-	const organization = await prisma.organization.findUnique({
-		where: { id: params.organizationId },
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-		},
-	})
+	const [organization] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+		})
+		.from(Organization)
+		.where(eq(Organization.id, params.organizationId))
+		.limit(1)
 
 	if (!organization) {
 		throw new Response('Organization not found', { status: 404 })
@@ -53,19 +54,30 @@ export async function loader({
 	)
 
 	// Get audit log statistics
-	const totalLogs = await prisma.auditLog.count({
-		where: { organizationId: params.organizationId },
-	})
-
-	const archivedLogs = await prisma.auditLog.count({
-		where: { organizationId: params.organizationId, archived: true },
-	})
-
-	const oldestLog = await prisma.auditLog.findFirst({
-		where: { organizationId: params.organizationId },
-		orderBy: { createdAt: 'asc' },
-		select: { createdAt: true },
-	})
+	const [total, archived, oldest] = await Promise.all([
+		db
+			.select({ count: count() })
+			.from(AuditLog)
+			.where(eq(AuditLog.organizationId, params.organizationId)),
+		db
+			.select({ count: count() })
+			.from(AuditLog)
+			.where(
+				and(
+					eq(AuditLog.organizationId, params.organizationId),
+					eq(AuditLog.archived, true),
+				),
+			),
+		db
+			.select({ createdAt: AuditLog.createdAt })
+			.from(AuditLog)
+			.where(eq(AuditLog.organizationId, params.organizationId))
+			.orderBy(asc(AuditLog.createdAt))
+			.limit(1),
+	])
+	const totalLogs = total[0]?.count ?? 0
+	const archivedLogs = archived[0]?.count ?? 0
+	const oldestLog = oldest[0]
 
 	const compliancePresets = AuditService.getCompliancePresets()
 

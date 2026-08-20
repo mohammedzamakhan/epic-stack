@@ -1,11 +1,18 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import {
+	db,
+	eq,
+	OrganizationNote,
+	Role,
+	User,
+	_RoleToUser,
+} from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import {
 	createTestOrganization,
 	createTestOrganizationWithMultipleUsers,
 } from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+// Removed db import - using test utilities instead
 
 test.describe('Search Functionality', () => {
 	test('Users can search for notes by title', async ({
@@ -22,31 +29,29 @@ test.describe('Search Functionality', () => {
 		const searchableTitle = 'Important Project Meeting'
 		const otherTitle = 'Random Daily Notes'
 
-		await prisma.organizationNote.createMany({
-			data: [
-				{
-					title: searchableTitle,
-					content: 'Meeting notes about the project',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-				{
-					title: otherTitle,
-					content: 'Some other content',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-				{
-					title: 'Another Important Document',
-					content: 'More content here',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: searchableTitle,
+				content: 'Meeting notes about the project',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+			{
+				title: otherTitle,
+				content: 'Some other content',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+			{
+				title: 'Another Important Document',
+				content: 'More content here',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+		])
 
 		// Navigate to organization notes page
 		await navigate('/:slug/notes', { slug: org.slug })
@@ -81,24 +86,22 @@ test.describe('Search Functionality', () => {
 			'This note contains specific keywords about React development'
 		const otherContent = 'This is about Vue.js and Angular frameworks'
 
-		await prisma.organizationNote.createMany({
-			data: [
-				{
-					title: 'Frontend Development',
-					content: searchableContent,
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-				{
-					title: 'Backend Development',
-					content: otherContent,
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: 'Frontend Development',
+				content: searchableContent,
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+			{
+				title: 'Backend Development',
+				content: otherContent,
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+		])
 
 		// Navigate to organization notes page
 		await navigate('/:slug/notes', { slug: org.slug })
@@ -128,14 +131,12 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note
-		await prisma.organizationNote.create({
-			data: {
-				title: 'Sample Note',
-				content: 'Some basic content',
-				organizationId: org.id,
-				createdById: user.id,
-				isPublic: true,
-			},
+		await db.insert(OrganizationNote).values({
+			title: 'Sample Note',
+			content: 'Some basic content',
+			organizationId: org.id,
+			createdById: user.id,
+			isPublic: true,
 		})
 
 		// Navigate to organization notes page
@@ -162,14 +163,12 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note with mixed case
-		await prisma.organizationNote.create({
-			data: {
-				title: 'JavaScript Development Guide',
-				content: 'This guide covers JavaScript fundamentals',
-				organizationId: org.id,
-				createdById: user.id,
-				isPublic: true,
-			},
+		await db.insert(OrganizationNote).values({
+			title: 'JavaScript Development Guide',
+			content: 'This guide covers JavaScript fundamentals',
+			organizationId: org.id,
+			createdById: user.id,
+			isPublic: true,
 		})
 
 		// Navigate to organization notes page
@@ -196,14 +195,22 @@ test.describe('Search Functionality', () => {
 		const user = await login()
 
 		// Create another user
-		const otherUser = await prisma.user.create({
-			data: {
+		const [otherUser] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!otherUser) throw new Error('Failed to create user')
+		const [role] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (role)
+			await db.insert(_RoleToUser).values({ A: role.id, B: otherUser.id })
 
 		// Create an organization for both users
 		const org = await createTestOrganizationWithMultipleUsers([
@@ -212,24 +219,22 @@ test.describe('Search Functionality', () => {
 		])
 
 		// Create notes with different visibility
-		await prisma.organizationNote.createMany({
-			data: [
-				{
-					title: 'Public Searchable Note',
-					content: 'This is public and searchable',
-					organizationId: org.id,
-					createdById: otherUser.id,
-					isPublic: true,
-				},
-				{
-					title: 'Private Searchable Note',
-					content: 'This is private and searchable',
-					organizationId: org.id,
-					createdById: otherUser.id,
-					isPublic: false,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: 'Public Searchable Note',
+				content: 'This is public and searchable',
+				organizationId: org.id,
+				createdById: otherUser.id,
+				isPublic: true,
+			},
+			{
+				title: 'Private Searchable Note',
+				content: 'This is private and searchable',
+				organizationId: org.id,
+				createdById: otherUser.id,
+				isPublic: false,
+			},
+		])
 
 		// Navigate to organization notes page
 		await navigate('/:slug/notes', { slug: org.slug })
@@ -259,14 +264,12 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note
-		await prisma.organizationNote.create({
-			data: {
-				title: 'Test Note for Search',
-				content: 'Content for testing search functionality',
-				organizationId: org.id,
-				createdById: user.id,
-				isPublic: true,
-			},
+		await db.insert(OrganizationNote).values({
+			title: 'Test Note for Search',
+			content: 'Content for testing search functionality',
+			organizationId: org.id,
+			createdById: user.id,
+			isPublic: true,
 		})
 
 		// Navigate to organization notes page
@@ -297,24 +300,22 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create multiple test notes
-		await prisma.organizationNote.createMany({
-			data: [
-				{
-					title: 'Searchable Note',
-					content: 'This note will be found',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-				{
-					title: 'Another Note',
-					content: 'This note has different content',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: 'Searchable Note',
+				content: 'This note will be found',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+			{
+				title: 'Another Note',
+				content: 'This note has different content',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+		])
 
 		// Navigate to organization notes page
 		await navigate('/:slug/notes', { slug: org.slug })
@@ -355,14 +356,12 @@ test.describe('Search Functionality', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test note with special characters
-		await prisma.organizationNote.create({
-			data: {
-				title: 'C++ Programming & Development',
-				content: 'Notes about C++ and object-oriented programming',
-				organizationId: org.id,
-				createdById: user.id,
-				isPublic: true,
-			},
+		await db.insert(OrganizationNote).values({
+			title: 'C++ Programming & Development',
+			content: 'Notes about C++ and object-oriented programming',
+			organizationId: org.id,
+			createdById: user.id,
+			isPublic: true,
 		})
 
 		// Navigate to organization notes page

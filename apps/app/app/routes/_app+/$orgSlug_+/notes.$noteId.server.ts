@@ -6,7 +6,22 @@ import {
 	ORG_PERMISSIONS,
 } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	Organization,
+	OrganizationNote,
+	OrganizationNoteFavorite,
+	Integration,
+	NoteAccess,
+	NoteComment,
+	NoteCommentImage,
+	NoteIntegrationConnection,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { noteHooks, integrationManager } from '@repo/integrations'
 import { data, type ActionFunctionArgs } from 'react-router'
 import { sanitizeCommentContent } from '#app/utils/content-sanitization.server.ts'
@@ -54,16 +69,21 @@ export async function handleDeleteNoteIntent({
 	}
 
 	const { noteId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: {
-			id: true,
-			title: true,
-			organizationId: true,
-			createdById: true,
-			organization: { select: { slug: true } },
-		},
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({
+			id: OrganizationNote.id,
+			title: OrganizationNote.title,
+			organizationId: OrganizationNote.organizationId,
+			createdById: OrganizationNote.createdById,
+			organizationSlug: Organization.slug,
+		})
+		.from(OrganizationNote)
+		.innerJoin(
+			Organization,
+			eq(OrganizationNote.organizationId, Organization.id),
+		)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Not found', { status: 404 })
 
 	let canDelete = false
@@ -103,9 +123,9 @@ export async function handleDeleteNoteIntent({
 	})
 
 	await noteHooks.beforeNoteDeleted(note.id, userId)
-	await prisma.organizationNote.delete({ where: { id: note.id } })
+	await db.delete(OrganizationNote).where(eq(OrganizationNote.id, note.id))
 
-	return redirectWithToast(`/${note.organization.slug}/notes`, {
+	return redirectWithToast(`/${note.organizationSlug}/notes`, {
 		type: 'success',
 		title: 'Success',
 		description: 'The note has been deleted.',
@@ -125,10 +145,11 @@ export async function handleConnectChannelIntent({
 	}
 
 	const { noteId, integrationId, channelId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: { organizationId: true },
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({ organizationId: OrganizationNote.organizationId })
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Note not found', { status: 404 })
 	await userHasOrgAccess(userId, note.organizationId)
 
@@ -171,18 +192,33 @@ export async function handleDisconnectChannelIntent({
 	}
 
 	const { connectionId } = submission.value
-	const connection = await prisma.noteIntegrationConnection.findFirst({
-		select: { note: { select: { organizationId: true } } },
-		where: { id: connectionId },
-	})
+	const [connection] = await db
+		.select({ organizationId: OrganizationNote.organizationId })
+		.from(NoteIntegrationConnection)
+		.innerJoin(
+			OrganizationNote,
+			eq(NoteIntegrationConnection.noteId, OrganizationNote.id),
+		)
+		.where(eq(NoteIntegrationConnection.id, connectionId))
+		.limit(1)
 	invariantResponse(connection, 'Connection not found', { status: 404 })
-	await userHasOrgAccess(userId, connection.note.organizationId)
+	await userHasOrgAccess(userId, connection.organizationId)
 
 	try {
-		const connectionDetails = await prisma.noteIntegrationConnection.findFirst({
-			where: { id: connectionId },
-			include: { integration: { select: { id: true, providerName: true } } },
-		})
+		const [connectionDetails] = await db
+			.select({
+				noteId: NoteIntegrationConnection.noteId,
+				externalId: NoteIntegrationConnection.externalId,
+				integrationId: Integration.id,
+				providerName: Integration.providerName,
+			})
+			.from(NoteIntegrationConnection)
+			.innerJoin(
+				Integration,
+				eq(NoteIntegrationConnection.integrationId, Integration.id),
+			)
+			.where(eq(NoteIntegrationConnection.id, connectionId))
+			.limit(1)
 
 		await integrationManager.disconnectNoteFromChannel(connectionId)
 
@@ -191,10 +227,10 @@ export async function handleDisconnectChannelIntent({
 				noteId: connectionDetails.noteId,
 				userId,
 				action: 'integration_disconnected',
-				integrationId: connectionDetails.integration.id,
+				integrationId: connectionDetails.integrationId,
 				metadata: {
 					externalId: connectionDetails.externalId,
-					providerName: connectionDetails.integration.providerName,
+					providerName: connectionDetails.providerName,
 				},
 			})
 		}
@@ -258,10 +294,14 @@ export async function handleUpdateSharingIntent({
 	}
 
 	const { noteId, isPublic } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: { organizationId: true, createdById: true },
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({
+			organizationId: OrganizationNote.organizationId,
+			createdById: OrganizationNote.createdById,
+		})
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Note not found', { status: 404 })
 	await userHasOrgAccess(userId, note.organizationId)
 
@@ -270,13 +310,13 @@ export async function handleUpdateSharingIntent({
 	}
 
 	try {
-		await prisma.organizationNote.update({
-			where: { id: noteId },
-			data: { isPublic },
-		})
+		await db
+			.update(OrganizationNote)
+			.set({ isPublic })
+			.where(eq(OrganizationNote.id, noteId))
 
 		if (isPublic) {
-			await prisma.noteAccess.deleteMany({ where: { noteId } })
+			await db.delete(NoteAccess).where(eq(NoteAccess.noteId, noteId))
 		}
 
 		await logNoteActivity({
@@ -308,10 +348,14 @@ export async function handleAddAccessIntent({
 	}
 
 	const { noteId, userId: targetUserId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: { organizationId: true, createdById: true },
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({
+			organizationId: OrganizationNote.organizationId,
+			createdById: OrganizationNote.createdById,
+		})
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Note not found', { status: 404 })
 	await userHasOrgAccess(userId, note.organizationId)
 
@@ -319,13 +363,17 @@ export async function handleAddAccessIntent({
 		throw new Response('Not authorized', { status: 403 })
 	}
 
-	const targetUserInOrg = await prisma.userOrganization.findFirst({
-		where: {
-			userId: targetUserId,
-			organizationId: note.organizationId,
-			active: true,
-		},
-	})
+	const [targetUserInOrg] = await db
+		.select({ userId: UserOrganization.userId })
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.userId, targetUserId),
+				eq(UserOrganization.organizationId, note.organizationId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.limit(1)
 
 	if (!targetUserInOrg) {
 		return data(
@@ -340,11 +388,10 @@ export async function handleAddAccessIntent({
 	}
 
 	try {
-		await prisma.noteAccess.upsert({
-			where: { noteId_userId: { noteId, userId: targetUserId } },
-			update: {},
-			create: { noteId, userId: targetUserId },
-		})
+		await db
+			.insert(NoteAccess)
+			.values({ noteId, userId: targetUserId })
+			.onConflictDoNothing()
 
 		await logNoteActivity({
 			noteId,
@@ -375,10 +422,14 @@ export async function handleRemoveAccessIntent({
 	}
 
 	const { noteId, userId: targetUserId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: { organizationId: true, createdById: true },
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({
+			organizationId: OrganizationNote.organizationId,
+			createdById: OrganizationNote.createdById,
+		})
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Note not found', { status: 404 })
 	await userHasOrgAccess(userId, note.organizationId)
 
@@ -387,9 +438,11 @@ export async function handleRemoveAccessIntent({
 	}
 
 	try {
-		await prisma.noteAccess.deleteMany({
-			where: { noteId, userId: targetUserId },
-		})
+		await db
+			.delete(NoteAccess)
+			.where(
+				and(eq(NoteAccess.noteId, noteId), eq(NoteAccess.userId, targetUserId)),
+			)
 
 		await logNoteActivity({
 			noteId,
@@ -437,10 +490,15 @@ export async function handleBatchUpdateAccessIntent({
 		usersToRemove: validUsersToRemove,
 	} = validationResult.data
 
-	const note = await prisma.organizationNote.findFirst({
-		select: { organizationId: true, createdById: true, isPublic: true },
-		where: { id: noteId },
-	})
+	const [note] = await db
+		.select({
+			organizationId: OrganizationNote.organizationId,
+			createdById: OrganizationNote.createdById,
+			isPublic: OrganizationNote.isPublic,
+		})
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 	invariantResponse(note, 'Note not found', { status: 404 })
 	await userHasOrgAccess(userId, note.organizationId)
 
@@ -450,14 +508,16 @@ export async function handleBatchUpdateAccessIntent({
 
 	let confirmedUserIdsToAdd: string[] = []
 	if (validUsersToAdd.length > 0 && !isPublic) {
-		const orgMembers = await prisma.userOrganization.findMany({
-			where: {
-				userId: { in: validUsersToAdd },
-				organizationId: note.organizationId,
-				active: true,
-			},
-			select: { userId: true },
-		})
+		const orgMembers = await db
+			.select({ userId: UserOrganization.userId })
+			.from(UserOrganization)
+			.where(
+				and(
+					inArray(UserOrganization.userId, validUsersToAdd),
+					eq(UserOrganization.organizationId, note.organizationId),
+					eq(UserOrganization.active, true),
+				),
+			)
 		confirmedUserIdsToAdd = orgMembers.map((member) => member.userId)
 		const invalidUsers = validUsersToAdd.filter(
 			(id) => !confirmedUserIdsToAdd.includes(id),
@@ -477,23 +537,28 @@ export async function handleBatchUpdateAccessIntent({
 
 	try {
 		let sharingChanged = false
-		await prisma.$transaction(async (tx) => {
+		await db.transaction(async (tx) => {
 			if (isPublic !== note.isPublic) {
-				await tx.organizationNote.update({
-					where: { id: noteId },
-					data: { isPublic },
-				})
+				await tx
+					.update(OrganizationNote)
+					.set({ isPublic })
+					.where(eq(OrganizationNote.id, noteId))
 				sharingChanged = true
 				if (isPublic) {
-					await tx.noteAccess.deleteMany({ where: { noteId } })
+					await tx.delete(NoteAccess).where(eq(NoteAccess.noteId, noteId))
 					return
 				}
 			}
 
 			if (validUsersToRemove.length > 0) {
-				await tx.noteAccess.deleteMany({
-					where: { noteId, userId: { in: validUsersToRemove } },
-				})
+				await tx
+					.delete(NoteAccess)
+					.where(
+						and(
+							eq(NoteAccess.noteId, noteId),
+							inArray(NoteAccess.userId, validUsersToRemove),
+						),
+					)
 				for (const targetUserId of validUsersToRemove) {
 					await logNoteActivity({
 						noteId,
@@ -506,11 +571,10 @@ export async function handleBatchUpdateAccessIntent({
 
 			if (confirmedUserIdsToAdd.length > 0 && !isPublic) {
 				for (const targetUserId of confirmedUserIdsToAdd) {
-					await tx.noteAccess.upsert({
-						where: { noteId_userId: { noteId, userId: targetUserId } },
-						update: {},
-						create: { noteId, userId: targetUserId },
-					})
+					await tx
+						.insert(NoteAccess)
+						.values({ noteId, userId: targetUserId })
+						.onConflictDoNothing()
 					await logNoteActivity({
 						noteId,
 						userId,
@@ -560,15 +624,12 @@ export async function handleAddCommentIntent({
 	}
 
 	const { noteId, content, parentId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: {
-			organizationId: true,
-			isPublic: true,
-			createdById: true,
-			noteAccess: { select: { userId: true } },
-		},
-		where: { id: noteId },
+	const noteRow = await db.query.OrganizationNote.findFirst({
+		columns: { organizationId: true, isPublic: true, createdById: true },
+		with: { noteAccess: { columns: { userId: true } } },
+		where: (note, { eq }) => eq(note.id, noteId),
 	})
+	const note = noteRow
 	invariantResponse(note, 'Note not found', { status: 404 })
 
 	await requireUserWithOrganizationPermission(
@@ -598,9 +659,11 @@ export async function handleAddCommentIntent({
 	}
 
 	if (parentId) {
-		const parentComment = await prisma.noteComment.findFirst({
-			where: { id: parentId, noteId },
-		})
+		const [parentComment] = await db
+			.select({ id: NoteComment.id })
+			.from(NoteComment)
+			.where(and(eq(NoteComment.id, parentId), eq(NoteComment.noteId, noteId)))
+			.limit(1)
 		if (!parentComment) {
 			return data(
 				{ result: { status: 'error', error: 'Parent comment not found' } },
@@ -611,14 +674,16 @@ export async function handleAddCommentIntent({
 
 	try {
 		const sanitizedContent = sanitizeCommentContent(content)
-		const comment = await prisma.noteComment.create({
-			data: {
+		const [comment] = await db
+			.insert(NoteComment)
+			.values({
 				content: sanitizedContent,
 				noteId,
 				userId,
 				parentId,
-			},
-		})
+			})
+			.returning({ id: NoteComment.id })
+		if (!comment) throw new Error('Failed to create comment')
 
 		const imageCount = parseInt(formData.get('imageCount') as string) || 0
 		if (imageCount < 0 || imageCount > 10) {
@@ -657,7 +722,7 @@ export async function handleAddCommentIntent({
 
 			if (imagePromises.length > 0) {
 				const uploadedImages = await Promise.all(imagePromises)
-				await prisma.noteCommentImage.createMany({ data: uploadedImages })
+				await db.insert(NoteCommentImage).values(uploadedImages)
 			}
 		}
 
@@ -670,18 +735,27 @@ export async function handleAddCommentIntent({
 		})
 
 		const [commenter, noteWithTitle, organization] = await Promise.all([
-			prisma.user.findUnique({
-				where: { id: userId },
-				select: { name: true, username: true },
-			}),
-			prisma.organizationNote.findUnique({
-				where: { id: noteId },
-				select: { title: true, createdById: true },
-			}),
-			prisma.organization.findUnique({
-				where: { id: note.organizationId },
-				select: { slug: true },
-			}),
+			db
+				.select({ name: User.name, username: User.username })
+				.from(User)
+				.where(eq(User.id, userId))
+				.limit(1)
+				.then((rows) => rows[0]),
+			db
+				.select({
+					title: OrganizationNote.title,
+					createdById: OrganizationNote.createdById,
+				})
+				.from(OrganizationNote)
+				.where(eq(OrganizationNote.id, noteId))
+				.limit(1)
+				.then((rows) => rows[0]),
+			db
+				.select({ slug: Organization.slug })
+				.from(Organization)
+				.where(eq(Organization.id, note.organizationId))
+				.limit(1)
+				.then((rows) => rows[0]),
 		])
 
 		if (commenter && noteWithTitle && organization) {
@@ -735,27 +809,30 @@ export async function handleDeleteCommentIntent({
 	}
 
 	const { commentId } = submission.value
-	const comment = await prisma.noteComment.findFirst({
-		select: {
-			userId: true,
-			note: { select: { organizationId: true } },
-		},
-		where: { id: commentId },
-	})
+	const [comment] = await db
+		.select({
+			userId: NoteComment.userId,
+			organizationId: OrganizationNote.organizationId,
+		})
+		.from(NoteComment)
+		.innerJoin(OrganizationNote, eq(NoteComment.noteId, OrganizationNote.id))
+		.where(eq(NoteComment.id, commentId))
+		.limit(1)
 	invariantResponse(comment, 'Comment not found', { status: 404 })
-	await userHasOrgAccess(userId, comment.note.organizationId)
+	await userHasOrgAccess(userId, comment.organizationId)
 
 	if (comment.userId !== userId) {
 		throw new Response('Not authorized', { status: 403 })
 	}
 
 	try {
-		const commentToDelete = await prisma.noteComment.findFirst({
-			where: { id: commentId },
-			select: { noteId: true },
-		})
+		const [commentToDelete] = await db
+			.select({ noteId: NoteComment.noteId })
+			.from(NoteComment)
+			.where(eq(NoteComment.id, commentId))
+			.limit(1)
 
-		await prisma.noteComment.delete({ where: { id: commentId } })
+		await db.delete(NoteComment).where(eq(NoteComment.id, commentId))
 
 		if (commentToDelete) {
 			await logNoteActivity({
@@ -788,14 +865,10 @@ export async function handleToggleFavoriteIntent({
 	}
 
 	const { noteId } = submission.value
-	const note = await prisma.organizationNote.findFirst({
-		select: {
-			organizationId: true,
-			isPublic: true,
-			createdById: true,
-			noteAccess: { select: { userId: true } },
-		},
-		where: { id: noteId },
+	const note = await db.query.OrganizationNote.findFirst({
+		columns: { organizationId: true, isPublic: true, createdById: true },
+		with: { noteAccess: { columns: { userId: true } } },
+		where: (record, { eq }) => eq(record.id, noteId),
 	})
 	invariantResponse(note, 'Note not found', { status: 404 })
 
@@ -826,18 +899,23 @@ export async function handleToggleFavoriteIntent({
 	}
 
 	try {
-		const existingFavorite = await prisma.organizationNoteFavorite.findFirst({
-			where: { userId, noteId },
-		})
+		const [existingFavorite] = await db
+			.select({ id: OrganizationNoteFavorite.id })
+			.from(OrganizationNoteFavorite)
+			.where(
+				and(
+					eq(OrganizationNoteFavorite.userId, userId),
+					eq(OrganizationNoteFavorite.noteId, noteId),
+				),
+			)
+			.limit(1)
 
 		if (existingFavorite) {
-			await prisma.organizationNoteFavorite.delete({
-				where: { id: existingFavorite.id },
-			})
+			await db
+				.delete(OrganizationNoteFavorite)
+				.where(eq(OrganizationNoteFavorite.id, existingFavorite.id))
 		} else {
-			await prisma.organizationNoteFavorite.create({
-				data: { userId, noteId },
-			})
+			await db.insert(OrganizationNoteFavorite).values({ userId, noteId })
 		}
 
 		return data({ result: { status: 'success' } })

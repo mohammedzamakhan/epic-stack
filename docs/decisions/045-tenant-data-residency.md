@@ -12,8 +12,9 @@ single global tenant API hostname or a US Sites BFF that proxies auth would move
 KSA PII through US servers.
 
 HttpOnly cookies on the Sites host would send customer JWTs to US Sites on every
-document request. Prisma already holds operator identity; putting customer
-phone/name/email there would mix control-plane data with regional PII.
+document request. The US control-plane database already holds operator identity;
+putting customer phone/name/email there would mix control-plane data with
+regional PII.
 
 ## Decision
 
@@ -52,6 +53,6 @@ Production tenant-api runs on **Oracle Cloud**: Always Free Ampere A1 in Riyadh
 (`us-ashburn-1`) for `us`. AWS still has no generally available Kingdom region.
 Bahrain and UAE are not KSA. Customer tokens are XSS-readable on the tenant
 origin. Org metadata (slug, `dataRegion`, `hasProvisionedDb`) still lives in US
-Prisma; that is not customer PII.
+the US control-plane database; that is not customer PII.
 
 How to operate this: [tenant data residency](../tenant-data-residency.md).

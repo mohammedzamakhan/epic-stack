@@ -10,7 +10,7 @@ Originally, the Epic Stack had a `role` and `permission` model which was quite
 limited in its use case. It was not very useful and not based on any real world
 scenario:
 
-```prisma
+```text
 model Role {
   id   String @id @unique @default(cuid())
   name String @unique
@@ -43,7 +43,7 @@ understand it.
 
 We're changing the implementation to follow a RBAC model:
 
-```prisma
+```text
 model Permission {
   id          String @id @default(cuid())
   action      String // e.g. create, read, update, delete

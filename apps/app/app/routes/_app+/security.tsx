@@ -9,7 +9,19 @@ import {
 	getUnusedBackupCodeCount,
 } from '@repo/auth'
 import { cache, cachified } from '@repo/cache'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	gt,
+	Password,
+	Passkey,
+	Session,
+	User,
+	UserImage,
+	Verification,
+} from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
 import { toDataURL as qrCodeToDataURL } from 'qrcode'
@@ -63,55 +75,66 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			key: `user-security:${userId}`,
 			cache,
 			ttl: 1000 * 30, // 30 seconds for security-sensitive data
-			getFreshValue: () =>
-				prisma.user.findUniqueOrThrow({
-					where: { id: userId },
-					select: getUserSecuritySelect(),
-				}),
+			getFreshValue: async () => {
+				const [user] = await db
+					.select(getUserSecuritySelect())
+					.from(User)
+					.leftJoin(UserImage, eq(UserImage.userId, User.id))
+					.where(eq(User.id, userId))
+					.limit(1)
+				if (!user) throw new Error('User not found')
+				return user
+			},
 		}),
-		prisma.verification.findUnique({
-			select: { id: true },
-			where: { target_type: { type: twoFAVerificationType, target: userId } },
-		}),
-		prisma.password.findUnique({
-			select: { userId: true },
-			where: { userId },
-		}),
-		prisma.connection.findMany({
-			select: {
+		db
+			.select({ id: Verification.id })
+			.from(Verification)
+			.where(
+				and(
+					eq(Verification.type, twoFAVerificationType),
+					eq(Verification.target, userId),
+				),
+			)
+			.limit(1),
+		db
+			.select({ userId: Password.userId })
+			.from(Password)
+			.where(eq(Password.userId, userId))
+			.limit(1),
+		db.query.Connection.findMany({
+			columns: {
 				id: true,
 				providerName: true,
 				providerId: true,
 				createdAt: true,
 			},
-			where: { userId },
+			where: (connection, { eq }) => eq(connection.userId, userId),
 		}),
 		// Get passkeys for this user
-		prisma.passkey.findMany({
-			where: { userId },
-			orderBy: { createdAt: 'desc' },
-			select: {
-				id: true,
-				deviceType: true,
-				createdAt: true,
-			},
-		}),
+		db
+			.select({
+				id: Passkey.id,
+				deviceType: Passkey.deviceType,
+				createdAt: Passkey.createdAt,
+			})
+			.from(Passkey)
+			.where(eq(Passkey.userId, userId))
+			.orderBy(desc(Passkey.createdAt)),
 		// Get all active sessions for this user
-		prisma.session.findMany({
-			where: {
-				userId,
-				expirationDate: { gt: new Date() },
-			},
-			orderBy: { createdAt: 'desc' },
-			select: {
-				id: true,
-				createdAt: true,
-				expirationDate: true,
-				updatedAt: true,
-				ipAddress: true,
-				userAgent: true,
-			},
-		}),
+		db
+			.select({
+				id: Session.id,
+				createdAt: Session.createdAt,
+				expirationDate: Session.expirationDate,
+				updatedAt: Session.updatedAt,
+				ipAddress: Session.ipAddress,
+				userAgent: Session.userAgent,
+			})
+			.from(Session)
+			.where(
+				and(eq(Session.userId, userId), gt(Session.expirationDate, new Date())),
+			)
+			.orderBy(desc(Session.createdAt)),
 		checkSSOEnforcementByUserId(userId),
 		getUnusedBackupCodeCount(userId),
 		getActiveErasureRequest(userId),
@@ -119,18 +142,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	])
 
 	// Extract results with error handling
-	const user =
+	const rawUser =
 		results[0].status === 'fulfilled'
 			? results[0].value
 			: (() => {
 					throw results[0].reason
 				})()
 	const twoFactorVerification =
-		results[1].status === 'fulfilled' ? results[1].value : null
-	const password = results[2].status === 'fulfilled' ? results[2].value : null
+		results[1].status === 'fulfilled' ? (results[1].value[0] ?? null) : null
+	const password =
+		results[2].status === 'fulfilled' ? (results[2].value[0] ?? null) : null
 	const connections = results[3].status === 'fulfilled' ? results[3].value : []
 	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
 	const rawSessions = results[5].status === 'fulfilled' ? results[5].value : []
+	const user = { ...rawUser, _count: { sessions: rawSessions.length } }
 	const ssoEnforcement =
 		results[6].status === 'fulfilled' ? results[6].value : { enforced: false }
 	const backupCodesRemaining =
@@ -172,13 +197,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 
 		// Store the TOTP config in the database temporarily
-		await prisma.verification.upsert({
-			where: {
-				target_type: { target: userId, type: twoFAVerifyVerificationType },
-			},
-			create: verificationData,
-			update: verificationData,
-		})
+		await db
+			.insert(Verification)
+			.values(verificationData)
+			.onConflictDoUpdate({
+				target: [Verification.target, Verification.type],
+				set: verificationData,
+			})
 	}
 
 	return {
@@ -299,12 +324,9 @@ async function deletePasskeyAction({ formData, userId }: SecurityActionArgs) {
 		throw new Response('Invalid passkey ID', { status: 400 })
 	}
 
-	await prisma.passkey.delete({
-		where: {
-			id: passkeyId,
-			userId, // Ensure the passkey belongs to the user
-		},
-	})
+	await db
+		.delete(Passkey)
+		.where(and(eq(Passkey.id, passkeyId), eq(Passkey.userId, userId)))
 
 	return { status: 'success' }
 }
@@ -329,12 +351,9 @@ async function revokeSessionAction({
 		throw new Response('Cannot revoke current session', { status: 400 })
 	}
 
-	await prisma.session.delete({
-		where: {
-			id: sessionId,
-			userId, // Ensure the session belongs to the user
-		},
-	})
+	await db
+		.delete(Session)
+		.where(and(eq(Session.id, sessionId), eq(Session.userId, userId)))
 
 	return { status: 'success' }
 }

@@ -1,7 +1,7 @@
 import path from 'path'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
-// Removed prisma import - using test utilities instead
+// Removed db import - using test utilities instead
 
 test.describe('File Operations', () => {
 	test('Users can upload profile photos', async ({ page, login, navigate }) => {

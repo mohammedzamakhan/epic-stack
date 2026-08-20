@@ -1,7 +1,11 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
+import {
+	mockDb,
+	mockSelectResults,
+	resetMockDb,
+} from '#tests/setup/drizzle-mock.ts'
 import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
 import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import { action } from './__org-note-editor.server.tsx'
@@ -10,7 +14,6 @@ vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -40,23 +43,23 @@ vi.mock(
 	},
 )
 
-vi.mock('@repo/database', () => ({
-	prisma: {
-		organization: {
-			findFirst: vi.fn(),
-		},
-		organizationNote: {
-			findFirst: vi.fn(),
-			findUnique: vi.fn(),
-			upsert: vi.fn(),
-		},
-		noteMediaUpload: {
-			findMany: vi.fn(),
-			update: vi.fn(),
-		},
-		$disconnect: vi.fn(),
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		Organization: drizzleTable,
+		OrganizationNote: drizzleTable,
+		OrganizationNoteUpload: drizzleTable,
+		UserOrganization: drizzleTable,
+		and: drizzleOperator,
+		eq: drizzleOperator,
+		inArray: drizzleOperator,
+		notInArray: drizzleOperator,
+	}
+})
 
 vi.mock('#app/utils/content-sanitization.server.ts', () => ({
 	sanitizeNoteContent: (c: string) => c,
@@ -87,14 +90,11 @@ vi.mock('@repo/integrations', () => ({
 describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 	const mockRequireUserId = vi.mocked(requireUserId)
 	const mockRequirePermission = vi.mocked(requireUserWithOrganizationPermission)
-	const mockPrismaOrg = vi.mocked(prisma.organization.findFirst)
-	const mockPrismaNoteFindFirst = vi.mocked(prisma.organizationNote.findFirst)
-	const mockPrismaNoteUpsert = vi.mocked(prisma.organizationNote.upsert)
 
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 		mockRequireUserId.mockResolvedValue('user-123')
-		mockPrismaOrg.mockResolvedValue({ id: 'org-123' } as any)
+		mockSelectResults([{ id: 'org-123' }])
 	})
 
 	it('denies note creation when member lacks CREATE_NOTE_OWN', async () => {
@@ -120,14 +120,14 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'create:note:own',
 		)
-		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
+		expect(mockDb.insert).not.toHaveBeenCalled()
 	})
 
 	it('denies update and prevents blind-overwrite when note is owned by another user and member lacks UPDATE_NOTE_ANY', async () => {
-		mockPrismaNoteFindFirst.mockResolvedValue({
-			id: 'note-456',
-			createdById: 'user-other',
-		} as any)
+		mockSelectResults(
+			[{ id: 'org-123' }],
+			[{ id: 'note-456', createdById: 'user-other' }],
+		)
 
 		mockRequirePermission.mockRejectedValue(
 			new Response('Insufficient permissions', { status: 403 }),
@@ -155,11 +155,11 @@ describe('__org-note-editor.server action (WO-84 Write Authorization)', () => {
 			'org-123',
 			'update:note:org',
 		)
-		expect(mockPrismaNoteUpsert).not.toHaveBeenCalled()
+		expect(mockDb.insert).not.toHaveBeenCalled()
 	})
 
 	it('throws 404 when target note id does not exist in organization', async () => {
-		mockPrismaNoteFindFirst.mockResolvedValue(null)
+		mockSelectResults([{ id: 'org-123' }], [])
 
 		const formData = new FormData()
 		formData.append('id', 'non-existent-note')

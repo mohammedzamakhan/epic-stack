@@ -1,5 +1,5 @@
 import { getDomainUrl } from '@repo/common'
-import { prisma } from '@repo/database'
+import { db, MCPClient } from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import { generateToken } from '#app/utils/mcp/oauth.server.ts'
 
@@ -30,12 +30,10 @@ export async function action({ request }: ActionFunctionArgs) {
 		const clientName = body.client_name || 'MCP Client'
 
 		// Store client registration in database
-		await prisma.mCPClient.create({
-			data: {
-				clientId,
-				clientName,
-				redirectUris: JSON.stringify(redirectUris),
-			},
+		await db.insert(MCPClient).values({
+			clientId,
+			clientName,
+			redirectUris: JSON.stringify(redirectUris),
 		})
 
 		// Return the registration response with the OAuth endpoints

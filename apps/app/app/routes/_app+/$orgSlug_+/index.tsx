@@ -7,7 +7,20 @@ import {
 	getOnboardingProgress,
 	autoDetectCompletedSteps,
 } from '@repo/common/onboarding'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	gte,
+	inArray,
+	Organization,
+	OrganizationNote,
+	User,
+	UserImage,
+	UserOrganization,
+} from '@repo/database'
 import { PageTitle } from '@repo/ui/page-title'
 import confetti from 'canvas-confetti'
 import { useEffect, useRef, lazy, Suspense } from 'react'
@@ -37,14 +50,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
 	invariant(orgSlug, 'orgSlug is required')
 
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: orgSlug,
-			active: true,
-			users: { some: { userId: userId, active: true } },
-		},
-		select: { id: true, name: true, createdAt: true },
-	})
+	const [organization] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			createdAt: Organization.createdAt,
+		})
+		.from(Organization)
+		.innerJoin(
+			UserOrganization,
+			and(
+				eq(UserOrganization.organizationId, Organization.id),
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.where(and(eq(Organization.slug, orgSlug), eq(Organization.active, true)))
+		.limit(1)
 
 	if (!organization) {
 		// Handle case where organization is not found or user is not a member
@@ -68,27 +90,32 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	// Run all independent queries in parallel for better performance
 	const [notesData, onboardingProgress, leadershipData] = await Promise.all([
 		// Notes data for chart
-		prisma.organizationNote.findMany({
-			where: {
-				organizationId: organization.id,
-				createdAt: { gte: startDate },
-			},
-			select: { createdAt: true },
-			orderBy: { createdAt: 'asc' },
-		}),
+		db
+			.select({ createdAt: OrganizationNote.createdAt })
+			.from(OrganizationNote)
+			.where(
+				and(
+					eq(OrganizationNote.organizationId, organization.id),
+					gte(OrganizationNote.createdAt, startDate),
+				),
+			)
+			.orderBy(OrganizationNote.createdAt),
 		// Onboarding progress (auto-detect + get progress)
 		(async () => {
 			await autoDetectCompletedSteps(userId, organization.id)
 			return getOnboardingProgress(userId, organization.id)
 		})(),
 		// Leadership data - top note creators
-		prisma.organizationNote.groupBy({
-			by: ['createdById'],
-			where: { organizationId: organization.id },
-			_count: { id: true },
-			orderBy: { _count: { id: 'desc' } },
-			take: 6,
-		}),
+		db
+			.select({
+				createdById: OrganizationNote.createdById,
+				noteCount: count(OrganizationNote.id),
+			})
+			.from(OrganizationNote)
+			.where(eq(OrganizationNote.organizationId, organization.id))
+			.groupBy(OrganizationNote.createdById)
+			.orderBy(desc(count(OrganizationNote.id)))
+			.limit(6),
 		// Set default organization (fire and forget, no await needed for result)
 		setUserDefaultOrganization(userId, organization.id),
 	])
@@ -129,15 +156,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const userIds = leadershipData.map((item) => item.createdById)
 	const users =
 		userIds.length > 0
-			? await prisma.user.findMany({
-					where: { id: { in: userIds } },
-					select: {
-						id: true,
-						name: true,
-						email: true,
-						image: { select: { objectKey: true } },
-					},
-				})
+			? await db
+					.select({
+						id: User.id,
+						name: User.name,
+						email: User.email,
+						objectKey: UserImage.objectKey,
+					})
+					.from(User)
+					.leftJoin(UserImage, eq(UserImage.userId, User.id))
+					.where(inArray(User.id, userIds))
 			: []
 
 	// ⚡ Performance: Build a Map for O(1) lookups instead of O(n) .find() per item
@@ -151,9 +179,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			id: item.createdById,
 			name: user?.name || 'Unknown User',
 			email: user?.email || '',
-			notesCount: item._count?.id || 0,
+			notesCount: item.noteCount,
 			rank: index + 1,
-			image: user?.image || null,
+			image: user?.objectKey || null,
 		}
 	})
 

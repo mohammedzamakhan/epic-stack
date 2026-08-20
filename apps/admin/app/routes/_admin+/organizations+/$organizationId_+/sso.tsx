@@ -3,7 +3,19 @@ import { invariant } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import {
+	Organization,
+	SSOSession,
+	Session,
+	User,
+	UserOrganization,
+	count,
+	db,
+	desc,
+	eq,
+	gt,
+	and,
+} from '@repo/database'
 import { validateEndpointUrl, validateOIDCIssuerUrl } from '@repo/validation'
 import { useActionData, useLoaderData, useNavigation } from 'react-router'
 import { z } from 'zod'
@@ -122,14 +134,15 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 	invariant(params.organizationId, 'Organization ID is required')
 
 	async function getOrganizationForSSO(organizationId: string) {
-		const organization = await prisma.organization.findUnique({
-			where: { id: organizationId },
-			select: {
-				id: true,
-				name: true,
-				slug: true,
-			},
-		})
+		const [organization] = await db
+			.select({
+				id: Organization.id,
+				name: Organization.name,
+				slug: Organization.slug,
+			})
+			.from(Organization)
+			.where(eq(Organization.id, organizationId))
+			.limit(1)
 
 		if (!organization) {
 			throw new Response('Organization not found', { status: 404 })
@@ -152,61 +165,56 @@ export async function loader({ request, params }: Route['LoaderArgs']) {
 		const [totalUsers, activeUsers, recentLogins, lastLoginResult] =
 			await Promise.all([
 				// Total users with SSO sessions
-				prisma.user.count({
-					where: {
-						organizations: {
-							some: {
-								organizationId: organization.id,
-							},
-						},
-						sessions: {
-							some: {
-								ssoSession: {
-									ssoConfigId: ssoConfig.id,
-								},
-							},
-						},
-					},
-				}),
+				db
+					.select({ count: count() })
+					.from(User)
+					.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+					.innerJoin(Session, eq(Session.userId, User.id))
+					.innerJoin(SSOSession, eq(SSOSession.sessionId, Session.id))
+					.where(
+						and(
+							eq(UserOrganization.organizationId, organization.id),
+							eq(SSOSession.ssoConfigId, ssoConfig.id),
+						),
+					)
+					.then(([row]) => row?.count ?? 0),
 				// Active users with SSO sessions
-				prisma.user.count({
-					where: {
-						organizations: {
-							some: {
-								organizationId: organization.id,
-								active: true,
-							},
-						},
-						sessions: {
-							some: {
-								ssoSession: {
-									ssoConfigId: ssoConfig.id,
-								},
-							},
-						},
-					},
-				}),
+				db
+					.select({ count: count() })
+					.from(User)
+					.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+					.innerJoin(Session, eq(Session.userId, User.id))
+					.innerJoin(SSOSession, eq(SSOSession.sessionId, Session.id))
+					.where(
+						and(
+							eq(UserOrganization.organizationId, organization.id),
+							eq(UserOrganization.active, true),
+							eq(SSOSession.ssoConfigId, ssoConfig.id),
+						),
+					)
+					.then(([row]) => row?.count ?? 0),
 				// Recent logins (last 7 days)
-				prisma.sSOSession.count({
-					where: {
-						ssoConfigId: ssoConfig.id,
-						createdAt: {
-							gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-						},
-					},
-				}),
+				db
+					.select({ count: count() })
+					.from(SSOSession)
+					.where(
+						and(
+							eq(SSOSession.ssoConfigId, ssoConfig.id),
+							gt(
+								SSOSession.createdAt,
+								new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+							),
+						),
+					)
+					.then(([row]) => row?.count ?? 0),
 				// Last login
-				prisma.sSOSession.findFirst({
-					where: {
-						ssoConfigId: ssoConfig.id,
-					},
-					orderBy: {
-						updatedAt: 'desc',
-					},
-					select: {
-						updatedAt: true,
-					},
-				}),
+				db
+					.select({ updatedAt: SSOSession.updatedAt })
+					.from(SSOSession)
+					.where(eq(SSOSession.ssoConfigId, ssoConfig.id))
+					.orderBy(desc(SSOSession.updatedAt))
+					.limit(1)
+					.then(([row]) => row),
 			])
 
 		ssoStats = {

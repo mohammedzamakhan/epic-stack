@@ -1,5 +1,13 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	gte,
+	asc,
+	Organization,
+	Notification,
+} from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -10,16 +18,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	let organizationId: string | undefined
 	if (orgSlug) {
-		const org = await prisma.organization.findUnique({
-			where: { slug: orgSlug },
-			select: { id: true },
-		})
+		const [org] = await db
+			.select({ id: Organization.id })
+			.from(Organization)
+			.where(eq(Organization.slug, orgSlug))
+			.limit(1)
 		if (org) organizationId = org.id
-	}
-
-	const whereClause = {
-		userId,
-		...(organizationId ? { organizationId } : {}),
 	}
 
 	let isClosed = false
@@ -53,13 +57,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				if (isClosed) return
 
 				try {
-					const newNotifications = await prisma.notification.findMany({
-						where: {
-							...whereClause,
-							updatedAt: { gte: lastCheckedAt },
-						},
-						orderBy: { updatedAt: 'asc' },
-					})
+					const newNotifications = await db
+						.select()
+						.from(Notification)
+						.where(
+							and(
+								eq(Notification.userId, userId),
+								organizationId
+									? eq(Notification.organizationId, organizationId)
+									: undefined,
+								gte(Notification.updatedAt, lastCheckedAt),
+							),
+						)
+						.orderBy(asc(Notification.updatedAt))
 
 					const unseen = newNotifications.filter((n) => !seenIds.has(n.id))
 

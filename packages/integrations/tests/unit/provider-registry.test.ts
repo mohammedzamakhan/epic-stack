@@ -16,7 +16,10 @@ import type {
 	OAuthCallbackParams,
 	ProviderType,
 } from '../../src/types'
-import type { Integration, NoteIntegrationConnection } from '@prisma/client'
+import type {
+	Integration,
+	NoteIntegrationConnection,
+} from '@repo/database/types'
 
 // Mock providers for testing
 class MockCommunicationProvider extends BaseIntegrationProvider {

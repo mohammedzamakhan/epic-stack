@@ -9,7 +9,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
-import { PrismaClient } from '@prisma/client'
+import { createClient } from '@libsql/client'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -95,21 +95,14 @@ function getDefaultDatabaseUrl() {
  */
 async function getOrganizationSiteHosts() {
 	const databaseUrl = process.env.DATABASE_URL || getDefaultDatabaseUrl()
-	const prisma = new PrismaClient({
-		datasources: {
-			db: { url: databaseUrl },
-		},
-	})
+	const url = databaseUrl.replace(/\?.*$/, '')
+	const client = createClient({ url })
 
 	try {
-		const organizations = await prisma.organization.findMany({
-			where: {
-				active: true,
-				sitePublished: true,
-			},
-			select: { slug: true, customDomain: true },
-			orderBy: { slug: 'asc' },
-		})
+		const result = await client.execute(
+			`SELECT slug, customDomain FROM "Organization" WHERE active = 1 AND sitePublished = 1 ORDER BY slug ASC`,
+		)
+		const organizations = result.rows
 
 		const orgSlugs = organizations
 			.map((org) => org.slug)
@@ -136,7 +129,7 @@ async function getOrganizationSiteHosts() {
 		)
 		return { orgSlugs: [], customDomains: [] }
 	} finally {
-		await prisma.$disconnect()
+		client.close()
 	}
 }
 

@@ -1,12 +1,33 @@
 import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 import { setupServer } from 'msw/node'
 import { handlers } from './utils/mocks'
+import { mockDb } from './utils/mock-database'
 
 // Mock Arcjet to avoid WASM compilation errors in Vitest
 vi.mock('@arcjet/remix', () => ({
 	default: vi.fn(() => ({})),
 	shield: vi.fn(),
 }))
+
+vi.mock('@repo/database', () => {
+	const table = new Proxy({}, { get: (_, property) => property })
+	const operator = vi.fn((...args: unknown[]) => args)
+	return {
+		db: mockDb,
+		Integration: table,
+		IntegrationLog: table,
+		NoteIntegrationConnection: table,
+		Organization: table,
+		OrganizationNote: table,
+		User: table,
+		and: operator,
+		count: operator,
+		desc: operator,
+		eq: operator,
+		gte: operator,
+		isNotNull: operator,
+	}
+})
 
 // Setup MSW server
 export const server = setupServer(...handlers)

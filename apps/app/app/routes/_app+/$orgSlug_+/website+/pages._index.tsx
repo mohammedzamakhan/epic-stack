@@ -6,7 +6,17 @@ import {
 	isReservedSiteLocaleSlug,
 	pickLocalized,
 } from '@repo/common/site-locales'
-import { prisma } from '@repo/database'
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	like,
+	OrganizationNote,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
 import { cn } from '@repo/ui'
 import {
 	AlertDialog,
@@ -123,14 +133,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
 	const search = url.searchParams.get('search')?.trim() || ''
 
-	const searchConditions = search ? { title: { contains: search } } : {}
-
-	const pages = await prisma.websitePage.findMany({
-		where: {
-			organizationId: organization.id,
-			...searchConditions,
-		},
-		select: {
+	const pages = await db.query.WebsitePage.findMany({
+		columns: {
 			id: true,
 			title: true,
 			slug: true,
@@ -139,11 +143,19 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			isHomePage: true,
 			createdAt: true,
 			updatedAt: true,
-			createdBy: {
-				select: { name: true, username: true },
-			},
 		},
-		orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
+		with: {
+			user: { columns: { name: true, username: true } },
+		},
+		where: (page, { and, eq, like }) =>
+			and(
+				eq(page.organizationId, organization.id),
+				search ? like(page.title, `%${search}%`) : undefined,
+			),
+		orderBy: (page, { asc, desc }) => [
+			asc(page.position),
+			desc(page.createdAt),
+		],
 	})
 
 	return {
@@ -155,7 +167,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				pickLocalized(page.title, defaultLocale, defaultLocale) || page.title,
 			createdAt: page.createdAt.toISOString(),
 			updatedAt: page.updatedAt.toISOString(),
-			createdByName: page.createdBy.name || page.createdBy.username,
+			createdByName: page.user?.name || page.user?.username || '',
 		})),
 		search,
 	}
@@ -191,15 +203,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const { template, title, slug } = submission.value
 
 		// Check for duplicate slug
-		const existing = await prisma.websitePage.findUnique({
-			where: {
-				organizationId_slug: {
-					organizationId: organization.id,
-					slug,
-				},
-			},
-			select: { id: true, isHomePage: true, slug: true },
-		})
+		const [existing] = await db
+			.select({
+				id: WebsitePage.id,
+				isHomePage: WebsitePage.isHomePage,
+				slug: WebsitePage.slug,
+			})
+			.from(WebsitePage)
+			.where(
+				and(
+					eq(WebsitePage.organizationId, organization.id),
+					eq(WebsitePage.slug, slug),
+				),
+			)
+			.limit(1)
 
 		if (existing) {
 			return Response.json({
@@ -213,35 +230,43 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		// Get the last position
-		const lastPage = await prisma.websitePage.findFirst({
-			where: { organizationId: organization.id },
-			orderBy: { position: 'desc' },
-			select: { position: true },
-		})
+		const [lastPage] = await db
+			.select({ position: WebsitePage.position })
+			.from(WebsitePage)
+			.where(eq(WebsitePage.organizationId, organization.id))
+			.orderBy(desc(WebsitePage.position))
+			.limit(1)
 		const nextPosition = (lastPage?.position ?? 0) + 1
 
 		await ensureSiteChrome(organization.id)
 
 		// Create page with template sections
 		const templateDef = PAGE_TEMPLATES[template as PageTemplate]
-		const page = await prisma.websitePage.create({
-			data: {
-				organizationId: organization.id,
-				title,
-				slug,
-				template,
-				position: nextPosition,
-				createdById: userId,
-				sections: {
-					create: (templateDef?.sections ?? []).map((section) => ({
+		const [page] = await db.transaction(async (tx) => {
+			const [createdPage] = await tx
+				.insert(WebsitePage)
+				.values({
+					organizationId: organization.id,
+					title,
+					slug,
+					template,
+					position: nextPosition,
+					createdById: userId,
+				})
+				.returning({ id: WebsitePage.id })
+			if (createdPage && templateDef?.sections.length) {
+				await tx.insert(WebsitePageSection).values(
+					templateDef.sections.map((section) => ({
+						pageId: createdPage.id,
 						type: section.type,
 						position: section.position,
 						config: JSON.stringify(getDefaultConfig(section.type as BlockType)),
 					})),
-				},
-			},
-			select: { id: true },
+				)
+			}
+			return [createdPage]
 		})
+		if (!page) throw new Error('Failed to create page')
 
 		return Response.json({
 			status: 'success' as const,
@@ -265,10 +290,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const { pageId } = submission.value
 
-		const page = await prisma.websitePage.findFirst({
-			where: { id: pageId, organizationId: organization.id },
-			select: { id: true, isHomePage: true, slug: true },
-		})
+		const [page] = await db
+			.select({
+				id: WebsitePage.id,
+				isHomePage: WebsitePage.isHomePage,
+				slug: WebsitePage.slug,
+			})
+			.from(WebsitePage)
+			.where(
+				and(
+					eq(WebsitePage.id, pageId),
+					eq(WebsitePage.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!page) {
 			return Response.json(
@@ -278,10 +313,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 
 		if (intent === publishPageIntent) {
-			await prisma.websitePage.update({
-				where: { id: pageId },
-				data: { status: 'published' },
-			})
+			await db
+				.update(WebsitePage)
+				.set({ status: 'published' })
+				.where(eq(WebsitePage.id, pageId))
 			return Response.json({ status: 'success' as const })
 		}
 
@@ -292,10 +327,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					error: 'Cannot unpublish the home page',
 				})
 			}
-			await prisma.websitePage.update({
-				where: { id: pageId },
-				data: { status: 'draft' },
-			})
+			await db
+				.update(WebsitePage)
+				.set({ status: 'draft' })
+				.where(eq(WebsitePage.id, pageId))
 			return Response.json({ status: 'success' as const })
 		}
 
@@ -306,9 +341,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					error: 'Cannot delete the home page',
 				})
 			}
-			await prisma.websitePage.delete({
-				where: { id: pageId },
-			})
+			await db.delete(WebsitePage).where(eq(WebsitePage.id, pageId))
 			return Response.json({ status: 'success' as const })
 		}
 	}

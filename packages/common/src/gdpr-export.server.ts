@@ -1,5 +1,18 @@
 import { getDomainUrl, getUserImgSrc, getNoteImgSrc } from './misc.js'
-import { prisma } from '@repo/database'
+import {
+	Connection,
+	db,
+	eq,
+	Feedback,
+	Note,
+	NoteImage,
+	Organization,
+	OrganizationRole,
+	Session,
+	User,
+	UserImage,
+	UserOrganization,
+} from '@repo/database'
 
 export interface UserDataExport {
 	exportedAt: string
@@ -77,102 +90,118 @@ export async function gatherUserDataForExport(
 ): Promise<UserDataExport> {
 	const domain = getDomainUrl(request)
 
-	const [user, notes, connections, organizations, sessions, feedback] =
-		await Promise.all([
-			prisma.user.findUniqueOrThrow({
-				where: { id: userId },
-				select: {
-					id: true,
-					email: true,
-					username: true,
-					name: true,
-					createdAt: true,
-					updatedAt: true,
-					image: {
-						select: {
-							objectKey: true,
-						},
-					},
-				},
-			}),
-			prisma.note.findMany({
-				where: { ownerId: userId },
-				select: {
-					id: true,
-					title: true,
-					content: true,
-					createdAt: true,
-					updatedAt: true,
-					images: {
-						select: {
-							id: true,
-							altText: true,
-							objectKey: true,
-							createdAt: true,
-						},
-					},
-				},
-			}),
-			prisma.connection.findMany({
-				where: { userId },
-				select: {
-					id: true,
-					providerName: true,
-					createdAt: true,
-				},
-			}),
-			prisma.userOrganization.findMany({
-				where: { userId },
-				select: {
-					organizationId: true,
-					organization: {
-						select: { name: true },
-					},
-					organizationRole: {
-						select: { name: true },
-					},
-					createdAt: true,
-				},
-			}),
-			prisma.session.findMany({
-				where: { userId },
-				select: {
-					id: true,
-					createdAt: true,
-					expirationDate: true,
-					ipAddress: true,
-					userAgent: true,
-				},
-			}),
-			prisma.feedback.findMany({
-				where: { userId },
-				select: {
-					id: true,
-					type: true,
-					message: true,
-					createdAt: true,
-				},
-			}),
-		])
+	const [
+		[user],
+		notes,
+		noteImagesRows,
+		connections,
+		organizations,
+		sessions,
+		feedback,
+	] = await Promise.all([
+		db
+			.select({
+				id: User.id,
+				email: User.email,
+				username: User.username,
+				name: User.name,
+				createdAt: User.createdAt,
+				updatedAt: User.updatedAt,
+				image: { objectKey: UserImage.objectKey },
+			})
+			.from(User)
+			.leftJoin(UserImage, eq(UserImage.userId, User.id))
+			.where(eq(User.id, userId))
+			.limit(1),
+		db
+			.select({
+				id: Note.id,
+				title: Note.title,
+				content: Note.content,
+				createdAt: Note.createdAt,
+				updatedAt: Note.updatedAt,
+			})
+			.from(Note)
+			.where(eq(Note.ownerId, userId)),
+		db
+			.select({
+				noteId: NoteImage.noteId,
+				id: NoteImage.id,
+				altText: NoteImage.altText,
+				objectKey: NoteImage.objectKey,
+				createdAt: NoteImage.createdAt,
+			})
+			.from(NoteImage)
+			.innerJoin(Note, eq(NoteImage.noteId, Note.id))
+			.where(eq(Note.ownerId, userId)),
+		db
+			.select({
+				id: Connection.id,
+				providerName: Connection.providerName,
+				createdAt: Connection.createdAt,
+			})
+			.from(Connection)
+			.where(eq(Connection.userId, userId)),
+		db
+			.select({
+				organizationId: UserOrganization.organizationId,
+				organizationName: Organization.name,
+				role: OrganizationRole.name,
+				createdAt: UserOrganization.createdAt,
+			})
+			.from(UserOrganization)
+			.innerJoin(
+				Organization,
+				eq(UserOrganization.organizationId, Organization.id),
+			)
+			.innerJoin(
+				OrganizationRole,
+				eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+			)
+			.where(eq(UserOrganization.userId, userId)),
+		db
+			.select({
+				id: Session.id,
+				createdAt: Session.createdAt,
+				expirationDate: Session.expirationDate,
+				ipAddress: Session.ipAddress,
+				userAgent: Session.userAgent,
+			})
+			.from(Session)
+			.where(eq(Session.userId, userId)),
+		db
+			.select({
+				id: Feedback.id,
+				type: Feedback.type,
+				message: Feedback.message,
+				createdAt: Feedback.createdAt,
+			})
+			.from(Feedback)
+			.where(eq(Feedback.userId, userId)),
+	])
+
+	if (!user) throw new Error(`User ${userId} not found`)
 
 	const noteImages: Array<{ noteId: string; objectKey: string; url: string }> =
 		[]
-	const notesWithUrls = notes.map((note: any) => ({
+	const notesWithUrls = notes.map((note) => ({
 		id: note.id,
 		title: note.title,
 		content: note.content,
 		createdAt: note.createdAt,
 		updatedAt: note.updatedAt,
-		images: note.images.map((image: any) => {
-			const url = domain + getNoteImgSrc(image.objectKey)
-			noteImages.push({ noteId: note.id, objectKey: image.objectKey, url })
-			return {
-				id: image.id,
-				altText: image.altText,
-				url,
-				createdAt: image.createdAt,
-			}
-		}),
+		images: noteImagesRows
+			.filter((image) => image.noteId === note.id)
+			.map((image) => {
+				const url = domain + getNoteImgSrc(image.objectKey)
+				noteImages.push({ noteId: note.id, objectKey: image.objectKey, url })
+				return {
+					id: image.id,
+					altText: image.altText,
+					url,
+					createdAt: image.createdAt,
+				}
+			}),
 	}))
 
 	return {
@@ -189,25 +218,25 @@ export async function gatherUserDataForExport(
 		},
 		relations: {
 			notes: notesWithUrls,
-			connections: connections.map((c: any) => ({
+			connections: connections.map((c) => ({
 				id: c.id,
 				providerName: c.providerName,
 				createdAt: c.createdAt,
 			})),
-			organizations: organizations.map((org: any) => ({
+			organizations: organizations.map((org) => ({
 				organizationId: org.organizationId,
-				organizationName: org.organization.name,
-				role: org.organizationRole.name,
+				organizationName: org.organizationName,
+				role: org.role,
 				joinedAt: org.createdAt,
 			})),
-			sessions: sessions.map((s: any) => ({
+			sessions: sessions.map((s) => ({
 				id: s.id,
 				createdAt: s.createdAt,
 				expirationDate: s.expirationDate,
 				ipAddress: s.ipAddress,
 				userAgent: s.userAgent,
 			})),
-			feedback: feedback.map((f: any) => ({
+			feedback: feedback.map((f) => ({
 				id: f.id,
 				type: f.type,
 				message: f.message,
@@ -215,7 +244,7 @@ export async function gatherUserDataForExport(
 			})),
 		},
 		files: {
-			userImage: user.image
+			userImage: user.image?.objectKey
 				? {
 						objectKey: user.image.objectKey,
 						url: domain + getUserImgSrc(user.image.objectKey),

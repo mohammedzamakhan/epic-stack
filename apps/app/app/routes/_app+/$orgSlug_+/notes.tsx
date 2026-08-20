@@ -3,7 +3,16 @@ import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
 import { getNotesViewMode, setNotesViewMode, useDebounce } from '@repo/common'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	Organization,
+	OrganizationImage,
+	OrganizationNote,
+	OrganizationNoteStatus,
+} from '@repo/database'
 import { useDirection } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -34,15 +43,30 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug
 	invariantResponse(orgSlug, 'Organization slug is required')
 
-	const organization = await prisma.organization.findFirst({
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			image: { select: { objectKey: true } },
-		},
-		where: { slug: orgSlug },
-	})
+	const [organizationRow] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+			objectKey: OrganizationImage.objectKey,
+		})
+		.from(Organization)
+		.leftJoin(
+			OrganizationImage,
+			eq(OrganizationImage.organizationId, Organization.id),
+		)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
+	const organization = organizationRow
+		? {
+				id: organizationRow.id,
+				name: organizationRow.name,
+				slug: organizationRow.slug,
+				image: organizationRow.objectKey
+					? { objectKey: organizationRow.objectKey }
+					: undefined,
+			}
+		: null
 
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
@@ -56,19 +80,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 	// Build search conditions
 	// For SQLite, we'll use a simpler approach and rely on the database's default behavior
-	const searchConditions = searchQuery
-		? {
-				OR: [
-					{ title: { contains: searchQuery } },
-					{ content: { contains: searchQuery } },
-				],
-			}
-		: {}
-
 	// Execute independent data fetching operations concurrently
 	const [notes, statuses, viewMode] = await Promise.all([
-		prisma.organizationNote.findMany({
-			select: {
+		db.query.OrganizationNote.findMany({
+			columns: {
 				id: true,
 				title: true,
 				content: true,
@@ -79,10 +94,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 				isPublic: true,
 				createdById: true,
 				statusId: true,
-				status: { select: { id: true, name: true, color: true } },
 				position: true,
-				uploads: {
-					select: {
+			},
+			with: {
+				status: { columns: { id: true, name: true, color: true } },
+				organizationNoteUploads: {
+					columns: {
 						id: true,
 						type: true,
 						altText: true,
@@ -91,63 +108,61 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 						status: true,
 					},
 				},
-				createdBy: {
-					select: {
-						name: true,
-						username: true,
-						image: {
-							select: {
-								objectKey: true,
-							},
-						},
-					},
+				user: {
+					columns: { name: true, username: true },
+					with: { image: { columns: { objectKey: true } } },
 				},
-				noteAccess: {
-					select: {
-						userId: true,
-					},
-				},
+				noteAccess: { columns: { userId: true } },
 			},
-			where: {
-				organizationId: organization.id,
-				AND: [
-					{
-						OR: [
-							{ isPublic: true },
-							{ createdById: userId },
-							{ noteAccess: { some: { userId } } },
-						],
-					},
-					searchConditions,
-				],
-			},
-			orderBy: [
-				{ statusId: 'asc' },
-				{ position: 'asc' },
-				{ createdAt: 'desc' },
+			where: (note, { and, eq, like, or }) =>
+				and(
+					eq(note.organizationId, organization.id),
+					searchQuery
+						? or(
+								like(note.title, `%${searchQuery}%`),
+								like(note.content, `%${searchQuery}%`),
+							)
+						: undefined,
+				),
+			orderBy: (note, { asc, desc }) => [
+				asc(note.statusId),
+				asc(note.position),
+				desc(note.createdAt),
 			],
 		}),
-		prisma.organizationNoteStatus.findMany({
-			where: { organizationId: organization.id },
-			orderBy: { position: 'asc' },
-			select: { id: true, name: true, color: true, position: true },
-		}),
+		db
+			.select({
+				id: OrganizationNoteStatus.id,
+				name: OrganizationNoteStatus.name,
+				color: OrganizationNoteStatus.color,
+				position: OrganizationNoteStatus.position,
+			})
+			.from(OrganizationNoteStatus)
+			.where(eq(OrganizationNoteStatus.organizationId, organization.id))
+			.orderBy(OrganizationNoteStatus.position),
 		getNotesViewMode(request),
 	])
 
-	const formattedNotes = notes.map((note) => ({
-		...note,
-		createdByName:
-			note.createdBy?.name || note.createdBy?.username || 'Unknown',
-		statusId: note.statusId ?? null,
-		statusName: note.status?.name ?? null,
-		position: note.position ?? null,
-		uploads: note.uploads.map((upload) => ({
-			...upload,
-			thumbnailKey: upload.thumbnailKey ?? null,
-			status: upload.status ?? 'pending',
-		})),
-	}))
+	const formattedNotes = notes
+		.filter(
+			(note) =>
+				note.isPublic ||
+				note.createdById === userId ||
+				note.noteAccess.some((access) => access.userId === userId),
+		)
+		.map((note) => ({
+			...note,
+			createdBy: note.user,
+			createdByName: note.user?.name || note.user?.username || 'Unknown',
+			statusId: note.statusId ?? null,
+			statusName: note.status?.name ?? null,
+			position: note.position ?? null,
+			uploads: note.organizationNoteUploads.map((upload) => ({
+				...upload,
+				thumbnailKey: upload.thumbnailKey ?? null,
+				status: upload.status ?? 'pending',
+			})),
+		}))
 
 	return {
 		organization,

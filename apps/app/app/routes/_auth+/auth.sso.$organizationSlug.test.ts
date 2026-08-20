@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { Organization, db, eq } from '@repo/database'
 import { RouterContextProvider } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
@@ -34,21 +34,22 @@ let testOrganization: any
 
 beforeEach(async () => {
 	// Create test organization with unique slug
-	testOrganization = await prisma.organization.create({
-		data: {
+	;[testOrganization] = await db
+		.insert(Organization)
+		.values({
 			name: 'Test Organization',
 			slug: TEST_ORG_SLUG,
 			description: 'Test organization for SSO',
-		},
-	})
+		})
+		.returning()
 })
 
 afterEach(async () => {
 	// Clean up test data by specific ID to avoid affecting parallel tests
 	if (testOrganization?.id) {
-		await prisma.organization.deleteMany({
-			where: { id: testOrganization.id },
-		})
+		await db
+			.delete(Organization)
+			.where(eq(Organization.id, testOrganization.id))
 	}
 	vi.clearAllMocks()
 })

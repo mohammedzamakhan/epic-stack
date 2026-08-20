@@ -230,11 +230,11 @@ Background job processing with Trigger.dev.
 npm run dev              # Start Trigger.dev dev server
 ```
 
-### Prisma Studio (`apps/studio`)
+### Drizzle Studio (`apps/studio`)
 
 Database management interface.
 
-- **Tech Stack**: Prisma Studio
+- **Tech Stack**: Drizzle Studio
 - **Port**: 3003 (development)
 - **Purpose**: Visual database browser and editor
 - **Features**:
@@ -245,7 +245,7 @@ Database management interface.
 **Development Commands**:
 
 ```bash
-npm run dev              # Start Prisma Studio
+npm run dev              # Start Drizzle Studio
 ```
 
 ## Shared Packages
@@ -253,7 +253,7 @@ npm run dev              # Start Prisma Studio
 All applications share code through workspace packages located in `packages/`:
 
 - **@repo/ui**: Shared UI components (shadcn/ui based)
-- **@repo/database**: Database schema and Prisma client
+- **@repo/database**: Database schema and Drizzle client
 - **@repo/email**: Email templates and utilities
 - **@repo/integrations**: Third-party integrations
 - **@repo/notifications**: Notification configurations
@@ -311,7 +311,7 @@ Default development ports for each application:
 | Sites            | 3008                            | http://localhost:3008 |
 | Tenant API (US)  | 3007                            | http://localhost:3007 |
 | Tenant API (KSA) | 3009                            | http://localhost:3009 |
-| Prisma Studio    | 5555                            | http://localhost:5555 |
+| Drizzle Studio   | 5555                            | http://localhost:5555 |
 
 <Note>
 	Ports may vary if the default port is already in use. Check the terminal

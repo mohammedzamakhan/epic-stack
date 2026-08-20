@@ -161,8 +161,8 @@ App and Admin stay on Fly in the US. Customer PII for tenant Sites lives on
 
 Set the tenancy **home region to Riyadh** at signup. Always Free compute, 200 GB
 block volume, and 10 TB egress apply only in the home region. The Ashburn VM is
-paid (~1 OCPU / 4 GB). Do not put KSA customer data on Fly, on the US Prisma
-volume, or in Bahrain/UAE.
+paid (~1 OCPU / 4 GB). Do not put KSA customer data on Fly, on the US
+control-plane SQLite volume, or in Bahrain/UAE.
 
 Full architecture, local two-node setup, and SMS rules:
 [Tenant data residency](./tenant-data-residency.md).
@@ -181,7 +181,7 @@ would require a sticky multi-machine cluster. Mount the volume at
 
 Skip an OCI load balancer and NAT gateway. Put Cloudflare (or a Cloudflare
 Tunnel) in front of port 8080. Set `APP_URL` to the US App so org flags do not
-require a shared Prisma volume.
+require a shared control-plane SQLite volume.
 
 On each VM, copy `apps/tenant-api/docker-compose.yml` and
 `apps/tenant-api/.env.example` to `/opt/tenant-api`, attach the volume at
@@ -266,14 +266,14 @@ Create a file at other/docker-entry-point.sh with the contents below.
 ```
 #!/bin/sh -ex
 
-npx prisma migrate deploy
+npx tsx packages/database/src/migrate.ts
 sqlite3 /litefs/data/sqlite.db "PRAGMA journal_mode = WAL;"
 sqlite3 /litefs/data/cache.db "PRAGMA journal_mode = WAL;"
 npm run start
 ```
 
-This takes care of applying the prisma migrations, followed by launching the
-node application (on port 8081).
+This takes care of applying control-plane SQL migrations, followed by launching
+the node application (on port 8081).
 
 Helpful commands:
 

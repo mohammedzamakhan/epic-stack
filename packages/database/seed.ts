@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
 import { MOCK_CODE_GITHUB } from '@repo/auth'
 import {
 	createPassword,
@@ -8,8 +7,21 @@ import {
 	getUserImages,
 } from '@repo/test-utils/db-utils'
 import { insertGitHubUser } from '@repo/test-utils/mocks/github'
-import { setupRoles } from './setup-roles.ts'
-import { initializeOnboardingSteps } from './setup-onboarding.ts'
+import {
+	Connection,
+	db,
+	eq,
+	inArray,
+	Note,
+	NoteImage,
+	Password,
+	Role,
+	User,
+	UserImage,
+	_RoleToUser,
+} from './db.server'
+import { setupRoles } from './setup-roles'
+import { initializeOnboardingSteps } from './setup-onboarding'
 
 async function seed() {
 	console.log('🌱 Seeding...')
@@ -30,54 +42,59 @@ async function seed() {
 
 	for (let index = 0; index < totalUsers; index++) {
 		const userData = createUser()
-		const user = await prisma.user.create({
-			select: { id: true },
-			data: {
-				...userData,
-				password: { create: createPassword(userData.username) },
-				roles: { connect: { name: 'user' } },
-			},
-		})
+		await db.transaction(async (tx) => {
+			const [user] = await tx
+				.insert(User)
+				.values(userData)
+				.returning({ id: User.id })
+			if (!user) throw new Error('Failed to create user')
 
-		// Upload user profile image
-		const userImage = userImages[index % userImages.length]
-		if (userImage) {
-			await prisma.userImage.create({
-				data: {
+			await tx
+				.insert(Password)
+				.values({ userId: user.id, ...createPassword(userData.username) })
+
+			const roles = await tx
+				.select({ id: Role.id })
+				.from(Role)
+				.where(eq(Role.name, 'user'))
+			await tx
+				.insert(_RoleToUser)
+				.values(roles.map((role) => ({ A: role.id, B: user.id })))
+
+			const userImage = userImages[index % userImages.length]
+			if (userImage) {
+				await tx.insert(UserImage).values({
 					userId: user.id,
 					objectKey: userImage.objectKey,
-				},
-			})
-		}
+				})
+			}
 
-		// Create notes with images
-		const notesCount = faker.number.int({ min: 1, max: 3 })
-		for (let noteIndex = 0; noteIndex < notesCount; noteIndex++) {
-			const note = await prisma.note.create({
-				select: { id: true },
-				data: {
-					title: faker.lorem.sentence(),
-					content: faker.lorem.paragraphs(),
-					ownerId: user.id,
-				},
-			})
+			const notesCount = faker.number.int({ min: 1, max: 3 })
+			for (let noteIndex = 0; noteIndex < notesCount; noteIndex++) {
+				const [note] = await tx
+					.insert(Note)
+					.values({
+						title: faker.lorem.sentence(),
+						content: faker.lorem.paragraphs(),
+						ownerId: user.id,
+					})
+					.returning({ id: Note.id })
+				if (!note) throw new Error('Failed to create note')
 
-			// Add images to note
-			const noteImageCount = faker.number.int({ min: 1, max: 3 })
-			for (let imageIndex = 0; imageIndex < noteImageCount; imageIndex++) {
-				const imgNumber = faker.number.int({ min: 0, max: 9 })
-				const noteImage = noteImages[imgNumber]
-				if (noteImage) {
-					await prisma.noteImage.create({
-						data: {
+				const noteImageCount = faker.number.int({ min: 1, max: 3 })
+				for (let imageIndex = 0; imageIndex < noteImageCount; imageIndex++) {
+					const imgNumber = faker.number.int({ min: 0, max: 9 })
+					const noteImage = noteImages[imgNumber]
+					if (noteImage) {
+						await tx.insert(NoteImage).values({
 							noteId: note.id,
 							altText: noteImage.altText,
 							objectKey: noteImage.objectKey,
-						},
-					})
+						})
+					}
 				}
 			}
-		}
+		})
 	}
 	console.timeEnd(`👤 Created ${totalUsers} users...`)
 
@@ -119,41 +136,58 @@ async function seed() {
 	const githubUser = await insertGitHubUser(MOCK_CODE_GITHUB)
 
 	// Check if kody already exists
-	let kody = await prisma.user.findUnique({
-		where: { username: 'kody' },
-		select: { id: true },
-	})
+	let [kody] = await db
+		.select({ id: User.id })
+		.from(User)
+		.where(eq(User.username, 'kody'))
+		.limit(1)
 
 	if (!kody) {
-		kody = await prisma.user.create({
-			select: { id: true },
-			data: {
-				email: 'kody@kcd.dev',
-				username: 'kody',
-				name: 'Kody',
-				password: { create: createPassword('KodyLovesYou!2026') },
-				connections: {
-					create: {
-						providerName: 'github',
-						providerId: String(githubUser.profile.id),
-					},
-				},
-				roles: { connect: [{ name: 'admin' }, { name: 'user' }] },
-			},
+		kody = await db.transaction(async (tx) => {
+			const [createdUser] = await tx
+				.insert(User)
+				.values({
+					email: 'kody@kcd.dev',
+					username: 'kody',
+					name: 'Kody',
+				})
+				.returning({ id: User.id })
+			if (!createdUser) throw new Error('Failed to create Kody')
+
+			await tx.insert(Password).values({
+				userId: createdUser.id,
+				...createPassword('KodyLovesYou!2026'),
+			})
+
+			await tx.insert(Connection).values({
+				userId: createdUser.id,
+				providerName: 'github',
+				providerId: String(githubUser.profile.id),
+			})
+
+			const roles = await tx
+				.select({ id: Role.id })
+				.from(Role)
+				.where(inArray(Role.name, ['admin', 'user']))
+			await tx
+				.insert(_RoleToUser)
+				.values(roles.map((role) => ({ A: role.id, B: createdUser.id })))
+
+			return createdUser
 		})
 	}
 
 	// Create user image if it doesn't exist
-	const existingImage = await prisma.userImage.findFirst({
-		where: { userId: kody.id },
-	})
+	const [existingImage] = await db
+		.select({ id: UserImage.id })
+		.from(UserImage)
+		.where(eq(UserImage.userId, kody.id))
+		.limit(1)
 
 	if (!existingImage) {
-		await prisma.userImage.create({
-			data: {
-				userId: kody.id,
-				objectKey: kodyImages.kodyUser.objectKey,
-			},
+		await db.insert(UserImage).values({
+			userId: kody.id,
+			objectKey: kodyImages.kodyUser.objectKey,
 		})
 	}
 
@@ -245,41 +279,48 @@ async function seed() {
 		},
 	]
 
-	for (const noteData of kodyNotes) {
-		const note = await prisma.note.create({
-			select: { id: true },
-			data: {
-				id: noteData.id,
-				title: noteData.title,
-				content: noteData.content,
-				ownerId: kody.id,
-			},
-		})
+	await db.transaction(async (tx) => {
+		for (const noteData of kodyNotes) {
+			const [existingNote] = await tx
+				.select({ id: Note.id })
+				.from(Note)
+				.where(eq(Note.id, noteData.id))
+				.limit(1)
+			const [note] = existingNote
+				? [existingNote]
+				: await tx
+						.insert(Note)
+						.values({
+							id: noteData.id,
+							title: noteData.title,
+							content: noteData.content,
+							ownerId: kody.id,
+						})
+						.returning({ id: Note.id })
 
-		for (const image of noteData.images) {
-			await prisma.noteImage.create({
-				data: {
-					noteId: note.id,
-					altText: image.altText,
-					objectKey: image.objectKey,
-				},
-			})
+			if (!note) throw new Error(`Failed to create note: ${noteData.id}`)
+
+			if (!existingNote) {
+				for (const image of noteData.images) {
+					await tx.insert(NoteImage).values({
+						noteId: note.id,
+						altText: image.altText,
+						objectKey: image.objectKey,
+					})
+				}
+			}
 		}
-	}
+	})
 
 	console.timeEnd(`🐨 Created admin user "kody"`)
 
 	console.timeEnd(`🌱 Database has been seeded`)
 }
 
-seed()
-	.catch((e) => {
-		console.error(e)
-		process.exit(1)
-	})
-	.finally(async () => {
-		await prisma.$disconnect()
-	})
+seed().catch((e) => {
+	console.error(e)
+	process.exit(1)
+})
 
 // we're ok to import from the test directory in this file
 /*

@@ -32,14 +32,5 @@ lease:
 
 exec:
   # Admin app doesn't run migrations - main app handles this
-  # - cmd: cd /myapp/packages/database && npx prisma migrate deploy
-  #   if-candidate: true
-
-  # No database setup - connects to shared database
-  # - cmd: sqlite3 $DATABASE_PATH "PRAGMA journal_mode = WAL;"
-  #   if-candidate: true
-
-  # Generate Typed SQL files (still needed for app functionality)
-  - cmd: cd /myapp/packages/database && npx prisma generate --sql
 
   - cmd: cd /myapp/apps/admin && npm start

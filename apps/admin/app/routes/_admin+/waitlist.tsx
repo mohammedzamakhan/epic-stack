@@ -1,8 +1,23 @@
 import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
-import { type WaitlistEntry, type User, type UserImage } from '@prisma/client'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	User as UserTable,
+	WaitlistEntry as WaitlistEntryTable,
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	inArray,
+	like,
+	or,
+} from '@repo/database'
+import {
+	type WaitlistEntry as WaitlistEntryModel,
+	type User as UserModel,
+	type UserImage,
+} from '@repo/database/types'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
@@ -43,66 +58,51 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '20', 10)
 	const sortBy = url.searchParams.get('sortBy') || 'rank' // 'rank', 'date', 'points'
 
-	// Build where clause
-	const where: any = {}
-
-	if (searchQuery) {
-		where.user = {
-			OR: [
-				{ name: { contains: searchQuery, mode: 'insensitive' } },
-				{ email: { contains: searchQuery, mode: 'insensitive' } },
-				{ username: { contains: searchQuery, mode: 'insensitive' } },
-			],
-		}
-	}
-
-	if (filterStatus === 'granted') {
-		where.hasEarlyAccess = true
-	} else if (filterStatus === 'pending') {
-		where.hasEarlyAccess = false
-	}
-
-	// Determine ordering
-	let orderBy: any = {}
-	if (sortBy === 'points') {
-		orderBy = [{ points: 'desc' }, { createdAt: 'asc' }]
-	} else if (sortBy === 'date') {
-		orderBy = { createdAt: 'desc' }
-	} else {
-		// Default: rank order (points DESC, createdAt ASC)
-		orderBy = [{ points: 'desc' }, { createdAt: 'asc' }]
-	}
+	const matchingUserIds = searchQuery
+		? await db
+				.select({ id: UserTable.id })
+				.from(UserTable)
+				.where(
+					or(
+						like(UserTable.name, `%${searchQuery}%`),
+						like(UserTable.email, `%${searchQuery}%`),
+						like(UserTable.username, `%${searchQuery}%`),
+					),
+				)
+		: []
+	const where = and(
+		searchQuery
+			? inArray(
+					WaitlistEntryTable.userId,
+					matchingUserIds.map((row) => row.id),
+				)
+			: undefined,
+		filterStatus === 'granted'
+			? eq(WaitlistEntryTable.hasEarlyAccess, true)
+			: filterStatus === 'pending'
+				? eq(WaitlistEntryTable.hasEarlyAccess, false)
+				: undefined,
+	)
 
 	// Get all entries for rank calculation (we need to calculate ranks across ALL entries, not just the current page)
 	// Then we'll slice for pagination
 	const [allEntries, totalCount] = await Promise.all([
-		prisma.waitlistEntry.findMany({
+		db.query.WaitlistEntry.findMany({
 			where,
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-						username: true,
-						image: {
-							select: {
-								id: true,
-								altText: true,
-								objectKey: true,
-							},
-						},
-					},
-				},
-				referrals: {
-					select: {
-						id: true,
-					},
-				},
+			with: {
+				user: { with: { image: true } },
+				referrals: { columns: { id: true } },
 			},
-			orderBy,
+			orderBy:
+				sortBy === 'date'
+					? desc(WaitlistEntryTable.createdAt)
+					: desc(WaitlistEntryTable.points),
 		}),
-		prisma.waitlistEntry.count({ where }),
+		db
+			.select({ count: count() })
+			.from(WaitlistEntryTable)
+			.where(where)
+			.then(([row]) => row?.count ?? 0),
 	])
 
 	// Calculate ranks for ALL entries in memory (more efficient than N queries)
@@ -177,8 +177,8 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 type LoaderData = {
-	entries: (WaitlistEntry & {
-		user: Pick<User, 'id' | 'name' | 'email' | 'username'> & {
+	entries: (WaitlistEntryModel & {
+		user: Pick<UserModel, 'id' | 'name' | 'email' | 'username'> & {
 			image: Pick<UserImage, 'id' | 'altText' | 'objectKey'> | null
 		}
 		referrals: { id: string }[]

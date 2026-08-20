@@ -1,6 +1,6 @@
-import { prisma } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 import {
 	createAuthenticatedSessionResponse,
@@ -12,7 +12,6 @@ vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -21,13 +20,17 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-vi.mock('@repo/database', () => ({
-	prisma: {
-		user: {
-			findUnique: vi.fn(),
-		},
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		User: drizzleTable,
+		eq: drizzleOperator,
+	}
+})
 
 vi.mock('@repo/security', () => ({
 	checkHoneypot: vi.fn().mockResolvedValue(undefined),
@@ -67,10 +70,8 @@ describe('auth.login.2fa API action (WO-82)', () => {
 	const mockCreateSession = vi.mocked(createAuthenticatedSessionResponse)
 
 	beforeEach(() => {
-		vi.clearAllMocks()
-		vi.mocked(prisma.user.findUnique).mockResolvedValue({
-			id: 'user-123',
-		} as any)
+		resetMockDb()
+		mockSelectResults([{ id: 'user-123' }])
 	})
 
 	it('returns error when 2FA code is invalid or expired (400)', async () => {

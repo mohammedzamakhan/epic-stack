@@ -90,36 +90,37 @@ Always verify resource ownership:
 
 ```typescript
 // ✅ Good - Verify ownership
-const note = await prisma.note.findFirst({
-	where: {
-		id: noteId,
-		organizationId: userOrganizationId, // Verify ownership
-	},
-})
+const [note] = await db
+	.select()
+	.from(Note)
+	.where(
+		and(eq(Note.id, noteId), eq(Note.organizationId, userOrganizationId)),
+	)
+	.limit(1)
 
 // ❌ Bad - No ownership check (IDOR vulnerability)
-const note = await prisma.note.findUnique({
-	where: { id: noteId }, // Any user can access any note!
-})
+const [note] = await db.select().from(Note).where(eq(Note.id, noteId)).limit(1)
 ```
 
 ## Database Security
 
 ### Use Parameterized Queries
 
-Always use Prisma's query builder or parameterized queries:
+Always use Drizzle's query builder or parameterized queries:
 
 ```typescript
-// ✅ Good - Prisma handles parameterization
-const user = await prisma.user.findUnique({
-	where: { email: userInput },
-})
+// ✅ Good - Drizzle handles parameterization
+const [user] = await db
+	.select()
+	.from(User)
+	.where(eq(User.email, userInput))
+	.limit(1)
 
 // ✅ Good - Parameterized raw query
-await prisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`
+await db.all(sql`SELECT * FROM users WHERE id = ${userId}`)
 
 // ❌ Bad - String concatenation (SQL injection risk)
-await prisma.$queryRawUnsafe(`SELECT * FROM users WHERE id = '${userId}'`)
+await db.all(sql.raw(`SELECT * FROM users WHERE id = '${userId}'`))
 ```
 
 ### Limit Data Exposure
@@ -128,16 +129,14 @@ Only select the fields you need:
 
 ```typescript
 // ✅ Good - Select only needed fields
-const user = await prisma.user.findUnique({
-	where: { id: userId },
-	select: { id: true, name: true, email: true },
-})
+const [user] = await db
+	.select({ id: User.id, name: User.name, email: User.email })
+	.from(User)
+	.where(eq(User.id, userId))
+	.limit(1)
 
 // ❌ Bad - Selecting everything including sensitive data
-const user = await prisma.user.findUnique({
-	where: { id: userId },
-	include: { password: true, sessions: true }, // Exposes sensitive data
-})
+const [user] = await db.select().from(User).where(eq(User.id, userId)).limit(1) // Exposes sensitive data
 ```
 
 ## Secrets Management

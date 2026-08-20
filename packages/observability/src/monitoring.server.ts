@@ -1,4 +1,3 @@
-import { PrismaInstrumentation } from '@prisma/instrumentation'
 import * as Sentry from '@sentry/react-router'
 
 export function init() {
@@ -15,12 +14,7 @@ export function init() {
 			/\/favicon.ico/,
 			/\/site\.webmanifest/,
 		],
-		integrations: [
-			Sentry.prismaIntegration({
-				prismaInstrumentation: new PrismaInstrumentation(),
-			}),
-			Sentry.httpIntegration(),
-		],
+		integrations: [Sentry.httpIntegration()],
 		tracesSampler(samplingContext) {
 			// ignore healthcheck transactions by other services (consul, etc.)
 			if (samplingContext.request?.url?.includes('/resources/healthcheck')) {

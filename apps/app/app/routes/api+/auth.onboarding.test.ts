@@ -2,13 +2,13 @@ import type * as AuthModule from '@repo/auth'
 import { verifySessionStorage } from '@repo/auth'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { action } from './auth.onboarding.ts'
 
 vi.hoisted(() => {
 	process.env.SESSION_SECRET = 'test-session-secret'
 	process.env.JWT_SECRET = 'test-jwt-secret-key'
 	process.env.DATABASE_URL = 'file:./data.db'
-	process.env.USE_S3_STORAGE = 'false'
 	process.env.AWS_ENDPOINT_URL_S3 = 'http://localhost:9000'
 	process.env.AWS_REGION = 'us-east-1'
 	process.env.AWS_ACCESS_KEY_ID = 'test'
@@ -28,13 +28,17 @@ vi.mock('@repo/auth', async (importOriginal) => {
 	}
 })
 
-vi.mock('@repo/database', () => ({
-	prisma: {
-		user: {
-			findUnique: vi.fn().mockResolvedValue(null),
-		},
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		User: drizzleTable,
+		eq: drizzleOperator,
+	}
+})
 
 vi.mock('@repo/security', () => ({
 	checkHoneypot: vi.fn().mockResolvedValue(undefined),
@@ -44,7 +48,7 @@ describe('auth.onboarding API action (WO-86 Email Session Binding)', () => {
 	const mockGetSession = vi.mocked(verifySessionStorage.getSession)
 
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 	})
 
 	it('rejects onboarding request when no verification session cookie is present (400)', async () => {

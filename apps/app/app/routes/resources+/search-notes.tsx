@@ -1,6 +1,13 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	like,
+	Organization,
+	OrganizationNote,
+} from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
@@ -12,10 +19,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	invariantResponse(orgSlug, 'Organization slug is required')
 
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
 
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
@@ -23,52 +31,52 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	await userHasOrgAccess(request, organization.id)
 
 	// Search notes
-	const notes = await prisma.organizationNote.findMany({
-		select: {
+	const notes = await db.query.OrganizationNote.findMany({
+		columns: {
 			id: true,
 			title: true,
 			content: true,
 			createdAt: true,
 			updatedAt: true,
-			createdBy: {
-				select: {
-					name: true,
-					username: true,
-				},
-			},
+			createdById: true,
+			isPublic: true,
 		},
-		where: {
-			organizationId: organization.id,
-			OR: [
-				{ isPublic: true },
-				{ createdById: userId },
-				{ noteAccess: { some: { userId } } },
-			],
-			AND: query
-				? {
-						OR: [
-							{ title: { contains: query } },
-							{ content: { contains: query } },
-						],
-					}
-				: {},
+		with: {
+			user: { columns: { name: true, username: true } },
+			noteAccess: { columns: { userId: true } },
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: 10, // Limit results for performance
+		where: (note, operators) =>
+			and(
+				eq(note.organizationId, organization.id),
+				query
+					? operators.or(
+							like(note.title, `%${query}%`),
+							like(note.content, `%${query}%`),
+						)
+					: undefined,
+			),
+		orderBy: (note, { desc }) => [desc(note.updatedAt)],
+		limit: 100,
 	})
 
-	const formattedNotes = notes.map((note) => ({
-		id: note.id,
-		title: note.title,
-		content:
-			note.content.substring(0, 100) + (note.content.length > 100 ? '...' : ''),
-		createdAt: note.createdAt.toISOString(),
-		updatedAt: note.updatedAt.toISOString(),
-		createdByName:
-			note.createdBy?.name || note.createdBy?.username || 'Unknown',
-	}))
+	const formattedNotes = notes
+		.filter(
+			(note) =>
+				note.isPublic ||
+				note.createdById === userId ||
+				note.noteAccess.some((access) => access.userId === userId),
+		)
+		.slice(0, 10)
+		.map((note) => ({
+			id: note.id,
+			title: note.title,
+			content:
+				note.content.substring(0, 100) +
+				(note.content.length > 100 ? '...' : ''),
+			createdAt: note.createdAt.toISOString(),
+			updatedAt: note.updatedAt.toISOString(),
+			createdByName: note.user?.name || note.user?.username || 'Unknown',
+		}))
 
 	return Response.json({ notes: formattedNotes })
 }

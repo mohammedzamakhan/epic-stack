@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db, OrganizationNote } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -527,15 +527,15 @@ test.describe('Accessibility', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create some notes to populate tables
-		await prisma.organizationNote.createMany({
-			data: Array.from({ length: 3 }, (_, i) => ({
+		await db.insert(OrganizationNote).values(
+			Array.from({ length: 3 }, (_, i) => ({
 				title: `Note ${i + 1}`,
 				content: `Content ${i + 1}`,
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
 			})),
-		})
+		)
 
 		// Navigate to notes page (likely has a table)
 		await navigate('/:slug/notes', { slug: org.slug })

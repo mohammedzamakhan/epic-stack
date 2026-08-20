@@ -41,7 +41,7 @@ SOC 2 evaluates organizations based on five Trust Service Criteria.
 | Control                  | Implementation                      | Evidence                                |
 | ------------------------ | ----------------------------------- | --------------------------------------- |
 | C1.1 Data Classification | PII handling, encryption            | Content sanitization, logging redaction |
-| C1.2 Data Disposal       | Cascade deletes, retention policies | Prisma schema, audit archival           |
+| C1.2 Data Disposal       | Cascade deletes, retention policies | Drizzle schema, audit archival           |
 
 ### Privacy
 
@@ -191,15 +191,13 @@ Configure retention per compliance requirements:
 | PCI DSS    | 1 year               | Default: 365 days    |
 
 ```typescript
-await prisma.auditLogRetentionPolicy.create({
-	data: {
-		organizationId,
-		retentionDays: 365,
-		hotStorageDays: 180,
-		archiveEnabled: true,
-		complianceType: 'SOC2',
-		immutable: true,
-	},
+await db.insert(AuditLogRetentionPolicy).values({
+	organizationId,
+	retentionDays: 365,
+	hotStorageDays: 180,
+	archiveEnabled: true,
+	complianceType: 'SOC2',
+	immutable: true,
 })
 ```
 

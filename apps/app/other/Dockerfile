@@ -6,7 +6,7 @@ FROM node:22-bookworm-slim as base
 # set for base and all layer that inherit from it
 ENV NODE_ENV production
 
-# Install openssl for Prisma
+# Install openssl and sqlite
 RUN apt-get update && apt-get install -y fuse3 openssl sqlite3 ca-certificates
 
 # Install all node_modules, including dev dependencies
@@ -43,9 +43,6 @@ COPY --from=deps /myapp/node_modules /myapp/node_modules
 # Copy the entire monorepo structure
 ADD . .
 
-# Generate Prisma client
-RUN cd packages/database && npx prisma generate
-
 # Build the specific app
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
   export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
@@ -65,8 +62,6 @@ ENV CACHE_DATABASE_URL="file:$CACHE_DATABASE_PATH"
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
 ENV NODE_ENV="production"
-# For WAL support: https://github.com/prisma/prisma-engines/issues/4675#issuecomment-1914383246
-ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK="1"
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
@@ -80,7 +75,6 @@ RUN INTERNAL_COMMAND_TOKEN=$(openssl rand -hex 32) && \
   echo "INTERNAL_COMMAND_TOKEN=$INTERNAL_COMMAND_TOKEN" > .env
 
 COPY --from=production-deps /myapp/node_modules /myapp/node_modules
-COPY --from=build /myapp/packages/database/node_modules/.prisma /myapp/packages/database/node_modules/.prisma
 
 # Copy the built app
 COPY --from=build /myapp/apps/app/build /myapp/apps/app/build

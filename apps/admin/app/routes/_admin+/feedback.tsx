@@ -1,5 +1,12 @@
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Feedback as FeedbackTable,
+	Organization as OrganizationTable,
+	User as UserTable,
+	db,
+	desc,
+	eq,
+} from '@repo/database'
 import {
 	type Feedback,
 	type Organization,
@@ -17,24 +24,23 @@ import { useLoaderData } from 'react-router'
 
 export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')
-	const feedback = await prisma.feedback.findMany({
-		include: {
-			user: {
-				select: {
-					name: true,
-					email: true,
-				},
-			},
-			organization: {
-				select: {
-					name: true,
-				},
-			},
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-	})
+	const feedback = await db
+		.select({
+			id: FeedbackTable.id,
+			message: FeedbackTable.message,
+			type: FeedbackTable.type,
+			createdAt: FeedbackTable.createdAt,
+			updatedAt: FeedbackTable.updatedAt,
+			user: { name: UserTable.name, email: UserTable.email },
+			organization: { name: OrganizationTable.name },
+		})
+		.from(FeedbackTable)
+		.innerJoin(UserTable, eq(FeedbackTable.userId, UserTable.id))
+		.innerJoin(
+			OrganizationTable,
+			eq(FeedbackTable.organizationId, OrganizationTable.id),
+		)
+		.orderBy(desc(FeedbackTable.createdAt))
 	return Response.json({ feedback })
 }
 

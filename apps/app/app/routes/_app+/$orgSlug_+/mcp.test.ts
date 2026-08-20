@@ -1,56 +1,100 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { invariant } from '@epic-web/invariant'
+import {
+	MCPAccessToken,
+	MCPAuthorization,
+	MCPRefreshToken,
+	Organization,
+	OrganizationRole,
+	Role,
+	User,
+	UserOrganization,
+	_RoleToUser,
+	and,
+	db,
+	eq,
+} from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { createAuthorizationWithTokens } from '#app/utils/mcp/oauth.server.ts'
 
-// Helper to create test user
+async function connectUserRole(userId: string, roleName: string) {
+	const [role] = await db
+		.select({ id: Role.id })
+		.from(Role)
+		.where(eq(Role.name, roleName))
+		.limit(1)
+	if (role) {
+		await db.insert(_RoleToUser).values({ A: role.id, B: userId })
+	}
+}
+
 async function createTestUser() {
-	return await prisma.user.create({
-		data: {
+	const [user] = await db
+		.insert(User)
+		.values({
 			email: faker.internet.email(),
 			username: `user-${faker.string.uuid().slice(0, 8)}`,
 			name: faker.person.fullName(),
-			roles: { connect: { name: 'user' } },
-		},
-	})
+		})
+		.returning()
+	if (!user) throw new Error('Failed to insert user')
+	await connectUserRole(user.id, 'user')
+	return user
 }
 
-// Helper to create test organization
 async function createTestOrganization(userId: string) {
-	return await prisma.organization.create({
-		data: {
+	let [adminRole] = await db
+		.select()
+		.from(OrganizationRole)
+		.where(eq(OrganizationRole.name, 'admin'))
+		.limit(1)
+	if (!adminRole) {
+		;[adminRole] = await db
+			.insert(OrganizationRole)
+			.values({
+				id: 'org_role_admin',
+				name: 'admin',
+				description: 'Administrator role',
+				level: 4,
+			})
+			.returning()
+		if (!adminRole) throw new Error('Admin role not found')
+	}
+
+	const [org] = await db
+		.insert(Organization)
+		.values({
 			name: faker.company.name(),
 			slug: `org-${faker.string.uuid().slice(0, 8)}`,
-			users: {
-				create: {
-					userId,
-					organizationRoleId: 'org_role_admin',
-				},
-			},
-		},
+		})
+		.returning()
+	if (!org) throw new Error('Failed to insert organization')
+	await db.insert(UserOrganization).values({
+		userId,
+		organizationId: org.id,
+		organizationRoleId: adminRole.id,
 	})
+	return org
 }
 
 describe('MCP Settings Page', () => {
 	beforeEach(async () => {
-		// Clean up test data before each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
+		await db.delete(MCPRefreshToken)
+		await db.delete(MCPAccessToken)
+		await db.delete(MCPAuthorization)
+		await db.delete(UserOrganization)
+		await db.delete(Organization)
+		await db.delete(User)
 	})
 
 	afterEach(async () => {
-		// Clean up test data after each test
-		await prisma.mCPRefreshToken.deleteMany({})
-		await prisma.mCPAccessToken.deleteMany({})
-		await prisma.mCPAuthorization.deleteMany({})
-		await prisma.userOrganization.deleteMany({})
-		await prisma.organization.deleteMany({})
-		await prisma.user.deleteMany({})
+		await db.delete(MCPRefreshToken)
+		await db.delete(MCPAccessToken)
+		await db.delete(MCPAuthorization)
+		await db.delete(UserOrganization)
+		await db.delete(Organization)
+		await db.delete(User)
 	})
 
 	describe('Property 12: Authorization list completeness', () => {
@@ -65,7 +109,6 @@ describe('MCP Settings Page', () => {
 						const user = await createTestUser()
 						const org = await createTestOrganization(user.id)
 
-						// Create multiple authorizations
 						const createdAuths = await Promise.all(
 							clientNames.map((clientName) =>
 								createAuthorizationWithTokens({
@@ -76,24 +119,23 @@ describe('MCP Settings Page', () => {
 							),
 						)
 
-						// Fetch authorizations for this user and organization
-						const authorizations = await prisma.mCPAuthorization.findMany({
-							where: {
-								userId: user.id,
-								organizationId: org.id,
-							},
-							select: {
-								id: true,
-								clientName: true,
-								createdAt: true,
-								lastUsedAt: true,
-							},
-						})
+						const authorizations = await db
+							.select({
+								id: MCPAuthorization.id,
+								clientName: MCPAuthorization.clientName,
+								createdAt: MCPAuthorization.createdAt,
+								lastUsedAt: MCPAuthorization.lastUsedAt,
+							})
+							.from(MCPAuthorization)
+							.where(
+								and(
+									eq(MCPAuthorization.userId, user.id),
+									eq(MCPAuthorization.organizationId, org.id),
+								),
+							)
 
-						// Verify all authorizations are returned
 						expect(authorizations).toHaveLength(createdAuths.length)
 
-						// Verify each authorization has the correct client name
 						const returnedNames = authorizations.map((a) => a.clientName).sort()
 						const expectedNames = clientNames.sort()
 						expect(returnedNames).toEqual(expectedNames)
@@ -108,38 +150,41 @@ describe('MCP Settings Page', () => {
 			const user2 = await createTestUser()
 			const org = await createTestOrganization(user1.id)
 
-			// Add user2 to the organization
-			await prisma.userOrganization.create({
-				data: {
-					userId: user2.id,
-					organizationId: org.id,
-					organizationRoleId: 'org_role_admin',
-				},
+			const [adminRole] = await db
+				.select()
+				.from(OrganizationRole)
+				.where(eq(OrganizationRole.name, 'admin'))
+				.limit(1)
+			invariant(adminRole, 'Admin role should exist')
+
+			await db.insert(UserOrganization).values({
+				userId: user2.id,
+				organizationId: org.id,
+				organizationRoleId: adminRole.id,
 			})
 
-			// Create authorization for user1
 			await createAuthorizationWithTokens({
 				userId: user1.id,
 				organizationId: org.id,
 				clientName: 'Client 1',
 			})
 
-			// Create authorization for user2
 			await createAuthorizationWithTokens({
 				userId: user2.id,
 				organizationId: org.id,
 				clientName: 'Client 2',
 			})
 
-			// Fetch authorizations for user1
-			const user1Auths = await prisma.mCPAuthorization.findMany({
-				where: {
-					userId: user1.id,
-					organizationId: org.id,
-				},
-			})
+			const user1Auths = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user1.id),
+						eq(MCPAuthorization.organizationId, org.id),
+					),
+				)
 
-			// Verify only user1's authorization is returned
 			expect(user1Auths).toHaveLength(1)
 			expect(user1Auths[0]!.clientName).toBe('Client 1')
 		})
@@ -149,29 +194,28 @@ describe('MCP Settings Page', () => {
 			const org1 = await createTestOrganization(user.id)
 			const org2 = await createTestOrganization(user.id)
 
-			// Create authorization for org1
 			await createAuthorizationWithTokens({
 				userId: user.id,
 				organizationId: org1.id,
 				clientName: 'Client 1',
 			})
 
-			// Create authorization for org2
 			await createAuthorizationWithTokens({
 				userId: user.id,
 				organizationId: org2.id,
 				clientName: 'Client 2',
 			})
 
-			// Fetch authorizations for org1
-			const org1Auths = await prisma.mCPAuthorization.findMany({
-				where: {
-					userId: user.id,
-					organizationId: org1.id,
-				},
-			})
+			const org1Auths = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user.id),
+						eq(MCPAuthorization.organizationId, org1.id),
+					),
+				)
 
-			// Verify only org1's authorization is returned
 			expect(org1Auths).toHaveLength(1)
 			expect(org1Auths[0]!.clientName).toBe('Client 1')
 		})
@@ -186,34 +230,33 @@ describe('MCP Settings Page', () => {
 						const user = await createTestUser()
 						const org = await createTestOrganization(user.id)
 
-						// Create authorization
 						await createAuthorizationWithTokens({
 							userId: user.id,
 							organizationId: org.id,
 							clientName,
 						})
 
-						// Fetch authorization
-						const authorization = await prisma.mCPAuthorization.findFirst({
-							where: {
-								userId: user.id,
-								organizationId: org.id,
-							},
-							select: {
-								id: true,
-								clientName: true,
-								createdAt: true,
-								lastUsedAt: true,
-							},
-						})
+						const [authorization] = await db
+							.select({
+								id: MCPAuthorization.id,
+								clientName: MCPAuthorization.clientName,
+								createdAt: MCPAuthorization.createdAt,
+								lastUsedAt: MCPAuthorization.lastUsedAt,
+							})
+							.from(MCPAuthorization)
+							.where(
+								and(
+									eq(MCPAuthorization.userId, user.id),
+									eq(MCPAuthorization.organizationId, org.id),
+								),
+							)
+							.limit(1)
 
-						// Verify all required fields are present
 						expect(authorization).toBeDefined()
 						expect(authorization?.id).toBeDefined()
 						expect(authorization?.clientName).toBe(clientName)
 						expect(authorization?.createdAt).toBeDefined()
 						expect(authorization?.createdAt).toBeInstanceOf(Date)
-						// lastUsedAt can be null initially
 						expect(authorization?.lastUsedAt).toBeNull()
 					},
 				),
@@ -225,7 +268,6 @@ describe('MCP Settings Page', () => {
 			const user = await createTestUser()
 			const org = await createTestOrganization(user.id)
 
-			// Create authorization
 			const { accessToken: ignoredAccessToken } =
 				await createAuthorizationWithTokens({
 					userId: user.id,
@@ -233,29 +275,34 @@ describe('MCP Settings Page', () => {
 					clientName: 'Test Client',
 				})
 
-			// Get initial authorization
-			let authorization = await prisma.mCPAuthorization.findFirst({
-				where: {
-					userId: user.id,
-					organizationId: org.id,
-				},
-			})
+			let [authorization] = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user.id),
+						eq(MCPAuthorization.organizationId, org.id),
+					),
+				)
+				.limit(1)
 
 			expect(authorization?.lastUsedAt).toBeNull()
 
-			// Simulate token usage by updating lastUsedAt
-			await prisma.mCPAuthorization.update({
-				where: { id: authorization!.id },
-				data: { lastUsedAt: new Date() },
-			})
+			await db
+				.update(MCPAuthorization)
+				.set({ lastUsedAt: new Date() })
+				.where(eq(MCPAuthorization.id, authorization!.id))
 
-			// Get updated authorization
-			authorization = await prisma.mCPAuthorization.findFirst({
-				where: {
-					userId: user.id,
-					organizationId: org.id,
-				},
-			})
+			;[authorization] = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user.id),
+						eq(MCPAuthorization.organizationId, org.id),
+					),
+				)
+				.limit(1)
 
 			expect(authorization?.lastUsedAt).toBeDefined()
 			expect(authorization?.lastUsedAt).toBeInstanceOf(Date)
@@ -276,7 +323,6 @@ describe('MCP Settings Page', () => {
 
 						let currentCount = 0
 
-						// Add authorizations one by one and verify count increases
 						for (const clientName of clientNames) {
 							await createAuthorizationWithTokens({
 								userId: user.id,
@@ -286,13 +332,15 @@ describe('MCP Settings Page', () => {
 
 							currentCount++
 
-							// Verify count increased by exactly 1
-							const authorizations = await prisma.mCPAuthorization.findMany({
-								where: {
-									userId: user.id,
-									organizationId: org.id,
-								},
-							})
+							const authorizations = await db
+								.select()
+								.from(MCPAuthorization)
+								.where(
+									and(
+										eq(MCPAuthorization.userId, user.id),
+										eq(MCPAuthorization.organizationId, org.id),
+									),
+								)
 
 							expect(authorizations).toHaveLength(currentCount)
 						}
@@ -306,7 +354,6 @@ describe('MCP Settings Page', () => {
 			const user = await createTestUser()
 			const org = await createTestOrganization(user.id)
 
-			// Create 3 authorizations
 			const auths = await Promise.all([
 				createAuthorizationWithTokens({
 					userId: user.id,
@@ -325,29 +372,32 @@ describe('MCP Settings Page', () => {
 				}),
 			])
 
-			// Verify initial count
-			let authorizations = await prisma.mCPAuthorization.findMany({
-				where: {
-					userId: user.id,
-					organizationId: org.id,
-				},
-			})
+			let authorizations = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user.id),
+						eq(MCPAuthorization.organizationId, org.id),
+					),
+				)
 			expect(authorizations).toHaveLength(3)
 
-			// Revoke one authorization
-			await prisma.mCPAuthorization.update({
-				where: { id: auths[0].authorization.id },
-				data: { isActive: false },
-			})
+			await db
+				.update(MCPAuthorization)
+				.set({ isActive: false })
+				.where(eq(MCPAuthorization.id, auths[0].authorization.id))
 
-			// Verify count decreased by 1 (when filtering for active)
-			authorizations = await prisma.mCPAuthorization.findMany({
-				where: {
-					userId: user.id,
-					organizationId: org.id,
-					isActive: true,
-				},
-			})
+			authorizations = await db
+				.select()
+				.from(MCPAuthorization)
+				.where(
+					and(
+						eq(MCPAuthorization.userId, user.id),
+						eq(MCPAuthorization.organizationId, org.id),
+						eq(MCPAuthorization.isActive, true),
+					),
+				)
 			expect(authorizations).toHaveLength(2)
 		})
 	})

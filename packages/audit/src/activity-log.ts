@@ -1,4 +1,14 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	AuditLog,
+	db,
+	desc,
+	eq,
+	Integration,
+	inArray,
+	User,
+	UserImage,
+} from '@repo/database'
 import { logger } from '@repo/observability'
 import { AuditAction } from './actions'
 import { auditService } from './index'
@@ -69,10 +79,11 @@ export async function logNoteActivity(options: ActivityLogOptions) {
 			integrationId &&
 			!metadata?.providerName
 		) {
-			const integration = await prisma.integration.findUnique({
-				where: { id: integrationId },
-				select: { providerName: true },
-			})
+			const [integration] = await db
+				.select({ providerName: Integration.providerName })
+				.from(Integration)
+				.where(eq(Integration.id, integrationId))
+				.limit(1)
 			if (integration) {
 				enrichedMetadata.providerName = integration.providerName
 				details = `Note ${action} (${integration.providerName})`
@@ -100,27 +111,30 @@ export async function logNoteActivity(options: ActivityLogOptions) {
 export async function getNoteActivityLogs(noteId: string, limit = 50) {
 	// Query the unified audit log table instead of the deprecated NoteActivityLog
 	// We map the AuditLog entries back to the shape expected by the UI
-	const logs = await prisma.auditLog.findMany({
-		where: {
-			resourceType: 'note',
-			resourceId: noteId,
-		},
-		include: {
+	const logs = await db
+		.select({
+			id: AuditLog.id,
+			resourceId: AuditLog.resourceId,
+			userId: AuditLog.userId,
+			action: AuditLog.action,
+			metadata: AuditLog.metadata,
+			targetUserId: AuditLog.targetUserId,
+			createdAt: AuditLog.createdAt,
 			user: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-					image: { select: { objectKey: true } },
-				},
+				id: User.id,
+				name: User.name,
+				username: User.username,
+				imageObjectKey: UserImage.objectKey,
 			},
-			// Note: AuditLog doesn't have direct relation to targetUser or integration
-			// We might need to fetch these if strictly required, but for now we'll rely on metadata
-			// or handle the missing data gracefully in the UI
-		},
-		orderBy: { createdAt: 'desc' },
-		take: limit,
-	})
+		})
+		.from(AuditLog)
+		.leftJoin(User, eq(AuditLog.userId, User.id))
+		.leftJoin(UserImage, eq(UserImage.userId, User.id))
+		.where(
+			and(eq(AuditLog.resourceType, 'note'), eq(AuditLog.resourceId, noteId)),
+		)
+		.orderBy(desc(AuditLog.createdAt))
+		.limit(limit)
 
 	// Map AuditLog back to the expected structure for backward compatibility
 	// We need to fetch target users if present to fully match the expected return type
@@ -130,14 +144,10 @@ export async function getNoteActivityLogs(noteId: string, limit = 50) {
 	let targetUsers: Record<string, any> = {}
 
 	if (targetUserIds.length > 0) {
-		const users = await prisma.user.findMany({
-			where: { id: { in: targetUserIds } },
-			select: {
-				id: true,
-				name: true,
-				username: true,
-			},
-		})
+		const users = await db
+			.select({ id: User.id, name: User.name, username: User.username })
+			.from(User)
+			.where(inArray(User.id, targetUserIds))
 		targetUsers = users.reduce(
 			(acc: any, user: any) => ({ ...acc, [user.id]: user }),
 			{},
@@ -165,7 +175,12 @@ export async function getNoteActivityLogs(noteId: string, limit = 50) {
 			integrationId: metadata.integrationId,
 			commentId: metadata.commentId,
 			createdAt: log.createdAt,
-			user: log.user!,
+			user: {
+				...log.user,
+				image: log.user?.imageObjectKey
+					? { objectKey: log.user.imageObjectKey }
+					: null,
+			},
 			targetUser: log.targetUserId ? targetUsers[log.targetUserId] : null,
 			integration: metadata.providerName
 				? { providerName: metadata.providerName }

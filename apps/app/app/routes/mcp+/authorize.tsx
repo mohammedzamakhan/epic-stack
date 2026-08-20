@@ -5,7 +5,14 @@ import {
 	logMCPAuthorizationDenied,
 } from '@repo/audit'
 import { getUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import {
@@ -88,31 +95,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	}
 
 	// Get user and their organizations
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			organizations: {
-				where: { active: true },
-				select: {
-					organizationId: true,
-					organization: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-						},
-					},
-				},
-			},
-		},
-	})
+	const [user] = await db
+		.select({ id: User.id, name: User.name, username: User.username })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
+	const organizations = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			Organization,
+			eq(UserOrganization.organizationId, Organization.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
 
 	invariantResponse(user, 'User not found', { status: 404 })
 	invariantResponse(
-		user.organizations.length > 0,
+		organizations.length > 0,
 		'User has no active organizations',
 		{ status: 403 },
 	)
@@ -125,7 +133,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		state,
 		codeChallenge,
 		codeChallengeMethod,
-		organizations: user.organizations.map((uo) => uo.organization),
+		organizations,
 	}
 }
 

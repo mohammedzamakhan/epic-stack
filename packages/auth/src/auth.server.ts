@@ -1,7 +1,10 @@
 import crypto from 'node:crypto'
-import { type Password, type User } from '@prisma/client'
 import { combineHeaders } from '@repo/common'
-import { prisma } from '@repo/database'
+import { and, db, eq, gt, Password, Session, User } from '@repo/database'
+import {
+	type Password as PasswordRow,
+	type User as UserRow,
+} from '@repo/database/types'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
@@ -13,24 +16,33 @@ export const getSessionExpirationDate = () =>
 
 export const sessionKey = 'sessionId'
 
+function userWhere(
+	where:
+		Pick<UserRow, 'username'> | Pick<UserRow, 'id'> | Pick<UserRow, 'email'>,
+) {
+	if ('id' in where) return eq(User.id, where.id)
+	if ('username' in where) return eq(User.username, where.username)
+	return eq(User.email, where.email)
+}
+
 export async function getUserId(request: Request) {
 	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	)
 	const sessionId = authSession.get(sessionKey)
 	if (!sessionId) return null
-	const session = await prisma.session.findUnique({
-		select: {
-			userId: true,
-			user: {
-				select: {
-					isBanned: true,
-					banExpiresAt: true,
-				},
-			},
-		},
-		where: { id: sessionId, expirationDate: { gt: new Date() } },
-	})
+	const [session] = await db
+		.select({
+			userId: Session.userId,
+			isBanned: User.isBanned,
+			banExpiresAt: User.banExpiresAt,
+		})
+		.from(Session)
+		.innerJoin(User, eq(Session.userId, User.id))
+		.where(
+			and(eq(Session.id, sessionId), gt(Session.expirationDate, new Date())),
+		)
+		.limit(1)
 	if (!session?.userId) {
 		throw redirect('/login', {
 			headers: {
@@ -39,25 +51,24 @@ export async function getUserId(request: Request) {
 		})
 	}
 
-	// Check if user is banned
-	if (session.user.isBanned) {
+	if (session.isBanned) {
 		const now = new Date()
 		const banExpired =
-			session.user.banExpiresAt && new Date(session.user.banExpiresAt) <= now
+			session.banExpiresAt && new Date(session.banExpiresAt) <= now
 
 		if (banExpired) {
-			await prisma.user.update({
-				where: { id: session.userId },
-				data: {
+			await db
+				.update(User)
+				.set({
 					isBanned: false,
 					banReason: null,
 					banExpiresAt: null,
 					bannedAt: null,
 					bannedById: null,
-				},
-			})
+				})
+				.where(eq(User.id, session.userId))
 		} else {
-			await prisma.session.deleteMany({ where: { userId: session.userId } })
+			await db.delete(Session).where(eq(Session.userId, session.userId))
 			throw redirect('/login?banned=true', {
 				headers: {
 					'set-cookie': await authSessionStorage.destroySession(authSession),
@@ -97,10 +108,11 @@ export async function requireAnonymous(request: Request) {
 }
 
 export async function canUserLogin(userId: string): Promise<boolean> {
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { isBanned: true, banExpiresAt: true },
-	})
+	const [user] = await db
+		.select({ isBanned: User.isBanned, banExpiresAt: User.banExpiresAt })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 	if (!user) return false
 
 	if (!user.isBanned) return true
@@ -109,16 +121,16 @@ export async function canUserLogin(userId: string): Promise<boolean> {
 	const banExpired = user.banExpiresAt && new Date(user.banExpiresAt) <= now
 
 	if (banExpired) {
-		await prisma.user.update({
-			where: { id: userId },
-			data: {
+		await db
+			.update(User)
+			.set({
 				isBanned: false,
 				banReason: null,
 				banExpiresAt: null,
 				bannedAt: null,
 				bannedById: null,
-			},
-		})
+			})
+			.where(eq(User.id, userId))
 		return true
 	}
 
@@ -140,16 +152,15 @@ export async function logout(
 	)
 	const sessionId = authSession.get(sessionKey)
 
-	// Get user ID for audit logging before deleting session
 	let userId: string | undefined
 	if (sessionId) {
-		const session = await prisma.session.findUnique({
-			select: { userId: true },
-			where: { id: sessionId },
-		})
+		const [session] = await db
+			.select({ userId: Session.userId })
+			.from(Session)
+			.where(eq(Session.id, sessionId))
+			.limit(1)
 		userId = session?.userId
 
-		// Log logout event (SOC 2 CC7.2)
 		if (userId) {
 			const { auditService, AuditAction } = await import('@repo/audit')
 			void auditService.logAuth(
@@ -162,7 +173,10 @@ export async function logout(
 			)
 		}
 
-		void prisma.session.deleteMany({ where: { id: sessionId } }).catch(() => {})
+		void db
+			.delete(Session)
+			.where(eq(Session.id, sessionId))
+			.catch(() => {})
 	}
 	throw redirect(safeRedirect(redirectTo), {
 		...responseInit,
@@ -179,19 +193,22 @@ export async function getPasswordHash(password: string) {
 }
 
 export async function verifyUserPassword(
-	where: Pick<User, 'username'> | Pick<User, 'id'> | Pick<User, 'email'>,
-	password: Password['hash'],
+	where:
+		Pick<UserRow, 'username'> | Pick<UserRow, 'id'> | Pick<UserRow, 'email'>,
+	password: PasswordRow['hash'],
 ) {
-	const userWithPassword = await prisma.user.findUnique({
-		where,
-		select: { id: true, password: { select: { hash: true } } },
-	})
+	const [userWithPassword] = await db
+		.select({ id: User.id, hash: Password.hash })
+		.from(User)
+		.leftJoin(Password, eq(Password.userId, User.id))
+		.where(userWhere(where))
+		.limit(1)
 
-	if (!userWithPassword || !userWithPassword.password) {
+	if (!userWithPassword || !userWithPassword.hash) {
 		return null
 	}
 
-	const isValid = await bcrypt.compare(password, userWithPassword.password.hash)
+	const isValid = await bcrypt.compare(password, userWithPassword.hash)
 
 	if (!isValid) {
 		return null

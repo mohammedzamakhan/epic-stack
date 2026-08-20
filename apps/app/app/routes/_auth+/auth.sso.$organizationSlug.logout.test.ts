@@ -4,7 +4,16 @@ import {
 	getSessionExpirationDate,
 	sessionKey,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Organization,
+	SSOConfiguration,
+	SSOSession,
+	Session,
+	User,
+	db,
+	eq,
+	inArray,
+} from '@repo/database'
 import { RouterContextProvider } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
@@ -53,17 +62,20 @@ let testSSOConfig: any
 
 beforeEach(async () => {
 	// Create test organization with unique slug
-	testOrganization = await prisma.organization.create({
-		data: {
+	;[testOrganization] = await db
+		.insert(Organization)
+		.values({
 			name: 'Test Organization',
 			slug: TEST_ORG_SLUG,
 			description: 'Test organization for SSO',
-		},
-	})
+		})
+		.returning()
+	if (!testOrganization) throw new Error('Failed to insert organization')
 
 	// Create test SSO configuration in database
-	testSSOConfig = await prisma.sSOConfiguration.create({
-		data: {
+	;[testSSOConfig] = await db
+		.insert(SSOConfiguration)
+		.values({
 			organizationId: testOrganization.id,
 			providerName: 'Test OIDC Provider',
 			issuerUrl: 'https://test-provider.example.com',
@@ -74,8 +86,9 @@ beforeEach(async () => {
 			autoProvision: true,
 			defaultRole: 'member',
 			attributeMapping: null,
-		},
-	})
+		})
+		.returning()
+	if (!testSSOConfig) throw new Error('Failed to insert SSO configuration')
 
 	// Setup default mocks
 	vi.mocked(ssoConfigurationService.getConfiguration).mockResolvedValue(
@@ -86,15 +99,19 @@ beforeEach(async () => {
 afterEach(async () => {
 	// Clean up test data by specific IDs to avoid affecting parallel tests
 	if (testOrganization?.id) {
-		await prisma.sSOSession.deleteMany({
-			where: { ssoConfig: { organizationId: testOrganization.id } },
-		})
-		await prisma.sSOConfiguration.deleteMany({
-			where: { organizationId: testOrganization.id },
-		})
-		await prisma.organization.deleteMany({
-			where: { id: testOrganization.id },
-		})
+		const ssoConfigIds = db
+			.select({ id: SSOConfiguration.id })
+			.from(SSOConfiguration)
+			.where(eq(SSOConfiguration.organizationId, testOrganization.id))
+		await db
+			.delete(SSOSession)
+			.where(inArray(SSOSession.ssoConfigId, ssoConfigIds))
+		await db
+			.delete(SSOConfiguration)
+			.where(eq(SSOConfiguration.organizationId, testOrganization.id))
+		await db
+			.delete(Organization)
+			.where(eq(Organization.id, testOrganization.id))
 	}
 	vi.clearAllMocks()
 })
@@ -103,28 +120,31 @@ test('successful SSO logout revokes tokens and performs regular logout', async (
 	const { logout } = await import('@repo/auth')
 
 	// Create user and session
-	const user = await prisma.user.create({
-		data: createUser(),
-	})
+	const [user] = await db.insert(User).values(createUser()).returning()
+	if (!user) throw new Error('Failed to insert user')
 
-	const session = await prisma.session.create({
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
-		},
-	})
+		})
+		.returning()
+	if (!session) throw new Error('Failed to insert session')
 
 	// Create SSO session
-	const ssoSession = await prisma.sSOSession.create({
-		data: {
+	const [ssoSession] = await db
+		.insert(SSOSession)
+		.values({
 			sessionId: session.id,
 			ssoConfigId: testSSOConfig.id,
 			providerUserId: faker.string.uuid(),
 			accessToken: 'encrypted-access-token',
 			refreshToken: 'encrypted-refresh-token',
 			tokenExpiresAt: new Date(Date.now() + 3600000),
-		},
-	})
+		})
+		.returning()
+	if (!ssoSession) throw new Error('Failed to insert SSO session')
 
 	// Mock successful token revocation
 	vi.mocked(ssoAuthService.revokeTokens).mockResolvedValue()
@@ -308,16 +328,17 @@ test('handles logout when no SSO session exists', async () => {
 	const { logout } = await import('@repo/auth')
 
 	// Create user and session but no SSO session
-	const user = await prisma.user.create({
-		data: createUser(),
-	})
+	const [user] = await db.insert(User).values(createUser()).returning()
+	if (!user) throw new Error('Failed to insert user')
 
-	const session = await prisma.session.create({
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
-		},
-	})
+		})
+		.returning()
+	if (!session) throw new Error('Failed to insert session')
 
 	const mockLogoutResponse = new Response(null, {
 		status: 302,
@@ -361,28 +382,31 @@ test('continues logout even if token revocation fails', async () => {
 	const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 	// Create user and session
-	const user = await prisma.user.create({
-		data: createUser(),
-	})
+	const [user] = await db.insert(User).values(createUser()).returning()
+	if (!user) throw new Error('Failed to insert user')
 
-	const session = await prisma.session.create({
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
 			userId: user.id,
-		},
-	})
+		})
+		.returning()
+	if (!session) throw new Error('Failed to insert session')
 
 	// Create SSO session
-	const ssoSession = await prisma.sSOSession.create({
-		data: {
+	const [ssoSession] = await db
+		.insert(SSOSession)
+		.values({
 			sessionId: session.id,
 			ssoConfigId: testSSOConfig.id,
 			providerUserId: faker.string.uuid(),
 			accessToken: 'encrypted-access-token',
 			refreshToken: 'encrypted-refresh-token',
 			tokenExpiresAt: new Date(Date.now() + 3600000),
-		},
-	})
+		})
+		.returning()
+	if (!ssoSession) throw new Error('Failed to insert SSO session')
 
 	// Mock token revocation failure
 	vi.mocked(ssoAuthService.revokeTokens).mockRejectedValue(

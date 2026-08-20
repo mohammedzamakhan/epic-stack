@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { prisma } from '@repo/database'
+import { db, eq, User, WaitlistEntry } from '@repo/database'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
 
 // Override LAUNCH_STATUS for these tests to force CLOSED_BETA mode
@@ -23,9 +23,18 @@ const test = base.extend<{
 			}
 			return onboardingData
 		})
-		await prisma.user.deleteMany({ where: { username: userData.username } })
+		await db.delete(User).where(eq(User.username, userData.username))
 	},
 })
+
+async function getWaitlistEntryByUserId(userId: string) {
+	const [entry] = await db
+		.select()
+		.from(WaitlistEntry)
+		.where(eq(WaitlistEntry.userId, userId))
+		.limit(1)
+	return entry
+}
 
 test.describe('Waitlist Referral System', () => {
 	test.afterAll(async () => {
@@ -43,12 +52,14 @@ test.describe('Waitlist Referral System', () => {
 		const referrer = await insertNewUser()
 
 		// Create waitlist entry for referrer
-		const referrerEntry = await prisma.waitlistEntry.create({
-			data: {
+		const [referrerEntry] = await db
+			.insert(WaitlistEntry)
+			.values({
 				userId: referrer.id,
 				referralCode: `${referrer.username}-5678`,
-			},
-		})
+			})
+			.returning()
+		if (!referrerEntry) throw new Error('Failed to create waitlist entry')
 
 		// Visit referral link as unauthenticated user
 		await navigate('/r/:code', { code: referrerEntry.referralCode })
@@ -66,28 +77,22 @@ test.describe('Waitlist Referral System', () => {
 		const user3 = await insertNewUser()
 
 		// Create waitlist entries with different points
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user1.id,
-				referralCode: `${user1.username}-0001`,
-				points: 10, // Highest points
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user1.id,
+			referralCode: `${user1.username}-0001`,
+			points: 10, // Highest points
 		})
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user2.id,
-				referralCode: `${user2.username}-0002`,
-				points: 5,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user2.id,
+			referralCode: `${user2.username}-0002`,
+			points: 5,
 		})
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user3.id,
-				referralCode: `${user3.username}-0003`,
-				points: 1, // Lowest points
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user3.id,
+			referralCode: `${user3.username}-0003`,
+			points: 1, // Lowest points
 		})
 
 		// Calculate ranks
@@ -109,25 +114,21 @@ test.describe('Waitlist Referral System', () => {
 		const user2 = await insertNewUser()
 
 		// Create entries with same points but different timestamps
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user1.id,
-				referralCode: `${user1.username}-1111`,
-				points: 5,
-				createdAt: new Date('2025-01-01T00:00:00Z'),
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user1.id,
+			referralCode: `${user1.username}-1111`,
+			points: 5,
+			createdAt: new Date('2025-01-01T00:00:00Z'),
 		})
 
 		// Wait a moment to ensure different timestamps
 		await new Promise((resolve) => setTimeout(resolve, 10))
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user2.id,
-				referralCode: `${user2.username}-2222`,
-				points: 5,
-				createdAt: new Date('2025-01-02T00:00:00Z'),
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user2.id,
+			referralCode: `${user2.username}-2222`,
+			points: 5,
+			createdAt: new Date('2025-01-02T00:00:00Z'),
 		})
 
 		const { calculateUserRank } = await import('#app/utils/waitlist.server.ts')
@@ -143,13 +144,11 @@ test.describe('Waitlist Referral System', () => {
 		const user = await insertNewUser()
 
 		// Create waitlist entry
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-3333`,
-				points: 1,
-				hasJoinedDiscord: false,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-3333`,
+			points: 1,
+			hasJoinedDiscord: false,
 		})
 
 		// Award Discord points
@@ -157,9 +156,7 @@ test.describe('Waitlist Referral System', () => {
 		await awardDiscordPoints(user.id)
 
 		// Verify points updated in database (1 initial + 2 Discord = 3)
-		const updatedEntry = await prisma.waitlistEntry.findUnique({
-			where: { userId: user.id },
-		})
+		const updatedEntry = await getWaitlistEntryByUserId(user.id)
 		expect(updatedEntry?.points).toBe(3)
 		expect(updatedEntry?.hasJoinedDiscord).toBe(true)
 
@@ -172,12 +169,14 @@ test.describe('Waitlist Referral System', () => {
 	test('prevents self-referral', async ({ insertNewUser }) => {
 		const user = await insertNewUser()
 
-		const waitlistEntry = await prisma.waitlistEntry.create({
-			data: {
+		const [waitlistEntry] = await db
+			.insert(WaitlistEntry)
+			.values({
 				userId: user.id,
 				referralCode: `${user.username}-4444`,
-			},
-		})
+			})
+			.returning()
+		if (!waitlistEntry) throw new Error('Failed to create waitlist entry')
 
 		const { linkReferral } = await import('#app/utils/waitlist.server.ts')
 
@@ -188,9 +187,7 @@ test.describe('Waitlist Referral System', () => {
 		expect(result.message).toContain('Cannot refer yourself')
 
 		// Points should remain unchanged
-		const updatedEntry = await prisma.waitlistEntry.findUnique({
-			where: { userId: user.id },
-		})
+		const updatedEntry = await getWaitlistEntryByUserId(user.id)
 		expect(updatedEntry?.points).toBe(1)
 	})
 
@@ -198,18 +195,18 @@ test.describe('Waitlist Referral System', () => {
 		const referrer = await insertNewUser()
 		const referee = await insertNewUser()
 
-		const referrerEntry = await prisma.waitlistEntry.create({
-			data: {
+		const [referrerEntry] = await db
+			.insert(WaitlistEntry)
+			.values({
 				userId: referrer.id,
 				referralCode: `${referrer.username}-5555`,
-			},
-		})
+			})
+			.returning()
+		if (!referrerEntry) throw new Error('Failed to create referrer entry')
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: referee.id,
-				referralCode: `${referee.username}-6666`,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: referee.id,
+			referralCode: `${referee.username}-6666`,
 		})
 
 		const { linkReferral } = await import('#app/utils/waitlist.server.ts')
@@ -251,19 +248,15 @@ test.describe('Waitlist Referral System', () => {
 		const referrer = await insertNewUser()
 		const referee = await insertNewUser()
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: referrer.id,
-				referralCode: `${referrer.username}-9991`,
-				points: 1,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: referrer.id,
+			referralCode: `${referrer.username}-9991`,
+			points: 1,
 		})
 
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: referee.id,
-				referralCode: `${referee.username}-9992`,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: referee.id,
+			referralCode: `${referee.username}-9992`,
 		})
 
 		const { linkReferral } = await import('#app/utils/waitlist.server.ts')
@@ -273,12 +266,8 @@ test.describe('Waitlist Referral System', () => {
 		expect(result.success).toBe(true)
 
 		// Verify both the link and points were updated
-		const referrerEntry = await prisma.waitlistEntry.findUnique({
-			where: { userId: referrer.id },
-		})
-		const refereeEntry = await prisma.waitlistEntry.findUnique({
-			where: { userId: referee.id },
-		})
+		const referrerEntry = await getWaitlistEntryByUserId(referrer.id)
+		const refereeEntry = await getWaitlistEntryByUserId(referee.id)
 
 		expect(referrerEntry?.points).toBe(6) // 1 + 5
 		expect(refereeEntry?.referredById).toBe(referrerEntry?.id)
@@ -308,12 +297,10 @@ test.describe('Waitlist Referral System', () => {
 		const user = await insertNewUser()
 
 		// Create waitlist entry without early access
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-7777`,
-				hasEarlyAccess: false,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-7777`,
+			hasEarlyAccess: false,
 		})
 
 		const { __setMockLaunchStatus } = await import('#app/utils/env.server.ts')
@@ -331,12 +318,10 @@ test.describe('Waitlist Referral System', () => {
 		const user = await insertNewUser()
 
 		// Create waitlist entry with early access
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-8888`,
-				hasEarlyAccess: true,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-8888`,
+			hasEarlyAccess: true,
 		})
 
 		const { __setMockLaunchStatus } = await import('#app/utils/env.server.ts')
@@ -354,12 +339,10 @@ test.describe('Waitlist Referral System', () => {
 		const user = await insertNewUser()
 
 		// Create waitlist entry without early access
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-9999`,
-				hasEarlyAccess: false,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-9999`,
+			hasEarlyAccess: false,
 		})
 
 		// Temporarily change LAUNCH_STATUS
@@ -382,21 +365,17 @@ test.describe('Waitlist Referral System', () => {
 		const admin = await insertNewUser()
 
 		// Create waitlist entry without early access
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-1001`,
-				hasEarlyAccess: false,
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-1001`,
+			hasEarlyAccess: false,
 		})
 
 		const { grantEarlyAccess } = await import('#app/utils/waitlist.server.ts')
 		await grantEarlyAccess(user.id, admin.id)
 
 		// Verify access was granted
-		const entry = await prisma.waitlistEntry.findUnique({
-			where: { userId: user.id },
-		})
+		const entry = await getWaitlistEntryByUserId(user.id)
 
 		expect(entry?.hasEarlyAccess).toBe(true)
 		expect(entry?.grantedAccessBy).toBe(admin.id)
@@ -409,23 +388,19 @@ test.describe('Waitlist Referral System', () => {
 		const user = await insertNewUser()
 
 		// Create waitlist entry with early access
-		await prisma.waitlistEntry.create({
-			data: {
-				userId: user.id,
-				referralCode: `${user.username}-1002`,
-				hasEarlyAccess: true,
-				grantedAccessAt: new Date(),
-				grantedAccessBy: user.id, // satisfying foreign key constraints
-			},
+		await db.insert(WaitlistEntry).values({
+			userId: user.id,
+			referralCode: `${user.username}-1002`,
+			hasEarlyAccess: true,
+			grantedAccessAt: new Date(),
+			grantedAccessBy: user.id, // satisfying foreign key constraints
 		})
 
 		const { revokeEarlyAccess } = await import('#app/utils/waitlist.server.ts')
 		await revokeEarlyAccess(user.id)
 
 		// Verify access was revoked
-		const entry = await prisma.waitlistEntry.findUnique({
-			where: { userId: user.id },
-		})
+		const entry = await getWaitlistEntryByUserId(user.id)
 
 		expect(entry?.hasEarlyAccess).toBe(false)
 		expect(entry?.grantedAccessBy).toBeNull()
@@ -453,15 +428,3 @@ test.describe('Waitlist Referral System', () => {
 		}
 	})
 })
-
-// Helper function for tests that need insertNewUser (currently unused but kept for future tests)
-// async function insertNewUser() {
-// 	const userData = createUser()
-// 	return await prisma.user.create({
-// 		data: {
-// 			...userData,
-// 			roles: { connect: { name: 'user' } },
-// 		},
-// 		select: { id: true, email: true, username: true, name: true },
-// 	})
-// }

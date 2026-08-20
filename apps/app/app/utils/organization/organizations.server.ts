@@ -1,7 +1,22 @@
-import { type User } from '@prisma/client'
 import { auditService, AuditAction } from '@repo/audit'
 import { getUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	Organization,
+	OrganizationImage,
+	OrganizationRole,
+	OrganizationRole as OrgRoleTable,
+	Permission,
+	_OrganizationPermissionToRole,
+	UserOrganization,
+	WebsitePage,
+	WebsitePageSection,
+} from '@repo/database'
+import { type User } from '@repo/database/types'
 import { data } from 'react-router'
 import { getDefaultConfig } from '#app/utils/website/block-types.ts'
 import {
@@ -24,225 +39,195 @@ export type UserOrganizationWithRole = {
 		id: string
 		name: string
 		level: number
-		permissions?: {
-			action: string
-			entity: string
-			access: string
-		}[]
+		permissions?: Array<{ action: string; entity: string; access: string }>
 	}
 	isDefault: boolean
-	// Keep for backward compatibility during transition
 	role?: string
+}
+
+async function getOrganizationSummary(organizationId: string) {
+	const [row] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+			imageId: OrganizationImage.id,
+			altText: OrganizationImage.altText,
+			objectKey: OrganizationImage.objectKey,
+		})
+		.from(Organization)
+		.leftJoin(
+			OrganizationImage,
+			eq(OrganizationImage.organizationId, Organization.id),
+		)
+		.where(eq(Organization.id, organizationId))
+		.limit(1)
+	if (!row) return null
+	return {
+		id: row.id,
+		name: row.name,
+		slug: row.slug,
+		image: row.imageId
+			? { id: row.imageId, altText: row.altText, objectKey: row.objectKey! }
+			: null,
+	}
 }
 
 export async function getUserOrganizations(
 	userId: User['id'],
-	includePermissions: boolean = false,
+	includePermissions = false,
 ) {
-	const userOrganizations = await prisma.userOrganization.findMany({
-		where: { userId, active: true },
-		select: {
+	const memberships = await db
+		.select({
+			organizationId: UserOrganization.organizationId,
+			isDefault: UserOrganization.isDefault,
+			roleId: OrgRoleTable.id,
+			roleName: OrgRoleTable.name,
+			roleLevel: OrgRoleTable.level,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			OrgRoleTable,
+			eq(UserOrganization.organizationRoleId, OrgRoleTable.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+	const result: UserOrganizationWithRole[] = []
+	for (const membership of memberships) {
+		const organization = await getOrganizationSummary(membership.organizationId)
+		if (!organization) continue
+		const permissions = includePermissions
+			? await db
+					.select({
+						action: Permission.action,
+						entity: Permission.entity,
+						access: Permission.access,
+					})
+					.from(_OrganizationPermissionToRole)
+					.innerJoin(
+						Permission,
+						eq(_OrganizationPermissionToRole.B, Permission.id),
+					)
+					.where(
+						and(
+							eq(_OrganizationPermissionToRole.A, membership.roleId),
+							eq(Permission.context, 'organization'),
+						),
+					)
+			: undefined
+		result.push({
+			organization,
 			organizationRole: {
-				select: {
-					id: true,
-					name: true,
-					level: true,
-					permissions: includePermissions
-						? {
-								where: { context: 'organization' },
-								select: {
-									action: true,
-									entity: true,
-									access: true,
-								},
-							}
-						: false,
-				},
+				id: membership.roleId,
+				name: membership.roleName,
+				level: membership.roleLevel,
+				...(permissions ? { permissions } : {}),
 			},
-			isDefault: true,
-			organization: {
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					image: {
-						select: {
-							id: true,
-							altText: true,
-							objectKey: true,
-						},
-					},
-				},
-			},
-		},
-	})
-
-	return userOrganizations as UserOrganizationWithRole[]
+			isDefault: membership.isDefault,
+		})
+	}
+	return result
 }
 
-/**
- * Shared select structure for user organization queries
- */
-const userOrganizationSelect = {
-	organization: {
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			image: {
-				select: {
-					id: true,
-					altText: true,
-					objectKey: true,
-				},
-			},
-			_count: {
-				select: {
-					users: {
-						where: { active: true },
-					},
-				},
-			},
-		},
-	},
-	organizationRole: {
-		select: {
-			id: true,
-			name: true,
-			level: true,
-		},
-	},
-	isDefault: true,
-} as const
-
 export async function getUserDefaultOrganization(userId: User['id']) {
-	// Single query: order by isDefault (desc) so default comes first, then by createdAt
-	const org = await prisma.userOrganization.findFirst({
-		where: { userId, active: true },
-		select: userOrganizationSelect,
-		orderBy: [
-			{ isDefault: 'desc' }, // Default org first
-			{ createdAt: 'asc' }, // Then by creation date
-		],
-	})
-
-	if (!org) return null
-
+	const [membership] = await db
+		.select({
+			organizationId: UserOrganization.organizationId,
+			isDefault: UserOrganization.isDefault,
+			roleId: OrgRoleTable.id,
+			roleName: OrgRoleTable.name,
+			roleLevel: OrgRoleTable.level,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			OrgRoleTable,
+			eq(UserOrganization.organizationRoleId, OrgRoleTable.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.orderBy(desc(UserOrganization.isDefault), UserOrganization.createdAt)
+		.limit(1)
+	if (!membership) return null
+	const organization = await getOrganizationSummary(membership.organizationId)
+	if (!organization) return null
+	const [countRow] = await db
+		.select({ value: count() })
+		.from(UserOrganization)
+		.where(eq(UserOrganization.organizationId, membership.organizationId))
+	if (!countRow)
+		return {
+			organization,
+			organizationRole: {
+				id: membership.roleId,
+				name: membership.roleName,
+				level: membership.roleLevel,
+			},
+			isDefault: membership.isDefault,
+		}
 	return {
-		...org,
-		organization: {
-			...org.organization,
-			userCount: org.organization._count.users,
+		organization: { ...organization, userCount: countRow.value },
+		organizationRole: {
+			id: membership.roleId,
+			name: membership.roleName,
+			level: membership.roleLevel,
 		},
-	} as UserOrganizationWithRole
+		isDefault: membership.isDefault,
+	} satisfies UserOrganizationWithRole
 }
 
 export async function setUserDefaultOrganization(
-	userId: User['id'],
+	userId: string,
 	organizationId: string,
 ) {
-	// Check if already default to avoid unnecessary updates
-	const currentDefault = await prisma.userOrganization.findFirst({
-		where: { userId, isDefault: true, active: true },
-		select: { organizationId: true },
+	await db.transaction(async (tx) => {
+		await tx
+			.update(UserOrganization)
+			.set({ isDefault: false })
+			.where(eq(UserOrganization.userId, userId))
+		await tx
+			.update(UserOrganization)
+			.set({ isDefault: true })
+			.where(
+				and(
+					eq(UserOrganization.userId, userId),
+					eq(UserOrganization.organizationId, organizationId),
+				),
+			)
 	})
-
-	// Skip update if already the default
-	if (currentDefault?.organizationId === organizationId) {
-		return getUserDefaultOrganization(userId)
-	}
-
-	// Use a transaction to ensure atomic update
-	await prisma.$transaction([
-		// Reset current default (if any)
-		prisma.userOrganization.updateMany({
-			where: { userId, isDefault: true },
-			data: { isDefault: false },
-		}),
-		// Set new default
-		prisma.userOrganization.update({
-			where: {
-				userId_organizationId: { userId, organizationId },
-			},
-			data: { isDefault: true },
-		}),
-	])
-
 	return getUserDefaultOrganization(userId)
 }
 
-/**
- * Get user organizations with optional slug-based organization switching
- * Handles caching and automatic organization switching if orgSlug differs from current default
- *
- * @param userId - User ID
- * @param orgSlug - Optional organization slug to switch to
- * @returns User organizations with current organization set based on orgSlug or default
- */
 export async function getUserOrganizationsWithSlugHandling(
 	userId: string,
 	orgSlug: string | undefined,
 ) {
-	const { cache, cachified } = await import('@repo/cache')
-
-	// Promise to fetch user organizations
-	const userOrganizationsPromise = (async () => {
-		try {
-			const orgs = await getUserOrganizations(userId, true)
-			const defaultOrg = await getUserDefaultOrganization(userId)
-			return {
-				organizations: orgs,
-				currentOrganization: defaultOrg || orgs[0],
-			}
-		} catch (error) {
-			console.error('Failed to load user organizations', error)
-			return undefined
-		}
-	})()
-
-	// Load and cache user organizations
-	let userOrganizations = await cachified({
-		key: `user-organizations:${userId}`,
-		cache,
-		ttl: 1000 * 60 * 2, // 2 minutes
-		getFreshValue: () => userOrganizationsPromise,
-	})
-
-	// Handle organization switching if orgSlug differs from current
+	const organizations = await getUserOrganizations(userId, true)
+	const defaultOrg = await getUserDefaultOrganization(userId)
+	const currentOrganization = defaultOrg || organizations[0]
 	if (
-		userOrganizations?.currentOrganization &&
+		currentOrganization &&
 		orgSlug &&
-		userOrganizations.currentOrganization.organization.slug !== orgSlug
+		currentOrganization.organization.slug !== orgSlug
 	) {
-		const org = userOrganizations.organizations.find(
+		const selected = organizations.find(
 			(org) => org.organization.slug === orgSlug,
 		)
-
-		if (!org) {
-			throw new Response('Organization not found', { status: 404 })
+		if (!selected) throw new Response('Organization not found', { status: 404 })
+		await setUserDefaultOrganization(userId, selected.organization.id)
+		return {
+			organizations,
+			currentOrganization: await getUserDefaultOrganization(userId),
 		}
-
-		// Update default organization in database and get complete org data with userCount
-		await setUserDefaultOrganization(userId, org.organization.id)
-		const updatedCurrentOrg = await getUserDefaultOrganization(userId)
-
-		// Update in-memory state
-		userOrganizations = {
-			organizations: userOrganizations.organizations,
-			currentOrganization: updatedCurrentOrg || undefined,
-		}
-
-		// Update cache with new value
-		await cache.set(`user-organizations:${userId}`, {
-			metadata: {
-				createdTime: Date.now(),
-				ttl: 1000 * 60 * 2,
-			},
-			value: userOrganizations,
-		})
 	}
-
-	return userOrganizations
+	return { organizations, currentOrganization }
 }
 
 export async function createOrganization({
@@ -260,63 +245,48 @@ export async function createOrganization({
 	imageObjectKey?: string
 	request?: Request
 }) {
-	const organization = await prisma.$transaction(async (tx) => {
-		// Get the admin role first
-		const adminRole = await tx.organizationRole.findUnique({
-			where: { name: 'admin' },
-			select: { id: true },
-		})
-
-		if (!adminRole) {
-			throw new Error('Admin role not found')
-		}
-
-		const organization = await tx.organization.create({
-			data: {
+	const organization = await db.transaction(async (tx) => {
+		const [adminRole] = await tx
+			.select({ id: OrganizationRole.id })
+			.from(OrganizationRole)
+			.where(eq(OrganizationRole.name, 'admin'))
+			.limit(1)
+		if (!adminRole) throw new Error('Admin role not found')
+		const [created] = await tx
+			.insert(Organization)
+			.values({
 				name,
 				slug,
 				description,
 				siteHeaderConfig: JSON.stringify(getDefaultConfig('header')),
 				siteFooterConfig: JSON.stringify(getDefaultConfig('footer')),
-				users: {
-					create: {
-						userId,
-						organizationRoleId: adminRole.id,
-						isDefault: true,
-					},
-				},
-				...(imageObjectKey
-					? {
-							image: {
-								create: {
-									altText: `${name} logo`,
-									objectKey: imageObjectKey,
-								},
-							},
-						}
-					: {}),
-			},
-			select: {
-				id: true,
-				name: true,
-				slug: true,
-				image: {
-					select: {
-						id: true,
-						objectKey: true,
-					},
-				},
-			},
+			})
+			.returning({
+				id: Organization.id,
+				name: Organization.name,
+				slug: Organization.slug,
+			})
+		if (!created) throw new Error('Failed to create organization')
+		await tx.insert(UserOrganization).values({
+			userId,
+			organizationId: created.id,
+			organizationRoleId: adminRole.id,
+			isDefault: true,
 		})
-
-		const homePageSections = getDefaultHomePageSections({
+		if (imageObjectKey)
+			await tx.insert(OrganizationImage).values({
+				organizationId: created.id,
+				altText: `${name} logo`,
+				objectKey: imageObjectKey,
+			})
+		const sections = getDefaultHomePageSections({
 			organizationName: name,
 			description,
 		})
-
-		await tx.websitePage.create({
-			data: {
-				organizationId: organization.id,
+		const [page] = await tx
+			.insert(WebsitePage)
+			.values({
+				organizationId: created.id,
 				title: HOME_PAGE_TITLE,
 				slug: HOME_PAGE_SLUG,
 				status: 'published',
@@ -324,30 +294,20 @@ export async function createOrganization({
 				isHomePage: true,
 				position: 0,
 				createdById: userId,
-				sections: {
-					create: homePageSections.map((section) => ({
-						type: section.type,
-						position: section.position,
-						config: JSON.stringify(section.config),
-					})),
-				},
-			},
-		})
-
-		// Set all other organizations as non-default
-		await tx.userOrganization.updateMany({
-			where: {
-				userId,
-				organizationId: { not: organization.id },
-				isDefault: true,
-			},
-			data: { isDefault: false },
-		})
-
-		return organization
+			})
+			.returning({ id: WebsitePage.id })
+		if (page && sections.length) {
+			await tx.insert(WebsitePageSection).values(
+				sections.map((section) => ({
+					pageId: page.id,
+					type: section.type,
+					position: section.position,
+					config: JSON.stringify(section.config),
+				})),
+			)
+		}
+		return created
 	})
-
-	// Log the organization creation
 	await auditService.log({
 		action: AuditAction.ORG_CREATED,
 		userId,
@@ -363,118 +323,108 @@ export async function createOrganization({
 		resourceType: 'organization',
 		resourceId: organization.id,
 	})
-
-	return organization
+	return {
+		...organization,
+		image: imageObjectKey
+			? await getOrganizationSummary(organization.id).then(
+					(row) => row?.image ?? null,
+				)
+			: null,
+	}
 }
 
 export async function getOrganizationBySlug(slug: string) {
-	return prisma.organization.findUnique({
-		where: { slug, active: true },
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			description: true,
-			image: {
-				select: {
-					id: true,
-					altText: true,
-				},
-			},
-		},
-	})
+	const [organization] = await db
+		.select()
+		.from(Organization)
+		.where(and(eq(Organization.slug, slug), eq(Organization.active, true)))
+		.limit(1)
+	return organization
+		? {
+				id: organization.id,
+				name: organization.name,
+				slug: organization.slug,
+				description: organization.description,
+				image: null,
+			}
+		: null
 }
 
 export async function getOrganizationByDomain(domain: string) {
-	return prisma.organization.findFirst({
-		where: {
-			verifiedDomain: domain.toLowerCase(),
-		},
-		select: {
-			id: true,
-			name: true,
-			slug: true,
-			verifiedDomain: true,
-		},
-	})
+	const [organization] = await db
+		.select({
+			id: Organization.id,
+			name: Organization.name,
+			slug: Organization.slug,
+			verifiedDomain: Organization.verifiedDomain,
+		})
+		.from(Organization)
+		.where(eq(Organization.verifiedDomain, domain.toLowerCase()))
+		.limit(1)
+	return organization ?? null
 }
 
 export async function discoverOrganizationFromEmail(email: string) {
 	const domain = email.split('@')[1]
-	if (!domain) return null
-
-	return getOrganizationByDomain(domain)
+	return domain ? getOrganizationByDomain(domain) : null
 }
 
 export async function checkUserOrganizationAccess(
 	userId: string,
 	organizationId: string,
 ) {
-	const userOrg = await prisma.userOrganization.findUnique({
-		where: {
-			userId_organizationId: {
-				userId,
-				organizationId,
-			},
-			active: true,
-		},
-		include: {
-			organizationRole: true,
-		},
-	})
-
-	return userOrg
+	const [row] = await db
+		.select({ membership: UserOrganization, organizationRole: OrgRoleTable })
+		.from(UserOrganization)
+		.innerJoin(
+			OrgRoleTable,
+			eq(UserOrganization.organizationRoleId, OrgRoleTable.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.organizationId, organizationId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.limit(1)
+	return row
+		? { ...row.membership, organizationRole: row.organizationRole }
+		: null
 }
 
-// Role level constants for server-side use
 export const ORGANIZATION_ROLE_LEVELS = {
 	admin: 4,
 	member: 3,
 	viewer: 2,
 	guest: 1,
 } as const
-
 export type OrganizationRoleName = keyof typeof ORGANIZATION_ROLE_LEVELS
 
-/**
- * Check if user has minimum required role level in organization
- */
 export async function userHasOrganizationRole(
 	userId: string,
 	organizationId: string,
 	requiredRole: OrganizationRoleName,
-): Promise<boolean> {
+) {
 	const userOrg = await checkUserOrganizationAccess(userId, organizationId)
-	if (!userOrg) return false
-
-	const userRoleLevel = userOrg.organizationRole.level
-	const requiredRoleLevel = ORGANIZATION_ROLE_LEVELS[requiredRole]
-
-	return userRoleLevel >= requiredRoleLevel
+	return (
+		!!userOrg &&
+		userOrg.organizationRole.level >= ORGANIZATION_ROLE_LEVELS[requiredRole]
+	)
 }
 
-/**
- * Require user to have minimum organization role - throws 403 if not
- */
 export async function requireUserWithOrganizationRole(
 	request: Request,
 	organizationId: string,
 	requiredRole: OrganizationRoleName,
-): Promise<string> {
+) {
 	const userId = await getUserId(request)
-	if (!userId) {
+	if (!userId)
 		throw data(
 			{ error: 'Unauthorized', message: 'Authentication required' },
 			{ status: 401 },
 		)
-	}
-
-	const hasRole = await userHasOrganizationRole(
-		userId,
-		organizationId,
-		requiredRole,
-	)
-	if (!hasRole) {
+	if (!(await userHasOrganizationRole(userId, organizationId, requiredRole))) {
 		throw data(
 			{
 				error: 'Unauthorized',
@@ -484,84 +434,43 @@ export async function requireUserWithOrganizationRole(
 			{ status: 403 },
 		)
 	}
-
 	return userId
 }
 
-/**
- * Check if the user has access to the specified organization
- * Throws a 403 Response if user doesn't have access
- */
 export async function userHasOrgAccess(
 	request: Request,
 	organizationId: string,
-): Promise<boolean> {
-	// Get the current user ID from the session (handles impersonation correctly)
+) {
 	const userId = await getUserId(request)
-
-	if (!userId) {
-		throw new Response('Unauthorized', { status: 401 })
-	}
-
-	// Check if user is a member of this organization
-	// No need to fetch user details - userId is sufficient for membership check
-	const userOrg = await prisma.userOrganization.findFirst({
-		where: {
-			userId,
-			organizationId,
-			active: true,
-		},
-	})
-
-	if (!userOrg) {
+	if (!userId) throw new Response('Unauthorized', { status: 401 })
+	if (!(await checkUserOrganizationAccess(userId, organizationId)))
 		throw new Response('You do not have access to this organization', {
 			status: 403,
 		})
-	}
-
 	return true
 }
 
-/**
- * Get organization by slug and verify user has access to it.
- * Combines getOrganizationBySlug with user access verification.
- * Throws 404 if organization not found, 403 if user doesn't have access.
- *
- * @param orgSlug - The organization slug
- * @param userId - The user ID to check access for
- * @param select - Optional custom select fields (defaults to id, name, slug)
- * @returns The organization with specified fields
- */
-export async function getOrganizationWithAccess<
-	T extends Record<string, any> = { id: true; name: true; slug: true },
->(
+export async function getOrganizationWithAccess(
 	orgSlug: string,
 	userId: string,
-	select?: T,
-): Promise<{
-	[K in keyof T]: T[K] extends true
-		? K extends 'id' | 'name' | 'slug'
-			? string
-			: any
-		: any
-}> {
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: orgSlug,
-			active: true,
-			users: {
-				some: {
-					userId,
-					active: true,
-				},
-			},
-		},
-		select: select || ({ id: true, name: true, slug: true } as any),
-	})
-
-	if (!organization) {
-		throw new Response('Not Found', { status: 404 })
-	}
-
-	return organization as any
+	select: Record<string, true> = { id: true, name: true, slug: true },
+) {
+	const [organization] = await db
+		.select()
+		.from(Organization)
+		.innerJoin(
+			UserOrganization,
+			and(
+				eq(UserOrganization.organizationId, Organization.id),
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.where(and(eq(Organization.slug, orgSlug), eq(Organization.active, true)))
+		.limit(1)
+	if (!organization) throw new Response('Not Found', { status: 404 })
+	const row = organization.Organization
+	return Object.fromEntries(
+		Object.keys(select).map((key) => [key, row[key as keyof typeof row]]),
+	)
 }

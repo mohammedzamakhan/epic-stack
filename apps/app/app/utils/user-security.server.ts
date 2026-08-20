@@ -1,4 +1,15 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	eq,
+	gt,
+	Password,
+	Session,
+	User,
+	UserImage,
+	Verification,
+} from '@repo/database'
 
 /**
  * Shared user select structure for security-related queries
@@ -6,22 +17,11 @@ import { prisma } from '@repo/database'
  */
 export function getUserSecuritySelect() {
 	return {
-		id: true,
-		name: true,
-		username: true,
-		email: true,
-		image: {
-			select: { objectKey: true },
-		},
-		_count: {
-			select: {
-				sessions: {
-					where: {
-						expirationDate: { gt: new Date() },
-					},
-				},
-			},
-		},
+		id: User.id,
+		name: User.name,
+		username: User.username,
+		email: User.email,
+		objectKey: UserImage.objectKey,
 	} as const
 }
 
@@ -34,23 +34,39 @@ export async function getUserSecurityData(
 	userId: string,
 	twoFAVerificationType: string,
 ) {
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: getUserSecuritySelect(),
-	})
+	const [user] = await db
+		.select(getUserSecuritySelect())
+		.from(User)
+		.leftJoin(UserImage, eq(UserImage.userId, User.id))
+		.where(eq(User.id, userId))
+		.limit(1)
+	if (!user) throw new Error('User not found')
+	const [sessionCount] = await db
+		.select({ value: count() })
+		.from(Session)
+		.where(
+			and(eq(Session.userId, userId), gt(Session.expirationDate, new Date())),
+		)
 
-	const twoFactorVerification = await prisma.verification.findUnique({
-		select: { id: true },
-		where: { target_type: { type: twoFAVerificationType, target: userId } },
-	})
+	const [twoFactorVerification] = await db
+		.select({ id: Verification.id })
+		.from(Verification)
+		.where(
+			and(
+				eq(Verification.type, twoFAVerificationType),
+				eq(Verification.target, userId),
+			),
+		)
+		.limit(1)
 
-	const password = await prisma.password.findUnique({
-		select: { userId: true },
-		where: { userId },
-	})
+	const [password] = await db
+		.select({ userId: Password.userId })
+		.from(Password)
+		.where(eq(Password.userId, userId))
+		.limit(1)
 
 	return {
-		user,
+		user: { ...user, sessionCount: sessionCount?.value ?? 0 },
 		twoFactorVerification,
 		password,
 	}

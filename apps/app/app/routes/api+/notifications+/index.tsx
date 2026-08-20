@@ -1,5 +1,13 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	Organization,
+	Notification,
+} from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
@@ -17,29 +25,34 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	let organizationId: string | undefined
 	if (orgSlug) {
-		const org = await prisma.organization.findUnique({
-			where: { slug: orgSlug },
-			select: { id: true },
-		})
+		const [org] = await db
+			.select({ id: Organization.id })
+			.from(Organization)
+			.where(eq(Organization.slug, orgSlug))
+			.limit(1)
 		if (org) organizationId = org.id
 	}
 
-	const whereClause = {
-		userId,
-		...(organizationId ? { organizationId } : {}),
-	}
+	const whereClause = and(
+		eq(Notification.userId, userId),
+		organizationId
+			? eq(Notification.organizationId, organizationId)
+			: undefined,
+	)
+	const [notifications, unread] = await Promise.all([
+		db
+			.select()
+			.from(Notification)
+			.where(whereClause)
+			.orderBy(desc(Notification.createdAt))
+			.limit(take),
+		db
+			.select({ value: count() })
+			.from(Notification)
+			.where(and(whereClause, eq(Notification.isRead, false))),
+	])
 
-	const notifications = await prisma.notification.findMany({
-		where: whereClause,
-		orderBy: { createdAt: 'desc' },
-		take,
-	})
-
-	const unreadCount = await prisma.notification.count({
-		where: { ...whereClause, isRead: false },
-	})
-
-	return Response.json({ notifications, unreadCount })
+	return Response.json({ notifications, unreadCount: unread[0]?.value ?? 0 })
 }
 
 const actionSchema = z.discriminatedUnion('intent', [
@@ -71,40 +84,50 @@ export async function action({ request }: ActionFunctionArgs) {
 		case 'markAsRead': {
 			let organizationId: string | undefined
 			if (data.orgSlug) {
-				const org = await prisma.organization.findUnique({
-					where: { slug: data.orgSlug },
-					select: { id: true },
-				})
+				const [org] = await db
+					.select({ id: Organization.id })
+					.from(Organization)
+					.where(eq(Organization.slug, data.orgSlug))
+					.limit(1)
 				if (org) organizationId = org.id
 			}
-			await prisma.notification.updateMany({
-				where: {
-					id: data.notificationId,
-					userId,
-					...(organizationId ? { organizationId } : {}),
-				},
-				data: { isRead: true, isSeen: true },
-			})
+			await db
+				.update(Notification)
+				.set({ isRead: true, isSeen: true })
+				.where(
+					and(
+						eq(Notification.id, data.notificationId),
+						eq(Notification.userId, userId),
+						organizationId
+							? eq(Notification.organizationId, organizationId)
+							: undefined,
+					),
+				)
 			return Response.json({ success: true })
 		}
 		case 'markAllAsRead': {
 			let organizationId: string | undefined
 			if (data.orgSlug) {
-				const org = await prisma.organization.findUnique({
-					where: { slug: data.orgSlug },
-					select: { id: true },
-				})
+				const [org] = await db
+					.select({ id: Organization.id })
+					.from(Organization)
+					.where(eq(Organization.slug, data.orgSlug))
+					.limit(1)
 				if (org) organizationId = org.id
 			}
 
-			await prisma.notification.updateMany({
-				where: {
-					userId,
-					isRead: false,
-					...(organizationId ? { organizationId } : {}),
-				},
-				data: { isRead: true, isSeen: true },
-			})
+			await db
+				.update(Notification)
+				.set({ isRead: true, isSeen: true })
+				.where(
+					and(
+						eq(Notification.userId, userId),
+						eq(Notification.isRead, false),
+						organizationId
+							? eq(Notification.organizationId, organizationId)
+							: undefined,
+					),
+				)
 			return Response.json({ success: true })
 		}
 	}

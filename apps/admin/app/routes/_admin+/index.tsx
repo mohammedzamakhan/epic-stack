@@ -2,7 +2,17 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Note,
+	Organization,
+	OrganizationNote,
+	Session,
+	User,
+	count,
+	db,
+	eq,
+	gt,
+} from '@repo/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/card'
 import { Link } from 'react-router'
 import { type Route } from './+types/index.ts'
@@ -26,55 +36,66 @@ export async function loader({ request }: Route.LoaderArgs) {
 		subscriptionStats,
 	] = await Promise.all([
 		// Total users count
-		prisma.user.count(),
+		db
+			.select({ count: count() })
+			.from(User)
+			.then(([row]) => row?.count ?? 0),
 
 		// Total organizations count
-		prisma.organization.count(),
+		db
+			.select({ count: count() })
+			.from(Organization)
+			.then(([row]) => row?.count ?? 0),
 
 		// Active organizations count
-		prisma.organization.count({
-			where: { active: true },
-		}),
+		db
+			.select({ count: count() })
+			.from(Organization)
+			.where(eq(Organization.active, true))
+			.then(([row]) => row?.count ?? 0),
 
 		// Total notes count (personal + organization)
-		Promise.all([prisma.note.count(), prisma.organizationNote.count()]).then(
-			([personal, org]) => personal + org,
+		Promise.all([
+			db.select({ count: count() }).from(Note),
+			db.select({ count: count() }).from(OrganizationNote),
+		]).then(
+			([personal, org]) => (personal[0]?.count ?? 0) + (org[0]?.count ?? 0),
 		),
 
 		// Active sessions count
-		prisma.session.count({
-			where: {
-				expirationDate: {
-					gt: new Date(),
-				},
-			},
-		}),
+		db
+			.select({ count: count() })
+			.from(Session)
+			.where(gt(Session.expirationDate, new Date()))
+			.then(([row]) => row?.count ?? 0),
 
 		// Recent users (last 7 days)
-		prisma.user.count({
-			where: {
-				createdAt: {
-					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-				},
-			},
-		}),
+		db
+			.select({ count: count() })
+			.from(User)
+			.where(gt(User.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)))
+			.then(([row]) => row?.count ?? 0),
 
 		// Recent organizations (last 7 days)
-		prisma.organization.count({
-			where: {
-				createdAt: {
-					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-				},
-			},
-		}),
+		db
+			.select({ count: count() })
+			.from(Organization)
+			.where(
+				gt(
+					Organization.createdAt,
+					new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+				),
+			)
+			.then(([row]) => row?.count ?? 0),
 
 		// Subscription statistics
-		prisma.organization.groupBy({
-			by: ['subscriptionStatus'],
-			_count: {
-				subscriptionStatus: true,
-			},
-		}),
+		db
+			.select({
+				subscriptionStatus: Organization.subscriptionStatus,
+				_count: { subscriptionStatus: count(Organization.subscriptionStatus) },
+			})
+			.from(Organization)
+			.groupBy(Organization.subscriptionStatus),
 	])
 
 	return {

@@ -4,7 +4,7 @@ import {
 	toastSessionStorage,
 	toastKey,
 } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { db, and, eq, Session } from '@repo/database'
 import * as setCookieParser from 'set-cookie-parser'
 import { expect } from 'vitest'
 import { convertSetCookieToCookie } from '#tests/utils.ts'
@@ -103,13 +103,17 @@ expect.extend({
 			}
 		}
 
-		const session = await prisma.session.findUnique({
-			select: { id: true },
-			where: { userId, id: sessionValue },
-		})
+		const [session] = await db
+			.select({ id: Session.id })
+			.from(Session)
+			.where(and(eq(Session.userId, userId), eq(Session.id, sessionValue)))
+			.limit(1)
 
 		if (!session) {
-			const allSessions = await prisma.session.findMany({ where: { userId } })
+			const allSessions = await db
+				.select()
+				.from(Session)
+				.where(eq(Session.userId, userId))
 			console.log('DEBUG toHaveSessionForUser:', {
 				userId,
 				sessionValue,

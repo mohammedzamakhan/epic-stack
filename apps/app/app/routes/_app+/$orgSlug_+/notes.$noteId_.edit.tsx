@@ -1,7 +1,7 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, Organization, OrganizationNote } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { lazy, Suspense } from 'react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
@@ -25,25 +25,28 @@ export async function loader({
 	const orgSlug = params.orgSlug
 
 	// Get the organization ID
-	const organization = await prisma.organization.findFirst({
-		where: { slug: orgSlug },
-		select: { id: true },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
 
 	invariantResponse(organization, 'Organization not found', { status: 404 })
 
 	// Check if the user has access to this organization
 	await userHasOrgAccess(request, organization.id)
 
-	const note = await prisma.organizationNote.findFirst({
-		select: {
+	const noteRow = await db.query.OrganizationNote.findFirst({
+		columns: {
 			id: true,
 			title: true,
 			content: true,
 			priority: true,
 			tags: true,
-			uploads: {
-				select: {
+		},
+		with: {
+			organizationNoteUploads: {
+				columns: {
 					id: true,
 					type: true,
 					altText: true,
@@ -53,11 +56,12 @@ export async function loader({
 				},
 			},
 		},
-		where: {
-			id: params.noteId,
-			organizationId: organization.id,
-		},
+		where: (note, { and, eq }) =>
+			and(eq(note.id, params.noteId), eq(note.organizationId, organization.id)),
 	})
+	const note = noteRow
+		? { ...noteRow, uploads: noteRow.organizationNoteUploads }
+		: null
 	invariantResponse(note, 'Not found', { status: 404 })
 	return { note, organizationId: organization.id }
 }

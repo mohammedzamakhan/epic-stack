@@ -10,7 +10,7 @@ import {
 	IMPERSONATION_COOKIE_MAX_AGE,
 } from '@repo/auth'
 import { createToastHeaders } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { ImpersonationSession, User, db, eq } from '@repo/database'
 import { data, redirect } from 'react-router'
 
 export async function action({
@@ -25,17 +25,18 @@ export async function action({
 	invariantResponse(userId, 'User ID is required')
 
 	// Get the target user to impersonate
-	const targetUser = await prisma.user.findUnique({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			email: true,
-			isBanned: true,
-			banExpiresAt: true,
-		},
-	})
+	const [targetUser] = await db
+		.select({
+			id: User.id,
+			name: User.name,
+			username: User.username,
+			email: User.email,
+			isBanned: User.isBanned,
+			banExpiresAt: User.banExpiresAt,
+		})
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 
 	invariantResponse(targetUser, 'User not found', { status: 404 })
 
@@ -61,14 +62,11 @@ export async function action({
 	}
 
 	// Get admin user info for audit logging
-	const adminUser = await prisma.user.findUnique({
-		where: { id: adminUserId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-		},
-	})
+	const [adminUser] = await db
+		.select({ id: User.id, name: User.name, username: User.username })
+		.from(User)
+		.where(eq(User.id, adminUserId))
+		.limit(1)
 
 	invariantResponse(adminUser, 'Admin user not found')
 
@@ -77,20 +75,25 @@ export async function action({
 	const ipHash = hashIp(clientIp)
 
 	// Delete any existing impersonation sessions for this admin
-	await prisma.impersonationSession.deleteMany({
-		where: { adminUserId },
-	})
+	await db
+		.delete(ImpersonationSession)
+		.where(eq(ImpersonationSession.adminUserId, adminUserId))
 
 	// Create a new impersonation session with 15-minute TTL and IP binding
-	const impersonationSession = await prisma.impersonationSession.create({
-		data: {
+	const [impersonationSession] = await db
+		.insert(ImpersonationSession)
+		.values({
 			adminUserId,
 			targetUserId: targetUser.id,
 			expiresAt: getImpersonationExpirationDate(),
 			ipHash,
-		},
-		select: { id: true, expiresAt: true },
-	})
+		})
+		.returning({
+			id: ImpersonationSession.id,
+			expiresAt: ImpersonationSession.expiresAt,
+		})
+	if (!impersonationSession)
+		throw new Error('Could not create impersonation session')
 
 	// Log the impersonation start using the audit service
 	await auditService.logAdminOperation(

@@ -5,7 +5,15 @@ import {
 	getSessionExpirationDate,
 	sessionKey,
 } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	Organization,
+	OrganizationRole,
+	User,
+	UserOrganization,
+	Session,
+	db,
+	eq,
+} from '@repo/database'
 import { RouterContextProvider } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { serverBuildContext } from '#app/server-context.ts'
@@ -48,13 +56,14 @@ let testSSOConfig: any
 
 beforeEach(async () => {
 	// Create test organization with unique slug
-	testOrganization = await prisma.organization.create({
-		data: {
+	;[testOrganization] = await db
+		.insert(Organization)
+		.values({
 			name: 'Test Organization',
 			slug: TEST_ORG_SLUG,
 			description: 'Test organization for SSO',
-		},
-	})
+		})
+		.returning()
 
 	// Create test SSO configuration
 	testSSOConfig = {
@@ -80,31 +89,41 @@ beforeEach(async () => {
 afterEach(async () => {
 	// Clean up test data by specific ID to avoid affecting parallel tests
 	if (testOrganization?.id) {
-		await prisma.organization.deleteMany({
-			where: { id: testOrganization.id },
-		})
+		await db
+			.delete(Organization)
+			.where(eq(Organization.id, testOrganization.id))
 	}
 	vi.clearAllMocks()
 })
 
 test('successful SSO authentication creates session for existing user', async () => {
 	const userData = createUser()
-	const existingUser = await prisma.user.create({
-		data: userData,
-	})
+	const [existingUser] = await db.insert(User).values(userData).returning()
+	if (!existingUser) throw new Error('Failed to insert user')
 
 	// Add user to organization
-	const memberRole = await prisma.organizationRole.findFirst({
-		where: { name: 'member' },
-	})
+	let [memberRole] = await db
+		.select()
+		.from(OrganizationRole)
+		.where(eq(OrganizationRole.name, 'member'))
+		.limit(1)
+	if (!memberRole) {
+		;[memberRole] = await db
+			.insert(OrganizationRole)
+			.values({
+				id: 'org_role_member',
+				name: 'member',
+				description: 'Member role',
+				level: 3,
+			})
+			.returning()
+	}
 	invariant(memberRole, 'Member role should exist')
 
-	await prisma.userOrganization.create({
-		data: {
-			userId: existingUser.id,
-			organizationId: testOrganization.id,
-			organizationRoleId: memberRole.id,
-		},
+	await db.insert(UserOrganization).values({
+		userId: existingUser.id,
+		organizationId: testOrganization.id,
+		organizationRoleId: memberRole.id,
 	})
 
 	const mockProviderUser = {
@@ -160,14 +179,16 @@ test('successful SSO authentication with auto-provisioning creates new user', as
 		name: faker.person.fullName(),
 	}
 
-	const createdUser = await prisma.user.create({
-		data: {
+	const [createdUser] = await db
+		.insert(User)
+		.values({
 			...createUser(),
 			email: newUserData.email,
 			username: newUserData.username,
 			name: newUserData.name,
-		},
-	})
+		})
+		.returning()
+	if (!createdUser) throw new Error('Failed to insert user')
 
 	const mockProviderUser = {
 		id: faker.string.uuid(),
@@ -385,13 +406,15 @@ test('handles user already logged in', async () => {
 
 test('handles banned user login attempt', async () => {
 	const userData = createUser()
-	const bannedUser = await prisma.user.create({
-		data: {
+	const [bannedUser] = await db
+		.insert(User)
+		.values({
 			...userData,
 			isBanned: true,
 			banReason: 'Test ban',
-		},
-	})
+		})
+		.returning()
+	if (!bannedUser) throw new Error('Failed to insert user')
 
 	const mockProviderUser = {
 		id: faker.string.uuid(),
@@ -441,20 +464,17 @@ async function setupRequest({
 }
 
 async function setupUser(userData = createUser()) {
-	const session = await prisma.session.create({
-		data: {
+	const [user] = await db.insert(User).values(userData).returning()
+	if (!user) throw new Error('Failed to insert user')
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(),
-			user: {
-				create: {
-					...userData,
-				},
-			},
-		},
-		select: {
-			id: true,
-			userId: true,
-		},
-	})
+			userId: user.id,
+		})
+		.returning({ id: Session.id, userId: Session.userId })
+
+	if (!session) throw new Error('Failed to insert session')
 
 	return session
 }

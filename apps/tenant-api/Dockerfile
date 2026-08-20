@@ -26,14 +26,11 @@ WORKDIR /myapp
 COPY --from=deps /myapp/node_modules /myapp/node_modules
 ADD . .
 
-RUN cd packages/database && npx prisma generate
-
 FROM base
 
 ENV PORT="8080"
 ENV TENANT_DB_DIR="/data/tenants"
 ENV NODE_ENV="production"
-ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK="1"
 
 WORKDIR /myapp
 

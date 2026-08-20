@@ -11,11 +11,11 @@ app, marketing site, admin dashboard, tenant sites, regional tenant-api, mobile
 app, CMS, background jobs, email templates, notifications) and shared packages
 (UI, auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
-**Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Prisma, Tailwind
-CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites). App/Admin
-deploy on Fly.io with LiteFS. CMS deploys on Cloudflare Workers with D1
-(SQLite) + R2. Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn) with
-per-org SQLite on a block volume.
+**Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Drizzle,
+Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites).
+App/Admin deploy on Fly.io with LiteFS. CMS deploys on Cloudflare Workers with
+D1 (SQLite) + R2. Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn)
+with per-org SQLite on a block volume.
 
 **Monorepo Structure**:
 
@@ -25,10 +25,11 @@ per-org SQLite on a block volume.
 
 **Tenant Sites vs App auth (read this before touching login, cookies, or PII):**
 
-- **App / Admin** authenticate operators. Sessions live in US Prisma.
+- **App / Admin** authenticate operators. Sessions live in US control-plane
+  SQLite.
 - **Sites** (`apps/sites`) authenticate **customers** with phone OTP. Customer
   PII lives in **regional** per-org SQLite (`packages/tenant-db`) behind
-  `apps/tenant-api`, not in Prisma.
+  `apps/tenant-api`, not in the US control-plane database.
 - The **browser** calls tenant-api directly. Sites SSR (often US) must not proxy
   phone/name/email — a Sites BFF would transit KSA PII through the US. Tokens
   stay in `localStorage`, not Sites cookies.
@@ -71,8 +72,8 @@ npm run dev:mobile          # Expo mobile app
 # `npm run dev` already starts both tenant-api nodes (3007 + 3009).
 
 # Database management
-npm run db:studio      # Prisma Studio UI (port 5555)
-npm run db:migrate     # Run Prisma migrations
+npm run db:studio      # Drizzle Studio UI (port 5555)
+npm run db:migrate:deploy # Apply control-plane SQL migrations
 npm run db:seed        # Seed database with test data
 npm run db:reset       # Reset database (destructive)
 ```
@@ -181,7 +182,7 @@ Epic Startup enforces specific import ordering:
 import { useState } from 'react' // 1. External dependencies
 import { useNavigate } from 'react-router' // 2. External dependencies
 import { Button } from '@repo/ui/button' // 3. Monorepo packages (@repo/*)
-import { prisma } from '@repo/database' // 4. Monorepo packages
+import { db } from '@repo/database' // 4. Monorepo packages
 import { requireUserId } from '@repo/auth' // 5. App imports (#app/*)
 import { EmptyState } from '#app/components/empty-state.tsx' // 6. App imports
 import { type Route } from './+types/route-name' // 7. Relative imports
@@ -264,12 +265,12 @@ Prefer inline type specifiers over top-level type-only imports:
 ```typescript
 // ✅ Correct - inline type specifier
 import { type LoaderFunctionArgs } from 'react-router'
-import { type User, prisma } from '@repo/database'
+import { type User, db } from '@repo/database'
 
 // ❌ Wrong - top-level type-only import
 import type { LoaderFunctionArgs } from 'react-router'
 import type { User } from '@repo/database'
-import { prisma } from '@repo/database'
+import { db } from '@repo/database'
 ```
 
 **5. Duplicate Imports (`import/no-duplicates`)**:
@@ -372,8 +373,6 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `ENCRYPTION_KEY` - 32 characters for general encryption
 - `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations
-- `USE_S3_STORAGE` - App/Admin only: set to `true` to force Tigris/S3 in dev
-  (default: mocked locally). Not read by the CMS.
 - `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
 - `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
   HTML for browser-direct auth (not a server proxy)
@@ -392,8 +391,6 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `apps/cms/wrangler.jsonc` declares an `R2_BUCKET` binding and
   `apps/cms/.env.schema` documents R2 credentials, but that binding is not yet
   wired into Payload, so production does not actually use R2 today
-- No `USE_S3_STORAGE` toggle for CMS — that variable only applies to the
-  unrelated App/Admin Tigris storage
 - See `docs/cms-storage.md` for details
 
 ## PR & Commit Guidelines
@@ -426,17 +423,20 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 
 ## Database Operations
 
-**Prisma Workflow**:
+**Control-plane Drizzle workflow** (`@repo/database`):
 
 ```bash
-# After schema changes in packages/database/schema.prisma
+# After schema changes in packages/database/src/schema.ts
 cd packages/database
-npx prisma migrate dev --name your_migration_name
-npx prisma generate  # Regenerate Prisma Client
+npx drizzle-kit generate --name your_migration_name
+npx tsx src/migrate.ts
 
 # View data
-npm run db:studio    # Opens Prisma Studio on localhost:5555
+npm run db:studio    # Opens Drizzle Studio on localhost:5555
 ```
+
+Call sites use `import { db } from '@repo/database'` with Drizzle tables and
+queries. Native SQL/query helpers also live on `db` from the same package.
 
 **LiteFS Notes**:
 
@@ -448,13 +448,13 @@ npm run db:studio    # Opens Prisma Studio on localhost:5555
   OCI VM + block volume per `dataRegion` (`us` | `ksa`). Never put KSA SQLite on
   the US App LiteFS cluster.
 
-**Tenant SQLite (Drizzle, not Prisma):**
+**Tenant SQLite (regional customer data plane):**
 
 - Schema: `packages/tenant-db/src/schema.ts`
 - Migrations: `packages/tenant-db/drizzle/`
 - Production path: `TENANT_DB_DIR` on an OCI block volume (`/data/tenants`)
 - Provisioned lazily on site publish; destroyed on region switch
-- Prisma `Organization.dataRegion` and `hasProvisionedDb` are flags only
+- `Organization.dataRegion` and `hasProvisionedDb` are flags only
 
 ## Deployment
 
@@ -505,7 +505,8 @@ npm install --prefix packages/<name>                   # Install deps in package
 
 - `@repo/ui` - Shared components (Radix UI + Tailwind)
 - `@repo/auth` - Operator authentication & RBAC (App/Admin, not Sites customers)
-- `@repo/database` - Prisma schema & client (control plane; no customer PII)
+- `@repo/database` - Control-plane SQLite schema & Drizzle client (no customer
+  PII)
 - `@repo/tenant-db` - Per-org customer SQLite (Drizzle)
 - `@repo/sms` - OTP SMS (`packages/sms`; Twilio blocked for KSA production)
 - `@repo/config` - Shared configs (ESLint, TypeScript, Prettier)

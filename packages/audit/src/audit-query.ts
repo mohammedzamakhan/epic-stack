@@ -1,4 +1,18 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	AuditLog,
+	count,
+	db,
+	desc,
+	eq,
+	gte,
+	inArray,
+	isNotNull,
+	like,
+	lte,
+	or,
+	User,
+} from '@repo/database'
 import { type AuditAction } from './actions.ts'
 
 export interface AuditQueryFilter {
@@ -21,81 +35,83 @@ export interface AuditQueryFilter {
 
 export class AuditLogQuery {
 	async query(filter: AuditQueryFilter) {
-		const where: any = {}
-
-		if (filter.organizationId !== undefined) {
-			where.organizationId = filter.organizationId
-		}
-
-		if (filter.userId) {
-			where.userId = filter.userId
-		}
-
-		if (filter.targetUserId) {
-			where.targetUserId = filter.targetUserId
-		}
-
-		if (filter.action) {
-			if (Array.isArray(filter.action)) {
-				where.action = { in: filter.action }
-			} else {
-				where.action = filter.action
-			}
-		}
-
-		if (filter.severity) {
-			where.severity = filter.severity
-		}
-
-		if (filter.resourceType) {
-			where.resourceType = filter.resourceType
-		}
-
-		if (filter.resourceId) {
-			where.resourceId = filter.resourceId
-		}
-
-		if (filter.startDate || filter.endDate) {
-			where.createdAt = {}
-			if (filter.startDate) where.createdAt.gte = filter.startDate
-			if (filter.endDate) where.createdAt.lte = filter.endDate
-		}
-
-		if (filter.search) {
-			where.OR = [
-				{ details: { contains: filter.search } },
-				{ action: { contains: filter.search } },
-			]
-		}
-
-		if (!filter.includeArchived) {
-			where.archived = false
-		}
+		const conditions = [
+			filter.organizationId !== undefined
+				? eq(AuditLog.organizationId, filter.organizationId)
+				: undefined,
+			filter.userId ? eq(AuditLog.userId, filter.userId) : undefined,
+			filter.targetUserId
+				? eq(AuditLog.targetUserId, filter.targetUserId)
+				: undefined,
+			filter.action
+				? Array.isArray(filter.action)
+					? inArray(AuditLog.action, filter.action)
+					: eq(AuditLog.action, filter.action)
+				: undefined,
+			filter.severity ? eq(AuditLog.severity, filter.severity) : undefined,
+			filter.resourceType
+				? eq(AuditLog.resourceType, filter.resourceType)
+				: undefined,
+			filter.resourceId
+				? eq(AuditLog.resourceId, filter.resourceId)
+				: undefined,
+			filter.startDate ? gte(AuditLog.createdAt, filter.startDate) : undefined,
+			filter.endDate ? lte(AuditLog.createdAt, filter.endDate) : undefined,
+			filter.search
+				? or(
+						like(AuditLog.details, `%${filter.search}%`),
+						like(AuditLog.action, `%${filter.search}%`),
+					)
+				: undefined,
+			!filter.includeArchived ? eq(AuditLog.archived, false) : undefined,
+		].filter(Boolean)
 
 		const take = Math.min(filter.limit || 50, 500)
 		const skip = filter.offset || 0
-		const orderBy = {
-			[filter.sortBy || 'createdAt']: filter.sortOrder || 'desc',
-		}
+		const sortColumn = {
+			createdAt: AuditLog.createdAt,
+			action: AuditLog.action,
+			severity: AuditLog.severity,
+		}[filter.sortBy || 'createdAt']
+		const orderBy = filter.sortOrder === 'asc' ? sortColumn : desc(sortColumn)
 
 		const [logs, totalCount] = await Promise.all([
-			prisma.auditLog.findMany({
-				where,
-				take,
-				skip,
-				orderBy,
-				include: {
+			db
+				.select({
+					id: AuditLog.id,
+					organizationId: AuditLog.organizationId,
+					userId: AuditLog.userId,
+					action: AuditLog.action,
+					details: AuditLog.details,
+					metadata: AuditLog.metadata,
+					createdAt: AuditLog.createdAt,
+					ipAddress: AuditLog.ipAddress,
+					userAgent: AuditLog.userAgent,
+					resourceType: AuditLog.resourceType,
+					resourceId: AuditLog.resourceId,
+					targetUserId: AuditLog.targetUserId,
+					severity: AuditLog.severity,
+					retainUntil: AuditLog.retainUntil,
+					archived: AuditLog.archived,
+					integrityHash: AuditLog.integrityHash,
 					user: {
-						select: {
-							id: true,
-							name: true,
-							email: true,
-							username: true,
-						},
+						id: User.id,
+						name: User.name,
+						email: User.email,
+						username: User.username,
 					},
-				},
-			}),
-			prisma.auditLog.count({ where }),
+				})
+				.from(AuditLog)
+				.leftJoin(User, eq(AuditLog.userId, User.id))
+				.where(and(...conditions))
+				.orderBy(orderBy)
+				.limit(take)
+				.offset(skip),
+			db
+				.select({ value: count() })
+				.from(AuditLog)
+				.where(and(...conditions))
+				.then(([row]) => row?.value ?? 0),
 		])
 
 		return {
@@ -157,10 +173,15 @@ export class AuditLogQuery {
 		const startDate = new Date()
 		startDate.setDate(startDate.getDate() - days)
 
-		const where: any = { createdAt: { gte: startDate } }
-		if (organizationId !== undefined) {
-			where.organizationId = organizationId
-		}
+		const conditions = [
+			gte(AuditLog.createdAt, startDate),
+			organizationId !== undefined
+				? eq(AuditLog.organizationId, organizationId)
+				: undefined,
+		].filter(Boolean)
+		const severityCount = count()
+		const actionCount = count()
+		const userCount = count()
 
 		const [
 			totalLogs,
@@ -169,32 +190,40 @@ export class AuditLogQuery {
 			topUsers,
 			unusualActivityCount,
 		] = await Promise.all([
-			prisma.auditLog.count({ where }),
-			prisma.auditLog.groupBy({
-				by: ['severity'],
-				where,
-				_count: true,
-			}),
-			prisma.auditLog.groupBy({
-				by: ['action'],
-				where,
-				_count: true,
-				orderBy: { _count: { action: 'desc' } },
-				take: 10,
-			}),
-			prisma.auditLog.groupBy({
-				by: ['userId'],
-				where: { ...where, userId: { not: null } },
-				_count: true,
-				orderBy: { _count: { userId: 'desc' } },
-				take: 5,
-			}),
-			prisma.auditLog.count({
-				where: {
-					...where,
-					severity: { in: ['warning', 'error', 'critical'] },
-				},
-			}),
+			db
+				.select({ value: count() })
+				.from(AuditLog)
+				.where(and(...conditions))
+				.then(([row]) => row?.value ?? 0),
+			db
+				.select({ severity: AuditLog.severity, count: severityCount })
+				.from(AuditLog)
+				.where(and(...conditions))
+				.groupBy(AuditLog.severity),
+			db
+				.select({ action: AuditLog.action, count: actionCount })
+				.from(AuditLog)
+				.where(and(...conditions))
+				.groupBy(AuditLog.action)
+				.orderBy(desc(actionCount))
+				.limit(10),
+			db
+				.select({ userId: AuditLog.userId, count: userCount })
+				.from(AuditLog)
+				.where(and(...conditions, isNotNull(AuditLog.userId)))
+				.groupBy(AuditLog.userId)
+				.orderBy(desc(userCount))
+				.limit(5),
+			db
+				.select({ value: count() })
+				.from(AuditLog)
+				.where(
+					and(
+						...conditions,
+						inArray(AuditLog.severity, ['warning', 'error', 'critical']),
+					),
+				)
+				.then(([row]) => row?.value ?? 0),
 		])
 
 		return {
@@ -202,17 +231,17 @@ export class AuditLogQuery {
 			totalEvents: totalLogs,
 			totalLogs,
 			severityBreakdown: Object.fromEntries(
-				severityCounts.map((s: any) => [s.severity, s._count]),
+				severityCounts.map((s) => [s.severity, s.count]),
 			),
-			topActions: actionCounts.map((a: any) => ({
+			topActions: actionCounts.map((a) => ({
 				action: a.action,
-				count: a._count,
-				_count: a._count,
+				count: a.count,
+				_count: a.count,
 			})),
-			topUserIds: topUsers.map((u: any) => ({
+			topUserIds: topUsers.map((u) => ({
 				userId: u.userId,
-				count: u._count,
-				_count: u._count,
+				count: u.count,
+				_count: u.count,
 			})),
 			unusualActivityCount,
 			recentSecurityEvents: [],

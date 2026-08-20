@@ -41,7 +41,8 @@
     "db:migrate:deploy": "cd packages/database && npm run db:migrate:deploy",
     "db:seed": "turbo run db:seed --filter=@repo/database",
     "db:migrate:dev": "cd packages/database && npm run db:migrate:dev",
-    "gdpr:process": "node scripts/process-gdpr-requests.mjs",
+    "db:studio": "cd packages/database && npm run db:studio",
+    "gdpr:process": "npx tsx scripts/process-gdpr-requests.mjs",
     "docs:dev": "cd apps/docs && npx mint dev",
     "docs:build": "cd apps/docs && npx mint build",
     "prepare": "husky"

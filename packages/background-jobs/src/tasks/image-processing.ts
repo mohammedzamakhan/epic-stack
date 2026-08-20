@@ -4,45 +4,7 @@ import fetch from 'node-fetch'
 import * as os from 'os'
 import * as path from 'path'
 import { createId } from '@paralleldrive/cuid2'
-
-// Set Prisma engine path for Trigger.dev
-if (!process.env.PRISMA_QUERY_ENGINE_LIBRARY) {
-	try {
-		const path = require('path')
-		const fs = require('fs')
-
-		// Try multiple possible paths relative to current working directory
-		const possiblePaths = [
-			path.resolve(
-				process.cwd(),
-				'node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node',
-			),
-			path.resolve(
-				process.cwd(),
-				'../../node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node',
-			),
-			path.resolve(
-				process.cwd(),
-				'../../../node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node',
-			),
-			path.resolve(
-				__dirname,
-				'../../../../node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node',
-			),
-		]
-
-		for (const enginePath of possiblePaths) {
-			if (fs.existsSync(enginePath)) {
-				process.env.PRISMA_QUERY_ENGINE_LIBRARY = enginePath
-				break
-			}
-		}
-	} catch {
-		// Fallback - let Prisma handle it
-	}
-}
-
-import { prisma } from '@repo/database'
+import { db, eq, OrganizationNoteUpload } from '@repo/database'
 
 // Import MSW setup for development mode
 import '../mocks/index'
@@ -231,10 +193,10 @@ export const imageProcessingTask = task({
 
 		try {
 			// Update image upload status to processing
-			await prisma.organizationNoteUpload.update({
-				where: { id: imageId },
-				data: { status: 'processing' },
-			})
+			await db
+				.update(OrganizationNoteUpload)
+				.set({ status: 'processing' })
+				.where(eq(OrganizationNoteUpload.id, imageId))
 
 			// Fetch the image with the signed URL
 			const response = await fetch(imageUrl, { headers: imageHeaders })
@@ -370,15 +332,15 @@ export const imageProcessingTask = task({
 			)
 
 			// Update image upload record with thumbnail and metadata
-			await prisma.organizationNoteUpload.update({
-				where: { id: imageId },
-				data: {
+			await db
+				.update(OrganizationNoteUpload)
+				.set({
 					thumbnailKey,
 					fileSize,
 					mimeType: contentType,
 					status: 'completed',
-				},
-			})
+				})
+				.where(eq(OrganizationNoteUpload.id, imageId))
 
 			// Clean up temporary files
 			await fs.unlink(thumbnailPath)
@@ -412,10 +374,10 @@ export const imageProcessingTask = task({
 
 			// Update image upload status to failed
 			try {
-				await prisma.organizationNoteUpload.update({
-					where: { id: imageId },
-					data: { status: 'failed' },
-				})
+				await db
+					.update(OrganizationNoteUpload)
+					.set({ status: 'failed' })
+					.where(eq(OrganizationNoteUpload.id, imageId))
 			} catch (dbError) {
 				logger.error('Failed to update image upload status to failed', {
 					dbError,

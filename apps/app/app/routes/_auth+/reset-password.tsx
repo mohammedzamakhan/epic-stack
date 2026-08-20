@@ -9,7 +9,7 @@ import {
 } from '@repo/auth'
 import { useIsPending } from '@repo/common'
 import { getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, Session, User } from '@repo/database'
 import {
 	Card,
 	CardContent,
@@ -83,9 +83,14 @@ export async function action({ request }: Route.ActionArgs) {
 	const { password } = submission.value
 
 	await resetUserPassword({ username: resetPasswordUsername, password })
-	await prisma.session.deleteMany({
-		where: { user: { username: resetPasswordUsername } },
-	})
+	const [user] = await db
+		.select({ id: User.id })
+		.from(User)
+		.where(eq(User.username, resetPasswordUsername))
+		.limit(1)
+	if (user) {
+		await db.delete(Session).where(eq(Session.userId, user.id))
+	}
 	const verifySession = await verifySessionStorage.getSession(
 		request.headers.get('cookie'),
 	)

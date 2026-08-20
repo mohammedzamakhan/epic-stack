@@ -1,7 +1,14 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
 import type { CoreMessage } from 'ai'
 import { type ActionFunctionArgs } from 'react-router'
-import { prisma } from '@repo/database'
+import {
+	NoteAccess,
+	NoteComment,
+	OrganizationNote,
+	User,
+	db,
+	eq,
+} from '@repo/database'
 
 export interface ChatDependencies {
 	requireUserId: (request: Request) => Promise<string>
@@ -52,13 +59,14 @@ export async function handleChat(
 		invariant(noteId, 'Note ID is required')
 	}
 
-	const noteMeta = await prisma.organizationNote.findUnique({
-		where: { id: noteId },
-		select: {
-			id: true,
-			organizationId: true,
-		},
-	})
+	const [noteMeta] = await db
+		.select({
+			id: OrganizationNote.id,
+			organizationId: OrganizationNote.organizationId,
+		})
+		.from(OrganizationNote)
+		.where(eq(OrganizationNote.id, noteId))
+		.limit(1)
 
 	if (!noteMeta) {
 		invariant(noteMeta, 'Note not found')
@@ -67,31 +75,29 @@ export async function handleChat(
 	// Enforce org membership before reading note details or comments.
 	await deps.requireOrgMembership(request, noteMeta.organizationId)
 
-	const note = await prisma.organizationNote.findUnique({
-		where: { id: noteId },
-		select: {
-			content: true,
-			title: true,
-			organizationId: true,
-			isPublic: true,
-			createdById: true,
-			noteAccess: {
-				select: {
-					userId: true,
-				},
-			},
-			comments: {
-				select: {
-					content: true,
-					user: {
-						select: {
-							name: true,
-						},
-					},
-				},
-			},
-		},
-	})
+	const [note, noteAccess, comments] = await Promise.all([
+		db
+			.select({
+				content: OrganizationNote.content,
+				title: OrganizationNote.title,
+				organizationId: OrganizationNote.organizationId,
+				isPublic: OrganizationNote.isPublic,
+				createdById: OrganizationNote.createdById,
+			})
+			.from(OrganizationNote)
+			.where(eq(OrganizationNote.id, noteId))
+			.limit(1)
+			.then((rows) => rows[0]),
+		db
+			.select({ userId: NoteAccess.userId })
+			.from(NoteAccess)
+			.where(eq(NoteAccess.noteId, noteId)),
+		db
+			.select({ content: NoteComment.content, userName: User.name })
+			.from(NoteComment)
+			.leftJoin(User, eq(NoteComment.userId, User.id))
+			.where(eq(NoteComment.noteId, noteId)),
+	])
 
 	if (!note) {
 		invariant(note, 'Note not found')
@@ -100,9 +106,7 @@ export async function handleChat(
 	if (!note.isPublic) {
 		const hasPersonalAccess =
 			note.createdById === userId ||
-			note.noteAccess.some(
-				(access: { userId: string }) => access.userId === userId,
-			)
+			noteAccess.some((access) => access.userId === userId)
 		invariantResponse(
 			hasPersonalAccess,
 			'Not authorized - insufficient note permissions',
@@ -130,11 +134,11 @@ export async function handleChat(
 		title: note.title,
 		content: note.content,
 		wordCount: note.content ? note.content.split(/\s+/).length : 0,
-		hasComments: note.comments && note.comments.length > 0,
-		commentCount: note.comments?.length || 0,
-		comments: note.comments.map((comment: any) => ({
+		hasComments: comments.length > 0,
+		commentCount: comments.length,
+		comments: comments.map((comment) => ({
 			content: comment.content,
-			userName: comment.user.name,
+			userName: comment.userName,
 		})),
 	}
 

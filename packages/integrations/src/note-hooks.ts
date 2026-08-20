@@ -5,7 +5,7 @@
  * and trigger integration notifications without requiring manual intervention.
  */
 
-import { prisma } from '@repo/database'
+import { db, eq, OrganizationNote as NoteTable } from '@repo/database'
 import { noteNotifier } from './note-notifier'
 
 /**
@@ -106,15 +106,16 @@ export class NoteHooks {
 	async beforeNoteDeleted(noteId: string, userId: string): Promise<void> {
 		try {
 			// Get note data before deletion
-			const note = await prisma.organizationNote.findUnique({
-				where: { id: noteId },
-				select: {
-					id: true,
-					title: true,
-					content: true,
-					organizationId: true,
-				},
-			})
+			const [note] = await db
+				.select({
+					id: NoteTable.id,
+					title: NoteTable.title,
+					content: NoteTable.content,
+					organizationId: NoteTable.organizationId,
+				})
+				.from(NoteTable)
+				.where(eq(NoteTable.id, noteId))
+				.limit(1)
 
 			if (!note) {
 				console.warn('Note not found for deletion hook:', noteId)
@@ -196,17 +197,18 @@ export class NoteHooks {
 	 */
 	async captureNoteSnapshot(noteId: string): Promise<NoteSnapshot | null> {
 		try {
-			const note = await prisma.organizationNote.findUnique({
-				where: { id: noteId },
-				select: {
-					id: true,
-					title: true,
-					content: true,
-					organizationId: true,
-				},
-			})
+			const [note] = await db
+				.select({
+					id: NoteTable.id,
+					title: NoteTable.title,
+					content: NoteTable.content,
+					organizationId: NoteTable.organizationId,
+				})
+				.from(NoteTable)
+				.where(eq(NoteTable.id, noteId))
+				.limit(1)
 
-			return note
+			return note ?? null
 		} catch (error) {
 			console.error('Error capturing note snapshot:', error)
 			return null

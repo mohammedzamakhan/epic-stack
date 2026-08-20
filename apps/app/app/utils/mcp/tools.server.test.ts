@@ -1,5 +1,16 @@
 import '#tests/setup/setup-test-env.ts'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	NoteAccess,
+	Organization,
+	OrganizationNote,
+	OrganizationRole,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { getTool, type MCPContext } from './server.server'
@@ -9,32 +20,32 @@ import './tools.server' // Import to register tools
  * Helper to add a user to an organization
  */
 async function addUserToOrganization(userId: string, organizationId: string) {
-	const memberRole = await prisma.organizationRole.create({
-		data: {
+	const [memberRole] = await db
+		.insert(OrganizationRole)
+		.values({
 			name: `test_member_${Date.now()}_${Math.random().toString(36).substring(7)}`,
 			description: 'Test Member role',
 			level: 1,
-		},
-	})
-
-	// Check if the user-organization relationship already exists
-	const existingRelation = await prisma.userOrganization.findUnique({
-		where: {
-			userId_organizationId: {
-				userId,
-				organizationId,
-			},
-		},
-	})
+		})
+		.returning()
+	if (!memberRole) throw new Error('Member role not found')
+	const [existingRelation] = await db
+		.select()
+		.from(UserOrganization)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.organizationId, organizationId),
+			),
+		)
+		.limit(1)
 
 	if (!existingRelation) {
-		await prisma.userOrganization.create({
-			data: {
-				userId,
-				organizationId,
-				organizationRoleId: memberRole.id,
-				active: true,
-			},
+		await db.insert(UserOrganization).values({
+			userId,
+			organizationId,
+			organizationRoleId: memberRole.id,
+			active: true,
 		})
 	}
 }
@@ -53,20 +64,26 @@ describe('MCP Tools Service', () => {
 		testOrgSlug = `test-org-mcp-tools-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
 		// Create test user and organization with unique slug
-		testUser = await prisma.user.create({
-			data: {
+		const [createdUser] = await db
+			.insert(User)
+			.values({
 				email: `test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`,
 				username: `testuser-${Date.now()}-${Math.random().toString(36).substring(7)}`,
 				name: 'Test User',
-			},
-		})
+			})
+			.returning()
+		if (!createdUser) throw new Error('Failed to insert user')
+		testUser = createdUser
 
-		testOrganization = await prisma.organization.create({
-			data: {
+		const [createdOrganization] = await db
+			.insert(Organization)
+			.values({
 				name: 'Test Organization',
 				slug: testOrgSlug,
-			},
-		})
+			})
+			.returning()
+		if (!createdOrganization) throw new Error('Failed to insert organization')
+		testOrganization = createdOrganization
 
 		// Add user to organization
 		await addUserToOrganization(testUser.id, testOrganization.id)
@@ -78,23 +95,31 @@ describe('MCP Tools Service', () => {
 		// Clean up test data by specific IDs to avoid affecting parallel tests
 		try {
 			if (testOrganization?.id) {
-				await prisma.organizationNote.deleteMany({
-					where: { organizationId: testOrganization.id },
-				})
-				await prisma.noteAccess.deleteMany({
-					where: { note: { organizationId: testOrganization.id } },
-				})
-				await prisma.userOrganization.deleteMany({
-					where: { organizationId: testOrganization.id },
-				})
-				await prisma.organization.deleteMany({
-					where: { id: testOrganization.id },
-				})
+				await db
+					.delete(OrganizationNote)
+					.where(eq(OrganizationNote.organizationId, testOrganization.id))
+				await db
+					.delete(NoteAccess)
+					.where(
+						inArray(
+							NoteAccess.noteId,
+							db
+								.select({ id: OrganizationNote.id })
+								.from(OrganizationNote)
+								.where(
+									eq(OrganizationNote.organizationId, testOrganization.id),
+								),
+						),
+					)
+				await db
+					.delete(UserOrganization)
+					.where(eq(UserOrganization.organizationId, testOrganization.id))
+				await db
+					.delete(Organization)
+					.where(eq(Organization.id, testOrganization.id))
 			}
 			if (testUser?.id) {
-				await prisma.user.deleteMany({
-					where: { id: testUser.id },
-				})
+				await db.delete(User).where(eq(User.id, testUser.id))
 			}
 			// Don't delete member role - it may be shared across tests
 		} catch {
@@ -118,13 +143,15 @@ describe('MCP Tools Service', () => {
 
 		it('should find users by name', async () => {
 			// Create additional users in the same organization
-			const user2 = await prisma.user.create({
-				data: {
+			const [user2] = await db
+				.insert(User)
+				.values({
 					email: 'alice@example.com',
 					username: 'alice',
 					name: 'Alice Smith',
-				},
-			})
+				})
+				.returning()
+			if (!user2) throw new Error('Failed to insert user')
 
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
@@ -137,13 +164,15 @@ describe('MCP Tools Service', () => {
 		})
 
 		it('should find users by username', async () => {
-			const user2 = await prisma.user.create({
-				data: {
+			const [user2] = await db
+				.insert(User)
+				.values({
 					email: 'bob@example.com',
 					username: 'bobsmith',
 					name: 'Bob Smith',
-				},
-			})
+				})
+				.returning()
+			if (!user2) throw new Error('Failed to insert user')
 
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
@@ -175,13 +204,15 @@ describe('MCP Tools Service', () => {
 				// Create 15 users in the organization
 				for (let i = 0; i < 15; i++) {
 					const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}-${i}`
-					const user = await prisma.user.create({
-						data: {
+					const [user] = await db
+						.insert(User)
+						.values({
 							email: `limit-user-${uniqueSuffix}@example.com`,
 							username: `limit-user-${uniqueSuffix}`,
 							name: `User ${i}`,
-						},
-					})
+						})
+						.returning()
+					if (!user) throw new Error('Failed to insert user')
 					extraUsers.push(user.id)
 
 					await addUserToOrganization(user.id, mockContext.organization.id)
@@ -197,12 +228,10 @@ describe('MCP Tools Service', () => {
 			} finally {
 				// Clean up extra users
 				if (extraUsers.length > 0) {
-					await prisma.userOrganization.deleteMany({
-						where: { userId: { in: extraUsers } },
-					})
-					await prisma.user.deleteMany({
-						where: { id: { in: extraUsers } },
-					})
+					await db
+						.delete(UserOrganization)
+						.where(inArray(UserOrganization.userId, extraUsers))
+					await db.delete(User).where(inArray(User.id, extraUsers))
 				}
 			}
 		})
@@ -242,20 +271,25 @@ describe('MCP Tools Service', () => {
 
 		it('should return notes for user', async () => {
 			// Create a note for the test user
-			const note = await prisma.organizationNote.create({
-				data: {
+			const [note] = await db
+				.insert(OrganizationNote)
+				.values({
 					title: 'Test Note',
 					content: 'This is a test note',
 					organizationId: mockContext.organization.id,
 					createdById: mockContext.user.id,
 					isPublic: true,
-				},
-			})
+				})
+				.returning()
+			if (!note) throw new Error('Failed to insert note')
 
 			// Ensure the note is committed and visible
-			const verifyNote = await prisma.organizationNote.findUnique({
-				where: { id: note.id },
-			})
+			const [verifyNote] = await db
+				.select()
+				.from(OrganizationNote)
+				.where(eq(OrganizationNote.id, note.id))
+				.limit(1)
+			if (!verifyNote) throw new Error('Failed to insert note')
 			expect(verifyNote).toBeDefined()
 
 			const tool = getTool('get_user_notes')
@@ -269,18 +303,20 @@ describe('MCP Tools Service', () => {
 			expect(result?.content![0]!.text).toContain('This is a test note')
 
 			// Clean up
-			await prisma.organizationNote.delete({ where: { id: note.id } })
+			await db.delete(OrganizationNote).where(eq(OrganizationNote.id, note.id))
 		})
 
 		it('should return no notes message when user has no notes', async () => {
 			// Create another user with no notes
-			const user2 = await prisma.user.create({
-				data: {
+			const [user2] = await db
+				.insert(User)
+				.values({
 					email: 'notnotes@example.com',
 					username: 'notnotes',
 					name: 'No Notes User',
-				},
-			})
+				})
+				.returning()
+			if (!user2) throw new Error('Failed to insert user')
 
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
@@ -292,36 +328,34 @@ describe('MCP Tools Service', () => {
 
 		it('should only return public notes or notes shared with user', async () => {
 			// Create another user
-			const user2 = await prisma.user.create({
-				data: {
+			const [user2] = await db
+				.insert(User)
+				.values({
 					email: 'other@example.com',
 					username: 'other',
 					name: 'Other User',
-				},
-			})
+				})
+				.returning()
+			if (!user2) throw new Error('Failed to insert user')
 
 			await addUserToOrganization(user2.id, mockContext.organization.id)
 
 			// Create a public note
-			await prisma.organizationNote.create({
-				data: {
-					title: 'Public Note',
-					content: 'Public content',
-					organizationId: mockContext.organization.id,
-					createdById: user2.id,
-					isPublic: true,
-				},
+			await db.insert(OrganizationNote).values({
+				title: 'Public Note',
+				content: 'Public content',
+				organizationId: mockContext.organization.id,
+				createdById: user2.id,
+				isPublic: true,
 			})
 
 			// Create a private note not shared with mockContext.user
-			await prisma.organizationNote.create({
-				data: {
-					title: 'Private Note',
-					content: 'Private content',
-					organizationId: mockContext.organization.id,
-					createdById: user2.id,
-					isPublic: false,
-				},
+			await db.insert(OrganizationNote).values({
+				title: 'Private Note',
+				content: 'Private content',
+				organizationId: mockContext.organization.id,
+				createdById: user2.id,
+				isPublic: false,
 			})
 
 			const tool = getTool('get_user_notes')
@@ -349,32 +383,38 @@ describe('MCP Tools Service', () => {
 						.filter((s) => /^[a-z]+$/.test(s)),
 					async (searchQuery) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
-							data: {
+						const [otherOrg] = await db
+							.insert(Organization)
+							.values({
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
-							},
-						})
+							})
+							.returning()
+						if (!otherOrg) throw new Error('Failed to insert organization')
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
-							data: {
+						const [otherUser] = await db
+							.insert(User)
+							.values({
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
 								name: `Other ${searchQuery}`,
-							},
-						})
+							})
+							.returning()
+						if (!otherUser) throw new Error('Failed to insert user')
 
 						await addUserToOrganization(otherUser.id, otherOrg.id)
 
 						// Create a user in the test organization
-						const testUser = await prisma.user.create({
-							data: {
+						const [testUser] = await db
+							.insert(User)
+							.values({
 								email: `test-${Date.now()}@example.com`,
 								username: `test-${Date.now()}`,
 								name: `Test ${searchQuery}`,
-							},
-						})
+							})
+							.returning()
+						if (!testUser) throw new Error('Failed to insert user')
 
 						await addUserToOrganization(
 							testUser.id,
@@ -401,32 +441,43 @@ describe('MCP Tools Service', () => {
 									const match = userText?.match(/\(([^)]+)\)/)
 									const username = match?.[1]
 									if (username) {
-										const user = await prisma.user.findUnique({
-											where: { username },
-											include: {
-												organizations: {
-													where: {
-														organizationId: mockContext.organization.id,
-													},
-												},
-											},
-										})
-
-										expect(user?.organizations.length ?? 0).toBeGreaterThan(0)
+										const [user] = await db
+											.select()
+											.from(User)
+											.where(eq(User.username, username))
+											.limit(1)
+										if (!user) throw new Error('Failed to insert user')
+										if (user) {
+											const orgMemberships = await db
+												.select()
+												.from(UserOrganization)
+												.where(
+													and(
+														eq(UserOrganization.userId, user.id),
+														eq(
+															UserOrganization.organizationId,
+															mockContext.organization.id,
+														),
+													),
+												)
+											expect(orgMemberships.length).toBeGreaterThan(0)
+										}
 									}
 								}
 							}
 						} finally {
 							// Clean up
-							await prisma.userOrganization.deleteMany({
-								where: { userId: otherUser.id },
-							})
-							await prisma.userOrganization.deleteMany({
-								where: { userId: testUser.id },
-							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.user.delete({ where: { id: testUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db
+								.delete(UserOrganization)
+								.where(eq(UserOrganization.userId, otherUser.id))
+							await db
+								.delete(UserOrganization)
+								.where(eq(UserOrganization.userId, testUser.id))
+							await db.delete(User).where(eq(User.id, otherUser.id))
+							await db.delete(User).where(eq(User.id, testUser.id))
+							await db
+								.delete(Organization)
+								.where(eq(Organization.id, otherOrg.id))
 						}
 					},
 				),
@@ -451,16 +502,18 @@ describe('MCP Tools Service', () => {
 						// Create multiple notes
 						const notes = []
 						for (let i = 0; i < noteCount; i++) {
-							const note = await prisma.organizationNote.create({
-								data: {
+							const [note] = await db
+								.insert(OrganizationNote)
+								.values({
 									title: `Note ${i}`,
 									content: `Content ${i}`,
 									organizationId: mockContext.organization.id,
 									createdById: mockContext.user.id,
 									isPublic: true,
 									createdAt: new Date(Date.now() - i * 1000), // Stagger creation times
-								},
-							})
+								})
+								.returning()
+							if (!note) throw new Error('Failed to insert note')
 							notes.push(note)
 						}
 
@@ -492,12 +545,17 @@ describe('MCP Tools Service', () => {
 							}
 						} finally {
 							// Clean up
-							await prisma.organizationNote.deleteMany({
-								where: {
-									organizationId: mockContext.organization.id,
-									createdById: mockContext.user.id,
-								},
-							})
+							await db
+								.delete(OrganizationNote)
+								.where(
+									and(
+										eq(
+											OrganizationNote.organizationId,
+											mockContext.organization.id,
+										),
+										eq(OrganizationNote.createdById, mockContext.user.id),
+									),
+								)
 						}
 					},
 				),
@@ -521,34 +579,40 @@ describe('MCP Tools Service', () => {
 					fc.string({ minLength: 1, maxLength: 20 }),
 					async (noteTitle) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
-							data: {
+						const [otherOrg] = await db
+							.insert(Organization)
+							.values({
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
-							},
-						})
+							})
+							.returning()
+						if (!otherOrg) throw new Error('Failed to insert organization')
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
-							data: {
+						const [otherUser] = await db
+							.insert(User)
+							.values({
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
 								name: 'Other User',
-							},
-						})
+							})
+							.returning()
+						if (!otherUser) throw new Error('Failed to insert user')
 
 						await addUserToOrganization(otherUser.id, otherOrg.id)
 
 						// Create a note in the other organization
-						const otherNote = await prisma.organizationNote.create({
-							data: {
+						const [otherNote] = await db
+							.insert(OrganizationNote)
+							.values({
 								title: noteTitle,
 								content: 'Other org content',
 								organizationId: otherOrg.id,
 								createdById: otherUser.id,
 								isPublic: true,
-							},
-						})
+							})
+							.returning()
+						if (!otherNote) throw new Error('Failed to insert note')
 
 						try {
 							const tool = getTool('get_user_notes')
@@ -561,14 +625,16 @@ describe('MCP Tools Service', () => {
 							expect(result?.content![0]!.text).toContain('User not found')
 						} finally {
 							// Clean up
-							await prisma.organizationNote.delete({
-								where: { id: otherNote.id },
-							})
-							await prisma.userOrganization.deleteMany({
-								where: { userId: otherUser.id },
-							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db
+								.delete(OrganizationNote)
+								.where(eq(OrganizationNote.id, otherNote.id))
+							await db
+								.delete(UserOrganization)
+								.where(eq(UserOrganization.userId, otherUser.id))
+							await db.delete(User).where(eq(User.id, otherUser.id))
+							await db
+								.delete(Organization)
+								.where(eq(Organization.id, otherOrg.id))
 						}
 					},
 				),
@@ -592,21 +658,25 @@ describe('MCP Tools Service', () => {
 					fc.string({ minLength: 1, maxLength: 20 }),
 					async (searchQuery) => {
 						// Create another organization
-						const otherOrg = await prisma.organization.create({
-							data: {
+						const [otherOrg] = await db
+							.insert(Organization)
+							.values({
 								name: 'Other Organization',
 								slug: `other-org-${Date.now()}`,
-							},
-						})
+							})
+							.returning()
+						if (!otherOrg) throw new Error('Failed to insert organization')
 
 						// Create a user in the other organization
-						const otherUser = await prisma.user.create({
-							data: {
+						const [otherUser] = await db
+							.insert(User)
+							.values({
 								email: `other-${Date.now()}@example.com`,
 								username: `other-${Date.now()}`,
 								name: searchQuery,
-							},
-						})
+							})
+							.returning()
+						if (!otherUser) throw new Error('Failed to insert user')
 
 						await addUserToOrganization(otherUser.id, otherOrg.id)
 
@@ -630,11 +700,13 @@ describe('MCP Tools Service', () => {
 							expect(foundOtherUser).toBe(false)
 						} finally {
 							// Clean up
-							await prisma.userOrganization.deleteMany({
-								where: { userId: otherUser.id },
-							})
-							await prisma.user.delete({ where: { id: otherUser.id } })
-							await prisma.organization.delete({ where: { id: otherOrg.id } })
+							await db
+								.delete(UserOrganization)
+								.where(eq(UserOrganization.userId, otherUser.id))
+							await db.delete(User).where(eq(User.id, otherUser.id))
+							await db
+								.delete(Organization)
+								.where(eq(Organization.id, otherOrg.id))
 						}
 					},
 				),

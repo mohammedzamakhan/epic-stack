@@ -15,11 +15,11 @@ Do not mix these up.
 
 | Who                           | Where they sign in         | Storage                      | Tokens                              |
 | ----------------------------- | -------------------------- | ---------------------------- | ----------------------------------- |
-| **Operators** (org staff)     | App (`apps/app`)           | US Prisma (`User`, sessions) | HttpOnly cookies via `@repo/auth`   |
+| **Operators** (org staff)     | App (`apps/app`)           | US SQLite (`User`, sessions) | HttpOnly cookies via `@repo/auth`   |
 | **Customers** (site visitors) | Tenant site (`apps/sites`) | Regional per-org SQLite      | JWT + refresh in **`localStorage`** |
 
-Customer PII must never land in Prisma, App session cookies, Admin, or a Sites
-server-side auth proxy.
+Customer PII must never land in the US control-plane database, App session
+cookies, Admin, or a Sites server-side auth proxy.
 
 ## Why this shape exists
 
@@ -36,7 +36,7 @@ browser therefore calls **that org’s regional tenant-api directly**.
 US (control plane)                         Regional data plane (US and/or KSA)
 ─────────────────                          ──────────────────────────────────
 App, Admin                                 Tenant API  (one OCI VM per region)
-Central Prisma                             Per-org SQLite  tenant_{orgId}.db
+Control-plane SQLite                       Per-org SQLite  tenant_{orgId}.db
   org flags, CMS, billing                  customers (name, email, phone, hashes)
 Sites SSR (CMS HTML only)  ─browser JS──►  In-region tenant-api (auth + PII)
                                            In-region SMS (Twilio is US-only)
@@ -53,7 +53,7 @@ and block volume.
 
 ## What lives where
 
-**US Prisma (`Organization`)** — flags only, not PII:
+**US control-plane SQLite (`Organization`)** — flags only, not PII:
 
 - `dataRegion` — `"us"` or `"ksa"` (default `"us"`)
 - `hasProvisionedDb` — tenant SQLite exists in the current region
@@ -122,9 +122,10 @@ migrated.
 
 1. If `hasProvisionedDb`, the UI requires an explicit confirm
    (`confirmWipe=true`).
-2. App deprovisions the **old** region (Prisma still has the old `dataRegion`,
-   so the old node accepts the wipe).
-3. App updates Prisma: new `dataRegion`, `hasProvisionedDb = false`.
+2. App deprovisions the **old** region (the control-plane database still has the
+   old `dataRegion`, so the old node accepts the wipe).
+3. App updates the control-plane database: new `dataRegion`,
+   `hasProvisionedDb = false`.
 4. If the site is published, App provisions an empty DB in the new region and
    sets `hasProvisionedDb = true`.
 5. Existing visitors must sign in again. Old tokens are useless against the new
@@ -165,7 +166,7 @@ accepted tradeoff for keeping KSA PII off US Sites servers. Do **not**:
 - Put customer tokens in cookies on the Sites host
 - Add `apps/sites/src/pages/api/auth/*` (or any Sites server proxy of PII)
 - Give Sites a `JWT_SECRET` so it can mint or verify customer sessions
-- Store customer phone/name/email on Prisma `User` / `Organization`
+- Store customer phone/name/email on control-plane `User` / `Organization`
 
 ## Local development
 
@@ -235,7 +236,7 @@ files live on the attached volume at `TENANT_DB_DIR=/data/tenants`. Run a
 
 App stays in the US and only sends `{ orgId, slug, dataRegion }` to the matching
 regional URL. Set `APP_URL` on each tenant-api so it can resolve org flags
-without the Prisma volume.
+without the control-plane SQLite volume.
 
 GitHub Actions builds the ARM image and pushes it to GHCR
 (`ghcr.io/<owner>/<repo>/tenant-api:<sha>`). Optional SSH deploy uses
@@ -247,16 +248,16 @@ See [Deployment](./deployment.md#regional-tenant-data-plane) and the
 
 ### Required secrets (per regional tenant-api)
 
-| Secret                   | Notes                                                                      |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `DATA_REGION`            | `us` or `ksa`. Startup fails otherwise.                                    |
-| `JWT_SECRET`             | Signs customer access tokens. No default in production. Unique per region. |
-| `AUTH_HMAC_SECRET`       | OTP and refresh hashes. Different from `INTERNAL_COMMAND_TOKEN`.           |
-| `INTERNAL_COMMAND_TOKEN` | Same value as US App. ≥16 chars. Empty token is rejected.                  |
-| `APP_URL`                | US App origin. Used when this node cannot read Prisma org flags (KSA).     |
-| `DATABASE_URL`           | Central Prisma for **org flags only** when available. Not customer PII.    |
-| `TENANT_DB_DIR`          | Volume mount for `tenant_{orgId}.db` (production: `/data/tenants`).        |
-| `ROOT_APP`               | Brand domain used to map `{slug}.{ROOT_APP}` origins for CORS.             |
+| Secret                   | Notes                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `DATA_REGION`            | `us` or `ksa`. Startup fails otherwise.                                       |
+| `JWT_SECRET`             | Signs customer access tokens. No default in production. Unique per region.    |
+| `AUTH_HMAC_SECRET`       | OTP and refresh hashes. Different from `INTERNAL_COMMAND_TOKEN`.              |
+| `INTERNAL_COMMAND_TOKEN` | Same value as US App. ≥16 chars. Empty token is rejected.                     |
+| `APP_URL`                | US App origin. Used when this node cannot read control-plane org flags (KSA). |
+| `DATABASE_URL`           | Control-plane SQLite for **org flags only** when available. Not customer PII. |
+| `TENANT_DB_DIR`          | Volume mount for `tenant_{orgId}.db` (production: `/data/tenants`).           |
+| `ROOT_APP`               | Brand domain used to map `{slug}.{ROOT_APP}` origins for CORS.                |
 
 ### App (US)
 
@@ -296,7 +297,7 @@ safe: tenant-api returns 404/409 when `dataRegion !== DATA_REGION`.
 | -------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | Login hits port 3007 for a KSA org     | Sites missing `PUBLIC_TENANT_API_URL_KSA`, or org `dataRegion` still `us`.                          |
 | CORS 403 on login                      | Origin not a published slug/custom domain for an org in that node’s region.                         |
-| `region_mismatch` on provision         | App called the wrong regional URL, or Prisma `dataRegion` does not match the node.                  |
+| `region_mismatch` on provision         | App called the wrong regional URL, or control-plane `dataRegion` does not match the node.           |
 | Empty customers after a region change  | Expected. Wipe is the product behavior; there is no PII migration.                                  |
 | Production tenant-api refuses to start | Placeholder `do-not-use-in-prod` secrets, missing `DATA_REGION`, or short `INTERNAL_COMMAND_TOKEN`. |
 | KSA OTP fails in production            | Twilio is blocked; configure in-kingdom SMS.                                                        |

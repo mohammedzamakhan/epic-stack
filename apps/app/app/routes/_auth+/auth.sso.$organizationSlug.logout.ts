@@ -1,5 +1,5 @@
 import { authSessionStorage, logout, sessionKey } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, SSOSession } from '@repo/database'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { getOrganizationBySlug } from '#app/utils/organization/organizations.server.ts'
 import { ssoAuthService } from '#app/utils/sso/auth.server.ts'
@@ -43,10 +43,11 @@ async function handleSSOLogout(
 
 	if (sessionId) {
 		// Check if this is an SSO session
-		const ssoSession = await prisma.sSOSession.findUnique({
-			where: { sessionId },
-			select: { id: true },
-		})
+		const [ssoSession] = await db
+			.select({ id: SSOSession.id })
+			.from(SSOSession)
+			.where(eq(SSOSession.sessionId, sessionId))
+			.limit(1)
 
 		if (ssoSession) {
 			// Revoke tokens at the identity provider

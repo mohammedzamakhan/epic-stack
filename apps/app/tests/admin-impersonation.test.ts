@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { prisma } from '@repo/database'
+import { Role, User, _RoleToUser, db, eq } from '@repo/database'
 import { test } from '#tests/playwright-utils.ts'
 
 test.describe('Admin Impersonation', () => {
@@ -10,14 +10,13 @@ test.describe('Admin Impersonation', () => {
 	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
-		await prisma.user.update({
-			where: { id: adminUser.id },
-			data: {
-				roles: {
-					connect: { name: 'admin' },
-				},
-			},
-		})
+		const [adminRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'admin'))
+			.limit(1)
+		if (!adminRole) throw new Error('Admin role not found')
+		await db.insert(_RoleToUser).values({ A: adminRole.id, B: adminUser.id })
 
 		// Create a regular user to impersonate
 		const targetUser = await insertNewUser({ username: 'target-user' })
@@ -89,25 +88,24 @@ test.describe('Admin Impersonation', () => {
 	}) => {
 		// Create an admin user
 		const adminUser = await insertNewUser({ username: 'admin-test' })
-		await prisma.user.update({
-			where: { id: adminUser.id },
-			data: {
-				roles: {
-					connect: { name: 'admin' },
-				},
-			},
-		})
+		const [adminRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'admin'))
+			.limit(1)
+		if (!adminRole) throw new Error('Admin role not found')
+		await db.insert(_RoleToUser).values({ A: adminRole.id, B: adminUser.id })
 
 		// Create a banned user
 		const bannedUser = await insertNewUser({ username: 'banned-user' })
-		await prisma.user.update({
-			where: { id: bannedUser.id },
-			data: {
+		await db
+			.update(User)
+			.set({
 				isBanned: true,
 				banReason: 'Test ban',
 				bannedAt: new Date(),
-			},
-		})
+			})
+			.where(eq(User.id, bannedUser.id))
 
 		// Login as admin
 		await navigate('/login')

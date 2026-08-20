@@ -1,6 +1,16 @@
 import { Trans } from '@lingui/react/macro'
 import { requireUserWithRole } from '@repo/auth'
-import { prisma } from '@repo/database'
+import {
+	AuditLog,
+	Organization,
+	User,
+	alias,
+	and,
+	db,
+	desc,
+	eq,
+	inArray,
+} from '@repo/database'
 import { Badge } from '@repo/ui/badge'
 import {
 	Card,
@@ -16,50 +26,45 @@ export async function loader({ request }: { request: Request }) {
 	await requireUserWithRole(request, 'admin')
 
 	// Get admin audit logs from the admin system organization
-	const adminOrg = await prisma.organization.findFirst({
-		where: { slug: 'admin-system' },
-		select: { id: true },
-	})
+	const [adminOrg] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(eq(Organization.slug, 'admin-system'))
+		.limit(1)
 
 	if (!adminOrg) {
 		return Response.json({ auditLogs: [] })
 	}
 
-	const auditLogs = await prisma.noteActivityLog.findMany({
-		where: {
-			note: {
-				organizationId: adminOrg.id,
-			},
-			action: {
-				in: ['ADMIN_IMPERSONATION_START', 'ADMIN_IMPERSONATION_END'],
-			},
-		},
-		select: {
-			id: true,
-			action: true,
-			metadata: true,
-			createdAt: true,
-			user: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			},
+	const targetUser = alias(User, 'audit_target_user')
+	const auditLogs = await db
+		.select({
+			id: AuditLog.id,
+			action: AuditLog.action,
+			metadata: AuditLog.metadata,
+			createdAt: AuditLog.createdAt,
+			user: { id: User.id, name: User.name, username: User.username },
 			targetUser: {
-				select: {
-					id: true,
-					name: true,
-					username: true,
-					email: true,
-				},
+				id: targetUser.id,
+				name: targetUser.name,
+				username: targetUser.username,
+				email: targetUser.email,
 			},
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		take: 100, // Limit to last 100 audit logs
-	})
+		})
+		.from(AuditLog)
+		.innerJoin(User, eq(AuditLog.userId, User.id))
+		.leftJoin(targetUser, eq(AuditLog.targetUserId, targetUser.id))
+		.where(
+			and(
+				eq(AuditLog.organizationId, adminOrg.id),
+				inArray(AuditLog.action, [
+					'ADMIN_IMPERSONATION_START',
+					'ADMIN_IMPERSONATION_END',
+				]),
+			),
+		)
+		.orderBy(desc(AuditLog.createdAt))
+		.limit(100)
 
 	return { auditLogs }
 }

@@ -1,7 +1,7 @@
 import { auditService, AuditAction } from '@repo/audit'
 import { requireUserWithRole } from '@repo/auth'
 import { gatherUserDataForExport } from '@repo/common/gdpr-export'
-import { prisma } from '@repo/database'
+import { DataSubjectRequest, User, db, eq } from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -12,24 +12,27 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('User ID required', { status: 400 })
 	}
 
-	const targetUser = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { id: true, email: true, username: true },
-	})
+	const [targetUser] = await db
+		.select({ id: User.id, email: User.email, username: User.username })
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
 
 	if (!targetUser) {
 		throw new Response('User not found', { status: 404 })
 	}
 
-	const dsr = await prisma.dataSubjectRequest.create({
-		data: {
+	const [dsr] = await db
+		.insert(DataSubjectRequest)
+		.values({
 			userId,
 			type: 'export',
 			status: 'processing',
 			processedAt: new Date(),
 			metadata: JSON.stringify({ adminInitiated: true, adminId }),
-		},
-	})
+		})
+		.returning()
+	if (!dsr) throw new Error('Could not create data export request')
 
 	await auditService.log({
 		action: AuditAction.DATA_EXPORT_REQUESTED,
@@ -56,9 +59,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	}
 
 	// Update the data subject request status
-	await prisma.dataSubjectRequest.update({
-		where: { id: dsr.id },
-		data: {
+	await db
+		.update(DataSubjectRequest)
+		.set({
 			status: 'completed',
 			completedAt: new Date(),
 			metadata: JSON.stringify({
@@ -66,8 +69,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				adminId,
 				statistics: exportData.statistics,
 			}),
-		},
-	})
+		})
+		.where(eq(DataSubjectRequest.id, dsr.id))
 
 	await auditService.log({
 		action: AuditAction.DATA_EXPORT_COMPLETED,

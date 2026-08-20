@@ -1,6 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { verifySessionStorage } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { z } from 'zod'
 
 import { newEmailAddressSessionKey } from '#app/routes/_app+/security.tsx'
@@ -23,9 +23,11 @@ export async function changeEmailAction({
 }: EmailActionArgs) {
 	const submission = await parseWithZod(formData, {
 		schema: ChangeEmailSchema.superRefine(async (data, ctx) => {
-			const existingUser = await prisma.user.findUnique({
-				where: { email: data.email },
-			})
+			const [existingUser] = await db
+				.select({ id: User.id })
+				.from(User)
+				.where(eq(User.email, data.email))
+				.limit(1)
 			if (existingUser) {
 				ctx.addIssue({
 					path: ['email'],

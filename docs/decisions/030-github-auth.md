@@ -31,7 +31,7 @@ OAuth2 or OIDC auth provider they have (if OIDC, they can use
 We will update the database schema to support multiple auth providers with a
 model called `Connection`:
 
-```prisma
+```text
 model Connection {
   id           String @id @default(cuid())
   providerName String

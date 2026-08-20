@@ -1,5 +1,5 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, Organization } from '@repo/database'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
@@ -105,37 +105,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const priceId = formData.get('priceId') as string | null
 
 	// Fetch full organization data with billing fields for payment actions
-	const organizationWithBilling = await prisma.organization.findUnique({
-		where: { id: organization.id },
-		select: {
-			id: true,
-			createdAt: true,
-			updatedAt: true,
-			name: true,
-			slug: true,
-			description: true,
-			active: true,
-			size: true,
-			stripeCustomerId: true,
-			stripeSubscriptionId: true,
-			stripeProductId: true,
-			planName: true,
-			subscriptionStatus: true,
-			verifiedDomain: true,
-			sitePublished: true,
-			customDomain: true,
-			customDomainStatus: true,
-			cloudflareHostnameId: true,
-			siteTheme: true,
-			siteLocales: true,
-			siteDefaultLocale: true,
-			siteIconKey: true,
-			siteHeaderConfig: true,
-			siteFooterConfig: true,
-			hasProvisionedDb: true,
-			dataRegion: true,
-		},
-	})
+	const [organizationWithBilling] = await db
+		.select()
+		.from(Organization)
+		.where(eq(Organization.id, organization.id))
+		.limit(1)
 
 	if (!organizationWithBilling) {
 		return Response.json({ error: 'Organization not found' }, { status: 404 })

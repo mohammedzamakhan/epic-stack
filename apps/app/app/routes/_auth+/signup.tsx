@@ -7,7 +7,7 @@ import { verifySessionStorage, requireAnonymous } from '@repo/auth'
 import { providerNames } from '@repo/auth/constants'
 import { useIsPending } from '@repo/common'
 import { brand, getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { sendEmail, SignupEmail } from '@repo/email'
 import { arcjet, checkHoneypot } from '@repo/security'
 import {
@@ -139,10 +139,11 @@ export async function action(args: Route.ActionArgs) {
 		)
 	}
 	const { email } = submission.value
-	const existingUser = await prisma.user.findUnique({
-		where: { email },
-		select: { id: true },
-	})
+	const [existingUser] = await db
+		.select({ id: User.id })
+		.from(User)
+		.where(eq(User.email, email))
+		.limit(1)
 
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
 		period: 10 * 60,

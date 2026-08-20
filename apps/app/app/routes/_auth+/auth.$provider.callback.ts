@@ -12,7 +12,7 @@ import {
 	getRedirectCookieValue,
 } from '@repo/common/redirect-cookie'
 import { createToastHeaders, redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { and, db, eq, Connection, Session, User } from '@repo/database'
 import { redirect } from 'react-router'
 import {
 	authenticator,
@@ -65,15 +65,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 	const { data: profile } = authResult
 
-	const existingConnection = await prisma.connection.findUnique({
-		select: { userId: true },
-		where: {
-			providerName_providerId: {
-				providerName,
-				providerId: String(profile.id),
-			},
-		},
-	})
+	const [existingConnection] = await db
+		.select({ userId: Connection.userId })
+		.from(Connection)
+		.where(
+			and(
+				eq(Connection.providerName, providerName),
+				eq(Connection.providerId, String(profile.id)),
+			),
+		)
+		.limit(1)
 
 	const userId = await getUserId(request)
 
@@ -101,12 +102,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 	// If we're already logged in, then link the account
 	if (userId) {
-		await prisma.connection.create({
-			data: {
-				providerName,
-				providerId: String(profile.id),
-				userId,
-			},
+		await db.insert(Connection).values({
+			providerName,
+			providerId: String(profile.id),
+			userId,
 		})
 		return redirectWithToast(
 			'/settings',
@@ -139,10 +138,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 	// if the email matches a user in the db, then link the account and
 	// make a new session
-	const user = await prisma.user.findUnique({
-		select: { id: true },
-		where: { email: profile.email.toLowerCase() },
-	})
+	const [user] = await db
+		.select({ id: User.id })
+		.from(User)
+		.where(eq(User.email, profile.email.toLowerCase()))
+		.limit(1)
 	if (user) {
 		// Check SSO enforcement before allowing social login
 		const ssoEnforcement = await checkSSOEnforcementByEmail(profile.email)
@@ -158,12 +158,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			)
 		}
 
-		await prisma.connection.create({
-			data: {
-				providerName,
-				providerId: String(profile.id),
-				userId: user.id,
-			},
+		await db.insert(Connection).values({
+			providerName,
+			providerId: String(profile.id),
+			userId: user.id,
 		})
 		return makeSession(
 			{ request, userId: user.id },
@@ -226,15 +224,20 @@ async function makeSession(
 	const ipAddress = getClientIp(request)
 	const userAgent = getUserAgent(request)
 
-	const session = await prisma.session.create({
-		select: { id: true, expirationDate: true, userId: true },
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			expirationDate: getSessionExpirationDate(false),
 			userId,
 			ipAddress,
 			userAgent,
-		},
-	})
+		})
+		.returning({
+			id: Session.id,
+			expirationDate: Session.expirationDate,
+			userId: Session.userId,
+		})
+	if (!session) throw new Error('Failed to create session')
 	return handleNewSession(
 		{ request, session, redirectTo, remember: false },
 		{ headers: combineHeaders(responseInit?.headers, destroyRedirectTo) },

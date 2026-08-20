@@ -1,4 +1,13 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	like,
+	or,
+	User,
+	UserImage,
+	UserOrganization,
+} from '@repo/database'
 import { logger } from '@repo/observability'
 import { getAccessibleNotes } from '../organization/note-access.server'
 import { getSignedGetRequestInfo } from '../storage.server'
@@ -72,30 +81,26 @@ registerTool({
 		try {
 			// Property 19: Organization-scoped user search
 			// All returned users should belong to the organization associated with the access token
-			const users = await prisma.user.findMany({
-				where: {
-					organizations: {
-						some: {
-							organizationId: context.organization.id,
-							active: true,
-						},
-					},
-					OR: [
-						{ name: { contains: query } },
-						{ username: { contains: query } },
-					],
-				},
-				select: {
-					name: true,
-					username: true,
-					image: {
-						select: {
-							objectKey: true,
-						},
-					},
-				},
-				take: 10,
-			})
+			const users = await db
+				.select({
+					name: User.name,
+					username: User.username,
+					image: { objectKey: UserImage.objectKey },
+				})
+				.from(User)
+				.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+				.leftJoin(UserImage, eq(UserImage.userId, User.id))
+				.where(
+					and(
+						eq(UserOrganization.organizationId, context.organization.id),
+						eq(UserOrganization.active, true),
+						or(
+							like(User.name, `%${query}%`),
+							like(User.username, `%${query}%`),
+						)!,
+					),
+				)
+				.limit(10)
 
 			const content: Array<{
 				type: 'text' | 'image'
@@ -187,22 +192,18 @@ registerTool({
 		try {
 			// Property 21: Organization access control
 			// The system should only return data from the organization associated with the access token
-			const user = await prisma.user.findFirst({
-				where: {
-					username,
-					organizations: {
-						some: {
-							organizationId: context.organization.id,
-							active: true,
-						},
-					},
-				},
-				select: {
-					id: true,
-					name: true,
-					username: true,
-				},
-			})
+			const [user] = await db
+				.select({ id: User.id, name: User.name, username: User.username })
+				.from(User)
+				.innerJoin(UserOrganization, eq(UserOrganization.userId, User.id))
+				.where(
+					and(
+						eq(User.username, username),
+						eq(UserOrganization.organizationId, context.organization.id),
+						eq(UserOrganization.active, true),
+					),
+				)
+				.limit(1)
 
 			if (!user) {
 				return {

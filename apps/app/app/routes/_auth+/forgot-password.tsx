@@ -4,7 +4,7 @@ import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, or, User } from '@repo/database'
 import { ForgotPasswordEmail, sendEmail } from '@repo/email'
 import { arcjet, checkHoneypot } from '@repo/security'
 import {
@@ -117,10 +117,13 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 	const { usernameOrEmail } = submission.value
 
-	const user = await prisma.user.findFirst({
-		where: { OR: [{ email: usernameOrEmail }, { username: usernameOrEmail }] },
-		select: { id: true, email: true, username: true },
-	})
+	const [user] = await db
+		.select({ id: User.id, email: User.email, username: User.username })
+		.from(User)
+		.where(
+			or(eq(User.email, usernameOrEmail), eq(User.username, usernameOrEmail)),
+		)
+		.limit(1)
 
 	if (user) {
 		const { verifyUrl, redirectTo, otp } = await prepareVerification({

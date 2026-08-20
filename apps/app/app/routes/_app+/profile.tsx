@@ -4,7 +4,7 @@ import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { requireUserId } from '@repo/auth'
 import { brand } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, User, UserImage } from '@repo/database'
 import { generateSeoMeta } from '@repo/seo'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import { PageTitle } from '@repo/ui/page-title'
@@ -41,18 +41,23 @@ const MAX_SIZE = 1024 * 1024 * 3 // 3MB
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			email: true,
-			image: {
-				select: { objectKey: true },
-			},
-		},
-	})
+	const [userRow] = await db
+		.select({
+			id: User.id,
+			name: User.name,
+			username: User.username,
+			email: User.email,
+		})
+		.from(User)
+		.where(eq(User.id, userId))
+		.limit(1)
+	if (!userRow) throw new Response('User not found', { status: 404 })
+	const [image] = await db
+		.select({ objectKey: UserImage.objectKey })
+		.from(UserImage)
+		.where(eq(UserImage.userId, userId))
+		.limit(1)
+	const user = { ...userRow, image }
 
 	return {
 		user,

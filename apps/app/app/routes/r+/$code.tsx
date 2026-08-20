@@ -1,6 +1,6 @@
 import { verifySessionStorage, getUserId } from '@repo/auth'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { db, eq, User, WaitlistEntry } from '@repo/database'
 import { redirect } from 'react-router'
 import { linkReferral } from '#app/utils/waitlist.server.ts'
 import { type Route } from './+types/$code.ts'
@@ -26,14 +26,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 	}
 
 	// Check if referral code exists
-	const referrerEntry = await prisma.waitlistEntry.findUnique({
-		where: { referralCode },
-		include: {
-			user: {
-				select: { name: true, username: true },
-			},
-		},
-	})
+	const [referrerEntry] = await db
+		.select({
+			id: WaitlistEntry.id,
+			userName: User.name,
+			userUsername: User.username,
+		})
+		.from(WaitlistEntry)
+		.leftJoin(User, eq(WaitlistEntry.userId, User.id))
+		.where(eq(WaitlistEntry.referralCode, referralCode))
+		.limit(1)
 
 	if (!referrerEntry) {
 		return redirectWithToast('/signup', {
@@ -61,9 +63,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		}
 
 		// User is authenticated, check if they already have a waitlist entry
-		const userEntry = await prisma.waitlistEntry.findUnique({
-			where: { userId },
-		})
+		const [userEntry] = await db
+			.select({ referredById: WaitlistEntry.referredById })
+			.from(WaitlistEntry)
+			.where(eq(WaitlistEntry.userId, userId))
+			.limit(1)
 
 		// If user already has a referrer, redirect to waitlist
 		if (userEntry?.referredById) {
@@ -86,7 +90,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			})
 		}
 
-		const referrerName = referrerEntry.user.name || referrerEntry.user.username
+		const referrerName =
+			referrerEntry.userName || referrerEntry.userUsername || 'Someone'
 
 		return redirectWithToast('/waitlist', {
 			title: 'Referral applied!',

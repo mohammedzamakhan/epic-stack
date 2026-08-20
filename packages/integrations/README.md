@@ -26,30 +26,7 @@ npm install @repo/integrations
 ## Quick Start
 
 ```typescript
-import {
-	integrationManager,
-	createWebAppIntegrationsConfig,
-} from '@repo/integrations'
-
-// Configure the integrations package
-const config = createWebAppIntegrationsConfig({
-	repositories: {
-		integrations: new PrismaIntegrationRepository(prisma),
-		connections: new PrismaConnectionRepository(prisma),
-	},
-	encryption: {
-		key: process.env.INTEGRATION_ENCRYPTION_KEY,
-	},
-	oauth: {
-		stateSecret: process.env.INTEGRATIONS_OAUTH_STATE_SECRET,
-	},
-	providers: {
-		slack: {
-			clientId: process.env.SLACK_CLIENT_ID,
-			clientSecret: process.env.SLACK_CLIENT_SECRET,
-		},
-	},
-})
+import { integrationManager } from '@repo/integrations'
 
 // Start OAuth flow
 const { authUrl, state } = await integrationManager.initiateOAuth(

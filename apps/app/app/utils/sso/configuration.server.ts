@@ -1,4 +1,10 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	SSOConfiguration as SSOConfigurationTable,
+} from '@repo/database'
 import { type SSOConfiguration } from '@repo/database/types'
 import { encrypt, decrypt, getSSOMasterKey } from '@repo/security'
 import {
@@ -56,8 +62,9 @@ export class SSOConfigurationService {
 			const masterKey = getSSOMasterKey()
 			const encryptedSecret = encrypt(validatedConfig.clientSecret, masterKey)
 
-			const ssoConfig = await prisma.sSOConfiguration.create({
-				data: {
+			const [ssoConfig] = await db
+				.insert(SSOConfigurationTable)
+				.values({
 					organizationId,
 					providerName: validatedConfig.providerName,
 					issuerUrl: validatedConfig.issuerUrl,
@@ -77,8 +84,9 @@ export class SSOConfigurationService {
 					allowedEmailDomains: validatedConfig.allowedEmailDomains || null,
 					enforceSSOLogin: validatedConfig.enforceSSOLogin ?? false,
 					createdById,
-				},
-			})
+				})
+				.returning()
+			if (!ssoConfig) throw new Error('Failed to create SSO configuration')
 
 			// Audit log the configuration creation
 			if (createdById) {
@@ -267,10 +275,12 @@ export class SSOConfigurationService {
 				}
 			}
 
-			const updatedConfig = await prisma.sSOConfiguration.update({
-				where: { id },
-				data: updateData,
-			})
+			const [updatedConfig] = await db
+				.update(SSOConfigurationTable)
+				.set(updateData)
+				.where(eq(SSOConfigurationTable.id, id))
+				.returning()
+			if (!updatedConfig) throw new Error('Configuration not found')
 
 			// Audit log the configuration update
 			if (updatedById) {
@@ -316,38 +326,24 @@ export class SSOConfigurationService {
 	async getConfiguration(
 		organizationId: string,
 	): Promise<SSOConfiguration | null> {
-		return prisma.sSOConfiguration.findUnique({
-			where: { organizationId },
-			include: {
-				organization: true,
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
-		})
+		const [config] = await db
+			.select()
+			.from(SSOConfigurationTable)
+			.where(eq(SSOConfigurationTable.organizationId, organizationId))
+			.limit(1)
+		return config ?? null
 	}
 
 	/**
 	 * Get SSO configuration by ID
 	 */
 	async getConfigurationById(id: string): Promise<SSOConfiguration | null> {
-		return prisma.sSOConfiguration.findUnique({
-			where: { id },
-			include: {
-				organization: true,
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
-		})
+		const [config] = await db
+			.select()
+			.from(SSOConfigurationTable)
+			.where(eq(SSOConfigurationTable.id, id))
+			.limit(1)
+		return config ?? null
 	}
 
 	/**
@@ -357,9 +353,9 @@ export class SSOConfigurationService {
 		// Get the configuration to find the organization ID
 		const config = await this.getConfigurationById(id)
 
-		await prisma.sSOConfiguration.delete({
-			where: { id },
-		})
+		await db
+			.delete(SSOConfigurationTable)
+			.where(eq(SSOConfigurationTable.id, id))
 
 		// Invalidate cache if configuration existed
 		if (config) {
@@ -381,10 +377,10 @@ export class SSOConfigurationService {
 			throw new Error('Configuration not found')
 		}
 
-		await prisma.sSOConfiguration.update({
-			where: { id },
-			data: { isEnabled },
-		})
+		await db
+			.update(SSOConfigurationTable)
+			.set({ isEnabled })
+			.where(eq(SSOConfigurationTable.id, id))
 
 		// Invalidate cache for this organization
 		ssoCache.invalidateConfiguration(config.organizationId)
@@ -501,10 +497,10 @@ export class SSOConfigurationService {
 			}
 
 			// Update last tested timestamp
-			await prisma.sSOConfiguration.update({
-				where: { id: config.id },
-				data: { lastTested: new Date() },
-			})
+			await db
+				.update(SSOConfigurationTable)
+				.set({ lastTested: new Date() })
+				.where(eq(SSOConfigurationTable.id, config.id))
 
 			// Audit log the successful test
 			if (userId) {
@@ -608,27 +604,10 @@ export class SSOConfigurationService {
 	 * List all SSO configurations (for admin purposes)
 	 */
 	async listConfigurations(): Promise<SSOConfiguration[]> {
-		return prisma.sSOConfiguration.findMany({
-			include: {
-				organization: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
-				},
-				createdBy: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		})
+		return db
+			.select()
+			.from(SSOConfigurationTable)
+			.orderBy(desc(SSOConfigurationTable.createdAt))
 	}
 }
 

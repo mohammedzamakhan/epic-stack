@@ -1,4 +1,11 @@
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	desc,
+	eq,
+	Organization,
+	OrganizationNoteStatus,
+} from '@repo/database'
 import { type ActionFunctionArgs } from 'react-router'
 import {
 	requireUserWithOrganizationPermission,
@@ -9,10 +16,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const orgSlug = params.orgSlug
 	if (!orgSlug) return new Response('Missing orgSlug', { status: 400 })
 
-	const organization = await prisma.organization.findFirst({
-		select: { id: true },
-		where: { slug: orgSlug },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.where(eq(Organization.slug, orgSlug))
+		.limit(1)
 	if (!organization)
 		return new Response('Organization not found', { status: 404 })
 
@@ -28,27 +36,41 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	if (!name) return new Response('Missing name', { status: 400 })
 
 	// Prevent duplicate status names in org
-	const existing = await prisma.organizationNoteStatus.findFirst({
-		where: { organizationId: organization.id, name },
-	})
+	const [existing] = await db
+		.select({ id: OrganizationNoteStatus.id })
+		.from(OrganizationNoteStatus)
+		.where(
+			and(
+				eq(OrganizationNoteStatus.organizationId, organization.id),
+				eq(OrganizationNoteStatus.name, name),
+			),
+		)
+		.limit(1)
 	if (existing) return new Response('Already exists', { status: 409 })
 
 	// Determine next position (always append at end)
-	const maxPos = await prisma.organizationNoteStatus.aggregate({
-		where: { organizationId: organization.id },
-		_max: { position: true },
-	})
-	const nextPosition = (maxPos._max.position ?? 0) + 1.0
+	const [maxPos] = await db
+		.select({ position: OrganizationNoteStatus.position })
+		.from(OrganizationNoteStatus)
+		.where(eq(OrganizationNoteStatus.organizationId, organization.id))
+		.orderBy(desc(OrganizationNoteStatus.position))
+		.limit(1)
+	const nextPosition = (maxPos?.position ?? 0) + 1.0
 
-	const created = await prisma.organizationNoteStatus.create({
-		data: {
+	const [created] = await db
+		.insert(OrganizationNoteStatus)
+		.values({
 			organizationId: organization.id,
 			name,
 			color,
 			position: nextPosition,
-		},
-		select: { id: true, name: true, color: true, position: true },
-	})
+		})
+		.returning({
+			id: OrganizationNoteStatus.id,
+			name: OrganizationNoteStatus.name,
+			color: OrganizationNoteStatus.color,
+			position: OrganizationNoteStatus.position,
+		})
 
 	return Response.json(created)
 }

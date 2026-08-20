@@ -1,4 +1,4 @@
-// Base User type based on Prisma schema
+// Base user type for authentication API responses
 export interface User {
 	id: string
 	email: string

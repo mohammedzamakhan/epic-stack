@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { db, eq, User, UserOrganization } from '@repo/database'
 import { data } from 'react-router'
 import { requireAuth } from '#app/utils/jwt.server.ts'
 import { type Route } from './+types/organizations.ts'
@@ -9,10 +9,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 		const payload = await requireAuth(request)
 
 		// Check if user exists
-		const user = await prisma.user.findUnique({
-			where: { id: payload.sub },
-			select: { id: true, email: true, username: true },
-		})
+		const [user] = await db
+			.select({ id: User.id, email: User.email, username: User.username })
+			.from(User)
+			.where(eq(User.id, payload.sub))
+			.limit(1)
 
 		if (!user) {
 			return data(
@@ -25,15 +26,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 			)
 		}
 
-		const userOrganizations = await prisma.userOrganization.findMany({
-			where: {
-				userId: payload.sub,
-				active: true,
-			},
-			select: {
-				isDefault: true,
+		const userOrganizations = await db.query.UserOrganization.findMany({
+			columns: { isDefault: true },
+			with: {
 				organization: {
-					select: {
+					columns: {
 						id: true,
 						name: true,
 						slug: true,
@@ -41,24 +38,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 						active: true,
 						createdAt: true,
 						updatedAt: true,
-						image: {
-							select: {
-								id: true,
-								objectKey: true,
-							},
-						},
 					},
+					with: { images: { columns: { id: true, objectKey: true } } },
 				},
 				organizationRole: {
-					select: {
-						id: true,
-						name: true,
-						level: true,
-					},
+					columns: { id: true, name: true, level: true },
 				},
 			},
-			orderBy: [{ isDefault: 'desc' }, { organization: { name: 'asc' } }],
+			where: (membership, { and, eq }) =>
+				and(eq(membership.userId, payload.sub), eq(membership.active, true)),
 		})
+		userOrganizations.sort(
+			(a, b) =>
+				Number(b.isDefault) - Number(a.isDefault) ||
+				a.organization.name.localeCompare(b.organization.name),
+		)
 
 		const organizations = userOrganizations.map((userOrg) => ({
 			id: userOrg.organization.id,
@@ -72,7 +66,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 				name: userOrg.organizationRole.name,
 				level: userOrg.organizationRole.level,
 			},
-			image: userOrg.organization.image?.objectKey,
+			image: userOrg.organization.images[0]?.objectKey,
 			createdAt: userOrg.organization.createdAt.toISOString(),
 			updatedAt: userOrg.organization.updatedAt.toISOString(),
 		}))

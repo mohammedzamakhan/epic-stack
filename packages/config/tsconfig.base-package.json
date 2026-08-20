@@ -8,6 +8,8 @@
 		"jsx": "react-jsx",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
 		"target": "ES2020",
 		"lib": ["ES2021", "DOM", "DOM.Iterable"],
 		"types": ["node"]

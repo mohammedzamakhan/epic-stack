@@ -1,5 +1,21 @@
 import { auditService, AuditAction } from '@repo/audit'
-import { prisma } from '@repo/database'
+import {
+	and,
+	count,
+	db,
+	desc,
+	eq,
+	gt,
+	inArray,
+	lte,
+	DataSubjectRequest,
+	Organization,
+	OrganizationRole,
+	RefreshToken,
+	Session,
+	User,
+	UserOrganization,
+} from '@repo/database'
 import { getClientIp } from '@repo/security'
 
 export const GDPR_DELETION_GRACE_PERIOD_DAYS = 7
@@ -82,14 +98,26 @@ async function getActiveRequest(
 	userId: string,
 	type: DataSubjectRequestType,
 ): Promise<{ id: string; status: string; scheduledFor: Date | null } | null> {
-	return prisma.dataSubjectRequest.findFirst({
-		where: {
-			userId,
-			type,
-			status: { in: ['requested', 'processing', 'scheduled'] },
-		},
-		select: { id: true, status: true, scheduledFor: true },
-	})
+	const [request] = await db
+		.select({
+			id: DataSubjectRequest.id,
+			status: DataSubjectRequest.status,
+			scheduledFor: DataSubjectRequest.scheduledFor,
+		})
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.userId, userId),
+				eq(DataSubjectRequest.type, type),
+				inArray(DataSubjectRequest.status, [
+					'requested',
+					'processing',
+					'scheduled',
+				]),
+			),
+		)
+		.limit(1)
+	return request ?? null
 }
 
 export async function createExportRequest(
@@ -110,16 +138,18 @@ export async function createExportRequest(
 		: undefined
 	const userAgent = request?.headers.get('user-agent') || undefined
 
-	const dsr = await prisma.dataSubjectRequest.create({
-		data: {
+	const [dsr] = await db
+		.insert(DataSubjectRequest)
+		.values({
 			userId,
 			type: 'export',
 			status: 'processing',
 			processedAt: new Date(),
 			ipAddress,
 			userAgent,
-		},
-	})
+		})
+		.returning({ id: DataSubjectRequest.id })
+	if (!dsr) throw new Error('Failed to create export request')
 
 	await auditService.log({
 		action: AuditAction.DATA_EXPORT_REQUESTED,
@@ -146,17 +176,17 @@ export async function generateUserDataExport(
 	const { gatherUserDataForExport } = await import('@repo/common/gdpr-export')
 	const exportData = await gatherUserDataForExport(userId, request)
 
-	await prisma.dataSubjectRequest.update({
-		where: { id: requestId },
-		data: {
+	await db
+		.update(DataSubjectRequest)
+		.set({
 			status: 'completed',
 			completedAt: new Date(),
 			metadata: JSON.stringify({
 				statistics: exportData.statistics,
 				schemaVersion: exportData.schemaVersion,
 			}),
-		},
-	})
+		})
+		.where(eq(DataSubjectRequest.id, requestId))
 
 	await auditService.log({
 		action: AuditAction.DATA_EXPORT_COMPLETED,
@@ -188,34 +218,37 @@ export async function createErasureRequest(
 		}
 	}
 
-	const userOrgsWithAdminRole = await prisma.userOrganization.findMany({
-		where: {
-			userId,
-			organizationRole: {
-				name: 'admin',
-			},
-		},
-		include: {
-			organization: {
-				include: {
-					users: {
-						where: {
-							organizationRole: {
-								name: 'admin',
-							},
-						},
-					},
-				},
-			},
-		},
-	})
-
-	const blockingOrgs = userOrgsWithAdminRole.filter(
-		(uo) => uo.organization.users.length === 1,
-	)
+	const adminMemberships = await db
+		.select({
+			organizationId: UserOrganization.organizationId,
+			name: Organization.name,
+		})
+		.from(UserOrganization)
+		.innerJoin(
+			OrganizationRole,
+			eq(UserOrganization.organizationRoleId, OrganizationRole.id),
+		)
+		.innerJoin(
+			Organization,
+			eq(UserOrganization.organizationId, Organization.id),
+		)
+		.where(
+			and(
+				eq(UserOrganization.userId, userId),
+				eq(OrganizationRole.name, 'admin'),
+			),
+		)
+	const blockingOrgs = []
+	for (const membership of adminMemberships) {
+		const [adminCount] = await db
+			.select({ value: count() })
+			.from(UserOrganization)
+			.where(eq(UserOrganization.organizationId, membership.organizationId))
+		if ((adminCount?.value ?? 0) === 1) blockingOrgs.push(membership)
+	}
 
 	if (blockingOrgs.length > 0) {
-		const orgNames = blockingOrgs.map((uo) => uo.organization.name).join(', ')
+		const orgNames = blockingOrgs.map((uo) => uo.name).join(', ')
 		return {
 			success: false,
 			error: `You are the sole admin of the following organizations: ${orgNames}. Please assign another admin before requesting account deletion.`,
@@ -230,27 +263,25 @@ export async function createErasureRequest(
 		: undefined
 	const userAgent = request?.headers.get('user-agent') || undefined
 
-	const dsr = await prisma.dataSubjectRequest.create({
-		data: {
+	const [dsr] = await db
+		.insert(DataSubjectRequest)
+		.values({
 			userId,
 			type: 'erasure',
 			status: 'scheduled',
 			scheduledFor,
 			ipAddress,
 			userAgent,
-		},
-	})
+		})
+		.returning({ id: DataSubjectRequest.id })
+	if (!dsr) throw new Error('Failed to create erasure request')
 
-	await prisma.session.deleteMany({
-		where: {
-			userId,
-		},
-	})
+	await db.delete(Session).where(eq(Session.userId, userId))
 
-	await prisma.refreshToken.updateMany({
-		where: { userId },
-		data: { revoked: true },
-	})
+	await db
+		.update(RefreshToken)
+		.set({ revoked: true })
+		.where(eq(RefreshToken.userId, userId))
 
 	await auditService.log({
 		action: AuditAction.DATA_DELETION_REQUESTED,
@@ -277,14 +308,18 @@ export async function cancelErasureRequest(
 	userId: string,
 	request?: Request,
 ): Promise<GdprRequestResult> {
-	const activeRequest = await prisma.dataSubjectRequest.findFirst({
-		where: {
-			userId,
-			type: 'erasure',
-			status: 'scheduled',
-			scheduledFor: { gt: new Date() },
-		},
-	})
+	const [activeRequest] = await db
+		.select()
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.userId, userId),
+				eq(DataSubjectRequest.type, 'erasure'),
+				eq(DataSubjectRequest.status, 'scheduled'),
+				gt(DataSubjectRequest.scheduledFor, new Date()),
+			),
+		)
+		.limit(1)
 
 	if (!activeRequest) {
 		return {
@@ -293,13 +328,13 @@ export async function cancelErasureRequest(
 		}
 	}
 
-	await prisma.dataSubjectRequest.update({
-		where: { id: activeRequest.id },
-		data: {
+	await db
+		.update(DataSubjectRequest)
+		.set({
 			status: 'cancelled',
 			cancelledAt: new Date(),
-		},
-	})
+		})
+		.where(eq(DataSubjectRequest.id, activeRequest.id))
 
 	await auditService.log({
 		action: AuditAction.DATA_DELETION_CANCELLED,
@@ -323,19 +358,27 @@ export async function getActiveErasureRequest(userId: string): Promise<{
 	scheduledFor: Date | null
 	requestedAt: Date
 } | null> {
-	return prisma.dataSubjectRequest.findFirst({
-		where: {
-			userId,
-			type: 'erasure',
-			status: { in: ['requested', 'processing', 'scheduled'] },
-		},
-		select: {
-			id: true,
-			status: true,
-			scheduledFor: true,
-			requestedAt: true,
-		},
-	})
+	const [request] = await db
+		.select({
+			id: DataSubjectRequest.id,
+			status: DataSubjectRequest.status,
+			scheduledFor: DataSubjectRequest.scheduledFor,
+			requestedAt: DataSubjectRequest.requestedAt,
+		})
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.userId, userId),
+				eq(DataSubjectRequest.type, 'erasure'),
+				inArray(DataSubjectRequest.status, [
+					'requested',
+					'processing',
+					'scheduled',
+				]),
+			),
+		)
+		.limit(1)
+	return request ?? null
 }
 
 export async function getLatestExportRequest(userId: string): Promise<{
@@ -344,19 +387,23 @@ export async function getLatestExportRequest(userId: string): Promise<{
 	completedAt: Date | null
 	requestedAt: Date
 } | null> {
-	return prisma.dataSubjectRequest.findFirst({
-		where: {
-			userId,
-			type: 'export',
-		},
-		orderBy: { requestedAt: 'desc' },
-		select: {
-			id: true,
-			status: true,
-			completedAt: true,
-			requestedAt: true,
-		},
-	})
+	const [request] = await db
+		.select({
+			id: DataSubjectRequest.id,
+			status: DataSubjectRequest.status,
+			completedAt: DataSubjectRequest.completedAt,
+			requestedAt: DataSubjectRequest.requestedAt,
+		})
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.userId, userId),
+				eq(DataSubjectRequest.type, 'export'),
+			),
+		)
+		.orderBy(desc(DataSubjectRequest.requestedAt))
+		.limit(1)
+	return request ?? null
 }
 
 export async function processDueErasureRequests(): Promise<{
@@ -365,18 +412,16 @@ export async function processDueErasureRequests(): Promise<{
 	errors: Array<{ requestId: string; error: string }>
 }> {
 	const now = new Date()
-	const dueRequests = await prisma.dataSubjectRequest.findMany({
-		where: {
-			type: 'erasure',
-			status: 'scheduled',
-			scheduledFor: { lte: now },
-		},
-		include: {
-			user: {
-				select: { id: true, email: true },
-			},
-		},
-	})
+	const dueRequests = await db
+		.select()
+		.from(DataSubjectRequest)
+		.where(
+			and(
+				eq(DataSubjectRequest.type, 'erasure'),
+				eq(DataSubjectRequest.status, 'scheduled'),
+				lte(DataSubjectRequest.scheduledFor, now),
+			),
+		)
 
 	const results = {
 		processed: 0,
@@ -386,26 +431,24 @@ export async function processDueErasureRequests(): Promise<{
 
 	for (const dsr of dueRequests) {
 		try {
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'processing',
 					processedAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
-			await prisma.user.delete({
-				where: { id: dsr.userId! },
-			})
+			if (dsr.userId) await db.delete(User).where(eq(User.id, dsr.userId))
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'completed',
 					completedAt: new Date(),
 					executedAt: new Date(),
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
 			await auditService.log({
 				action: AuditAction.DATA_DELETION_COMPLETED,
@@ -425,13 +468,13 @@ export async function processDueErasureRequests(): Promise<{
 			const errorMessage =
 				error instanceof Error ? error.message : 'Unknown error'
 
-			await prisma.dataSubjectRequest.update({
-				where: { id: dsr.id },
-				data: {
+			await db
+				.update(DataSubjectRequest)
+				.set({
 					status: 'failed',
 					failureReason: errorMessage,
-				},
-			})
+				})
+				.where(eq(DataSubjectRequest.id, dsr.id))
 
 			await auditService.log({
 				action: AuditAction.DATA_DELETION_FAILED,

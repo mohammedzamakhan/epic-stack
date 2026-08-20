@@ -4,7 +4,17 @@ import { createId as cuid } from '@paralleldrive/cuid2'
 import { logNoteActivity } from '@repo/audit'
 import { requireUserId } from '@repo/auth'
 import { markStepCompleted } from '@repo/common/onboarding'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	notInArray,
+	Organization,
+	OrganizationNote,
+	OrganizationNoteUpload,
+	UserOrganization,
+} from '@repo/database'
 import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
@@ -22,16 +32,23 @@ import { MAX_UPLOAD_SIZE, OrgNoteEditorSchema } from './__org-note-editor'
 export async function action({ request, params }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const orgSlug = params.orgSlug
+	if (!orgSlug)
+		throw new Response('Organization slug is required', { status: 400 })
 
 	// Find organization ID - ensure user is an active member
-	const organization = await prisma.organization.findFirst({
-		where: {
-			slug: orgSlug,
-			active: true,
-			users: { some: { userId, active: true } },
-		},
-		select: { id: true },
-	})
+	const [organization] = await db
+		.select({ id: Organization.id })
+		.from(Organization)
+		.innerJoin(
+			UserOrganization,
+			and(
+				eq(UserOrganization.organizationId, Organization.id),
+				eq(UserOrganization.userId, userId),
+				eq(UserOrganization.active, true),
+			),
+		)
+		.where(and(eq(Organization.slug, orgSlug), eq(Organization.active, true)))
+		.limit(1)
 
 	if (!organization) {
 		throw new Response('Organization not found or you do not have access', {
@@ -48,10 +65,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		typeof rawId === 'string' && rawId.trim() !== '' ? rawId.trim() : undefined
 
 	if (targetId) {
-		const existingNoteForAuth = await prisma.organizationNote.findFirst({
-			where: { id: targetId, organizationId: organization.id },
-			select: { id: true, createdById: true },
-		})
+		const [existingNoteForAuth] = await db
+			.select({
+				id: OrganizationNote.id,
+				createdById: OrganizationNote.createdById,
+			})
+			.from(OrganizationNote)
+			.where(
+				and(
+					eq(OrganizationNote.id, targetId),
+					eq(OrganizationNote.organizationId, organization.id),
+				),
+			)
+			.limit(1)
 
 		if (!existingNoteForAuth) {
 			throw new Response('Note not found', { status: 404 })
@@ -82,10 +108,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		schema: OrgNoteEditorSchema.superRefine(async (data, ctx) => {
 			if (!data.id) return
 
-			const note = await prisma.organizationNote.findUnique({
-				select: { id: true },
-				where: { id: data.id, organizationId: organization.id },
-			})
+			const [note] = await db
+				.select({ id: OrganizationNote.id })
+				.from(OrganizationNote)
+				.where(
+					and(
+						eq(OrganizationNote.id, data.id),
+						eq(OrganizationNote.organizationId, organization.id),
+					),
+				)
+				.limit(1)
 			if (!note) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
@@ -153,16 +185,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			: null
 
 	// Check if this is a new note or an update
-	const existingNote = await prisma.organizationNote.findFirst({
-		where: { id: noteId, organizationId: organization.id },
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			priority: true,
-			tags: true,
-		},
-	})
+	const [existingNote] = await db
+		.select({
+			id: OrganizationNote.id,
+			title: OrganizationNote.title,
+			content: OrganizationNote.content,
+			priority: OrganizationNote.priority,
+			tags: OrganizationNote.tags,
+		})
+		.from(OrganizationNote)
+		.where(
+			and(
+				eq(OrganizationNote.id, noteId),
+				eq(OrganizationNote.organizationId, organization.id),
+			),
+		)
+		.limit(1)
 
 	const isNewNote = !existingNote
 	let beforeSnapshot:
@@ -183,49 +221,70 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
-	const updatedNote = await prisma.organizationNote.upsert({
-		select: { id: true },
-		where: { id: noteId },
-		create: {
-			id: noteId,
+	const updatedNote = await db.transaction(async (tx) => {
+		const noteValues = {
 			title,
 			content: sanitizedContent,
 			priority: processedPriority,
 			tags: processedTags,
-			organization: { connect: { id: organization.id } },
-			createdBy: { connect: { id: userId } },
-			uploads: { create: newUploads },
-		},
-		update:
-			actionType === 'inline-edit'
-				? {
-						title,
-						content: sanitizedContent,
-					}
-				: {
-						title,
-						content: sanitizedContent,
-						priority: processedPriority,
-						tags: processedTags,
-						uploads: {
-							deleteMany: {
-								id: {
-									notIn: uploadUpdates
-										.map((u) => u.id)
-										.filter((id): id is string => Boolean(id)),
-								},
-							},
-							updateMany: uploadUpdates.map((updates) => ({
-								where: { id: updates.id },
-								data: {
-									...updates,
-									// If the upload is new, we need to generate a new ID to bust the cache.
-									id: updates.objectKey ? cuid() : updates.id,
-								},
-							})),
-							create: newUploads,
-						},
-					},
+		}
+		const [updated] = isNewNote
+			? await tx
+					.insert(OrganizationNote)
+					.values({
+						id: noteId,
+						...noteValues,
+						organizationId: organization.id,
+						createdById: userId,
+					})
+					.returning({ id: OrganizationNote.id })
+			: await tx
+					.update(OrganizationNote)
+					.set(
+						actionType === 'inline-edit'
+							? { title, content: sanitizedContent }
+							: noteValues,
+					)
+					.where(eq(OrganizationNote.id, noteId))
+					.returning({ id: OrganizationNote.id })
+		if (!updated) throw new Error('Failed to save note')
+
+		if (!isNewNote && actionType !== 'inline-edit') {
+			const retainedIds = uploadUpdates
+				.map((upload) => upload.id)
+				.filter((id): id is string => Boolean(id))
+			if (retainedIds.length > 0) {
+				await tx
+					.delete(OrganizationNoteUpload)
+					.where(
+						and(
+							eq(OrganizationNoteUpload.noteId, noteId),
+							notInArray(OrganizationNoteUpload.id, retainedIds),
+						),
+					)
+			} else {
+				await tx
+					.delete(OrganizationNoteUpload)
+					.where(eq(OrganizationNoteUpload.noteId, noteId))
+			}
+			for (const upload of uploadUpdates) {
+				if (upload.id) {
+					await tx
+						.update(OrganizationNoteUpload)
+						.set({
+							...upload,
+							id: upload.objectKey ? cuid() : upload.id,
+						})
+						.where(eq(OrganizationNoteUpload.id, upload.id))
+				}
+			}
+		}
+		if (newUploads.length > 0) {
+			await tx
+				.insert(OrganizationNoteUpload)
+				.values(newUploads.map((upload) => ({ ...upload, noteId })))
+		}
+		return updated
 	})
 
 	// Trigger processing background jobs for new media

@@ -8,7 +8,7 @@ import {
 } from '@repo/auth'
 import { combineResponseInits } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
-import { prisma } from '@repo/database'
+import { and, db, eq, Verification, Session } from '@repo/database'
 import { redirect } from 'react-router'
 import { safeRedirect } from 'remix-utils/safe-redirect'
 import { handleNewDeviceSignin } from '#app/utils/new-device-signin.server.tsx'
@@ -33,12 +33,16 @@ export async function handleNewSession(
 	},
 	responseInit?: ResponseInit,
 ) {
-	const verification = await prisma.verification.findUnique({
-		select: { id: true },
-		where: {
-			target_type: { target: session.userId, type: twoFAVerificationType },
-		},
-	})
+	const [verification] = await db
+		.select({ id: Verification.id })
+		.from(Verification)
+		.where(
+			and(
+				eq(Verification.target, session.userId),
+				eq(Verification.type, twoFAVerificationType),
+			),
+		)
+		.limit(1)
 	const userHasTwoFactor = Boolean(verification)
 
 	// Check for new device and send notification email (async, don't wait)
@@ -125,10 +129,11 @@ export async function handleVerification({
 
 	const unverifiedSessionId = verifySession.get(unverifiedSessionIdKey)
 	if (unverifiedSessionId) {
-		const session = await prisma.session.findUnique({
-			select: { expirationDate: true },
-			where: { id: unverifiedSessionId },
-		})
+		const [session] = await db
+			.select({ expirationDate: Session.expirationDate })
+			.from(Session)
+			.where(eq(Session.id, unverifiedSessionId))
+			.limit(1)
 		if (!session) {
 			throw await redirectWithToast('/login', {
 				type: 'error',
@@ -157,10 +162,11 @@ export async function handleVerification({
 	)
 
 	// Log successful login with 2FA (SOC 2 CC7.2)
-	const sessionForLog = await prisma.session.findUnique({
-		select: { userId: true },
-		where: { id: unverifiedSessionId || '' },
-	})
+	const [sessionForLog] = await db
+		.select({ userId: Session.userId })
+		.from(Session)
+		.where(eq(Session.id, unverifiedSessionId || ''))
+		.limit(1)
 	if (sessionForLog) {
 		void auditService.logAuth(
 			AuditAction.USER_LOGIN,
@@ -186,10 +192,16 @@ export async function shouldRequestTwoFA(request: Request) {
 	const userId = await getUserId(request)
 	if (!userId) return false
 	// if it's over two hours since they last verified, we should request 2FA again
-	const userHasTwoFA = await prisma.verification.findUnique({
-		select: { id: true },
-		where: { target_type: { target: userId, type: twoFAVerificationType } },
-	})
+	const [userHasTwoFA] = await db
+		.select({ id: Verification.id })
+		.from(Verification)
+		.where(
+			and(
+				eq(Verification.target, userId),
+				eq(Verification.type, twoFAVerificationType),
+			),
+		)
+		.limit(1)
 	if (!userHasTwoFA) return false
 	const verifiedTime = authSession.get(verifiedTimeKey) ?? new Date(0)
 	const twoHours = 1000 * 60 * 2

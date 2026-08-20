@@ -6,7 +6,7 @@ import { vi } from 'vitest'
 import {
 	type Integration,
 	type NoteIntegrationConnection,
-} from '@prisma/client'
+} from '@repo/database/types'
 import { BaseIntegrationProvider } from '../../src/provider'
 import {
 	type TokenData,

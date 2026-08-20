@@ -1,4 +1,12 @@
-import { prisma } from '@repo/database'
+import {
+	alias,
+	and,
+	db,
+	eq,
+	lte,
+	User,
+	ImpersonationSession,
+} from '@repo/database'
 import {
 	impersonationSessionStorage,
 	impersonationSessionKey,
@@ -21,6 +29,9 @@ export interface ImpersonationValidationResult {
 	invalidReason?: 'not_found' | 'expired' | 'ip_mismatch'
 }
 
+const adminUser = alias(User, 'adminUser')
+const targetUser = alias(User, 'targetUser')
+
 async function getImpersonationSessionId(
 	request: Request,
 ): Promise<string | null> {
@@ -38,13 +49,23 @@ export async function validateImpersonation(
 		return { valid: false, info: null }
 	}
 
-	const impersonationSession = await prisma.impersonationSession.findUnique({
-		where: { id: sessionId },
-		include: {
-			adminUser: { select: { id: true, name: true, username: true } },
-			targetUser: { select: { id: true, name: true, username: true } },
-		},
-	})
+	const [impersonationSession] = await db
+		.select({
+			adminUserId: ImpersonationSession.adminUserId,
+			targetUserId: ImpersonationSession.targetUserId,
+			ipHash: ImpersonationSession.ipHash,
+			createdAt: ImpersonationSession.createdAt,
+			expiresAt: ImpersonationSession.expiresAt,
+			adminName: adminUser.name,
+			adminUsername: adminUser.username,
+			targetName: targetUser.name,
+			targetUsername: targetUser.username,
+		})
+		.from(ImpersonationSession)
+		.innerJoin(adminUser, eq(ImpersonationSession.adminUserId, adminUser.id))
+		.innerJoin(targetUser, eq(ImpersonationSession.targetUserId, targetUser.id))
+		.where(eq(ImpersonationSession.id, sessionId))
+		.limit(1)
 
 	if (!impersonationSession) {
 		return { valid: false, info: null, invalidReason: 'not_found' }
@@ -64,12 +85,10 @@ export async function validateImpersonation(
 	const info: ImpersonationInfo = {
 		adminUserId: impersonationSession.adminUserId,
 		adminName:
-			impersonationSession.adminUser.name ||
-			impersonationSession.adminUser.username,
+			impersonationSession.adminName || impersonationSession.adminUsername,
 		targetUserId: impersonationSession.targetUserId,
 		targetName:
-			impersonationSession.targetUser.name ||
-			impersonationSession.targetUser.username,
+			impersonationSession.targetName || impersonationSession.targetUsername,
 		startedAt: impersonationSession.createdAt.toISOString(),
 		expiresAt: impersonationSession.expiresAt.toISOString(),
 	}
@@ -112,16 +131,16 @@ export async function destroyImpersonationSession(
 export async function deleteImpersonationSessionFromDb(
 	sessionId: string,
 ): Promise<void> {
-	await prisma.impersonationSession
-		.delete({ where: { id: sessionId } })
-		.catch(() => {
-			// Session may already be expired/deleted, ignore errors
-		})
+	await db
+		.delete(ImpersonationSession)
+		.where(eq(ImpersonationSession.id, sessionId))
+		.catch(() => {})
 }
 
 export async function cleanupExpiredImpersonationSessions(): Promise<number> {
-	const result = await prisma.impersonationSession.deleteMany({
-		where: { expiresAt: { lte: new Date() } },
-	})
-	return result.count
+	const deleted = await db
+		.delete(ImpersonationSession)
+		.where(lte(ImpersonationSession.expiresAt, new Date()))
+		.returning({ id: ImpersonationSession.id })
+	return deleted.length
 }

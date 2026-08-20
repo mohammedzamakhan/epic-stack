@@ -22,13 +22,6 @@ export const logos = [
 		row: 3,
 	},
 	{
-		src: '/logos/prisma.svg',
-		alt: 'Prisma',
-		href: 'https://prisma.io',
-		column: 2,
-		row: 2,
-	},
-	{
 		src: '/logos/zod.svg',
 		alt: 'Zod',
 		href: 'https://zod.dev/',

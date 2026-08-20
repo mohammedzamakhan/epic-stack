@@ -1,6 +1,6 @@
 import { parseWithZod } from '@conform-to/zod'
 import { verifySessionStorage, checkIsCommonPassword } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 import {
 	NameSchema,
@@ -89,10 +89,11 @@ export async function action({ request }: Route.ActionArgs) {
 
 		const submission = await parseWithZod(formData, {
 			schema: OnboardingFormSchema.superRefine(async (data, ctx) => {
-				const existingUser = await prisma.user.findUnique({
-					where: { username: data.username },
-					select: { id: true },
-				})
+				const [existingUser] = await db
+					.select({ id: User.id })
+					.from(User)
+					.where(eq(User.username, data.username))
+					.limit(1)
 				if (existingUser) {
 					ctx.addIssue({
 						path: ['username'],

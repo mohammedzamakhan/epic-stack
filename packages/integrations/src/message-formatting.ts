@@ -1,4 +1,4 @@
-import { type OrganizationNote } from './prisma-types'
+import { type OrganizationNote } from './database-types'
 import { type MessageData } from './types'
 
 /**

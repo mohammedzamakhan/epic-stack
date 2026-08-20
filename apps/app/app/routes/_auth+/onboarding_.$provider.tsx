@@ -16,7 +16,7 @@ import {
 import { useIsPending } from '@repo/common'
 import { redirectWithToast } from '@repo/common/toast'
 import { getPageTitle } from '@repo/config/brand'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import {
 	Card,
 	CardContent,
@@ -116,10 +116,11 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 	const submission = await parseWithZod(formData, {
 		schema: SignupFormSchema.superRefine(async (data, ctx) => {
-			const existingUser = await prisma.user.findUnique({
-				where: { username: data.username },
-				select: { id: true },
-			})
+			const [existingUser] = await db
+				.select({ id: User.id })
+				.from(User)
+				.where(eq(User.username, data.username))
+				.limit(1)
 			if (existingUser) {
 				ctx.addIssue({
 					path: ['username'],

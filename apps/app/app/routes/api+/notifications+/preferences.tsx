@@ -1,5 +1,5 @@
 import { requireUserId } from '@repo/auth'
-import { prisma } from '@repo/database'
+import { and, db, eq, NotificationPreference } from '@repo/database'
 import { checkHoneypot } from '@repo/security'
 
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
@@ -15,12 +15,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		return Response.json({ preferences: [] }, { status: 400 })
 	}
 
-	const preferences = await prisma.notificationPreference.findMany({
-		where: {
-			userId,
-			organizationId,
-		},
-	})
+	const preferences = await db
+		.select()
+		.from(NotificationPreference)
+		.where(
+			and(
+				eq(NotificationPreference.userId, userId),
+				eq(NotificationPreference.organizationId, organizationId),
+			),
+		)
 
 	return Response.json({ preferences })
 }
@@ -53,29 +56,33 @@ export async function action({ request }: ActionFunctionArgs) {
 	await userHasOrgAccess(request, organizationId)
 
 	// upsert
-	await prisma.notificationPreference.upsert({
-		where: {
-			userId_organizationId_workflow: {
-				userId,
-				organizationId,
-				workflow,
-			},
-		},
-		create: {
+	await db
+		.insert(NotificationPreference)
+		.values({
 			userId,
 			organizationId,
 			workflow,
 			[channel]: enabled,
-		},
-		update: {
-			[channel]: enabled,
-		},
-	})
+		})
+		.onConflictDoUpdate({
+			target: [
+				NotificationPreference.userId,
+				NotificationPreference.organizationId,
+				NotificationPreference.workflow,
+			],
+			set: { [channel]: enabled },
+		})
 
 	// Return updated preferences so the fetcher data stays populated
-	const preferences = await prisma.notificationPreference.findMany({
-		where: { userId, organizationId },
-	})
+	const preferences = await db
+		.select()
+		.from(NotificationPreference)
+		.where(
+			and(
+				eq(NotificationPreference.userId, userId),
+				eq(NotificationPreference.organizationId, organizationId),
+			),
+		)
 
 	return Response.json({ success: true, preferences })
 }

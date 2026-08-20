@@ -13,7 +13,6 @@ uniwind-env.d.ts
 
 /database/data.db
 /database/data.db-journal
-/tests/prisma
 
 /test-results/
 /playwright-report/

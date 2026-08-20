@@ -1,5 +1,5 @@
 import { parseWithZod } from '@conform-to/zod'
-import { prisma } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { NameSchema, UsernameSchema } from '@repo/validation'
 import { z } from 'zod'
 
@@ -20,10 +20,11 @@ export async function profileUpdateAction({
 	const submission = await parseWithZod(formData, {
 		async: true,
 		schema: ProfileFormSchema.superRefine(async ({ username }, ctx) => {
-			const existingUsername = await prisma.user.findUnique({
-				where: { username },
-				select: { id: true },
-			})
+			const [existingUsername] = await db
+				.select({ id: User.id })
+				.from(User)
+				.where(eq(User.username, username))
+				.limit(1)
 			if (existingUsername && existingUsername.id !== userId) {
 				ctx.addIssue({
 					path: ['username'],
@@ -42,14 +43,13 @@ export async function profileUpdateAction({
 
 	const { username, name } = submission.value
 
-	await prisma.user.update({
-		select: { username: true },
-		where: { id: userId },
-		data: {
+	await db
+		.update(User)
+		.set({
 			name: name,
 			username: username,
-		},
-	})
+		})
+		.where(eq(User.id, userId))
 
 	return Response.json({
 		result: submission.reply(),

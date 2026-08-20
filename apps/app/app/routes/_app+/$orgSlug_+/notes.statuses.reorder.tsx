@@ -1,5 +1,5 @@
 import { calculateReorderPosition } from '@repo/common'
-import { prisma } from '@repo/database'
+import { and, db, eq, ne, asc, OrganizationNoteStatus } from '@repo/database'
 import { type ActionFunction } from 'react-router'
 import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
 import {
@@ -25,22 +25,34 @@ export const action: ActionFunction = async ({ request, params }) => {
 	const targetIndex = Number(positionStr)
 
 	// Validate statusId
-	const statusToMove = await prisma.organizationNoteStatus.findFirst({
-		where: { id: statusId, organizationId: organization.id },
-	})
+	const [statusToMove] = await db
+		.select({ id: OrganizationNoteStatus.id })
+		.from(OrganizationNoteStatus)
+		.where(
+			and(
+				eq(OrganizationNoteStatus.id, statusId),
+				eq(OrganizationNoteStatus.organizationId, organization.id),
+			),
+		)
+		.limit(1)
 	if (!statusToMove) return new Response('Status not found', { status: 404 })
 
 	// Use a transaction to calculate and update position
-	await prisma.$transaction(async (tx) => {
+	await db.transaction(async (tx) => {
 		// Get all statuses in the organization (excluding the one being moved)
-		const allStatuses = await tx.organizationNoteStatus.findMany({
-			where: {
-				organizationId: organization.id,
-				id: { not: statusId },
-			},
-			select: { id: true, position: true },
-			orderBy: { position: 'asc' },
-		})
+		const allStatuses = await tx
+			.select({
+				id: OrganizationNoteStatus.id,
+				position: OrganizationNoteStatus.position,
+			})
+			.from(OrganizationNoteStatus)
+			.where(
+				and(
+					eq(OrganizationNoteStatus.organizationId, organization.id),
+					ne(OrganizationNoteStatus.id, statusId),
+				),
+			)
+			.orderBy(asc(OrganizationNoteStatus.position))
 
 		// Calculate the new fractional position using shared utility
 		const newPosition = calculateReorderPosition(
@@ -49,10 +61,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 		)
 
 		// Update the status with new position
-		await tx.organizationNoteStatus.update({
-			where: { id: statusId },
-			data: { position: newPosition },
-		})
+		await tx
+			.update(OrganizationNoteStatus)
+			.set({ position: newPosition })
+			.where(eq(OrganizationNoteStatus.id, statusId))
 	})
 
 	return new Response(null, { status: 204 })

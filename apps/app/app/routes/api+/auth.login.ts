@@ -1,7 +1,7 @@
 import { detectBot, slidingWindow } from '@arcjet/remix'
 import { parseWithZod } from '@conform-to/zod'
 import { auditService, AuditAction } from '@repo/audit'
-import { prisma } from '@repo/database'
+import { and, db, eq, Verification } from '@repo/database'
 import { arcjet, checkHoneypot } from '@repo/security'
 import { UsernameSchema, PasswordSchema } from '@repo/validation'
 import { data } from 'react-router'
@@ -115,9 +115,16 @@ export async function action({ request }: Route.ActionArgs) {
 	const { session } = submission.value
 
 	// Check if user has 2FA enrolled
-	const twoFactorVerification = await prisma.verification.findFirst({
-		where: { target: session.userId, type: '2fa' },
-	})
+	const [twoFactorVerification] = await db
+		.select()
+		.from(Verification)
+		.where(
+			and(
+				eq(Verification.target, session.userId),
+				eq(Verification.type, '2fa'),
+			),
+		)
+		.limit(1)
 
 	if (twoFactorVerification) {
 		const loginToken = create2FAToken(session.userId, session.id)

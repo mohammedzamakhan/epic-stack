@@ -1,5 +1,14 @@
 import { getClientIp } from '@repo/security'
-import { prisma } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	gt,
+	IpAddress,
+	IpAddressUser,
+	sql,
+	User,
+} from '@repo/database'
 
 export interface IpTrackingData {
 	ip: string
@@ -34,16 +43,19 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 		}
 
 		// Find or create IP address record
-		let ipRecord = await prisma.ipAddress.findUnique({
-			where: { ip: data.ip },
-		})
+		let [ipRecord] = await db
+			.select()
+			.from(IpAddress)
+			.where(eq(IpAddress.ip, data.ip))
+			.limit(1)
 
 		if (!ipRecord) {
 			// Try to get geolocation data (you can integrate with a service like ipapi.co)
 			const geoData = await getIpGeolocation(data.ip)
 
-			ipRecord = await prisma.ipAddress.create({
-				data: {
+			;[ipRecord] = await db
+				.insert(IpAddress)
+				.values({
 					ip: data.ip,
 					country: geoData?.country,
 					region: geoData?.region,
@@ -51,12 +63,17 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 					requestCount: 1,
 					lastRequestAt: new Date(),
 					lastUserAgent: data.userAgent,
-				},
-			})
+				})
+				.returning()
 		} else {
 			// Update existing record with simple counting
-			const updateData: any = {
-				requestCount: { increment: 1 },
+			const updateData: {
+				requestCount: ReturnType<typeof sql>
+				lastRequestAt: Date
+				lastUserAgent?: string
+				suspiciousScore?: ReturnType<typeof sql>
+			} = {
+				requestCount: sql`${IpAddress.requestCount} + 1`,
 				lastRequestAt: new Date(),
 			}
 
@@ -68,36 +85,37 @@ export async function trackIpRequest(data: IpTrackingData): Promise<void> {
 			// Simple suspicious activity detection
 			const isHighFrequency = await checkHighFrequencyRequests(data.ip)
 			if (isHighFrequency) {
-				updateData.suspiciousScore = { increment: 1 }
+				updateData.suspiciousScore = sql`${IpAddress.suspiciousScore} + 1`
 			}
 
-			await prisma.ipAddress.update({
-				where: { ip: data.ip },
-				data: updateData,
-			})
+			await db
+				.update(IpAddress)
+				.set(updateData)
+				.where(eq(IpAddress.ip, data.ip))
+		}
+
+		if (!ipRecord) {
+			throw new Error(`Unable to create IP record for ${data.ip}`)
 		}
 
 		// Track user-IP relationship if user is logged in
 		if (data.userId) {
-			await prisma.ipAddressUser.upsert({
-				where: {
-					userId_ipAddressId: {
-						userId: data.userId,
-						ipAddressId: ipRecord.id,
-					},
-				},
-				update: {
-					lastSeenAt: new Date(),
-					requestCount: { increment: 1 },
-				},
-				create: {
+			await db
+				.insert(IpAddressUser)
+				.values({
 					userId: data.userId,
 					ipAddressId: ipRecord.id,
-					firstSeenAt: new Date(),
 					lastSeenAt: new Date(),
+					firstSeenAt: new Date(),
 					requestCount: 1,
-				},
-			})
+				})
+				.onConflictDoUpdate({
+					target: [IpAddressUser.userId, IpAddressUser.ipAddressId],
+					set: {
+						lastSeenAt: new Date(),
+						requestCount: sql`${IpAddressUser.requestCount} + 1`,
+					},
+				})
 		}
 
 		// Check if IP is blacklisted
@@ -189,124 +207,127 @@ export async function blacklistIp(
 	reason: string,
 	blacklistedById: string,
 ): Promise<void> {
-	await prisma.ipAddress.upsert({
-		where: { ip },
-		update: {
-			isBlacklisted: true,
-			blacklistReason: reason,
-			blacklistedAt: new Date(),
-			blacklistedById,
-		},
-		create: {
+	await db
+		.insert(IpAddress)
+		.values({
 			ip,
 			isBlacklisted: true,
 			blacklistReason: reason,
 			blacklistedAt: new Date(),
 			blacklistedById,
 			requestCount: 0,
-		},
-	})
+		})
+		.onConflictDoUpdate({
+			target: IpAddress.ip,
+			set: {
+				isBlacklisted: true,
+				blacklistReason: reason,
+				blacklistedAt: new Date(),
+				blacklistedById,
+			},
+		})
 }
 
 export async function unblacklistIp(ip: string): Promise<void> {
-	await prisma.ipAddress.update({
-		where: { ip },
-		data: {
+	await db
+		.update(IpAddress)
+		.set({
 			isBlacklisted: false,
 			blacklistReason: null,
 			blacklistedAt: null,
 			blacklistedById: null,
 			suspiciousScore: 0, // Reset suspicious score
-		},
-	})
+		})
+		.where(eq(IpAddress.ip, ip))
 }
 
 export async function isIpBlacklisted(ip: string): Promise<boolean> {
-	const ipRecord = await prisma.ipAddress.findUnique({
-		where: { ip },
-		select: { isBlacklisted: true },
-	})
+	const [ipRecord] = await db
+		.select({ isBlacklisted: IpAddress.isBlacklisted })
+		.from(IpAddress)
+		.where(eq(IpAddress.ip, ip))
+		.limit(1)
 	return ipRecord?.isBlacklisted || false
 }
 
 // Get IP statistics for admin dashboard
 export async function getIpStats() {
-	const stats = await prisma.ipAddress.aggregate({
-		_count: { _all: true },
-		_sum: { requestCount: true },
-		where: { isBlacklisted: false },
-	})
-
-	const blacklistedCount = await prisma.ipAddress.count({
-		where: { isBlacklisted: true },
-	})
-
-	const suspiciousCount = await prisma.ipAddress.count({
-		where: {
-			suspiciousScore: { gt: 0 },
-			isBlacklisted: false,
-		},
-	})
+	const [stats] = await db
+		.select({
+			totalIps: sql<number>`count(*)`,
+			totalRequests: sql<number>`coalesce(sum(${IpAddress.requestCount}), 0)`,
+		})
+		.from(IpAddress)
+		.where(eq(IpAddress.isBlacklisted, false))
+	const [blacklisted] = await db
+		.select({ value: sql<number>`count(*)` })
+		.from(IpAddress)
+		.where(eq(IpAddress.isBlacklisted, true))
+	const [suspicious] = await db
+		.select({ value: sql<number>`count(*)` })
+		.from(IpAddress)
+		.where(
+			and(gt(IpAddress.suspiciousScore, 0), eq(IpAddress.isBlacklisted, false)),
+		)
 
 	return {
-		totalIps: stats._count._all || 0,
-		totalRequests: stats._sum.requestCount || 0,
-		blacklistedIps: blacklistedCount,
-		suspiciousIps: suspiciousCount,
+		totalIps: stats?.totalIps || 0,
+		totalRequests: stats?.totalRequests || 0,
+		blacklistedIps: blacklisted?.value || 0,
+		suspiciousIps: suspicious?.value || 0,
 	}
 }
 
 // Get users who have used a specific IP address - for admin use
 export async function getUsersByIpAddress(ip: string) {
-	const ipRecord = await prisma.ipAddress.findUnique({
-		where: { ip },
-		include: {
-			ipAddressUsers: {
-				include: {
-					user: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							email: true,
-							createdAt: true,
-							isBanned: true,
-						},
-					},
-				},
-				orderBy: {
-					lastSeenAt: 'desc',
-				},
+	return db
+		.select({
+			id: IpAddressUser.id,
+			userId: IpAddressUser.userId,
+			ipAddressId: IpAddressUser.ipAddressId,
+			firstSeenAt: IpAddressUser.firstSeenAt,
+			lastSeenAt: IpAddressUser.lastSeenAt,
+			requestCount: IpAddressUser.requestCount,
+			user: {
+				id: User.id,
+				name: User.name,
+				username: User.username,
+				email: User.email,
+				createdAt: User.createdAt,
+				isBanned: User.isBanned,
 			},
-		},
-	})
-
-	return ipRecord?.ipAddressUsers || []
+		})
+		.from(IpAddressUser)
+		.innerJoin(IpAddress, eq(IpAddressUser.ipAddressId, IpAddress.id))
+		.innerJoin(User, eq(IpAddressUser.userId, User.id))
+		.where(eq(IpAddress.ip, ip))
+		.orderBy(IpAddressUser.lastSeenAt)
 }
 
 // Get IP addresses used by a specific user - for admin use
 export async function getIpAddressesByUser(userId: string) {
-	const userIpConnections = await prisma.ipAddressUser.findMany({
-		where: { userId },
-		include: {
+	return db
+		.select({
+			id: IpAddressUser.id,
+			userId: IpAddressUser.userId,
+			ipAddressId: IpAddressUser.ipAddressId,
+			firstSeenAt: IpAddressUser.firstSeenAt,
+			lastSeenAt: IpAddressUser.lastSeenAt,
+			requestCount: IpAddressUser.requestCount,
 			ipAddress: {
-				select: {
-					id: true,
-					ip: true,
-					country: true,
-					region: true,
-					city: true,
-					isBlacklisted: true,
-					suspiciousScore: true,
-					createdAt: true,
-					lastRequestAt: true,
-				},
+				id: IpAddress.id,
+				ip: IpAddress.ip,
+				country: IpAddress.country,
+				region: IpAddress.region,
+				city: IpAddress.city,
+				isBlacklisted: IpAddress.isBlacklisted,
+				suspiciousScore: IpAddress.suspiciousScore,
+				createdAt: IpAddress.createdAt,
+				lastRequestAt: IpAddress.lastRequestAt,
 			},
-		},
-		orderBy: {
-			lastSeenAt: 'desc',
-		},
-	})
-
-	return userIpConnections
+		})
+		.from(IpAddressUser)
+		.innerJoin(IpAddress, eq(IpAddressUser.ipAddressId, IpAddress.id))
+		.where(eq(IpAddressUser.userId, userId))
+		.orderBy(IpAddressUser.lastSeenAt)
 }
