@@ -1,14 +1,15 @@
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
+import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
+import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
+import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import {
 	mockDb,
 	mockSelectResults,
 	mockUpdateReturning,
 	resetMockDb,
 } from '#tests/setup/drizzle-mock.ts'
-import { validateOrgAccess } from '#app/utils/organization/loader.server.ts'
-import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
-import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import { action as reorderNotesAction } from './notes.reorder.tsx'
 import { action as statusIdAction } from './notes.status.$statusId.tsx'
 import { action as reorderStatusesAction } from './notes.statuses.reorder.tsx'
@@ -52,7 +53,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

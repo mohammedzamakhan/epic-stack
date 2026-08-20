@@ -1,3 +1,4 @@
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
@@ -7,7 +8,7 @@ process.env.SESSION_SECRET = 'test-session-secret'
 process.env.DATABASE_URL = 'file:./data.db'
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

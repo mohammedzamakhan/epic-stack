@@ -12,6 +12,7 @@ import { Button } from '@repo/ui/button'
 import { FieldLabel } from '@repo/ui/field'
 import { Icon } from '@repo/ui/icon'
 import React, { useState, useRef, useCallback } from 'react'
+import { VideoPoster } from '#app/components/ui/video-poster.tsx'
 import { type MediaFieldset } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
 import { useDragAndDrop } from './use-drag-and-drop.tsx'
 import { createFileInputRef } from './use-file-input-ref.tsx'
@@ -32,10 +33,9 @@ interface MultiMediaUploadProps {
 		id: string
 		altText: string | null
 		objectKey: string
-		thumbnailKey?: string | null
-		status: string
 	}>
 	organizationId: string
+	mediaTransformBaseUrl?: string | null
 }
 
 export function MultiMediaUpload({
@@ -48,6 +48,7 @@ export function MultiMediaUpload({
 	existingImages = [],
 	existingVideos = [],
 	organizationId,
+	mediaTransformBaseUrl = null,
 }: MultiMediaUploadProps) {
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const [form] = useForm({ id: formId })
@@ -167,6 +168,7 @@ export function MultiMediaUpload({
 								existingImage={existingImage}
 								existingVideo={existingVideo}
 								organizationId={organizationId}
+								mediaTransformBaseUrl={mediaTransformBaseUrl}
 								onRemove={() => {
 									setPreviewUrls((prev) => {
 										const newMap = new Map(prev)
@@ -242,6 +244,7 @@ function MediaPreview({
 	existingImage,
 	existingVideo,
 	organizationId,
+	mediaTransformBaseUrl,
 	onRemove,
 	disabled,
 }: {
@@ -257,10 +260,9 @@ function MediaPreview({
 		id: string
 		altText: string | null
 		objectKey: string
-		thumbnailKey?: string | null
-		status: string
 	}
 	organizationId: string
+	mediaTransformBaseUrl?: string | null
 	onRemove: () => void
 	disabled?: boolean
 }) {
@@ -268,16 +270,12 @@ function MediaPreview({
 	const fields = meta.getFieldset()
 	const isVideo = file?.type.startsWith('video/') || existingVideo
 
-	// Handle existing media
 	const existingImageUrl = existingImage?.objectKey
 		? getNoteImgSrc(existingImage.objectKey, organizationId)
 		: null
 
-	const existingVideoThumbnail = existingVideo?.thumbnailKey
-		? getNoteImgSrc(existingVideo.thumbnailKey, organizationId)
-		: null
-
-	const mediaUrl = existingImageUrl ?? existingVideoThumbnail ?? previewUrl
+	const hasExistingVideo = Boolean(existingVideo?.objectKey)
+	const mediaUrl = existingImageUrl ?? previewUrl
 
 	return (
 		<fieldset
@@ -295,28 +293,30 @@ function MediaPreview({
 						!existingImageUrl && !existingVideo,
 				})}
 			>
-				{mediaUrl ? (
+				{mediaUrl || hasExistingVideo ? (
 					<div className="relative size-32 overflow-hidden rounded-lg">
-						<img
-							src={mediaUrl}
-							alt={fields.altText.initialValue ?? ''}
-							className="size-32 rounded-lg object-cover"
-							width={128}
-							height={128}
-						/>
+						{hasExistingVideo && existingVideo ? (
+							<VideoPoster
+								objectKey={existingVideo.objectKey}
+								organizationId={organizationId}
+								mediaTransformBaseUrl={mediaTransformBaseUrl}
+								alt={fields.altText.initialValue ?? ''}
+								className="size-32 rounded-lg"
+								width={128}
+								height={128}
+							/>
+						) : mediaUrl ? (
+							<img
+								src={mediaUrl}
+								alt={fields.altText.initialValue ?? ''}
+								className="size-32 rounded-lg object-cover"
+								width={128}
+								height={128}
+							/>
+						) : null}
 						{isVideo && (
 							<div className="absolute inset-0 flex items-center justify-center bg-black/30">
 								<Icon name="arrow-right" className="h-8 w-8 text-white" />
-							</div>
-						)}
-						{existingVideo?.status === 'processing' && (
-							<div className="absolute inset-0 flex items-center justify-center bg-black/50">
-								<div className="text-xs text-white">Processing...</div>
-							</div>
-						)}
-						{existingVideo?.status === 'failed' && (
-							<div className="absolute inset-0 flex items-center justify-center bg-red-500/50">
-								<Icon name="x" className="h-6 w-6 text-white" />
 							</div>
 						)}
 					</div>

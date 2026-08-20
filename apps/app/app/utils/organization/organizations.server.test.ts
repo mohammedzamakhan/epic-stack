@@ -1,16 +1,17 @@
 import { auditService, AuditAction } from '@repo/audit'
+import type * as DatabaseModule from '@repo/database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+	HOME_PAGE_SLUG,
+	HOME_PAGE_TITLE,
+} from '#app/utils/website/home-page.ts'
 import {
 	captureInserts,
 	mockDb,
 	mockSelectResults,
 	resetMockDb,
 } from '#tests/setup/drizzle-mock.ts'
-import {
-	HOME_PAGE_SLUG,
-	HOME_PAGE_TITLE,
-} from '#app/utils/website/home-page.ts'
 import { createOrganization } from './organizations.server.ts'
 
 type CreatedHomePageSection = {
@@ -33,7 +34,7 @@ vi.mock('@repo/auth', () => ({
 }))
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

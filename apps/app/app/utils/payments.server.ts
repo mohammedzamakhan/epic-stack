@@ -3,7 +3,6 @@
  * Uses @repo/payments for provider abstraction
  */
 
-import { type Organization } from '@repo/database/types'
 import { requireUserId } from '@repo/auth'
 import {
 	and,
@@ -15,6 +14,7 @@ import {
 	User,
 	UserOrganization,
 } from '@repo/database'
+import { type Organization } from '@repo/database/types'
 import { sendEmail, TrialEndingEmail } from '@repo/email'
 import {
 	createStripeProvider,

@@ -737,7 +737,7 @@ export const meta: MetaFunction = ({ location }) => {
   return [
     ...generateSeoMeta({
       title: 'Features | Epic Stack',
-      description: 'Explore the powerful features of Epic Stack including authentication, payments, background jobs, and more.',
+      description: 'Explore the powerful features of Epic Stack including authentication, payments, scheduled jobs, and more.',
       url: `https://epicstartup.com${location.pathname}`,
       keywords: ['features', 'saas', 'authentication', 'payments'],
     }),

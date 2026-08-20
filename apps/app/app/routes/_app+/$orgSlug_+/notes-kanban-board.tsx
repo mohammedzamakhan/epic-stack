@@ -53,8 +53,6 @@ type LoaderNote = {
 		type: string
 		altText: string | null
 		objectKey: string
-		thumbnailKey: string | null
-		status: string
 	}>
 }
 

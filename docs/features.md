@@ -30,6 +30,14 @@ Here are a few things you get today:
 - SQLite database access with [Drizzle](https://orm.drizzle.team/)
 - Role-based User Permissions
 - Image storage and serving with [Tigris](https://www.tigrisdata.com/)
+- Per-organization BYO S3 storage (see
+  [organization S3 storage](./organization-s3-storage.md))
+- On-demand video posters and hover clips via Cloudflare Media Transformations
+  (see
+  [scheduled jobs](./scheduled-jobs.md#video-note-media-no-background-jobs))
+- Scheduled control-plane maintenance via Cloudflare Cron Worker
+  (`apps/jobs-cron`) — audit archival, MCP token cleanup, GDPR erasure (see
+  [scheduled jobs](./scheduled-jobs.md))
 - Caching via [cachified](https://npm.im/@epic-web/cachified): Both in-memory
   and SQLite-based (with
   [better-sqlite3](https://github.com/WiseLibs/better-sqlite3))

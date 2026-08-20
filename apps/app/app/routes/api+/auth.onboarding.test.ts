@@ -1,5 +1,6 @@
 import type * as AuthModule from '@repo/auth'
 import { verifySessionStorage } from '@repo/auth'
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { resetMockDb } from '#tests/setup/drizzle-mock.ts'
@@ -29,7 +30,7 @@ vi.mock('@repo/auth', async (importOriginal) => {
 })
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

@@ -1,3 +1,4 @@
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Mock console methods to test logging
@@ -33,7 +34,7 @@ const mockSsoMonitoringService = {
 }
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb } = await import('#tests/setup/drizzle-mock.ts')
 	return {
 		...actual,

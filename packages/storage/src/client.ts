@@ -31,6 +31,13 @@ function getSignatureKey(
 	return kSigning
 }
 
+function encodeObjectKey(key: string) {
+	return key
+		.split('/')
+		.map((segment) => encodeURIComponent(segment))
+		.join('/')
+}
+
 function getBaseSignedRequestInfo({
 	method,
 	key,
@@ -38,17 +45,13 @@ function getBaseSignedRequestInfo({
 	uploadDate,
 	config,
 }: {
-	method: 'GET' | 'PUT' | 'DELETE'
+	method: 'GET' | 'HEAD' | 'PUT' | 'DELETE'
 	key: string
 	contentType?: string
 	uploadDate?: string
 	config: StorageConfig
 }) {
-	// URI encode the key for proper AWS Signature V4 handling
-	const encodedKey = key
-		.split('/')
-		.map((segment) => encodeURIComponent(segment))
-		.join('/')
+	const encodedKey = encodeObjectKey(key)
 	const url = `${config.endpoint}/${config.bucket}/${encodedKey}`
 	const endpoint = new URL(url)
 
@@ -135,7 +138,7 @@ function getSignedPutRequestInfo(
 	}
 }
 
-function getSignedDeleteRequestInfo(key: string, config: StorageConfig) {
+export function getSignedDeleteRequestInfo(key: string, config: StorageConfig) {
 	const { url, baseHeaders } = getBaseSignedRequestInfo({
 		method: 'DELETE',
 		key,
@@ -164,6 +167,40 @@ export function getSignedGetRequestInfo(key: string, config: StorageConfig) {
 	}
 }
 
+export function getSignedPutRequestInfoForKey(
+	key: string,
+	config: StorageConfig,
+	contentType: string,
+) {
+	const { url, baseHeaders } = getBaseSignedRequestInfo({
+		method: 'PUT',
+		key,
+		contentType,
+		config,
+	})
+
+	return {
+		url,
+		headers: {
+			...baseHeaders,
+			'Content-Type': contentType,
+		},
+	}
+}
+
+export function getSignedHeadRequestInfo(key: string, config: StorageConfig) {
+	const { url, baseHeaders } = getBaseSignedRequestInfo({
+		method: 'HEAD',
+		key,
+		config,
+	})
+
+	return {
+		url,
+		headers: baseHeaders,
+	}
+}
+
 /**
  * Get signed GET request info asynchronously (supports org-specific config)
  */
@@ -181,6 +218,124 @@ export async function getSignedGetRequestInfoAsync(
 		url,
 		headers: baseHeaders,
 	}
+}
+
+function buildCanonicalQueryString(params: Array<[string, string]>): string {
+	return params
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(
+			([key, value]) =>
+				`${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+		)
+		.join('&')
+}
+
+/**
+ * Build a query-string presigned GET URL (SigV4).
+ * Useful when a client must fetch without custom Authorization headers.
+ */
+export function getPresignedGetUrl(
+	key: string,
+	config: StorageConfig,
+	expiresInSeconds = 3600,
+) {
+	const encodedKey = encodeObjectKey(key)
+	const endpoint = new URL(`${config.endpoint}/${config.bucket}/${encodedKey}`)
+	const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '')
+	const dateStamp = amzDate.slice(0, 8)
+	const algorithm = 'AWS4-HMAC-SHA256'
+	const credentialScope = `${dateStamp}/${config.region}/s3/aws4_request`
+	const canonicalQueryString = buildCanonicalQueryString([
+		['X-Amz-Algorithm', algorithm],
+		['X-Amz-Credential', `${config.accessKey}/${credentialScope}`],
+		['X-Amz-Date', amzDate],
+		['X-Amz-Expires', String(expiresInSeconds)],
+		['X-Amz-SignedHeaders', 'host'],
+	])
+	const canonicalHeaders = `host:${endpoint.host}\n`
+	const signedHeaders = 'host'
+	const canonicalRequest = [
+		'GET',
+		`/${config.bucket}/${encodedKey}`,
+		canonicalQueryString,
+		canonicalHeaders,
+		signedHeaders,
+		'UNSIGNED-PAYLOAD',
+	].join('\n')
+	const stringToSign = [
+		algorithm,
+		amzDate,
+		credentialScope,
+		sha256(canonicalRequest),
+	].join('\n')
+	const signingKey = getSignatureKey(
+		config.secretKey,
+		dateStamp,
+		config.region,
+		's3',
+	)
+	const signature = createHmac('sha256', signingKey)
+		.update(stringToSign)
+		.digest('hex')
+
+	const url = new URL(endpoint.toString())
+	url.search = `${canonicalQueryString}&X-Amz-Signature=${signature}`
+
+	return url.toString()
+}
+
+/**
+ * Build a query-string presigned PUT URL (SigV4).
+ */
+export function getPresignedPutUrl(
+	key: string,
+	config: StorageConfig,
+	contentType: string,
+	expiresInSeconds = 3600,
+) {
+	const encodedKey = encodeObjectKey(key)
+	const endpoint = new URL(`${config.endpoint}/${config.bucket}/${encodedKey}`)
+	const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '')
+	const dateStamp = amzDate.slice(0, 8)
+	const algorithm = 'AWS4-HMAC-SHA256'
+	const credentialScope = `${dateStamp}/${config.region}/s3/aws4_request`
+	const canonicalQueryString = buildCanonicalQueryString([
+		['X-Amz-Algorithm', algorithm],
+		['X-Amz-Credential', `${config.accessKey}/${credentialScope}`],
+		['X-Amz-Date', amzDate],
+		['X-Amz-Expires', String(expiresInSeconds)],
+		['X-Amz-SignedHeaders', 'content-type;host'],
+	])
+	const canonicalHeaders = `content-type:${contentType}\nhost:${endpoint.host}\n`
+	const signedHeaders = 'content-type;host'
+	const canonicalRequest = [
+		'PUT',
+		`/${config.bucket}/${encodedKey}`,
+		canonicalQueryString,
+		canonicalHeaders,
+		signedHeaders,
+		'UNSIGNED-PAYLOAD',
+	].join('\n')
+	const stringToSign = [
+		algorithm,
+		amzDate,
+		credentialScope,
+		sha256(canonicalRequest),
+	].join('\n')
+	const signingKey = getSignatureKey(
+		config.secretKey,
+		dateStamp,
+		config.region,
+		's3',
+	)
+	const signature = createHmac('sha256', signingKey)
+		.update(stringToSign)
+		.digest('hex')
+
+	const url = new URL(endpoint.toString())
+	url.search = `${canonicalQueryString}&X-Amz-Signature=${signature}`
+
+	return url.toString()
 }
 
 /**

@@ -14,6 +14,7 @@ import {
 	uploadWebsiteAsset as _uploadWebsiteAsset,
 	uploadSiteFont as _uploadSiteFont,
 	getSignedGetRequestInfo as _getSignedGetRequestInfo,
+	getSignedHeadRequestInfo as _getSignedHeadRequestInfo,
 	testS3Connection as _testS3Connection,
 	type StorageConfig,
 	type UploadOptions,
@@ -229,6 +230,24 @@ export async function getSignedGetRequestInfoAsync(
 		},
 	)
 	return { url, headers }
+}
+
+export async function getSignedHeadRequestInfoAsync(
+	key: string,
+	organizationId?: string,
+) {
+	const config = await storageClient.getConfig(organizationId, {
+		getOrganizationConfig: async (orgId) => {
+			const [configRow] = await db
+				.select()
+				.from(OrganizationS3Config)
+				.where(eq(OrganizationS3Config.organizationId, orgId))
+				.limit(1)
+			return configRow ?? null
+		},
+		decrypt: (encrypted) => decrypt(encrypted, getSSOMasterKey()),
+	})
+	return _getSignedHeadRequestInfo(key, config)
 }
 
 export async function testS3Connection(config: StorageConfig) {

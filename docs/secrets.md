@@ -22,11 +22,13 @@ directory.
 
 Tenant Sites phone auth adds secrets that **do not belong on Sites**:
 
-| Secret                   | Where                  | Purpose                                              |
-| ------------------------ | ---------------------- | ---------------------------------------------------- |
-| `JWT_SECRET`             | Each tenant-api        | Sign customer access tokens. Unique per region.      |
-| `AUTH_HMAC_SECRET`       | Each tenant-api        | Hash OTP codes and refresh tokens.                   |
-| `INTERNAL_COMMAND_TOKEN` | App + every tenant-api | Provision/deprovision only (`{ orgId }`). ≥16 chars. |
+| Secret                     | Where                              | Purpose                                                                                                        |
+| -------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`               | Each tenant-api                    | Sign customer access tokens. Unique per region.                                                                |
+| `AUTH_HMAC_SECRET`         | Each tenant-api                    | Hash OTP codes and refresh tokens.                                                                             |
+| `INTERNAL_COMMAND_TOKEN`   | App + every tenant-api + jobs-cron | Provision/deprovision on tenant-api; cron POSTs to `/resources/jobs/*` on App. ≥16 chars.                      |
+| `JOBS_CRON_WORKER_URL`     | App only                           | Public URL of `apps/jobs-cron`; starts storage migration workflows.                                            |
+| `MEDIA_TRANSFORM_BASE_URL` | App only                           | Cloudflare-proxied app URL with Media Transformations enabled. On-demand video posters/clips. Optional in dev. |
 
 Sites only needs public API **URLs** (`PUBLIC_TENANT_API_URL`,
 `PUBLIC_TENANT_API_URL_KSA`) injected into HTML. Local `.env.schema` values
@@ -34,7 +36,8 @@ contain `do-not-use-in-prod` and are rejected at tenant-api startup in
 production. Full list: [tenant data residency](./tenant-data-residency.md).
 
 App/Admin production secrets use `fly secrets set`. Tenant-api production
-secrets live in `/opt/tenant-api/.env` on each OCI VM.
+secrets live in `/opt/tenant-api/.env` on each OCI VM. The jobs-cron Worker uses
+`wrangler secret put` (see [scheduled jobs](./scheduled-jobs.md)).
 
 You can also put the real value of the secret in `.env` which is `.gitignore`d
 so you can interact with the real service if you need to during development.

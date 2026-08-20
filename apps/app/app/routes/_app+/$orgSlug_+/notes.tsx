@@ -4,13 +4,10 @@ import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
 import { getNotesViewMode, setNotesViewMode, useDebounce } from '@repo/common'
 import {
-	and,
 	db,
-	desc,
 	eq,
 	Organization,
 	OrganizationImage,
-	OrganizationNote,
 	OrganizationNoteStatus,
 } from '@repo/database'
 import { useDirection } from '@repo/ui'
@@ -33,6 +30,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 } from 'react-router'
+import { ENV } from 'varlock/env'
 import { EmptyState } from '#app/components/empty-state.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
@@ -104,8 +102,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 						type: true,
 						altText: true,
 						objectKey: true,
-						thumbnailKey: true,
-						status: true,
 					},
 				},
 				user: {
@@ -157,11 +153,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			statusId: note.statusId ?? null,
 			statusName: note.status?.name ?? null,
 			position: note.position ?? null,
-			uploads: note.organizationNoteUploads.map((upload) => ({
-				...upload,
-				thumbnailKey: upload.thumbnailKey ?? null,
-				status: upload.status ?? 'pending',
-			})),
+			uploads: note.organizationNoteUploads,
 		}))
 
 	return {
@@ -170,6 +162,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		statuses,
 		viewMode,
 		searchQuery,
+		mediaTransformBaseUrl: ENV.MEDIA_TRANSFORM_BASE_URL?.trim() || null,
 	}
 }
 
@@ -214,8 +207,6 @@ export default function NotesRoute({
 				type: string
 				altText: string | null
 				objectKey: string
-				thumbnailKey: string | null
-				status: string
 			}>
 			createdBy?: {
 				name: string | null
@@ -233,6 +224,7 @@ export default function NotesRoute({
 		}>
 		viewMode: 'cards' | 'kanban'
 		searchQuery: string
+		mediaTransformBaseUrl: string | null
 	}
 }) {
 	const { _ } = useLingui()

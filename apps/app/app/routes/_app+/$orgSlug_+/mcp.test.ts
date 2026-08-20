@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker'
 import { invariant } from '@epic-web/invariant'
+import { faker } from '@faker-js/faker'
 import {
 	MCPAccessToken,
 	MCPAuthorization,

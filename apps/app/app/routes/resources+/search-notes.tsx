@@ -1,13 +1,6 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { requireUserId } from '@repo/auth'
-import {
-	and,
-	db,
-	eq,
-	like,
-	Organization,
-	OrganizationNote,
-} from '@repo/database'
+import { and, db, eq, like, Organization } from '@repo/database'
 import { type LoaderFunctionArgs } from 'react-router'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 

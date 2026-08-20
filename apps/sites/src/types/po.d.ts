@@ -1,3 +1,4 @@
 declare module '*.po' {
-	export const messages: import('@lingui/core').Messages
+	import { type Messages } from '@lingui/core'
+	export const messages: Messages
 }

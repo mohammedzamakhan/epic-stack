@@ -31,6 +31,7 @@ import {
 	type LoaderFunctionArgs,
 	data,
 } from 'react-router'
+import { ENV } from 'varlock/env'
 import { z } from 'zod'
 
 // Simple error boundary for lazy-loaded components
@@ -71,6 +72,7 @@ import {
 	CanEditNote,
 	CanDeleteNote,
 } from '#app/components/permissions/permission-guard.tsx'
+import { VideoPoster } from '#app/components/ui/video-poster.tsx'
 
 import {
 	requireUserWithOrganizationPermission,
@@ -140,8 +142,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 					type: true,
 					altText: true,
 					objectKey: true,
-					thumbnailKey: true,
-					status: true,
 				},
 			},
 			organization: { columns: { slug: true, id: true } },
@@ -314,6 +314,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			isActive: int.isActive,
 		})),
 		userPermissions,
+		mediaTransformBaseUrl: ENV.MEDIA_TRANSFORM_BASE_URL?.trim() || null,
 	}
 }
 
@@ -456,8 +457,6 @@ type NoteLoaderData = {
 			type: string
 			altText: string | null
 			objectKey: string
-			thumbnailKey: string | null
-			status: string
 		}[]
 		organization: { slug: string; id: string }
 		noteAccess: Array<{
@@ -550,6 +549,7 @@ type NoteLoaderData = {
 			}>
 		}
 	} | null
+	mediaTransformBaseUrl: string | null
 }
 
 export default function NoteRoute() {
@@ -563,6 +563,7 @@ export default function NoteRoute() {
 		activityLogs,
 		connections,
 		availableIntegrations,
+		mediaTransformBaseUrl,
 	} = useLoaderData() as NoteLoaderData
 
 	// Add ref for auto-focusing
@@ -712,26 +713,20 @@ export default function NoteRoute() {
 										</li>
 									))}
 								{note.uploads
-									.filter(
-										(upload) =>
-											upload.type === 'video' &&
-											upload.thumbnailKey &&
-											upload.status === 'completed',
-									)
+									.filter((upload) => upload.type === 'video')
 									.map((video) => (
 										<li key={video.objectKey}>
-											<div className="relative">
-												<Img
-													src={getNoteImgSrc(
-														video.thumbnailKey!,
-														note.organization.id,
-													)}
+											<div className="relative size-32 overflow-hidden rounded-lg">
+												<VideoPoster
+													objectKey={video.objectKey}
+													organizationId={note.organization.id}
+													mediaTransformBaseUrl={mediaTransformBaseUrl}
 													alt={video.altText ?? 'Video thumbnail'}
-													className="size-32 rounded-lg object-cover"
+													className="size-32 rounded-lg"
 													width={512}
 													height={512}
 												/>
-												<div className="absolute inset-0 flex items-center justify-center">
+												<div className="pointer-events-none absolute inset-0 flex items-center justify-center">
 													<div className="rounded-full bg-black/50 p-2">
 														<Icon
 															name="arrow-right"

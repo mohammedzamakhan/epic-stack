@@ -24,6 +24,7 @@ import { Field, ErrorList } from '#app/components/forms.tsx'
 export const S3StorageSchema = z
 	.object({
 		s3Enabled: z.boolean().default(false),
+		s3MigrateExistingFiles: z.boolean().optional(),
 		s3Endpoint: z.string().url().optional().or(z.literal('')),
 		s3BucketName: z
 			.string()
@@ -62,6 +63,16 @@ export const S3StorageSchema = z
 	)
 
 export const s3StorageActionIntent = 'update-s3-storage'
+export const startS3MigrationActionIntent = 'start-s3-migration'
+
+interface StorageMigrationStatus {
+	id: string
+	status: string
+	totalObjects: number
+	processedObjects: number
+	failedObjects: number
+	lastError: string | null
+}
 
 interface Organization {
 	id: string
@@ -101,11 +112,11 @@ function Switch({
 
 	return (
 		<>
-			{/* <input name={name} id={props.id} hidden /> */}
+			<input type="hidden" name={name} value={control.value ?? ''} />
 			<ShadcnSwitch
 				{...props}
-				name={name}
-				checked={control.value === 'on' ? true : false}
+				name={undefined}
+				checked={control.value === 'on'}
 				onCheckedChange={(checked) => control.change(checked ? 'on' : '')}
 				onBlur={() => control.blur()}
 			/>
@@ -116,11 +127,18 @@ function Switch({
 export function S3StorageCard({
 	organization,
 	actionData,
+	activeMigration,
+	latestMigration,
+	mediaFileCount,
 }: {
 	organization: Organization
 	actionData?: any
+	activeMigration?: StorageMigrationStatus | null
+	latestMigration?: StorageMigrationStatus | null
+	mediaFileCount: number
 }) {
 	const fetcher = useFetcher()
+	const migrationFetcher = useFetcher()
 
 	const [form, fields] = useForm({
 		id: 's3-storage-form',
@@ -140,6 +158,20 @@ export function S3StorageCard({
 	})
 
 	const testConnectionFetcher = useFetcher()
+	const migration = activeMigration ?? latestMigration
+	const migrationInProgress =
+		activeMigration?.status === 'pending' ||
+		activeMigration?.status === 'running'
+	const canStartMigration =
+		organization.s3Config?.isEnabled &&
+		mediaFileCount > 0 &&
+		!migrationInProgress
+
+	const processedObjects = migration?.processedObjects ?? 0
+	const totalObjects = migration?.totalObjects ?? 0
+	const failedObjects = migration?.failedObjects ?? 0
+	const failedObjectsText =
+		failedObjects > 0 ? ` (${failedObjects} failed)` : ''
 
 	return (
 		<Card>
@@ -281,13 +313,75 @@ export function S3StorageCard({
 									)}
 								</div>
 
+								{mediaFileCount > 0 ? (
+									<div className="rounded-lg border p-4">
+										<Label className="flex items-start gap-2">
+											<input
+												type="checkbox"
+												name="s3MigrateExistingFiles"
+												value="on"
+												className="mt-1"
+											/>
+											<span className="space-y-1">
+												<span className="block font-medium">
+													<Trans>Migrate existing org media after saving</Trans>
+												</span>
+												<span className="text-muted-foreground block text-sm">
+													<Trans>
+														Copy {mediaFileCount} note and comment media files
+														from the previous storage location into this bucket.
+													</Trans>
+												</span>
+											</span>
+										</Label>
+									</div>
+								) : null}
+
 								<ErrorList id={form.errorId} errors={form.errors} />
 							</div>
 						)}
 					</fetcher.Form>
 				</div>
+
+				{migration ? (
+					<div className="rounded-lg border p-4">
+						<p className="font-medium">
+							<Trans>Storage migration</Trans>{' '}
+							<span className="text-muted-foreground text-sm capitalize">
+								({migration.status})
+							</span>
+						</p>
+						<p className="text-muted-foreground mt-1 text-sm">
+							<Trans>
+								{processedObjects} of {totalObjects} files copied
+								{failedObjectsText}
+							</Trans>
+						</p>
+						{migration.lastError ? (
+							<p className="mt-2 text-sm text-red-600">{migration.lastError}</p>
+						) : null}
+					</div>
+				) : null}
 			</CardContent>
 			<CardFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+				{canStartMigration ? (
+					<migrationFetcher.Form method="POST" className="contents">
+						<input
+							type="hidden"
+							name="intent"
+							value={startS3MigrationActionIntent}
+						/>
+						<StatusButton
+							type="submit"
+							variant="outline"
+							size="sm"
+							status={migrationFetcher.state !== 'idle' ? 'pending' : 'idle'}
+						>
+							<Icon name="refresh-cw" className="mr-1 h-4 w-4" />
+							<Trans>Migrate existing media</Trans>
+						</StatusButton>
+					</migrationFetcher.Form>
+				) : null}
 				{fields.s3Endpoint.value &&
 					fields.s3BucketName.value &&
 					fields.s3AccessKeyId.value &&

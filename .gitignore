@@ -3,6 +3,7 @@ node_modules
 
 /build
 .env
+.dev.vars
 .cache
 .astro/
 .next/
@@ -71,3 +72,8 @@ graph.html
 .wrangler/
 .commandcode/
 .jules/
+data.db-wal
+data.db-shm
+base.db
+data.*.db-wal
+data.*.db-shm

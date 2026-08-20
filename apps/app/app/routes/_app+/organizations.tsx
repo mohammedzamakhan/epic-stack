@@ -6,8 +6,6 @@ import {
 	and,
 	db,
 	eq,
-	gte,
-	desc,
 	OrganizationInvitation,
 	User,
 	UserOrganization,

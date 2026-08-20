@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `npm run dev` (wrangler dev).
+# INTERNAL_COMMAND_TOKEN must match apps/app (default in .env.schema).
+
+INTERNAL_COMMAND_TOKEN=dev-internal-command-token-do-not-use-in-prod
+APP_BASE_URL=http://localhost:3001

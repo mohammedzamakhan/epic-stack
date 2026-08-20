@@ -17,18 +17,21 @@ App and Admin deploy to Fly.io:
 
 ## Cloudflare Deployment
 
-The **CMS** deploys to **Cloudflare Workers** (via OpenNext) — not Fly.io, and
-not MongoDB. `wrangler.jsonc` declares Cloudflare **D1** (SQLite) and **R2**
-(media storage) bindings for it, but Payload isn't wired to use either yet;
+The **CMS** and **jobs-cron** Worker deploy to **Cloudflare Workers** — not
+Fly.io. The CMS uses OpenNext; jobs-cron uses Cron Triggers only.
+
+`wrangler.jsonc` for CMS declares Cloudflare **D1** (SQLite) and **R2**
+(media storage) bindings, but Payload isn't wired to use either yet;
 it currently runs on local SQLite and local file storage in every
-environment. See [CMS storage](/docs/cms-storage.md). The marketing
+environment. See [CMS storage](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/cms-storage.md). The marketing
 **Website** and **Sites** deploy to Cloudflare Pages.
 
 Regional **tenant-api** (customer PII, per-org SQLite) deploys to **Oracle Cloud
 Ampere** in Ashburn and Riyadh. See the repo docs:
-[Deployment](/docs/deployment.md),
-[Deployment checklist](/docs/deployment-checklist.md), and
-[Tenant data residency](/docs/tenant-data-residency.md).
+[Deployment](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment.md),
+[Deployment checklist](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/deployment-checklist.md),
+[Scheduled jobs](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/scheduled-jobs.md), and
+[Tenant data residency](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/tenant-data-residency.md).
 
 ## Server Requirements
 
@@ -44,6 +47,8 @@ Key environment variables include:
 
 - `SESSION_SECRET` - Required for secure sessions
 - `DATABASE_URL` - Database connection string
+- `INTERNAL_COMMAND_TOKEN` - App, tenant-api, and jobs-cron (internal POST auth)
+- `MEDIA_TRANSFORM_BASE_URL` - App; Cloudflare video transforms (production)
 - Various authentication provider keys (if using OAuth)
 
 ## CI/CD Pipeline

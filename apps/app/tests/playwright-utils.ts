@@ -1,5 +1,4 @@
 import { test as base } from '@playwright/test'
-import { type User as UserModel } from '@repo/database/types'
 import {
 	authSessionStorage,
 	MOCK_CODE_GITHUB_HEADER,
@@ -10,17 +9,16 @@ import {
 } from '@repo/auth'
 import { cookieConsentCookie } from '@repo/common/cookie-consent'
 import {
-	and,
 	db,
 	eq,
 	Password,
 	Session,
 	User,
-	UserImage,
 	WebsitePage,
 	Role,
 	_RoleToUser,
 } from '@repo/database'
+import { type User as UserModel } from '@repo/database/types'
 import * as setCookieParser from 'set-cookie-parser'
 import { createUser } from './db-utils.ts'
 import {

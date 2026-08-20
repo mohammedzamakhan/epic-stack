@@ -1,3 +1,4 @@
+import type * as DatabaseModule from '@repo/database'
 import { sendEmail } from '@repo/email'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -16,7 +17,7 @@ vi.hoisted(() => {
 })
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

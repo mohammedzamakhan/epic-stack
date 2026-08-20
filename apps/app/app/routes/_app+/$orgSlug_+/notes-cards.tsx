@@ -15,6 +15,7 @@ import DOMPurify from 'isomorphic-dompurify'
 import { Img } from 'openimg/react'
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useRouteLoaderData, useFetcher } from 'react-router'
+import { VideoPoster } from '#app/components/ui/video-poster.tsx'
 import { type loader } from './notes'
 
 type LoaderNote = {
@@ -32,8 +33,6 @@ type LoaderNote = {
 		type: string
 		altText: string | null
 		objectKey: string
-		thumbnailKey: string | null
-		status: string
 	}>
 }
 
@@ -58,8 +57,6 @@ export type Note = {
 		type: string
 		altText: string | null
 		objectKey: string
-		thumbnailKey: string | null
-		status: string
 	}>
 }
 
@@ -201,13 +198,12 @@ export const NoteCard = ({
 		[note.id],
 	)
 
-	// Get the first media item for display (prioritize videos with thumbnails, then images)
-	const firstVideo = note.uploads.find(
-		(u) => u.type === 'video' && u.thumbnailKey && u.status === 'completed',
-	)
+	// Get the first media item for display (prioritize videos, then images)
+	const firstVideo = note.uploads.find((u) => u.type === 'video')
 	const firstImage = note.uploads.find((u) => u.type === 'image')
 	const firstMedia = firstVideo || firstImage
 	const isVideo = !!firstVideo
+	const mediaTransformBaseUrl = loaderData?.mediaTransformBaseUrl ?? null
 
 	// Parse tags from JSON string - memoized to avoid re-parsing on every render
 	const tags = useMemo(() => {
@@ -290,22 +286,25 @@ export const NoteCard = ({
 						<div className="relative mb-2 h-[160px] w-full rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]">
 							{firstMedia ? (
 								<>
-									<Img
-										src={
-											isVideo && firstVideo?.thumbnailKey
-												? getNoteImgSrc(firstVideo.thumbnailKey, organizationId)
-												: firstImage
-													? getNoteImgSrc(firstImage.objectKey, organizationId)
-													: ''
-										}
-										alt={
-											firstMedia.altText ||
-											(isVideo ? 'Video thumbnail' : 'Note image')
-										}
-										className="absolute inset-0 h-full w-full rounded-xl object-cover transition-all duration-300"
-										width={200}
-										height={200}
-									/>
+									{isVideo && firstVideo ? (
+										<VideoPoster
+											objectKey={firstVideo.objectKey}
+											organizationId={organizationId}
+											mediaTransformBaseUrl={mediaTransformBaseUrl}
+											alt={firstVideo.altText || 'Video thumbnail'}
+											className="absolute inset-0 h-full w-full rounded-xl transition-all duration-300"
+											width={200}
+											height={200}
+										/>
+									) : firstImage ? (
+										<Img
+											src={getNoteImgSrc(firstImage.objectKey, organizationId)}
+											alt={firstImage.altText || 'Note image'}
+											className="absolute inset-0 h-full w-full rounded-xl object-cover transition-all duration-300"
+											width={200}
+											height={200}
+										/>
+									) : null}
 
 									{/* Video play overlay */}
 									{isVideo && (

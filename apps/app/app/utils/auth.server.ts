@@ -1,4 +1,3 @@
-import { type Connection, type User } from '@repo/database/types'
 import { getUtmParams } from '@repo/analytics'
 import {
 	canUserLogin,
@@ -21,6 +20,7 @@ import {
 	UtmSource,
 	UserImage,
 } from '@repo/database'
+import { type Connection, type User } from '@repo/database/types'
 import { getClientIp } from '@repo/security'
 import { Authenticator } from 'remix-auth'
 import { ssoAuthService } from './sso/auth.server.ts'

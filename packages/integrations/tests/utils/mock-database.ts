@@ -13,6 +13,7 @@ export function queryChain(rows: QueryResult = []): any {
 		values: () => chain,
 		set: () => chain,
 		returning: () => chain,
+		// oxlint-disable-next-line unicorn/no-thenable
 		then: (
 			resolve: (value: QueryResult) => unknown,
 			reject?: (error: unknown) => unknown,

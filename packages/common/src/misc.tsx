@@ -17,6 +17,53 @@ export function getNoteImgSrc(objectKey: string, organizationId?: string) {
 	return `/resources/images?${params.toString()}`
 }
 
+export function getVideoSourceSrc(objectKey: string, organizationId?: string) {
+	const params = new URLSearchParams({ objectKey })
+	if (organizationId) {
+		params.set('organizationId', organizationId)
+	}
+	return `/resources/videos/source?${params.toString()}`
+}
+
+function buildMediaTransformUrl(
+	sourcePath: string,
+	options: string,
+	mediaTransformBaseUrl?: string | null,
+) {
+	if (!mediaTransformBaseUrl) {
+		return sourcePath
+	}
+	const base = mediaTransformBaseUrl.replace(/\/$/, '')
+	const absoluteSource = `${base}${sourcePath.startsWith('/') ? sourcePath : `/${sourcePath}`}`
+	return `${base}/cdn-cgi/media/${options}/${encodeURIComponent(absoluteSource)}`
+}
+
+export function getVideoPosterSrc(
+	objectKey: string,
+	organizationId?: string,
+	mediaTransformBaseUrl?: string | null,
+) {
+	const sourcePath = getVideoSourceSrc(objectKey, organizationId)
+	return buildMediaTransformUrl(
+		sourcePath,
+		'mode=frame,time=1s,width=640,fit=scale-down,format=jpg',
+		mediaTransformBaseUrl,
+	)
+}
+
+export function getVideoClipSrc(
+	objectKey: string,
+	organizationId?: string,
+	mediaTransformBaseUrl?: string | null,
+) {
+	const sourcePath = getVideoSourceSrc(objectKey, organizationId)
+	return buildMediaTransformUrl(
+		sourcePath,
+		'mode=video,time=1s,duration=3s,width=480,fit=scale-down,audio=false',
+		mediaTransformBaseUrl,
+	)
+}
+
 export function formatDate(date: Date | string | number) {
 	return new Intl.DateTimeFormat('en-US', {
 		dateStyle: 'medium',

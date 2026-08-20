@@ -238,6 +238,36 @@ Production startup refuses empty or development-default `JWT_SECRET`,
 `AUTH_HMAC_SECRET`, and `INTERNAL_COMMAND_TOKEN`. KSA production SMS via Twilio
 is rejected; configure an in-kingdom provider first.
 
+## Scheduled jobs (Cloudflare Worker)
+
+Control-plane cron work (audit archival, MCP token cleanup, GDPR erasure) runs
+on the App primary instance. Scheduling is handled by `apps/jobs-cron`, a
+Cloudflare Worker that POSTs to `/resources/jobs/*` with
+`Authorization: Bearer INTERNAL_COMMAND_TOKEN`.
+
+1. Use the **same** `INTERNAL_COMMAND_TOKEN` on App and the worker
+   (`wrangler secret put INTERNAL_COMMAND_TOKEN` in `apps/jobs-cron`).
+2. Set `APP_BASE_URL` in `apps/jobs-cron/wrangler.jsonc` to your App URL
+   (staging vs production).
+3. CI deploys via the `deploy-jobs-cron` job when `apps/jobs-cron/**` changes.
+
+Full details: [scheduled jobs](./scheduled-jobs.md).
+
+## Video media transformations
+
+Note video posters and hover clips use **Cloudflare Media Transformations** on
+demand (no ffmpeg, no async job queue):
+
+1. Put the App hostname behind Cloudflare (proxied).
+2. Enable **Media Transformations** on the zone.
+3. Set on the App: `MEDIA_TRANSFORM_BASE_URL=https://app.yourdomain.com`
+
+The App serves raw video bytes from org storage via `/resources/videos/source`;
+Cloudflare `/cdn-cgi/media/` derives frames and short clips from that URL.
+
+See
+[scheduled jobs — video media](./scheduled-jobs.md#video-note-media-no-background-jobs).
+
 ## Deploying locally using docker/podman
 
 If you'd like to deploy locally by building a docker container image, you

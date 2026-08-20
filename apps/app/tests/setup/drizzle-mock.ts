@@ -15,6 +15,7 @@ export function queryChain(rows: QueryResult = []): any {
 		returning: () => chain,
 		onConflictDoUpdate: () => chain,
 		onConflictDoNothing: () => chain,
+		// oxlint-disable-next-line unicorn/no-thenable
 		then: (
 			resolve: (value: QueryResult) => unknown,
 			reject?: (error: unknown) => unknown,

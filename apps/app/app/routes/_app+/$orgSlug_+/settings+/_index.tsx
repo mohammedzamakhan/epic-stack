@@ -8,7 +8,6 @@ import {
 	and,
 	db,
 	eq,
-	gte,
 	isNull,
 	like,
 	Organization,
@@ -18,7 +17,7 @@ import {
 	User,
 	UserOrganization,
 } from '@repo/database'
-import { encrypt, getSSOMasterKey } from '@repo/security'
+import { decrypt, encrypt, getSSOMasterKey } from '@repo/security'
 import { AnnotatedLayout, AnnotatedSection } from '@repo/ui/annotated-layout'
 import {
 	type ActionFunctionArgs,
@@ -38,6 +37,7 @@ import {
 	S3StorageCard,
 	S3StorageSchema,
 	s3StorageActionIntent,
+	startS3MigrationActionIntent,
 } from '#app/components/settings/cards/organization/s3-storage-card.tsx'
 import TeamSizeCard, {
 	TeamSizeSchema,
@@ -55,6 +55,16 @@ import {
 	updateSeatQuantity,
 	deleteSubscription,
 } from '#app/utils/payments.server.ts'
+import {
+	collectOrgMediaObjectKeys,
+	createAndStartStorageMigration,
+	customSnapshotFromS3ConfigRow,
+	getActiveStorageMigration,
+	getLatestStorageMigration,
+	previousSnapshotFieldsFromConfig,
+	resolveStorageMigrationPlan,
+	s3BucketSettingsChanged,
+} from '#app/utils/storage-migration.server.ts'
 import {
 	uploadOrganizationImage,
 	testS3Connection,
@@ -99,8 +109,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			.then((rows) => rows[0] ?? null),
 	])
 
+	const [activeMigration, latestMigration, mediaFileCount] = await Promise.all([
+		getActiveStorageMigration(organization.id),
+		getLatestStorageMigration(organization.id),
+		collectOrgMediaObjectKeys(organization.id).then((keys) => keys.length),
+	])
+
 	return {
 		organization: { ...organization, s3Config, image },
+		activeMigration,
+		latestMigration,
+		mediaFileCount,
 	}
 }
 
@@ -465,6 +484,56 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 	}
 
+	if (intent === startS3MigrationActionIntent) {
+		await requireUserWithOrganizationPermission(
+			request,
+			organization.id,
+			ORG_PERMISSIONS.UPDATE_SETTINGS_ANY,
+		)
+
+		const [s3Config] = await db
+			.select()
+			.from(OrganizationS3Config)
+			.where(eq(OrganizationS3Config.organizationId, organization.id))
+			.limit(1)
+
+		if (!s3Config?.isEnabled) {
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Migration unavailable',
+				description: 'Enable custom S3 storage before migrating media files.',
+				type: 'error',
+			})
+		}
+
+		try {
+			const dest = customSnapshotFromS3ConfigRow(s3Config)
+			const plan = resolveStorageMigrationPlan({
+				existingConfig: s3Config,
+				dest,
+			})
+
+			await createAndStartStorageMigration({
+				organizationId: organization.id,
+				...plan,
+			})
+
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Storage migration started',
+				description:
+					'Copying existing org media to your bucket. Refresh this page for progress.',
+				type: 'success',
+			})
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : 'Failed to start migration'
+			return redirectWithToast(`/${organization.slug}/settings`, {
+				title: 'Migration failed to start',
+				description: message,
+				type: 'error',
+			})
+		}
+	}
+
 	if (intent === s3StorageActionIntent) {
 		const submission = parseWithZod(formData, {
 			schema: S3StorageSchema,
@@ -476,6 +545,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		const {
 			s3Enabled,
+			s3MigrateExistingFiles,
 			s3Endpoint,
 			s3BucketName,
 			s3AccessKeyId,
@@ -484,17 +554,34 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		} = submission.value
 
 		try {
-			if (s3Enabled) {
-				// Get existing config to preserve secret key if not updated
-				const [existingConfig] = await db
-					.select()
-					.from(OrganizationS3Config)
-					.where(eq(OrganizationS3Config.organizationId, organization.id))
-					.limit(1)
+			const [existingConfig] = await db
+				.select()
+				.from(OrganizationS3Config)
+				.where(eq(OrganizationS3Config.organizationId, organization.id))
+				.limit(1)
 
+			const nextBucketSettings = {
+				endpoint: s3Endpoint || '',
+				bucketName: s3BucketName || '',
+				accessKeyId: s3AccessKeyId || '',
+				region: s3Region || '',
+			}
+
+			const bucketChanged = Boolean(
+				existingConfig?.isEnabled &&
+				s3Enabled &&
+				s3BucketSettingsChanged(existingConfig, nextBucketSettings),
+			)
+
+			if (s3Enabled) {
 				const secretToUse = s3SecretAccessKey
 					? encrypt(s3SecretAccessKey, getSSOMasterKey())
 					: existingConfig?.secretAccessKey || ''
+
+				const previousSnapshot =
+					bucketChanged && existingConfig
+						? previousSnapshotFieldsFromConfig(existingConfig)
+						: {}
 
 				// Create or update S3 configuration
 				await db
@@ -502,21 +589,23 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					.values({
 						organizationId: organization.id,
 						isEnabled: true,
-						endpoint: s3Endpoint || '',
-						bucketName: s3BucketName || '',
-						accessKeyId: s3AccessKeyId || '',
+						endpoint: nextBucketSettings.endpoint,
+						bucketName: nextBucketSettings.bucketName,
+						accessKeyId: nextBucketSettings.accessKeyId,
 						secretAccessKey: secretToUse,
-						region: s3Region || '',
+						region: nextBucketSettings.region,
+						...previousSnapshot,
 					})
 					.onConflictDoUpdate({
 						target: OrganizationS3Config.organizationId,
 						set: {
 							isEnabled: true,
-							endpoint: s3Endpoint || '',
-							bucketName: s3BucketName || '',
-							accessKeyId: s3AccessKeyId || '',
+							endpoint: nextBucketSettings.endpoint,
+							bucketName: nextBucketSettings.bucketName,
+							accessKeyId: nextBucketSettings.accessKeyId,
 							secretAccessKey: secretToUse,
-							region: s3Region || '',
+							region: nextBucketSettings.region,
+							...previousSnapshot,
 						},
 					})
 			} else {
@@ -538,16 +627,68 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					})
 			}
 
+			if (s3Enabled && s3MigrateExistingFiles) {
+				const destSecret =
+					s3SecretAccessKey ||
+					(existingConfig?.secretAccessKey
+						? decrypt(existingConfig.secretAccessKey, getSSOMasterKey())
+						: '')
+
+				if (
+					s3Endpoint &&
+					s3BucketName &&
+					s3AccessKeyId &&
+					destSecret &&
+					s3Region
+				) {
+					const dest = {
+						endpoint: s3Endpoint,
+						bucketName: s3BucketName,
+						accessKeyId: s3AccessKeyId,
+						secretAccessKey: destSecret,
+						region: s3Region,
+					}
+
+					try {
+						const plan = resolveStorageMigrationPlan({
+							existingConfig,
+							dest,
+						})
+
+						await createAndStartStorageMigration({
+							organizationId: organization.id,
+							...plan,
+						})
+					} catch (error) {
+						const message =
+							error instanceof Error
+								? error.message
+								: 'Failed to start storage migration'
+						return redirectWithToast(`/${organization.slug}/settings`, {
+							title: 'S3 storage saved',
+							description: `${message}. Your configuration was saved, but media was not migrated.`,
+							type: 'message',
+						})
+					}
+				}
+			}
+
 			await invalidateUserOrganizationsCache(userId)
 
 			return redirectWithToast(`/${organization.slug}/settings`, {
 				title: 'S3 Storage updated',
 				description: s3Enabled
-					? 'Your custom S3 storage configuration has been saved.'
+					? s3MigrateExistingFiles
+						? 'Your S3 configuration was saved and media migration has started.'
+						: 'Your custom S3 storage configuration has been saved.'
 					: 'S3 storage has been disabled. Using default storage.',
 				type: 'success',
 			})
-		} catch {
+		} catch (error) {
+			if (error instanceof Response) {
+				throw error
+			}
+			console.error('s3StorageActionIntent error', error)
 			return Response.json({
 				result: submission.reply({
 					formErrors: [
@@ -596,7 +737,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function GeneralSettings() {
-	const { organization } = useLoaderData<typeof loader>()
+	const { organization, activeMigration, latestMigration, mediaFileCount } =
+		useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (
@@ -619,7 +761,13 @@ export default function GeneralSettings() {
 
 			{/* Infrastructure */}
 			<AnnotatedSection>
-				<S3StorageCard organization={organization} actionData={actionData} />
+				<S3StorageCard
+					organization={organization}
+					actionData={actionData}
+					activeMigration={activeMigration}
+					latestMigration={latestMigration}
+					mediaFileCount={mediaFileCount}
+				/>
 			</AnnotatedSection>
 
 			{/* Destructive — separated from routine settings */}
