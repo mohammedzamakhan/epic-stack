@@ -12,15 +12,8 @@
 		{
 			"idx": 1,
 			"version": "6",
-			"when": 1787234690000,
-			"tag": "0001_upload_backfill_and_storage_migration",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "6",
-			"when": 1787261000000,
-			"tag": "0002_organization_s3_previous_bucket",
+			"when": 1787263448673,
+			"tag": "0001_storage_migration_and_s3_previous_bucket",
 			"breakpoints": true
 		}
 	]

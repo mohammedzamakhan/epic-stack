@@ -28,4 +28,9 @@ CREATE TABLE `StorageMigration` (
 --> statement-breakpoint
 CREATE INDEX `StorageMigration_organizationId_status_idx` ON `StorageMigration` (`organizationId`,`status`);--> statement-breakpoint
 CREATE INDEX `StorageMigration_organizationId_idx` ON `StorageMigration` (`organizationId`);--> statement-breakpoint
+ALTER TABLE `OrganizationS3Config` ADD `previousEndpoint` text;--> statement-breakpoint
+ALTER TABLE `OrganizationS3Config` ADD `previousBucketName` text;--> statement-breakpoint
+ALTER TABLE `OrganizationS3Config` ADD `previousAccessKeyId` text;--> statement-breakpoint
+ALTER TABLE `OrganizationS3Config` ADD `previousSecretAccessKey` text;--> statement-breakpoint
+ALTER TABLE `OrganizationS3Config` ADD `previousRegion` text;--> statement-breakpoint
 UPDATE "OrganizationNoteUpload" SET "status" = 'completed' WHERE "status" = 'processing';
