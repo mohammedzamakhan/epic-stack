@@ -1,4 +1,14 @@
-import { db } from '@repo/database'
+import {
+	MCPAccessToken,
+	MCPAuthorization,
+	MCPRefreshToken,
+	Organization,
+	User,
+	UserOrganization,
+	db,
+	eq,
+	inArray,
+} from '@repo/database'
 import * as fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
@@ -23,20 +33,22 @@ describe('MCP Server Service', () => {
 		clearTools()
 
 		// Create test user and organization with unique slug
-		testUser = await db.user.create({
-			data: {
+		;[testUser] = await db
+			.insert(User)
+			.values({
 				email: `test-${Date.now()}@example.com`,
 				username: `testuser-${Date.now()}`,
 				name: 'Test User',
-			},
-		})
+			})
+			.returning()
 
-		testOrganization = await db.organization.create({
-			data: {
+		;[testOrganization] = await db
+			.insert(Organization)
+			.values({
 				name: 'Test Organization',
 				slug: TEST_ORG_SLUG,
-			},
-		})
+			})
+			.returning()
 
 		mockContext = { user: testUser, organization: testOrganization }
 	})
@@ -46,26 +58,28 @@ describe('MCP Server Service', () => {
 
 		// Clean up test data by specific IDs to avoid affecting parallel tests
 		if (testOrganization?.id) {
-			await db.mCPAccessToken.deleteMany({
-				where: { authorization: { organizationId: testOrganization.id } },
-			})
-			await db.mCPRefreshToken.deleteMany({
-				where: { authorization: { organizationId: testOrganization.id } },
-			})
-			await db.mCPAuthorization.deleteMany({
-				where: { organizationId: testOrganization.id },
-			})
-			await db.userOrganization.deleteMany({
-				where: { organizationId: testOrganization.id },
-			})
-			await db.organization.deleteMany({
-				where: { id: testOrganization.id },
-			})
+			const authIds = db
+				.select({ id: MCPAuthorization.id })
+				.from(MCPAuthorization)
+				.where(eq(MCPAuthorization.organizationId, testOrganization.id))
+			await db
+				.delete(MCPAccessToken)
+				.where(inArray(MCPAccessToken.authorizationId, authIds))
+			await db
+				.delete(MCPRefreshToken)
+				.where(inArray(MCPRefreshToken.authorizationId, authIds))
+			await db
+				.delete(MCPAuthorization)
+				.where(eq(MCPAuthorization.organizationId, testOrganization.id))
+			await db
+				.delete(UserOrganization)
+				.where(eq(UserOrganization.organizationId, testOrganization.id))
+			await db
+				.delete(Organization)
+				.where(eq(Organization.id, testOrganization.id))
 		}
 		if (testUser?.id) {
-			await db.user.deleteMany({
-				where: { id: testUser.id },
-			})
+			await db.delete(User).where(eq(User.id, testUser.id))
 		}
 	})
 

@@ -1,9 +1,56 @@
 import { faker } from '@faker-js/faker'
-import { db } from '@repo/database'
+import {
+	and,
+	db,
+	eq,
+	Organization,
+	OrganizationInvitation,
+	Role,
+	User,
+	UserOrganization,
+	_RoleToUser,
+} from '@repo/database'
 // Removed db import - using test utilities instead
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
+
+async function createOwnerUser() {
+	const [owner] = await db
+		.insert(User)
+		.values({
+			email: faker.internet.email(),
+			username: faker.internet.username(),
+			name: faker.person.fullName(),
+		})
+		.returning()
+	if (!owner) throw new Error('Failed to create owner')
+	const [role] = await db
+		.select({ id: Role.id })
+		.from(Role)
+		.where(eq(Role.name, 'user'))
+		.limit(1)
+	if (role) await db.insert(_RoleToUser).values({ A: role.id, B: owner.id })
+	return owner
+}
+
+async function createOrgWithAdmin(ownerId: string) {
+	const [org] = await db
+		.insert(Organization)
+		.values({
+			name: faker.company.name(),
+			slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
+			description: faker.company.catchPhrase(),
+		})
+		.returning()
+	if (!org) throw new Error('Failed to create organization')
+	await db.insert(UserOrganization).values({
+		userId: ownerId,
+		organizationId: org.id,
+		organizationRoleId: 'org_role_admin',
+	})
+	return org
+}
 
 test.describe('Organization Invitations', () => {
 	test('Organization owners can send invitations', async ({
@@ -48,12 +95,16 @@ test.describe('Organization Invitations', () => {
 		await expect(page.getByPlaceholder('Enter email address')).toHaveValue('')
 
 		// Verify invitation exists in database
-		const invitation = await db.organizationInvitation.findFirst({
-			where: {
-				organizationId: org.id,
-				email: inviteEmail,
-			},
-		})
+		const [invitation] = await db
+			.select()
+			.from(OrganizationInvitation)
+			.where(
+				and(
+					eq(OrganizationInvitation.organizationId, org.id),
+					eq(OrganizationInvitation.email, inviteEmail),
+				),
+			)
+			.limit(1)
 		expect(invitation).toBeTruthy()
 		expect(invitation?.organizationRoleId).toBe('org_role_member')
 
@@ -76,42 +127,22 @@ test.describe('Organization Invitations', () => {
 	}) => {
 		const invitedUser = await login()
 
-		// Create organization owner
-		const owner = await db.user.create({
-			data: {
-				email: faker.internet.email(),
-				username: faker.internet.username(),
-				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
-
-		// Create an organization
-		const org = await db.organization.create({
-			data: {
-				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
-				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: owner.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
-		})
+		const owner = await createOwnerUser()
+		const org = await createOrgWithAdmin(owner.id)
 
 		// Create an invitation for the logged-in user
-		const invitation = await db.organizationInvitation.create({
-			data: {
+		const [invitation] = await db
+			.insert(OrganizationInvitation)
+			.values({
 				organizationId: org.id,
 				email: invitedUser.email,
 				organizationRoleId: 'org_role_member',
 				inviterId: owner.id,
 				token: `accept-test-1-${faker.string.uuid()}-${Date.now()}`,
 				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			},
-		})
+			})
+			.returning()
+		if (!invitation) throw new Error('Failed to create invitation')
 
 		// Navigate directly to organizations page where pending invitations are shown
 		await navigate('/organizations')
@@ -140,34 +171,26 @@ test.describe('Organization Invitations', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Verify user is now a member in database
-		const membership = await db.organization.findFirst({
-			where: {
-				id: org.id,
-				users: {
-					some: {
-						userId: invitedUser.id,
-					},
-				},
-			},
-			select: {
-				users: {
-					where: {
-						userId: invitedUser.id,
-					},
-					select: {
-						organizationRoleId: true,
-					},
-				},
-			},
-		})
+		const [membership] = await db
+			.select({ organizationRoleId: UserOrganization.organizationRoleId })
+			.from(UserOrganization)
+			.where(
+				and(
+					eq(UserOrganization.organizationId, org.id),
+					eq(UserOrganization.userId, invitedUser.id),
+				),
+			)
+			.limit(1)
 		expect(membership).toBeTruthy()
-		expect(membership?.users[0]?.organizationRoleId).toBe('org_role_member')
+		expect(membership?.organizationRoleId).toBe('org_role_member')
 
 		// Verify invitation is deleted after acceptance (correct behavior)
-		const updatedInvitation = await db.organizationInvitation.findUnique({
-			where: { id: invitation.id },
-		})
-		expect(updatedInvitation).toBeNull()
+		const [updatedInvitation] = await db
+			.select()
+			.from(OrganizationInvitation)
+			.where(eq(OrganizationInvitation.id, invitation.id))
+			.limit(1)
+		expect(updatedInvitation ?? null).toBeNull()
 	})
 
 	test('Users can decline organization invitations', async ({
@@ -177,42 +200,22 @@ test.describe('Organization Invitations', () => {
 	}) => {
 		const invitedUser = await login()
 
-		// Create organization owner
-		const owner = await db.user.create({
-			data: {
-				email: faker.internet.email(),
-				username: faker.internet.username(),
-				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
-
-		// Create an organization
-		const org = await db.organization.create({
-			data: {
-				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
-				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: owner.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
-		})
+		const owner = await createOwnerUser()
+		const org = await createOrgWithAdmin(owner.id)
 
 		// Create an invitation for the logged-in user
-		const invitation = await db.organizationInvitation.create({
-			data: {
+		const [invitation] = await db
+			.insert(OrganizationInvitation)
+			.values({
 				organizationId: org.id,
 				email: invitedUser.email,
 				organizationRoleId: 'org_role_member',
 				inviterId: owner.id,
 				token: `decline-test-${faker.string.uuid()}-${Date.now()}`,
 				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			},
-		})
+			})
+			.returning()
+		if (!invitation) throw new Error('Failed to create invitation')
 
 		// Navigate to organizations page where pending invitations are shown
 		await navigate('/organizations')
@@ -234,23 +237,25 @@ test.describe('Organization Invitations', () => {
 		await expect(page.getByText(org.name)).not.toBeVisible()
 
 		// Verify user is not a member in database
-		const membership = await db.organization.findFirst({
-			where: {
-				id: org.id,
-				users: {
-					some: {
-						userId: invitedUser.id,
-					},
-				},
-			},
-		})
-		expect(membership).toBeNull()
+		const [membership] = await db
+			.select({ organizationId: UserOrganization.organizationId })
+			.from(UserOrganization)
+			.where(
+				and(
+					eq(UserOrganization.organizationId, org.id),
+					eq(UserOrganization.userId, invitedUser.id),
+				),
+			)
+			.limit(1)
+		expect(membership ?? null).toBeNull()
 
 		// Verify invitation is deleted after declining (correct behavior)
-		const updatedInvitation = await db.organizationInvitation.findUnique({
-			where: { id: invitation.id },
-		})
-		expect(updatedInvitation).toBeNull()
+		const [updatedInvitation] = await db
+			.select()
+			.from(OrganizationInvitation)
+			.where(eq(OrganizationInvitation.id, invitation.id))
+			.limit(1)
+		expect(updatedInvitation ?? null).toBeNull()
 	})
 
 	test('Organization owners can revoke pending invitations', async ({
@@ -264,16 +269,18 @@ test.describe('Organization Invitations', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a pending invitation
-		const invitation = await db.organizationInvitation.create({
-			data: {
+		const [invitation] = await db
+			.insert(OrganizationInvitation)
+			.values({
 				organizationId: org.id,
 				email: faker.internet.email(),
 				organizationRoleId: 'org_role_member',
 				inviterId: user.id,
 				token: `revoke-test-${faker.string.uuid()}-${Date.now()}`,
 				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-			},
-		})
+			})
+			.returning()
+		if (!invitation) throw new Error('Failed to create invitation')
 
 		// Navigate to organization members page
 		await navigate('/:slug/settings/members', { slug: org.slug })
@@ -282,10 +289,10 @@ test.describe('Organization Invitations', () => {
 		// Find and revoke the invitation (look for the trash button in pending invitations)
 		const invitationEmail = faker.internet.email()
 		// Update the invitation to use a known email
-		await db.organizationInvitation.update({
-			where: { id: invitation.id },
-			data: { email: invitationEmail },
-		})
+		await db
+			.update(OrganizationInvitation)
+			.set({ email: invitationEmail })
+			.where(eq(OrganizationInvitation.id, invitation.id))
 
 		// Refresh the page to see the updated invitation
 		await page.reload()
@@ -307,10 +314,12 @@ test.describe('Organization Invitations', () => {
 		await expect(pendingSection.getByText(invitationEmail)).not.toBeVisible()
 
 		// Verify invitation is deleted from database
-		const deletedInvitation = await db.organizationInvitation.findUnique({
-			where: { id: invitation.id },
-		})
-		expect(deletedInvitation).toBeNull()
+		const [deletedInvitation] = await db
+			.select()
+			.from(OrganizationInvitation)
+			.where(eq(OrganizationInvitation.id, invitation.id))
+			.limit(1)
+		expect(deletedInvitation ?? null).toBeNull()
 	})
 
 	test('Users can view their pending invitations', async ({
@@ -320,66 +329,29 @@ test.describe('Organization Invitations', () => {
 	}) => {
 		const invitedUser = await login()
 
-		// Create organization owner
-		const owner = await db.user.create({
-			data: {
-				email: faker.internet.email(),
-				username: faker.internet.username(),
-				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
-
-		// Create multiple organizations with invitations
-		const org1 = await db.organization.create({
-			data: {
-				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
-				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: owner.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
-		})
-
-		const org2 = await db.organization.create({
-			data: {
-				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
-				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: owner.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
-		})
+		const owner = await createOwnerUser()
+		const org1 = await createOrgWithAdmin(owner.id)
+		const org2 = await createOrgWithAdmin(owner.id)
 
 		// Create invitations for both organizations
-		await db.organizationInvitation.createMany({
-			data: [
-				{
-					organizationId: org1.id,
-					email: invitedUser.email,
-					organizationRoleId: 'org_role_member',
-					inviterId: owner.id,
-					token: `view-test-1-${faker.string.uuid()}-${Date.now()}`,
-					expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-				},
-				{
-					organizationId: org2.id,
-					email: invitedUser.email,
-					organizationRoleId: 'org_role_admin',
-					inviterId: owner.id,
-					token: `view-test-2-${faker.string.uuid()}-${Date.now()}`,
-					expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
-				},
-			],
-		})
+		await db.insert(OrganizationInvitation).values([
+			{
+				organizationId: org1.id,
+				email: invitedUser.email,
+				organizationRoleId: 'org_role_member',
+				inviterId: owner.id,
+				token: `view-test-1-${faker.string.uuid()}-${Date.now()}`,
+				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
+			},
+			{
+				organizationId: org2.id,
+				email: invitedUser.email,
+				organizationRoleId: 'org_role_admin',
+				inviterId: owner.id,
+				token: `view-test-2-${faker.string.uuid()}-${Date.now()}`,
+				expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
+			},
+		])
 
 		// Navigate to organizations page
 		await navigate('/organizations')
@@ -405,37 +377,16 @@ test.describe('Organization Invitations', () => {
 	}) => {
 		const invitedUser = await login()
 
-		// Create organization owner
-		const owner = await db.user.create({
-			data: {
-				email: faker.internet.email(),
-				username: faker.internet.username(),
-				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
-
-		// Create an organization
-		const org = await db.organization.create({
-			data: {
-				name: faker.company.name(),
-				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
-				description: faker.company.catchPhrase(),
-				users: {
-					create: {
-						userId: owner.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
-		})
+		const owner = await createOwnerUser()
+		const org = await createOrgWithAdmin(owner.id)
 
 		// Create an expired invitation (created 8 days ago)
 		const expiredDate = new Date()
 		expiredDate.setDate(expiredDate.getDate() - 8)
 
-		const ignored_invitation = await db.organizationInvitation.create({
-			data: {
+		const [ignored_invitation] = await db
+			.insert(OrganizationInvitation)
+			.values({
 				organizationId: org.id,
 				email: invitedUser.email,
 				organizationRoleId: 'org_role_member',
@@ -443,8 +394,9 @@ test.describe('Organization Invitations', () => {
 				createdAt: expiredDate,
 				token: `expired-test-${faker.string.uuid()}-${Date.now()}`,
 				expiresAt: expiredDate, // Set expiration to the past
-			},
-		})
+			})
+			.returning()
+		if (!ignored_invitation) throw new Error('Failed to create invitation')
 
 		// Navigate to organizations page where pending invitations are shown
 		await navigate('/organizations')

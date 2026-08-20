@@ -2,10 +2,7 @@
  * Control-plane SQLite schema for Drizzle.
  *
  * DATETIME columns use millisecond timestamps and BOOLEAN columns use 0/1
- * integers, matching the existing SQLite storage format.
- *
- * Apply schema changes with `npm run db:migrate:dev` (drizzle-kit generate)
- * plus a SQL file in `migrations/` so `scripts/migrate.mjs` can deploy it.
+ * integers. Schema changes: `drizzle-kit generate`, then `tsx src/migrate.ts`.
  */
 import { createId } from '@paralleldrive/cuid2'
 import {

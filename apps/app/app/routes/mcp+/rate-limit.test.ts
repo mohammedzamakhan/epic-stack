@@ -1,4 +1,4 @@
-import { db } from '@repo/database'
+import { RateLimitEntry, count, db, eq } from '@repo/database'
 import { getClientIp } from '@repo/security'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
@@ -6,12 +6,12 @@ import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 describe('Rate Limiting', () => {
 	beforeEach(async () => {
 		// Clean up rate limit entries before each test
-		await db.rateLimitEntry.deleteMany({})
+		await db.delete(RateLimitEntry)
 	})
 
 	afterEach(async () => {
 		// Clean up after each test
-		await db.rateLimitEntry.deleteMany({})
+		await db.delete(RateLimitEntry)
 	})
 
 	describe('Authorization Rate Limit (10 per hour per user)', () => {
@@ -250,20 +250,21 @@ describe('Rate Limiting', () => {
 			const now = Date.now()
 
 			// Create an entry that's outside the window
-			await db.rateLimitEntry.create({
-				data: {
-					keyId: `user:${userId}`,
-					keyType: 'user',
-					keyValue: userId,
-					createdAt: new Date(now - RATE_LIMITS.authorization.windowMs - 1000),
-				},
+			await db.insert(RateLimitEntry).values({
+				keyId: `user:${userId}`,
+				keyType: 'user',
+				keyValue: userId,
+				createdAt: new Date(now - RATE_LIMITS.authorization.windowMs - 1000),
 			})
 
 			// Verify old entry exists
-			let count = await db.rateLimitEntry.count({
-				where: { keyId: `user:${userId}` },
-			})
-			expect(count).toBe(1)
+			const [countRow] = await db
+				.select({ count: count() })
+				.from(RateLimitEntry)
+				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+			if (!countRow) throw new Error('Failed to count entries')
+			const entryCount = countRow.count
+			expect(entryCount).toBe(1)
 
 			// Make a new request (should trigger cleanup)
 			await checkRateLimit(
@@ -272,10 +273,13 @@ describe('Rate Limiting', () => {
 			)
 
 			// Old entry should be deleted
-			count = await db.rateLimitEntry.count({
-				where: { keyId: `user:${userId}` },
-			})
-			expect(count).toBe(1) // Only the new entry
+			const [countRowLater] = await db
+				.select({ count: count() })
+				.from(RateLimitEntry)
+				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+			if (!countRowLater) throw new Error('Failed to count entries')
+			const entryCountAfter = countRowLater.count
+			expect(entryCountAfter).toBe(1) // Only the new entry
 		})
 	})
 

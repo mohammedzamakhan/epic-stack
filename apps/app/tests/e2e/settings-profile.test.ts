@@ -1,7 +1,7 @@
 import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { verifyUserPassword } from '@repo/auth'
-import { db } from '@repo/database'
+import { db, eq, User } from '@repo/database'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { expect, test, createUser, waitFor } from '#tests/playwright-utils.ts'
 
@@ -177,10 +177,11 @@ test('Users can change their email address', async ({
 	await page.getByRole('button', { name: 'Verify' }).click()
 	await expect(page.getByText(/email changed/i)).toBeVisible()
 
-	const updatedUser = await db.user.findUnique({
-		where: { id: preUpdateUser.id },
-		select: { email: true },
-	})
+	const [updatedUser] = await db
+		.select({ email: User.email })
+		.from(User)
+		.where(eq(User.id, preUpdateUser.id))
+		.limit(1)
 	invariant(updatedUser, 'Updated user not found')
 	expect(updatedUser.email).toBe(newEmailAddress)
 	const noticeEmail = await waitFor(() => readEmail(preUpdateUser.email), {

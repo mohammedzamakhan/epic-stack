@@ -1,19 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { action } from './auth.signup.ts'
 
 process.env.SESSION_SECRET = 'test-session-secret'
 process.env.DATABASE_URL = 'file:./data.db'
 
-vi.mock('@repo/database', async () => {
-	const actual =
-		await vi.importActual<typeof import('@repo/database')>('@repo/database')
-	const limit = vi.fn().mockResolvedValue([])
-	const where = vi.fn().mockReturnValue({ limit })
-	const from = vi.fn().mockReturnValue({ where })
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
 	return {
 		...actual,
-		db: { select: vi.fn().mockReturnValue({ from }) },
+		db: mockDb,
+		User: drizzleTable,
+		eq: drizzleOperator,
 	}
 })
 
@@ -33,7 +34,8 @@ vi.mock('#app/routes/_auth+/verify.server.tsx', () => ({
 
 describe('auth.signup API action (WO-86 OTP Secret Response Omission)', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
+		mockSelectResults([])
 	})
 
 	it('returns success response omitting verifyUrl and raw OTP code', async () => {

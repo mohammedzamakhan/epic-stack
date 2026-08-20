@@ -4,6 +4,7 @@
 	"exclude": ["node_modules", "dist", "src/**/*.test.ts", "drizzle-introspect"],
 	"compilerOptions": {
 		"rootDir": ".",
-		"noEmit": true
+		"noEmit": true,
+		"allowImportingTsExtensions": true
 	}
 }

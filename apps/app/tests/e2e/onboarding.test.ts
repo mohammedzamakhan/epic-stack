@@ -2,7 +2,7 @@ import { invariant } from '@epic-web/invariant'
 import { faker } from '@faker-js/faker'
 import { normalizeEmail, normalizeUsername } from '@repo/auth'
 import { brand } from '@repo/config/brand'
-import { db } from '@repo/database'
+import { and, Connection, db, eq, User } from '@repo/database'
 import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from '@repo/validation'
 import { readEmail } from '#tests/mocks/utils.ts'
 import { createUser, expect, test as base } from '#tests/playwright-utils.ts'
@@ -31,7 +31,7 @@ const test = base.extend<{
 			}
 			return onboardingData
 		})
-		await db.user.deleteMany({ where: { username: userData.username } })
+		await db.delete(User).where(eq(User.username, userData.username))
 	},
 })
 
@@ -139,9 +139,13 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 
 	// let's verify we do not have user with that email in our system:
 	expect(
-		await db.user.findUnique({
-			where: { email: normalizeEmail(ghUser.primaryEmail) },
-		}),
+		(
+			await db
+				.select()
+				.from(User)
+				.where(eq(User.email, normalizeEmail(ghUser.primaryEmail)))
+				.limit(1)
+		)[0] ?? null,
 	).toBeNull()
 
 	await navigate('/signup')
@@ -190,9 +194,12 @@ test('completes onboarding after GitHub OAuth given valid user details', async (
 	await expect(page.getByText(/thanks for signing up/i)).toBeVisible()
 
 	// internally, a user has been created:
-	await db.user.findUniqueOrThrow({
-		where: { email: normalizeEmail(ghUser.primaryEmail) },
-	})
+	const [createdUser] = await db
+		.select()
+		.from(User)
+		.where(eq(User.email, normalizeEmail(ghUser.primaryEmail)))
+		.limit(1)
+	if (!createdUser) throw new Error('User not found')
 })
 
 test('logs user in after GitHub OAuth if they are already registered', async ({
@@ -204,27 +211,39 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 
 	// let's verify we do not have user with that email in our system ...
 	expect(
-		await db.user.findUnique({
-			where: { email: normalizeEmail(ghUser.primaryEmail) },
-		}),
+		(
+			await db
+				.select()
+				.from(User)
+				.where(eq(User.email, normalizeEmail(ghUser.primaryEmail)))
+				.limit(1)
+		)[0] ?? null,
 	).toBeNull()
 	// ... and create one:
 	const name = faker.person.fullName()
-	const user = await db.user.create({
-		select: { id: true, name: true },
-		data: {
+	const [user] = await db
+		.insert(User)
+		.values({
 			email: normalizeEmail(ghUser.primaryEmail),
 			username: normalizeUsername(ghUser.profile.login),
 			name,
-		},
-	})
+		})
+		.returning({ id: User.id, name: User.name })
+	if (!user) throw new Error('Failed to create user')
 
 	// let's verify there is no connection between the GitHub user
 	// and out app's user:
-	const connection = await db.connection.findFirst({
-		where: { providerName: 'github', userId: user.id },
-	})
-	expect(connection).toBeNull()
+	const [connection] = await db
+		.select()
+		.from(Connection)
+		.where(
+			and(
+				eq(Connection.providerName, 'github'),
+				eq(Connection.userId, user.id),
+			),
+		)
+		.limit(1)
+	expect(connection ?? null).toBeNull()
 
 	await navigate('/signup')
 	await page.getByRole('button', { name: /signup with github/i }).click()
@@ -232,9 +251,17 @@ test('logs user in after GitHub OAuth if they are already registered', async ({
 	await expect(page).toHaveURL(`/organizations/create`)
 
 	// internally, a connection (rather than a new user) has been created:
-	await db.connection.findFirstOrThrow({
-		where: { providerName: 'github', userId: user.id },
-	})
+	const [linkedConnection] = await db
+		.select()
+		.from(Connection)
+		.where(
+			and(
+				eq(Connection.providerName, 'github'),
+				eq(Connection.userId, user.id),
+			),
+		)
+		.limit(1)
+	if (!linkedConnection) throw new Error('Connection not found')
 })
 
 test('shows help texts on entering invalid details on onboarding page after GitHub OAuth', async ({

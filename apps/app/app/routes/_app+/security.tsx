@@ -149,8 +149,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 					throw results[0].reason
 				})()
 	const twoFactorVerification =
-		results[1].status === 'fulfilled' ? results[1].value : null
-	const password = results[2].status === 'fulfilled' ? results[2].value : null
+		results[1].status === 'fulfilled' ? (results[1].value[0] ?? null) : null
+	const password =
+		results[2].status === 'fulfilled' ? (results[2].value[0] ?? null) : null
 	const connections = results[3].status === 'fulfilled' ? results[3].value : []
 	const passkeys = results[4].status === 'fulfilled' ? results[4].value : []
 	const rawSessions = results[5].status === 'fulfilled' ? results[5].value : []

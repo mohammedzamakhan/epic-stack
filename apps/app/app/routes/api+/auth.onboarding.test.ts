@@ -2,6 +2,7 @@ import type * as AuthModule from '@repo/auth'
 import { verifySessionStorage } from '@repo/auth'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { action } from './auth.onboarding.ts'
 
 vi.hoisted(() => {
@@ -27,13 +28,17 @@ vi.mock('@repo/auth', async (importOriginal) => {
 	}
 })
 
-vi.mock('@repo/database', () => ({
-	db: {
-		user: {
-			findUnique: vi.fn().mockResolvedValue(null),
-		},
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		User: drizzleTable,
+		eq: drizzleOperator,
+	}
+})
 
 vi.mock('@repo/security', () => ({
 	checkHoneypot: vi.fn().mockResolvedValue(undefined),
@@ -43,7 +48,7 @@ describe('auth.onboarding API action (WO-86 Email Session Binding)', () => {
 	const mockGetSession = vi.mocked(verifySessionStorage.getSession)
 
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 	})
 
 	it('rejects onboarding request when no verification session cookie is present (400)', async () => {

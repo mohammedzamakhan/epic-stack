@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { db } from '@repo/database'
+import { db, eq, OrganizationNote } from '@repo/database'
 import { expect, test, waitFor } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -67,15 +67,16 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await db.organizationNote.create({
-			select: { id: true },
-			data: {
+		const [note] = await db
+			.insert(OrganizationNote)
+			.values({
 				...createNote(),
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
-			},
-		})
+			})
+			.returning({ id: OrganizationNote.id })
+		if (!note) throw new Error('Failed to create note')
 
 		// Go straight to the edit sheet — avoids TipTap/ProseMirror fill issues.
 		// Playwright fill() does not update TipTap's document model; clearing the
@@ -95,10 +96,11 @@ test.describe('Notes CRUD Operations', () => {
 		await expect(page).toHaveURL(`/${org.slug}/notes/${note.id}`)
 
 		await waitFor(async () => {
-			const updatedNoteInDb = await db.organizationNote.findUnique({
-				where: { id: note.id },
-				select: { title: true },
-			})
+			const [updatedNoteInDb] = await db
+				.select({ title: OrganizationNote.title })
+				.from(OrganizationNote)
+				.where(eq(OrganizationNote.id, note.id))
+				.limit(1)
 			expect(updatedNoteInDb?.title).toBe(updatedTitle)
 			return true
 		})
@@ -110,15 +112,16 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await db.organizationNote.create({
-			select: { id: true },
-			data: {
+		const [note] = await db
+			.insert(OrganizationNote)
+			.values({
 				...createNote(),
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
-			},
-		})
+			})
+			.returning({ id: OrganizationNote.id })
+		if (!note) throw new Error('Failed to create note')
 		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
 
@@ -155,20 +158,24 @@ test.describe('Notes CRUD Operations', () => {
 			if (deletionAttempted) {
 				// Verify note is deleted or soft-deleted in database
 				await page.waitForTimeout(1000)
-				const deletedNote = await db.organizationNote.findUnique({
-					where: { id: note.id },
-				})
+				const [deletedNote] = await db
+					.select()
+					.from(OrganizationNote)
+					.where(eq(OrganizationNote.id, note.id))
+					.limit(1)
 				// Note should be either null (hard delete) or have a deletedAt field (soft delete)
 				const isDeleted =
-					deletedNote === null || (deletedNote as any).deletedAt !== null
+					!deletedNote || (deletedNote as any).deletedAt !== null
 				expect(isDeleted || hasSuccessMessage || hasUrlChanged).toBeTruthy()
 			}
 		} else {
 			// No delete button found - note might not have delete functionality in current UI
 			// Just verify note exists in database
-			const existingNote = await db.organizationNote.findUnique({
-				where: { id: note.id },
-			})
+			const [existingNote] = await db
+				.select()
+				.from(OrganizationNote)
+				.where(eq(OrganizationNote.id, note.id))
+				.limit(1)
 			expect(existingNote).toBeTruthy()
 		}
 	})
@@ -180,15 +187,16 @@ test.describe('Notes CRUD Operations', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		const noteData = createNote()
-		const note = await db.organizationNote.create({
-			select: { id: true },
-			data: {
+		const [note] = await db
+			.insert(OrganizationNote)
+			.values({
 				...noteData,
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
-			},
-		})
+			})
+			.returning({ id: OrganizationNote.id })
+		if (!note) throw new Error('Failed to create note')
 
 		await navigate('/:slug/notes/:id', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
@@ -217,14 +225,14 @@ test.describe('Notes CRUD Operations', () => {
 
 		// Create multiple notes
 		const notes = Array.from({ length: 3 }, () => createNote())
-		await db.organizationNote.createMany({
-			data: notes.map((note) => ({
+		await db.insert(OrganizationNote).values(
+			notes.map((note) => ({
 				...note,
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
 			})),
-		})
+		)
 
 		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
@@ -249,22 +257,20 @@ test.describe('Notes CRUD Operations', () => {
 		const draftNote = createNote()
 		const publishedNote = createNote()
 
-		await db.organizationNote.createMany({
-			data: [
-				{
-					...draftNote,
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: false, // Draft
-				},
-				{
-					...publishedNote,
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true, // Published
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				...draftNote,
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: false, // Draft
+			},
+			{
+				...publishedNote,
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true, // Published
+			},
+		])
 
 		await navigate('/:slug/notes', { slug: org.slug })
 		await page.waitForLoadState('networkidle')
@@ -298,15 +304,16 @@ test.describe('Notes CRUD Operations', () => {
 		// Create an organization for the user
 		const org = await createTestOrganization(user.id, 'admin')
 
-		const note = await db.organizationNote.create({
-			select: { id: true },
-			data: {
+		const [note] = await db
+			.insert(OrganizationNote)
+			.values({
 				...createNote(),
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: false, // Start as private
-			},
-		})
+			})
+			.returning({ id: OrganizationNote.id })
+		if (!note) throw new Error('Failed to create note')
 
 		await navigate('/:slug/notes/:id/edit', { slug: org.slug, id: note.id })
 		await page.waitForLoadState('networkidle')
@@ -321,10 +328,11 @@ test.describe('Notes CRUD Operations', () => {
 			await page.getByRole('button', { name: /update/i }).click()
 
 			// Verify note is now public
-			const updatedNote = await db.organizationNote.findUnique({
-				where: { id: note.id },
-				select: { isPublic: true },
-			})
+			const [updatedNote] = await db
+				.select({ isPublic: OrganizationNote.isPublic })
+				.from(OrganizationNote)
+				.where(eq(OrganizationNote.id, note.id))
+				.limit(1)
 			expect(updatedNote?.isPublic).toBe(true)
 		}
 	})

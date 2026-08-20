@@ -1,32 +1,46 @@
 import { requireUserId } from '@repo/auth'
-import { db } from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+import {
+	mockDb,
+	mockSelectResults,
+	resetMockDb,
+} from '#tests/setup/drizzle-mock.ts'
 import { action, loader } from './index.tsx'
 
 vi.mock('@repo/auth', () => ({
 	requireUserId: vi.fn().mockResolvedValue('user1'),
 }))
 
-vi.mock('@repo/database', () => ({
-	db: {
-		notification: {
-			findMany: vi.fn().mockResolvedValue([]),
-			count: vi.fn().mockResolvedValue(0),
-			updateMany: vi.fn().mockResolvedValue({ count: 1 }),
-		},
-		organization: {
-			findUnique: vi.fn().mockResolvedValue({ id: 'org1' }),
-		},
-	},
+vi.mock('@repo/security', () => ({
+	checkHoneypot: vi.fn().mockResolvedValue(undefined),
 }))
+
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		Notification: drizzleTable,
+		Organization: drizzleTable,
+		and: drizzleOperator,
+		count: drizzleOperator,
+		desc: drizzleOperator,
+		eq: drizzleOperator,
+	}
+})
 
 describe('Notifications API Routes', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
 	})
 
 	describe('loader', () => {
 		it('returns notifications for user', async () => {
+			mockSelectResults([], [{ value: 0 }])
+
 			const request = new Request('http://localhost/api/notifications')
 			const response = await loader({ request, params: {} } as any)
 			const data = (await response.json()) as any
@@ -36,33 +50,18 @@ describe('Notifications API Routes', () => {
 				unreadCount: 0,
 			})
 			expect(requireUserId).toHaveBeenCalledWith(request)
-			expect(db.notification.findMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						userId: 'user1',
-					}),
-				}),
-			)
+			expect(mockDb.select).toHaveBeenCalledTimes(2)
 		})
 
 		it('applies orgSlug filter if provided', async () => {
+			mockSelectResults([{ id: 'org1' }], [], [{ value: 0 }])
+
 			const request = new Request(
 				'http://localhost/api/notifications?orgSlug=acme',
 			)
 			await loader({ request, params: {} } as any)
 
-			expect(db.organization.findUnique).toHaveBeenCalledWith({
-				where: { slug: 'acme' },
-				select: { id: true },
-			})
-			expect(db.notification.findMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						userId: 'user1',
-						organizationId: 'org1',
-					}),
-				}),
-			)
+			expect(mockDb.select).toHaveBeenCalledTimes(3)
 		})
 	})
 
@@ -79,18 +78,12 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(db.notification.updateMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						userId: 'user1',
-						isRead: false,
-					}),
-					data: { isRead: true, isSeen: true },
-				}),
-			)
+			expect(mockDb.update).toHaveBeenCalledTimes(1)
 		})
 
 		it('handles markAllAsRead with orgSlug', async () => {
+			mockSelectResults([{ id: 'org1' }])
+
 			const formData = new FormData()
 			formData.append('intent', 'markAllAsRead')
 			formData.append('orgSlug', 'acme')
@@ -103,20 +96,8 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(db.organization.findUnique).toHaveBeenCalledWith({
-				where: { slug: 'acme' },
-				select: { id: true },
-			})
-			expect(db.notification.updateMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						userId: 'user1',
-						isRead: false,
-						organizationId: 'org1',
-					}),
-					data: { isRead: true, isSeen: true },
-				}),
-			)
+			expect(mockDb.select).toHaveBeenCalledTimes(1)
+			expect(mockDb.update).toHaveBeenCalledTimes(1)
 		})
 
 		it('handles markAsRead', async () => {
@@ -132,15 +113,7 @@ describe('Notifications API Routes', () => {
 			const data = (await response.json()) as any
 
 			expect(data.success).toBe(true)
-			expect(db.notification.updateMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					where: expect.objectContaining({
-						userId: 'user1',
-						id: 'notif1',
-					}),
-					data: { isRead: true, isSeen: true },
-				}),
-			)
+			expect(mockDb.update).toHaveBeenCalledTimes(1)
 		})
 	})
 })

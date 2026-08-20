@@ -25,12 +25,9 @@
     "db:push": "drizzle-kit push",
     "db:seed": "npx varlock run -- tsx seed.ts",
     "db:migrate:dev": "drizzle-kit generate",
-    "db:migrate:deploy": "node scripts/migrate.mjs",
+    "db:migrate:deploy": "tsx src/migrate.ts",
     "db:reset": "rm -f db/data.db db/data.db-wal db/data.db-shm && npm run db:migrate:deploy && npm run db:seed",
     "db:studio": "drizzle-kit studio --port 5555",
-    "db:drizzle:pull": "drizzle-kit pull",
-    "db:drizzle:generate": "drizzle-kit generate",
-    "db:drizzle:check": "drizzle-kit check",
     "setup": "npm run db:migrate:deploy",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -42,12 +39,12 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@remix-run/server-runtime": "^2.17.5",
     "drizzle-orm": "^0.45.2",
-    "react-router": "^8.3.0"
+    "react-router": "^8.3.0",
+    "tsx": "^4.19.4"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.7.0",
     "drizzle-kit": "^0.30.4",
-    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "varlock": "^0.1.0",
     "vitest": "^4.1.10"

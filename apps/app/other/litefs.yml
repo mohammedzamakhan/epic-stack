@@ -30,7 +30,7 @@ lease:
     key: 'epic-startup-shared-db'
 
 exec:
-  - cmd: cd /myapp/packages/database && node scripts/migrate.mjs
+  - cmd: cd /myapp/packages/database && npx tsx src/migrate.ts
     if-candidate: true
 
   # Set the journal mode for the database to WAL. This reduces concurrency deadlock issues

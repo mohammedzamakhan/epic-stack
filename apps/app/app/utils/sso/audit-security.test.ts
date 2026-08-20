@@ -32,13 +32,14 @@ const mockSsoMonitoringService = {
 	stopMonitoring: vi.fn(),
 }
 
-// Mock dependencies
-vi.mock('@repo/database', () => ({
-	db: {
-		$queryRaw: vi.fn(),
-		$disconnect: vi.fn(),
-	},
-}))
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb } = await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+	}
+})
 
 vi.mock('./configuration.server.ts', () => ({
 	ssoConfigurationService: {

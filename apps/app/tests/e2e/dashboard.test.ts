@@ -1,5 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { db } from '@repo/database'
+import {
+	count,
+	db,
+	eq,
+	OnboardingStep,
+	Organization,
+	OrganizationNote,
+	Role,
+	User,
+	UserOrganization,
+	_RoleToUser,
+} from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 // Removed db import - using test utilities instead
@@ -7,7 +18,8 @@ import { initializeOnboardingSteps } from '../../../../packages/database/setup-o
 
 // Ensure onboarding steps are seeded before tests
 async function ensureOnboardingStepsExist() {
-	const existingSteps = await db.onboardingStep.count()
+	const [result] = await db.select({ count: count() }).from(OnboardingStep)
+	const existingSteps = result?.count ?? 0
 	if (existingSteps === 0) {
 		console.log('Seeding onboarding steps for tests...')
 		await initializeOnboardingSteps()
@@ -54,34 +66,32 @@ test.describe('Dashboard', () => {
 		const twoDaysAgo = new Date(today)
 		twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
 
-		await db.organizationNote.createMany({
-			data: [
-				{
-					title: 'Today Note 1',
-					content: 'Content 1',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-					createdAt: today,
-				},
-				{
-					title: 'Today Note 2',
-					content: 'Content 2',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-					createdAt: today,
-				},
-				{
-					title: 'Yesterday Note',
-					content: 'Content 3',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-					createdAt: yesterday,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: 'Today Note 1',
+				content: 'Content 1',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+				createdAt: today,
+			},
+			{
+				title: 'Today Note 2',
+				content: 'Content 2',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+				createdAt: today,
+			},
+			{
+				title: 'Yesterday Note',
+				content: 'Content 3',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+				createdAt: yesterday,
+			},
+		])
 
 		// Navigate to organization dashboard
 		await navigate('/:slug', { slug: org.slug })
@@ -105,18 +115,19 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create a new organization with minimal data to avoid auto-completion
-		const org = await db.organization.create({
-			data: {
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: '', // Empty name to avoid hasCompletedProfile auto-detection
 				slug: `test-org-${Date.now()}-${Math.random().toString(36).substring(7)}`,
 				description: '',
-				users: {
-					create: {
-						userId: user.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values({
+			userId: user.id,
+			organizationId: org.id,
+			organizationRoleId: 'org_role_admin',
 		})
 
 		// Navigate to organization dashboard
@@ -140,24 +151,22 @@ test.describe('Dashboard', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create some recent notes
-		await db.organizationNote.createMany({
-			data: [
-				{
-					title: 'Recent Note 1',
-					content: 'Recent content 1',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-				{
-					title: 'Recent Note 2',
-					content: 'Recent content 2',
-					organizationId: org.id,
-					createdById: user.id,
-					isPublic: true,
-				},
-			],
-		})
+		await db.insert(OrganizationNote).values([
+			{
+				title: 'Recent Note 1',
+				content: 'Recent content 1',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+			{
+				title: 'Recent Note 2',
+				content: 'Recent content 2',
+				organizationId: org.id,
+				createdById: user.id,
+				isPublic: true,
+			},
+		])
 
 		// Navigate to organization dashboard
 		await navigate('/:slug', { slug: org.slug })
@@ -175,50 +184,74 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create additional users
-		const member1 = await db.user.create({
-			data: {
+		const [member1] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!member1) throw new Error('Failed to create member1')
 
-		const member2 = await db.user.create({
-			data: {
+		const [member2] = await db
+			.insert(User)
+			.values({
 				email: faker.internet.email(),
 				username: faker.internet.username(),
 				name: faker.person.fullName(),
-				roles: { connect: { name: 'user' } },
-			},
-		})
+			})
+			.returning()
+		if (!member2) throw new Error('Failed to create member2')
 
-		// Create an organization with multiple members
-		const org = await db.organization.create({
-			data: {
+		const [userRole] = await db
+			.select({ id: Role.id })
+			.from(Role)
+			.where(eq(Role.name, 'user'))
+			.limit(1)
+		if (userRole) {
+			await db.insert(_RoleToUser).values([
+				{ A: userRole.id, B: member1.id },
+				{ A: userRole.id, B: member2.id },
+			])
+		}
+
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: faker.company.name(),
 				slug: faker.helpers.slugify(faker.company.name()).toLowerCase(),
 				description: faker.company.catchPhrase(),
-				users: {
-					create: [
-						{ userId: user.id, organizationRoleId: 'org_role_admin' },
-						{ userId: member1.id, organizationRoleId: 'org_role_member' },
-						{ userId: member2.id, organizationRoleId: 'org_role_member' },
-					],
-				},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values([
+			{
+				userId: user.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_admin',
 			},
-		})
+			{
+				userId: member1.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_member',
+			},
+			{
+				userId: member2.id,
+				organizationId: org.id,
+				organizationRoleId: 'org_role_member',
+			},
+		])
 
-		// Create multiple notes
-		await db.organizationNote.createMany({
-			data: Array.from({ length: 5 }, (_, i) => ({
+		await db.insert(OrganizationNote).values(
+			Array.from({ length: 5 }, (_, i) => ({
 				title: `Note ${i + 1}`,
 				content: `Content ${i + 1}`,
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
 			})),
-		})
+		)
 
 		// Navigate to organization dashboard
 		await navigate('/:slug', { slug: org.slug })
@@ -266,18 +299,19 @@ test.describe('Dashboard', () => {
 		const user = await login()
 
 		// Create a new organization with minimal data to avoid auto-completion
-		const org = await db.organization.create({
-			data: {
+		const [org] = await db
+			.insert(Organization)
+			.values({
 				name: '', // Empty name to avoid hasCompletedProfile auto-detection
 				slug: `test-org-${Date.now()}-${Math.random().toString(36).substring(7)}`,
 				description: '',
-				users: {
-					create: {
-						userId: user.id,
-						organizationRoleId: 'org_role_admin',
-					},
-				},
-			},
+			})
+			.returning()
+		if (!org) throw new Error('Failed to create organization')
+		await db.insert(UserOrganization).values({
+			userId: user.id,
+			organizationId: org.id,
+			organizationRoleId: 'org_role_admin',
 		})
 
 		// Navigate to organization dashboard

@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { remember } from '@epic-web/remember'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
-import * as relations from './relations'
-import * as tables from './schema'
+import * as relations from './relations.ts'
+import * as tables from './schema.ts'
 
 export const schema = { ...tables, ...relations }
 
@@ -52,8 +52,14 @@ export function resolveSqliteFileUrl() {
 	return `file:${path.resolve(packageDir, 'db/data.db')}`
 }
 
-export const sqliteClient = remember('libsql', () =>
-	createClient({ url: resolveSqliteFileUrl() }),
-)
+export const sqliteClient = remember('libsql', () => {
+	const url = resolveSqliteFileUrl()
+	fs.mkdirSync(path.dirname(url.replace(/^file:/, '')), { recursive: true })
+	const client = createClient({ url })
+	void client
+		.execute('PRAGMA busy_timeout = 5000')
+		.then(() => client.execute('PRAGMA journal_mode = WAL'))
+	return client
+})
 
 export const db = remember('drizzle', () => drizzle(sqliteClient, { schema }))

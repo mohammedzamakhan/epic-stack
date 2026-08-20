@@ -1,4 +1,4 @@
-import { db } from '@repo/database'
+import { db, Notification } from '@repo/database'
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
@@ -94,18 +94,16 @@ test.describe('Notifications', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create a test notification for this user
-		await db.notification.create({
-			data: {
-				userId: user.id,
-				organizationId: org.id,
-				type: 'mention',
-				isRead: false,
-				entityId: 'test-entity',
-				payload: JSON.stringify({
-					commenterName: 'Test User',
-					noteId: 'test-note',
-				}),
-			},
+		await db.insert(Notification).values({
+			userId: user.id,
+			organizationId: org.id,
+			type: 'mention',
+			isRead: false,
+			entityId: 'test-entity',
+			payload: JSON.stringify({
+				commenterName: 'Test User',
+				noteId: 'test-note',
+			}),
 		})
 
 		await navigate('/:slug', { slug: org.slug })

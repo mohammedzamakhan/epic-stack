@@ -1,5 +1,18 @@
 import { faker } from '@faker-js/faker'
-import { db } from '@repo/database'
+import {
+	MCPAccessToken,
+	MCPAuthorization,
+	MCPRefreshToken,
+	Organization,
+	OrganizationRole,
+	Role,
+	Session,
+	User,
+	UserOrganization,
+	_RoleToUser,
+	db,
+	eq,
+} from '@repo/database'
 import fc from 'fast-check'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
@@ -9,59 +22,94 @@ import {
 	ACCESS_TOKEN_EXPIRATION,
 } from '#app/utils/mcp/oauth.server.ts'
 
+async function connectUserRole(userId: string, roleName: string) {
+	const [role] = await db
+		.select({ id: Role.id })
+		.from(Role)
+		.where(eq(Role.name, roleName))
+		.limit(1)
+	if (role) {
+		await db.insert(_RoleToUser).values({ A: role.id, B: userId })
+	}
+}
+
 // Helper to create test user with session
 async function createTestUserWithSession() {
-	const user = await db.user.create({
-		data: {
+	const [user] = await db
+		.insert(User)
+		.values({
 			email: faker.internet.email(),
 			username: faker.internet.username(),
 			name: faker.person.fullName(),
-			roles: { connect: { name: 'user' } },
-		},
-	})
+		})
+		.returning()
+	if (!user) throw new Error('Failed to insert user')
+	await connectUserRole(user.id, 'user')
 
-	const session = await db.session.create({
-		data: {
+	const [session] = await db
+		.insert(Session)
+		.values({
 			userId: user.id,
 			expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-		},
-	})
+		})
+		.returning()
+	if (!session) throw new Error('Failed to insert session')
 
 	return { user, session }
 }
 
 // Helper to create test organization
 async function createTestOrganization(userId: string) {
-	return await db.organization.create({
-		data: {
+	let [adminRole] = await db
+		.select()
+		.from(OrganizationRole)
+		.where(eq(OrganizationRole.name, 'admin'))
+		.limit(1)
+	if (!adminRole) {
+		;[adminRole] = await db
+			.insert(OrganizationRole)
+			.values({
+				id: 'org_role_admin',
+				name: 'admin',
+				description: 'Administrator role',
+				level: 4,
+			})
+			.returning()
+		if (!adminRole) throw new Error('Admin role not found')
+	}
+
+	const [org] = await db
+		.insert(Organization)
+		.values({
 			name: faker.company.name(),
 			slug:
 				faker.helpers.slugify(faker.company.name()).toLowerCase() +
 				'-' +
 				faker.string.uuid(),
-			users: {
-				create: {
-					userId,
-					organizationRoleId: 'org_role_admin',
-				},
-			},
-		},
+		})
+		.returning()
+	if (!org) throw new Error('Failed to insert organization')
+	await db.insert(UserOrganization).values({
+		userId,
+		organizationId: org.id,
+		organizationRoleId: adminRole.id,
 	})
+	return org
 }
 
 describe('OAuth Token Endpoint', () => {
 	beforeEach(async () => {
 		// Clean up test data before each test
-		await db.mCPAuthorization.deleteMany({})
-		await db.mCPAccessToken.deleteMany({})
-		await db.mCPRefreshToken.deleteMany({})
+		await db.delete(MCPAuthorization)
+		await db.delete(MCPAccessToken)
+		await db.delete(MCPRefreshToken)
 	})
 
 	afterEach(async () => {
 		// Clean up test data after each test
-		await db.mCPAuthorization.deleteMany({})
-		await db.mCPAccessToken.deleteMany({})
-		await db.mCPRefreshToken.deleteMany({})
+		await db.delete(MCPAuthorization)
+		await db.delete(MCPAccessToken)
+		await db.delete(MCPRefreshToken)
 	})
 
 	describe('Property 24: Token response structure', () => {

@@ -52,6 +52,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 		// Create a pending invitation for this user
 		const invitation = await createInvitationFromLink(token, user.email)
+		if (!invitation) {
+			throw new Error('Failed to create invitation')
+		}
 
 		// Redirect to settings/organizations where they can accept/decline
 		const inviterName =

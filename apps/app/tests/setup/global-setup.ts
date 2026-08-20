@@ -16,11 +16,11 @@ const CONTROL_PLANE_SCHEMA = path.resolve(
 )
 const CONTROL_PLANE_MIGRATIONS = path.resolve(
 	process.cwd(),
-	'../../packages/database/migrations',
+	'../../packages/database/drizzle',
 )
 const CONTROL_PLANE_MIGRATE = path.resolve(
 	process.cwd(),
-	'../../packages/database/scripts/migrate.mjs',
+	'../../packages/database/src/migrate.ts',
 )
 
 async function latestSourceMtime() {
@@ -30,16 +30,16 @@ async function latestSourceMtime() {
 		withFileTypes: true,
 	})
 	for (const entry of entries) {
-		if (!entry.isDirectory()) continue
-		const sqlPath = path.join(
-			CONTROL_PLANE_MIGRATIONS,
-			entry.name,
-			'migration.sql',
+		if (!entry.isFile() || !entry.name.endsWith('.sql')) continue
+		const stat = await fsExtra.stat(
+			path.join(CONTROL_PLANE_MIGRATIONS, entry.name),
 		)
-		if (await fsExtra.pathExists(sqlPath)) {
-			const stat = await fsExtra.stat(sqlPath)
-			if (stat.mtimeMs > latest) latest = stat.mtimeMs
-		}
+		if (stat.mtimeMs > latest) latest = stat.mtimeMs
+	}
+	const metaJournal = path.join(CONTROL_PLANE_MIGRATIONS, 'meta/_journal.json')
+	if (await fsExtra.pathExists(metaJournal)) {
+		const stat = await fsExtra.stat(metaJournal)
+		if (stat.mtimeMs > latest) latest = stat.mtimeMs
 	}
 	return latest
 }
@@ -58,7 +58,7 @@ export async function setup() {
 		await fsExtra.remove(`${BASE_DATABASE_PATH}-shm`).catch(() => {})
 	}
 
-	await execaCommand(`node ${CONTROL_PLANE_MIGRATE}`, {
+	await execaCommand(`npx tsx ${CONTROL_PLANE_MIGRATE}`, {
 		stdio: 'inherit',
 		env: {
 			...process.env,

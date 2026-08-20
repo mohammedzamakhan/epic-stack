@@ -2,7 +2,7 @@
   "name": "studio",
   "version": "0.0.0",
   "scripts": {
-    "dev": "drizzle-kit studio --config ../../packages/database/drizzle.config.ts --port 3003 --host 127.0.0.1",
+    "dev": "cd ../../packages/database && drizzle-kit studio --port 3003 --host 127.0.0.1",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "devDependencies": {

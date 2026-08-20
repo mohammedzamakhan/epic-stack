@@ -1,6 +1,12 @@
 import { auditService, AuditAction } from '@repo/audit'
-import { db } from '@repo/database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import {
+	captureInserts,
+	mockDb,
+	mockSelectResults,
+	resetMockDb,
+} from '#tests/setup/drizzle-mock.ts'
 import {
 	HOME_PAGE_SLUG,
 	HOME_PAGE_TITLE,
@@ -26,48 +32,41 @@ vi.mock('@repo/auth', () => ({
 	getUserId: vi.fn(),
 }))
 
-vi.mock('@repo/database', () => {
-	const db = {
-		organizationRole: {
-			findUnique: vi.fn(),
-		},
-		organization: {
-			create: vi.fn(),
-		},
-		userOrganization: {
-			updateMany: vi.fn(),
-		},
-		websitePage: {
-			create: vi.fn(),
-		},
-		$transaction: vi.fn((fn: any) => fn(db)),
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
+	return {
+		...actual,
+		db: mockDb,
+		Organization: drizzleTable,
+		OrganizationImage: drizzleTable,
+		OrganizationRole: drizzleTable,
+		UserOrganization: drizzleTable,
+		WebsitePage: drizzleTable,
+		WebsitePageSection: drizzleTable,
+		and: drizzleOperator,
+		count: drizzleOperator,
+		desc: drizzleOperator,
+		eq: drizzleOperator,
 	}
-
-	return { db }
 })
 
 describe('createOrganization', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
-		vi.mocked(db.organizationRole.findUnique).mockResolvedValue({
-			id: 'role-admin',
-		} as any)
-		vi.mocked(db.organization.create).mockResolvedValue({
-			id: 'org-1',
-			name: 'Acme',
-			slug: 'acme',
-			image: null,
-		} as any)
-		vi.mocked(db.userOrganization.updateMany).mockResolvedValue({
-			count: 0,
-		} as any)
-		vi.mocked(db.websitePage.create).mockResolvedValue({
-			id: 'page-1',
-		} as any)
+		resetMockDb()
+		mockSelectResults([{ id: 'role-admin' }])
 		vi.mocked(auditService.log).mockResolvedValue(undefined as any)
 	})
 
 	it('creates a published protected home page for new organizations', async () => {
+		const { insertedValues } = captureInserts(
+			[{ id: 'org-1', name: 'Acme', slug: 'acme' }],
+			[],
+			[{ id: 'page-1' }],
+			[],
+		)
+
 		await createOrganization({
 			name: 'Acme',
 			slug: 'acme',
@@ -75,20 +74,18 @@ describe('createOrganization', () => {
 			userId: 'user-1',
 		})
 
-		const organizationCreate = vi.mocked(db.organization.create).mock
-			.calls[0]![0]
-		const organizationData = organizationCreate.data as {
+		const organizationValues = insertedValues[0] as {
 			siteHeaderConfig: string
 			siteFooterConfig: string
 		}
-		expect(JSON.parse(organizationData.siteHeaderConfig)).toEqual(
+		expect(JSON.parse(organizationValues.siteHeaderConfig)).toEqual(
 			expect.objectContaining({
 				navLinks: [],
 				ctaLabel: 'Get started',
 				ctaUrl: '/login',
 			}),
 		)
-		expect(JSON.parse(organizationData.siteFooterConfig)).toEqual(
+		expect(JSON.parse(organizationValues.siteFooterConfig)).toEqual(
 			expect.objectContaining({
 				columns: [
 					{
@@ -101,8 +98,18 @@ describe('createOrganization', () => {
 			}),
 		)
 
-		expect(db.websitePage.create).toHaveBeenCalledWith({
-			data: expect.objectContaining({
+		const pageValues = insertedValues[2] as {
+			organizationId: string
+			title: string
+			slug: string
+			status: string
+			template: string
+			isHomePage: boolean
+			position: number
+			createdById: string
+		}
+		expect(pageValues).toEqual(
+			expect.objectContaining({
 				organizationId: 'org-1',
 				title: HOME_PAGE_TITLE,
 				slug: HOME_PAGE_SLUG,
@@ -112,13 +119,9 @@ describe('createOrganization', () => {
 				position: 0,
 				createdById: 'user-1',
 			}),
-		})
+		)
 
-		const pageCreate = vi.mocked(db.websitePage.create).mock.calls[0]![0]
-		const pageData = pageCreate.data as {
-			sections: { create: CreatedHomePageSection[] }
-		}
-		const sections = pageData.sections.create
+		const sections = insertedValues[3] as CreatedHomePageSection[]
 		expect(sections.map((section) => section.type)).toEqual([
 			'hero',
 			'features',
@@ -155,7 +158,8 @@ describe('createOrganization', () => {
 	})
 
 	it('does not create an organization without the admin role', async () => {
-		vi.mocked(db.organizationRole.findUnique).mockResolvedValue(null)
+		resetMockDb()
+		mockSelectResults([])
 
 		await expect(
 			createOrganization({
@@ -165,8 +169,7 @@ describe('createOrganization', () => {
 			}),
 		).rejects.toThrow('Admin role not found')
 
-		expect(db.organization.create).not.toHaveBeenCalled()
-		expect(db.websitePage.create).not.toHaveBeenCalled()
+		expect(mockDb.insert).not.toHaveBeenCalled()
 		expect(auditService.log).not.toHaveBeenCalledWith(
 			expect.objectContaining({ action: AuditAction.ORG_CREATED }),
 		)

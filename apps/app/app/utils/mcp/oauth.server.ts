@@ -1,7 +1,6 @@
 import crypto from 'node:crypto'
 import { auditService, AuditAction } from '@repo/audit'
 import {
-	and,
 	db,
 	eq,
 	MCPAccessToken,
@@ -369,17 +368,16 @@ export async function validateApiKey(apiKey: string) {
 
 // Revoke authorization (invalidates all tokens)
 export async function revokeAuthorization(authorizationId: string) {
-	// Use a transaction to ensure atomicity and reduce risk of database corruption
-	await db.transaction(async (tx) => {
-		await tx
+	await db.batch([
+		db
 			.update(MCPAuthorization)
 			.set({ isActive: false })
-			.where(eq(MCPAuthorization.id, authorizationId))
-		await tx
+			.where(eq(MCPAuthorization.id, authorizationId)),
+		db
 			.update(MCPRefreshToken)
 			.set({ revoked: true, revokedAt: new Date() })
-			.where(eq(MCPRefreshToken.authorizationId, authorizationId))
-	})
+			.where(eq(MCPRefreshToken.authorizationId, authorizationId)),
+	])
 }
 
 // Generate authorization code (stored in memory/cache)

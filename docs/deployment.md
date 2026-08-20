@@ -266,7 +266,7 @@ Create a file at other/docker-entry-point.sh with the contents below.
 ```
 #!/bin/sh -ex
 
-node packages/database/scripts/migrate.mjs
+npx tsx packages/database/src/migrate.ts
 sqlite3 /litefs/data/sqlite.db "PRAGMA journal_mode = WAL;"
 sqlite3 /litefs/data/cache.db "PRAGMA journal_mode = WAL;"
 npm run start

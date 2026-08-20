@@ -14,11 +14,11 @@ function sqliteUrl() {
 
 /**
  * Drizzle Kit config for the US control-plane SQLite database.
- * Paths are absolute so `drizzle-kit` works when launched from apps/studio.
+ * Run drizzle-kit from this package directory so schema/out stay relative.
  */
 export default defineConfig({
-	schema: path.join(packageDir, 'src/schema.ts'),
-	out: path.join(packageDir, 'drizzle'),
+	schema: './src/schema.ts',
+	out: './drizzle',
 	dialect: 'sqlite',
 	dbCredentials: {
 		url: sqliteUrl(),

@@ -70,28 +70,37 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		size: true,
 		verifiedDomain: true,
 		stripeSubscriptionId: true,
-		s3Config: {
-			select: {
-				id: true,
-				isEnabled: true,
-				endpoint: true,
-				bucketName: true,
-				accessKeyId: true,
-				secretAccessKey: true,
-				region: true,
-			},
-		},
-		image: {
-			select: {
-				id: true,
-				objectKey: true,
-				altText: true,
-			},
-		},
 	})
 
+	const [s3Config, image] = await Promise.all([
+		db
+			.select({
+				id: OrganizationS3Config.id,
+				isEnabled: OrganizationS3Config.isEnabled,
+				endpoint: OrganizationS3Config.endpoint,
+				bucketName: OrganizationS3Config.bucketName,
+				accessKeyId: OrganizationS3Config.accessKeyId,
+				secretAccessKey: OrganizationS3Config.secretAccessKey,
+				region: OrganizationS3Config.region,
+			})
+			.from(OrganizationS3Config)
+			.where(eq(OrganizationS3Config.organizationId, organization.id))
+			.limit(1)
+			.then((rows) => rows[0] ?? null),
+		db
+			.select({
+				id: OrganizationImage.id,
+				objectKey: OrganizationImage.objectKey,
+				altText: OrganizationImage.altText,
+			})
+			.from(OrganizationImage)
+			.where(eq(OrganizationImage.organizationId, organization.id))
+			.limit(1)
+			.then((rows) => rows[0] ?? null),
+	])
+
 	return {
-		organization,
+		organization: { ...organization, s3Config, image },
 	}
 }
 
@@ -110,17 +119,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			size: true,
 			verifiedDomain: true,
 			stripeSubscriptionId: true,
-			s3Config: {
-				select: {
-					id: true,
-					isEnabled: true,
-					endpoint: true,
-					bucketName: true,
-					accessKeyId: true,
-					secretAccessKey: true,
-					region: true,
-				},
-			},
 		}),
 		// Get user email for domain validation
 		db

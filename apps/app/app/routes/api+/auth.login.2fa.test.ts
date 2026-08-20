@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 import {
 	createAuthenticatedSessionResponse,
@@ -19,15 +20,15 @@ vi.hoisted(() => {
 	process.env.BUCKET_NAME = 'test'
 })
 
-vi.mock('@repo/database', async () => {
-	const actual =
-		await vi.importActual<typeof import('@repo/database')>('@repo/database')
-	const limit = vi.fn().mockResolvedValue([{ id: 'user-123' }])
-	const where = vi.fn().mockReturnValue({ limit })
-	const from = vi.fn().mockReturnValue({ where })
+vi.mock('@repo/database', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@repo/database')>()
+	const { mockDb, drizzleTable, drizzleOperator } =
+		await import('#tests/setup/drizzle-mock.ts')
 	return {
 		...actual,
-		db: { select: vi.fn().mockReturnValue({ from }) },
+		db: mockDb,
+		User: drizzleTable,
+		eq: drizzleOperator,
 	}
 })
 
@@ -69,7 +70,8 @@ describe('auth.login.2fa API action (WO-82)', () => {
 	const mockCreateSession = vi.mocked(createAuthenticatedSessionResponse)
 
 	beforeEach(() => {
-		vi.clearAllMocks()
+		resetMockDb()
+		mockSelectResults([{ id: 'user-123' }])
 	})
 
 	it('returns error when 2FA code is invalid or expired (400)', async () => {

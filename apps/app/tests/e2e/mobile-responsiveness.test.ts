@@ -1,4 +1,4 @@
-import { db } from '@repo/database'
+import { db, OrganizationNote } from '@repo/database'
 // Removed db import - using test utilities instead
 import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
@@ -159,15 +159,15 @@ test.describe('Mobile Responsiveness', () => {
 		const org = await createTestOrganization(user.id, 'admin')
 
 		// Create multiple notes to populate table
-		await db.organizationNote.createMany({
-			data: Array.from({ length: 5 }, (_, i) => ({
+		await db.insert(OrganizationNote).values(
+			Array.from({ length: 5 }, (_, i) => ({
 				title: `Note ${i + 1}`,
 				content: `Content for note ${i + 1}`,
 				organizationId: org.id,
 				createdById: user.id,
 				isPublic: true,
 			})),
-		})
+		)
 
 		// Set mobile viewport
 		await page.setViewportSize({ width: 375, height: 667 })

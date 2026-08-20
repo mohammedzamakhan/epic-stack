@@ -429,10 +429,7 @@ npm run validate  # Must pass: lint + typecheck + test + e2e
 # After schema changes in packages/database/src/schema.ts
 cd packages/database
 npx drizzle-kit generate --name your_migration_name
-# Also add the SQL to packages/database/migrations/<timestamp>_name/migration.sql
-# so production deploy (`node scripts/migrate.mjs`) applies it.
-# If relation names changed, regenerate the query catalog:
-npm run db:generate
+npx tsx src/migrate.ts
 
 # View data
 npm run db:studio    # Opens Drizzle Studio on localhost:5555

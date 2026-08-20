@@ -318,9 +318,8 @@ You've got a few options:
    app after deleting/fixing the faulty migration. **(Make sure that the backup
    isn't too old, otherwise you'll lose data)**
    - You can fix a faulty migration by either editing the migration SQL file, or
-     by deleting the particular migration folder from
-     `packages/database/migrations` and re-generating the migration after fixing
-     the error.
+     by deleting the particular migration SQL from `packages/database/drizzle`
+     and re-generating the migration after fixing the error.
 3. If you do care about the data and don't have a backup, you can follow these
    steps:
    1. Comment out the
@@ -359,9 +358,9 @@ You've got a few options:
       migration, it will fail again. So you need to delete/fix the faulty
       migration.
       - You can fix a faulty migration by either editing the migration SQL file,
-        or by deleting the particular migration folder from
-        `packages/database/migrations` and re-generating the migration after
-        fixing the error.
+        or by deleting the particular migration SQL from
+        `packages/database/drizzle` and re-generating the migration after fixing
+        the error.
    9. Uncomment the
       [`exec` section from `litefs.yml` file](https://github.com/mohammedzamakhan/epic-startup/blob/main/other/litefs.yml#L31-L37).
 
