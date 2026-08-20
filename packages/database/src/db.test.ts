@@ -3,9 +3,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { eq, getTableName, sql } from 'drizzle-orm'
-import { db } from './client.ts'
-import { countUsers } from './queries.ts'
-import { User } from './schema.ts'
+import { db } from './client'
+import { countUsers } from './queries'
+import { User } from './schema'
 
 const dbFile = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),

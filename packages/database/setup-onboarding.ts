@@ -1,4 +1,4 @@
-import { db, OnboardingStep } from './db.server.ts'
+import { db, OnboardingStep } from './db.server'
 
 // Default onboarding steps to seed the database
 export const DEFAULT_ONBOARDING_STEPS = [

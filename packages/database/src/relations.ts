@@ -58,7 +58,7 @@ import {
 	WebsitePageSection,
 	NotificationPreference,
 	Notification,
-} from './schema.ts'
+} from './schema'
 
 export const NoteRelations = relations(Note, ({ one, many }) => ({
 	owner: one(User, {

@@ -1,4 +1,4 @@
-import { db, eq, Role } from './db.server.ts'
+import { db, eq, Role } from './db.server'
 
 export async function setupRoles() {
 	console.log('Setting up roles...')

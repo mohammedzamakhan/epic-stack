@@ -19,9 +19,9 @@ import {
 	User,
 	UserImage,
 	_RoleToUser,
-} from './db.server.ts'
-import { setupRoles } from './setup-roles.ts'
-import { initializeOnboardingSteps } from './setup-onboarding.ts'
+} from './db.server'
+import { setupRoles } from './setup-roles'
+import { initializeOnboardingSteps } from './setup-onboarding'
 
 async function seed() {
 	console.log('🌱 Seeding...')

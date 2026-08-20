@@ -1,5 +1,5 @@
-export * from './schema.ts'
-export * from './relations.ts'
+export * from './schema'
+export * from './relations'
 export {
 	and,
 	asc,
@@ -27,10 +27,10 @@ export {
 	sum,
 } from 'drizzle-orm'
 export { alias } from 'drizzle-orm/sqlite-core'
-export { db, resolveSqliteFileUrl, schema, sqliteClient } from './client.ts'
+export { db, resolveSqliteFileUrl, schema, sqliteClient } from './client'
 export {
 	countSsoConfigurations,
 	countSsoSessions,
 	countUsers,
 	pingControlPlane,
-} from './queries.ts'
+} from './queries'

@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { remember } from '@epic-web/remember'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
-import * as relations from './relations.ts'
-import * as tables from './schema.ts'
+import * as relations from './relations'
+import * as tables from './schema'
 
 export const schema = { ...tables, ...relations }
 

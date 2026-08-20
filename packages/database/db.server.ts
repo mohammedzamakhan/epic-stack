@@ -1,2 +1,2 @@
-export * from './src/index.ts'
-export { db, sqliteClient } from './src/client.ts'
+export * from './src/index'
+export { db, sqliteClient } from './src/client'

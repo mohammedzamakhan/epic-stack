@@ -208,7 +208,6 @@ relations = relations.replace(
 	"import { relations } from 'drizzle-orm'",
 )
 relations = relations.replace('";', "'")
-relations = relations.replace("from './schema'", "from './schema.ts'")
 relations = relations.replaceAll('";', "'")
 relations = relations.replaceAll('";\n', "'\n")
 writeFileSync(path.join(outDir, 'relations.ts'), relations)

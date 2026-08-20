@@ -1,6 +1,6 @@
 import { count, eq, sql } from 'drizzle-orm'
-import { db } from './client.ts'
-import { SSOConfiguration, SSOSession, User } from './schema.ts'
+import { db } from './client'
+import { SSOConfiguration, SSOSession, User } from './schema'
 
 /** Lightweight connectivity probe used by Fly HTTP healthchecks. */
 export async function pingControlPlane() {

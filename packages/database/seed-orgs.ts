@@ -11,7 +11,7 @@ import {
 	UserOrganization,
 	WebsitePage,
 	WebsitePageSection,
-} from './db.server.ts'
+} from './db.server'
 
 type WebsitePageSectionSeed = {
 	type: string

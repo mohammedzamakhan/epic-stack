@@ -1,4 +1,4 @@
-export * from './src/generated-types.ts'
+export * from './src/generated-types'
 
 export type JsonValue =
 	string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }

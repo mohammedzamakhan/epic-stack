@@ -1,6 +1,6 @@
 /* eslint-disable */
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
-import type * as schema from './schema.ts'
+import type * as schema from './schema'
 
 export type User = InferSelectModel<typeof schema.User>
 export type UserInsert = InferInsertModel<typeof schema.User>
