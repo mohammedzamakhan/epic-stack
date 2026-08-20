@@ -899,6 +899,11 @@ export const OrganizationS3Config = sqliteTable(
 		accessKeyId: text().notNull(),
 		secretAccessKey: text().notNull(),
 		region: text().notNull(),
+		previousEndpoint: text(),
+		previousBucketName: text(),
+		previousAccessKeyId: text(),
+		previousSecretAccessKey: text(),
+		previousRegion: text(),
 		createdAt: integer({ mode: 'timestamp_ms' })
 			.$defaultFn(() => new Date())
 			.notNull(),
@@ -917,6 +922,56 @@ export const OrganizationS3Config = sqliteTable(
 		uniqueIndex('OrganizationS3Config_organizationId_key').on(
 			table.organizationId,
 		),
+	],
+)
+
+export const StorageMigration = sqliteTable(
+	'StorageMigration',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		organizationId: text()
+			.notNull()
+			.references(() => Organization.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		status: text().notNull().default('pending'),
+		sourceType: text().notNull(),
+		sourceEndpoint: text(),
+		sourceBucketName: text(),
+		sourceAccessKeyId: text(),
+		sourceSecretAccessKey: text(),
+		sourceRegion: text(),
+		destType: text().notNull(),
+		destEndpoint: text(),
+		destBucketName: text(),
+		destAccessKeyId: text(),
+		destSecretAccessKey: text(),
+		destRegion: text(),
+		totalObjects: integer().notNull().default(0),
+		processedObjects: integer().notNull().default(0),
+		failedObjects: integer().notNull().default(0),
+		cursor: integer().notNull().default(0),
+		workflowInstanceId: text(),
+		lastError: text(),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+		completedAt: integer({ mode: 'timestamp_ms' }),
+	},
+	(table) => [
+		index('StorageMigration_organizationId_status_idx').on(
+			table.organizationId,
+			table.status,
+		),
+		index('StorageMigration_organizationId_idx').on(table.organizationId),
 	],
 )
 

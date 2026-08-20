@@ -12,7 +12,12 @@ export {
 	uploadToStorage,
 	testS3Connection,
 	getSignedGetRequestInfo,
+	getSignedHeadRequestInfo,
 	getSignedGetRequestInfoAsync,
+	getSignedPutRequestInfoForKey,
+	getSignedDeleteRequestInfo,
+	getPresignedGetUrl,
+	getPresignedPutUrl,
 } from './src/client'
 
 export {

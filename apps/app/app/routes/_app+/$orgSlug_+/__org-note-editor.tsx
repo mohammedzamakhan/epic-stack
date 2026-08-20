@@ -126,8 +126,6 @@ type OrgNoteEditorProps = {
 			type: string
 			altText: string | null
 			objectKey: string
-			thumbnailKey?: string | null
-			status: string
 		}>
 	}
 	actionData?: {
@@ -135,6 +133,7 @@ type OrgNoteEditorProps = {
 	}
 	onSuccess?: () => void
 	organizationId: string
+	mediaTransformBaseUrl?: string | null
 }
 
 export function OrgNoteEditor({
@@ -142,6 +141,7 @@ export function OrgNoteEditor({
 	actionData,
 	onSuccess,
 	organizationId,
+	mediaTransformBaseUrl = null,
 }: OrgNoteEditorProps) {
 	const { _ } = useLingui()
 	const isPending = useIsPending()
@@ -336,6 +336,7 @@ export function OrgNoteEditor({
 											(u) => u.type === 'video',
 										)}
 										organizationId={organizationId}
+										mediaTransformBaseUrl={mediaTransformBaseUrl}
 									/>
 								</Suspense>
 							</LazyLoadErrorBoundary>

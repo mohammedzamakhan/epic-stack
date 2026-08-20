@@ -8,8 +8,8 @@ Epic Startup monorepo.
 **Epic Startup** is a production-ready, full-stack SaaS template built as a
 Turborepo-based monorepo with npm workspaces. It includes multiple apps (main
 app, marketing site, admin dashboard, tenant sites, regional tenant-api, mobile
-app, CMS, background jobs, email templates, notifications) and shared packages
-(UI, auth, tenant-db, AI, payments, storage, security, i18n, etc.).
+app, CMS, jobs-cron, email templates, notifications) and shared packages (UI,
+auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Drizzle,
 Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites).
@@ -376,7 +376,14 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
 - `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
   HTML for browser-direct auth (not a server proxy)
-- `INTERNAL_COMMAND_TOKEN` - Shared by App and every tenant-api (≥16 chars)
+- `INTERNAL_COMMAND_TOKEN` - Shared by App, every tenant-api, and
+  `apps/jobs-cron` (≥16 chars). Authenticates cron POSTs to `/resources/jobs/*`
+  and tenant provision/deprovision.
+- `JOBS_CRON_WORKER_URL` - App only. Public URL of `apps/jobs-cron` Worker used
+  to start storage migration workflows.
+- `MEDIA_TRANSFORM_BASE_URL` - App only. Cloudflare-proxied hostname with Media
+  Transformations enabled; powers on-demand video posters/clips via
+  `/cdn-cgi/media/`. Empty in dev (falls back to `/resources/videos/source`).
 - `DATA_REGION` - Tenant-api only: `us` or `ksa`
 - `TENANT_DB_DIR` - Tenant-api only: directory for `tenant_{orgId}.db` (OCI:
   `/data/tenants`)
@@ -458,8 +465,8 @@ queries. Native SQL/query helpers also live on `db` from the same package.
 
 ## Deployment
 
-**Platform**: Fly.io (App/Admin) + Cloudflare Workers (CMS) + OCI Ampere
-(tenant-api) + Cloudflare Pages (Sites / marketing web)
+**Platform**: Fly.io (App/Admin) + Cloudflare Workers (CMS, jobs-cron) + OCI
+Ampere (tenant-api) + Cloudflare Pages (Sites / marketing web)
 
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
@@ -470,8 +477,8 @@ queries. Native SQL/query helpers also live on `db` from the same package.
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
 5. Docker build (app, admin on Fly)
-6. Deploy App/Admin to Fly.io; CMS to Cloudflare Workers; Sites and marketing
-   web to Cloudflare Pages
+6. Deploy App/Admin to Fly.io; CMS and jobs-cron to Cloudflare Workers; Sites
+   and marketing web to Cloudflare Pages
 7. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
 
 **Zero-Downtime Deployments**:
@@ -513,9 +520,11 @@ npm install --prefix packages/<name>                   # Install deps in package
 - `@repo/ai` - AI/ML integrations (Vercel AI SDK, Google AI)
 - `@repo/security` - Security utilities (encryption, rate limiting)
 
-**Key Apps (tenant data plane):**
+**Key Apps:**
 
-- `apps/app` - Operators; publishes sites; routes provision by `dataRegion`
+- `apps/app` - Operators; publishes sites; routes provision by `dataRegion`;
+  hosts `/resources/jobs/*` and `/resources/videos/source`
+- `apps/jobs-cron` - Cloudflare Worker cron → authenticated App job routes
 - `apps/sites` - Public CMS HTML; injects tenant-api URL; no PII proxy
 - `apps/tenant-api` - Regional customer auth + SQLite (local US :3007, KSA
   :3009; production OCI Ashburn + Riyadh)
@@ -527,4 +536,5 @@ npm install --prefix packages/<name>                   # Install deps in package
 - **Security**: See `SECURITY_AUDIT_REPORT.md`
 - **Getting Started**: See `docs/getting-started.md`
 - **Tenant data residency**: See `docs/tenant-data-residency.md`
+- **Scheduled jobs & video transforms**: See `docs/scheduled-jobs.md`
 - **Testing Guide**: See `docs/testing.md`

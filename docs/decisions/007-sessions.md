@@ -40,5 +40,6 @@ request. This is not a problem for us since we're using SQLite and there's 0
 latency, so the query is extremely fast.
 
 The sessions table does not currently have the capability to proactively delete
-expired sessions which means it could fill up indefinitely. This would be a good
-problem for built-in cron job support to solve eventually.
+expired sessions which means it could fill up indefinitely. Cron infrastructure
+exists today (`apps/jobs-cron`); a dedicated expired-session cleanup route is
+not yet implemented.

@@ -19,8 +19,6 @@ import {
 	inArray,
 	Organization,
 	OrganizationAnnouncement,
-	WebsitePage,
-	WebsitePageSection,
 } from '@repo/database'
 import {
 	composePageSectionsWithChrome,
@@ -371,12 +369,10 @@ export async function findPublishedSitePage(
 	pageSlug: string | null,
 	options?: { preview?: boolean; home?: boolean },
 ): Promise<PublicSitePage | null> {
-	const visibility = options?.preview ? {} : { status: 'published' as const }
-
 	if (options?.home) {
 		const homePage =
 			(await db.query.WebsitePage.findFirst({
-				where: (page, operators) =>
+				where: (page, _operators) =>
 					and(
 						eq(page.organizationId, organizationId),
 						eq(page.isHomePage, true),
@@ -401,7 +397,7 @@ export async function findPublishedSitePage(
 				},
 			})) ??
 			(await db.query.WebsitePage.findFirst({
-				where: (page, operators) =>
+				where: (page, _operators) =>
 					and(
 						eq(page.organizationId, organizationId),
 						inArray(page.slug, ['', 'home']),

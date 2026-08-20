@@ -1,4 +1,5 @@
 import { requireUserId } from '@repo/auth'
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import {
@@ -17,7 +18,7 @@ vi.mock('@repo/security', () => ({
 }))
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

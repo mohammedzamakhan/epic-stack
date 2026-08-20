@@ -1,13 +1,14 @@
 import { requireUserId } from '@repo/auth'
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
+import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
+import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import {
 	mockDb,
 	mockSelectResults,
 	resetMockDb,
 } from '#tests/setup/drizzle-mock.ts'
-import type * as PermissionsModule from '#app/utils/organization/permissions.server.ts'
-import { requireUserWithOrganizationPermission } from '#app/utils/organization/permissions.server.ts'
 import { action } from './__org-note-editor.server.tsx'
 
 vi.hoisted(() => {
@@ -44,7 +45,7 @@ vi.mock(
 )
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {
@@ -69,7 +70,6 @@ vi.mock('#app/utils/note-media-pipeline.server.ts', () => ({
 	processNoteMediaUploads: vi
 		.fn()
 		.mockResolvedValue({ uploadUpdates: [], newUploads: [] }),
-	triggerMediaProcessingJobs: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@repo/audit', () => ({

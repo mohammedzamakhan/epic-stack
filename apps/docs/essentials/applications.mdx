@@ -89,7 +89,7 @@ marketing website (`apps/web`). Deploys to Cloudflare Workers, not Fly.io.
 - **Tech Stack**: Payload CMS 3.x, Next.js, local SQLite (`@payloadcms/db-sqlite`),
   deployed with OpenNext. Cloudflare D1 and R2 bindings are declared in
   `wrangler.jsonc` but not yet wired into Payload (see
-  [CMS storage](/docs/cms-storage.md))
+  [CMS storage](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/cms-storage.md))
 - **Port**: 3006 (development)
 - **Purpose**: Content management for the marketing website
 - **Key Features**:
@@ -99,7 +99,7 @@ marketing website (`apps/web`). Deploys to Cloudflare Workers, not Fly.io.
   - Nested documents support
   - Search functionality
   - Local file storage today, in every environment — an R2 binding is
-    declared but not yet wired in (see [CMS storage](/docs/cms-storage.md))
+    declared but not yet wired in (see [CMS storage](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/cms-storage.md))
   - Redirects management
 
 **Development Commands**:
@@ -213,22 +213,45 @@ Development server for Novu notification workflows.
 npm run dev              # Start Novu dev server
 ```
 
-### Background Jobs (`apps/background-jobs`)
+### Jobs Cron (`apps/jobs-cron`)
 
-Background job processing with Trigger.dev.
+Cloudflare Worker that triggers scheduled control-plane maintenance jobs on the
+App primary instance.
 
-- **Tech Stack**: Trigger.dev
-- **Purpose**: Development environment for background jobs and scheduled tasks
-- **Features**:
-  - Job scheduling and management
-  - Local development and testing
-  - Job monitoring and debugging
+- **Tech Stack**: Cloudflare Workers (Cron Triggers)
+- **Purpose**: Fire daily POST requests to authenticated `/resources/jobs/*`
+  routes on `apps/app`
+- **Schedules** (UTC):
+  - `0 2 * * *` — audit log archival
+  - `0 3 * * *` — MCP token cleanup
+  - `0 4 * * *` — GDPR erasure processing
+- **Secrets**: `INTERNAL_COMMAND_TOKEN` (Wrangler secret; must match App)
+- **Config**: `APP_BASE_URL` in `wrangler.jsonc`
 
 **Development Commands**:
 
 ```bash
-npm run dev              # Start Trigger.dev dev server
+cd apps/jobs-cron && npm run dev
 ```
+
+**Production setup**: See [Scheduled jobs](https://github.com/mohammedzamakhan/epic-startup/blob/main/docs/scheduled-jobs.md) in the repo
+docs.
+
+### Video note media (on-demand transforms)
+
+Video note posters and hover preview clips use **Cloudflare Media Transformations**
+via `/cdn-cgi/media/` — no ffmpeg, no async background worker.
+
+- **Source route**: `/resources/videos/source` proxies org video from Tigris or
+  custom S3 (HEAD + Range)
+- **Env**: `MEDIA_TRANSFORM_BASE_URL` on App (Cloudflare-proxied hostname with
+  Transformations enabled). Empty in dev → direct source URLs.
+- **UI**: `VideoPoster` component; URL helpers in `@repo/common`
+
+**One-off ops scripts** (repo root):
+
+- `npm run audit:integrity-backfill` — audit log HMAC backfill
+- `scripts/transfer-s3-files.ts` — BYO S3 object migration
 
 ### Drizzle Studio (`apps/studio`)
 
@@ -257,7 +280,6 @@ All applications share code through workspace packages located in `packages/`:
 - **@repo/email**: Email templates and utilities
 - **@repo/integrations**: Third-party integrations
 - **@repo/notifications**: Notification configurations
-- **@repo/background-jobs**: Shared job definitions
 - **@repo/config**: Shared configuration (ESLint, TypeScript, etc.)
 - **@repo/types**: Shared TypeScript types
 - **@repo/validation**: Shared Zod schemas

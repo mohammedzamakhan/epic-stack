@@ -8,7 +8,6 @@ import {
 	and,
 	db,
 	eq,
-	inArray,
 	notInArray,
 	Organization,
 	OrganizationNote,
@@ -19,10 +18,7 @@ import { noteHooks } from '@repo/integrations'
 import { data, redirect, type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { sanitizeNoteContent } from '#app/utils/content-sanitization.server.ts'
-import {
-	processNoteMediaUploads,
-	triggerMediaProcessingJobs,
-} from '#app/utils/note-media-pipeline.server.ts'
+import { processNoteMediaUploads } from '#app/utils/note-media-pipeline.server.ts'
 import {
 	requireUserWithOrganizationPermission,
 	ORG_PERMISSIONS,
@@ -286,14 +282,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		}
 		return updated
 	})
-
-	// Trigger processing background jobs for new media
-	await triggerMediaProcessingJobs(
-		updatedNote.id,
-		organization.id,
-		userId,
-		newUploads,
-	)
 
 	// Log activity
 	if (isNewNote) {

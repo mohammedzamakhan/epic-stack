@@ -8,12 +8,9 @@ import {
 } from '@repo/common/site-locales'
 import {
 	and,
-	asc,
 	db,
 	desc,
 	eq,
-	like,
-	OrganizationNote,
 	WebsitePage,
 	WebsitePageSection,
 } from '@repo/database'

@@ -28,36 +28,6 @@ async function getOrganizationRoleId(roleName: OrganizationRoleName) {
 	return role.id
 }
 
-async function getInvitation(id: string) {
-	const [row] = await db
-		.select({
-			invitation: OrganizationInvitation,
-			organizationRole: OrganizationRole,
-			organization: Organization,
-			inviter: User,
-		})
-		.from(OrganizationInvitation)
-		.innerJoin(
-			OrganizationRole,
-			eq(OrganizationInvitation.organizationRoleId, OrganizationRole.id),
-		)
-		.innerJoin(
-			Organization,
-			eq(OrganizationInvitation.organizationId, Organization.id),
-		)
-		.leftJoin(User, eq(OrganizationInvitation.inviterId, User.id))
-		.where(eq(OrganizationInvitation.id, id))
-		.limit(1)
-	return row
-		? {
-				...row.invitation,
-				organizationRole: row.organizationRole,
-				organization: row.organization,
-				inviter: row.inviter,
-			}
-		: null
-}
-
 export async function createOrganizationInvitation({
 	organizationId,
 	email,

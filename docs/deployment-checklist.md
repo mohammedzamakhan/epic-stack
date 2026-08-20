@@ -305,6 +305,19 @@ via Wrangler, not `flyctl secrets`:
       `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (shared with the
       website/Sites Cloudflare Pages jobs).
 
+### Jobs Cron Worker (Cloudflare)
+
+- [ ] **5.6a** Set `APP_BASE_URL` in `apps/jobs-cron/wrangler.jsonc` for
+      staging/production.
+- [ ] **5.6b** Set the worker secret (must match App `INTERNAL_COMMAND_TOKEN`):
+  ```bash
+  cd apps/jobs-cron
+  npx wrangler secret put INTERNAL_COMMAND_TOKEN
+  ```
+- [ ] **5.6c** (Production) Enable Cloudflare **Media Transformations** on the
+      App zone and set `MEDIA_TRANSFORM_BASE_URL` on the App to the proxied
+      hostname (see [scheduled jobs](./scheduled-jobs.md)).
+
 ### Verify Environment Variables
 
 - [ ] **5.7** Check secrets are set correctly
@@ -312,6 +325,7 @@ via Wrangler, not `flyctl secrets`:
   flyctl secrets list --app epic-startup
   flyctl secrets list --app epic-startup-admin
   (cd apps/cms && npx wrangler secret list)
+  (cd apps/jobs-cron && npx wrangler secret list)
   ```
 
 ---

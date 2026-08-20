@@ -33,10 +33,9 @@ One way I explored for reducing this risk is rotating the encryption secret by
 having a special database table for storing the secret and then having a
 background job that rotates the secret every so often. This would also mean that
 we need to keep old secrets around for as long as the encrypted data is valid so
-we can decrypt it. We don't yet have background job support, but we're planning
-on adding it eventually (we probably should do something like this for our
-`INTERNAL_COMMAND_TOKEN` in the future). In any case, it would be nice to avoid
-the extra complexity.
+we can decrypt it. Scheduled job infrastructure exists today (`apps/jobs-cron`
+POSTing to App routes), but secret rotation is not implemented yet. In any case,
+it would be nice to avoid the extra complexity.
 
 And so we come to TOTP (Time-based One-Time Passwords). TOTP is a standard for
 generating one-time passwords that are only valid for a specific amount of time.
@@ -108,7 +107,8 @@ now been published as [@epic-web/totp](https://npm.im/@epic-web/totp).
 This also means we now need a new table in the database. This can be designed in
 such a way that there's no migration cost and it's purely additive.
 
-Eventually, we'll want to set up a background job that deletes expired TOTPs
-from the database. It's not a ship stopper for this feature, but something we'll
-want to have implemented eventually (the same applies to expired sessions as
-well).
+Eventually, we'll want a scheduled job (or extend an existing cron route) that
+deletes expired TOTPs from the database. It's not a ship stopper for this
+feature, but something we'll want to have implemented eventually (the same
+applies to expired sessions as well). See
+[scheduled jobs](../scheduled-jobs.md).

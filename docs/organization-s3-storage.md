@@ -93,7 +93,9 @@ All existing file upload functions support organization-specific storage:
 - Note images
 - Comment images
 - Note videos
-- Video thumbnails
+- Video posters and hover preview clips (on-demand via Cloudflare Media
+  Transformations when `MEDIA_TRANSFORM_BASE_URL` is set; see
+  [scheduled jobs](./scheduled-jobs.md))
 
 ## Migration
 
@@ -102,6 +104,16 @@ When enabling this feature on an existing system:
 1. Existing files will remain in the default storage
 2. New files will be uploaded to the organization's configured S3 storage
 3. Organizations can be migrated gradually as they configure their S3 settings
+
+Use the **Migrate existing media** button in org settings, or check **Migrate
+existing org media after saving** when updating bucket credentials. The App
+creates a `StorageMigration` record and triggers the `storage-migration`
+Workflow on `apps/jobs-cron` (same Worker as cron jobs). Each file is copied to
+the destination bucket and removed from the source (same behavior as
+`scripts/transfer-s3-files.ts` without `--keep-source`).
+
+For break-glass / local ops, `scripts/transfer-s3-files.ts` remains available.
+See [scheduled jobs](./scheduled-jobs.md#storage-migration-cloudflare-workflow).
 
 ## Troubleshooting
 

@@ -1,11 +1,12 @@
+import type * as DatabaseModule from '@repo/database'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { isCodeValid } from '#app/routes/_auth+/verify.server.tsx'
 import {
 	createAuthenticatedSessionResponse,
 	verify2FAToken,
 } from '#app/utils/jwt.server.ts'
+import { mockSelectResults, resetMockDb } from '#tests/setup/drizzle-mock.ts'
 import { action } from './auth.login.2fa.ts'
 
 vi.hoisted(() => {
@@ -21,7 +22,7 @@ vi.hoisted(() => {
 })
 
 vi.mock('@repo/database', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@repo/database')>()
+	const actual = await importOriginal<typeof DatabaseModule>()
 	const { mockDb, drizzleTable, drizzleOperator } =
 		await import('#tests/setup/drizzle-mock.ts')
 	return {

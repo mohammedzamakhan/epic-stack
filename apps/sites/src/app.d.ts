@@ -1,11 +1,15 @@
 /// <reference types="astro/client" />
 
-declare namespace App {
-	interface Locals {
-		orgSlug: string | null
-		customHost: string | null
-		requestedLocale: string
-		defaultLocale: string
-		i18n: import('@lingui/core').I18n
+import { type I18n } from '@lingui/core'
+
+declare global {
+	namespace App {
+		interface Locals {
+			orgSlug: string | null
+			customHost: string | null
+			requestedLocale: string
+			defaultLocale: string
+			i18n: I18n
+		}
 	}
 }

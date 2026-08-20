@@ -263,7 +263,7 @@ authRoutes.post(
 
 		const loaded = await loadProvisionedOrgDb(c, parsed.data)
 		if ('error' in loaded) return loaded.error
-		const { organization, db } = loaded
+		const { db } = loaded
 
 		const phoneLimit = rateLimitByKey('send-code-phone', phone, {
 			maxRequests: 3,

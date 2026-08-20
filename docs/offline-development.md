@@ -162,8 +162,9 @@ This is expected and doesn't impact local development experience.
 We're continuously improving offline capabilities:
 
 - [ ] Local email preview without Resend
+- [x] Scheduled maintenance via `apps/jobs-cron` (optional in local dev; job
+      routes can be invoked manually)
 - [ ] Offline AI model support
-- [ ] Local background job processing
 
 See [guiding principles](./guiding-principles.md) for our commitment to offline
 development.

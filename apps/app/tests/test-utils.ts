@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { db, eq, Organization, UserOrganization } from '@repo/database'
+import { db, Organization, UserOrganization } from '@repo/database'
 
 export async function createTestOrganization(
 	userId: string,

@@ -32,6 +32,7 @@ import {
 	IpAddress,
 	IpAddressUser,
 	OrganizationS3Config,
+	StorageMigration,
 	OrganizationNoteStatus,
 	_OrganizationPermissionToRole,
 	OrganizationRole,
@@ -151,7 +152,7 @@ export const PasswordRelations = relations(Password, ({ one }) => ({
 	}),
 }))
 
-export const SessionRelations = relations(Session, ({ one, many }) => ({
+export const SessionRelations = relations(Session, ({ one }) => ({
 	user: one(User, {
 		fields: [Session.userId],
 		references: [User.id],
@@ -225,6 +226,7 @@ export const OrganizationRelations = relations(Organization, ({ many }) => ({
 	onboardingProgress: many(OnboardingProgress),
 	feedback: many(Feedback),
 	s3Configs: many(OrganizationS3Config),
+	storageMigrations: many(StorageMigration),
 	organizationNotes: many(OrganizationNote),
 	noteStatuses: many(OrganizationNoteStatus),
 	sentInvitations: many(OrganizationInvitation),
@@ -468,6 +470,16 @@ export const OrganizationS3ConfigRelations = relations(
 	({ one }) => ({
 		organization: one(Organization, {
 			fields: [OrganizationS3Config.organizationId],
+			references: [Organization.id],
+		}),
+	}),
+)
+
+export const StorageMigrationRelations = relations(
+	StorageMigration,
+	({ one }) => ({
+		organization: one(Organization, {
+			fields: [StorageMigration.organizationId],
 			references: [Organization.id],
 		}),
 	}),

@@ -3,6 +3,7 @@ node_modules
 
 /build
 .env
+.dev.vars
 .cache
 .astro/
 .next/

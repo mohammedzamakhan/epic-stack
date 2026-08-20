@@ -1,9 +1,10 @@
 import { invariantResponse } from '@epic-web/invariant'
 import { Trans } from '@lingui/macro'
 import { requireUserId } from '@repo/auth'
-import { db, eq, Organization, OrganizationNote } from '@repo/database'
+import { db, eq, Organization } from '@repo/database'
 import { SheetHeader, SheetTitle } from '@repo/ui/sheet'
 import { lazy, Suspense } from 'react'
+import { ENV } from 'varlock/env'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { userHasOrgAccess } from '#app/utils/organization/organizations.server.ts'
 
@@ -51,8 +52,6 @@ export async function loader({
 					type: true,
 					altText: true,
 					objectKey: true,
-					thumbnailKey: true,
-					status: true,
 				},
 			},
 		},
@@ -63,7 +62,11 @@ export async function loader({
 		? { ...noteRow, uploads: noteRow.organizationNoteUploads }
 		: null
 	invariantResponse(note, 'Not found', { status: 404 })
-	return { note, organizationId: organization.id }
+	return {
+		note,
+		organizationId: organization.id,
+		mediaTransformBaseUrl: ENV.MEDIA_TRANSFORM_BASE_URL?.trim() || null,
+	}
 }
 
 type NoteEditProps = {
@@ -79,11 +82,10 @@ type NoteEditProps = {
 				type: string
 				altText: string | null
 				objectKey: string
-				thumbnailKey: string | null
-				status: string
 			}>
 		}
 		organizationId: string
+		mediaTransformBaseUrl: string | null
 	}
 	actionData?: { result: any }
 }
@@ -113,6 +115,7 @@ export default function NoteEdit({ loaderData, actionData }: NoteEditProps) {
 						note={loaderData.note}
 						actionData={actionData}
 						organizationId={loaderData.organizationId}
+						mediaTransformBaseUrl={loaderData.mediaTransformBaseUrl}
 					/>
 				</Suspense>
 			</section>

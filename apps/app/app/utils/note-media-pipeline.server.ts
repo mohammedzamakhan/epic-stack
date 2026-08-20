@@ -1,17 +1,8 @@
 import {
-	triggerVideoProcessing,
-	triggerImageProcessing,
-} from '@repo/background-jobs'
-import { and, db, eq, OrganizationNoteUpload } from '@repo/database'
-import {
 	type ImageFieldset,
 	type MediaFieldset,
 } from '#app/routes/_app+/$orgSlug_+/__org-note-editor.tsx'
-import {
-	uploadNoteImage,
-	uploadNoteVideo,
-	getSignedGetRequestInfo,
-} from '#app/utils/storage.server.ts'
+import { uploadNoteImage, uploadNoteVideo } from '#app/utils/storage.server.ts'
 
 type UploadFieldset = (ImageFieldset | MediaFieldset) & { type?: string }
 
@@ -78,7 +69,7 @@ export async function processNoteMediaUploads(
 					objectKey,
 					mimeType: upload.file?.type,
 					fileSize: upload.file?.size,
-					status: 'processing',
+					status: 'completed',
 				}
 			} else {
 				return {
@@ -106,83 +97,10 @@ export async function processNoteMediaUploads(
 					objectKey,
 					mimeType: upload.file?.type,
 					fileSize: upload.file?.size,
-					status: 'processing',
+					status: 'completed',
 				}
 			}),
 	)
 
 	return { uploadUpdates, newUploads }
-}
-
-export async function triggerMediaProcessingJobs(
-	noteId: string,
-	organizationId: string,
-	userId: string,
-	newUploads: Array<{ type: string; objectKey: string }>,
-): Promise<void> {
-	const newVideoUploads = newUploads.filter((upload) => upload.type === 'video')
-	for (const video of newVideoUploads) {
-		try {
-			const [videoRecord] = await db
-				.select({ id: OrganizationNoteUpload.id })
-				.from(OrganizationNoteUpload)
-				.where(
-					and(
-						eq(OrganizationNoteUpload.noteId, noteId),
-						eq(OrganizationNoteUpload.objectKey, video.objectKey),
-						eq(OrganizationNoteUpload.type, 'video'),
-					),
-				)
-				.limit(1)
-
-			if (videoRecord) {
-				const { url: signedVideoUrl, headers: videoHeaders } =
-					getSignedGetRequestInfo(video.objectKey)
-
-				await triggerVideoProcessing({
-					videoUrl: signedVideoUrl,
-					videoHeaders,
-					videoId: videoRecord.id,
-					noteId,
-					organizationId,
-					userId,
-				})
-			}
-		} catch (error) {
-			console.error('Failed to trigger video processing:', error)
-		}
-	}
-
-	const newImageUploads = newUploads.filter((upload) => upload.type === 'image')
-	for (const image of newImageUploads) {
-		try {
-			const [imageRecord] = await db
-				.select({ id: OrganizationNoteUpload.id })
-				.from(OrganizationNoteUpload)
-				.where(
-					and(
-						eq(OrganizationNoteUpload.noteId, noteId),
-						eq(OrganizationNoteUpload.objectKey, image.objectKey),
-						eq(OrganizationNoteUpload.type, 'image'),
-					),
-				)
-				.limit(1)
-
-			if (imageRecord) {
-				const { url: signedImageUrl, headers: imageHeaders } =
-					getSignedGetRequestInfo(image.objectKey)
-
-				await triggerImageProcessing({
-					imageUrl: signedImageUrl,
-					imageHeaders,
-					imageId: imageRecord.id,
-					noteId,
-					organizationId,
-					userId,
-				})
-			}
-		} catch (error) {
-			console.error('Failed to trigger image processing:', error)
-		}
-	}
 }
