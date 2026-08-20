@@ -8,7 +8,7 @@ import {
 	NoteCommentImage,
 	OrganizationNote,
 	OrganizationNoteUpload,
-	type OrganizationS3Config,
+	OrganizationS3Config,
 	StorageMigration,
 } from '@repo/database'
 import { decrypt, encrypt, getSSOMasterKey } from '@repo/security'
