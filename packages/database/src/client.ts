@@ -55,10 +55,14 @@ export function resolveSqliteFileUrl() {
 export const sqliteClient = remember('libsql', () => {
 	const url = resolveSqliteFileUrl()
 	fs.mkdirSync(path.dirname(url.replace(/^file:/, '')), { recursive: true })
-	const client = createClient({ url })
-	void client
-		.execute('PRAGMA busy_timeout = 5000')
-		.then(() => client.execute('PRAGMA journal_mode = WAL'))
+	// libsql opens a logical connection per execute()/transaction(). `timeout`
+	// sets busy_timeout on each of those; `concurrency: 1` serializes in-process writers.
+	const client = createClient({
+		url,
+		timeout: 5000,
+		concurrency: 1,
+	})
+	void client.execute('PRAGMA journal_mode = WAL')
 	return client
 })
 
