@@ -1,7 +1,6 @@
-import { slidingWindow } from '@arcjet/remix'
 import { requireUserId } from '@repo/auth'
 import { isSiteContentLocale } from '@repo/common/site-locales'
-import { arcjet } from '@repo/security'
+import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs } from 'react-router'
 import { z } from 'zod'
 import { sanitizeWebsiteContent } from '#app/utils/content-sanitization.server.ts'
@@ -11,6 +10,7 @@ import {
 	ORG_PERMISSIONS,
 	requireUserWithOrganizationPermission,
 } from '#app/utils/organization/permissions.server.ts'
+import { checkRateLimit } from '#app/utils/rate-limit.server.ts'
 
 const translateSchema = z.object({
 	orgSlug: z.string().min(1),
@@ -30,13 +30,15 @@ const translateSchema = z.object({
 	allowHtml: z.union([z.boolean(), z.array(z.boolean())]).optional(),
 })
 
-const aj = arcjet.withRule(
-	slidingWindow({
-		mode: 'LIVE',
-		max: 30,
-		interval: '60s',
-	}),
-)
+// The server-level rate limiter (apps/app/server/index.ts) doesn't give this
+// endpoint a dedicated tier, so replicate the 30-requests-per-minute window
+// Arcjet used to enforce here with the same DB-backed limiter used elsewhere
+// in this app (see #app/utils/rate-limit.server.ts).
+const isDev = process.env.NODE_ENV !== 'production'
+const TRANSLATE_RATE_LIMIT = {
+	maxRequests: isDev ? 1000 : 30,
+	windowMs: 60 * 1000, // 60 seconds
+}
 
 export async function action({ request }: ActionFunctionArgs) {
 	await requireUserId(request)
@@ -45,15 +47,16 @@ export async function action({ request }: ActionFunctionArgs) {
 		return Response.json({ error: 'Method not allowed' }, { status: 405 })
 	}
 
-	const decision = await aj.protect({ request, context: {} })
-	if (decision.isDenied()) {
-		if (decision.reason.isRateLimit()) {
-			return Response.json(
-				{ error: 'Too many translation requests. Please try again later.' },
-				{ status: 429 },
-			)
-		}
-		return Response.json({ error: 'Forbidden' }, { status: 403 })
+	const clientIp = getClientIp(request)
+	const rateLimitCheck = await checkRateLimit(
+		{ type: 'ip', value: clientIp },
+		TRANSLATE_RATE_LIMIT,
+	)
+	if (!rateLimitCheck.allowed) {
+		return Response.json(
+			{ error: 'Too many translation requests. Please try again later.' },
+			{ status: 429 },
+		)
 	}
 
 	try {

@@ -27,16 +27,16 @@ Epic Stack is built with security as a core principle. This section provides com
 
 ## Security Controls Summary
 
-| Control Area      | Implementation                           | Status    |
-| ----------------- | ---------------------------------------- | --------- |
-| Authentication    | Bcrypt (cost 12), MFA, Passkeys, SSO     | ✅ Active |
-| Authorization     | RBAC with organization-level permissions | ✅ Active |
-| Encryption        | AES-256-GCM at rest, TLS 1.3 in transit  | ✅ Active |
-| Rate Limiting     | 3-tier rate limiting with Arcjet WAF     | ✅ Active |
-| Input Validation  | Zod schemas + DOMPurify                  | ✅ Active |
-| Audit Logging     | Structured logs with PII redaction       | ✅ Active |
-| Security Headers  | CSP, HSTS, X-Frame-Options via Helmet    | ✅ Active |
-| Secret Management | Environment variables with validation    | ✅ Active |
+| Control Area      | Implementation                            | Status    |
+| ----------------- | ----------------------------------------- | --------- |
+| Authentication    | Bcrypt (cost 12), MFA, Passkeys, SSO      | ✅ Active |
+| Authorization     | RBAC with organization-level permissions  | ✅ Active |
+| Encryption        | AES-256-GCM at rest, TLS 1.3 in transit   | ✅ Active |
+| Rate Limiting     | 3-tier rate limiting + DB-backed limiters | ✅ Active |
+| Input Validation  | Zod schemas + DOMPurify                   | ✅ Active |
+| Audit Logging     | Structured logs with PII redaction        | ✅ Active |
+| Security Headers  | CSP, HSTS, X-Frame-Options via Helmet     | ✅ Active |
+| Secret Management | Environment variables with validation     | ✅ Active |
 
 ## Quick Links
 

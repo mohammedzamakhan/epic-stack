@@ -22,7 +22,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@arcjet/remix": "^1.0.0-beta.9",
     "@remix-run/server-runtime": "^2.17.5",
     "react-router": "^8.3.0",
     "remix-utils": "^8.5.0"

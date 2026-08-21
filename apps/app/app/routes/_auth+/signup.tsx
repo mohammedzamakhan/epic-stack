@@ -1,4 +1,3 @@
-import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
@@ -9,7 +8,7 @@ import { useIsPending } from '@repo/common'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { db, eq, User } from '@repo/database'
 import { sendEmail, SignupEmail } from '@repo/email'
-import { arcjet, checkHoneypot } from '@repo/security'
+import { checkHoneypot, validateEmailAddress } from '@repo/security'
 import {
 	Card,
 	CardContent,
@@ -24,7 +23,6 @@ import { StatusButton } from '@repo/ui/status-button'
 import { EmailSchema } from '@repo/validation'
 import { data, redirect, Form, useSearchParams, Link } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import {
@@ -44,34 +42,10 @@ const SignupSchema = z.object({
 	email: EmailSchema,
 })
 
-// Add rules to the base Arcjet instance outside of the handler function.
-const aj = arcjet
-	.withRule(
-		detectBot({
-			// Will block requests. Use "DRY_RUN" to log only.
-			mode: 'LIVE',
-			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
-			// Blocks all bots except monitoring services.
-			allow: ['CATEGORY:MONITOR'],
-		}),
-	)
-	.withRule(
-		// Chain bot protection with rate limiting.
-		// A signup form shouldn't be submitted more than a few times a minute.
-		slidingWindow({
-			mode: 'LIVE',
-			max: 5, // 5 requests per window.
-			interval: '60s', // 60 second sliding window.
-		}),
-	)
-	.withRule(
-		// Validate the email address to prevent spam.
-		validateEmail({
-			mode: 'LIVE',
-			// Block disposable, invalid, and email addresses with no MX records.
-			deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
-		}),
-	)
+// Signup is protected by the server-level rate limiter (10 requests/min for
+// paths including /signup - see apps/app/server/index.ts). Bot detection and
+// disposable/invalid email checks used to come from Arcjet; the email checks
+// are replaced below by an in-repo validator.
 
 export async function loader({ request }: Route.LoaderArgs) {
 	await requireAnonymous(request)
@@ -92,42 +66,27 @@ export async function action(args: Route.ActionArgs) {
 
 	const submission = await parseWithZod(formData, {
 		schema: SignupSchema.superRefine(async (data, ctx) => {
-			// existingUser check moved to action to prevent email enumeration
-			// Arcjet security protection (skip in test environment)
-			if (
-				ENV.ARCJET_KEY &&
-				ENV.NODE_ENV !== 'test' &&
-				process['env'].MOCKS !== 'true'
-			) {
-				const email = formData.get('email') as string
-				try {
-					const decision = await aj.protect(args, { email })
+			// existingUser check moved to action to prevent email enumeration.
+			// Block disposable/invalid/no-MX-record email addresses. The MX
+			// lookup is skipped in test/mocked environments so tests don't
+			// depend on real DNS access.
+			const email = formData.get('email') as string
+			const checkMx =
+				process.env.NODE_ENV !== 'test' && process['env'].MOCKS !== 'true'
+			const emailValidation = await validateEmailAddress(email, { checkMx })
 
-					if (decision.isDenied()) {
-						let errorMessage = 'Access denied'
+			if (!emailValidation.isValid) {
+				const errorMessage =
+					emailValidation.reason === 'DISPOSABLE'
+						? 'Disposable email addresses are not allowed'
+						: 'Invalid email address'
 
-						if (decision.reason.isBot()) {
-							errorMessage = 'Forbidden'
-						} else if (decision.reason.isRateLimit()) {
-							errorMessage = 'Too many signup attempts - try again shortly'
-						} else if (decision.reason.isEmail()) {
-							// This is a generic error, but you could be more specific
-							// See https://docs.arcjet.com/email-validation/reference#checking-the-email-type
-							errorMessage = 'Invalid email address'
-						}
-
-						// Return early with error response
-						ctx.addIssue({
-							path: ['email'],
-							code: z.ZodIssueCode.custom,
-							message: errorMessage,
-						})
-						return
-					}
-				} catch (error) {
-					// If Arcjet fails, log error but continue with signup process
-					console.error('Arcjet protection failed:', error)
-				}
+				ctx.addIssue({
+					path: ['email'],
+					code: z.ZodIssueCode.custom,
+					message: errorMessage,
+				})
+				return
 			}
 		}),
 		async: true,

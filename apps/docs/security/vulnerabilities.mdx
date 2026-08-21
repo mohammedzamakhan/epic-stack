@@ -179,7 +179,9 @@ cookie: {
 
 ```typescript
 // ❌ Vulnerable - No ownership check
-await db.delete(OrganizationInvitation).where(eq(OrganizationInvitation.id, invitationId)) // Any user can delete any invitation!
+await db
+	.delete(OrganizationInvitation)
+	.where(eq(OrganizationInvitation.id, invitationId)) // Any user can delete any invitation!
 
 // ✅ Secure - Verify ownership
 await db
@@ -202,11 +204,15 @@ Epic Stack implements 3-tier rate limiting:
 | Strict    | 100/min  | All POST/PUT/DELETE to auth routes |
 | General   | 1000/min | All other endpoints                |
 
+Endpoints that need a tighter or different window than the tiers above use a
+dedicated DB-backed sliding-window limiter (`apps/app/app/utils/rate-limit.server.ts`),
+e.g. forgot-password (3/hour) and the translate API (30/min).
+
 Additional protections:
 
-- Arcjet WAF for advanced threat detection
-- Bot detection
 - Honeypot fields on forms
+- IP blacklist and request tracking (`@repo/common/ip-tracking`)
+- Helmet + CSP security headers
 
 ## Security Testing
 

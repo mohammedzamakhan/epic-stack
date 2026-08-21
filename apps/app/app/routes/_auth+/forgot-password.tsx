@@ -1,4 +1,3 @@
-import { detectBot, slidingWindow, validateEmail } from '@arcjet/remix'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Trans, t } from '@lingui/macro'
@@ -6,7 +5,11 @@ import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { brand, getPageTitle } from '@repo/config/brand'
 import { db, eq, or, User } from '@repo/database'
 import { ForgotPasswordEmail, sendEmail } from '@repo/email'
-import { arcjet, checkHoneypot } from '@repo/security'
+import {
+	checkHoneypot,
+	getClientIp,
+	validateEmailAddress,
+} from '@repo/security'
 import {
 	Card,
 	CardContent,
@@ -21,13 +24,16 @@ import { StatusButton } from '@repo/ui/status-button'
 import { EmailSchema, UsernameSchema } from '@repo/validation'
 import { data, redirect, Link, Form, useActionData } from 'react-router'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
-import { ENV } from 'varlock/env'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import {
 	ErrorList,
 	convertErrorsToFieldFormat,
 } from '#app/components/forms.tsx'
+import {
+	checkRateLimit,
+	createRateLimitResponse,
+} from '#app/utils/rate-limit.server.ts'
 import { type Route } from './+types/forgot-password.ts'
 import { prepareVerification } from './verify.server.tsx'
 
@@ -39,73 +45,49 @@ const ForgotPasswordSchema = z.object({
 	usernameOrEmail: z.union([EmailSchema, UsernameSchema]),
 })
 
-// Add rules to the base Arcjet instance for forgot password protection
-const aj = arcjet
-	.withRule(
-		detectBot({
-			// Will block requests. Use "DRY_RUN" to log only.
-			mode: 'LIVE',
-			// Configured with a list of bots to allow from https://arcjet.com/bot-list.
-			// Blocks all bots except monitoring services.
-			allow: ['CATEGORY:MONITOR'],
-		}),
-	)
-	.withRule(
-		// Chain bot protection with rate limiting.
-		// Forgot password form shouldn't be submitted more than a few times per hour to prevent abuse.
-		slidingWindow({
-			mode: 'LIVE',
-			max: 3, // 3 requests per window.
-			interval: '3600s', // 1 hour sliding window.
-		}),
-	)
-	.withRule(
-		// Validate the email address to prevent spam.
-		validateEmail({
-			mode: 'LIVE',
-			// Block disposable, invalid, and email addresses with no MX records.
-			deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
-		}),
-	)
+// Forgot-password is the one auth form the server-level rate limiter
+// (apps/app/server/index.ts) does not cover as tightly as it should - it
+// falls under the general 100/min tier there. Arcjet used to enforce a
+// stricter 3-requests-per-hour window here; replicate that with the same
+// DB-backed limiter used elsewhere in this app (see #app/utils/rate-limit.server.ts).
+const isDev = process.env.NODE_ENV !== 'production'
+const FORGOT_PASSWORD_RATE_LIMIT = {
+	maxRequests: isDev ? 1000 : 3,
+	windowMs: 60 * 60 * 1000, // 1 hour
+}
 
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
 	await checkHoneypot(formData)
 
-	// Arcjet security protection for forgot password (skip in test environment)
-	if (
-		ENV.ARCJET_KEY &&
-		ENV.NODE_ENV === 'production' &&
-		process['env'].MOCKS !== 'true'
-	) {
-		const usernameOrEmail = formData.get('usernameOrEmail') as string
-		try {
-			const decision = await aj.protect(
-				{ request, context: {} },
-				{ email: usernameOrEmail },
+	const clientIp = getClientIp(request)
+	const rateLimitCheck = await checkRateLimit(
+		{ type: 'ip', value: clientIp },
+		FORGOT_PASSWORD_RATE_LIMIT,
+	)
+	if (!rateLimitCheck.allowed) {
+		return createRateLimitResponse(rateLimitCheck.resetAt)
+	}
+
+	// Block disposable/invalid/no-MX-record email addresses (mirrors Arcjet's
+	// validateEmail rule). Skip the DNS-dependent MX check in test/mocked
+	// environments. The submitted value may be a username rather than an
+	// email; only validate when it looks like an email address.
+	const rawUsernameOrEmail = formData.get('usernameOrEmail') as string
+	if (rawUsernameOrEmail?.includes('@')) {
+		const checkMx =
+			process.env.NODE_ENV !== 'test' && process['env'].MOCKS !== 'true'
+		const emailValidation = await validateEmailAddress(rawUsernameOrEmail, {
+			checkMx,
+		})
+		if (!emailValidation.isValid) {
+			return data(
+				{ result: null },
+				{ status: 400, statusText: 'Invalid email address' },
 			)
-
-			if (decision.isDenied()) {
-				let errorMessage = 'Access denied'
-
-				if (decision.reason.isBot()) {
-					errorMessage = 'Forbidden'
-				} else if (decision.reason.isRateLimit()) {
-					errorMessage = 'Too many password reset attempts - try again later'
-				} else if (decision.reason.isEmail()) {
-					// This is a generic error, but you could be more specific
-					// See https://docs.arcjet.com/email-validation/reference#checking-the-email-type
-					errorMessage = 'Invalid email address'
-				}
-
-				// Return early with error response
-				return data({ result: null }, { status: 400, statusText: errorMessage })
-			}
-		} catch (error) {
-			// If Arcjet fails, log error but continue with forgot password process
-			console.error('Arcjet protection failed:', error)
 		}
 	}
+
 	const submission = await parseWithZod(formData, {
 		schema: ForgotPasswordSchema,
 	})

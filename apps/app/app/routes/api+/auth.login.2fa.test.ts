@@ -35,16 +35,6 @@ vi.mock('@repo/database', async (importOriginal) => {
 
 vi.mock('@repo/security', () => ({
 	checkHoneypot: vi.fn().mockResolvedValue(undefined),
-	arcjet: {
-		withRule: vi.fn().mockReturnThis(),
-		protect: vi.fn().mockResolvedValue({
-			isDenied: () => false,
-			reason: {
-				isBot: () => false,
-				isRateLimit: () => false,
-			},
-		}),
-	},
 }))
 
 vi.mock('@repo/audit', () => ({
