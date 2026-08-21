@@ -1,0 +1,801 @@
+import { resolveMx } from 'node:dns/promises'
+
+/**
+ * Self-hosted replacement for Arcjet's `validateEmail` rule
+ * (`deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS']`), previously used to
+ * protect signup and forgot-password from throwaway/invalid addresses.
+ *
+ * - `DISPOSABLE` and `INVALID` are deterministic, in-process checks and
+ *   always block matching addresses.
+ * - `NO_MX_RECORDS` depends on a DNS lookup. If the lookup fails for
+ *   infrastructure reasons (timeout, resolver error, etc.) we fail OPEN and
+ *   allow the request through, matching this app's existing fail-open
+ *   posture for infra failures. If the lookup succeeds and finds no MX
+ *   records, we fail CLOSED (deterministic denial).
+ */
+
+export type EmailValidationReason = 'DISPOSABLE' | 'INVALID' | 'NO_MX_RECORDS'
+
+export interface EmailValidationResult {
+	isValid: boolean
+	reason?: EmailValidationReason
+}
+
+export interface ValidateEmailAddressOptions {
+	/**
+	 * Whether to perform the DNS MX record lookup. Disable in tests / mocked
+	 * environments to avoid depending on real network/DNS access.
+	 * @default true
+	 */
+	checkMx?: boolean
+	/**
+	 * Timeout (ms) for the MX lookup before it's treated as an infra failure
+	 * and fails open.
+	 * @default 3000
+	 */
+	mxTimeoutMs?: number
+}
+
+// Defensive upper bound. RFC 5321 caps a valid address at 254 characters;
+// anything longer is rejected outright before any parsing work runs. This
+// also protects `hasValidEmailFormat` against algorithmic-complexity (ReDoS)
+// attacks that rely on very long attacker-controlled input.
+const MAX_EMAIL_LENGTH = 254
+
+// A single, unquantified character-class test - this can only ever perform
+// one linear scan of the input, so it cannot suffer catastrophic
+// backtracking regardless of input length or content.
+const WHITESPACE_REGEX = /\s/
+
+/**
+ * A curated list of well-known disposable/temporary email providers.
+ * This is intentionally not exhaustive - the goal is to catch the common
+ * throwaway-inbox services that are typically abused for spam signups.
+ */
+const DISPOSABLE_EMAIL_DOMAINS = new Set<string>([
+	'0-mail.com',
+	'0815.ru',
+	'0clickemail.com',
+	'0wnd.net',
+	'10minutemail.com',
+	'10minutemail.net',
+	'10minutemail.co.za',
+	'123-m.com',
+	'1secmail.com',
+	'1secmail.net',
+	'1secmail.org',
+	'20minutemail.com',
+	'21cn.com',
+	'2prong.com',
+	'33mail.com',
+	'3trtretgfrfewffewq.com',
+	'4warding.com',
+	'5mail.cf',
+	'5mail.ga',
+	'6ip.us',
+	'6paq.com',
+	'7tags.com',
+	'9ox.net',
+	'a-bc.net',
+	'agedmail.com',
+	'amilegit.com',
+	'anonbox.net',
+	'anonymbox.com',
+	'antispam.de',
+	'armyspy.com',
+	'baxomale.ht.cx',
+	'beefmilk.com',
+	'binkmail.com',
+	'bio-muesli.net',
+	'bobmail.info',
+	'bofthew.com',
+	'brefmail.com',
+	'bugmenot.com',
+	'bumpymail.com',
+	'burnermail.io',
+	'burstmail.info',
+	'buymoreplays.com',
+	'byom.de',
+	'cek.pm',
+	'chammy.info',
+	'childsavetrust.org',
+	'chogmail.com',
+	'clrmail.com',
+	'cool.fr.nf',
+	'correo.blogos.net',
+	'cosmorph.com',
+	'courriel.fr.nf',
+	'cubiclink.com',
+	'curryworld.de',
+	'cust.in',
+	'dacoolest.com',
+	'dandikmail.com',
+	'dayrep.com',
+	'dcemail.com',
+	'deadaddress.com',
+	'deagot.com',
+	'despam.it',
+	'devnullmail.com',
+	'dfgh.net',
+	'digitalsanctuary.com',
+	'discard.email',
+	'discardmail.com',
+	'discardmail.de',
+	'disposableaddress.com',
+	'disposableemailaddresses.com',
+	'disposableinbox.com',
+	'dispose.it',
+	'dispostable.com',
+	'dodgeit.com',
+	'dodgit.com',
+	'dodgit.org',
+	'donemail.ru',
+	'dontreg.com',
+	'dontsendmespam.de',
+	'drdrb.net',
+	'dropmail.me',
+	'dumpandjunk.com',
+	'dumpmail.de',
+	'dumpyemail.com',
+	'e4ward.com',
+	'easytrashmail.com',
+	'einrot.com',
+	'email-fake.com',
+	'email60.com',
+	'emailage.cf',
+	'emailage.ga',
+	'emailigo.de',
+	'emailinfive.com',
+	'emailisvalid.com',
+	'emailmiser.com',
+	'emailondeck.com',
+	'emailsensei.com',
+	'emailtemporario.com.br',
+	'emailthe.net',
+	'emailtmp.com',
+	'emailwarden.com',
+	'emailx.at.hm',
+	'emailxfer.com',
+	'emeil.in',
+	'emeil.ir',
+	'emz.net',
+	'ero-tube.org',
+	'evopo.com',
+	'explodemail.com',
+	'express.net.ua',
+	'eyepaste.com',
+	'facebook-email.cf',
+	'fake-mail.net',
+	'fakeinbox.com',
+	'fakeinformation.com',
+	'fakemail.fr',
+	'fakemailgenerator.com',
+	'fansworldwide.de',
+	'fantasymail.de',
+	'fastacura.com',
+	'fastkawasaki.com',
+	'fastmazda.com',
+	'fastmessaging.com',
+	'fastyamaha.com',
+	'fatflap.com',
+	'fdfdsfds.com',
+	'fightallspam.com',
+	'filzmail.com',
+	'fixmail.tk',
+	'fizmail.com',
+	'fleckens.hu',
+	'frapmail.com',
+	'front14.org',
+	'fuckingduh.com',
+	'fudgerub.com',
+	'fyii.de',
+	'garliclife.com',
+	'gelitik.in',
+	'get1mail.com',
+	'get2mail.fr',
+	'getairmail.com',
+	'getnada.com',
+	'getonemail.com',
+	'ghosttexter.de',
+	'girlsundertheinfluence.com',
+	'gishpuppy.com',
+	'gmial.com',
+	'goemailgo.com',
+	'gotmail.net',
+	'gotmail.org',
+	'gotti.otherinbox.com',
+	'great-host.in',
+	'grr.la',
+	'gsrv.co.uk',
+	'guerillamail.biz',
+	'guerillamail.com',
+	'guerrillamail.biz',
+	'guerrillamail.com',
+	'guerrillamail.de',
+	'guerrillamail.info',
+	'guerrillamail.net',
+	'guerrillamail.org',
+	'guerrillamailblock.com',
+	'gustr.com',
+	'h8s.org',
+	'hacccc.com',
+	'haltospam.com',
+	'hidemail.de',
+	'hidzz.com',
+	'hmamail.com',
+	'hopemail.biz',
+	'hulapla.de',
+	'ieatspam.eu',
+	'ieatspam.info',
+	'ihateyoualot.info',
+	'iheartspam.org',
+	'imails.info',
+	'inboxalias.com',
+	'inboxbear.com',
+	'inboxclean.com',
+	'inboxclean.org',
+	'incognitomail.com',
+	'incognitomail.net',
+	'incognitomail.org',
+	'insorg-mail.info',
+	'ipoo.org',
+	'irish2me.com',
+	'jetable.com',
+	'jetable.fr.nf',
+	'jetable.net',
+	'jetable.org',
+	'jnxjn.com',
+	'jourrapide.com',
+	'jsrsolutions.com',
+	'kasmail.com',
+	'kaspop.com',
+	'keepmymail.com',
+	'killmail.com',
+	'killmail.net',
+	'klassmaster.com',
+	'klzlk.com',
+	'kurzepost.de',
+	'letthemeatspam.com',
+	'lhsdv.com',
+	'lifebyfood.com',
+	'link2mail.net',
+	'litedrop.com',
+	'lol.ovpn.to',
+	'lookugly.com',
+	'lopl.co.cc',
+	'lortemail.dk',
+	'lr78.com',
+	'lroid.com',
+	'lukemail.info',
+	'm21.cc',
+	'mail-filter.com',
+	'mail-temporaire.fr',
+	'mail.by',
+	'mail.mezimages.net',
+	'mail4trash.com',
+	'mailbidon.com',
+	'mailbucket.org',
+	'mailcatch.com',
+	'mailde.de',
+	'mailde.info',
+	'maildrop.cc',
+	'maildx.com',
+	'maileater.com',
+	'mailexpire.com',
+	'mailfa.tk',
+	'mailforspam.com',
+	'mailfreeonline.com',
+	'mailguard.me',
+	'mailimate.com',
+	'mailin8r.com',
+	'mailinater.com',
+	'mailinator.com',
+	'mailinator.net',
+	'mailinator.org',
+	'mailinator2.com',
+	'mailincubator.com',
+	'mailismagic.com',
+	'mailme.lv',
+	'mailme24.com',
+	'mailmetrash.com',
+	'mailmoat.com',
+	'mailnesia.com',
+	'mailnull.com',
+	'mailorg.org',
+	'mailpick.biz',
+	'mailrock.biz',
+	'mailscrap.com',
+	'mailshell.com',
+	'mailsiphon.com',
+	'mailslapping.com',
+	'mailslite.com',
+	'mailtemp.info',
+	'mailtome.de',
+	'mailtothis.com',
+	'mailtrash.net',
+	'mailtv.net',
+	'mailtv.tv',
+	'mailzilla.com',
+	'mailzilla.org',
+	'makemetheking.com',
+	'manybrain.com',
+	'mbx.cc',
+	'mega.zik.dj',
+	'meinspamschutz.de',
+	'meltmail.com',
+	'messagebeamer.de',
+	'mierdamail.com',
+	'mintemail.com',
+	'moakt.cc',
+	'moakt.com',
+	'mobileninja.co.uk',
+	'moburl.com',
+	'mohmal.com',
+	'monemail.fr.nf',
+	'monumentmail.com',
+	'msa.minsmail.com',
+	'mt2009.com',
+	'mt2014.com',
+	'mx0.wwwnew.eu',
+	'mycard.net.ua',
+	'mycleaninbox.net',
+	'mypacks.net',
+	'mypartyclip.de',
+	'myphantomemail.com',
+	'mysamp.de',
+	'mytemp.email',
+	'mytempemail.com',
+	'mytrashmail.com',
+	'nabuma.com',
+	'neomailbox.com',
+	'nepwk.com',
+	'nervmich.net',
+	'nervtmich.net',
+	'netmails.com',
+	'netmails.net',
+	'netzidiot.de',
+	'neverbox.com',
+	'nice-4u.com',
+	'nincsmail.hu',
+	'nnh.com',
+	'no-spam.ws',
+	'noblepioneer.com',
+	'nomail.xl.cx',
+	'nomail2me.com',
+	'nomorespamemails.com',
+	'nospam.ze.tc',
+	'nospam4.us',
+	'nospamfor.us',
+	'nospammail.net',
+	'notmailinator.com',
+	'nowmymail.com',
+	'nurfuerspam.de',
+	'nwldx.com',
+	'objectmail.com',
+	'obobbo.com',
+	'odaymail.com',
+	'onewaymail.com',
+	'online.ms',
+	'opayq.com',
+	'ordinaryamerican.net',
+	'otherinbox.com',
+	'ovpn.to',
+	'owlpic.com',
+	'pancakemail.com',
+	'pcusers.otherinbox.com',
+	'pjjkp.com',
+	'plexolan.de',
+	'poczta.onet.pl',
+	'politikerclub.de',
+	'poofy.org',
+	'pookmail.com',
+	'privacy.net',
+	'privatdemail.net',
+	'proxymail.eu',
+	'prtnx.com',
+	'punkass.com',
+	'putthisinyourspamdatabase.com',
+	'pwrby.com',
+	'quickinbox.com',
+	'quickmail.nl',
+	'rcpt.at',
+	'reallymymail.com',
+	'realtyalerts.ca',
+	'recode.me',
+	'recursor.net',
+	'recyclemail.dk',
+	'regbypass.com',
+	'rejectmail.com',
+	'reliable-mail.com',
+	'rhyta.com',
+	'rmqkr.net',
+	'royal.net',
+	'rppkn.com',
+	'rtrtr.com',
+	's0ny.net',
+	'safe-mail.net',
+	'safersignup.de',
+	'safetymail.info',
+	'safetypost.de',
+	'sandelf.de',
+	'saynotospams.com',
+	'schafmail.de',
+	'schrott-email.de',
+	'secretemail.de',
+	'secure-mail.biz',
+	'senseless-entertainment.com',
+	'services391.com',
+	'sharklasers.com',
+	'shieldedmail.com',
+	'shiftmail.com',
+	'shitmail.me',
+	'shitmail.org',
+	'shitware.nl',
+	'shortmail.net',
+	'sibmail.com',
+	'sinnlos-mail.de',
+	'skeefmail.com',
+	'slaskpost.se',
+	'slopsbox.com',
+	'smashmail.de',
+	'smellfear.com',
+	'snakemail.com',
+	'sneakemail.com',
+	'sofimail.com',
+	'sofort-mail.de',
+	'sogetthis.com',
+	'soodonims.com',
+	'spam.la',
+	'spam.su',
+	'spam4.me',
+	'spamail.de',
+	'spamarrest.com',
+	'spambob.com',
+	'spambob.net',
+	'spambob.org',
+	'spambog.com',
+	'spambog.de',
+	'spambog.ru',
+	'spambox.info',
+	'spambox.us',
+	'spamcannon.com',
+	'spamcannon.net',
+	'spamcero.com',
+	'spamcon.org',
+	'spamcorptastic.com',
+	'spamcowboy.com',
+	'spamcowboy.net',
+	'spamcowboy.org',
+	'spamday.com',
+	'spamex.com',
+	'spamfree24.com',
+	'spamfree24.de',
+	'spamfree24.eu',
+	'spamfree24.info',
+	'spamfree24.net',
+	'spamfree24.org',
+	'spamgoes.in',
+	'spamherelots.com',
+	'spamhereplease.com',
+	'spamhole.com',
+	'spamify.com',
+	'spaminator.de',
+	'spamkill.info',
+	'spaml.com',
+	'spaml.de',
+	'spammotel.com',
+	'spamobox.com',
+	'spamoff.de',
+	'spamsalad.in',
+	'spamslicer.com',
+	'spamspot.com',
+	'spamstack.net',
+	'spamthis.co.uk',
+	'spamthisplease.com',
+	'spamtrail.com',
+	'spamtroll.net',
+	'speed.1s.fr',
+	'spikio.com',
+	'spoofmail.de',
+	'squizzy.de',
+	'stinkefinger.net',
+	'stop-my-spam.com',
+	'streetwisemail.com',
+	'stuffmail.de',
+	'super-auswahl.de',
+	'supergreatmail.com',
+	'supermailer.jp',
+	'superrito.com',
+	'superstachel.de',
+	'suremail.info',
+	'talkinator.com',
+	'teewars.org',
+	'teleworm.com',
+	'teleworm.us',
+	'temp-mail.com',
+	'temp-mail.org',
+	'temp-mail.ru',
+	'tempail.com',
+	'tempalias.com',
+	'tempe-mail.com',
+	'tempemail.biz',
+	'tempemail.co.za',
+	'tempemail.com',
+	'tempemail.net',
+	'tempinbox.co.uk',
+	'tempinbox.com',
+	'tempmail.eu',
+	'tempmail.it',
+	'tempmail2.com',
+	'tempmailaddress.com',
+	'tempmailer.com',
+	'tempmailer.de',
+	'tempomail.fr',
+	'temporarily.de',
+	'temporarioemail.com.br',
+	'temporaryemail.net',
+	'temporaryemail.us',
+	'temporaryforwarding.com',
+	'temporaryinbox.com',
+	'temporarymailaddress.com',
+	'tempsky.com',
+	'tempthe.net',
+	'thanksnospam.info',
+	'thankyou2010.com',
+	'thecloudindex.com',
+	'thelimestones.com',
+	'thisisnotmyrealemail.com',
+	'thismail.net',
+	'throam.com',
+	'throwawayemailaddress.com',
+	'throwawaymail.com',
+	'tilien.com',
+	'tittbit.in',
+	'tizi.com',
+	'tmail.ws',
+	'tmailinator.com',
+	'toiea.com',
+	'tokenmail.de',
+	'toomail.biz',
+	'topranklist.de',
+	'tradermail.info',
+	'trash-amil.com',
+	'trash-mail.at',
+	'trash-mail.com',
+	'trash-mail.de',
+	'trash2009.com',
+	'trashdevil.com',
+	'trashemail.de',
+	'trashinbox.com',
+	'trashmail.at',
+	'trashmail.com',
+	'trashmail.de',
+	'trashmail.me',
+	'trashmail.net',
+	'trashmail.org',
+	'trashmail.ws',
+	'trashmailer.com',
+	'trashymail.com',
+	'trashymail.net',
+	'trbvm.com',
+	'trickmail.net',
+	'trillianpro.com',
+	'twinmail.de',
+	'tyldd.com',
+	'uggsrock.com',
+	'umail.net',
+	'uroid.com',
+	'us.af',
+	'venompen.com',
+	'veryrealemail.com',
+	'vidchart.com',
+	'viditag.com',
+	'viralplays.com',
+	'vpn.st',
+	'vsimcard.com',
+	'vubby.com',
+	'wasteland.rfc822.org',
+	'webemail.me',
+	'weg-werf-email.de',
+	'wegwerf-email-addressen.de',
+	'wegwerf-email-adressen.de',
+	'wegwerf-email.de',
+	'wegwerf-email.net',
+	'wegwerfadresse.de',
+	'wegwerfemail.com',
+	'wegwerfemail.de',
+	'wegwerfmail.de',
+	'wegwerfmail.info',
+	'wegwerfmail.net',
+	'wegwerfmail.org',
+	'wetrainbayarea.com',
+	'wh4f.org',
+	'whatiaas.com',
+	'whatpaas.com',
+	'whatsaas.com',
+	'whopy.com',
+	'whyspam.me',
+	'willselfdestruct.com',
+	'winemaven.info',
+	'wronghead.com',
+	'wuzup.net',
+	'wuzupmail.net',
+	'wwwnew.eu',
+	'xagloo.com',
+	'xemaps.com',
+	'xents.com',
+	'xmaily.com',
+	'xoxy.net',
+	'yep.it',
+	'yopmail.com',
+	'yopmail.fr',
+	'yopmail.net',
+	'ypmail.webarnak.fr.eu.org',
+	'yuurok.com',
+	'zehnminuten.de',
+	'zehnminutenmail.de',
+	'zippymail.info',
+	'zoaxe.com',
+	'zoemail.org',
+	'zomg.info',
+])
+
+/**
+ * Check whether `domain` is, or is a subdomain of, a listed disposable
+ * domain (e.g. `mail.mailinator.com` must be blocked because
+ * `mailinator.com` is listed). Walks progressively shorter dot-separated
+ * suffixes of the (already lowercased) domain, each an O(1) Set lookup.
+ */
+export function isDisposableEmailDomain(domain: string): boolean {
+	const normalized = domain.toLowerCase()
+	const labels = normalized.split('.')
+	for (let i = 0; i < labels.length - 1; i++) {
+		const candidate = labels.slice(i).join('.')
+		if (DISPOSABLE_EMAIL_DOMAINS.has(candidate)) {
+			return true
+		}
+	}
+	return false
+}
+
+/**
+ * Check whether `email` is a syntactically plausible address.
+ *
+ * Implemented with `indexOf`/`lastIndexOf`/`slice` rather than a single
+ * combined regex. The previous implementation used
+ * `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`, whose domain-side character class also
+ * matches `.`, so a long run of ambiguous characters (e.g. `!@` followed by
+ * many repeated `!.`) forces the engine to try many equivalent split points
+ * between the two `[^\s@]+` groups before failing - a classic polynomial
+ * ReDoS. String-index operations here are all single linear scans with no
+ * backtracking, so this is safe regardless of input length or content.
+ */
+export function hasValidEmailFormat(email: string): boolean {
+	if (typeof email !== 'string') return false
+	// Reject oversized input before doing any further work.
+	if (email.length === 0 || email.length > MAX_EMAIL_LENGTH) return false
+	if (WHITESPACE_REGEX.test(email)) return false
+
+	const atIndex = email.indexOf('@')
+	// No '@', or '@' as the first/last character (empty local-part/domain).
+	if (atIndex <= 0 || atIndex === email.length - 1) return false
+	// Reject a second '@' - scanning forward from the first match is still a
+	// single linear pass, not a second full scan with backtracking.
+	if (email.indexOf('@', atIndex + 1) !== -1) return false
+
+	const domain = email.slice(atIndex + 1)
+	const dotIndex = domain.lastIndexOf('.')
+	// Domain must contain a '.' that isn't its first or last character.
+	if (dotIndex <= 0 || dotIndex === domain.length - 1) return false
+
+	return true
+}
+
+const DEFAULT_MX_LOOKUP_TIMEOUT_MS = 3000
+const MX_CACHE_TTL_MS = 5 * 60 * 1000
+
+type MxLookupResult = 'has-records' | 'no-records' | 'unknown'
+
+// Small in-memory cache so repeated signups/resets for the same domain don't
+// each pay for a fresh DNS round trip. Infra failures ('unknown') are
+// intentionally not cached so a transient DNS outage can recover on the
+// very next request.
+const mxResultCache = new Map<
+	string,
+	{ result: MxLookupResult; expiresAt: number }
+>()
+
+/**
+ * Look up MX records for a domain with a timeout.
+ * - `'has-records'` - domain has at least one MX record.
+ * - `'no-records'` - lookup succeeded but there are no MX records
+ *   (deterministic - the domain cannot receive mail).
+ * - `'unknown'` - lookup could not be completed (timeout, resolver error,
+ *   etc.) - treated as an infra failure by the caller.
+ */
+async function checkMxRecords(
+	domain: string,
+	timeoutMs: number = DEFAULT_MX_LOOKUP_TIMEOUT_MS,
+): Promise<MxLookupResult> {
+	const cached = mxResultCache.get(domain)
+	if (cached && cached.expiresAt > Date.now()) {
+		return cached.result
+	}
+
+	let timeoutHandle: ReturnType<typeof setTimeout> | undefined
+	try {
+		const records = await Promise.race([
+			resolveMx(domain),
+			new Promise<never>((_resolve, reject) => {
+				timeoutHandle = setTimeout(
+					() => reject(new Error('MX lookup timed out')),
+					timeoutMs,
+				)
+			}),
+		])
+		const result: MxLookupResult =
+			records.length > 0 ? 'has-records' : 'no-records'
+		mxResultCache.set(domain, {
+			result,
+			expiresAt: Date.now() + MX_CACHE_TTL_MS,
+		})
+		return result
+	} catch (error) {
+		// ENOTFOUND/ENODATA mean the resolver successfully determined the
+		// domain has no MX records - that's a deterministic result, not an
+		// infra failure. Anything else (timeout, ESERVFAIL, network errors)
+		// is an infra failure, so we fail open by returning 'unknown'.
+		const code = (error as NodeJS.ErrnoException | undefined)?.code
+		if (code === 'ENOTFOUND' || code === 'ENODATA') {
+			mxResultCache.set(domain, {
+				result: 'no-records',
+				expiresAt: Date.now() + MX_CACHE_TTL_MS,
+			})
+			return 'no-records'
+		}
+		console.error('MX record lookup failed:', error)
+		return 'unknown'
+	} finally {
+		if (timeoutHandle) clearTimeout(timeoutHandle)
+	}
+}
+
+/**
+ * Validate an email address the way Arcjet's `validateEmail` rule did for
+ * signup / forgot-password: block disposable domains and malformed
+ * addresses deterministically, and block domains with no MX records unless
+ * the DNS lookup itself fails for infrastructure reasons (fail open).
+ *
+ * Callers should still parse/length-bound untrusted input (e.g. with a Zod
+ * schema) before calling this, but `hasValidEmailFormat`'s own length cap
+ * means this function is safe to call directly on unbounded input too.
+ */
+export async function validateEmailAddress(
+	email: string,
+	options: ValidateEmailAddressOptions = {},
+): Promise<EmailValidationResult> {
+	const { checkMx = true, mxTimeoutMs } = options
+
+	if (!hasValidEmailFormat(email)) {
+		return { isValid: false, reason: 'INVALID' }
+	}
+
+	const domain = email.slice(email.indexOf('@') + 1).toLowerCase()
+	if (!domain) {
+		return { isValid: false, reason: 'INVALID' }
+	}
+
+	if (isDisposableEmailDomain(domain)) {
+		return { isValid: false, reason: 'DISPOSABLE' }
+	}
+
+	if (checkMx) {
+		const mxResult = await checkMxRecords(domain, mxTimeoutMs)
+		if (mxResult === 'no-records') {
+			return { isValid: false, reason: 'NO_MX_RECORDS' }
+		}
+		// 'unknown' means the lookup itself failed - fail open and allow it.
+	}
+
+	return { isValid: true }
+}

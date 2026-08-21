@@ -352,8 +352,9 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - AES-256-GCM encryption for sensitive data (SSO, integrations)
 - PBKDF2-SHA512 key derivation (100k iterations)
 - Bcrypt cost factor 12 for passwords
-- 3-tier rate limiting (10/100/1000 req/min)
-- Arcjet WAF protection
+- 3-tier rate limiting (10/100/1000 req/min), plus DB-backed sliding-window
+  limiters for endpoints needing a tighter/different window (forgot-password,
+  translate API, MCP OAuth, SSO)
 - Helmet.js security headers
 - CSRF protection with honeypots
 - HttpOnly, Secure, SameSite cookies (App/Admin operator sessions)

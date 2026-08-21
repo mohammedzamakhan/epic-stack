@@ -4,16 +4,12 @@ import { type LoaderFunctionArgs } from 'react-router'
 import {
 	checkRateLimit,
 	createRateLimitResponse,
+	PUBLIC_SITE_RATE_LIMIT,
 } from '#app/utils/rate-limit.server.ts'
 import {
 	findPublishedSiteOrganization,
 	toPublicSitePayload,
 } from '#app/utils/sites/public-org.server.ts'
-
-const PUBLIC_SITE_RATE_LIMIT = {
-	maxRequests: process.env.NODE_ENV === 'development' ? 1000 : 100,
-	windowMs: 60 * 1000, // 1 minute
-}
 
 /**
  * Public endpoint for org Sites pages by slug.

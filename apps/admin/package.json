@@ -47,7 +47,6 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.45",
     "@ai-sdk/react": "^2.0.111",
-    "@arcjet/remix": "^1.0.0-beta.9",
     "@coji/remix-auth-google": "^4.2.0",
     "@conform-to/react": "^1.8.2",
     "@conform-to/zod": "^1.8.2",
