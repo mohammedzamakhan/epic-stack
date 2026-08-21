@@ -9,7 +9,6 @@ import {
 	type AnyD1Database,
 	type DrizzleD1Database,
 } from 'drizzle-orm/d1'
-import { isCloudflareWorkerRuntime } from '@repo/common'
 import * as relations from './relations.ts'
 import * as tables from './schema.ts'
 
@@ -83,6 +82,11 @@ export function bindCloudflareD1(database: AnyD1Database): void {
 
 export function isD1Bound(): boolean {
 	return d1Db !== null
+}
+
+function isCloudflareWorkerRuntime(): boolean {
+	const workerCaches = (globalThis as { caches?: { default?: unknown } }).caches
+	return workerCaches !== undefined && 'default' in workerCaches
 }
 
 function getLibsqlClient(): Client {
