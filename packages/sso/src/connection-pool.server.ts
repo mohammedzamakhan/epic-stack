@@ -2,6 +2,7 @@
  * Connection pool for identity provider requests
  * Manages HTTP connections to reduce latency and improve performance
  */
+import { isCloudflareWorkerRuntime } from '@repo/common'
 export class SSOConnectionPool {
 	private pools = new Map<string, ConnectionPoolEntry>()
 	private readonly maxPoolSize = 10
@@ -180,7 +181,7 @@ interface ConnectionPoolStats {
 export const ssoConnectionPool = new SSOConnectionPool()
 
 // Periodic cleanup of idle pools
-if (typeof setInterval !== 'undefined') {
+if (!isCloudflareWorkerRuntime() && typeof setInterval !== 'undefined') {
 	setInterval(() => {
 		ssoConnectionPool.cleanupIdlePools()
 	}, 60000) // Clean up every minute

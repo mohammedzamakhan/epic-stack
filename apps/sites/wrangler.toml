@@ -1,6 +1,13 @@
 name = "epic-startup-sites"
+account_id = "8870705ba38bb749459b00ab2949f857"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+PUBLIC_APP_URL = "https://epic-startup-app.zama-887.workers.dev"
+ROOT_APP = "zama-887.workers.dev"
+PUBLIC_ROOT_APP = "zama-887.workers.dev"
 
 [env.production]
 name = "epic-startup-sites"

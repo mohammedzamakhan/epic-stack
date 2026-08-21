@@ -4,6 +4,7 @@ import { getInstanceInfo } from '@repo/common/litefs'
 import { redirect } from 'react-router'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
+import { isCloudflareWorkerRuntime } from '#app/utils/runtime.server.ts'
 import { type Route } from './+types/cache_.sqlite.ts'
 
 function safeCompare(
@@ -17,11 +18,13 @@ function safeCompare(
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
-	if (!currentIsPrimary) {
-		throw new Error(
-			`${request.url} should only be called on the primary instance (${primaryInstance})}`,
-		)
+	if (!isCloudflareWorkerRuntime()) {
+		const { currentIsPrimary, primaryInstance } = await getInstanceInfo()
+		if (!currentIsPrimary) {
+			throw new Error(
+				`${request.url} should only be called on the primary instance (${primaryInstance})}`,
+			)
+		}
 	}
 	const token = ENV.INTERNAL_COMMAND_TOKEN
 	const authHeader = request.headers.get('Authorization')

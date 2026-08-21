@@ -2,7 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "epic-startup-cms",
+  "account_id": "8870705ba38bb749459b00ab2949f857",
   "compatibility_date": "2025-08-15",
+  "workers_dev": true,
   "compatibility_flags": [
     // Enable Node.js API
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
@@ -18,17 +20,13 @@
   "d1_databases": [
     {
       "binding": "D1",
-      // Replace DATABASE_ID with the actual D1 database ID after running:
-      //   wrangler d1 create epic-startup-cms
-      "database_id": "DATABASE_ID",
+      "database_id": "3091bea4-f213-44ab-9779-8779059bd564",
       "database_name": "epic-startup-cms",
     },
   ],
   "r2_buckets": [
     {
       "binding": "R2_BUCKET",
-      // Create the R2 bucket with:
-      //   wrangler r2 bucket create epic-startup-cms-media
       "bucket_name": "epic-startup-cms-media",
     },
   ],
@@ -37,6 +35,8 @@
   //   CRON_SECRET
   //   PREVIEW_SECRET
   "vars": {
-    "NEXT_PUBLIC_SERVER_URL": "https://epic-startup-cms.<your-subdomain>.workers.dev",
+    "NEXT_PUBLIC_SERVER_URL": "https://epic-startup-cms.zama-887.workers.dev",
+    "WEB_APP_URL": "https://epic-startup.zama-887.workers.dev",
+    "NEXT_PUBLIC_WEB_APP_URL": "https://epic-startup.zama-887.workers.dev",
   },
 }

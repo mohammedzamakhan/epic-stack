@@ -1,13 +1,14 @@
-import crypto from 'node:crypto'
-import { PassThrough } from 'node:stream'
 import { contentSecurity } from '@nichtsam/helmet/content'
-import { createReadableStreamFromReadable } from '@react-router/node'
-import { NonceProvider, makeTimings } from '@repo/common'
+import {
+	NonceProvider,
+	isCloudflareWorkerRuntime,
+	makeTimings,
+} from '@repo/common'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
 import { sentryLogger, sanitizeUrl } from '@repo/observability'
 import { isbot } from 'isbot'
-import { renderToPipeableStream } from 'react-dom/server'
+import { renderToReadableStream } from 'react-dom/server'
 import {
 	ServerRouter,
 	type LoaderFunctionArgs,
@@ -22,24 +23,17 @@ export const streamTimeout = 5000
 
 const MODE = process.env.NODE_ENV ?? 'development'
 
+function createNonce() {
+	const bytes = new Uint8Array(16)
+	crypto.getRandomValues(bytes)
+	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+		'',
+	)
+}
+
 type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
 
-export default async function handleRequest(...args: DocRequestArgs) {
-	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
-		args
-
-	// Automatic audit logging for sensitive routes
-	void auditSensitiveRoutes(
-		request,
-		new Response(null, { status: responseStatusCode }),
-	)
-
-	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
-	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
-	responseHeaders.set('fly-primary-instance', primaryInstance)
-	responseHeaders.set('fly-instance', currentInstance)
-
+function applySecurityHeaders(responseHeaders: Headers) {
 	responseHeaders.set('X-Content-Type-Options', 'nosniff')
 	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
 	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
@@ -53,190 +47,135 @@ export default async function handleRequest(...args: DocRequestArgs) {
 			responseHeaders.append('Document-Policy', 'js-profiling')
 		}
 	}
+}
 
-	const callbackName = isbot(request.headers.get('user-agent'))
-		? 'onAllReady'
-		: 'onShellReady'
+function applyRuntimeHeaders(responseHeaders: Headers) {
+	if (isCloudflareWorkerRuntime()) {
+		responseHeaders.set('cf-worker', 'epic-startup-app')
+		return
+	}
 
-	const nonce = crypto.randomBytes(16).toString('hex')
+	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown')
+	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
+}
+
+async function applyInstanceHeaders(responseHeaders: Headers) {
+	const { currentInstance, primaryInstance } = await getInstanceInfo()
+	responseHeaders.set('fly-primary-instance', primaryInstance)
+	responseHeaders.set('fly-instance', currentInstance)
+}
+
+function applyContentSecurity(
+	responseHeaders: Headers,
+	nonce: string,
+	builderMode: boolean,
+) {
+	contentSecurity(responseHeaders, {
+		crossOriginEmbedderPolicy: false,
+		contentSecurityPolicy: {
+			directives: {
+				document: {
+					'base-uri': ["'self'"],
+				},
+				navigation: {
+					'form-action': ["'self'"],
+					'frame-ancestors': ["'self'"],
+				},
+				fetch: {
+					'default-src': ["'self'"],
+					'object-src': ["'none'"],
+					'connect-src': [
+						MODE === 'development' ? 'ws:' : undefined,
+						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+						"'self'",
+					],
+					'font-src': ["'self'"],
+					'frame-src': [
+						"'self'",
+						'builder.io',
+						'*.epic-startup.me:*',
+						'*.epic-startup.me',
+						'localhost:*',
+					],
+					'img-src': ["'self'", 'data:'],
+					'script-src': builderMode
+						? [
+								"'unsafe-inline'",
+								"'unsafe-eval'",
+								"'self'",
+								`'nonce-${nonce}'`,
+								'https://cdn.builder.io',
+							]
+						: ["'strict-dynamic'", "'self'", `'nonce-${nonce}'`],
+					'script-src-attr': builderMode
+						? [`'nonce-${nonce}'`, "'unsafe-inline'"]
+						: [`'nonce-${nonce}'`],
+				},
+			},
+		},
+	})
+}
+
+export default async function handleRequest(...args: DocRequestArgs) {
+	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
+		args
+
+	void auditSensitiveRoutes(
+		request,
+		new Response(null, { status: responseStatusCode }),
+	)
+
+	applySecurityHeaders(responseHeaders)
+	applyRuntimeHeaders(responseHeaders)
+	await applyInstanceHeaders(responseHeaders)
+
+	const nonce = createNonce()
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
-	if (MODE === 'development' && request.url.includes('builder.my')) {
-		return new Promise((resolve, reject) => {
-			let didError = false
-			// NOTE: this timing will only include things that are rendered in the shell
-			// and will not include suspended components and deferred loaders
-			const timings = makeTimings('render', 'renderToPipeableStream')
+	const builderMode =
+		MODE === 'development' &&
+		request.url.includes('builder.my') &&
+		!isCloudflareWorkerRuntime()
 
-			const { pipe, abort } = renderToPipeableStream(
-				<I18nProvider i18n={i18n}>
-					<NonceProvider value={nonce}>
-						<ServerRouter
-							nonce={nonce}
-							context={reactRouterContext}
-							url={request.url}
-						/>
-					</NonceProvider>
-				</I18nProvider>,
-				{
-					[callbackName]: () => {
-						const body = new PassThrough()
-						responseHeaders.set('Content-Type', 'text/html')
-						responseHeaders.append('Server-Timing', timings.toString())
+	let didError = false
+	const timings = makeTimings('render', 'renderToReadableStream')
 
-						contentSecurity(responseHeaders, {
-							crossOriginEmbedderPolicy: false,
-							contentSecurityPolicy: {
-								directives: {
-									document: {
-										'base-uri': ["'self'"],
-									},
-									navigation: {
-										'form-action': ["'self'"],
-										'frame-ancestors': ["'self'"],
-									},
-									fetch: {
-										'default-src': ["'self'"],
-										'object-src': ["'none'"],
-										'connect-src': [
-											MODE === 'development' ? 'ws:' : undefined,
-											process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
-											"'self'",
-										],
-										'font-src': ["'self'"],
-										'frame-src': [
-											"'self'",
-											'builder.io',
-											'*.epic-startup.me:*',
-											'*.epic-startup.me',
-											'localhost:*',
-										],
-										'img-src': ["'self'", 'data:'],
-										'script-src': [
-											"'unsafe-inline'",
-											"'unsafe-eval'",
-											"'self'",
-											`'nonce-${nonce}'`,
-											'https://cdn.builder.io',
-										],
-										'script-src-attr': [`'nonce-${nonce}'`, "'unsafe-inline'"],
-									},
-								},
-							},
-						})
-
-						resolve(
-							new Response(createReadableStreamFromReadable(body), {
-								headers: responseHeaders,
-								status: didError ? 500 : responseStatusCode,
-							}),
-						)
-						pipe(body)
-					},
-					onShellError: (err: unknown) => {
-						reject(err)
-					},
-					onError: () => {
-						didError = true
-					},
-					nonce,
-				},
-			)
-
-			setTimeout(abort, streamTimeout + 5000)
-		})
-	}
-	return new Promise((resolve, reject) => {
-		let didError = false
-		// NOTE: this timing will only include things that are rendered in the shell
-		// and will not include suspended components and deferred loaders
-		const timings = makeTimings('render', 'renderToPipeableStream')
-
-		const { pipe, abort } = renderToPipeableStream(
-			<I18nProvider i18n={i18n}>
-				<NonceProvider value={nonce}>
-					<ServerRouter
-						nonce={nonce}
-						context={reactRouterContext}
-						url={request.url}
-					/>
-				</NonceProvider>
-			</I18nProvider>,
-			{
-				[callbackName]: () => {
-					const body = new PassThrough()
-					responseHeaders.set('Content-Type', 'text/html')
-					responseHeaders.append('Server-Timing', timings.toString())
-
-					contentSecurity(responseHeaders, {
-						crossOriginEmbedderPolicy: false,
-						contentSecurityPolicy: {
-							directives: {
-								document: {
-									'base-uri': ["'self'"],
-								},
-								navigation: {
-									'form-action': ["'self'"],
-									'frame-ancestors': ["'self'"],
-								},
-								fetch: {
-									'default-src': ["'self'"],
-									'object-src': ["'none'"],
-									'connect-src': [
-										MODE === 'development' ? 'ws:' : undefined,
-										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
-										"'self'",
-									],
-									'font-src': ["'self'"],
-									'frame-src': [
-										"'self'",
-										'builder.io',
-										'*.epic-startup.me:*',
-										'*.epic-startup.me',
-										'localhost:*',
-									],
-									'img-src': ["'self'", 'data:'],
-									'script-src': [
-										"'strict-dynamic'",
-										"'self'",
-										`'nonce-${nonce}'`,
-									],
-									'script-src-attr': [`'nonce-${nonce}'`],
-								},
-							},
-						},
-					})
-
-					resolve(
-						new Response(createReadableStreamFromReadable(body), {
-							headers: responseHeaders,
-							status: didError ? 500 : responseStatusCode,
-						}),
-					)
-					pipe(body)
-				},
-				onShellError: (err: unknown) => {
-					reject(err)
-				},
-				onError: () => {
-					didError = true
-				},
-				nonce,
+	const stream = await renderToReadableStream(
+		<I18nProvider i18n={i18n}>
+			<NonceProvider value={nonce}>
+				<ServerRouter
+					nonce={nonce}
+					context={reactRouterContext}
+					url={request.url}
+				/>
+			</NonceProvider>
+		</I18nProvider>,
+		{
+			nonce,
+			onError: () => {
+				didError = true
 			},
-		)
+		},
+	)
 
-		setTimeout(abort, streamTimeout + 5000)
+	if (isbot(request.headers.get('user-agent'))) {
+		await stream.allReady
+	}
+
+	responseHeaders.set('Content-Type', 'text/html')
+	responseHeaders.append('Server-Timing', timings.toString())
+	applyContentSecurity(responseHeaders, nonce, builderMode)
+
+	return new Response(stream, {
+		headers: responseHeaders,
+		status: didError ? 500 : responseStatusCode,
 	})
 }
 
 export async function handleDataRequest(response: Response) {
-	const { currentInstance, primaryInstance } = await getInstanceInfo()
-	response.headers.set('fly-region', process.env.FLY_REGION ?? 'unknown')
-	response.headers.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown')
-	response.headers.set('fly-primary-instance', primaryInstance)
-	response.headers.set('fly-instance', currentInstance)
-
+	applyRuntimeHeaders(response.headers)
+	await applyInstanceHeaders(response.headers)
 	return response
 }
 
@@ -244,14 +183,10 @@ export function handleError(
 	error: unknown,
 	{ request }: LoaderFunctionArgs | ActionFunctionArgs,
 ): void {
-	// Skip capturing if the request is aborted as Remix docs suggest
-	// Ref: https://remix.run/docs/en/main/file-conventions/entry.server#handleerror
 	if (request.signal.aborted) {
 		return
 	}
 
-	// Log with context and automatically send to Sentry
-	// Sanitize URL to prevent leaking sensitive query parameters
 	const requestLogger = sentryLogger.child({
 		url: sanitizeUrl(request.url),
 		method: request.method,

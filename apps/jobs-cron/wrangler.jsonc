@@ -2,7 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "epic-startup-jobs-cron",
   "main": "src/index.ts",
+  "account_id": "8870705ba38bb749459b00ab2949f857",
   "compatibility_date": "2025-08-15",
+  "workers_dev": true,
   "observability": {
     "enabled": true
   },
@@ -17,6 +19,6 @@
     }
   ],
   "vars": {
-    "APP_BASE_URL": "https://app.epic-startup.me"
+    "APP_BASE_URL": "https://epic-startup-app.zama-887.workers.dev"
   }
 }

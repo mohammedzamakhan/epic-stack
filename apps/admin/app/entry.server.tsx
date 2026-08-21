@@ -1,14 +1,11 @@
-import crypto from 'node:crypto'
-import { PassThrough } from 'node:stream'
 import { styleText } from 'node:util'
 import { contentSecurity } from '@nichtsam/helmet/content'
-import { createReadableStreamFromReadable } from '@react-router/node'
 import { NonceProvider, makeTimings } from '@repo/common'
 import { getInstanceInfo } from '@repo/common/litefs'
 import { i18n, I18nProvider } from '@repo/i18n'
 import * as Sentry from '@sentry/react-router'
 import { isbot } from 'isbot'
-import { renderToPipeableStream } from 'react-dom/server'
+import { renderToReadableStream } from 'react-dom/server'
 import {
 	ServerRouter,
 	type LoaderFunctionArgs,
@@ -26,22 +23,22 @@ const MODE = ENV.NODE_ENV ?? 'development'
 
 type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
 
-export default async function handleRequest(...args: DocRequestArgs) {
-	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
-		args
-
-	// Automatic audit logging for sensitive routes
-	void auditSensitiveRoutes(
-		request,
-		new Response(null, { status: responseStatusCode }),
+function createNonce() {
+	const bytes = crypto.getRandomValues(new Uint8Array(16))
+	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+		'',
 	)
+}
 
+async function setFlyHeaders(responseHeaders: Headers) {
 	const { currentInstance, primaryInstance } = await getInstanceInfo()
 	responseHeaders.set('fly-region', ENV.FLY_REGION ?? 'unknown')
 	responseHeaders.set('fly-app', ENV.FLY_APP_NAME ?? 'unknown')
 	responseHeaders.set('fly-primary-instance', primaryInstance)
 	responseHeaders.set('fly-instance', currentInstance)
+}
 
+function setSecurityHeaders(responseHeaders: Headers) {
 	responseHeaders.set('X-Content-Type-Options', 'nosniff')
 	responseHeaders.set('X-Frame-Options', 'SAMEORIGIN')
 	responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin')
@@ -55,67 +52,83 @@ export default async function handleRequest(...args: DocRequestArgs) {
 			responseHeaders.append('Document-Policy', 'js-profiling')
 		}
 	}
+}
 
-	const callbackName = isbot(request.headers.get('user-agent'))
-		? 'onAllReady'
-		: 'onShellReady'
+function applyContentSecurity(
+	responseHeaders: Headers,
+	nonce: string,
+	options: { relaxed: boolean },
+) {
+	contentSecurity(responseHeaders, {
+		crossOriginEmbedderPolicy: false,
+		contentSecurityPolicy: {
+			directives: {
+				document: {
+					'base-uri': ["'self'"],
+				},
+				navigation: {
+					'form-action': ["'self'"],
+					'frame-ancestors': ["'self'"],
+				},
+				fetch: {
+					'default-src': ["'self'"],
+					'object-src': ["'none'"],
+					'connect-src': [
+						MODE === 'development' ? 'ws:' : undefined,
+						ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
+						"'self'",
+					],
+					'font-src': ["'self'"],
+					'frame-src': ["'self'", 'builder.io'],
+					'img-src': ["'self'", 'data:'],
+					'script-src': options.relaxed
+						? [
+								"'unsafe-inline'",
+								"'unsafe-eval'",
+								"'self'",
+								`'nonce-${nonce}'`,
+								'https://cdn.builder.io',
+							]
+						: ["'strict-dynamic'", "'self'", `'nonce-${nonce}'`],
+					'script-src-attr': options.relaxed
+						? [`'nonce-${nonce}'`, "'unsafe-inline'"]
+						: [`'nonce-${nonce}'`],
+				},
+			},
+		},
+	})
+}
 
-	const nonce = crypto.randomBytes(16).toString('hex')
+export default async function handleRequest(...args: DocRequestArgs) {
+	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
+		args
+
+	// Automatic audit logging for sensitive routes
+	void auditSensitiveRoutes(
+		request,
+		new Response(null, { status: responseStatusCode }),
+	)
+
+	await setFlyHeaders(responseHeaders)
+	setSecurityHeaders(responseHeaders)
+
+	const userAgent = request.headers.get('user-agent')
+	const waitForAllContent = isbot(userAgent)
+
+	const nonce = createNonce()
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
-	if (MODE === 'development' && request.url.includes('builder.my')) {
-		return new Promise((resolve, reject) => {
-			let didError = false
-			// NOTE: this timing will only include things that are rendered in the shell
-			// and will not include suspended components and deferred loaders
-			const timings = makeTimings('render', 'renderToPipeableStream')
+	const relaxedCsp =
+		MODE === 'development' && request.url.includes('builder.my')
+	const timings = makeTimings('render', 'renderToReadableStream')
+	const controller = new AbortController()
+	const timeoutId = setTimeout(() => controller.abort(), streamTimeout + 5000)
 
-			const { pipe, abort } = renderToPipeableStream(
-				<I18nProvider i18n={i18n}>
-					<NonceProvider value={nonce}>
-						<ServerRouter
-							nonce={nonce}
-							context={reactRouterContext}
-							url={request.url}
-						/>
-					</NonceProvider>
-				</I18nProvider>,
-				{
-					[callbackName]: () => {
-						const body = new PassThrough()
-						responseHeaders.set('Content-Type', 'text/html')
-						responseHeaders.append('Server-Timing', timings.toString())
+	let didError = false
 
-						resolve(
-							new Response(createReadableStreamFromReadable(body), {
-								headers: responseHeaders,
-								status: didError ? 500 : responseStatusCode,
-							}),
-						)
-						pipe(body)
-					},
-					onShellError: (err: unknown) => {
-						reject(err)
-					},
-					onError: () => {
-						didError = true
-					},
-					nonce,
-				},
-			)
-
-			setTimeout(abort, streamTimeout + 5000)
-		})
-	}
-
-	return new Promise((resolve, reject) => {
-		let didError = false
-		// NOTE: this timing will only include things that are rendered in the shell
-		// and will not include suspended components and deferred loaders
-		const timings = makeTimings('render', 'renderToPipeableStream')
-
-		const { pipe, abort } = renderToPipeableStream(
+	try {
+		const body = await renderToReadableStream(
 			<I18nProvider i18n={i18n}>
 				<NonceProvider value={nonce}>
 					<ServerRouter
@@ -126,64 +139,31 @@ export default async function handleRequest(...args: DocRequestArgs) {
 				</NonceProvider>
 			</I18nProvider>,
 			{
-				[callbackName]: () => {
-					const body = new PassThrough()
-					responseHeaders.set('Content-Type', 'text/html')
-					responseHeaders.append('Server-Timing', timings.toString())
-
-					contentSecurity(responseHeaders, {
-						crossOriginEmbedderPolicy: false,
-						contentSecurityPolicy: {
-							directives: {
-								document: {
-									'base-uri': ["'self'"],
-								},
-								navigation: {
-									'form-action': ["'self'"],
-									'frame-ancestors': ["'self'"],
-								},
-								fetch: {
-									'default-src': ["'self'"],
-									'object-src': ["'none'"],
-									'connect-src': [
-										MODE === 'development' ? 'ws:' : undefined,
-										ENV.SENTRY_DSN ? '*.sentry.io' : undefined,
-										"'self'",
-									],
-									'font-src': ["'self'"],
-									'frame-src': ["'self'", 'builder.io'],
-									'img-src': ["'self'", 'data:'],
-									'script-src': [
-										"'strict-dynamic'",
-										"'self'",
-										`'nonce-${nonce}'`,
-									],
-									'script-src-attr': [`'nonce-${nonce}'`],
-								},
-							},
-						},
-					})
-
-					resolve(
-						new Response(createReadableStreamFromReadable(body), {
-							headers: responseHeaders,
-							status: didError ? 500 : responseStatusCode,
-						}),
-					)
-					pipe(body)
-				},
-				onShellError: (err: unknown) => {
-					reject(err)
-				},
+				nonce,
+				signal: controller.signal,
 				onError: () => {
 					didError = true
 				},
-				nonce,
 			},
 		)
 
-		setTimeout(abort, streamTimeout + 5000)
-	})
+		responseHeaders.set('Content-Type', 'text/html')
+		responseHeaders.append('Server-Timing', timings.toString())
+		if (!relaxedCsp) {
+			applyContentSecurity(responseHeaders, nonce, { relaxed: false })
+		}
+
+		if (waitForAllContent) {
+			await body.allReady
+		}
+
+		return new Response(body, {
+			headers: responseHeaders,
+			status: didError ? 500 : responseStatusCode,
+		})
+	} finally {
+		clearTimeout(timeoutId)
+	}
 }
 
 export async function handleDataRequest(response: Response) {

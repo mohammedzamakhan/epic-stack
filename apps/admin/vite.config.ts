@@ -1,3 +1,6 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { cloudflare } from '@cloudflare/vite-plugin'
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import { brand } from '@repo/config/brand'
@@ -11,9 +14,38 @@ import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 const domain = 'admin.' + brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
 
 const MODE = process.env.NODE_ENV
+const isCloudflareDeploy = process.env.DEPLOY_TARGET === 'cloudflare'
+
+function cloudflareWorkerAliasPlugin(): Plugin | null {
+	if (!isCloudflareDeploy) return null
+	const workerFile = (name: string) => path.resolve(__dirname, 'workers', name)
+	const ssrOnly: Record<string, string> = {
+		'isomorphic-dompurify': workerFile('dompurify-stub.ts'),
+		'@sentry/react-router': workerFile('sentry-stub.ts'),
+	}
+	const always: Record<string, string> = {
+		'litefs-js/remix': workerFile('litefs-stub.ts'),
+		'litefs-js': workerFile('litefs-stub.ts'),
+		'@sentry/profiling-node': workerFile('litefs-stub.ts'),
+		'node:sqlite': workerFile('node-sqlite-stub.ts'),
+	}
+	const remixCrypto = workerFile('remix-crypto-stub.ts')
+	return {
+		name: 'cloudflare-worker-aliases',
+		enforce: 'pre',
+		resolveId(id, _importer, options) {
+			if (always[id]) return always[id]
+			if (/remix-utils\/build\/common\/crypto/.test(id)) return remixCrypto
+			if (options?.ssr && ssrOnly[id]) return ssrOnly[id]
+			return null
+		},
+	}
+}
 
 // Plugin to stub out cache.server.ts in test mode to avoid node:sqlite in jsdom
 function stubCacheServerPlugin(): Plugin {
@@ -52,26 +84,48 @@ function stubCacheServerPlugin(): Plugin {
 	}
 }
 
+const sentryConfig: SentryReactRouterBuildOptions = {
+	authToken: process.env.SENTRY_AUTH_TOKEN,
+	org: process.env.SENTRY_ORG,
+	project: process.env.SENTRY_PROJECT,
+
+	unstable_sentryVitePluginOptions: {
+		release: {
+			name: process.env.COMMIT_SHA,
+			setCommits: {
+				auto: true,
+			},
+		},
+		sourcemaps: {
+			filesToDeleteAfterUpload: ['./build/**/*.map'],
+		},
+	},
+}
+
 export default defineConfig((config) => ({
 	build: {
 		target: 'es2022',
 		cssMinify: MODE === 'production',
 
-		rollupOptions: {
-			input: config.isSsrBuild ? './server/app.ts' : undefined,
-			external: [
-				/node:.*/,
-				'fsevents',
-				'@sentry/profiling-node',
-				'@sentry-internal/node-cpu-profiler',
-			],
-		},
+		rollupOptions: isCloudflareDeploy
+			? {}
+			: {
+					input: config.isSsrBuild ? './server/app.ts' : undefined,
+					external: [
+						/node:.*/,
+						'fsevents',
+						'@sentry/profiling-node',
+						'@sentry-internal/node-cpu-profiler',
+					],
+				},
 
-		assetsInlineLimit: (source: string) => {
-			if (source.includes('/app/assets')) {
-				return false
-			}
-		},
+		assetsInlineLimit: isCloudflareDeploy
+			? 4096
+			: (source: string) => {
+					if (typeof source === 'string' && source.includes('/app/assets')) {
+						return false
+					}
+				},
 
 		sourcemap: true,
 	},
@@ -81,7 +135,7 @@ export default defineConfig((config) => ({
 	},
 	...(MODE !== 'test' && {
 		ssr: {
-			noExternal: ['@repo/email'],
+			noExternal: isCloudflareDeploy ? true : ['@repo/email'],
 		},
 	}),
 	server: {
@@ -100,6 +154,10 @@ export default defineConfig((config) => ({
 	},
 	sentryConfig,
 	plugins: [
+		isCloudflareDeploy
+			? cloudflare({ viteEnvironment: { name: 'ssr' } })
+			: null,
+		cloudflareWorkerAliasPlugin(),
 		varlockVitePlugin(),
 		MODE === 'test' ? stubCacheServerPlugin() : null,
 		envOnlyMacros(),
@@ -110,7 +168,9 @@ export default defineConfig((config) => ({
 		MODE === 'test' ? null : reactRouter(),
 		macrosPlugin(),
 		lingui(),
-		MODE === 'production' && process.env.SENTRY_AUTH_TOKEN
+		MODE === 'production' &&
+		process.env.SENTRY_AUTH_TOKEN &&
+		!isCloudflareDeploy
 			? sentryReactRouter(sentryConfig, config)
 			: null,
 	].filter(Boolean) as Plugin[],
@@ -128,21 +188,3 @@ export default defineConfig((config) => ({
 		},
 	},
 }))
-
-const sentryConfig: SentryReactRouterBuildOptions = {
-	authToken: process.env.SENTRY_AUTH_TOKEN,
-	org: process.env.SENTRY_ORG,
-	project: process.env.SENTRY_PROJECT,
-
-	unstable_sentryVitePluginOptions: {
-		release: {
-			name: process.env.COMMIT_SHA,
-			setCommits: {
-				auto: true,
-			},
-		},
-		sourcemaps: {
-			filesToDeleteAfterUpload: ['./build/**/*.map'],
-		},
-	},
-}

@@ -27,7 +27,15 @@ export {
 	sum,
 } from 'drizzle-orm'
 export { alias } from 'drizzle-orm/sqlite-core'
-export { db, resolveSqliteFileUrl, schema, sqliteClient } from './client.ts'
+export {
+	bindCloudflareD1,
+	db,
+	isD1Bound,
+	resolveSqliteFileUrl,
+	schema,
+	sqliteClient,
+	type ControlPlaneDb,
+} from './client.ts'
 export {
 	countSsoConfigurations,
 	countSsoSessions,

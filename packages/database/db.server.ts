@@ -1,2 +1,2 @@
 export * from './src/index.ts'
-export { db, sqliteClient } from './src/client.ts'
+export { bindCloudflareD1, db, isD1Bound, sqliteClient } from './src/client.ts'
