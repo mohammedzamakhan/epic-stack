@@ -65,15 +65,17 @@ export async function action(args: Route.ActionArgs) {
 	await checkHoneypot(formData)
 
 	const submission = await parseWithZod(formData, {
-		schema: SignupSchema.superRefine(async (data, ctx) => {
+		schema: SignupSchema.superRefine(async (fields, ctx) => {
 			// existingUser check moved to action to prevent email enumeration.
-			// Block disposable/invalid/no-MX-record email addresses. The MX
-			// lookup is skipped in test/mocked environments so tests don't
-			// depend on real DNS access.
-			const email = formData.get('email') as string
+			// Block disposable/invalid/no-MX-record email addresses, using the
+			// already Zod-validated (and length-bounded) email rather than the
+			// raw form value. The MX lookup is skipped in test/mocked
+			// environments so tests don't depend on real DNS access.
 			const checkMx =
 				process.env.NODE_ENV !== 'test' && process['env'].MOCKS !== 'true'
-			const emailValidation = await validateEmailAddress(email, { checkMx })
+			const emailValidation = await validateEmailAddress(fields.email, {
+				checkMx,
+			})
 
 			if (!emailValidation.isValid) {
 				const errorMessage =

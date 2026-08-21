@@ -36,10 +36,16 @@ export interface ValidateEmailAddressOptions {
 	mxTimeoutMs?: number
 }
 
-// A conservative, RFC-5322-ish syntax check. This mirrors the level of
-// "syntax" validation Arcjet's INVALID rule performed - it is not a full
-// RFC parser, just a guard against obviously malformed input.
-const EMAIL_FORMAT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Defensive upper bound. RFC 5321 caps a valid address at 254 characters;
+// anything longer is rejected outright before any parsing work runs. This
+// also protects `hasValidEmailFormat` against algorithmic-complexity (ReDoS)
+// attacks that rely on very long attacker-controlled input.
+const MAX_EMAIL_LENGTH = 254
+
+// A single, unquantified character-class test - this can only ever perform
+// one linear scan of the input, so it cannot suffer catastrophic
+// backtracking regardless of input length or content.
+const WHITESPACE_REGEX = /\s/
 
 /**
  * A curated list of well-known disposable/temporary email providers.
@@ -634,15 +640,70 @@ const DISPOSABLE_EMAIL_DOMAINS = new Set<string>([
 	'zomg.info',
 ])
 
+/**
+ * Check whether `domain` is, or is a subdomain of, a listed disposable
+ * domain (e.g. `mail.mailinator.com` must be blocked because
+ * `mailinator.com` is listed). Walks progressively shorter dot-separated
+ * suffixes of the (already lowercased) domain, each an O(1) Set lookup.
+ */
 export function isDisposableEmailDomain(domain: string): boolean {
-	return DISPOSABLE_EMAIL_DOMAINS.has(domain.toLowerCase())
+	const normalized = domain.toLowerCase()
+	const labels = normalized.split('.')
+	for (let i = 0; i < labels.length - 1; i++) {
+		const candidate = labels.slice(i).join('.')
+		if (DISPOSABLE_EMAIL_DOMAINS.has(candidate)) {
+			return true
+		}
+	}
+	return false
 }
 
+/**
+ * Check whether `email` is a syntactically plausible address.
+ *
+ * Implemented with `indexOf`/`lastIndexOf`/`slice` rather than a single
+ * combined regex. The previous implementation used
+ * `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`, whose domain-side character class also
+ * matches `.`, so a long run of ambiguous characters (e.g. `!@` followed by
+ * many repeated `!.`) forces the engine to try many equivalent split points
+ * between the two `[^\s@]+` groups before failing - a classic polynomial
+ * ReDoS. String-index operations here are all single linear scans with no
+ * backtracking, so this is safe regardless of input length or content.
+ */
 export function hasValidEmailFormat(email: string): boolean {
-	return EMAIL_FORMAT_REGEX.test(email)
+	if (typeof email !== 'string') return false
+	// Reject oversized input before doing any further work.
+	if (email.length === 0 || email.length > MAX_EMAIL_LENGTH) return false
+	if (WHITESPACE_REGEX.test(email)) return false
+
+	const atIndex = email.indexOf('@')
+	// No '@', or '@' as the first/last character (empty local-part/domain).
+	if (atIndex <= 0 || atIndex === email.length - 1) return false
+	// Reject a second '@' - scanning forward from the first match is still a
+	// single linear pass, not a second full scan with backtracking.
+	if (email.indexOf('@', atIndex + 1) !== -1) return false
+
+	const domain = email.slice(atIndex + 1)
+	const dotIndex = domain.lastIndexOf('.')
+	// Domain must contain a '.' that isn't its first or last character.
+	if (dotIndex <= 0 || dotIndex === domain.length - 1) return false
+
+	return true
 }
 
 const DEFAULT_MX_LOOKUP_TIMEOUT_MS = 3000
+const MX_CACHE_TTL_MS = 5 * 60 * 1000
+
+type MxLookupResult = 'has-records' | 'no-records' | 'unknown'
+
+// Small in-memory cache so repeated signups/resets for the same domain don't
+// each pay for a fresh DNS round trip. Infra failures ('unknown') are
+// intentionally not cached so a transient DNS outage can recover on the
+// very next request.
+const mxResultCache = new Map<
+	string,
+	{ result: MxLookupResult; expiresAt: number }
+>()
 
 /**
  * Look up MX records for a domain with a timeout.
@@ -655,15 +716,30 @@ const DEFAULT_MX_LOOKUP_TIMEOUT_MS = 3000
 async function checkMxRecords(
 	domain: string,
 	timeoutMs: number = DEFAULT_MX_LOOKUP_TIMEOUT_MS,
-): Promise<'has-records' | 'no-records' | 'unknown'> {
+): Promise<MxLookupResult> {
+	const cached = mxResultCache.get(domain)
+	if (cached && cached.expiresAt > Date.now()) {
+		return cached.result
+	}
+
+	let timeoutHandle: ReturnType<typeof setTimeout> | undefined
 	try {
 		const records = await Promise.race([
 			resolveMx(domain),
 			new Promise<never>((_resolve, reject) => {
-				setTimeout(() => reject(new Error('MX lookup timed out')), timeoutMs)
+				timeoutHandle = setTimeout(
+					() => reject(new Error('MX lookup timed out')),
+					timeoutMs,
+				)
 			}),
 		])
-		return records.length > 0 ? 'has-records' : 'no-records'
+		const result: MxLookupResult =
+			records.length > 0 ? 'has-records' : 'no-records'
+		mxResultCache.set(domain, {
+			result,
+			expiresAt: Date.now() + MX_CACHE_TTL_MS,
+		})
+		return result
 	} catch (error) {
 		// ENOTFOUND/ENODATA mean the resolver successfully determined the
 		// domain has no MX records - that's a deterministic result, not an
@@ -671,10 +747,16 @@ async function checkMxRecords(
 		// is an infra failure, so we fail open by returning 'unknown'.
 		const code = (error as NodeJS.ErrnoException | undefined)?.code
 		if (code === 'ENOTFOUND' || code === 'ENODATA') {
+			mxResultCache.set(domain, {
+				result: 'no-records',
+				expiresAt: Date.now() + MX_CACHE_TTL_MS,
+			})
 			return 'no-records'
 		}
 		console.error('MX record lookup failed:', error)
 		return 'unknown'
+	} finally {
+		if (timeoutHandle) clearTimeout(timeoutHandle)
 	}
 }
 
@@ -683,6 +765,10 @@ async function checkMxRecords(
  * signup / forgot-password: block disposable domains and malformed
  * addresses deterministically, and block domains with no MX records unless
  * the DNS lookup itself fails for infrastructure reasons (fail open).
+ *
+ * Callers should still parse/length-bound untrusted input (e.g. with a Zod
+ * schema) before calling this, but `hasValidEmailFormat`'s own length cap
+ * means this function is safe to call directly on unbounded input too.
  */
 export async function validateEmailAddress(
 	email: string,
@@ -694,7 +780,7 @@ export async function validateEmailAddress(
 		return { isValid: false, reason: 'INVALID' }
 	}
 
-	const domain = email.split('@')[1]?.toLowerCase()
+	const domain = email.slice(email.indexOf('@') + 1).toLowerCase()
 	if (!domain) {
 		return { isValid: false, reason: 'INVALID' }
 	}

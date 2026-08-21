@@ -248,10 +248,11 @@ describe('Rate Limiting', () => {
 		it('should clean up old entries outside the window', async () => {
 			const userId = 'test-user-cleanup'
 			const now = Date.now()
+			const keyId = `${RATE_LIMITS.authorization.scope}:user:${userId}`
 
 			// Create an entry that's outside the window
 			await db.insert(RateLimitEntry).values({
-				keyId: `user:${userId}`,
+				keyId,
 				keyType: 'user',
 				keyValue: userId,
 				createdAt: new Date(now - RATE_LIMITS.authorization.windowMs - 1000),
@@ -261,7 +262,7 @@ describe('Rate Limiting', () => {
 			const [countRow] = await db
 				.select({ count: count() })
 				.from(RateLimitEntry)
-				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+				.where(eq(RateLimitEntry.keyId, keyId))
 			if (!countRow) throw new Error('Failed to count entries')
 			const entryCount = countRow.count
 			expect(entryCount).toBe(1)
@@ -276,7 +277,7 @@ describe('Rate Limiting', () => {
 			const [countRowLater] = await db
 				.select({ count: count() })
 				.from(RateLimitEntry)
-				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+				.where(eq(RateLimitEntry.keyId, keyId))
 			if (!countRowLater) throw new Error('Failed to count entries')
 			const entryCountAfter = countRowLater.count
 			expect(entryCountAfter).toBe(1) // Only the new entry
@@ -284,7 +285,7 @@ describe('Rate Limiting', () => {
 	})
 
 	describe('Rate Limit Reset Time', () => {
-		it('should provide correct reset time', async () => {
+		it('resets a full windowMs from now when there is no prior entry', async () => {
 			const userId = 'test-user-reset'
 			const beforeTime = Date.now()
 
@@ -295,14 +296,113 @@ describe('Rate Limiting', () => {
 
 			const afterTime = Date.now()
 
-			// Reset time should be approximately windowStart + window
-			// Since windowStart = now - window, resetAt = (now - window) + window = now
-			// So resetAt should be approximately now
-			const expectedMin = beforeTime
-			const expectedMax = afterTime + 1000 // Allow 1 second buffer
+			// The reset time is derived from the oldest surviving entry (this
+			// request's own, since there was no prior one) plus the window - not
+			// `windowStart + windowMs`, which always equals `now`.
+			const expectedMin = beforeTime + RATE_LIMITS.authorization.windowMs
+			const expectedMax = afterTime + RATE_LIMITS.authorization.windowMs + 1000 // 1s buffer
 
 			expect(result.resetAt.getTime()).toBeGreaterThanOrEqual(expectedMin)
 			expect(result.resetAt.getTime()).toBeLessThanOrEqual(expectedMax)
+		})
+
+		it('does not report an immediate reset while a 429 is still in effect', async () => {
+			const userId = 'test-user-reset-denied'
+
+			// Exhaust the limit
+			for (let i = 0; i < RATE_LIMITS.authorization.maxRequests; i++) {
+				await checkRateLimit(
+					{ type: 'user', value: userId },
+					RATE_LIMITS.authorization,
+				)
+			}
+
+			const result = await checkRateLimit(
+				{ type: 'user', value: userId },
+				RATE_LIMITS.authorization,
+			)
+
+			expect(result.allowed).toBe(false)
+			// All prior entries were inserted moments ago, so the reset should
+			// still be nearly a full window away - not "now".
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(
+				RATE_LIMITS.authorization.windowMs - 5000,
+			)
+		})
+	})
+
+	describe('Concurrent request atomicity', () => {
+		it('never allows more than maxRequests when requests race', async () => {
+			const userId = 'test-user-concurrency'
+			const config = {
+				scope: 'test-concurrency',
+				maxRequests: 5,
+				windowMs: 60_000,
+			}
+
+			const results = await Promise.all(
+				Array.from({ length: 20 }, () =>
+					checkRateLimit({ type: 'user', value: userId }, config),
+				),
+			)
+
+			const allowedCount = results.filter((r) => r.allowed).length
+			expect(allowedCount).toBe(5)
+		}, 15000)
+	})
+
+	describe('Rule namespacing (scope)', () => {
+		it('does not share buckets between different rules using the same key', async () => {
+			const ip = '10.0.0.99'
+			const ruleA = { scope: 'test-rule-a', maxRequests: 1, windowMs: 60_000 }
+			const ruleB = { scope: 'test-rule-b', maxRequests: 1, windowMs: 60_000 }
+
+			const first = await checkRateLimit({ type: 'ip', value: ip }, ruleA)
+			expect(first.allowed).toBe(true)
+
+			// Exhaust rule A
+			const second = await checkRateLimit({ type: 'ip', value: ip }, ruleA)
+			expect(second.allowed).toBe(false)
+
+			// Rule B, same IP, must still have its own full budget
+			const third = await checkRateLimit({ type: 'ip', value: ip }, ruleB)
+			expect(third.allowed).toBe(true)
+		})
+
+		it("does not let a short-window rule's cleanup delete a long-window rule's entries for the same key", async () => {
+			const ip = '10.0.0.100'
+			const shortRule = {
+				scope: 'test-short-window',
+				maxRequests: 100,
+				windowMs: 1000, // 1 second
+			}
+			const longRule = {
+				scope: 'test-long-window',
+				maxRequests: 3,
+				windowMs: 60 * 60 * 1000, // 1 hour
+			}
+
+			// Exhaust the long-window rule for this IP
+			for (let i = 0; i < 3; i++) {
+				await checkRateLimit({ type: 'ip', value: ip }, longRule)
+			}
+			const longDenied = await checkRateLimit(
+				{ type: 'ip', value: ip },
+				longRule,
+			)
+			expect(longDenied.allowed).toBe(false)
+
+			// Exercise the short-window rule for the SAME ip; its cleanup pass
+			// (which deletes entries older than *its own* 1s window) must not
+			// touch the long-window rule's still-active entries.
+			await checkRateLimit({ type: 'ip', value: ip }, shortRule)
+
+			const stillDenied = await checkRateLimit(
+				{ type: 'ip', value: ip },
+				longRule,
+			)
+			expect(stillDenied.allowed).toBe(false)
 		})
 	})
 })

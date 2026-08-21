@@ -52,6 +52,7 @@ const ForgotPasswordSchema = z.object({
 // DB-backed limiter used elsewhere in this app (see #app/utils/rate-limit.server.ts).
 const isDev = process.env.NODE_ENV !== 'production'
 const FORGOT_PASSWORD_RATE_LIMIT = {
+	scope: 'auth-forgot-password',
 	maxRequests: isDev ? 1000 : 3,
 	windowMs: 60 * 60 * 1000, // 1 hour
 }
@@ -69,25 +70,10 @@ export async function action({ request }: Route.ActionArgs) {
 		return createRateLimitResponse(rateLimitCheck.resetAt)
 	}
 
-	// Block disposable/invalid/no-MX-record email addresses (mirrors Arcjet's
-	// validateEmail rule). Skip the DNS-dependent MX check in test/mocked
-	// environments. The submitted value may be a username rather than an
-	// email; only validate when it looks like an email address.
-	const rawUsernameOrEmail = formData.get('usernameOrEmail') as string
-	if (rawUsernameOrEmail?.includes('@')) {
-		const checkMx =
-			process.env.NODE_ENV !== 'test' && process['env'].MOCKS !== 'true'
-		const emailValidation = await validateEmailAddress(rawUsernameOrEmail, {
-			checkMx,
-		})
-		if (!emailValidation.isValid) {
-			return data(
-				{ result: null },
-				{ status: 400, statusText: 'Invalid email address' },
-			)
-		}
-	}
-
+	// Parse and length-bound the submitted value with Zod *before* running any
+	// additional checks on it - `EmailSchema`/`UsernameSchema` cap it at
+	// 100/20 characters respectively, so an attacker can't hand an unbounded
+	// string to the disposable/MX validator below.
 	const submission = await parseWithZod(formData, {
 		schema: ForgotPasswordSchema,
 	})
@@ -98,6 +84,24 @@ export async function action({ request }: Route.ActionArgs) {
 		)
 	}
 	const { usernameOrEmail } = submission.value
+
+	// Block disposable/invalid/no-MX-record email addresses (mirrors Arcjet's
+	// validateEmail rule). Skip the DNS-dependent MX check in test/mocked
+	// environments. `usernameOrEmail` may be a username rather than an email;
+	// only validate when it looks like an email address.
+	if (usernameOrEmail.includes('@')) {
+		const checkMx =
+			process.env.NODE_ENV !== 'test' && process['env'].MOCKS !== 'true'
+		const emailValidation = await validateEmailAddress(usernameOrEmail, {
+			checkMx,
+		})
+		if (!emailValidation.isValid) {
+			return data(
+				{ result: null },
+				{ status: 400, statusText: 'Invalid email address' },
+			)
+		}
+	}
 
 	const [user] = await db
 		.select({ id: User.id, email: User.email, username: User.username })

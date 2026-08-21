@@ -149,9 +149,13 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 
 			expect(result.allowed).toBe(false)
 			expect(result.resetAt).toBeInstanceOf(Date)
-			// Reset time should be approximately now (within 2 seconds)
-			const timeDiff = Math.abs(result.resetAt.getTime() - Date.now())
-			expect(timeDiff).toBeLessThan(2000)
+			// The oldest entry was inserted moments ago, so the reset should
+			// still be nearly a full window away - a 429 must not claim an
+			// immediate reset.
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(
+				RATE_LIMITS.authorization.windowMs - 5000,
+			)
 		})
 
 		it('should isolate rate limits between different users', async () => {
@@ -382,10 +386,11 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		it('should clean up old entries outside the window', async () => {
 			const userId = testUserId
 			const now = Date.now()
+			const keyId = `${RATE_LIMITS.authorization.scope}:user:${userId}`
 
 			// Create an entry that's outside the window
 			await db.insert(RateLimitEntry).values({
-				keyId: `user:${userId}`,
+				keyId,
 				keyType: 'user',
 				keyValue: userId,
 				createdAt: new Date(now - RATE_LIMITS.authorization.windowMs - 1000),
@@ -395,7 +400,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const [countRow] = await db
 				.select({ count: count() })
 				.from(RateLimitEntry)
-				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+				.where(eq(RateLimitEntry.keyId, keyId))
 			if (!countRow) throw new Error('Failed to count entries')
 			const entryCount = countRow.count
 			expect(entryCount).toBe(1)
@@ -410,7 +415,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const [countRowLater] = await db
 				.select({ count: count() })
 				.from(RateLimitEntry)
-				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+				.where(eq(RateLimitEntry.keyId, keyId))
 			if (!countRowLater) throw new Error('Failed to count entries')
 			const entryCountLater = countRowLater.count
 			expect(entryCountLater).toBe(1)
@@ -419,10 +424,11 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 		it('should preserve entries within the window', async () => {
 			const userId = testUserId
 			const now = Date.now()
+			const keyId = `${RATE_LIMITS.authorization.scope}:user:${userId}`
 
 			// Create an entry that's within the window
 			await db.insert(RateLimitEntry).values({
-				keyId: `user:${userId}`,
+				keyId,
 				keyType: 'user',
 				keyValue: userId,
 				createdAt: new Date(now - 1000), // 1 second ago
@@ -438,7 +444,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 			const [countRowLater] = await db
 				.select({ count: count() })
 				.from(RateLimitEntry)
-				.where(eq(RateLimitEntry.keyId, `user:${userId}`))
+				.where(eq(RateLimitEntry.keyId, keyId))
 			if (!countRowLater) throw new Error('Failed to count entries')
 			const entryCount = countRowLater.count
 			expect(entryCount).toBe(2)
@@ -446,7 +452,7 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 	})
 
 	describe('Rate Limit Reset Time Calculation', () => {
-		it('should provide correct reset time for authorization limit', async () => {
+		it('should reset a full window from now for authorization limit when there is no prior entry', async () => {
 			const userId = testUserId
 
 			const result = await checkRateLimit(
@@ -456,12 +462,17 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 
 			// Reset time should be a valid Date
 			expect(result.resetAt).toBeInstanceOf(Date)
-			// Reset time should be approximately now (within 2 seconds)
-			const timeDiff = Math.abs(result.resetAt.getTime() - Date.now())
-			expect(timeDiff).toBeLessThan(2000)
+			// With no prior entry, the reset is a full window away - not "now".
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(
+				RATE_LIMITS.authorization.windowMs - 2000,
+			)
+			expect(remainingMs).toBeLessThanOrEqual(
+				RATE_LIMITS.authorization.windowMs + 2000,
+			)
 		})
 
-		it('should provide correct reset time for token limit', async () => {
+		it('should reset a full window from now for token limit when there is no prior entry', async () => {
 			const ip = '192.168.1.200'
 
 			const result = await checkRateLimit(
@@ -469,14 +480,13 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 				RATE_LIMITS.token,
 			)
 
-			// Reset time should be a valid Date
 			expect(result.resetAt).toBeInstanceOf(Date)
-			// Reset time should be approximately now (within 2 seconds)
-			const timeDiff = Math.abs(result.resetAt.getTime() - Date.now())
-			expect(timeDiff).toBeLessThan(2000)
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(RATE_LIMITS.token.windowMs - 2000)
+			expect(remainingMs).toBeLessThanOrEqual(RATE_LIMITS.token.windowMs + 2000)
 		})
 
-		it('should provide correct reset time for tool invocation limit', async () => {
+		it('should reset a full window from now for tool invocation limit when there is no prior entry', async () => {
 			const token = generateToken()
 
 			const result = await checkRateLimit(
@@ -484,11 +494,30 @@ describe('MCP OAuth Rate Limiting Integration Tests', () => {
 				RATE_LIMITS.toolInvocation,
 			)
 
-			// Reset time should be a valid Date
 			expect(result.resetAt).toBeInstanceOf(Date)
-			// Reset time should be approximately now (within 2 seconds)
-			const timeDiff = Math.abs(result.resetAt.getTime() - Date.now())
-			expect(timeDiff).toBeLessThan(2000)
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(
+				RATE_LIMITS.toolInvocation.windowMs - 2000,
+			)
+			expect(remainingMs).toBeLessThanOrEqual(
+				RATE_LIMITS.toolInvocation.windowMs + 2000,
+			)
+		})
+
+		it('should not report an immediate reset while a 429 is still in effect', async () => {
+			const ip = '192.168.1.204'
+
+			for (let i = 0; i < RATE_LIMITS.token.maxRequests; i++) {
+				await checkRateLimit({ type: 'ip', value: ip }, RATE_LIMITS.token)
+			}
+			const result = await checkRateLimit(
+				{ type: 'ip', value: ip },
+				RATE_LIMITS.token,
+			)
+
+			expect(result.allowed).toBe(false)
+			const remainingMs = result.resetAt.getTime() - Date.now()
+			expect(remainingMs).toBeGreaterThan(RATE_LIMITS.token.windowMs - 5000)
 		})
 	})
 

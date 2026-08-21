@@ -36,6 +36,7 @@ const translateSchema = z.object({
 // in this app (see #app/utils/rate-limit.server.ts).
 const isDev = process.env.NODE_ENV !== 'production'
 const TRANSLATE_RATE_LIMIT = {
+	scope: 'api-translate',
 	maxRequests: isDev ? 1000 : 30,
 	windowMs: 60 * 1000, // 60 seconds
 }
