@@ -1,0 +1,140 @@
+[
+	{
+		"verdict": "confirmed",
+		"title": "Account Takeover via SSO Email Claim Trust",
+		"description": "The SSO authentication service provisions or links users based solely on the `email` claim returned by the Identity Provider (IdP). An attacker who can configure an OIDC provider for an organization they control (or using any permissive OIDC provider if they can bypass organization restrictions) can set their `email` claim to match a victim's email (e.g., an administrator). When logging in via SSO, `provisionUser` links the SSO session to the victim's existing account. The only defense is `allowedEmailDomains`, which is configurable per-organization. However, the system allows the attacker to log in to the victim's account.",
+		"root_cause": "provisionUser in apps/app/app/utils/sso/auth.server.ts does not verify that the SSO provider is authoritative for the user's email domain before linking to an existing account, allowing account takeover if the SSO provider is attacker-controlled.",
+		"intended_behavior": "The system should only link an SSO identity to an existing account if the SSO provider is trusted for that user's email domain or if the existing account explicitly links the SSO provider in their settings.",
+		"trace": [
+			{
+				"kind": "entrypoint",
+				"file": "apps/app/app/routes/_auth+/auth.sso.$organizationSlug.callback.ts",
+				"line": 154,
+				"scope": "loader",
+				"description": "Attacker initiates an SSO callback with a forged ID token containing the victim's email."
+			},
+			{
+				"kind": "propagation",
+				"file": "apps/app/app/utils/sso/auth.server.ts",
+				"line": 637,
+				"scope": "handleUserInfo",
+				"description": "The SSO service extracts the email claim from the token and passes it to provisionUser."
+			},
+			{
+				"kind": "sink",
+				"file": "apps/app/app/utils/sso/auth.server.ts",
+				"line": 230,
+				"scope": "provisionUser",
+				"description": "The system finds the existing user by email and links the new SSO identity, returning the victim's account to be logged in."
+			}
+		],
+		"conditions": [
+			{
+				"kind": "system_configuration",
+				"description": "The attacker must be able to configure a malicious SSO provider for an organization, or the victim's organization must use a permissive SSO provider that allows users to change their email."
+			}
+		],
+		"execution": {
+			"attacker_perspective": "An authenticated user who can create/configure an organization and set up its SSO, or any user targeting a permissive SSO configuration.",
+			"payloads": [
+				"A crafted OIDC ID token with `\"email\": \"admin@epic-startup.com\"`"
+			],
+			"instructions": [
+				"1. Create an organization and configure SSO pointing to an attacker-controlled OIDC server.",
+				"2. Initiate the SSO login flow for the created organization.",
+				"3. Have the attacker-controlled OIDC server return an ID token with the victim's email (e.g., admin@epic-startup.com).",
+				"4. The application links the SSO login to the victim's account and provisions a session for the attacker as the victim."
+			],
+			"expected_result": "The attacker receives a session cookie for the victim's account and gains full access."
+		},
+		"remediation": {
+			"strategy": "Require explicit confirmation or domain verification before linking a new SSO identity to an existing account.",
+			"code_changes": [
+				{
+					"file_name": "apps/app/app/utils/sso/auth.server.ts",
+					"fixed_code": "if (existingUser) { /* add logic to verify domain or require user consent to link */ }"
+				}
+			]
+		},
+		"severity": {
+			"likelihood": {
+				"score": "high",
+				"reason": "If users can create organizations and configure SSO, the attack is trivial to execute."
+			},
+			"impact": {
+				"score": "critical",
+				"reason": "Full account takeover of any user on the platform, including administrators."
+			},
+			"overall_severity": "critical"
+		},
+		"confidence": {
+			"score": "high",
+			"reason": "The code trace clearly shows that existing users are found by email and updated/returned without checking if the SSO provider is authoritative for that domain."
+		}
+	},
+	{
+		"verdict": "confirmed",
+		"title": "Orphaned Database Session Records on API Login",
+		"description": "When a user logs in via the API endpoint (`api+/auth.login.ts`), the underlying `login` function creates a full database `Session` record. However, the API endpoint then generates JWT tokens (access and refresh) and returns those, completely discarding the database `Session` ID. This creates orphaned session records in the database every time an API login occurs, which are never cleared by API logout (since API logout only revokes the refresh token).",
+		"root_cause": "action in apps/app/app/routes/api+/auth.login.ts does not delete or utilize the database session created by the login utility, allowing orphaned session records to accumulate.",
+		"intended_behavior": "The API login should either not create a traditional database session (only generating JWTs) or properly track and expire the database session tied to the JWTs.",
+		"trace": [
+			{
+				"kind": "entrypoint",
+				"file": "apps/app/app/routes/api+/auth.login.ts",
+				"line": 34,
+				"scope": "action",
+				"description": "User authenticates via the API login endpoint."
+			},
+			{
+				"kind": "propagation",
+				"file": "apps/app/app/utils/auth.server.ts",
+				"line": 158,
+				"scope": "login",
+				"description": "The login utility inserts a new Session record into the database."
+			},
+			{
+				"kind": "sink",
+				"file": "apps/app/app/routes/api+/auth.login.ts",
+				"line": 113,
+				"scope": "action",
+				"description": "The endpoint calls createAuthenticatedSessionResponse, which generates JWTs, but the endpoint discards the DB Session ID, leaving it orphaned."
+			}
+		],
+		"conditions": [],
+		"execution": {
+			"attacker_perspective": "Any user capable of making API requests.",
+			"payloads": ["Multiple POST requests to `/api/auth/login`"],
+			"instructions": [
+				"1. Write a script to repeatedly call the `/api/auth/login` endpoint with valid credentials.",
+				"2. Observe the `Session` table in the database.",
+				"3. Notice that each login creates a new session record that is never returned to the client and never cleaned up by standard API logouts."
+			],
+			"expected_result": "The database fills up with orphaned session records, potentially leading to resource exhaustion."
+		},
+		"remediation": {
+			"strategy": "Avoid creating a DB session for API logins, or clean it up if it is not going to be used.",
+			"code_changes": [
+				{
+					"file_name": "apps/app/app/routes/api+/auth.login.ts",
+					"fixed_code": "// Delete the created session since we use JWTs for API\nawait db.delete(Session).where(eq(Session.id, session.id))"
+				}
+			]
+		},
+		"severity": {
+			"likelihood": {
+				"score": "high",
+				"reason": "This happens on every normal API login."
+			},
+			"impact": {
+				"score": "low",
+				"reason": "It causes database bloat but sessions eventually expire and might be cleaned up by a cron job, limiting the direct security impact."
+			},
+			"overall_severity": "low"
+		},
+		"confidence": {
+			"score": "high",
+			"reason": "The code trace clearly shows the session being created and discarded."
+		}
+	}
+]
