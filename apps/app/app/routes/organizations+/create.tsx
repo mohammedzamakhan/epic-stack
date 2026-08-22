@@ -1223,6 +1223,7 @@ function CreateInviteFieldset({
 						<Button
 							variant="ghost"
 							size="icon"
+							aria-label={_(t`Remove invitation`)}
 							{...form.remove.getButtonProps({
 								name: fields.invites.name,
 								index,
