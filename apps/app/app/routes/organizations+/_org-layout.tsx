@@ -1,7 +1,13 @@
 import { requireUserId } from '@repo/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/ui/avatar'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@repo/ui/dropdown-menu'
 import { Logo } from '@repo/ui/logo'
-import { Outlet, useRouteLoaderData } from 'react-router'
+import { Link, Outlet, useRouteLoaderData } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
 
 export async function loader({ request }: { request: Request }) {
@@ -19,22 +25,35 @@ export default function OrganizationLayout() {
 					<a href="/">
 						<Logo />
 					</a>
-					<div className="flex items-center gap-2">
-						<Avatar className="h-8 w-8 rounded-full">
-							<AvatarImage
-								src={
-									rootData?.user?.image
-										? `/resources/images?objectKey=${rootData.user.image.objectKey}`
-										: undefined
-								}
-								alt={rootData?.user?.name || 'User avatar'}
+					<DropdownMenu>
+						<DropdownMenuTrigger className="flex items-center gap-2 outline-none">
+							<Avatar className="h-8 w-8 rounded-full">
+								<AvatarImage
+									src={
+										rootData?.user?.image
+											? `/resources/images?objectKey=${rootData.user.image.objectKey}`
+											: undefined
+									}
+									alt={rootData?.user?.name || 'User avatar'}
+								/>
+								<AvatarFallback>
+									{rootData?.user?.name?.charAt(0).toUpperCase()}
+								</AvatarFallback>
+							</Avatar>
+							<span>{rootData?.user?.name}</span>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								render={<Link to="/profile">Profile page</Link>}
 							/>
-							<AvatarFallback>
-								{rootData?.user?.name?.charAt(0).toUpperCase()}
-							</AvatarFallback>
-						</Avatar>
-						<span>{rootData?.user?.name}</span>
-					</div>
+							<DropdownMenuItem
+								render={<Link to="/security">Security page</Link>}
+							/>
+							<DropdownMenuItem
+								render={<Link to="/organizations">Organizations page</Link>}
+							/>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</header>
 			<div className="bg-muted/10 flex-1">
