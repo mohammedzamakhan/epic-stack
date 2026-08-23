@@ -1,32 +1,16 @@
 /**
  * MCP Streamable HTTP Transport Utilities
  *
- * Implements the MCP 2026-07-28 Streamable HTTP transport specification:
+ * Implements the MCP 2026-07-28 Stateless HTTP transport specification:
  * - Protocol version validation
  * - Origin validation (DNS rebinding protection)
- * - Session management with MCP-Session-Id
  * - Content negotiation (JSON vs SSE)
+ * - Header-based routing (Mcp-Method, Mcp-Name)
  */
 
 import crypto from 'node:crypto'
 
 export const MCP_PROTOCOL_VERSION = '2026-07-28'
-
-// Session store - in-memory for single instance deployments
-// For multi-instance, consider Redis or database storage
-interface MCPSession {
-	sessionId: string
-	userId: string
-	organizationId: string
-	authorizationId: string
-	createdAt: Date
-	lastSeenAt: Date
-}
-
-const sessions = new Map<string, MCPSession>()
-
-// Session expiration: 30 minutes of inactivity
-const SESSION_TTL_MS = 30 * 60 * 1000
 
 /**
  * Get allowed origins from environment or use defaults
@@ -57,7 +41,6 @@ export function validateProtocolVersion(request: Request): Response | null {
 	// But we only support 2026-07-28, so we'll be lenient during migration
 	if (!protocolVersion) {
 		// Allow requests without the header for backwards compatibility
-		// The spec says assume 2025-03-26, but we'll accept it
 		return null
 	}
 
@@ -156,127 +139,9 @@ export function negotiateResponseType(request: Request): 'json' | 'sse' {
 }
 
 /**
- * Get session ID from request header
- */
-export function getSessionId(request: Request): string | null {
-	return request.headers.get('MCP-Session-Id')
-}
-
-/**
- * Generate a new session ID
- */
-function generateSessionId(): string {
-	return crypto.randomUUID()
-}
-
-/**
- * Clean up expired sessions (call periodically)
- */
-function cleanupExpiredSessions(): void {
-	const now = Date.now()
-	for (const [sessionId, session] of sessions) {
-		if (now - session.lastSeenAt.getTime() > SESSION_TTL_MS) {
-			sessions.delete(sessionId)
-		}
-	}
-}
-
-/**
- * Create or retrieve a session for the initialize request
- */
-export function createSession(tokenData: {
-	user: { id: string }
-	organization: { id: string }
-	authorizationId: string
-}): { sessionId: string; isNew: boolean } {
-	// Clean up expired sessions periodically
-	cleanupExpiredSessions()
-
-	const sessionId = generateSessionId()
-	const now = new Date()
-
-	sessions.set(sessionId, {
-		sessionId,
-		userId: tokenData.user.id,
-		organizationId: tokenData.organization.id,
-		authorizationId: tokenData.authorizationId,
-		createdAt: now,
-		lastSeenAt: now,
-	})
-
-	return { sessionId, isNew: true }
-}
-
-/**
- * Get an existing session and validate it belongs to the token
- */
-export function getSession(
-	sessionId: string,
-	tokenData: {
-		user: { id: string }
-		organization: { id: string }
-	},
-): MCPSession | null {
-	// Clean up expired sessions periodically
-	cleanupExpiredSessions()
-
-	const session = sessions.get(sessionId)
-
-	if (!session) {
-		return null
-	}
-
-	// Validate session belongs to this token's user and org
-	if (
-		session.userId !== tokenData.user.id ||
-		session.organizationId !== tokenData.organization.id
-	) {
-		return null
-	}
-
-	// Check if session has expired
-	if (Date.now() - session.lastSeenAt.getTime() > SESSION_TTL_MS) {
-		sessions.delete(sessionId)
-		return null
-	}
-
-	// Update last seen time
-	session.lastSeenAt = new Date()
-
-	return session
-}
-
-/**
- * Delete a session (for explicit termination)
- */
-export function deleteSession(
-	sessionId: string,
-	tokenData: {
-		user: { id: string }
-		organization: { id: string }
-	},
-): boolean {
-	const session = sessions.get(sessionId)
-	if (!session) {
-		return false
-	}
-
-	// Validate session belongs to this token's user and org
-	if (
-		session.userId !== tokenData.user.id ||
-		session.organizationId !== tokenData.organization.id
-	) {
-		return false
-	}
-
-	return sessions.delete(sessionId)
-}
-
-/**
  * Create standard response headers for MCP responses
  */
 export function createMCPHeaders(options: {
-	sessionId?: string
 	origin?: string
 	contentType?: string
 }): Headers {
@@ -285,19 +150,14 @@ export function createMCPHeaders(options: {
 	headers.set('Content-Type', options.contentType || 'application/json')
 	headers.set('MCP-Protocol-Version', MCP_PROTOCOL_VERSION)
 
-	if (options.sessionId) {
-		headers.set('MCP-Session-Id', options.sessionId)
-	}
-
 	// CORS headers only if origin is provided (validated)
 	if (options.origin) {
 		headers.set('Access-Control-Allow-Origin', options.origin)
 		headers.set('Vary', 'Origin')
 		headers.set(
 			'Access-Control-Allow-Headers',
-			'Authorization, Content-Type, MCP-Protocol-Version, MCP-Session-Id, Accept',
+			'Authorization, Content-Type, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Accept',
 		)
-		headers.set('Access-Control-Expose-Headers', 'MCP-Session-Id')
 	}
 
 	return headers
@@ -314,12 +174,11 @@ export function createPreflightHeaders(origin?: string): Headers {
 		headers.set('Vary', 'Origin')
 	}
 
-	headers.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+	headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
 	headers.set(
 		'Access-Control-Allow-Headers',
-		'Authorization, Content-Type, MCP-Protocol-Version, MCP-Session-Id, Accept',
+		'Authorization, Content-Type, MCP-Protocol-Version, Mcp-Method, Mcp-Name, Accept',
 	)
-	headers.set('Access-Control-Expose-Headers', 'MCP-Session-Id')
 	headers.set('Access-Control-Max-Age', '86400') // 24 hours
 
 	return headers
