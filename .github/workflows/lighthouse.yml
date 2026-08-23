@@ -51,7 +51,7 @@ jobs:
           cd apps/web
           npm run build
         env:
-          PUBLIC_CMS_URL: ${{ secrets.PUBLIC_CMS_URL }}
+          PUBLIC_CMS_URL: ${{ vars.PUBLIC_CMS_URL || 'https://cms.epic-startup.me:2999' }}
 
       - name: 🚀 Deploy Preview to Cloudflare Pages
         id: deploy

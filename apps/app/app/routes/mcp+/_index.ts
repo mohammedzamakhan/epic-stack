@@ -1,6 +1,6 @@
 import { logMCPRateLimitExceeded, logMCPToolInvoked } from '@repo/audit'
 import { getDomainUrl } from '@repo/common'
-import { getClientIp } from '@repo/security'
+import { getMcpServerName } from '@repo/config/brand'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
 	validateAccessToken,
@@ -21,11 +21,7 @@ import {
 	validateOrigin,
 	validateProtocolVersion,
 } from '#app/utils/mcp/streamable-http.server.ts'
-import {
-	checkRateLimit,
-	createRateLimitResponse,
-	RATE_LIMITS,
-} from '#app/utils/rate-limit.server.ts'
+import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 
 /**
  * Build resource URL for OAuth discovery (RFC 9728)
@@ -170,7 +166,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					// Additional capabilities can be added here
 				},
 				serverInfo: {
-					name: 'epic-startup-mcp',
+					name: getMcpServerName(),
 					version: '2.0.0', // updated for 2026-07-28
 				},
 			}

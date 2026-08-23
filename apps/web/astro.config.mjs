@@ -2,13 +2,13 @@ import cloudflare from '@astrojs/cloudflare'
 import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
-import { brand } from '@repo/config/brand'
+import { getBrandDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
 
-const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+const domain = getBrandDomain()
 
 export default defineConfig({
 	output: 'server',

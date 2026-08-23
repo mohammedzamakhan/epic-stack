@@ -793,11 +793,9 @@ export class SSOAuthService {
 			throw new Error(`Organization not found: ${organizationId}`)
 		}
 
-		const baseUrl = process.env.BASE_URL || process.env.APP_URL
+		const baseUrl = process.env.BASE_URL
 		if (!baseUrl) {
-			throw new Error(
-				'BASE_URL environment variable is required (or set APP_URL)',
-			)
+			throw new Error('BASE_URL environment variable is required')
 		}
 		return `${baseUrl}/auth/sso/${organization.slug}/callback`
 	}

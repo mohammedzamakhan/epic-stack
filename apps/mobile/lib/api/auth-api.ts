@@ -535,5 +535,5 @@ export function getOAuthProviderConfig(
 /**
  * Default auth API instance for backward compatibility
  */
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001'
 export const authApi = createDefaultAuthApi(API_BASE_URL)

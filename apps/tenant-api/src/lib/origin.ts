@@ -1,6 +1,9 @@
 import { LRUCache } from 'lru-cache'
+
+import { getBrandDomain } from '@repo/config/brand'
 import { and, db, eq, or, Organization } from '@repo/database'
 import { TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
+
 import { orgMatchesNodeRegion } from './region.ts'
 
 const RESERVED_SUBDOMAINS = new Set([
@@ -124,7 +127,7 @@ async function lookupOrganizationFromApp(query: {
 }
 
 function brandDomain() {
-	return (process.env.ROOT_APP || 'epic-startup.me').toLowerCase()
+	return (process.env.ROOT_APP || getBrandDomain()).toLowerCase()
 }
 
 function parseOrigin(origin: string): URL | null {

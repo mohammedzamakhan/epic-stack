@@ -1,3 +1,4 @@
+import { brand, getBrandDomain } from '@repo/config/brand'
 import { ENV } from 'varlock/env'
 
 export type CustomHostnameStatus =
@@ -26,7 +27,7 @@ function getCloudflareConfig() {
 	const zoneId = ENV.CLOUDFLARE_ZONE_ID?.trim() || ''
 	const cnameTarget =
 		ENV.CLOUDFLARE_CUSTOM_HOSTNAME_CNAME_TARGET?.trim() ||
-		'sites.epic-startup.me'
+		`sites.${getBrandDomain()}`
 
 	return {
 		apiToken,
@@ -163,7 +164,7 @@ export async function createCustomHostname(
 				type: 'dv',
 			},
 			custom_metadata: {
-				source: 'epic-startup-sites',
+				source: `${brand.slug}-sites`,
 			},
 		}),
 	})

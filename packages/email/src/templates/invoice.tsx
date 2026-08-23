@@ -13,6 +13,7 @@ import {
 	Tailwind,
 	Text,
 } from '@react-email/components'
+import { brand, getCopyright } from '@repo/config/brand'
 
 export interface InvoiceEmailProps {
 	orderNumber: string
@@ -37,7 +38,7 @@ const InvoiceEmail = (props: InvoiceEmailProps) => {
 			<Tailwind>
 				<Head />
 				<Preview>
-					Invoice {props.orderNumber} - Your Epic Startup purchase confirmation
+					Invoice {props.orderNumber} - Your {brand.name} purchase confirmation
 				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
@@ -193,11 +194,11 @@ const InvoiceEmail = (props: InvoiceEmailProps) => {
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Thank you for choosing Epic Startup
+								Thank you for choosing {brand.name}
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
-									href="mailto:support@epicnotes.com"
+									href={`mailto:${brand.supportEmail}`}
 									className="text-[#2563eb] no-underline"
 								>
 									Contact Support
@@ -211,7 +212,7 @@ const InvoiceEmail = (props: InvoiceEmailProps) => {
 								</Link>
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Startup
+								{getCopyright()}
 							</Text>
 						</Section>
 					</Container>
@@ -224,11 +225,11 @@ const InvoiceEmail = (props: InvoiceEmailProps) => {
 InvoiceEmail.PreviewProps = {
 	orderNumber: 'INV-2025-001234',
 	invoiceDate: 'January 24, 2025',
-	customerName: 'Epic Startup Pro',
+	customerName: `${brand.name} Pro`,
 	customerEmail: 'alex@example.com',
 	items: [
 		{
-			name: 'Epic Startup Pro Plan',
+			name: `${brand.name} Pro Plan`,
 			description: 'Monthly subscription - Advanced note-taking platform',
 			quantity: 1,
 			amount: '29.00',
@@ -249,7 +250,7 @@ InvoiceEmail.PreviewProps = {
 	subtotal: '119.00',
 	tax: '9.52',
 	total: '128.52',
-	downloadUrl: 'https://epicnotes.com/invoice/download/INV-2025-001234',
+	downloadUrl: 'https://example.com/invoice/download/INV-2025-001234',
 }
 
 export default InvoiceEmail

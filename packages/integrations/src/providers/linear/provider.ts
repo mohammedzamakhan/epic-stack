@@ -2,6 +2,8 @@
  * Linear integration provider implementation
  */
 
+import { getIntegrationUserAgent } from '@repo/config/brand'
+
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -13,6 +15,8 @@ import {
 	type MessageData,
 	type OAuthCallbackParams,
 } from '../../types'
+
+const USER_AGENT = getIntegrationUserAgent()
 
 /**
  * Linear API response interfaces
@@ -453,7 +457,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				Accept: 'application/json',
-				'User-Agent': 'epic-startup-Integration/1.0',
+				'User-Agent': USER_AGENT,
 			},
 			body: requestBody,
 		})
@@ -511,7 +515,7 @@ export class LinearProvider extends BaseIntegrationProvider {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				'Content-Type': 'application/json',
-				'User-Agent': 'epic-startup-Integration/1.0',
+				'User-Agent': USER_AGENT,
 			},
 			body: JSON.stringify({
 				query: query.trim(),

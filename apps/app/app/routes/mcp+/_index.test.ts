@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker'
+
+import { getMcpServerName } from '@repo/config/brand'
 import {
 	MCPAccessToken,
 	MCPAuthorization,
@@ -224,8 +226,13 @@ describe('MCP Stateless Endpoint', () => {
 			expect(response.status).toBe(200)
 
 			const data = (await response.json()) as JsonRpcResponse
-			expect(data.result.protocolVersion).toBe(MCP_PROTOCOL_VERSION)
-			expect(data.result.serverInfo.name).toBe('epic-startup-mcp')
+			expect(data.jsonrpc).toBe('2.0')
+			expect(data.id).toBe(1)
+			expect(data.result).toBeDefined()
+			expect(data.result!.protocolVersion).toBe(MCP_PROTOCOL_VERSION)
+			expect(data.result!.capabilities).toBeDefined()
+			expect(data.result!.serverInfo).toBeDefined()
+			expect(data.result!.serverInfo.name).toBe(getMcpServerName())
 		})
 	})
 

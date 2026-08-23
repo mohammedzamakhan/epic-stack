@@ -1,11 +1,13 @@
 import { createCookie } from 'react-router'
 
+import { sharedCookieDomain } from './cookie-domain.server.ts'
+
 export const cookieConsentCookie = createCookie('cconsent', {
 	maxAge: 31_536_000, // one year
 	sameSite: 'lax',
 	path: '/',
 	httpOnly: true,
-	domain: process.env.ROOT_APP ? `.${process.env.ROOT_APP}` : undefined,
+	domain: sharedCookieDomain(),
 })
 
 export async function getCookieConsentState(request: Request) {

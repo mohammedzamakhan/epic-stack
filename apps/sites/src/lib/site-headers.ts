@@ -1,0 +1,64 @@
+const CLOUDFLARE_INSIGHTS_SCRIPT = 'https://static.cloudflareinsights.com'
+const CLOUDFLARE_INSIGHTS_CONNECT = 'https://cloudflareinsights.com'
+
+export function sitesScriptSrc(isDev: boolean) {
+	const evalSrc = isDev ? " 'unsafe-eval'" : ''
+	return `script-src 'self' 'unsafe-inline'${evalSrc} ${CLOUDFLARE_INSIGHTS_SCRIPT}`
+}
+
+export function sitesConnectSrc(origins: string[]) {
+	return ['connect-src', "'self'", ...origins, CLOUDFLARE_INSIGHTS_CONNECT]
+		.filter(Boolean)
+		.join(' ')
+}
+
+/** Prefer Vite `MODE` — a schema `DEV` flag used to shadow `import.meta.env.DEV`. */
+export function isSitesProduction() {
+	return import.meta.env.MODE === 'production'
+}
+
+export function shouldCachePublishedHtml(
+	request: Request,
+	url: URL,
+	isProduction = isSitesProduction(),
+) {
+	if (!isProduction) return false
+	if (request.method !== 'GET') return false
+	if (url.searchParams.has('preview')) return false
+	if (url.pathname.startsWith('/api/')) return false
+	return true
+}
+
+const APP_ROUTE_SLUGS = new Set(['login', 'verify', 'complete-name', 'profile'])
+
+export function isSitesAppRoute(pathname: string) {
+	const slug = pathname.replace(/^\/+|\/+$/g, '')
+	return APP_ROUTE_SLUGS.has(slug)
+}
+
+export function publishedHtmlCacheUrl(requestUrl: URL, host: string | null) {
+	const cacheUrl = new URL(requestUrl)
+	if (host) {
+		const [hostname, port] = host.split(':')
+		if (hostname) cacheUrl.hostname = hostname
+		cacheUrl.port = port ?? ''
+	}
+	return cacheUrl
+}
+
+export function edgeCache(): Cache | null {
+	const cachesApi = (globalThis as { caches?: { default?: Cache } }).caches
+	return cachesApi?.default ?? null
+}
+
+/**
+ * Cache API / cross-realm bodies fail Astro's `instanceof Response` check
+ * (`MiddlewareNotAResponse`). Rebuild in this isolate before returning.
+ */
+export function asAstroResponse(response: Response): Response {
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers: new Headers(response.headers),
+	})
+}

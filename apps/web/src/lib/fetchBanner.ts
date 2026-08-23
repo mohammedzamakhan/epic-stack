@@ -1,7 +1,7 @@
 import { ENV } from 'varlock/env'
 import { type BannerData } from '../types/banner'
 
-const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3000'
+const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3006'
 
 export async function fetchBannerData(): Promise<BannerData | null> {
 	try {

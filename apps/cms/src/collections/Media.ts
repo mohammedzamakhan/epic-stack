@@ -39,8 +39,11 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // In development: files stored in public/media (served by Next.js)
-    // In production: files stored in S3 (configured via storage adapter plugin)
+    // Local `next dev`: files in public/media. Vercel / Cloudflare: R2 via the
+    // storage plugin (S3 API on Vercel, Workers binding on Cloudflare).
+    disableLocalStorage: Boolean(
+      process.env.VERCEL || process.env.R2_ACCESS_KEY_ID || process.env.CMS_USE_R2 === 'true',
+    ),
     staticDir: path.resolve(_dirname, '../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,

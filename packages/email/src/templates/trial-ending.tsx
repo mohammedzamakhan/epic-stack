@@ -11,6 +11,7 @@ import {
 	Preview,
 	Tailwind,
 } from '@react-email/components'
+import { brand, getBrandTeam, getCopyright } from '@repo/config/brand'
 
 export interface TrialEndingEmailProps {
 	portalUrl: string
@@ -28,7 +29,7 @@ export default function TrialEndingEmail({
 			<Tailwind>
 				<Head />
 				<Preview>
-					Your Epic Startup trial ends in {daysRemaining.toString()}{' '}
+					Your {brand.name} trial ends in {daysRemaining.toString()}{' '}
 					{daysRemaining === 1 ? 'day' : 'days'}
 				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
@@ -40,14 +41,14 @@ export default function TrialEndingEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								Your Epic Startup trial is ending in {daysRemaining}{' '}
+								Your {brand.name} trial is ending in {daysRemaining}{' '}
 								{daysRemaining === 1 ? 'day' : 'days'}. We hope you've enjoyed
 								organizing your thoughts and collaborating with your team using
 								our powerful note-taking platform.
 							</Text>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								To continue using Epic Startup without interruption and keep all
+								To continue using {brand.name} without interruption and keep all
 								your valuable notes and collaborations, please upgrade your
 								account:
 							</Text>
@@ -73,25 +74,25 @@ export default function TrialEndingEmail({
 
 							<Text className="mb-[16px] text-[16px] leading-[24px] text-[#020304]">
 								Questions about pricing or need help choosing the right plan?
-								Our support team is here to help you make the most of Epic
-								Notes.
+								Our support team is here to help you make the most of{' '}
+								{brand.name}.
 							</Text>
 
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
-								Thank you for trying Epic Startup!
+								Thank you for trying {brand.name}!
 								<br />
-								The Epic Startup Team
+								{getBrandTeam()}
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Startup
+								Organize your thoughts with {brand.name}
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
-									href="mailto:support@epicnotes.com"
+									href={`mailto:${brand.supportEmail}`}
 									className="text-[#2563eb] no-underline"
 								>
 									Contact Support
@@ -100,7 +101,7 @@ export default function TrialEndingEmail({
 								If the button doesn't work, copy this link: {portalUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Startup
+								{getCopyright()}
 							</Text>
 						</Section>
 					</Container>

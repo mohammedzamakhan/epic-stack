@@ -10,6 +10,7 @@ import {
 	Preview,
 	Tailwind,
 } from '@react-email/components'
+import { brand, getBrandTeam, getCopyright } from '@repo/config/brand'
 
 export interface EmailChangeNoticeEmailProps {
 	userId: string
@@ -24,7 +25,7 @@ export default function EmailChangeNoticeEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Your Epic Startup email has been changed</Preview>
+				<Preview>Your {brand.name} email has been changed</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}
@@ -34,7 +35,7 @@ export default function EmailChangeNoticeEmail({
 							</Heading>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We're writing to let you know that your Epic Startup email
+								We're writing to let you know that your {brand.name} email
 								address has been successfully changed. This is an important
 								security notification.
 							</Text>
@@ -58,32 +59,32 @@ export default function EmailChangeNoticeEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Stay secure!
 								<br />
-								The Epic Startup Team
+								{getBrandTeam()}
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Startup
+								Organize your thoughts with {brand.name}
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
-									href="mailto:support@epicnotes.com"
+									href={`mailto:${brand.supportEmail}`}
 									className="text-[#2563eb] no-underline"
 								>
 									Contact Support
 								</Link>
 								{' | '}
 								<Link
-									href="https://epicnotes.com/security"
+									href={`${brand.url}/security`}
 									className="text-[#2563eb] no-underline"
 								>
 									Security Center
 								</Link>
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Startup
+								{getCopyright()}
 							</Text>
 						</Section>
 					</Container>

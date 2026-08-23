@@ -1,10 +1,10 @@
 ---
-import '../styles/tailwind.css'
-import '../styles/site-fonts.css'
 import { buildCustomSiteFontFaceCss } from '@repo/common/site-fonts'
 import { brand } from '@repo/config/brand'
 import { resolveMediaUrl } from '~/lib/media'
 import { type PublicSiteTheme } from '~/lib/org'
+import '../styles/tailwind.css'
+import siteFontsStylesheet from '../styles/site-fonts.css?url'
 
 interface Props {
 	title?: string
@@ -87,6 +87,15 @@ const htmlClass =
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
+		<link
+			rel="stylesheet"
+			href={siteFontsStylesheet}
+			media="print"
+			onload="this.setAttribute('media','all')"
+		/>
+		<noscript>
+			<link rel="stylesheet" href={siteFontsStylesheet} />
+		</noscript>
 		<title>{title}</title>
 		{description ? <meta name="description" content={description} /> : null}
 		{noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
@@ -103,6 +112,7 @@ const htmlClass =
 		<meta name="twitter:title" content={title} />
 		{description ? <meta name="twitter:description" content={description} /> : null}
 		{imageUrl ? <meta name="twitter:image" content={imageUrl} /> : null}
+		<link rel="icon" href="/favicon.ico" sizes="any" />
 		{
 			siteIcon ? (
 				<>

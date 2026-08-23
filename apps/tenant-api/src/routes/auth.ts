@@ -2,10 +2,12 @@ import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { SignJWT, jwtVerify } from 'jose'
-import { sendSms } from '@repo/sms'
-import { customers, getTenantDb, TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
 import { ENV } from 'varlock/env'
 import { z } from 'zod'
+
+import { brand } from '@repo/config/brand'
+import { sendSms } from '@repo/sms'
+import { customers, getTenantDb, TENANT_ORG_ID_PATTERN } from '@repo/tenant-db'
 import {
 	findActiveOrganizationById,
 	resolveOrganizationForBrowserAuth,
@@ -137,7 +139,7 @@ async function issueAccessToken(payload: {
 		type: 'access',
 	})
 		.setProtectedHeader({ alg: 'HS256' })
-		.setIssuer('epic-startup')
+		.setIssuer(brand.slug)
 		.setAudience('tenant-api')
 		.setExpirationTime(ACCESS_TOKEN_EXPIRY)
 		.sign(secret)
@@ -188,7 +190,7 @@ async function authenticateCustomer(c: Context) {
 	try {
 		const secret = new TextEncoder().encode(JWT_SECRET)
 		const { payload } = await jwtVerify(token, secret, {
-			issuer: 'epic-startup',
+			issuer: brand.slug,
 			audience: 'tenant-api',
 		})
 		decoded = payload as typeof decoded

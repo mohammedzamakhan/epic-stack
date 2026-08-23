@@ -10,6 +10,7 @@ import {
 	Preview,
 	Tailwind,
 } from '@react-email/components'
+import { brand, getBrandTeam, getCopyright } from '@repo/config/brand'
 
 export interface OrganizationInviteEmailProps {
 	inviteUrl: string
@@ -29,7 +30,7 @@ export default function OrganizationInviteEmail({
 			<Tailwind>
 				<Head />
 				<Preview>
-					You're invited to join {organizationName} on Epic Startup
+					You're invited to join {organizationName} on {brand.name}
 				</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
@@ -41,7 +42,7 @@ export default function OrganizationInviteEmail({
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
 								Great news! {inviterName} has invited you to collaborate with{' '}
-								{organizationName} on Epic Startup. You'll be able to share
+								{organizationName} on {brand.name}. You'll be able to share
 								notes, collaborate on projects, and stay organized together.
 							</Text>
 
@@ -76,20 +77,20 @@ export default function OrganizationInviteEmail({
 							<Text className="text-[16px] leading-[24px] text-[#020304]">
 								Welcome to the team!
 								<br />
-								The Epic Startup Team
+								{getBrandTeam()}
 							</Text>
 						</Section>
 
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Startup
+								Organize your thoughts with {brand.name}
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								If the button doesn't work, copy this link: {inviteUrl}
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Startup
+								{getCopyright()}
 							</Text>
 						</Section>
 					</Container>

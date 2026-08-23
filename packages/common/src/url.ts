@@ -1,3 +1,13 @@
+import { getBrandDomain } from '@repo/config/brand'
+
+function defaultDevUrl(targetSubdomain: string, path = '') {
+	return `http://${targetSubdomain}.${getBrandDomain()}:2999${path}`
+}
+
+function defaultOrgSiteUrl(orgSlug: string) {
+	return `https://${orgSlug}.${getBrandDomain()}:2999`
+}
+
 /**
  * Generate a cross-app URL by replacing the subdomain of the current host.
  * Useful for linking between apps in the same domain (e.g., app.example.com -> docs.example.com)
@@ -10,9 +20,9 @@
  * @returns The generated URL
  *
  * @example
- * // On app.epic-startup.me:2999
+ * // On app.example.com:2999
  * getCrossAppUrl('docs', '/integrations/slack')
- * // Returns: 'http://docs.epic-startup.me:2999/integrations/slack'
+ * // Returns: 'http://docs.example.com:2999/integrations/slack'
  *
  * @example
  * // On app.xyz.com
@@ -25,9 +35,7 @@ export function getCrossAppUrl(
 	fallbackUrl?: string,
 ): string {
 	if (typeof window === 'undefined') {
-		return (
-			fallbackUrl ?? `http://${targetSubdomain}.epic-startup.me:2999${path}`
-		)
+		return fallbackUrl ?? defaultDevUrl(targetSubdomain, path)
 	}
 
 	const currentHost = window.location.host
@@ -45,21 +53,19 @@ export function getCrossAppUrl(
 		return `${protocol}//${targetSubdomain}.${baseDomain}${port}${path}`
 	}
 
-	// Fallback
-	return fallbackUrl ?? `http://${targetSubdomain}.epic-startup.me:2999${path}`
+	return fallbackUrl ?? defaultDevUrl(targetSubdomain, path)
 }
 
 /**
  * Generate the public Sites URL for an organization slug.
- * Uses the org slug as a subdomain of the brand base domain
- * (e.g. acme.epic-startup.me).
+ * Uses the org slug as a subdomain of the brand base domain.
  *
  * @param orgSlug - Organization slug (subdomain label)
  * @param fallbackUrl - Optional fallback when window is unavailable
  */
 export function getOrgSiteUrl(orgSlug: string, fallbackUrl?: string): string {
 	if (typeof window === 'undefined') {
-		return fallbackUrl ?? `https://${orgSlug}.epic-startup.me:2999`
+		return fallbackUrl ?? defaultOrgSiteUrl(orgSlug)
 	}
 
 	const currentHost = window.location.host
@@ -74,5 +80,5 @@ export function getOrgSiteUrl(orgSlug: string, fallbackUrl?: string): string {
 		return `${protocol}//${orgSlug}.${baseDomain}${port}`
 	}
 
-	return fallbackUrl ?? `https://${orgSlug}.epic-startup.me:2999`
+	return fallbackUrl ?? defaultOrgSiteUrl(orgSlug)
 }

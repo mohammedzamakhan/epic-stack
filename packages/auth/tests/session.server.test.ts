@@ -212,12 +212,11 @@ describe('Session Management', () => {
 			expect(setCookieHeader).toContain('Path=/')
 		})
 
-		it('should set domain when ROOT_APP is defined in production', async () => {
-			const originalRootApp = process.env.ROOT_APP
+		it('should set domain from BASE_URL app.{apex} in production', async () => {
+			const originalBaseUrl = process.env.BASE_URL
 			const originalNodeEnv = process.env.NODE_ENV
-			process.env.ROOT_APP = 'example.com'
+			process.env.BASE_URL = 'https://app.example.com'
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = 'production'
-			// Reset modules to reload session storage with new env
 			vi.resetModules()
 			const { authSessionStorage: testAuthSessionStorage } =
 				await import('../src/session.server')
@@ -230,20 +229,19 @@ describe('Session Management', () => {
 
 			expect(setCookieHeader).toContain('Domain=.example.com')
 
-			// Restore original env
-			if (originalRootApp) {
-				process.env.ROOT_APP = originalRootApp
+			if (originalBaseUrl) {
+				process.env.BASE_URL = originalBaseUrl
 			} else {
-				delete process.env.ROOT_APP
+				delete process.env.BASE_URL
 			}
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = originalNodeEnv
 			vi.resetModules()
 		})
 
-		it('should set .localhost domain when ROOT_APP is localhost in non-production', async () => {
-			const originalRootApp = process.env.ROOT_APP
+		it('should set .localhost domain when BASE_URL is app.localhost', async () => {
+			const originalBaseUrl = process.env.BASE_URL
 			const originalNodeEnv = process.env.NODE_ENV
-			process.env.ROOT_APP = 'localhost'
+			process.env.BASE_URL = 'http://app.localhost:3001'
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = 'test'
 			vi.resetModules()
 			const { authSessionStorage: testAuthSessionStorage } =
@@ -257,19 +255,19 @@ describe('Session Management', () => {
 
 			expect(setCookieHeader).toContain('Domain=.localhost')
 
-			if (originalRootApp) {
-				process.env.ROOT_APP = originalRootApp
+			if (originalBaseUrl) {
+				process.env.BASE_URL = originalBaseUrl
 			} else {
-				delete process.env.ROOT_APP
+				delete process.env.BASE_URL
 			}
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = originalNodeEnv
 			vi.resetModules()
 		})
 
-		it('should omit domain when ROOT_APP is a non-localhost host in non-production', async () => {
-			const originalRootApp = process.env.ROOT_APP
+		it('should omit domain when BASE_URL is localhost', async () => {
+			const originalBaseUrl = process.env.BASE_URL
 			const originalNodeEnv = process.env.NODE_ENV
-			process.env.ROOT_APP = 'example.com'
+			process.env.BASE_URL = 'http://localhost:3001'
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = 'test'
 			vi.resetModules()
 			const { authSessionStorage: testAuthSessionStorage } =
@@ -283,10 +281,10 @@ describe('Session Management', () => {
 
 			expect(setCookieHeader).not.toContain('Domain=')
 
-			if (originalRootApp) {
-				process.env.ROOT_APP = originalRootApp
+			if (originalBaseUrl) {
+				process.env.BASE_URL = originalBaseUrl
 			} else {
-				delete process.env.ROOT_APP
+				delete process.env.BASE_URL
 			}
 			;(process.env as { NODE_ENV?: string }).NODE_ENV = originalNodeEnv
 			vi.resetModules()

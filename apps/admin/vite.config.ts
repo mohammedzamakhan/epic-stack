@@ -1,6 +1,6 @@
 import { lingui } from '@lingui/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
-import { brand } from '@repo/config/brand'
+import { getBrandDomain } from '@repo/config/brand'
 import {
 	type SentryReactRouterBuildOptions,
 	sentryReactRouter,
@@ -11,7 +11,7 @@ import { defineConfig, type Plugin } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import macrosPlugin from 'vite-plugin-babel-macros'
 
-const domain = 'admin.' + brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+const domain = `admin.${getBrandDomain()}`
 
 const MODE = process.env.NODE_ENV
 

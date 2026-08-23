@@ -11,10 +11,19 @@ breeze.
 ### Usage
 
 ```typescript
-import { brand, getPageTitle, getCopyright } from '@repo/config/brand'
+import {
+	brand,
+	getPageTitle,
+	getCopyright,
+	getBrandDomain,
+	getBrandTeam,
+} from '@repo/config/brand'
 
 // Use brand name
 console.log(brand.name) // "Epic Startup"
+console.log(brand.slug) // "epic-startup"
+console.log(brand.domain) // "epic-startup.me"
+console.log(getBrandDomain()) // "epic-startup.me"
 
 // Generate page titles
 const title = getPageTitle('Login') // "Login | Epic Startup"
@@ -31,7 +40,7 @@ const copyright = getCopyright() // "© 2025 Epic Startup. All rights reserved."
 
 ### What's Centralized
 
-- **Core Identity**: Brand name, tagline, description
+- **Core Identity**: Brand name, slug, app domain, tagline, description
 - **URLs**: Main URL, support email
 - **Product Descriptions**: App-specific names and descriptions
 - **Email Subjects**: Standardized email subject lines
@@ -42,9 +51,12 @@ const copyright = getCopyright() // "© 2025 Epic Startup. All rights reserved."
 
 To rebrand your entire application:
 
-1. Edit `packages/config/brand.ts`
-2. Change the values (e.g., `name: 'Your New Brand'`)
-3. All apps will automatically use the new values
+1. Run `npm run setup:brand` (asks for name, short name, **app domain** such as
+   `.me` / `.io` / `.dev`, then website URL and support email)
+2. Or edit `packages/config/brand.ts` (`name`, `slug`, `domain`, …)
+3. Rebuild with `npm run build --workspace=@repo/config` if you edited
+   `brand.ts` by hand
+4. All apps will use the new values (hosts/SSL/dev-proxy read `brand.domain`)
 
 ## Favicons & Static Assets
 

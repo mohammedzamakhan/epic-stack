@@ -3,10 +3,21 @@
  * Change these values once to update across the entire monorepo
  */
 
+export function toBrandSlug(name: string) {
+	const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+	let start = 0
+	let end = slug.length
+	while (start < end && slug.charCodeAt(start) === 45) start += 1
+	while (end > start && slug.charCodeAt(end - 1) === 45) end -= 1
+	return slug.slice(start, end) || 'app'
+}
+
 export const brand = {
 	// Core brand identity
 	name: 'Epic Startup',
 	shortName: 'Epic Startup',
+	slug: 'epic-startup',
+	domain: 'epic-startup.me',
 	tagline: 'Build your next startup even faster',
 	description:
 		'Epic Startup is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.',
@@ -59,6 +70,7 @@ export const brand = {
 		passwordReset: 'Epic Startup Password Reset',
 		welcome: 'Welcome to Epic Startup!',
 		emailChange: 'Epic Startup Email Change Verification',
+		newDeviceSignin: 'New Sign-In Detected - Epic Startup',
 	},
 
 	// AI Assistant configuration
@@ -67,6 +79,14 @@ export const brand = {
 			'You are an intelligent AI assistant for Epic Startup, a comprehensive note-taking and organization management platform. You specialize in helping users maximize their productivity and collaboration through smart note management.',
 	},
 } as const
+
+export const getBrandDomain = () => brand.domain
+
+export const getBrandTeam = () => `The ${brand.name} Team`
+
+export const getIntegrationUserAgent = () => `${brand.slug}-Integration/1.0`
+
+export const getMcpServerName = () => `${brand.slug}-mcp`
 
 // Helper to generate page titles
 export const getPageTitle = (page?: string) => {

@@ -1,31 +1,41 @@
 import { resolveSiteLocaleRequest } from '@repo/common/site-locales'
-import { brand } from '@repo/config/brand'
 import { defineMiddleware } from 'astro:middleware'
 import { ENV } from 'varlock/env'
 import { createSiteI18n } from '~/lib/i18n'
 import {
-	fetchPublishedOrganization,
-	fetchPublishedOrganizationByHost,
+	fetchPublishedOrganizationForHost,
+	fetchPublishedSitePage,
 } from '~/lib/org'
+import {
+	type SiteHostEnv,
+	getSiteHostSuffixes,
+	resolveHost,
+} from '~/lib/resolve-host'
+import {
+	asAstroResponse,
+	edgeCache,
+	isSitesAppRoute,
+	isSitesProduction,
+	publishedHtmlCacheUrl,
+	shouldCachePublishedHtml,
+	sitesConnectSrc,
+	sitesScriptSrc,
+} from '~/lib/site-headers'
 
-const RESERVED_SUBDOMAINS = new Set([
-	'app',
-	'admin',
-	'cms',
-	'docs',
-	'studio',
-	'api',
-	'www',
-	'mail',
-	'ftp',
-	'sites',
-	'status',
-	'cdn',
-	'static',
-	'assets',
-])
+export {
+	resolveHost,
+	resolveOrgSlugFromHost,
+	type HostResolution,
+} from '~/lib/resolve-host'
 
-const brandDomain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+function siteHostEnv(): SiteHostEnv {
+	const env = ENV as SiteHostEnv
+	return {
+		ROOT_APP: process.env.ROOT_APP || env.ROOT_APP,
+		PUBLIC_SITE_HOST_SUFFIXES:
+			process.env.PUBLIC_SITE_HOST_SUFFIXES || env.PUBLIC_SITE_HOST_SUFFIXES,
+	}
+}
 
 const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
 	/\/$/,
@@ -41,69 +51,36 @@ const tenantApiUrlKsa = (
 ).replace(/\/$/, '')
 const imgSrc = `img-src 'self' data: ${appUrl}`
 const fontSrc = `font-src 'self' data: ${appUrl}`
-const connectSrc = ["connect-src 'self'", appUrl, tenantApiUrl, tenantApiUrlKsa]
-	.filter(Boolean)
-	.join(' ')
+const connectSrc = sitesConnectSrc([appUrl, tenantApiUrl, tenantApiUrlKsa])
 
-const isDev = import.meta.env.DEV
+const isProduction = isSitesProduction()
 
-const securityHeaders = {
-	'X-Content-Type-Options': 'nosniff',
-	'Content-Security-Policy': [
-		"default-src 'self'",
-		connectSrc,
-		...(isDev ? ["script-src 'self' 'unsafe-inline' 'unsafe-eval'"] : []),
-		"style-src 'self' 'unsafe-inline'",
-		fontSrc,
-		imgSrc,
-		"object-src 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-		`frame-ancestors 'self' *.${brandDomain}:* *.${brandDomain} localhost:*`,
-	].join('; '),
-}
+function securityHeadersFor(env: SiteHostEnv) {
+	const frameAncestors = getSiteHostSuffixes(env)
+		.flatMap((domain) => [`*.${domain}:*`, `*.${domain}`])
+		.join(' ')
 
-export type HostResolution =
-	| { kind: 'slug'; orgSlug: string }
-	| { kind: 'custom'; host: string }
-	| { kind: 'none' }
-
-/**
- * Resolve Host / X-Forwarded-Host to either an org slug subdomain or a custom domain.
- */
-export function resolveHost(hostHeader: string | null): HostResolution {
-	if (!hostHeader) return { kind: 'none' }
-
-	const hostWithoutPort = hostHeader.split(':')[0]?.toLowerCase() ?? ''
-	if (!hostWithoutPort) return { kind: 'none' }
-
-	const suffix = `.${brandDomain}`
-
-	if (hostWithoutPort === brandDomain) {
-		return { kind: 'none' }
+	return {
+		'X-Content-Type-Options': 'nosniff',
+		'Content-Security-Policy': [
+			"default-src 'self'",
+			connectSrc,
+			sitesScriptSrc(!isProduction),
+			"style-src 'self' 'unsafe-inline'",
+			fontSrc,
+			imgSrc,
+			"object-src 'none'",
+			"base-uri 'self'",
+			"form-action 'self'",
+			`frame-ancestors 'self' ${frameAncestors} localhost:*`,
+		].join('; '),
+		...(isProduction
+			? {
+					'Strict-Transport-Security':
+						'max-age=63072000; includeSubDomains; preload',
+				}
+			: {}),
 	}
-
-	if (hostWithoutPort.endsWith(suffix)) {
-		const subdomain = hostWithoutPort.slice(0, -suffix.length)
-		if (
-			!subdomain ||
-			subdomain.includes('.') ||
-			RESERVED_SUBDOMAINS.has(subdomain)
-		) {
-			return { kind: 'none' }
-		}
-		return { kind: 'slug', orgSlug: subdomain }
-	}
-
-	return { kind: 'custom', host: hostWithoutPort }
-}
-
-/** @deprecated Prefer resolveHost */
-export function resolveOrgSlugFromHost(
-	hostHeader: string | null,
-): string | null {
-	const resolved = resolveHost(hostHeader)
-	return resolved.kind === 'slug' ? resolved.orgSlug : null
 }
 
 function isStaticPath(pathname: string) {
@@ -117,47 +94,81 @@ function isStaticPath(pathname: string) {
 	)
 }
 
-function withSecurityHeaders(response: Response, pathname: string) {
+function withSecurityHeaders(
+	response: Response,
+	pathname: string,
+	env: SiteHostEnv,
+	cacheControl?: string,
+) {
 	const newHeaders = new Headers(response.headers)
 
-	for (const [key, value] of Object.entries(securityHeaders)) {
+	for (const [key, value] of Object.entries(securityHeadersFor(env))) {
 		newHeaders.set(key, value)
 	}
 
 	if (pathname.startsWith('/api/')) {
 		newHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+	} else if (cacheControl) {
+		newHeaders.set('Cache-Control', cacheControl)
 	}
 
-	return new Response(response.body, {
-		status: response.status,
-		statusText: response.statusText,
-		headers: newHeaders,
-	})
+	return asAstroResponse(
+		new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders,
+		}),
+	)
+}
+
+function waitUntil(context: { locals: App.Locals }, task: Promise<unknown>) {
+	const runtime = (
+		context.locals as App.Locals & {
+			runtime?: { ctx?: { waitUntil?: (promise: Promise<unknown>) => void } }
+		}
+	).runtime
+	if (runtime?.ctx?.waitUntil) {
+		runtime.ctx.waitUntil(task)
+		return
+	}
+	void task
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
+	const hostEnv = siteHostEnv()
 	const forwardedHost = context.request.headers.get('x-forwarded-host')
 	const host = forwardedHost || context.request.headers.get('host')
-	const resolved = resolveHost(host)
+	const resolved = resolveHost(host, hostEnv)
 
 	context.locals.orgSlug = resolved.kind === 'slug' ? resolved.orgSlug : null
 	context.locals.customHost = resolved.kind === 'custom' ? resolved.host : null
 	context.locals.requestedLocale ??= 'en'
 	context.locals.defaultLocale ??= 'en'
 	context.locals.i18n ??= createSiteI18n(context.locals.requestedLocale)
+	context.locals.organization = null
 
 	const url = new URL(context.request.url)
 
 	if (isStaticPath(url.pathname)) {
-		return withSecurityHeaders(await next(), url.pathname)
+		return withSecurityHeaders(await next(), url.pathname, hostEnv)
 	}
 
-	const organization =
-		resolved.kind === 'slug'
-			? await fetchPublishedOrganization(resolved.orgSlug)
-			: resolved.kind === 'custom'
-				? await fetchPublishedOrganizationByHost(resolved.host)
-				: null
+	const cache = edgeCache()
+	const cacheHtml = shouldCachePublishedHtml(context.request, url, isProduction)
+	const cacheKey = new Request(publishedHtmlCacheUrl(url, host).toString(), {
+		method: 'GET',
+	})
+	if (cache && cacheHtml) {
+		const cached = await cache.match(cacheKey)
+		if (cached?.status === 200) {
+			return asAstroResponse(cached)
+		}
+	}
+
+	let organization = await fetchPublishedOrganizationForHost(
+		context.locals.orgSlug,
+		context.locals.customHost,
+	)
 
 	const enabledLocales = organization?.locales ?? ['en']
 	const defaultLocale = organization?.defaultLocale ?? 'en'
@@ -174,6 +185,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		return withSecurityHeaders(
 			new Response('Not Found', { status: 404, statusText: 'Not Found' }),
 			url.pathname,
+			hostEnv,
 		)
 	}
 
@@ -184,11 +196,35 @@ export const onRequest = defineMiddleware(async (context, next) => {
 				headers: { Location: localeResult.location },
 			}),
 			url.pathname,
+			hostEnv,
 		)
 	}
 
 	context.locals.requestedLocale = localeResult.locale
 	context.locals.i18n = createSiteI18n(localeResult.locale)
+
+	if (organization && localeResult.locale !== defaultLocale) {
+		organization = await fetchPublishedOrganizationForHost(
+			context.locals.orgSlug,
+			context.locals.customHost,
+			localeResult.locale,
+		)
+	}
+	context.locals.organization = organization
+
+	const routedPathname =
+		localeResult.kind === 'rewrite' ? localeResult.pathname : url.pathname
+	if (organization && !isSitesAppRoute(routedPathname)) {
+		const pageSlug = routedPathname.replace(/^\/+|\/+$/g, '')
+		context.locals.publishedPagePromise = fetchPublishedSitePage({
+			slug: context.locals.orgSlug,
+			host: context.locals.customHost,
+			home: pageSlug === '',
+			pageSlug: pageSlug || undefined,
+			preview: url.searchParams.get('preview') === 'true',
+			lng: localeResult.locale,
+		})
+	}
 
 	// `next(path)` rewrites without re-running this middleware. `context.rewrite()`
 	// would start a new render, reset locals, and serve the default locale.
@@ -197,5 +233,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
 			? await next(`${localeResult.pathname}${localeResult.search}`)
 			: await next()
 
-	return withSecurityHeaders(response, url.pathname)
+	const htmlCacheControl = cacheHtml
+		? 'public, max-age=60, s-maxage=60, stale-while-revalidate=300'
+		: undefined
+	const secured = withSecurityHeaders(
+		response,
+		url.pathname,
+		hostEnv,
+		response.status === 200 ? htmlCacheControl : undefined,
+	)
+
+	if (cache && cacheHtml && secured.status === 200) {
+		waitUntil(context, cache.put(cacheKey, secured.clone()))
+	}
+
+	return secured
 })

@@ -13,7 +13,7 @@ type AriaRole = 'alert' | 'status'
 const bgColors: Record<BannerType, string> = {
 	info: 'bg-primary',
 	warning: 'bg-accent',
-	error: 'bg-destructive',
+	error: 'announcement-error',
 	success: 'bg-primary',
 }
 
@@ -170,6 +170,18 @@ const showNav = announcements.length > 1
 				})
 			}
 		</div>
+	) : null
+}
+
+{
+	announcements.length > 0 ? (
+		<style is:global>
+			.announcement-error {
+				color: #fff;
+				background-color: oklch(0.42 0.19 25);
+				background-color: oklch(from var(--destructive) min(l, 0.42) c h);
+			}
+		</style>
 	) : null
 }
 

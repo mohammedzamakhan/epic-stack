@@ -2,6 +2,8 @@
  * GitHub integration provider implementation
  */
 
+import { getIntegrationUserAgent } from '@repo/config/brand'
+
 import {
 	type Integration,
 	type NoteIntegrationConnection,
@@ -13,6 +15,8 @@ import {
 	type MessageData,
 	type OAuthCallbackParams,
 } from '../../types'
+
+const USER_AGENT = getIntegrationUserAgent()
 
 /**
  * GitHub API response interfaces
@@ -356,7 +360,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 				Authorization: `token ${accessToken}`,
 				Accept: 'application/vnd.github+json',
 				'X-GitHub-Api-Version': '2022-11-28',
-				'User-Agent': 'epic-startup-Integration/1.0',
+				'User-Agent': USER_AGENT,
 			},
 		})
 
@@ -410,7 +414,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 						Authorization: `token ${accessToken}`,
 						Accept: 'application/vnd.github+json',
 						'X-GitHub-Api-Version': '2022-11-28',
-						'User-Agent': 'epic-startup-Integration/1.0',
+						'User-Agent': USER_AGENT,
 					},
 				},
 			)
@@ -454,7 +458,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 					Authorization: `token ${accessToken}`,
 					Accept: 'application/vnd.github+json',
 					'X-GitHub-Api-Version': '2022-11-28',
-					'User-Agent': 'epic-startup-Integration/1.0',
+					'User-Agent': USER_AGENT,
 				},
 			},
 		)
@@ -483,7 +487,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 					Accept: 'application/vnd.github+json',
 					'X-GitHub-Api-Version': '2022-11-28',
 					'Content-Type': 'application/json',
-					'User-Agent': 'epic-startup-Integration/1.0',
+					'User-Agent': USER_AGENT,
 				},
 				body: JSON.stringify(issueData),
 			},
@@ -582,7 +586,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 						Authorization: `token ${accessToken}`,
 						Accept: 'application/vnd.github+json',
 						'X-GitHub-Api-Version': '2022-11-28',
-						'User-Agent': 'epic-startup-Integration/1.0',
+						'User-Agent': USER_AGENT,
 					},
 				},
 			)
@@ -612,7 +616,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 						Authorization: `token ${accessToken}`,
 						Accept: 'application/vnd.github+json',
 						'X-GitHub-Api-Version': '2022-11-28',
-						'User-Agent': 'epic-startup-Integration/1.0',
+						'User-Agent': USER_AGENT,
 					},
 				},
 			)
@@ -643,7 +647,7 @@ export class GitHubProvider extends BaseIntegrationProvider {
 						Authorization: `token ${accessToken}`,
 						Accept: 'application/vnd.github+json',
 						'X-GitHub-Api-Version': '2022-11-28',
-						'User-Agent': 'epic-startup-Integration/1.0',
+						'User-Agent': USER_AGENT,
 					},
 				},
 			)

@@ -42,10 +42,11 @@ page:
 
 ## Environment Variables
 
-The following environment variable is required for encryption:
+The following environment variable is required for encryption of org S3
+credentials (same key used for SSO IdP secrets):
 
 ```bash
-ENCRYPTION_KEY="your-32-character-secret-key-here"
+SSO_ENCRYPTION_KEY="your-64-hex-character-key-here"
 ```
 
 ## Database Schema
@@ -132,6 +133,6 @@ See [scheduled jobs](./scheduled-jobs.md#storage-migration-cloudflare-workflow).
 
 ### Encryption Issues
 
-- Ensure the `ENCRYPTION_KEY` environment variable is set
-- Verify the encryption key is exactly 32 characters (for AES-256)
-- Check that the key is consistent across all application instances
+- Ensure the `SSO_ENCRYPTION_KEY` environment variable is set
+- Verify the encryption key is 64 hex characters (32 bytes)
+- Check that the key is consistent across App and Admin instances

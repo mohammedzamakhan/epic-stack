@@ -5558,7 +5558,9 @@ export default function PageBuilderRoute() {
 																	to={`/${params.orgSlug}/website/pages/${p.id}`}
 																	className="flex w-full items-center"
 																>
-																	<span className="flex-1 truncate">{p.title}</span>
+																	<span className="flex-1 truncate">
+																		{p.title}
+																	</span>
 																	{p.isHomePage && (
 																		<Badge
 																			variant="outline"
@@ -5577,12 +5579,16 @@ export default function PageBuilderRoute() {
 													<Icon name="file-text" className="mr-2 size-4" />
 													<Trans>Page settings</Trans>
 												</DropdownMenuItem>
-												<DropdownMenuItem onSelect={() => setInspector('branding')}>
+												<DropdownMenuItem
+													onSelect={() => setInspector('branding')}
+												>
 													<Icon name="paintbrush" className="mr-2 size-4" />
 													<Trans>Branding</Trans>
 												</DropdownMenuItem>
 												<DropdownMenuSeparator />
-												<DropdownMenuItem onSelect={() => setCreatePageOpen(true)}>
+												<DropdownMenuItem
+													onSelect={() => setCreatePageOpen(true)}
+												>
 													<Icon name="plus" className="mr-2 size-4" />
 													<Trans>Add new page</Trans>
 												</DropdownMenuItem>
@@ -5709,7 +5715,10 @@ export default function PageBuilderRoute() {
 								</DropdownMenu>
 							</div>
 						</header>
-						<CreatePageDialog open={createPageOpen} onOpenChange={setCreatePageOpen} />
+						<CreatePageDialog
+							open={createPageOpen}
+							onOpenChange={setCreatePageOpen}
+						/>
 
 						<div className="flex min-h-0 flex-1">
 							{isSplitLayout ? (

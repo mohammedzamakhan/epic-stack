@@ -4,14 +4,16 @@
  * Prompts users to customize their brand assets during initial setup
  */
 
+import { execSync } from 'child_process'
 import {
 	readFileSync,
 	writeFileSync,
 	copyFileSync,
 	existsSync,
 	mkdirSync,
+	readdirSync,
 } from 'fs'
-import { join, dirname, resolve } from 'path'
+import { join, dirname, resolve, extname, relative } from 'path'
 import { fileURLToPath } from 'url'
 import readline from 'readline'
 
@@ -56,13 +58,24 @@ async function promptBrandInfo() {
 		rl,
 		`${colors.bright}Brand Name${colors.reset} (default: Epic Startup): `,
 	)
+	const name = brandName || 'Epic Startup'
 	const shortName =
 		(await question(
 			rl,
-			`${colors.bright}Short Name${colors.reset} (for mobile/app manifests, default: ${brandName || 'Epic Startup'}): `,
-		)) ||
-		brandName ||
-		'Epic Startup'
+			`${colors.bright}Short Name${colors.reset} (for mobile/app manifests, default: ${name}): `,
+		)) || name
+
+	const defaultDomain = `${toBrandSlug(name)}.me`
+	const domain = normalizeAppDomain(
+		await question(
+			rl,
+			`${colors.bright}App domain${colors.reset} (e.g. acme.io, acme.dev; local HTTPS, cookies, org subdomains; default: ${defaultDomain}): `,
+		),
+		defaultDomain,
+	)
+	const defaultUrl = `https://${domain}`
+	const defaultEmail = `support@${domain}`
+
 	const tagline = await question(
 		rl,
 		`${colors.bright}Tagline${colors.reset} (default: Build your next startup even faster): `,
@@ -73,11 +86,11 @@ async function promptBrandInfo() {
 	)
 	const url = await question(
 		rl,
-		`${colors.bright}Website URL${colors.reset} (default: https://epicstartup.com): `,
+		`${colors.bright}Website URL${colors.reset} (default: ${defaultUrl}): `,
 	)
 	const supportEmail = await question(
 		rl,
-		`${colors.bright}Support Email${colors.reset} (default: support@epicstartup.com): `,
+		`${colors.bright}Support Email${colors.reset} (default: ${defaultEmail}): `,
 	)
 	const twitterHandle = await question(
 		rl,
@@ -87,16 +100,18 @@ async function promptBrandInfo() {
 	rl.close()
 
 	return {
-		name: brandName || 'Epic Startup',
-		shortName: shortName || brandName || 'Epic Startup',
+		name,
+		shortName,
+		slug: toBrandSlug(name),
+		domain,
 		tagline: tagline || 'Build your next startup even faster',
 		description:
 			description ||
-			`${brandName || 'Epic Startup'} is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.`,
-		url: url || 'https://epicstartup.com',
-		supportEmail: supportEmail || 'support@epicstartup.com',
+			`${name} is a modern SaaS boilerplate that helps developers and founders launch production-ready applications in minutes.`,
+		url: url || defaultUrl,
+		supportEmail: supportEmail || defaultEmail,
 		twitterHandle: twitterHandle || '@epicstartup',
-		companyName: brandName || 'Epic Startup',
+		companyName: name,
 	}
 }
 
@@ -141,10 +156,176 @@ function escapeString(str) {
 	return str.replace(/'/g, "\\'").replace(/\n/g, '\\n')
 }
 
-function getBrandDomain(brandName) {
-	// Convert brand name to domain format (lowercase, replace spaces with hyphens)
-	const domainName = brandName.toLowerCase().replace(/\s+/g, '-')
-	return `${domainName}.me`
+function toBrandSlug(name) {
+	const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+	let start = 0
+	let end = slug.length
+	while (start < end && slug.charCodeAt(start) === 45) start += 1
+	while (end > start && slug.charCodeAt(end - 1) === 45) end -= 1
+	return slug.slice(start, end) || 'app'
+}
+
+function normalizeAppDomain(value, fallback) {
+	const normalized = String(value || '')
+		.trim()
+		.toLowerCase()
+		.replace(/^https?:\/\//, '')
+		.replace(/\/.*$/, '')
+		.replace(/\.$/, '')
+	if (!normalized || !normalized.includes('.')) {
+		return fallback
+	}
+	return normalized
+}
+
+const GITHUB_URL_RE = /(https:\/\/(?:api\.)?github\.com\/[^\s)"'`]+)/g
+const DEFAULT_BRAND_NAME = 'Epic Startup'
+const DEFAULT_BRAND_SLUG = 'epic-startup'
+const DEFAULT_BRAND_DOMAIN = 'epic-startup.me'
+const PROTECTED_SLUG_RE =
+	/packageJson\[['"']epic-startup['"']\]|epic-startup field/g
+
+const SKIP_DIR_NAMES = new Set([
+	'node_modules',
+	'.git',
+	'dist',
+	'coverage',
+	'.turbo',
+	'.next',
+	'.open-next',
+	'build',
+	'.cache',
+	'playwright-report',
+	'test-results',
+	'.output',
+	'.vercel',
+	'remix.init',
+	'fixtures',
+])
+
+const SKIP_EXTENSIONS = new Set([
+	'.png',
+	'.jpg',
+	'.jpeg',
+	'.gif',
+	'.webp',
+	'.ico',
+	'.svg',
+	'.woff',
+	'.woff2',
+	'.ttf',
+	'.eot',
+	'.db',
+	'.sqlite',
+	'.mp4',
+	'.webm',
+	'.map',
+	'.bin',
+	'.wasm',
+	'.pdf',
+	'.zip',
+	'.lock',
+])
+
+function replaceBrandTokens(content, { name, slug, domain }) {
+	if (
+		name === DEFAULT_BRAND_NAME &&
+		slug === DEFAULT_BRAND_SLUG &&
+		domain === DEFAULT_BRAND_DOMAIN
+	) {
+		return content
+	}
+
+	const protectedSlices = []
+	const withPlaceholders = content.replace(PROTECTED_SLUG_RE, (match) => {
+		protectedSlices.push(match)
+		return `__BRAND_PROTECT_${protectedSlices.length - 1}__`
+	})
+
+	const replaced = withPlaceholders
+		.split(GITHUB_URL_RE)
+		.map((part, index) => {
+			if (index % 2 === 1) return part
+			let next = part
+			if (domain !== DEFAULT_BRAND_DOMAIN) {
+				next = next.replaceAll(DEFAULT_BRAND_DOMAIN, domain)
+			}
+			if (name !== DEFAULT_BRAND_NAME) {
+				next = next.replaceAll(DEFAULT_BRAND_NAME, name)
+			}
+			if (slug !== DEFAULT_BRAND_SLUG) {
+				next = next.replaceAll(DEFAULT_BRAND_SLUG, slug)
+			}
+			return next
+		})
+		.join('')
+
+	return replaced.replace(
+		/__BRAND_PROTECT_(\d+)__/g,
+		(_, index) => protectedSlices[Number(index)] ?? _,
+	)
+}
+
+function shouldSkipBrandRewrite(relPath) {
+	const parts = relPath.split(/[\\/]/)
+	if (parts.some((part) => SKIP_DIR_NAMES.has(part))) return true
+	const base = parts.at(-1) ?? ''
+	if (base === 'setup-brand.mjs' || base === 'ts-log.txt') return true
+	if (SKIP_EXTENSIONS.has(extname(base).toLowerCase())) return true
+	return false
+}
+
+function listRewritableFiles(dir, acc = []) {
+	let entries
+	try {
+		entries = readdirSync(dir, { withFileTypes: true })
+	} catch {
+		return acc
+	}
+
+	for (const entry of entries) {
+		const fullPath = join(dir, entry.name)
+		const relPath = relative(rootDir, fullPath)
+
+		if (entry.isDirectory()) {
+			if (SKIP_DIR_NAMES.has(entry.name)) continue
+			if (entry.name.startsWith('.') && entry.name !== '.github') continue
+			listRewritableFiles(fullPath, acc)
+			continue
+		}
+
+		if (shouldSkipBrandRewrite(relPath)) continue
+		if (
+			entry.name.startsWith('.') &&
+			!entry.name.startsWith('.env') &&
+			entry.name !== '.github'
+		) {
+			continue
+		}
+
+		acc.push(relPath)
+	}
+
+	return acc
+}
+
+function updateFileWithBrandTokens(relPath, brandInfo) {
+	const filePath = join(rootDir, relPath)
+	if (!existsSync(filePath)) return false
+
+	let original
+	try {
+		original = readFileSync(filePath, 'utf-8')
+	} catch {
+		return false
+	}
+	if (original.includes('\u0000')) return false
+
+	const updated = replaceBrandTokens(original, brandInfo)
+	if (updated === original) return false
+
+	writeFileSync(filePath, updated, 'utf-8')
+	return true
 }
 
 function updateBrandConfig(brandInfo) {
@@ -153,6 +334,8 @@ function updateBrandConfig(brandInfo) {
 
 	const escapedName = escapeString(brandInfo.name)
 	const escapedShortName = escapeString(brandInfo.shortName)
+	const escapedSlug = escapeString(brandInfo.slug)
+	const escapedDomain = escapeString(brandInfo.domain)
 	const escapedTagline = escapeString(brandInfo.tagline)
 	const escapedDescription = escapeString(brandInfo.description)
 	const escapedCompanyName = escapeString(brandInfo.companyName)
@@ -165,6 +348,14 @@ function updateBrandConfig(brandInfo) {
 	content = content.replace(
 		/\tshortName: 'Epic Startup',/g,
 		`\tshortName: '${escapedShortName}',`,
+	)
+	content = content.replace(
+		/\tslug: 'epic-startup',/g,
+		`\tslug: '${escapedSlug}',`,
+	)
+	content = content.replace(
+		/\tdomain: 'epic-startup.me',/g,
+		`\tdomain: '${escapedDomain}',`,
 	)
 	content = content.replace(
 		/\ttagline: 'Build your next startup even faster',/g,
@@ -217,6 +408,10 @@ function updateBrandConfig(brandInfo) {
 		`\t\tname: '${escapedName} CMS',`,
 	)
 	content = content.replace(
+		/\t\tname: 'Epic Startup Sites',/g,
+		`\t\tname: '${escapedName} Sites',`,
+	)
+	content = content.replace(
 		/\t\tchrome: 'Epic Startup Chrome Extension',/g,
 		`\t\tchrome: '${escapedName} Chrome Extension',`,
 	)
@@ -252,6 +447,10 @@ function updateBrandConfig(brandInfo) {
 		/\t\temailChange: 'Epic Startup Email Change Verification',/g,
 		`\t\temailChange: '${escapedName} Email Change Verification',`,
 	)
+	content = content.replace(
+		/\t\tnewDeviceSignin: 'New Sign-In Detected - Epic Startup',/g,
+		`\t\tnewDeviceSignin: 'New Sign-In Detected - ${escapedName}',`,
+	)
 
 	// Replace AI system prompt
 	content = content.replace(
@@ -263,9 +462,14 @@ function updateBrandConfig(brandInfo) {
 	log(`✅ Updated ${brandPath}`, 'green')
 }
 
-function updateEnvFiles(brandName) {
-	const domain = getBrandDomain(brandName)
-	const envFiles = ['apps/app/.env', 'apps/admin/.env']
+function updateEnvFiles(domain) {
+	const envFiles = [
+		'apps/app/.env',
+		'apps/admin/.env',
+		'apps/sites/.env',
+		'apps/tenant-api/.env',
+		'apps/web/.env',
+	]
 
 	let updatedCount = 0
 
@@ -279,11 +483,15 @@ function updateEnvFiles(brandName) {
 			}
 
 			let content = readFileSync(envPath, 'utf-8')
+			const original = content
 
-			// Replace ROOT_APP value
-			const rootAppPattern = /^ROOT_APP=.*$/m
-			if (rootAppPattern.test(content)) {
-				content = content.replace(rootAppPattern, `ROOT_APP=${domain}`)
+			content = content.replace(/^ROOT_APP=.*$/m, `ROOT_APP=${domain}`)
+			content = content.replace(
+				/^PUBLIC_ROOT_APP=.*$/m,
+				`PUBLIC_ROOT_APP=${domain}`,
+			)
+
+			if (content !== original) {
 				writeFileSync(envPath, content, 'utf-8')
 				updatedCount++
 				log(`✅ Updated ROOT_APP in ${envFile} to ${domain}`, 'green')
@@ -303,6 +511,83 @@ function updateEnvFiles(brandName) {
 	}
 }
 
+function fileHasUnprotectedBrandTokens(content, brandInfo) {
+	const withoutGithub = content
+		.split(GITHUB_URL_RE)
+		.filter((_, index) => index % 2 === 0)
+		.join('')
+		.replace(PROTECTED_SLUG_RE, '')
+	return (
+		(brandInfo.name !== DEFAULT_BRAND_NAME &&
+			withoutGithub.includes(DEFAULT_BRAND_NAME)) ||
+		(brandInfo.slug !== DEFAULT_BRAND_SLUG &&
+			withoutGithub.includes(DEFAULT_BRAND_SLUG)) ||
+		(brandInfo.domain !== DEFAULT_BRAND_DOMAIN &&
+			withoutGithub.includes(DEFAULT_BRAND_DOMAIN))
+	)
+}
+
+function updateStaticBrandFiles(brandInfo) {
+	log('\n📦 Updating product names and slugs across the repo', 'bright')
+	const files = listRewritableFiles(rootDir)
+	const updated = []
+	for (const file of files) {
+		if (updateFileWithBrandTokens(file, brandInfo)) updated.push(file)
+	}
+	log(`✅ Rewrote brand tokens in ${updated.length} files`, 'green')
+	for (const file of updated.slice(0, 40)) {
+		log(`   - ${file}`, 'gray')
+	}
+	if (updated.length > 40) {
+		log(`   - …and ${updated.length - 40} more`, 'gray')
+	}
+
+	const leftovers = files.filter((relPath) => {
+		if (relPath.endsWith('setup-brand.mjs')) return false
+		try {
+			return fileHasUnprotectedBrandTokens(
+				readFileSync(join(rootDir, relPath), 'utf-8'),
+				brandInfo,
+			)
+		} catch {
+			return false
+		}
+	})
+
+	if (leftovers.length > 0) {
+		log(
+			`\n⚠️  ${leftovers.length} files still mention the old brand (GitHub template links are kept):`,
+			'yellow',
+		)
+		for (const file of leftovers.slice(0, 20)) {
+			log(`   - ${file}`, 'gray')
+		}
+		if (leftovers.length > 20) {
+			log(`   - …and ${leftovers.length - 20} more`, 'gray')
+		}
+	} else {
+		log(
+			'✅ No leftover product brand strings outside GitHub template links',
+			'green',
+		)
+	}
+}
+
+function rebuildBrandPackage() {
+	try {
+		execSync('npm run build --workspace=@repo/config', {
+			cwd: rootDir,
+			stdio: 'inherit',
+		})
+		log('✅ Rebuilt @repo/config so apps pick up the new brand', 'green')
+	} catch (error) {
+		log(
+			`⚠️  Failed to rebuild @repo/config: ${error.message}. Run npm run build --workspace=@repo/config`,
+			'yellow',
+		)
+	}
+}
+
 function updateMobileAppConfig(brandInfo) {
 	const appJsonPath = join(rootDir, 'apps/mobile/app.json')
 
@@ -315,22 +600,20 @@ function updateMobileAppConfig(brandInfo) {
 		const content = readFileSync(appJsonPath, 'utf-8')
 		const appConfig = JSON.parse(content)
 
-		// Update app name and slug based on brand
 		const mobileAppName = `${brandInfo.name} Mobile`
-		const slug = brandInfo.name.toLowerCase().replace(/\s+/g, '-') + '-mobile'
-		const domain = getBrandDomain(brandInfo.name)
+		const slug = `${brandInfo.slug}-mobile`
+		const domain = brandInfo.domain
+		const bundleId = `com.${brandInfo.slug.replace(/-/g, '')}.mobile`
 
-		// Update expo configuration
 		appConfig.expo.name = mobileAppName
 		appConfig.expo.slug = slug
-
-		// Update bundle identifiers
-		const bundleId = `com.${brandInfo.name.toLowerCase().replace(/\s+/g, '')}.mobile`
+		appConfig.expo.scheme = brandInfo.slug
 		appConfig.expo.ios.bundleIdentifier = bundleId
 		appConfig.expo.android.package = bundleId
-
-		// Update linking prefixes
-		appConfig.expo.linking.prefixes = [`${slug}://`, `https://${domain}`]
+		appConfig.expo.linking.prefixes = [
+			`${brandInfo.slug}://`,
+			`https://${domain}`,
+		]
 
 		// Write back the updated configuration
 		writeFileSync(appJsonPath, JSON.stringify(appConfig, null, '\t'), 'utf-8')
@@ -402,8 +685,10 @@ async function main() {
 
 		const brandInfo = await promptBrandInfo()
 		updateBrandConfig(brandInfo)
-		updateEnvFiles(brandInfo.name)
+		updateEnvFiles(brandInfo.domain)
 		updateMobileAppConfig(brandInfo)
+		updateStaticBrandFiles(brandInfo)
+		rebuildBrandPackage()
 
 		const faviconPath = await promptFavicon()
 		if (faviconPath) {

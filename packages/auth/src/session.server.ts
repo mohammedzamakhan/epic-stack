@@ -1,5 +1,7 @@
 import { createCookieSessionStorage } from 'react-router'
 
+import { sharedCookieDomain } from '@repo/common/cookie-domain'
+
 // Validate SESSION_SECRET environment variable
 if (!process.env.SESSION_SECRET) {
 	throw new Error(
@@ -26,14 +28,7 @@ export const authSessionStorage = createCookieSessionStorage({
 		sameSite: 'lax', // CSRF protection is advised if changing to 'none'
 		path: '/',
 		httpOnly: true,
-		domain:
-			process.env.NODE_ENV === 'production'
-				? process.env.ROOT_APP
-					? `.${process.env.ROOT_APP}`
-					: undefined
-				: process.env.ROOT_APP === 'localhost'
-					? '.localhost'
-					: undefined,
+		domain: sharedCookieDomain(),
 		secrets: sessionSecrets,
 		secure: process.env.NODE_ENV === 'production',
 	},

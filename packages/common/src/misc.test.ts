@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+
 import { getDomainUrl, getErrorMessage, formatDate } from '@repo/common'
+import { getBrandDomain } from '@repo/config/brand'
 
 describe('formatDate', () => {
 	test('formats Date object correctly', () => {
@@ -89,15 +91,17 @@ describe('getDomainUrl', () => {
 		expect(getDomainUrl(request)).toBe('http://example.org')
 	})
 
-	test('forces https for epic-startup.me', () => {
-		const url = 'http://epic-startup.me'
+	test('forces https for the brand domain', () => {
+		const domain = getBrandDomain()
+		const url = `http://${domain}`
 		const request = new Request(url)
-		expect(getDomainUrl(request)).toBe('https://epic-startup.me')
+		expect(getDomainUrl(request)).toBe(`https://${domain}`)
 	})
 
-	test('forces https for epic-startup.me subdomain', () => {
-		const url = 'http://sub.epic-startup.me'
+	test('forces https for a brand subdomain', () => {
+		const domain = getBrandDomain()
+		const url = `http://sub.${domain}`
 		const request = new Request(url)
-		expect(getDomainUrl(request)).toBe('https://sub.epic-startup.me')
+		expect(getDomainUrl(request)).toBe(`https://sub.${domain}`)
 	})
 })

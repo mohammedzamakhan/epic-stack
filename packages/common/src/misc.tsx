@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFormAction, useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'
 
+import { getBrandDomain } from '@repo/config/brand'
+
 export function getUserImgSrc(objectKey?: string | null) {
 	return objectKey
 		? `/resources/images?objectKey=${encodeURIComponent(objectKey)}`
@@ -129,7 +131,7 @@ export function getDomainUrl(request: Request) {
 	const hostValue = host.split(',')[0]?.trim() ?? host
 	// If we're behind a proxy that terminates TLS, use https
 	// Also brute force for specific domain to match existing logic
-	if (protocol === 'https' || hostValue.includes('epic-startup.me')) {
+	if (protocol === 'https' || hostValue.includes(getBrandDomain())) {
 		return `https://${hostValue}`
 	}
 	return `${protocol}://${hostValue}`

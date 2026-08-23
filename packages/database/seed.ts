@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { MOCK_CODE_GITHUB } from '@repo/auth'
+import { MOCK_CODE_GITHUB } from '@repo/auth/constants'
 import {
 	createPassword,
 	createUser,

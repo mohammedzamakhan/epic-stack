@@ -15,6 +15,7 @@ import {
 	type HandleDocumentRequestFunction,
 } from 'react-router'
 import { auditSensitiveRoutes } from '#app/utils/audit/audit-middleware.server.ts'
+import { sitePreviewFrameSrc } from '#app/utils/csp-frame-src.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
 
@@ -23,6 +24,52 @@ export const streamTimeout = 5000
 const MODE = process.env.NODE_ENV ?? 'development'
 
 type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
+
+function applyContentSecurity(
+	responseHeaders: Headers,
+	nonce: string,
+	builderMode: boolean,
+	requestHost?: string | null,
+) {
+	contentSecurity(responseHeaders, {
+		crossOriginEmbedderPolicy: false,
+		contentSecurityPolicy: {
+			directives: {
+				document: {
+					'base-uri': ["'self'"],
+				},
+				navigation: {
+					'form-action': ["'self'"],
+					'frame-ancestors': ["'self'"],
+				},
+				fetch: {
+					'default-src': ["'self'"],
+					'object-src': ["'none'"],
+					'connect-src': [
+						MODE === 'development' ? 'ws:' : undefined,
+						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+						"'self'",
+					],
+					'font-src': ["'self'"],
+					'frame-src': sitePreviewFrameSrc(process.env, requestHost),
+					'img-src': ["'self'", 'data:'],
+					'script-src': builderMode
+						? [
+								"'unsafe-inline'",
+								"'unsafe-eval'",
+								"'self'",
+								`'nonce-${nonce}'`,
+								'https://cdn.builder.io',
+							]
+						: ["'strict-dynamic'", "'self'", `'nonce-${nonce}'`],
+					'script-src-attr': builderMode
+						? [`'nonce-${nonce}'`, "'unsafe-inline'"]
+						: [`'nonce-${nonce}'`],
+				},
+			},
+		},
+	})
+}
 
 export default async function handleRequest(...args: DocRequestArgs) {
 	const [request, responseStatusCode, responseHeaders, reactRouterContext] =
@@ -62,91 +109,11 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	const locale = await linguiServer.getLocale(request)
 	await loadCatalog(locale)
 
-	if (MODE === 'development' && request.url.includes('builder.my')) {
-		return new Promise((resolve, reject) => {
-			let didError = false
-			// NOTE: this timing will only include things that are rendered in the shell
-			// and will not include suspended components and deferred loaders
-			const timings = makeTimings('render', 'renderToPipeableStream')
+	const builderMode =
+		MODE === 'development' && request.url.includes('builder.my')
+	const requestHost =
+		request.headers.get('x-forwarded-host') ?? request.headers.get('host')
 
-			const { pipe, abort } = renderToPipeableStream(
-				<I18nProvider i18n={i18n}>
-					<NonceProvider value={nonce}>
-						<ServerRouter
-							nonce={nonce}
-							context={reactRouterContext}
-							url={request.url}
-						/>
-					</NonceProvider>
-				</I18nProvider>,
-				{
-					[callbackName]: () => {
-						const body = new PassThrough()
-						responseHeaders.set('Content-Type', 'text/html')
-						responseHeaders.append('Server-Timing', timings.toString())
-
-						contentSecurity(responseHeaders, {
-							crossOriginEmbedderPolicy: false,
-							contentSecurityPolicy: {
-								directives: {
-									document: {
-										'base-uri': ["'self'"],
-									},
-									navigation: {
-										'form-action': ["'self'"],
-										'frame-ancestors': ["'self'"],
-									},
-									fetch: {
-										'default-src': ["'self'"],
-										'object-src': ["'none'"],
-										'connect-src': [
-											MODE === 'development' ? 'ws:' : undefined,
-											process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
-											"'self'",
-										],
-										'font-src': ["'self'"],
-										'frame-src': [
-											"'self'",
-											'builder.io',
-											'*.epic-startup.me:*',
-											'*.epic-startup.me',
-											'localhost:*',
-										],
-										'img-src': ["'self'", 'data:'],
-										'script-src': [
-											"'unsafe-inline'",
-											"'unsafe-eval'",
-											"'self'",
-											`'nonce-${nonce}'`,
-											'https://cdn.builder.io',
-										],
-										'script-src-attr': [`'nonce-${nonce}'`, "'unsafe-inline'"],
-									},
-								},
-							},
-						})
-
-						resolve(
-							new Response(createReadableStreamFromReadable(body), {
-								headers: responseHeaders,
-								status: didError ? 500 : responseStatusCode,
-							}),
-						)
-						pipe(body)
-					},
-					onShellError: (err: unknown) => {
-						reject(err)
-					},
-					onError: () => {
-						didError = true
-					},
-					nonce,
-				},
-			)
-
-			setTimeout(abort, streamTimeout + 5000)
-		})
-	}
 	return new Promise((resolve, reject) => {
 		let didError = false
 		// NOTE: this timing will only include things that are rendered in the shell
@@ -168,45 +135,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 					const body = new PassThrough()
 					responseHeaders.set('Content-Type', 'text/html')
 					responseHeaders.append('Server-Timing', timings.toString())
-
-					contentSecurity(responseHeaders, {
-						crossOriginEmbedderPolicy: false,
-						contentSecurityPolicy: {
-							directives: {
-								document: {
-									'base-uri': ["'self'"],
-								},
-								navigation: {
-									'form-action': ["'self'"],
-									'frame-ancestors': ["'self'"],
-								},
-								fetch: {
-									'default-src': ["'self'"],
-									'object-src': ["'none'"],
-									'connect-src': [
-										MODE === 'development' ? 'ws:' : undefined,
-										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
-										"'self'",
-									],
-									'font-src': ["'self'"],
-									'frame-src': [
-										"'self'",
-										'builder.io',
-										'*.epic-startup.me:*',
-										'*.epic-startup.me',
-										'localhost:*',
-									],
-									'img-src': ["'self'", 'data:'],
-									'script-src': [
-										"'strict-dynamic'",
-										"'self'",
-										`'nonce-${nonce}'`,
-									],
-									'script-src-attr': [`'nonce-${nonce}'`],
-								},
-							},
-						},
-					})
+					applyContentSecurity(responseHeaders, nonce, builderMode, requestHost)
 
 					resolve(
 						new Response(createReadableStreamFromReadable(body), {

@@ -8,8 +8,6 @@
  * - Header-based routing (Mcp-Method, Mcp-Name)
  */
 
-import crypto from 'node:crypto'
-
 export const MCP_PROTOCOL_VERSION = '2026-07-28'
 
 /**

@@ -85,11 +85,11 @@ const secondary = links[1]
 		<div class="absolute inset-0 bg-primary" aria-hidden="true"></div>
 	) : null}
 
-	{overlay === 'dark' ? (
-		<div class="absolute inset-0 bg-black/45" aria-hidden="true"></div>
-	) : overlay === 'gradient' ? (
+	{hasMedia && overlay === 'dark' ? (
+		<div class="absolute inset-0 bg-black/65" aria-hidden="true"></div>
+	) : hasMedia && overlay === 'gradient' ? (
 		<div
-			class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/15"
+			class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/25"
 			aria-hidden="true"
 		></div>
 	) : null}
@@ -104,7 +104,7 @@ const secondary = links[1]
 			<p
 				class:list={[
 					'mb-3 max-w-xl text-sm font-medium tracking-wide sm:text-base',
-					hasMedia || overlay !== 'none' ? 'text-white/85' : 'text-primary-foreground/85',
+					hasMedia ? 'text-white' : 'text-primary-foreground',
 				]}
 			>
 				{subheading}
@@ -114,7 +114,7 @@ const secondary = links[1]
 			<h1
 				class:list={[
 					'max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-6xl',
-					hasMedia || overlay !== 'none' ? 'text-white' : 'text-primary-foreground',
+					hasMedia ? 'text-white' : 'text-primary-foreground',
 				]}
 			>
 				{heading}

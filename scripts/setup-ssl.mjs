@@ -74,8 +74,16 @@ function getBrandDomain() {
 		}
 
 		const brandContent = readFileSync(brandConfigPath, 'utf-8')
+		const domainMatch = brandContent.match(/^\tdomain:\s*'([^']+)'/m)
+		if (domainMatch?.[1]) {
+			return domainMatch[1]
+		}
 
-		// Extract brand name from the config
+		const slugMatch = brandContent.match(/^\tslug:\s*'([^']+)'/m)
+		if (slugMatch?.[1]) {
+			return `${slugMatch[1]}.me`
+		}
+
 		const nameMatch = brandContent.match(/name:\s*'([^']+)'/)
 		if (!nameMatch) {
 			log('⚠️  Could not parse brand name, using default domain', 'yellow')
@@ -83,8 +91,10 @@ function getBrandDomain() {
 		}
 
 		const brandName = nameMatch[1]
-		// Convert brand name to domain format (lowercase, replace spaces with hyphens)
-		const domainName = brandName.toLowerCase().replace(/\s+/g, '-')
+		const domainName = brandName
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '')
 		return `${domainName}.me`
 	} catch (error) {
 		log(`⚠️  Error reading brand config: ${error.message}`, 'yellow')

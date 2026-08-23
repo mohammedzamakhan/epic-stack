@@ -51,7 +51,6 @@ import {
 	Link,
 	useFetcher,
 	useLoaderData,
-	useNavigate,
 	useSearchParams,
 } from 'react-router'
 import { z } from 'zod'
