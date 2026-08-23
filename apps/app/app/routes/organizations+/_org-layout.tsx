@@ -43,15 +43,15 @@ export default function OrganizationLayout() {
 							<span>{rootData?.user?.name}</span>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
-							<DropdownMenuItem asChild>
-								<Link to="/profile">Profile page</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link to="/security">Security page</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link to="/organizations">Organizations page</Link>
-							</DropdownMenuItem>
+							<DropdownMenuItem
+								render={<Link to="/profile">Profile page</Link>}
+							/>
+							<DropdownMenuItem
+								render={<Link to="/security">Security page</Link>}
+							/>
+							<DropdownMenuItem
+								render={<Link to="/organizations">Organizations page</Link>}
+							/>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
