@@ -515,7 +515,7 @@ function PageRow({
 export default function WebsitePagesRoute() {
 	const { pages, search } = useLoaderData<typeof loader>()
 	const [searchParams, setSearchParams] = useSearchParams()
-	const { _, t } = useLingui()
+	const { _ } = useLingui()
 	const [createOpen, setCreateOpen] = useState(false)
 
 	const handleSearch = useCallback(
@@ -544,7 +544,16 @@ export default function WebsitePagesRoute() {
 						</Trans>
 					</p>
 				</div>
-				<CreatePageDialog open={createOpen} onOpenChange={setCreateOpen} trigger={<Button size="sm" className="shrink-0"><Icon name="plus" className="size-4" /><Trans>New Page</Trans></Button>} />
+				<CreatePageDialog
+					open={createOpen}
+					onOpenChange={setCreateOpen}
+					trigger={
+						<Button size="sm" className="shrink-0">
+							<Icon name="plus" className="size-4" />
+							<Trans>New Page</Trans>
+						</Button>
+					}
+				/>
 			</div>
 
 			{pages.length === 0 && !search ? (

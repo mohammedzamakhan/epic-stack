@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans, t } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
@@ -17,7 +17,10 @@ import { RadioGroup, RadioGroupItem } from '@repo/ui/radio-group'
 import { Spinner } from '@repo/ui/spinner'
 import { useCallback, useEffect, useState } from 'react'
 import { useFetcher, useNavigate, useParams } from 'react-router'
-import { PAGE_TEMPLATES, type PageTemplate } from '#app/utils/website/block-types.ts'
+import {
+	PAGE_TEMPLATES,
+	type PageTemplate,
+} from '#app/utils/website/block-types.ts'
 
 export function CreatePageDialog({
 	open,
@@ -28,7 +31,7 @@ export function CreatePageDialog({
 	onOpenChange: (open: boolean) => void
 	trigger?: React.ReactNode
 }) {
-	const { _, t } = useLingui()
+	const { _ } = useLingui()
 	const fetcher = useFetcher()
 	const navigate = useNavigate()
 	const params = useParams()
@@ -85,7 +88,9 @@ export function CreatePageDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			{trigger ? <DialogTrigger render={trigger as React.ReactElement} /> : null}
+			{trigger ? (
+				<DialogTrigger render={trigger as React.ReactElement} />
+			) : null}
 			<DialogContent className="sm:max-w-md">
 				{step === 1 ? (
 					<>
