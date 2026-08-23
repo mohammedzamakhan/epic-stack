@@ -1,7 +1,6 @@
 import { logMCPRateLimitExceeded, logMCPToolInvoked } from '@repo/audit'
 import { getDomainUrl } from '@repo/common'
 import { getMcpServerName } from '@repo/config/brand'
-import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
 	validateAccessToken,
@@ -22,11 +21,7 @@ import {
 	validateOrigin,
 	validateProtocolVersion,
 } from '#app/utils/mcp/streamable-http.server.ts'
-import {
-	checkRateLimit,
-	createRateLimitResponse,
-	RATE_LIMITS,
-} from '#app/utils/rate-limit.server.ts'
+import { checkRateLimit, RATE_LIMITS } from '#app/utils/rate-limit.server.ts'
 
 /**
  * Build resource URL for OAuth discovery (RFC 9728)

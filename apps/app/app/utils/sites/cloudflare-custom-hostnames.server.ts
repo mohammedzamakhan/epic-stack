@@ -1,6 +1,5 @@
-import { ENV } from 'varlock/env'
-
 import { brand, getBrandDomain } from '@repo/config/brand'
+import { ENV } from 'varlock/env'
 
 export type CustomHostnameStatus =
 	'pending' | 'active' | 'moved' | 'deleted' | 'blocked' | 'error'

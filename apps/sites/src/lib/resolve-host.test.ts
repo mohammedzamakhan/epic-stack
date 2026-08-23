@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest'
-
 import { getBrandDomain } from '@repo/config/brand'
+import { describe, expect, it } from 'vitest'
 
 import { getSiteHostSuffixes, resolveHost } from './resolve-host.ts'
 
