@@ -85,7 +85,7 @@ export function CreatePageDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			{trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
+			{trigger ? <DialogTrigger render={trigger as React.ReactElement} /> : null}
 			<DialogContent className="sm:max-w-md">
 				{step === 1 ? (
 					<>

@@ -5536,35 +5536,40 @@ export default function PageBuilderRoute() {
 											{displayTitle}
 										</button>
 										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon-xs"
-													className="text-muted-foreground hover:text-foreground"
-													aria-label="Page menu"
-												>
-													<Icon name="chevron-down" className="size-3.5" />
-												</Button>
-											</DropdownMenuTrigger>
+											<DropdownMenuTrigger
+												render={
+													<Button
+														variant="ghost"
+														size="icon-xs"
+														className="text-muted-foreground hover:text-foreground"
+														aria-label="Page menu"
+													>
+														<Icon name="chevron-down" className="size-3.5" />
+													</Button>
+												}
+											/>
 											<DropdownMenuContent align="start" className="w-56">
 												<div className="max-h-[300px] overflow-y-auto">
 													{linkPages.map((p) => (
-														<DropdownMenuItem key={p.id} asChild>
-															<Link
-																to={`/${params.orgSlug}/website/pages/${p.id}`}
-																className="flex w-full items-center"
-															>
-																<span className="flex-1 truncate">{p.title}</span>
-																{p.isHomePage && (
-																	<Badge
-																		variant="outline"
-																		className="ml-2 h-4 shrink-0 px-1 text-[10px]"
-																	>
-																		<Trans>Home</Trans>
-																	</Badge>
-																)}
-															</Link>
-														</DropdownMenuItem>
+														<DropdownMenuItem
+															key={p.id}
+															render={
+																<Link
+																	to={`/${params.orgSlug}/website/pages/${p.id}`}
+																	className="flex w-full items-center"
+																>
+																	<span className="flex-1 truncate">{p.title}</span>
+																	{p.isHomePage && (
+																		<Badge
+																			variant="outline"
+																			className="ml-2 h-4 shrink-0 px-1 text-[10px]"
+																		>
+																			<Trans>Home</Trans>
+																		</Badge>
+																	)}
+																</Link>
+															}
+														/>
 													))}
 												</div>
 												<DropdownMenuSeparator />
