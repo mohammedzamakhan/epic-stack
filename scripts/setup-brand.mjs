@@ -157,12 +157,12 @@ function escapeString(str) {
 }
 
 function toBrandSlug(name) {
-	return (
-		name
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, '-')
-			.replace(/^-+|-+$/g, '') || 'app'
-	)
+	const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+	let start = 0
+	let end = slug.length
+	while (start < end && slug.charCodeAt(start) === 45) start += 1
+	while (end > start && slug.charCodeAt(end - 1) === 45) end -= 1
+	return slug.slice(start, end) || 'app'
 }
 
 function normalizeAppDomain(value, fallback) {
