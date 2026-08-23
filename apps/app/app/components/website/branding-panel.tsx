@@ -117,6 +117,12 @@ export function BrandingPanel({
 			: null)
 
 	const persistTheme = (next: SiteThemeConfig) => {
+		if (typeof document !== 'undefined') {
+			try {
+				const encoded = encodeURIComponent(JSON.stringify(next))
+				document.cookie = `epic_preview_theme=${encoded}; path=/; max-age=86400; SameSite=Lax`
+			} catch {}
+		}
 		setTheme(next)
 		void themeFetcher.submit(
 			{

@@ -106,6 +106,7 @@ const alternateLinks = [
 			</slot>
 		</main>
 		<SiteFooter config={footer?.config} organization={organization} />
+		
 		{isPreview ? (
 			<script is:inline>
 				;(function () {
@@ -124,8 +125,43 @@ const alternateLinks = [
 					restoreScroll()
 					window.addEventListener('scroll', saveScroll, { passive: true })
 					window.addEventListener('beforeunload', saveScroll)
+
+					// Polling for cookie changes to apply them without full page refresh
+					let lastSectionsCookie = (document.cookie.match(/(?:^|; )epic_preview_sections=([^;]*)/) || [])[1];
+					let lastThemeCookie = (document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) || [])[1];
+
+					setInterval(async () => {
+						const currentSectionsCookie = (document.cookie.match(/(?:^|; )epic_preview_sections=([^;]*)/) || [])[1];
+						const currentThemeCookie = (document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) || [])[1];
+
+						if (currentSectionsCookie !== lastSectionsCookie || currentThemeCookie !== lastThemeCookie) {
+							lastSectionsCookie = currentSectionsCookie;
+							lastThemeCookie = currentThemeCookie;
+
+							try {
+								const res = await fetch(window.location.href);
+								const html = await res.text();
+								const parser = new DOMParser();
+								const doc = parser.parseFromString(html, 'text/html');
+								
+								// Replace main and header/footer without full reload
+								const currentContainer = document.querySelector('div.bg-background');
+								const newContainer = doc.querySelector('div.bg-background');
+								
+								if (currentContainer && newContainer) {
+									// We morph the children manually or just replace innerHTML.
+									// Replacing innerHTML might destroy scripts, but since Astro pages 
+									// are mostly static HTML, it's fine for the preview.
+									currentContainer.innerHTML = newContainer.innerHTML;
+								}
+							} catch (err) {
+								console.error('Failed to update preview', err);
+							}
+						}
+					}, 200);
 				})()
 			</script>
 		) : null}
+
 	</div>
 </SiteLayout>

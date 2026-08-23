@@ -23,6 +23,23 @@ const page = await (Astro.locals.publishedPagePromise ??
 		lng: requestedLocale,
 	}))
 
+
+if (page && Astro.url.searchParams.get('preview') === 'true') {
+	const sectionsCookie = Astro.cookies.get('epic_preview_sections')?.value
+	const themeCookie = Astro.cookies.get('epic_preview_theme')?.value
+
+	if (sectionsCookie) {
+		try {
+			page.sections = JSON.parse(decodeURIComponent(sectionsCookie))
+		} catch (err) {}
+	}
+	if (themeCookie) {
+		try {
+			organization.theme = JSON.parse(decodeURIComponent(themeCookie))
+		} catch (err) {}
+	}
+}
+
 const seoTitle = page?.seo?.title || page?.title
 const pageTitle = seoTitle
 	? getPageTitle(`${seoTitle} - ${organization.name}`)

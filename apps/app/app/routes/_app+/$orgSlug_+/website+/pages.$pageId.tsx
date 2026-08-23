@@ -20,7 +20,7 @@ import { Trans } from '@lingui/macro'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
-import { useDebounce } from '@repo/common'
+
 import {
 	getLocaleHref,
 	getLocalizedEditableValue,
@@ -4937,10 +4937,6 @@ export default function PageBuilderRoute() {
 	const [previewUrl, setPreviewUrl] = useState('')
 	const [iframeKey, setIframeKey] = useState(Date.now())
 
-	const updateIframeKey = useDebounce(() => {
-		setIframeKey(Date.now())
-	}, 1000)
-
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			const origin = window.location.origin
@@ -4972,8 +4968,15 @@ export default function PageBuilderRoute() {
 	])
 
 	useEffect(() => {
-		updateIframeKey()
-	}, [page.sections, updateIframeKey, previewUrl])
+		if (typeof document !== 'undefined') {
+			try {
+				const encoded = encodeURIComponent(JSON.stringify(page.sections))
+				document.cookie = `epic_preview_sections=${encoded}; path=/; max-age=86400; SameSite=Lax`
+			} catch (ignoredErr) {
+				console.error('Failed to save preview sections to cookie', err)
+			}
+		}
+	}, [page.sections])
 
 	const [mode, setMode] = useState<'build' | 'preview'>('build')
 	// Page builder split is desktop-first (matches `lg:` preview visibility).
@@ -5147,12 +5150,20 @@ export default function PageBuilderRoute() {
 
 	const handleUpdateSection = useCallback(
 		(sectionId: string, config: string) => {
+			if (typeof document !== 'undefined') {
+				try {
+					const nextSections = page.sections.map((s) =>
+						s.id === sectionId ? { ...s, config } : s,
+					)
+					document.cookie = `epic_preview_sections=${encodeURIComponent(JSON.stringify(nextSections))}; path=/; max-age=86400; SameSite=Lax`
+				} catch {}
+			}
 			void sectionFetcher.submit(
 				{ intent: updateSectionIntent, sectionId, config },
 				{ method: 'POST' },
 			)
 		},
-		[sectionFetcher],
+		[sectionFetcher, page.sections],
 	)
 
 	const handleRemoveSection = useCallback(
@@ -5182,6 +5193,11 @@ export default function PageBuilderRoute() {
 	)
 
 	const handlePublish = useCallback(() => {
+		if (typeof document !== 'undefined') {
+			document.cookie =
+				'epic_preview_sections=; path=/; max-age=0; SameSite=Lax'
+			document.cookie = 'epic_preview_theme=; path=/; max-age=0; SameSite=Lax'
+		}
 		void publishFetcher.submit({ intent: publishIntent }, { method: 'POST' })
 	}, [publishFetcher])
 
