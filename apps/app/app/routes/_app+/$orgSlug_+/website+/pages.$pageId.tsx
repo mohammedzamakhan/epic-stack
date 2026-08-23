@@ -117,6 +117,7 @@ import {
 	uploadSiteFontActionIntent,
 } from '#app/components/settings/cards/organization/site-theme-card.tsx'
 import { BrandingPanel } from '#app/components/website/branding-panel.tsx'
+import { CreatePageDialog } from '#app/components/website/create-page-dialog.tsx'
 import {
 	LinkInspector,
 	SiteLinkBuilderContext,
@@ -5041,6 +5042,7 @@ export default function PageBuilderRoute() {
 	const handlePreviewRefresh = useCallback(() => {
 		setIframeKey(Date.now())
 	}, [])
+	const [createPageOpen, setCreatePageOpen] = useState(false)
 	const [editingTitle, setEditingTitle] = useState(false)
 	const [titleValue, setTitleValue] = useState(page.title)
 
@@ -5524,14 +5526,69 @@ export default function PageBuilderRoute() {
 										autoFocus
 									/>
 								) : (
-									<button
-										type="button"
-										className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-										onClick={() => setEditingTitle(true)}
-										title={displayTitle}
-									>
-										{displayTitle}
-									</button>
+									<div className="flex items-center gap-1">
+										<button
+											type="button"
+											className="hover:bg-muted focus-visible:ring-ring max-w-52 truncate rounded-md px-1.5 py-1 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+											onClick={() => setEditingTitle(true)}
+											title={displayTitle}
+										>
+											{displayTitle}
+										</button>
+										<DropdownMenu>
+											<DropdownMenuTrigger
+												render={
+													<Button
+														variant="ghost"
+														size="icon-xs"
+														className="text-muted-foreground hover:text-foreground"
+														aria-label="Page menu"
+													>
+														<Icon name="chevron-down" className="size-3.5" />
+													</Button>
+												}
+											/>
+											<DropdownMenuContent align="start" className="w-56">
+												<div className="max-h-[300px] overflow-y-auto">
+													{linkPages.map((p) => (
+														<DropdownMenuItem
+															key={p.id}
+															render={
+																<Link
+																	to={`/${params.orgSlug}/website/pages/${p.id}`}
+																	className="flex w-full items-center"
+																>
+																	<span className="flex-1 truncate">{p.title}</span>
+																	{p.isHomePage && (
+																		<Badge
+																			variant="outline"
+																			className="ml-2 h-4 shrink-0 px-1 text-[10px]"
+																		>
+																			<Trans>Home</Trans>
+																		</Badge>
+																	)}
+																</Link>
+															}
+														/>
+													))}
+												</div>
+												<DropdownMenuSeparator />
+												<DropdownMenuItem onSelect={() => setInspector('page')}>
+													<Icon name="file-text" className="mr-2 size-4" />
+													<Trans>Page settings</Trans>
+												</DropdownMenuItem>
+												<DropdownMenuItem onSelect={() => setInspector('branding')}>
+													<Icon name="paintbrush" className="mr-2 size-4" />
+													<Trans>Branding</Trans>
+												</DropdownMenuItem>
+												<DropdownMenuSeparator />
+												<DropdownMenuItem onSelect={() => setCreatePageOpen(true)}>
+													<Icon name="plus" className="mr-2 size-4" />
+													<Trans>Add new page</Trans>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
 								)}
 
 								{page.isHomePage ? (
@@ -5652,6 +5709,7 @@ export default function PageBuilderRoute() {
 								</DropdownMenu>
 							</div>
 						</header>
+						<CreatePageDialog open={createPageOpen} onOpenChange={setCreatePageOpen} />
 
 						<div className="flex min-h-0 flex-1">
 							{isSplitLayout ? (
