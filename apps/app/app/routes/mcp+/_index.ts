@@ -40,7 +40,7 @@ function getResourceUrl(request: Request): string {
 }
 
 /**
- * MCP Server Endpoint - Streamable HTTP Transport (Protocol Version 2025-11-25)
+ * MCP Server Endpoint - Streamable HTTP Transport (Protocol Version 2026-07-28)
  *
  * This endpoint implements the MCP Streamable HTTP transport specification:
  *
@@ -284,7 +284,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		const protocolVersionHeader = request.headers.get('MCP-Protocol-Version')
 		const isLegacyClient = !protocolVersionHeader
 
-		// For Streamable HTTP clients (2025-11-25), require a valid session
+		// For Streamable HTTP clients (2026-07-28), require a valid session
 		// For legacy clients (2024-11-05), session is optional
 		if (!isLegacyClient) {
 			if (!session && sessionId) {
@@ -502,7 +502,7 @@ function createSseResponse(
  * Handle GET requests for SSE transport
  *
  * Supports two modes:
- * 1. Streamable HTTP (2025-11-25): Requires MCP-Session-Id, used for server-to-client messages
+ * 1. Streamable HTTP (2026-07-28): Requires MCP-Session-Id, used for server-to-client messages
  * 2. Legacy SSE (2024-11-05): No session required, returns endpoint event for backwards compatibility
  */
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -541,7 +541,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		return createLegacySseResponse(request, originResult.origin)
 	}
 
-	// Streamable HTTP transport (2025-11-25)
+	// Streamable HTTP transport (2026-07-28)
 	// Validate protocol version for new clients
 	const protocolError = validateProtocolVersion(request)
 	if (protocolError) {

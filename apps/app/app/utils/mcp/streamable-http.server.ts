@@ -1,7 +1,7 @@
 /**
  * MCP Streamable HTTP Transport Utilities
  *
- * Implements the MCP 2025-11-25 Streamable HTTP transport specification:
+ * Implements the MCP 2026-07-28 Streamable HTTP transport specification:
  * - Protocol version validation
  * - Origin validation (DNS rebinding protection)
  * - Session management with MCP-Session-Id
@@ -10,7 +10,7 @@
 
 import crypto from 'node:crypto'
 
-export const MCP_PROTOCOL_VERSION = '2025-11-25'
+export const MCP_PROTOCOL_VERSION = '2026-07-28'
 
 // Session store - in-memory for single instance deployments
 // For multi-instance, consider Redis or database storage
@@ -54,7 +54,7 @@ export function validateProtocolVersion(request: Request): Response | null {
 	const protocolVersion = request.headers.get('MCP-Protocol-Version')
 
 	// For backwards compatibility: if no header, assume 2025-03-26 (per spec)
-	// But we only support 2025-11-25, so we'll be lenient during migration
+	// But we only support 2026-07-28, so we'll be lenient during migration
 	if (!protocolVersion) {
 		// Allow requests without the header for backwards compatibility
 		// The spec says assume 2025-03-26, but we'll accept it
