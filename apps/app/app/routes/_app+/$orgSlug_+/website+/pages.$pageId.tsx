@@ -4972,7 +4972,7 @@ export default function PageBuilderRoute() {
 			try {
 				const encoded = encodeURIComponent(JSON.stringify(page.sections))
 				document.cookie = `epic_preview_sections=${encoded}; path=/; max-age=86400; SameSite=Lax`
-			} catch (ignoredErr) {
+			} catch (err) {
 				console.error('Failed to save preview sections to cookie', err)
 			}
 		}
