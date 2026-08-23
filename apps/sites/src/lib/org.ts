@@ -1,5 +1,6 @@
 import { type SiteFontSelection } from '@repo/common/site-fonts'
 import { ENV } from 'varlock/env'
+import { edgeCache } from '~/lib/site-headers'
 
 export type PublicSiteCustomFont = {
 	url: string
@@ -47,34 +48,74 @@ export type PublicOrganization = {
 }
 
 function getAppUrl(): string {
-	return (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(/\/$/, '')
+	return (
+		process.env.PUBLIC_APP_URL ||
+		ENV.PUBLIC_APP_URL ||
+		'http://localhost:3001'
+	).replace(/\/$/, '')
+}
+
+async function fetchAppJson<T>(
+	url: string,
+	useCache = true,
+): Promise<T | null> {
+	const cache = useCache ? edgeCache() : null
+	const cacheRequest = new Request(url, { method: 'GET' })
+	if (cache) {
+		const cached = await cache.match(cacheRequest)
+		if (cached?.ok) {
+			try {
+				return (await cached.json()) as T
+			} catch {
+				/* fall through to network */
+			}
+		}
+	}
+
+	try {
+		const response = await fetch(url, {
+			headers: { Accept: 'application/json' },
+			signal: AbortSignal.timeout(6_000),
+		})
+		if (!response.ok) return null
+		const data = (await response.json()) as T
+		if (cache) {
+			void cache.put(
+				cacheRequest,
+				new Response(JSON.stringify(data), {
+					headers: {
+						'Content-Type': 'application/json',
+						'Cache-Control': 'max-age=60',
+					},
+				}),
+			)
+		}
+		return data
+	} catch {
+		return null
+	}
 }
 
 async function fetchPublicOrganization(
 	params: URLSearchParams,
 ): Promise<PublicOrganization | null> {
-	const url = `${getAppUrl()}/resources/sites?${params.toString()}`
-
-	try {
-		const response = await fetch(url, {
-			headers: {
-				Accept: 'application/json',
-			},
-		})
-
-		if (!response.ok) {
-			return null
-		}
-
-		const data = (await response.json()) as PublicOrganization
-		if (!data?.name || !data?.slug) {
-			return null
-		}
-
-		return data
-	} catch {
+	const data = await fetchAppJson<PublicOrganization>(
+		`${getAppUrl()}/resources/sites?${params.toString()}`,
+	)
+	if (!data?.name || !data?.slug) {
 		return null
 	}
+	return data
+}
+
+export async function fetchPublishedOrganizationForHost(
+	orgSlug: string | null,
+	customHost: string | null,
+	locale?: string | null,
+): Promise<PublicOrganization | null> {
+	if (orgSlug) return fetchPublishedOrganization(orgSlug, locale)
+	if (customHost) return fetchPublishedOrganizationByHost(customHost, locale)
+	return null
 }
 
 /**
@@ -138,15 +179,8 @@ export async function fetchPublishedSitePage(options: {
 	if (options.preview) params.set('preview', 'true')
 	if (options.lng) params.set('lng', options.lng)
 
-	const url = `${getAppUrl()}/resources/sites/page?${params.toString()}`
-
-	try {
-		const response = await fetch(url, {
-			headers: { Accept: 'application/json' },
-		})
-		if (!response.ok) return null
-		return (await response.json()) as PublicWebsitePage
-	} catch {
-		return null
-	}
+	return fetchAppJson<PublicWebsitePage>(
+		`${getAppUrl()}/resources/sites/page?${params.toString()}`,
+		!options.preview,
+	)
 }

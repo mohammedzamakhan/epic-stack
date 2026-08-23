@@ -4,16 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.font-title {
-	font-family: 'Nunito Sans', sans-serif;
-}
-
-.font-cursive {
-	font-family:
-		Dancing Script,
-		sans-serif;
-}
-
 /*
  * Color tokens come from the org theme CSS injected in SiteLayout.
  * Keep only the Tailwind ↔ CSS-variable bridge here.

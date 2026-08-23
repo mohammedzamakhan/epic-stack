@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.schema
+.vercel
+.open-next
+.wrangler
+data
+public/media

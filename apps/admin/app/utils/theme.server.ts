@@ -1,5 +1,5 @@
+import { sharedCookieDomain } from '@repo/common/cookie-domain'
 import * as cookie from 'cookie'
-import { ENV } from 'varlock/env'
 
 const cookieName = 'en_theme'
 export type Theme = 'light' | 'dark'
@@ -12,9 +12,10 @@ export function getTheme(request: Request): Theme | null {
 }
 
 export function setTheme(theme: Theme | 'system') {
+	const domain = sharedCookieDomain()
 	const cookieOptions = {
 		path: '/',
-		...(ENV.ROOT_APP && { domain: `.${ENV.ROOT_APP}` }),
+		...(domain ? { domain } : {}),
 		sameSite: 'lax' as const,
 	}
 

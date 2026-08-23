@@ -13,7 +13,7 @@ import {
 } from './notifications.server.ts'
 
 vi.hoisted(() => {
-	process.env.APP_URL = 'http://localhost:3000'
+	process.env.BASE_URL = 'http://localhost:3000'
 })
 
 vi.mock('@repo/database', async (importOriginal) => {

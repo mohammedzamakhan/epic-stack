@@ -1,14 +1,8 @@
 ---
 import { msg } from '@lingui/core/macro'
 import SitePage from '~/components/SitePage.astro'
-import {
-	fetchPublishedOrganization,
-	fetchPublishedOrganizationByHost,
-} from '~/lib/org'
 
-const orgSlug = Astro.locals.orgSlug
-const customHost = Astro.locals.customHost
-const requestedLocale = Astro.locals.requestedLocale
+const organization = Astro.locals.organization
 const i18n = Astro.locals.i18n
 const yourProfile = i18n._(msg`Your Profile`)
 const updateDetails = i18n._(msg`Update your basic details below.`)
@@ -21,10 +15,6 @@ const saving = i18n._(msg`Saving...`)
 const profileUpdated = i18n._(msg`Profile updated successfully!`)
 const somethingWentWrong = i18n._(msg`Something went wrong.`)
 const networkError = i18n._(msg`Network error. Please try again.`)
-
-const organization = orgSlug
-	? await fetchPublishedOrganization(orgSlug, requestedLocale)
-	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
 
 if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })

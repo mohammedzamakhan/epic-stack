@@ -1,6 +1,8 @@
 import crypto from 'node:crypto'
 import { createCookieSessionStorage } from 'react-router'
 
+import { sharedCookieDomain } from '@repo/common/cookie-domain'
+
 const IMPERSONATION_SESSION_TTL = 15 * 60 * 1000 // 15 minutes in milliseconds
 export const IMPERSONATION_COOKIE_MAX_AGE = 15 * 60 // 15 minutes in seconds
 
@@ -32,7 +34,7 @@ export const impersonationSessionStorage = createCookieSessionStorage({
 		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,
-		domain: process.env.ROOT_APP ? `.${process.env.ROOT_APP}` : undefined,
+		domain: sharedCookieDomain(),
 		secrets: impersonationSecrets,
 		secure: process.env.NODE_ENV === 'production',
 	},

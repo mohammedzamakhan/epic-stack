@@ -1,3 +1,4 @@
+import { sharedCookieDomain } from '@repo/common/cookie-domain'
 import * as cookie from 'cookie'
 
 const cookieName = 'en_theme'
@@ -11,9 +12,10 @@ export function getTheme(request: Request): Theme | null {
 }
 
 export function setTheme(theme: Theme | 'system') {
+	const domain = sharedCookieDomain()
 	const cookieOptions = {
 		path: '/',
-		...(process.env.ROOT_APP && { domain: `.${process.env.ROOT_APP}` }),
+		...(domain ? { domain } : {}),
 		sameSite: 'lax' as const,
 	}
 

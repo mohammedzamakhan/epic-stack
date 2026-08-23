@@ -13,8 +13,8 @@ import { extractMentions, resolveMentionsToUserIds } from '@repo/notifications'
 
 import { sanitizeTextContent } from '#app/utils/content-sanitization.server.ts'
 
-const appUrl = process.env.APP_URL || process.env.BASE_URL
-invariant(appUrl, 'APP_URL or BASE_URL is required')
+const appUrl = process.env.BASE_URL
+invariant(appUrl, 'BASE_URL is required')
 
 interface NotifyCommentMentionsParams {
 	commentContent: string

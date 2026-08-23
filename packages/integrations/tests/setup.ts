@@ -33,7 +33,6 @@ beforeAll(() => {
 
 	// Set test environment variables
 	process.env.NODE_ENV = 'test'
-	process.env.ENCRYPTION_KEY = 'test-encryption-key-32-characters'
 	process.env.INTEGRATION_ENCRYPTION_KEY = 'test-encryption-key-32-characters'
 	process.env.INTEGRATIONS_OAUTH_STATE_SECRET =
 		'test-oauth-state-secret-32-chars'

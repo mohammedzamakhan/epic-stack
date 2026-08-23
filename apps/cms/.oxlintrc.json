@@ -1,0 +1,5 @@
+{
+  "$schema": "https://oxc.rs/schema/oxlintrc.json",
+  "extends": ["../../.oxlintrc.json"],
+  "ignorePatterns": ["src/migrations/**"]
+}

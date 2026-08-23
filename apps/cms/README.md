@@ -27,26 +27,17 @@ Core features:
 
 ## Storage Configuration
 
-Today this app uses **local file storage in every environment**:
-
-- Files are stored in the `public/media/` directory and served directly by
-  Next.js
-- No cloud storage credentials are required to run it
-- [`wrangler.jsonc`](./wrangler.jsonc) declares an `R2_BUCKET` binding, and
-  `@payloadcms/storage-r2` is a listed dependency, but no R2 plugin is
-  registered in `payload.config.ts` yet — production does not actually use R2
-
-See [CMS Storage Documentation](../../docs/cms-storage.md) for the full
-picture, including what it would take to wire R2 in.
+Local development stores files in `public/media/`. Production uses the same
+Cloudflare **R2** bucket (`epic-startup-cms-media`): S3 API credentials on
+Vercel, the `R2_BUCKET` Worker binding on Cloudflare. See
+[CMS storage](../../docs/cms-storage.md).
 
 ## Database
 
-Payload uses [`@payloadcms/db-sqlite`](https://payloadcms.com/docs/database/sqlite)
-pointed at a local SQLite file (`apps/cms/data/cms.db`) — in every
-environment, including the deployed Worker, since the `D1` binding declared
-in `wrangler.jsonc` is not yet wired into the adapter. There is no Postgres
-or MongoDB adapter in this app. See
-[CMS storage](../../docs/cms-storage.md) for details.
+Local development uses a SQLite file (`apps/cms/data/cms.db`). Vercel uses
+**Turso** (libsql) with the same `@payloadcms/db-sqlite` adapter. Cloudflare
+Workers can use the `D1` binding via `@payloadcms/db-d1-sqlite`. There is no
+Postgres or MongoDB adapter in this app.
 
 ## Quick Start
 
@@ -213,24 +204,21 @@ The seed script will also create a demo user for demonstration purposes only:
 
 ## Production and deployment
 
-This app builds and deploys to **Cloudflare Workers** with
-[OpenNext](https://opennext.js.org/cloudflare), not to Vercel, Payload Cloud,
-or Fly.io. Relevant `apps/cms/package.json` scripts:
+The free production host is **Vercel Hobby**. Cloudflare Workers' free 3 MiB
+gzip limit is too small for this Payload + Next admin bundle (~7 MiB). Workers
+Paid (10 MiB) is the optional one-platform path later. Adapters are selected
+in [`src/platform.ts`](./src/platform.ts) — see
+[CMS storage](../../docs/cms-storage.md).
 
 ```bash
-npm run build          # next build
-npm run build:worker    # opennextjs-cloudflare build
-npm run deploy:database # run Payload migrations (against the local SQLite
-                         # file baked into the build — not D1, see below)
-npm run deploy:app      # build + deploy the Worker
-npm run deploy          # deploy:database + deploy:app
+npm run build              # next build
+npm run deploy             # Vercel production (default)
+npm run deploy:vercel      # same
+npm run deploy:cloudflare  # OpenNext Worker (needs paid plan)
+npm run deploy:database    # payload migrate (Turso or local file)
+npm run deploy:database:d1 # migrate + D1 PRAGMA optimize
+npm run build:worker       # opennextjs-cloudflare build
 ```
-
-See [Deployment checklist](../../docs/deployment-checklist.md) for the
-provisioning steps in place today (D1 database, R2 bucket, Worker secrets,
-and the `deploy-cms` GitHub Actions job), and
-[CMS storage](../../docs/cms-storage.md) for why the D1/R2 bindings aren't
-actually used by Payload yet.
 
 ## Questions
 

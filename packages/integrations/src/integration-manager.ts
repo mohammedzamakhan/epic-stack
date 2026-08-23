@@ -835,12 +835,9 @@ export class IntegrationManager {
 	 * @returns Note URL
 	 */
 	private generateNoteUrl(note: OrganizationNote): string {
-		const baseUrl =
-			process.env.APP_BASE_URL || process.env.APP_URL || process.env.BASE_URL
+		const baseUrl = process.env.BASE_URL
 		if (!baseUrl) {
-			throw new Error(
-				'APP_BASE_URL environment variable is required (or set APP_URL/BASE_URL)',
-			)
+			throw new Error('BASE_URL environment variable is required')
 		}
 		return `${baseUrl}/app/notes/${note.id}`
 	}

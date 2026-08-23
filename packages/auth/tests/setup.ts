@@ -5,7 +5,6 @@ beforeAll(() => {
 	// Set test environment variables
 	process.env.NODE_ENV = 'test'
 	process.env.SESSION_SECRET = 'test-session-secret-key-32-chars-long'
-	process.env.ROOT_APP = 'example.com'
 
 	// Mock console methods to reduce noise in tests
 	global.console = {

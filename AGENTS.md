@@ -13,9 +13,10 @@ auth, tenant-db, AI, payments, storage, security, i18n, etc.).
 
 **Tech Stack**: React 19 + React Router 7, Node.js 22, SQLite + Drizzle,
 Tailwind CSS 4, TypeScript, Expo (mobile), Astro (marketing + tenant sites).
-App/Admin deploy on Fly.io with LiteFS. CMS deploys on Cloudflare Workers with
-D1 (SQLite) + R2. Regional tenant-api deploys on OCI Ampere (Riyadh + Ashburn)
-with per-org SQLite on a block volume.
+App/Admin deploy on Fly.io with LiteFS. CMS deploys on Vercel Hobby (Turso + R2
+via S3). Cloudflare Workers is an optional paid path (D1 + R2 binding) once the
+gzip bundle fits the 10 MiB plan. Regional tenant-api deploys on OCI Ampere
+(Riyadh + Ashburn) with per-org SQLite on a block volume.
 
 **Monorepo Structure**:
 
@@ -366,18 +367,22 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 
 **Environment Variables**:
 
-- `SESSION_SECRET` - Required, validated on startup
+- `SESSION_SECRET` - Required, validated on startup (App/Admin)
 - `AUDIT_LOG_SECRET_KEY` - Required in production for HMAC audit log integrity
-  verification
-- `APP_URL` / `BASE_URL` / `APP_BASE_URL` - Base application URLs for email
-  generation, OAuth callbacks, and external links
-- `ENCRYPTION_KEY` - 32 characters for general encryption
-- `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO
-- `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integrations
+  verification (App/Admin)
+- `BASE_URL` - App/Admin public origin for emails, OAuth callbacks, and JWT
+  issuer/audience. Canonical name in App code.
+- `APP_URL` - Tenant-api only: US App origin for org-flag lookup when this node
+  has no control-plane SQLite
+- `APP_BASE_URL` - jobs-cron Worker only: App origin the worker POSTs to
+- `SSO_ENCRYPTION_KEY` - 64 hex chars (32 bytes) for SSO IdP secrets and org S3
+  credentials
+- `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integration OAuth tokens (App
+  only)
 - `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
 - `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
   HTML for browser-direct auth (not a server proxy)
-- `INTERNAL_COMMAND_TOKEN` - Shared by App, every tenant-api, and
+- `INTERNAL_COMMAND_TOKEN` - Shared by App, Admin, every tenant-api, and
   `apps/jobs-cron` (≥16 chars). Authenticates cron POSTs to `/resources/jobs/*`
   and tenant provision/deprovision.
 - `JOBS_CRON_WORKER_URL` - App only. Public URL of `apps/jobs-cron` Worker used
@@ -388,18 +393,19 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
 - `DATA_REGION` - Tenant-api only: `us` or `ksa`
 - `TENANT_DB_DIR` - Tenant-api only: directory for `tenant_{orgId}.db` (OCI:
   `/data/tenants`)
-- `JWT_SECRET` / `AUTH_HMAC_SECRET` - Tenant-api only (customer tokens / OTP
-  hashes). Sites must not have these.
+- `JWT_SECRET` - App: mobile/API operator tokens. Tenant-api: customer tokens.
+  Same name, **must not share values**.
+- `AUTH_HMAC_SECRET` - Tenant-api only (OTP / refresh hashes). Sites must not
+  have this.
+- `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` - Tenant-api
+  US node only (`@repo/sms`). Do not set on App or KSA.
 
 **CMS Storage**:
 
-- Payload is currently configured for **local file storage only**
-  (`apps/cms/public/media/`), in every environment — `Media.ts`'s `staticDir` is
-  unconditional, and no `@payloadcms/storage-r2` plugin is registered
-- `apps/cms/wrangler.jsonc` declares an `R2_BUCKET` binding and
-  `apps/cms/.env.schema` documents R2 credentials, but that binding is not yet
-  wired into Payload, so production does not actually use R2 today
-- See `docs/cms-storage.md` for details
+- Local: `apps/cms/public/media/`
+- Vercel: R2 via S3 API (`R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`)
+- Cloudflare Workers: `R2_BUCKET` binding (`@payloadcms/storage-r2`)
+- See `docs/cms-storage.md`
 
 ## PR & Commit Guidelines
 
@@ -466,8 +472,9 @@ queries. Native SQL/query helpers also live on `db` from the same package.
 
 ## Deployment
 
-**Platform**: Fly.io (App/Admin) + Cloudflare Workers (CMS, jobs-cron) + OCI
-Ampere (tenant-api) + Cloudflare Pages (Sites / marketing web)
+**Platform**: Fly.io (App/Admin) + Vercel (CMS) + Cloudflare Workers (jobs-cron;
+optional CMS on paid plan) + OCI Ampere (tenant-api) + Cloudflare Pages (Sites /
+marketing web)
 
 **Deployment Trigger**: Push to `main` (production) or `dev` (staging)
 
@@ -478,8 +485,8 @@ Ampere (tenant-api) + Cloudflare Pages (Sites / marketing web)
 3. Unit tests (Vitest)
 4. E2E tests (Playwright, 60min timeout)
 5. Docker build (app, admin on Fly)
-6. Deploy App/Admin to Fly.io; CMS and jobs-cron to Cloudflare Workers; Sites
-   and marketing web to Cloudflare Pages
+6. Deploy App/Admin to Fly.io; CMS to Vercel; jobs-cron to Cloudflare Workers;
+   Sites and marketing web to Cloudflare Pages
 7. Tenant-api: build `linux/arm64`, push GHCR, SSH to OCI Ashburn + Riyadh VMs
 
 **Zero-Downtime Deployments**:

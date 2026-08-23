@@ -62,6 +62,12 @@ export default defineConfig({
 			tailwindcss(),
 			lingui(),
 			fontless({
+				defaults: {
+					preload: false,
+					weights: [400, 500, 600, 700],
+					styles: ['normal'],
+					subsets: ['latin', 'latin-ext', 'arabic'],
+				},
 				families: [
 					{
 						name: 'GeistPixel',
@@ -139,6 +145,23 @@ export default defineConfig({
 				process.env.NODE_ENV || 'production',
 			),
 		},
+		build: {
+			rollupOptions: {
+				output: {
+					assetFileNames(info) {
+						const name = info.names?.[0] ?? info.name ?? ''
+						if (name.includes('site-fonts')) {
+							return '_astro/site-fonts.css'
+						}
+						return '_astro/[name].[hash][extname]'
+					},
+				},
+			},
+		},
+	},
+
+	build: {
+		inlineStylesheets: 'always',
 	},
 
 	adapter:

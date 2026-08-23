@@ -3,18 +3,15 @@ import { ENV } from 'varlock/env'
 import { getPageTitle } from '@repo/config/brand'
 import SitePage from '~/components/SitePage.astro'
 import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
-import {
-	fetchPublishedOrganization,
-	fetchPublishedOrganizationByHost,
-	fetchPublishedSitePage,
-} from '~/lib/org'
+import { fetchPublishedSitePage } from '~/lib/org'
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
 const requestedLocale = Astro.locals.requestedLocale
+const organization = Astro.locals.organization
 const slug = Astro.params.slug?.replace(/^\/+|\/+$/g, '') ?? ''
 
-if (!orgSlug && !customHost) {
+if (!organization) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
 }
 
@@ -22,21 +19,14 @@ if (!slug) {
 	return Astro.rewrite('/')
 }
 
-const organization = orgSlug
-	? await fetchPublishedOrganization(orgSlug, requestedLocale)
-	: await fetchPublishedOrganizationByHost(customHost!, requestedLocale)
-
-if (!organization) {
-	return new Response('Not Found', { status: 404, statusText: 'Not Found' })
-}
-
-const page = await fetchPublishedSitePage({
-	slug: orgSlug,
-	host: customHost,
-	pageSlug: slug,
-	preview: Astro.url.searchParams.get('preview') === 'true',
-	lng: requestedLocale,
-})
+const page = await (Astro.locals.publishedPagePromise ??
+	fetchPublishedSitePage({
+		slug: orgSlug,
+		host: customHost,
+		pageSlug: slug,
+		preview: Astro.url.searchParams.get('preview') === 'true',
+		lng: requestedLocale,
+	}))
 
 if (!page) {
 	return new Response('Not Found', { status: 404, statusText: 'Not Found' })

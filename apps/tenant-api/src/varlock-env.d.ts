@@ -9,6 +9,10 @@ declare module 'varlock/env' {
 		readonly TENANT_DB_DIR?: string
 		readonly DATA_REGION: string
 		readonly ROOT_APP?: string
+		readonly TWILIO_ACCOUNT_SID?: string
+		readonly TWILIO_AUTH_TOKEN?: string
+		readonly TWILIO_FROM_NUMBER?: string
+		readonly GLOBAL_SMS_CAP?: string
 	}
 }
 

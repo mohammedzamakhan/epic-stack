@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "astro check",
+    "test": "vitest run",
     "lingui:extract": "lingui extract --clean"
   },
   "dependencies": {

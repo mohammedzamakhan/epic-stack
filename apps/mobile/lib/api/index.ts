@@ -10,7 +10,7 @@ export { JWTHttpClient } from './jwt-http-client'
 // Create the default JWT auth API instance
 import { createDefaultJWTAuthApi } from './jwt-auth-api'
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001'
 
 // Export the JWT auth API instance for use throughout the app
 export const jwtAuthApi = createDefaultJWTAuthApi(API_BASE_URL)

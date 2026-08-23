@@ -1,72 +1,85 @@
 # CMS Storage
 
-The CMS (`apps/cms`, Payload CMS on Cloudflare Workers) has its own storage
-story, separate from the **App**'s Tigris image storage — see
-[Image storage](./image-storage.md) for that. Do not confuse the two: CMS
-storage is described below; App/Admin user images go to Tigris.
+The CMS (`apps/cms`, Payload) has its own storage story, separate from the
+**App**'s Tigris image storage — see [Image storage](./image-storage.md). Do not
+confuse the two.
 
-## Current state (as shipped)
+## Default production: Vercel (free)
 
-As of this writing, Payload is configured to use **local storage only, in every
-environment**:
+The Payload admin + API is too large for Cloudflare Workers' **free 3 MiB gzip**
+script limit (~7 MiB today). The supported free production host is **Vercel
+Hobby**.
 
-- [`apps/cms/src/payload.config.ts`](../apps/cms/src/payload.config.ts) uses
-  `sqliteAdapter` from `@payloadcms/db-sqlite`, pointed at a local SQLite file
-  (`apps/cms/data/cms.db`, or `DATABASE_URL` if it's set to something other than
-  a `file:.`-prefixed path)
-- [`apps/cms/src/collections/Media.ts`](../apps/cms/src/collections/Media.ts)
-  sets `staticDir` to `apps/cms/public/media/` unconditionally — there is no
-  environment check
-- No `@payloadcms/storage-r2` plugin is registered in `payload.config.ts`'s
-  `plugins` array, even though it's already a dependency in
-  `apps/cms/package.json`
+| Concern  | Local `next dev`                     | Vercel Hobby                                | Cloudflare Workers (paid, 10 MiB)      |
+| -------- | ------------------------------------ | ------------------------------------------- | -------------------------------------- |
+| Database | SQLite file (`apps/cms/data/cms.db`) | Turso (`libsql://` + `DATABASE_AUTH_TOKEN`) | D1 binding `D1`                        |
+| Media    | `public/media/`                      | Same R2 bucket via S3 API                   | Same R2 bucket via `R2_BUCKET` binding |
+| Deploy   | `npm run dev:cms`                    | `npm run deploy:vercel`                     | `npm run deploy:cloudflare`            |
 
-Practically: content and media are stored locally regardless of whether you're
-running `npm run dev:cms` or the deployed Worker. Nothing currently routes
-through Cloudflare D1 or R2.
+Switching Vercel → Cloudflare later is env + host, not a rewrite: keep SQLite
+(Turso or dump into D1) and keep the `epic-startup-cms-media` R2 bucket.
 
-## Declared, not-yet-wired production infrastructure
+## How the adapters are chosen
 
-[`apps/cms/wrangler.jsonc`](../apps/cms/wrangler.jsonc) declares two Cloudflare
-bindings for the Worker, created via the commands in
-[Deployment checklist](./deployment-checklist.md):
+[`apps/cms/src/platform.ts`](../apps/cms/src/platform.ts) picks implementations
+at boot:
 
-- `D1` — a Cloudflare D1 (SQLite) database, created with `wrangler d1 create`
-- `R2_BUCKET` — an R2 bucket for media, created with `wrangler r2 bucket create`
+1. **Database**
+   - Cloudflare Worker with a `D1` binding → `@payloadcms/db-d1-sqlite`
+   - Otherwise → `@payloadcms/db-sqlite` with `DATABASE_URL` (file or Turso)
+2. **Media**
+   - Cloudflare Worker with `R2_BUCKET` → `@payloadcms/storage-r2`
+   - `R2_ACCESS_KEY_ID` + `R2_SECRET_ACCESS_KEY` + account/bucket →
+     `@payloadcms/storage-s3` against the R2 S3 endpoint
+   - Otherwise → local `staticDir`
 
-[`apps/cms/.env.schema`](../apps/cms/.env.schema) also documents the R2
-credentials (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`,
-`CLOUDFLARE_ACCOUNT_ID`) that `@payloadcms/storage-r2` would need.
+`getCloudflareContext()` is skipped when `VERCEL` is set so OpenNext/wrangler
+never run on the Hobby build.
 
-Creating the D1 database and R2 bucket, and setting these variables, does
-**not** by itself make Payload use them — that requires code changes that
-haven't been made yet:
+## Vercel env
 
-1. Point the SQLite adapter at the `D1` binding instead of a local file path
-   (Payload's Cloudflare/D1 support requires passing the binding through to
-   `sqliteAdapter`, not just setting `DATABASE_URL`)
-2. Add `@payloadcms/storage-r2` to the `plugins` array in `payload.config.ts`,
-   configured for the `media` collection and the `R2_BUCKET` binding/credentials
-
-## Configuration
-
-Relevant variables, defined in
-[`apps/cms/.env.schema`](../apps/cms/.env.schema):
+Create a Turso database (free [Starter plan](https://turso.tech/pricing)), then
+set on the Vercel project:
 
 ```bash
-# Not currently read anywhere in apps/cms/src — see "Declared, not-yet-wired" above
+DATABASE_URL=libsql://….turso.io
+DATABASE_AUTH_TOKEN=
+PAYLOAD_SECRET=
+CRON_SECRET=
+PREVIEW_SECRET=
+NEXT_PUBLIC_SERVER_URL=https://<cms>.vercel.app
+WEB_APP_URL=https://epic-startup.zama-887.workers.dev
+# R2 S3 API (same bucket the Worker binding uses)
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
 R2_BUCKET_NAME=epic-startup-cms-media
-CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_ACCOUNT_ID=8870705ba38bb749459b00ab2949f857
 ```
 
-## Database
+R2 S3 tokens are created in the Cloudflare dashboard under **R2 → Manage API
+Tokens** ([docs](https://developers.cloudflare.com/r2/api/tokens/)).
 
-CMS content (pages, posts, media metadata) is intended to live in Cloudflare
-**D1** in production, separate from the App/Admin control-plane SQLite database
-— but per above, the code currently always uses a local SQLite file via
-`@payloadcms/db-sqlite`, including in the `deploy-cms` GitHub Actions job (which
-runs `payload migrate` against that local file, not the `D1` binding). See
-[Deployment checklist](./deployment-checklist.md) for the D1/R2 provisioning
-steps that are in place today.
+Point `apps/web` `PUBLIC_CMS_URL` at the Vercel origin after the first deploy.
+
+## Cloudflare Workers (optional, ~$5/mo)
+
+Workers Paid raises the gzip limit to 10 MiB, which is enough for the current
+OpenNext bundle. `wrangler.jsonc` already binds D1 `epic-startup-cms` and R2
+`epic-startup-cms-media`. Then:
+
+```bash
+cd apps/cms
+npx wrangler secret put PAYLOAD_SECRET
+npx wrangler secret put CRON_SECRET
+npx wrangler secret put PREVIEW_SECRET
+npm run deploy:cloudflare
+```
+
+No S3 keys are required on Workers; the `R2_BUCKET` binding is used instead. The
+smallest Cloudflare move is to keep the same Turso `DATABASE_URL` as Worker
+secrets so you do not copy data into D1. D1 is only needed if you want to drop
+Turso.
+
+## Configuration reference
+
+Variables are defined in [`apps/cms/.env.schema`](../apps/cms/.env.schema).

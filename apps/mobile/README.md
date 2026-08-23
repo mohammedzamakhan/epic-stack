@@ -84,14 +84,11 @@ Copy `.env.example` to `.env` and configure:
 
 ```bash
 # API Configuration
-EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_API_URL=http://localhost:3001
 
 # OAuth Configuration
 EXPO_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 EXPO_PUBLIC_GITHUB_CLIENT_ID=your_github_client_id
-
-# App Configuration
-EXPO_PUBLIC_APP_ENV=development
 ```
 
 ### App Configuration

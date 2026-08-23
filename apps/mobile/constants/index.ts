@@ -4,7 +4,7 @@ export const APP_VERSION = '1.0.0'
 
 // API Configuration
 export const API_BASE_URL =
-	process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'
+	process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001'
 
 // Storage keys
 export const STORAGE_KEYS = {

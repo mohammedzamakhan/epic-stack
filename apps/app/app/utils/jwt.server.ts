@@ -14,8 +14,8 @@ const JWT_SECRET = process.env.JWT_SECRET
 const ACCESS_TOKEN_EXPIRES_IN = '15m' // 15 minutes
 const REFRESH_TOKEN_BYTES = 48
 const REFRESH_TOKEN_EXPIRES_DAYS = 30
-const JWT_ISSUER = process.env.APP_URL || 'epic-stack'
-const JWT_AUDIENCE = process.env.APP_URL || 'epic-stack-client'
+const JWT_ISSUER = process.env.BASE_URL || 'epic-stack'
+const JWT_AUDIENCE = process.env.BASE_URL || 'epic-stack-client'
 
 export interface JWTPayload {
 	sub: string // user ID

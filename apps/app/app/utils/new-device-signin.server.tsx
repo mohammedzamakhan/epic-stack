@@ -128,11 +128,9 @@ export async function sendNewDeviceSigninEmail({
 	// Get first name from user's name
 	const firstName = user.name?.split(' ')[0] || 'there'
 
-	const baseUrl = process.env.BASE_URL || process.env.APP_URL
+	const baseUrl = process.env.BASE_URL
 	if (!baseUrl) {
-		throw new Error(
-			'BASE_URL environment variable is required (or set APP_URL)',
-		)
+		throw new Error('BASE_URL environment variable is required')
 	}
 
 	// Create secure account URL

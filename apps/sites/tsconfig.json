@@ -14,7 +14,8 @@
 		"env.d.ts",
 		"src/app.d.ts",
 		"src/types/**/*.d.ts",
-		"lingui.config.ts"
+		"lingui.config.ts",
+		"vitest.config.ts"
 	],
 	"exclude": ["dist", "node_modules"]
 }

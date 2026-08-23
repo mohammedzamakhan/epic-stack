@@ -90,11 +90,8 @@ export async function sendOrganizationInvitationEmail({
 	organizationName: string
 	inviterName: string
 }) {
-	const baseUrl = process.env.APP_URL || process.env.BASE_URL
-	if (!baseUrl)
-		throw new Error(
-			'APP_URL environment variable is required (or set BASE_URL)',
-		)
+	const baseUrl = process.env.BASE_URL
+	if (!baseUrl) throw new Error('BASE_URL environment variable is required')
 	return sendEmail({
 		to: invitation.email,
 		subject: `You're invited to join ${organizationName}`,

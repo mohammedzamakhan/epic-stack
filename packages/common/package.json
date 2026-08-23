@@ -17,6 +17,11 @@
       "import": "./src/url.ts",
       "default": "./src/url.ts"
     },
+    "./cookie-domain": {
+      "types": "./src/cookie-domain.server.ts",
+      "import": "./src/cookie-domain.server.ts",
+      "default": "./src/cookie-domain.server.ts"
+    },
     "./cookie-consent": {
       "types": "./src/cookie-consent.server.ts",
       "import": "./src/cookie-consent.server.ts",

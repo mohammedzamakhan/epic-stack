@@ -206,9 +206,9 @@ volume regardless of whether D1/R2 are wired in.
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(openssl rand -hex 32)" \
-    ENCRYPTION_KEY="$(openssl rand -hex 32)" \
     SSO_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
     INTEGRATION_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+    AUDIT_LOG_SECRET_KEY="$(openssl rand -hex 32)" \
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
@@ -226,9 +226,9 @@ volume regardless of whether D1/R2 are wired in.
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(openssl rand -hex 32)" \
-    ENCRYPTION_KEY="$(openssl rand -hex 32)" \
     SSO_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
     INTEGRATION_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+    AUDIT_LOG_SECRET_KEY="$(openssl rand -hex 32)" \
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
     INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
@@ -245,12 +245,11 @@ volume regardless of whether D1/R2 are wired in.
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(flyctl secrets list --app epic-startup | grep SESSION_SECRET | awk '{print $2}')" \
-    ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup | grep ENCRYPTION_KEY | awk '{print $2}')" \
     SSO_ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup | grep SSO_ENCRYPTION_KEY | awk '{print $2}')" \
-    INTEGRATION_ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup | grep INTEGRATION_ENCRYPTION_KEY | awk '{print $2}')" \
+    AUDIT_LOG_SECRET_KEY="$(flyctl secrets list --app epic-startup | grep AUDIT_LOG_SECRET_KEY | awk '{print $2}')" \
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
-    INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    INTERNAL_COMMAND_TOKEN="$(flyctl secrets list --app epic-startup | grep INTERNAL_COMMAND_TOKEN | awk '{print $2}')" \
     --app epic-startup-admin
   ```
 
@@ -261,12 +260,11 @@ volume regardless of whether D1/R2 are wired in.
   ```bash
   flyctl secrets set \
     SESSION_SECRET="$(flyctl secrets list --app epic-startup-staging | grep SESSION_SECRET | awk '{print $2}')" \
-    ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup-staging | grep ENCRYPTION_KEY | awk '{print $2}')" \
     SSO_ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup-staging | grep SSO_ENCRYPTION_KEY | awk '{print $2}')" \
-    INTEGRATION_ENCRYPTION_KEY="$(flyctl secrets list --app epic-startup-staging | grep INTEGRATION_ENCRYPTION_KEY | awk '{print $2}')" \
+    AUDIT_LOG_SECRET_KEY="$(flyctl secrets list --app epic-startup-staging | grep AUDIT_LOG_SECRET_KEY | awk '{print $2}')" \
     DATABASE_URL="file:/litefs/data/sqlite.db" \
     CACHE_DATABASE_URL="file:/litefs/data/cache.db" \
-    INTERNAL_COMMAND_TOKEN="$(openssl rand -hex 32)" \
+    INTERNAL_COMMAND_TOKEN="$(flyctl secrets list --app epic-startup-staging | grep INTERNAL_COMMAND_TOKEN | awk '{print $2}')" \
     --app epic-startup-admin-staging
   ```
 
@@ -286,24 +284,26 @@ block volume per region. Home region = Riyadh.
 - [ ] **5.4d** Put Cloudflare (or a Tunnel) in front of port 8080. Skip OCI load
       balancers and NAT.
 
-### CMS Worker Secrets (Cloudflare, not Fly)
+### CMS (Vercel Hobby; Cloudflare Workers optional)
 
-CMS has a single Worker (no separate staging app). Secrets are set on Cloudflare
-via Wrangler, not `flyctl secrets`:
+The Payload admin exceeds Cloudflare's free 3 MiB Worker limit. Default
+production is Vercel. See [CMS storage](./cms-storage.md).
 
-- [ ] **5.5** Set the CMS Worker secrets
+- [ ] **5.5** Create a Turso database and set Vercel project env:
+      `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `PAYLOAD_SECRET`, `CRON_SECRET`,
+      `PREVIEW_SECRET`, `NEXT_PUBLIC_SERVER_URL`, `WEB_APP_URL`,
+      `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`,
+      `CLOUDFLARE_ACCOUNT_ID`.
+- [ ] **5.6** Set GitHub Actions secrets for `deploy-cms`: `VERCEL_TOKEN`,
+      `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+- [ ] **5.6-cf** (Optional, Workers Paid) Set CMS Worker secrets and
+      `vars.CMS_DEPLOY_TARGET=cloudflare` to run `deploy-cms-cloudflare`:
   ```bash
   cd apps/cms
   npx wrangler secret put PAYLOAD_SECRET
   npx wrangler secret put CRON_SECRET
   npx wrangler secret put PREVIEW_SECRET
   ```
-  `NEXT_PUBLIC_SERVER_URL` is a plaintext var already set in
-  `apps/cms/wrangler.jsonc`; update it to your real `workers.dev` (or custom)
-  domain there instead of as a secret.
-- [ ] **5.6** Set the GitHub Actions secrets the `deploy-cms` job needs:
-      `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (shared with the
-      website/Sites Cloudflare Pages jobs).
 
 ### Jobs Cron Worker (Cloudflare)
 
@@ -353,10 +353,9 @@ via Wrangler, not `flyctl secrets`:
 - [ ] **6.3** Check `.github/workflows/deploy.yml` includes all apps
   - [ ] `container-app` / `deploy-app` jobs exist
   - [ ] `container-admin` / `deploy-admin` jobs exist
-  - [ ] `deploy-cms` job exists (builds with OpenNext, runs `payload migrate`
-        against the local SQLite file baked into the build — not D1, see
-        [CMS storage](./cms-storage.md) — then `wrangler deploy`, no container
-        step)
+  - [ ] `deploy-cms` job exists (Vercel; skips if `VERCEL_TOKEN` is unset)
+  - [ ] `deploy-cms-cloudflare` is optional
+        (`vars.CMS_DEPLOY_TARGET=cloudflare`)
   - [ ] `container-tenant-api` builds `linux/arm64` and pushes to GHCR
   - [ ] `deploy-tenant-api` SSHs to OCI VMs when `OCI_TENANT_*_HOST` is set
   - [ ] `deploy-web` and `deploy-sites` Cloudflare Pages jobs exist
@@ -588,14 +587,15 @@ CMS has one Worker environment (the `NEXT_PUBLIC_SERVER_URL` var in
 
 ## 💰 Cost Breakdown
 
-| Service                | Monthly Cost | Notes                                    |
-| ---------------------- | ------------ | ---------------------------------------- |
-| **Fly.io Apps**        | $10-20       | App / Admin only                         |
-| **OCI tenant-api**     | $0-20        | Free Riyadh A1 + paid Ashburn A1         |
-| **Cloudflare Workers** | $0           | CMS Worker, free tier covers low traffic |
-| **Cloudflare D1 + R2** | $0           | Free tier; pay-as-you-go beyond limits   |
-| **Cloudflare Pages**   | $0           | Website + Sites, free tier               |
-| **Total**              | **$10-40**   | Skip OCI LB / NAT                        |
+| Service                | Monthly Cost | Notes                                  |
+| ---------------------- | ------------ | -------------------------------------- |
+| **Fly.io Apps**        | $10-20       | App / Admin only                       |
+| **OCI tenant-api**     | $0-20        | Free Riyadh A1 + paid Ashburn A1       |
+| **Vercel (CMS)**       | $0           | Hobby plan; Turso + R2 S3              |
+| **Cloudflare Workers** | $0–5         | jobs-cron free; CMS Worker needs Paid  |
+| **Cloudflare D1 + R2** | $0           | Free tier; pay-as-you-go beyond limits |
+| **Cloudflare Pages**   | $0           | Website + Sites, free tier             |
+| **Total**              | **$10-40**   | Skip OCI LB / NAT                      |
 
 ---
 
@@ -615,17 +615,22 @@ CMS has one Worker environment (the `NEXT_PUBLIC_SERVER_URL` var in
 - [ ] Monitor LiteFS logs for coordination issues
 - [ ] Verify volumes are properly mounted
 
-### If the CMS Worker Won't Deploy
+### If the CMS Vercel Deploy Won't Run
 
-- [ ] Verify `apps/cms/wrangler.jsonc` has a real `database_id` (not the
-      placeholder `DATABASE_ID`) from `wrangler d1 create` — required for the
-      binding to exist, even though Payload doesn't use it yet (see
-      [CMS storage](./cms-storage.md))
-- [ ] Check Worker secrets are set: `npx wrangler secret list` (from `apps/cms`)
-- [ ] Tail Worker logs: `npx wrangler tail` (from `apps/cms`)
-- [ ] Confirm the R2 bucket exists: `npx wrangler r2 bucket list`
-- [ ] Confirm `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` are set as GitHub
-      Actions secrets for the `deploy-cms` job
+- [ ] Confirm Turso `DATABASE_URL` + `DATABASE_AUTH_TOKEN` are set on the Vercel
+      project
+- [ ] Confirm R2 S3 keys (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
+      `CLOUDFLARE_ACCOUNT_ID`, `R2_BUCKET_NAME`) are set
+- [ ] Confirm GitHub secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`,
+      `VERCEL_PROJECT_ID`
+- [ ] See [CMS storage](./cms-storage.md)
+
+### If the optional CMS Worker Won't Deploy
+
+- [ ] Free Workers is capped at 3 MiB gzip; use Workers Paid or stay on Vercel
+- [ ] Verify `apps/cms/wrangler.jsonc` has a real D1 `database_id`
+- [ ] Check Worker secrets: `npx wrangler secret list` (from `apps/cms`)
+- [ ] Set `vars.CMS_DEPLOY_TARGET=cloudflare` for the optional CI job
 
 ### If Deployments Fail
 

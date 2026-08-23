@@ -1,12 +1,12 @@
-// storage-adapter-import-placeholder
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
-
 import crypto from 'node:crypto'
-import fs from 'node:fs'
 import path from 'node:path'
-import { buildConfig, type PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { buildConfig, type PayloadRequest } from 'payload'
+import sharp from 'sharp'
+
+import { defaultLexical } from '@/fields/defaultLexical'
+import { Banner } from './Banner/config'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
@@ -14,24 +14,19 @@ import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
-import { Banner } from './Banner/config'
+import {
+  getCloudflareEnv,
+  getCorsOrigins,
+  getCsrfOrigins,
+  getDatabaseAdapter,
+  getMediaStoragePlugins,
+} from './platform'
 import { plugins } from './plugins'
-import { defaultLexical } from '@/fields/defaultLexical'
-import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const getDatabaseUrl = () => {
-  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:.')) {
-    return process.env.DATABASE_URL
-  }
-  const dataDir = path.resolve(dirname, '../data')
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-  return `file:${path.resolve(dataDir, 'cms.db')}`
-}
+const cloudflareEnv = await getCloudflareEnv()
 
 export default buildConfig({
   admin: {
@@ -64,42 +59,14 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: sqliteAdapter({
-    client: {
-      url: getDatabaseUrl(),
-    },
-  }),
+  db: getDatabaseAdapter(cloudflareEnv),
   collections: [Pages, Posts, Media, Categories, Users],
-  cors: [
-    getServerSideURL(),
-    'https://cms.epic-startup.me:2999',
-    'https://epic-startup.me:2999',
-    'https://*.epic-startup.me:2999',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3006',
-    'http://localhost:2999',
-    'https://*.vercel.app',
-    'https://glorious-space-spork-jr6jrp7r4p3p7pj-3000.app.github.dev',
-  ].filter(Boolean),
-  csrf: [
-    getServerSideURL(),
-    'https://cms.epic-startup.me:2999',
-    'https://epic-startup.me:2999',
-    'https://*.epic-startup.me:2999',
-    'http://localhost:3006',
-    'http://localhost:2999',
-  ].filter(Boolean),
+  cors: getCorsOrigins(),
+  csrf: getCsrfOrigins(),
   globals: [Header, Footer, Banner],
-  plugins: [
-    ...plugins,
-    // R2 storage for media in production
-    // In development, Payload uses default local storage (public/media directory)
-    // The R2 bucket binding is provided by the Cloudflare Workers runtime
-    // via wrangler.jsonc d1_databases / r2_buckets config
-  ],
+  plugins: [...plugins, ...getMediaStoragePlugins(cloudflareEnv)],
   secret: process.env.PAYLOAD_SECRET,
+  sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

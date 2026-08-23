@@ -4,6 +4,7 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://loc
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(process.env.VERCEL ? { serverExternalPackages: ['wrangler', '@opennextjs/cloudflare'] } : {}),
   allowedDevOrigins: [
     'cms.epic-startup.me',
     'cms.epic-startup.me:2999',
