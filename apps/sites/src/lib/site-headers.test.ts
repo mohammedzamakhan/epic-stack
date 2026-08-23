@@ -91,14 +91,12 @@ describe('asAstroResponse', () => {
 
 describe('publishedHtmlCacheUrl', () => {
 	it('keys cache entries by the public Host header, not the worker origin', () => {
-		const requestUrl = new URL(
-			'https://epic-startup-sites.example.workers.dev/',
-		)
+		const requestUrl = new URL('https://sites.example.workers.dev/')
 		expect(
-			publishedHtmlCacheUrl(requestUrl, 'acme12.epic-startup.dev').href,
-		).toBe('https://acme12.epic-startup.dev/')
+			publishedHtmlCacheUrl(requestUrl, 'acme12.preview.example.dev').href,
+		).toBe('https://acme12.preview.example.dev/')
 		expect(
-			publishedHtmlCacheUrl(requestUrl, 'acme13.epic-startup.dev').href,
-		).toBe('https://acme13.epic-startup.dev/')
+			publishedHtmlCacheUrl(requestUrl, 'acme13.preview.example.dev').href,
+		).toBe('https://acme13.preview.example.dev/')
 	})
 })

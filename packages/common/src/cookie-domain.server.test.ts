@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest'
+
+import { getBrandDomain } from '@repo/config/brand'
+
 import {
 	sharedCookieDomain,
 	sharedCookieDomainFromHost,
@@ -6,12 +9,14 @@ import {
 
 describe('sharedCookieDomainFromHost', () => {
 	it('strips the app/admin label from a two-label apex', () => {
-		expect(sharedCookieDomainFromHost('app.menuza.io')).toBe('.menuza.io')
-		expect(sharedCookieDomainFromHost('app.epic-startup.dev:2999')).toBe(
+		expect(sharedCookieDomainFromHost('app.epic-startup.dev')).toBe(
 			'.epic-startup.dev',
 		)
-		expect(sharedCookieDomainFromHost('admin.epic-startup.me')).toBe(
-			'.epic-startup.me',
+		expect(sharedCookieDomainFromHost('app.preview.example.dev:2999')).toBe(
+			'.preview.example.dev',
+		)
+		expect(sharedCookieDomainFromHost(`admin.${getBrandDomain()}`)).toBe(
+			`.${getBrandDomain()}`,
 		)
 	})
 
@@ -19,7 +24,7 @@ describe('sharedCookieDomainFromHost', () => {
 		expect(sharedCookieDomainFromHost('localhost:3001')).toBeUndefined()
 		expect(sharedCookieDomainFromHost('127.0.0.1')).toBeUndefined()
 		expect(
-			sharedCookieDomainFromHost('epic-startup-app.zama-887.workers.dev'),
+			sharedCookieDomainFromHost('example-app.example.workers.dev'),
 		).toBeUndefined()
 	})
 
@@ -30,7 +35,9 @@ describe('sharedCookieDomainFromHost', () => {
 
 describe('sharedCookieDomain', () => {
 	it('reads the apex from BASE_URL', () => {
-		expect(sharedCookieDomain('https://app.menuza.io')).toBe('.menuza.io')
+		expect(sharedCookieDomain('https://app.epic-startup.dev')).toBe(
+			'.epic-startup.dev',
+		)
 		expect(sharedCookieDomain('http://localhost:3001')).toBeUndefined()
 	})
 })

@@ -218,9 +218,9 @@ async function setupDeployment({ rootDirectory }) {
 	console.log(`🗄️ Setting up Tigris object storage`)
 	const $S = $({ stdio: ['inherit', 'ignore', 'inherit'], cwd: rootDirectory })
 	if (shouldSetupStaging) {
-		await $S`fly storage create --yes --app ${APP_NAME}-staging --name epic-startup-${APP_NAME}-staging`
+		await $S`fly storage create --yes --app ${APP_NAME}-staging --name ${APP_NAME}-staging`
 	}
-	await $S`fly storage create --yes --app ${APP_NAME} --name epic-startup-${APP_NAME}`
+	await $S`fly storage create --yes --app ${APP_NAME} --name ${APP_NAME}`
 
 	const { shouldDeploy } = await inquirer.prompt([
 		{

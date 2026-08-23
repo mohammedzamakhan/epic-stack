@@ -1,7 +1,7 @@
 # Organization Sites
 
 Public Astro app that serves published organization websites at
-`{orgSlug}.{brand}.me` (e.g. `acme.epic-startup.me`) and optional customer
+`{orgSlug}.{brand.domain}` (e.g. `acme.epic-startup.me`) and optional customer
 custom domains (e.g. `www.acme.com`) via Cloudflare for SaaS.
 
 ## Local development

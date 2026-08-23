@@ -1,3 +1,5 @@
+import { getBrandDomain } from '@repo/config/brand'
+
 type FrameSrcEnv = {
 	PUBLIC_SITE_HOST_SUFFIXES?: string
 	BASE_URL?: string
@@ -22,7 +24,7 @@ function hostnameFromUrl(value: string | undefined) {
 
 /**
  * Parent apex for `{sub}.{apex}` hosts used by App + tenant Sites.
- * `app.epic-startup.dev` → `epic-startup.dev`
+ * `app.preview.example.dev` → `preview.example.dev`
  */
 export function parentDomainFromHost(hostHeader: string | null | undefined) {
 	const host = hostHeader?.split(':')[0]?.toLowerCase() ?? ''
@@ -40,7 +42,7 @@ export function sitePreviewHostSuffixes(
 	requestHost?: string | null,
 ) {
 	const values = [
-		'epic-startup.me',
+		getBrandDomain(),
 		...splitHosts(env.PUBLIC_SITE_HOST_SUFFIXES),
 		parentDomainFromHost(requestHost),
 		parentDomainFromHost(hostnameFromUrl(env.BASE_URL)),

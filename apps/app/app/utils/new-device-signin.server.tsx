@@ -1,4 +1,5 @@
 import { getClientIp, trackIpRequest } from '@repo/common/ip-tracking'
+import { brand } from '@repo/config/brand'
 import {
 	and,
 	db,
@@ -139,7 +140,7 @@ export async function sendNewDeviceSigninEmail({
 	try {
 		await sendEmail({
 			to: user.email,
-			subject: 'New Sign-In Detected - Epic Startup',
+			subject: brand.email.newDeviceSignin,
 			react: (
 				<NewDeviceSigninEmail
 					firstName={firstName}

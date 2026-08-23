@@ -2,6 +2,7 @@ import { Trans, msg } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { type OnboardingProgressData } from '@repo/common/onboarding'
 import { getCrossAppUrl } from '@repo/common/url'
+import { getBrandDomain } from '@repo/config/brand'
 import { useDirection } from '@repo/ui'
 import { ArrowLeftIcon } from '@repo/ui/arrow-left-icon'
 import { BuildingIcon } from '@repo/ui/building-icon'
@@ -192,11 +193,12 @@ function OrganizationSidebar({
 	const { _ } = useLingui()
 	const goToHomepageLabel = _(msg`Go to homepage`)
 	const [isExtensionInstalled, setIsExtensionInstalled] = useState(false)
-	const [helpUrl, setHelpUrl] = useState('https://docs.epic-startup.me:2999')
+	const docsFallback = `https://docs.${getBrandDomain()}:2999`
+	const [helpUrl, setHelpUrl] = useState(docsFallback)
 
 	useEffect(() => {
-		setHelpUrl(getCrossAppUrl('docs', '', 'https://docs.epic-startup.me:2999'))
-	}, [])
+		setHelpUrl(getCrossAppUrl('docs', '', docsFallback))
+	}, [docsFallback])
 
 	useEffect(() => {
 		if (!extensionId) return

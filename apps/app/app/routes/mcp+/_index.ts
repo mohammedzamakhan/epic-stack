@@ -1,5 +1,6 @@
 import { logMCPRateLimitExceeded, logMCPToolInvoked } from '@repo/audit'
 import { getDomainUrl } from '@repo/common'
+import { getMcpServerName } from '@repo/config/brand'
 import { getClientIp } from '@repo/security'
 import { type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import {
@@ -256,7 +257,7 @@ export async function action({ request }: ActionFunctionArgs) {
 					tools: {},
 				},
 				serverInfo: {
-					name: 'epic-startup-mcp',
+					name: getMcpServerName(),
 					version: '1.0.0',
 				},
 			}

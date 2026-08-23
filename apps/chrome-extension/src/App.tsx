@@ -23,6 +23,10 @@ function App() {
 	const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
 	useEffect(() => {
+		document.title = brand.products.extension.name
+	}, [])
+
+	useEffect(() => {
 		let mounted = true
 
 		const init = async () => {

@@ -3,8 +3,7 @@ const OPERATOR_SUBDOMAINS = new Set(['app', 'admin'])
 /**
  * Cookie Domain for App/Admin when they run as `app.{apex}` / `admin.{apex}`.
  *
- * `app.menuza.io` → `.menuza.io`
- * `admin.epic-startup.dev` → `.epic-startup.dev`
+ * `admin.preview.example.dev` → `.preview.example.dev`
  * `localhost` / workers.dev previews → omit (host-only cookie)
  */
 export function sharedCookieDomainFromHost(

@@ -2,13 +2,13 @@ import { fileURLToPath } from 'node:url'
 import cloudflare from '@astrojs/cloudflare'
 import { lingui } from '@lingui/vite-plugin'
 import { SITE_FONTS } from '@repo/common/site-fonts'
-import { brand } from '@repo/config/brand'
+import { getBrandDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
 import { fontless } from 'fontless'
 
-const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+const domain = getBrandDomain()
 
 export default defineConfig({
 	output: 'server',
@@ -85,7 +85,7 @@ export default defineConfig({
 			}),
 		],
 		server: {
-			// Allow org subdomains (acme.epic-startup.me) via the local proxy
+			// Allow org subdomains via the local proxy
 			allowedHosts: [`.${domain}`, domain, 'localhost'],
 		},
 		optimizeDeps: {

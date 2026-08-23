@@ -1,4 +1,4 @@
-import { brand } from '@repo/config/brand'
+import { getBrandDomain } from '@repo/config/brand'
 
 const RESERVED_SUBDOMAINS = new Set([
 	'app',
@@ -28,7 +28,7 @@ export type SiteHostEnv = {
 }
 
 export function brandSiteDomain() {
-	return brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+	return getBrandDomain()
 }
 
 function splitHosts(value: string | undefined) {
@@ -41,7 +41,7 @@ function splitHosts(value: string | undefined) {
 
 /**
  * Apex domains whose first subdomain is an org slug.
- * `{org}.epic-startup.me`, `{org}.{ROOT_APP}`, and extra Worker routes.
+ * `{org}.{brand domain}`, `{org}.{ROOT_APP}`, and extra Worker routes.
  */
 export function getSiteHostSuffixes(env: SiteHostEnv = {}): string[] {
 	const values = [

@@ -2,6 +2,7 @@ import { invariantResponse } from '@epic-web/invariant'
 import { t, Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 import { requireUserId } from '@repo/auth'
+import { brand } from '@repo/config/brand'
 import {
 	and,
 	db,
@@ -694,7 +695,7 @@ function SetupInstructionsCard({
 	const claudeConfig = JSON.stringify(
 		{
 			mcpServers: {
-				[`epic-notes-${organization.slug}`]: {
+				[`${brand.slug}-${organization.slug}`]: {
 					url: `${serverUrl}`,
 				},
 			},
@@ -706,7 +707,7 @@ function SetupInstructionsCard({
 	const kiroConfig = JSON.stringify(
 		{
 			mcpServers: {
-				[`epic-notes-${organization.slug}`]: {
+				[`${brand.slug}-${organization.slug}`]: {
 					url: `${serverUrl}`,
 					disabled: false,
 					autoApprove: ['find_user', 'get_user_notes'],
@@ -720,7 +721,7 @@ function SetupInstructionsCard({
 	const cursorConfig = JSON.stringify(
 		{
 			mcpServers: {
-				[`epic-notes-${organization.slug}`]: {
+				[`${brand.slug}-${organization.slug}`]: {
 					url: `${serverUrl}`,
 				},
 			},

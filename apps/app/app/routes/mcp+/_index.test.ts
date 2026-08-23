@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker'
+
+import { getMcpServerName } from '@repo/config/brand'
 import {
 	MCPAccessToken,
 	MCPAuthorization,
@@ -638,7 +640,7 @@ describe('MCP SSE Endpoint', () => {
 			expect(data.result!.protocolVersion).toBe(MCP_PROTOCOL_VERSION)
 			expect(data.result!.capabilities).toBeDefined()
 			expect(data.result!.serverInfo).toBeDefined()
-			expect(data.result!.serverInfo.name).toBe('epic-startup-mcp')
+			expect(data.result!.serverInfo.name).toBe(getMcpServerName())
 		})
 
 		it('should handle tools/list request with session', async () => {

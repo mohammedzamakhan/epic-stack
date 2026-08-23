@@ -10,6 +10,7 @@ import {
 	Heading,
 	Link,
 } from '@react-email/components'
+import { brand, getCopyright } from '@repo/config/brand'
 
 export interface ContactTemplateProps {
 	readonly name: string
@@ -35,7 +36,7 @@ export const ContactTemplate = ({
 						</Heading>
 
 						<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-							You've received a new contact message through Epic Startup. Here
+							You've received a new contact message through {brand.name}. Here
 							are the details:
 						</Text>
 
@@ -74,10 +75,10 @@ export const ContactTemplate = ({
 					{/* Footer */}
 					<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 						<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-							Epic Startup Contact Form
+							{brand.name} Contact Form
 						</Text>
 						<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-							Copyright © 2025 Epic Startup
+							{getCopyright()}
 						</Text>
 					</Section>
 				</Container>

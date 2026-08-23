@@ -1,5 +1,6 @@
-// App constants
-export const APP_NAME = 'Epic Stack Mobile'
+import { brand } from '@repo/config/brand'
+
+export const APP_NAME = `${brand.name} Mobile`
 export const APP_VERSION = '1.0.0'
 
 // API Configuration

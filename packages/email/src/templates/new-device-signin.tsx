@@ -12,6 +12,7 @@ import {
 	Tailwind,
 	Hr,
 } from '@react-email/components'
+import { brand, getCopyright } from '@repo/config/brand'
 
 export interface NewDeviceSigninEmailProps {
 	firstName?: string
@@ -36,7 +37,7 @@ export default function NewDeviceSigninEmail({
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>New sign-in detected to your Epic Startup account</Preview>
+				<Preview>New sign-in detected to your {brand.name} account</Preview>
 				<Body className="bg-[#F6F8FA] py-[40px] font-sans">
 					<Container className="mx-auto max-w-[600px] rounded-[8px] bg-[#FFFFFF] px-[32px] py-[40px]">
 						{/* Main Content */}
@@ -50,7 +51,7 @@ export default function NewDeviceSigninEmail({
 							</Text>
 
 							<Text className="mb-[24px] text-[16px] leading-[24px] text-[#020304]">
-								We detected a new sign-in to your Epic Startup account from a
+								We detected a new sign-in to your {brand.name} account from a
 								device we don't recognize.
 							</Text>
 
@@ -102,10 +103,10 @@ export default function NewDeviceSigninEmail({
 							<Text className="mb-[16px] text-[14px] leading-[20px] text-[#6B7280]">
 								If you didn't sign in, please contact support immediately at{' '}
 								<Link
-									href="mailto:support@epicnotes.com"
+									href={`mailto:${brand.supportEmail}`}
 									className="text-[#2563eb] no-underline"
 								>
-									support@epicnotes.com
+									{brand.supportEmail}
 								</Link>
 							</Text>
 						</Section>
@@ -113,25 +114,25 @@ export default function NewDeviceSigninEmail({
 						{/* Footer */}
 						<Section className="mt-[40px] border-t border-solid border-[#E5E7EB] pt-[32px]">
 							<Text className="mb-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-								Organize your thoughts with Epic Startup
+								Organize your thoughts with {brand.name}
 							</Text>
 							<Text className="mb-[8px] text-center text-[12px] leading-[16px] text-[#6B7280]">
 								<Link
-									href="mailto:support@epicnotes.com"
+									href={`mailto:${brand.supportEmail}`}
 									className="text-[#2563eb] no-underline"
 								>
 									Contact Support
 								</Link>
 								{' | '}
 								<Link
-									href="https://epicnotes.com/security"
+									href={`${brand.url}/security`}
 									className="text-[#2563eb] no-underline"
 								>
 									Security Center
 								</Link>
 							</Text>
 							<Text className="m-0 text-center text-[12px] leading-[16px] text-[#6B7280]">
-								Copyright © 2025 Epic Startup
+								{getCopyright()}
 							</Text>
 						</Section>
 					</Container>
@@ -148,5 +149,5 @@ NewDeviceSigninEmail.PreviewProps = {
 	location: 'San Francisco, CA, United States',
 	ipAddress: '192.168.1.1',
 	timestamp: 'January 15, 2025 at 3:45 PM UTC',
-	secureAccountUrl: 'https://epicnotes.com/settings/security',
+	secureAccountUrl: 'https://example.com/settings/security',
 } as NewDeviceSigninEmailProps

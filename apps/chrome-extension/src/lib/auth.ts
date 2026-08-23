@@ -1,8 +1,8 @@
-import { brand } from '@repo/config/brand'
+import { getBrandDomain } from '@repo/config/brand'
 import browser from 'webextension-polyfill'
 import { logger, debugMessage } from './debug'
 
-const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+const domain = getBrandDomain()
 
 export const AUTH_STATUS_KEY = 'auth_status'
 export const DOMAIN = `.${domain}`

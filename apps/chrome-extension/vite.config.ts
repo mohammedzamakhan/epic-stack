@@ -1,11 +1,11 @@
 import { crx, type ManifestV3Export } from '@crxjs/vite-plugin'
-import { brand } from '@repo/config/brand'
+import { brand, getBrandDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 const BROWSER = process.env.BROWSER || 'chrome'
-const domain = brand.name.toLowerCase().replace(/\s+/g, '-') + '.me'
+const domain = getBrandDomain()
 
 const baseManifest: ManifestV3Export = {
 	manifest_version: 3,
@@ -46,7 +46,7 @@ const firefoxManifest: Partial<ManifestV3Export> = {
 	},
 	applications: {
 		gecko: {
-			id: 'epic-saas-extension@example.com',
+			id: `${brand.slug}-extension@example.com`,
 		},
 	},
 }
