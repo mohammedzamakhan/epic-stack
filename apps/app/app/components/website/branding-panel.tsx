@@ -66,6 +66,9 @@ export function BrandingPanel({
 		}
 		if (lastThemeRefresh.current && themeFetcher.data?.status === 'success') {
 			lastThemeRefresh.current = false
+			if (typeof document !== 'undefined') {
+				document.cookie = 'epic_preview_theme=; path=/; max-age=0; SameSite=Lax'
+			}
 			onPreviewRefresh()
 		}
 	}, [themeFetcher.state, themeFetcher.data, onPreviewRefresh])
@@ -115,6 +118,22 @@ export function BrandingPanel({
 		(iconFetcher.data?.status === 'error'
 			? (iconFetcher.data.error ?? null)
 			: null)
+
+	const handleSaveTheme = () => {
+		void themeFetcher.submit(
+			{
+				intent: siteThemeActionIntent,
+				organizationId: organization.id,
+				baseColor: theme.baseColor,
+				theme: theme.theme,
+				radius: theme.radius,
+				mode: theme.mode,
+				...(theme.headingFont ? { headingFont: theme.headingFont } : {}),
+				...(theme.bodyFont ? { bodyFont: theme.bodyFont } : {}),
+			},
+			{ method: 'POST' },
+		)
+	}
 
 	const persistTheme = (next: SiteThemeConfig) => {
 		if (typeof document !== 'undefined') {
@@ -339,6 +358,12 @@ export function BrandingPanel({
 					) : null}
 				</div>
 			</ScrollArea>
+			<div className="border-border bg-background flex items-center justify-end border-t p-3">
+				<Button size="sm" onClick={handleSaveTheme} disabled={busyTheme}>
+					{busyTheme ? <Spinner className="mr-2 size-3" /> : null}
+					<Trans>Save Branding</Trans>
+				</Button>
+			</div>
 		</div>
 	)
 }
