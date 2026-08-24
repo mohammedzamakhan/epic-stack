@@ -8,7 +8,7 @@ import { fetchPublishedSitePage } from '~/lib/org'
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
 const requestedLocale = Astro.locals.requestedLocale
-let organization = Astro.locals.organization
+const organization = Astro.locals.organization
 const slug = Astro.params.slug?.replace(/^\/+|\/+$/g, '') ?? ''
 
 if (!organization) {
@@ -19,7 +19,7 @@ if (!slug) {
 	return Astro.rewrite('/')
 }
 
-let page = await (Astro.locals.publishedPagePromise ??
+const page = await (Astro.locals.publishedPagePromise ??
 	fetchPublishedSitePage({
 		slug: orgSlug,
 		host: customHost,
@@ -46,12 +46,52 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 
 	if (sectionsCookie) {
 		try {
-			page = { ...page, sections: JSON.parse(decodeURIComponent(sectionsCookie)) }
+			function deepLocalize(value, locale, defaultLocale) {
+					if (typeof value === 'string') {
+						if (value.startsWith('{')) {
+							try {
+								const obj = JSON.parse(value);
+								if (typeof obj === 'object' && obj !== null) {
+									return obj[locale] || obj[defaultLocale] || obj[Object.keys(obj)[0]] || value;
+								}
+							} catch (e) {}
+						}
+						return value;
+					}
+					if (Array.isArray(value)) {
+						return value.map(item => deepLocalize(item, locale, defaultLocale));
+					}
+					if (typeof value === 'object' && value !== null) {
+						const keys = Object.keys(value);
+						const looksLikeLocalizedMap = keys.length > 0 && keys.every(k => /^[a-z]{2}(-[A-Z]{2})?$/.test(k)) && Object.values(value).every(v => typeof v === 'string');
+						if (looksLikeLocalizedMap) {
+							return value[locale] || value[defaultLocale] || value[keys[0]] || '';
+						}
+						const result = {};
+						for (const key of keys) {
+							result[key] = deepLocalize(value[key], locale, defaultLocale);
+						}
+						return result;
+					}
+					return value;
+				}
+			const parsedSections = JSON.parse(decodeURIComponent(sectionsCookie))
+			page.sections = parsedSections.map(s => {
+				if (typeof s.config === 'string') {
+					try { 
+						const parsed = JSON.parse(s.config);
+						s.config = deepLocalize(parsed, requestedLocale || 'en', 'en');
+					} catch (e) {}
+				} else {
+					s.config = deepLocalize(s.config, requestedLocale || 'en', 'en');
+				}
+				return s;
+			})
 		} catch (err) {}
 	}
 	if (themeCookie) {
 		try {
-			organization = { ...organization, theme: JSON.parse(decodeURIComponent(themeCookie)) }
+			organization.theme = JSON.parse(decodeURIComponent(themeCookie))
 		} catch (err) {}
 	}
 }
