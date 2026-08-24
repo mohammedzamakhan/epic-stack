@@ -96,41 +96,46 @@ export async function getUserOrganizations(
 				eq(UserOrganization.active, true),
 			),
 		)
-	const result: UserOrganizationWithRole[] = []
-	for (const membership of memberships) {
-		const organization = await getOrganizationSummary(membership.organizationId)
-		if (!organization) continue
-		const permissions = includePermissions
-			? await db
-					.select({
-						action: Permission.action,
-						entity: Permission.entity,
-						access: Permission.access,
-					})
-					.from(_OrganizationPermissionToRole)
-					.innerJoin(
-						Permission,
-						eq(_OrganizationPermissionToRole.B, Permission.id),
-					)
-					.where(
-						and(
-							eq(_OrganizationPermissionToRole.A, membership.roleId),
-							eq(Permission.context, 'organization'),
-						),
-					)
-			: undefined
-		result.push({
-			organization,
-			organizationRole: {
-				id: membership.roleId,
-				name: membership.roleName,
-				level: membership.roleLevel,
-				...(permissions ? { permissions } : {}),
-			},
-			isDefault: membership.isDefault,
-		})
-	}
-	return result
+	const results = await Promise.all(
+		memberships.map(async (membership) => {
+			const organization = await getOrganizationSummary(
+				membership.organizationId,
+			)
+			if (!organization) return null
+			const permissions = includePermissions
+				? await db
+						.select({
+							action: Permission.action,
+							entity: Permission.entity,
+							access: Permission.access,
+						})
+						.from(_OrganizationPermissionToRole)
+						.innerJoin(
+							Permission,
+							eq(_OrganizationPermissionToRole.B, Permission.id),
+						)
+						.where(
+							and(
+								eq(_OrganizationPermissionToRole.A, membership.roleId),
+								eq(Permission.context, 'organization'),
+							),
+						)
+				: undefined
+
+			const result: UserOrganizationWithRole = {
+				organization,
+				organizationRole: {
+					id: membership.roleId,
+					name: membership.roleName,
+					level: membership.roleLevel,
+					...(permissions ? { permissions } : {}),
+				},
+				isDefault: membership.isDefault,
+			}
+			return result
+		}),
+	)
+	return results.filter((r) => r !== null) as UserOrganizationWithRole[]
 }
 
 export async function getUserDefaultOrganization(userId: User['id']) {
