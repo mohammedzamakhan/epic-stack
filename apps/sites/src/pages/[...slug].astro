@@ -47,7 +47,7 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 
 	if (sectionsCookie) {
 		try {
-			function deepLocalize(value, locale, defaultLocale) {
+			function deepLocalize(value: any, locale: string, defaultLocale: string): any {
 					if (typeof value === 'string') {
 						if (value.startsWith('{')) {
 							try {
@@ -60,7 +60,7 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 						return value;
 					}
 					if (Array.isArray(value)) {
-						return value.map(item => deepLocalize(item, locale, defaultLocale));
+						return value.map((item: any) => deepLocalize(item, locale, defaultLocale));
 					}
 					if (typeof value === 'object' && value !== null) {
 						const keys = Object.keys(value);
@@ -68,7 +68,7 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 						if (looksLikeLocalizedMap) {
 							return value[locale] || value[defaultLocale] || value[keys[0]] || '';
 						}
-						const result = {};
+						const result: Record<string, any> = {};
 						for (const key of keys) {
 							result[key] = deepLocalize(value[key], locale, defaultLocale);
 						}
@@ -77,7 +77,7 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 					return value;
 				}
 			const parsedSections = JSON.parse(decodeURIComponent(sectionsCookie))
-			page.sections = parsedSections.map(s => {
+			page.sections = parsedSections.map((s: any) => {
 				if (typeof s.config === 'string') {
 					try { 
 						const parsed = JSON.parse(s.config);
