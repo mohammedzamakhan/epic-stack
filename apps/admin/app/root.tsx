@@ -285,7 +285,7 @@ function Document({
 				{allowIndexing ? null : (
 					<meta name="robots" content="noindex, nofollow" />
 				)}
-				<Links />
+				<Links nonce={nonce} />
 			</head>
 			<body className="bg-background text-foreground">
 				<DirectionProvider direction={direction}>{children}</DirectionProvider>

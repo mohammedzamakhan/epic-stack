@@ -24,6 +24,18 @@ import {
 
 const MAX_ICON_SIZE = 1024 * 1024 * 5
 
+function getSharedCookieDomain() {
+	if (typeof window === 'undefined') return ''
+	const host = window.location.hostname
+	if (host === 'localhost' || host === '127.0.0.1') return ''
+	if (host.endsWith('.localhost')) return '; domain=.localhost'
+	const parts = host.split('.')
+	if (parts.length >= 3 && (parts[0] === 'app' || parts[0] === 'admin')) {
+		return '; domain=.' + parts.slice(1).join('.')
+	}
+	return ''
+}
+
 export function BrandingPanel({
 	organization,
 	themeConfig,
@@ -66,6 +78,9 @@ export function BrandingPanel({
 		}
 		if (lastThemeRefresh.current && themeFetcher.data?.status === 'success') {
 			lastThemeRefresh.current = false
+			if (typeof document !== 'undefined') {
+				document.cookie = `epic_preview_theme=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
+			}
 			onPreviewRefresh()
 		}
 	}, [themeFetcher.state, themeFetcher.data, onPreviewRefresh])
@@ -116,21 +131,30 @@ export function BrandingPanel({
 			? (iconFetcher.data.error ?? null)
 			: null)
 
-	const persistTheme = (next: SiteThemeConfig) => {
-		setTheme(next)
+	const handleSaveTheme = () => {
 		void themeFetcher.submit(
 			{
 				intent: siteThemeActionIntent,
 				organizationId: organization.id,
-				baseColor: next.baseColor,
-				theme: next.theme,
-				radius: next.radius,
-				mode: next.mode,
-				headingFont: next.headingFont,
-				bodyFont: next.bodyFont,
+				baseColor: theme.baseColor,
+				theme: theme.theme,
+				radius: theme.radius,
+				mode: theme.mode,
+				...(theme.headingFont ? { headingFont: theme.headingFont } : {}),
+				...(theme.bodyFont ? { bodyFont: theme.bodyFont } : {}),
 			},
 			{ method: 'POST' },
 		)
+	}
+
+	const persistTheme = (next: SiteThemeConfig) => {
+		if (typeof window !== 'undefined') {
+			window.dispatchEvent(
+				new CustomEvent('epic-preview-theme-change', { detail: next }),
+			)
+		}
+		setTheme(next)
+		// Theme changes are now only saved to cookies until published
 	}
 
 	const handleUploadFont = (role: 'heading' | 'body', file: File) => {
@@ -345,6 +369,12 @@ export function BrandingPanel({
 					) : null}
 				</div>
 			</ScrollArea>
+			<div className="border-border bg-background flex items-center justify-end border-t p-3">
+				<Button size="sm" onClick={handleSaveTheme} disabled={busyTheme}>
+					{busyTheme ? <Spinner className="mr-2 size-3" /> : null}
+					<Trans>Save Branding</Trans>
+				</Button>
+			</div>
 		</div>
 	)
 }

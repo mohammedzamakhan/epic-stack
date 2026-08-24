@@ -4,14 +4,17 @@
 	"main": "./workers/app.ts",
 	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2026-08-20",
-	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"nodejs_compat_populate_process_env",
+	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
 	"workers_dev": true,
 	"assets": {
 		"directory": "./build/client",
-		"binding": "ASSETS"
+		"binding": "ASSETS",
 	},
 	"d1_databases": [
 		{
@@ -24,7 +27,7 @@
 		{
 			"binding": "CACHE",
 			"id": "109ff22c36e9490d8463b4175e26a354",
-		}
+		},
 	],
 	// Secrets (set via `wrangler secret put <NAME>`):
 	//   SESSION_SECRET
@@ -46,6 +49,6 @@
 		"AWS_ACCESS_KEY_ID": "mock-access-key",
 		"SENTRY_DSN": "your-dsn",
 		"FLY_REGION": "",
-		"FLY_APP_NAME": ""
-	}
+		"FLY_APP_NAME": "",
+	},
 }

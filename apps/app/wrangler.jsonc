@@ -4,7 +4,10 @@
 	"main": "./workers/app.ts",
 	"account_id": "8870705ba38bb749459b00ab2949f857",
 	"compatibility_date": "2026-08-20",
-	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"nodejs_compat_populate_process_env",
+	],
 	"workers_dev": true,
 	"observability": {
 		"enabled": true,
@@ -44,6 +47,6 @@
 		"PUBLIC_SITE_HOST_SUFFIXES": "workers.dev",
 		"TENANT_API_URL": "http://localhost:3007",
 		"TENANT_API_URL_KSA": "http://localhost:3009",
-		"JOBS_CRON_WORKER_URL": "https://epic-startup-jobs-cron.zama-887.workers.dev"
+		"JOBS_CRON_WORKER_URL": "https://epic-startup-jobs-cron.zama-887.workers.dev",
 	},
 }

@@ -22,7 +22,7 @@
       //   wrangler d1 create epic-startup-cms
       "database_id": "DATABASE_ID",
       "database_name": "epic-startup-cms",
-    }
+    },
   ],
   "r2_buckets": [
     {
@@ -30,7 +30,7 @@
       // Create the R2 bucket with:
       //   wrangler r2 bucket create epic-startup-cms-media
       "bucket_name": "epic-startup-cms-media",
-    }
+    },
   ],
   // Secrets (set via `wrangler secret put <NAME>`):
   //   PAYLOAD_SECRET
@@ -40,5 +40,5 @@
     "CMS_USE_R2": "true",
     "NEXT_PUBLIC_SERVER_URL": "https://epic-startup-cms.zama-887.workers.dev",
     "WEB_APP_URL": "https://epic-startup.zama-887.workers.dev",
-  }
+  },
 }

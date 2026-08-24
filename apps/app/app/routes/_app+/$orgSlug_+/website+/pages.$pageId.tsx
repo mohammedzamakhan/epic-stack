@@ -20,7 +20,7 @@ import { Trans } from '@lingui/macro'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { requireUserId } from '@repo/auth'
 import { invalidateUserOrganizationsCache } from '@repo/cache'
-import { useDebounce } from '@repo/common'
+
 import {
 	getLocaleHref,
 	getLocalizedEditableValue,
@@ -86,6 +86,7 @@ import { ScrollArea } from '@repo/ui/scroll-area'
 import { Spinner } from '@repo/ui/spinner'
 import { Switch } from '@repo/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
+import * as cookie from 'cookie'
 import {
 	type ReactNode,
 	useCallback,
@@ -540,6 +541,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Page not found', { status: 404 })
 	}
 
+	const cookieHeader = request.headers.get('Cookie')
+	const cookies = cookieHeader ? cookie.parse(cookieHeader) : {}
+
+	let themeConfig = parseSiteThemeConfig(organization.siteTheme)
+	if (cookies.epic_preview_theme) {
+		try {
+			themeConfig = JSON.parse(
+				decodeURIComponent(cookies.epic_preview_theme),
+			) as ReturnType<typeof parseSiteThemeConfig>
+		} catch {}
+	}
+
 	const headerConfig =
 		chrome?.siteHeaderConfig ?? JSON.stringify(getDefaultConfig('header'))
 	const footerConfig =
@@ -547,12 +560,21 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	return {
 		organization,
-		themeConfig: parseSiteThemeConfig(organization.siteTheme),
+		themeConfig,
 		sitePages,
 		page: {
 			...page,
 			sections: composePageSectionsWithChrome(
-				page.sections,
+				(() => {
+					if (cookies.epic_preview_sections) {
+						try {
+							return JSON.parse(
+								decodeURIComponent(cookies.epic_preview_sections),
+							) as typeof page.sections
+						} catch {}
+					}
+					return page.sections
+				})(),
 				headerConfig,
 				footerConfig,
 			),
@@ -1267,6 +1289,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === publishIntent) {
+		const themeData = formData.get('theme') as string | null
 		const sections = await db
 			.select({
 				id: WebsitePageSection.id,
@@ -1281,13 +1304,38 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			(section) => !isLockedBlockType(section.type),
 		)
 
-		await db
-			.update(WebsitePage)
-			.set({
-				status: 'published',
-				publishedData: JSON.stringify(publishedSections),
-			})
-			.where(eq(WebsitePage.id, page.id))
+		await db.transaction(async (tx) => {
+			await tx
+				.update(WebsitePage)
+				.set({
+					status: 'published',
+					publishedData: JSON.stringify(publishedSections),
+				})
+				.where(eq(WebsitePage.id, page.id))
+
+			if (themeData) {
+				try {
+					const theme = JSON.parse(themeData) as ReturnType<
+						typeof parseSiteThemeConfig
+					>
+					const [org] = await tx
+						.select({ siteTheme: Organization.siteTheme })
+						.from(Organization)
+						.where(eq(Organization.id, organization.id))
+						.limit(1)
+					const current = parseSiteThemeConfig(org?.siteTheme)
+					await tx
+						.update(Organization)
+						.set({
+							siteTheme: serializeSiteThemeConfig({
+								...current,
+								...theme,
+							}),
+						})
+						.where(eq(Organization.id, organization.id))
+				} catch {}
+			}
+		})
 		return Response.json({ status: 'success' })
 	}
 
@@ -4887,8 +4935,20 @@ function InspectorNav({
 // Main Builder Component
 // ==============================================
 export default function PageBuilderRoute() {
-	const { organization, page, themeConfig, sitePages } =
-		useLoaderData<typeof loader>()
+	const {
+		organization,
+		page,
+		themeConfig: initialTheme,
+		sitePages,
+	} = useLoaderData<typeof loader>()
+	const [themeConfig, setThemeConfig] = useState(initialTheme)
+
+	useEffect(() => {
+		const handleThemeChange = (e: any) => setThemeConfig(e.detail)
+		window.addEventListener('epic-preview-theme-change', handleThemeChange)
+		return () =>
+			window.removeEventListener('epic-preview-theme-change', handleThemeChange)
+	}, [])
 	const params = useParams()
 	const titleFetcher = useFetcher()
 	const sectionFetcher = useFetcher()
@@ -4937,10 +4997,6 @@ export default function PageBuilderRoute() {
 	const [previewUrl, setPreviewUrl] = useState('')
 	const [iframeKey, setIframeKey] = useState(Date.now())
 
-	const updateIframeKey = useDebounce(() => {
-		setIframeKey(Date.now())
-	}, 1000)
-
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			const origin = window.location.origin
@@ -4972,8 +5028,19 @@ export default function PageBuilderRoute() {
 	])
 
 	useEffect(() => {
-		updateIframeKey()
-	}, [page.sections, updateIframeKey, previewUrl])
+		const frame = iframeRef.current
+		if (frame?.contentWindow && previewUrl) {
+			const targetOrigin = new URL(previewUrl).origin
+			frame.contentWindow.postMessage(
+				{
+					type: 'epic-preview-update',
+					sections: page.sections,
+					theme: themeConfig,
+				},
+				targetOrigin,
+			)
+		}
+	}, [page.sections, themeConfig, previewUrl])
 
 	const [mode, setMode] = useState<'build' | 'preview'>('build')
 	// Page builder split is desktop-first (matches `lg:` preview visibility).
@@ -4990,6 +5057,7 @@ export default function PageBuilderRoute() {
 		return () => mql.removeEventListener('change', onChange)
 	}, [])
 	const previewFrameRef = useRef<HTMLDivElement>(null)
+	const iframeRef = useRef<HTMLIFrameElement>(null)
 	const previewViewportRef = useRef(previewViewport)
 	const [previewDesktopWidth, setPreviewDesktopWidth] = useState<number | null>(
 		null,
@@ -5147,12 +5215,20 @@ export default function PageBuilderRoute() {
 
 	const handleUpdateSection = useCallback(
 		(sectionId: string, config: string) => {
+			if (typeof document !== 'undefined') {
+				try {
+					const nextSections = page.sections.map((s) =>
+						s.id === sectionId ? { ...s, config } : s,
+					)
+					document.cookie = `epic_preview_sections=${encodeURIComponent(JSON.stringify(nextSections))}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
+				} catch {}
+			}
 			void sectionFetcher.submit(
 				{ intent: updateSectionIntent, sectionId, config },
 				{ method: 'POST' },
 			)
 		},
-		[sectionFetcher],
+		[sectionFetcher, page.sections],
 	)
 
 	const handleRemoveSection = useCallback(
@@ -5182,7 +5258,20 @@ export default function PageBuilderRoute() {
 	)
 
 	const handlePublish = useCallback(() => {
-		void publishFetcher.submit({ intent: publishIntent }, { method: 'POST' })
+		let themeCookie = ''
+		if (typeof document !== 'undefined') {
+			themeCookie =
+				(document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) ||
+					[])[1] || ''
+			document.cookie = `epic_preview_sections=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
+			document.cookie = `epic_preview_theme=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
+		}
+		const formData = new FormData()
+		formData.append('intent', publishIntent)
+		if (themeCookie) {
+			formData.append('theme', decodeURIComponent(themeCookie))
+		}
+		void publishFetcher.submit(formData, { method: 'POST' })
 	}, [publishFetcher])
 
 	const handleUnpublish = useCallback(() => {
@@ -5459,6 +5548,7 @@ export default function PageBuilderRoute() {
 						) : (
 							<iframe
 								key={iframeKey}
+								ref={iframeRef}
 								src={previewUrl}
 								className="h-full w-full border-0"
 								title="Live Preview"
@@ -5759,4 +5849,16 @@ export default function PageBuilderRoute() {
 			</TranslateProvider>
 		</LocaleContext.Provider>
 	)
+}
+
+function getSharedCookieDomain() {
+	if (typeof window === 'undefined') return ''
+	const host = window.location.hostname
+	if (host === 'localhost' || host === '127.0.0.1') return ''
+	if (host.endsWith('.localhost')) return '; domain=.localhost'
+	const parts = host.split('.')
+	if (parts.length >= 3 && (parts[0] === 'app' || parts[0] === 'admin')) {
+		return '; domain=.' + parts.slice(1).join('.')
+	}
+	return ''
 }

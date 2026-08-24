@@ -93,9 +93,7 @@ Always verify resource ownership:
 const [note] = await db
 	.select()
 	.from(Note)
-	.where(
-		and(eq(Note.id, noteId), eq(Note.organizationId, userOrganizationId)),
-	)
+	.where(and(eq(Note.id, noteId), eq(Note.organizationId, userOrganizationId)))
 	.limit(1)
 
 // ❌ Bad - No ownership check (IDOR vulnerability)

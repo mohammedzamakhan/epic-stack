@@ -4,6 +4,7 @@ import { getPageTitle } from '@repo/config/brand'
 import SitePage from '~/components/SitePage.astro'
 import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
 import { fetchPublishedSitePage } from '~/lib/org'
+import { buildSiteThemeCss } from '@repo/common/site-theme'
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
@@ -22,6 +23,75 @@ const page = await (Astro.locals.publishedPagePromise ??
 		preview: Astro.url.searchParams.get('preview') === 'true',
 		lng: requestedLocale,
 	}))
+
+
+if (page && Astro.url.searchParams.get('preview') === 'true') {
+	let sectionsCookie = Astro.cookies.get('epic_preview_sections')?.value
+	let themeCookie = Astro.cookies.get('epic_preview_theme')?.value
+
+	if (Astro.request.method === 'POST') {
+		try {
+			const body = await Astro.request.json()
+			if (body.sections) sectionsCookie = encodeURIComponent(JSON.stringify(body.sections))
+			if (body.theme) themeCookie = encodeURIComponent(JSON.stringify(body.theme))
+		} catch (err) {}
+	}
+
+	if (sectionsCookie) {
+		try {
+			function deepLocalize(value: any, locale: string, defaultLocale: string): any {
+					if (typeof value === 'string') {
+						if (value.startsWith('{')) {
+							try {
+								const obj = JSON.parse(value);
+								if (typeof obj === 'object' && obj !== null) {
+									return obj[locale] || obj[defaultLocale] || obj[Object.keys(obj)[0]] || value;
+								}
+							} catch (e) {}
+						}
+						return value;
+					}
+					if (Array.isArray(value)) {
+						return value.map((item: any) => deepLocalize(item, locale, defaultLocale));
+					}
+					if (typeof value === 'object' && value !== null) {
+						const keys = Object.keys(value);
+						const looksLikeLocalizedMap = keys.length > 0 && keys.every(k => /^[a-z]{2}(-[A-Z]{2})?$/.test(k)) && Object.values(value).every(v => typeof v === 'string');
+						if (looksLikeLocalizedMap) {
+							return value[locale] || value[defaultLocale] || value[keys[0]] || '';
+						}
+						const result: Record<string, any> = {};
+						for (const key of keys) {
+							result[key] = deepLocalize(value[key], locale, defaultLocale);
+						}
+						return result;
+					}
+					return value;
+				}
+			const parsedSections = JSON.parse(decodeURIComponent(sectionsCookie))
+			page.sections = parsedSections.map((s: any) => {
+				if (typeof s.config === 'string') {
+					try { 
+						const parsed = JSON.parse(s.config);
+						s.config = deepLocalize(parsed, requestedLocale || 'en', 'en');
+					} catch (e) {}
+				} else {
+					s.config = deepLocalize(s.config, requestedLocale || 'en', 'en');
+				}
+				return s;
+			})
+		} catch (err) {}
+	}
+	if (themeCookie) {
+		try {
+			const parsedTheme = JSON.parse(decodeURIComponent(themeCookie))
+			organization.theme = {
+				...parsedTheme,
+				css: buildSiteThemeCss(parsedTheme)
+			}
+		} catch (err) {}
+	}
+}
 
 const seoTitle = page?.seo?.title || page?.title
 const pageTitle = seoTitle

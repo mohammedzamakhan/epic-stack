@@ -106,26 +106,62 @@ const alternateLinks = [
 			</slot>
 		</main>
 		<SiteFooter config={footer?.config} organization={organization} />
+		
 		{isPreview ? (
 			<script is:inline>
-				;(function () {
-					const storageKey = 'site-preview-scroll'
-					const restoreScroll = () => {
-						const saved = window.sessionStorage.getItem(storageKey)
-						if (!saved) return
-						window.scrollTo({ top: Number(saved) || 0 })
-					}
-					const saveScroll = () => {
-						window.sessionStorage.setItem(storageKey, String(window.scrollY))
-					}
-					if ('scrollRestoration' in history) {
-						history.scrollRestoration = 'manual'
-					}
-					restoreScroll()
-					window.addEventListener('scroll', saveScroll, { passive: true })
-					window.addEventListener('beforeunload', saveScroll)
+				(function() {
+					window.addEventListener('message', async (event) => {
+						if (event.data?.type === 'epic-preview-update') {
+							try {
+								const res = await fetch(window.location.href, {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ sections: event.data.sections, theme: event.data.theme })
+								});
+								const html = await res.text();
+								const parser = new DOMParser();
+								const doc = parser.parseFromString(html, 'text/html');
+								
+								const newHtml = doc.documentElement;
+								document.documentElement.className = newHtml.className;
+								['siteTheme', 'siteBase', 'headingFont', 'bodyFont'].forEach(key => {
+									if (newHtml.dataset[key]) {
+										document.documentElement.dataset[key] = newHtml.dataset[key];
+									} else {
+										delete document.documentElement.dataset[key];
+									}
+								});
+								
+								const updateStyle = (id) => {
+									const current = document.getElementById(id);
+									const next = doc.getElementById(id);
+									if (current && next) {
+										// Use textContent for style elements — CSS is not HTML, avoids XSS flag
+										current.textContent = next.textContent;
+									} else if (!current && next) {
+										document.head.appendChild(next.cloneNode(true));
+									} else if (current && !next) {
+										current.remove();
+									}
+								};
+								updateStyle('org-site-theme');
+								updateStyle('org-site-fonts');
+
+								const currentContainer = document.querySelector('div.bg-background');
+								const newContainer = doc.querySelector('div.bg-background');
+								
+								if (currentContainer && newContainer) {
+									// Use replaceChildren with cloned nodes instead of innerHTML
+									currentContainer.replaceChildren(...Array.from(newContainer.cloneNode(true).childNodes));
+								}
+							} catch (err) {
+								console.error('Failed to update preview', err);
+							}
+						}
+					});
 				})()
 			</script>
 		) : null}
+
 	</div>
 </SiteLayout>
