@@ -60,7 +60,7 @@ export async function loader({ request }: { request: Request }) {
 			limit,
 			offset,
 		}),
-		auditService.getStatistics(organizationId)
+		auditService.getStatistics(organizationId),
 	])
 
 	// Metadata is already parsed by the auditService, but we ensure it's a valid object

@@ -4935,8 +4935,20 @@ function InspectorNav({
 // Main Builder Component
 // ==============================================
 export default function PageBuilderRoute() {
-	const { organization, page, themeConfig, sitePages } =
-		useLoaderData<typeof loader>()
+	const {
+		organization,
+		page,
+		themeConfig: initialTheme,
+		sitePages,
+	} = useLoaderData<typeof loader>()
+	const [themeConfig, setThemeConfig] = useState(initialTheme)
+
+	useEffect(() => {
+		const handleThemeChange = (e: any) => setThemeConfig(e.detail)
+		window.addEventListener('epic-preview-theme-change', handleThemeChange)
+		return () =>
+			window.removeEventListener('epic-preview-theme-change', handleThemeChange)
+	}, [])
 	const params = useParams()
 	const titleFetcher = useFetcher()
 	const sectionFetcher = useFetcher()
@@ -5016,15 +5028,18 @@ export default function PageBuilderRoute() {
 	])
 
 	useEffect(() => {
-		if (typeof document !== 'undefined') {
-			try {
-				const encoded = encodeURIComponent(JSON.stringify(page.sections))
-				document.cookie = `epic_preview_sections=${encoded}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
-			} catch (err) {
-				console.error('Failed to save preview sections to cookie', err)
-			}
+		const frame = iframeRef.current
+		if (frame?.contentWindow && previewUrl) {
+			frame.contentWindow.postMessage(
+				{
+					type: 'epic-preview-update',
+					sections: page.sections,
+					theme: themeConfig,
+				},
+				'*',
+			)
 		}
-	}, [page.sections])
+	}, [page.sections, themeConfig, previewUrl])
 
 	const [mode, setMode] = useState<'build' | 'preview'>('build')
 	// Page builder split is desktop-first (matches `lg:` preview visibility).
@@ -5041,6 +5056,7 @@ export default function PageBuilderRoute() {
 		return () => mql.removeEventListener('change', onChange)
 	}, [])
 	const previewFrameRef = useRef<HTMLDivElement>(null)
+	const iframeRef = useRef<HTMLIFrameElement>(null)
 	const previewViewportRef = useRef(previewViewport)
 	const [previewDesktopWidth, setPreviewDesktopWidth] = useState<number | null>(
 		null,
@@ -5531,6 +5547,7 @@ export default function PageBuilderRoute() {
 						) : (
 							<iframe
 								key={iframeKey}
+								ref={iframeRef}
 								src={previewUrl}
 								className="h-full w-full border-0"
 								title="Live Preview"
@@ -5831,4 +5848,16 @@ export default function PageBuilderRoute() {
 			</TranslateProvider>
 		</LocaleContext.Provider>
 	)
+}
+
+function getSharedCookieDomain() {
+	if (typeof window === 'undefined') return ''
+	const host = window.location.hostname
+	if (host === 'localhost' || host === '127.0.0.1') return ''
+	if (host.endsWith('.localhost')) return '; domain=.localhost'
+	const parts = host.split('.')
+	if (parts.length >= 3 && (parts[0] === 'app' || parts[0] === 'admin')) {
+		return '; domain=.' + parts.slice(1).join('.')
+	}
+	return ''
 }

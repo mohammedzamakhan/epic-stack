@@ -148,11 +148,10 @@ export function BrandingPanel({
 	}
 
 	const persistTheme = (next: SiteThemeConfig) => {
-		if (typeof document !== 'undefined') {
-			try {
-				const encoded = encodeURIComponent(JSON.stringify(next))
-				document.cookie = `epic_preview_theme=${encoded}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
-			} catch {}
+		if (typeof window !== 'undefined') {
+			window.dispatchEvent(
+				new CustomEvent('epic-preview-theme-change', { detail: next }),
+			)
 		}
 		setTheme(next)
 		// Theme changes are now only saved to cookies until published

@@ -1,22 +1,22 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "epic-startup-jobs-cron",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-08-15",
-  "observability": {
-    "enabled": true
-  },
-  "triggers": {
-    "crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *"]
-  },
-  "workflows": [
-    {
-      "name": "storage-migration",
-      "binding": "STORAGE_MIGRATION_WORKFLOW",
-      "class_name": "StorageMigrationWorkflow"
-    }
-  ],
-  "vars": {
-    "APP_BASE_URL": "https://app.epic-startup.me"
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "epic-startup-jobs-cron",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-08-15",
+	"observability": {
+		"enabled": true,
+	},
+	"triggers": {
+		"crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *"],
+	},
+	"workflows": [
+		{
+			"name": "storage-migration",
+			"binding": "STORAGE_MIGRATION_WORKFLOW",
+			"class_name": "StorageMigrationWorkflow",
+		},
+	],
+	"vars": {
+		"APP_BASE_URL": "https://app.epic-startup.me",
+	},
 }

@@ -602,7 +602,8 @@ jobs:
     needs: [lint, typecheck, vitest, affected]
     if:
       ${{ github.event_name == 'push' && (needs.affected.outputs.jobs_cron ==
-      'true' || contains(github.event.head_commit.modified, 'apps/jobs-cron/')) }}
+      'true' || contains(github.event.head_commit.modified, 'apps/jobs-cron/'))
+      }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4

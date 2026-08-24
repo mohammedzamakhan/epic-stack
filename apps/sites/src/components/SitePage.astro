@@ -109,42 +109,18 @@ const alternateLinks = [
 		
 		{isPreview ? (
 			<script is:inline>
-				;(function () {
-					const storageKey = 'site-preview-scroll'
-					const restoreScroll = () => {
-						const saved = window.sessionStorage.getItem(storageKey)
-						if (!saved) return
-						window.scrollTo({ top: Number(saved) || 0 })
-					}
-					const saveScroll = () => {
-						window.sessionStorage.setItem(storageKey, String(window.scrollY))
-					}
-					if ('scrollRestoration' in history) {
-						history.scrollRestoration = 'manual'
-					}
-					restoreScroll()
-					window.addEventListener('scroll', saveScroll, { passive: true })
-					window.addEventListener('beforeunload', saveScroll)
-
-					// Polling for cookie changes to apply them without full page refresh
-					let lastSectionsCookie = (document.cookie.match(/(?:^|; )epic_preview_sections=([^;]*)/) || [])[1];
-					let lastThemeCookie = (document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) || [])[1];
-
-					setInterval(async () => {
-						const currentSectionsCookie = (document.cookie.match(/(?:^|; )epic_preview_sections=([^;]*)/) || [])[1];
-						const currentThemeCookie = (document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) || [])[1];
-
-						if (currentSectionsCookie !== lastSectionsCookie || currentThemeCookie !== lastThemeCookie) {
-							lastSectionsCookie = currentSectionsCookie;
-							lastThemeCookie = currentThemeCookie;
-
+				(function() {
+					window.addEventListener('message', async (event) => {
+						if (event.data?.type === 'epic-preview-update') {
 							try {
-								const res = await fetch(window.location.href);
+								const res = await fetch(window.location.href, {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ sections: event.data.sections, theme: event.data.theme })
+								});
 								const html = await res.text();
 								const parser = new DOMParser();
 								const doc = parser.parseFromString(html, 'text/html');
-								
-								// Replace main and header/footer without full reload
 								
 								const newHtml = doc.documentElement;
 								document.documentElement.className = newHtml.className;
@@ -171,20 +147,16 @@ const alternateLinks = [
 								updateStyle('org-site-fonts');
 
 								const currentContainer = document.querySelector('div.bg-background');
-
 								const newContainer = doc.querySelector('div.bg-background');
 								
 								if (currentContainer && newContainer) {
-									// We morph the children manually or just replace innerHTML.
-									// Replacing innerHTML might destroy scripts, but since Astro pages 
-									// are mostly static HTML, it's fine for the preview.
 									currentContainer.innerHTML = newContainer.innerHTML;
 								}
 							} catch (err) {
 								console.error('Failed to update preview', err);
 							}
 						}
-					}, 200);
+					});
 				})()
 			</script>
 		) : null}

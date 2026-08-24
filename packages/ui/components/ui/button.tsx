@@ -23,14 +23,14 @@ const buttonVariants = cva(
 			size: {
 				default:
 					'h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-				xs: "relative after:absolute after:-inset-2 md:after:hidden h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-				sm: "relative after:absolute after:-inset-2 md:after:hidden h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
+				xs: "relative h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs after:absolute after:-inset-2 in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 md:after:hidden [&_svg:not([class*='size-'])]:size-3",
+				sm: "relative h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] after:absolute after:-inset-2 in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 md:after:hidden [&_svg:not([class*='size-'])]:size-3.5",
 				lg: 'h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
-				icon: 'relative after:absolute after:-inset-2 md:after:hidden size-8',
+				icon: 'relative size-8 after:absolute after:-inset-2 md:after:hidden',
 				'icon-xs':
-					"relative after:absolute after:-inset-2 md:after:hidden size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+					"relative size-6 rounded-[min(var(--radius-md),10px)] after:absolute after:-inset-2 in-data-[slot=button-group]:rounded-lg md:after:hidden [&_svg:not([class*='size-'])]:size-3",
 				'icon-sm':
-					'relative after:absolute after:-inset-2 md:after:hidden size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
+					'relative size-7 rounded-[min(var(--radius-md),12px)] after:absolute after:-inset-2 in-data-[slot=button-group]:rounded-lg md:after:hidden',
 				'icon-lg': 'size-9',
 			},
 		},
