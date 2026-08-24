@@ -45,12 +45,21 @@ function Button({
 	className,
 	variant = 'default',
 	size = 'default',
+	nativeButton,
 	...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+	let resolvedNativeButton = nativeButton
+	if (
+		resolvedNativeButton === undefined &&
+		React.isValidElement(props.render)
+	) {
+		resolvedNativeButton = props.render.type === 'button'
+	}
 	return (
 		<ButtonPrimitive
 			data-slot="button"
 			className={cn(buttonVariants({ variant, size, className }))}
+			nativeButton={resolvedNativeButton}
 			{...props}
 		/>
 	)

@@ -357,7 +357,7 @@ function Document({
 						__html: JSON.stringify(organizationSchema),
 					}}
 				/>
-				<Links />
+				<Links nonce={nonce} />
 			</head>
 			<body className="bg-background text-foreground">
 				<a
