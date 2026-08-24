@@ -4,6 +4,7 @@ import { getPageTitle } from '@repo/config/brand'
 import SitePage from '~/components/SitePage.astro'
 import RenderBlocks from '~/components/blocks/RenderBlocks.astro'
 import { fetchPublishedSitePage } from '~/lib/org'
+import { buildSiteThemeCss } from '@repo/common/site-theme'
 
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
@@ -83,7 +84,11 @@ if (page && Astro.url.searchParams.get('preview') === 'true') {
 	}
 	if (themeCookie) {
 		try {
-			organization.theme = JSON.parse(decodeURIComponent(themeCookie))
+			const parsedTheme = JSON.parse(decodeURIComponent(themeCookie))
+			organization.theme = {
+				...parsedTheme,
+				css: buildSiteThemeCss(parsedTheme)
+			}
 		} catch (err) {}
 	}
 }
