@@ -145,7 +145,33 @@ const alternateLinks = [
 								const doc = parser.parseFromString(html, 'text/html');
 								
 								// Replace main and header/footer without full reload
+								
+								const newHtml = doc.documentElement;
+								document.documentElement.className = newHtml.className;
+								['siteTheme', 'siteBase', 'headingFont', 'bodyFont'].forEach(key => {
+									if (newHtml.dataset[key]) {
+										document.documentElement.dataset[key] = newHtml.dataset[key];
+									} else {
+										delete document.documentElement.dataset[key];
+									}
+								});
+								
+								const updateStyle = (id) => {
+									const current = document.getElementById(id);
+									const next = doc.getElementById(id);
+									if (current && next) {
+										current.innerHTML = next.innerHTML;
+									} else if (!current && next) {
+										document.head.appendChild(next.cloneNode(true));
+									} else if (current && !next) {
+										current.remove();
+									}
+								};
+								updateStyle('org-site-theme');
+								updateStyle('org-site-fonts');
+
 								const currentContainer = document.querySelector('div.bg-background');
+
 								const newContainer = doc.querySelector('div.bg-background');
 								
 								if (currentContainer && newContainer) {
