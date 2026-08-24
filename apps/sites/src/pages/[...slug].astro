@@ -8,7 +8,7 @@ import { fetchPublishedSitePage } from '~/lib/org'
 const orgSlug = Astro.locals.orgSlug
 const customHost = Astro.locals.customHost
 const requestedLocale = Astro.locals.requestedLocale
-const organization = Astro.locals.organization
+let organization = Astro.locals.organization
 const slug = Astro.params.slug?.replace(/^\/+|\/+$/g, '') ?? ''
 
 if (!organization) {
@@ -19,7 +19,7 @@ if (!slug) {
 	return Astro.rewrite('/')
 }
 
-const page = await (Astro.locals.publishedPagePromise ??
+let page = await (Astro.locals.publishedPagePromise ??
 	fetchPublishedSitePage({
 		slug: orgSlug,
 		host: customHost,
@@ -46,12 +46,12 @@ if (Astro.url.searchParams.get('preview') === 'true') {
 
 	if (sectionsCookie) {
 		try {
-			page.sections = JSON.parse(decodeURIComponent(sectionsCookie))
+			page = { ...page, sections: JSON.parse(decodeURIComponent(sectionsCookie)) }
 		} catch (err) {}
 	}
 	if (themeCookie) {
 		try {
-			organization.theme = JSON.parse(decodeURIComponent(themeCookie))
+			organization = { ...organization, theme: JSON.parse(decodeURIComponent(themeCookie)) }
 		} catch (err) {}
 	}
 }
