@@ -24,6 +24,18 @@ import {
 
 const MAX_ICON_SIZE = 1024 * 1024 * 5
 
+function getSharedCookieDomain() {
+	if (typeof window === 'undefined') return ''
+	const host = window.location.hostname
+	if (host === 'localhost' || host === '127.0.0.1') return ''
+	if (host.endsWith('.localhost')) return '; domain=.localhost'
+	const parts = host.split('.')
+	if (parts.length >= 3 && (parts[0] === 'app' || parts[0] === 'admin')) {
+		return '; domain=.' + parts.slice(1).join('.')
+	}
+	return ''
+}
+
 export function BrandingPanel({
 	organization,
 	themeConfig,
@@ -67,7 +79,7 @@ export function BrandingPanel({
 		if (lastThemeRefresh.current && themeFetcher.data?.status === 'success') {
 			lastThemeRefresh.current = false
 			if (typeof document !== 'undefined') {
-				document.cookie = 'epic_preview_theme=; path=/; max-age=0; SameSite=Lax'
+				document.cookie = `epic_preview_theme=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
 			}
 			onPreviewRefresh()
 		}
@@ -139,7 +151,7 @@ export function BrandingPanel({
 		if (typeof document !== 'undefined') {
 			try {
 				const encoded = encodeURIComponent(JSON.stringify(next))
-				document.cookie = `epic_preview_theme=${encoded}; path=/; max-age=86400; SameSite=Lax`
+				document.cookie = `epic_preview_theme=${encoded}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
 			} catch {}
 		}
 		setTheme(next)

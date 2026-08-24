@@ -86,6 +86,7 @@ import { ScrollArea } from '@repo/ui/scroll-area'
 import { Spinner } from '@repo/ui/spinner'
 import { Switch } from '@repo/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
+import * as cookie from 'cookie'
 import {
 	type ReactNode,
 	useCallback,
@@ -106,7 +107,6 @@ import {
 	useParams,
 } from 'react-router'
 import { z } from 'zod'
-import * as cookie from 'cookie'
 import {
 	deleteSiteIconActionIntent,
 	uploadSiteIconActionIntent,
@@ -5019,7 +5019,7 @@ export default function PageBuilderRoute() {
 		if (typeof document !== 'undefined') {
 			try {
 				const encoded = encodeURIComponent(JSON.stringify(page.sections))
-				document.cookie = `epic_preview_sections=${encoded}; path=/; max-age=86400; SameSite=Lax`
+				document.cookie = `epic_preview_sections=${encoded}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
 			} catch (err) {
 				console.error('Failed to save preview sections to cookie', err)
 			}
@@ -5203,7 +5203,7 @@ export default function PageBuilderRoute() {
 					const nextSections = page.sections.map((s) =>
 						s.id === sectionId ? { ...s, config } : s,
 					)
-					document.cookie = `epic_preview_sections=${encodeURIComponent(JSON.stringify(nextSections))}; path=/; max-age=86400; SameSite=Lax`
+					document.cookie = `epic_preview_sections=${encodeURIComponent(JSON.stringify(nextSections))}; path=/; max-age=86400; SameSite=Lax${getSharedCookieDomain()}`
 				} catch {}
 			}
 			void sectionFetcher.submit(
@@ -5246,9 +5246,8 @@ export default function PageBuilderRoute() {
 			themeCookie =
 				(document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) ||
 					[])[1] || ''
-			document.cookie =
-				'epic_preview_sections=; path=/; max-age=0; SameSite=Lax'
-			document.cookie = 'epic_preview_theme=; path=/; max-age=0; SameSite=Lax'
+			document.cookie = `epic_preview_sections=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
+			document.cookie = `epic_preview_theme=; path=/; max-age=0; SameSite=Lax${getSharedCookieDomain()}`
 		}
 		const formData = new FormData()
 		formData.append('intent', publishIntent)
