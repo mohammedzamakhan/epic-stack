@@ -5030,13 +5030,14 @@ export default function PageBuilderRoute() {
 	useEffect(() => {
 		const frame = iframeRef.current
 		if (frame?.contentWindow && previewUrl) {
+			const targetOrigin = new URL(previewUrl).origin
 			frame.contentWindow.postMessage(
 				{
 					type: 'epic-preview-update',
 					sections: page.sections,
 					theme: themeConfig,
 				},
-				'*',
+				targetOrigin,
 			)
 		}
 	}, [page.sections, themeConfig, previewUrl])
