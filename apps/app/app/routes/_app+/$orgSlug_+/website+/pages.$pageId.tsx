@@ -106,6 +106,7 @@ import {
 	useParams,
 } from 'react-router'
 import { z } from 'zod'
+import * as cookie from 'cookie'
 import {
 	deleteSiteIconActionIntent,
 	uploadSiteIconActionIntent,
@@ -540,6 +541,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('Page not found', { status: 404 })
 	}
 
+	const cookieHeader = request.headers.get('Cookie')
+	const cookies = cookieHeader ? cookie.parse(cookieHeader) : {}
+
+	let themeConfig = parseSiteThemeConfig(organization.siteTheme)
+	if (cookies.epic_preview_theme) {
+		try {
+			themeConfig = JSON.parse(
+				decodeURIComponent(cookies.epic_preview_theme),
+			) as ReturnType<typeof parseSiteThemeConfig>
+		} catch {}
+	}
+
 	const headerConfig =
 		chrome?.siteHeaderConfig ?? JSON.stringify(getDefaultConfig('header'))
 	const footerConfig =
@@ -547,12 +560,21 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	return {
 		organization,
-		themeConfig: parseSiteThemeConfig(organization.siteTheme),
+		themeConfig,
 		sitePages,
 		page: {
 			...page,
 			sections: composePageSectionsWithChrome(
-				page.sections,
+				(() => {
+					if (cookies.epic_preview_sections) {
+						try {
+							return JSON.parse(
+								decodeURIComponent(cookies.epic_preview_sections),
+							) as typeof page.sections
+						} catch {}
+					}
+					return page.sections
+				})(),
 				headerConfig,
 				footerConfig,
 			),
@@ -1267,6 +1289,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	}
 
 	if (intent === publishIntent) {
+		const themeData = formData.get('theme') as string | null
 		const sections = await db
 			.select({
 				id: WebsitePageSection.id,
@@ -1281,13 +1304,38 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			(section) => !isLockedBlockType(section.type),
 		)
 
-		await db
-			.update(WebsitePage)
-			.set({
-				status: 'published',
-				publishedData: JSON.stringify(publishedSections),
-			})
-			.where(eq(WebsitePage.id, page.id))
+		await db.transaction(async (tx) => {
+			await tx
+				.update(WebsitePage)
+				.set({
+					status: 'published',
+					publishedData: JSON.stringify(publishedSections),
+				})
+				.where(eq(WebsitePage.id, page.id))
+
+			if (themeData) {
+				try {
+					const theme = JSON.parse(themeData) as ReturnType<
+						typeof parseSiteThemeConfig
+					>
+					const [org] = await tx
+						.select({ siteTheme: Organization.siteTheme })
+						.from(Organization)
+						.where(eq(Organization.id, organization.id))
+						.limit(1)
+					const current = parseSiteThemeConfig(org?.siteTheme)
+					await tx
+						.update(Organization)
+						.set({
+							siteTheme: serializeSiteThemeConfig({
+								...current,
+								...theme,
+							}),
+						})
+						.where(eq(Organization.id, organization.id))
+				} catch {}
+			}
+		})
 		return Response.json({ status: 'success' })
 	}
 
@@ -5193,12 +5241,21 @@ export default function PageBuilderRoute() {
 	)
 
 	const handlePublish = useCallback(() => {
+		let themeCookie = ''
 		if (typeof document !== 'undefined') {
+			themeCookie =
+				(document.cookie.match(/(?:^|; )epic_preview_theme=([^;]*)/) ||
+					[])[1] || ''
 			document.cookie =
 				'epic_preview_sections=; path=/; max-age=0; SameSite=Lax'
 			document.cookie = 'epic_preview_theme=; path=/; max-age=0; SameSite=Lax'
 		}
-		void publishFetcher.submit({ intent: publishIntent }, { method: 'POST' })
+		const formData = new FormData()
+		formData.append('intent', publishIntent)
+		if (themeCookie) {
+			formData.append('theme', decodeURIComponent(themeCookie))
+		}
+		void publishFetcher.submit(formData, { method: 'POST' })
 	}, [publishFetcher])
 
 	const handleUnpublish = useCallback(() => {

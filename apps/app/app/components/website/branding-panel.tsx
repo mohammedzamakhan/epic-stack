@@ -124,19 +124,7 @@ export function BrandingPanel({
 			} catch {}
 		}
 		setTheme(next)
-		void themeFetcher.submit(
-			{
-				intent: siteThemeActionIntent,
-				organizationId: organization.id,
-				baseColor: next.baseColor,
-				theme: next.theme,
-				radius: next.radius,
-				mode: next.mode,
-				headingFont: next.headingFont,
-				bodyFont: next.bodyFont,
-			},
-			{ method: 'POST' },
-		)
+		// Theme changes are now only saved to cookies until published
 	}
 
 	const handleUploadFont = (role: 'heading' | 'body', file: File) => {
