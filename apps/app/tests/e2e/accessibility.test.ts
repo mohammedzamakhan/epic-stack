@@ -44,10 +44,9 @@ test.describe('Accessibility', () => {
 
 		// Test settings page
 		await navigate('/:slug/settings', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
-
-		// Verify h1 exists
-		await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
+		await expect(
+			page.getByRole('heading', { name: /^settings$/i, level: 1 }),
+		).toBeVisible()
 	})
 
 	test('Forms have proper labels and ARIA attributes', async ({

@@ -39,8 +39,10 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 
 		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
 		await expect(page.locator('.react-flow')).toBeVisible()
+		// eslint-disable-next-line playwright/no-raw-locators -- React Flow node wrapper
+		await expect(page.locator('.react-flow__node').first()).toBeVisible()
 		await expect(
-			page.locator('.react-flow').getByRole('heading', { name: /^trigger$/i }),
+			page.getByRole('heading', { name: /^trigger$/i }),
 		).toBeVisible()
 	})
 
@@ -57,8 +59,10 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
 		const reactFlow = page.locator('.react-flow')
 		await expect(reactFlow).toBeVisible()
+		// eslint-disable-next-line playwright/no-raw-locators -- React Flow node wrapper
+		await expect(page.locator('.react-flow__node').first()).toBeVisible()
 
-		const triggerNode = reactFlow.getByRole('heading', { name: /^trigger$/i })
+		const triggerNode = page.getByRole('heading', { name: /^trigger$/i })
 		await triggerNode.click()
 
 		await expect(page.getByText(/trigger event type/i)).toBeVisible()
@@ -69,7 +73,7 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		if (await delayPaletteBtn.isVisible()) {
 			await delayPaletteBtn.click()
 			await expect(
-				reactFlow.getByRole('heading', { name: /^time delay$/i }),
+				page.getByRole('heading', { name: /^time delay$/i }),
 			).toBeVisible()
 		}
 
@@ -79,11 +83,11 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		if (await emailPaletteBtn.isVisible()) {
 			await emailPaletteBtn.click()
 			await expect(
-				reactFlow.getByRole('heading', { name: /^email$/i }),
+				page.getByRole('heading', { name: /^email$/i }),
 			).toBeVisible()
 		}
 
-		const emailNode = reactFlow.getByRole('heading', { name: /^email$/i })
+		const emailNode = page.getByRole('heading', { name: /^email$/i })
 		await emailNode.click()
 
 		await expect(page.getByText(/subject line/i)).toBeVisible()

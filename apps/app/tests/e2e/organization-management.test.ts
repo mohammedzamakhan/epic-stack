@@ -24,8 +24,8 @@ test.describe('Organization Management', () => {
 		await navigate('/organizations')
 		await page.waitForLoadState('networkidle')
 
-		// Click create organization button (it's labeled "Add organization")
-		await page.getByRole('button', { name: /add organization/i }).click()
+		// Header CTA (distinct from empty-state "Add organization" when user has no orgs)
+		await page.getByRole('button', { name: '+ Add organization' }).click()
 		await expect(page).toHaveURL('/organizations/create')
 
 		// Fill in organization details
