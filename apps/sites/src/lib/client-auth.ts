@@ -53,9 +53,8 @@ export function clearSessionTokens() {
 export function getBrowserTenantApiUrl(): string {
 	const fromDom = document.documentElement.dataset.tenantApiUrl
 	if (fromDom) return fromDom.replace(/\/$/, '')
-	return (
-		import.meta.env.PUBLIC_TENANT_API_URL || 'http://localhost:3007'
-	).replace(/\/$/, '')
+	// SSR should set data-tenant-api-url; localhost fallback for local dev only.
+	return 'http://localhost:3007'
 }
 
 export function getOrgBinding(): OrgBinding {

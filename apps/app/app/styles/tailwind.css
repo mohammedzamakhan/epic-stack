@@ -4,6 +4,8 @@
 
 @custom-variant dark (&:is(.dark *));
 @source './../../../../packages/ui/**/*.{js,jsx,ts,tsx}';
+@source './../../../../packages/marketing-workflow/**/*.{js,jsx,ts,tsx}';
+@source './../../../../packages/marketing/**/*.{js,jsx,ts,tsx}';
 
 :root {
 	--background: oklch(1 0 0);

@@ -174,10 +174,10 @@ and one block volume per region. **Do not use LiteFS** — that is Fly-only and
 would require a sticky multi-machine cluster. Mount the volume at
 `/data/tenants` (`TENANT_DB_DIR`).
 
-1. **US (Ashburn)** — paid Ampere A1. `DATA_REGION=us`. Public URL in App
-   `TENANT_API_URL` and Sites `PUBLIC_TENANT_API_URL`.
+1. **US (Ashburn)** — paid Ampere A1. `DATA_REGION=us`. Public URL in App and
+   Sites `TENANT_API_URL`.
 2. **KSA (Riyadh)** — home-region Always Free A1. `DATA_REGION=ksa`. Public URL
-   in `TENANT_API_URL_KSA` / `PUBLIC_TENANT_API_URL_KSA`.
+   in `TENANT_API_URL_KSA` (App and Sites).
 
 Skip an OCI load balancer and NAT gateway. Put Cloudflare (or a Cloudflare
 Tunnel) in front of port 8080. Set `APP_URL` to the US App so org flags do not
@@ -216,8 +216,8 @@ INTERNAL_COMMAND_TOKEN=<same as tenant-api>
 On Sites (Cloudflare env / GitHub Actions variables):
 
 ```
-PUBLIC_TENANT_API_URL=https://tenant-us.example.com
-PUBLIC_TENANT_API_URL_KSA=https://tenant-ksa.example.com
+TENANT_API_URL=https://tenant-us.example.com
+TENANT_API_URL_KSA=https://tenant-ksa.example.com
 ```
 
 GitHub Actions builds `linux/arm64` and pushes to GHCR. If `OCI_TENANT_US_HOST`

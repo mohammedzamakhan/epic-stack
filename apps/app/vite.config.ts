@@ -130,11 +130,18 @@ export default defineConfig((config) => ({
 			'@sentry-internal/node-cpu-profiler',
 			'@repo/ai',
 			'@repo/ui',
+			'@repo/marketing',
+			'@repo/marketing-workflow',
 		],
 	},
 	...(MODE !== 'test' && {
 		ssr: {
-			noExternal: ['@repo/ai', '@repo/email'],
+			noExternal: [
+				'@repo/ai',
+				'@repo/email',
+				'@repo/marketing',
+				'@repo/marketing-workflow',
+			],
 		},
 	}),
 	server: {

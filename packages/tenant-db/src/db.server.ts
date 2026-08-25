@@ -58,6 +58,22 @@ function getTenantDbFilePath(orgId: string) {
 }
 
 /**
+ * Lists org IDs that have a provisioned tenant SQLite file on this node.
+ */
+export function listTenantOrgIds(): string[] {
+	const dir = getTenantDbDirectory()
+	if (!fs.existsSync(dir)) return []
+
+	return fs
+		.readdirSync(dir)
+		.filter(
+			(fileName) => fileName.startsWith('tenant_') && fileName.endsWith('.db'),
+		)
+		.map((fileName) => fileName.slice('tenant_'.length, -'.db'.length))
+		.filter((orgId) => TENANT_ORG_ID_PATTERN.test(orgId))
+}
+
+/**
  * Returns an asynchronous Drizzle database instance for the specified tenant using @libsql/client.
  * WAL journal mode is set during connection setup (single-writer VM, not LiteFS).
  * @param orgId The organization ID
@@ -103,6 +119,9 @@ export async function getTenantDb(
 		// WAL is the default for a single-writer VM. DELETE is only needed when
 		// a FUSE replicator (LiteFS) is in front of the file.
 		await db.run(sql`PRAGMA journal_mode = WAL;`)
+		// Enforce referential integrity. SQLite/libSQL default to OFF, which
+		// would silently accept orphaned rows and disable ON DELETE CASCADE.
+		await db.run(sql`PRAGMA foreign_keys = ON;`)
 
 		dbCache.set(orgId, { db, client })
 

@@ -7,11 +7,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./client": {
       "types": "./client.d.ts",
-      "import": "./client.ts"
+      "import": "./client.ts",
+      "require": "./client.ts",
+      "default": "./client.ts"
     }
   },
   "scripts": {

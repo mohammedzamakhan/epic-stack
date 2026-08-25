@@ -1,7 +1,0 @@
-{
-	"detector": {
-		"ignoreRules": [],
-		"ignoreFiles": ["dev-proxy.js"],
-		"ignoreValues": []
-	}
-}

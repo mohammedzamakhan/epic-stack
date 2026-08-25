@@ -7,18 +7,21 @@
     "eslint-preset.js",
     "brand.ts",
     "manifest.ts",
+    "marketing-email.ts",
     "tsconfig.base-package.json",
     "dist"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf node_modules dist",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "vitest run"
   },
   "exports": {
     "./eslint-preset": "./eslint-preset.js",
     "./brand": "./dist/brand.js",
-    "./manifest": "./dist/manifest.js"
+    "./manifest": "./dist/manifest.js",
+    "./marketing-email": "./dist/marketing-email.js"
   },
   "dependencies": {
     "@epic-web/config": "^1.20.1",

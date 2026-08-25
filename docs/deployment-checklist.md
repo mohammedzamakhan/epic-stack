@@ -343,7 +343,7 @@ production is Vercel. See [CMS storage](./cms-storage.md).
   - [ ] Add `FLY_API_TOKEN` (from step 6.1)
   - [ ] Add `SENTRY_AUTH_TOKEN` (optional, for error tracking)
   - [ ] Optional repository **variables** for Sites builds: `PUBLIC_APP_URL`,
-        `PUBLIC_TENANT_API_URL`, `PUBLIC_TENANT_API_URL_KSA`
+        `TENANT_API_URL`, `TENANT_API_URL_KSA`
   - [ ] Optional OCI deploy: variables `OCI_TENANT_US_HOST`,
         `OCI_TENANT_KSA_HOST`, `OCI_TENANT_SSH_USER`; secrets
         `OCI_TENANT_SSH_KEY`, `GHCR_PULL_TOKEN`

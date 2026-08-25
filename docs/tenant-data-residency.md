@@ -269,15 +269,14 @@ See [Deployment](./deployment.md#regional-tenant-data-plane) and the
 
 ### Sites
 
-| Variable                    | Notes                                                                                  |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `PUBLIC_TENANT_API_URL`     | Public US tenant-api URL (injected into pages).                                        |
-| `PUBLIC_TENANT_API_URL_KSA` | Public KSA tenant-api URL. Safe on a US Sites instance — it is a URL, not a PII proxy. |
-| `PUBLIC_APP_URL`            | US App, for CMS JSON (not PII).                                                        |
+| Variable             | Notes                                                                           |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `TENANT_API_URL`     | US tenant-api URL (injected into pages for browser calls).                      |
+| `TENANT_API_URL_KSA` | KSA tenant-api URL. Safe on a US Sites instance — it is a URL, not a PII proxy. |
+| `PUBLIC_APP_URL`     | US App, for CMS JSON (not PII).                                                 |
 
-Sites must **not** call tenant-api with customer PII on the server. `PUBLIC_*`
-values are published into HTML on purpose so the browser can reach the right
-region.
+Sites must **not** call tenant-api with customer PII on the server. These URLs
+are published into HTML on purpose so the browser can reach the right region.
 
 ### SMS
 
@@ -295,7 +294,7 @@ safe: tenant-api returns 404/409 when `dataRegion !== DATA_REGION`.
 
 | Symptom                                | Likely cause                                                                                        |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Login hits port 3007 for a KSA org     | Sites missing `PUBLIC_TENANT_API_URL_KSA`, or org `dataRegion` still `us`.                          |
+| Login hits port 3007 for a KSA org     | Sites missing `TENANT_API_URL_KSA`, or org `dataRegion` still `us`.                                 |
 | CORS 403 on login                      | Origin not a published slug/custom domain for an org in that node’s region.                         |
 | `region_mismatch` on provision         | App called the wrong regional URL, or control-plane `dataRegion` does not match the node.           |
 | Empty customers after a region change  | Expected. Wipe is the product behavior; there is no PII migration.                                  |

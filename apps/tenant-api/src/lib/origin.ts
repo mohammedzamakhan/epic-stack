@@ -283,6 +283,21 @@ export async function isAllowedBrowserOrigin(origin: string): Promise<boolean> {
 	const cached = corsCache.get(origin)
 	if (cached !== undefined) return cached
 
+	const url = parseOrigin(origin)
+	const appHostname = `app.${brandDomain()}`
+	const appUrl = parseOrigin(appBaseUrl())
+	const isAppOrigin = Boolean(
+		url &&
+		(url.hostname === appHostname ||
+			url.hostname === 'localhost' ||
+			(appUrl && url.origin === appUrl.origin)),
+	)
+
+	if (isAppOrigin) {
+		corsCache.set(origin, true)
+		return true
+	}
+
 	const binding = resolveOriginBinding(origin)
 	let allowed = false
 

@@ -7,7 +7,13 @@ import { isAllowedBrowserOrigin } from './lib/origin.ts'
 import { assertDataRegion, getNodeRegion } from './lib/region.ts'
 import { assertTenantApiSecrets } from './lib/secrets.ts'
 import { authRoutes } from './routes/auth.ts'
+import {
+	journeySystemRoutes,
+	journeyOperatorRoutes,
+} from './routes/journeys.ts'
+import { operatorRoutes } from './routes/operator.ts'
 import { provisionRoutes } from './routes/provision.ts'
+import { engagementSyncRoutes } from './routes/engagement-sync.ts'
 
 assertTenantApiSecrets()
 assertDataRegion()
@@ -16,8 +22,8 @@ const app = new Hono()
 
 app.use('*', logger())
 
-// Browser-facing auth: Sites may run in another region, so the page JS calls
-// this API directly. Allow only origins that resolve to an org in THIS region.
+// Browser-facing: Sites auth and App operator pages call tenant-api directly.
+// Allow only origins that resolve to an org in THIS region (App origin is always allowed).
 app.use('*', async (c, next) => {
 	const origin = c.req.header('Origin')
 	const allowed = origin ? await isAllowedBrowserOrigin(origin) : false
@@ -29,7 +35,7 @@ app.use('*', async (c, next) => {
 		return c.body(null, 204, {
 			'Access-Control-Allow-Origin': origin,
 			Vary: 'Origin',
-			'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+			'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
 			'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 			'Access-Control-Max-Age': '600',
 		})
@@ -54,6 +60,10 @@ app.get('/health', (c) => {
 
 app.route('/auth', authRoutes)
 app.route('/api', provisionRoutes)
+app.route('/api/marketing', engagementSyncRoutes)
+app.route('/api/journeys', journeySystemRoutes)
+app.route('/operator', operatorRoutes)
+app.route('/operator/journeys', journeyOperatorRoutes)
 
 app.notFound((c) => {
 	return c.json({ error: 'Endpoint Not Found' }, 404)

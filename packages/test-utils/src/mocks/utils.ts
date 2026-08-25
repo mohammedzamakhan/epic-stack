@@ -28,6 +28,41 @@ export const EmailSchema = z.object({
 	html: z.string(),
 })
 
+const OciSubmitEmailBodySchema = z.object({
+	submitEmailDetails: z.object({
+		subject: z.string(),
+		bodyHtml: z.string(),
+		bodyText: z.string(),
+		recipients: z.object({
+			to: z.array(z.object({ email: z.string() })).min(1),
+		}),
+		sender: z
+			.object({
+				senderAddress: z.object({
+					email: z.string(),
+				}),
+			})
+			.optional(),
+	}),
+})
+
+export async function writeOciSubmitEmail(body: unknown) {
+	const parsed = OciSubmitEmailBodySchema.parse(body)
+	const details = parsed.submitEmailDetails
+	const recipient = details.recipients.to[0]
+	if (!recipient) {
+		throw new Error('OCI submitEmail mock requires at least one recipient')
+	}
+
+	return writeEmail({
+		to: recipient.email,
+		from: details.sender?.senderAddress.email,
+		subject: details.subject,
+		text: details.bodyText,
+		html: details.bodyHtml,
+	})
+}
+
 export async function writeEmail(rawEmail: unknown) {
 	const email = EmailSchema.parse(rawEmail)
 	await createFixture('email', email.to, email)

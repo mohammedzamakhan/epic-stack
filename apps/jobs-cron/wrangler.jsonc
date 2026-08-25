@@ -4,19 +4,26 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-15",
 	"observability": {
-		"enabled": true,
+		"enabled": true
 	},
 	"triggers": {
-		"crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *"],
+		"crons": ["0 2 * * *", "0 3 * * *", "0 4 * * *", "0 * * * *"]
 	},
 	"workflows": [
 		{
 			"name": "storage-migration",
 			"binding": "STORAGE_MIGRATION_WORKFLOW",
-			"class_name": "StorageMigrationWorkflow",
+			"class_name": "StorageMigrationWorkflow"
 		},
+		{
+			"name": "marketing-journey",
+			"binding": "MARKETING_JOURNEY_WORKFLOW",
+			"class_name": "MarketingJourneyWorkflow"
+		}
 	],
 	"vars": {
 		"APP_BASE_URL": "https://app.epic-startup.me",
-	},
+		"TENANT_API_URL": "https://tenant-us.epic-startup.me",
+		"TENANT_API_URL_KSA": "https://tenant-ksa.epic-startup.me"
+	}
 }

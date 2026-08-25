@@ -27,6 +27,7 @@ interface Env {
 	STRIPE_SECRET_KEY?: string
 	STRIPE_WEBHOOK_SECRET?: string
 	INTERNAL_COMMAND_TOKEN?: string
+	TENANT_OPERATOR_TOKEN?: string
 	AWS_ACCESS_KEY_ID?: string
 	AWS_SECRET_ACCESS_KEY?: string
 	JWT_SECRET?: string

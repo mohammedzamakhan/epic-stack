@@ -2128,3 +2128,182 @@ export const Organization = sqliteTable(
 		uniqueIndex('Organization_slug_key').on(table.slug),
 	],
 )
+
+export const PlatformMarketingCampaign = sqliteTable(
+	'PlatformMarketingCampaign',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		name: text().notNull(),
+		channel: text().notNull(),
+		subject: text(),
+		content: text().notNull(),
+		status: text().default('Draft').notNull(),
+		audience: text().default('all_operators').notNull(),
+		targetOrganizationId: text().references(() => Organization.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
+		targetAudienceCount: integer().default(0).notNull(),
+		segmentationRules: text(),
+		scheduledAt: integer({ mode: 'timestamp_ms' }),
+		createdById: text().references(() => User.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('PlatformMarketingCampaign_status_idx').on(table.status),
+		index('PlatformMarketingCampaign_createdAt_idx').on(table.createdAt),
+	],
+)
+
+export const PlatformMarketingMessage = sqliteTable(
+	'PlatformMarketingMessage',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		campaignId: text()
+			.notNull()
+			.references(() => PlatformMarketingCampaign.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		userId: text()
+			.notNull()
+			.references(() => User.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		status: text().default('Processing').notNull(),
+		sentAt: integer({ mode: 'timestamp_ms' }),
+		openedAt: integer({ mode: 'timestamp_ms' }),
+		clickedAt: integer({ mode: 'timestamp_ms' }),
+		providerMessageId: text(),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('PlatformMarketingMessage_campaignId_idx').on(table.campaignId),
+		index('PlatformMarketingMessage_userId_idx').on(table.userId),
+		index('PlatformMarketingMessage_providerMessageId_idx').on(
+			table.providerMessageId,
+		),
+	],
+)
+
+export const PlatformMarketingJourney = sqliteTable(
+	'PlatformMarketingJourney',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		name: text().notNull(),
+		description: text(),
+		status: text().default('draft').notNull(),
+		triggerType: text().notNull(),
+		triggerConfig: text(),
+		nodes: text(),
+		edges: text(),
+		graphJson: text(),
+		version: integer().default(1).notNull(),
+		publishedAt: integer({ mode: 'timestamp_ms' }),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('PlatformMarketingJourney_status_idx').on(table.status),
+		index('PlatformMarketingJourney_triggerType_idx').on(table.triggerType),
+	],
+)
+
+export const PlatformJourneyRun = sqliteTable(
+	'PlatformJourneyRun',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		journeyId: text()
+			.notNull()
+			.references(() => PlatformMarketingJourney.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		userId: text()
+			.notNull()
+			.references(() => User.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		organizationId: text().references(() => Organization.id, {
+			onDelete: 'set null',
+			onUpdate: 'cascade',
+		}),
+		status: text().default('running').notNull(),
+		currentNodeId: text(),
+		currentStepNodeId: text(),
+		triggerEvent: text(),
+		contextData: text(),
+		errorMessage: text(),
+		startedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		completedAt: integer({ mode: 'timestamp_ms' }),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('PlatformJourneyRun_journeyId_status_idx').on(
+			table.journeyId,
+			table.status,
+		),
+		index('PlatformJourneyRun_userId_idx').on(table.userId),
+	],
+)
+
+export const PlatformJourneyStepExecution = sqliteTable(
+	'PlatformJourneyStepExecution',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		runId: text()
+			.notNull()
+			.references(() => PlatformJourneyRun.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		nodeId: text().notNull(),
+		nodeType: text().notNull(),
+		status: text().default('pending').notNull(),
+		attempt: integer().default(0).notNull(),
+		executionDetails: text(),
+		errorMessage: text(),
+		executedAt: integer({ mode: 'timestamp_ms' }),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('PlatformJourneyStepExecution_runId_idx').on(table.runId),
+		uniqueIndex('PlatformJourneyStepExecution_runId_nodeId_key').on(
+			table.runId,
+			table.nodeId,
+		),
+	],
+)

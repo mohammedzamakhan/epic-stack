@@ -379,9 +379,11 @@ git commit --no-verify -m "fix: resolve ESLint warnings (verified manually)"
   credentials
 - `INTEGRATION_ENCRYPTION_KEY` - 64 hex chars for integration OAuth tokens (App
   only)
-- `TENANT_API_URL` / `TENANT_API_URL_KSA` - App provision targets (US / KSA)
-- `PUBLIC_TENANT_API_URL` / `PUBLIC_TENANT_API_URL_KSA` - Injected into Sites
-  HTML for browser-direct auth (not a server proxy)
+- `TENANT_API_URL` / `TENANT_API_URL_KSA` - Regional tenant-api origins (App
+  provision + browser calls from App/Sites; not a server PII proxy)
+- `EMAIL_PROVIDER` - App/Admin: `resend` (default) or `oci`. When `oci`, set
+  `OCI_*` vars; `sendEmail()` routes to OCI Email Delivery. See
+  `docs/platform-marketing-email.md`.
 - `INTERNAL_COMMAND_TOKEN` - Shared by App, Admin, every tenant-api, and
   `apps/jobs-cron` (≥16 chars). Authenticates cron POSTs to `/resources/jobs/*`
   and tenant provision/deprovision.

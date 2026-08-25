@@ -24,5 +24,40 @@ export type { NewDeviceSigninEmailProps } from './templates/new-device-signin'
 export type { MentionEmailProps } from './templates/mention-email'
 export type { CommentEmailProps } from './templates/comment-email'
 
-// Export sendEmail function
-export { sendEmail } from './send-email'
+// Export sendEmail function (App/Admin — routes via EMAIL_PROVIDER)
+export {
+	sendEmail,
+	type SendEmailInput,
+	type SendEmailResult,
+} from './send-email'
+export {
+	getEmailProvider,
+	isOciEmailProvider,
+	type EmailProvider,
+} from './provider'
+export {
+	verifyResendWebhook,
+	type ResendWebhookHeaders,
+} from './resend-webhook'
+
+// OCI Email Delivery (tenant-api regional marketing email + engagement)
+export {
+	createOciAuthProvider,
+	fetchOciEngagementEvents,
+	getOciEmailConfig,
+	getOciEmailLogOcid,
+	getOciMarketingMetrics,
+	isOciEmailConfigured,
+	isOciEngagementLoggingConfigured,
+	parseOciEngagementLogRecord,
+	resetOciEmailConfigCache,
+	sendOciEmail,
+	OCI_EMAIL_MOCK_SUBMIT_URL,
+	shouldUseOciEmailMockTransport,
+	type OciEmailConfig,
+	type OciEngagementAction,
+	type OciEngagementEvent,
+	type OciMarketingMetrics,
+	type SendOciEmailInput,
+	type SendOciEmailResult,
+} from './oci'
