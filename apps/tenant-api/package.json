@@ -9,12 +9,14 @@
     "dev:ksa": "DATA_REGION=ksa PORT=3009 tsx watch src/index.ts",
     "start": "node --import=tsx src/index.ts",
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
     "@repo/config": "*",
     "@repo/database": "^0.0.0",
+    "@repo/email": "*",
     "@repo/sms": "*",
     "@repo/tenant-db": "*",
     "drizzle-orm": "^0.45.2",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.10"
   }
 }

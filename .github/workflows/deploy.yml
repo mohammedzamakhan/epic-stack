@@ -257,10 +257,10 @@ jobs:
         env:
           PUBLIC_APP_URL:
             ${{ vars.PUBLIC_APP_URL || 'https://epic-startup.me' }}
-          PUBLIC_TENANT_API_URL:
-            ${{ vars.PUBLIC_TENANT_API_URL || 'https://tenant-us.example.com' }}
-          PUBLIC_TENANT_API_URL_KSA:
-            ${{ vars.PUBLIC_TENANT_API_URL_KSA ||
+          TENANT_API_URL:
+            ${{ vars.TENANT_API_URL || 'https://tenant-us.example.com' }}
+          TENANT_API_URL_KSA:
+            ${{ vars.TENANT_API_URL_KSA ||
             'https://tenant-ksa.example.com' }}
 
       - name: 🚀 Deploy Sites to Cloudflare Pages (Production)

@@ -47,6 +47,14 @@ function applyContentSecurity(
 					'object-src': ["'none'"],
 					'connect-src': [
 						MODE === 'development' ? 'ws:' : undefined,
+						MODE === 'development' ? 'http://localhost:3007' : undefined,
+						MODE === 'development' ? 'http://localhost:3009' : undefined,
+						process.env.TENANT_API_URL
+							? process.env.TENANT_API_URL.replace(/\/$/, '')
+							: undefined,
+						process.env.TENANT_API_URL_KSA
+							? process.env.TENANT_API_URL_KSA.replace(/\/$/, '')
+							: undefined,
 						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
 						"'self'",
 					],

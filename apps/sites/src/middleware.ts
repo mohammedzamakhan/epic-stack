@@ -42,11 +42,13 @@ const appUrl = (ENV.PUBLIC_APP_URL || 'http://localhost:3001').replace(
 	'',
 )
 const tenantApiUrl = (
-	ENV.PUBLIC_TENANT_API_URL || 'http://localhost:3007'
+	process.env.TENANT_API_URL ||
+	ENV.TENANT_API_URL ||
+	'http://localhost:3007'
 ).replace(/\/$/, '')
 const tenantApiUrlKsa = (
-	process.env.PUBLIC_TENANT_API_URL_KSA ||
-	ENV.PUBLIC_TENANT_API_URL_KSA ||
+	process.env.TENANT_API_URL_KSA ||
+	ENV.TENANT_API_URL_KSA ||
 	''
 ).replace(/\/$/, '')
 const imgSrc = `img-src 'self' data: ${appUrl}`

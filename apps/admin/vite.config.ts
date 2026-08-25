@@ -77,11 +77,20 @@ export default defineConfig((config) => ({
 	},
 	optimizeDeps: {
 		include: ['@repo/email', '@repo/integrations', '@repo/ai', '@repo/ui'],
-		exclude: ['@sentry/profiling-node', '@sentry-internal/node-cpu-profiler'],
+		exclude: [
+			'@sentry/profiling-node',
+			'@sentry-internal/node-cpu-profiler',
+			'@repo/marketing',
+			'@repo/marketing-workflow',
+		],
 	},
 	...(MODE !== 'test' && {
 		ssr: {
-			noExternal: ['@repo/email'],
+			noExternal: [
+				'@repo/email',
+				'@repo/marketing',
+				'@repo/marketing-workflow',
+			],
 		},
 	}),
 	server: {

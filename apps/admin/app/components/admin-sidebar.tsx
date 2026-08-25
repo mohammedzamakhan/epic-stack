@@ -59,6 +59,31 @@ export function AdminSidebar({
 			icon: BuildingIcon,
 		},
 		{
+			title: _(msg`Marketing`),
+			url: '/marketing',
+			isActive: location.pathname.startsWith('/marketing'),
+			icon: MessageSquareMoreIcon,
+			items: [
+				{
+					title: _(msg`Overview`),
+					url: '/marketing',
+					isActive:
+						location.pathname === '/marketing' ||
+						location.pathname === '/marketing/',
+				},
+				{
+					title: _(msg`Broadcasts`),
+					url: '/marketing/campaigns',
+					isActive: location.pathname.startsWith('/marketing/campaigns'),
+				},
+				{
+					title: _(msg`Automations`),
+					url: '/marketing/automations',
+					isActive: location.pathname.startsWith('/marketing/automations'),
+				},
+			],
+		},
+		{
 			title: _(msg`Roles`),
 			url: '/roles',
 			isActive: location.pathname.startsWith('/roles'),

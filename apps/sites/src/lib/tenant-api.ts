@@ -1,23 +1,22 @@
 import { ENV } from 'varlock/env'
 
 /**
- * Public URL of the regional tenant-api for this org.
+ * Regional tenant-api URL for this org.
  *
- * Injected into the page so the **browser** can call tenant-api directly.
- * Sites (often US) must not proxy customer PII — that would leave the org's
- * data region.
+ * Injected into the page (`data-tenant-api-url`) so the browser calls
+ * tenant-api directly. Sites must not proxy customer PII.
  */
 export function getTenantApiUrl(dataRegion?: string | null): string {
 	const region = (dataRegion || 'us').toLowerCase()
 	if (region === 'ksa') {
-		const ksaUrl =
-			process.env.PUBLIC_TENANT_API_URL_KSA || ENV.PUBLIC_TENANT_API_URL_KSA
+		const ksaUrl = process.env.TENANT_API_URL_KSA || ENV.TENANT_API_URL_KSA
 		if (ksaUrl) {
 			return ksaUrl.replace(/\/$/, '')
 		}
 	}
-	return (ENV.PUBLIC_TENANT_API_URL || 'http://localhost:3007').replace(
-		/\/$/,
-		'',
-	)
+	return (
+		process.env.TENANT_API_URL ||
+		ENV.TENANT_API_URL ||
+		'http://localhost:3007'
+	).replace(/\/$/, '')
 }

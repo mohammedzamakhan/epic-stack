@@ -39,6 +39,8 @@ import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'
 import { ExternalLinkIcon } from './icons/external-link-icon'
+import { SendIcon } from './icons/send-icon'
+import { UsersRoundIcon } from './icons/users-round-icon'
 import { NavSecondary } from './nav-secondary'
 
 // Upgrade Account Card Component
@@ -241,6 +243,41 @@ function OrganizationSidebar({
 			url: `/${orgSlug}/mcp`,
 			isActive: location.pathname.includes(`/${orgSlug}/mcp`),
 			icon: McpIcon,
+		},
+		{
+			title: _(msg`Customers`),
+			url: `/${orgSlug}/customers`,
+			isActive: location.pathname.includes(`/${orgSlug}/customers`),
+			icon: UsersRoundIcon,
+		},
+		{
+			title: _(msg`Marketing`),
+			url: `/${orgSlug}/marketing`,
+			isActive: location.pathname.includes(`/${orgSlug}/marketing`),
+			icon: SendIcon,
+			items: [
+				{
+					title: _(msg`Overview`),
+					url: `/${orgSlug}/marketing`,
+					isActive:
+						location.pathname === `/${orgSlug}/marketing` ||
+						location.pathname === `/${orgSlug}/marketing/`,
+				},
+				{
+					title: _(msg`Broadcasts`),
+					url: `/${orgSlug}/marketing/campaigns`,
+					isActive: location.pathname.includes(
+						`/${orgSlug}/marketing/campaigns`,
+					),
+				},
+				{
+					title: _(msg`Automations`),
+					url: `/${orgSlug}/marketing/automations`,
+					isActive: location.pathname.includes(
+						`/${orgSlug}/marketing/automations`,
+					),
+				},
+			],
 		},
 		{
 			title: _(msg`Website`),

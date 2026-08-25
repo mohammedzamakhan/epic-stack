@@ -22,8 +22,13 @@ export function timingSafeEqualString(left: string, right: string) {
 	return crypto.timingSafeEqual(leftHash, rightHash)
 }
 
+export function getOperatorToken() {
+	return process.env.TENANT_OPERATOR_TOKEN || ENV.TENANT_OPERATOR_TOKEN || ''
+}
+
 export function assertTenantApiSecrets() {
 	const internalToken = ENV.INTERNAL_COMMAND_TOKEN || ''
+	const operatorToken = getOperatorToken()
 	const jwtSecret = ENV.JWT_SECRET || ''
 	const hmacSecret = process.env.AUTH_HMAC_SECRET || ''
 	const isProd = process.env.NODE_ENV === 'production'
@@ -31,6 +36,14 @@ export function assertTenantApiSecrets() {
 	if (internalToken.length < 16) {
 		throw new Error(
 			'INTERNAL_COMMAND_TOKEN must be set to at least 16 characters',
+		)
+	}
+	if (
+		operatorToken.length < 16 ||
+		(isProd && isInsecureSecret(operatorToken))
+	) {
+		throw new Error(
+			'TENANT_OPERATOR_TOKEN is missing, too short, or using a default value',
 		)
 	}
 	if (jwtSecret.length < 16 || (isProd && isInsecureSecret(jwtSecret))) {

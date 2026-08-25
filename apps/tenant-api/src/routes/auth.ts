@@ -21,6 +21,7 @@ import {
 } from '../lib/rate-limit.ts'
 import { orgMatchesNodeRegion, getNodeRegion } from '../lib/region.ts'
 import { getBearerToken, hmacHash } from '../lib/secrets.ts'
+import { evaluateAndSpawnTriggers } from '../services/journey-service.ts'
 
 export const authRoutes = new Hono()
 
@@ -52,7 +53,13 @@ const profileSchema = z.object({
 	email: z.string().email('Invalid email address').or(z.literal('')).optional(),
 })
 
-const JWT_SECRET = ENV.JWT_SECRET
+function getJwtSecret(): string {
+	if (process.env.JWT_SECRET) return process.env.JWT_SECRET
+	try {
+		if (ENV && (ENV as any).JWT_SECRET) return (ENV as any).JWT_SECRET
+	} catch {}
+	return ''
+}
 
 const ACCESS_TOKEN_EXPIRY = '15m'
 const REFRESH_TOKEN_EXPIRY_DAYS = 30
@@ -133,7 +140,7 @@ async function issueAccessToken(payload: {
 	orgSlug: string
 	customDomain?: string | null
 }): Promise<string> {
-	const secret = new TextEncoder().encode(JWT_SECRET)
+	const secret = new TextEncoder().encode(getJwtSecret())
 	return new SignJWT({
 		...payload,
 		type: 'access',
@@ -188,7 +195,7 @@ async function authenticateCustomer(c: Context) {
 	}
 
 	try {
-		const secret = new TextEncoder().encode(JWT_SECRET)
+		const secret = new TextEncoder().encode(getJwtSecret())
 		const { payload } = await jwtVerify(token, secret, {
 			issuer: brand.slug,
 			audience: 'tenant-api',
@@ -403,6 +410,22 @@ authRoutes.post(
 			organization,
 		)
 
+		// Fire-and-forget: evaluate active marketing journey triggers
+		void evaluateAndSpawnTriggers(
+			organization.id,
+			'customer_signup',
+			customer.id,
+		).catch((err) => {
+			console.error('Failed to evaluate customer_signup journey triggers:', err)
+		})
+		void evaluateAndSpawnTriggers(
+			organization.id,
+			'phone_verified',
+			customer.id,
+		).catch((err) => {
+			console.error('Failed to evaluate phone_verified journey triggers:', err)
+		})
+
 		return c.json({
 			success: true,
 			accessToken,
@@ -550,6 +573,18 @@ authRoutes.post('/profile', async (c) => {
 			{ id: customerId, name },
 			auth.organization,
 		)
+
+		// Fire-and-forget: evaluate active marketing journey triggers
+		void evaluateAndSpawnTriggers(
+			auth.orgId,
+			'profile_completed',
+			customerId,
+		).catch((err) => {
+			console.error(
+				'Failed to evaluate profile_completed journey triggers:',
+				err,
+			)
+		})
 
 		return c.json({ success: true, accessToken, refreshToken })
 	} catch (error) {

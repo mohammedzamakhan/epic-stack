@@ -17,6 +17,6 @@
 		"isolatedModules": true,
 		"noEmit": false
 	},
-	"include": ["brand.ts", "manifest.ts"],
+	"include": ["brand.ts", "manifest.ts", "marketing-email.ts"],
 	"exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

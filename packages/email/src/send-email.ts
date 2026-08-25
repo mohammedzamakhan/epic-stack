@@ -3,6 +3,12 @@ import { brand } from '@repo/config/brand'
 import { type ReactElement } from 'react'
 import { z } from 'zod'
 import { logger } from '@repo/observability'
+import {
+	marketingTagsToOciHeaders,
+	getMarketingMessageIdFromTags,
+} from './marketing-tags-to-headers.ts'
+import { getEmailProvider } from './provider.ts'
+import { sendOciEmail } from './oci/send-oci-email.ts'
 
 const resendErrorSchema = z.union([
 	z.object({
@@ -23,42 +29,142 @@ const resendSuccessSchema = z.object({
 	id: z.string(),
 })
 
-export async function sendEmail({
-	react,
-	...options
-}: {
+export type SendEmailResult =
+	| { status: 'success'; data: { id: string } }
+	| { status: 'error'; error: ResendError }
+
+export type SendEmailInput = {
 	to: string
 	subject: string
+	/** Resend tags / OCI headers for webhook or log correlation (e.g. platform marketing). */
+	tags?: Record<string, string>
 } & (
 	| { html: string; text: string; react?: never }
 	| { react: ReactElement; html?: never; text?: never }
-)) {
+)
+
+export async function sendEmail(
+	input: SendEmailInput,
+): Promise<SendEmailResult> {
+	const { to, subject, tags } = input
+	let html: string
+	let text: string
+
+	if ('react' in input && input.react) {
+		const rendered = await renderReactEmail(input.react)
+		html = rendered.html
+		text = rendered.text
+	} else {
+		html = input.html
+		text = input.text
+	}
+
+	if (getEmailProvider() === 'oci') {
+		return sendEmailViaOci({
+			to,
+			subject,
+			html,
+			text,
+			tags,
+		})
+	}
+
+	return sendEmailViaResend({
+		to,
+		subject,
+		html,
+		text,
+		tags,
+	})
+}
+
+async function sendEmailViaOci({
+	to,
+	subject,
+	html,
+	text,
+	tags,
+}: {
+	to: string
+	subject: string
+	html: string
+	text: string
+	tags?: Record<string, string>
+}): Promise<SendEmailResult> {
+	const headerFields = marketingTagsToOciHeaders(tags)
+	const taggedMessageId = getMarketingMessageIdFromTags(tags)
+
+	const result = await sendOciEmail({
+		to,
+		subject,
+		html,
+		text,
+		messageId: taggedMessageId,
+		headerFields,
+	})
+
+	if (result.status === 'success') {
+		return {
+			status: 'success',
+			data: { id: result.data.messageId },
+		}
+	}
+
+	if (result.status === 'skipped') {
+		return {
+			status: 'success',
+			data: { id: result.data.messageId },
+		}
+	}
+
+	return {
+		status: 'error',
+		error: {
+			name: 'OciEmailError',
+			message: result.error.message,
+			statusCode: result.error.statusCode ?? 500,
+		},
+	}
+}
+
+async function sendEmailViaResend({
+	to,
+	subject,
+	html,
+	text,
+	tags,
+}: {
+	to: string
+	subject: string
+	html: string
+	text: string
+	tags?: Record<string, string>
+}): Promise<SendEmailResult> {
 	const from = brand.supportEmail
 
 	const email = {
 		from,
-		...options,
-		...(react ? await renderReactEmail(react) : null),
+		to,
+		subject,
+		html,
+		text,
+		...(tags
+			? {
+					tags: Object.entries(tags).map(([name, value]) => ({ name, value })),
+				}
+			: null),
 	}
 
-	// FORCE HTTP REQUEST FOR TESTS - bypass the environment check
-	// This ensures MSW can intercept the request
 	if (process.env.NODE_ENV === 'test') {
-		logger.debug(
-			{ to: options.to, subject: options.subject },
-			'Test mode: sendEmail called',
+		logger.debug({ to, subject }, 'Test mode: sendEmail called')
+	} else if (!process.env.RESEND_API_KEY && !process.env.MOCKS) {
+		logger.warn(
+			{ email },
+			'RESEND_API_KEY not set and not in mocks mode. Email not sent.',
 		)
-	} else {
-		// Production check - feel free to remove this condition once you've set up resend
-		if (!process.env.RESEND_API_KEY && !process.env.MOCKS) {
-			logger.warn(
-				{ email },
-				'RESEND_API_KEY not set and not in mocks mode. Email not sent.',
-			)
-			return {
-				status: 'success',
-				data: { id: 'mocked' },
-			} as const
+		return {
+			status: 'success',
+			data: { id: 'mocked' },
 		}
 	}
 
@@ -76,26 +182,26 @@ export async function sendEmail({
 	if (response.ok && parsedData.success) {
 		return {
 			status: 'success',
-			data: parsedData,
-		} as const
-	} else {
-		const parseResult = resendErrorSchema.safeParse(data)
-		if (parseResult.success) {
-			return {
-				status: 'error',
-				error: parseResult.data,
-			} as const
-		} else {
-			return {
-				status: 'error',
-				error: {
-					name: 'UnknownError',
-					message: 'Unknown Error',
-					statusCode: 500,
-					cause: data,
-				} satisfies ResendError,
-			} as const
+			data: parsedData.data,
 		}
+	}
+
+	const parseResult = resendErrorSchema.safeParse(data)
+	if (parseResult.success) {
+		return {
+			status: 'error',
+			error: parseResult.data,
+		}
+	}
+
+	return {
+		status: 'error',
+		error: {
+			name: 'UnknownError',
+			message: 'Unknown Error',
+			statusCode: 500,
+			cause: data,
+		},
 	}
 }
 

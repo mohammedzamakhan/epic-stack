@@ -12,7 +12,7 @@ function isAlreadyAppliedError(error: unknown) {
 	for (let i = 0; i < 5 && current; i++) {
 		if (current instanceof Error) {
 			parts.push(current.message)
-			current = current.cause
+			current = (current as { cause?: unknown }).cause
 		} else {
 			parts.push(String(current))
 			break
