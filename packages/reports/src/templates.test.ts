@@ -23,4 +23,16 @@ describe('definitionForNewReport', () => {
 		expect(second.subject).toBe('audit_logs')
 		expect(second.groupBy).toEqual(['severity'])
 	})
+
+	it('creates weekly and list customer templates', () => {
+		const weekly = definitionForNewReport('organization', 'customers-by-week')
+		expect(weekly.groupBy).toEqual(['createdAt'])
+		expect(weekly.timeBucket).toBe('week')
+		expect(weekly.visualization.chartStyle).toBe('bar')
+
+		const list = definitionForNewReport('organization', 'customer-list')
+		expect(list.visualization.chartStyle).toBe('table')
+		expect(list.groupBy).toEqual([])
+		expect(list.columns).toEqual(['name', 'email', 'phone', 'createdAt'])
+	})
 })

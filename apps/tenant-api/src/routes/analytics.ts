@@ -24,11 +24,16 @@ function mapCustomer(row: {
 	createdAt: Date | null
 	phoneVerified: boolean | null
 	email: string | null
+	name: string | null
+	phone: string | null
 }): ReportRecord {
 	return {
 		createdAt: row.createdAt,
 		phoneVerified: Boolean(row.phoneVerified),
 		hasEmail: Boolean(row.email && row.email.length > 0),
+		email: row.email ?? '',
+		name: row.name ?? '',
+		phone: row.phone ?? '',
 	}
 }
 
@@ -126,6 +131,8 @@ analyticsRoutes.post('/query', async (c) => {
 			createdAt: customers.createdAt,
 			phoneVerified: customers.phoneVerified,
 			email: customers.email,
+			name: customers.name,
+			phone: customers.phone,
 		})
 		.from(customers)
 

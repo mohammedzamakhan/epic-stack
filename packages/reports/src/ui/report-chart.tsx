@@ -6,6 +6,7 @@ import {
 } from '@repo/ui/chart'
 import { Icon } from '@repo/ui/icon'
 import { Skeleton } from '@repo/ui/skeleton'
+import { type Ref } from 'react'
 import {
 	Table,
 	TableBody,
@@ -28,6 +29,7 @@ import {
 	type ReportDefinition,
 	type ReportResult,
 	type ReportRunError,
+	isListReport,
 } from '../dsl.ts'
 
 export const SEGMENT_COLORS = [
@@ -91,11 +93,13 @@ export function ReportVisualization({
 	result,
 	error,
 	loading,
+	containerRef,
 }: {
 	definition: ReportDefinition
 	result: ReportResult | null
 	error: ReportRunError | string | null
 	loading: boolean
+	containerRef?: Ref<HTMLDivElement>
 }) {
 	if (loading && !result) {
 		return (
@@ -142,7 +146,7 @@ export function ReportVisualization({
 				<Message
 					icon="layout-grid"
 					title="Configure the report"
-					body="Choose a subject, timeframe, and grouping field to see a live visualization."
+					body="Choose a subject and timeframe to see a live visualization."
 				/>
 			</Frame>
 		)
@@ -150,13 +154,68 @@ export function ReportVisualization({
 
 	if (definition.visualization.chartStyle === 'single_number') {
 		return (
-			<div className="flex min-h-80 flex-1 flex-col items-center justify-center gap-2 px-6">
+			<div
+				ref={containerRef}
+				className="flex min-h-80 flex-1 flex-col items-center justify-center gap-2 px-6"
+			>
 				<p className="text-muted-foreground text-sm">
 					{definition.settings.title}
 				</p>
 				<p className="text-foreground text-6xl font-semibold tabular-nums">
 					{result.total.toLocaleString()}
 				</p>
+			</div>
+		)
+	}
+
+	if (isListReport(definition)) {
+		const columns = result.columns ?? []
+		const rows = result.rows ?? []
+		if (rows.length === 0) {
+			return (
+				<Frame>
+					<Message
+						title="No matching records"
+						body="Nothing in this timeframe matches the current filters. Widen the range or clear a filter to see results."
+					/>
+				</Frame>
+			)
+		}
+		return (
+			<div
+				ref={containerRef}
+				className="flex min-h-80 flex-1 flex-col overflow-hidden"
+			>
+				{result.truncated ? (
+					<p className="text-muted-foreground border-b px-4 py-2 text-sm">
+						Showing the first {rows.length.toLocaleString()} of{' '}
+						{result.total.toLocaleString()} rows.
+					</p>
+				) : null}
+				<div className="flex-1 overflow-auto p-4">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								{columns.map((column) => (
+									<TableHead key={column.id}>{column.label}</TableHead>
+								))}
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{rows.map((row, index) => (
+								<TableRow
+									key={`${index}-${columns.map((c) => row[c.id]).join('|')}`}
+								>
+									{columns.map((column) => (
+										<TableCell key={column.id}>
+											{row[column.id] ?? '—'}
+										</TableCell>
+									))}
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
 			</div>
 		)
 	}
@@ -174,7 +233,7 @@ export function ReportVisualization({
 
 	if (definition.visualization.chartStyle === 'table') {
 		return (
-			<div className="min-h-80 flex-1 overflow-auto p-4">
+			<div ref={containerRef} className="min-h-80 flex-1 overflow-auto p-4">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -215,7 +274,7 @@ export function ReportVisualization({
 
 	if (definition.visualization.chartStyle === 'bar') {
 		return (
-			<div className="min-h-0 flex-1 p-4">
+			<div ref={containerRef} className="min-h-0 flex-1 p-4">
 				<ChartContainer
 					config={config}
 					className="aspect-auto h-full max-h-[420px] w-full"
@@ -226,10 +285,11 @@ export function ReportVisualization({
 							dataKey="label"
 							tickLine={false}
 							axisLine={false}
-							interval={0}
+							interval={data.length > 8 ? 'equidistantPreserveStart' : 0}
 							angle={data.length > 6 ? -24 : 0}
 							textAnchor={data.length > 6 ? 'end' : 'middle'}
 							height={data.length > 6 ? 64 : 32}
+							minTickGap={16}
 						/>
 						<YAxis tickLine={false} axisLine={false} allowDecimals={false} />
 						<ChartTooltip content={<ChartTooltipContent />} />
@@ -245,7 +305,10 @@ export function ReportVisualization({
 	}
 
 	return (
-		<div className="flex h-full min-h-0 flex-1 items-center justify-center p-4">
+		<div
+			ref={containerRef}
+			className="flex h-full min-h-0 flex-1 items-center justify-center p-4"
+		>
 			<ChartContainer
 				config={config}
 				className="h-full max-h-[420px] w-full max-w-3xl"

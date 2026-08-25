@@ -65,6 +65,9 @@ export const timeframeSchema = z.object({
 })
 export type ReportTimeframe = z.infer<typeof timeframeSchema>
 
+export const timeBucketSchema = z.enum(['week', 'month'])
+export type TimeBucket = z.infer<typeof timeBucketSchema>
+
 export const visualizationSchema = z.object({
 	chartStyle: chartStyleSchema,
 	measure: measureSchema.default('count'),
@@ -85,12 +88,21 @@ export const reportDefinitionSchema = z.object({
 	subject: z.string().min(1),
 	timeframe: timeframeSchema,
 	groupBy: z.array(z.string().min(1)).max(3).default([]),
+	timeBucket: timeBucketSchema.default('month'),
+	columns: z.array(z.string().min(1)).max(8).default([]),
 	filters: filterGroupSchema.default({ combinator: 'and', conditions: [] }),
 	advancedFilters: z.boolean().default(false),
 	visualization: visualizationSchema,
 	settings: reportSettingsSchema,
 })
 export type ReportDefinition = z.infer<typeof reportDefinitionSchema>
+
+export function isListReport(definition: ReportDefinition) {
+	return (
+		definition.visualization.chartStyle === 'table' &&
+		definition.groupBy.length === 0
+	)
+}
 
 export function emptyFilterGroup(): FilterGroup {
 	return { combinator: 'and', conditions: [] }
@@ -137,6 +149,8 @@ export function createReportDefinition(
 	return reportDefinitionSchema.parse({
 		version: REPORT_DSL_VERSION,
 		groupBy: [],
+		timeBucket: 'month',
+		columns: [],
 		filters: emptyFilterGroup(),
 		advancedFilters: false,
 		...partial,
@@ -150,9 +164,17 @@ export type ReportSegment = {
 	percent: number
 }
 
+export type ReportColumn = {
+	id: string
+	label: string
+}
+
 export type ReportResult = {
 	total: number
 	segments: ReportSegment[]
+	columns?: ReportColumn[]
+	rows?: Array<Record<string, string>>
+	truncated?: boolean
 	refreshedAt: string
 }
 

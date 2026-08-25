@@ -9,14 +9,11 @@ import { BuildingIcon } from '@repo/ui/building-icon'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import { CircleHelpIcon } from '@repo/ui/circle-help'
-import { FileTextIcon } from '@repo/ui/file-text-icon'
 import { FoldersIcon } from '@repo/ui/folders-icon'
 import { HomeIcon } from '@repo/ui/home-icon'
 import { LaptopMinimalCheckIcon } from '@repo/ui/laptop-minimal-check-icon'
 import { LockOpenIcon } from '@repo/ui/lock-open-icon'
 import { Logo } from '@repo/ui/logo'
-
-import { McpIcon } from '@repo/ui/mcp-icon'
 import { MessageSquareMoreIcon } from '@repo/ui/message-square-more'
 import { SettingsGearIcon } from '@repo/ui/settings-gear-icon'
 import {
@@ -39,6 +36,7 @@ import { type loader as rootLoader } from '#app/root.tsx'
 import FeedbackModal from './core/feedback-modal'
 import FavoriteNotes from './favorite-notes'
 import { FeatureUpdates } from './feature-updates'
+import { ChartPieIcon } from './icons/chart-pie-icon'
 import { ExternalLinkIcon } from './icons/external-link-icon'
 import { SendIcon } from './icons/send-icon'
 import { UsersRoundIcon } from './icons/users-round-icon'
@@ -237,19 +235,13 @@ function OrganizationSidebar({
 			title: _(msg`Reports`),
 			url: `/${orgSlug}/reports`,
 			isActive: location.pathname.includes(`/${orgSlug}/reports`),
-			icon: FileTextIcon,
+			icon: ChartPieIcon,
 		},
 		{
 			title: _(msg`Notes`),
 			url: `/${orgSlug}/notes`,
 			isActive: location.pathname.includes(`/${orgSlug}/notes`),
 			icon: FoldersIcon,
-		},
-		{
-			title: _(msg`MCP Server`),
-			url: `/${orgSlug}/mcp`,
-			isActive: location.pathname.includes(`/${orgSlug}/mcp`),
-			icon: McpIcon,
 		},
 		{
 			title: _(msg`Customers`),
@@ -314,7 +306,9 @@ function OrganizationSidebar({
 		{
 			title: _(msg`Settings`),
 			url: `/${orgSlug}/settings`,
-			isActive: location.pathname.includes(`/${orgSlug}/settings`),
+			isActive:
+				location.pathname.includes(`/${orgSlug}/settings`) ||
+				location.pathname.includes(`/${orgSlug}/mcp`),
 			icon: SettingsGearIcon,
 			items: [
 				{
@@ -331,6 +325,11 @@ function OrganizationSidebar({
 					title: _(msg`Integrations`),
 					url: `/${orgSlug}/settings/integrations`,
 					isActive: location.pathname === `/${orgSlug}/settings/integrations`,
+				},
+				{
+					title: _(msg`MCP Server`),
+					url: `/${orgSlug}/mcp`,
+					isActive: location.pathname.includes(`/${orgSlug}/mcp`),
 				},
 				{
 					title: _(msg`Notifications`),

@@ -79,8 +79,9 @@ function originFromUrl(value: string | undefined) {
 }
 
 /**
- * Browser-facing tenant-api origins for operator analytics (`connect-src`).
- * Customer queries leave the App origin and hit regional APIs directly.
+ * Browser-facing tenant-api origins for operator pages (`connect-src`):
+ * customers, marketing, and reports. Customer PII queries leave the App origin
+ * and hit regional APIs directly.
  */
 export function tenantApiConnectSrc(env: TenantApiConnectEnv = {}) {
 	return [

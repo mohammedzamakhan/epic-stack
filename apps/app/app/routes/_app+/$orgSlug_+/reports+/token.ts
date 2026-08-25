@@ -3,6 +3,7 @@ import { mintOperatorAnalyticsToken } from '@repo/reports/token'
 import { data } from 'react-router'
 import { ENV } from 'varlock/env'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
+import { resolveRegionalTenantApiUrls } from '#app/utils/tenant-api.server.ts'
 import { type Route } from './+types/token.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -20,22 +21,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 		role: 'operator',
 	})
 
-	const tenantApiUrl =
-		organization.dataRegion === 'ksa'
-			? (
-					process.env.PUBLIC_TENANT_API_URL_KSA ||
-					ENV.TENANT_API_URL_KSA ||
-					'http://localhost:3009'
-				).replace(/\/$/, '')
-			: (
-					process.env.PUBLIC_TENANT_API_URL ||
-					ENV.TENANT_API_URL ||
-					'http://localhost:3007'
-				).replace(/\/$/, '')
+	const { publicTenantApiUrl } = resolveRegionalTenantApiUrls(
+		organization.dataRegion,
+	)
 
 	return data({
 		...minted,
-		tenantApiUrl,
+		tenantApiUrl: publicTenantApiUrl,
 		orgId: organization.id,
 		hasProvisionedDb: organization.hasProvisionedDb,
 	})

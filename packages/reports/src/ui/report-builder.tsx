@@ -13,13 +13,16 @@ import {
 } from '@repo/ui/select'
 import { Textarea } from '@repo/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import {
 	type ReportCatalog,
+	defaultListColumns,
 	filterableFields,
+	getField,
 	getSubject,
 	groupableFields,
+	listableFields,
 	timeframeFields,
 } from '../catalog.ts'
 import {
@@ -29,10 +32,12 @@ import {
 	countFilterConditions,
 	emptyFilterGroup,
 	flattenFilterConditions,
+	isListReport,
 } from '../dsl.ts'
-import { timeframePresetLabel } from '../engine.ts'
+import { timeBucketLabel, timeframePresetLabel } from '../engine.ts'
 import { FilterEditor } from './filter-editor.tsx'
 import { ReportVisualization } from './report-chart.tsx'
+import { ReportExportMenu } from './report-export.tsx'
 
 type BuilderPanel =
 	'subject' | 'visualization' | 'filters' | 'group' | 'settings'
@@ -175,17 +180,30 @@ export function ReportBuilder({
 	hasTenantDb?: boolean
 }) {
 	const [panel, setPanel] = useState<BuilderPanel | null>('visualization')
+	const chartRef = useRef<HTMLDivElement>(null)
 	const subject = getSubject(catalog, definition.subject)
 	const groupFields = subject ? groupableFields(subject) : []
+	const columnFields = subject ? listableFields(subject) : []
 	const timeFields = subject ? timeframeFields(subject) : []
 	const filterFields = subject ? filterableFields(subject) : []
 	const filterCount = countFilterConditions(definition.filters)
-	const groupCount = definition.groupBy.length
+	const listMode = isListReport(definition)
+	const groupCount = listMode
+		? definition.columns.length
+		: definition.groupBy.length
 
 	const selectedGroup = useMemo(
 		() => groupFields.filter((field) => definition.groupBy.includes(field.id)),
 		[definition.groupBy, groupFields],
 	)
+	const selectedColumns = useMemo(() => {
+		if (!subject) return []
+		return definition.columns
+			.map((id) => getField(subject, id))
+			.filter((field): field is NonNullable<typeof field> => Boolean(field))
+	}, [definition.columns, subject])
+	const groupedField = selectedGroup[0]
+	const datetimeGrouped = groupedField?.type === 'datetime'
 
 	function update(patch: Partial<ReportDefinition>) {
 		onChange({ ...definition, ...patch })
@@ -227,6 +245,12 @@ export function ReportBuilder({
 								{loading ? 'Updating…' : 'Updated just now'}
 							</p>
 						) : null}
+						<ReportExportMenu
+							definition={definition}
+							result={result}
+							error={error}
+							chartRef={chartRef}
+						/>
 						<Button onClick={onSave} disabled={saving}>
 							{saving ? 'Saving…' : 'Save Report'}
 						</Button>
@@ -262,13 +286,28 @@ export function ReportBuilder({
 				</ConfigCard>
 				<ConfigCard
 					icon="layout-grid"
-					label="Group Results By"
-					tooltip="Further group results by a field related to the subject of the report."
+					label={listMode ? 'Columns' : 'Group Results By'}
+					tooltip={
+						listMode
+							? 'Choose which fields appear as columns in the table.'
+							: 'Further group results by a field related to the subject of the report.'
+					}
 					active={panel === 'group'}
 					onClick={() => togglePanel('group')}
 				>
-					{selectedGroup.length > 0 ? (
-						selectedGroup.map((field) => field.label).join(', ')
+					{listMode ? (
+						selectedColumns.length > 0 ? (
+							selectedColumns.map((field) => field.label).join(', ')
+						) : (
+							<span className="text-destructive">Select columns…</span>
+						)
+					) : selectedGroup.length > 0 ? (
+						<>
+							{selectedGroup.map((field) => field.label).join(', ')}
+							{datetimeGrouped
+								? ` · ${timeBucketLabel(definition.timeBucket)}`
+								: null}
+						</>
 					) : (
 						<span className="text-destructive">Select a field…</span>
 					)}
@@ -291,13 +330,18 @@ export function ReportBuilder({
 						result={result}
 						error={error}
 						loading={loading}
+						containerRef={chartRef}
 					/>
 				</div>
 
 				{panel ? (
 					<aside className="bg-background absolute inset-y-0 right-12 z-10 w-[min(100%-3rem,20rem)] border-l shadow-md md:static md:w-80 md:shadow-none">
 						<div className="flex items-center justify-between border-b px-4 py-3">
-							<h2 className="text-sm font-semibold">{PANEL_LABELS[panel]}</h2>
+							<h2 className="text-sm font-semibold">
+								{panel === 'group' && listMode
+									? 'Columns'
+									: PANEL_LABELS[panel]}
+							</h2>
 							<Button
 								variant="ghost"
 								size="icon-sm"
@@ -321,6 +365,8 @@ export function ReportBuilder({
 												const timeframeField =
 													next?.fields.find((field) => field.timeframe)?.id ??
 													'createdAt'
+												const nextList =
+													definition.visualization.chartStyle === 'table'
 												update({
 													subject: value,
 													timeframe: {
@@ -328,6 +374,8 @@ export function ReportBuilder({
 														field: timeframeField,
 													},
 													groupBy: [],
+													columns:
+														nextList && next ? defaultListColumns(next) : [],
 													filters: emptyFilterGroup(),
 												})
 											}}
@@ -417,12 +465,42 @@ export function ReportBuilder({
 											value={definition.visualization.chartStyle}
 											onValueChange={(value) => {
 												if (!value) return
+												const chartStyle =
+													value as ReportDefinition['visualization']['chartStyle']
+												if (chartStyle === 'table') {
+													update({
+														visualization: {
+															...definition.visualization,
+															chartStyle,
+														},
+														groupBy: [],
+														columns:
+															definition.columns.length > 0
+																? definition.columns
+																: subject
+																	? defaultListColumns(subject)
+																	: [],
+													})
+													return
+												}
+												const nextGroupBy = definition.groupBy
+												const groupedType =
+													nextGroupBy[0] && subject
+														? getField(subject, nextGroupBy[0])?.type
+														: undefined
+												const nextStyle =
+													chartStyle === 'pie' && groupedType === 'datetime'
+														? 'bar'
+														: chartStyle
 												update({
 													visualization: {
 														...definition.visualization,
-														chartStyle:
-															value as ReportDefinition['visualization']['chartStyle'],
+														chartStyle: nextStyle,
 													},
+													columns:
+														definition.visualization.chartStyle === 'table'
+															? []
+															: definition.columns,
 												})
 											}}
 										>
@@ -448,89 +526,97 @@ export function ReportBuilder({
 											</SelectContent>
 										</Select>
 									</div>
-									<div className="space-y-2">
-										<Label>Measure</Label>
-										<Select
-											value={definition.visualization.measure}
-											onValueChange={(value) => {
-												if (!value) return
-												update({
-													visualization: {
-														...definition.visualization,
-														measure:
-															value as ReportDefinition['visualization']['measure'],
-													},
-												})
-											}}
-										>
-											<SelectTrigger className="w-full">
-												<SelectValue>
-													{definition.visualization.measure === 'percent'
-														? 'Percent'
-														: 'Count'}
-												</SelectValue>
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="count">Count</SelectItem>
-												<SelectItem value="percent">Percent</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="space-y-2">
-										<Label>Sort By</Label>
-										<Select
-											value={definition.visualization.sortBy}
-											onValueChange={(value) => {
-												if (!value) return
-												update({
-													visualization: {
-														...definition.visualization,
-														sortBy:
-															value as ReportDefinition['visualization']['sortBy'],
-													},
-												})
-											}}
-										>
-											<SelectTrigger className="w-full">
-												<SelectValue>
-													{
-														{
-															none: 'None',
-															label: 'Label',
-															value_asc: 'Value (asc)',
-															value_desc: 'Value (desc)',
-														}[definition.visualization.sortBy]
+									{listMode ? null : (
+										<>
+											<div className="space-y-2">
+												<Label>Measure</Label>
+												<Select
+													value={definition.visualization.measure}
+													onValueChange={(value) => {
+														if (!value) return
+														update({
+															visualization: {
+																...definition.visualization,
+																measure:
+																	value as ReportDefinition['visualization']['measure'],
+															},
+														})
+													}}
+												>
+													<SelectTrigger className="w-full">
+														<SelectValue>
+															{definition.visualization.measure === 'percent'
+																? 'Percent'
+																: 'Count'}
+														</SelectValue>
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="count">Count</SelectItem>
+														<SelectItem value="percent">Percent</SelectItem>
+													</SelectContent>
+												</Select>
+											</div>
+											<div className="space-y-2">
+												<Label>Sort By</Label>
+												<Select
+													value={definition.visualization.sortBy}
+													onValueChange={(value) => {
+														if (!value) return
+														update({
+															visualization: {
+																...definition.visualization,
+																sortBy:
+																	value as ReportDefinition['visualization']['sortBy'],
+															},
+														})
+													}}
+												>
+													<SelectTrigger className="w-full">
+														<SelectValue>
+															{
+																{
+																	none: 'None',
+																	label: 'Label',
+																	value_asc: 'Value (asc)',
+																	value_desc: 'Value (desc)',
+																}[definition.visualization.sortBy]
+															}
+														</SelectValue>
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="none">None</SelectItem>
+														<SelectItem value="label">Label</SelectItem>
+														<SelectItem value="value_asc">
+															Value (asc)
+														</SelectItem>
+														<SelectItem value="value_desc">
+															Value (desc)
+														</SelectItem>
+													</SelectContent>
+												</Select>
+											</div>
+											<div className="space-y-2">
+												<Label className="flex items-center gap-1">
+													Hide Counts
+													<HelpTip
+														label="Hide counts help"
+														text="Hide raw counts and show only percentages."
+													/>
+												</Label>
+												<Checkbox
+													checked={definition.visualization.hideCounts}
+													onCheckedChange={(checked) =>
+														update({
+															visualization: {
+																...definition.visualization,
+																hideCounts: checked === true,
+															},
+														})
 													}
-												</SelectValue>
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="none">None</SelectItem>
-												<SelectItem value="label">Label</SelectItem>
-												<SelectItem value="value_asc">Value (asc)</SelectItem>
-												<SelectItem value="value_desc">Value (desc)</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="space-y-2">
-										<Label className="flex items-center gap-1">
-											Hide Counts
-											<HelpTip
-												label="Hide counts help"
-												text="Hide raw counts and show only percentages."
-											/>
-										</Label>
-										<Checkbox
-											checked={definition.visualization.hideCounts}
-											onCheckedChange={(checked) =>
-												update({
-													visualization: {
-														...definition.visualization,
-														hideCounts: checked === true,
-													},
-												})
-											}
-										/>
-									</div>
+												/>
+											</div>
+										</>
+									)}
 								</>
 							) : null}
 
@@ -557,30 +643,129 @@ export function ReportBuilder({
 							) : null}
 
 							{panel === 'group' ? (
-								<div className="space-y-2">
-									<Label>Group Results By</Label>
-									<Select
-										value={definition.groupBy[0]}
-										onValueChange={(value) => {
-											update({ groupBy: value ? [value] : [] })
-										}}
-									>
-										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Select a field…" />
-										</SelectTrigger>
-										<SelectContent>
-											{groupFields.map((field) => (
-												<SelectItem key={field.id} value={field.id}>
-													{field.label}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<p className="text-muted-foreground text-xs leading-relaxed">
-										Further group results by a field related to the subject of
-										the report.
-									</p>
-								</div>
+								listMode ? (
+									<div className="space-y-3">
+										<Label>Table columns</Label>
+										<p className="text-muted-foreground text-xs leading-relaxed">
+											Add the fields you want as columns. Up to 8 columns.
+										</p>
+										<div className="space-y-2">
+											{columnFields.map((field) => {
+												const checked = definition.columns.includes(field.id)
+												const atLimit =
+													!checked && definition.columns.length >= 8
+												return (
+													<label
+														key={field.id}
+														className="flex items-center gap-2 text-sm"
+													>
+														<Checkbox
+															checked={checked}
+															disabled={atLimit}
+															onCheckedChange={(value) => {
+																if (value === true) {
+																	if (definition.columns.length >= 8) return
+																	update({
+																		columns: [...definition.columns, field.id],
+																	})
+																	return
+																}
+																if (definition.columns.length <= 1) return
+																update({
+																	columns: definition.columns.filter(
+																		(id) => id !== field.id,
+																	),
+																})
+															}}
+														/>
+														<span>{field.label}</span>
+													</label>
+												)
+											})}
+										</div>
+									</div>
+								) : (
+									<div className="space-y-4">
+										<div className="space-y-2">
+											<Label>Group Results By</Label>
+											<Select
+												value={definition.groupBy[0]}
+												onValueChange={(value) => {
+													const field = value
+														? subject
+															? getField(subject, value)
+															: null
+														: null
+													const nextStyle =
+														definition.visualization.chartStyle === 'pie' &&
+														field?.type === 'datetime'
+															? 'bar'
+															: definition.visualization.chartStyle
+													update({
+														groupBy: value ? [value] : [],
+														visualization: {
+															...definition.visualization,
+															chartStyle: nextStyle,
+														},
+													})
+												}}
+											>
+												<SelectTrigger className="w-full">
+													<SelectValue placeholder="Select a field…">
+														{groupedField?.label}
+													</SelectValue>
+												</SelectTrigger>
+												<SelectContent>
+													{groupFields.map((field) => (
+														<SelectItem key={field.id} value={field.id}>
+															{field.label}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<p className="text-muted-foreground text-xs leading-relaxed">
+												Further group results by a field related to the subject
+												of the report.
+											</p>
+										</div>
+										{datetimeGrouped ? (
+											<div className="space-y-2">
+												<Label>Breakdown</Label>
+												<Select
+													value={definition.timeBucket}
+													onValueChange={(value) => {
+														if (!value) return
+														update({
+															timeBucket:
+																value as ReportDefinition['timeBucket'],
+															visualization: {
+																...definition.visualization,
+																chartStyle:
+																	definition.visualization.chartStyle === 'pie'
+																		? 'bar'
+																		: definition.visualization.chartStyle,
+															},
+														})
+													}}
+												>
+													<SelectTrigger className="w-full">
+														<SelectValue>
+															{timeBucketLabel(definition.timeBucket)}
+														</SelectValue>
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="week">Weekly</SelectItem>
+														<SelectItem value="month">Monthly</SelectItem>
+													</SelectContent>
+												</Select>
+												<p className="text-muted-foreground text-xs leading-relaxed">
+													Bucket dates into calendar weeks (Monday–Sunday, UTC)
+													or calendar months.
+												</p>
+											</div>
+										) : null}
+									</div>
+								)
 							) : null}
 
 							{panel === 'settings' ? (
@@ -672,7 +857,7 @@ export function ReportBuilder({
 					/>
 					<RailButton
 						icon="layout-grid"
-						label="Group"
+						label={listMode ? 'Columns' : 'Group'}
 						active={panel === 'group'}
 						badge={groupCount}
 						onClick={() => togglePanel('group')}

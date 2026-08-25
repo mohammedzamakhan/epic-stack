@@ -42,9 +42,12 @@ interface CustomerListItem {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug || ''
-	const { jwt, tenantApiUrl } = await getOperatorTenantClient(request, orgSlug)
+	const { jwt, publicTenantApiUrl } = await getOperatorTenantClient(
+		request,
+		orgSlug,
+	)
 
-	return { jwt, tenantApiUrl }
+	return { jwt, tenantApiUrl: publicTenantApiUrl }
 }
 
 export default function CustomersRoute() {

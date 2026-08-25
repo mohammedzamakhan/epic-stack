@@ -22,6 +22,9 @@ function template(
 		chartStyle: ReportDefinition['visualization']['chartStyle']
 		timeframePreset?: ReportDefinition['timeframe']['preset']
 		timeframeField?: string
+		timeBucket?: ReportDefinition['timeBucket']
+		columns?: string[]
+		sortBy?: ReportDefinition['visualization']['sortBy']
 		title?: string
 	},
 ): ReportTemplate {
@@ -48,11 +51,13 @@ function template(
 				preset: input.timeframePreset ?? 'last_3_months',
 			},
 			groupBy: input.groupBy,
+			timeBucket: input.timeBucket ?? 'month',
+			columns: input.columns ?? [],
 			filters: emptyFilterGroup(),
 			visualization: {
 				chartStyle: input.chartStyle,
 				measure: 'count',
-				sortBy: 'value_desc',
+				sortBy: input.sortBy ?? 'value_desc',
 				hideCounts: false,
 			},
 			settings: {
@@ -74,6 +79,32 @@ export function organizationTemplates(): ReportTemplate[] {
 			subject: 'customers',
 			groupBy: ['createdAt'],
 			chartStyle: 'bar',
+			timeBucket: 'month',
+			sortBy: 'none',
+		}),
+		template('organization', {
+			id: 'customers-by-week',
+			category: 'Customers',
+			title: 'Customers by week',
+			description: 'Count new site customers week by week.',
+			subject: 'customers',
+			groupBy: ['createdAt'],
+			chartStyle: 'bar',
+			timeBucket: 'week',
+			sortBy: 'none',
+		}),
+		template('organization', {
+			id: 'customer-list',
+			category: 'Customers',
+			title: 'Customer list',
+			description:
+				'A table of site customers with name, email, phone, and created date.',
+			subject: 'customers',
+			groupBy: [],
+			chartStyle: 'table',
+			columns: ['name', 'email', 'phone', 'createdAt'],
+			timeframePreset: 'all_time',
+			sortBy: 'none',
 		}),
 		template('organization', {
 			id: 'customers-verified',
@@ -168,7 +199,9 @@ export function platformTemplates(): ReportTemplate[] {
 			subject: 'users',
 			groupBy: ['createdAt'],
 			chartStyle: 'bar',
+			timeBucket: 'month',
 			timeframePreset: 'last_6_months',
+			sortBy: 'none',
 		}),
 		template('platform', {
 			id: 'waitlist-access',
@@ -222,6 +255,8 @@ export function blankReportDefinition(scope: ReportScope): ReportDefinition {
 			subject: 'organizations',
 			timeframe: { field: 'createdAt', preset: 'all_time' },
 			groupBy: ['dataRegion'],
+			timeBucket: 'month',
+			columns: [],
 			filters: emptyFilterGroup(),
 			visualization: {
 				chartStyle: 'pie',
@@ -241,6 +276,8 @@ export function blankReportDefinition(scope: ReportScope): ReportDefinition {
 		subject: 'customers',
 		timeframe: { field: 'createdAt', preset: 'last_3_months' },
 		groupBy: [],
+		timeBucket: 'month',
+		columns: [],
 		filters: emptyFilterGroup(),
 		visualization: {
 			chartStyle: 'pie',

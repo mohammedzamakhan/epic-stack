@@ -58,7 +58,6 @@
     "./laptop-minimal-check-icon": "./components/animated-icons/laptop-minimal-check-icon.tsx",
     "./lock-open-icon": "./components/animated-icons/lock-open-icon.tsx",
     "./logout-icon": "./components/animated-icons/logout-icon.tsx",
-    "./mcp-icon": "./components/animated-icons/mcp-icon.tsx",
     "./message-square-more": "./components/animated-icons/message-square-more.tsx",
     "./settings-gear-icon": "./components/animated-icons/settings-gear-icon.tsx",
     "./shield-check-icon": "./components/animated-icons/shield-check-icon.tsx",

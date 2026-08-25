@@ -7,8 +7,8 @@ import {
 } from '@repo/reports/server'
 import { ReportWorkspace } from '@repo/reports/ui'
 import { redirect, useLoaderData } from 'react-router'
-import { ENV } from 'varlock/env'
 import { requireUserOrganization } from '#app/utils/organization/loader.server.ts'
+import { resolveRegionalTenantApiUrls } from '#app/utils/tenant-api.server.ts'
 import { type Route } from './+types/new.ts'
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -41,18 +41,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 			subject: parseDefinition(report.definition).subject,
 		})),
 		hasProvisionedDb: organization.hasProvisionedDb,
-		tenantApiUrl:
-			organization.dataRegion === 'ksa'
-				? (
-						process.env.PUBLIC_TENANT_API_URL_KSA ||
-						ENV.TENANT_API_URL_KSA ||
-						'http://localhost:3009'
-					).replace(/\/$/, '')
-				: (
-						process.env.PUBLIC_TENANT_API_URL ||
-						ENV.TENANT_API_URL ||
-						'http://localhost:3007'
-					).replace(/\/$/, ''),
+		tenantApiUrl: resolveRegionalTenantApiUrls(organization.dataRegion)
+			.publicTenantApiUrl,
 	}
 }
 

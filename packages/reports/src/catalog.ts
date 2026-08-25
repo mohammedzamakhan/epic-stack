@@ -11,8 +11,8 @@ export type ReportField = {
 	groupable?: boolean
 	timeframe?: boolean
 	options?: Array<{ value: string; label: string }>
-	/** When grouping a datetime field, bucket by calendar month. */
-	bucket?: 'month'
+	/** Include this field as a list-table column. Defaults to true. */
+	listable?: boolean
 }
 
 export type ReportSubject = {
@@ -36,8 +36,25 @@ const customerFields: ReportField[] = [
 		type: 'datetime',
 		timeframe: true,
 		groupable: true,
-		bucket: 'month',
 		description: 'When the customer first signed in on the public site.',
+	},
+	{
+		id: 'name',
+		label: 'Name',
+		type: 'string',
+		filterable: true,
+	},
+	{
+		id: 'email',
+		label: 'Email',
+		type: 'string',
+		filterable: true,
+	},
+	{
+		id: 'phone',
+		label: 'Phone',
+		type: 'string',
+		filterable: true,
 	},
 	{
 		id: 'phoneVerified',
@@ -62,7 +79,12 @@ const noteFields: ReportField[] = [
 		type: 'datetime',
 		timeframe: true,
 		groupable: true,
-		bucket: 'month',
+	},
+	{
+		id: 'title',
+		label: 'Title',
+		type: 'string',
+		filterable: true,
 	},
 	{
 		id: 'updatedAt',
@@ -106,7 +128,18 @@ const memberFields: ReportField[] = [
 		type: 'datetime',
 		timeframe: true,
 		groupable: true,
-		bucket: 'month',
+	},
+	{
+		id: 'name',
+		label: 'Name',
+		type: 'string',
+		filterable: true,
+	},
+	{
+		id: 'email',
+		label: 'Email',
+		type: 'string',
+		filterable: true,
 	},
 	{
 		id: 'role',
@@ -138,7 +171,6 @@ const feedbackFields: ReportField[] = [
 		type: 'datetime',
 		timeframe: true,
 		groupable: true,
-		bucket: 'month',
 	},
 	{
 		id: 'type',
@@ -203,7 +235,18 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
+				},
+				{
+					id: 'name',
+					label: 'Name',
+					type: 'string',
+					filterable: true,
+				},
+				{
+					id: 'slug',
+					label: 'Slug',
+					type: 'string',
+					filterable: true,
 				},
 				{
 					id: 'dataRegion',
@@ -259,7 +302,24 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
+				},
+				{
+					id: 'name',
+					label: 'Name',
+					type: 'string',
+					filterable: true,
+				},
+				{
+					id: 'username',
+					label: 'Username',
+					type: 'string',
+					filterable: true,
+				},
+				{
+					id: 'email',
+					label: 'Email',
+					type: 'string',
+					filterable: true,
 				},
 				{
 					id: 'isBanned',
@@ -283,7 +343,6 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
 				},
 				{
 					id: 'hasEarlyAccess',
@@ -314,7 +373,6 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
 				},
 				{
 					id: 'type',
@@ -338,7 +396,6 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
 				},
 			],
 		},
@@ -355,7 +412,6 @@ export const platformCatalog: ReportCatalog = {
 					type: 'datetime',
 					timeframe: true,
 					groupable: true,
-					bucket: 'month',
 				},
 				{
 					id: 'action',
@@ -404,6 +460,19 @@ export function groupableFields(subject: ReportSubject) {
 
 export function filterableFields(subject: ReportSubject) {
 	return subject.fields.filter((field) => field.filterable)
+}
+
+export function listableFields(subject: ReportSubject) {
+	return subject.fields.filter((field) => field.listable !== false)
+}
+
+export function defaultListColumns(subject: ReportSubject) {
+	const fields = listableFields(subject)
+	const identity = fields.filter(
+		(field) => field.type !== 'datetime' && field.type !== 'boolean',
+	)
+	const rest = fields.filter((field) => !identity.includes(field))
+	return [...identity, ...rest].slice(0, 4).map((field) => field.id)
 }
 
 export function defaultTimeframeField(subject: ReportSubject) {

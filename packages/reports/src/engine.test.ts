@@ -31,6 +31,21 @@ describe('report DSL', () => {
 		const parsed = reportDefinitionSchema.parse(notesDefinition())
 		expect(parsed.version).toBe(1)
 		expect(parsed.groupBy).toEqual(['status'])
+		expect(parsed.timeBucket).toBe('month')
+		expect(parsed.columns).toEqual([])
+	})
+
+	it('defaults timeBucket and columns on saved reports', () => {
+		const parsed = reportDefinitionSchema.parse({
+			version: 1,
+			subject: 'notes',
+			timeframe: { field: 'createdAt', preset: 'all_time' },
+			groupBy: ['status'],
+			visualization: { chartStyle: 'pie' },
+			settings: { title: 'Notes' },
+		})
+		expect(parsed.timeBucket).toBe('month')
+		expect(parsed.columns).toEqual([])
 	})
 })
 
@@ -235,5 +250,114 @@ describe('runReport', () => {
 
 	it('does not use unused emptyFilterGroup in a way that fails types', () => {
 		expect(emptyFilterGroup().conditions).toEqual([])
+	})
+
+	it('buckets datetime groups by ISO week starting Monday UTC', () => {
+		const result = runReport(
+			organizationCatalog,
+			createReportDefinition({
+				subject: 'customers',
+				timeframe: { field: 'createdAt', preset: 'last_3_months' },
+				groupBy: ['createdAt'],
+				timeBucket: 'week',
+				visualization: {
+					chartStyle: 'bar',
+					measure: 'count',
+					sortBy: 'none',
+					hideCounts: false,
+				},
+				settings: { title: 'Customers by week', notes: '', timezone: 'UTC' },
+			}),
+			[
+				{ createdAt: '2026-08-03T12:00:00.000Z' },
+				{ createdAt: '2026-08-04T15:00:00.000Z' },
+				{ createdAt: '2026-08-10T09:00:00.000Z' },
+			],
+			now,
+		)
+		expect(isReportRunError(result)).toBe(false)
+		if (isReportRunError(result)) return
+		const counted = result.segments.filter((segment) => segment.count > 0)
+		expect(counted).toHaveLength(2)
+		expect(counted[0]).toMatchObject({ key: '2026-08-03', count: 2 })
+		expect(counted[1]).toMatchObject({ key: '2026-08-10', count: 1 })
+		expect(counted[0]?.label).toMatch(/Aug 3/)
+	})
+
+	it('fills empty months with zero counts on a time axis', () => {
+		const result = runReport(
+			organizationCatalog,
+			createReportDefinition({
+				subject: 'customers',
+				timeframe: { field: 'createdAt', preset: 'last_3_months' },
+				groupBy: ['createdAt'],
+				timeBucket: 'month',
+				visualization: {
+					chartStyle: 'bar',
+					measure: 'count',
+					sortBy: 'none',
+					hideCounts: false,
+				},
+				settings: { title: 'Customers by month', notes: '', timezone: 'UTC' },
+			}),
+			[{ createdAt: '2026-08-01T00:00:00.000Z' }],
+			now,
+		)
+		expect(isReportRunError(result)).toBe(false)
+		if (isReportRunError(result)) return
+		expect(result.total).toBe(1)
+		expect(result.segments.length).toBeGreaterThan(1)
+		const august = result.segments.find((segment) => segment.key === '2026-08')
+		expect(august).toMatchObject({ count: 1, label: 'Aug 2026' })
+		expect(result.segments.some((segment) => segment.count === 0)).toBe(true)
+		expect(result.segments.map((segment) => segment.key)).toEqual(
+			[...result.segments].map((segment) => segment.key).sort(),
+		)
+	})
+
+	it('returns list rows for a table without groupBy', () => {
+		const result = runReport(
+			organizationCatalog,
+			createReportDefinition({
+				subject: 'customers',
+				timeframe: { field: 'createdAt', preset: 'all_time' },
+				groupBy: [],
+				columns: ['name', 'email', 'phone'],
+				visualization: {
+					chartStyle: 'table',
+					measure: 'count',
+					sortBy: 'none',
+					hideCounts: false,
+				},
+				settings: { title: 'Customer list', notes: '', timezone: 'UTC' },
+			}),
+			[
+				{
+					createdAt: '2026-08-02T00:00:00.000Z',
+					name: 'Ada',
+					email: 'ada@example.com',
+					phone: '+15551212',
+				},
+				{
+					createdAt: '2026-08-10T00:00:00.000Z',
+					name: 'Grace',
+					email: 'grace@example.com',
+					phone: '',
+				},
+			],
+			now,
+		)
+		expect(isReportRunError(result)).toBe(false)
+		if (isReportRunError(result)) return
+		expect(result.total).toBe(2)
+		expect(result.columns).toEqual([
+			{ id: 'name', label: 'Name' },
+			{ id: 'email', label: 'Email' },
+			{ id: 'phone', label: 'Phone' },
+		])
+		expect(result.rows).toEqual([
+			{ name: 'Grace', email: 'grace@example.com', phone: '—' },
+			{ name: 'Ada', email: 'ada@example.com', phone: '+15551212' },
+		])
 	})
 })

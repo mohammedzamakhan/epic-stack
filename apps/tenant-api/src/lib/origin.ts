@@ -290,6 +290,7 @@ export async function isAllowedBrowserOrigin(origin: string): Promise<boolean> {
 	const isAppOrigin = Boolean(
 		url &&
 		(url.hostname === appHostname ||
+			url.hostname === `admin.${brandDomain()}` ||
 			url.hostname === 'localhost' ||
 			(appUrl && url.origin === appUrl.origin)),
 	)

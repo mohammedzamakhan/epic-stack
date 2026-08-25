@@ -5,18 +5,23 @@ import {
 	type ReportResult,
 	type ReportRunError,
 	type ReportSegment,
+	type TimeBucket,
 	type TimeframePreset,
 	isFilterGroup,
+	isListReport,
 } from './dsl.ts'
 import {
 	type ReportCatalog,
 	type ReportField,
 	type ReportSubject,
+	defaultListColumns,
 	getField,
 	getSubject,
 } from './catalog.ts'
 
 export type ReportRecord = Record<string, unknown>
+
+const MAX_LIST_ROWS = 200
 
 function asDate(value: unknown): Date | null {
 	if (value instanceof Date && !Number.isNaN(value.getTime())) return value
@@ -83,6 +88,10 @@ export function timeframePresetLabel(preset: TimeframePreset): string {
 		case 'custom':
 			return 'Custom range'
 	}
+}
+
+export function timeBucketLabel(bucket: TimeBucket): string {
+	return bucket === 'week' ? 'Weekly' : 'Monthly'
 }
 
 function inTimeframe(
@@ -158,20 +167,74 @@ function formatBoolean(value: unknown): string {
 	return 'Unspecified'
 }
 
-function formatMonth(value: unknown): string {
-	const date = asDate(value)
-	if (!date) return 'Unspecified'
+function startOfUtcWeek(date: Date): Date {
+	const day = date.getUTCDay()
+	const mondayOffset = day === 0 ? -6 : 1 - day
+	return new Date(
+		Date.UTC(
+			date.getUTCFullYear(),
+			date.getUTCMonth(),
+			date.getUTCDate() + mondayOffset,
+		),
+	)
+}
+
+function monthKey(date: Date): string {
 	return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
+function weekKey(date: Date): string {
+	return startOfUtcWeek(date).toISOString().slice(0, 10)
+}
+
+function formatMonthLabel(date: Date): string {
+	return date.toLocaleString('en-US', {
+		month: 'short',
+		year: 'numeric',
+		timeZone: 'UTC',
+	})
+}
+
+function formatWeekLabel(date: Date): string {
+	const start = startOfUtcWeek(date)
+	const end = new Date(start)
+	end.setUTCDate(end.getUTCDate() + 6)
+	const sameYear = start.getUTCFullYear() === end.getUTCFullYear()
+	const startLabel = start.toLocaleString('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: sameYear ? undefined : 'numeric',
+		timeZone: 'UTC',
+	})
+	const endLabel = end.toLocaleString('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+		timeZone: 'UTC',
+	})
+	return `${startLabel} – ${endLabel}`
+}
+
+function datetimeBucket(
+	value: unknown,
+	timeBucket: TimeBucket,
+): { key: string; label: string } {
+	const date = asDate(value)
+	if (!date) return { key: 'unspecified', label: 'Unspecified' }
+	if (timeBucket === 'week') {
+		return { key: weekKey(date), label: formatWeekLabel(date) }
+	}
+	return { key: monthKey(date), label: formatMonthLabel(date) }
 }
 
 function segmentValue(
 	record: ReportRecord,
 	field: ReportField,
+	timeBucket: TimeBucket,
 ): { key: string; label: string } {
 	const raw = record[field.id]
-	if (field.type === 'datetime' || field.bucket === 'month') {
-		const key = formatMonth(raw)
-		return { key, label: key }
+	if (field.type === 'datetime') {
+		return datetimeBucket(raw, timeBucket)
 	}
 	if (field.type === 'boolean') {
 		const key = asString(raw) || 'unspecified'
@@ -185,11 +248,37 @@ function segmentValue(
 	return { key, label: option?.label ?? key }
 }
 
+function formatListCell(record: ReportRecord, field: ReportField): string {
+	const raw = record[field.id]
+	if (field.type === 'datetime') {
+		const date = asDate(raw)
+		if (!date) return '—'
+		return date.toISOString().slice(0, 10)
+	}
+	if (field.type === 'boolean') {
+		if (raw === null || raw === undefined || asString(raw).length === 0) {
+			return '—'
+		}
+		return formatBoolean(raw)
+	}
+	if (raw === null || raw === undefined || asString(raw).length === 0) {
+		return '—'
+	}
+	const key = asString(raw)
+	const option = field.options?.find((item) => item.value === key)
+	return option?.label ?? key
+}
+
 function sortSegments(
 	segments: ReportSegment[],
 	sortBy: ReportDefinition['visualization']['sortBy'],
+	chronological: boolean,
 ): ReportSegment[] {
 	const copy = [...segments]
+	if (chronological && (sortBy === 'none' || sortBy === 'label')) {
+		copy.sort((a, b) => a.key.localeCompare(b.key))
+		return copy
+	}
 	if (sortBy === 'label') {
 		copy.sort((a, b) => a.label.localeCompare(b.label))
 	} else if (sortBy === 'value_asc') {
@@ -198,6 +287,47 @@ function sortSegments(
 		copy.sort((a, b) => b.count - a.count)
 	}
 	return copy
+}
+
+function iterateTimeBuckets(
+	start: Date,
+	end: Date,
+	timeBucket: TimeBucket,
+): Array<{ key: string; label: string }> {
+	const buckets: Array<{ key: string; label: string }> = []
+	if (timeBucket === 'week') {
+		let cursor = startOfUtcWeek(start)
+		const last = startOfUtcWeek(end)
+		while (cursor <= last) {
+			buckets.push({
+				key: weekKey(cursor),
+				label: formatWeekLabel(cursor),
+			})
+			cursor = new Date(cursor)
+			cursor.setUTCDate(cursor.getUTCDate() + 7)
+		}
+		return buckets
+	}
+
+	let cursor = new Date(
+		Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1),
+	)
+	const last = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1))
+	while (cursor <= last) {
+		buckets.push({
+			key: monthKey(cursor),
+			label: formatMonthLabel(cursor),
+		})
+		cursor = new Date(
+			Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1),
+		)
+	}
+	return buckets
+}
+
+function needsGroupBy(definition: ReportDefinition) {
+	const style = definition.visualization.chartStyle
+	return style === 'pie' || style === 'bar'
 }
 
 export function validateReportDefinition(
@@ -222,16 +352,63 @@ export function validateReportDefinition(
 			}
 		}
 	}
-	if (
-		definition.visualization.chartStyle !== 'single_number' &&
-		definition.groupBy.length === 0
-	) {
+	for (const fieldId of definition.columns) {
+		const field = getField(subject, fieldId)
+		if (!field || field.listable === false) {
+			return {
+				error: 'invalid_definition',
+				message: `Cannot show column "${fieldId}".`,
+			}
+		}
+	}
+	if (needsGroupBy(definition) && definition.groupBy.length === 0) {
 		return {
 			error: 'missing_group_by',
 			message: "Select at least one 'Group Results By' field to see results.",
 		}
 	}
 	return null
+}
+
+function listResult(
+	subject: ReportSubject,
+	definition: ReportDefinition,
+	matched: ReportRecord[],
+	now: Date,
+): ReportResult {
+	const columnIds =
+		definition.columns.length > 0
+			? definition.columns
+			: defaultListColumns(subject)
+	const columns = columnIds
+		.map((id) => getField(subject, id))
+		.filter((field): field is ReportField => Boolean(field))
+		.map((field) => ({ id: field.id, label: field.label }))
+
+	const sorted = [...matched].sort((a, b) => {
+		const left = asDate(a[definition.timeframe.field])?.getTime() ?? 0
+		const right = asDate(b[definition.timeframe.field])?.getTime() ?? 0
+		return right - left
+	})
+	const truncated = sorted.length > MAX_LIST_ROWS
+	const visible = sorted.slice(0, MAX_LIST_ROWS)
+	const rows = visible.map((record) => {
+		const row: Record<string, string> = {}
+		for (const column of columns) {
+			const field = getField(subject, column.id)
+			row[column.id] = field ? formatListCell(record, field) : '—'
+		}
+		return row
+	})
+
+	return {
+		total: matched.length,
+		segments: [],
+		columns,
+		rows,
+		truncated,
+		refreshedAt: now.toISOString(),
+	}
 }
 
 export function runReport(
@@ -249,6 +426,10 @@ export function runReport(
 			inTimeframe(record, definition, now) &&
 			matchesGroup(record, definition.filters),
 	)
+
+	if (isListReport(definition)) {
+		return listResult(subject, definition, matched, now)
+	}
 
 	if (
 		definition.visualization.chartStyle === 'single_number' ||
@@ -271,15 +452,42 @@ export function runReport(
 	const groupFields = definition.groupBy
 		.map((id) => getField(subject, id))
 		.filter((field): field is ReportField => Boolean(field))
+	const timeGrouped =
+		groupFields.length === 1 && groupFields[0]?.type === 'datetime'
 
 	const buckets = new Map<string, { label: string; count: number }>()
 	for (const record of matched) {
-		const parts = groupFields.map((field) => segmentValue(record, field))
+		const parts = groupFields.map((field) =>
+			segmentValue(record, field, definition.timeBucket),
+		)
 		const key = parts.map((part) => part.key).join(' / ')
 		const label = parts.map((part) => part.label).join(' / ')
 		const existing = buckets.get(key)
 		if (existing) existing.count += 1
 		else buckets.set(key, { label, count: 1 })
+	}
+
+	if (timeGrouped && matched.length > 0) {
+		const range = resolveTimeframeRange(
+			definition.timeframe.preset,
+			now,
+			definition.timeframe,
+		)
+		const earliest =
+			matched
+				.map((record) => asDate(record[definition.groupBy[0] ?? '']))
+				.filter((date): date is Date => Boolean(date))
+				.sort((a, b) => a.getTime() - b.getTime())[0] ?? now
+		const fillStart = range.start ?? earliest
+		for (const slot of iterateTimeBuckets(
+			fillStart,
+			range.end,
+			definition.timeBucket,
+		)) {
+			if (!buckets.has(slot.key)) {
+				buckets.set(slot.key, { label: slot.label, count: 0 })
+			}
+		}
 	}
 
 	const total = matched.length
@@ -291,6 +499,7 @@ export function runReport(
 			percent: total === 0 ? 0 : (bucket.count / total) * 100,
 		})),
 		definition.visualization.sortBy,
+		timeGrouped,
 	)
 
 	return {

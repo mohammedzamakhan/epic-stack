@@ -40,6 +40,7 @@ export async function fetchControlPlaneRecords(options: {
 				.select({
 					createdAt: OrganizationNote.createdAt,
 					updatedAt: OrganizationNote.updatedAt,
+					title: OrganizationNote.title,
 					priority: OrganizationNote.priority,
 					isPublic: OrganizationNote.isPublic,
 					status: OrganizationNoteStatus.name,
@@ -56,6 +57,8 @@ export async function fetchControlPlaneRecords(options: {
 			const rows = await db
 				.select({
 					createdAt: UserOrganization.createdAt,
+					name: User.name,
+					email: User.email,
 					role: OrganizationRole.name,
 					department: UserOrganization.department,
 					active: UserOrganization.active,
@@ -65,6 +68,7 @@ export async function fetchControlPlaneRecords(options: {
 					OrganizationRole,
 					eq(UserOrganization.organizationRoleId, OrganizationRole.id),
 				)
+				.innerJoin(User, eq(UserOrganization.userId, User.id))
 				.where(eq(UserOrganization.organizationId, organizationId))
 			return rows
 		}
@@ -85,6 +89,8 @@ export async function fetchControlPlaneRecords(options: {
 		return db
 			.select({
 				createdAt: Organization.createdAt,
+				name: Organization.name,
+				slug: Organization.slug,
 				dataRegion: Organization.dataRegion,
 				active: Organization.active,
 				sitePublished: Organization.sitePublished,
@@ -97,6 +103,9 @@ export async function fetchControlPlaneRecords(options: {
 		return db
 			.select({
 				createdAt: User.createdAt,
+				name: User.name,
+				username: User.username,
+				email: User.email,
 				isBanned: User.isBanned,
 			})
 			.from(User)
