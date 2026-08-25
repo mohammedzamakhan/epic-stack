@@ -1,3 +1,5 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -9,41 +11,48 @@ import {
 	ItemTitle,
 } from '@repo/ui/item'
 import { Link } from 'react-router'
+import { useCampaignLabels } from '../i18n/campaign-labels.ts'
 import { CampaignStatusBadge } from './campaign-list.tsx'
 import { type CampaignDetail } from '../types/campaign.ts'
-
-function formatAudience(audience?: string | null) {
-	if (!audience) return 'All recipients'
-	return audience
-		.replaceAll('_', ' ')
-		.replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-function recipientContact(recipient: CampaignDetail['recipients'][number]) {
-	if (recipient.email) return recipient.email
-	if (recipient.phone) return recipient.phone
-	return 'No contact on file'
-}
-
-function recipientEngagement(recipient: CampaignDetail['recipients'][number]) {
-	if (recipient.clickedAt) {
-		return `Clicked ${new Date(recipient.clickedAt).toLocaleString()}`
-	}
-	if (recipient.openedAt) {
-		return `Opened ${new Date(recipient.openedAt).toLocaleString()}`
-	}
-	return null
-}
 
 export function CampaignDetailView({
 	campaign,
 	backHref,
-	backLabel = 'Back to broadcasts',
+	backLabel,
 }: {
 	campaign: CampaignDetail
 	backHref: string
 	backLabel?: string
 }) {
+	const { _ } = useLingui()
+	const { channelLabel } = useCampaignLabels()
+	const resolvedBackLabel = backLabel ?? _(msg`Back to broadcasts`)
+
+	function formatAudience(audience?: string | null) {
+		if (!audience) return _(msg`All recipients`)
+		return audience
+			.replaceAll('_', ' ')
+			.replace(/\b\w/g, (char) => char.toUpperCase())
+	}
+
+	function recipientContact(recipient: CampaignDetail['recipients'][number]) {
+		if (recipient.email) return recipient.email
+		if (recipient.phone) return recipient.phone
+		return _(msg`No contact on file`)
+	}
+
+	function recipientEngagement(
+		recipient: CampaignDetail['recipients'][number],
+	) {
+		if (recipient.clickedAt) {
+			return _(msg`Clicked ${new Date(recipient.clickedAt).toLocaleString()}`)
+		}
+		if (recipient.openedAt) {
+			return _(msg`Opened ${new Date(recipient.openedAt).toLocaleString()}`)
+		}
+		return null
+	}
+
 	return (
 		<div className="space-y-8">
 			<div className="space-y-4">
@@ -54,7 +63,7 @@ export function CampaignDetailView({
 					render={<Link to={backHref} />}
 				>
 					<Icon name="arrow-left" className="size-4" />
-					{backLabel}
+					{resolvedBackLabel}
 				</Button>
 
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -66,11 +75,11 @@ export function CampaignDetailView({
 							<CampaignStatusBadge status={campaign.status} />
 						</div>
 						<p className="text-muted-foreground text-sm">
-							<span className="capitalize">{campaign.channel}</span>
+							{channelLabel(campaign.channel)}
 							{' · '}
 							{formatAudience(campaign.audience)}
 							{' · '}
-							Sent {new Date(campaign.createdAt).toLocaleString()}
+							{_(msg`Sent ${new Date(campaign.createdAt).toLocaleString()}`)}
 						</p>
 					</div>
 				</div>
@@ -78,7 +87,7 @@ export function CampaignDetailView({
 
 			<section className="space-y-3" aria-labelledby="campaign-message-heading">
 				<h2 id="campaign-message-heading" className="text-sm font-medium">
-					Message
+					{_(msg`Message`)}
 				</h2>
 				<div className="rounded-lg border p-4">
 					{campaign.channel === 'email' && campaign.subject ? (
@@ -96,18 +105,19 @@ export function CampaignDetailView({
 			>
 				<div className="flex items-center justify-between gap-4">
 					<h2 id="campaign-recipients-heading" className="text-sm font-medium">
-						Recipients
+						{_(msg`Recipients`)}
 					</h2>
 					<p className="text-muted-foreground text-xs">
-						{campaign.recipients.length.toLocaleString()} of{' '}
-						{campaign.targetAudienceCount.toLocaleString()} targeted
+						{_(
+							msg`${campaign.recipients.length} of ${campaign.targetAudienceCount} targeted`,
+						)}
 					</p>
 				</div>
 
 				{campaign.recipients.length === 0 ? (
 					<div className="rounded-lg border border-dashed px-4 py-10 text-center">
 						<p className="text-muted-foreground text-sm">
-							No delivery records yet.
+							{_(msg`No delivery records yet.`)}
 						</p>
 					</div>
 				) : (
@@ -118,12 +128,12 @@ export function CampaignDetailView({
 								<Item key={recipient.id} variant="outline" size="sm">
 									<ItemContent>
 										<ItemTitle>
-											{recipient.name || 'Unnamed recipient'}
+											{recipient.name || _(msg`Unnamed recipient`)}
 										</ItemTitle>
 										<ItemDescription>
 											{recipientContact(recipient)}
 											{recipient.sentAt
-												? ` · Sent ${new Date(recipient.sentAt).toLocaleString()}`
+												? ` · ${_(msg`Sent ${new Date(recipient.sentAt).toLocaleString()}`)}`
 												: ''}
 											{engagement ? ` · ${engagement}` : ''}
 										</ItemDescription>

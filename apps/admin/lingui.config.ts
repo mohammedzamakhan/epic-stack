@@ -8,7 +8,11 @@ const config: LinguiConfig = {
 	catalogs: [
 		{
 			path: '<rootDir>/app/locales/{locale}',
-			include: ['app'],
+			include: [
+				'app',
+				'../../packages/marketing',
+				'../../packages/marketing-workflow',
+			],
 		},
 	],
 }

@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import {
 	deletePlatformJourney,
@@ -6,6 +9,7 @@ import {
 	pausePlatformJourney,
 	publishPlatformJourney,
 } from '@repo/marketing/server/platform-journeys'
+import { type PlatformJourneyListItem } from '@repo/marketing/types/platform'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
 import {
@@ -35,6 +39,16 @@ import {
 } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 
+const JOURNEY_STATUS_LABELS: Record<
+	'draft' | 'active' | 'paused' | 'archived',
+	ReturnType<typeof msg>
+> = {
+	draft: msg`Draft`,
+	active: msg`Active`,
+	paused: msg`Paused`,
+	archived: msg`Archived`,
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
 	const journeys = await listPlatformJourneys()
@@ -62,7 +76,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 	} catch (error) {
 		return {
-			error: error instanceof Error ? error.message : 'Action failed',
+			error: error instanceof Error ? error.message : i18n._(t`Action failed`),
 		}
 	}
 
@@ -70,23 +84,41 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function AdminAutomationsIndexRoute() {
+	const { _ } = useLingui()
 	const { journeys, error } = useLoaderData<typeof loader>()
 	const fetcher = useFetcher()
 	const [searchQuery, setSearchQuery] = useState('')
 
-	const filtered = journeys.filter((j) =>
+	const filtered = journeys.filter((j: PlatformJourneyListItem) =>
 		j.name.toLowerCase().includes(searchQuery.toLowerCase()),
 	)
+
+	const getTriggerLabel = (triggerType: string) => {
+		switch (triggerType) {
+			case 'org_created':
+				return _(msg`Organization Created`)
+			case 'operator_invited':
+				return _(msg`Operator Invited`)
+			case 'subscription_started':
+				return _(msg`Subscription Started`)
+			case 'subscription_cancelled':
+				return _(msg`Subscription Cancelled`)
+			case 'manual':
+				return _(msg`Manual Trigger`)
+			default:
+				return triggerType.replace(/_/g, ' ')
+		}
+	}
 
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between border-b pb-4">
 				<div>
 					<h1 className="text-2xl font-bold tracking-tight">
-						Platform Automations
+						<Trans>Platform Automations</Trans>
 					</h1>
 					<p className="text-muted-foreground mt-1 text-sm">
-						Event-driven workflows for tenant operator lifecycle.
+						<Trans>Event-driven workflows for tenant operator lifecycle.</Trans>
 					</p>
 				</div>
 				<Button
@@ -94,12 +126,12 @@ export default function AdminAutomationsIndexRoute() {
 					className="gap-2"
 				>
 					<Icon name="plus" className="size-4" />
-					New Automation
+					<Trans>New Automation</Trans>
 				</Button>
 			</div>
 
 			<Input
-				placeholder="Search automations..."
+				placeholder={_(msg`Search automations...`)}
 				value={searchQuery}
 				onChange={(e) => setSearchQuery(e.target.value)}
 				className="h-9 max-w-md"
@@ -113,11 +145,11 @@ export default function AdminAutomationsIndexRoute() {
 
 			{filtered.length === 0 ? (
 				<EmptyState
-					title="No automations found"
-					description="Create your first platform automation workflow."
+					title={_(msg`No automations found`)}
+					description={_(msg`Create your first platform automation workflow.`)}
 					icons={['route', 'mail']}
 					action={{
-						label: 'Create Automation',
+						label: _(msg`Create Automation`),
 						href: '/marketing/automations/new',
 					}}
 				/>
@@ -132,17 +164,21 @@ export default function AdminAutomationsIndexRoute() {
 								>
 									<ItemTitle>{journey.name}</ItemTitle>
 									<ItemDescription>
-										<span className="capitalize">
-											{journey.triggerType.replace(/_/g, ' ')}
-										</span>
+										{getTriggerLabel(journey.triggerType)}
 										{' · '}
-										{journey.stepCount} steps · {journey.runsCount} runs
+										{journey.stepCount} <Trans>steps</Trans>
+										{' · '}
+										{journey.runsCount} <Trans>runs</Trans>
 									</ItemDescription>
 								</Link>
 							</ItemContent>
 							<ItemActions>
 								<Badge variant="outline" className="text-[10px] capitalize">
-									{journey.status}
+									{_(
+										JOURNEY_STATUS_LABELS[
+											journey.status as keyof typeof JOURNEY_STATUS_LABELS
+										],
+									)}
 								</Badge>
 								<DropdownMenu>
 									<DropdownMenuTrigger
@@ -150,7 +186,7 @@ export default function AdminAutomationsIndexRoute() {
 											<Button
 												variant="ghost"
 												size="icon-xs"
-												aria-label="Actions"
+												aria-label={_(msg`Actions`)}
 											/>
 										}
 									>
@@ -162,7 +198,7 @@ export default function AdminAutomationsIndexRoute() {
 												<Link to={`/marketing/automations/${journey.id}`} />
 											}
 										>
-											Edit
+											<Trans>Edit</Trans>
 										</DropdownMenuItem>
 										{journey.status !== 'active' && (
 											<fetcher.Form method="post">
@@ -173,7 +209,7 @@ export default function AdminAutomationsIndexRoute() {
 													value={journey.id}
 												/>
 												<DropdownMenuItem render={<button type="submit" />}>
-													Publish
+													<Trans>Publish</Trans>
 												</DropdownMenuItem>
 											</fetcher.Form>
 										)}
@@ -186,7 +222,7 @@ export default function AdminAutomationsIndexRoute() {
 													value={journey.id}
 												/>
 												<DropdownMenuItem render={<button type="submit" />}>
-													Pause
+													<Trans>Pause</Trans>
 												</DropdownMenuItem>
 											</fetcher.Form>
 										)}
@@ -198,7 +234,7 @@ export default function AdminAutomationsIndexRoute() {
 												value={journey.id}
 											/>
 											<DropdownMenuItem render={<button type="submit" />}>
-												Duplicate
+												<Trans>Duplicate</Trans>
 											</DropdownMenuItem>
 										</fetcher.Form>
 										<fetcher.Form method="post">
@@ -212,7 +248,7 @@ export default function AdminAutomationsIndexRoute() {
 												className="text-destructive"
 												render={<button type="submit" />}
 											>
-												Delete
+												<Trans>Delete</Trans>
 											</DropdownMenuItem>
 										</fetcher.Form>
 									</DropdownMenuContent>

@@ -25,9 +25,7 @@ test.describe('Organization Management', () => {
 		await page.waitForLoadState('networkidle')
 
 		// Click create organization button (it's labeled "Add organization")
-		await page
-			.getByRole('link', { name: '+ Add organization', exact: true })
-			.click()
+		await page.getByRole('button', { name: /add organization/i }).click()
 		await expect(page).toHaveURL('/organizations/create')
 
 		// Fill in organization details

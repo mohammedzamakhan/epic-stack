@@ -2,7 +2,7 @@ import { expect, test } from '#tests/playwright-utils.ts'
 import { createTestOrganization } from '#tests/test-utils.ts'
 
 test.describe('Marketing Automation Journey Builder E2E', () => {
-	test('User can navigate to Marketing Journeys, open visual builder canvas, and view palette', async ({
+	test('User can navigate to automations, open visual builder canvas, and view palette', async ({
 		page,
 		login,
 		navigate,
@@ -10,45 +10,38 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		const user = await login()
 		const org = await createTestOrganization(user.id, 'admin')
 
-		// 1. Navigate to Marketing Journeys overview
-		await navigate('/:slug/marketing/journeys', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
+		await navigate('/:slug/marketing/automations', { slug: org.slug })
 
-		// Verify page title and header elements
 		await expect(
-			page.getByRole('heading', { name: /marketing automation/i }),
+			page.getByRole('heading', { name: /^automations$/i }),
 		).toBeVisible()
-		await expect(page.getByRole('link', { name: /new journey/i })).toBeVisible()
+		await expect(
+			page.getByRole('button', { name: /new automation/i }),
+		).toBeVisible()
 
-		// 2. Click "New Journey" to open Visual Canvas
-		await page.getByRole('link', { name: /new journey/i }).click()
-		await page.waitForLoadState('networkidle')
+		await page.getByRole('button', { name: /new automation/i }).click()
 		await expect(page).toHaveURL(
-			new RegExp(`/${org.slug}/marketing/journeys/new`),
+			new RegExp(`/${org.slug}/marketing/automations/new`),
 		)
 
-		// 3. Verify Canvas layout: Toolbar, Palette, ReactFlow
 		await expect(page.getByText(/new customer journey/i)).toBeVisible()
 		await expect(
 			page.getByRole('button', { name: /save draft/i }),
 		).toBeVisible()
-		await expect(page.getByRole('button', { name: /publish/i })).toBeVisible()
+		await expect(page.getByRole('button', { name: /^publish$/i })).toBeVisible()
 
-		// Verify Node Palette components
-		await expect(page.getByText(/node library/i)).toBeVisible()
-		await expect(page.getByText(/trigger/i).first()).toBeVisible()
-		await expect(page.getByText(/delay \/ wait/i)).toBeVisible()
-		await expect(page.getByText(/send email/i)).toBeVisible()
-		await expect(page.getByText(/send sms/i)).toBeVisible()
-		await expect(page.getByText(/condition/i)).toBeVisible()
+		await expect(page.getByText(/^nodes$/i)).toBeVisible()
+		await expect(page.getByText(/trigger event/i).first()).toBeVisible()
+		await expect(page.getByText(/time delay/i).first()).toBeVisible()
+		await expect(page.getByText(/send email/i).first()).toBeVisible()
+		await expect(page.getByText(/send sms/i).first()).toBeVisible()
+		await expect(page.getByText(/condition branch/i).first()).toBeVisible()
 
-		// Verify React Flow canvas container
 		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
-		const reactFlowContainer = page.locator('.react-flow')
-		await expect(reactFlowContainer).toBeVisible()
-
-		// Verify default trigger node is present on canvas
-		await expect(page.getByRole('heading', { name: 'Trigger' })).toBeVisible()
+		await expect(page.locator('.react-flow')).toBeVisible()
+		await expect(
+			page.locator('.react-flow').getByRole('heading', { name: /^trigger$/i }),
+		).toBeVisible()
 	})
 
 	test('Visual Canvas validates DAG and displays node configuration inspector', async ({
@@ -59,46 +52,48 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		const user = await login()
 		const org = await createTestOrganization(user.id, 'admin')
 
-		// Navigate directly to new journey canvas
-		await navigate('/:slug/marketing/journeys/new', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
+		await navigate('/:slug/marketing/automations/new', { slug: org.slug })
 
-		// Click on default trigger node to open inspector drawer
-		const triggerNode = page.getByRole('heading', { name: 'Trigger' })
+		// eslint-disable-next-line playwright/no-raw-locators -- React Flow viewport has no semantic role
+		const reactFlow = page.locator('.react-flow')
+		await expect(reactFlow).toBeVisible()
+
+		const triggerNode = reactFlow.getByRole('heading', { name: /^trigger$/i })
 		await triggerNode.click()
 
-		// Verify Inspector drawer opened
-		await expect(page.getByText(/node inspector/i)).toBeVisible()
-		await expect(page.getByText(/trigger type/i)).toBeVisible()
+		await expect(page.getByText(/trigger event type/i)).toBeVisible()
 
-		// Click "Delay / Wait" in palette to add a delay node
-		const delayPaletteBtn = page.getByRole('button', { name: /delay \/ wait/i })
+		const delayPaletteBtn = page.getByRole('button', {
+			name: /add time delay/i,
+		})
 		if (await delayPaletteBtn.isVisible()) {
 			await delayPaletteBtn.click()
 			await expect(
-				page.getByRole('heading', { name: 'Time delay' }),
+				reactFlow.getByRole('heading', { name: /^time delay$/i }),
 			).toBeVisible()
 		}
 
-		// Click "Send Email" in palette to add email action
-		const emailPaletteBtn = page.getByRole('button', { name: /send email/i })
+		const emailPaletteBtn = page.getByRole('button', {
+			name: /add send email/i,
+		})
 		if (await emailPaletteBtn.isVisible()) {
 			await emailPaletteBtn.click()
-			await expect(page.getByRole('heading', { name: 'Email' })).toBeVisible()
+			await expect(
+				reactFlow.getByRole('heading', { name: /^email$/i }),
+			).toBeVisible()
 		}
 
-		// Click on email node to inspect email settings and merge tag chips
-		const emailNode = page.getByRole('heading', { name: 'Email' })
+		const emailNode = reactFlow.getByRole('heading', { name: /^email$/i })
 		await emailNode.click()
 
 		await expect(page.getByText(/subject line/i)).toBeVisible()
-		await expect(page.getByText(/merge tags/i)).toBeVisible()
+		await expect(page.getByText(/insert merge tags/i)).toBeVisible()
 		await expect(
 			page.getByRole('button', { name: /\{\{name\}\}/i }),
 		).toBeVisible()
 	})
 
-	test('User can view execution history and runs page', async ({
+	test('User can navigate from marketing overview to automations', async ({
 		page,
 		login,
 		navigate,
@@ -106,18 +101,18 @@ test.describe('Marketing Automation Journey Builder E2E', () => {
 		const user = await login()
 		const org = await createTestOrganization(user.id, 'admin')
 
-		// Navigate to Marketing overview tab
 		await navigate('/:slug/marketing', { slug: org.slug })
-		await page.waitForLoadState('networkidle')
 
-		// Verify navigation tabs
-		await expect(page.getByRole('tab', { name: /overview/i })).toBeVisible()
 		await expect(
-			page.getByRole('tab', { name: /automated journeys/i }),
+			page.getByRole('heading', { name: /^marketing$/i }),
 		).toBeVisible()
 
-		// Click Automated Journeys tab
-		await page.getByRole('tab', { name: /automated journeys/i }).click()
-		await expect(page).toHaveURL(new RegExp(`/${org.slug}/marketing/journeys`))
+		await page.getByRole('link', { name: /^automations$/i }).click()
+		await expect(page).toHaveURL(
+			new RegExp(`/${org.slug}/marketing/automations/?$`),
+		)
+		await expect(
+			page.getByRole('heading', { name: /^automations$/i }),
+		).toBeVisible()
 	})
 })

@@ -1,13 +1,17 @@
+import { Trans } from '@lingui/macro'
 import { cn } from '@repo/ui'
 import { Icon } from '@repo/ui/icon'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { memo } from 'react'
 import { type ConditionFlowNode } from '../types.ts'
+import { useWorkflowUiLabels } from '../workflow-labels.ts'
 
 function ConditionNodeComponent({
 	data,
 	selected,
 }: NodeProps<ConditionFlowNode>) {
+	const { conditionFieldLabel } = useWorkflowUiLabels()
+
 	return (
 		<div
 			className={cn(
@@ -29,7 +33,7 @@ function ConditionNodeComponent({
 						<Icon name="route" size="xs" />
 					</div>
 					<h4 className="text-foreground text-sm font-medium">
-						Conditional split
+						<Trans>Conditional split</Trans>
 					</h4>
 				</div>
 				<Icon name="ellipsis" size="xs" className="text-muted-foreground" />
@@ -38,16 +42,16 @@ function ConditionNodeComponent({
 			<div className="p-4 text-center">
 				<p className="text-muted-foreground line-clamp-2 text-sm">
 					{data.field === 'phoneVerified' ? (
-						<span>
+						<Trans>
 							Customer{' '}
 							<span className="text-foreground font-semibold">Phone</span> is{' '}
 							{data.value === 'true' ? '' : 'not '}
 							<span className="text-foreground font-semibold">Verified</span>
-						</span>
+						</Trans>
 					) : (
-						<span>
+						<Trans>
 							<span className="text-foreground font-semibold">
-								{data.field || 'Field'}
+								{conditionFieldLabel(data.field || 'email')}
 							</span>{' '}
 							{data.operator === 'equals'
 								? 'is'
@@ -57,7 +61,7 @@ function ConditionNodeComponent({
 							<span className="text-foreground font-semibold">
 								"{data.value}"
 							</span>
-						</span>
+						</Trans>
 					)}
 				</p>
 			</div>
@@ -70,7 +74,7 @@ function ConditionNodeComponent({
 				style={{ left: '25%' }}
 			/>
 			<div className="border-border bg-card text-foreground absolute -bottom-6 left-[25%] z-10 -translate-x-1/2 rounded border px-1.5 py-0.5 text-[10px] font-medium shadow-sm">
-				Yes
+				<Trans>Yes</Trans>
 			</div>
 
 			<Handle
@@ -81,7 +85,7 @@ function ConditionNodeComponent({
 				style={{ left: '75%' }}
 			/>
 			<div className="border-border bg-card text-muted-foreground absolute -bottom-6 left-[75%] z-10 -translate-x-1/2 rounded border px-1.5 py-0.5 text-[10px] font-medium shadow-sm">
-				No
+				<Trans>No</Trans>
 			</div>
 		</div>
 	)

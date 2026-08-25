@@ -1,3 +1,5 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import { CampaignStatusBadge, type CampaignListItem } from '@repo/marketing'
 import {
@@ -19,43 +21,43 @@ import { Link, type LoaderFunctionArgs, useLoaderData } from 'react-router'
 const QUICK_LINKS: Array<{
 	to: string
 	icon: IconName
-	title: string
-	description: string
+	title: ReturnType<typeof msg>
+	description: ReturnType<typeof msg>
 }> = [
 	{
 		to: '/marketing/campaigns',
 		icon: 'send',
-		title: 'Broadcasts',
-		description: 'Email tenant operators',
+		title: msg`Broadcasts`,
+		description: msg`Email tenant operators`,
 	},
 	{
 		to: '/marketing/automations',
 		icon: 'route',
-		title: 'Automations',
-		description: 'Platform lifecycle workflows',
+		title: msg`Automations`,
+		description: msg`Platform lifecycle workflows`,
 	},
 ]
 
 const METRIC_ITEMS = [
 	{
 		key: 'emailsSent',
-		label: 'Emails sent',
+		label: msg`Emails sent`,
 		format: (metrics: { emailsSent: number }) =>
 			metrics.emailsSent.toLocaleString(),
 	},
 	{
 		key: 'openRate',
-		label: 'Open rate',
+		label: msg`Open rate`,
 		format: (metrics: { openRate: string }) => `${metrics.openRate}%`,
 	},
 	{
 		key: 'clickRate',
-		label: 'Click rate',
+		label: msg`Click rate`,
 		format: (metrics: { clickRate: string }) => `${metrics.clickRate}%`,
 	},
 	{
 		key: 'activeCampaigns',
-		label: 'Active campaigns',
+		label: msg`Active campaigns`,
 		format: (metrics: { activeCampaigns: number }) =>
 			String(metrics.activeCampaigns),
 	},
@@ -73,16 +75,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function MarketingOverviewRoute() {
+	const { _ } = useLingui()
 	const { metrics, campaigns } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="space-y-8">
 			<header className="space-y-1">
 				<h1 className="text-2xl font-semibold tracking-tight">
-					Platform marketing
+					<Trans>Platform marketing</Trans>
 				</h1>
 				<p className="text-muted-foreground text-sm">
-					Broadcasts and automations for tenant operators.
+					<Trans>Broadcasts and automations for tenant operators.</Trans>
 				</p>
 			</header>
 
@@ -93,8 +96,8 @@ export default function MarketingOverviewRoute() {
 							<Icon name={item.icon} className="size-4" />
 						</ItemMedia>
 						<ItemContent>
-							<ItemTitle>{item.title}</ItemTitle>
-							<ItemDescription>{item.description}</ItemDescription>
+							<ItemTitle>{_(item.title)}</ItemTitle>
+							<ItemDescription>{_(item.description)}</ItemDescription>
 						</ItemContent>
 						<ItemActions>
 							<Icon
@@ -106,12 +109,12 @@ export default function MarketingOverviewRoute() {
 				))}
 			</ItemGroup>
 
-			<section aria-label="Performance metrics">
+			<section aria-label={_(msg`Performance metrics`)}>
 				<ItemGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 					{METRIC_ITEMS.map((item) => (
 						<Item key={item.key} variant="outline" size="sm">
 							<ItemContent>
-								<ItemDescription>{item.label}</ItemDescription>
+								<ItemDescription>{_(item.label)}</ItemDescription>
 								<p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">
 									{item.format(metrics)}
 								</p>
@@ -124,24 +127,26 @@ export default function MarketingOverviewRoute() {
 			<section aria-labelledby="recent-campaigns-heading">
 				<div className="mb-3 flex items-center justify-between gap-4">
 					<h2 id="recent-campaigns-heading" className="text-sm font-medium">
-						Recent campaigns
+						<Trans>Recent campaigns</Trans>
 					</h2>
 					<Link
 						to="/marketing/campaigns"
 						className="text-muted-foreground hover:text-foreground text-xs transition-colors"
 					>
-						View all
+						<Trans>View all</Trans>
 					</Link>
 				</div>
 
 				{campaigns.length === 0 ? (
 					<div className="px-4 py-10 text-center">
-						<p className="text-muted-foreground text-sm">No campaigns yet.</p>
+						<p className="text-muted-foreground text-sm">
+							<Trans>No campaigns yet.</Trans>
+						</p>
 						<Link
 							to="/marketing/campaigns/new"
 							className="text-foreground mt-2 inline-block text-sm underline-offset-4 hover:underline"
 						>
-							Create your first broadcast
+							<Trans>Create your first broadcast</Trans>
 						</Link>
 					</div>
 				) : (
@@ -156,7 +161,8 @@ export default function MarketingOverviewRoute() {
 								<ItemContent>
 									<ItemTitle>{campaign.name}</ItemTitle>
 									<ItemDescription>
-										{campaign.targetAudienceCount.toLocaleString()} recipients
+										{campaign.targetAudienceCount.toLocaleString()}{' '}
+										<Trans>recipients</Trans>
 									</ItemDescription>
 								</ItemContent>
 								<ItemActions>

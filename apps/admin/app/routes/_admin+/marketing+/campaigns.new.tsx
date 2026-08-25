@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import { db, Organization } from '@repo/database'
 import { CampaignForm } from '@repo/marketing'
@@ -55,7 +58,9 @@ export async function action({ request }: ActionFunctionArgs) {
 	} catch (error) {
 		return {
 			error:
-				error instanceof Error ? error.message : 'Failed to create campaign',
+				error instanceof Error
+					? error.message
+					: i18n._(t`Failed to create campaign`),
 		}
 	}
 
@@ -63,6 +68,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function AdminNewCampaignRoute() {
+	const { _ } = useLingui()
 	const { organizations } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
@@ -75,17 +81,17 @@ export default function AdminNewCampaignRoute() {
 					variant="ghost"
 					size="icon-xs"
 					render={<Link to="/marketing/campaigns" />}
-					aria-label="Back"
+					aria-label={_(msg`Back`)}
 					className="mt-0.5"
 				>
 					<Icon name="arrow-left" className="size-4" />
 				</Button>
 				<header className="space-y-1">
 					<h1 className="text-2xl font-semibold tracking-tight">
-						New broadcast
+						<Trans>New broadcast</Trans>
 					</h1>
 					<p className="text-muted-foreground text-sm">
-						Send a one-time message to tenant operators.
+						<Trans>Send a one-time message to tenant operators.</Trans>
 					</p>
 				</header>
 			</div>
@@ -99,28 +105,30 @@ export default function AdminNewCampaignRoute() {
 					audienceField={
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="audience">Target Audience</Label>
+								<Label htmlFor="audience">
+									<Trans>Target Audience</Trans>
+								</Label>
 								<Select name="audience" defaultValue="all_operators">
 									<SelectTrigger id="audience">
-										<SelectValue placeholder="Select audience" />
+										<SelectValue placeholder={_(msg`Select audience`)} />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="all_operators">
-											All Tenant Operators
+											<Trans>All Tenant Operators</Trans>
 										</SelectItem>
 										<SelectItem value="organization">
-											Specific Organization
+											<Trans>Specific Organization</Trans>
 										</SelectItem>
 									</SelectContent>
 								</Select>
 							</div>
 							<div className="space-y-2">
 								<Label htmlFor="targetOrganizationId">
-									Organization (optional)
+									<Trans>Organization (optional)</Trans>
 								</Label>
 								<Select name="targetOrganizationId">
 									<SelectTrigger id="targetOrganizationId">
-										<SelectValue placeholder="All organizations" />
+										<SelectValue placeholder={_(msg`All organizations`)} />
 									</SelectTrigger>
 									<SelectContent>
 										{organizations.map((org) => (

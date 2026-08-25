@@ -21,6 +21,17 @@ msgstr ""
 msgid "(Expired)"
 msgstr ""
 
+#. placeholder {0}: data.messageText?.length || 0
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:404
+msgid "{0} / 1600 chars"
+msgstr ""
+
+#. placeholder {0}: campaign.recipients.length
+#. placeholder {1}: campaign.targetAudienceCount
+#: ../../packages/marketing/src/components/campaign-detail.tsx:109
+msgid "{0} of {1} targeted"
+msgstr ""
+
 #: app/routes/_admin+/index.tsx:193
 msgid "{active} active • +{recent} new this week"
 msgstr ""
@@ -43,9 +54,13 @@ msgstr ""
 msgid "{currentSize} / {maxSize} max"
 msgstr ""
 
-#: app/components/impersonation-banner.tsx:37
-#~ msgid "{duration, plural, one {# minute ago} other {# minutes ago}}"
-#~ msgstr ""
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:230
+msgid "{errorCount, plural, one {# validation error} other {# validation errors}}"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:336
+msgid "{field}"
+msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:108
 msgid "{providerName} identity provider configuration"
@@ -59,6 +74,10 @@ msgstr ""
 msgid "{selectedCount} selected"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:334
+msgid "{status}"
+msgstr ""
+
 #: app/components/admin-user-detail.tsx:278
 msgid "{totalSessions} total sessions"
 msgstr ""
@@ -67,9 +86,24 @@ msgstr ""
 msgid "{totalSize} total"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:332
+msgid "{unit}"
+msgstr ""
+
 #: app/routes/_admin+/roles+/$roleId.tsx:547
 #: app/routes/_admin+/roles+/system.$roleId.tsx:353
 msgid "{userCount} users"
+msgstr ""
+
+#. placeholder {0}: data.field === 'phoneVerified' ? 'Verification Status' : conditionFieldLabel(data.field || 'email')
+#. placeholder {1}: data.field === 'phoneVerified' ? ' is ' : data.operator === 'equals' ? ' equals ' : data.operator === 'not_equals' ? ' does not equal ' : ' contains '
+#. placeholder {2}: data.field === 'phoneVerified' ? data.value === 'true' ? 'Verified' : 'Not Verified' : data.value || '...'
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:544
+msgid "• If Customer {0}{1}<0>{2}</0> → <1>True branch</1>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:570
+msgid "• Otherwise → <0>False branch</0>"
 msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:74
@@ -86,6 +120,25 @@ msgstr ""
 
 #: app/routes/_admin+/index.tsx:162
 msgid "+{recentUsers} new this week"
+msgstr ""
+
+#. placeholder {0}: conditionFieldLabel(data.field || 'email')
+#. placeholder {1}: data.operator === 'equals' ? 'is' : data.operator === 'not_equals' ? 'is not' : 'contains'
+#. placeholder {2}: data.value
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:52
+msgid "<0>{0}</0> {1} <1>\"{2}\"</1>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:106
+msgid "<p>Hi {{name}},</p><p>Check out our latest update.</p>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:338
+msgid "<p>Hi {{name}},</p><p>Welcome to our service!</p>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:115
+msgid "<p>Hi {{name}},</p><p>Your organization {{organizationName}} is ready.</p>"
 msgstr ""
 
 #: app/components/admin-user-detail.tsx:686
@@ -126,6 +179,10 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:80
+msgid "Action failed"
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:377
 #: app/components/admin/feature-flags.tsx:485
 #: app/components/admin/feature-flags.tsx:659
@@ -133,6 +190,7 @@ msgstr ""
 #: app/routes/_admin+/cache.tsx:619
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:251
 #: app/routes/_admin+/ip-addresses+/index.tsx:227
+#: app/routes/_admin+/marketing+/automations._index.tsx:188
 #: app/routes/_admin+/roles+/index.tsx:401
 #: app/routes/_admin+/roles+/index.tsx:445
 #: app/routes/_admin+/waitlist.tsx:355
@@ -143,6 +201,10 @@ msgstr ""
 msgid "Activate"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:313
+msgid "active"
+msgstr ""
+
 #: app/components/admin-organizations-table.tsx:103
 #: app/components/admin-organizations-table.tsx:279
 #: app/components/admin-users-table.tsx:184
@@ -150,8 +212,13 @@ msgstr ""
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:127
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:278
 #: app/routes/_admin+/ip-addresses+/index.tsx:269
+#: app/routes/_admin+/marketing+/automations._index.tsx:47
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:315
 msgid "Active"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:60
+msgid "Active campaigns"
 msgstr ""
 
 #: app/components/admin-user-detail.tsx:271
@@ -170,6 +237,11 @@ msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:160
 msgid "Activity Information"
+msgstr ""
+
+#. placeholder {0}: item.label
+#: ../../packages/marketing-workflow/src/node-palette.tsx:96
+msgid "Add {0}"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:776
@@ -192,8 +264,8 @@ msgstr ""
 msgid "Add permission"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:108
-#: app/components/admin-sidebar.tsx:116
+#: app/components/admin-sidebar.tsx:133
+#: app/components/admin-sidebar.tsx:141
 #: app/components/sso-configuration-form.tsx:392
 #: app/components/sso-user-management.tsx:98
 #: app/routes/_admin+/roles+/$roleId.tsx:435
@@ -201,7 +273,7 @@ msgstr ""
 msgid "Admin"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:134
+#: app/components/admin-sidebar.tsx:159
 #: app/routes/_admin+/index.tsx:126
 msgid "Admin Dashboard"
 msgstr ""
@@ -218,6 +290,7 @@ msgstr ""
 #: app/routes/_admin+/audit-logs.tsx:300
 #: app/routes/_admin+/gdpr-requests.tsx:503
 #: app/routes/_admin+/gdpr-requests.tsx:529
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:18
 msgid "All"
 msgstr ""
 
@@ -225,12 +298,21 @@ msgstr ""
 msgid "All caches"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:341
+msgid "All checks passed. This workflow is ready to publish."
+msgstr ""
+
 #: app/components/admin-users-table.tsx:335
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:131
 msgid "All organizations"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:448
 msgid "All plans"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:32
+msgid "All recipients"
 msgstr ""
 
 #: app/routes/_admin+/audit-logs.tsx:296
@@ -240,6 +322,10 @@ msgstr ""
 #: app/components/admin-organizations-table.tsx:430
 #: app/routes/_admin+/gdpr-requests.tsx:525
 msgid "All statuses"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:117
+msgid "All Tenant Operators"
 msgstr ""
 
 #: app/routes/_admin+/gdpr-requests.tsx:499
@@ -268,6 +354,14 @@ msgstr ""
 
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:507
 msgid "Archive Old Logs"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:315
+msgid "archived"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:49
+msgid "Archived"
 msgstr ""
 
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:256
@@ -302,7 +396,7 @@ msgstr ""
 msgid "Audit Log Retention Policy"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:80
+#: app/components/admin-sidebar.tsx:105
 #: app/routes/_admin+/audit-logs.tsx:159
 msgid "Audit Logs"
 msgstr ""
@@ -341,8 +435,41 @@ msgstr ""
 msgid "Automatically discover OAuth2 endpoints from the issuer URL"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:137
+msgid "Automation menu"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:33
+msgid "Automation not found"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:129
+msgid "Automation saved"
+msgstr ""
+
+#: app/components/admin-sidebar.tsx:80
+#: app/routes/_admin+/marketing+/_index.tsx:36
+msgid "Automations"
+msgstr ""
+
 #: app/routes/_admin+/cache.tsx:312
 msgid "Average Size"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:84
+msgid "Back"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:99
+msgid "Back to automations"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:29
+msgid "Back to broadcasts"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:83
+msgid "Back to nodes"
 msgstr ""
 
 #: app/components/admin-user-detail.tsx:195
@@ -426,11 +553,24 @@ msgstr ""
 msgid "Boolean"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/campaigns.$campaignId.tsx:15
+msgid "Broadcast not found"
+msgstr ""
+
+#: app/components/admin-sidebar.tsx:75
+#: app/routes/_admin+/marketing+/_index.tsx:30
+msgid "Broadcasts"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:88
+msgid "Broadcasts and automations for tenant operators."
+msgstr ""
+
 #: app/routes/_admin+/cache.tsx:861
 msgid "Bulk Actions ({selectedCount})"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:74
+#: app/components/admin-sidebar.tsx:99
 #: app/routes/_admin+/index.tsx:373
 msgid "Cache"
 msgstr ""
@@ -444,6 +584,12 @@ msgstr ""
 msgid "Cache Type:"
 msgstr ""
 
+#: ../../packages/marketing/src/components/campaign-form.tsx:84
+msgid "Campaign name"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:403
+#: ../../packages/marketing/src/components/campaign-form.tsx:134
 #: app/components/admin-ban-user-dialog.tsx:166
 #: app/components/admin-cache-confirmation-dialog.tsx:111
 #: app/routes/_admin+/gdpr-requests.tsx:659
@@ -457,6 +603,14 @@ msgstr ""
 
 #: app/routes/_admin+/gdpr-requests.tsx:544
 msgid "Cancelled"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:53
+msgid "Channel"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:99
+msgid "Check out our new summer menu"
 msgstr ""
 
 #: app/routes/_admin+/cache.tsx:782
@@ -476,6 +630,15 @@ msgstr ""
 msgid "Clear selection"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/_index.tsx:55
+msgid "Click rate"
+msgstr ""
+
+#. placeholder {0}: new Date(recipient.clickedAt).toLocaleString()
+#: ../../packages/marketing/src/components/campaign-detail.tsx:46
+msgid "Clicked {0}"
+msgstr ""
+
 #: app/components/sso-configuration-form.tsx:177
 msgid "Client ID"
 msgstr ""
@@ -488,12 +651,18 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:355
+msgid "Close"
+msgstr ""
+
 #: app/components/admin-organizations-table.tsx:473
 #: app/components/admin-users-table.tsx:360
 msgid "Columns"
 msgstr ""
 
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:9
 #: app/routes/_admin+/gdpr-requests.tsx:541
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:19
 msgid "Completed"
 msgstr ""
 
@@ -521,12 +690,36 @@ msgstr ""
 msgid "Comprehensive activity tracking and compliance audit trail"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:99
+msgid "Condition Branch"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:26
+msgid "Condition comparison field is required."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:497
+msgid "Condition Logic"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:27
+msgid "Condition operator is required."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:36
+msgid "Conditional split"
+msgstr ""
+
 #: app/components/sso-user-management.tsx:439
 msgid "Config Changes"
 msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:182
 msgid "Configuration"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:109
+msgid "Configuration required"
 msgstr ""
 
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:358
@@ -561,6 +754,14 @@ msgstr ""
 msgid "Connected Accounts"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:286
+msgid "Connections"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:518
+msgid "Contains (Partial Match)"
+msgstr ""
+
 #: app/routes/_admin+/roles+/system.$roleId.tsx:252
 msgid "Core System Role"
 msgstr ""
@@ -581,6 +782,14 @@ msgstr ""
 msgid "Create an override at user level."
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:153
+msgid "Create Automation"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:105
+msgid "Create Broadcast"
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:187
 msgid "Create Flag"
 msgstr ""
@@ -599,6 +808,18 @@ msgstr ""
 
 #: app/routes/_admin+/roles+/index.tsx:342
 msgid "Create Role"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:149
+msgid "Create your first broadcast"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:150
+msgid "Create your first platform automation workflow."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:101
+msgid "Create your first platform email campaign for tenant operators."
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:286
@@ -640,8 +861,50 @@ msgstr ""
 msgid "Currently logged in users"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:36
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:51
+msgid "Custom Event"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:188
+msgid "Custom Event Name"
+msgstr ""
+
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:355
 msgid "Custom Retention Policy"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:16
+msgid "Custom trigger event"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:269
+msgid "customer"
+msgstr ""
+
+#. placeholder {0}: data.value === 'true' ? '' : 'not '
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:45
+msgid "Customer <0>Phone</0> is {0}<1>Verified</1>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:432
+msgid "Customer Attribute"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:378
+msgid "Customer ID"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:16
+msgid "Customer Signup"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:46
+msgid "Customer Signup (Registration)"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:294
+msgid "Cycles"
 msgstr ""
 
 #: app/routes/resources+/theme-switch.tsx:73
@@ -664,6 +927,14 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:307
+msgid "days"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:247
+msgid "Days"
+msgstr ""
+
 #: app/components/sso-user-management.tsx:298
 msgid "Deactivate"
 msgstr ""
@@ -676,7 +947,16 @@ msgstr ""
 msgid "Default Role"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/validation.ts:19
+msgid "Delay duration must be at least 1."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:20
+msgid "Delay unit is required."
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:408
+#: app/routes/_admin+/marketing+/automations._index.tsx:250
 msgid "Delete"
 msgstr ""
 
@@ -694,6 +974,11 @@ msgstr ""
 
 #: app/routes/_admin+/cache.tsx:735
 msgid "Delete Cache Key"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:98
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:99
+msgid "Delete node"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:480
@@ -720,6 +1005,10 @@ msgstr ""
 msgid "Detailed information for IP {ip}"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:305
+msgid "Detected"
+msgstr ""
+
 #: app/components/sso-configuration-overview.tsx:130
 msgid "Disable"
 msgstr ""
@@ -738,8 +1027,67 @@ msgstr ""
 msgid "Discord"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:92
+msgid "Dispatch personalized email with merge tags"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:96
+msgid "Dispatch text message with merge tags"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:515
+msgid "Does Not Equal"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:312
+msgid "draft"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:57
+#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:52
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:6
+#: app/routes/_admin+/marketing+/automations._index.tsx:46
+msgid "Draft"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:236
+msgid "Duplicate"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:209
+msgid "Duration"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:530
+msgid "e.g. @gmail.com"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:192
+msgid "e.g. checkout_abandoned, tier_upgraded"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:175
+msgid "e.g. contact-us, demo-request"
+msgstr ""
+
 #: app/routes/_admin+/roles+/$roleId.tsx:842
 msgid "e.g. create, read, approve, publish"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:384
+msgid "e.g. cust_123"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:289
+msgid "e.g. Sarah from Marketing"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:160
+msgid "e.g. VIP, lead-hot, subscriber"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:276
+msgid "e.g. Welcome {{name}}!"
 msgstr ""
 
 #: app/routes/_admin+/roles+/index.tsx:286
@@ -753,6 +1101,7 @@ msgstr ""
 #: app/components/admin/feature-flags.tsx:401
 #: app/components/roles/roles-table-rows.tsx:59
 #: app/components/sso-configuration-overview.tsx:118
+#: app/routes/_admin+/marketing+/automations._index.tsx:200
 msgid "Edit"
 msgstr ""
 
@@ -778,13 +1127,48 @@ msgstr ""
 msgid "Effective Value"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:37
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:14
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:236
 #: app/routes/_admin+/waitlist.tsx:337
 msgid "Email"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:454
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:319
+msgid "Email Address"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:22
+msgid "Email body content is required."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:333
+msgid "Email HTML Body"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:21
+msgid "Email subject line is required."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:31
+msgid "Email tenant operators"
+msgstr ""
+
 #: app/routes/_admin+/gdpr-requests.tsx:485
 msgid "Email, username, or name..."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:44
+msgid "Emails sent"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:45
+msgid "Empty message"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/action-email-node.tsx:45
+msgid "Empty subject"
 msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:132
@@ -854,6 +1238,10 @@ msgstr ""
 msgid "Entries:"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:117
+msgid "Epic Startup Team"
+msgstr ""
+
 #: app/routes/_admin+/gdpr-requests.tsx:592
 msgid "Erasure"
 msgstr ""
@@ -864,6 +1252,18 @@ msgstr ""
 
 #: app/routes/_admin+/audit-logs.tsx:309
 msgid "Error"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:316
+msgid "Errors"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:122
+msgid "Event-driven workflows for tenant operator lifecycle."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:512
+msgid "Exactly Equals"
 msgstr ""
 
 #: app/routes/_admin+/gdpr-requests.tsx:677
@@ -898,7 +1298,9 @@ msgstr ""
 msgid "Export JSON"
 msgstr ""
 
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:10
 #: app/routes/_admin+/gdpr-requests.tsx:547
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:21
 msgid "Failed"
 msgstr ""
 
@@ -906,7 +1308,24 @@ msgstr ""
 msgid "Failed Requests"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:98
+#: app/routes/_admin+/marketing+/automations.new.tsx:63
+msgid "Failed to create automation"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:63
+msgid "Failed to create campaign"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:17
+msgid "Failed to format graph for validation"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:97
+#: app/routes/_admin+/marketing+/automations.new.tsx:76
+msgid "Failed to publish automation"
+msgstr ""
+
+#: app/components/admin-sidebar.tsx:123
 msgid "Feature Flags"
 msgstr ""
 
@@ -919,7 +1338,7 @@ msgstr ""
 msgid "Feature: {selectedEntity}"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:92
+#: app/components/admin-sidebar.tsx:117
 msgid "Feedback"
 msgstr ""
 
@@ -947,6 +1366,14 @@ msgstr ""
 msgid "First Seen"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:239
+msgid "Fit canvas view"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:201
+msgid "Fix validation errors before publishing"
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:121
 msgid "Flag Key"
 msgstr ""
@@ -968,11 +1395,24 @@ msgstr ""
 msgid "Flags for User: {searchedUserId} (Org: {searchedOrgId})"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:171
+msgid "Form Identifier / Slug"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:32
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:50
+msgid "Form Submitted"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:285
+msgid "From Name (Optional)"
+msgstr ""
+
 #: app/routes/_admin+/gdpr-requests.tsx:390
 msgid "GDPR Data Requests"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:86
+#: app/components/admin-sidebar.tsx:111
 msgid "GDPR Requests"
 msgstr ""
 
@@ -1004,8 +1444,40 @@ msgstr ""
 msgid "Grant Access"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations.new.tsx:33
+msgid "Graph data is required"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:64
+msgid "Graph data missing"
+msgstr ""
+
 #: app/components/sso-configuration-form.tsx:401
 msgid "Guest"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:107
+msgid "Hi {{name}}, Check out our latest update."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:352
+msgid "Hi {{name}}, Welcome to our service!"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:111
+msgid "Hi {{name}}, your account update is ready!"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:120
+msgid "Hi {{name}}, your Epic Startup account is ready."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:412
+msgid "Hi {{name}}, your order has been confirmed!"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:116
+msgid "Hi {{name}}, Your organization {{organizationName}} is ready."
 msgstr ""
 
 #: app/routes/_admin+/roles+/index.tsx:325
@@ -1018,6 +1490,14 @@ msgstr ""
 
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:329
 msgid "Hot storage: {hotStorageDays} days"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:306
+msgid "hours"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:244
+msgid "Hours"
 msgstr ""
 
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:380
@@ -1081,12 +1561,22 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:298
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:365
+msgid "Insert Merge Tags:"
+msgstr ""
+
 #: app/routes/_admin+/cache.tsx:422
 msgid "Instance:"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:226
 msgid "Integrations"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:71
+#: app/routes/_admin+/marketing+/automations.new.tsx:40
+msgid "Invalid graph format"
 msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:90
@@ -1098,7 +1588,7 @@ msgstr ""
 msgid "IP Address Details"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:68
+#: app/components/admin-sidebar.tsx:93
 #: app/components/admin-user-detail.tsx:333
 #: app/components/admin-user-detail.tsx:782
 #: app/routes/_admin+/ip-addresses+/index.tsx:152
@@ -1111,6 +1601,10 @@ msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:84
 msgid "IP Information"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:485
+msgid "Is Verified (True)"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:162
@@ -1180,6 +1674,10 @@ msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:180
 msgid "Last User Agent"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:406
+msgid "Launch run"
 msgstr ""
 
 #: app/routes/_admin+/waitlist.tsx:269
@@ -1276,12 +1774,23 @@ msgstr ""
 msgid "Manual Endpoint Configuration"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:40
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:52
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:76
+#: app/routes/_admin+/marketing+/automations._index.tsx:108
+msgid "Manual Trigger"
+msgstr ""
+
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:510
 msgid "Manually trigger archival of logs older than the hot storage period"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:426
 msgid "Map OIDC claims to user attributes. Leave empty for default mapping."
+msgstr ""
+
+#: app/components/admin-sidebar.tsx:62
+msgid "Marketing"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:395
@@ -1291,6 +1800,19 @@ msgstr ""
 
 #: app/components/admin-organizations-table.tsx:195
 msgid "Members"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:88
+#: ../../packages/marketing/src/components/campaign-form.tsx:107
+msgid "Message"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:305
+msgid "minutes"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:241
+msgid "Minutes"
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:246
@@ -1313,11 +1835,17 @@ msgstr ""
 msgid "Monitor organization activity"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:215
+msgid "More actions"
+msgstr ""
+
 #: app/routes/_admin+/audit-logs.tsx:232
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:281
 msgid "N/A"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:463
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:322
 #: app/routes/_admin+/roles+/$roleId.tsx:500
 #: app/routes/_admin+/roles+/$roleId.tsx:733
 #: app/routes/_admin+/roles+/$roleId.tsx:824
@@ -1335,6 +1863,18 @@ msgstr ""
 msgid "Never"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:130
+msgid "New Automation"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:91
+msgid "New broadcast"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:61
+msgid "New Broadcast"
+msgstr ""
+
 #: app/routes/_admin+/roles+/$roleId.tsx:717
 #: app/routes/_admin+/roles+/$roleId.tsx:724
 msgid "New feature"
@@ -1344,10 +1884,19 @@ msgstr ""
 msgid "New permission"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations.new.tsx:28
+#: app/routes/_admin+/marketing+/automations.new.tsx:112
+msgid "New Platform Automation"
+msgstr ""
+
 #: app/routes/_admin+/audit-logs.tsx:445
 #: app/routes/_admin+/gdpr-requests.tsx:726
 #: app/routes/_admin+/waitlist.tsx:523
 msgid "Next"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:88
+msgid "No"
 msgstr ""
 
 #: app/components/admin-user-detail.tsx:771
@@ -1363,6 +1912,14 @@ msgstr ""
 msgid "No audit logs found"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:149
+msgid "No automations found"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:99
+msgid "No broadcasts found"
+msgstr ""
+
 #: app/routes/_admin+/cache.tsx:510
 msgid "No cache entries found"
 msgstr ""
@@ -1371,8 +1928,20 @@ msgstr ""
 msgid "No cache keys match \"{query}\""
 msgstr ""
 
+#: app/routes/_admin+/marketing+/_index.tsx:143
+msgid "No campaigns yet."
+msgstr ""
+
 #: app/components/admin-user-detail.tsx:723
 msgid "No connected accounts"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:41
+msgid "No contact on file"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:116
+msgid "No delivery records yet."
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:182
@@ -1462,6 +2031,12 @@ msgstr ""
 msgid "No waitlist entries found"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-palette.tsx:49
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:278
+msgid "Nodes"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:307
 #: app/components/admin-users-table.tsx:138
 #: app/components/admin-users-table.tsx:148
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:465
@@ -1470,6 +2045,10 @@ msgstr ""
 
 #: app/components/admin-user-detail.tsx:678
 msgid "Not Set"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:488
+msgid "Not Verified (False)"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:213
@@ -1500,8 +2079,30 @@ msgstr ""
 msgid "Oldest Log"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:388
+msgid "Only the customer ID is sent. Regional tenant-api resolves PII locally."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:50
+msgid "Open rate"
+msgstr ""
+
+#. placeholder {0}: new Date(recipient.openedAt).toLocaleString()
+#: ../../packages/marketing/src/components/campaign-detail.tsx:49
+msgid "Opened {0}"
+msgstr ""
+
 #: app/components/sso-configuration-form.tsx:212
 msgid "openid email profile"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:290
+msgid "operator"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:64
+#: app/routes/_admin+/marketing+/automations._index.tsx:102
+msgid "Operator Invited"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:764
@@ -1516,6 +2117,15 @@ msgstr ""
 #: app/components/admin-organizations-table.tsx:147
 #: app/components/admin/feature-flags.tsx:749
 msgid "Organization"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:127
+msgid "Organization (optional)"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:60
+#: app/routes/_admin+/marketing+/automations._index.tsx:100
+msgid "Organization Created"
 msgstr ""
 
 #: app/components/admin/feature-flags.tsx:523
@@ -1549,6 +2159,7 @@ msgstr ""
 msgid "Override Value"
 msgstr ""
 
+#: app/components/admin-sidebar.tsx:68
 #: app/components/admin-user-detail.tsx:321
 msgid "Overview"
 msgstr ""
@@ -1587,6 +2198,19 @@ msgstr ""
 msgid "Past Due"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:191
+#: app/routes/_admin+/marketing+/automations._index.tsx:224
+msgid "Pause"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:314
+msgid "paused"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:48
+msgid "Paused"
+msgstr ""
+
 #: app/routes/_admin+/waitlist.tsx:418
 msgid "Pending"
 msgstr ""
@@ -1601,6 +2225,10 @@ msgstr ""
 
 #: app/routes/_admin+/cache.tsx:321
 msgid "per SQLite entry"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:112
+msgid "Performance metrics"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:558
@@ -1618,9 +2246,59 @@ msgstr ""
 msgid "Personal + Organization notes"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:457
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:320
+msgid "Phone Number"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:460
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:321
+msgid "Phone Verification Status"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:20
+msgid "Phone Verified"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:47
+msgid "Phone Verified (OTP Success)"
+msgstr ""
+
 #: app/components/sso-configuration-form.tsx:329
 #: app/components/sso-configuration-overview.tsx:208
 msgid "PKCE Enabled"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:347
+msgid "Plaintext Fallback (Optional)"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:324
+msgid "Plan Name"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.new.tsx:53
+msgid "Platform automation created via visual builder."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:119
+msgid "Platform Automations"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:50
+msgid "Platform Broadcasts"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:37
+msgid "Platform lifecycle workflows"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:85
+msgid "Platform marketing"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:156
+msgid "Platform test runs are not yet wired to execution."
 msgstr ""
 
 #: app/routes/_admin+/waitlist.tsx:340
@@ -1633,12 +2311,27 @@ msgstr ""
 msgid "Previous"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-palette.tsx:77
+#: ../../packages/marketing/src/components/campaign-form.tsx:72
+msgid "Pro"
+msgstr ""
+
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:8
 #: app/routes/_admin+/gdpr-requests.tsx:535
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:20
 msgid "Processing"
 msgstr ""
 
 #: app/components/admin-cache-confirmation-dialog.tsx:122
 msgid "Processing..."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:24
+msgid "Profile Completed"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:48
+msgid "Profile Completed (Name/Email)"
 msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:144
@@ -1651,6 +2344,27 @@ msgstr ""
 
 #: app/components/sso-configuration-overview.tsx:149
 msgid "Provider:"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:205
+#: app/routes/_admin+/marketing+/automations._index.tsx:211
+msgid "Publish"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:202
+msgid "Publish and activate automation"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.$journeyId.tsx:137
+msgid "Publishing automation..."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.new.tsx:104
+msgid "Publishing new automation..."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:205
+msgid "Publishing..."
 msgstr ""
 
 #: app/routes/_admin+/index.tsx:410
@@ -1685,6 +2399,10 @@ msgstr ""
 msgid "Recent Activity"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/_index.tsx:130
+msgid "Recent campaigns"
+msgstr ""
+
 #: app/components/admin-user-detail.tsx:574
 msgid "Recent Comments"
 msgstr ""
@@ -1707,6 +2425,15 @@ msgstr ""
 
 #: app/components/sso-user-management.tsx:335
 msgid "Recent SSO configuration changes and user activities"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-list.tsx:80
+#: app/routes/_admin+/marketing+/_index.tsx:165
+msgid "recipients"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:106
+msgid "Recipients"
 msgstr ""
 
 #: app/routes/_admin+/waitlist.tsx:343
@@ -1789,7 +2516,7 @@ msgstr ""
 msgid "Role Type"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:62
+#: app/components/admin-sidebar.tsx:87
 #: app/routes/_admin+/roles+/$roleId.tsx:443
 #: app/routes/_admin+/roles+/index.tsx:362
 #: app/routes/_admin+/roles+/system.$roleId.tsx:236
@@ -1798,6 +2525,10 @@ msgstr ""
 
 #: app/routes/_admin+/roles+/index.tsx:378
 msgid "Roles that apply within specific organizations"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:541
+msgid "Routing Logic:"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:579
@@ -1809,8 +2540,56 @@ msgstr ""
 msgid "Run Archival"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:146
+msgid "Run history"
+msgstr ""
+
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:498
 msgid "Run maintenance tasks on audit logs"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations._index.tsx:174
+msgid "runs"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:33
+msgid "Runs on website form submission"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:17
+msgid "Runs when a new customer registers"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:61
+msgid "Runs when a new tenant organization is created"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:29
+msgid "Runs when a tag is applied to customer"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:73
+msgid "Runs when a tenant cancels their subscription"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:69
+msgid "Runs when a tenant starts a paid subscription"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:65
+msgid "Runs when an operator is invited to an organization"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:37
+msgid "Runs when custom event triggers"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:25
+msgid "Runs when customer updates name/email"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:21
+msgid "Runs when customer verifies phone OTP"
 msgstr ""
 
 #: app/routes/_admin+/roles+/$roleId.tsx:536
@@ -1822,15 +2601,29 @@ msgstr ""
 msgid "Save Configuration"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:186
+msgid "Save draft"
+msgstr ""
+
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:483
 msgid "Save Policy"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations.new.tsx:118
+msgid "Save the automation first before running test triggers."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/automations.new.tsx:96
+msgid "Saving new automation draft..."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:186
 #: app/components/sso-configuration-form.tsx:447
 #: app/routes/_admin+/organizations+/$organizationId_+/audit-retention.tsx:481
 msgid "Saving..."
 msgstr ""
 
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:7
 #: app/routes/_admin+/gdpr-requests.tsx:538
 msgid "Scheduled"
 msgstr ""
@@ -1853,12 +2646,20 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:135
+msgid "Search automations..."
+msgstr ""
+
 #: app/routes/_admin+/waitlist.tsx:291
 msgid "Search by name, email, or username..."
 msgstr ""
 
 #: app/routes/_admin+/cache.tsx:352
 msgid "Search cache keys..."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:67
+msgid "Search campaigns..."
 msgstr ""
 
 #: app/routes/_admin+/audit-logs.tsx:257
@@ -1900,13 +2701,68 @@ msgstr ""
 msgid "Select access level"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:449
+msgid "Select attribute"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:113
+msgid "Select audience"
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:130
 msgid "Select flag type"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:507
+msgid "Select operator"
 msgstr ""
 
 #: app/routes/_admin+/roles+/index.tsx:256
 #: app/routes/_admin+/roles+/index.tsx:259
 msgid "Select role type"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:480
+msgid "Select status"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:135
+msgid "Select trigger type"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:147
+msgid "Select which event initiates this automated journey."
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:94
+msgid "Send a one-time message to tenant operators."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:91
+msgid "Send Email"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:45
+msgid "Send now"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns._index.tsx:53
+msgid "Send one-time emails to tenant operators."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:95
+msgid "Send SMS"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:46
+msgid "Sending..."
+msgstr ""
+
+#. placeholder {0}: new Date(campaign.createdAt).toLocaleString()
+#. placeholder {0}: new Date(recipient.sentAt).toLocaleString()
+#: ../../packages/marketing/src/components/campaign-detail.tsx:80
+#: ../../packages/marketing/src/components/campaign-detail.tsx:132
+msgid "Sent {0}"
 msgstr ""
 
 #: app/components/admin-user-detail.tsx:754
@@ -1966,6 +2822,27 @@ msgstr ""
 msgid "Size"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/nodes/action-sms-node.tsx:37
+#: ../../packages/marketing/src/i18n/campaign-labels.ts:15
+msgid "SMS"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:25
+msgid "SMS message exceeds 1600 characters maximum."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:392
+msgid "SMS Message Text"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:24
+msgid "SMS message text is required."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:419
+msgid "SMS messages over 160 characters will be segmented according to standard GSM telecommunication protocols."
+msgstr ""
+
 #: app/routes/_admin+/waitlist.tsx:314
 msgid "Sort by Date"
 msgstr ""
@@ -1981,6 +2858,14 @@ msgstr ""
 #: app/components/admin/feature-flags.tsx:482
 #: app/components/admin/feature-flags.tsx:656
 msgid "Source"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:120
+msgid "Specific Organization"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:100
+msgid "Split path based on rules (True / False)"
 msgstr ""
 
 #: app/routes/_admin+/cache.tsx:280
@@ -2025,6 +2910,10 @@ msgstr ""
 msgid "Start Date"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:84
+msgid "Start journey on lifecycle event"
+msgstr ""
+
 #: app/components/admin-organizations-table.tsx:274
 #: app/components/admin-users-table.tsx:169
 #: app/components/sso-configuration-overview.tsx:232
@@ -2041,6 +2930,10 @@ msgstr ""
 msgid "Status:"
 msgstr ""
 
+#: app/routes/_admin+/marketing+/automations._index.tsx:171
+msgid "steps"
+msgstr ""
+
 #: app/components/impersonation-banner.tsx:58
 msgid "Stop Impersonation"
 msgstr ""
@@ -2049,12 +2942,42 @@ msgstr ""
 msgid "String"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:267
+msgid "Structural checks for triggers, connections, and node configuration."
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:95
+msgid "Subject"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:272
+msgid "Subject Line"
+msgstr ""
+
 #: app/components/admin-organizations-table.tsx:246
 msgid "Subscription"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:72
+#: app/routes/_admin+/marketing+/automations._index.tsx:106
+msgid "Subscription Cancelled"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:68
+#: app/routes/_admin+/marketing+/automations._index.tsx:104
+msgid "Subscription Started"
+msgstr ""
+
 #: app/routes/_admin+/index.tsx:270
 msgid "Subscription Status"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:88
+msgid "Summer promo"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:109
+msgid "supported"
 msgstr ""
 
 #: app/routes/_admin+/ip-addresses+/index.tsx:191
@@ -2089,7 +3012,7 @@ msgstr ""
 msgid "System Flags"
 msgstr ""
 
-#: app/components/admin-sidebar.tsx:137
+#: app/components/admin-sidebar.tsx:162
 msgid "System Management"
 msgstr ""
 
@@ -2123,9 +3046,39 @@ msgstr ""
 msgid "System-wide permissions for this role"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:28
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:49
+msgid "Tag Added"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:323
+msgid "Tags"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/campaigns.new.tsx:109
+msgid "Target Audience"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:156
+msgid "Target Tag Name"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:526
+msgid "Target Value"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:108
+msgid "Team"
+msgstr ""
+
 #: app/components/sso-configuration-form.tsx:476
 #: app/components/sso-configuration-overview.tsx:114
 msgid "Test Connection"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:153
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:366
+msgid "Test run"
 msgstr ""
 
 #: app/components/sso-configuration-form.tsx:471
@@ -2144,8 +3097,22 @@ msgstr ""
 msgid "The cache is empty"
 msgstr ""
 
+#. placeholder {0}: data.duration || 1
+#. placeholder {1}: delayUnitLabel(data.unit || 'hours')
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:258
+msgid "The execution engine will durably sleep for {0} {1} before continuing to the next node."
+msgstr ""
+
 #: app/components/nav-user.tsx:121
 msgid "Theme"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/delay-node.tsx:33
+msgid "Time delay"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:87
+msgid "Time Delay"
 msgstr ""
 
 #: app/routes/resources+/theme-switch.tsx:102
@@ -2200,6 +3167,34 @@ msgstr ""
 msgid "Trial"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:33
+msgid "Trigger"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:369
+msgid "Trigger a test execution for a specific customer ID."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:83
+msgid "Trigger Event"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:125
+msgid "Trigger Event Type"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:18
+msgid "Trigger event type is required."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:77
+msgid "Triggered via admin test or API"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:41
+msgid "Triggered via operator test or API"
+msgstr ""
+
 #: app/routes/_admin+/cache.tsx:616
 msgid "TTL"
 msgstr ""
@@ -2212,10 +3207,23 @@ msgstr ""
 msgid "Unblacklist"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/validation.ts:23
+msgid "Unedited boilerplate text detected in email body."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:228
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:237
+msgid "Unit"
+msgstr ""
+
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:106
 #: app/routes/_admin+/ip-addresses+/$ip.tsx:183
 #: app/routes/_admin+/ip-addresses+/index.tsx:254
 msgid "Unknown"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-detail.tsx:127
+msgid "Unnamed recipient"
 msgstr ""
 
 #: app/components/admin-organizations-table.tsx:122
@@ -2303,8 +3311,20 @@ msgstr ""
 msgid "Users who have authenticated through SSO"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:228
+msgid "Validation passed"
+msgstr ""
+
 #: app/components/admin/feature-flags.tsx:374
 msgid "Value"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:472
+msgid "Verification Status"
+msgstr ""
+
+#: app/routes/_admin+/marketing+/_index.tsx:136
+msgid "View all"
 msgstr ""
 
 #: app/components/sso-user-management.tsx:367
@@ -2339,6 +3359,16 @@ msgstr ""
 msgid "Viewer"
 msgstr ""
 
+#. placeholder {0}: data.duration
+#. placeholder {1}: delayUnitLabel(data.unit)
+#: ../../packages/marketing-workflow/src/nodes/delay-node.tsx:41
+msgid "Wait {0} {1}"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:88
+msgid "Wait for a specified duration before next step"
+msgstr ""
+
 #: app/components/admin-sidebar.tsx:50
 msgid "Waitlist"
 msgstr ""
@@ -2355,8 +3385,49 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:329
+msgid "Warnings"
+msgstr ""
+
 #: app/components/privacy-banner.tsx:20
 msgid "We use cookies to enhance your experience, analyze site traffic and deliver personalized content."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:308
+msgid "weeks"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/node-inspector.tsx:250
+msgid "Weeks"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:114
+msgid "Welcome to Epic Startup, {{organizationName}}"
+msgstr ""
+
+#. placeholder {0}: info.label
+#: ../../packages/marketing-workflow/src/nodes/trigger-node.tsx:41
+msgid "When someone does <0>{0}</0>"
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/validation.ts:16
+msgid "Workflow must contain at least one Trigger node."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-toolbar.tsx:263
+msgid "Workflow validation"
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:117
+msgid "Write your email. Use {{name}} to personalize."
+msgstr ""
+
+#: ../../packages/marketing/src/components/campaign-form.tsx:118
+msgid "Write your text message. Max 160 characters."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/nodes/condition-node.tsx:77
+msgid "Yes"
 msgstr ""
 
 #: app/components/admin-ban-user-dialog.tsx:90
@@ -2370,4 +3441,8 @@ msgstr ""
 #: app/routes/_admin+/_layout.tsx:52
 #: app/routes/_admin+/cache.tsx:930
 msgid "You don't have permission to access this admin area."
+msgstr ""
+
+#: ../../packages/marketing-workflow/src/workflow-labels.ts:105
+msgid "Your Exclusive Update"
 msgstr ""

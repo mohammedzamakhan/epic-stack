@@ -1,3 +1,5 @@
+import { msg } from '@lingui/macro'
+import { type MessageDescriptor } from '@lingui/core'
 import {
 	validateWorkflowDAG as validateTenantWorkflowDAG,
 	type DAGValidationResult,
@@ -5,6 +7,30 @@ import {
 } from '@repo/tenant-db/types/journey'
 import { type Node, type Edge } from '@xyflow/react'
 import { reactFlowToWorkflowGraph } from './serialization.ts'
+
+export type ValidationTranslateFn = (descriptor: MessageDescriptor) => string
+
+export const VALIDATION_MSGS = {
+	emptyWorkflow: msg`Workflow must contain at least one Trigger node.`,
+	formatFailed: msg`Failed to format graph for validation`,
+	triggerTypeRequired: msg`Trigger event type is required.`,
+	delayDurationMin: msg`Delay duration must be at least 1.`,
+	delayUnitRequired: msg`Delay unit is required.`,
+	emailSubjectRequired: msg`Email subject line is required.`,
+	emailBodyRequired: msg`Email body content is required.`,
+	emailBoilerplate: msg`Unedited boilerplate text detected in email body.`,
+	smsMessageRequired: msg`SMS message text is required.`,
+	smsMessageTooLong: msg`SMS message exceeds 1600 characters maximum.`,
+	conditionFieldRequired: msg`Condition comparison field is required.`,
+	conditionOperatorRequired: msg`Condition operator is required.`,
+} as const
+
+function t(
+	descriptor: MessageDescriptor,
+	translate?: ValidationTranslateFn,
+): string {
+	return translate ? translate(descriptor) : (descriptor.message ?? '')
+}
 
 export interface RealtimeValidationState extends DAGValidationResult {
 	nodeErrors: Record<string, string[]>
@@ -16,13 +42,14 @@ export interface RealtimeValidationState extends DAGValidationResult {
 export function validateFlowCanvas(
 	nodes: Node[],
 	edges: Edge[],
+	translate?: ValidationTranslateFn,
 ): RealtimeValidationState {
 	const nodeErrors: Record<string, string[]> = {}
 
 	if (!nodes || nodes.length === 0) {
 		return {
 			valid: false,
-			errors: ['Workflow must contain at least one Trigger node.'],
+			errors: [t(VALIDATION_MSGS.emptyWorkflow, translate)],
 			warnings: [],
 			nodeCount: 0,
 			edgeCount: 0,
@@ -42,7 +69,7 @@ export function validateFlowCanvas(
 			errors: [
 				err instanceof Error
 					? err.message
-					: 'Failed to format graph for validation',
+					: t(VALIDATION_MSGS.formatFailed, translate),
 			],
 			warnings: [],
 			nodeCount: nodes.length,
@@ -64,15 +91,15 @@ export function validateFlowCanvas(
 		switch (node.type) {
 			case 'trigger':
 				if (!data.triggerType) {
-					errs.push('Trigger event type is required.')
+					errs.push(t(VALIDATION_MSGS.triggerTypeRequired, translate))
 				}
 				break
 			case 'delay':
 				if (typeof data.duration !== 'number' || data.duration < 1) {
-					errs.push('Delay duration must be at least 1.')
+					errs.push(t(VALIDATION_MSGS.delayDurationMin, translate))
 				}
 				if (!data.unit) {
-					errs.push('Delay unit is required.')
+					errs.push(t(VALIDATION_MSGS.delayUnitRequired, translate))
 				}
 				break
 			case 'action_email':
@@ -81,10 +108,10 @@ export function validateFlowCanvas(
 					typeof data.subject !== 'string' ||
 					data.subject.trim() === ''
 				) {
-					errs.push('Email subject line is required.')
+					errs.push(t(VALIDATION_MSGS.emailSubjectRequired, translate))
 				}
 				if (!data.bodyHtml && !data.bodyText) {
-					errs.push('Email body content is required.')
+					errs.push(t(VALIDATION_MSGS.emailBodyRequired, translate))
 				} else {
 					const combined = (
 						(data.bodyHtml || '') +
@@ -96,7 +123,7 @@ export function validateFlowCanvas(
 						combined.includes('insert text here') ||
 						combined.includes('default template text')
 					) {
-						errs.push('Unedited boilerplate text detected in email body.')
+						errs.push(t(VALIDATION_MSGS.emailBoilerplate, translate))
 					}
 				}
 				break
@@ -106,9 +133,9 @@ export function validateFlowCanvas(
 					typeof data.messageText !== 'string' ||
 					data.messageText.trim() === ''
 				) {
-					errs.push('SMS message text is required.')
+					errs.push(t(VALIDATION_MSGS.smsMessageRequired, translate))
 				} else if (data.messageText.length > 1600) {
-					errs.push('SMS message exceeds 1600 characters maximum.')
+					errs.push(t(VALIDATION_MSGS.smsMessageTooLong, translate))
 				}
 				break
 			case 'condition':
@@ -117,10 +144,10 @@ export function validateFlowCanvas(
 					typeof data.field !== 'string' ||
 					data.field.trim() === ''
 				) {
-					errs.push('Condition comparison field is required.')
+					errs.push(t(VALIDATION_MSGS.conditionFieldRequired, translate))
 				}
 				if (!data.operator) {
-					errs.push('Condition operator is required.')
+					errs.push(t(VALIDATION_MSGS.conditionOperatorRequired, translate))
 				}
 				break
 		}

@@ -1,3 +1,5 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
@@ -6,6 +8,7 @@ import { Textarea } from '@repo/ui/textarea'
 import { Icon } from '@repo/ui/icon'
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { useCampaignLabels } from '../i18n/campaign-labels.ts'
 import { type CampaignChannel } from '../types/campaign.ts'
 
 export interface CampaignFormProps {
@@ -18,35 +21,39 @@ export interface CampaignFormProps {
 	submittingLabel?: string
 }
 
-const CHANNELS: Array<{
-	value: CampaignChannel
-	label: string
-	icon: 'mail' | 'smartphone'
-}> = [
-	{ value: 'email', label: 'Email', icon: 'mail' },
-	{ value: 'sms', label: 'SMS', icon: 'smartphone' },
-]
-
 export function CampaignForm({
 	error,
 	isSubmitting = false,
 	cancelTo,
 	showSmsProBadge = true,
 	audienceField,
-	submitLabel = 'Send now',
-	submittingLabel = 'Sending...',
+	submitLabel,
+	submittingLabel,
 }: CampaignFormProps) {
+	const { _ } = useLingui()
+	const { channelLabel } = useCampaignLabels()
 	const [channel, setChannel] = useState<CampaignChannel>('email')
+
+	const channels: Array<{
+		value: CampaignChannel
+		icon: 'mail' | 'smartphone'
+	}> = [
+		{ value: 'email', icon: 'mail' },
+		{ value: 'sms', icon: 'smartphone' },
+	]
+
+	const resolvedSubmitLabel = submitLabel ?? _(msg`Send now`)
+	const resolvedSubmittingLabel = submittingLabel ?? _(msg`Sending...`)
 
 	return (
 		<div className="space-y-6">
 			{error ? <p className="text-destructive text-sm">{error}</p> : null}
 
 			<div className="space-y-2">
-				<Label>Channel</Label>
+				<Label>{_(msg`Channel`)}</Label>
 				<input type="hidden" name="channel" value={channel} />
 				<div className="inline-flex rounded-lg border p-1">
-					{CHANNELS.map((option) => (
+					{channels.map((option) => (
 						<button
 							key={option.value}
 							type="button"
@@ -59,10 +66,10 @@ export function CampaignForm({
 							)}
 						>
 							<Icon name={option.icon} className="size-4" />
-							<span>{option.label}</span>
+							<span>{channelLabel(option.value)}</span>
 							{showSmsProBadge && option.value === 'sms' ? (
 								<span className="text-muted-foreground text-[10px] font-normal tracking-wide uppercase">
-									Pro
+									{_(msg`Pro`)}
 								</span>
 							) : null}
 						</button>
@@ -74,17 +81,22 @@ export function CampaignForm({
 				{audienceField}
 
 				<div className="space-y-2">
-					<Label htmlFor="name">Campaign name</Label>
-					<Input id="name" name="name" placeholder="Summer promo" required />
+					<Label htmlFor="name">{_(msg`Campaign name`)}</Label>
+					<Input
+						id="name"
+						name="name"
+						placeholder={_(msg`Summer promo`)}
+						required
+					/>
 				</div>
 
 				{channel === 'email' ? (
 					<div className="space-y-2">
-						<Label htmlFor="subject">Subject</Label>
+						<Label htmlFor="subject">{_(msg`Subject`)}</Label>
 						<Input
 							id="subject"
 							name="subject"
-							placeholder="Check out our new summer menu"
+							placeholder={_(msg`Check out our new summer menu`)}
 							required
 						/>
 					</div>
@@ -92,9 +104,9 @@ export function CampaignForm({
 
 				<div className="space-y-2">
 					<div className="flex items-center justify-between gap-4">
-						<Label htmlFor="content">Message</Label>
+						<Label htmlFor="content">{_(msg`Message`)}</Label>
 						<span className="text-muted-foreground text-xs">
-							{'{{name}}'} supported
+							{'{{name}}'} {_(msg`supported`)}
 						</span>
 					</div>
 					<Textarea
@@ -102,8 +114,8 @@ export function CampaignForm({
 						name="content"
 						placeholder={
 							channel === 'email'
-								? 'Write your email. Use {{name}} to personalize.'
-								: 'Write your text message. Max 160 characters.'
+								? _(msg`Write your email. Use {{name}} to personalize.`)
+								: _(msg`Write your text message. Max 160 characters.`)
 						}
 						className="min-h-[180px] resize-y"
 						required
@@ -119,7 +131,7 @@ export function CampaignForm({
 						render={<Link to={cancelTo} />}
 						disabled={isSubmitting}
 					>
-						Cancel
+						{_(msg`Cancel`)}
 					</Button>
 				) : (
 					<span />
@@ -128,12 +140,12 @@ export function CampaignForm({
 					{isSubmitting ? (
 						<>
 							<Icon name="loader" className="size-4 animate-spin" />
-							{submittingLabel}
+							{resolvedSubmittingLabel}
 						</>
 					) : (
 						<>
 							<Icon name="send" className="size-4" />
-							{submitLabel}
+							{resolvedSubmitLabel}
 						</>
 					)}
 				</Button>

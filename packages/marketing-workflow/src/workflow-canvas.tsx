@@ -13,6 +13,7 @@ import {
 	type Edge,
 	type Node,
 } from '@xyflow/react'
+import { useLingui } from '@lingui/react'
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -45,8 +46,13 @@ import {
 	validateFlowCanvas,
 	type RealtimeValidationState,
 } from './validation.ts'
+import {
+	useLocalizedPlatformWorkflowConfig,
+	useLocalizedTenantWorkflowConfig,
+} from './workflow-labels.ts'
 import { WorkflowToolbar } from './workflow-toolbar.tsx'
 import {
+	PLATFORM_WORKFLOW_CONFIG,
 	TENANT_WORKFLOW_CONFIG,
 	WorkflowConfigProvider,
 	type WorkflowConfig,
@@ -79,7 +85,8 @@ function WorkflowCanvasInner({
 	onViewRuns,
 	isSaving,
 	isPublishing,
-}: WorkflowCanvasProps) {
+}: Omit<WorkflowCanvasProps, 'workflowConfig'>) {
+	const { _ } = useLingui()
 	const reactFlowWrapper = useRef<HTMLDivElement>(null)
 	const { screenToFlowPosition, fitView } = useReactFlow()
 
@@ -94,8 +101,8 @@ function WorkflowCanvasInner({
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialData.edges)
 
 	const validation = useMemo<RealtimeValidationState>(() => {
-		return validateFlowCanvas(nodes, edges)
-	}, [nodes, edges])
+		return validateFlowCanvas(nodes, edges, _)
+	}, [nodes, edges, _])
 
 	const selectedNode = useMemo(() => {
 		return nodes.find((n) => n.id === selectedNodeId) || null
@@ -348,10 +355,40 @@ function WorkflowCanvasInner({
 	)
 }
 
+function resolveLocalizedWorkflowConfig(
+	workflowConfigProp: WorkflowConfig | undefined,
+	localizedTenant: WorkflowConfig,
+	localizedPlatform: WorkflowConfig,
+): WorkflowConfig {
+	if (workflowConfigProp === PLATFORM_WORKFLOW_CONFIG) {
+		return localizedPlatform
+	}
+	if (
+		workflowConfigProp === undefined ||
+		workflowConfigProp === TENANT_WORKFLOW_CONFIG
+	) {
+		return localizedTenant
+	}
+	return workflowConfigProp
+}
+
 export function WorkflowCanvas({
-	workflowConfig = TENANT_WORKFLOW_CONFIG,
+	workflowConfig: workflowConfigProp,
 	...props
 }: WorkflowCanvasProps) {
+	const localizedTenant = useLocalizedTenantWorkflowConfig()
+	const localizedPlatform = useLocalizedPlatformWorkflowConfig()
+
+	const workflowConfig = useMemo(
+		() =>
+			resolveLocalizedWorkflowConfig(
+				workflowConfigProp,
+				localizedTenant,
+				localizedPlatform,
+			),
+		[workflowConfigProp, localizedTenant, localizedPlatform],
+	)
+
 	return (
 		<WorkflowConfigProvider config={workflowConfig}>
 			<ReactFlowProvider>

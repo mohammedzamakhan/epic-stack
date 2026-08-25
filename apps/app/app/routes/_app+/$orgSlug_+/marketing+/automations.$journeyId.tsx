@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	WorkflowCanvas,
 	type WorkflowGraph,
@@ -21,7 +24,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	const res = await fetchTenant(`/operator/journeys/${journeyId}`)
 	if (!res.ok) {
-		throw new Response('Automation not found', { status: 404 })
+		throw new Response(i18n._(t`Automation not found`), { status: 404 })
 	}
 
 	const data = (await res.json()) as any
@@ -57,14 +60,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const graphJson = formData.get('graphJson')
 
 		if (typeof graphJson !== 'string') {
-			return { error: 'Graph data missing' }
+			return { error: i18n._(t`Graph data missing`) }
 		}
 
 		let parsedGraph: WorkflowGraph
 		try {
 			parsedGraph = JSON.parse(graphJson) as WorkflowGraph
 		} catch {
-			return { error: 'Invalid graph format' }
+			return { error: i18n._(t`Invalid graph format`) }
 		}
 
 		const triggerNode = parsedGraph.nodes.find((n: any) => n.type === 'trigger')
@@ -87,10 +90,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (!updateRes.ok) {
 			const err = await updateRes.json().catch(() => ({}))
-			return { error: (err as any).error || 'Failed to save automation' }
+			return {
+				error: (err as any).error || i18n._(t`Failed to save automation`),
+			}
 		}
 
-		return { success: true, message: 'Automation saved successfully' }
+		return { success: true, message: i18n._(t`Automation saved successfully`) }
 	}
 
 	if (intent === 'publish') {
@@ -125,10 +130,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (!publishRes.ok) {
 			const err = await publishRes.json().catch(() => ({}))
-			return { error: (err as any).error || 'Failed to publish automation' }
+			return {
+				error: (err as any).error || i18n._(t`Failed to publish automation`),
+			}
 		}
 
-		return { success: true, message: 'Automation published and activated!' }
+		return {
+			success: true,
+			message: i18n._(t`Automation published and activated!`),
+		}
 	}
 
 	if (intent === 'pause') {
@@ -141,10 +151,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (!pauseRes.ok) {
 			const err = await pauseRes.json().catch(() => ({}))
-			return { error: (err as any).error || 'Failed to pause automation' }
+			return {
+				error: (err as any).error || i18n._(t`Failed to pause automation`),
+			}
 		}
 
-		return { success: true, message: 'Automation paused' }
+		return { success: true, message: i18n._(t`Automation paused`) }
 	}
 
 	if (intent === 'delete') {
@@ -154,7 +166,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 		if (!deleteRes.ok) {
 			const err = await deleteRes.json().catch(() => ({}))
-			return { error: (err as any).error || 'Failed to delete automation' }
+			return {
+				error: (err as any).error || i18n._(t`Failed to delete automation`),
+			}
 		}
 
 		return redirect(`/${orgSlug}/marketing/automations`)
@@ -163,7 +177,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	if (intent === 'test_run') {
 		const customerId = formData.get('customerId')
 		if (typeof customerId !== 'string' || !customerId) {
-			return { error: 'customerId is required' }
+			return { error: i18n._(t`customerId is required`) }
 		}
 
 		const testRes = await fetchTenant('/operator/journeys/trigger-test', {
@@ -177,22 +191,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (!testRes.ok) {
 			const err = await testRes.json().catch(() => ({}))
 			return {
-				error: (err as any).error || 'Failed to trigger test automation',
+				error:
+					(err as any).error || i18n._(t`Failed to trigger test automation`),
 			}
 		}
 
 		const data = (await testRes.json()) as any
 		return {
 			success: true,
-			message: `Test run triggered successfully (Run ID: ${data.runId || 'initiated'})`,
+			message: i18n._(
+				t`Test run triggered successfully (Run ID: ${data.runId || 'initiated'})`,
+			),
 			runId: data.runId,
 		}
 	}
 
-	return { error: 'Unknown intent' }
+	return { error: i18n._(t`Unknown intent`) }
 }
 
 export default function JourneyBuilderRoute() {
+	const { _ } = useLingui()
 	const { orgSlug, journey } = useLoaderData<typeof loader>()
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
@@ -216,7 +234,7 @@ export default function JourneyBuilderRoute() {
 			},
 			{ method: 'POST' },
 		)
-		toast.success('Saving automation draft...')
+		toast.success(_(msg`Saving automation draft...`))
 	}
 
 	const handlePublish = (graph: WorkflowGraph, name: string) => {
@@ -228,7 +246,7 @@ export default function JourneyBuilderRoute() {
 			},
 			{ method: 'POST' },
 		)
-		toast.success('Publishing and activating automation...')
+		toast.success(_(msg`Publishing and activating automation...`))
 	}
 
 	const handlePause = () => {
@@ -238,7 +256,7 @@ export default function JourneyBuilderRoute() {
 			},
 			{ method: 'POST' },
 		)
-		toast.info('Pausing automation...')
+		toast.info(_(msg`Pausing automation...`))
 	}
 
 	const handleTestRun = (customerId: string) => {
@@ -249,7 +267,7 @@ export default function JourneyBuilderRoute() {
 			},
 			{ method: 'POST' },
 		)
-		toast.info(`Triggering test run for customer "${customerId}"...`)
+		toast.info(_(msg`Triggering test run for customer "${customerId}"...`))
 	}
 
 	return (

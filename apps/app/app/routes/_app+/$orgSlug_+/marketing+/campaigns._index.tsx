@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { CampaignStatusBadge, type CampaignListItem } from '@repo/marketing'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
@@ -24,7 +27,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	const res = await fetchTenant('/operator/marketing/campaigns')
 	if (!res.ok) {
-		return { orgSlug, campaigns: [], error: 'Failed to load campaigns' }
+		return {
+			orgSlug,
+			campaigns: [],
+			error: i18n._(t`Failed to load campaigns`),
+		}
 	}
 
 	const data = (await res.json()) as { campaigns?: CampaignListItem[] }
@@ -36,9 +43,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function CampaignsIndexRoute() {
+	const { _ } = useLingui()
 	const { orgSlug, campaigns, error } = useLoaderData<typeof loader>()
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState<string>('all')
+
+	const statusFilterLabels: Record<(typeof STATUS_FILTERS)[number], string> = {
+		all: _(msg`All`),
+		completed: _(msg`Completed`),
+		processing: _(msg`Processing`),
+		failed: _(msg`Failed`),
+	}
 
 	const filteredCampaigns = campaigns.filter((campaign) => {
 		const matchesSearch = campaign.name
@@ -55,9 +70,11 @@ export default function CampaignsIndexRoute() {
 		<div className="space-y-8">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<header className="space-y-1">
-					<h1 className="text-2xl font-semibold tracking-tight">Broadcasts</h1>
+					<h1 className="text-2xl font-semibold tracking-tight">
+						{_(msg`Broadcasts`)}
+					</h1>
 					<p className="text-muted-foreground text-sm">
-						One-time email and SMS campaigns.
+						{_(msg`One-time email and SMS campaigns.`)}
 					</p>
 				</header>
 				<Button
@@ -65,7 +82,7 @@ export default function CampaignsIndexRoute() {
 					className="shrink-0 gap-2"
 				>
 					<Icon name="plus" className="size-4" />
-					New broadcast
+					{_(msg`New broadcast`)}
 				</Button>
 			</div>
 
@@ -76,7 +93,7 @@ export default function CampaignsIndexRoute() {
 						className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
 					/>
 					<Input
-						placeholder="Search campaigns..."
+						placeholder={_(msg`Search campaigns...`)}
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						className="h-9 pl-9"
@@ -89,13 +106,13 @@ export default function CampaignsIndexRoute() {
 							type="button"
 							onClick={() => setStatusFilter(status)}
 							className={cn(
-								'rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors',
+								'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
 								statusFilter === status
 									? 'bg-muted text-foreground'
 									: 'text-muted-foreground hover:text-foreground',
 							)}
 						>
-							{status}
+							{statusFilterLabels[status]}
 						</button>
 					))}
 				</div>
@@ -105,17 +122,17 @@ export default function CampaignsIndexRoute() {
 				<p className="text-destructive text-sm">{error}</p>
 			) : filteredCampaigns.length === 0 ? (
 				<EmptyState
-					title="No broadcasts found"
+					title={_(msg`No broadcasts found`)}
 					description={
 						hasFilters
-							? 'Try adjusting your search or filter.'
-							: 'Create your first one-time email or SMS campaign.'
+							? _(msg`Try adjusting your search or filter.`)
+							: _(msg`Create your first one-time email or SMS campaign.`)
 					}
 					icons={['mail', 'send', 'smartphone']}
 					action={
 						!hasFilters
 							? {
-									label: 'Create broadcast',
+									label: _(msg`Create broadcast`),
 									href: `/${orgSlug}/marketing/campaigns/new`,
 								}
 							: undefined
@@ -137,7 +154,9 @@ export default function CampaignsIndexRoute() {
 								<ItemDescription>
 									<span className="capitalize">{campaign.channel}</span>
 									{' · '}
-									{campaign.targetAudienceCount.toLocaleString()} recipients
+									{_(
+										msg`${campaign.targetAudienceCount.toLocaleString()} recipients`,
+									)}
 									{' · '}
 									{new Date(campaign.createdAt).toLocaleDateString()}
 								</ItemDescription>

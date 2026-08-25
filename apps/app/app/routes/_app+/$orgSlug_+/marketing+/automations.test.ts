@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as tenantApiServer from '#app/utils/tenant-api.server.ts'
+import { activateTestLingui } from './test-lingui.ts'
 import {
 	loader as runsLoader,
 	action as runsAction,
@@ -18,6 +19,7 @@ describe('Marketing Journeys Routes Loaders & Actions', () => {
 	let mockFetchTenant: ReturnType<typeof vi.fn>
 
 	beforeEach(() => {
+		activateTestLingui()
 		mockFetchTenant = vi.fn()
 		vi.spyOn(tenantApiServer, 'getOperatorTenantClient').mockResolvedValue({
 			orgId: 'org_test_123',

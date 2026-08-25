@@ -1,3 +1,5 @@
+import { msg, Plural, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Button } from '@repo/ui/button'
 import {
@@ -21,6 +23,7 @@ import { Label } from '@repo/ui/label'
 import { useState, type FormEvent } from 'react'
 import { type JourneyStatus } from './types.ts'
 import { type RealtimeValidationState } from './validation.ts'
+import { useWorkflowUiLabels } from './workflow-labels.ts'
 
 interface WorkflowToolbarProps {
 	name: string
@@ -55,6 +58,8 @@ export function WorkflowToolbar({
 	onFitView,
 	className,
 }: WorkflowToolbarProps) {
+	const { _ } = useLingui()
+	const { journeyStatusLabel } = useWorkflowUiLabels()
 	const [showValidationDialog, setShowValidationDialog] = useState(false)
 	const [showTestRunDialog, setShowTestRunDialog] = useState(false)
 	const [testCustomerId, setTestCustomerId] = useState('cust_test_123')
@@ -91,7 +96,7 @@ export function WorkflowToolbar({
 						variant="ghost"
 						size="icon-xs"
 						onClick={onBack}
-						aria-label="Back to automations"
+						aria-label={_(msg`Back to automations`)}
 					>
 						<Icon name="arrow-left" className="size-4" />
 					</Button>
@@ -129,7 +134,7 @@ export function WorkflowToolbar({
 												variant="ghost"
 												size="icon-xs"
 												className="text-muted-foreground hover:text-foreground"
-												aria-label="Automation menu"
+												aria-label={_(msg`Automation menu`)}
 											>
 												<Icon name="chevron-down" className="size-3.5" />
 											</Button>
@@ -138,14 +143,14 @@ export function WorkflowToolbar({
 									<DropdownMenuContent align="start" className="w-56">
 										<DropdownMenuItem onSelect={onViewRuns}>
 											<Icon name="clock" className="mr-2 size-4" />
-											Run history
+											<Trans>Run history</Trans>
 										</DropdownMenuItem>
 										<DropdownMenuSeparator />
 										<DropdownMenuItem
 											onSelect={() => setShowTestRunDialog(true)}
 										>
 											<Icon name="play" className="mr-2 size-4" />
-											Test run
+											<Trans>Test run</Trans>
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>
@@ -168,7 +173,7 @@ export function WorkflowToolbar({
 											: 'bg-muted-foreground/40',
 							)}
 						/>
-						<span className="capitalize">{status}</span>
+						<span className="capitalize">{journeyStatusLabel(status)}</span>
 					</div>
 
 					<Button
@@ -178,12 +183,12 @@ export function WorkflowToolbar({
 						onClick={onSave}
 						disabled={isSaving}
 					>
-						{isSaving ? 'Saving...' : 'Save draft'}
+						{isSaving ? <Trans>Saving...</Trans> : <Trans>Save draft</Trans>}
 					</Button>
 
 					{status === 'active' && onPause ? (
 						<Button type="button" variant="outline" size="sm" onClick={onPause}>
-							Pause
+							<Trans>Pause</Trans>
 						</Button>
 					) : (
 						<Button
@@ -193,11 +198,15 @@ export function WorkflowToolbar({
 							disabled={!isValid || isPublishing}
 							title={
 								!isValid
-									? 'Fix validation errors before publishing'
-									: 'Publish and activate automation'
+									? _(msg`Fix validation errors before publishing`)
+									: _(msg`Publish and activate automation`)
 							}
 						>
-							{isPublishing ? 'Publishing...' : 'Publish'}
+							{isPublishing ? (
+								<Trans>Publishing...</Trans>
+							) : (
+								<Trans>Publish</Trans>
+							)}
 						</Button>
 					)}
 
@@ -207,7 +216,7 @@ export function WorkflowToolbar({
 								<Button
 									variant="ghost"
 									size="icon-xs"
-									aria-label="More actions"
+									aria-label={_(msg`More actions`)}
 								>
 									<Icon name="ellipsis" className="size-4" />
 								</Button>
@@ -219,13 +228,19 @@ export function WorkflowToolbar({
 									name={isValid ? 'check-circle' : 'alert-triangle'}
 									className="mr-2 size-4"
 								/>
-								{isValid
-									? 'Validation passed'
-									: `${errorCount} validation ${errorCount === 1 ? 'error' : 'errors'}`}
+								{isValid ? (
+									<Trans>Validation passed</Trans>
+								) : (
+									<Plural
+										value={errorCount}
+										one="# validation error"
+										other="# validation errors"
+									/>
+								)}
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={onFitView}>
 								<Icon name="layout-grid" className="mr-2 size-4" />
-								Fit canvas view
+								<Trans>Fit canvas view</Trans>
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -248,30 +263,40 @@ export function WorkflowToolbar({
 									<Icon name="alert-triangle" className="size-4" />
 								</div>
 							)}
-							<span>Workflow validation</span>
+							<span>
+								<Trans>Workflow validation</Trans>
+							</span>
 						</DialogTitle>
 						<DialogDescription>
-							Structural checks for triggers, connections, and node
-							configuration.
+							<Trans>
+								Structural checks for triggers, connections, and node
+								configuration.
+							</Trans>
 						</DialogDescription>
 					</DialogHeader>
 
 					<div className="space-y-4 py-2">
 						<div className="grid grid-cols-3 gap-2 rounded-lg border p-3 text-center">
 							<div>
-								<p className="text-muted-foreground text-[11px]">Nodes</p>
+								<p className="text-muted-foreground text-[11px]">
+									<Trans>Nodes</Trans>
+								</p>
 								<p className="text-base font-semibold tabular-nums">
 									{validation.nodeCount}
 								</p>
 							</div>
 							<div>
-								<p className="text-muted-foreground text-[11px]">Connections</p>
+								<p className="text-muted-foreground text-[11px]">
+									<Trans>Connections</Trans>
+								</p>
 								<p className="text-base font-semibold tabular-nums">
 									{validation.edgeCount}
 								</p>
 							</div>
 							<div>
-								<p className="text-muted-foreground text-[11px]">Cycles</p>
+								<p className="text-muted-foreground text-[11px]">
+									<Trans>Cycles</Trans>
+								</p>
 								<p
 									className={cn(
 										'text-base font-semibold',
@@ -280,7 +305,11 @@ export function WorkflowToolbar({
 											: 'text-emerald-600',
 									)}
 								>
-									{validation.hasCycles ? 'Detected' : 'None'}
+									{validation.hasCycles ? (
+										<Trans>Detected</Trans>
+									) : (
+										<Trans>None</Trans>
+									)}
 								</p>
 							</div>
 						</div>
@@ -288,7 +317,7 @@ export function WorkflowToolbar({
 						{validation.errors.length > 0 ? (
 							<div className="space-y-2">
 								<h4 className="text-destructive text-xs font-medium">
-									Errors ({validation.errors.length})
+									<Trans>Errors</Trans> ({validation.errors.length})
 								</h4>
 								<ul className="border-destructive/20 text-destructive space-y-1.5 rounded-lg border p-3 text-xs">
 									{validation.errors.map((err, i) => (
@@ -301,7 +330,7 @@ export function WorkflowToolbar({
 						{validation.warnings.length > 0 ? (
 							<div className="space-y-2">
 								<h4 className="text-xs font-medium text-amber-600 dark:text-amber-400">
-									Warnings ({validation.warnings.length})
+									<Trans>Warnings</Trans> ({validation.warnings.length})
 								</h4>
 								<ul className="space-y-1.5 rounded-lg border border-amber-500/20 p-3 text-xs text-amber-700 dark:text-amber-300">
 									{validation.warnings.map((warn, i) => (
@@ -313,7 +342,9 @@ export function WorkflowToolbar({
 
 						{isValid && validation.warnings.length === 0 ? (
 							<p className="text-muted-foreground rounded-lg border p-3 text-center text-xs">
-								All checks passed. This workflow is ready to publish.
+								<Trans>
+									All checks passed. This workflow is ready to publish.
+								</Trans>
 							</p>
 						) : null}
 					</div>
@@ -325,7 +356,7 @@ export function WorkflowToolbar({
 							size="sm"
 							onClick={() => setShowValidationDialog(false)}
 						>
-							Close
+							<Trans>Close</Trans>
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -335,27 +366,33 @@ export function WorkflowToolbar({
 				<DialogContent className="sm:max-w-[420px]">
 					<form onSubmit={handleTestRunSubmit}>
 						<DialogHeader>
-							<DialogTitle>Test run</DialogTitle>
+							<DialogTitle>
+								<Trans>Test run</Trans>
+							</DialogTitle>
 							<DialogDescription>
-								Trigger a test execution for a specific customer ID.
+								<Trans>
+									Trigger a test execution for a specific customer ID.
+								</Trans>
 							</DialogDescription>
 						</DialogHeader>
 
 						<div className="space-y-4 py-4">
 							<div className="space-y-2">
 								<Label htmlFor="testCustomerId" className="text-xs font-medium">
-									Customer ID
+									<Trans>Customer ID</Trans>
 								</Label>
 								<Input
 									id="testCustomerId"
 									value={testCustomerId}
 									onChange={(e) => setTestCustomerId(e.target.value)}
-									placeholder="e.g. cust_123"
+									placeholder={_(msg`e.g. cust_123`)}
 									required
 								/>
 								<p className="text-muted-foreground text-[11px]">
-									Only the customer ID is sent. Regional tenant-api resolves PII
-									locally.
+									<Trans>
+										Only the customer ID is sent. Regional tenant-api resolves
+										PII locally.
+									</Trans>
 								</p>
 							</div>
 						</div>
@@ -367,10 +404,10 @@ export function WorkflowToolbar({
 								size="sm"
 								onClick={() => setShowTestRunDialog(false)}
 							>
-								Cancel
+								<Trans>Cancel</Trans>
 							</Button>
 							<Button type="submit" size="sm">
-								Launch run
+								<Trans>Launch run</Trans>
 							</Button>
 						</DialogFooter>
 					</form>

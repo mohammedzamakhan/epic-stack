@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import {
 	getPlatformJourneyById,
@@ -27,7 +30,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const journey = await getPlatformJourneyById(journeyId)
 
 	if (!journey) {
-		throw new Response('Automation not found', { status: 404 })
+		throw new Response(i18n._(t`Automation not found`), { status: 404 })
 	}
 
 	const nodes = journey.nodes ? JSON.parse(journey.nodes) : []
@@ -58,14 +61,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		const graphJson = formData.get('graphJson')
 
 		if (typeof graphJson !== 'string') {
-			return { error: 'Graph data missing' }
+			return { error: i18n._(t`Graph data missing`) }
 		}
 
 		let parsedGraph: WorkflowGraph
 		try {
 			parsedGraph = JSON.parse(graphJson) as WorkflowGraph
 		} catch {
-			return { error: 'Invalid graph format' }
+			return { error: i18n._(t`Invalid graph format`) }
 		}
 
 		const triggerNode = parsedGraph.nodes.find((n) => n.type === 'trigger')
@@ -91,7 +94,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 					error:
 						error instanceof Error
 							? error.message
-							: 'Failed to publish automation',
+							: i18n._(t`Failed to publish automation`),
 				}
 			}
 		}
@@ -108,6 +111,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function AdminEditAutomationRoute() {
+	const { _ } = useLingui()
 	const { journey } = useLoaderData<typeof loader>()
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
@@ -122,7 +126,7 @@ export default function AdminEditAutomationRoute() {
 			{ intent: 'save', name, graphJson: JSON.stringify(graph) },
 			{ method: 'POST' },
 		)
-		toast.success('Automation saved')
+		toast.success(_(msg`Automation saved`))
 	}
 
 	const handlePublish = (graph: WorkflowGraph, name: string) => {
@@ -130,7 +134,7 @@ export default function AdminEditAutomationRoute() {
 			{ intent: 'publish', name, graphJson: JSON.stringify(graph) },
 			{ method: 'POST' },
 		)
-		toast.success('Publishing automation...')
+		toast.success(_(msg`Publishing automation...`))
 	}
 
 	const handlePause = () => {
@@ -148,7 +152,7 @@ export default function AdminEditAutomationRoute() {
 				onPublish={handlePublish}
 				onPause={journey.status === 'active' ? handlePause : undefined}
 				onTestRun={() => {
-					toast.info('Platform test runs are not yet wired to execution.')
+					toast.info(_(msg`Platform test runs are not yet wired to execution.`))
 				}}
 				onBack={() => navigate('/marketing/automations')}
 				isSaving={isSubmitting}

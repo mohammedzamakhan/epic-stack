@@ -1,3 +1,5 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { CampaignDetailView, type CampaignDetail } from '@repo/marketing'
 import { Skeleton } from '@repo/ui/skeleton'
 import { useEffect, useState } from 'react'
@@ -17,6 +19,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function CampaignDetailRoute() {
+	const { _ } = useLingui()
 	const { orgSlug, campaignId, jwt, tenantApiUrl } =
 		useLoaderData<typeof loader>()
 	const [campaign, setCampaign] = useState<CampaignDetail | null>(null)
@@ -33,13 +36,13 @@ export default function CampaignDetailRoute() {
 					},
 				)
 				if (!res.ok) {
-					throw new Error('Failed to load broadcast')
+					throw new Error(_(msg`Failed to load broadcast`))
 				}
 				const data = (await res.json()) as { campaign?: CampaignDetail }
 				setCampaign(data.campaign ?? null)
 			} catch (err) {
 				setError(
-					err instanceof Error ? err.message : 'Failed to load broadcast',
+					err instanceof Error ? err.message : _(msg`Failed to load broadcast`),
 				)
 			} finally {
 				setLoading(false)
@@ -47,7 +50,7 @@ export default function CampaignDetailRoute() {
 		}
 
 		void fetchCampaign()
-	}, [campaignId, jwt, tenantApiUrl])
+	}, [campaignId, jwt, tenantApiUrl, _])
 
 	if (loading) {
 		return (
@@ -67,7 +70,7 @@ export default function CampaignDetailRoute() {
 	if (error || !campaign) {
 		return (
 			<p className="text-destructive text-sm">
-				{error ?? 'Broadcast not found'}
+				{error ?? _(msg`Broadcast not found`)}
 			</p>
 		)
 	}

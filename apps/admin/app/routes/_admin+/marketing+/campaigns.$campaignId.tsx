@@ -1,3 +1,5 @@
+import { i18n } from '@lingui/core'
+import { t } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
 import { CampaignDetailView } from '@repo/marketing'
 import { getPlatformCampaign } from '@repo/marketing/server/platform-campaigns'
@@ -10,7 +12,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const campaign = await getPlatformCampaign(campaignId)
 
 	if (!campaign) {
-		throw new Response('Broadcast not found', { status: 404 })
+		throw new Response(i18n._(t`Broadcast not found`), { status: 404 })
 	}
 
 	return { campaign }

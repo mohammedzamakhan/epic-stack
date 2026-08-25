@@ -1,3 +1,5 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import { CampaignListGrid } from '@repo/marketing'
 import { listPlatformCampaigns } from '@repo/marketing/server/platform-campaigns'
@@ -9,6 +11,16 @@ import { useState } from 'react'
 import { Link, type LoaderFunctionArgs, useLoaderData } from 'react-router'
 import { EmptyState } from '#app/components/empty-state.tsx'
 
+const STATUS_FILTERS: Array<{
+	value: string
+	label: ReturnType<typeof msg>
+}> = [
+	{ value: 'all', label: msg`All` },
+	{ value: 'completed', label: msg`Completed` },
+	{ value: 'processing', label: msg`Processing` },
+	{ value: 'failed', label: msg`Failed` },
+]
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
 	const campaigns = await listPlatformCampaigns()
@@ -16,6 +28,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function AdminCampaignsIndexRoute() {
+	const { _ } = useLingui()
 	const { campaigns, error } = useLoaderData<typeof loader>()
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState('all')
@@ -34,10 +47,10 @@ export default function AdminCampaignsIndexRoute() {
 			<div className="flex items-center justify-between border-b pb-4">
 				<div>
 					<h1 className="text-2xl font-bold tracking-tight">
-						Platform Broadcasts
+						<Trans>Platform Broadcasts</Trans>
 					</h1>
 					<p className="text-muted-foreground mt-1 text-sm">
-						Send one-time emails to tenant operators.
+						<Trans>Send one-time emails to tenant operators.</Trans>
 					</p>
 				</div>
 				<Button
@@ -45,31 +58,31 @@ export default function AdminCampaignsIndexRoute() {
 					className="gap-2"
 				>
 					<Icon name="plus" className="size-4" />
-					New Broadcast
+					<Trans>New Broadcast</Trans>
 				</Button>
 			</div>
 
 			<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
 				<Input
-					placeholder="Search campaigns..."
+					placeholder={_(msg`Search campaigns...`)}
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					className="h-9 max-w-md"
 				/>
 				<div className="bg-card flex items-center gap-1 rounded-lg border p-1">
-					{['all', 'completed', 'processing', 'failed'].map((st) => (
+					{STATUS_FILTERS.map((filter) => (
 						<button
-							key={st}
+							key={filter.value}
 							type="button"
-							onClick={() => setStatusFilter(st)}
+							onClick={() => setStatusFilter(filter.value)}
 							className={cn(
 								'rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors',
-								statusFilter === st
+								statusFilter === filter.value
 									? 'bg-primary text-primary-foreground font-semibold shadow-xs'
 									: 'text-muted-foreground hover:text-foreground',
 							)}
 						>
-							{st}
+							{_(filter.label)}
 						</button>
 					))}
 				</div>
@@ -83,11 +96,13 @@ export default function AdminCampaignsIndexRoute() {
 
 			{filteredCampaigns.length === 0 ? (
 				<EmptyState
-					title="No broadcasts found"
-					description="Create your first platform email campaign for tenant operators."
+					title={_(msg`No broadcasts found`)}
+					description={_(
+						msg`Create your first platform email campaign for tenant operators.`,
+					)}
 					icons={['mail', 'send']}
 					action={{
-						label: 'Create Broadcast',
+						label: _(msg`Create Broadcast`),
 						href: '/marketing/campaigns/new',
 					}}
 				/>

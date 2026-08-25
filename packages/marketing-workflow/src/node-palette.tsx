@@ -1,3 +1,5 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -21,6 +23,7 @@ interface NodePaletteProps {
 }
 
 export function NodePalette({ onAddNode, className }: NodePaletteProps) {
+	const { _ } = useLingui()
 	const { paletteItems } = useWorkflowConfig()
 
 	const onDragStart = (
@@ -42,7 +45,9 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 				<span className="bg-muted text-muted-foreground flex size-6 items-center justify-center rounded-md">
 					<Icon name="blocks" size="xs" />
 				</span>
-				<span className="min-w-0 truncate text-sm font-medium">Nodes</span>
+				<span className="min-w-0 truncate text-sm font-medium">
+					<Trans>Nodes</Trans>
+				</span>
 				<span className="text-muted-foreground text-xs tabular-nums">
 					{paletteItems.length}
 				</span>
@@ -69,7 +74,7 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 												variant="outline"
 												className="text-muted-foreground h-4 px-1 text-[9px] uppercase"
 											>
-												Pro
+												<Trans>Pro</Trans>
 											</Badge>
 										) : null}
 									</div>
@@ -88,7 +93,7 @@ export function NodePalette({ onAddNode, className }: NodePaletteProps) {
 									e.stopPropagation()
 									onAddNode(item)
 								}}
-								title={`Add ${item.label}`}
+								title={_(msg`Add ${item.label}`)}
 							>
 								<Icon name="plus" size="xs" />
 							</Button>

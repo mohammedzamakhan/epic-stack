@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import {
 	type JourneyRunRecord,
 	type JourneyStepExecutionRecord,
@@ -36,6 +39,9 @@ import {
 } from 'react-router'
 import { getOperatorTenantClient } from '#app/utils/tenant-api.server.ts'
 
+type JourneyStatus = 'draft' | 'active' | 'paused' | 'archived'
+type RunStatus = 'completed' | 'running' | 'failed' | 'cancelled'
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug || ''
 	const journeyId = params.journeyId || ''
@@ -47,7 +53,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	])
 
 	if (!journeyRes.ok) {
-		throw new Response('Automation not found', { status: 404 })
+		throw new Response(i18n._(t`Automation not found`), { status: 404 })
 	}
 
 	const journeyData = (await journeyRes.json()) as any
@@ -84,42 +90,57 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const runId = formData.get('runId')
 
 	if (typeof runId !== 'string' || !runId) {
-		return { error: 'runId is required' }
+		return { error: i18n._(t`runId is required`) }
 	}
 
 	const res = await fetchTenant(`/operator/journeys/runs/${runId}`)
 	if (!res.ok) {
-		return { error: 'Failed to load timeline' }
+		return { error: i18n._(t`Failed to load timeline`) }
 	}
 
 	const data = (await res.json()) as any
 	return { timeline: data.timeline || data.steps || [] }
 }
 
-function formatDuration(
-	startedAt: string | Date,
-	completedAt?: string | Date | null,
-) {
-	if (!startedAt) return '—'
-	const start = new Date(startedAt).getTime()
-	const end = completedAt ? new Date(completedAt).getTime() : Date.now()
-	const diffSec = Math.max(0, Math.floor((end - start) / 1000))
-
-	if (!completedAt) {
-		return `${diffSec}s (running)`
-	}
-
-	if (diffSec < 60) return `${diffSec}s`
-	const minutes = Math.floor(diffSec / 60)
-	const remainingSec = diffSec % 60
-	return `${minutes}m ${remainingSec}s`
-}
-
 export default function JourneyRunsRoute() {
+	const { _ } = useLingui()
 	const { orgSlug, journey, runs } = useLoaderData<typeof loader>()
 	const [selectedRun, setSelectedRun] = useState<JourneyRunRecord | null>(null)
 	const [timeline, setTimeline] = useState<JourneyStepExecutionRecord[]>([])
 	const [loadingTimeline, setLoadingTimeline] = useState(false)
+
+	const journeyStatusLabels: Record<JourneyStatus, string> = {
+		draft: _(msg`Draft`),
+		active: _(msg`Active`),
+		paused: _(msg`Paused`),
+		archived: _(msg`Archived`),
+	}
+
+	const runStatusLabels: Record<RunStatus, string> = {
+		completed: _(msg`Completed`),
+		running: _(msg`Running`),
+		failed: _(msg`Failed`),
+		cancelled: _(msg`Cancelled`),
+	}
+
+	const formatDuration = (
+		startedAt: string | Date,
+		completedAt?: string | Date | null,
+	) => {
+		if (!startedAt) return '—'
+		const start = new Date(startedAt).getTime()
+		const end = completedAt ? new Date(completedAt).getTime() : Date.now()
+		const diffSec = Math.max(0, Math.floor((end - start) / 1000))
+
+		if (!completedAt) {
+			return _(msg`${diffSec}s (running)`)
+		}
+
+		if (diffSec < 60) return _(msg`${diffSec}s`)
+		const minutes = Math.floor(diffSec / 60)
+		const remainingSec = diffSec % 60
+		return _(msg`${minutes}m ${remainingSec}s`)
+	}
 
 	const openTimeline = async (run: JourneyRunRecord) => {
 		setSelectedRun(run)
@@ -142,9 +163,10 @@ export default function JourneyRunsRoute() {
 		}
 	}
 
+	const journeyStatus = journey.status as JourneyStatus
+
 	return (
 		<div className="space-y-6">
-			{/* Header */}
 			<div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 				<div className="space-y-1">
 					<div className="flex items-center gap-2">
@@ -167,7 +189,7 @@ export default function JourneyRunsRoute() {
 							</svg>
 						</Button>
 						<h2 className="text-foreground text-xl font-bold tracking-tight">
-							{journey.name} — Execution Runs
+							{journey.name} — {_(msg`Execution Runs`)}
 						</h2>
 						<Badge
 							variant="outline"
@@ -180,12 +202,13 @@ export default function JourneyRunsRoute() {
 									'border-amber-500/30 bg-amber-500/10 text-amber-600',
 							)}
 						>
-							{journey.status}
+							{journeyStatusLabels[journeyStatus]}
 						</Badge>
 					</div>
 					<p className="text-muted-foreground pl-10 text-xs">
-						Audit trail and step execution history triggered by "
-						{journey.triggerType.replace('_', ' ')}".
+						{_(
+							msg`Audit trail and step execution history triggered by "${journey.triggerType.replace('_', ' ')}".`,
+						)}
 					</p>
 				</div>
 
@@ -207,25 +230,27 @@ export default function JourneyRunsRoute() {
 						<path d="M12 20h9" />
 						<path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
 					</svg>
-					<span>Open Visual Builder</span>
+					<span>{_(msg`Open Visual Builder`)}</span>
 				</Button>
 			</div>
 
-			{/* Runs Table */}
 			<Card>
 				<CardHeader className="pb-3">
 					<CardTitle className="text-base">
-						Execution History ({runs.length})
+						{_(msg`Execution History (${runs.length})`)}
 					</CardTitle>
 					<CardDescription>
-						All customer automation workflows orchestrated durably by Cloudflare
-						Workflows and executed by the regional data engine.
+						{_(
+							msg`All customer automation workflows orchestrated durably by Cloudflare Workflows and executed by the regional data engine.`,
+						)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{runs.length === 0 ? (
 						<div className="text-muted-foreground space-y-3 py-12 text-center text-sm">
-							<p>No execution runs recorded yet for this automation.</p>
+							<p>
+								{_(msg`No execution runs recorded yet for this automation.`)}
+							</p>
 							<Button
 								render={
 									<Link
@@ -235,7 +260,7 @@ export default function JourneyRunsRoute() {
 								size="sm"
 								variant="outline"
 							>
-								Launch Test Run in Builder
+								{_(msg`Launch Test Run in Builder`)}
 							</Button>
 						</div>
 					) : (
@@ -243,12 +268,16 @@ export default function JourneyRunsRoute() {
 							<Table>
 								<TableHeader>
 									<TableRow className="bg-muted/50">
-										<TableHead className="w-[180px]">Run ID</TableHead>
-										<TableHead>Customer UUID</TableHead>
-										<TableHead>Status</TableHead>
-										<TableHead>Started At</TableHead>
-										<TableHead>Duration</TableHead>
-										<TableHead className="text-right">Audit Trail</TableHead>
+										<TableHead className="w-[180px]">
+											{_(msg`Run ID`)}
+										</TableHead>
+										<TableHead>{_(msg`Customer UUID`)}</TableHead>
+										<TableHead>{_(msg`Status`)}</TableHead>
+										<TableHead>{_(msg`Started At`)}</TableHead>
+										<TableHead>{_(msg`Duration`)}</TableHead>
+										<TableHead className="text-right">
+											{_(msg`Audit Trail`)}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -275,7 +304,8 @@ export default function JourneyRunsRoute() {
 															'bg-muted text-muted-foreground',
 													)}
 												>
-													{run.status}
+													{runStatusLabels[run.status as RunStatus] ??
+														run.status}
 												</Badge>
 											</TableCell>
 											<TableCell className="text-muted-foreground text-xs">
@@ -292,7 +322,7 @@ export default function JourneyRunsRoute() {
 													className="text-primary hover:text-primary hover:bg-primary/10 h-7 text-xs font-medium"
 													onClick={() => openTimeline(run)}
 												>
-													View Timeline &rarr;
+													{_(msg`View Timeline →`)}
 												</Button>
 											</TableCell>
 										</TableRow>
@@ -304,7 +334,6 @@ export default function JourneyRunsRoute() {
 				</CardContent>
 			</Card>
 
-			{/* Timeline Dialog */}
 			<Dialog
 				open={Boolean(selectedRun)}
 				onOpenChange={(open) => {
@@ -314,7 +343,7 @@ export default function JourneyRunsRoute() {
 				<DialogContent className="sm:max-w-[560px]">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">
-							<span>Run Execution Timeline</span>
+							<span>{_(msg`Run Execution Timeline`)}</span>
 							{selectedRun && (
 								<Badge
 									variant="outline"
@@ -328,35 +357,38 @@ export default function JourneyRunsRoute() {
 											'bg-destructive/10 text-destructive border-destructive/30',
 									)}
 								>
-									{selectedRun.status}
+									{runStatusLabels[selectedRun.status as RunStatus] ??
+										selectedRun.status}
 								</Badge>
 							)}
 						</DialogTitle>
 						<DialogDescription className="font-mono text-xs">
-							Run ID: {selectedRun?.id}
+							{_(msg`Run ID: ${selectedRun?.id ?? ''}`)}
 						</DialogDescription>
 					</DialogHeader>
 
 					<div className="space-y-4 py-2">
 						{selectedRun?.errorMessage && (
 							<div className="border-destructive/30 bg-destructive/10 text-destructive rounded-lg border p-3 text-xs">
-								<p className="font-semibold">Workflow Error:</p>
+								<p className="font-semibold">{_(msg`Workflow Error:`)}</p>
 								<p>{selectedRun.errorMessage}</p>
 							</div>
 						)}
 
 						{loadingTimeline ? (
 							<p className="text-muted-foreground py-6 text-center text-sm">
-								Loading step executions from regional SQLite outbox...
+								{_(msg`Loading step executions from regional SQLite outbox...`)}
 							</p>
 						) : timeline.length === 0 ? (
 							<div className="text-muted-foreground py-6 text-center text-sm">
-								No discrete action step dispatches recorded for this run.
+								{_(
+									msg`No discrete action step dispatches recorded for this run.`,
+								)}
 							</div>
 						) : (
 							<div className="space-y-3">
 								<h4 className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-									Step Executions ({timeline.length})
+									{_(msg`Step Executions (${timeline.length})`)}
 								</h4>
 								<div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
 									{timeline.map((step, idx) => (
@@ -377,10 +409,13 @@ export default function JourneyRunsRoute() {
 													</Badge>
 												</div>
 												<p className="text-muted-foreground font-mono text-[11px]">
-													Attempt: {step.attempt} • Executed:{' '}
-													{step.executedAt
-														? new Date(step.executedAt).toLocaleTimeString()
-														: 'Pending'}
+													{_(
+														msg`Attempt: ${step.attempt} • Executed: ${
+															step.executedAt
+																? new Date(step.executedAt).toLocaleTimeString()
+																: _(msg`Pending`)
+														}`,
+													)}
 												</p>
 												{step.errorMessage && (
 													<p className="text-destructive text-xs">

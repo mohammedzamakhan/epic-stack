@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { CampaignForm } from '@repo/marketing'
 import { Button } from '@repo/ui/button'
 import { Icon } from '@repo/ui/icon'
@@ -37,7 +40,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		return {
 			error:
 				(err as { error?: string }).error ||
-				'Failed to create and dispatch campaign',
+				i18n._(t`Failed to create and dispatch campaign`),
 		}
 	}
 
@@ -45,6 +48,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function NewCampaignRoute() {
+	const { _ } = useLingui()
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
 	const isSubmitting = navigation.state === 'submitting'
@@ -56,17 +60,17 @@ export default function NewCampaignRoute() {
 					variant="ghost"
 					size="icon-xs"
 					render={<Link to=".." />}
-					aria-label="Back"
+					aria-label={_(msg`Back`)}
 					className="mt-0.5"
 				>
 					<Icon name="arrow-left" className="size-4" />
 				</Button>
 				<header className="space-y-1">
 					<h1 className="text-2xl font-semibold tracking-tight">
-						New broadcast
+						{_(msg`New broadcast`)}
 					</h1>
 					<p className="text-muted-foreground text-sm">
-						Send a one-time email or SMS to your audience.
+						{_(msg`Send a one-time email or SMS to your audience.`)}
 					</p>
 				</header>
 			</div>

@@ -1,6 +1,7 @@
 import { jwtVerify } from 'jose'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as tenantApiServer from '#app/utils/tenant-api.server.ts'
+import { activateTestLingui } from './test-lingui.ts'
 import {
 	loader as runsLoader,
 	action as runsAction,
@@ -19,6 +20,7 @@ describe('Adversarial Security & Robustness Suite: Marketing Journey Builder', (
 	let mockFetchTenant: ReturnType<typeof vi.fn>
 
 	beforeEach(() => {
+		activateTestLingui()
 		mockFetchTenant = vi.fn()
 		vi.spyOn(tenantApiServer, 'getOperatorTenantClient').mockResolvedValue({
 			orgId: 'org_secure_999',

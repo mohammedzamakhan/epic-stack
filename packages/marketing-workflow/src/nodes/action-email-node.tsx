@@ -1,3 +1,5 @@
+import { msg, Trans } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Icon } from '@repo/ui/icon'
@@ -9,6 +11,8 @@ function ActionEmailNodeComponent({
 	data,
 	selected,
 }: NodeProps<ActionEmailFlowNode>) {
+	const { _ } = useLingui()
+
 	return (
 		<div
 			className={cn(
@@ -29,14 +33,16 @@ function ActionEmailNodeComponent({
 					<div className="text-muted-foreground flex size-5 items-center justify-center">
 						<Icon name="mail" size="xs" />
 					</div>
-					<h4 className="text-foreground text-sm font-medium">Email</h4>
+					<h4 className="text-foreground text-sm font-medium">
+						<Trans>Email</Trans>
+					</h4>
 				</div>
 				<Icon name="ellipsis" size="xs" className="text-muted-foreground" />
 			</div>
 
 			<div className="flex flex-col gap-1 p-4">
 				<p className="text-foreground truncate text-sm font-medium">
-					{data.subject || 'Empty subject'}
+					{data.subject || _(msg`Empty subject`)}
 				</p>
 				<div className="mt-2 flex items-center justify-between">
 					<Icon
@@ -48,7 +54,7 @@ function ActionEmailNodeComponent({
 						variant="outline"
 						className="text-muted-foreground text-[10px] font-normal"
 					>
-						Draft
+						<Trans>Draft</Trans>
 					</Badge>
 				</div>
 			</div>

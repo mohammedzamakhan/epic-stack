@@ -1,3 +1,5 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Icon } from '@repo/ui/icon'
@@ -11,6 +13,7 @@ import {
 	ItemTitle,
 } from '@repo/ui/item'
 import { Link } from 'react-router'
+import { useCampaignLabels } from '../i18n/campaign-labels.ts'
 import {
 	type CampaignListItem,
 	type CampaignStatus,
@@ -18,7 +21,7 @@ import {
 
 function statusBadgeClass(status: CampaignStatus) {
 	return cn(
-		'shrink-0 text-[10px] font-semibold capitalize',
+		'shrink-0 text-[10px] font-semibold',
 		status === 'Completed' &&
 			'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
 		status === 'Processing' &&
@@ -31,9 +34,11 @@ function statusBadgeClass(status: CampaignStatus) {
 }
 
 export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {
+	const { statusLabel } = useCampaignLabels()
+
 	return (
 		<Badge variant="outline" className={statusBadgeClass(status)}>
-			{status}
+			{statusLabel(status)}
 		</Badge>
 	)
 }
@@ -45,6 +50,9 @@ export function CampaignListGrid({
 	campaigns: CampaignListItem[]
 	getCampaignHref?: (campaign: CampaignListItem) => string
 }) {
+	const { _ } = useLingui()
+	const { channelLabel } = useCampaignLabels()
+
 	return (
 		<ItemGroup>
 			{campaigns.map((campaign) => (
@@ -67,9 +75,10 @@ export function CampaignListGrid({
 					<ItemContent>
 						<ItemTitle>{campaign.name}</ItemTitle>
 						<ItemDescription>
-							<span className="capitalize">{campaign.channel}</span>
+							{channelLabel(campaign.channel)}
 							{' · '}
-							{campaign.targetAudienceCount.toLocaleString()} recipients
+							{campaign.targetAudienceCount.toLocaleString()}{' '}
+							{_(msg`recipients`)}
 							{' · '}
 							{new Date(campaign.createdAt).toLocaleDateString()}
 						</ItemDescription>

@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { cn } from '@repo/ui'
 import { Badge } from '@repo/ui/badge'
 import { Button } from '@repo/ui/button'
@@ -44,6 +47,15 @@ export interface JourneyListItem {
 }
 
 function JourneyStatusBadge({ status }: { status: JourneyListItem['status'] }) {
+	const { _ } = useLingui()
+
+	const statusLabels: Record<JourneyListItem['status'], string> = {
+		draft: _(msg`Draft`),
+		active: _(msg`Active`),
+		paused: _(msg`Paused`),
+		archived: _(msg`Archived`),
+	}
+
 	return (
 		<Badge
 			variant="outline"
@@ -58,7 +70,7 @@ function JourneyStatusBadge({ status }: { status: JourneyListItem['status'] }) {
 					'bg-destructive/10 text-destructive border-destructive/30',
 			)}
 		>
-			{status}
+			{statusLabels[status]}
 		</Badge>
 	)
 }
@@ -77,7 +89,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			return {
 				journeys: [] as JourneyListItem[],
 				orgSlug,
-				error: 'Failed to load journeys from regional tenant storage.',
+				error: i18n._(t`Failed to load journeys from regional tenant storage.`),
 			}
 		}
 
@@ -105,7 +117,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		return {
 			journeys: [] as JourneyListItem[],
 			orgSlug,
-			error: err instanceof Error ? err.message : 'Database connection error',
+			error:
+				err instanceof Error
+					? err.message
+					: i18n._(t`Database connection error`),
 		}
 	}
 }
@@ -118,7 +133,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 	const journeyId = formData.get('journeyId')
 
 	if (typeof journeyId !== 'string' || !journeyId) {
-		return { error: 'journeyId is required' }
+		return { error: i18n._(t`journeyId is required`) }
 	}
 
 	if (intent === 'publish') {
@@ -128,7 +143,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}))
 			return {
-				error: (err as { error?: string }).error || 'Failed to publish journey',
+				error:
+					(err as { error?: string }).error ||
+					i18n._(t`Failed to publish journey`),
 			}
 		}
 		return { success: true }
@@ -141,7 +158,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}))
 			return {
-				error: (err as { error?: string }).error || 'Failed to pause journey',
+				error:
+					(err as { error?: string }).error ||
+					i18n._(t`Failed to pause journey`),
 			}
 		}
 		return { success: true }
@@ -154,7 +173,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}))
 			return {
-				error: (err as { error?: string }).error || 'Failed to delete journey',
+				error:
+					(err as { error?: string }).error ||
+					i18n._(t`Failed to delete journey`),
 			}
 		}
 		return { success: true }
@@ -162,7 +183,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 	if (intent === 'duplicate') {
 		const getRes = await fetchTenant(`/operator/journeys/${journeyId}`)
-		if (!getRes.ok) return { error: 'Failed to find original journey' }
+		if (!getRes.ok) return { error: i18n._(t`Failed to find original journey`) }
 		const orig = (await getRes.json()) as {
 			journey?: {
 				name?: string
@@ -174,10 +195,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			}
 		}
 
+		const journeyName = orig.journey?.name || i18n._(t`Journey`)
 		const createRes = await fetchTenant('/operator/journeys', {
 			method: 'POST',
 			body: JSON.stringify({
-				name: `${orig.journey?.name || 'Journey'} (Copy)`,
+				name: i18n._(t`${journeyName} (Copy)`),
 				description: orig.journey?.description,
 				triggerType: orig.journey?.triggerType,
 				nodes: orig.journey?.nodes || [],
@@ -190,7 +212,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
 			const err = await createRes.json().catch(() => ({}))
 			return {
 				error:
-					(err as { error?: string }).error || 'Failed to duplicate journey',
+					(err as { error?: string }).error ||
+					i18n._(t`Failed to duplicate journey`),
 			}
 		}
 
@@ -200,14 +223,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
 		)
 	}
 
-	return { error: 'Unknown intent' }
+	return { error: i18n._(t`Unknown intent`) }
 }
 
 export default function JourneysList() {
+	const { _ } = useLingui()
 	const { journeys, orgSlug, error } = useLoaderData<typeof loader>()
 	const fetcher = useFetcher()
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState<string>('all')
+
+	const statusFilterLabels: Record<(typeof STATUS_FILTERS)[number], string> = {
+		all: _(msg`All`),
+		active: _(msg`Active`),
+		draft: _(msg`Draft`),
+		paused: _(msg`Paused`),
+	}
 
 	const filteredJourneys = journeys.filter((journey) => {
 		const matchesSearch =
@@ -225,9 +256,11 @@ export default function JourneysList() {
 		<div className="space-y-8">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<header className="space-y-1">
-					<h1 className="text-2xl font-semibold tracking-tight">Automations</h1>
+					<h1 className="text-2xl font-semibold tracking-tight">
+						{_(msg`Automations`)}
+					</h1>
 					<p className="text-muted-foreground text-sm">
-						Event-driven workflows with triggers, delays, and actions.
+						{_(msg`Event-driven workflows with triggers, delays, and actions.`)}
 					</p>
 				</header>
 				<Button
@@ -235,7 +268,7 @@ export default function JourneysList() {
 					className="shrink-0 gap-2"
 				>
 					<Icon name="plus" className="size-4" />
-					New automation
+					{_(msg`New automation`)}
 				</Button>
 			</div>
 
@@ -246,7 +279,7 @@ export default function JourneysList() {
 						className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
 					/>
 					<Input
-						placeholder="Search automations..."
+						placeholder={_(msg`Search automations...`)}
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						className="h-9 pl-9"
@@ -259,13 +292,13 @@ export default function JourneysList() {
 							type="button"
 							onClick={() => setStatusFilter(status)}
 							className={cn(
-								'rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors',
+								'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
 								statusFilter === status
 									? 'bg-muted text-foreground'
 									: 'text-muted-foreground hover:text-foreground',
 							)}
 						>
-							{status}
+							{statusFilterLabels[status]}
 						</button>
 					))}
 				</div>
@@ -275,17 +308,17 @@ export default function JourneysList() {
 				<p className="text-destructive text-sm">{error}</p>
 			) : filteredJourneys.length === 0 ? (
 				<EmptyState
-					title="No automations found"
+					title={_(msg`No automations found`)}
 					description={
 						hasFilters
-							? 'Try adjusting your search or filter.'
-							: 'Create your first marketing automation.'
+							? _(msg`Try adjusting your search or filter.`)
+							: _(msg`Create your first marketing automation.`)
 					}
 					icons={['play', 'route', 'clock']}
 					action={
 						!hasFilters
 							? {
-									label: 'Create automation',
+									label: _(msg`Create automation`),
 									href: `/${orgSlug}/marketing/automations/new`,
 								}
 							: undefined
@@ -306,9 +339,9 @@ export default function JourneysList() {
 											{formatTriggerType(journey.triggerType)}
 										</span>
 										{' · '}
-										{journey.stepCount} steps
+										{_(msg`${journey.stepCount} steps`)}
 										{' · '}
-										{journey.runsCount} runs
+										{_(msg`${journey.runsCount} runs`)}
 									</ItemDescription>
 								</Link>
 							</ItemContent>
@@ -325,7 +358,7 @@ export default function JourneysList() {
 									variant="ghost"
 									size="sm"
 									className="text-muted-foreground size-8 p-0"
-									title="View run history"
+									title={_(msg`View run history`)}
 								>
 									<Icon name="clock" className="size-4" />
 								</Button>
@@ -337,7 +370,7 @@ export default function JourneysList() {
 												variant="ghost"
 												size="sm"
 												className="text-muted-foreground size-8 p-0"
-												title="More actions"
+												title={_(msg`More actions`)}
 											>
 												<Icon name="ellipsis" className="size-4" />
 											</Button>
@@ -354,7 +387,7 @@ export default function JourneysList() {
 													)
 												}}
 											>
-												Publish
+												{_(msg`Publish`)}
 											</DropdownMenuItem>
 										) : journey.status === 'active' ? (
 											<DropdownMenuItem
@@ -365,7 +398,7 @@ export default function JourneysList() {
 													)
 												}}
 											>
-												Pause
+												{_(msg`Pause`)}
 											</DropdownMenuItem>
 										) : null}
 
@@ -377,7 +410,7 @@ export default function JourneysList() {
 												)
 											}}
 										>
-											Duplicate
+											{_(msg`Duplicate`)}
 										</DropdownMenuItem>
 
 										<DropdownMenuItem
@@ -385,7 +418,9 @@ export default function JourneysList() {
 											onClick={() => {
 												if (
 													confirm(
-														`Are you sure you want to delete "${journey.name}"?`,
+														_(
+															msg`Are you sure you want to delete "${journey.name}"?`,
+														),
 													)
 												) {
 													void fetcher.submit(
@@ -395,7 +430,7 @@ export default function JourneysList() {
 												}
 											}}
 										>
-											Delete
+											{_(msg`Delete`)}
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>

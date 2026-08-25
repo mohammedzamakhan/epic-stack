@@ -213,7 +213,7 @@ function createPlatformPaletteItems(): PaletteItem[] {
 	]
 }
 
-function createDefaultPlatformJourneyGraph(): WorkflowGraph {
+export function createDefaultPlatformJourneyGraph(): WorkflowGraph {
 	return {
 		nodes: [
 			{

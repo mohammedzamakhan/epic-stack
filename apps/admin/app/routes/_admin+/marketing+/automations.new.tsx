@@ -1,3 +1,6 @@
+import { i18n } from '@lingui/core'
+import { msg, t } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { requireUserWithRole } from '@repo/auth'
 import { createPlatformJourney } from '@repo/marketing/server/platform-journeys'
 import {
@@ -22,19 +25,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
 	const formData = await request.formData()
-	const name = formData.get('name') || 'New Platform Automation'
+	const name = formData.get('name') || i18n._(t`New Platform Automation`)
 	const graphJson = formData.get('graphJson')
 	const shouldPublish = formData.get('publish') === 'true'
 
 	if (typeof graphJson !== 'string' || !graphJson) {
-		return { error: 'Graph data is required' }
+		return { error: i18n._(t`Graph data is required`) }
 	}
 
 	let parsedGraph: WorkflowGraph
 	try {
 		parsedGraph = JSON.parse(graphJson) as WorkflowGraph
 	} catch {
-		return { error: 'Invalid graph format' }
+		return { error: i18n._(t`Invalid graph format`) }
 	}
 
 	const triggerNode = parsedGraph.nodes.find((n) => n.type === 'trigger')
@@ -46,7 +49,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	const created = await createPlatformJourney({
 		name: String(name),
-		description: 'Platform automation created via visual builder.',
+		description: i18n._(t`Platform automation created via visual builder.`),
 		triggerType,
 		triggerConfig,
 		nodes: parsedGraph.nodes,
@@ -55,7 +58,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	})
 
 	if (!created?.id) {
-		return { error: 'Failed to create automation' }
+		return { error: i18n._(t`Failed to create automation`) }
 	}
 
 	if (shouldPublish) {
@@ -68,7 +71,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				error:
 					error instanceof Error
 						? error.message
-						: 'Failed to publish automation',
+						: i18n._(t`Failed to publish automation`),
 			}
 		}
 	}
@@ -77,6 +80,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function AdminNewAutomationRoute() {
+	const { _ } = useLingui()
 	const navigate = useNavigate()
 	const fetcher = useFetcher()
 	const isSubmitting = fetcher.state !== 'idle'
@@ -87,7 +91,7 @@ export default function AdminNewAutomationRoute() {
 			{ name, graphJson: JSON.stringify(graph), publish: 'false' },
 			{ method: 'POST' },
 		)
-		toast.success('Saving new automation draft...')
+		toast.success(_(msg`Saving new automation draft...`))
 	}
 
 	const handlePublish = (graph: WorkflowGraph, name: string) => {
@@ -95,7 +99,7 @@ export default function AdminNewAutomationRoute() {
 			{ name, graphJson: JSON.stringify(graph), publish: 'true' },
 			{ method: 'POST' },
 		)
-		toast.success('Publishing new automation...')
+		toast.success(_(msg`Publishing new automation...`))
 	}
 
 	return (
@@ -103,12 +107,14 @@ export default function AdminNewAutomationRoute() {
 			<WorkflowCanvas
 				workflowConfig={PLATFORM_WORKFLOW_CONFIG}
 				initialGraph={initialGraph}
-				journeyName="New Platform Automation"
+				journeyName={_(msg`New Platform Automation`)}
 				journeyStatus="draft"
 				onSave={handleSave}
 				onPublish={handlePublish}
 				onTestRun={() => {
-					toast.info('Save the automation first before running test triggers.')
+					toast.info(
+						_(msg`Save the automation first before running test triggers.`),
+					)
 				}}
 				onBack={() => navigate('/marketing/automations')}
 				isSaving={isSubmitting}

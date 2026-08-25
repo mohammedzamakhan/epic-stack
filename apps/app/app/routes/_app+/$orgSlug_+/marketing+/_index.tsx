@@ -1,5 +1,7 @@
+import { msg } from '@lingui/macro'
+import { useLingui } from '@lingui/react'
 import { CampaignStatusBadge, type CampaignListItem } from '@repo/marketing'
-import { Icon, type IconName } from '@repo/ui/icon'
+import { Icon } from '@repo/ui/icon'
 import {
 	Item,
 	ItemActions,
@@ -21,45 +23,6 @@ type MarketingMetricsState = {
 	activeCampaigns: number
 }
 
-const METRIC_ITEMS: Array<{
-	key: keyof MarketingMetricsState
-	label: string
-	format: (metrics: MarketingMetricsState) => string
-}> = [
-	{
-		key: 'emailsSent',
-		label: 'Emails sent',
-		format: (m) => m.emailsSent.toLocaleString(),
-	},
-	{ key: 'openRate', label: 'Open rate', format: (m) => `${m.openRate}%` },
-	{ key: 'clickRate', label: 'Click rate', format: (m) => `${m.clickRate}%` },
-	{
-		key: 'activeCampaigns',
-		label: 'Active',
-		format: (m) => String(m.activeCampaigns),
-	},
-]
-
-const QUICK_LINKS: Array<{
-	to: string
-	icon: IconName
-	title: string
-	description: string
-}> = [
-	{
-		to: 'campaigns',
-		icon: 'send',
-		title: 'Broadcasts',
-		description: 'One-time email and SMS',
-	},
-	{
-		to: 'automations',
-		icon: 'route',
-		title: 'Automations',
-		description: 'Event-driven workflows',
-	},
-]
-
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const orgSlug = params.orgSlug || ''
 	const { jwt, tenantApiUrl } = await getOperatorTenantClient(request, orgSlug)
@@ -72,6 +35,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function MarketingOverview() {
+	const { _ } = useLingui()
 	const { jwt, tenantApiUrl, orgSlug } = useLoaderData<typeof loader>()
 	const [metrics, setMetrics] = useState<MarketingMetricsState>({
 		emailsSent: 0,
@@ -82,6 +46,48 @@ export default function MarketingOverview() {
 	const [campaigns, setCampaigns] = useState<CampaignListItem[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+
+	const metricItems: Array<{
+		key: keyof MarketingMetricsState
+		label: string
+		format: (metrics: MarketingMetricsState) => string
+	}> = [
+		{
+			key: 'emailsSent',
+			label: _(msg`Emails sent`),
+			format: (m) => m.emailsSent.toLocaleString(),
+		},
+		{
+			key: 'openRate',
+			label: _(msg`Open rate`),
+			format: (m) => `${m.openRate}%`,
+		},
+		{
+			key: 'clickRate',
+			label: _(msg`Click rate`),
+			format: (m) => `${m.clickRate}%`,
+		},
+		{
+			key: 'activeCampaigns',
+			label: _(msg`Active`),
+			format: (m) => String(m.activeCampaigns),
+		},
+	]
+
+	const quickLinks = [
+		{
+			to: 'campaigns',
+			icon: 'send' as const,
+			title: _(msg`Broadcasts`),
+			description: _(msg`One-time email and SMS`),
+		},
+		{
+			to: 'automations',
+			icon: 'route' as const,
+			title: _(msg`Automations`),
+			description: _(msg`Event-driven workflows`),
+		},
+	]
 
 	useEffect(() => {
 		async function fetchMarketingData() {
@@ -119,7 +125,7 @@ export default function MarketingOverview() {
 				setError(
 					err instanceof Error
 						? err.message
-						: 'Failed to load marketing metrics',
+						: _(msg`Failed to load marketing metrics`),
 				)
 			} finally {
 				setLoading(false)
@@ -127,21 +133,23 @@ export default function MarketingOverview() {
 		}
 
 		void fetchMarketingData()
-	}, [jwt, tenantApiUrl])
+	}, [jwt, tenantApiUrl, _])
 
 	const recentCampaigns = campaigns.slice(0, 5)
 
 	return (
 		<div className="space-y-8">
 			<header className="space-y-1">
-				<h1 className="text-2xl font-semibold tracking-tight">Marketing</h1>
+				<h1 className="text-2xl font-semibold tracking-tight">
+					{_(msg`Marketing`)}
+				</h1>
 				<p className="text-muted-foreground text-sm">
-					Broadcasts, automations, and performance at a glance.
+					{_(msg`Broadcasts, automations, and performance at a glance.`)}
 				</p>
 			</header>
 
 			<ItemGroup className="grid gap-3 sm:grid-cols-2">
-				{QUICK_LINKS.map((item) => (
+				{quickLinks.map((item) => (
 					<Item
 						key={item.to}
 						variant="outline"
@@ -168,9 +176,9 @@ export default function MarketingOverview() {
 				<p className="text-destructive text-sm">{error}</p>
 			) : (
 				<>
-					<section aria-label="Performance metrics">
+					<section aria-label={_(msg`Performance metrics`)}>
 						<ItemGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-							{METRIC_ITEMS.map((item) => (
+							{metricItems.map((item) => (
 								<Item key={item.key} variant="outline" size="sm">
 									<ItemContent>
 										<ItemDescription>{item.label}</ItemDescription>
@@ -190,13 +198,13 @@ export default function MarketingOverview() {
 					<section aria-labelledby="recent-campaigns-heading">
 						<div className="mb-3 flex items-center justify-between gap-4">
 							<h2 id="recent-campaigns-heading" className="text-sm font-medium">
-								Recent campaigns
+								{_(msg`Recent campaigns`)}
 							</h2>
 							<Link
 								to={`/${orgSlug}/marketing/campaigns`}
 								className="text-muted-foreground hover:text-foreground text-xs transition-colors"
 							>
-								View all
+								{_(msg`View all`)}
 							</Link>
 						</div>
 
@@ -209,13 +217,13 @@ export default function MarketingOverview() {
 						) : recentCampaigns.length === 0 ? (
 							<div className="px-4 py-10 text-center">
 								<p className="text-muted-foreground text-sm">
-									No campaigns yet.
+									{_(msg`No campaigns yet.`)}
 								</p>
 								<Link
 									to={`/${orgSlug}/marketing/campaigns/new`}
 									className="text-foreground mt-2 inline-block text-sm underline-offset-4 hover:underline"
 								>
-									Create your first broadcast
+									{_(msg`Create your first broadcast`)}
 								</Link>
 							</div>
 						) : (
@@ -234,8 +242,9 @@ export default function MarketingOverview() {
 										<ItemContent>
 											<ItemTitle>{campaign.name}</ItemTitle>
 											<ItemDescription>
-												{(campaign.targetAudienceCount ?? 0).toLocaleString()}{' '}
-												recipients
+												{_(
+													msg`${(campaign.targetAudienceCount ?? 0).toLocaleString()} recipients`,
+												)}
 											</ItemDescription>
 										</ItemContent>
 										<ItemActions>
