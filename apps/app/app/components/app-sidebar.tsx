@@ -9,6 +9,7 @@ import { BuildingIcon } from '@repo/ui/building-icon'
 import { Button } from '@repo/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@repo/ui/card'
 import { CircleHelpIcon } from '@repo/ui/circle-help'
+import { FileTextIcon } from '@repo/ui/file-text-icon'
 import { FoldersIcon } from '@repo/ui/folders-icon'
 import { HomeIcon } from '@repo/ui/home-icon'
 import { LaptopMinimalCheckIcon } from '@repo/ui/laptop-minimal-check-icon'
@@ -231,6 +232,12 @@ function OrganizationSidebar({
 			url: `/${orgSlug}`,
 			isActive: location.pathname === `/${orgSlug}`,
 			icon: HomeIcon,
+		},
+		{
+			title: _(msg`Reports`),
+			url: `/${orgSlug}/reports`,
+			isActive: location.pathname.includes(`/${orgSlug}/reports`),
+			icon: FileTextIcon,
 		},
 		{
 			title: _(msg`Notes`),

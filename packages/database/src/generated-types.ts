@@ -210,6 +210,8 @@ export type NotificationPreference = InferSelectModel<
 export type NotificationPreferenceInsert = InferInsertModel<
 	typeof schema.NotificationPreference
 >
+export type SavedReport = InferSelectModel<typeof schema.SavedReport>
+export type SavedReportInsert = InferInsertModel<typeof schema.SavedReport>
 
 export const ConfigFlagLevel = {
 	system: 'system',

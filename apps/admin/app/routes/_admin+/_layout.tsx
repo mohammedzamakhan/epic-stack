@@ -1,7 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { requireUserWithRole } from '@repo/auth'
 import { SidebarInset, SidebarProvider } from '@repo/ui/sidebar'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { AdminSidebar } from '#app/components/admin-sidebar.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { type Route } from './+types/_layout.ts'
@@ -14,25 +14,43 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function AdminLayout() {
+	const location = useLocation()
+	const isReports =
+		location.pathname === '/reports' ||
+		location.pathname.startsWith('/reports/')
+
 	return (
 		<SidebarProvider
 			open={true}
+			className={isReports ? 'h-svh overflow-hidden' : undefined}
 			style={
 				{
 					'--sidebar-width': 'calc(var(--spacing) * 60)',
-					'--header-height': 'calc(var(--spacing) * 12)',
+					'--header-height': isReports ? '0px' : 'calc(var(--spacing) * 12)',
 				} as React.CSSProperties
 			}
 		>
 			<AdminSidebar variant="inset" />
-			<SidebarInset>
-				<div className="flex flex-1 flex-col">
-					<div className="@container/main flex flex-1 flex-col gap-2 rounded-lg md:px-2">
-						<div className="container mx-auto px-4 py-8">
-							<Outlet />
+			<SidebarInset
+				className={
+					isReports
+						? 'min-h-0 overflow-hidden md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0'
+						: undefined
+				}
+			>
+				{isReports ? (
+					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+						<Outlet />
+					</div>
+				) : (
+					<div className="flex flex-1 flex-col">
+						<div className="@container/main flex flex-1 flex-col gap-2 rounded-lg md:px-2">
+							<div className="container mx-auto px-4 py-8">
+								<Outlet />
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
 			</SidebarInset>
 		</SidebarProvider>
 	)

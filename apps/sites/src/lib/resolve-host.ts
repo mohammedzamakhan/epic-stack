@@ -7,6 +7,7 @@ const RESERVED_SUBDOMAINS = new Set([
 	'docs',
 	'studio',
 	'api',
+	'api-ksa',
 	'www',
 	'mail',
 	'ftp',

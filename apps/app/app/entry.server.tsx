@@ -15,7 +15,10 @@ import {
 	type HandleDocumentRequestFunction,
 } from 'react-router'
 import { auditSensitiveRoutes } from '#app/utils/audit/audit-middleware.server.ts'
-import { sitePreviewFrameSrc } from '#app/utils/csp-frame-src.server.ts'
+import {
+	sitePreviewFrameSrc,
+	tenantApiConnectSrc,
+} from '#app/utils/csp-frame-src.server.ts'
 import { loadCatalog } from './modules/lingui/lingui'
 import { linguiServer } from './modules/lingui/lingui.server'
 
@@ -57,6 +60,7 @@ function applyContentSecurity(
 							: undefined,
 						process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
 						"'self'",
+						...tenantApiConnectSrc(process.env),
 					],
 					'font-src': ["'self'"],
 					'frame-src': sitePreviewFrameSrc(process.env, requestHost),

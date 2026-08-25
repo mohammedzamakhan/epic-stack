@@ -23,6 +23,7 @@ const RESERVED_SUBDOMAINS = new Set([
 	'docs',
 	'studio',
 	'api',
+	'api-ksa',
 	'www',
 	'mail',
 	'ftp',
@@ -41,6 +42,7 @@ const PRODUCT_SUBDOMAINS = [
 	'docs.',
 	'cms.',
 	'api.',
+	'api-ksa.',
 ]
 
 // ANSI color codes for terminal output

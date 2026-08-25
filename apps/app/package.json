@@ -87,6 +87,7 @@
     "@repo/notifications": "*",
     "@repo/observability": "*",
     "@repo/payments": "*",
+    "@repo/reports": "*",
     "@repo/seo": "*",
     "@repo/storage": "*",
     "@repo/tenant-db": "*",

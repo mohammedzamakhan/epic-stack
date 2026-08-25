@@ -2307,3 +2307,42 @@ export const PlatformJourneyStepExecution = sqliteTable(
 		),
 	],
 )
+
+export const SavedReport = sqliteTable(
+	'SavedReport',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => createId())
+			.notNull(),
+		scope: text().notNull(),
+		organizationId: text().references(() => Organization.id, {
+			onDelete: 'cascade',
+			onUpdate: 'cascade',
+		}),
+		createdById: text()
+			.notNull()
+			.references(() => User.id, {
+				onDelete: 'cascade',
+				onUpdate: 'cascade',
+			}),
+		title: text().notNull(),
+		notes: text().default('').notNull(),
+		definition: text().notNull(),
+		createdAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.notNull(),
+		updatedAt: integer({ mode: 'timestamp_ms' })
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index('SavedReport_organizationId_updatedAt_idx').on(
+			table.organizationId,
+			table.updatedAt,
+		),
+		index('SavedReport_scope_updatedAt_idx').on(table.scope, table.updatedAt),
+		index('SavedReport_createdById_idx').on(table.createdById),
+	],
+)
