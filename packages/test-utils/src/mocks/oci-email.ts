@@ -1,14 +1,17 @@
 import { faker } from '@faker-js/faker'
-import { OCI_EMAIL_MOCK_SUBMIT_URL } from '@repo/email'
 import { HttpResponse, http, type HttpHandler } from 'msw'
 import { writeOciSubmitEmail } from './utils.ts'
 
 const { json } = HttpResponse
 
+/** Keep in sync with `packages/email/src/oci/mock-transport.ts`. */
+const OCI_EMAIL_MOCK_SUBMIT_URL =
+	'https://mock.epic-stack.test/oci-email/actions/submitEmail'
+
 const OCI_DATAPLANE_SUBMIT_URL =
 	/https:\/\/cell0\.submit\.email\.[^/]+\/actions\/submitEmail$/
 
-async function handleOciSubmitEmail(request: Request) {
+async function handleOciSubmitEmail(request: { json: () => Promise<unknown> }) {
 	const body = await request.json()
 	console.info('🔶 mocked OCI email contents:', body)
 
