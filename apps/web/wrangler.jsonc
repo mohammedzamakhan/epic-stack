@@ -4,6 +4,7 @@
 	"compatibility_date": "2024-09-23",
 	"compatibility_flags": ["nodejs_compat"],
 	"workers_dev": true,
+	"main": "./src/worker.ts",
 	"vars": {
 		"PUBLIC_ROOT_APP": "zama-887.workers.dev"
 	},
@@ -27,5 +28,13 @@
 		"preview": {
 			"name": "epic-startup-preview"
 		}
+	},
+	"worker_loaders": [
+		{
+			"binding": "LOADER"
+		}
+	],
+	"triggers": {
+		"crons": ["* * * * *"]
 	}
 }
