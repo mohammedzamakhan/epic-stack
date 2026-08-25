@@ -3,7 +3,6 @@ import { brand, getCopyright } from '@repo/config/brand'
 import GridDesign from './GridDesign.astro'
 import Button from './ui/Button.astro'
 import { fetchFooterData } from '../lib/fetchFooter'
-import type { FooterData } from '../types/footer'
 
 const footerData = await fetchFooterData()
 const columns = footerData?.columns || []
@@ -222,7 +221,7 @@ const demoUrl = `${protocol}//${appHostname}${port ? `:${port}` : ''}/signup`
 								{column.title}
 							</h3>
 							<ul class="space-y-3">
-								{column.links.map((linkRef) => {
+								{column.links?.map((linkRef: any) => {
 									const link = linkRef.link
 									const href = link.url || '#'
 									return (

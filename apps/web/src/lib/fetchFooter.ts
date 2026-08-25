@@ -1,29 +1,16 @@
-import { ENV } from 'varlock/env'
+import { getMenu } from 'emdash'
 import { type FooterData } from '../types/footer'
-
-const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3006'
 
 export async function fetchFooterData(): Promise<FooterData | null> {
 	try {
-		const response = await fetch(`${CMS_URL}/api/footer`, {
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		const menu = await getMenu('footer')
 
-		if (!response.ok) {
-			console.error('Failed to fetch footer data:', response.statusText)
+		if (!menu) {
+			console.error('Failed to fetch footer menu')
 			return null
 		}
 
-		const result = await response.json()
-
-		if (!result.success || !result.data) {
-			console.error('Invalid footer data response')
-			return null
-		}
-
-		return result.data
+		return { columns: menu.items } as FooterData
 	} catch (error) {
 		console.error('Error fetching footer data:', error)
 		return null

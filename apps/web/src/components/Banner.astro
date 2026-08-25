@@ -11,8 +11,8 @@ const banner = await fetchBannerData()
 const isEnabled = banner?.isEnabled
 
 const type: BannerType = (banner?.type as BannerType) || 'info'
-const content = banner?.content
-const addLink = banner?.addLink
+const content = banner?.content || banner?.text
+const addLink = banner?.addLink || !!banner?.link
 const link = banner?.link
 
 const bgColors: Record<BannerType, string> = {
@@ -44,22 +44,14 @@ const textColors: Record<BannerType, string> = {
 			<div class="container mx-auto flex items-center justify-between">
 				<div class="flex-1 text-center text-sm font-medium flex justify-center items-center">
 					<span class="flex items-center" set:html={content}></span>
-					{addLink && link && (
+					{addLink && typeof link === 'string' && (
 						<>
 							<span class="mx-2 mr-1 text-muted-foreground">—</span>
 							<a
-								href={
-									link.type === 'custom'
-										? link.url
-										: link.reference?.value?.slug
-											? `/${link.reference.value.slug}`
-											: '#'
-								}
-								target={link.newTab ? '_blank' : undefined}
-								rel={link.newTab ? 'noopener noreferrer' : undefined}
+								href={link}
 								class="ml-2 hover:text-opacity-80 transition-colors flex items-center gap-1"
 							>
-								{link.label || 'Learn more'}
+								Learn more
 								<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5h6v6m0-6L5 19"/></svg>
 							</a>
 						</>

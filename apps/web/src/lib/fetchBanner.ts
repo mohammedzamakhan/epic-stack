@@ -1,29 +1,17 @@
-import { ENV } from 'varlock/env'
+import { getSiteSettings } from 'emdash'
 import { type BannerData } from '../types/banner'
-
-const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3006'
 
 export async function fetchBannerData(): Promise<BannerData | null> {
 	try {
-		const response = await fetch(`${CMS_URL}/api/banner`, {
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		const settings = await getSiteSettings()
 
-		if (!response.ok) {
-			console.error('Failed to fetch banner data:', response.statusText)
+		if (!settings) {
+			console.error('Failed to fetch site settings for banner')
 			return null
 		}
 
-		const result = await response.json()
-
-		if (!result.success || !result.data) {
-			console.error('Invalid banner data response')
-			return null
-		}
-
-		return result.data
+		// Assume banner settings might be in site settings under some key, or create a sensible default
+		return { text: (settings as any).bannerText, link: (settings as any).bannerLink } as BannerData
 	} catch (error) {
 		console.error('Error fetching banner data:', error)
 		return null

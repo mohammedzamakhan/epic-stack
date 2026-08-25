@@ -1,6 +1,16 @@
 import React from 'react'
 import { cn } from '../../lib/utils'
-import { type Post } from '@/lib/cms'
+
+export interface Post {
+	id: string
+	title: string
+	slug?: string | null
+	categories?: any[] | null
+	meta?: {
+		description?: string | null
+		image?: { url: string; alt?: string }
+	}
+}
 
 export interface CardProps {
 	className?: string
@@ -13,13 +23,13 @@ export const Card: React.FC<CardProps> = ({
 	post,
 	showCategories = false,
 }) => {
-	const { slug, categories, meta, title } = post
+	const { id, slug, categories, meta, title } = post
 	const { description, image: metaImage } = meta || {}
 
 	const hasCategories =
 		categories && Array.isArray(categories) && categories.length > 0
 	const sanitizedDescription = description?.replace(/\s/g, ' ')
-	const href = `/posts/${slug}`
+	const href = `/blog/${id}`
 
 	return (
 		<article

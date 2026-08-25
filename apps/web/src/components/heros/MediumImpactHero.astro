@@ -2,7 +2,7 @@
 import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 
 interface Props {
 	richText?: any
@@ -75,7 +75,7 @@ const renderLexicalContent = (content: any) => {
 			<div class="mt-8">
 				<img
 					class="w-full rounded-lg shadow-xl"
-					src={`${CMS_URL}${media.url}`}
+					src={`${media.url}`}
 					alt={media.alt || 'Hero image'}
 					width={media.width || 1200}
 					height={media.height || 600}

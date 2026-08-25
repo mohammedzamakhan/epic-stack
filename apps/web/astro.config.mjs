@@ -2,10 +2,12 @@ import cloudflare from '@astrojs/cloudflare'
 import partytown from '@astrojs/partytown'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
+import { d1, r2 } from '@emdash-cms/cloudflare'
 import { getBrandDomain } from '@repo/config/brand'
 import tailwindcss from '@tailwindcss/vite'
 import varlockAstroIntegration from '@varlock/astro-integration'
 import { defineConfig } from 'astro/config'
+import emdash, { local } from 'emdash/astro'
 import { fontless } from 'fontless'
 
 const domain = getBrandDomain()
@@ -54,6 +56,14 @@ export default defineConfig({
 				forward: ['dataLayer.push', 'gtag'],
 			},
 		}),
+		emdash(
+			process.env.npm_lifecycle_event === 'build'
+				? {
+						database: d1({ binding: 'DB' }),
+						storage: r2({ binding: 'MEDIA' }),
+					}
+				: undefined,
+		),
 	],
 
 	vite: {
@@ -123,7 +133,6 @@ export default defineConfig({
 				'node:querystring',
 				'node:assert',
 			],
-			noExternal: ['@payloadcms/live-preview'],
 		},
 		define: {
 			'process.env.NODE_ENV': JSON.stringify(

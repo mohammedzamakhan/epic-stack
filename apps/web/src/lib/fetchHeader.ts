@@ -1,29 +1,16 @@
-import { ENV } from 'varlock/env'
+import { getMenu } from 'emdash'
 import { type HeaderData } from '../types/header'
-
-const CMS_URL = ENV.PUBLIC_CMS_URL || 'http://localhost:3006'
 
 export async function fetchHeaderData(): Promise<HeaderData | null> {
 	try {
-		const response = await fetch(`${CMS_URL}/api/header`, {
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
+		const menu = await getMenu('header')
 
-		if (!response.ok) {
-			console.error('Failed to fetch header data:', response.statusText)
+		if (!menu) {
+			console.error('Failed to fetch header menu')
 			return null
 		}
 
-		const result = await response.json()
-
-		if (!result.success || !result.data) {
-			console.error('Invalid header data response')
-			return null
-		}
-
-		return result.data
+		return { navItems: menu.items } as HeaderData
 	} catch (error) {
 		console.error('Error fetching header data:', error)
 		return null

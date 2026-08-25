@@ -3,7 +3,7 @@ import GridDesign from '../GridDesign.astro'
 import Button from '../ui/Button.astro'
 import Badge from '../ui/Badge.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 
 interface Card {
 	tagline: string
@@ -43,7 +43,7 @@ const imagePositionConfig: Record<string, { wrapper: string; innerHeight: string
 
 function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
 	if (typeof image === 'string') return image
-	return `${CMS_URL}${image?.url}` || ''
+	return `${image?.url}` || ''
 }
 
 interface Props {

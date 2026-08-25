@@ -1,38 +1,28 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
-import { cmsClient } from '../lib/cms'
 import PageContent from '../components/PageContent.astro'
 import SEO from '../components/SEO.astro'
+import { getEmDashEntry } from 'emdash'
 
-export const prerender = true
+const { slug } = Astro.params
 
-export async function getStaticPaths() {
-  const pages = await cmsClient.getPages()
-  
-  return pages.map((page) => ({
-    params: { slug: page.slug },
-    props: { 
-      title: page.title,
-      hero: page.hero,
-      layout: page.layout,
-      meta: page.meta,
-      updatedAt: page.updatedAt,
-      createdAt: page.createdAt
-    },
-  }))
+const { entry: page } = await getEmDashEntry('pages', slug || '')
+
+if (!page) {
+	return Astro.redirect('/404')
 }
 
-const { title, hero, layout, meta } = Astro.props
+const { title, hero, layout, meta } = page.data
 ---
 
 <MarketingLayout>
   <Fragment slot="head">
     <SEO
       title={meta?.title || title}
-      description={meta?.description}
+      description={meta?.description || undefined}
       image={meta?.image}
     />
   </Fragment>
 
-  <PageContent title={title} hero={hero} layout={layout} meta={meta} />
+  <PageContent title={title} hero={hero} layout={layout} meta={meta as any} />
 </MarketingLayout>

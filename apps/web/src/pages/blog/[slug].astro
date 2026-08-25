@@ -1,30 +1,18 @@
 ---
 import MarketingLayout from '../../layouts/MarketingLayout.astro'
-import { cmsClient } from '../../lib/cms'
 import PostContent from '../../components/PostContent.astro'
 import SEO from '../../components/SEO.astro'
+import { getEmDashEntry } from 'emdash'
 
-export const prerender = true
+const { slug } = Astro.params
 
-export async function getStaticPaths() {
-	const posts = await cmsClient.getPosts(1, 100)
+const { entry: post } = await getEmDashEntry('posts', slug || '')
 
-	return posts.docs.map((post) => ({
-		params: { slug: post.slug },
-		props: {
-			slug: post.slug,
-			title: post.title,
-			content: post.content,
-			meta: post.meta,
-			publishedAt: post.publishedAt,
-			updatedAt: post.updatedAt,
-			categories: post.categories,
-			heroImage: post.heroImage,
-		},
-	}))
+if (!post) {
+	return Astro.redirect('/404')
 }
 
-const { slug, title, content, meta, publishedAt, updatedAt, categories, heroImage } = Astro.props
+const { title, content, meta, publishedAt, updatedAt, categories, heroImage } = post.data
 
 // Calculate reading time (average 200 words per minute)
 function calculateReadingTime(content: unknown): number {
@@ -40,7 +28,7 @@ const readingTime = calculateReadingTime(content)
 const breadcrumbs = [
 	{ name: 'Home', url: '/' },
 	{ name: 'Blog', url: '/blog' },
-	{ name: title, url: `/blog/${slug}` },
+	{ name: title as string, url: `/blog/${slug}` },
 ]
 ---
 
@@ -48,10 +36,10 @@ const breadcrumbs = [
 	<Fragment slot="head">
 		<SEO
 			title={meta?.title || title}
-			description={meta?.description}
+			description={meta?.description || undefined}
 			image={meta?.image || heroImage}
 			type="article"
-			publishedTime={publishedAt}
+			publishedTime={publishedAt || undefined}
 			modifiedTime={updatedAt}
 			keywords={categories?.map((cat: { title: string }) => cat.title) || []}
 			breadcrumbs={breadcrumbs}
@@ -62,9 +50,9 @@ const breadcrumbs = [
 	<PostContent 
 		title={title}
 		content={content}
-		meta={meta}
-		publishedAt={publishedAt}
-		categories={categories}
+		meta={meta as any}
+		publishedAt={publishedAt || undefined}
+		categories={categories as any}
 		heroImage={heroImage}
 	/>
 </MarketingLayout>

@@ -1,7 +1,7 @@
 ---
 import GridDesign from '../GridDesign.astro'
 
-const CMS_URL = (import.meta as any).env?.PUBLIC_CMS_URL
+
 
 
 interface TeamMember {
@@ -18,8 +18,8 @@ interface Props {
 }
 
 function getImageUrl(image: string | { url?: string | null } | null | undefined): string {
-	if (typeof image === 'string') return `${CMS_URL}${image}`
-	return `${CMS_URL}${image?.url}` || ''
+	if (typeof image === 'string') return `${image}`
+	return `${image?.url}` || ''
 }
 
 function getImageAlt(

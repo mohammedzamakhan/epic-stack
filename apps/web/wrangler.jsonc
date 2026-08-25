@@ -1,0 +1,31 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "epic-startup",
+	"compatibility_date": "2024-09-23",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"vars": {
+		"PUBLIC_ROOT_APP": "zama-887.workers.dev"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "epic-startup-db",
+			"database_id": "00000000-0000-0000-0000-000000000000"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "epic-startup-media"
+		}
+	],
+	"env": {
+		"production": {
+			"name": "epic-startup"
+		},
+		"preview": {
+			"name": "epic-startup-preview"
+		}
+	}
+}
